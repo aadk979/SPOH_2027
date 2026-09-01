@@ -66,6 +66,7 @@ export default function FootfallCapturePage(): ReactNode {
 
   return (
     <AppShell
+      width="capture"
       title={station.name}
       back={{ href: '/home', label: 'Home' }}
       actions={<SyncIndicator />}

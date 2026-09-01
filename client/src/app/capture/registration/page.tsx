@@ -72,6 +72,7 @@ export default function RegistrationCapturePage(): ReactNode {
 
   return (
     <AppShell
+      width="capture"
       title="Registration"
       back={{ href: '/home', label: 'Home' }}
       actions={<SyncIndicator />}

@@ -48,6 +48,7 @@ export default function LostFoundPage(): ReactNode {
 
   return (
     <AppShell
+      width="wide"
       title="Lost and found"
       back={{ href: '/home', label: 'Home' }}
       actions={

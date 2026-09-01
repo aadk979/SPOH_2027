@@ -29,6 +29,7 @@ export default function HomePage(): ReactNode {
 
   return (
     <AppShell
+      width="wide"
       title={me ? `Hello, ${me.volunteer.displayName}` : 'SPOH 2027'}
       actions={<SyncIndicator />}
     >
@@ -181,7 +182,7 @@ function RoleTiles({ me }: { me: MeResponse }): ReactNode {
       >
         Your station
       </h2>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {tiles.map((tile) => (
           <Link
             key={tile.href}
@@ -237,7 +238,7 @@ function LeadershipTiles({ me }: { me: MeResponse }): ReactNode {
       >
         Oversight
       </h2>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {tiles.map((tile) => (
           <Link key={tile.href} href={tile.href} className="tile-flat block">
             <span className="font-semibold">{tile.label}</span>
@@ -263,6 +264,12 @@ function UniversalTiles(): ReactNode {
       label: 'Report an incident',
       hint: 'Injury, near-miss, hazard',
     },
+    { href: '/inbox', label: 'Announcements', hint: 'Messages for you' },
+    {
+      href: '/safety/lost-found',
+      label: 'Lost and found',
+      hint: 'Search, or log something handed in',
+    },
   ];
 
   return (
@@ -273,7 +280,7 @@ function UniversalTiles(): ReactNode {
       >
         Everyone
       </h2>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {tiles.map((tile) => (
           <Link key={tile.href} href={tile.href} className="tile-flat block">
             <span className="font-semibold">{tile.label}</span>

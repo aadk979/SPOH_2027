@@ -94,6 +94,7 @@ export default function GroupRegistrationPage(): ReactNode {
 
   return (
     <AppShell
+      width="capture"
       title="A group arriving together"
       back={{ href: '/capture/registration', label: 'Registration' }}
     >

@@ -69,7 +69,7 @@ export default function FallbackPage(): ReactNode {
   const closed = (windows.data ?? []).filter((window) => !window.open);
 
   return (
-    <AppShell title="Fallback" back={{ href: '/chief', label: 'Live operations' }}>
+    <AppShell width="wide" title="Fallback" back={{ href: '/chief', label: 'Live operations' }}>
       {open.length > 0 ? (
         <section
           className="tile mb-6"

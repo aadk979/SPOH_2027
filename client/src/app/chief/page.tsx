@@ -27,6 +27,7 @@ export default function ChiefDashboardPage(): ReactNode {
 
   return (
     <AppShell
+      width="wide"
       title="Live operations"
       back={{ href: '/home', label: 'Home' }}
       actions={
@@ -59,7 +60,7 @@ function DashboardBody({ data }: { data: LiveDashboardResponse }): ReactNode {
 
       <section>
         <SectionHeading>Today — {data.eventDayLabel ?? 'not an event day'}</SectionHeading>
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <StatTile
             label="Registered"
             value={data.registrations.todayTotal}
@@ -130,7 +131,7 @@ function DashboardBody({ data }: { data: LiveDashboardResponse }): ReactNode {
 
       <section>
         <SectionHeading>Gift stock</SectionHeading>
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {data.gifts.map((gift) => (
             <StatTile
               key={gift.id}
@@ -228,7 +229,10 @@ function AttentionPanel({ data }: { data: LiveDashboardResponse }): ReactNode {
 
   for (const station of data.dataHealth.silentStations) {
     problems.push({
-      text: `${station.stationName} has recorded nothing for ${station.minutesSinceLastActivity ?? '—'} minutes`,
+      text:
+        station.minutesSinceLastActivity === null
+          ? `${station.stationName} has recorded nothing at all today`
+          : `${station.stationName} has recorded nothing for ${station.minutesSinceLastActivity} minutes`,
       tone: 'warn',
     });
   }

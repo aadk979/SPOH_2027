@@ -118,6 +118,7 @@ export default function StampCapturePage(): ReactNode {
 
   return (
     <AppShell
+      width="capture"
       title={`Stamp — ${station.name}`}
       back={{ href: '/home', label: 'Home' }}
       actions={<SyncIndicator />}

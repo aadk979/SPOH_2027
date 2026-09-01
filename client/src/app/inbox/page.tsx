@@ -39,7 +39,7 @@ export default function InboxPage(): ReactNode {
   const announcements = inbox.data ?? [];
 
   return (
-    <AppShell title="Announcements" back={{ href: '/home', label: 'Home' }}>
+    <AppShell width="wide" title="Announcements" back={{ href: '/home', label: 'Home' }}>
       {canSend ? <Composer me={me} /> : null}
 
       {announcements.length === 0 ? (

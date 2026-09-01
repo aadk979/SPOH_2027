@@ -96,7 +96,11 @@ export default function ImportsPage(): ReactNode {
   if (!session) return null;
 
   return (
-    <AppShell title="Import fallback data" back={{ href: '/chief', label: 'Live operations' }}>
+    <AppShell
+      width="wide"
+      title="Import fallback data"
+      back={{ href: '/chief', label: 'Live operations' }}
+    >
       <p className="mb-5 text-sm" style={{ color: 'var(--text-muted)' }}>
         Paste the rows from the fallback sheet or the paper tally. Everything imported is tagged
         with where it came from, and every report will say so.

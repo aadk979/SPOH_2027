@@ -74,7 +74,7 @@ export function LostPersonBanner(): ReactNode {
 
             <p className="text-lg leading-snug">{alert.descriptionText}</p>
 
-            <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm opacity-90">
+            <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm opacity-90">
               {alert.approxAge ? (
                 <>
                   <dt className="font-semibold">Approx. age</dt>

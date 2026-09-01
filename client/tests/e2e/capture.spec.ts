@@ -189,6 +189,15 @@ test.describe('lost person', () => {
     // The searcher never touched their screen; the poll clears it for them.
     await expect(searcherPage.getByText(description)).toHaveCount(0, { timeout: 20_000 });
 
+    // Clear anything left over from an earlier failed run too. An alert that
+    // outlives its test buries every screen behind it in a red banner.
+    for (let i = 0; i < 10; i += 1) {
+      const stale = icPage.getByRole('button', { name: /Found — clear this alert/ });
+      if ((await stale.count()) === 0) break;
+      await stale.first().click();
+      await icPage.waitForTimeout(400);
+    }
+
     await reporter.close();
     await searcher.close();
     await icContext.close();

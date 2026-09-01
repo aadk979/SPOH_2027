@@ -102,7 +102,7 @@ export default function RedeemPage(): ReactNode {
 
   if (!station) {
     return (
-      <AppShell title="Redeem a gift" back={{ href: '/home', label: 'Home' }}>
+      <AppShell width="capture" title="Redeem a gift" back={{ href: '/home', label: 'Home' }}>
         <p className="tile">You are not on shift right now, so redemption is closed.</p>
       </AppShell>
     );

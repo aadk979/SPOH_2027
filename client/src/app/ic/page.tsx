@@ -44,7 +44,7 @@ export default function IcConsolePage(): ReactNode {
   if (!session) return null;
 
   return (
-    <AppShell title="IC console" back={{ href: '/home', label: 'Home' }}>
+    <AppShell width="wide" title="IC console" back={{ href: '/home', label: 'Home' }}>
       <label htmlFor="station" className="mb-2 block font-semibold">
         Station
       </label>
@@ -70,7 +70,7 @@ export default function IcConsolePage(): ReactNode {
 
       {dashboard.data ? (
         <div className="flex flex-col gap-6">
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <StatTile
               label="Registered here"
               value={dashboard.data.registrations.todayTotal}

@@ -71,7 +71,7 @@ export default function ReportsPage(): ReactNode {
   const data = report.data;
 
   return (
-    <AppShell title="Post-event report" back={{ href: '/home', label: 'Home' }}>
+    <AppShell width="wide" title="Post-event report" back={{ href: '/home', label: 'Home' }}>
       {report.isLoading ? (
         <p style={{ color: 'var(--text-muted)' }}>Generating…</p>
       ) : !data ? (
@@ -126,7 +126,7 @@ export default function ReportsPage(): ReactNode {
             </button>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <StatTile
               label="Registrations"
               value={data.registrations.total}
@@ -204,7 +204,7 @@ export default function ReportsPage(): ReactNode {
 
           <section>
             <SectionHeading>Safety</SectionHeading>
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <StatTile
                 label="Incidents"
                 value={data.safety.incidents.length}
@@ -236,7 +236,7 @@ export default function ReportsPage(): ReactNode {
 
           <section>
             <SectionHeading>Volunteers</SectionHeading>
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <StatTile
                 label="Shift assignments"
                 value={data.volunteers.assignments}
