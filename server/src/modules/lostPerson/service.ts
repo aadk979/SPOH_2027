@@ -1,0 +1,233 @@
+import {
+  ERROR_CODES,
+  type ActiveLostPersonResponse,
+  type LostPersonAlertRecord,
+  type RaiseLostPersonRequest,
+  type ResolveLostPersonRequest,
+} from '@spoh/shared';
+import { writeAudit, type AuditContext } from '../../lib/audit.js';
+import { AppError, NotFoundError } from '../../lib/errors.js';
+import { logger } from '../../lib/logger.js';
+import { prisma } from '../../lib/prisma.js';
+import { minutesBetween } from '../../lib/time.js';
+import { SYSTEM_AUDIT_CONTEXT } from '../../lib/requestContext.js';
+import { findStationById } from '../station/repo.js';
+import {
+  acknowledgeAlert,
+  acknowledgedAlertIds,
+  createAlert,
+  findAlertById,
+  findPurgeCandidates,
+  listActiveAlerts,
+  purgeAlert,
+  resolveAlert,
+  toAlertRecord,
+  type AlertWithContext,
+} from './repo.js';
+
+/**
+ * Lost person (PRODUCT_BRIEF §7.3) — the highest-value single feature here, and
+ * the only place the system holds a description of a human being.
+ *
+ * Two constraints shape everything below:
+ *
+ *  1. The record is TRANSIENT. It exists to coordinate a search. Once resolved
+ *     and past the retention window it is reduced to an anonymised summary, and
+ *     every report reads the summary. What goes in the post-event report is
+ *     "3 cases, all resolved, median 7 minutes", never a description of a child.
+ *
+ *  2. Calling still beats tapping. This coordinates the search; it is not the
+ *     emergency channel. The reporter's phone number rides with the alert for
+ *     exactly that reason.
+ */
+
+/** How long a resolved alert keeps its descriptive fields (BUILD_PLAN §5.9). */
+export const PURGE_AFTER_HOURS = 24;
+
+export async function raiseAlert(
+  request: RaiseLostPersonRequest,
+  raisedById: string,
+  audit: AuditContext,
+): Promise<LostPersonAlertRecord> {
+  const alert = await prisma.$transaction(async (tx) => {
+    const row = await createAlert(tx, {
+      approxAge: request.approxAge ?? null,
+      descriptionText: request.descriptionText,
+      clothingText: request.clothingText ?? null,
+      lastSeenStationId: request.lastSeenStationId ?? null,
+      lastSeenAt: request.lastSeenAt ? new Date(request.lastSeenAt) : null,
+      raisedById,
+      raisedAt: new Date(),
+    });
+
+    await writeAudit(tx, {
+      ...audit,
+      action: 'lostPerson.raise',
+      entityType: 'LostPersonAlert',
+      entityId: row.id,
+      // No description in the audit payload. The alert's own fields are purged
+      // on resolution; copying them into an audit row that is never purged
+      // would quietly defeat the whole transience guarantee.
+      after: { lastSeenStationId: row.lastSeenStationId },
+    });
+
+    return row;
+  });
+
+  broadcast(alert.id);
+
+  return decorate(alert, raisedById);
+}
+
+/**
+ * The client polls this every 10 seconds. Push is best effort; the poll is the
+ * contract (BUILD_PLAN §7.3).
+ */
+export async function getActiveAlerts(viewerId: string): Promise<ActiveLostPersonResponse> {
+  const alerts = await listActiveAlerts();
+  const acked = await acknowledgedAlertIds(
+    viewerId,
+    alerts.map((alert) => alert.id),
+  );
+
+  const records = await Promise.all(
+    alerts.map(async (alert) => {
+      const station = alert.lastSeenStationId
+        ? await findStationById(alert.lastSeenStationId)
+        : null;
+      return toAlertRecord(alert, {
+        stationName: station?.name ?? null,
+        ackedByMe: acked.has(alert.id),
+      });
+    }),
+  );
+
+  return { asOf: new Date().toISOString(), alerts: records };
+}
+
+/**
+ * Acknowledge. This is what lets the Safety IC see live how much of the floor
+ * an alert has actually reached, rather than assuming a broadcast was read.
+ */
+export async function acknowledge(
+  alertId: string,
+  volunteerId: string,
+): Promise<LostPersonAlertRecord> {
+  const alert = await findAlertById(alertId);
+  if (!alert) throw new NotFoundError('Lost person alert');
+
+  await acknowledgeAlert(alertId, volunteerId);
+
+  const refreshed = await findAlertById(alertId);
+  if (!refreshed) throw new NotFoundError('Lost person alert');
+
+  return decorate(refreshed, volunteerId);
+}
+
+/** Resolving clears the alert on every device. */
+export async function resolve(
+  alertId: string,
+  request: ResolveLostPersonRequest,
+  audit: AuditContext,
+): Promise<LostPersonAlertRecord> {
+  const existing = await findAlertById(alertId);
+  if (!existing) throw new NotFoundError('Lost person alert');
+
+  if (existing.status !== 'ACTIVE') {
+    throw new AppError(
+      409,
+      ERROR_CODES.ALERT_ALREADY_RESOLVED,
+      'This alert has already been resolved',
+    );
+  }
+
+  const now = new Date();
+
+  await prisma.$transaction(async (tx) => {
+    await resolveAlert(tx, alertId, request.outcome, now);
+
+    await writeAudit(tx, {
+      ...audit,
+      action: 'lostPerson.resolve',
+      entityType: 'LostPersonAlert',
+      entityId: alertId,
+      before: { status: existing.status },
+      after: {
+        status: request.outcome,
+        resolutionMinutes: minutesBetween(existing.raisedAt, now),
+      },
+    });
+  });
+
+  const refreshed = await findAlertById(alertId);
+  if (!refreshed) throw new NotFoundError('Lost person alert');
+
+  return decorate(refreshed, audit.actorId ?? '');
+}
+
+/**
+ * The purge job (BUILD_PLAN §5.9). Runs every 15 minutes and on demand.
+ *
+ * Creates the anonymised summary and nulls the descriptive fields in one
+ * transaction per alert, so an alert can never end up both un-summarised and
+ * stripped of the information the summary is derived from.
+ */
+export async function purgeResolvedAlerts(now = new Date()): Promise<number> {
+  const cutoff = new Date(now.getTime() - PURGE_AFTER_HOURS * 60 * 60 * 1000);
+  const candidates = await findPurgeCandidates(cutoff);
+
+  let purged = 0;
+
+  for (const alert of candidates) {
+    // Defensive: `findPurgeCandidates` already filters on these, but the purge
+    // is the one operation that destroys data and it should not rely on a
+    // query filter alone.
+    if (alert.status === 'ACTIVE' || !alert.resolvedAt) continue;
+    const outcome: 'RESOLVED_FOUND' | 'RESOLVED_OTHER' = alert.status;
+    const resolvedAt = alert.resolvedAt;
+
+    await prisma.$transaction(async (tx) => {
+      await purgeAlert(tx, {
+        id: alert.id,
+        raisedAt: alert.raisedAt,
+        resolvedAt,
+        outcome,
+        ackCount: alert._count.acknowledgements,
+        resolutionMinutes: minutesBetween(alert.raisedAt, resolvedAt),
+      });
+
+      await writeAudit(tx, {
+        ...SYSTEM_AUDIT_CONTEXT,
+        action: 'lostPerson.purge',
+        entityType: 'LostPersonAlert',
+        entityId: alert.id,
+        after: { purged: true },
+      });
+    });
+
+    purged += 1;
+  }
+
+  if (purged > 0) logger.info({ purged }, 'purged resolved lost-person alerts');
+
+  return purged;
+}
+
+async function decorate(alert: AlertWithContext, viewerId: string): Promise<LostPersonAlertRecord> {
+  const station = alert.lastSeenStationId ? await findStationById(alert.lastSeenStationId) : null;
+  const acked = await acknowledgedAlertIds(viewerId, [alert.id]);
+
+  return toAlertRecord(alert, {
+    stationName: station?.name ?? null,
+    ackedByMe: acked.has(alert.id),
+  });
+}
+
+/**
+ * Web Push fan-out is Phase 3. Until then the 10-second poll of
+ * `/lost-person/active` is the delivery mechanism, and it is the guaranteed one
+ * either way — push is best effort by design.
+ */
+function broadcast(alertId: string): void {
+  logger.warn({ alertId }, 'lost-person alert raised — clients will pick it up on next poll');
+}
