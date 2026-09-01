@@ -1,0 +1,121 @@
+name: CI
+
+# Every PR, plus main. BUILD_PLAN §11.3.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '24'
+
+jobs:
+  quality:
+    name: Lint, typecheck, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      # `npm ci` and not `npm install`: the lockfile is the build input.
+      - run: npm ci
+
+      # The client and server both import @spoh/shared from its built output,
+      # so it has to exist before anything else compiles.
+      - run: npm run build:shared
+
+      - run: npx prisma generate
+        working-directory: server
+
+      - run: npm run lint
+
+      - run: npm run typecheck
+
+      - run: npm run build --workspace client
+        env:
+          NEXT_PUBLIC_API_BASE_URL: https://api.example.invalid
+
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: spoh
+          POSTGRES_PASSWORD: spoh
+          POSTGRES_DB: spoh2027_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U spoh -d spoh2027_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      NODE_ENV: test
+      # Points at the service container above. The truncation guard in
+      # tests/helpers/db.ts refuses to run against anything that is not
+      # recognisably a test database.
+      DATABASE_URL: postgresql://spoh:spoh@localhost:5432/spoh2027_test
+      AUTH_PROVIDER: local
+      LOCAL_AUTH_SECRET: ci-only-secret-at-least-thirty-two-characters
+      CORS_ALLOWED_ORIGINS: http://localhost:3000
+      SPOH_SKIP_DOTENV: '1'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build:shared
+
+      - run: npx prisma migrate deploy
+        working-directory: server
+
+      - name: Server unit tests
+        run: npm run test:unit --workspace server
+
+      - name: Server integration tests
+        run: npm run test:integration --workspace server
+
+      - name: Client tests
+        run: npm run test --workspace client
+
+  security:
+    name: Security checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # gitleaks needs history to scan commits, not just the tree.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      # Fails the build on a high or critical advisory (BUILD_PLAN §8.6).
+      - name: Dependency audit
+        run: npm audit --audit-level=high
+
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

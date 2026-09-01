@@ -1,0 +1,14 @@
+# CI runs on Linux and the repo is edited on Windows. Normalising to LF in the
+# index keeps diffs clean and stops shell scripts arriving with CRLF endings.
+* text=auto eol=lf
+
+# Binary assets must never be line-ending converted.
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
+
+# Generated; do not diff it in review.
+package-lock.json linguist-generated=true -diff

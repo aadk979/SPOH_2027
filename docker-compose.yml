@@ -1,0 +1,24 @@
+# Local development database only. Staging and production use RDS Postgres.
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: spoh2027-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: spoh
+      POSTGRES_PASSWORD: spoh
+      POSTGRES_DB: spoh2027
+    ports:
+      # 5432 is commonly already taken by a locally installed Postgres, so the
+      # dev container is published on 5435. Match this in DATABASE_URL.
+      - '5435:5432'
+    volumes:
+      - spoh-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U spoh -d spoh2027']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  spoh-pgdata:
