@@ -215,6 +215,18 @@ function LeadershipTiles({ me }: { me: MeResponse }): ReactNode {
     tiles.push({ href: '/ic', label: 'IC console', hint: 'Per-station and per-device' });
   }
 
+  if (me.capabilities.includes('fallback.declare')) {
+    tiles.push({ href: '/chief/fallback', label: 'Fallback', hint: 'Declare or close a window' });
+  }
+
+  if (me.capabilities.includes('fallback.import')) {
+    tiles.push({ href: '/chief/imports', label: 'Import', hint: 'Recover fallback data' });
+  }
+
+  if (me.capabilities.includes('report.generate')) {
+    tiles.push({ href: '/reports', label: 'Reports', hint: 'The post-event dataset' });
+  }
+
   if (tiles.length === 0) return null;
 
   return (

@@ -85,11 +85,12 @@ export async function recordTick(
 
   const since = startOfEventDay();
 
-  return {
-    tick: toFootfallTickRecord(tick),
-    sessionTotal: await sumForRecorderSince(actor.volunteerId, station.id, since),
-    stationTotal: await sumForStationSince(station.id, since),
-  };
+  const [sessionTotal, stationTotal] = await Promise.all([
+    sumForRecorderSince(actor.volunteerId, station.id, since),
+    sumForStationSince(station.id, since),
+  ]);
+
+  return { tick: toFootfallTickRecord(tick), sessionTotal, stationTotal };
 }
 
 /**

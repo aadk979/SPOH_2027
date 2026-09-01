@@ -1,6 +1,6 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/prisma/client.js';
-import { env, isProduction, isTest } from '../config/env.js';
+import { env, isTest } from '../config/env.js';
 import { logger } from './logger.js';
 
 /**
@@ -13,8 +13,10 @@ import { logger } from './logger.js';
  */
 const adapter = new PrismaPg({
   connectionString: env.DATABASE_URL,
-  max: isProduction ? 10 : 5,
+  max: env.DATABASE_POOL_MAX,
   idleTimeoutMillis: 30_000,
+  // A capture that waits five seconds for a connection has already failed the
+  // volunteer; better to error and let the outbox retry than to hold the tap.
   connectionTimeoutMillis: 5_000,
 });
 

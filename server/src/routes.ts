@@ -1,14 +1,18 @@
 import { Router } from 'express';
 import { env } from './config/env.js';
 import { announcementRouter } from './modules/announcement/router.js';
+import { auditRouter } from './modules/audit/router.js';
 import { dashboardRouter } from './modules/dashboard/router.js';
+import { fallbackRouter } from './modules/fallback/router.js';
 import { footfallRouter } from './modules/footfall/router.js';
 import { giftRouter } from './modules/gift/router.js';
 import { incidentRouter } from './modules/incident/router.js';
+import { lostFoundRouter } from './modules/lostFound/router.js';
 import { lostPersonRouter } from './modules/lostPerson/router.js';
 import { meRouter } from './modules/me/router.js';
 import { missionCardRouter } from './modules/missionCard/router.js';
 import { registrationRouter } from './modules/registration/router.js';
+import { reportRouter } from './modules/report/router.js';
 import { rosterRouter } from './modules/roster/router.js';
 import { shiftRouter } from './modules/shift/router.js';
 import { stationRouter } from './modules/station/router.js';
@@ -38,6 +42,12 @@ apiRouter.use('/cards', missionCardRouter);
 apiRouter.use('/gifts', giftRouter);
 apiRouter.use('/announcements', announcementRouter);
 apiRouter.use('/dashboard', dashboardRouter);
+apiRouter.use('/lost-found', lostFoundRouter);
+apiRouter.use('/reports', reportRouter);
+apiRouter.use('/audit', auditRouter);
+// Fallback declarations and the reconciliation imports live together: the
+// import only makes sense in the context of the window it is recovering from.
+apiRouter.use('/fallback', fallbackRouter);
 
 // Development sign-in. The factory returns an empty router outside
 // AUTH_PROVIDER=local, so the path simply 404s in every deployed environment.

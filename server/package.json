@@ -21,7 +21,8 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "db:test:setup": "node scripts/setup-test-db.mjs",
-    "pretest:integration": "npm run db:test:setup"
+    "pretest:integration": "npm run db:test:setup",
+    "load-test": "node scripts/load-test.mjs"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -33,6 +34,7 @@
     "@spoh/shared": "*",
     "aws-jwt-verify": "^5.2.1",
     "cors": "^2.8.5",
+    "exceljs": "^4.4.0",
     "express": "^5.2.1",
     "express-rate-limit": "^8.7.0",
     "helmet": "^8.3.0",

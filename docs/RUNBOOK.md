@@ -3,10 +3,10 @@
 **For:** the Chief Coordinator, Deputy Coordinators, and whoever is on call for the system.
 **Event window:** 6–9 January 2027. **Deploy freeze:** from 5 January 2027.
 
-> **Status: partial.** The sections below cover what exists after Phase 3
-> (capture, safety, roster, cards, gifts, dashboard, comms). Fallback
-> declaration, CSV import and report export are Phase 4 and are marked as such.
-> This document must be complete before Dry Run #2 on 4 January 2027.
+> **Status: complete except for the contact table in section 8**, which is
+> deliberately not committed to the repository. Fill it in on the printed
+> contact card in each station kit and in the `FALLBACK_RunbookAndBriefing`
+> Google Doc before Dry Run #2 on 4 January 2027.
 
 ---
 
@@ -157,20 +157,87 @@ it sparingly - volunteers who receive forty pushes stop reading pushes by 11am.
 An IC may address their own station; event-wide needs a Deputy Coordinator or
 the Chief.
 
-## 5. Fallback tiers — **Phase 4, not yet built**
+## 5. Fallback tiers
 
-The tier ladder is defined in PRODUCT_BRIEF §11. Declaration, closure and CSV
-re-import are Phase 4 work. What exists today:
+The ladder is defined in PRODUCT_BRIEF §11. What matters operationally:
 
-- `FallbackWindow` rows can be created directly in the database, and every
-  summary endpoint already reports `containsFallbackData: true` for any range
-  that overlaps one.
-- The Google fallback pack and the paper packs are **operational preparation**,
-  not code, and must exist and be exercised at Dry Run #1 regardless of whether
-  the import path is finished.
+| Tier  | Situation                            | Response                                    |
+| ----- | ------------------------------------ | ------------------------------------------- |
+| **0** | Normal                               | App                                         |
+| **1** | One volunteer's device fails         | Spare device from the station kit           |
+| **2** | One station cannot reach the backend | Nothing to do — the app buffers and retries |
+| **3** | App or backend unavailable           | Google fallback pack                        |
+| **4** | Total digital failure                | Paper pack                                  |
 
-**Before Dry Run #1 (18 Nov):** build the Google pack, set permissions, print
-the laminated station cards, and run one full station on Tier 3 for 30 minutes.
+**Tier 3 and 4 are declared by the Chief Coordinator or a Deputy Coordinator
+only**, and announced in the Safety Communications Chat. An IC cannot declare
+one and the system will refuse them. Individual volunteers deciding to switch
+systems is how the same visitor ends up counted in three places.
+
+Tier 2 needs no declaration and no action: the app buffers writes locally,
+shows the volunteer an unsynced count, and retries. They keep working.
+
+### Declaring
+
+**Chief → Fallback**, or:
+
+```
+POST /api/v1/fallback/windows
+  { "tier": 3, "reason": "...", "stationId": null, "startedAt": "..." }
+```
+
+`startedAt` can be backdated — degraded operation almost always began a few
+minutes before anybody declared it, and the window should cover the real
+period. `stationId: null` means event-wide.
+
+**Declaring does not switch anyone over.** It records that the period was
+degraded so every report covering it says so. The switch itself is your
+announcement in the Safety Communications Chat.
+
+Close it the same way when the app is back:
+
+```
+POST /api/v1/fallback/windows/:id/close
+```
+
+While a window is open, the Chief dashboard shows it, and every summary
+endpoint returns `containsFallbackData: true` for any range that overlaps it.
+
+### Recovering the data afterwards
+
+**Chief → Import.** Reconciliation is a named post-event task with a named
+owner, done within 48 hours while people still remember.
+
+1. Export the fallback sheet, or transcribe the paper tally.
+2. Paste the rows into the import screen and press **Preview**. Nothing is
+   written. The preview tells you exactly how many records would be created and
+   lists every row it could not read.
+3. Fix the rows it flagged — almost always a mistyped station code.
+4. Commit.
+
+Times are ISO-8601 UTC. A 30-minute block start is enough: a tally sheet never
+had more precision than that, and pretending otherwise would invent it.
+
+**Re-running the same rows is safe.** Import keys are derived from the row
+content, so a second run creates nothing and reports everything as skipped.
+If an import fails halfway, run it again.
+
+Every imported record is tagged `FALLBACK_SHEET` or `PAPER`. It can never be
+mistaken for an app tap, and the report shows the split by source next to every
+total.
+
+### What must exist before it is needed
+
+The Google pack and the paper packs are operational preparation, not code:
+
+- **Before Dry Run #1 (18 Nov):** build the Google pack, set permissions, print
+  the laminated per-station QR cards, and **run one full station on Tier 3 for
+  30 minutes**.
+- **Before Dry Run #2 (4 Jan):** seal the paper packs into the station kits and
+  run one station on Tier 4.
+
+If the fallback has never been used before the day it is needed, it is not a
+fallback.
 
 ## 6. Backups and rollback
 

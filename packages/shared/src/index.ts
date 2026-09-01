@@ -23,3 +23,6 @@ export * from './dto/gift.js';
 export * from './dto/announcement.js';
 export * from './dto/shift.js';
 export * from './dto/dashboard.js';
+export * from './dto/fallback.js';
+export * from './dto/lostFound.js';
+export * from './dto/report.js';

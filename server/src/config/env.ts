@@ -63,6 +63,17 @@ const EnvSchema = z
 
     TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(0),
 
+    /**
+     * Postgres connection pool size.
+     *
+     * At peak roughly 80 volunteers capture concurrently, and every capture is
+     * a short transaction. A pool of 5 turns that into a queue: the load test
+     * showed p50 13ms and p95 547ms, which is not a slow database, it is
+     * requests waiting for a connection. RDS t4g.small allows far more than
+     * this, so the ceiling is instance count x pool size, not the pool alone.
+     */
+    DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(100).default(25),
+
     S3_MEDIA_BUCKET: z.string().optional(),
     AWS_REGION: z.string().default('ap-southeast-1'),
   })

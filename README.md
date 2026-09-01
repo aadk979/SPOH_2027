@@ -157,9 +157,21 @@ wins, because a missed tap is a visitor who never gets counted.
 npm run lint
 npm run typecheck
 npm run test:unit --workspace server         # 190 tests, no database needed
-npm run test:integration --workspace server  # 161 tests, needs Postgres
+npm run test:integration --workspace server  # 224 tests, needs Postgres
 npm run test --workspace client              #  14 tests, real IndexedDB
 ```
+
+The load test is a script, not a test — it provisions accounts and writes real
+rows, so it belongs on staging before the dry runs rather than in CI:
+
+```bash
+npm run db:up && npm run dev            # server must be running
+npm run load-test --workspace server -- --clients 100 --taps 20 --duration 60
+```
+
+It simulates 100 **distinct** volunteers, each on their own account, and
+reports p95 for the steady state separately from the ramp-up. Measured at
+p95 48ms against a 300ms budget.
 
 Integration tests run against a **real Postgres** — the count aggregations use
 `date_trunc` and epoch bucketing that a substitute would not reproduce
