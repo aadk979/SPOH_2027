@@ -98,9 +98,21 @@ token verification differs. `config/env.ts` refuses to boot with
 `AUTH_PROVIDER=local` when `NODE_ENV=production`, and `createLocalAuthProvider`
 throws if constructed there anyway.
 
-To switch to Cognito: fill in `COGNITO_*` in `server/.env`, set
-`AUTH_PROVIDER=cognito`, and fill in `NEXT_PUBLIC_COGNITO_*` in the client. The
+**A staging pool exists and the Cognito path is proven.** Pool
+`ap-southeast-1_9bwl2nGF7`, client `23uft7mvtnrno1uunsc5lp0h2v`, in
+`ap-southeast-1`. To switch: set `AUTH_PROVIDER=cognito` in `server/.env` (the
+ids are already there) and fill in `NEXT_PUBLIC_COGNITO_*` in the client. The
 dev sign-in route stops being mounted at all.
+
+```bash
+cd server
+VERIFY_EMAIL=booth@spoh2027.test VERIFY_PASSWORD=... npm run verify:cognito
+```
+
+17 checks: pool configuration, all six groups and their precedence, client
+token lifetimes, and a live round trip proving a real token authenticates, a
+forged one is rejected, and the dev route is gone. See
+[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ---
 
@@ -228,7 +240,6 @@ Phases 0–2 are everything gated by Dry Run #1.
 
 ### Known gaps
 
-- **Cognito is not provisioned.** Development runs on the local auth provider.
 - **Briefing content is placeholder.** `client/src/content/brief.ts` needs
   sign-off from the Chief Coordinator and the course leads before the
   4 November training.

@@ -82,6 +82,38 @@ which is right for one or two App Runner instances on a `t4g.small`.
 
 ## 3. Cognito
 
+### Staging is already provisioned
+
+Created in `ap-southeast-1`, account `665146708212`, and verified end to end.
+
+|            |                                                              |
+| ---------- | ------------------------------------------------------------ |
+| User pool  | `ap-southeast-1_9bwl2nGF7` (`spoh2027-staging`)              |
+| App client | `23uft7mvtnrno1uunsc5lp0h2v` (public SPA, no secret)         |
+| Users      | booth, counter, ic, chief, lead — matching the seeded roster |
+
+Pool and client ids are **not secrets**. They ship in the browser bundle of any
+Cognito SPA, which is why they sit in `.env.example` rather than in Secrets
+Manager.
+
+Verify it, or any other environment, in one command:
+
+```bash
+cd server
+VERIFY_EMAIL=booth@spoh2027.test VERIFY_PASSWORD=...   node scripts/verify-cognito.mjs --api https://staging-api.example
+```
+
+It checks self sign-up is off, the password policy, all six groups and their
+precedence, that the client has no secret, the token lifetimes — and then proves
+a real token works against the API, a forged one is rejected, and the
+development sign-in route is not mounted. **Run it before each dry run and
+before 6 January.**
+
+Production needs its own pool. A staging token must never authenticate against
+production.
+
+### Creating a pool from scratch
+
 One User Pool per environment, one App Client (public SPA, **no client secret**).
 
 ```
@@ -150,6 +182,41 @@ NEXT_PUBLIC_COGNITO_CLIENT_ID=xxxxxxxxxxxxxxxxxxxxxxxxxx
 That is the whole change. The development sign-in route stops being mounted,
 and `config/env.ts` refuses to start with `AUTH_PROVIDER=local` when
 `NODE_ENV=production`.
+
+### Migrating an existing roster onto a pool
+
+Roster rows created under the development provider carry a `local:...` subject.
+Rewrite them to the real ones, matched by email, so everybody keeps their id,
+their shifts and everything they have captured:
+
+```bash
+cd server
+node scripts/sync-cognito-subs.mjs            # preview
+node scripts/sync-cognito-subs.mjs --commit
+```
+
+Needed exactly once per environment. After that, new volunteers come in through
+`POST /api/v1/roster/volunteers`, which creates the Cognito account and the
+roster row together.
+
+### What was verified against the real pool
+
+Not configuration review — these were executed:
+
+- A real access token from `ap-southeast-1_9bwl2nGF7` authenticates and resolves
+  to the right roster row, role and station.
+- The capability matrix holds under real tokens: a `Lead` is refused
+  `registration.create`; an `IC` is refused the event-wide dashboard; a
+  volunteer is refused the audit log.
+- Station scoping holds: a booth volunteer posting a tick to DCDF gets
+  `STATION_SCOPE_DENIED`.
+- A Cognito account with no roster row gets `403 NOT_PROVISIONED`.
+- `POST /roster/volunteers` really creates the Cognito user, sets the invite
+  flow, and adds it to the right group.
+- **Adding a volunteer to the `Admin` group in the Cognito console grants them
+  nothing.** The token claimed `Admin`, the server kept them at `VOLUNTEER`,
+  `/audit` and `/dashboard/live` both stayed 403, and the drift was logged. The
+  roster is authoritative, not the identity provider.
 
 ---
 

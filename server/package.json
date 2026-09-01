@@ -22,7 +22,9 @@
     "db:studio": "prisma studio",
     "db:test:setup": "node scripts/setup-test-db.mjs",
     "pretest:integration": "npm run db:test:setup",
-    "load-test": "node scripts/load-test.mjs"
+    "load-test": "node scripts/load-test.mjs",
+    "verify:cognito": "node scripts/verify-cognito.mjs",
+    "cognito:sync-subs": "node scripts/sync-cognito-subs.mjs"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
