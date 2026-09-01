@@ -12,14 +12,14 @@
 
 ## 0. The one-minute version
 
-| Something is wrong                        | Do this                                                    |
-| ----------------------------------------- | ---------------------------------------------------------- |
-| A volunteer says taps are not landing     | Send them to **My shift → Sync**. Read the unsynced count.  |
-| A station has stopped counting            | Check `/api/v1/footfall/live` — silent stations are flagged. |
-| Someone cannot sign in                    | They are not on the roster, or not provisioned. See §3.     |
-| A count is obviously wrong                | An IC voids the record with a reason. Never edit history.   |
-| The app is down                           | Declare a fallback tier. **Chief or a DC only.** See §5.    |
-| A child is missing                        | **Call first.** Then raise the alert so the floor searches. |
+| Something is wrong                    | Do this                                                      |
+| ------------------------------------- | ------------------------------------------------------------ |
+| A volunteer says taps are not landing | Send them to **My shift → Sync**. Read the unsynced count.   |
+| A station has stopped counting        | Check `/api/v1/footfall/live` — silent stations are flagged. |
+| Someone cannot sign in                | They are not on the roster, or not provisioned. See §3.      |
+| A count is obviously wrong            | An IC voids the record with a reason. Never edit history.    |
+| The app is down                       | Declare a fallback tier. **Chief or a DC only.** See §5.     |
+| A child is missing                    | **Call first.** Then raise the alert so the floor searches.  |
 
 **Nobody below Deputy Coordinator declares a fallback tier.** That is how the
 same visitor ends up counted in three places.
@@ -74,12 +74,12 @@ which is source-tagged so it stays distinguishable from app taps in every report
 
 ## 3. Somebody cannot sign in
 
-| Symptom                              | Cause                                    | Fix                                              |
-| ------------------------------------ | ---------------------------------------- | ------------------------------------------------ |
-| `NOT_PROVISIONED` (403)              | Valid account, not on the roster         | Chief provisions them: `POST /api/v1/roster/volunteers` |
-| `ACCOUNT_INACTIVE` (403)             | Deactivated                              | Reactivate through provisioning                  |
-| `UNAUTHENTICATED` (401)              | Expired or bad token                     | Sign in again                                    |
-| `STATION_SCOPE_DENIED` (403)         | Not rostered at that station, right now  | Fix the roster, or an IC captures on their behalf |
+| Symptom                      | Cause                                   | Fix                                                     |
+| ---------------------------- | --------------------------------------- | ------------------------------------------------------- |
+| `NOT_PROVISIONED` (403)      | Valid account, not on the roster        | Chief provisions them: `POST /api/v1/roster/volunteers` |
+| `ACCOUNT_INACTIVE` (403)     | Deactivated                             | Reactivate through provisioning                         |
+| `UNAUTHENTICATED` (401)      | Expired or bad token                    | Sign in again                                           |
+| `STATION_SCOPE_DENIED` (403) | Not rostered at that station, right now | Fix the roster, or an IC captures on their behalf       |
 
 Station scope is checked against the **database**, not the token, because
 station assignment changes hourly and group membership does not. It also
@@ -135,12 +135,12 @@ the laminated station cards, and run one full station on Tier 3 for 30 minutes.
 
 ## 7. Alarms worth having
 
-| Alarm                 | Threshold        | Means                                     |
-| --------------------- | ---------------- | ----------------------------------------- |
-| API 5xx rate          | > 1%             | Something is broken. Check logs by requestId. |
-| p95 latency           | > 1s             | Taps are feeling slow at the booth.       |
-| RDS CPU               | > 80%            | Unexpected at this volume. Investigate.   |
-| RDS free storage      | low              | Should never happen at 60k rows.          |
+| Alarm            | Threshold | Means                                         |
+| ---------------- | --------- | --------------------------------------------- |
+| API 5xx rate     | > 1%      | Something is broken. Check logs by requestId. |
+| p95 latency      | > 1s      | Taps are feeling slow at the booth.           |
+| RDS CPU          | > 80%     | Unexpected at this volume. Investigate.       |
+| RDS free storage | low       | Should never happen at 60k rows.              |
 
 The **data-health view is the more important monitor**. Silent stations and
 stale devices matter more than server metrics: the API can be perfectly healthy
@@ -152,11 +152,11 @@ while a station quietly records nothing for an hour.
 > committed to the repository — keep this table in the printed contact card in
 > each station kit and in the `FALLBACK_RunbookAndBriefing` Google Doc.
 
-| Role                                          | Name | Phone |
-| --------------------------------------------- | ---- | ----- |
-| Chief Coordinator                             |      |       |
-| Deputy Coordinator (Operations)               |      |       |
-| Deputy Coordinator (Welfare, Safety & Comms)  |      |       |
-| Safety IC                                     |      |       |
-| Campus security                               |      |       |
-| System on-call                                |      |       |
+| Role                                         | Name | Phone |
+| -------------------------------------------- | ---- | ----- |
+| Chief Coordinator                            |      |       |
+| Deputy Coordinator (Operations)              |      |       |
+| Deputy Coordinator (Welfare, Safety & Comms) |      |       |
+| Safety IC                                    |      |       |
+| Campus security                              |      |       |
+| System on-call                               |      |       |

@@ -18,11 +18,11 @@ Everything else in this repository is negotiable. These two are not.
 
 ### 1. The three counts never merge
 
-| Count            | Table                            | Unit                          | Answers                 |
-| ---------------- | -------------------------------- | ----------------------------- | ----------------------- |
-| **Registration** | `Registration`                   | 1 row = 1 registered visitor  | who showed up           |
-| **Footfall**     | `FootfallTick`                   | 1 row = 1 body entering a room| how busy, and when      |
-| **Mission Card** | `MissionCard` + `CardStampEvent` | 1 card = 1 journey            | engagement / completion |
+| Count            | Table                            | Unit                           | Answers                 |
+| ---------------- | -------------------------------- | ------------------------------ | ----------------------- |
+| **Registration** | `Registration`                   | 1 row = 1 registered visitor   | who showed up           |
+| **Footfall**     | `FootfallTick`                   | 1 row = 1 body entering a room | how busy, and when      |
+| **Mission Card** | `MissionCard` + `CardStampEvent` | 1 card = 1 journey             | engagement / completion |
 
 One Mission Card can be four humans. There is no foreign key between
 `Registration` and `FootfallTick`, no `totalVisitors` column anywhere, and every
@@ -65,15 +65,15 @@ npm run dev                   # server :4010, client :3000
 
 Open <http://localhost:3000> and sign in with a seeded roster email:
 
-| Email                      | Role                | Station          |
-| -------------------------- | ------------------- | ---------------- |
-| `booth@spoh2027.test`      | Volunteer           | Sign-Up Booth    |
-| `counter@spoh2027.test`    | Volunteer           | DCDF Station     |
-| `ic@spoh2027.test`         | IC                  | Sign-Up Booth    |
-| `dc@spoh2027.test`         | Deputy Coordinator  | —                |
-| `chief@spoh2027.test`      | Chief Coordinator   | —                |
-| `lead@spoh2027.test`       | Lead                | —                |
-| `admin@spoh2027.test`      | Admin               | —                |
+| Email                   | Role               | Station       |
+| ----------------------- | ------------------ | ------------- |
+| `booth@spoh2027.test`   | Volunteer          | Sign-Up Booth |
+| `counter@spoh2027.test` | Volunteer          | DCDF Station  |
+| `ic@spoh2027.test`      | IC                 | Sign-Up Booth |
+| `dc@spoh2027.test`      | Deputy Coordinator | —             |
+| `chief@spoh2027.test`   | Chief Coordinator  | —             |
+| `lead@spoh2027.test`    | Lead               | —             |
+| `admin@spoh2027.test`   | Admin              | —             |
 
 > **Port note.** The dev database is published on **5435** and the API on
 > **4010** rather than the conventional 5432/4000, because both of those are
@@ -164,34 +164,38 @@ npm run test --workspace client              #  14 tests, real IndexedDB
 Integration tests run against a **real Postgres** — the count aggregations use
 `date_trunc` and epoch bucketing that a substitute would not reproduce
 faithfully. They freeze the clock to a known instant inside a shift block, since
-station scoping asks "is this volunteer rostered here *now*".
+station scoping asks "is this volunteer rostered here _now_".
 
-`tests/helpers/db.ts` truncates every table and refuses to run unless the
-connection string names something recognisably local or a test database.
+The integration suite **deletes every row it finds**, so it runs against its own
+database (`spoh2027_test`), created and migrated automatically by
+`pretest:integration`. `tests/helpers/db.ts` refuses to run unless the database
+name ends in `_test` — a developer's own database is on localhost too, and
+wiping their seeded roster mid-afternoon is the accident that guard prevents.
+Override with `TEST_DATABASE_URL` if you need to.
 
 The tests worth knowing about:
 
-| Test                                  | Proves                                                   |
-| ------------------------------------- | -------------------------------------------------------- |
-| `unit/capabilities.test.ts`           | the §6.3 matrix, transcribed independently by hand        |
-| `unit/noPii.test.ts`                  | no visitor-scoped model has a PII-shaped field            |
-| `integration/rbac.test.ts`            | every ❌ in the matrix is a 403 on the wire               |
-| `integration/capture.test.ts`         | the mandatory cases from BUILD_PLAN §10                   |
-| `integration/lostPerson.test.ts`      | the purge actually purges                                 |
-| `client/tests/outbox.test.ts`         | retries reuse the idempotency key, so they cannot duplicate |
+| Test                             | Proves                                                      |
+| -------------------------------- | ----------------------------------------------------------- |
+| `unit/capabilities.test.ts`      | the §6.3 matrix, transcribed independently by hand          |
+| `unit/noPii.test.ts`             | no visitor-scoped model has a PII-shaped field              |
+| `integration/rbac.test.ts`       | every ❌ in the matrix is a 403 on the wire                 |
+| `integration/capture.test.ts`    | the mandatory cases from BUILD_PLAN §10                     |
+| `integration/lostPerson.test.ts` | the purge actually purges                                   |
+| `client/tests/outbox.test.ts`    | retries reuse the idempotency key, so they cannot duplicate |
 
 ---
 
 ## Status
 
-| Phase | Scope                                          | State                        |
-| ----- | ---------------------------------------------- | ---------------------------- |
-| 0     | Foundations, schema, seed, CI                  | ✅ done                      |
-| 1     | Auth, RBAC, `/me`, check-in, provisioning      | ✅ done (local auth provider)|
-| 2     | Capture core, outbox, incidents, lost person   | ✅ done                      |
-| 3     | Cards, gifts, dashboard, announcements, swaps  | not started                  |
-| 4     | Fallback windows, imports, reports, hardening  | not started                  |
-| 5     | Event readiness                                | not started                  |
+| Phase | Scope                                         | State                         |
+| ----- | --------------------------------------------- | ----------------------------- |
+| 0     | Foundations, schema, seed, CI                 | ✅ done                       |
+| 1     | Auth, RBAC, `/me`, check-in, provisioning     | ✅ done (local auth provider) |
+| 2     | Capture core, outbox, incidents, lost person  | ✅ done                       |
+| 3     | Cards, gifts, dashboard, announcements, swaps | not started                   |
+| 4     | Fallback windows, imports, reports, hardening | not started                   |
+| 5     | Event readiness                               | not started                   |
 
 Phases 0–2 are everything gated by Dry Run #1.
 

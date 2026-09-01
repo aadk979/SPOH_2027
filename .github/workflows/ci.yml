@@ -63,10 +63,11 @@ jobs:
 
     env:
       NODE_ENV: test
-      # Points at the service container above. The truncation guard in
-      # tests/helpers/db.ts refuses to run against anything that is not
-      # recognisably a test database.
+      # The unit suite reads DATABASE_URL; the integration suite takes
+      # TEST_DATABASE_URL, because it deletes every row it finds and its
+      # truncation guard requires a database name ending in _test.
       DATABASE_URL: postgresql://spoh:spoh@localhost:5432/spoh2027_test
+      TEST_DATABASE_URL: postgresql://spoh:spoh@localhost:5432/spoh2027_test
       AUTH_PROVIDER: local
       LOCAL_AUTH_SECRET: ci-only-secret-at-least-thirty-two-characters
       CORS_ALLOWED_ORIGINS: http://localhost:3000

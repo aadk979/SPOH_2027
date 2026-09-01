@@ -19,7 +19,9 @@
     "db:deploy": "prisma migrate deploy",
     "db:reset": "prisma migrate reset --force",
     "db:seed": "tsx prisma/seed.ts",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:test:setup": "node scripts/setup-test-db.mjs",
+    "pretest:integration": "npm run db:test:setup"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

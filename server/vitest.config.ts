@@ -23,9 +23,23 @@ export default defineConfig({
           include: ['tests/integration/**/*.test.ts'],
           environment: 'node',
           setupFiles: ['tests/setup.ts'],
-          // Silences the logger and lets the truncation guard in
-          // tests/helpers/db.ts recognise this as a test run.
-          env: { NODE_ENV: 'test' },
+          /**
+           * The integration suite truncates every table, so it must never point
+           * at the database a developer has been working in. `SPOH_SKIP_DOTENV`
+           * stops `config/env.ts` loading `server/.env` over the top of these,
+           * and the whole environment is declared here instead - the same shape
+           * CI uses, so a local failure reproduces there and vice versa.
+           */
+          env: {
+            NODE_ENV: 'test',
+            SPOH_SKIP_DOTENV: '1',
+            DATABASE_URL:
+              process.env.TEST_DATABASE_URL ??
+              'postgresql://spoh:spoh@localhost:5435/spoh2027_test',
+            AUTH_PROVIDER: 'local',
+            LOCAL_AUTH_SECRET: 'test-only-secret-at-least-thirty-two-chars',
+            CORS_ALLOWED_ORIGINS: 'http://localhost:3000',
+          },
           // Integration tests share one database. Running files in parallel
           // would let one suite's truncation delete another's fixtures.
           fileParallelism: false,

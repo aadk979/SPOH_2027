@@ -9,15 +9,24 @@ import { prisma } from '../../src/lib/prisma.js';
  * worth of data. They refuse to run unless the connection string names a
  * database that looks like a test database.
  */
-const TEST_DATABASE_PATTERN = /(_test|test_|\/spoh2027_test|localhost|127\.0\.0\.1)/i;
+/**
+ * The database NAME must end in `_test`. Deliberately stricter than "is it
+ * localhost": a developer's own dev database is on localhost too, and wiping
+ * their seeded roster mid-afternoon is exactly the accident this prevents.
+ */
+const TEST_DATABASE_NAME = /_test$/i;
 
 function assertTestDatabase(): void {
   if (env.NODE_ENV === 'production') {
     throw new Error('refusing to truncate: NODE_ENV=production');
   }
-  if (!TEST_DATABASE_PATTERN.test(env.DATABASE_URL)) {
+
+  const name = new URL(env.DATABASE_URL).pathname.replace(/^\//, '');
+
+  if (!TEST_DATABASE_NAME.test(name)) {
     throw new Error(
-      'refusing to truncate: DATABASE_URL does not look like a local or test database',
+      `refusing to truncate database "${name}": the integration suite deletes every row, ` +
+        'so its database name must end in "_test". Run `npm run db:test:setup`.',
     );
   }
 }
