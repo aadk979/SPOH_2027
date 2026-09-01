@@ -28,7 +28,8 @@ same visitor ends up counted in three places.
 
 ## 1. Before each event day
 
-- [ ] Take a manual RDS snapshot (§6)
+- [ ] EBS snapshot (§6)
+- [ ] `./ops/backup/spoh-backup-check.sh` returns OK
 - [ ] Confirm `/readyz` returns 200 on production
 - [ ] Confirm the roster for today is loaded and every volunteer is provisioned
 - [ ] Confirm each station kit has: spare device, power bank, physical clicker,
@@ -241,10 +242,64 @@ fallback.
 
 ## 6. Backups and rollback
 
-- RDS automated backups, 7-day retention
-- **Manual snapshot before and after each event day**, and on 5 January
+### The daemon
+
+`pg_dump` to S3 every 15 minutes during event hours, hourly outside them.
+Installed by `ops/backup/install.sh`; see `ops/backup/README.md`.
+
+**Why 15 minutes.** The client's outbox deletes its local copy of a capture the
+moment the server confirms it. Restore to an hour ago and that data is gone from
+_both_ sides — unlike a fallback window, where a paper tally still exists on
+paper. Fifteen minutes is about the most a booth can lose and still reconstruct
+from memory and the physical Mission Cards.
+
+```bash
+./ops/backup/spoh-backup-check.sh     # is the newest dump recent enough
+systemctl status spoh-backup.timer    # is it scheduled
+journalctl -u spoh-backup -n 50       # what happened
+./ops/backup/spoh-backup.sh --force   # take one right now
+```
+
+Bucket `s3://spoh2027-backups-665146708212` (ap-southeast-1). Versioned, so a
+corrupt dump cannot overwrite a good one. Public access blocked, SSE-S3.
+
+### Restoring
+
+**Always rehearse into a scratch database first.** The script refuses any target
+whose name does not end in `_restore_check` or `_scratch` unless you pass
+`--i-am-sure` — on 7 January somebody will run this from the wrong terminal.
+
+```bash
+./ops/backup/spoh-restore.sh --list
+./ops/backup/spoh-restore.sh --latest --into spoh2027_restore_check
+```
+
+It verifies the SHA-256 before touching anything, then prints row counts so you
+can see the data is actually there. A corrupt dump fails before the restore
+starts, not halfway through.
+
+The real thing, when you mean it:
+
+```bash
+systemctl stop spoh-server
+./ops/backup/spoh-restore.sh --latest --into spoh2027 --i-am-sure
+systemctl start spoh-server
+```
+
+Then **declare a fallback window covering the gap** between the dump and the
+failure, so every report says which minutes are missing.
+
+### Rehearse it at Dry Run #1
+
+Restore into a scratch database and time it. An untested restore is not a
+backup, it is a hope — the same discipline the fallback pack gets in §11.5.
+
+### Also
+
+- **EBS snapshot before and after each event day**, and on 5 January. That is
+  the disaster tier; `pg_dump` is what you would actually reach for.
 - Rollback: redeploy the previous image. Migrations are forward-only — do not
-  roll a migration back mid-event; correct forward instead.
+  roll one back mid-event; correct forward instead.
 
 ## 7. Alarms worth having
 

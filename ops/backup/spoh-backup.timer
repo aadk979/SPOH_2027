@@ -1,0 +1,18 @@
+[Unit]
+Description=Run the SPOH 2027 database backup every 15 minutes
+Documentation=file:///opt/spoh/ops/backup/spoh-backup.sh
+
+[Timer]
+# Every quarter hour, on the quarter. The script itself decides whether to dump:
+# every tick during event hours, hourly outside them.
+OnCalendar=*:0/15
+# Spread the start by up to 30s so a fleet does not hit S3 in lockstep.
+RandomizedDelaySec=30
+# If the box was asleep or rebooting over a scheduled tick, run once on boot
+# rather than waiting for the next quarter.
+Persistent=true
+AccuracySec=10s
+Unit=spoh-backup.service
+
+[Install]
+WantedBy=timers.target

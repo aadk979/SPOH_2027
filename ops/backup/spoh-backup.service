@@ -1,0 +1,36 @@
+[Unit]
+Description=SPOH 2027 database backup to S3
+Documentation=file:///opt/spoh/ops/backup/spoh-backup.sh
+# Pointless to dump if the database is not up, and pointless to try without a
+# network to upload over.
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=spoh
+Group=spoh
+
+ExecStart=/opt/spoh/ops/backup/spoh-backup.sh
+
+# A dump of this database takes seconds. Ten minutes means something is very
+# wrong, and the timer must not stack runs waiting for it.
+TimeoutStartSec=600
+
+# Shout when it fails. A backup that stops quietly is the failure mode that
+# actually hurts, because you find out during a restore.
+OnFailure=spoh-backup-failed.service
+
+# Nothing here needs to reach beyond its own working directories.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/tmp/spoh-backup /var/lib/spoh /var/lock
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=spoh-backup
+
+[Install]
+WantedBy=multi-user.target

@@ -12,3 +12,6 @@
 
 # Generated; do not diff it in review.
 package-lock.json linguist-generated=true -diff
+
+# shell scripts must keep LF endings or they will not execute on Linux
+*.sh text eol=lf

@@ -1,0 +1,11 @@
+[Unit]
+Description=SPOH 2027 backup failure notice
+
+[Service]
+Type=oneshot
+# Deliberately loud in the journal, and the hook where a real alert goes.
+#
+# Wire this to whatever the team will actually see: an SNS topic, a webhook into
+# the Safety Communications Chat, or an email. A CloudWatch alarm on the log
+# pattern below works without any code.
+ExecStart=/usr/bin/logger -t spoh-backup -p daemon.crit "SPOH BACKUP FAILED on %H - the database is running unprotected. Check: journalctl -u spoh-backup -n 50"

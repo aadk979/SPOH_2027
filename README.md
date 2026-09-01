@@ -8,6 +8,7 @@ Volunteer operations for the Singapore Polytechnic School of Computing Open Hous
 - **Design language:** [`docs/design.md`](docs/design.md) — tokens; see [Design](#design) for how it is applied
 - **Runbook:** [`docs/RUNBOOK.md`](docs/RUNBOOK.md) — event-day operations
 - **Deployment:** [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — AWS, Cognito, environments
+- **Backups:** [`ops/backup/README.md`](ops/backup/README.md) — the 15-minute dump daemon
 
 **The deadline that matters is Dry Run #1 on 18 November 2026**, not the event.
 

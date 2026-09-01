@@ -1,0 +1,14 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "WriteBackupsAndManifest",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject", "s3:ListBucket"],
+      "Resource": [
+        "arn:aws:s3:::spoh2027-backups-665146708212",
+        "arn:aws:s3:::spoh2027-backups-665146708212/*"
+      ]
+    }
+  ]
+}
