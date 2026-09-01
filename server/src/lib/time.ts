@@ -8,6 +8,7 @@
  * is safe.
  */
 import type { ShiftBlock } from '@spoh/shared';
+import { env } from '../config/env.js';
 
 export const EVENT_TIME_ZONE = 'Asia/Singapore';
 
@@ -51,8 +52,18 @@ export function singaporeMinuteOfDay(instant: Date = new Date()): number {
  * Which shift blocks contain this instant. Returns both during the 13:30–14:00
  * handover, and an empty array outside event hours — station scoping treats
  * "outside any block" as "not on shift".
+ *
+ * `alwaysOpen` exists so the capture screens can be exercised outside
+ * 09:30–18:00 on a developer machine. It defaults to the environment flag,
+ * which `config/env.ts` refuses to accept in production — a counter that never
+ * closes would let a volunteer capture against a station they left hours ago.
  */
-export function activeShiftBlocks(instant: Date = new Date()): ShiftBlock[] {
+export function activeShiftBlocks(
+  instant: Date = new Date(),
+  alwaysOpen: boolean = env.SHIFT_HOURS_ALWAYS_OPEN,
+): ShiftBlock[] {
+  if (alwaysOpen) return Object.keys(SHIFT_BLOCKS) as ShiftBlock[];
+
   const minute = singaporeMinuteOfDay(instant);
   return (Object.keys(SHIFT_BLOCKS) as ShiftBlock[]).filter((block) => {
     const { startMinute, endMinute } = SHIFT_BLOCKS[block];

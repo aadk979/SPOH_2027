@@ -64,6 +64,22 @@ const EnvSchema = z
     TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(0),
 
     /**
+     * Treat every hour as event hours. DEVELOPMENT ONLY.
+     *
+     * Station scoping requires a shift block to be running, which outside
+     * 09:30-18:00 Singapore means no capture screen works at all. Correct for
+     * the event — a counter left open overnight must not keep writing — and
+     * unworkable for a student team testing at 10pm.
+     *
+     * Refused in production, where a counter that never closes would let a
+     * volunteer capture against a station they left hours ago.
+     */
+    SHIFT_HOURS_ALWAYS_OPEN: z
+      .enum(['true', 'false'])
+      .default('false')
+      .transform((value) => value === 'true'),
+
+    /**
      * Postgres connection pool size.
      *
      * At peak roughly 80 volunteers capture concurrently, and every capture is
@@ -114,6 +130,15 @@ const EnvSchema = z
           message: 'required when AUTH_PROVIDER=local',
         });
       }
+    }
+
+    if (env.NODE_ENV === 'production' && env.SHIFT_HOURS_ALWAYS_OPEN) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['SHIFT_HOURS_ALWAYS_OPEN'],
+        message:
+          'SHIFT_HOURS_ALWAYS_OPEN is a development convenience and is forbidden when NODE_ENV=production',
+      });
     }
 
     if (env.NODE_ENV === 'production' && !env.DATABASE_URL.includes('sslmode=require')) {

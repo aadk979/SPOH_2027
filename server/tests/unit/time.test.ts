@@ -42,7 +42,8 @@ describe('singaporeMinuteOfDay', () => {
 });
 
 describe('activeShiftBlocks', () => {
-  const at = (utc: string) => activeShiftBlocks(new Date(utc));
+  // Explicitly not the override: these assert the real event-hours rule.
+  const at = (utc: string) => activeShiftBlocks(new Date(utc), false);
 
   it('reports no block before the morning shift starts', () => {
     // 09:00 SGT — half an hour before the morning block opens.
