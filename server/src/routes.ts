@@ -1,0 +1,33 @@
+import { Router } from 'express';
+import { env } from './config/env.js';
+import { footfallRouter } from './modules/footfall/router.js';
+import { incidentRouter } from './modules/incident/router.js';
+import { lostPersonRouter } from './modules/lostPerson/router.js';
+import { meRouter } from './modules/me/router.js';
+import { registrationRouter } from './modules/registration/router.js';
+import { rosterRouter } from './modules/roster/router.js';
+import { stationRouter } from './modules/station/router.js';
+import { createDevAuthRouter } from './modules/devAuth/router.js';
+
+/**
+ * The versioned API surface (BUILD_PLAN §7.1).
+ *
+ * Every router below mounts `requireAuth` itself — default deny, with
+ * `/healthz` and `/readyz` mounted outside this router as the only
+ * unauthenticated routes in the system.
+ */
+export const apiRouter: Router = Router();
+
+apiRouter.use('/me', meRouter);
+apiRouter.use('/stations', stationRouter);
+apiRouter.use('/registrations', registrationRouter);
+apiRouter.use('/footfall', footfallRouter);
+apiRouter.use('/incidents', incidentRouter);
+apiRouter.use('/lost-person', lostPersonRouter);
+apiRouter.use('/roster', rosterRouter);
+
+// Development sign-in. The factory returns an empty router outside
+// AUTH_PROVIDER=local, so the path simply 404s in every deployed environment.
+if (env.AUTH_PROVIDER === 'local') {
+  apiRouter.use('/dev-auth', createDevAuthRouter());
+}
