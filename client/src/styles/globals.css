@@ -1,0 +1,256 @@
+@import 'tailwindcss';
+
+/**
+ * SPOH 2027 design tokens.
+ *
+ * The palette, type scale, radii and spacing rhythm come from `docs/design.md`
+ * — a restrained, photography-first system with a single interactive blue and
+ * no decorative chrome. It is the right voice for the reading surfaces: the
+ * brief, the map, the dashboards, the IC console.
+ *
+ * It is NOT the right voice for the capture screens, and the overrides at the
+ * bottom of this file say so explicitly. A booth volunteer facing a queue is
+ * looking at a phone dimmed to save battery, in a bright hall, one-handed. The
+ * design language's weight-300 CTAs, 44px targets and low-contrast greys would
+ * cost taps and therefore data. Where the two conflict, BUILD_PLAN §9.4 and
+ * §9.7 win and this file records the deviation rather than hiding it.
+ */
+
+@theme {
+  /* ── Colour: Action Blue is the only interactive colour in the system ── */
+  --color-primary: #0066cc;
+  --color-primary-focus: #0071e3;
+  --color-primary-on-dark: #2997ff;
+  --color-on-primary: #ffffff;
+
+  --color-ink: #1d1d1f;
+  --color-ink-muted: #333333;
+  --color-ink-subtle: #7a7a7a;
+  --color-on-dark: #ffffff;
+  --color-on-dark-muted: #cccccc;
+
+  --color-canvas: #ffffff;
+  --color-parchment: #f5f5f7;
+  --color-pearl: #fafafc;
+  --color-tile-dark: #272729;
+  --color-tile-darker: #252527;
+  --color-void: #000000;
+
+  --color-hairline: #e0e0e0;
+  --color-divider: #f0f0f0;
+
+  /*
+   * Status colours. Not in design.md — Apple's system has exactly one accent
+   * because it is selling objects, not running an event. Safety states must be
+   * unmistakable, so these are added deliberately and are always paired with
+   * text or an icon, never carrying meaning by colour alone (BUILD_PLAN §9.7).
+   */
+  --color-alert: #b3261e;
+  --color-alert-surface: #fcebea;
+  --color-warn: #8a5300;
+  --color-warn-surface: #fdf3e3;
+  --color-ok: #0f6b3f;
+  --color-ok-surface: #e9f5ee;
+
+  /* ── Type ── */
+  --font-display: 'SF Pro Display', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-text: 'SF Pro Text', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --text-hero: 3.5rem;
+  --text-hero--line-height: 1.07;
+  --text-hero--letter-spacing: -0.005em;
+  --text-display: 2.5rem;
+  --text-display--line-height: 1.1;
+  --text-lead: 1.75rem;
+  --text-lead--line-height: 1.14;
+  --text-tagline: 1.3125rem;
+  --text-tagline--line-height: 1.19;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.47;
+  --text-body--letter-spacing: -0.022em;
+  --text-caption: 0.875rem;
+  --text-caption--line-height: 1.43;
+  --text-fine: 0.75rem;
+
+  /* ── Radii ── */
+  --radius-xs: 5px;
+  --radius-sm: 8px;
+  --radius-md: 11px;
+  --radius-lg: 18px;
+  --radius-pill: 9999px;
+
+  /* ── Spacing rhythm ── */
+  --spacing-xxs: 4px;
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 17px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+  --spacing-section: 80px;
+
+  /*
+   * The single drop-shadow in the whole system. design.md reserves it for
+   * product photography resting on a surface; here it is reserved for the
+   * lost-person banner, which is the one element that must lift off the page.
+   */
+  --shadow-lift: 3px 5px 30px rgba(0, 0, 0, 0.22);
+}
+
+:root {
+  color-scheme: light;
+  --surface: var(--color-canvas);
+  --surface-alt: var(--color-parchment);
+  --text: var(--color-ink);
+  --text-muted: var(--color-ink-muted);
+  --line: var(--color-hairline);
+}
+
+/*
+ * A dark palette for the ops room display and for anyone whose phone is in
+ * dark mode at 09:00 in a bright hall. Roles swap; the blue brightens, because
+ * Action Blue disappears against a near-black tile.
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --surface: var(--color-tile-darker);
+    --surface-alt: var(--color-tile-dark);
+    --text: var(--color-on-dark);
+    --text-muted: var(--color-on-dark-muted);
+    --line: #3a3a3c;
+    --color-primary: var(--color-primary-on-dark);
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --surface: var(--color-tile-darker);
+  --surface-alt: var(--color-tile-dark);
+  --text: var(--color-on-dark);
+  --text-muted: var(--color-on-dark-muted);
+  --line: #3a3a3c;
+  --color-primary: var(--color-primary-on-dark);
+}
+
+html,
+body {
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  /* Notched phones: the capture buttons must not sit under the home indicator. */
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Keyboard focus is always visible — the IC and dashboard screens are operated
+   with a keyboard (BUILD_PLAN §9.7). */
+:focus-visible {
+  outline: 2px solid var(--color-primary-focus);
+  outline-offset: 2px;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Capture-screen overrides (BUILD_PLAN §9.4, §9.7)
+   Documented deviations from docs/design.md, and the reason for each.
+   ────────────────────────────────────────────────────────────────────────── */
+@layer components {
+  /**
+   * design.md puts touch targets at 44px minimum and CTA labels at weight 300.
+   * A capture button is 88px minimum and weight 600: it is pressed hundreds of
+   * times an hour without being looked at, and a missed tap is a visitor who
+   * never gets counted.
+   */
+  .capture-target {
+    min-height: 88px;
+    min-width: 88px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.25rem;
+    line-height: 1.2;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line);
+    background: var(--surface-alt);
+    color: var(--text);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      transform 80ms ease-out,
+      background-color 80ms ease-out;
+  }
+
+  .capture-target:active {
+    transform: scale(0.97);
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+  }
+
+  /** The footfall `+`. Sized to be hit one-handed without looking. */
+  .capture-primary {
+    min-height: 60vh;
+    width: 100%;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(4rem, 22vw, 9rem);
+    border-radius: var(--radius-lg);
+    border: none;
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .capture-primary:active {
+    transform: scale(0.99);
+    background: var(--color-primary-focus);
+  }
+
+  /**
+   * Reading surfaces keep the design language as written: parchment tiles, no
+   * border, the colour change acting as the divider.
+   */
+  .tile {
+    background: var(--surface-alt);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+  }
+
+  .tile-flat {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+  }
+
+  .pill {
+    border-radius: var(--radius-pill);
+    padding: 11px 22px;
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    font-size: var(--text-body);
+    min-height: 44px;
+  }
+
+  .pill-quiet {
+    border-radius: var(--radius-pill);
+    padding: 11px 22px;
+    background: var(--color-pearl);
+    color: var(--color-ink-muted);
+    border: 1px solid var(--color-divider);
+    font-size: var(--text-caption);
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
