@@ -1,0 +1,623 @@
+// SPOH 2027 Event Operations System — data model.
+// Transcribed from BUILD_PLAN §5. Extend only with approval.
+//
+// Two rules are enforced by the shape of this file rather than by convention:
+//
+//  1. THE THREE COUNTS NEVER MERGE (PRODUCT_BRIEF §0.1). `Registration`,
+//     `FootfallTick` and `MissionCard`/`CardStampEvent` are separate tables with
+//     no foreign key joining registration to footfall, and there is no
+//     `totalVisitors` column anywhere. One Mission Card can be four humans.
+//
+//  2. NO VISITOR PERSONAL DATA (PRODUCT_BRIEF §0.2). No visitor-scoped model
+//     carries a name, contact detail, school or identifier. `LostPersonAlert` is
+//     the single exception and is purged to `LostPersonSummary` after
+//     resolution. A CI test asserts this — see server/tests/unit/noPii.test.ts.
+//
+// Known gap, pending approval: seven foreign-key columns are stored as plain
+// scalars with no Prisma relation and therefore no database-level referential
+// integrity — GiftStockAdjustment.createdById, IncidentFollowUp.authorId,
+// LostPersonAck.volunteerId, LostFoundItem.foundStationId,
+// Announcement.targetStationId, FallbackWindow.declaredById and
+// FallbackWindow.stationId. They are reproduced exactly as BUILD_PLAN §5
+// specifies them.
+
+// Prisma 7 moves the connection URL out of the schema: Migrate reads it from
+// `prisma.config.ts`, and the runtime client receives a driver adapter instead
+// (see src/lib/prisma.ts). Nothing about the data model changes.
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
+/// The eight sign-up booth buttons, matching the booth screen one for one.
+enum VisitorCategory {
+  SEC_1
+  SEC_2
+  SEC_3
+  SEC_4
+  SEC_5
+  GRADUATED_AWAITING_RESULTS
+  PARENT_GUARDIAN
+  OTHER
+}
+
+enum StationKind {
+  SIGNUP_BOOTH
+  WELCOME_LOUNGE
+  COURSE_STATION
+  MISSION_COMPLETE
+  WELCOME_PARTY
+  OTHER
+}
+
+enum CourseCode {
+  DAAA
+  DCDF
+  DCS
+  DCITP
+}
+
+enum CommitteeRole {
+  VOLUNTEER
+  IC
+  DEPUTY_COORDINATOR
+  CHIEF_COORDINATOR
+  LEAD
+  ADMIN
+}
+
+/// Provenance of a captured row. Reports must never silently blend sources.
+enum DataSource {
+  APP
+  FALLBACK_SHEET
+  PAPER
+  MANUAL_ADJUSTMENT
+}
+
+enum ShiftBlock {
+  MORNING // 09:30 - 14:00
+  AFTERNOON // 13:30 - 18:00
+}
+
+enum SwapStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum IncidentType {
+  INJURY
+  ILLNESS
+  NEAR_MISS
+  SAFETY_CONCERN
+  CROWD_CONCERN
+  EQUIPMENT
+  OTHER
+}
+
+enum IncidentSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum IncidentStatus {
+  OPEN
+  ACKNOWLEDGED
+  RESOLVED
+}
+
+enum LostPersonStatus {
+  ACTIVE
+  RESOLVED_FOUND
+  RESOLVED_OTHER
+}
+
+enum LostFoundStatus {
+  HELD
+  CLAIMED
+  UNCLAIMED_AT_CLOSE
+  DISPOSED
+}
+
+enum CardStatus {
+  UNISSUED
+  ISSUED
+  COMPLETED
+  VOIDED
+  LOST
+}
+
+enum AnnouncementPriority {
+  INFO
+  OPERATIONAL
+  URGENT
+}
+
+// ─────────────────────────────────────────────
+// REFERENCE / CONFIG
+// ─────────────────────────────────────────────
+
+model EventDay {
+  id          String   @id @default(cuid())
+  date        DateTime @db.Date
+  /// "Sec 4 Tour Day 1", "Open House Day 2"
+  label       String
+  isPublicDay Boolean  @default(true)
+  isTourDay   Boolean  @default(false)
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+
+  shiftAssignments ShiftAssignment[]
+  briefingSlots    BriefingSlot[]
+
+  @@unique([date])
+}
+
+model Station {
+  id          String      @id @default(cuid())
+  /// "DAAA_STATION", "SIGNUP_BOOTH"
+  code        String      @unique
+  name        String
+  kind        StationKind
+  courseCode  CourseCode?
+  floor       String?
+  /// Is this a footfall-counted room (PRODUCT_BRIEF §3).
+  countsEntry Boolean     @default(false)
+  issuesStamp Boolean     @default(false)
+  active      Boolean     @default(true)
+  sortOrder   Int         @default(0)
+
+  registrations    Registration[]
+  footfallTicks    FootfallTick[]
+  stampEvents      CardStampEvent[]
+  shiftAssignments ShiftAssignment[]
+  incidents        Incident[]
+  redemptions      GiftRedemption[]
+
+  @@index([kind, active])
+}
+
+// ─────────────────────────────────────────────
+// PEOPLE (committee only — never visitors)
+// ─────────────────────────────────────────────
+
+model Volunteer {
+  id          String        @id @default(cuid())
+  cognitoSub  String        @unique
+  displayName String
+  email       String        @unique
+  phone       String?
+  role        CommitteeRole @default(VOLUNTEER)
+  /// for DCs: "Operations & Crowd Management"
+  portfolio   String?
+  reportsToId String?
+  active      Boolean       @default(true)
+  createdAt   DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime      @updatedAt @db.Timestamptz(3)
+
+  reportsTo     Volunteer?  @relation("Hierarchy", fields: [reportsToId], references: [id])
+  directReports Volunteer[] @relation("Hierarchy")
+
+  shiftAssignments ShiftAssignment[]
+  registrations    Registration[]
+  footfallTicks    FootfallTick[]
+  stampEvents      CardStampEvent[]
+  redemptions      GiftRedemption[]
+  incidentsRaised  Incident[]         @relation("IncidentReporter")
+  lostPersonAlerts LostPersonAlert[]
+  lostFoundItems   LostFoundItem[]
+  announcements    Announcement[]
+  auditLogs        AuditLog[]
+  swapsRequested   ShiftSwapRequest[] @relation("SwapRequester")
+  swapsTargeted    ShiftSwapRequest[] @relation("SwapTarget")
+  briefingSlots    BriefingSlot[]
+
+  @@index([role, active])
+}
+
+model ShiftAssignment {
+  id           String     @id @default(cuid())
+  volunteerId  String
+  stationId    String
+  eventDayId   String
+  block        ShiftBlock
+  /// "Usher", "Counter", "Lead Facilitator"
+  roleLabel    String
+  checkedInAt  DateTime?  @db.Timestamptz(3)
+  checkedOutAt DateTime?  @db.Timestamptz(3)
+  createdAt    DateTime   @default(now()) @db.Timestamptz(3)
+
+  volunteer    Volunteer          @relation(fields: [volunteerId], references: [id])
+  station      Station            @relation(fields: [stationId], references: [id])
+  eventDay     EventDay           @relation(fields: [eventDayId], references: [id])
+  swapRequests ShiftSwapRequest[]
+
+  @@unique([volunteerId, eventDayId, block])
+  @@index([stationId, eventDayId, block])
+}
+
+model ShiftSwapRequest {
+  id           String     @id @default(cuid())
+  assignmentId String
+  requesterId  String
+  targetId     String
+  status       SwapStatus @default(REQUESTED)
+  reason       String?
+  decidedById  String?
+  decidedAt    DateTime?  @db.Timestamptz(3)
+  createdAt    DateTime   @default(now()) @db.Timestamptz(3)
+
+  assignment ShiftAssignment @relation(fields: [assignmentId], references: [id])
+  requester  Volunteer       @relation("SwapRequester", fields: [requesterId], references: [id])
+  target     Volunteer       @relation("SwapTarget", fields: [targetId], references: [id])
+
+  @@index([status])
+}
+
+model BriefingSlot {
+  id          String    @id @default(cuid())
+  eventDayId  String
+  startsAt    DateTime  @db.Timestamptz(3)
+  briefierId  String?
+  waveSize    Int       @default(20)
+  completedAt DateTime? @db.Timestamptz(3)
+  notes       String?
+
+  eventDay EventDay   @relation(fields: [eventDayId], references: [id])
+  briefier Volunteer? @relation(fields: [briefierId], references: [id])
+
+  @@index([eventDayId, startsAt])
+}
+
+// ─────────────────────────────────────────────
+// COUNT 1 — REGISTRATION  (no PII, ever)
+// ─────────────────────────────────────────────
+
+model Registration {
+  id               String          @id @default(cuid())
+  category         VisitorCategory
+  stationId        String
+  recordedById     String
+  /// Links members of one family/group. One group may share one Mission Card.
+  groupId          String?
+  /// Optional by design: a failed card link must never block the count.
+  missionCardId    String?
+  source           DataSource      @default(APP)
+  recordedAt       DateTime        @default(now()) @db.Timestamptz(3)
+  clientRecordedAt DateTime?       @db.Timestamptz(3)
+  idempotencyKey   String          @unique
+  voided           Boolean         @default(false)
+  voidedReason     String?
+
+  station     Station      @relation(fields: [stationId], references: [id])
+  recordedBy  Volunteer    @relation(fields: [recordedById], references: [id])
+  missionCard MissionCard? @relation(fields: [missionCardId], references: [id])
+
+  @@index([recordedAt])
+  @@index([category, recordedAt])
+  @@index([groupId])
+}
+
+// ─────────────────────────────────────────────
+// COUNT 2 — FOOTFALL  (never joined to Registration)
+// ─────────────────────────────────────────────
+
+model FootfallTick {
+  id               String     @id @default(cuid())
+  stationId        String
+  recordedById     String
+  /// >1 only for manual clicker totals and fallback block entries.
+  quantity         Int        @default(1)
+  source           DataSource @default(APP)
+  recordedAt       DateTime   @default(now()) @db.Timestamptz(3)
+  clientRecordedAt DateTime?  @db.Timestamptz(3)
+  /// Set for fallback/paper block entries where only a 30-minute block is known.
+  timeBlockStart   DateTime?  @db.Timestamptz(3)
+  idempotencyKey   String     @unique
+  voided           Boolean    @default(false)
+
+  station    Station   @relation(fields: [stationId], references: [id])
+  recordedBy Volunteer @relation(fields: [recordedById], references: [id])
+
+  @@index([stationId, recordedAt])
+  @@index([recordedAt])
+}
+
+// ─────────────────────────────────────────────
+// COUNT 3 — MISSION CARD
+// ─────────────────────────────────────────────
+
+model MissionCard {
+  id             String     @id @default(cuid())
+  /// 6 chars, printed at production time, ambiguity-free alphabet.
+  shortCode      String     @unique
+  qrPayload      String     @unique
+  status         CardStatus @default(UNISSUED)
+  issuedAt       DateTime?  @db.Timestamptz(3)
+  completedAt    DateTime?  @db.Timestamptz(3)
+  voidedAt       DateTime?  @db.Timestamptz(3)
+  reissuedFromId String?
+  /// print batch
+  batchLabel     String?
+  createdAt      DateTime   @default(now()) @db.Timestamptz(3)
+
+  reissuedFrom  MissionCard?     @relation("Reissue", fields: [reissuedFromId], references: [id])
+  reissues      MissionCard[]    @relation("Reissue")
+  stampEvents   CardStampEvent[]
+  registrations Registration[]
+  redemptions   GiftRedemption[]
+
+  @@index([status])
+}
+
+model CardStampEvent {
+  id               String     @id @default(cuid())
+  missionCardId    String
+  stationId        String
+  recordedById     String
+  source           DataSource @default(APP)
+  recordedAt       DateTime   @default(now()) @db.Timestamptz(3)
+  clientRecordedAt DateTime?  @db.Timestamptz(3)
+  idempotencyKey   String     @unique
+
+  missionCard MissionCard @relation(fields: [missionCardId], references: [id])
+  station     Station     @relation(fields: [stationId], references: [id])
+  recordedBy  Volunteer   @relation(fields: [recordedById], references: [id])
+
+  @@unique([missionCardId, stationId])
+  @@index([recordedAt])
+}
+
+// ─────────────────────────────────────────────
+// GIFTS
+// ─────────────────────────────────────────────
+
+model GiftType {
+  id                String  @id @default(cuid())
+  name              String  @unique
+  initialStock      Int
+  lowStockThreshold Int     @default(50)
+  active            Boolean @default(true)
+
+  redemptions GiftRedemption[]
+  adjustments GiftStockAdjustment[]
+}
+
+model GiftRedemption {
+  id             String     @id @default(cuid())
+  giftTypeId     String
+  missionCardId  String?
+  stationId      String
+  recordedById   String
+  source         DataSource @default(APP)
+  recordedAt     DateTime   @default(now()) @db.Timestamptz(3)
+  idempotencyKey String     @unique
+  voided         Boolean    @default(false)
+
+  giftType    GiftType     @relation(fields: [giftTypeId], references: [id])
+  missionCard MissionCard? @relation(fields: [missionCardId], references: [id])
+  station     Station      @relation(fields: [stationId], references: [id])
+  recordedBy  Volunteer    @relation(fields: [recordedById], references: [id])
+
+  @@index([giftTypeId, recordedAt])
+}
+
+model GiftStockAdjustment {
+  id          String   @id @default(cuid())
+  giftTypeId  String
+  delta       Int
+  reason      String
+  createdById String
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+
+  giftType GiftType @relation(fields: [giftTypeId], references: [id])
+}
+
+// ─────────────────────────────────────────────
+// SAFETY
+// ─────────────────────────────────────────────
+
+model Incident {
+  id             String           @id @default(cuid())
+  type           IncidentType
+  severity       IncidentSeverity
+  status         IncidentStatus   @default(OPEN)
+  stationId      String?
+  locationNote   String?
+  /// Describes the EVENT, not the person.
+  description    String
+  reportedById   String
+  occurredAt     DateTime         @db.Timestamptz(3)
+  reportedAt     DateTime         @default(now()) @db.Timestamptz(3)
+  idempotencyKey String           @unique
+
+  station    Station?           @relation(fields: [stationId], references: [id])
+  reportedBy Volunteer          @relation("IncidentReporter", fields: [reportedById], references: [id])
+  followUps  IncidentFollowUp[]
+
+  @@index([status, severity])
+  @@index([reportedAt])
+}
+
+model IncidentFollowUp {
+  id         String   @id @default(cuid())
+  incidentId String
+  note       String
+  authorId   String
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+
+  incident Incident @relation(fields: [incidentId], references: [id])
+
+  @@index([incidentId, createdAt])
+}
+
+/// TRANSIENT by design. See BUILD_PLAN §5.9 — purged to LostPersonSummary on resolve.
+model LostPersonAlert {
+  id                String           @id @default(cuid())
+  status            LostPersonStatus @default(ACTIVE)
+  approxAge         String?
+  descriptionText   String?
+  clothingText      String?
+  lastSeenStationId String?
+  lastSeenAt        DateTime?        @db.Timestamptz(3)
+  raisedById        String
+  raisedAt          DateTime         @default(now()) @db.Timestamptz(3)
+  resolvedAt        DateTime?        @db.Timestamptz(3)
+  purgedAt          DateTime?        @db.Timestamptz(3)
+
+  raisedBy         Volunteer       @relation(fields: [raisedById], references: [id])
+  acknowledgements LostPersonAck[]
+
+  @@index([status])
+}
+
+model LostPersonAck {
+  id          String   @id @default(cuid())
+  alertId     String
+  volunteerId String
+  ackedAt     DateTime @default(now()) @db.Timestamptz(3)
+
+  alert LostPersonAlert @relation(fields: [alertId], references: [id])
+
+  @@unique([alertId, volunteerId])
+}
+
+/// What survives after purge — analytics only. Every report reads this, never the alert.
+model LostPersonSummary {
+  id                String           @id @default(cuid())
+  raisedAt          DateTime         @db.Timestamptz(3)
+  resolvedAt        DateTime         @db.Timestamptz(3)
+  resolutionMinutes Int
+  outcome           LostPersonStatus
+  ackCount          Int
+  createdAt         DateTime         @default(now()) @db.Timestamptz(3)
+}
+
+model LostFoundItem {
+  id             String          @id @default(cuid())
+  itemLabel      String
+  categoryLabel  String?
+  foundStationId String?
+  foundAt        DateTime        @db.Timestamptz(3)
+  /// "held at Mission Complete desk"
+  holderNote     String?
+  /// S3 key
+  photoKey       String?
+  status         LostFoundStatus @default(HELD)
+  loggedById     String
+  claimedAt      DateTime?       @db.Timestamptz(3)
+  createdAt      DateTime        @default(now()) @db.Timestamptz(3)
+
+  loggedBy Volunteer @relation(fields: [loggedById], references: [id])
+
+  @@index([status])
+}
+
+// ─────────────────────────────────────────────
+// COMMS
+// ─────────────────────────────────────────────
+
+model Announcement {
+  id               String               @id @default(cuid())
+  body             String
+  priority         AnnouncementPriority @default(INFO)
+  targetRole       CommitteeRole?
+  targetStationId  String?
+  targetEventDayId String?
+  requiresAck      Boolean              @default(false)
+  authorId         String
+  createdAt        DateTime             @default(now()) @db.Timestamptz(3)
+  expiresAt        DateTime?            @db.Timestamptz(3)
+
+  author Volunteer         @relation(fields: [authorId], references: [id])
+  acks   AnnouncementAck[]
+
+  @@index([createdAt])
+}
+
+model AnnouncementAck {
+  id             String   @id @default(cuid())
+  announcementId String
+  volunteerId    String
+  ackedAt        DateTime @default(now()) @db.Timestamptz(3)
+
+  announcement Announcement @relation(fields: [announcementId], references: [id])
+
+  @@unique([announcementId, volunteerId])
+}
+
+// ─────────────────────────────────────────────
+// OPERATIONS / INTEGRITY
+// ─────────────────────────────────────────────
+
+/// A declared period of degraded operation. Reports covering an overlapping
+/// range must say so plainly rather than silently blending sources (§11.4).
+model FallbackWindow {
+  id           String    @id @default(cuid())
+  /// 3 = google sheets, 4 = paper
+  tier         Int
+  startedAt    DateTime  @db.Timestamptz(3)
+  endedAt      DateTime? @db.Timestamptz(3)
+  /// null = event-wide
+  stationId    String?
+  declaredById String
+  reason       String
+  createdAt    DateTime  @default(now()) @db.Timestamptz(3)
+
+  @@index([startedAt])
+}
+
+model ImportBatch {
+  id           String     @id @default(cuid())
+  source       DataSource
+  targetTable  String
+  rowCount     Int
+  fileName     String?
+  importedById String
+  importedAt   DateTime   @default(now()) @db.Timestamptz(3)
+  notes        String?
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actorSub   String?
+  /// "registration.void", "card.reissue"
+  action     String
+  entityType String
+  entityId   String?
+  before     Json?
+  after      Json?
+  ip         String?
+  userAgent  String?
+  requestId  String?
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+
+  actor Volunteer? @relation(fields: [actorId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+/// Makes the client's retry-on-failure loop safe, which is what makes the local
+/// write buffer possible without duplicate counts (BUILD_PLAN §7.4).
+model IdempotencyRecord {
+  key          String   @id
+  endpoint     String
+  actorSub     String
+  responseBody Json
+  statusCode   Int
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([createdAt])
+}
