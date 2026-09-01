@@ -154,6 +154,39 @@ async function checkLiveAuth() {
 
   console.log(`\nlive auth against ${API}`);
 
+  /**
+   * Establish which auth provider the API is running before anything else,
+   * because it explains every failure that follows.
+   *
+   * Pointing this at a local development server is the likeliest mistake, and
+   * "the token was rejected" is a confusing way to discover it at 8am before a
+   * dry run.
+   */
+  const devAuthProbe = await fetch(`${API}/api/v1/dev-auth/sign-in`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: TEST_EMAIL }),
+  });
+
+  const apiRunsCognito = devAuthProbe.status === 404;
+
+  check(
+    'the development sign-in route is not mounted',
+    apiRunsCognito,
+    apiRunsCognito
+      ? undefined
+      : `got ${devAuthProbe.status} — this API is running AUTH_PROVIDER=local`,
+  );
+
+  if (!apiRunsCognito) {
+    console.log('');
+    console.log(`  ${API} is running the development auth provider, so it cannot`);
+    console.log('  verify a Cognito token. The pool configuration above is still valid.');
+    console.log('  Set AUTH_PROVIDER=cognito on that server, or pass --api pointing at a');
+    console.log('  deployed environment.');
+    return;
+  }
+
   const auth = await cognito.send(
     new AdminInitiateAuthCommand({
       UserPoolId: POOL_ID,
@@ -191,18 +224,6 @@ async function checkLiveAuth() {
     'an unauthenticated request is rejected',
     anonymous.status === 401,
     `got ${anonymous.status}`,
-  );
-
-  // The development sign-in route must not exist in a Cognito environment.
-  const devAuth = await fetch(`${API}/api/v1/dev-auth/sign-in`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: TEST_EMAIL }),
-  });
-  check(
-    'the development sign-in route is not mounted',
-    devAuth.status === 404,
-    `got ${devAuth.status}`,
   );
 }
 
