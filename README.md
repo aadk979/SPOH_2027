@@ -156,8 +156,8 @@ wins, because a missed tap is a visitor who never gets counted.
 ```bash
 npm run lint
 npm run typecheck
-npm run test:unit --workspace server         # 182 tests, no database needed
-npm run test:integration --workspace server  #  90 tests, needs Postgres
+npm run test:unit --workspace server         # 190 tests, no database needed
+npm run test:integration --workspace server  # 161 tests, needs Postgres
 npm run test --workspace client              #  14 tests, real IndexedDB
 ```
 
@@ -211,7 +211,10 @@ Phases 0–2 are everything gated by Dry Run #1.
   BUILD_PLAN §5 specifies them; see the note at the top of `schema.prisma`.
 - **Push notifications are not built.** The 10-second poll of
   `/lost-person/active` is the delivery mechanism, and it is the contract
-  either way (BUILD_PLAN §7.3).
+  either way (BUILD_PLAN §7.3). The same applies to urgent announcements and
+  low-stock alerts: both are logged server-side and reach devices on the poll.
+- **Briefers are not assigned to waves.** Slots are seeded across the tour days
+  with `waveSize: 20`; who briefs which wave is a decision for the Chief.
 
 ---
 

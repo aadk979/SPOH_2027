@@ -368,16 +368,89 @@ async function seedDevelopmentFixtures(): Promise<void> {
   }
 }
 
+/**
+ * Briefing waves (PRODUCT_BRIEF §6.2).
+ *
+ * Waves of 20 Sec 4 students every 30 minutes across the tour days, one briefer
+ * per wave rotating through the Chief and the Deputy Coordinators. Seeded
+ * unassigned in production — who briefs which wave is the Chief's call, not a
+ * seed script's.
+ */
+async function seedBriefingSlots(): Promise<void> {
+  const tourDays = await prisma.eventDay.findMany({
+    where: { isTourDay: true },
+    select: { id: true, date: true },
+  });
+
+  // 09:30 to 12:30 Singapore time, every 30 minutes. Stored UTC (SGT is UTC+8).
+  const startHourUtc = 1;
+  const slotsPerDay = 7;
+
+  for (const day of tourDays) {
+    for (let index = 0; index < slotsPerDay; index += 1) {
+      const startsAt = new Date(day.date);
+      startsAt.setUTCHours(startHourUtc, 30 + index * 30, 0, 0);
+
+      const existing = await prisma.briefingSlot.findFirst({
+        where: { eventDayId: day.id, startsAt },
+        select: { id: true },
+      });
+
+      if (!existing) {
+        await prisma.briefingSlot.create({
+          data: { eventDayId: day.id, startsAt, waveSize: 20 },
+        });
+      }
+    }
+  }
+}
+
+/**
+ * A small batch of Mission Cards for development.
+ *
+ * Real cards are generated through `POST /api/v1/cards/batch` and printed; this
+ * exists only so the stamp and redemption screens have something to scan on a
+ * developer machine. Never in production, where a card that was never printed
+ * would be a card nobody can present.
+ */
+async function seedDevMissionCards(): Promise<void> {
+  const existing = await prisma.missionCard.count();
+  if (existing > 0) return;
+
+  const alphabet = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+  const rows = Array.from({ length: 50 }, (_unused, index) => {
+    // Deterministic, so the same codes come back after a database reset and a
+    // developer can keep a card code in a scratch file.
+    let code = '';
+    let n = index + 1;
+    for (let i = 0; i < 6; i += 1) {
+      code = alphabet[n % alphabet.length] + code;
+      n = Math.floor(n / alphabet.length) + 7 * (i + 1);
+    }
+    return {
+      shortCode: code,
+      qrPayload: `spoh2027:dev-${String(index + 1).padStart(4, '0')}`,
+      batchLabel: 'DEV',
+    };
+  });
+
+  await prisma.missionCard.createMany({ data: rows, skipDuplicates: true });
+  console.log(`seed: ${rows.length} development mission cards (batch DEV)`);
+  console.log(`      try card ${rows[0]?.shortCode}`);
+}
+
 async function main(): Promise<void> {
   await seedEventDays();
   await seedStations();
   await seedGiftTypes();
   await seedAdmin();
+  await seedBriefingSlots();
 
   if (isProduction) {
     console.log('seed: production — event days, stations, gift types and admin only');
   } else {
     await seedDevelopmentFixtures();
+    await seedDevMissionCards();
     console.log('seed: development fixtures created');
     console.log(
       '      sign in with POST /api/v1/dev-auth/sign-in { "email": "booth@spoh2027.test" }',

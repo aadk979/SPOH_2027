@@ -36,6 +36,14 @@ export async function findStationByCode(code: string): Promise<Station | null> {
   return prisma.station.findUnique({ where: { code } });
 }
 
+/** Stations that stamp a Mission Card — the journey the funnel measures. */
+export async function listStampingStations(): Promise<Station[]> {
+  return prisma.station.findMany({
+    where: { active: true, issuesStamp: true },
+    orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+  });
+}
+
 /** Stations whose room entries are counted — the footfall rooms. */
 export async function listCountedStations(): Promise<Station[]> {
   return prisma.station.findMany({

@@ -1,0 +1,178 @@
+import {
+  roleMeets,
+  type AnnouncementRecord,
+  type CommitteeRole,
+  type CreateAnnouncementRequest,
+  type ListAnnouncementsQuery,
+} from '@spoh/shared';
+import { writeAudit, type AuditContext } from '../../lib/audit.js';
+import { ForbiddenError, NotFoundError } from '../../lib/errors.js';
+import { logger } from '../../lib/logger.js';
+import { prisma } from '../../lib/prisma.js';
+import { eventDayAnchor, singaporeDateString } from '../../lib/time.js';
+import { findStationById } from '../station/repo.js';
+import {
+  acknowledge,
+  acknowledgedIds,
+  countAudience,
+  createAnnouncement,
+  findAnnouncementById,
+  listForRecipient,
+  toAnnouncementRecord,
+} from './repo.js';
+
+/**
+ * Broadcast and comms (PRODUCT_BRIEF §8).
+ *
+ * Quiet by default. Only URGENT messages are eligible for a push; everything
+ * else lands in the inbox. Volunteers who receive forty pushes stop reading
+ * pushes by 11am, and then the one that matters is the one they miss.
+ */
+
+export async function sendAnnouncement(
+  request: CreateAnnouncementRequest,
+  sender: { volunteerId: string; role: CommitteeRole },
+  audit: AuditContext,
+): Promise<AnnouncementRecord> {
+  const stationId = request.target.stationId ?? null;
+
+  /**
+   * An IC may address their own station; only a DC and above may address the
+   * whole event. Enforced here rather than by two separate routes because the
+   * distinction is in the payload, not the path — and the capability check on
+   * the route cannot see the payload.
+   */
+  if (!stationId && !roleMeets(sender.role, 'DEPUTY_COORDINATOR')) {
+    throw new ForbiddenError(
+      'Only a Deputy Coordinator or above may send an event-wide announcement. Target a station instead.',
+    );
+  }
+
+  const announcement = await prisma.$transaction(async (tx) => {
+    const row = await createAnnouncement(tx, {
+      body: request.body,
+      priority: request.priority,
+      targetRole: request.target.role ?? null,
+      targetStationId: stationId,
+      targetEventDayId: request.target.eventDayId ?? null,
+      requiresAck: request.requiresAck,
+      authorId: sender.volunteerId,
+      expiresAt: request.expiresAt ? new Date(request.expiresAt) : null,
+    });
+
+    await writeAudit(tx, {
+      ...audit,
+      action: 'announcement.send',
+      entityType: 'Announcement',
+      entityId: row.id,
+      after: {
+        priority: row.priority,
+        targetRole: row.targetRole,
+        targetStationId: row.targetStationId,
+        requiresAck: row.requiresAck,
+      },
+    });
+
+    return row;
+  });
+
+  if (announcement.priority === 'URGENT') pushToDevices(announcement.id);
+
+  return decorate(announcement, sender.volunteerId, { includeAudience: true });
+}
+
+export async function listInbox(
+  query: ListAnnouncementsQuery,
+  recipient: { volunteerId: string; role: CommitteeRole },
+): Promise<AnnouncementRecord[]> {
+  const today = eventDayAnchor(singaporeDateString());
+
+  // Station targeting matches every station this volunteer is rostered at
+  // today, not just the one they happen to be standing in right now.
+  const assignments = await prisma.shiftAssignment.findMany({
+    where: { volunteerId: recipient.volunteerId, eventDay: { date: today } },
+    select: { stationId: true, eventDayId: true },
+  });
+
+  const announcements = await listForRecipient({
+    role: recipient.role,
+    stationIds: [...new Set(assignments.map((a) => a.stationId))],
+    eventDayIds: [...new Set(assignments.map((a) => a.eventDayId))],
+    limit: query.limit,
+    ...(query.cursor ? { cursor: query.cursor } : {}),
+    now: new Date(),
+  });
+
+  const acked = await acknowledgedIds(
+    recipient.volunteerId,
+    announcements.map((a) => a.id),
+  );
+
+  const records = await Promise.all(
+    announcements.map(async (announcement) => {
+      const station = announcement.targetStationId
+        ? await findStationById(announcement.targetStationId)
+        : null;
+
+      return toAnnouncementRecord(announcement, {
+        stationName: station?.name ?? null,
+        ackedByMe: acked.has(announcement.id),
+        audienceCount: null,
+      });
+    }),
+  );
+
+  return query.unackedOnly
+    ? records.filter((record) => record.requiresAck && !record.ackedByMe)
+    : records;
+}
+
+export async function acknowledgeAnnouncement(
+  announcementId: string,
+  volunteerId: string,
+): Promise<AnnouncementRecord> {
+  const existing = await findAnnouncementById(announcementId);
+  if (!existing) throw new NotFoundError('Announcement');
+
+  await acknowledge(announcementId, volunteerId);
+
+  const refreshed = await findAnnouncementById(announcementId);
+  if (!refreshed) throw new NotFoundError('Announcement');
+
+  return decorate(refreshed, volunteerId, { includeAudience: false });
+}
+
+async function decorate(
+  announcement: Awaited<ReturnType<typeof findAnnouncementById>> & object,
+  viewerId: string,
+  options: { includeAudience: boolean },
+): Promise<AnnouncementRecord> {
+  const station = announcement.targetStationId
+    ? await findStationById(announcement.targetStationId)
+    : null;
+
+  const acked = await acknowledgedIds(viewerId, [announcement.id]);
+
+  const audienceCount = options.includeAudience
+    ? await countAudience({
+        role: announcement.targetRole,
+        stationId: announcement.targetStationId,
+        eventDayId: announcement.targetEventDayId,
+      })
+    : null;
+
+  return toAnnouncementRecord(announcement, {
+    stationName: station?.name ?? null,
+    ackedByMe: acked.has(announcement.id),
+    audienceCount,
+  });
+}
+
+/**
+ * Web Push fan-out is not built. Until it is, the client's inbox poll is the
+ * delivery mechanism — and it would be the guaranteed one either way, because
+ * push is best effort by design (BUILD_PLAN §7.3).
+ */
+function pushToDevices(announcementId: string): void {
+  logger.warn({ announcementId }, 'urgent announcement — clients will pick it up on next poll');
+}

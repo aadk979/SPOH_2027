@@ -18,3 +18,8 @@ export * from './dto/footfall.js';
 export * from './dto/incident.js';
 export * from './dto/lostPerson.js';
 export * from './dto/roster.js';
+export * from './dto/missionCard.js';
+export * from './dto/gift.js';
+export * from './dto/announcement.js';
+export * from './dto/shift.js';
+export * from './dto/dashboard.js';

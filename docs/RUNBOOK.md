@@ -3,10 +3,10 @@
 **For:** the Chief Coordinator, Deputy Coordinators, and whoever is on call for the system.
 **Event window:** 6–9 January 2027. **Deploy freeze:** from 5 January 2027.
 
-> **Status: partial.** The sections below cover what exists after Phase 2
-> (capture, safety, roster). Fallback declaration, CSV import and report export
-> are Phase 4 and are marked as such. This document must be complete before
-> Dry Run #2 on 4 January 2027.
+> **Status: partial.** The sections below cover what exists after Phase 3
+> (capture, safety, roster, cards, gifts, dashboard, comms). Fallback
+> declaration, CSV import and report export are Phase 4 and are marked as such.
+> This document must be complete before Dry Run #2 on 4 January 2027.
 
 ---
 
@@ -110,6 +110,52 @@ the server runs it on the next tick.
 Immutable once submitted. Updates go into the append-only follow-up log. An IC
 or above changes status. This produces the incident log for the post-event
 report directly, rather than reconstructing it from memory a week later.
+
+## 4a. Mission Cards, gifts and comms
+
+### A card will not scan
+
+Type the six-character code instead. It is printed on every card, and the input
+sits beside the camera rather than behind a toggle. If neither works, stamp the
+card physically and carry on: the physical card is the keepsake and the
+authority, and the system only mirrors it. You lose journey data for that scan,
+not the visitor.
+
+### A visitor has lost their card
+
+An IC reissues against a fresh card:
+
+```
+POST /api/v1/cards/:oldCode/reissue
+  { "reason": "...", "replacementShortCode": "NEWCODE" }
+```
+
+The stamps carry over and the original is voided in the same transaction, so one
+journey can never be redeemed twice.
+
+### Gift stock looks wrong
+
+Stock is derived, never stored: initial + adjustments - redemptions. The
+redemption log is the truth. Do not try to correct a total; record an adjustment
+with a reason and the derived number follows:
+
+```
+POST /api/v1/gifts/:id/adjust   { "delta": -50, "reason": "..." }
+```
+
+Low stock surfaces on the Chief dashboard automatically.
+
+**Out of stock is the only hard stop in redemption.** Unknown card, incomplete
+card, and a second gift against one card are all warnings the volunteer can
+confirm through, because a card that will not scan must never stop a visitor who
+walked the whole journey.
+
+### Announcements
+
+Only **Urgent** is eligible for a push; everything else lands in the inbox. Use
+it sparingly - volunteers who receive forty pushes stop reading pushes by 11am.
+An IC may address their own station; event-wide needs a Deputy Coordinator or
+the Chief.
 
 ## 5. Fallback tiers — **Phase 4, not yet built**
 

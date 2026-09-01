@@ -38,6 +38,7 @@ export default function HomePage(): ReactNode {
         <div className="flex flex-col gap-6">
           <ShiftCard me={me} />
           <RoleTiles me={me} />
+          <LeadershipTiles me={me} />
           <UniversalTiles />
           <EscalationChain me={me} />
           <FiveThings />
@@ -154,6 +155,22 @@ function RoleTiles({ me }: { me: MeResponse }): ReactNode {
     });
   }
 
+  if (can('card.stamp') && assignment.station.issuesStamp) {
+    tiles.push({
+      href: '/capture/stamp',
+      label: 'Stamp a card',
+      hint: 'Scan after stamping by hand',
+    });
+  }
+
+  if (can('gift.redeem') && assignment.station.kind === 'MISSION_COMPLETE') {
+    tiles.push({
+      href: '/capture/redeem',
+      label: 'Redeem a gift',
+      hint: 'Check the physical stamps first',
+    });
+  }
+
   if (tiles.length === 0) return null;
 
   return (
@@ -173,6 +190,46 @@ function RoleTiles({ me }: { me: MeResponse }): ReactNode {
           >
             <span>{tile.label}</span>
             <span className="mt-1 text-sm font-normal" style={{ color: 'var(--text-muted)' }}>
+              {tile.hint}
+            </span>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/**
+ * The oversight screens. Shown only to whoever can actually read them — the
+ * server would reject the fetch anyway, and a tile that leads to a 403 erodes
+ * trust in every other tile on the page.
+ */
+function LeadershipTiles({ me }: { me: MeResponse }): ReactNode {
+  const tiles: Array<{ href: string; label: string; hint: string }> = [];
+
+  if (me.capabilities.includes('dashboard.event.read')) {
+    tiles.push({ href: '/chief', label: 'Live operations', hint: 'Everything, right now' });
+  }
+
+  if (me.capabilities.includes('dashboard.station.read')) {
+    tiles.push({ href: '/ic', label: 'IC console', hint: 'Per-station and per-device' });
+  }
+
+  if (tiles.length === 0) return null;
+
+  return (
+    <section>
+      <h2
+        className="mb-3 text-sm font-semibold uppercase tracking-wide"
+        style={{ color: 'var(--text-muted)' }}
+      >
+        Oversight
+      </h2>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {tiles.map((tile) => (
+          <Link key={tile.href} href={tile.href} className="tile-flat block">
+            <span className="font-semibold">{tile.label}</span>
+            <span className="mt-1 block text-sm" style={{ color: 'var(--text-muted)' }}>
               {tile.hint}
             </span>
           </Link>

@@ -1,11 +1,16 @@
 import { Router } from 'express';
 import { env } from './config/env.js';
+import { announcementRouter } from './modules/announcement/router.js';
+import { dashboardRouter } from './modules/dashboard/router.js';
 import { footfallRouter } from './modules/footfall/router.js';
+import { giftRouter } from './modules/gift/router.js';
 import { incidentRouter } from './modules/incident/router.js';
 import { lostPersonRouter } from './modules/lostPerson/router.js';
 import { meRouter } from './modules/me/router.js';
+import { missionCardRouter } from './modules/missionCard/router.js';
 import { registrationRouter } from './modules/registration/router.js';
 import { rosterRouter } from './modules/roster/router.js';
+import { shiftRouter } from './modules/shift/router.js';
 import { stationRouter } from './modules/station/router.js';
 import { createDevAuthRouter } from './modules/devAuth/router.js';
 
@@ -25,6 +30,14 @@ apiRouter.use('/footfall', footfallRouter);
 apiRouter.use('/incidents', incidentRouter);
 apiRouter.use('/lost-person', lostPersonRouter);
 apiRouter.use('/roster', rosterRouter);
+// Swaps, briefing waves and gaps share the roster path: one people-and-shifts
+// surface, split across two modules only because they were built in different
+// phases.
+apiRouter.use('/roster', shiftRouter);
+apiRouter.use('/cards', missionCardRouter);
+apiRouter.use('/gifts', giftRouter);
+apiRouter.use('/announcements', announcementRouter);
+apiRouter.use('/dashboard', dashboardRouter);
 
 // Development sign-in. The factory returns an empty router outside
 // AUTH_PROVIDER=local, so the path simply 404s in every deployed environment.
