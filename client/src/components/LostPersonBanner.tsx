@@ -1,7 +1,12 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useAcknowledgeAlert, useActiveAlerts } from '@/features/lostPerson/useActiveAlerts';
+import {
+  useAcknowledgeAlert,
+  useActiveAlerts,
+  useResolveAlert,
+} from '@/features/lostPerson/useActiveAlerts';
+import { useMe } from '@/features/session/useSession';
 
 /**
  * The one element in this app allowed to interrupt whatever is on screen.
@@ -16,13 +21,38 @@ import { useAcknowledgeAlert, useActiveAlerts } from '@/features/lostPerson/useA
  */
 export function LostPersonBanner(): ReactNode {
   const { data } = useActiveAlerts();
+  const { data: me } = useMe();
   const acknowledge = useAcknowledgeAlert();
+  const resolve = useResolveAlert();
+
+  // IC and above. A volunteer who found the child tells their IC; the person
+  // who clears the floor is the person coordinating the search.
+  const canResolve = me?.capabilities.includes('lostPerson.resolve') ?? false;
 
   const alerts = data?.alerts ?? [];
   if (alerts.length === 0) return null;
 
+  /**
+   * Capped and internally scrollable.
+   *
+   * Sticky and unbounded, three concurrent alerts filled a phone screen and
+   * made everything beneath the banner unclickable — including the map and the
+   * call button a searcher needs. Found by the e2e suite, which could not
+   * reach the capture tiles while stale alerts were live.
+   *
+   * The alert must dominate the screen. It must not become the screen.
+   */
   return (
-    <div role="alert" aria-live="assertive" className="sticky top-0 z-50">
+    <div
+      role="alert"
+      aria-live="assertive"
+      // Named, so a screen reader announces what this region is rather than
+      // just reading its contents. It also distinguishes it from the router's
+      // own live region, which shares role="alert".
+      aria-label={`Lost person alert${alerts.length === 1 ? '' : 's'}`}
+      className="sticky top-0 z-50 overflow-y-auto"
+      style={{ maxHeight: '60dvh' }}
+    >
       {alerts.map((alert) => (
         <div
           key={alert.id}
@@ -90,6 +120,18 @@ export function LostPersonBanner(): ReactNode {
               >
                 {alert.ackedByMe ? 'Acknowledged ✓' : 'Acknowledge'}
               </button>
+
+              {canResolve ? (
+                <button
+                  type="button"
+                  onClick={() => resolve.mutate({ alertId: alert.id, outcome: 'RESOLVED_FOUND' })}
+                  disabled={resolve.isPending}
+                  className="rounded-full bg-white px-5 py-3 text-base font-semibold disabled:opacity-70"
+                  style={{ color: 'var(--color-alert)', minHeight: 44 }}
+                >
+                  Found — clear this alert
+                </button>
+              ) : null}
             </div>
           </div>
         </div>

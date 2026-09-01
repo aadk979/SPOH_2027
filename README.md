@@ -7,6 +7,7 @@ Volunteer operations for the Singapore Polytechnic School of Computing Open Hous
 - **Build plan:** [`docs/SPOH2027_BUILD_PLAN.md`](docs/SPOH2027_BUILD_PLAN.md) — the engineering plan
 - **Design language:** [`docs/design.md`](docs/design.md) — tokens; see [Design](#design) for how it is applied
 - **Runbook:** [`docs/RUNBOOK.md`](docs/RUNBOOK.md) — event-day operations
+- **Deployment:** [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — AWS, Cognito, environments
 
 **The deadline that matters is Dry Run #1 on 18 November 2026**, not the event.
 
@@ -172,6 +173,20 @@ npm run load-test --workspace server -- --clients 100 --taps 20 --duration 60
 It simulates 100 **distinct** volunteers, each on their own account, and
 reports p95 for the steady state separately from the ramp-up. Measured at
 p95 48ms against a 300ms budget.
+
+End-to-end tests need both apps running against a seeded database:
+
+```bash
+npm run db:up
+npm run db:seed --workspace server
+npm run dev                              # in another terminal
+npm run test:e2e --workspace client      # 13 tests on a Pixel 7 viewport
+```
+
+They drive a real browser at phone size, because the capture screens are only
+meaningful on one. Navigation goes through the app rather than by URL: the
+access token lives in memory (§6.4), so a hard page load drops the session —
+which is exactly what should happen on a shared phone.
 
 Integration tests run against a **real Postgres** — the count aggregations use
 `date_trunc` and epoch bucketing that a substitute would not reproduce

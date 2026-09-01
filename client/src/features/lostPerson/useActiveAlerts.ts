@@ -40,3 +40,28 @@ export function useAcknowledgeAlert(): ReturnType<typeof useMutation<unknown, Er
     },
   });
 }
+
+/**
+ * Resolve an alert. IC and above only.
+ *
+ * Without this the alert would sit on every device in the building until the
+ * purge job ran, long after the child was found — and the next real alert would
+ * arrive into a screen people had already learned to ignore.
+ */
+export function useResolveAlert(): ReturnType<
+  typeof useMutation<
+    unknown,
+    Error,
+    { alertId: string; outcome: 'RESOLVED_FOUND' | 'RESOLVED_OTHER' }
+  >
+> {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ alertId, outcome }) =>
+      api(`/lost-person/${alertId}/resolve`, { method: 'POST', body: { outcome } }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['lost-person', 'active'] });
+    },
+  });
+}
