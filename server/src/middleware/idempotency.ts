@@ -3,6 +3,7 @@ import { ERROR_CODES } from '@spoh/shared';
 import { AppError, IdempotencyKeyReuseError, ValidationError } from '../lib/errors.js';
 import { logger } from '../lib/logger.js';
 import { prisma } from '../lib/prisma.js';
+import { getSettings, DEFAULT_SETTINGS } from '../lib/settings.js';
 import { getAuth } from './auth/index.js';
 
 /**
@@ -21,17 +22,54 @@ import { getAuth } from './auth/index.js';
  *   insert conflicts -> someone got here first:
  *                         different endpoint/actor -> 409 key reuse
  *                         still in progress        -> 409 retry shortly
+ *                         abandoned (see below)    -> take it over
  *                         finished                 -> replay stored response
  *
- * A reservation whose handler failed is deleted, so a genuine retry after an
- * error is not permanently blocked by the failed attempt.
+ * ── Settling ────────────────────────────────────────────────────────────────
+ *
+ * The outcome is written back to the reservation BEFORE the response is sent.
+ * This used to be fire-and-forget on the grounds that a volunteer should not
+ * wait on bookkeeping — but a lost settle leaves an IN_PROGRESS row, and every
+ * retry of that capture then gets a 409 until the record is pruned days later.
+ * A capture that can never be retried is a worse outcome than one extra
+ * millisecond on an indexed primary-key update.
+ *
+ * The wait is bounded: if the settle has not completed within
+ * `SETTLE_TIMEOUT_MS` the response goes out anyway, because a slow bookkeeping
+ * write must never hold a booth tap open. The abandoned-reservation takeover
+ * below is what makes that safe.
+ *
+ * ── Abandoned reservations ──────────────────────────────────────────────────
+ *
+ * No amount of awaiting helps if the process dies between reserving the key and
+ * settling it. So an IN_PROGRESS reservation older than `STALE_RESERVATION_MS`
+ * is treated as abandoned and taken over by the retry. The window is comfortably
+ * longer than any real request, so a genuine in-flight duplicate still gets a
+ * 409 rather than racing.
  */
 
 /** Sentinel status for a reservation whose handler has not finished yet. */
 const IN_PROGRESS = 0;
 
+/** How long the response waits for its own bookkeeping before going out anyway. */
+const SETTLE_TIMEOUT_MS = 2_000;
+
+/**
+ * How long before an unsettled reservation is assumed to belong to a process
+ * that died. Longer than the API's slowest write by a wide margin.
+ */
+const STALE_RESERVATION_MS = 60_000;
+
 interface IdempotentBody {
   idempotencyKey?: unknown;
+}
+
+interface Reservation {
+  endpoint: string;
+  actorSub: string;
+  statusCode: number;
+  responseBody: unknown;
+  createdAt: Date;
 }
 
 export function idempotent(endpointName: string): RequestHandler {
@@ -55,19 +93,34 @@ export function idempotent(endpointName: string): RequestHandler {
           }
 
           if (existing.statusCode === IN_PROGRESS) {
-            next(
-              new AppError(
-                409,
-                ERROR_CODES.IDEMPOTENCY_IN_PROGRESS,
-                'An identical request is already being processed. Retry shortly.',
-              ),
+            const abandoned = Date.now() - existing.createdAt.getTime() > STALE_RESERVATION_MS;
+
+            if (!abandoned) {
+              next(
+                new AppError(
+                  409,
+                  ERROR_CODES.IDEMPOTENCY_IN_PROGRESS,
+                  'An identical request is already being processed. Retry shortly.',
+                ),
+              );
+              return;
+            }
+
+            // The process that claimed this key never finished. Take it over
+            // rather than leaving the capture permanently unretryable.
+            logger.warn(
+              { requestId: req.id, endpoint: endpointName, key },
+              'taking over an abandoned idempotency reservation',
             );
+            await prisma.idempotencyRecord.update({
+              where: { key },
+              data: { createdAt: new Date() },
+            });
+          } else {
+            logger.debug({ requestId: req.id, endpoint: endpointName }, 'idempotent replay');
+            res.status(existing.statusCode).json(existing.responseBody);
             return;
           }
-
-          logger.debug({ requestId: req.id, endpoint: endpointName }, 'idempotent replay');
-          res.status(existing.statusCode).json(existing.responseBody);
-          return;
         }
 
         captureResponse(req, res, key);
@@ -87,12 +140,7 @@ async function reserve(
   key: string,
   endpoint: string,
   actorSub: string,
-): Promise<{
-  endpoint: string;
-  actorSub: string;
-  statusCode: number;
-  responseBody: unknown;
-} | null> {
+): Promise<Reservation | null> {
   try {
     await prisma.idempotencyRecord.create({
       data: { key, endpoint, actorSub, statusCode: IN_PROGRESS, responseBody: {} },
@@ -108,8 +156,13 @@ async function reserve(
 }
 
 /**
- * Wrap `res.json` so the outcome is written back to the reservation. Successful
- * responses are stored for replay; failures release the key.
+ * Wrap `res.json` so the outcome is written back to the reservation before the
+ * body reaches the client. Successful responses are stored for replay; failures
+ * release the key so a genuine retry is not blocked by a failed attempt.
+ *
+ * The override returns `res` synchronously to satisfy Express's signature, and
+ * defers the actual send until the settle resolves or times out. The handler has
+ * already returned by then and nothing else writes to this response.
  */
 function captureResponse(req: Request, res: Response, key: string): void {
   const originalJson = res.json.bind(res);
@@ -125,22 +178,40 @@ function captureResponse(req: Request, res: Response, key: string): void {
           })
         : prisma.idempotencyRecord.delete({ where: { key } });
 
-    // Not awaited: the volunteer's response must not wait on bookkeeping. A
-    // lost settle leaves an in-progress row that expires with the daily prune,
-    // and the client's retry gets a clean 409 rather than a duplicate row.
-    void settle.catch((error: unknown) => {
-      logger.error({ err: error, requestId: req.id, key }, 'failed to settle idempotency record');
+    const send = (): void => {
+      // The client may have hung up while we were settling.
+      if (!res.writableEnded) originalJson(body);
+    };
+
+    // Bounded wait. A slow settle must not hold the tap open; the abandoned
+    // reservation takeover covers the case where it never lands at all.
+    const timeout = new Promise<void>((resolve) => {
+      setTimeout(resolve, SETTLE_TIMEOUT_MS).unref();
     });
 
-    return originalJson(body);
+    void Promise.race([
+      settle.then(
+        () => undefined,
+        (error: unknown) => {
+          logger.error(
+            { err: error, requestId: req.id, key },
+            'failed to settle idempotency record',
+          );
+        },
+      ),
+      timeout,
+    ]).finally(send);
+
+    return res;
   };
 }
 
 /** Records older than this are pruned by the daily job (BUILD_PLAN §7.4). */
-export const IDEMPOTENCY_RETENTION_DAYS = 7;
+export const IDEMPOTENCY_RETENTION_DAYS = DEFAULT_SETTINGS.idempotencyRetentionDays;
 
 export async function pruneIdempotencyRecords(now: Date = new Date()): Promise<number> {
-  const cutoff = new Date(now.getTime() - IDEMPOTENCY_RETENTION_DAYS * 24 * 60 * 60 * 1000);
+  const days = getSettings().idempotencyRetentionDays;
+  const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
   const { count } = await prisma.idempotencyRecord.deleteMany({
     where: { createdAt: { lt: cutoff } },
   });

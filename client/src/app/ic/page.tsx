@@ -4,11 +4,24 @@ import { useQuery } from '@tanstack/react-query';
 import { useState, type ReactNode } from 'react';
 import type { StationSummary, SwapRequestRecord } from '@spoh/shared';
 import { AppShell } from '@/components/AppShell';
-import { BarRow, StatTile } from '@/components/dashboard/StatTile';
+import { BarList, BarRow, StatTile } from '@/components/dashboard/StatTile';
+import {
+  Button,
+  Callout,
+  Card,
+  CardGrid,
+  EmptyState,
+  Field,
+  LoadingCards,
+  Section,
+  Select,
+  Stack,
+  StatusText,
+} from '@/components/ui';
 import { useStationDashboard } from '@/features/dashboard/useDashboard';
 import { useMe, useRequireSession } from '@/features/session/useSession';
 import { api } from '@/lib/api';
-import { readableCategory } from '../chief/page';
+import { blockWord, readableCategory } from '@/lib/format';
 
 /**
  * The IC console (PRODUCT_BRIEF §2.5).
@@ -43,172 +56,164 @@ export default function IcConsolePage(): ReactNode {
 
   if (!session) return null;
 
+  const board = dashboard.data;
+
   return (
     <AppShell width="wide" title="IC console" back={{ href: '/home', label: 'Home' }}>
-      <label htmlFor="station" className="mb-2 block font-semibold">
-        Station
-      </label>
-      <select
-        id="station"
-        value={selected ?? ''}
-        onChange={(event) => setStationId(event.target.value)}
-        className="mb-6 w-full rounded-lg border px-4 py-3"
-        style={{
-          borderColor: 'var(--line)',
-          background: 'var(--surface)',
-          color: 'var(--text)',
-          minHeight: 48,
-        }}
-      >
-        <option value="">Choose a station…</option>
-        {(stations.data ?? []).map((station) => (
-          <option key={station.id} value={station.id}>
-            {station.name}
-          </option>
-        ))}
-      </select>
+      <Stack>
+        {/*
+          The picker is capped at a phone's width even on a console. A select
+          stretched across 1600px puts its chevron a full head-turn away from
+          its label.
+        */}
+        <Field id="station" label="Station" className="max-w-picker">
+          {(props) => (
+            <Select
+              {...props}
+              value={selected ?? ''}
+              onChange={(event) => setStationId(event.target.value)}
+            >
+              <option value="">Choose a station…</option>
+              {(stations.data ?? []).map((station) => (
+                <option key={station.id} value={station.id}>
+                  {station.name}
+                </option>
+              ))}
+            </Select>
+          )}
+        </Field>
 
-      {dashboard.data ? (
-        <div className="flex flex-col gap-6">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <StatTile
-              label="Registered here"
-              value={dashboard.data.registrations.todayTotal}
-              unit="registrations"
-            />
-            <StatTile
-              label="Room entries"
-              value={dashboard.data.footfall.todayTotal}
-              unit="entries, not people"
-            />
-            <StatTile label="Cards stamped" value={dashboard.data.stamps} unit="stamps" />
-          </div>
+        {board ? (
+          <>
+            <CardGrid>
+              <StatTile
+                label="Registered here"
+                value={board.registrations.todayTotal}
+                unit="registrations"
+              />
+              <StatTile
+                label="Room entries"
+                value={board.footfall.todayTotal}
+                unit="entries, not people"
+              />
+              <StatTile label="Cards stamped" value={board.stamps} unit="stamps" />
+            </CardGrid>
 
-          {dashboard.data.registrations.byDevice.length > 0 ? (
-            <section>
-              <h2
-                className="mb-3 text-sm font-semibold uppercase tracking-wide"
-                style={{ color: 'var(--text-muted)' }}
-              >
-                Registrations per device
-              </h2>
-              <div className="tile flex flex-col gap-2">
-                {dashboard.data.registrations.byDevice.map((device) => (
-                  <div key={device.volunteerId}>
-                    <BarRow
-                      label={device.volunteerName}
-                      value={device.value}
-                      max={Math.max(
+            <div className="grid gap-lg lg:grid-cols-2">
+              {board.registrations.byDevice.length > 0 ? (
+                <Section
+                  title="Registrations per device"
+                  description="Two volunteers on one queue should track each other. A gap that appears here can still be explained; a gap found at reconciliation cannot."
+                >
+                  <BarList>
+                    {board.registrations.byDevice.map((device) => {
+                      const max = Math.max(
                         1,
-                        ...dashboard.data.registrations.byDevice.map((d) => d.value),
-                      )}
-                    />
-                    {device.rateAnomaly ? (
-                      <p className="ml-40 text-sm" style={{ color: 'var(--color-warn)' }}>
-                        ▲ {device.perMinute}/min — check they are not tapping to catch up
-                      </p>
-                    ) : null}
-                  </div>
-                ))}
-              </div>
-            </section>
-          ) : null}
+                        ...board.registrations.byDevice.map((row) => row.value),
+                      );
 
-          {dashboard.data.footfall.contributors.length > 0 ? (
-            <section>
-              <h2
-                className="mb-3 text-sm font-semibold uppercase tracking-wide"
-                style={{ color: 'var(--text-muted)' }}
-              >
-                Counters contributing
-              </h2>
-              <div className="tile flex flex-col gap-2">
-                {dashboard.data.footfall.contributors.map((contributor) => (
-                  <BarRow
-                    key={contributor.volunteerId}
-                    label={contributor.volunteerName}
-                    value={contributor.value}
-                    max={Math.max(1, ...dashboard.data.footfall.contributors.map((c) => c.value))}
-                  />
-                ))}
-              </div>
-            </section>
-          ) : null}
+                      return (
+                        <div key={device.volunteerId}>
+                          <BarRow label={device.volunteerName} value={device.value} max={max} />
+                          {device.rateAnomaly ? (
+                            /*
+                              Sits directly under its own bar rather than at a
+                              hard-coded 160px indent, which on a phone put the
+                              warning under the wrong volunteer entirely.
+                            */
+                            <p className="mt-xxs text-caption text-warn">
+                              <span aria-hidden="true">▲ </span>
+                              {device.perMinute}/min — check they are not tapping to catch up
+                            </p>
+                          ) : null}
+                        </div>
+                      );
+                    })}
+                  </BarList>
+                </Section>
+              ) : null}
 
-          <section>
-            <h2
-              className="mb-3 text-sm font-semibold uppercase tracking-wide"
-              style={{ color: 'var(--text-muted)' }}
-            >
-              Who is here
-            </h2>
-            <ul className="tile flex flex-col gap-2">
-              {dashboard.data.roster.length === 0 ? (
-                <li style={{ color: 'var(--text-muted)' }}>Nobody rostered here today.</li>
-              ) : (
-                dashboard.data.roster.map((person) => (
-                  <li key={person.volunteerId} className="flex justify-between gap-3">
-                    <span>
-                      {person.volunteerName}
-                      <span className="ml-2 text-sm" style={{ color: 'var(--text-muted)' }}>
-                        {person.roleLabel}
-                      </span>
-                    </span>
-                    <span
-                      className="text-sm font-semibold"
-                      style={{
-                        color: person.checkedOutAt
-                          ? 'var(--text-muted)'
-                          : person.checkedInAt
-                            ? 'var(--color-ok)'
-                            : 'var(--color-warn)',
-                      }}
-                    >
-                      {person.checkedOutAt
-                        ? 'Left'
-                        : person.checkedInAt
-                          ? 'Checked in'
-                          : 'Not arrived'}
-                    </span>
-                  </li>
-                ))
-              )}
-            </ul>
-          </section>
+              {board.footfall.contributors.length > 0 ? (
+                <Section title="Counters contributing">
+                  <BarList>
+                    {board.footfall.contributors.map((contributor) => (
+                      <BarRow
+                        key={contributor.volunteerId}
+                        label={contributor.volunteerName}
+                        value={contributor.value}
+                        max={Math.max(1, ...board.footfall.contributors.map((row) => row.value))}
+                      />
+                    ))}
+                  </BarList>
+                </Section>
+              ) : null}
 
-          <section>
-            <h2
-              className="mb-3 text-sm font-semibold uppercase tracking-wide"
-              style={{ color: 'var(--text-muted)' }}
-            >
-              Categories
-            </h2>
-            <div className="tile flex flex-col gap-2">
-              {dashboard.data.registrations.byCategory.length === 0 ? (
-                <p style={{ color: 'var(--text-muted)' }}>Nothing recorded here today.</p>
-              ) : (
-                dashboard.data.registrations.byCategory.map((row) => (
-                  <BarRow
-                    key={row.key}
-                    label={readableCategory(row.key)}
-                    value={row.value}
-                    max={Math.max(
-                      1,
-                      ...dashboard.data.registrations.byCategory.map((r) => r.value),
-                    )}
-                  />
-                ))
-              )}
+              <Section title="Who is here">
+                <Card as="ul" className="flex flex-col divide-y divide-line-soft">
+                  {board.roster.length === 0 ? (
+                    <li className="text-text-muted">Nobody rostered here today.</li>
+                  ) : (
+                    board.roster.map((person) => (
+                      <li
+                        key={person.volunteerId}
+                        className="flex items-center justify-between gap-sm py-xs first:pt-0 last:pb-0"
+                      >
+                        <span className="min-w-0">
+                          <span className="block">{person.volunteerName}</span>
+                          <span className="block text-caption text-text-muted">
+                            {person.roleLabel}
+                          </span>
+                        </span>
+
+                        <StatusText
+                          tone={
+                            person.checkedOutAt ? 'neutral' : person.checkedInAt ? 'ok' : 'warn'
+                          }
+                          className="shrink-0"
+                        >
+                          {person.checkedOutAt
+                            ? 'Left'
+                            : person.checkedInAt
+                              ? 'Checked in'
+                              : 'Not arrived'}
+                        </StatusText>
+                      </li>
+                    ))
+                  )}
+                </Card>
+              </Section>
+
+              <Section title="Categories">
+                <BarList>
+                  {board.registrations.byCategory.length === 0 ? (
+                    <p className="text-text-muted">Nothing recorded here today.</p>
+                  ) : (
+                    board.registrations.byCategory.map((row) => (
+                      <BarRow
+                        key={row.key}
+                        label={readableCategory(row.key)}
+                        value={row.value}
+                        max={Math.max(
+                          1,
+                          ...board.registrations.byCategory.map((entry) => entry.value),
+                        )}
+                      />
+                    ))
+                  )}
+                </BarList>
+              </Section>
             </div>
-          </section>
-        </div>
-      ) : selected ? (
-        <p style={{ color: 'var(--text-muted)' }}>Loading…</p>
-      ) : (
-        <p style={{ color: 'var(--text-muted)' }}>Choose a station to see its numbers.</p>
-      )}
+          </>
+        ) : selected ? (
+          <LoadingCards count={3} label="Loading station numbers" />
+        ) : (
+          <EmptyState title="Choose a station">
+            Pick a station above to see its numbers, its roster and its per-device totals.
+          </EmptyState>
+        )}
 
-      <SwapQueue swaps={swaps.data ?? []} onDecided={() => void swaps.refetch()} />
+        <SwapQueue swaps={swaps.data ?? []} onDecided={() => void swaps.refetch()} />
+      </Stack>
     </AppShell>
   );
 }
@@ -222,12 +227,16 @@ function SwapQueue({
   onDecided(): void;
 }): ReactNode {
   const [pending, setPending] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   async function decide(id: string, decision: 'APPROVED' | 'REJECTED'): Promise<void> {
     setPending(id);
+    setError(null);
     try {
       await api(`/roster/swaps/${id}/decide`, { method: 'POST', body: { decision } });
       onDecided();
+    } catch {
+      setError('Could not update swap request. Check your connection and try again.');
     } finally {
       setPending(null);
     }
@@ -236,45 +245,44 @@ function SwapQueue({
   if (swaps.length === 0) return null;
 
   return (
-    <section className="mt-6">
-      <h2
-        className="mb-3 text-sm font-semibold uppercase tracking-wide"
-        style={{ color: 'var(--text-muted)' }}
-      >
-        Swap requests
-      </h2>
-      <ul className="flex flex-col gap-3">
+    <Section title="Swap requests">
+      {error ? (
+        <Callout tone="alert" role="alert" className="mb-sm">
+          {error}
+        </Callout>
+      ) : null}
+      <ul className="flex flex-col gap-sm">
         {swaps.map((swap) => (
-          <li key={swap.id} className="tile-flat">
+          <Card as="li" variant="flat" key={swap.id}>
             <p>
-              <strong>{swap.requesterName}</strong> → <strong>{swap.targetName}</strong>
+              <strong>{swap.requesterName}</strong> <span aria-hidden="true">→</span>
+              <span className="sr-only">wants to swap with</span> <strong>{swap.targetName}</strong>
             </p>
-            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-              {swap.stationName} · {swap.date} ·{' '}
-              {swap.block === 'MORNING' ? 'morning' : 'afternoon'}
+            <p className="text-caption text-text-muted">
+              {swap.stationName} · {swap.date} · {blockWord(swap.block)}
               {swap.reason ? ` · ${swap.reason}` : ''}
             </p>
-            <div className="mt-3 flex gap-3">
-              <button
-                type="button"
-                className="pill"
+
+            <div className="mt-sm flex flex-wrap gap-sm">
+              <Button
                 disabled={pending === swap.id}
                 onClick={() => void decide(swap.id, 'APPROVED')}
+                aria-label={`Approve the swap from ${swap.requesterName} to ${swap.targetName}`}
               >
                 Approve
-              </button>
-              <button
-                type="button"
-                className="pill-quiet"
+              </Button>
+              <Button
+                variant="quiet"
                 disabled={pending === swap.id}
                 onClick={() => void decide(swap.id, 'REJECTED')}
+                aria-label={`Reject the swap from ${swap.requesterName} to ${swap.targetName}`}
               >
                 Reject
-              </button>
+              </Button>
             </div>
-          </li>
+          </Card>
         ))}
       </ul>
-    </section>
+    </Section>
   );
 }

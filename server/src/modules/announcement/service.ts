@@ -7,10 +7,10 @@ import {
 } from '@spoh/shared';
 import { writeAudit, type AuditContext } from '../../lib/audit.js';
 import { ForbiddenError, NotFoundError } from '../../lib/errors.js';
-import { logger } from '../../lib/logger.js';
 import { prisma } from '../../lib/prisma.js';
 import { eventDayAnchor, singaporeDateString } from '../../lib/time.js';
 import { findStationById } from '../station/repo.js';
+import { dispatch } from '../notification/service.js';
 import {
   acknowledge,
   acknowledgedIds,
@@ -76,7 +76,7 @@ export async function sendAnnouncement(
     return row;
   });
 
-  if (announcement.priority === 'URGENT') pushToDevices(announcement.id);
+  if (announcement.priority === 'URGENT') pushToDevices(announcement);
 
   return decorate(announcement, sender.volunteerId, { includeAudience: true });
 }
@@ -169,10 +169,37 @@ async function decorate(
 }
 
 /**
- * Web Push fan-out is not built. Until it is, the client's inbox poll is the
- * delivery mechanism — and it would be the guaranteed one either way, because
- * push is best effort by design (BUILD_PLAN §7.3).
+ * Push an urgent announcement.
+ *
+ * Only URGENT reaches here — the caller checks the priority — and the audience
+ * is the announcement's own targeting, so a message aimed at one station does
+ * not buzz the whole event. The inbox poll delivers it either way; this is what
+ * makes it arrive while the app is closed.
  */
-function pushToDevices(announcementId: string): void {
-  logger.warn({ announcementId }, 'urgent announcement — clients will pick it up on next poll');
+function pushToDevices(announcement: {
+  id: string;
+  body: string;
+  targetRole: CommitteeRole | null;
+  targetStationId: string | null;
+}): void {
+  // Unlike an incident description, this text was written by a coordinator for
+  // exactly this audience, so showing it directly is safe and useful. Truncated
+  // here rather than left to the lock screen, which cuts mid-word.
+  const preview =
+    announcement.body.length > 140 ? `${announcement.body.slice(0, 137)}...` : announcement.body;
+
+  void dispatch({
+    kind: 'announcement.urgent',
+    priority: 'URGENT',
+    title: 'Urgent — SPOH Ops',
+    body: preview,
+    url: '/inbox',
+    tag: `announcement:${announcement.id}`,
+    audience: {
+      everyone: announcement.targetRole === null && announcement.targetStationId === null,
+      ...(announcement.targetRole ? { minimumRole: announcement.targetRole } : {}),
+      ...(announcement.targetStationId ? { stationId: announcement.targetStationId } : {}),
+      volunteerIds: [],
+    },
+  });
 }

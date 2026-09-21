@@ -1,6 +1,8 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { formatCount } from '@/lib/format';
+import { Card, cx } from '@/components/ui';
 
 /**
  * A single figure, with its unit stated.
@@ -8,6 +10,11 @@ import type { ReactNode } from 'react';
  * The unit is not decoration. The three counts never merge (PRODUCT_BRIEF
  * §0.1), and a dashboard that showed four bare numbers side by side would be
  * inviting someone to add them together. Every tile says what it is counting.
+ *
+ * The figure used to be `text-6xl` — 60px, fixed, at every width. On a phone
+ * that pushed the unit label below the fold, which quietly removed the one
+ * thing keeping the counts apart. It is now the design.md display-lg ceiling
+ * (40px) and scales down with the viewport.
  */
 export function StatTile({
   label,
@@ -27,38 +34,34 @@ export function StatTile({
 }): ReactNode {
   const toneColour =
     tone === 'ok'
-      ? 'var(--color-ok)'
+      ? 'text-ok'
       : tone === 'warn'
-        ? 'var(--color-warn)'
+        ? 'text-warn'
         : tone === 'alert'
-          ? 'var(--color-alert)'
-          : 'var(--text)';
+          ? 'text-alert'
+          : 'text-text';
 
   return (
-    <div className="tile">
-      <p
-        className="text-xs font-semibold uppercase tracking-wide"
-        style={{ color: 'var(--text-muted)' }}
-      >
+    <Card className="flex flex-col">
+      <p className="text-caption font-semibold tracking-[0.06em] text-text-muted uppercase">
         {label}
       </p>
+
       <p
-        className={large ? 'text-6xl font-semibold' : 'text-4xl font-semibold'}
-        style={{ fontFamily: 'var(--font-display)', color: toneColour, letterSpacing: '-0.01em' }}
+        className={cx(
+          'mt-xxs font-display font-semibold tabular-nums',
+          large ? 'text-stat-lg' : 'text-stat',
+          toneColour,
+        )}
       >
-        {typeof value === 'number' ? value.toLocaleString('en-SG') : value}
+        {typeof value === 'number' ? formatCount(value) : value}
       </p>
-      {unit ? (
-        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          {unit}
-        </p>
-      ) : null}
-      {note ? (
-        <p className="mt-1 text-sm" style={{ color: 'var(--text-muted)' }}>
-          {note}
-        </p>
-      ) : null}
-    </div>
+
+      {/* The unit sits directly under the figure with no gap: it is part of
+          the number, not a caption about it. */}
+      {unit ? <p className="text-caption text-text-muted">{unit}</p> : null}
+      {note ? <p className="mt-xs text-caption text-text-muted">{note}</p> : null}
+    </Card>
   );
 }
 
@@ -66,6 +69,12 @@ export function StatTile({
  * A horizontal bar. Deliberately not a charting library: this is four to eight
  * bars on a screen someone glances at while walking, and a 90KB dependency
  * would be the largest thing in the bundle.
+ *
+ * The label column used to be a fixed 160px, which on a 360px phone left 90px
+ * for the bar and the number together — every bar looked full. It is now a
+ * grid that gives the label a third of the row on a phone and a fixed measure
+ * once there is room, and the label wraps to two lines instead of truncating a
+ * station name down to "DCDF Stat…".
  */
 export function BarRow({
   label,
@@ -80,27 +89,37 @@ export function BarRow({
   suffix?: string;
   muted?: boolean;
 }): ReactNode {
-  const width = max > 0 ? Math.max(1, Math.round((value / max) * 100)) : 0;
+  const width = max > 0 && value > 0 ? Math.max(1, Math.round((value / max) * 100)) : 0;
 
   return (
-    <div className="flex items-center gap-3">
-      <span className="w-40 shrink-0 truncate text-sm">{label}</span>
-      <span
-        className="h-6 flex-1 overflow-hidden rounded-sm"
-        style={{ background: 'var(--color-divider)' }}
-      >
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-sm gap-y-xxs sm:grid-cols-[minmax(7rem,11rem)_minmax(0,1fr)_auto]">
+      <span className="min-w-0 text-caption">{label}</span>
+
+      {/*
+        The bar is `order-last` on a phone so it spans the full width beneath
+        the label and figure, rather than being squeezed between them.
+      */}
+      <span className="order-last col-span-2 h-[10px] overflow-hidden rounded-pill bg-line-soft sm:order-none sm:col-span-1 sm:h-[20px] sm:rounded-sm">
         <span
-          className="block h-full rounded-sm"
-          style={{
-            width: `${width}%`,
-            background: muted ? 'var(--color-ink-subtle)' : 'var(--color-primary)',
-          }}
+          // The one runtime-computed value in the app, and the only surviving
+          // inline style: a percentage cannot be a utility class.
+          style={{ width: `${width}%` }}
+          className={cx(
+            'block h-full rounded-pill sm:rounded-sm',
+            muted ? 'bg-text-subtle' : 'bg-primary',
+          )}
         />
       </span>
-      <span className="w-20 shrink-0 text-right text-sm font-semibold tabular-nums">
-        {value.toLocaleString('en-SG')}
+
+      <span className="text-right text-caption font-semibold tabular-nums">
+        {formatCount(value)}
         {suffix ?? ''}
       </span>
     </div>
   );
+}
+
+/** The container every bar list sits in, so the gaps agree across screens. */
+export function BarList({ children }: { children: ReactNode }): ReactNode {
+  return <Card className="flex flex-col gap-sm">{children}</Card>;
 }

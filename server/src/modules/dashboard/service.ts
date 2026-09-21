@@ -16,6 +16,7 @@ import { listGifts } from '../gift/service.js';
 import { getFunnel } from '../missionCard/service.js';
 import { findStationById } from '../station/repo.js';
 import { getLongShifts, getStaffingGaps } from '../shift/service.js';
+import { DEFAULT_SETTINGS, getSettings } from '../../lib/settings.js';
 import {
   activeLostPersonCount,
   checkedInCount,
@@ -41,11 +42,8 @@ import {
  * screen, because there is no honest way to produce one.
  */
 
-/** A device that has recorded nothing for this long during event hours. */
-const STALE_DEVICE_MINUTES = 15;
-
-/** Registrations per minute above which the IC view flags a tapping anomaly. */
-const IMPLAUSIBLE_PER_MINUTE = 20;
+/** Shipped default; the live value is a runtime setting. */
+const STALE_DEVICE_MINUTES = DEFAULT_SETTINGS.staleDeviceMinutes;
 
 function startOfEventDay(now: Date): Date {
   return eventDayAnchor(singaporeDateString(now));
@@ -161,6 +159,8 @@ export async function getDataHealth(now = new Date()): Promise<DataHealthRespons
         }))
     : [];
 
+  const staleAfter = getSettings().staleDeviceMinutes;
+
   const staleDevices =
     withinEventHours && eventDay
       ? (await checkedInWithLastCapture({ eventDayId: eventDay.id, blocks, since }))
@@ -175,8 +175,7 @@ export async function getDataHealth(now = new Date()): Promise<DataHealthRespons
           }))
           .filter(
             (row) =>
-              row.minutesSinceLastCapture === null ||
-              row.minutesSinceLastCapture >= STALE_DEVICE_MINUTES,
+              row.minutesSinceLastCapture === null || row.minutesSinceLastCapture >= staleAfter,
           )
       : [];
 
@@ -203,6 +202,7 @@ export async function getStationDashboard(
   const station = await findStationById(stationId);
   if (!station) throw new NotFoundError('Station');
 
+  const implausibleRate = getSettings().implausibleTapsPerMinute;
   const since = startOfEventDay(now);
   const today = eventDayAnchor(singaporeDateString(now));
 
@@ -252,7 +252,7 @@ export async function getStationDashboard(
           perMinute: Math.round(perMinute * 10) / 10,
           // An implausible rate usually means someone is tapping to catch up
           // rather than counting as visitors arrive (§2.4).
-          rateAnomaly: perMinute > IMPLAUSIBLE_PER_MINUTE,
+          rateAnomaly: perMinute > implausibleRate,
         };
       }),
     },

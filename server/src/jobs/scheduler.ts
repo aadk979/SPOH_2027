@@ -1,6 +1,8 @@
 import { logger } from '../lib/logger.js';
+import { loadSettings } from '../lib/settings.js';
 import { pruneIdempotencyRecords } from '../middleware/idempotency.js';
 import { purgeResolvedAlerts } from '../modules/lostPerson/service.js';
+import { pruneRefreshSessions } from '../modules/auth/service.js';
 
 /**
  * In-process scheduled jobs.
@@ -16,6 +18,17 @@ import { purgeResolvedAlerts } from '../modules/lostPerson/service.js';
 
 const PURGE_INTERVAL_MS = 15 * 60 * 1000;
 const PRUNE_INTERVAL_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * How long a settings change takes to reach an instance that did not make it.
+ *
+ * A write refreshes its own instance immediately; this is what brings the
+ * others into line. One minute is the right trade for values that change a
+ * handful of times across the event's life — long enough to cost nothing, short
+ * enough that an admin who moves a shift boundary sees it take effect while
+ * they are still looking at the screen.
+ */
+const SETTINGS_REFRESH_MS = 60 * 1000;
 
 export interface StoppableJobs {
   stop(): void;
@@ -34,6 +47,21 @@ export function startScheduledJobs(): StoppableJobs {
     schedule('idempotency prune', PRUNE_INTERVAL_MS, async () => {
       const removed = await pruneIdempotencyRecords();
       if (removed > 0) logger.info({ removed }, 'pruned expired idempotency records');
+    }),
+  );
+
+  // Expired and long-revoked sessions. This is the table that grows fastest,
+  // because every silent refresh writes a row.
+  timers.push(
+    schedule('refresh session prune', PRUNE_INTERVAL_MS, async () => {
+      await pruneRefreshSessions();
+    }),
+  );
+
+  // Converge on settings changed by another instance.
+  timers.push(
+    schedule('settings refresh', SETTINGS_REFRESH_MS, async () => {
+      await loadSettings();
     }),
   );
 

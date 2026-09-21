@@ -13,6 +13,23 @@ import type { FullReport } from '@spoh/shared';
  * place to say why that number would be meaningless.
  */
 
+/**
+ * Render an instant in Singapore time, for a human.
+ *
+ * This workbook is read by the committee, in Singapore, about an event that
+ * happened in Singapore. Labelling the peak period in UTC is technically honest
+ * and practically useless — "the busiest block started at 03:30" is not a
+ * sentence anybody can act on.
+ *
+ * The true instant is still in the API payload for anything that needs to
+ * compute rather than read.
+ */
+function sgt(iso: string | null): string {
+  if (!iso) return '—';
+  const shifted = new Date(new Date(iso).getTime() + 8 * 60 * 60_000).toISOString();
+  return `${shifted.slice(0, 10)} ${shifted.slice(11, 16)}`;
+}
+
 /** Sheet names, so the export and the CSV bundle stay in step. */
 const SHEETS = {
   readMe: 'Read me first',
@@ -101,8 +118,8 @@ function buildRegistrations(workbook: ExcelJS.Workbook, report: FullReport): voi
 
   sheet.addRow([]);
   sheet.addRow(['By hour']).font = { bold: true };
-  sheet.addRow(['Hour (UTC)', 'Registrations']).font = { bold: true };
-  for (const row of report.registrations.byHour) sheet.addRow([row.hour, row.value]);
+  sheet.addRow(['Hour (Singapore)', 'Registrations']).font = { bold: true };
+  for (const row of report.registrations.byHour) sheet.addRow([row.localHour, row.value]);
 }
 
 function buildFootfall(workbook: ExcelJS.Workbook, report: FullReport): void {
@@ -115,9 +132,9 @@ function buildFootfall(workbook: ExcelJS.Workbook, report: FullReport): void {
   sheet.addRow([`Total: ${report.footfall.total}`]);
   sheet.addRow([]);
 
-  header(sheet, ['Station', 'Room entries', 'Peak 30-min block', 'Peak entries']);
+  header(sheet, ['Station', 'Room entries', 'Peak 30-min block (SGT)', 'Peak entries']);
   for (const row of report.footfall.byStation) {
-    sheet.addRow([row.stationName, row.total, row.peakBlockStart ?? '—', row.peakBlockValue]);
+    sheet.addRow([row.stationName, row.total, sgt(row.peakBlockStart), row.peakBlockValue]);
   }
 
   sheet.addRow([]);
@@ -127,10 +144,14 @@ function buildFootfall(workbook: ExcelJS.Workbook, report: FullReport): void {
 
   sheet.addRow([]);
   sheet.addRow(['30-minute curve']).font = { bold: true };
-  sheet.addRow(['Block start (UTC)', 'Station', 'Room entries']).font = { bold: true };
+  sheet.addRow(['Block start (SGT)', 'Station', 'Room entries']).font = { bold: true };
   const names = new Map(report.footfall.byStation.map((row) => [row.stationId, row.stationName]));
   for (const point of report.footfall.curve) {
-    sheet.addRow([point.bucketStart, names.get(point.stationId) ?? point.stationId, point.value]);
+    sheet.addRow([
+      sgt(point.bucketStart),
+      names.get(point.stationId) ?? point.stationId,
+      point.value,
+    ]);
   }
 }
 
@@ -207,7 +228,7 @@ function buildSafety(workbook: ExcelJS.Workbook, report: FullReport): void {
     'Severity',
     'Status',
     'Station',
-    'Occurred (UTC)',
+    'Occurred (SGT)',
     'What happened',
     'Follow-ups',
   ]);
@@ -218,7 +239,7 @@ function buildSafety(workbook: ExcelJS.Workbook, report: FullReport): void {
       incident.severity,
       incident.status,
       incident.stationName ?? '—',
-      incident.occurredAt,
+      sgt(incident.occurredAt),
       incident.description,
       incident.followUpCount,
     ]);
@@ -273,7 +294,7 @@ function buildIntegrity(workbook: ExcelJS.Workbook, report: FullReport): void {
   sheet.addRow(['Fallback windows — periods when data was captured off-app']).font = {
     bold: true,
   };
-  sheet.addRow(['Tier', 'Started (UTC)', 'Ended (UTC)', 'Minutes', 'Scope and reason']).font = {
+  sheet.addRow(['Tier', 'Started (SGT)', 'Ended (SGT)', 'Minutes', 'Scope and reason']).font = {
     bold: true,
   };
 
@@ -283,8 +304,8 @@ function buildIntegrity(workbook: ExcelJS.Workbook, report: FullReport): void {
     for (const window of report.dataIntegrity.fallbackWindows) {
       sheet.addRow([
         window.tier === 4 ? '4 (paper)' : '3 (Google pack)',
-        window.startedAt,
-        window.endedAt ?? 'still open',
+        sgt(window.startedAt),
+        window.endedAt ? sgt(window.endedAt) : 'still open',
         window.durationMinutes ?? 0,
         `${window.stationName ?? 'Event-wide'} — ${window.reason}`,
       ]);
@@ -300,12 +321,12 @@ function buildIntegrity(workbook: ExcelJS.Workbook, report: FullReport): void {
 
   sheet.addRow([]);
   sheet.addRow(['Imports run']).font = { bold: true };
-  sheet.addRow(['Imported (UTC)', 'Source', 'Target', 'Rows', 'File / notes']).font = {
+  sheet.addRow(['Imported (SGT)', 'Source', 'Target', 'Rows', 'File / notes']).font = {
     bold: true,
   };
   for (const batch of report.dataIntegrity.imports) {
     sheet.addRow([
-      batch.importedAt,
+      sgt(batch.importedAt),
       batch.source,
       batch.targetTable,
       batch.rowCount,
@@ -349,9 +370,9 @@ export function toCsv(report: FullReport): string {
   row('TOTAL', report.registrations.total);
 
   section('Room entries (unit: roomEntries — not unique visitors)');
-  row('Station', 'Room entries', 'Peak block', 'Peak value');
+  row('Station', 'Room entries', 'Peak block (SGT)', 'Peak value');
   for (const item of report.footfall.byStation) {
-    row(item.stationName, item.total, item.peakBlockStart, item.peakBlockValue);
+    row(item.stationName, item.total, sgt(item.peakBlockStart), item.peakBlockValue);
   }
   row('TOTAL', report.footfall.total);
 
@@ -369,14 +390,14 @@ export function toCsv(report: FullReport): string {
   }
 
   section('Safety');
-  row('Type', 'Severity', 'Status', 'Station', 'Occurred', 'What happened');
+  row('Type', 'Severity', 'Status', 'Station', 'Occurred (SGT)', 'What happened');
   for (const incident of report.safety.incidents) {
     row(
       incident.type,
       incident.severity,
       incident.status,
       incident.stationName,
-      incident.occurredAt,
+      sgt(incident.occurredAt),
       incident.description,
     );
   }
@@ -391,12 +412,12 @@ export function toCsv(report: FullReport): string {
   row('Total hours', report.volunteers.totalHours);
 
   section('Data integrity');
-  row('Tier', 'Started', 'Ended', 'Minutes', 'Scope and reason');
+  row('Tier', 'Started (SGT)', 'Ended (SGT)', 'Minutes', 'Scope and reason');
   for (const window of report.dataIntegrity.fallbackWindows) {
     row(
       window.tier,
-      window.startedAt,
-      window.endedAt,
+      sgt(window.startedAt),
+      window.endedAt ? sgt(window.endedAt) : 'still open',
       window.durationMinutes,
       `${window.stationName ?? 'Event-wide'} - ${window.reason}`,
     );

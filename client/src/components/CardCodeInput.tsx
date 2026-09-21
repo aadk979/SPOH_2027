@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent, type ReactNode, type RefObject } from 'react';
 import type { ScannerState } from '@/features/capture/useQrScanner';
+import { Button, Input } from './ui';
 
 /**
  * Scan-or-type, side by side (BUILD_PLAN §9.4).
@@ -10,6 +11,15 @@ import type { ScannerState } from '@/features/capture/useQrScanner';
  * named case in the brief, and a facilitator who has to discover the fallback
  * while a visitor waits will give up and stop scanning altogether.
  */
+
+const SCANNER_MESSAGE: Record<ScannerState, string> = {
+  scanning: 'Point the camera at the QR code on the card.',
+  starting: 'Starting the camera…',
+  denied: 'The camera is not available. Type the six-character code instead.',
+  unavailable: 'This device cannot scan. Type the six-character code instead.',
+  idle: 'Camera off.',
+};
+
 export function CardCodeInput({
   videoRef,
   scannerState,
@@ -22,20 +32,42 @@ export function CardCodeInput({
   pending: boolean;
 }): ReactNode {
   const [code, setCode] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   function submit(event: FormEvent): void {
     event.preventDefault();
     const trimmed = code.trim().toUpperCase();
-    if (trimmed.length !== 6) return;
+    if (trimmed.length !== 6) {
+      setError('Card code must be exactly 6 characters.');
+      return;
+    }
+    setError(null);
     onSubmitCode(trimmed);
     setCode('');
   }
 
+  function handlePaste(event: React.ClipboardEvent<HTMLInputElement>): void {
+    event.preventDefault();
+    const pasted = event.clipboardData.getData('text');
+    const cleaned = pasted.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 6);
+    setCode(cleaned);
+    if (error) setError(null);
+  }
+
+  const isCameraDisabled = scannerState === 'denied' || scannerState === 'unavailable';
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-sm">
+      {/*
+        The viewfinder is capped as well as ratioed. At 4:3 unconstrained it
+        took the whole of a phone screen and pushed the type-it-instead field
+        below the fold, which is exactly the fallback a damaged card needs.
+        When camera access is denied or unavailable, the void is hidden.
+      */}
       <div
-        className="overflow-hidden rounded-lg"
-        style={{ background: 'var(--color-void)', aspectRatio: '4 / 3' }}
+        className={`mx-auto w-full max-w-form overflow-hidden rounded-lg bg-void [aspect-ratio:4/3] ${
+          isCameraDisabled ? 'hidden' : ''
+        }`}
       >
         {/* muted + playsInline are required for autoplay on iOS. */}
         <video
@@ -47,48 +79,44 @@ export function CardCodeInput({
         />
       </div>
 
-      <p className="text-sm" style={{ color: 'var(--text-muted)' }} aria-live="polite">
-        {scannerState === 'scanning'
-          ? 'Point the camera at the QR code on the card.'
-          : scannerState === 'starting'
-            ? 'Starting the camera…'
-            : scannerState === 'denied'
-              ? 'The camera is not available. Type the six-character code instead.'
-              : scannerState === 'unavailable'
-                ? 'This device cannot scan. Type the six-character code instead.'
-                : 'Camera off.'}
+      <p className="text-caption text-text-muted" aria-live="polite">
+        {SCANNER_MESSAGE[scannerState]}
       </p>
 
-      <form onSubmit={submit} className="flex gap-2">
-        <label htmlFor="card-code" className="sr-only">
-          Six-character card code
-        </label>
-        <input
-          id="card-code"
-          value={code}
-          onChange={(event) => setCode(event.target.value)}
-          maxLength={6}
-          autoCapitalize="characters"
-          autoComplete="off"
-          spellCheck={false}
-          placeholder="Card code"
-          className="flex-1 rounded-lg border px-4 py-3 text-2xl uppercase tracking-widest"
-          style={{
-            borderColor: 'var(--line)',
-            background: 'var(--surface)',
-            color: 'var(--text)',
-            minHeight: 56,
-            fontFamily: 'var(--font-display)',
-          }}
-        />
-        <button
-          type="submit"
-          className="pill"
-          style={{ minHeight: 56 }}
-          disabled={code.trim().length !== 6 || pending}
-        >
-          Go
-        </button>
+      <form onSubmit={submit} className="flex flex-col gap-xs">
+        <div className="flex gap-xs">
+          <label htmlFor="card-code" className="sr-only">
+            Six-character card code
+          </label>
+          <Input
+            id="card-code"
+            value={code}
+            onChange={(event) => {
+              setCode(event.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase());
+              if (error) setError(null);
+            }}
+            onPaste={handlePaste}
+            maxLength={6}
+            autoCapitalize="characters"
+            autoComplete="off"
+            spellCheck={false}
+            placeholder="Card code"
+            scale="lg"
+            // Wide tracking and the display face: this is read back against a
+            // printed card character by character, and 0/O and 1/I have to be
+            // told apart at arm's length.
+            className="flex-1 font-display tracking-[0.25em] uppercase"
+            aria-invalid={error ? true : undefined}
+          />
+          <Button type="submit" size="lg" disabled={code.trim().length !== 6 || pending}>
+            Go
+          </Button>
+        </div>
+        {error ? (
+          <p role="alert" className="text-caption font-semibold text-alert">
+            {error}
+          </p>
+        ) : null}
       </form>
     </div>
   );

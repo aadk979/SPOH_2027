@@ -13,9 +13,12 @@ const isDev = process.env.NODE_ENV !== 'production';
 
 const contentSecurityPolicy = [
   "default-src 'self'",
-  // No 'unsafe-eval' anywhere. In development Next's fast refresh needs
-  // 'unsafe-inline' for its injected bootstrap; production does not.
-  isDev ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'" : "script-src 'self'",
+  // 'unsafe-inline' is required in both dev and prod: Next's App Router
+  // injects inline bootstrap/RSC-payload scripts that a nonce could replace,
+  // but only at the cost of forcing every page to dynamic rendering (see
+  // Next's CSP guide). 'unsafe-eval' is dev-only — React's dev-mode error
+  // reconstruction needs it; neither React nor Next use eval in production.
+  isDev ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'" : "script-src 'self' 'unsafe-inline'",
   // Tailwind emits a style element at runtime, and inline `style` attributes
   // carry the design tokens. Styles only — scripts are never inline in prod.
   "style-src 'self' 'unsafe-inline'",
@@ -29,6 +32,8 @@ const contentSecurityPolicy = [
 ].join('; ');
 
 const nextConfig: NextConfig = {
+  // The floating development badge overlaps the mobile Home tab.
+  devIndicators: false,
   reactStrictMode: true,
   poweredByHeader: false,
 

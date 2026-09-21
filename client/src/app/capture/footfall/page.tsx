@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { AppShell } from '@/components/AppShell';
 import { SyncIndicator } from '@/components/SyncIndicator';
+import { Button, Callout, EmptyState } from '@/components/ui';
 import { useCapture, useWakeLock } from '@/features/capture/useCapture';
 import { useMe, useRequireSession } from '@/features/session/useSession';
 
@@ -27,7 +28,7 @@ const IDLE_NUDGE_MS = 20 * 60 * 1000;
 export default function FootfallCapturePage(): ReactNode {
   const session = useRequireSession();
   const { data: me } = useMe();
-  const { sessionCount, undoable, capture, undo } = useCapture();
+  const { sessionCount, undoable, error, capture, undo } = useCapture();
   const [idle, setIdle] = useState(false);
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -55,11 +56,11 @@ export default function FootfallCapturePage(): ReactNode {
   if (!station || !station.countsEntry) {
     return (
       <AppShell title="Counter" back={{ href: '/home', label: 'Home' }}>
-        <p className="tile">
+        <EmptyState title="This counter is closed">
           {station
             ? `${station.name} is not a counted room, so entries are not recorded here.`
-            : 'You are not on shift right now, so this counter is closed. It reopens when your shift starts.'}
-        </p>
+            : 'You are not on shift right now. The counter reopens when your shift starts.'}
+        </EmptyState>
       </AppShell>
     );
   }
@@ -71,58 +72,70 @@ export default function FootfallCapturePage(): ReactNode {
       back={{ href: '/home', label: 'Home' }}
       actions={<SyncIndicator />}
     >
-      {idle ? (
-        <p
-          role="status"
-          className="mb-4 rounded-lg px-4 py-3"
-          style={{ background: 'var(--color-warn-surface)', color: 'var(--color-warn)' }}
-        >
-          No entries counted for 20 minutes. Still on the door?
-        </p>
-      ) : null}
+      <div className="flex flex-col gap-sm">
+        {error ? (
+          <Callout tone="alert" role="alert">
+            {error}
+          </Callout>
+        ) : null}
 
-      <p className="mb-3 text-center">
-        <span
-          className="block text-6xl font-semibold"
-          style={{ fontFamily: 'var(--font-display)' }}
-          aria-live="polite"
-        >
-          {sessionCount}
-        </span>
-        <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          counted on this device this session
-        </span>
-      </p>
+        {idle ? (
+          <Callout tone="warn" role="status">
+            No entries counted for 20 minutes. Still on the door?
+          </Callout>
+        ) : null}
 
-      <button
-        type="button"
-        className="capture-primary"
-        aria-label={`Count one entry to ${station.name}`}
-        onClick={() => {
-          resetIdle();
-          void capture({
-            endpoint: '/footfall/ticks',
-            body: { stationId: station.id },
-            label: 'entry',
-          });
-        }}
-      >
-        +
-      </button>
-
-      <div className="mt-4 flex min-h-[56px] items-center justify-between gap-3">
-        {undoable ? (
-          <>
-            <span aria-live="polite">Counted one entry</span>
-            <button type="button" className="pill-quiet" onClick={() => void undo()}>
-              Undo
-            </button>
-          </>
-        ) : (
-          <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            One tap per person entering the room.
+        {/*
+          The running count sits above the button rather than inside it: it has
+          to stay readable while the thumb is over the target, and a number
+          under a moving thumb is a number nobody checks.
+        */}
+        <p className="text-center">
+          <span
+            className="block font-display text-stat-lg font-semibold tabular-nums"
+            aria-live="polite"
+          >
+            {sessionCount}
           </span>
-        )}
+          <span className="text-caption text-text-muted">counted on this device this session</span>
+        </p>
+
+        <button
+          type="button"
+          className="capture-primary"
+          aria-label={`Count one entry to ${station.name}`}
+          onClick={() => {
+            resetIdle();
+            void capture({
+              endpoint: '/footfall/ticks',
+              body: { stationId: station.id },
+              label: 'entry',
+            });
+          }}
+        >
+          {/* Punctuation, not a word. The accessible name is on the button. */}
+          <span aria-hidden="true">+</span>
+        </button>
+
+        {/*
+          The undo row holds its height whether or not there is anything to
+          undo. Without the floor, the row appears on the first tap and shoves
+          the counter up by 56px — under a thumb that is already coming down.
+        */}
+        <div className="flex min-h-[56px] items-center justify-between gap-sm">
+          {undoable ? (
+            <>
+              <span aria-live="polite">Counted one entry</span>
+              <Button variant="quiet" onClick={() => void undo()}>
+                Undo
+              </Button>
+            </>
+          ) : (
+            <span className="text-caption text-text-muted">
+              One tap per person entering the room.
+            </span>
+          )}
+        </div>
       </div>
     </AppShell>
   );

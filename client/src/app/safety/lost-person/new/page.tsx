@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { AppShell } from '@/components/AppShell';
+import { Button, Callout, Field, Input, Textarea } from '@/components/ui';
 import { useMe, useRequireSession } from '@/features/session/useSession';
 import { api } from '@/lib/api';
 
@@ -29,12 +30,19 @@ export default function RaiseLostPersonPage(): ReactNode {
   const [approxAge, setApproxAge] = useState('');
   const [clothing, setClothing] = useState('');
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [descriptionError, setDescriptionError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   async function submit(event: FormEvent): Promise<void> {
     event.preventDefault();
+    if (description.trim().length < 3) {
+      setDescriptionError('Please provide a description of who we are looking for (at least 3 characters).');
+      return;
+    }
+
     setPending(true);
-    setError(null);
+    setDescriptionError(null);
+    setFormError(null);
 
     try {
       await api('/lost-person', {
@@ -51,7 +59,7 @@ export default function RaiseLostPersonPage(): ReactNode {
 
       router.replace('/home');
     } catch {
-      setError(
+      setFormError(
         'The alert could not be sent. Call your IC on the radio now — do not wait for this screen.',
       );
     } finally {
@@ -63,100 +71,91 @@ export default function RaiseLostPersonPage(): ReactNode {
 
   return (
     <AppShell title="Report a lost person" back={{ href: '/home', label: 'Home' }}>
-      <p
-        className="mb-5 rounded-lg px-4 py-3"
-        style={{ background: 'var(--color-alert-surface)', color: 'var(--color-alert)' }}
-      >
+      <Callout tone="alert" className="mb-lg">
         <strong>If this is a medical or fire emergency, call — do not tap.</strong> This alert
         coordinates a search across every volunteer device.
-      </p>
+      </Callout>
 
-      <form onSubmit={(event) => void submit(event)} className="flex flex-col gap-4">
-        <div>
-          <label htmlFor="description" className="font-semibold">
-            What has happened, and who are we looking for?
-          </label>
-          <textarea
-            id="description"
-            required
-            minLength={3}
-            maxLength={500}
-            rows={3}
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            placeholder="Child separated from their group near the Welcome Lounge"
-            className="mt-2 w-full rounded-lg border px-4 py-3 text-lg"
-            style={{
-              borderColor: 'var(--line)',
-              background: 'var(--surface)',
-              color: 'var(--text)',
-            }}
-          />
-        </div>
+      <form onSubmit={(event) => void submit(event)} className="flex flex-col gap-md">
+        <Field
+          id="description"
+          label="What has happened, and who are we looking for?"
+          error={descriptionError}
+        >
+          {(props) => (
+            <Textarea
+              {...props}
+              required
+              minLength={3}
+              maxLength={500}
+              rows={3}
+              value={description}
+              onChange={(event) => {
+                setDescription(event.target.value);
+                if (descriptionError) setDescriptionError(null);
+              }}
+              placeholder="Child separated from their group near the Welcome Lounge"
+            />
+          )}
+        </Field>
 
-        <div>
-          <label htmlFor="age" className="font-semibold">
-            Approximate age
-          </label>
-          <input
-            id="age"
-            value={approxAge}
-            onChange={(event) => setApproxAge(event.target.value)}
-            placeholder="about 8"
-            className="mt-2 w-full rounded-lg border px-4 py-3 text-lg"
-            style={{
-              borderColor: 'var(--line)',
-              background: 'var(--surface)',
-              color: 'var(--text)',
-              minHeight: 48,
-            }}
-          />
-        </div>
+        {/*
+          Age and clothing sit side by side once there is room: they are the two
+          things a searcher scans the floor for, and on the banner they are read
+          together.
+        */}
+        <div className="grid gap-md sm:grid-cols-2">
+          <Field id="age" label="Approximate age" optional>
+            {(props) => (
+              <Input
+                {...props}
+                value={approxAge}
+                onChange={(event) => setApproxAge(event.target.value)}
+                placeholder="about 8"
+              />
+            )}
+          </Field>
 
-        <div>
-          <label htmlFor="clothing" className="font-semibold">
-            What are they wearing?
-          </label>
-          <input
-            id="clothing"
-            value={clothing}
-            onChange={(event) => setClothing(event.target.value)}
-            placeholder="red jacket, dark jeans"
-            className="mt-2 w-full rounded-lg border px-4 py-3 text-lg"
-            style={{
-              borderColor: 'var(--line)',
-              background: 'var(--surface)',
-              color: 'var(--text)',
-              minHeight: 48,
-            }}
-          />
+          <Field id="clothing" label="What are they wearing?" optional>
+            {(props) => (
+              <Input
+                {...props}
+                value={clothing}
+                onChange={(event) => setClothing(event.target.value)}
+                placeholder="red jacket, dark jeans"
+              />
+            )}
+          </Field>
         </div>
 
         {me?.currentAssignment ? (
-          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-caption text-text-muted">
             Last seen will be recorded as {me.currentAssignment.station.name}.
           </p>
         ) : null}
 
-        {error ? (
-          <p role="alert" style={{ color: 'var(--color-alert)' }}>
-            {error}
-          </p>
+        {formError ? (
+          <Callout tone="alert" role="alert">
+            {formError}
+          </Callout>
         ) : null}
 
-        <button
-          type="submit"
-          className="rounded-lg px-5 py-5 text-lg font-semibold"
-          style={{ background: 'var(--color-alert)', color: '#ffffff', minHeight: 64 }}
-          disabled={pending || description.trim().length < 3}
-        >
-          {pending ? 'Alerting everyone…' : 'Alert every volunteer now'}
-        </button>
+        <div>
+          <Button
+            type="submit"
+            variant="danger"
+            size="lg"
+            block
+            disabled={pending || description.trim().length < 3}
+          >
+            {pending ? 'Alerting everyone…' : 'Alert every volunteer now'}
+          </Button>
 
-        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          This description is deleted once the alert is resolved. Only the resolution time is kept
-          for the post-event report.
-        </p>
+          <p className="mt-sm text-caption text-text-muted">
+            This description is deleted once the alert is resolved. Only the resolution time is kept
+            for the post-event report.
+          </p>
+        </div>
       </form>
     </AppShell>
   );

@@ -31,7 +31,22 @@ export const RegistrationReport = z
     ),
     byDay: z.array(z.object({ date: IsoDate, value: z.number().int().nonnegative() }).strict()),
     byHour: z.array(
-      z.object({ hour: IsoDateTime, value: z.number().int().nonnegative() }).strict(),
+      z
+        .object({
+          /** The true UTC instant the bucket starts at. Unambiguous, for machines. */
+          hour: IsoDateTime,
+          /**
+           * The same moment in Singapore time, `YYYY-MM-DD HH:00`.
+           *
+           * The bucket boundaries were always right — Singapore is a whole
+           * number of hours from UTC — but the label was not, and a reader
+           * looking for the 11am rush had to shift every row by eight in their
+           * head. Both are returned so neither audience has to convert.
+           */
+          localHour: z.string(),
+          value: z.number().int().nonnegative(),
+        })
+        .strict(),
     ),
     /** Excluded from every total above, reported so the corrections are visible. */
     voided: z.number().int().nonnegative(),

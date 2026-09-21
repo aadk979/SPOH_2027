@@ -2,16 +2,17 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
-import { useCurrentSession } from '@/features/session/useSession';
+import { useSessionState } from '@/features/session/useSession';
 
 /** Root: straight to the home screen, or to sign-in. Nothing renders here. */
 export default function IndexPage(): ReactNode {
-  const session = useCurrentSession();
+  const { session, status } = useSessionState();
   const router = useRouter();
 
   useEffect(() => {
+    if (status === 'unknown') return;
     router.replace(session ? '/home' : '/sign-in');
-  }, [session, router]);
+  }, [session, status, router]);
 
   return null;
 }

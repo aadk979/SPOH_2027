@@ -3,6 +3,7 @@ import {
   AdminAddUserToGroupCommand,
   AdminCreateUserCommand,
   AdminDisableUserCommand,
+  AdminEnableUserCommand,
   CognitoIdentityProviderClient,
   UsernameExistsException,
 } from '@aws-sdk/client-cognito-identity-provider';
@@ -36,6 +37,16 @@ export interface IdentityProvider {
 
   /** Revoke access. Used when a volunteer leaves or loses a device. */
   disableUser(email: string): Promise<void>;
+
+  /**
+   * Restore access to a previously disabled account.
+   *
+   * Reinstating somebody is an ordinary correction — a volunteer suspended in
+   * error, or one who came back — and without this the only remedy would be
+   * deleting and re-provisioning them, which would issue a new subject and
+   * orphan every capture they had already recorded.
+   */
+  enableUser(email: string): Promise<void>;
 }
 
 /** Cognito group names are PascalCase; `CommitteeRole` values are not. */
@@ -106,6 +117,10 @@ function createCognitoIdentityProvider(userPoolId: string): IdentityProvider {
     async disableUser(email) {
       await client.send(new AdminDisableUserCommand({ UserPoolId: userPoolId, Username: email }));
     },
+
+    async enableUser(email) {
+      await client.send(new AdminEnableUserCommand({ UserPoolId: userPoolId, Username: email }));
+    },
   };
 }
 
@@ -128,6 +143,11 @@ function createLocalIdentityProvider(): IdentityProvider {
 
     disableUser(email) {
       logger.info({ email }, 'local identity provider: disable is a no-op');
+      return Promise.resolve();
+    },
+
+    enableUser(email) {
+      logger.info({ email }, 'local identity provider: enable is a no-op');
       return Promise.resolve();
     },
   };

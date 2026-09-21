@@ -20,6 +20,7 @@ import {
 import { rangeOverlapsFallbackWindow } from '../fallback/repo.js';
 import { listCountedStations } from '../station/repo.js';
 import { requireCountedStation } from '../station/service.js';
+import { DEFAULT_SETTINGS, getSettings } from '../../lib/settings.js';
 import {
   createTick,
   findTickById,
@@ -41,8 +42,14 @@ import {
  * "tidied up" into fiction. A wrong tick is voided, and the void is visible.
  */
 
-/** A station silent for longer than this during event hours is flagged. */
-export const SILENT_STATION_MINUTES = 15;
+/**
+ * A station silent for longer than this during event hours is flagged.
+ *
+ * The live value is a runtime setting; this export is the shipped default, kept
+ * as a named constant because it documents the configuration and gives tests a
+ * stable reference.
+ */
+export const SILENT_STATION_MINUTES = DEFAULT_SETTINGS.silentStationMinutes;
 
 function startOfEventDay(now = new Date()): Date {
   return eventDayAnchor(singaporeDateString(now));
@@ -220,6 +227,7 @@ export async function summariseFootfall(
  * nobody notices has stopped (PRODUCT_BRIEF §9).
  */
 export async function getLiveFootfall(now = new Date()): Promise<FootfallLiveResponse> {
+  const silentAfter = getSettings().silentStationMinutes;
   const since = startOfEventDay(now);
   const [stations, stats] = await Promise.all([listCountedStations(), liveStationStats(since)]);
 
@@ -242,7 +250,7 @@ export async function getLiveFootfall(now = new Date()): Promise<FootfallLiveRes
         activeCounterCount: row?.counters ?? 0,
         // No activity at all today counts as silent: that is exactly the case
         // where a counter never opened the app.
-        silent: minutesSince === null || minutesSince >= SILENT_STATION_MINUTES,
+        silent: minutesSince === null || minutesSince >= silentAfter,
       };
     }),
   };

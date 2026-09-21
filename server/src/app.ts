@@ -1,3 +1,4 @@
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { type Express } from 'express';
 import helmet from 'helmet';
@@ -46,7 +47,13 @@ export function createApp(): Express {
         if (!origin) return callback(null, true);
         callback(null, env.CORS_ALLOWED_ORIGINS.includes(origin));
       },
-      credentials: false,
+      // The refresh cookie is httpOnly and scoped to /api/v1/auth, so the
+      // browser only attaches it there — but it has to be attached at all,
+      // which a credentialled request is the only way to do. Safe precisely
+      // because the allowlist above is exact: a credentialled response is never
+      // returned to an origin we do not serve, and env validation refuses a
+      // wildcard in production.
+      credentials: true,
       methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id'],
       exposedHeaders: ['X-Request-Id'],
@@ -66,6 +73,9 @@ export function createApp(): Express {
   // 100kb is generous for the largest capture payload (a group registration)
   // and small enough that a malformed client cannot push megabytes at the API.
   app.use(express.json({ limit: '100kb' }));
+
+  // Only the refresh cookie is ever read, and only by the auth router.
+  app.use(cookieParser());
 
   app.use(healthRouter);
   app.use('/api/v1', apiRouter);

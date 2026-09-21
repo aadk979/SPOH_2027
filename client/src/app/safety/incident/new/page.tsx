@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import type { IncidentSeverity, IncidentType } from '@spoh/shared';
 import { AppShell } from '@/components/AppShell';
+import { Button, Callout, ChoiceGroup, Field, Input, Textarea, type ChoiceOption } from '@/components/ui';
 import { useMe, useRequireSession } from '@/features/session/useSession';
 import { api } from '@/lib/api';
 
@@ -20,7 +21,7 @@ import { api } from '@/lib/api';
  * which is an IC action.
  */
 
-const TYPES: Array<{ value: IncidentType; label: string }> = [
+const TYPES: Array<ChoiceOption<IncidentType>> = [
   { value: 'INJURY', label: 'Injury' },
   { value: 'ILLNESS', label: 'Illness' },
   { value: 'NEAR_MISS', label: 'Near miss' },
@@ -30,7 +31,7 @@ const TYPES: Array<{ value: IncidentType; label: string }> = [
   { value: 'OTHER', label: 'Other' },
 ];
 
-const SEVERITIES: Array<{ value: IncidentSeverity; label: string; hint: string }> = [
+const SEVERITIES: Array<ChoiceOption<IncidentSeverity>> = [
   { value: 'LOW', label: 'Low', hint: 'Noted, no action needed now' },
   { value: 'MEDIUM', label: 'Medium', hint: 'Needs attention this shift' },
   { value: 'HIGH', label: 'High', hint: 'Needs an IC now' },
@@ -47,12 +48,19 @@ export default function NewIncidentPage(): ReactNode {
   const [description, setDescription] = useState('');
   const [locationNote, setLocationNote] = useState('');
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [descriptionError, setDescriptionError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   async function submit(event: FormEvent): Promise<void> {
     event.preventDefault();
+    if (description.trim().length < 10) {
+      setDescriptionError('Please provide at least 10 characters describing what happened.');
+      return;
+    }
+
     setPending(true);
-    setError(null);
+    setDescriptionError(null);
+    setFormError(null);
 
     try {
       await api('/incidents', {
@@ -70,7 +78,7 @@ export default function NewIncidentPage(): ReactNode {
 
       router.replace('/home');
     } catch {
-      setError('The report could not be sent. Tell your IC directly, then try again.');
+      setFormError('The report could not be sent. Tell your IC directly, then try again.');
     } finally {
       setPending(false);
     }
@@ -80,129 +88,96 @@ export default function NewIncidentPage(): ReactNode {
 
   return (
     <AppShell title="Report an incident" back={{ href: '/home', label: 'Home' }}>
-      <form onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
-        <fieldset>
-          <legend className="font-semibold">What kind of incident?</legend>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {TYPES.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => setType(option.value)}
-                aria-pressed={type === option.value}
-                className="rounded-full border px-4 py-3"
-                style={{
-                  minHeight: 44,
-                  borderColor: type === option.value ? 'var(--color-primary)' : 'var(--line)',
-                  background: type === option.value ? 'var(--color-primary)' : 'var(--surface)',
-                  color: type === option.value ? 'var(--color-on-primary)' : 'var(--text)',
-                }}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </fieldset>
+      <form onSubmit={(event) => void submit(event)} className="flex flex-col gap-lg">
+        <ChoiceGroup
+          legend="What kind of incident?"
+          name="incident-type"
+          value={type}
+          onChange={setType}
+          options={TYPES}
+        />
 
-        <fieldset>
-          <legend className="font-semibold">How serious is it?</legend>
-          <div className="mt-2 flex flex-col gap-2">
-            {SEVERITIES.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => setSeverity(option.value)}
-                aria-pressed={severity === option.value}
-                className="flex items-baseline gap-3 rounded-lg border px-4 py-3 text-left"
-                style={{
-                  minHeight: 48,
-                  borderColor: severity === option.value ? 'var(--color-primary)' : 'var(--line)',
-                  background: severity === option.value ? 'var(--surface-alt)' : 'var(--surface)',
-                }}
-              >
-                {/* Severity is never carried by colour alone (BUILD_PLAN §9.7). */}
-                <span className="font-semibold">{option.label}</span>
-                <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                  {option.hint}
-                </span>
-              </button>
-            ))}
-          </div>
-        </fieldset>
+        <ChoiceGroup
+          legend="How serious is it?"
+          name="incident-severity"
+          value={severity}
+          onChange={setSeverity}
+          options={SEVERITIES}
+          // Stacked, with each level's meaning beside it. As chips, "Low" and
+          // "Critical" looked like equivalent choices — severity is the field
+          // that decides whether an IC is interrupted.
+          layout="list"
+        />
 
-        <div>
-          <label htmlFor="description" className="font-semibold">
-            What happened?
-          </label>
-          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            Describe the event, not the people. No names.
-          </p>
-          <textarea
-            id="description"
-            required
-            minLength={10}
-            maxLength={2000}
-            rows={4}
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            placeholder="A cable across the walkway was taped down after someone tripped on it."
-            className="mt-2 w-full rounded-lg border px-4 py-3 text-lg"
-            style={{
-              borderColor: 'var(--line)',
-              background: 'var(--surface)',
-              color: 'var(--text)',
-            }}
-          />
-        </div>
+        <Field
+          id="description"
+          label="What happened?"
+          hint="Describe the event, not the people. No names. Minimum 10 characters."
+          error={descriptionError}
+        >
+          {(props) => (
+            <Textarea
+              {...props}
+              required
+              minLength={10}
+              maxLength={2000}
+              rows={4}
+              value={description}
+              onChange={(event) => {
+                setDescription(event.target.value);
+                if (descriptionError) setDescriptionError(null);
+              }}
+              placeholder="A cable across the walkway was taped down after someone tripped on it."
+            />
+          )}
+        </Field>
 
-        <div>
-          <label htmlFor="location" className="font-semibold">
-            Where, exactly?
-          </label>
-          <input
-            id="location"
-            value={locationNote}
-            onChange={(event) => setLocationNote(event.target.value)}
-            placeholder={
-              me?.currentAssignment
-                ? `Near the entrance to ${me.currentAssignment.station.name}`
-                : 'T19, level 2 walkway'
-            }
-            maxLength={200}
-            className="mt-2 w-full rounded-lg border px-4 py-3 text-lg"
-            style={{
-              borderColor: 'var(--line)',
-              background: 'var(--surface)',
-              color: 'var(--text)',
-              minHeight: 48,
-            }}
-          />
-          {me?.currentAssignment ? (
-            <p className="mt-1 text-sm" style={{ color: 'var(--text-muted)' }}>
-              Recorded against {me.currentAssignment.station.name}.
-            </p>
-          ) : null}
-        </div>
+        <Field
+          id="location"
+          label="Where, exactly?"
+          optional
+          hint={
+            me?.currentAssignment
+              ? `Recorded against ${me.currentAssignment.station.name}. Add the detail that would help someone find the spot.`
+              : 'Add the detail that would help someone find the spot.'
+          }
+        >
+          {(props) => (
+            <Input
+              {...props}
+              value={locationNote}
+              onChange={(event) => setLocationNote(event.target.value)}
+              placeholder={
+                me?.currentAssignment
+                  ? `Near the entrance to ${me.currentAssignment.station.name}`
+                  : 'T19, level 2 walkway'
+              }
+              maxLength={200}
+            />
+          )}
+        </Field>
 
-        {error ? (
-          <p role="alert" style={{ color: 'var(--color-alert)' }}>
-            {error}
-          </p>
+        {formError ? (
+          <Callout tone="alert" role="alert">
+            {formError}
+          </Callout>
         ) : null}
 
-        <button
-          type="submit"
-          className="pill w-full"
-          style={{ minHeight: 56 }}
-          disabled={pending || description.trim().length < 10}
-        >
-          {pending ? 'Sending…' : 'Submit report'}
-        </button>
+        <div>
+          <Button
+            type="submit"
+            size="lg"
+            block
+            disabled={pending || description.trim().length < 10}
+          >
+            {pending ? 'Sending…' : 'Submit report'}
+          </Button>
 
-        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          This goes straight to the Safety IC, the Deputy Coordinator and the Chief. Once submitted
-          it cannot be edited — updates are added as follow-ups.
-        </p>
+          <p className="mt-sm text-caption text-text-muted">
+            This goes straight to the Safety IC, the Deputy Coordinator and the Chief. Once
+            submitted it cannot be edited — updates are added as follow-ups.
+          </p>
+        </div>
       </form>
     </AppShell>
   );

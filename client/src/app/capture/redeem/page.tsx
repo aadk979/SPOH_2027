@@ -5,6 +5,16 @@ import { useCallback, useState, type ReactNode } from 'react';
 import type { GiftTypeRecord, RedeemGiftResponse } from '@spoh/shared';
 import { AppShell } from '@/components/AppShell';
 import { CardCodeInput } from '@/components/CardCodeInput';
+import {
+  Button,
+  Callout,
+  EmptyState,
+  LoadingRows,
+  Section,
+  StatusText,
+  cx,
+  type Tone,
+} from '@/components/ui';
 import { useQrScanner } from '@/features/capture/useQrScanner';
 import { useMe, useRequireSession } from '@/features/session/useSession';
 import { ApiError, api } from '@/lib/api';
@@ -24,9 +34,7 @@ export default function RedeemPage(): ReactNode {
   const session = useRequireSession();
   const { data: me } = useMe();
   const [selected, setSelected] = useState<string | null>(null);
-  const [message, setMessage] = useState<{ tone: 'ok' | 'warn' | 'error'; text: string } | null>(
-    null,
-  );
+  const [message, setMessage] = useState<{ tone: Tone; text: string } | null>(null);
   const [pending, setPending] = useState(false);
 
   const station = me?.currentAssignment?.station;
@@ -72,7 +80,7 @@ export default function RedeemPage(): ReactNode {
         );
       } catch (error) {
         setMessage({
-          tone: 'error',
+          tone: 'alert',
           text:
             error instanceof ApiError
               ? error.message
@@ -103,101 +111,102 @@ export default function RedeemPage(): ReactNode {
   if (!station) {
     return (
       <AppShell width="capture" title="Redeem a gift" back={{ href: '/home', label: 'Home' }}>
-        <p className="tile">You are not on shift right now, so redemption is closed.</p>
+        <EmptyState title="Redemption is closed">
+          You are not on shift right now, so gifts cannot be redeemed from this device.
+        </EmptyState>
       </AppShell>
     );
   }
 
   return (
-    <AppShell title="Redeem a gift" back={{ href: '/home', label: 'Home' }}>
-      <p className="mb-4 text-sm" style={{ color: 'var(--text-muted)' }}>
-        Check the stamps on the physical card first. The scan is a cross-check, not a gate.
-      </p>
-
-      <h2 className="mb-2 font-semibold">Which gift?</h2>
-      <div className="mb-6 flex flex-col gap-2">
-        {(gifts.data ?? []).map((gift) => (
-          <button
-            key={gift.id}
-            type="button"
-            onClick={() => setSelected(gift.id)}
-            aria-pressed={selected === gift.id}
-            disabled={gift.outOfStock}
-            className="flex items-center justify-between rounded-lg border px-4 py-4 text-left disabled:opacity-60"
-            style={{
-              minHeight: 64,
-              borderColor: selected === gift.id ? 'var(--color-primary)' : 'var(--line)',
-              background: selected === gift.id ? 'var(--surface-alt)' : 'var(--surface)',
-            }}
-          >
-            <span className="font-semibold">{gift.name}</span>
-            {/* Stock state is words, not a colour (BUILD_PLAN §9.7). */}
-            <span
-              className="text-sm font-semibold"
-              style={{
-                color: gift.outOfStock
-                  ? 'var(--color-alert)'
-                  : gift.lowStock
-                    ? 'var(--color-warn)'
-                    : 'var(--text-muted)',
-              }}
-            >
-              {gift.outOfStock
-                ? 'Out of stock'
-                : gift.lowStock
-                  ? `Low — ${gift.remaining} left`
-                  : `${gift.remaining} left`}
-            </span>
-          </button>
-        ))}
-      </div>
-
-      {selected ? (
-        <>
-          <h2 className="mb-2 font-semibold">Scan the card, or hand it over without one</h2>
-          <CardCodeInput
-            videoRef={scanner.videoRef}
-            scannerState={scanner.state}
-            onSubmitCode={(code) => void redeem(code)}
-            pending={pending}
-          />
-
-          <button
-            type="button"
-            className="pill-quiet mt-4 w-full"
-            style={{ minHeight: 56 }}
-            disabled={pending}
-            onClick={() => void redeem()}
-          >
-            Redeem without a card code
-          </button>
-        </>
-      ) : (
-        <p style={{ color: 'var(--text-muted)' }}>Pick a gift to continue.</p>
-      )}
-
-      {message ? (
-        <p
-          role="status"
-          className="mt-4 rounded-lg px-4 py-3 font-semibold"
-          style={{
-            background:
-              message.tone === 'ok'
-                ? 'var(--color-ok-surface)'
-                : message.tone === 'warn'
-                  ? 'var(--color-warn-surface)'
-                  : 'var(--color-alert-surface)',
-            color:
-              message.tone === 'ok'
-                ? 'var(--color-ok)'
-                : message.tone === 'warn'
-                  ? 'var(--color-warn)'
-                  : 'var(--color-alert)',
-          }}
-        >
-          {message.text}
+    <AppShell width="capture" title="Redeem a gift" back={{ href: '/home', label: 'Home' }}>
+      <div className="flex flex-col gap-lg">
+        <p className="text-caption text-text-muted">
+          Check the stamps on the physical card first. The scan is a cross-check, not a gate.
         </p>
-      ) : null}
+
+        <Section title="Which gift?">
+          {gifts.isLoading ? (
+            <LoadingRows count={3} label="Loading gifts" />
+          ) : (
+            <div className="flex flex-col gap-xs">
+              {(gifts.data ?? []).map((gift) => (
+                <button
+                  key={gift.id}
+                  type="button"
+                  onClick={() => setSelected(gift.id)}
+                  aria-pressed={selected === gift.id}
+                  disabled={gift.outOfStock}
+                  className={cx(
+                    'flex min-h-[64px] items-center justify-between gap-sm rounded-lg border',
+                    'px-md py-sm text-left transition-colors',
+                    'disabled:cursor-not-allowed disabled:opacity-60',
+                    selected === gift.id
+                      ? 'border-primary bg-surface-alt shadow-[inset_0_0_0_1px_var(--color-primary)]'
+                      : 'border-line bg-surface hover:bg-surface-alt',
+                  )}
+                >
+                  <span className="flex min-w-0 items-center gap-xs font-semibold">
+                    <span
+                      aria-hidden="true"
+                      className={cx(
+                        'w-[1ch] shrink-0 font-semibold text-primary',
+                        selected === gift.id ? 'visible' : 'invisible',
+                      )}
+                    >
+                      ✓
+                    </span>
+                    <span className="truncate">{gift.name}</span>
+                  </span>
+
+                  {/* Stock state is words, not a colour (BUILD_PLAN §9.7). */}
+                  <StatusText
+                    tone={gift.outOfStock ? 'alert' : gift.lowStock ? 'warn' : 'neutral'}
+                    className="shrink-0"
+                  >
+                    {gift.outOfStock
+                      ? 'Out of stock'
+                      : gift.lowStock
+                        ? `Low — ${gift.remaining} left`
+                        : `${gift.remaining} left`}
+                  </StatusText>
+                </button>
+              ))}
+            </div>
+          )}
+        </Section>
+
+        {selected ? (
+          <Section title="Scan the card, or hand it over without one">
+            <div className="flex flex-col gap-md">
+              <CardCodeInput
+                videoRef={scanner.videoRef}
+                scannerState={scanner.state}
+                onSubmitCode={(code) => void redeem(code)}
+                pending={pending}
+              />
+
+              <Button
+                variant="quiet"
+                size="lg"
+                block
+                disabled={pending}
+                onClick={() => void redeem()}
+              >
+                Redeem without a card code
+              </Button>
+            </div>
+          </Section>
+        ) : (
+          <p className="text-text-muted">Pick a gift to continue.</p>
+        )}
+
+        {message ? (
+          <Callout tone={message.tone} role="status">
+            <span className="font-semibold">{message.text}</span>
+          </Callout>
+        ) : null}
+      </div>
     </AppShell>
   );
 }

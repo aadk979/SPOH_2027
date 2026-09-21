@@ -49,5 +49,22 @@ export const defaultRateLimit = build(env.RATE_LIMIT_MAX_DEFAULT);
 /** Registration taps and footfall ticks. */
 export const captureRateLimit = build(env.RATE_LIMIT_MAX_CAPTURE);
 
-/** Provisioning, imports, and anything else that is expensive or privileged. */
+/**
+ * Anything that mints a credential, sends an email, or reads the whole event.
+ *
+ * Provisioning, roster and fallback imports, report generation, sign-in. Kept
+ * deliberately tight: these are slow, and none of them is something a human
+ * does twenty times a minute.
+ */
 export const sensitiveRateLimit = build(env.RATE_LIMIT_MAX_SENSITIVE);
+
+/**
+ * Administration writes.
+ *
+ * Between the two. Editing a volunteer or a station is privileged but cheap,
+ * and it comes in bursts — configuring eight stations and four event days
+ * before a dry run is one sitting, not an attack. The sensitive ceiling would
+ * stop an admin halfway through and look like a broken screen; the default
+ * ceiling is looser than a privileged write deserves.
+ */
+export const adminRateLimit = build(env.RATE_LIMIT_MAX_ADMIN);

@@ -10,6 +10,7 @@ import { logger } from '../../lib/logger.js';
 import { prisma } from '../../lib/prisma.js';
 import { requestIdOf } from '../requestId.js';
 import type { RequestAuth } from '../../types/express.js';
+import { verifyAccessToken } from '../../modules/auth/tokens.js';
 import { createCognitoAuthProvider } from './cognitoProvider.js';
 import { createLocalAuthProvider } from './localProvider.js';
 import type { AuthProvider } from './types.js';
@@ -17,9 +18,10 @@ import type { AuthProvider } from './types.js';
 export type { AuthProvider, VerifiedToken } from './types.js';
 
 /**
- * The active provider, constructed once at boot from validated configuration.
- * Cognito in staging and production; the local development provider only where
- * `config/env.ts` has already established that we are not in production.
+ * The active identity provider, constructed once at boot from validated
+ * configuration. Cognito in staging and production; the local development
+ * provider only where `config/env.ts` has already established that we are not
+ * in production.
  *
  * Constructed exactly once: the local provider logs a warning on construction,
  * and the dev sign-in route reuses this instance through `localAuthIssuer`
@@ -60,6 +62,17 @@ logger.info({ authProvider: authProvider.name }, 'authentication provider select
  */
 const VOLUNTEER_CACHE_TTL_MS = 60_000;
 
+/**
+ * Session liveness cache.
+ *
+ * An access token is short-lived but not instantly revocable, and "sign this
+ * device out" has to mean something sooner than the token's own expiry. So the
+ * session row backing a token is checked — cached on the same 60-second budget,
+ * which turns it into roughly one extra query per device per minute rather than
+ * one per capture tap.
+ */
+const SESSION_CACHE_TTL_MS = 60_000;
+
 interface CachedVolunteer {
   volunteerId: string;
   displayName: string;
@@ -69,11 +82,22 @@ interface CachedVolunteer {
 }
 
 const volunteerCache = new Map<string, CachedVolunteer>();
+const sessionCache = new Map<string, { live: boolean; expiresAt: number }>();
 
 /** Drop a subject from the cache. Called when a volunteer is edited. */
 export function invalidateVolunteerCache(sub?: string): void {
-  if (sub === undefined) volunteerCache.clear();
-  else volunteerCache.delete(sub);
+  if (sub === undefined) {
+    volunteerCache.clear();
+    sessionCache.clear();
+  } else {
+    volunteerCache.delete(sub);
+  }
+}
+
+/** Drop one session from the liveness cache, so a revoke takes effect at once. */
+export function invalidateSessionCache(sessionId?: string): void {
+  if (sessionId === undefined) sessionCache.clear();
+  else sessionCache.delete(sessionId);
 }
 
 async function resolveVolunteer(sub: string): Promise<CachedVolunteer> {
@@ -99,6 +123,22 @@ async function resolveVolunteer(sub: string): Promise<CachedVolunteer> {
   return entry;
 }
 
+/** Is the refresh session behind this access token still live? */
+async function sessionIsLive(sessionId: string): Promise<boolean> {
+  const cached = sessionCache.get(sessionId);
+  if (cached && cached.expiresAt > Date.now()) return cached.live;
+
+  const session = await prisma.refreshSession.findUnique({
+    where: { id: sessionId },
+    select: { revokedAt: true, expiresAt: true },
+  });
+
+  const live = session !== null && session.revokedAt === null && session.expiresAt > new Date();
+
+  sessionCache.set(sessionId, { live, expiresAt: Date.now() + SESSION_CACHE_TTL_MS });
+  return live;
+}
+
 function readBearerToken(req: Request): string {
   const header = req.get('authorization');
   if (!header) throw new UnauthenticatedError();
@@ -111,15 +151,44 @@ function readBearerToken(req: Request): string {
 
 /**
  * Default-deny gate. Every router mounts this before any handler; the only
- * unauthenticated routes in the system are `/healthz` and `/readyz`
- * (BUILD_PLAN §8.5).
+ * unauthenticated routes in the system are `/healthz`, `/readyz` and the
+ * session-opening endpoints under `/auth` (BUILD_PLAN §8.5).
+ *
+ * Two token shapes are accepted, in order:
+ *
+ *  1. An access token this API issued, which is the normal path — short-lived,
+ *     renewed from the refresh cookie, and revocable through its session row.
+ *
+ *  2. An identity-provider token, verified directly. This is what the
+ *     integration suite uses and what a service-to-service caller would present;
+ *     it skips the session layer, so it cannot be revoked before it expires.
+ *
+ * Whichever arrives, only the subject is taken from it. Role, capabilities and
+ * station scope are read from the roster, every time.
  */
 export async function requireAuth(req: Request, _res: Response, next: NextFunction): Promise<void> {
   try {
     const token = readBearerToken(req);
-    const verified = await authProvider.verify(token);
 
-    const volunteer = await resolveVolunteer(verified.sub);
+    const session = await verifyAccessToken(token);
+    let sub: string;
+    let groups: RequestAuth['groups'] = [];
+    let sessionId: string | undefined;
+
+    if (session) {
+      if (!(await sessionIsLive(session.sid))) {
+        // Signed out on this device, or revoked by an administrator.
+        throw new UnauthenticatedError();
+      }
+      sub = session.sub;
+      sessionId = session.sid;
+    } else {
+      const verified = await authProvider.verify(token);
+      sub = verified.sub;
+      groups = verified.groups;
+    }
+
+    const volunteer = await resolveVolunteer(sub);
     if (!volunteer.active) throw new AccountInactiveError();
 
     /**
@@ -129,22 +198,23 @@ export async function requireAuth(req: Request, _res: Response, next: NextFuncti
      * matching roster change must not silently grant capabilities.
      */
     const role = volunteer.role;
-    const tokenRole = highestRole(verified.groups);
+    const tokenRole = highestRole(groups);
 
     if (tokenRole !== undefined && tokenRole !== role) {
       logger.warn(
-        { requestId: requestIdOf(req), sub: verified.sub, tokenRole, rosterRole: role },
+        { requestId: requestIdOf(req), sub, tokenRole, rosterRole: role },
         'identity provider groups disagree with the roster; roster wins',
       );
     }
 
     req.auth = {
-      sub: verified.sub,
-      groups: verified.groups,
+      sub,
+      groups,
       role,
       volunteerId: volunteer.volunteerId,
       displayName: volunteer.displayName,
       capabilities: capabilitiesForRole(role),
+      ...(sessionId ? { sessionId } : {}),
     };
 
     next();

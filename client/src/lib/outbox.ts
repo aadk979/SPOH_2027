@@ -2,6 +2,7 @@
 
 import { openDB, type IDBPDatabase } from 'idb';
 import { api, isRetryable } from './api';
+import { getClientSettings, ms } from './runtimeSettings';
 
 /**
  * The local write buffer (BUILD_PLAN §9.5).
@@ -59,6 +60,11 @@ const BACKOFF_MS = [1_000, 2_000, 4_000, 8_000, 16_000, 30_000];
  */
 export const SEND_GRACE_MS = 2_000;
 
+/** The live value, which a coordinator can change without a deploy. */
+function sendGraceMs(): number {
+  return ms.sendGrace();
+}
+
 /** Thresholds at which the volunteer is told to notify their IC (§9.5). */
 export const UNSYNCED_WARNING_COUNT = 20;
 export const UNSYNCED_WARNING_AGE_MS = 5 * 60 * 1000;
@@ -66,12 +72,21 @@ export const UNSYNCED_WARNING_AGE_MS = 5 * 60 * 1000;
 let dbPromise: Promise<IDBPDatabase> | null = null;
 
 function db(): Promise<IDBPDatabase> {
-  dbPromise ??= openDB(DB_NAME, DB_VERSION, {
-    upgrade(database) {
-      const store = database.createObjectStore(STORE, { keyPath: 'id' });
-      store.createIndex('status', 'status');
-    },
-  });
+  if (!dbPromise) {
+    dbPromise = openDB(DB_NAME, DB_VERSION, {
+      upgrade(database) {
+        const store = database.createObjectStore(STORE, { keyPath: 'id' });
+        store.createIndex('status', 'status');
+      },
+      // A denied or unavailable database (Safari private browsing, storage
+      // full) must not wedge the outbox for the rest of the session: without
+      // clearing the cache, every future call reuses this same rejected
+      // promise and a tap can never be queued again until the page reloads.
+    }).catch((error: unknown) => {
+      dbPromise = null;
+      throw error;
+    });
+  }
   return dbPromise;
 }
 
@@ -126,7 +141,7 @@ export async function enqueue(input: {
   await notify();
 
   // Deliberately not an immediate flush — see SEND_GRACE_MS.
-  scheduleFlush(SEND_GRACE_MS);
+  scheduleFlush(sendGraceMs());
 
   return entry;
 }
@@ -226,7 +241,7 @@ function backoffFor(attempts: number): number {
 /** How long is left of this entry's undo grace period. */
 function graceRemaining(entry: OutboxEntry): number {
   if (entry.attempts > 0) return 0;
-  const due = new Date(entry.clientRecordedAt).getTime() + SEND_GRACE_MS;
+  const due = new Date(entry.clientRecordedAt).getTime() + sendGraceMs();
   return Math.max(0, due - Date.now());
 }
 
@@ -281,12 +296,14 @@ export function startOutboxFlushLoop(): () => void {
 
 /** Should the volunteer be told to talk to their IC? (§9.5) */
 export function needsAttention(entries: OutboxEntry[], now = Date.now()): boolean {
+  const settings = getClientSettings();
   const unsent = entries.filter((entry) => entry.status !== 'failed');
+
   if (entries.some((entry) => entry.status === 'failed')) return true;
-  if (unsent.length > UNSYNCED_WARNING_COUNT) return true;
+  if (unsent.length > settings.outboxWarningCount) return true;
 
   return unsent.some(
-    (entry) => now - new Date(entry.clientRecordedAt).getTime() > UNSYNCED_WARNING_AGE_MS,
+    (entry) => now - new Date(entry.clientRecordedAt).getTime() > ms.outboxWarningAge(),
   );
 }
 

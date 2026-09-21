@@ -37,6 +37,8 @@ export default defineConfig({
               process.env.TEST_DATABASE_URL ??
               'postgresql://spoh:spoh@localhost:5435/spoh2027_test',
             AUTH_PROVIDER: 'local',
+            ATTENDANCE_ROOT_EMAIL: 'root@attendance.test',
+            ATTENDANCE_SP_CIDRS: '127.0.0.1/32,::1/128,203.0.113.0/24',
             LOCAL_AUTH_SECRET: 'test-only-secret-at-least-thirty-two-chars',
             CORS_ALLOWED_ORIGINS: 'http://localhost:3000',
           },

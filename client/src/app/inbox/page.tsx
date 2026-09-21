@@ -4,8 +4,24 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactNode } from 'react';
 import type { AnnouncementRecord, StationSummary } from '@spoh/shared';
 import { AppShell } from '@/components/AppShell';
+import {
+  Button,
+  Callout,
+  Card,
+  Checkbox,
+  ChoiceGroup,
+  EmptyState,
+  Field,
+  LoadingRows,
+  Section,
+  Select,
+  Stack,
+  Textarea,
+  type CardTone,
+} from '@/components/ui';
 import { useMe, useRequireSession } from '@/features/session/useSession';
 import { api } from '@/lib/api';
+import { formatTime } from '@/lib/format';
 
 /**
  * The announcements inbox (PRODUCT_BRIEF §8).
@@ -15,6 +31,14 @@ import { api } from '@/lib/api';
  * then the one that matters is the one they miss.
  */
 const INBOX_POLL_MS = 30_000;
+
+type Priority = 'INFO' | 'OPERATIONAL' | 'URGENT';
+
+const PRIORITY_LABELS: Record<Priority, string> = {
+  INFO: 'Information',
+  OPERATIONAL: 'Operational',
+  URGENT: 'Urgent',
+};
 
 export default function InboxPage(): ReactNode {
   const session = useRequireSession();
@@ -39,73 +63,71 @@ export default function InboxPage(): ReactNode {
   const announcements = inbox.data ?? [];
 
   return (
-    <AppShell width="wide" title="Announcements" back={{ href: '/home', label: 'Home' }}>
-      {canSend ? <Composer me={me} /> : null}
+    <AppShell width="reading" title="Announcements" back={{ href: '/home', label: 'Home' }}>
+      <Stack>
+        {canSend ? <Composer me={me} /> : null}
 
-      {announcements.length === 0 ? (
-        <p className="tile" style={{ color: 'var(--text-muted)' }}>
-          Nothing yet.
-        </p>
-      ) : (
-        <ul className="flex flex-col gap-3">
-          {announcements.map((announcement) => (
-            <li
-              key={announcement.id}
-              className="tile"
-              style={
-                announcement.priority === 'URGENT'
-                  ? { borderLeft: '4px solid var(--color-alert)' }
-                  : undefined
-              }
-            >
-              <p
-                className="mb-1 text-xs font-semibold uppercase tracking-wide"
-                style={{ color: 'var(--text-muted)' }}
-              >
-                {/* Priority is a word, not a colour (BUILD_PLAN §9.7). */}
-                {announcement.priority === 'URGENT'
-                  ? 'Urgent'
-                  : announcement.priority === 'OPERATIONAL'
-                    ? 'Operational'
-                    : 'Information'}
-                {announcement.targetStationName ? ` · ${announcement.targetStationName}` : ''}
-              </p>
-
-              <p style={{ fontSize: 'var(--text-body)' }}>{announcement.body}</p>
-
-              <p className="mt-2 text-sm" style={{ color: 'var(--text-muted)' }}>
-                {announcement.authorName} ·{' '}
-                {new Date(announcement.createdAt).toLocaleTimeString('en-SG', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  timeZone: 'Asia/Singapore',
-                })}
-                {announcement.requiresAck ? ` · ${announcement.ackCount} acknowledged` : ''}
-              </p>
-
-              {announcement.requiresAck ? (
-                <button
-                  type="button"
-                  className={announcement.ackedByMe ? 'pill-quiet mt-3' : 'pill mt-3'}
-                  disabled={announcement.ackedByMe || acknowledge.isPending}
-                  onClick={() => acknowledge.mutate(announcement.id)}
+        <Section title="Your messages">
+          {inbox.isLoading ? (
+            <LoadingRows count={3} label="Loading announcements" />
+          ) : announcements.length === 0 ? (
+            <EmptyState title="Nothing yet">
+              Messages from your IC and from the Chief land here. Only urgent ones push to your
+              phone.
+            </EmptyState>
+          ) : (
+            <ul className="flex flex-col gap-sm">
+              {announcements.map((announcement) => (
+                <Card
+                  as="li"
+                  key={announcement.id}
+                  tone={PRIORITY_TONE[announcement.priority as Priority] ?? 'neutral'}
                 >
-                  {announcement.ackedByMe ? 'Acknowledged ✓' : 'Acknowledge'}
-                </button>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      )}
+                  <p className="text-fine font-semibold tracking-[0.06em] text-text-muted uppercase">
+                    {/* Priority is a word, not a colour (BUILD_PLAN §9.7). */}
+                    {PRIORITY_LABELS[announcement.priority as Priority] ?? announcement.priority}
+                    {announcement.targetStationName ? ` · ${announcement.targetStationName}` : ''}
+                  </p>
+
+                  <p className="mt-xs text-reading">{announcement.body}</p>
+
+                  <p className="mt-xs text-caption text-text-muted">
+                    {announcement.authorName} · {formatTime(announcement.createdAt)}
+                    {announcement.requiresAck ? ` · ${announcement.ackCount} acknowledged` : ''}
+                  </p>
+
+                  {announcement.requiresAck ? (
+                    <Button
+                      variant={announcement.ackedByMe ? 'quiet' : 'primary'}
+                      className="mt-sm"
+                      disabled={announcement.ackedByMe || acknowledge.isPending}
+                      onClick={() => acknowledge.mutate(announcement.id)}
+                    >
+                      {announcement.ackedByMe ? 'Acknowledged ✓' : 'Acknowledge'}
+                    </Button>
+                  ) : null}
+                </Card>
+              ))}
+            </ul>
+          )}
+        </Section>
+      </Stack>
     </AppShell>
   );
 }
+
+/** Urgent gets the rail; the other two do not need one to be found. */
+const PRIORITY_TONE: Record<Priority, CardTone> = {
+  URGENT: 'alert',
+  OPERATIONAL: 'neutral',
+  INFO: 'neutral',
+};
 
 /** IC and above. Station-targeted by default; event-wide needs a DC. */
 function Composer({ me }: { me: ReturnType<typeof useMe>['data'] }): ReactNode {
   const queryClient = useQueryClient();
   const [body, setBody] = useState('');
-  const [priority, setPriority] = useState<'INFO' | 'OPERATIONAL' | 'URGENT'>('OPERATIONAL');
+  const [priority, setPriority] = useState<Priority>('OPERATIONAL');
   const [requiresAck, setRequiresAck] = useState(false);
   const [eventWide, setEventWide] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -141,111 +163,87 @@ function Composer({ me }: { me: ReturnType<typeof useMe>['data'] }): ReactNode {
   });
 
   return (
-    <section className="tile mb-6">
-      <h2 className="mb-3 font-semibold">Send an announcement</h2>
+    <Card as="section" className="flex flex-col gap-md">
+      <h2 className="text-tagline">Send an announcement</h2>
 
-      <textarea
-        value={body}
-        onChange={(event) => setBody(event.target.value)}
-        rows={2}
-        maxLength={1000}
-        placeholder="DCDF at capacity, ushers hold at Welcome Lounge."
-        className="w-full rounded-lg border px-4 py-3"
-        style={{ borderColor: 'var(--line)', background: 'var(--surface)', color: 'var(--text)' }}
+      <Field id="announcement-body" label="Message" error={error}>
+        {(props) => (
+          <Textarea
+            {...props}
+            value={body}
+            onChange={(event) => setBody(event.target.value)}
+            rows={3}
+            maxLength={1000}
+            placeholder="DCDF at capacity, ushers hold at Welcome Lounge."
+          />
+        )}
+      </Field>
+
+      <ChoiceGroup
+        legend="Priority"
+        name="announcement-priority"
+        value={priority}
+        onChange={setPriority}
+        options={[
+          { value: 'INFO', label: PRIORITY_LABELS.INFO },
+          { value: 'OPERATIONAL', label: PRIORITY_LABELS.OPERATIONAL },
+          { value: 'URGENT', label: PRIORITY_LABELS.URGENT },
+        ]}
       />
 
-      <div className="mt-3 flex flex-wrap gap-2">
-        {(['INFO', 'OPERATIONAL', 'URGENT'] as const).map((option) => (
-          <button
-            key={option}
-            type="button"
-            onClick={() => setPriority(option)}
-            aria-pressed={priority === option}
-            className="rounded-full border px-4 py-2 text-sm"
-            style={{
-              minHeight: 44,
-              borderColor: priority === option ? 'var(--color-primary)' : 'var(--line)',
-              background: priority === option ? 'var(--color-primary)' : 'var(--surface)',
-              color: priority === option ? 'var(--color-on-primary)' : 'var(--text)',
-            }}
-          >
-            {option === 'INFO'
-              ? 'Information'
-              : option === 'OPERATIONAL'
-                ? 'Operational'
-                : 'Urgent'}
-          </button>
-        ))}
-      </div>
-
       {priority === 'URGENT' ? (
-        <p className="mt-2 text-sm" style={{ color: 'var(--color-warn)' }}>
+        <Callout tone="warn">
           Urgent is the only priority that pushes to phones. Use it sparingly — volunteers who get
           forty pushes stop reading them.
-        </p>
+        </Callout>
       ) : null}
 
-      <div className="mt-3 flex flex-col gap-2">
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={requiresAck}
-            onChange={(event) => setRequiresAck(event.target.checked)}
-          />
-          Ask for acknowledgement
-        </label>
+      <div className="flex flex-col">
+        <Checkbox
+          label="Ask for acknowledgement"
+          checked={requiresAck}
+          onChange={(event) => setRequiresAck(event.target.checked)}
+        />
 
         {canSendEventWide ? (
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={eventWide}
-              onChange={(event) => setEventWide(event.target.checked)}
-            />
-            Send to the whole event
-          </label>
-        ) : null}
-
-        {!eventWide ? (
-          <select
-            value={stationId}
-            onChange={(event) => setStationId(event.target.value)}
-            className="rounded-lg border px-4 py-3"
-            style={{
-              borderColor: 'var(--line)',
-              background: 'var(--surface)',
-              color: 'var(--text)',
-              minHeight: 48,
-            }}
-          >
-            <option value="">
-              {me?.currentAssignment
-                ? `My station (${me.currentAssignment.station.name})`
-                : 'Choose a station…'}
-            </option>
-            {(stations.data ?? []).map((station) => (
-              <option key={station.id} value={station.id}>
-                {station.name}
-              </option>
-            ))}
-          </select>
+          <Checkbox
+            label="Send to the whole event"
+            checked={eventWide}
+            onChange={(event) => setEventWide(event.target.checked)}
+          />
         ) : null}
       </div>
 
-      {error ? (
-        <p role="alert" className="mt-2" style={{ color: 'var(--color-alert)' }}>
-          {error}
-        </p>
+      {!eventWide ? (
+        <Field id="announcement-station" label="Send to">
+          {(props) => (
+            <Select
+              {...props}
+              value={stationId}
+              onChange={(event) => setStationId(event.target.value)}
+            >
+              <option value="">
+                {me?.currentAssignment
+                  ? `My station (${me.currentAssignment.station.name})`
+                  : 'Choose a station…'}
+              </option>
+              {(stations.data ?? []).map((station) => (
+                <option key={station.id} value={station.id}>
+                  {station.name}
+                </option>
+              ))}
+            </Select>
+          )}
+        </Field>
       ) : null}
 
-      <button
-        type="button"
-        className="pill mt-4"
+      <Button
+        className="self-start"
         disabled={body.trim().length < 3 || send.isPending}
         onClick={() => send.mutate()}
       >
         {send.isPending ? 'Sending…' : 'Send'}
-      </button>
-    </section>
+      </Button>
+    </Card>
   );
 }

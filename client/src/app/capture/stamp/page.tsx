@@ -5,6 +5,7 @@ import type { MissionCardRecord, StampCardResponse } from '@spoh/shared';
 import { AppShell } from '@/components/AppShell';
 import { CardCodeInput } from '@/components/CardCodeInput';
 import { SyncIndicator } from '@/components/SyncIndicator';
+import { Callout, Card, CardTitle, EmptyState, type Tone } from '@/components/ui';
 import { useQrScanner } from '@/features/capture/useQrScanner';
 import { useWakeLock } from '@/features/capture/useCapture';
 import { useMe, useRequireSession } from '@/features/session/useSession';
@@ -27,9 +28,7 @@ export default function StampCapturePage(): ReactNode {
   const session = useRequireSession();
   const { data: me } = useMe();
   const [card, setCard] = useState<MissionCardRecord | null>(null);
-  const [message, setMessage] = useState<{ tone: 'ok' | 'warn' | 'error'; text: string } | null>(
-    null,
-  );
+  const [message, setMessage] = useState<{ tone: Tone; text: string } | null>(null);
   const [pending, setPending] = useState(false);
   const [scanned, setScanned] = useState(0);
 
@@ -67,7 +66,7 @@ export default function StampCapturePage(): ReactNode {
       } catch (error) {
         setCard(null);
         setMessage({
-          tone: 'error',
+          tone: 'alert',
           text:
             error instanceof ApiError
               ? error.message
@@ -107,11 +106,11 @@ export default function StampCapturePage(): ReactNode {
   if (!station?.issuesStamp) {
     return (
       <AppShell title="Stamp a card" back={{ href: '/home', label: 'Home' }}>
-        <p className="tile">
+        <EmptyState title="Scanning is closed here">
           {station
             ? `${station.name} does not stamp Mission Cards.`
-            : 'You are not on shift right now, so scanning is closed.'}
-        </p>
+            : 'You are not on shift right now.'}
+        </EmptyState>
       </AppShell>
     );
   }
@@ -123,42 +122,27 @@ export default function StampCapturePage(): ReactNode {
       back={{ href: '/home', label: 'Home' }}
       actions={<SyncIndicator />}
     >
-      <p className="mb-4 text-sm" style={{ color: 'var(--text-muted)' }}>
-        Stamp the card by hand first. The scan records the journey — it is not what the visitor
-        takes home. <strong>{scanned}</strong> stamped this session.
-      </p>
-
-      <CardCodeInput
-        videoRef={scanner.videoRef}
-        scannerState={scanner.state}
-        onSubmitCode={(code) => void stamp(code)}
-        pending={pending}
-      />
-
-      {message ? (
-        <p
-          role="status"
-          className="mt-4 rounded-lg px-4 py-3 font-semibold"
-          style={{
-            background:
-              message.tone === 'ok'
-                ? 'var(--color-ok-surface)'
-                : message.tone === 'warn'
-                  ? 'var(--color-warn-surface)'
-                  : 'var(--color-alert-surface)',
-            color:
-              message.tone === 'ok'
-                ? 'var(--color-ok)'
-                : message.tone === 'warn'
-                  ? 'var(--color-warn)'
-                  : 'var(--color-alert)',
-          }}
-        >
-          {message.text}
+      <div className="flex flex-col gap-md">
+        <p className="text-caption text-text-muted">
+          Stamp the card by hand first. The scan records the journey — it is not what the visitor
+          takes home. <strong>{scanned}</strong> stamped this session.
         </p>
-      ) : null}
 
-      {card ? <CardSummary card={card} /> : null}
+        <CardCodeInput
+          videoRef={scanner.videoRef}
+          scannerState={scanner.state}
+          onSubmitCode={(code) => void stamp(code)}
+          pending={pending}
+        />
+
+        {message ? (
+          <Callout tone={message.tone} role="status">
+            <span className="font-semibold">{message.text}</span>
+          </Callout>
+        ) : null}
+
+        {card ? <CardSummary card={card} /> : null}
+      </div>
     </AppShell>
   );
 }
@@ -166,29 +150,29 @@ export default function StampCapturePage(): ReactNode {
 /** What the facilitator reads out: where they have been, where to go next. */
 function CardSummary({ card }: { card: MissionCardRecord }): ReactNode {
   return (
-    <section className="tile mt-4">
-      <h2 className="mb-1 text-xl font-semibold" style={{ fontFamily: 'var(--font-display)' }}>
-        {card.shortCode}
-      </h2>
-      <p className="mb-3 text-sm" style={{ color: 'var(--text-muted)' }}>
+    <Card>
+      <CardTitle className="font-display tracking-[0.15em]">{card.shortCode}</CardTitle>
+      <p className="text-caption text-text-muted">
         {card.status === 'COMPLETED' ? 'Journey complete' : `${card.stamps.length} stamps so far`}
       </p>
 
-      <ul className="flex flex-col gap-1">
+      <ul className="mt-sm flex flex-col gap-xxs">
         {card.stamps.map((stampRecord) => (
           <li key={stampRecord.id}>
-            <span aria-hidden="true">✓ </span>
+            <span aria-hidden="true" className="mr-xs text-ok">
+              ✓
+            </span>
             {stampRecord.stationName}
           </li>
         ))}
       </ul>
 
       {card.remainingStationIds.length > 0 ? (
-        <p className="mt-3 text-sm" style={{ color: 'var(--text-muted)' }}>
+        <p className="mt-sm text-caption text-text-muted">
           {card.remainingStationIds.length} station
           {card.remainingStationIds.length === 1 ? '' : 's'} still to visit.
         </p>
       ) : null}
-    </section>
+    </Card>
   );
 }

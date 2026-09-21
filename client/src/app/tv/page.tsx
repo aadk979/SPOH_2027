@@ -3,7 +3,8 @@
 import { useEffect, type ReactNode } from 'react';
 import { useLiveDashboard } from '@/features/dashboard/useDashboard';
 import { useRequireSession } from '@/features/session/useSession';
-import { readableCategory } from '../chief/page';
+import { cx } from '@/components/ui';
+import { formatCount, formatTime, readableCategory } from '@/lib/format';
 
 /**
  * TV mode — the ops-room display (PRODUCT_BRIEF §9).
@@ -15,6 +16,11 @@ import { readableCategory } from '../chief/page';
  *
  * Anything wrong takes the whole top of the screen. The point of a display
  * nobody is looking at is that it catches your eye when it needs to.
+ *
+ * The type scale here is viewport-relative rather than fixed. The ops room may
+ * put this on a 1080p panel or a 4K one, and a fixed 72px figure is half the
+ * physical size on the second — the numbers have to stay the same size on the
+ * wall, not the same size in pixels.
  */
 export default function TvPage(): ReactNode {
   const session = useRequireSession();
@@ -51,47 +57,56 @@ export default function TvPage(): ReactNode {
   if (!data) {
     return (
       <main
-        className="flex min-h-dvh items-center justify-center"
-        style={{ background: 'var(--color-void)', color: 'var(--color-on-dark)' }}
+        // `data-theme` rather than a pile of colour classes: this screen is
+        // permanently dark whatever the browser's preference, and setting the
+        // theme means every token beneath it already resolves correctly.
+        data-theme="dark"
+        className="flex min-h-dvh items-center justify-center bg-void text-on-dark"
       >
-        <p className="text-3xl">Connecting…</p>
+        <p className="text-tv-row">Connecting…</p>
       </main>
     );
   }
 
   const alerts = data.safety.activeLostPersonAlerts;
   const silent = data.dataHealth.silentStations;
+  const gaps = data.staffing.gaps.length;
 
   return (
     <main
-      className="min-h-dvh p-8"
-      style={{ background: 'var(--color-void)', color: 'var(--color-on-dark)' }}
+      data-theme="dark"
+      className="flex min-h-dvh flex-col gap-[2vw] bg-void p-[2vw] text-on-dark"
     >
       {alerts > 0 ? (
+        // The solid fill, not `bg-alert`. This page is permanently dark, and in
+        // the dark palette `--color-alert` is the LIGHTENED foreground red —
+        // white on it is 2.5:1, unreadable at four metres, on the one element
+        // that has to be readable from across the room.
         <div
-          className="mb-8 rounded-lg px-8 py-6 text-center"
-          style={{ background: 'var(--color-alert)' }}
+          role="alert"
+          aria-live="assertive"
+          className="rounded-lg bg-alert-solid px-[2vw] py-[1.5vw] text-center text-on-alert"
         >
-          <p className="text-5xl font-semibold">
+          <p className="text-tv-stat font-display font-semibold">
             {alerts} ACTIVE LOST-PERSON ALERT{alerts === 1 ? '' : 'S'}
           </p>
         </div>
       ) : null}
 
-      <header className="mb-8 flex items-baseline justify-between">
-        <h1 className="text-4xl font-semibold" style={{ fontFamily: 'var(--font-display)' }}>
-          SPOH 2027 · {data.eventDayLabel ?? 'Ops'}
-        </h1>
-        <p className="text-2xl" style={{ color: 'var(--color-on-dark-muted)' }}>
-          {new Date(data.asOf).toLocaleTimeString('en-SG', {
-            hour: '2-digit',
-            minute: '2-digit',
-            timeZone: 'Asia/Singapore',
-          })}
-        </p>
+      <header className="flex flex-wrap items-baseline justify-between gap-sm">
+        <div className="flex items-baseline gap-sm">
+          <h1 className="text-tv-row font-semibold">SPOH 2027 · {data.eventDayLabel ?? 'Ops'}</h1>
+          <a
+            href="/chief"
+            className="rounded-sm bg-tile-dark px-sm py-xxs text-caption text-on-dark-muted no-underline hover:text-on-dark focus-visible:outline-primary-on-dark"
+          >
+            Exit TV mode
+          </a>
+        </div>
+        <p className="text-tv-row tabular-nums text-on-dark-muted">{formatTime(data.asOf)}</p>
       </header>
 
-      <div className="mb-8 grid grid-cols-3 gap-6">
+      <div className="grid gap-[1.5vw] sm:grid-cols-3">
         <TvStat label="Registered" value={data.registrations.todayTotal} unit="registrations" />
         <TvStat label="Room entries" value={data.footfall.todayTotal} unit="entries, not people" />
         <TvStat
@@ -101,50 +116,46 @@ export default function TvPage(): ReactNode {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-8">
-        <section>
-          <TvHeading>Room entries</TvHeading>
-          <ul className="flex flex-col gap-3">
-            {data.footfall.stations.map((station) => (
-              <li key={station.stationId} className="flex items-baseline justify-between text-3xl">
-                <span style={{ color: station.silent ? 'var(--color-warn)' : undefined }}>
-                  {station.stationName}
-                  {station.silent ? ' · silent' : ''}
-                </span>
-                <span className="font-semibold tabular-nums">
-                  {station.todayTotal.toLocaleString('en-SG')}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
+      {/*
+        `min-h-0` on the two panels: without it a long station list stretches
+        the grid past the viewport and the footer warning scrolls off a display
+        nobody can scroll.
+      */}
+      <div className="grid min-h-0 flex-1 gap-[2vw] lg:grid-cols-2">
+        <TvPanel title="Room entries">
+          {data.footfall.stations.length === 0 ? (
+            <li className="text-tv-row text-on-dark-muted">No room entries recorded yet today.</li>
+          ) : (
+            data.footfall.stations.map((station) => (
+              <TvRow
+                key={station.stationId}
+                label={station.stationName}
+                value={station.todayTotal}
+                muted={station.silent}
+                suffix={station.silent ? ' · silent' : ''}
+              />
+            ))
+          )}
+        </TvPanel>
 
-        <section>
-          <TvHeading>Who is arriving</TvHeading>
-          <ul className="flex flex-col gap-3">
-            {data.registrations.byCategory.slice(0, 6).map((row) => (
-              <li key={row.key} className="flex items-baseline justify-between text-3xl">
-                <span>{readableCategory(row.key)}</span>
-                <span className="font-semibold tabular-nums">
-                  {row.value.toLocaleString('en-SG')}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
+        <TvPanel title="Who is arriving">
+          {data.registrations.byCategory.length === 0 ? (
+            <li className="text-tv-row text-on-dark-muted">No registrations recorded yet today.</li>
+          ) : (
+            data.registrations.byCategory.slice(0, 6).map((row) => (
+              <TvRow key={row.key} label={readableCategory(row.key)} value={row.value} />
+            ))
+          )}
+        </TvPanel>
       </div>
 
-      {silent.length > 0 || data.staffing.gaps.length > 0 ? (
-        <footer
-          className="mt-8 rounded-lg px-6 py-4 text-2xl"
-          style={{ background: 'var(--color-tile-dark)', color: 'var(--color-warn)' }}
-        >
+      {silent.length > 0 || gaps > 0 ? (
+        <footer className="rounded-lg bg-tile-dark px-[1.5vw] py-[1vw] text-tv-row text-warn">
+          <span aria-hidden="true">▲ </span>
           {silent.length > 0
             ? `Silent: ${silent.map((station) => station.stationName).join(', ')}. `
             : ''}
-          {data.staffing.gaps.length > 0
-            ? `${data.staffing.gaps.length} staffing gap${data.staffing.gaps.length === 1 ? '' : 's'}.`
-            : ''}
+          {gaps > 0 ? `${gaps} staffing gap${gaps === 1 ? '' : 's'}.` : ''}
         </footer>
       ) : null}
     </main>
@@ -153,33 +164,45 @@ export default function TvPage(): ReactNode {
 
 function TvStat({ label, value, unit }: { label: string; value: number; unit: string }): ReactNode {
   return (
-    <div className="rounded-lg p-6" style={{ background: 'var(--color-tile-dark)' }}>
-      <p
-        className="text-xl uppercase tracking-wide"
-        style={{ color: 'var(--color-on-dark-muted)' }}
-      >
-        {label}
-      </p>
-      <p
-        className="text-7xl font-semibold tabular-nums"
-        style={{ fontFamily: 'var(--font-display)' }}
-      >
-        {value.toLocaleString('en-SG')}
-      </p>
-      <p className="text-xl" style={{ color: 'var(--color-on-dark-muted)' }}>
-        {unit}
-      </p>
+    <div className="rounded-lg bg-tile-dark p-[1.5vw]">
+      <p className="text-tv-label tracking-[0.06em] text-on-dark-muted uppercase">{label}</p>
+      <p className="font-display text-tv-stat font-semibold tabular-nums">{formatCount(value)}</p>
+      {/* The unit is as load-bearing here as on the phone dashboard: this is
+          the screen most likely to be photographed and quoted. */}
+      <p className="text-tv-label text-on-dark-muted">{unit}</p>
     </div>
   );
 }
 
-function TvHeading({ children }: { children: ReactNode }): ReactNode {
+function TvPanel({ title, children }: { title: string; children: ReactNode }): ReactNode {
   return (
-    <h2
-      className="mb-4 text-xl uppercase tracking-wide"
-      style={{ color: 'var(--color-on-dark-muted)' }}
-    >
-      {children}
-    </h2>
+    <section className="flex min-h-0 flex-col">
+      <h2 className="mb-[1vw] text-tv-label tracking-[0.06em] text-on-dark-muted uppercase">
+        {title}
+      </h2>
+      <ul className="flex min-h-0 flex-1 flex-col gap-[0.6vw] overflow-hidden">{children}</ul>
+    </section>
+  );
+}
+
+function TvRow({
+  label,
+  value,
+  suffix = '',
+  muted = false,
+}: {
+  label: string;
+  value: number;
+  suffix?: string;
+  muted?: boolean;
+}): ReactNode {
+  return (
+    <li className="flex items-baseline justify-between gap-sm text-tv-row">
+      <span className={cx('min-w-0 truncate', muted && 'text-warn')}>
+        {label}
+        {suffix}
+      </span>
+      <span className="shrink-0 font-semibold tabular-nums">{formatCount(value)}</span>
+    </li>
   );
 }

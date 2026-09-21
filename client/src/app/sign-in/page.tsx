@@ -2,16 +2,9 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState, type FormEvent, type ReactNode } from 'react';
-import type { CommitteeRole } from '@spoh/shared';
-import { ApiError, api } from '@/lib/api';
 import { clientEnv, isDevAuth } from '@/lib/env';
-import { setSession } from '@/lib/session';
-
-interface DevSignInResponse {
-  accessToken: string;
-  expiresIn: number;
-  volunteer: { displayName: string; role: CommitteeRole };
-}
+import { openSession } from '@/lib/session';
+import { Button, ButtonLink, Card, Field, Input, Skeleton } from '@/components/ui';
 
 /**
  * Sign-in.
@@ -20,6 +13,11 @@ interface DevSignInResponse {
  * provider a roster email is enough. Against Cognito this hands off to the
  * hosted sign-in — accounts are provisioned from the roster, never self-signup,
  * so there is deliberately no "create account" affordance here (BUILD_PLAN §6.1).
+ *
+ * Either way the credential is exchanged at `POST /auth/session`, which returns
+ * a short-lived access token for memory and sets an httpOnly refresh cookie the
+ * page cannot read. That cookie is what makes a reload survivable without ever
+ * putting a long-lived credential where script can reach it.
  */
 function SignInForm(): ReactNode {
   const router = useRouter();
@@ -36,24 +34,17 @@ function SignInForm(): ReactNode {
     setError(null);
 
     try {
-      const result = await api<DevSignInResponse>('/dev-auth/sign-in', {
-        method: 'POST',
-        body: { email: email.trim().toLowerCase() },
-      });
-
-      setSession({
-        accessToken: result.accessToken,
-        displayName: result.volunteer.displayName,
-        role: result.volunteer.role,
-        expiresAt: Date.now() + result.expiresIn * 1000,
-      });
-
+      await openSession({ email: email.trim().toLowerCase() });
       router.replace(returnTo);
     } catch (cause) {
+      const status = (cause as { status?: number }).status;
+
       setError(
-        cause instanceof ApiError && cause.status === 404
+        status === 404
           ? 'That email is not on the volunteer roster. Check with your IC.'
-          : 'Could not sign in. Check your connection and try again.',
+          : status === 403
+            ? 'That account has been deactivated. Speak to your Chief Coordinator.'
+            : 'Could not sign in. Check your connection and try again.',
       );
     } finally {
       setPending(false);
@@ -62,74 +53,81 @@ function SignInForm(): ReactNode {
 
   if (!isDevAuth) {
     return (
-      <div className="tile">
-        <p className="mb-4" style={{ fontSize: 'var(--text-body)' }}>
+      <Card className="flex flex-col gap-md">
+        <p>
           Sign in with the email address on your volunteer roster entry. Your account was created
           for you — there is no sign-up.
         </p>
-        <a className="pill inline-block" href={`${clientEnv.apiBaseUrl}/api/v1/auth/login`}>
+        <ButtonLink href={`${clientEnv.apiBaseUrl}/api/v1/auth/login`} size="lg" block>
           Continue to sign in
-        </a>
-      </div>
+        </ButtonLink>
+      </Card>
     );
   }
 
   return (
-    <form onSubmit={(event) => void onSubmit(event)} className="tile flex flex-col gap-4">
-      <label htmlFor="email" className="font-semibold">
-        Roster email
-      </label>
-      <input
-        id="email"
-        type="email"
-        required
-        autoComplete="email"
-        inputMode="email"
-        value={email}
-        onChange={(event) => setEmail(event.target.value)}
-        placeholder="you@spoh2027.test"
-        className="rounded-lg border px-4 py-3 text-lg"
-        style={{
-          borderColor: 'var(--line)',
-          background: 'var(--surface)',
-          color: 'var(--text)',
-          minHeight: 48,
-        }}
-      />
+    <Card
+      as="form"
+      onSubmit={(event: FormEvent) => void onSubmit(event)}
+      className="flex flex-col gap-md"
+    >
+      <Field id="email" label="Roster email" error={error}>
+        {(props) => (
+          <Input
+            {...props}
+            type="email"
+            required
+            autoComplete="email"
+            inputMode="email"
+            autoCapitalize="off"
+            spellCheck={false}
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="you@spoh2027.test"
+          />
+        )}
+      </Field>
 
-      {error ? (
-        <p role="alert" style={{ color: 'var(--color-alert)' }}>
-          {error}
-        </p>
-      ) : null}
-
-      <button type="submit" className="pill" disabled={pending}>
+      <Button type="submit" size="lg" block disabled={pending}>
         {pending ? 'Signing in…' : 'Sign in'}
-      </button>
+      </Button>
 
-      <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+      <p className="text-caption text-text-muted">
         Development sign-in. This screen is replaced by Cognito once the user pool is provisioned.
       </p>
-    </form>
+    </Card>
   );
 }
 
 export default function SignInPage(): ReactNode {
   return (
-    <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-4">
-      <h1
-        className="mb-2 text-4xl font-semibold"
-        style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.01em' }}
-      >
-        SPOH 2027
-      </h1>
-      <p className="mb-6" style={{ color: 'var(--text-muted)' }}>
+    /*
+     * Centred, and capped at a phone's width even on a laptop. A sign-in form
+     * stretched to a reading measure puts the field and its button an eye
+     * movement apart for no reason.
+     */
+    <main className="mx-auto flex min-h-dvh max-w-form flex-col justify-center px-md py-xl">
+      <h1 className="text-display">SPOH 2027</h1>
+      <p className="mt-xxs mb-lg text-lead text-text-muted">
         School of Computing Open House · volunteer operations
       </p>
 
-      <Suspense fallback={<div className="tile">Loading…</div>}>
+      {/*
+        `useSearchParams` suspends, so the fallback has to hold the form's
+        shape — a bare "Loading…" here made the page jump by 200px on the
+        slowest phones, which is the moment somebody taps the wrong thing.
+      */}
+      <Suspense
+        fallback={
+          <Card aria-busy="true" aria-label="Loading sign-in" className="flex flex-col gap-md">
+            <Skeleton className="w-1/3" />
+            <Skeleton height="48px" />
+            <Skeleton height="56px" className="rounded-pill" />
+          </Card>
+        }
+      >
         <SignInForm />
       </Suspense>
-    </div>
+    </main>
   );
 }

@@ -3,6 +3,7 @@
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import type { LiveDashboardResponse, StationDashboardResponse } from '@spoh/shared';
 import { api } from '@/lib/api';
+import { DEFAULT_CLIENT_SETTINGS, ms } from '@/lib/runtimeSettings';
 import { useCurrentSession } from '../session/useSession';
 
 /**
@@ -12,7 +13,8 @@ import { useCurrentSession } from '../session/useSession';
  * dashboard clients, and polling is dramatically simpler to operate and debug
  * on event day — which is the only day it has to work.
  */
-export const DASHBOARD_POLL_MS = 3_000;
+/** Shipped default; the live cadence is a runtime setting. */
+export const DASHBOARD_POLL_MS = DEFAULT_CLIENT_SETTINGS.dashboardPollSeconds * 1000;
 
 export function useLiveDashboard(): UseQueryResult<LiveDashboardResponse> {
   const session = useCurrentSession();
@@ -21,7 +23,7 @@ export function useLiveDashboard(): UseQueryResult<LiveDashboardResponse> {
     queryKey: ['dashboard', 'live'],
     queryFn: () => api<LiveDashboardResponse>('/dashboard/live'),
     enabled: session !== null,
-    refetchInterval: DASHBOARD_POLL_MS,
+    refetchInterval: ms.dashboardPoll(),
     // The ops-room display is never focused. Without this it would silently
     // freeze the moment somebody clicked away from it.
     refetchIntervalInBackground: true,
@@ -38,7 +40,7 @@ export function useStationDashboard(
     queryKey: ['dashboard', 'station', stationId],
     queryFn: () => api<StationDashboardResponse>(`/dashboard/station/${stationId ?? ''}`),
     enabled: session !== null && Boolean(stationId),
-    refetchInterval: DASHBOARD_POLL_MS,
+    refetchInterval: ms.dashboardPoll(),
     staleTime: 0,
   });
 }

@@ -2,6 +2,7 @@ import { createApp } from './app.js';
 import { env } from './config/env.js';
 import { logger } from './lib/logger.js';
 import { disconnectPrisma, pingDatabase } from './lib/prisma.js';
+import { loadSettings } from './lib/settings.js';
 import { startScheduledJobs } from './jobs/scheduler.js';
 
 /**
@@ -13,6 +14,12 @@ import { startScheduledJobs } from './jobs/scheduler.js';
  */
 async function main(): Promise<void> {
   await pingDatabase();
+
+  // Runtime settings before the first request, so no capture is ever scoped
+  // against the compiled shift boundaries when a configured one exists. Total
+  // by design: a failure here logs and leaves the defaults in place rather than
+  // stopping the server.
+  await loadSettings();
 
   const app = createApp();
   const jobs = startScheduledJobs();

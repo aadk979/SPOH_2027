@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { AppShell } from '@/components/AppShell';
+import { Card } from '@/components/ui';
 import { VISITOR_JOURNEY } from '@/content/brief';
 import { useRequireSession } from '@/features/session/useSession';
 
@@ -18,30 +19,33 @@ export default function JourneyPage(): ReactNode {
 
   return (
     <AppShell title="The visitor journey" back={{ href: '/home', label: 'Home' }}>
-      <ol className="flex flex-col gap-3">
+      <ol className="flex flex-col gap-sm">
         {VISITOR_JOURNEY.map((step) => (
-          <li key={step.step} className="tile flex gap-4">
+          <Card as="li" key={step.step} className="flex gap-md">
+            {/*
+              The step number is a graphic, not content: the list itself is
+              ordered, so a screen reader already announces "item 3 of 6" and
+              reading "3" again is noise.
+            */}
             <span
               aria-hidden="true"
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-lg font-semibold"
-              style={{ background: 'var(--color-primary)', color: 'var(--color-on-primary)' }}
+              className="flex size-[36px] shrink-0 items-center justify-center rounded-pill bg-primary font-display text-body font-semibold text-on-primary tabular-nums"
             >
               {step.step}
             </span>
-            <span>
-              <span className="block text-lg font-semibold">{step.title}</span>
-              <span className="block" style={{ color: 'var(--text-muted)' }}>
-                {step.detail}
-              </span>
+
+            <span className="min-w-0">
+              <span className="block text-tagline font-semibold">{step.title}</span>
+              <span className="block text-reading text-text-muted">{step.detail}</span>
             </span>
-          </li>
+          </Card>
         ))}
       </ol>
 
-      <p className="tile-flat mt-6">
+      <Card variant="flat" className="mt-lg">
         One Mission Card can be a whole family. That is why the registration count and the card
         count are different numbers, and why nobody should add them together.
-      </p>
+      </Card>
     </AppShell>
   );
 }

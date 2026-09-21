@@ -55,7 +55,14 @@ const EXPECTED: Record<Capability, Row> = {
   'fallback.declare':          [false, false, true,  true,  false, true],
   'fallback.import':           [false, false, false, true,  false, true],
   'report.generate':           [false, false, true,  true,  true,  true],
+  // Reading the roster is a wider grant than changing it: a DC runs their own
+  // portfolio's people, and a Lead needs the list to write the report.
+  'user.read':                 [false, false, true,  true,  true,  true],
   'user.provision':            [false, false, false, true,  false, true],
+  // Stations, event days, gift types and the runtime tuning values. Narrower
+  // than roster.edit because moving a shift boundary silently re-scopes every
+  // capture permission in the system.
+  'config.manage':             [false, false, false, true,  false, true],
   'audit.read':                [false, false, false, true,  true,  true],
 };
 

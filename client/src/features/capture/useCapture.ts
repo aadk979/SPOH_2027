@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { enqueue, cancel as cancelOutboxEntry } from '@/lib/outbox';
+import { ms } from '@/lib/runtimeSettings';
 
 /**
  * The shared mechanics behind both capture screens (BUILD_PLAN §9.4).
@@ -21,7 +22,13 @@ import { enqueue, cancel as cancelOutboxEntry } from '@/lib/outbox';
  * something that never really happened.
  */
 
-/** How long undo stays available after a tap. */
+/**
+ * How long undo stays available after a tap.
+ *
+ * Shipped default; the live value is a runtime setting, because how long a
+ * booth volunteer needs to notice a mis-tap is exactly the kind of thing a dry
+ * run tells you and a redeploy should not gate.
+ */
 export const UNDO_WINDOW_MS = 10_000;
 
 export interface CaptureTap {
@@ -37,6 +44,14 @@ export interface UseCaptureResult {
   sessionCount: number;
   /** The tap that can still be undone, if any. */
   undoable: CaptureTap | null;
+  /**
+   * Set when the most recent tap could not even be queued locally — not a
+   * network failure (the outbox absorbs those invisibly), but the local
+   * database itself refusing the write. Rare, but silent here means a
+   * volunteer keeps tapping into a void for an hour, which is the one
+   * outcome this whole screen exists to prevent.
+   */
+  error: string | null;
   capture(input: { endpoint: string; body: object; label: string }): Promise<void>;
   undo(): Promise<void>;
 }
@@ -44,6 +59,7 @@ export interface UseCaptureResult {
 export function useCapture(): UseCaptureResult {
   const [sessionCount, setSessionCount] = useState(0);
   const [undoable, setUndoable] = useState<CaptureTap | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(
@@ -57,19 +73,28 @@ export function useCapture(): UseCaptureResult {
     async (input: { endpoint: string; body: object; label: string }): Promise<void> => {
       const idempotencyKey = crypto.randomUUID();
 
-      await enqueue({
-        idempotencyKey,
-        endpoint: input.endpoint,
-        body: {
-          ...input.body,
+      try {
+        await enqueue({
           idempotencyKey,
-          // The moment the volunteer actually tapped. The server stamps its own
-          // time on receipt; storing both is what makes a phone that slept for
-          // ten minutes visible rather than a silent dent in the curve.
-          clientRecordedAt: new Date().toISOString(),
-        },
-      });
+          endpoint: input.endpoint,
+          body: {
+            ...input.body,
+            idempotencyKey,
+            // The moment the volunteer actually tapped. The server stamps its
+            // own time on receipt; storing both is what makes a phone that
+            // slept for ten minutes visible rather than a silent dent in the
+            // curve.
+            clientRecordedAt: new Date().toISOString(),
+          },
+        });
+      } catch {
+        // The local write itself failed — not a network problem, so the
+        // outbox cannot recover it. Tell the volunteer now, not never.
+        setError('This tap was not recorded. Try again, and tell your IC if it keeps happening.');
+        return;
+      }
 
+      setError(null);
       setSessionCount((count) => count + 1);
       setUndoable({ id: idempotencyKey, label: input.label, at: Date.now() });
 
@@ -78,7 +103,7 @@ export function useCapture(): UseCaptureResult {
       navigator.vibrate?.(15);
 
       if (timer.current) clearTimeout(timer.current);
-      timer.current = setTimeout(() => setUndoable(null), UNDO_WINDOW_MS);
+      timer.current = setTimeout(() => setUndoable(null), ms.undoWindow());
     },
     [],
   );
@@ -95,7 +120,7 @@ export function useCapture(): UseCaptureResult {
     if (timer.current) clearTimeout(timer.current);
   }, [undoable]);
 
-  return { sessionCount, undoable, capture, undo };
+  return { sessionCount, undoable, error, capture, undo };
 }
 
 /**

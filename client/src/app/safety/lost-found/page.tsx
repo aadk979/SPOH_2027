@@ -1,12 +1,25 @@
 'use client';
 
-import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import type { LostFoundRecord } from '@spoh/shared';
 import { AppShell } from '@/components/AppShell';
+import {
+  Button,
+  ButtonLink,
+  Callout,
+  Card,
+  Checkbox,
+  EmptyState,
+  Field,
+  Input,
+  LoadingCards,
+  StatusText,
+  type Tone,
+} from '@/components/ui';
 import { useRequireSession } from '@/features/session/useSession';
 import { api } from '@/lib/api';
+import { formatDateTime } from '@/lib/format';
 
 /**
  * The lost-and-found desk (PRODUCT_BRIEF §7.2).
@@ -23,7 +36,15 @@ export default function LostFoundPage(): ReactNode {
   const session = useRequireSession();
   const queryClient = useQueryClient();
   const [query, setQuery] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const [heldOnly, setHeldOnly] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setQuery(searchInput);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   const items = useQuery({
     queryKey: ['lost-found', query, heldOnly],
@@ -52,85 +73,103 @@ export default function LostFoundPage(): ReactNode {
       title="Lost and found"
       back={{ href: '/home', label: 'Home' }}
       actions={
-        <Link href="/safety/lost-found/new" className="pill">
+        <ButtonLink href="/safety/lost-found/new" size="sm">
           Log an item
-        </Link>
+        </ButtonLink>
       }
     >
-      <label htmlFor="search" className="block font-semibold">
-        What are they looking for?
-      </label>
-      <input
-        id="search"
-        type="search"
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder="blue water bottle"
-        className="mt-2 w-full rounded-lg border px-4 py-3 text-lg"
-        style={{
-          borderColor: 'var(--line)',
-          background: 'var(--surface)',
-          color: 'var(--text)',
-          minHeight: 48,
-        }}
-      />
+      {/*
+        The search box is capped at a reading measure even on the wide shell:
+        the results are a grid, but the question is one short phrase.
+      */}
+      <div className="max-w-panel">
+        <Field
+          id="search"
+          label="What are they looking for?"
+          hint="One or two words. The label was typed in a hurry, so a shorter word finds more."
+        >
+          {(props) => (
+            <Input
+              {...props}
+              type="search"
+              value={searchInput}
+              onChange={(event) => setSearchInput(event.target.value)}
+              placeholder="blue water bottle"
+              scale="lg"
+            />
+          )}
+        </Field>
 
-      <label className="mt-3 flex items-center gap-2">
-        <input
-          type="checkbox"
+        <Checkbox
+          label="Only items still held"
           checked={heldOnly}
           onChange={(event) => setHeldOnly(event.target.checked)}
         />
-        Only items still held
-      </label>
+      </div>
 
-      <p className="mt-5 mb-3 text-sm" style={{ color: 'var(--text-muted)' }}>
+      {claim.isError ? (
+        <Callout tone="alert" role="alert" className="mt-md">
+          Could not mark item as claimed. Check your connection and try again.
+        </Callout>
+      ) : null}
+
+      <p className="mt-md mb-sm text-caption text-text-muted" aria-live="polite">
         {items.isLoading
           ? 'Searching…'
           : `${results.length} item${results.length === 1 ? '' : 's'}`}
       </p>
 
-      {results.length === 0 && !items.isLoading ? (
-        <p className="tile" style={{ color: 'var(--text-muted)' }}>
-          Nothing matching. Try a shorter word — the label was typed in a hurry.
-        </p>
+      {items.isLoading ? (
+        <LoadingCards count={3} label="Searching lost and found" />
+      ) : results.length === 0 ? (
+        <EmptyState title="Nothing matching">
+          Try a shorter word, or clear the filter to include items already claimed.
+        </EmptyState>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="grid gap-sm sm:grid-cols-2 sm:gap-md lg:grid-cols-3">
           {results.map((item) => (
-            <li key={item.id} className="tile">
-              <p className="text-lg font-semibold">{item.itemLabel}</p>
+            <Card as="li" key={item.id} className="flex flex-col">
+              <p className="text-tagline font-semibold">{item.itemLabel}</p>
 
-              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-caption text-text-muted">
                 {item.categoryLabel ? `${item.categoryLabel} · ` : ''}
-                Found {formatTime(item.foundAt)}
+                Found {formatDateTime(item.foundAt)}
                 {item.foundStationName ? ` at ${item.foundStationName}` : ''}
               </p>
 
               {item.holderNote ? (
-                <p className="mt-1 text-sm">
+                <p className="mt-xs text-caption">
                   <strong>Where it is:</strong> {item.holderNote}
                 </p>
               ) : null}
 
-              <p
-                className="mt-2 text-sm font-semibold"
-                style={{ color: statusColour(item.status) }}
-              >
-                {/* Status is a word, never carried by colour alone. */}
+              {item.photoKey ? (
+                <p className="mt-xs text-caption text-text-muted">
+                  <span aria-hidden="true">📷 </span>
+                  Photo on file
+                </p>
+              ) : null}
+
+              {/* Status is a word, never carried by colour alone. */}
+              <StatusText tone={statusTone(item.status)} className="mt-sm block">
                 {readableStatus(item.status)}
-              </p>
+              </StatusText>
 
               {item.status === 'HELD' ? (
-                <button
-                  type="button"
-                  className="pill mt-3"
-                  disabled={claim.isPending}
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="mt-sm self-start"
+                  disabled={claim.isPending && claim.variables === item.id}
                   onClick={() => claim.mutate(item.id)}
+                  // Otherwise a screen-reader user hears "Mark claimed" once per
+                  // card with no way to tell which item they are about to close.
+                  aria-label={`Mark ${item.itemLabel} claimed`}
                 >
-                  Mark claimed
-                </button>
+                  {claim.isPending && claim.variables === item.id ? 'Claiming…' : 'Mark claimed'}
+                </Button>
               ) : null}
-            </li>
+            </Card>
           ))}
         </ul>
       )}
@@ -151,20 +190,6 @@ function readableStatus(status: LostFoundRecord['status']): string {
   }
 }
 
-function statusColour(status: LostFoundRecord['status']): string {
-  return status === 'HELD'
-    ? 'var(--color-warn)'
-    : status === 'CLAIMED'
-      ? 'var(--color-ok)'
-      : 'var(--text-muted)';
-}
-
-function formatTime(iso: string): string {
-  return new Date(iso).toLocaleString('en-SG', {
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: 'Asia/Singapore',
-  });
+function statusTone(status: LostFoundRecord['status']): Tone {
+  return status === 'HELD' ? 'warn' : status === 'CLAIMED' ? 'ok' : 'neutral';
 }

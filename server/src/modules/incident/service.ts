@@ -9,6 +9,8 @@ import { writeAudit, type AuditContext } from '../../lib/audit.js';
 import { NotFoundError } from '../../lib/errors.js';
 import { logger } from '../../lib/logger.js';
 import { prisma } from '../../lib/prisma.js';
+import { dispatch } from '../notification/service.js';
+import type { IncidentSeverity } from '@spoh/shared';
 import {
   addFollowUp,
   createIncident,
@@ -59,7 +61,22 @@ export async function reportIncident(
     return row;
   });
 
-  notifySafetyChain(incident.id, request.severity);
+  const station = incident.stationId
+    ? await prisma.station.findUnique({
+        where: { id: incident.stationId },
+        select: { name: true },
+      })
+    : null;
+
+  notifySafetyChain(
+    {
+      id: incident.id,
+      severity: incident.severity,
+      type: incident.type,
+      stationName: station?.name ?? request.locationNote ?? null,
+    },
+    reporterId,
+  );
 
   return toIncidentRecord(incident);
 }
@@ -138,14 +155,41 @@ export async function changeIncidentStatus(
 }
 
 /**
- * Notify the Safety IC, the Deputy Coordinator (Welfare, Safety &
- * Communications) and the Chief.
+ * Notify the safety chain.
  *
- * Push delivery is Phase 3 work. Until it exists this writes a structured log
- * line rather than pretending to notify anyone — the WhatsApp Safety
- * Communications Chat remains the human channel and the app feeds it rather
- * than replacing it (PRODUCT_BRIEF §7.4).
+ * Only HIGH and CRITICAL push. A low-severity near-miss is a record, not an
+ * interruption, and pushing every one of them is how the chain learns to ignore
+ * the channel before a severe one arrives.
+ *
+ * The WhatsApp Safety Communications Chat remains the human channel; this feeds
+ * it rather than replacing it (PRODUCT_BRIEF §7.4). The description stays out
+ * of the payload — it is free text typed in a hurry about a real person, and it
+ * belongs behind authentication rather than on a lock screen.
  */
-function notifySafetyChain(incidentId: string, severity: string): void {
-  logger.warn({ incidentId, severity }, 'incident reported — safety chain notification pending');
+function notifySafetyChain(
+  incident: { id: string; severity: IncidentSeverity; type: string; stationName: string | null },
+  reporterId: string,
+): void {
+  if (incident.severity !== 'HIGH' && incident.severity !== 'CRITICAL') {
+    logger.info(
+      { incidentId: incident.id, severity: incident.severity },
+      'incident recorded; below the push threshold',
+    );
+    return;
+  }
+
+  const what = incident.type.replace(/_/g, ' ').toLowerCase();
+
+  void dispatch({
+    kind: 'incident.critical',
+    priority: 'URGENT',
+    title: `${incident.severity} incident reported`,
+    body: `${what} at ${incident.stationName ?? 'an unlisted location'}. Open SPOH Ops.`,
+    url: '/safety',
+    tag: `incident:${incident.id}`,
+    // IC and above: the people who can actually resolve one.
+    audience: { everyone: false, minimumRole: 'IC', volunteerIds: [] },
+    // The reporter is standing over it already.
+    excludeVolunteerId: reporterId,
+  });
 }

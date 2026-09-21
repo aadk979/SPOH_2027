@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
+import { parseCidr } from '../lib/campusNetwork.js';
 
 /**
  * Boot-time configuration.
@@ -60,8 +61,23 @@ const EnvSchema = z
     RATE_LIMIT_MAX_DEFAULT: z.coerce.number().int().min(1).default(300),
     RATE_LIMIT_MAX_CAPTURE: z.coerce.number().int().min(1).default(1200),
     RATE_LIMIT_MAX_SENSITIVE: z.coerce.number().int().min(1).default(20),
+    RATE_LIMIT_MAX_ADMIN: z.coerce.number().int().min(1).default(60),
 
     TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(0),
+    ATTENDANCE_ROOT_EMAIL: z
+      .email()
+      .transform((value) => value.toLowerCase())
+      .optional(),
+    ATTENDANCE_SIGNING_SECRET: z.string().min(32).optional(),
+    ATTENDANCE_SP_CIDRS: CsvList.default([]).superRefine((cidrs, ctx) => {
+      for (const cidr of cidrs) {
+        try {
+          parseCidr(cidr);
+        } catch {
+          ctx.addIssue({ code: 'custom', message: `Invalid campus CIDR: ${cidr}` });
+        }
+      }
+    }),
 
     /**
      * Treat every hour as event hours. DEVELOPMENT ONLY.
@@ -92,6 +108,55 @@ const EnvSchema = z
 
     S3_MEDIA_BUCKET: z.string().optional(),
     AWS_REGION: z.string().default('ap-southeast-1'),
+    /** Seconds a presigned upload policy stays valid. */
+    S3_UPLOAD_TTL_SECONDS: z.coerce.number().int().min(30).max(3600).default(300),
+    /** Ceiling written into the presigned policy, so S3 enforces it too. */
+    S3_MAX_UPLOAD_BYTES: z.coerce
+      .number()
+      .int()
+      .min(1024)
+      .max(50 * 1024 * 1024)
+      .default(10 * 1024 * 1024),
+
+    /**
+     * Signing key for the API's own access tokens.
+     *
+     * The API issues its own short-lived token rather than passing the identity
+     * provider's straight through, which is what makes the refresh path
+     * possible. Required in production; outside it an ephemeral key is
+     * generated at boot, so a developer machine needs no extra configuration
+     * and every restart simply invalidates its own sessions.
+     */
+    SESSION_SIGNING_SECRET: z.string().min(32).optional(),
+    /** Access-token lifetime. Short, because a refresh cookie renews it. */
+    ACCESS_TOKEN_TTL_SECONDS: z.coerce.number().int().min(60).max(86_400).default(900),
+    /**
+     * Domain for the refresh cookie. Leave unset for a host-only cookie, which
+     * is correct when the API and client share an origin or a parent domain is
+     * not required.
+     */
+    SESSION_COOKIE_DOMAIN: z.string().optional(),
+    /**
+     * Send the refresh cookie cross-site.
+     *
+     * Needed when the client is served from a different origin than the API,
+     * which is the deployed topology. SameSite=None demands Secure, so this is
+     * refused without HTTPS in production.
+     */
+    SESSION_COOKIE_CROSS_SITE: z
+      .enum(['true', 'false'])
+      .default('false')
+      .transform((value) => value === 'true'),
+
+    /**
+     * VAPID keys for Web Push. Absent means push is simply off — the ten-second
+     * alert poll and the three-second dashboard poll are the contract either
+     * way, so an unconfigured deployment is a quieter system, not a broken one.
+     */
+    VAPID_PUBLIC_KEY: z.string().optional(),
+    VAPID_PRIVATE_KEY: z.string().optional(),
+    /** `mailto:` or `https:` contact the push service can reach, per RFC 8292. */
+    VAPID_SUBJECT: z.string().optional(),
   })
   .superRefine((env, ctx) => {
     if (env.AUTH_PROVIDER === 'cognito') {
@@ -146,6 +211,40 @@ const EnvSchema = z
         code: 'custom',
         path: ['DATABASE_URL'],
         message: 'production DATABASE_URL must specify sslmode=require (BUILD_PLAN §8.8)',
+      });
+    }
+
+    if (env.NODE_ENV === 'production' && !env.SESSION_SIGNING_SECRET) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['SESSION_SIGNING_SECRET'],
+        message:
+          'required in production: an ephemeral key would sign out every volunteer on each deploy and every instance would reject the others tokens',
+      });
+    }
+
+    if (
+      env.NODE_ENV === 'production' &&
+      env.SESSION_COOKIE_CROSS_SITE &&
+      env.CORS_ALLOWED_ORIGINS.some((origin) => origin.startsWith('http://'))
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['SESSION_COOKIE_CROSS_SITE'],
+        message:
+          'a cross-site refresh cookie requires SameSite=None, which browsers only accept with Secure — every allowed origin must be https',
+      });
+    }
+
+    // Half a VAPID pair is a misconfiguration that would otherwise surface as
+    // silent non-delivery of exactly the alerts that matter most.
+    const vapid = [env.VAPID_PUBLIC_KEY, env.VAPID_PRIVATE_KEY, env.VAPID_SUBJECT];
+    if (vapid.some(Boolean) && !vapid.every(Boolean)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['VAPID_PUBLIC_KEY'],
+        message:
+          'set all three of VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY and VAPID_SUBJECT, or none of them',
       });
     }
 

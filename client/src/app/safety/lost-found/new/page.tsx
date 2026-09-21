@@ -3,6 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { AppShell } from '@/components/AppShell';
+import { Button, Callout, Field, Input } from '@/components/ui';
+import { usePhotoUpload } from '@/features/media/usePhotoUpload';
 import { useMe, useRequireSession } from '@/features/session/useSession';
 import { api } from '@/lib/api';
 
@@ -14,7 +16,9 @@ import { api } from '@/lib/api';
  * item findable again.
  *
  * There is deliberately no field for who lost it. This is a record of an
- * object, not of a person.
+ * object, not of a person — and the same rule governs the photo: it exists so
+ * somebody can recognise a bottle among nine other bottles, and it must never
+ * be a picture of the person who lost it or the person collecting it.
  */
 export default function NewLostFoundPage(): ReactNode {
   const session = useRequireSession();
@@ -25,12 +29,20 @@ export default function NewLostFoundPage(): ReactNode {
   const [categoryLabel, setCategoryLabel] = useState('');
   const [holderNote, setHolderNote] = useState('');
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [itemError, setItemError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const photo = usePhotoUpload();
 
   async function submit(event: FormEvent): Promise<void> {
     event.preventDefault();
+    if (itemLabel.trim().length < 2) {
+      setItemError('Please provide what the item is (at least 2 characters).');
+      return;
+    }
+
     setPending(true);
-    setError(null);
+    setItemError(null);
+    setFormError(null);
 
     try {
       await api('/lost-found', {
@@ -39,6 +51,7 @@ export default function NewLostFoundPage(): ReactNode {
           itemLabel: itemLabel.trim(),
           ...(categoryLabel.trim() ? { categoryLabel: categoryLabel.trim() } : {}),
           ...(holderNote.trim() ? { holderNote: holderNote.trim() } : {}),
+          ...(photo.key ? { photoKey: photo.key } : {}),
           ...(me?.currentAssignment ? { foundStationId: me.currentAssignment.station.id } : {}),
           foundAt: new Date().toISOString(),
         },
@@ -46,7 +59,7 @@ export default function NewLostFoundPage(): ReactNode {
 
       router.replace('/safety/lost-found');
     } catch {
-      setError('Could not save. Check your connection and try again.');
+      setFormError('Could not save. Check your connection and try again.');
     } finally {
       setPending(false);
     }
@@ -59,99 +72,131 @@ export default function NewLostFoundPage(): ReactNode {
       title="Log a found item"
       back={{ href: '/safety/lost-found', label: 'Lost and found' }}
     >
-      <form onSubmit={(event) => void submit(event)} className="flex flex-col gap-4">
-        <div>
-          <label htmlFor="item" className="font-semibold">
-            What is it?
-          </label>
-          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            Describe it the way somebody would ask for it.
-          </p>
-          <input
-            id="item"
-            required
-            minLength={2}
-            maxLength={120}
-            value={itemLabel}
-            onChange={(event) => setItemLabel(event.target.value)}
-            placeholder="Blue metal water bottle with stickers"
-            className="mt-2 w-full rounded-lg border px-4 py-3 text-lg"
-            style={{
-              borderColor: 'var(--line)',
-              background: 'var(--surface)',
-              color: 'var(--text)',
-              minHeight: 48,
-            }}
-          />
-        </div>
+      <form onSubmit={(event) => void submit(event)} className="flex flex-col gap-md">
+        <Field
+          id="item"
+          label="What is it?"
+          hint="Describe it the way somebody would ask for it."
+          error={itemError}
+        >
+          {(props) => (
+            <Input
+              {...props}
+              required
+              minLength={2}
+              maxLength={120}
+              value={itemLabel}
+              onChange={(event) => {
+                setItemLabel(event.target.value);
+                if (itemError) setItemError(null);
+              }}
+              placeholder="Blue metal water bottle with stickers"
+              scale="lg"
+            />
+          )}
+        </Field>
 
-        <div>
-          <label htmlFor="category" className="font-semibold">
-            Kind of thing <span style={{ color: 'var(--text-muted)' }}>(optional)</span>
-          </label>
-          <input
-            id="category"
-            maxLength={60}
-            value={categoryLabel}
-            onChange={(event) => setCategoryLabel(event.target.value)}
-            placeholder="Bottle, bag, phone, clothing…"
-            className="mt-2 w-full rounded-lg border px-4 py-3"
-            style={{
-              borderColor: 'var(--line)',
-              background: 'var(--surface)',
-              color: 'var(--text)',
-              minHeight: 48,
-            }}
-          />
-        </div>
+        <Field id="category" label="Kind of thing" optional>
+          {(props) => (
+            <Input
+              {...props}
+              maxLength={60}
+              value={categoryLabel}
+              onChange={(event) => setCategoryLabel(event.target.value)}
+              placeholder="Bottle, bag, phone, clothing…"
+            />
+          )}
+        </Field>
 
-        <div>
-          <label htmlFor="holder" className="font-semibold">
-            Where is it being kept?
-          </label>
-          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            The field people forget, and the one that makes it findable again.
-          </p>
-          <input
-            id="holder"
-            maxLength={200}
-            value={holderNote}
-            onChange={(event) => setHolderNote(event.target.value)}
-            placeholder="Held at the Mission Complete desk"
-            className="mt-2 w-full rounded-lg border px-4 py-3"
-            style={{
-              borderColor: 'var(--line)',
-              background: 'var(--surface)',
-              color: 'var(--text)',
-              minHeight: 48,
-            }}
-          />
-        </div>
+        <Field
+          id="holder"
+          label="Where is it being kept?"
+          optional
+          hint="The field people forget, and the one that makes it findable again."
+        >
+          {(props) => (
+            <Input
+              {...props}
+              maxLength={200}
+              value={holderNote}
+              onChange={(event) => setHolderNote(event.target.value)}
+              placeholder="Held at the Mission Complete desk"
+            />
+          )}
+        </Field>
+
+        {photo.available ? (
+          <Field
+            id="photo"
+            label="Photo"
+            optional
+            hint="Of the item, never of a person. It makes one blue bottle findable among nine."
+            error={photo.error}
+          >
+            {(props) => (
+              <div className="flex flex-col gap-sm">
+                <input
+                  {...props}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  // Opens the rear camera on a phone rather than the gallery,
+                  // which is what somebody standing over a found item wants.
+                  capture="environment"
+                  disabled={photo.state === 'uploading'}
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) void photo.upload(file);
+                  }}
+                  className="text-body file:mr-sm file:rounded-pill file:border-0 file:bg-surface-sunken file:px-md file:py-xs file:text-caption"
+                />
+
+                {photo.state === 'uploading' ? (
+                  <p className="text-caption text-text-muted">Uploading…</p>
+                ) : null}
+
+                {photo.state === 'done' && photo.previewUrl ? (
+                  <div className="flex items-center gap-sm">
+                    {/*
+                      A plain <img>, not next/image: the source is a local
+                      object URL for a file that has not left the device yet,
+                      which the image optimiser can do nothing with.
+                    */}
+                    <img
+                      src={photo.previewUrl}
+                      alt="The item you just photographed"
+                      className="size-[64px] rounded-md object-cover"
+                    />
+                    <Button variant="quiet" size="sm" type="button" onClick={photo.reset}>
+                      Remove
+                    </Button>
+                  </div>
+                ) : null}
+              </div>
+            )}
+          </Field>
+        ) : null}
 
         {me?.currentAssignment ? (
-          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-caption text-text-muted">
             Recorded as found at {me.currentAssignment.station.name}.
           </p>
         ) : null}
 
-        {error ? (
-          <p role="alert" style={{ color: 'var(--color-alert)' }}>
-            {error}
-          </p>
+        {formError ? (
+          <Callout tone="alert" role="alert">
+            {formError}
+          </Callout>
         ) : null}
 
-        <button
-          type="submit"
-          className="pill w-full"
-          style={{ minHeight: 56 }}
-          disabled={pending || itemLabel.trim().length < 2}
-        >
-          {pending ? 'Saving…' : 'Log this item'}
-        </button>
+        <div>
+          <Button type="submit" size="lg" block disabled={pending || itemLabel.trim().length < 2}>
+            {pending ? 'Saving…' : 'Log this item'}
+          </Button>
 
-        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          Do not record anything about the person who lost it.
-        </p>
+          <p className="mt-sm text-caption text-text-muted">
+            Do not record anything about the person who lost it.
+          </p>
+        </div>
       </form>
     </AppShell>
   );

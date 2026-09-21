@@ -2,15 +2,15 @@
 
 import type { ErrorBody } from '@spoh/shared';
 import { clientEnv } from './env';
-import { clearSession, getAccessToken } from './session';
+import { clearSession, getAccessToken, refreshSession } from './session';
 
 /**
  * Typed fetch wrapper.
  *
- * Every call goes through here so that authorization, error shape and the
- * request-id correlation are handled in exactly one place. The client talks to
- * the Express API directly — there is no Next.js proxy in front of it
- * (BUILD_PLAN §9.1).
+ * Every call goes through here so that authorization, error shape, token
+ * renewal and the request-id correlation are handled in exactly one place. The
+ * client talks to the Express API directly — there is no Next.js proxy in front
+ * of it (BUILD_PLAN §9.1).
  */
 
 export class ApiError extends Error {
@@ -53,25 +53,42 @@ export interface ApiRequest {
   signal?: AbortSignal;
 }
 
-export async function api<T>(path: string, options: ApiRequest = {}): Promise<T> {
-  const method = options.method ?? 'GET';
-  const token = getAccessToken();
-
+async function send(path: string, options: ApiRequest, token: string | null): Promise<Response> {
   const headers: Record<string, string> = { Accept: 'application/json' };
   if (options.body !== undefined) headers['Content-Type'] = 'application/json';
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  let response: Response;
-
   try {
-    response = await fetch(`${clientEnv.apiBaseUrl}/api/v1${path}`, {
-      method,
+    return await fetch(`${clientEnv.apiBaseUrl}/api/v1${path}`, {
+      method: options.method ?? 'GET',
       headers,
       ...(options.body !== undefined ? { body: JSON.stringify(options.body) } : {}),
       ...(options.signal ? { signal: options.signal } : {}),
     });
   } catch (cause) {
     throw new NetworkError(cause);
+  }
+}
+
+export async function api<T>(path: string, options: ApiRequest = {}): Promise<T> {
+  let response = await send(path, options, getAccessToken());
+
+  /**
+   * One transparent retry after a refresh.
+   *
+   * The access token is short-lived, and a phone that slept through its expiry
+   * wakes up holding a dead one. Renewing and retrying here means the volunteer
+   * sees a capture succeed rather than a sign-in screen.
+   *
+   * Bounded to a single attempt, and skipped for the auth routes themselves —
+   * refreshing in response to a failed refresh is a loop, not a recovery.
+   */
+  if (response.status === 401 && !path.startsWith('/auth/')) {
+    const renewed = await refreshSession();
+
+    if (renewed) {
+      response = await send(path, options, renewed.accessToken);
+    }
   }
 
   if (response.status === 204) return undefined as T;
@@ -85,8 +102,8 @@ export async function api<T>(path: string, options: ApiRequest = {}): Promise<T>
       requestId: response.headers.get('x-request-id') ?? 'unknown',
     };
 
-    // An expired or revoked token: drop it so the app routes to sign-in rather
-    // than retrying a request that can never succeed.
+    // Still unauthenticated after a refresh: the session is genuinely over.
+    // Drop it so the app routes to sign-in rather than retrying forever.
     if (response.status === 401) clearSession();
 
     throw new ApiError(response.status, body);

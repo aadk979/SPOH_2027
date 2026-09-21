@@ -1,6 +1,11 @@
 import { Router } from 'express';
+import { attendanceRouter } from './modules/attendance/router.js';
 import { env } from './config/env.js';
 import { announcementRouter } from './modules/announcement/router.js';
+import { adminRouter } from './modules/admin/router.js';
+import { authRouter } from './modules/auth/router.js';
+import { mediaRouter } from './modules/media/router.js';
+import { notificationRouter } from './modules/notification/router.js';
 import { auditRouter } from './modules/audit/router.js';
 import { dashboardRouter } from './modules/dashboard/router.js';
 import { fallbackRouter } from './modules/fallback/router.js';
@@ -27,7 +32,15 @@ import { createDevAuthRouter } from './modules/devAuth/router.js';
  */
 export const apiRouter: Router = Router();
 
+/**
+ * Session lifecycle. The only routes inside `/api/v1` that are reachable
+ * without a bearer token — opening a session is how you get one. They carry
+ * their own origin check and the sensitive rate limit instead.
+ */
+apiRouter.use('/auth', authRouter);
+
 apiRouter.use('/me', meRouter);
+apiRouter.use('/attendance', attendanceRouter);
 apiRouter.use('/stations', stationRouter);
 apiRouter.use('/registrations', registrationRouter);
 apiRouter.use('/footfall', footfallRouter);
@@ -45,6 +58,13 @@ apiRouter.use('/dashboard', dashboardRouter);
 apiRouter.use('/lost-found', lostFoundRouter);
 apiRouter.use('/reports', reportRouter);
 apiRouter.use('/audit', auditRouter);
+// People, places, days, gift types and the runtime tuning values. Split by
+// capability inside the router rather than by path.
+apiRouter.use('/admin', adminRouter);
+// Push registration. Delivery is best effort; the polls remain the contract.
+apiRouter.use('/notifications', notificationRouter);
+// Presigned S3 access. The file itself never passes through this API.
+apiRouter.use('/media', mediaRouter);
 // Fallback declarations and the reconciliation imports live together: the
 // import only makes sense in the context of the window it is recovering from.
 apiRouter.use('/fallback', fallbackRouter);

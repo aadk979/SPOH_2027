@@ -95,9 +95,26 @@ export async function checkIn(
   const now = new Date();
 
   return prisma.$transaction(async (tx) => {
-    const updated = await tx.shiftAssignment.update({
-      where: { id: assignmentId },
+    const attendance = await tx.attendance.findUnique({
+      where: { volunteerId_eventDayId: { volunteerId, eventDayId: assignment.eventDayId } },
+    });
+    if (
+      !attendance ||
+      assignment.eventDay.date.getTime() !== eventDayAnchor(singaporeDateString(now)).getTime() ||
+      !activeShiftBlocks(now).includes(assignment.block)
+    ) {
+      throw new ForbiddenError(
+        'Submit verified attendance for today before checking into a current shift.',
+      );
+    }
+    const changed = await tx.shiftAssignment.updateMany({
+      where: { id: assignmentId, volunteerId, checkedInAt: null },
       data: { checkedInAt: now },
+    });
+    if (!changed.count)
+      throw new ForbiddenError('This shift has changed. Refresh your shift list.');
+    const updated = await tx.shiftAssignment.findUniqueOrThrow({
+      where: { id: assignmentId },
       include: { station: true, eventDay: true },
     });
 

@@ -65,11 +65,21 @@ export async function resetDatabase(): Promise<void> {
   await prisma.missionCard.deleteMany();
 
   await prisma.shiftSwapRequest.deleteMany();
+  await prisma.attendanceAttempt.deleteMany();
+  await prisma.attendanceChallenge.deleteMany();
+  await prisma.attendance.deleteMany();
   await prisma.shiftAssignment.deleteMany();
   await prisma.briefingSlot.deleteMany();
 
   await prisma.fallbackWindow.deleteMany();
   await prisma.importBatch.deleteMany();
+
+  // Session and device state. RefreshSession and PushSubscription cascade from
+  // Volunteer, but AppSetting does not — and a settings override left behind by
+  // one test would silently retune every test that ran after it.
+  await prisma.refreshSession.deleteMany();
+  await prisma.pushSubscription.deleteMany();
+  await prisma.appSetting.deleteMany();
 
   await prisma.station.deleteMany();
   await prisma.eventDay.deleteMany();

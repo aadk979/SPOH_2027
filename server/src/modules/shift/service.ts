@@ -13,6 +13,7 @@ import {
 import { writeAudit, type AuditContext } from '../../lib/audit.js';
 import { AppError, ForbiddenError, NotFoundError } from '../../lib/errors.js';
 import { prisma } from '../../lib/prisma.js';
+import { DEFAULT_SETTINGS, getSettings } from '../../lib/settings.js';
 import {
   activeShiftBlocks,
   eventDayAnchor,
@@ -37,8 +38,14 @@ import {
 
 /** Swaps, briefing waves and staffing gaps (PRODUCT_BRIEF §6). */
 
-/** Three hours on station without a break is the welfare threshold (slide 39). */
-export const LONG_SHIFT_MINUTES = 180;
+/**
+ * Time on station without a break before the welfare list picks somebody up.
+ *
+ * Three hours is the threshold from slide 39, and it is the shipped default;
+ * the live value is a runtime setting, because how long is too long depends on
+ * the room and the day and is exactly the sort of thing a dry run tells you.
+ */
+export const LONG_SHIFT_MINUTES = DEFAULT_SETTINGS.longShiftMinutes;
 
 export async function requestSwap(
   request: CreateSwapRequest,
@@ -291,7 +298,7 @@ export async function getStaffingGaps(now = new Date()): Promise<StaffingGapsRes
 }
 
 export async function getLongShifts(now = new Date()): Promise<LongShiftWarning[]> {
-  const cutoff = new Date(now.getTime() - LONG_SHIFT_MINUTES * 60_000);
+  const cutoff = new Date(now.getTime() - getSettings().longShiftMinutes * 60_000);
   const rows = await longRunningShifts(cutoff);
 
   /**

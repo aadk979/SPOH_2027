@@ -12,6 +12,8 @@ import { prisma } from '../../lib/prisma.js';
 import { minutesBetween } from '../../lib/time.js';
 import { SYSTEM_AUDIT_CONTEXT } from '../../lib/requestContext.js';
 import { findStationById } from '../station/repo.js';
+import { DEFAULT_SETTINGS, getSettings } from '../../lib/settings.js';
+import { dispatch } from '../notification/service.js';
 import {
   acknowledgeAlert,
   acknowledgedAlertIds,
@@ -41,8 +43,14 @@ import {
  *     exactly that reason.
  */
 
-/** How long a resolved alert keeps its descriptive fields (BUILD_PLAN §5.9). */
-export const PURGE_AFTER_HOURS = 24;
+/**
+ * How long a resolved alert keeps its descriptive fields (BUILD_PLAN §5.9).
+ *
+ * The shipped default; the live value is a runtime setting. Shortening it is
+ * the safer direction and the one somebody may want on the day — the only cost
+ * is that a report run the morning after has to lean on the unpurged count.
+ */
+export const PURGE_AFTER_HOURS = DEFAULT_SETTINGS.lostPersonPurgeHours;
 
 export async function raiseAlert(
   request: RaiseLostPersonRequest,
@@ -74,7 +82,7 @@ export async function raiseAlert(
     return row;
   });
 
-  broadcast(alert.id);
+  broadcast(alert);
 
   return decorate(alert, raisedById);
 }
@@ -162,6 +170,8 @@ export async function resolve(
   const refreshed = await findAlertById(alertId);
   if (!refreshed) throw new NotFoundError('Lost person alert');
 
+  broadcastResolved(alertId);
+
   return decorate(refreshed, audit.actorId ?? '');
 }
 
@@ -173,7 +183,7 @@ export async function resolve(
  * stripped of the information the summary is derived from.
  */
 export async function purgeResolvedAlerts(now = new Date()): Promise<number> {
-  const cutoff = new Date(now.getTime() - PURGE_AFTER_HOURS * 60 * 60 * 1000);
+  const cutoff = new Date(now.getTime() - getSettings().lostPersonPurgeHours * 60 * 60 * 1000);
   const candidates = await findPurgeCandidates(cutoff);
 
   let purged = 0;
@@ -224,10 +234,47 @@ async function decorate(alert: AlertWithContext, viewerId: string): Promise<Lost
 }
 
 /**
- * Web Push fan-out is Phase 3. Until then the 10-second poll of
- * `/lost-person/active` is the delivery mechanism, and it is the guaranteed one
- * either way — push is best effort by design.
+ * Fan out to every device.
+ *
+ * The 10-second poll of `/lost-person/active` remains the delivery guarantee;
+ * this reaches the phones that are in a pocket with the app closed, which the
+ * poll cannot.
+ *
+ * Note what the payload does NOT contain: the description, the clothing, the
+ * approximate age. Those are the fields the purge exists to destroy after 24
+ * hours, and a push notification is copied into the operating system's own
+ * notification history, where nothing we do afterwards can reach it. The
+ * notification says a child is missing; the app says who.
  */
-function broadcast(alertId: string): void {
-  logger.warn({ alertId }, 'lost-person alert raised — clients will pick it up on next poll');
+function broadcast(alert: { id: string }): void {
+  void dispatch({
+    kind: 'lostPerson.raised',
+    priority: 'URGENT',
+    title: 'Lost person — check your app now',
+    body: 'A lost person alert is active. Open SPOH Ops for the description.',
+    url: '/home',
+    tag: `lost-person:${alert.id}`,
+    audience: { everyone: true, volunteerIds: [] },
+  });
+}
+
+/**
+ * Tell the floor to stand down.
+ *
+ * As important as raising it. Volunteers still searching for a child who has
+ * been found are volunteers not doing their actual job, and the next real alert
+ * lands on people who learned that the last one never ended.
+ */
+function broadcastResolved(alertId: string): void {
+  void dispatch({
+    kind: 'lostPerson.resolved',
+    priority: 'OPERATIONAL',
+    title: 'Lost person resolved',
+    body: 'The alert has been closed. Thank you — stand down.',
+    url: '/home',
+    // Same tag as the raise, so it replaces that notification rather than
+    // stacking underneath it.
+    tag: `lost-person:${alertId}`,
+    audience: { everyone: true, volunteerIds: [] },
+  });
 }

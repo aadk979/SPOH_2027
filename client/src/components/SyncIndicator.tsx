@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from 'react';
 import { needsAttention, subscribeToOutbox, type OutboxEntry } from '@/lib/outbox';
+import { cx } from './ui/cx';
 
 /**
  * The unsynced count, visible at all times on every capture screen
@@ -18,24 +19,42 @@ export function useOutboxEntries(): OutboxEntry[] {
   return entries;
 }
 
+/**
+ * Sits in the sub-nav beside the page title.
+ *
+ * A dot and a word, not a word alone: at a glance in a bright hall the shape
+ * carries further than the reading does, and the word is still there for
+ * anyone who cannot tell the two colours apart (BUILD_PLAN §9.7).
+ */
 export function SyncIndicator(): ReactNode {
   const entries = useOutboxEntries();
   const unsent = entries.filter((entry) => entry.status !== 'failed').length;
   const failed = entries.filter((entry) => entry.status === 'failed').length;
-
-  if (unsent === 0 && failed === 0) {
-    return (
-      <span className="text-sm" style={{ color: 'var(--color-ok)' }}>
-        All synced
-      </span>
-    );
-  }
+  const settled = unsent === 0 && failed === 0;
 
   return (
-    <span className="text-sm font-semibold" style={{ color: 'var(--color-warn)' }}>
-      {unsent > 0 ? `${unsent} unsynced` : null}
-      {unsent > 0 && failed > 0 ? ' · ' : null}
-      {failed > 0 ? `${failed} failed` : null}
+    <span
+      // Polite, not assertive: this changes on every tap, and an assertive
+      // region would interrupt the screen reader hundreds of times an hour.
+      aria-live="polite"
+      className={cx(
+        'flex items-center gap-xs text-caption font-semibold whitespace-nowrap',
+        settled ? 'text-ok' : 'text-warn',
+      )}
+    >
+      <span
+        aria-hidden="true"
+        className={cx('size-[8px] shrink-0 rounded-pill', settled ? 'bg-ok' : 'bg-warn')}
+      />
+      {settled ? (
+        'All synced'
+      ) : (
+        <>
+          {unsent > 0 ? `${unsent} unsynced` : null}
+          {unsent > 0 && failed > 0 ? ' · ' : null}
+          {failed > 0 ? `${failed} failed` : null}
+        </>
+      )}
     </span>
   );
 }
@@ -48,15 +67,13 @@ export function SyncWarningBanner(): ReactNode {
   const failed = entries.filter((entry) => entry.status === 'failed').length;
 
   return (
-    <div
-      role="status"
-      className="px-4 py-3 text-sm"
-      style={{ background: 'var(--color-warn-surface)', color: 'var(--color-warn)' }}
-    >
-      <strong>Taps are not reaching the server.</strong>{' '}
-      {failed > 0
-        ? `${failed} could not be sent. Tell your IC — the counts can still be recovered from the Shift screen.`
-        : 'Keep counting; tell your IC so they can watch the station total.'}
+    <div role="status" className="bg-warn-surface px-md py-sm text-caption text-warn">
+      <p className="mx-auto max-w-reading">
+        <strong>Taps are not reaching the server.</strong>{' '}
+        {failed > 0
+          ? `${failed} could not be sent. Tell your IC — the counts can still be recovered from the Shift screen.`
+          : 'Keep counting; tell your IC so they can watch the station total.'}
+      </p>
     </div>
   );
 }

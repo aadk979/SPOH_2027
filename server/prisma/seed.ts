@@ -274,7 +274,11 @@ async function seedGiftTypes(): Promise<void> {
 }
 
 async function seedAdmin(): Promise<void> {
-  const email = process.env.SEED_ADMIN_EMAIL ?? 'admin@spoh2027.test';
+  const email = (
+    process.env.ATTENDANCE_ROOT_EMAIL ??
+    process.env.SEED_ADMIN_EMAIL ??
+    'admin@spoh2027.test'
+  ).toLowerCase();
   const displayName = process.env.SEED_ADMIN_NAME ?? 'SPOH 2027 Administrator';
 
   await prisma.volunteer.upsert({
@@ -443,7 +447,6 @@ async function main(): Promise<void> {
   await seedEventDays();
   await seedStations();
   await seedGiftTypes();
-  await seedAdmin();
   await seedBriefingSlots();
 
   if (isProduction) {
@@ -457,6 +460,8 @@ async function main(): Promise<void> {
     );
   }
 
+  // Apply last so a configured root matching a development fixture stays ADMIN.
+  await seedAdmin();
   console.log('seed: done');
 }
 

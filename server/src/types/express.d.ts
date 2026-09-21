@@ -20,6 +20,12 @@ export interface RequestAuth {
   /** Capabilities granted by `role`, computed from the shared matrix. */
   capabilities: Capability[];
   /**
+   * The RefreshSession backing this request, when the caller presented an
+   * access token this API issued. Absent for an identity-provider token, which
+   * has no session row and therefore cannot be revoked before it expires.
+   */
+  sessionId?: string;
+  /**
    * Set when an IC-or-above wrote to a station they are not rostered on.
    * The write is allowed, but the service records it in the audit log inside
    * the same transaction as the mutation (BUILD_PLAN §6.3).

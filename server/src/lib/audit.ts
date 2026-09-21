@@ -15,6 +15,8 @@ import type { PrismaTransactionClient } from './prisma.js';
 
 /** Every auditable action. String union rather than an enum so it reads in logs. */
 export type AuditAction =
+  | 'attendance.present'
+  | 'attendance.challenge'
   | 'registration.create'
   | 'registration.createGroup'
   | 'registration.void'
@@ -45,7 +47,23 @@ export type AuditAction =
   | 'fallback.close'
   | 'import.run'
   | 'user.provision'
+  | 'user.update'
   | 'user.deactivate'
+  | 'user.reactivate'
+  | 'assignment.create'
+  | 'assignment.delete'
+  | 'station.create'
+  | 'station.update'
+  | 'eventDay.create'
+  | 'eventDay.update'
+  | 'giftType.create'
+  | 'giftType.update'
+  | 'settings.update'
+  | 'session.create'
+  | 'session.revoke'
+  | 'session.reuseDetected'
+  | 'notification.dispatch'
+  | 'media.upload'
   | 'auth.stationScopeBypass';
 
 export interface AuditContext {

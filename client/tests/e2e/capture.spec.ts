@@ -23,11 +23,15 @@ async function signIn(page: Page, email: string): Promise<void> {
 /**
  * Navigate the way a volunteer does — by tapping, not by URL.
  *
- * `page.goto` is a full page load, and the access token is held in memory
- * rather than localStorage (BUILD_PLAN §6.4), so a hard navigation drops the
- * session and lands on sign-in. That is deliberate: a volunteer phone is
- * shared, borrowed and occasionally lost. It also means these tests have to
- * move through the app the way the app is actually used.
+ * The access token is still held in memory rather than localStorage
+ * (BUILD_PLAN §6.4), because a volunteer phone is shared, borrowed and
+ * occasionally lost. A full page load no longer ends the session, though: the
+ * httpOnly refresh cookie recovers it, and `admin.spec.ts` covers that
+ * directly.
+ *
+ * Tapping through is kept regardless. These are the flows that decide whether
+ * the event has usable data, and a test that jumps straight to a URL would not
+ * notice the day the tile stopped being reachable.
  */
 async function tapThrough(page: Page, linkName: RegExp, expectedPath: string): Promise<void> {
   await page.getByRole('link', { name: linkName }).click();
@@ -151,6 +155,7 @@ test.describe('lost person', () => {
 
     const description = `E2E test alert ${Date.now()}`;
 
+    await tapThrough(reporterPage, /^Safety$/, '/safety');
     await tapThrough(reporterPage, /Report a lost person/, '/safety/lost-person/new');
     await reporterPage.getByLabel(/What has happened/).fill(description);
     await reporterPage.getByLabel('Approximate age').fill('about 8');
@@ -205,6 +210,7 @@ test.describe('lost person', () => {
 
   test('tells the volunteer to call rather than tap', async ({ page }) => {
     await signIn(page, BOOTH);
+    await tapThrough(page, /^Safety$/, '/safety');
     await tapThrough(page, /Report a lost person/, '/safety/lost-person/new');
 
     // The standing instruction for a genuine emergency is phone and voice.

@@ -4,12 +4,22 @@ import { useQuery } from '@tanstack/react-query';
 import { useState, type ReactNode } from 'react';
 import type { FullReport } from '@spoh/shared';
 import { AppShell } from '@/components/AppShell';
-import { BarRow, StatTile } from '@/components/dashboard/StatTile';
+import { BarList, BarRow, StatTile } from '@/components/dashboard/StatTile';
+import {
+  Button,
+  Callout,
+  Card,
+  CardGrid,
+  CardTitle,
+  LoadingCards,
+  Section,
+  Stack,
+} from '@/components/ui';
 import { useRequireSession } from '@/features/session/useSession';
 import { api } from '@/lib/api';
 import { clientEnv } from '@/lib/env';
+import { formatTime, readableCategory } from '@/lib/format';
 import { getAccessToken } from '@/lib/session';
-import { readableCategory } from '../chief/page';
 
 /**
  * The post-event report (PRODUCT_BRIEF §10).
@@ -25,6 +35,7 @@ import { readableCategory } from '../chief/page';
 export default function ReportsPage(): ReactNode {
   const session = useRequireSession();
   const [downloading, setDownloading] = useState<string | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   const report = useQuery({
     queryKey: ['reports', 'summary'],
@@ -43,6 +54,7 @@ export default function ReportsPage(): ReactNode {
    */
   async function download(format: 'xlsx' | 'csv'): Promise<void> {
     setDownloading(format);
+    setExportError(null);
 
     try {
       const response = await fetch(
@@ -61,6 +73,13 @@ export default function ReportsPage(): ReactNode {
       anchor.click();
 
       URL.revokeObjectURL(url);
+    } catch {
+      // Silence here used to look identical to a browser that had blocked the
+      // download — the Lead would tap twice more and then ask whether the
+      // report existed at all.
+      setExportError(
+        `The ${format.toUpperCase()} could not be generated. Try again, or take the figures from this page.`,
+      );
     } finally {
       setDownloading(null);
     }
@@ -73,30 +92,29 @@ export default function ReportsPage(): ReactNode {
   return (
     <AppShell width="wide" title="Post-event report" back={{ href: '/home', label: 'Home' }}>
       {report.isLoading ? (
-        <p style={{ color: 'var(--text-muted)' }}>Generating…</p>
+        <LoadingCards count={3} label="Generating the report" />
       ) : !data ? (
-        <p className="tile" style={{ color: 'var(--color-alert)' }}>
-          The report could not be generated.
-        </p>
+        <Callout tone="alert" title="The report could not be generated">
+          Try again in a moment. The underlying data is unaffected.
+        </Callout>
       ) : (
-        <div className="flex flex-col gap-6">
-          <section className="tile" style={{ borderLeft: '4px solid var(--color-primary)' }}>
-            <h2 className="mb-2 font-semibold">How to read these numbers</h2>
-            <p>{data.countingNote}</p>
-          </section>
+        <Stack>
+          <Card tone="info">
+            <CardTitle>How to read these numbers</CardTitle>
+            {/* The single most-misread thing in the system; it gets the pace. */}
+            <p className="mt-xs text-reading">{data.countingNote}</p>
+          </Card>
 
           {data.dataIntegrity.containsFallbackData ? (
-            <section className="tile" style={{ borderLeft: '4px solid var(--color-warn)' }}>
-              <h2 className="mb-2 font-semibold" style={{ color: 'var(--color-warn)' }}>
-                This report contains data captured off-app
-              </h2>
-              <p>
+            <Card tone="warn">
+              <CardTitle>This report contains data captured off-app</CardTitle>
+              <p className="mt-xs">
                 {data.dataIntegrity.degradedMinutes} minutes of degraded operation across{' '}
                 {data.dataIntegrity.fallbackWindows.length} window
                 {data.dataIntegrity.fallbackWindows.length === 1 ? '' : 's'}. Those periods are
                 approximate.
               </p>
-              <ul className="mt-2 flex flex-col gap-1 text-sm">
+              <ul className="mt-xs flex flex-col gap-xxs text-caption text-text-muted">
                 {data.dataIntegrity.fallbackWindows.map((window) => (
                   <li key={window.id}>
                     Tier {window.tier} · {window.stationName ?? 'Event-wide'} ·{' '}
@@ -104,29 +122,29 @@ export default function ReportsPage(): ReactNode {
                   </li>
                 ))}
               </ul>
-            </section>
+            </Card>
           ) : null}
 
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              className="pill"
-              disabled={downloading !== null}
-              onClick={() => void download('xlsx')}
-            >
+          <div className="flex flex-wrap gap-sm">
+            <Button disabled={downloading !== null} onClick={() => void download('xlsx')}>
               {downloading === 'xlsx' ? 'Preparing…' : 'Download XLSX'}
-            </button>
-            <button
-              type="button"
-              className="pill-quiet"
+            </Button>
+            <Button
+              variant="quiet"
               disabled={downloading !== null}
               onClick={() => void download('csv')}
             >
               {downloading === 'csv' ? 'Preparing…' : 'Download CSV'}
-            </button>
+            </Button>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {exportError ? (
+            <Callout tone="alert" role="alert">
+              {exportError}
+            </Callout>
+          ) : null}
+
+          <CardGrid>
             <StatTile
               label="Registrations"
               value={data.registrations.total}
@@ -144,67 +162,95 @@ export default function ReportsPage(): ReactNode {
               unit="journeys, not people"
               note={`${(data.cards.completionRate * 100).toFixed(1)}% completed`}
             />
+          </CardGrid>
+
+          <div className="grid gap-lg lg:grid-cols-2">
+            <Section title="Who came">
+              <BarList>
+                {data.registrations.byCategory.length === 0 ? (
+                  <p className="text-text-muted">Nothing recorded.</p>
+                ) : (
+                  data.registrations.byCategory.map((row) => (
+                    <BarRow
+                      key={row.key}
+                      label={readableCategory(row.key)}
+                      value={row.value}
+                      max={Math.max(1, ...data.registrations.byCategory.map((entry) => entry.value))}
+                    />
+                  ))
+                )}
+              </BarList>
+            </Section>
+
+            <Section title="Room entries and peak periods">
+              <BarList>
+                {data.footfall.byStation.length === 0 ? (
+                  <p className="text-text-muted">Nothing recorded.</p>
+                ) : (
+                  data.footfall.byStation.map((row) => (
+                    <div key={row.stationId}>
+                      <BarRow
+                        label={row.stationName}
+                        value={row.total}
+                        max={Math.max(1, ...data.footfall.byStation.map((entry) => entry.total))}
+                      />
+                      {row.peakBlockStart ? (
+                        // Under its own bar, not at a fixed 160px indent that
+                        // landed under the neighbouring station on a phone.
+                        <p className="mt-xxs text-caption text-text-muted">
+                          Busiest 30 minutes: {formatTime(row.peakBlockStart)} · {row.peakBlockValue}{' '}
+                          entries
+                        </p>
+                      ) : null}
+                    </div>
+                  ))
+                )}
+              </BarList>
+            </Section>
+
+            <Section
+              title="Mission Card funnel"
+              description="Issued and completed do not have to match: a card issued on one day may be completed on another, because visitors keep their card and return."
+            >
+              <BarList>
+                {data.cards.byStation.length === 0 ? (
+                  <p className="text-text-muted">Nothing recorded.</p>
+                ) : (
+                  data.cards.byStation.map((row) => (
+                    <BarRow
+                      key={row.stationId}
+                      label={row.stationName}
+                      value={row.cards}
+                      max={Math.max(1, data.cards.issued)}
+                    />
+                  ))
+                )}
+              </BarList>
+            </Section>
+
+            <Section title="Gifts">
+              <BarList>
+                {data.gifts.byGiftType.length === 0 ? (
+                  <p className="text-text-muted">Nothing recorded.</p>
+                ) : (
+                  data.gifts.byGiftType.map((row) => (
+                    <BarRow
+                      key={row.giftTypeId}
+                      label={row.giftTypeName}
+                      value={row.redeemed}
+                      max={Math.max(1, ...data.gifts.byGiftType.map((entry) => entry.redeemed))}
+                    />
+                  ))
+                )}
+              </BarList>
+            </Section>
           </div>
 
-          <ReportSection title="Who came">
-            {data.registrations.byCategory.map((row) => (
-              <BarRow
-                key={row.key}
-                label={readableCategory(row.key)}
-                value={row.value}
-                max={Math.max(1, ...data.registrations.byCategory.map((r) => r.value))}
-              />
-            ))}
-          </ReportSection>
-
-          <ReportSection title="Room entries and peak periods">
-            {data.footfall.byStation.map((row) => (
-              <div key={row.stationId}>
-                <BarRow
-                  label={row.stationName}
-                  value={row.total}
-                  max={Math.max(1, ...data.footfall.byStation.map((s) => s.total))}
-                />
-                {row.peakBlockStart ? (
-                  <p className="ml-40 text-sm" style={{ color: 'var(--text-muted)' }}>
-                    Busiest 30 minutes: {formatTime(row.peakBlockStart)} · {row.peakBlockValue}{' '}
-                    entries
-                  </p>
-                ) : null}
-              </div>
-            ))}
-          </ReportSection>
-
-          <ReportSection title="Mission Card funnel">
-            {data.cards.byStation.map((row) => (
-              <BarRow
-                key={row.stationId}
-                label={row.stationName}
-                value={row.cards}
-                max={Math.max(1, data.cards.issued)}
-              />
-            ))}
-            <p className="mt-2 text-sm" style={{ color: 'var(--text-muted)' }}>
-              Issued and completed are shown by day in the export. They do not have to match: a card
-              issued on one day may be completed on another, because visitors keep their card and
-              return.
-            </p>
-          </ReportSection>
-
-          <ReportSection title="Gifts">
-            {data.gifts.byGiftType.map((row) => (
-              <BarRow
-                key={row.giftTypeId}
-                label={row.giftTypeName}
-                value={row.redeemed}
-                max={Math.max(1, ...data.gifts.byGiftType.map((g) => g.redeemed))}
-              />
-            ))}
-          </ReportSection>
-
-          <section>
-            <SectionHeading>Safety</SectionHeading>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <Section
+            title="Safety"
+            description="Lost-person descriptions are deleted once a case is resolved. Only timings and outcomes are kept."
+          >
+            <CardGrid>
               <StatTile
                 label="Incidents"
                 value={data.safety.incidents.length}
@@ -227,16 +273,11 @@ export default function ReportsPage(): ReactNode {
                 unit="items logged"
                 note={`${data.safety.lostAndFound.claimed} claimed`}
               />
-            </div>
-            <p className="mt-2 text-sm" style={{ color: 'var(--text-muted)' }}>
-              Lost-person descriptions are deleted once a case is resolved. Only timings and
-              outcomes are kept.
-            </p>
-          </section>
+            </CardGrid>
+          </Section>
 
-          <section>
-            <SectionHeading>Volunteers</SectionHeading>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <Section title="Volunteers">
+            <CardGrid>
               <StatTile
                 label="Shift assignments"
                 value={data.volunteers.assignments}
@@ -253,38 +294,10 @@ export default function ReportsPage(): ReactNode {
                 value={data.volunteers.totalHours}
                 unit="check-in to check-out"
               />
-            </div>
-          </section>
-        </div>
+            </CardGrid>
+          </Section>
+        </Stack>
       )}
     </AppShell>
   );
-}
-
-function ReportSection({ title, children }: { title: string; children: ReactNode }): ReactNode {
-  return (
-    <section>
-      <SectionHeading>{title}</SectionHeading>
-      <div className="tile flex flex-col gap-2">{children}</div>
-    </section>
-  );
-}
-
-function SectionHeading({ children }: { children: ReactNode }): ReactNode {
-  return (
-    <h2
-      className="mb-3 text-sm font-semibold uppercase tracking-wide"
-      style={{ color: 'var(--text-muted)' }}
-    >
-      {children}
-    </h2>
-  );
-}
-
-function formatTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString('en-SG', {
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: 'Asia/Singapore',
-  });
 }

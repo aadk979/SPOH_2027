@@ -1,9 +1,21 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
+import { AlertDelivery } from '@/components/AlertDelivery';
 import { AppShell } from '@/components/AppShell';
 import { useOutboxEntries } from '@/components/SyncIndicator';
+import {
+  Button,
+  ButtonLink,
+  Callout,
+  Card,
+  EmptyState,
+  Section,
+  Stack,
+  StatusText,
+} from '@/components/ui';
 import { useMe, useRequireSession } from '@/features/session/useSession';
+import { blockLabel, formatTime } from '@/lib/format';
 import { flush, toClipboardText } from '@/lib/outbox';
 
 /**
@@ -19,6 +31,7 @@ export default function ShiftPage(): ReactNode {
   const { data: me } = useMe();
   const entries = useOutboxEntries();
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
 
   if (!session) return null;
 
@@ -26,97 +39,107 @@ export default function ShiftPage(): ReactNode {
   const pending = entries.filter((entry) => entry.status !== 'failed');
 
   async function copyFailed(): Promise<void> {
-    await navigator.clipboard.writeText(toClipboardText(failed));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 3000);
+    try {
+      await navigator.clipboard.writeText(toClipboardText(failed));
+      setCopyError(false);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 3000);
+    } catch {
+      // Clipboard access can be refused (iOS Safari, an unfocused tab). This
+      // is the moment an IC is salvaging failed captures during an outage —
+      // it must say so rather than quietly do nothing.
+      setCopied(false);
+      setCopyError(true);
+    }
   }
 
   return (
     <AppShell title="My shift" back={{ href: '/home', label: 'Home' }}>
-      <section className="mb-6">
-        <h2
-          className="mb-3 text-sm font-semibold uppercase tracking-wide"
-          style={{ color: 'var(--text-muted)' }}
-        >
-          Shifts
-        </h2>
-
-        {me && me.upcomingAssignments.length > 0 ? (
-          <ul className="flex flex-col gap-2">
-            {me.upcomingAssignments.map((assignment) => (
-              <li key={assignment.id} className="tile-flat">
-                <p className="font-semibold">{assignment.station.name}</p>
-                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                  {assignment.dayLabel} ·{' '}
-                  {assignment.block === 'MORNING' ? '09:30–14:00' : '13:30–18:00'} ·{' '}
-                  {assignment.roleLabel}
-                </p>
-                {assignment.checkedInAt ? (
-                  <p className="mt-1 text-sm" style={{ color: 'var(--color-ok)' }}>
-                    ✓ Checked in
+      <Stack>
+        <Section title="Attendance" description="Verify your presence with your admin or exco.">
+          <ButtonLink href="/attendance">Submit attendance / verify team</ButtonLink>
+        </Section>
+        <Section title="Shifts">
+          {me && me.upcomingAssignments.length > 0 ? (
+            <ul className="flex flex-col gap-xs">
+              {me.upcomingAssignments.map((assignment) => (
+                <Card as="li" variant="flat" key={assignment.id}>
+                  <p className="font-semibold">{assignment.station.name}</p>
+                  <p className="text-caption text-text-muted">
+                    {assignment.dayLabel} · {blockLabel(assignment.block)} · {assignment.roleLabel}
                   </p>
+                  {assignment.checkedInAt ? (
+                    <StatusText tone="ok" className="mt-xxs block">
+                      <span aria-hidden="true">✓ </span>
+                      Checked in {formatTime(assignment.checkedInAt)}
+                    </StatusText>
+                  ) : null}
+                </Card>
+              ))}
+            </ul>
+          ) : (
+            <EmptyState title="No shifts assigned yet">
+              Your IC assigns shifts from the roster. Check with them if the event has started.
+            </EmptyState>
+          )}
+        </Section>
+
+        <Section title="Alerts" description="Whether this phone can reach you with the app closed.">
+          <AlertDelivery />
+        </Section>
+
+        <Section title="Sync">
+          {entries.length === 0 ? (
+            <Callout tone="ok">Everything you have captured has reached the server.</Callout>
+          ) : (
+            <Card variant="flat">
+              <p>
+                <strong>{pending.length}</strong> waiting to send, <strong>{failed.length}</strong>{' '}
+                could not be sent.
+              </p>
+
+              <div className="mt-md flex flex-wrap gap-sm">
+                <Button onClick={() => void flush({ force: true })}>Try again now</Button>
+
+                {failed.length > 0 ? (
+                  <Button variant="quiet" onClick={() => void copyFailed()}>
+                    {copied ? 'Copied ✓' : 'Copy failed captures'}
+                  </Button>
                 ) : null}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="tile">No shifts assigned yet. Check with your IC.</p>
-        )}
-      </section>
+              </div>
 
-      <section>
-        <h2
-          className="mb-3 text-sm font-semibold uppercase tracking-wide"
-          style={{ color: 'var(--text-muted)' }}
-        >
-          Sync
-        </h2>
-
-        {entries.length === 0 ? (
-          <p className="tile-flat" style={{ color: 'var(--color-ok)' }}>
-            Everything you have captured has reached the server.
-          </p>
-        ) : (
-          <div className="tile-flat">
-            <p>
-              <strong>{pending.length}</strong> waiting to send, <strong>{failed.length}</strong>{' '}
-              could not be sent.
-            </p>
-
-            <div className="mt-3 flex flex-wrap gap-3">
-              <button type="button" className="pill" onClick={() => void flush({ force: true })}>
-                Try again now
-              </button>
+              {copyError ? (
+                <Callout tone="alert" role="alert" className="mt-md">
+                  Could not copy automatically. Select the list below by hand and copy it instead.
+                </Callout>
+              ) : null}
 
               {failed.length > 0 ? (
-                <button type="button" className="pill-quiet" onClick={() => void copyFailed()}>
-                  {copied ? 'Copied ✓' : 'Copy failed captures'}
-                </button>
-              ) : null}
-            </div>
+                <>
+                  <p className="mt-lg text-caption text-text-muted">
+                    Give these to your IC to enter on the fallback sheet. They paste straight into a
+                    spreadsheet.
+                  </p>
 
-            {failed.length > 0 ? (
-              <>
-                <p className="mt-4 text-sm" style={{ color: 'var(--text-muted)' }}>
-                  Give these to your IC to enter on the fallback sheet. They paste straight into a
-                  spreadsheet.
-                </p>
-                <ul className="mt-2 flex flex-col gap-1 text-sm">
-                  {failed.map((entry) => (
-                    <li key={entry.id} style={{ color: 'var(--text-muted)' }}>
-                      {new Date(entry.clientRecordedAt).toLocaleTimeString('en-SG', {
-                        timeZone: 'Asia/Singapore',
-                      })}{' '}
-                      · {entry.endpoint} · {entry.attempts} attempts ·{' '}
-                      {entry.lastError ?? 'unknown error'}
-                    </li>
-                  ))}
-                </ul>
-              </>
-            ) : null}
-          </div>
-        )}
-      </section>
+                  {/*
+                    Scrolls inside itself. An hour of failed taps is hundreds of
+                    rows, and letting them run down the page buries the "Try
+                    again" button the volunteer came here to press.
+                  */}
+                  <ul className="mt-xs flex max-h-[40dvh] flex-col gap-xxs overflow-y-auto text-caption text-text-muted">
+                    {failed.map((entry) => (
+                      <li key={entry.id}>
+                        {formatTime(entry.clientRecordedAt)} · {entry.endpoint} · {entry.attempts}{' '}
+                        attempts · {entry.lastError ?? 'unknown error'}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
+            </Card>
+          )}
+        </Section>
+      </Stack>
     </AppShell>
   );
 }

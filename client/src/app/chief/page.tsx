@@ -1,12 +1,22 @@
 'use client';
 
-import Link from 'next/link';
 import type { ReactNode } from 'react';
 import type { LiveDashboardResponse } from '@spoh/shared';
 import { AppShell } from '@/components/AppShell';
-import { BarRow, StatTile } from '@/components/dashboard/StatTile';
+import { BarList, BarRow, StatTile } from '@/components/dashboard/StatTile';
+import {
+  ButtonLink,
+  Callout,
+  Card,
+  CardGrid,
+  CardTitle,
+  LoadingCards,
+  Section,
+  Stack,
+} from '@/components/ui';
 import { useLiveDashboard } from '@/features/dashboard/useDashboard';
 import { useRequireSession } from '@/features/session/useSession';
+import { formatDuration, readableCategory } from '@/lib/format';
 
 /**
  * The live operations dashboard (PRODUCT_BRIEF §9).
@@ -31,17 +41,17 @@ export default function ChiefDashboardPage(): ReactNode {
       title="Live operations"
       back={{ href: '/home', label: 'Home' }}
       actions={
-        <Link href="/tv" className="pill-quiet">
+        <ButtonLink href="/tv" variant="quiet" size="sm">
           TV mode
-        </Link>
+        </ButtonLink>
       }
     >
       {isError ? (
-        <p className="tile" style={{ color: 'var(--color-alert)' }}>
-          The dashboard could not be loaded. Capture is unaffected — volunteers keep working.
-        </p>
+        <Callout tone="alert" title="The dashboard could not be loaded">
+          Capture is unaffected — volunteers keep working.
+        </Callout>
       ) : isLoading || !data ? (
-        <p style={{ color: 'var(--text-muted)' }}>Loading…</p>
+        <LoadingCards count={3} label="Loading live operations" />
       ) : (
         <DashboardBody data={data} />
       )}
@@ -55,12 +65,11 @@ function DashboardBody({ data }: { data: LiveDashboardResponse }): ReactNode {
   const maxStage = Math.max(1, ...data.cards.stages.map((row) => row.value));
 
   return (
-    <div className="flex flex-col gap-6">
+    <Stack>
       <AttentionPanel data={data} />
 
-      <section>
-        <SectionHeading>Today — {data.eventDayLabel ?? 'not an event day'}</SectionHeading>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <Section title={`Today — ${data.eventDayLabel ?? 'not an event day'}`}>
+        <CardGrid>
           <StatTile
             label="Registered"
             value={data.registrations.todayTotal}
@@ -78,76 +87,78 @@ function DashboardBody({ data }: { data: LiveDashboardResponse }): ReactNode {
             unit="cards — a card can be a family"
             note={`${data.cards.completed} completed`}
           />
-        </div>
-      </section>
+        </CardGrid>
+      </Section>
 
-      <section>
-        <SectionHeading>Who is arriving</SectionHeading>
-        <div className="tile flex flex-col gap-2">
-          {data.registrations.byCategory.length === 0 ? (
-            <p style={{ color: 'var(--text-muted)' }}>Nothing recorded yet today.</p>
-          ) : (
-            data.registrations.byCategory.map((row) => (
+      {/*
+        Two columns from `lg` up. These four bar panels are the bulk of the
+        page, and stacked on a 1600px console they were four short charts in a
+        1600px-wide column with an enormous amount of scrolling between them.
+      */}
+      <div className="grid gap-lg lg:grid-cols-2">
+        <Section title="Who is arriving">
+          <BarList>
+            {data.registrations.byCategory.length === 0 ? (
+              <p className="text-text-muted">Nothing recorded yet today.</p>
+            ) : (
+              data.registrations.byCategory.map((row) => (
+                <BarRow
+                  key={row.key}
+                  label={readableCategory(row.key)}
+                  value={row.value}
+                  max={maxCategory}
+                />
+              ))
+            )}
+          </BarList>
+        </Section>
+
+        <Section title="Room entries by station">
+          <BarList>
+            {data.footfall.stations.map((station) => (
               <BarRow
-                key={row.key}
-                label={readableCategory(row.key)}
-                value={row.value}
-                max={maxCategory}
+                key={station.stationId}
+                label={`${station.stationName}${station.silent ? ' · silent' : ''}`}
+                value={station.todayTotal}
+                max={maxStation}
+                muted={station.silent}
               />
-            ))
-          )}
-        </div>
-      </section>
+            ))}
+          </BarList>
+        </Section>
 
-      <section>
-        <SectionHeading>Room entries by station</SectionHeading>
-        <div className="tile flex flex-col gap-2">
-          {data.footfall.stations.map((station) => (
-            <BarRow
-              key={station.stationId}
-              label={`${station.stationName}${station.silent ? ' · silent' : ''}`}
-              value={station.todayTotal}
-              max={maxStation}
-              muted={station.silent}
-            />
-          ))}
-        </div>
-      </section>
+        <Section title="Mission Card funnel — cards, not people">
+          <BarList>
+            {data.cards.stages.map((stage) => (
+              <BarRow
+                key={stage.key}
+                label={stage.label}
+                value={stage.value}
+                max={maxStage}
+                suffix={stage.key === 'issued' ? '' : ` · ${Math.round(stage.rateOfIssued * 100)}%`}
+              />
+            ))}
+          </BarList>
+        </Section>
 
-      <section>
-        <SectionHeading>Mission Card funnel — cards, not people</SectionHeading>
-        <div className="tile flex flex-col gap-2">
-          {data.cards.stages.map((stage) => (
-            <BarRow
-              key={stage.key}
-              label={stage.label}
-              value={stage.value}
-              max={maxStage}
-              suffix={stage.key === 'issued' ? '' : ` · ${Math.round(stage.rateOfIssued * 100)}%`}
-            />
-          ))}
-        </div>
-      </section>
+        <Section title="Gift stock">
+          <CardGrid columns={2}>
+            {data.gifts.map((gift) => (
+              <StatTile
+                key={gift.id}
+                label={gift.name}
+                value={gift.remaining}
+                unit="remaining"
+                note={`${gift.redeemed} redeemed`}
+                tone={gift.outOfStock ? 'alert' : gift.lowStock ? 'warn' : 'neutral'}
+              />
+            ))}
+          </CardGrid>
+        </Section>
+      </div>
 
-      <section>
-        <SectionHeading>Gift stock</SectionHeading>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {data.gifts.map((gift) => (
-            <StatTile
-              key={gift.id}
-              label={gift.name}
-              value={gift.remaining}
-              unit="remaining"
-              note={`${gift.redeemed} redeemed`}
-              tone={gift.outOfStock ? 'alert' : gift.lowStock ? 'warn' : 'neutral'}
-            />
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <SectionHeading>Staffing</SectionHeading>
-        <div className="grid gap-3 sm:grid-cols-2">
+      <Section title="Staffing">
+        <CardGrid columns={2}>
           <StatTile
             label="On shift"
             value={data.staffing.onShift}
@@ -160,14 +171,17 @@ function DashboardBody({ data }: { data: LiveDashboardResponse }): ReactNode {
             unit="stations needing attention"
             tone={data.staffing.gaps.length > 0 ? 'warn' : 'ok'}
           />
-        </div>
+        </CardGrid>
 
         {data.staffing.gaps.length > 0 ? (
-          <ul className="tile mt-3 flex flex-col gap-1">
+          // Columns, because this is a flat list of short lines: sixteen of
+          // them down a single 1400px column was one phrase per row and a
+          // screenful of scrolling to read what fits in a third of the height.
+          <Card as="ul" className="mt-sm grid gap-x-lg gap-y-xxs sm:grid-cols-2 xl:grid-cols-3">
             {data.staffing.gaps.map((gap) => (
               <li key={`${gap.stationId}:${gap.block}`}>
                 <strong>{gap.stationName}</strong>{' '}
-                <span style={{ color: 'var(--text-muted)' }}>
+                <span className="text-text-muted">
                   {gap.severity === 'UNSTAFFED'
                     ? 'nobody rostered'
                     : gap.severity === 'NOBODY_CHECKED_IN'
@@ -176,26 +190,53 @@ function DashboardBody({ data }: { data: LiveDashboardResponse }): ReactNode {
                 </span>
               </li>
             ))}
-          </ul>
+          </Card>
         ) : null}
 
         {data.staffing.longShifts.length > 0 ? (
-          <div className="tile mt-3">
-            <p className="mb-2 font-semibold" style={{ color: 'var(--color-warn)' }}>
+          <Card tone="warn" className="mt-sm">
+            <h3 className="text-body font-semibold text-warn">
               On station three hours or more, no break recorded
-            </p>
-            <ul className="flex flex-col gap-1">
+            </h3>
+            <ul className="mt-xs flex flex-col gap-xxs text-text-muted">
               {data.staffing.longShifts.map((warning) => (
                 <li key={warning.volunteerId}>
                   {warning.volunteerName} — {warning.stationName},{' '}
-                  {Math.floor(warning.minutesOnStation / 60)}h{warning.minutesOnStation % 60}m
+                  {formatDuration(warning.minutesOnStation)}
                 </li>
               ))}
             </ul>
-          </div>
+          </Card>
         ) : null}
-      </section>
-    </div>
+      </Section>
+
+      {/*
+        Last, deliberately. This screen is read while walking and its order is
+        the order of urgency — what is broken, what is happening, then the
+        numbers. Administration is none of those: it is what you open on a
+        laptop the week before, and putting it above a staffing gap would be
+        putting furniture in front of a fire door.
+      */}
+      <Section title="Administration">
+        <div className="flex flex-wrap gap-sm">
+          <ButtonLink href="/admin/users" variant="secondary" size="sm">
+            Volunteers
+          </ButtonLink>
+          <ButtonLink href="/admin/settings" variant="secondary" size="sm">
+            Event settings
+          </ButtonLink>
+          <ButtonLink href="/chief/fallback" variant="secondary" size="sm">
+            Fallback
+          </ButtonLink>
+          <ButtonLink href="/chief/imports" variant="secondary" size="sm">
+            Reconciliation
+          </ButtonLink>
+          <ButtonLink href="/reports" variant="secondary" size="sm">
+            Post-event report
+          </ButtonLink>
+        </div>
+      </Section>
+    </Stack>
   );
 }
 
@@ -250,55 +291,28 @@ function AttentionPanel({ data }: { data: LiveDashboardResponse }): ReactNode {
 
   if (problems.length === 0) {
     return (
-      <p className="tile" style={{ color: 'var(--color-ok)' }}>
+      <Callout tone="ok">
         {data.dataHealth.withinEventHours
           ? 'Every counted room is reporting. Nothing needs attention.'
           : 'Outside event hours. Silence is expected.'}
-      </p>
+      </Callout>
     );
   }
 
   return (
-    <section
-      className="tile"
-      style={{ borderLeft: '4px solid var(--color-alert)' }}
-      aria-label="Needs attention"
-    >
-      <h2 className="mb-2 font-semibold">Needs attention</h2>
-      <ul className="flex flex-col gap-1">
+    <Card tone={problems.some((problem) => problem.tone === 'alert') ? 'alert' : 'warn'}>
+      <CardTitle>Needs attention</CardTitle>
+      <ul className="mt-xs flex flex-col gap-xxs">
         {problems.map((problem) => (
-          <li key={problem.text} style={{ color: `var(--color-${problem.tone})` }}>
+          <li key={problem.text} className={problem.tone === 'alert' ? 'text-alert' : 'text-warn'}>
             {/* An icon and words, never colour alone. */}
-            <span aria-hidden="true">{problem.tone === 'alert' ? '■ ' : '▲ '}</span>
+            <span aria-hidden="true" className="mr-xs">
+              {problem.tone === 'alert' ? '■' : '▲'}
+            </span>
             {problem.text}
           </li>
         ))}
       </ul>
-    </section>
+    </Card>
   );
-}
-
-function SectionHeading({ children }: { children: ReactNode }): ReactNode {
-  return (
-    <h2
-      className="mb-3 text-sm font-semibold uppercase tracking-wide"
-      style={{ color: 'var(--text-muted)' }}
-    >
-      {children}
-    </h2>
-  );
-}
-
-export function readableCategory(key: string): string {
-  const labels: Record<string, string> = {
-    SEC_1: 'Sec 1',
-    SEC_2: 'Sec 2',
-    SEC_3: 'Sec 3',
-    SEC_4: 'Sec 4',
-    SEC_5: 'Sec 5',
-    GRADUATED_AWAITING_RESULTS: 'Graduated',
-    PARENT_GUARDIAN: 'Parent / Guardian',
-    OTHER: 'Other',
-  };
-  return labels[key] ?? key;
 }

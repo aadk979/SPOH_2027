@@ -13,13 +13,17 @@
 //     the single exception and is purged to `LostPersonSummary` after
 //     resolution. A CI test asserts this — see server/tests/unit/noPii.test.ts.
 //
-// Known gap, pending approval: seven foreign-key columns are stored as plain
-// scalars with no Prisma relation and therefore no database-level referential
-// integrity — GiftStockAdjustment.createdById, IncidentFollowUp.authorId,
-// LostPersonAck.volunteerId, LostFoundItem.foundStationId,
-// Announcement.targetStationId, FallbackWindow.declaredById and
-// FallbackWindow.stationId. They are reproduced exactly as BUILD_PLAN §5
-// specifies them.
+//  3. EVERY FOREIGN KEY IS A REAL FOREIGN KEY. No column holds an id by
+//     convention alone. A dangling actor on a stock adjustment or a fallback
+//     declaration is precisely the row that matters during reconciliation, and
+//     "it is always populated in practice" is not a constraint.
+//
+// Referential actions are chosen per relation rather than left to the default:
+// Restrict where deleting the parent would orphan operational history, Cascade
+// only where the child is meaningless without its parent (an acknowledgement, a
+// push subscription, a refresh session). AuditLog.actorId is the one SetNull —
+// the audit trail must outlive the roster it describes, and actorSub is kept so
+// a removed volunteer's actions stay attributable.
 
 // Prisma 7 moves the connection URL out of the schema: Migrate reads it from
 // `prisma.config.ts`, and the runtime client receives a driver adapter instead
@@ -159,8 +163,11 @@ model EventDay {
 
   shiftAssignments ShiftAssignment[]
   briefingSlots    BriefingSlot[]
+  announcements    Announcement[]
 
   @@unique([date])
+  attendance Attendance[]
+  attendanceChallenges AttendanceChallenge[]
 }
 
 model Station {
@@ -183,6 +190,9 @@ model Station {
   shiftAssignments ShiftAssignment[]
   incidents        Incident[]
   redemptions      GiftRedemption[]
+  lostFoundItems   LostFoundItem[]
+  announcements    Announcement[]
+  fallbackWindows  FallbackWindow[]
 
   @@index([kind, active])
 }
@@ -192,21 +202,33 @@ model Station {
 // ─────────────────────────────────────────────
 
 model Volunteer {
-  id          String        @id @default(cuid())
-  cognitoSub  String        @unique
-  displayName String
-  email       String        @unique
-  phone       String?
-  role        CommitteeRole @default(VOLUNTEER)
+  id                String        @id @default(cuid())
+  cognitoSub        String        @unique
+  displayName       String
+  email             String        @unique
+  phone             String?
+  role              CommitteeRole @default(VOLUNTEER)
   /// for DCs: "Operations & Crowd Management"
-  portfolio   String?
-  reportsToId String?
-  active      Boolean       @default(true)
-  createdAt   DateTime      @default(now()) @db.Timestamptz(3)
-  updatedAt   DateTime      @updatedAt @db.Timestamptz(3)
+  portfolio         String?
+  reportsToId       String?
+  active            Boolean       @default(true)
+  /// When and why access was withdrawn. Kept on the row as well as in the audit
+  /// log so the roster screen can explain a greyed-out name without a second
+  /// query, and so reinstating someone is a visible act rather than a silent one.
+  deactivatedAt     DateTime?     @db.Timestamptz(3)
+  deactivatedReason String?
+  /// Last authenticated request. Lets an admin see who has actually signed in
+  /// before the event, rather than discovering it at 09:25 on the day.
+  lastSeenAt        DateTime?     @db.Timestamptz(3)
+  createdAt         DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime      @updatedAt @db.Timestamptz(3)
 
   reportsTo     Volunteer?  @relation("Hierarchy", fields: [reportsToId], references: [id])
   directReports Volunteer[] @relation("Hierarchy")
+  attendance Attendance[] @relation("Attendee")
+  verifiedAttendance Attendance[] @relation("AttendanceVerifier")
+  attendanceChallenges AttendanceChallenge[]
+  attendanceAttempt AttendanceAttempt?
 
   shiftAssignments ShiftAssignment[]
   registrations    Registration[]
@@ -220,9 +242,23 @@ model Volunteer {
   auditLogs        AuditLog[]
   swapsRequested   ShiftSwapRequest[] @relation("SwapRequester")
   swapsTargeted    ShiftSwapRequest[] @relation("SwapTarget")
+  swapsDecided     ShiftSwapRequest[] @relation("SwapDecider")
   briefingSlots    BriefingSlot[]
 
+  // Back-relations for the foreign keys that used to be scalars by convention.
+  giftAdjustments   GiftStockAdjustment[]
+  incidentFollowUps IncidentFollowUp[]
+  lostPersonAcks    LostPersonAck[]
+  announcementAcks  AnnouncementAck[]
+  fallbackWindows   FallbackWindow[]
+  importBatches     ImportBatch[]
+  settingsChanged   AppSetting[]
+  pushSubscriptions PushSubscription[]
+  refreshSessions   RefreshSession[]
+
   @@index([role, active])
+  // The roster screen lists by name within an active/inactive split.
+  @@index([active, displayName])
 }
 
 model ShiftAssignment {
@@ -246,6 +282,47 @@ model ShiftAssignment {
   @@index([stationId, eventDayId, block])
 }
 
+enum AttendanceMethod {
+  ROOT
+  QR
+  PIN
+}
+
+model Attendance {
+  id String @id @default(cuid())
+  volunteerId String
+  eventDayId String
+  verifiedById String?
+  method AttendanceMethod
+  presentAt DateTime @default(now()) @db.Timestamptz(3)
+  volunteer Volunteer @relation("Attendee", fields: [volunteerId], references: [id], onDelete: Restrict)
+  verifiedBy Volunteer? @relation("AttendanceVerifier", fields: [verifiedById], references: [id], onDelete: Restrict)
+  eventDay EventDay @relation(fields: [eventDayId], references: [id], onDelete: Restrict)
+  @@unique([volunteerId, eventDayId])
+  @@index([eventDayId, presentAt])
+}
+
+model AttendanceChallenge {
+  id String @id
+  issuerId String
+  eventDayId String
+  pinHash String @unique
+  campusNetwork Boolean
+  expiresAt DateTime @db.Timestamptz(3)
+  issuer Volunteer @relation(fields: [issuerId], references: [id], onDelete: Cascade)
+  eventDay EventDay @relation(fields: [eventDayId], references: [id], onDelete: Cascade)
+  @@unique([issuerId, eventDayId])
+  @@index([expiresAt])
+}
+
+// Persisted across processes and restarts so PIN guessing cannot evade limits.
+model AttendanceAttempt {
+  volunteerId String @id
+  windowStart DateTime @db.Timestamptz(3)
+  attempts Int
+  volunteer Volunteer @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+}
+
 model ShiftSwapRequest {
   id           String     @id @default(cuid())
   assignmentId String
@@ -257,9 +334,10 @@ model ShiftSwapRequest {
   decidedAt    DateTime?  @db.Timestamptz(3)
   createdAt    DateTime   @default(now()) @db.Timestamptz(3)
 
-  assignment ShiftAssignment @relation(fields: [assignmentId], references: [id])
-  requester  Volunteer       @relation("SwapRequester", fields: [requesterId], references: [id])
-  target     Volunteer       @relation("SwapTarget", fields: [targetId], references: [id])
+  assignment ShiftAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  requester  Volunteer       @relation("SwapRequester", fields: [requesterId], references: [id], onDelete: Restrict)
+  target     Volunteer       @relation("SwapTarget", fields: [targetId], references: [id], onDelete: Restrict)
+  decidedBy  Volunteer?      @relation("SwapDecider", fields: [decidedById], references: [id], onDelete: SetNull)
 
   @@index([status])
 }
@@ -420,7 +498,10 @@ model GiftStockAdjustment {
   createdById String
   createdAt   DateTime @default(now()) @db.Timestamptz(3)
 
-  giftType GiftType @relation(fields: [giftTypeId], references: [id])
+  giftType  GiftType  @relation(fields: [giftTypeId], references: [id], onDelete: Restrict)
+  createdBy Volunteer @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([giftTypeId, createdAt])
 }
 
 // ─────────────────────────────────────────────
@@ -456,7 +537,8 @@ model IncidentFollowUp {
   authorId   String
   createdAt  DateTime @default(now()) @db.Timestamptz(3)
 
-  incident Incident @relation(fields: [incidentId], references: [id])
+  incident Incident  @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  author   Volunteer @relation(fields: [authorId], references: [id], onDelete: Restrict)
 
   @@index([incidentId, createdAt])
 }
@@ -487,7 +569,8 @@ model LostPersonAck {
   volunteerId String
   ackedAt     DateTime @default(now()) @db.Timestamptz(3)
 
-  alert LostPersonAlert @relation(fields: [alertId], references: [id])
+  alert     LostPersonAlert @relation(fields: [alertId], references: [id], onDelete: Cascade)
+  volunteer Volunteer       @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
 
   @@unique([alertId, volunteerId])
 }
@@ -518,9 +601,11 @@ model LostFoundItem {
   claimedAt      DateTime?       @db.Timestamptz(3)
   createdAt      DateTime        @default(now()) @db.Timestamptz(3)
 
-  loggedBy Volunteer @relation(fields: [loggedById], references: [id])
+  loggedBy     Volunteer @relation(fields: [loggedById], references: [id], onDelete: Restrict)
+  foundStation Station?  @relation(fields: [foundStationId], references: [id], onDelete: SetNull)
 
   @@index([status])
+  @@index([foundAt])
 }
 
 // ─────────────────────────────────────────────
@@ -539,8 +624,10 @@ model Announcement {
   createdAt        DateTime             @default(now()) @db.Timestamptz(3)
   expiresAt        DateTime?            @db.Timestamptz(3)
 
-  author Volunteer         @relation(fields: [authorId], references: [id])
-  acks   AnnouncementAck[]
+  author        Volunteer         @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  targetStation Station?          @relation(fields: [targetStationId], references: [id], onDelete: Cascade)
+  targetDay     EventDay?         @relation(fields: [targetEventDayId], references: [id], onDelete: Cascade)
+  acks          AnnouncementAck[]
 
   @@index([createdAt])
 }
@@ -551,7 +638,8 @@ model AnnouncementAck {
   volunteerId    String
   ackedAt        DateTime @default(now()) @db.Timestamptz(3)
 
-  announcement Announcement @relation(fields: [announcementId], references: [id])
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  volunteer    Volunteer    @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
 
   @@unique([announcementId, volunteerId])
 }
@@ -574,7 +662,12 @@ model FallbackWindow {
   reason       String
   createdAt    DateTime  @default(now()) @db.Timestamptz(3)
 
+  declaredBy Volunteer @relation(fields: [declaredById], references: [id], onDelete: Restrict)
+  station    Station?  @relation(fields: [stationId], references: [id], onDelete: Restrict)
+
   @@index([startedAt])
+  // "Is a window open right now" is asked on every dashboard poll.
+  @@index([endedAt])
 }
 
 model ImportBatch {
@@ -586,6 +679,10 @@ model ImportBatch {
   importedById String
   importedAt   DateTime   @default(now()) @db.Timestamptz(3)
   notes        String?
+
+  importedBy Volunteer @relation(fields: [importedById], references: [id], onDelete: Restrict)
+
+  @@index([importedAt])
 }
 
 model AuditLog {
@@ -603,10 +700,12 @@ model AuditLog {
   requestId  String?
   createdAt  DateTime @default(now()) @db.Timestamptz(3)
 
-  actor Volunteer? @relation(fields: [actorId], references: [id])
+  actor Volunteer? @relation(fields: [actorId], references: [id], onDelete: SetNull)
 
   @@index([entityType, entityId])
   @@index([createdAt])
+  @@index([actorId, createdAt])
+  @@index([action, createdAt])
 }
 
 /// Makes the client's retry-on-failure loop safe, which is what makes the local
@@ -620,4 +719,76 @@ model IdempotencyRecord {
   createdAt    DateTime @default(now()) @db.Timestamptz(3)
 
   @@index([createdAt])
+}
+
+/// Runtime configuration (see server/src/lib/settings.ts).
+///
+/// Shift block times, silence thresholds, the implausible-tap rate and the
+/// retention windows were constants compiled into the server. Every one of them
+/// is a number somebody wants to change during a dry run without a redeploy, so
+/// they live here instead: a typed key, a JSON value, and the volunteer who
+/// last changed it. Unknown or unset keys fall back to the compiled defaults,
+/// so an empty table is a working system.
+model AppSetting {
+  key         String   @id
+  value       Json
+  updatedById String?
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+
+  updatedBy Volunteer? @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+}
+
+/// A browser push endpoint (RFC 8030 / Web Push).
+///
+/// One row per device per volunteer, keyed on the endpoint URL because that is
+/// what the push service considers unique. failureCount lets a subscription
+/// that has started refusing deliveries be dropped before it wastes a send on
+/// every urgent broadcast; a 404 or 410 from the push service deletes it
+/// outright, which is the documented way a subscription expires.
+model PushSubscription {
+  id           String   @id @default(cuid())
+  volunteerId  String
+  endpoint     String   @unique
+  p256dh       String
+  auth         String
+  userAgent    String?
+  failureCount Int      @default(0)
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+  lastSeenAt   DateTime @default(now()) @db.Timestamptz(3)
+
+  volunteer Volunteer @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+
+  @@index([volunteerId])
+}
+
+/// A refresh-token family member.
+///
+/// The access token is short-lived and held in memory by the client; this is
+/// what lets a hard refresh recover the session without putting a long-lived
+/// credential in localStorage. Only the SHA-256 of the token is stored, so the
+/// table is useless to anybody who reads it.
+///
+/// familyId implements reuse detection: rotation issues a new row in the same
+/// family and revokes the old one, so presenting an already-rotated token means
+/// the cookie leaked and the entire family is revoked at once.
+model RefreshSession {
+  id            String    @id @default(cuid())
+  volunteerId   String
+  /// SHA-256 hex of the opaque token. Never the token itself.
+  tokenHash     String    @unique
+  familyId      String
+  userAgent     String?
+  ip            String?
+  issuedAt      DateTime  @default(now()) @db.Timestamptz(3)
+  expiresAt     DateTime  @db.Timestamptz(3)
+  lastUsedAt    DateTime? @db.Timestamptz(3)
+  revokedAt     DateTime? @db.Timestamptz(3)
+  /// Why it was revoked: "rotated", "signed-out", "reuse-detected", "deactivated".
+  revokedReason String?
+
+  volunteer Volunteer @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+
+  @@index([volunteerId, revokedAt])
+  @@index([familyId])
+  @@index([expiresAt])
 }

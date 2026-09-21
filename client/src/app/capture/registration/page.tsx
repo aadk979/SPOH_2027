@@ -1,14 +1,15 @@
 'use client';
 
-import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import type { RegistrationSummaryResponse, VisitorCategory } from '@spoh/shared';
 import { AppShell } from '@/components/AppShell';
 import { SyncIndicator } from '@/components/SyncIndicator';
+import { Button, ButtonLink, Callout, EmptyState } from '@/components/ui';
 import { useCapture, useWakeLock } from '@/features/capture/useCapture';
 import { useMe, useRequireSession } from '@/features/session/useSession';
 import { api } from '@/lib/api';
+import { formatCount } from '@/lib/format';
 
 /**
  * The sign-up booth (BUILD_PLAN §9.4, PRODUCT_BRIEF §2).
@@ -33,7 +34,7 @@ const CATEGORIES: Array<{ value: VisitorCategory; label: string }> = [
 export default function RegistrationCapturePage(): ReactNode {
   const session = useRequireSession();
   const { data: me } = useMe();
-  const { sessionCount, undoable, capture, undo } = useCapture();
+  const { sessionCount, undoable, error, capture, undo } = useCapture();
 
   useWakeLock(session !== null);
 
@@ -62,10 +63,10 @@ export default function RegistrationCapturePage(): ReactNode {
   if (!stationId) {
     return (
       <AppShell title="Registration" back={{ href: '/home', label: 'Home' }}>
-        <p className="tile">
+        <EmptyState title="Registration is closed on this device">
           You are not on shift at the sign-up booth right now, so registrations cannot be recorded
-          from this device. Check with your IC.
-        </p>
+          here. Check with your IC.
+        </EmptyState>
       </AppShell>
     );
   }
@@ -77,60 +78,74 @@ export default function RegistrationCapturePage(): ReactNode {
       back={{ href: '/home', label: 'Home' }}
       actions={<SyncIndicator />}
     >
-      <div className="mb-4 flex items-baseline justify-between">
-        <p>
-          <span className="text-3xl font-semibold" style={{ fontFamily: 'var(--font-display)' }}>
-            {sessionCount}
-          </span>
-          <span className="ml-2 text-sm" style={{ color: 'var(--text-muted)' }}>
-            this device
-          </span>
-        </p>
-        {boothTotal.data ? (
-          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            Booth today: <strong>{boothTotal.data.total}</strong> registrations
-          </p>
+      <div className="flex flex-col gap-md">
+        {error ? (
+          <Callout tone="alert" role="alert">
+            {error}
+          </Callout>
         ) : null}
-      </div>
 
-      {/* 2 x 4 grid, each cell at least 88px, filling the viewport. */}
-      <div className="grid grid-cols-2 gap-3">
-        {CATEGORIES.map((category) => (
-          <button
-            key={category.value}
-            type="button"
-            className="capture-target"
-            onClick={() =>
-              void capture({
-                endpoint: '/registrations',
-                body: { category: category.value, stationId },
-                label: category.label,
-              })
-            }
-          >
-            {category.label}
-          </button>
-        ))}
-      </div>
+        <div className="flex flex-wrap items-baseline justify-between gap-x-md gap-y-xxs">
+          <p>
+            <span className="font-display text-stat font-semibold tabular-nums">
+              {sessionCount}
+            </span>
+            <span className="ml-xs text-caption text-text-muted">this device</span>
+          </p>
 
-      <div className="mt-4 flex min-h-[56px] items-center justify-between gap-3">
-        {undoable ? (
-          <>
-            <span aria-live="polite">Recorded {undoable.label}</span>
-            <button type="button" className="pill-quiet" onClick={() => void undo()}>
-              Undo
+          {boothTotal.data ? (
+            <p className="text-caption text-text-muted">
+              Booth today: <strong>{formatCount(boothTotal.data.total)}</strong> registrations
+            </p>
+          ) : null}
+        </div>
+
+        {/*
+          2 × 4 on a phone, 4 × 2 once the row is wide enough to keep every cell
+          inside a thumb's arc. Each cell is at least 88 × 88 (BUILD_PLAN §9.4)
+          and the e2e suite measures it.
+        */}
+        <div className="grid grid-cols-2 gap-sm sm:grid-cols-4">
+          {CATEGORIES.map((category) => (
+            <button
+              key={category.value}
+              type="button"
+              className="capture-target"
+              onClick={() =>
+                void capture({
+                  endpoint: '/registrations',
+                  body: { category: category.value, stationId },
+                  label: category.label,
+                })
+              }
+            >
+              {category.label}
             </button>
-          </>
-        ) : (
-          <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            Tap a category for each visitor. Undo is available for ten seconds.
-          </span>
-        )}
-      </div>
+          ))}
+        </div>
 
-      <Link href="/capture/registration/group" className="pill mt-6 inline-block">
-        A family arriving together
-      </Link>
+        {/* Holds its height so the grid never shifts under a thumb mid-queue. */}
+        <div className="flex min-h-[56px] items-center justify-between gap-sm">
+          {undoable ? (
+            <>
+              <span aria-live="polite">Recorded {undoable.label}</span>
+              <Button variant="quiet" onClick={() => void undo()}>
+                Undo
+              </Button>
+            </>
+          ) : (
+            <span className="text-caption text-text-muted">
+              Tap a category for each visitor. Undo is available for ten seconds.
+            </span>
+          )}
+        </div>
+
+        {/* `self-start` so the pill sizes to its label: the parent is a flex
+            column, which would otherwise stretch it across the whole booth. */}
+        <ButtonLink href="/capture/registration/group" variant="secondary" className="self-start">
+          A family arriving together
+        </ButtonLink>
+      </div>
     </AppShell>
   );
 }

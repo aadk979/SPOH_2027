@@ -37,7 +37,9 @@ export const Capability = z.enum([
   'fallback.declare',
   'fallback.import',
   'report.generate',
+  'user.read',
   'user.provision',
+  'config.manage',
   'audit.read',
 ]);
 export type Capability = z.infer<typeof Capability>;
@@ -75,7 +77,15 @@ export const CAPABILITY_MATRIX: Matrix = Object.freeze({
   'fallback.declare': [D, C, A],
   'fallback.import': [C, A],
   'report.generate': [D, C, L, A],
+  // Reading the roster is a wider grant than changing it: a DC runs their own
+  // portfolio's people and a Lead needs the list to write the report. Neither
+  // may edit a role, which is what `user.provision` gates.
+  'user.read': [D, C, L, A],
   'user.provision': [C, A],
+  // Stations, event days, gift types and the runtime tuning values. Distinct
+  // from provisioning because it changes how the event itself is measured —
+  // moving a shift boundary silently re-scopes every capture permission.
+  'config.manage': [C, A],
   'audit.read': [C, L, A],
 });
 

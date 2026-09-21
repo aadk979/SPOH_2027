@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { AppShell } from '@/components/AppShell';
+import { Card, CardTitle, Section, Stack } from '@/components/ui';
 import { COURSES, ESCALATION_SCRIPT, FIVE_THINGS } from '@/content/brief';
 import { useRequireSession } from '@/features/session/useSession';
 
@@ -11,6 +12,9 @@ import { useRequireSession } from '@/features/session/useSession';
  * Course one-liners short enough to actually be repeated, the questions
  * visitors keep asking, and the escalation script — which exists so that not
  * knowing stops feeling like a failure and starts being the correct answer.
+ *
+ * The escalation script leads, because it is the one thing on the screen a
+ * volunteer needs while a visitor is standing in front of them.
  */
 export default function BriefPage(): ReactNode {
   const session = useRequireSession();
@@ -18,56 +22,55 @@ export default function BriefPage(): ReactNode {
 
   return (
     <AppShell title="What do I say" back={{ href: '/home', label: 'Home' }}>
-      <section className="tile mb-6">
-        <h2 className="mb-2 text-xl font-semibold">If you do not know</h2>
-        <p style={{ fontSize: 'var(--text-body)' }}>{ESCALATION_SCRIPT}</p>
-      </section>
+      <Stack>
+        <Card tone="info">
+          <CardTitle>If you do not know</CardTitle>
+          {/* Read aloud to a visitor, so it keeps design.md's reading pace. */}
+          <p className="mt-xs text-reading">{ESCALATION_SCRIPT}</p>
+        </Card>
 
-      <h2
-        className="mb-3 text-sm font-semibold uppercase tracking-wide"
-        style={{ color: 'var(--text-muted)' }}
-      >
-        The courses, in one line each
-      </h2>
+        <Section title="The courses, in one line each">
+          <div className="flex flex-col gap-xs">
+            {COURSES.map((course) => (
+              <Card as="details" variant="flat" key={course.code}>
+                <summary className="flex cursor-pointer list-none items-baseline gap-xs marker:content-none transition-colors hover:text-primary">
+                  <span aria-hidden="true" className="text-primary">
+                    ▸
+                  </span>
+                  <span className="font-semibold">{course.code}</span>
+                  <span className="min-w-0 text-caption text-text-muted">{course.name}</span>
+                </summary>
 
-      <div className="mb-6 flex flex-col gap-3">
-        {COURSES.map((course) => (
-          <details key={course.code} className="tile-flat">
-            <summary className="cursor-pointer">
-              <span className="font-semibold">{course.code}</span>
-              <span className="ml-2" style={{ color: 'var(--text-muted)' }}>
-                {course.name}
-              </span>
-            </summary>
-            <p className="mt-3">{course.oneLiner}</p>
-            <dl className="mt-3 flex flex-col gap-2">
-              {course.askedOften.map((item) => (
-                <div key={item.question}>
-                  <dt className="font-semibold">{item.question}</dt>
-                  <dd style={{ color: 'var(--text-muted)' }}>{item.answer}</dd>
-                </div>
+                <p className="mt-sm text-reading">{course.oneLiner}</p>
+
+                <dl className="mt-sm flex flex-col gap-xs">
+                  {course.askedOften.map((item) => (
+                    <div key={item.question}>
+                      <dt className="font-semibold">{item.question}</dt>
+                      <dd className="text-reading text-text-muted">{item.answer}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </Card>
+            ))}
+          </div>
+        </Section>
+
+        <Section title="The five things">
+          <Card>
+            <ol className="flex list-decimal flex-col gap-xs pl-lg text-reading">
+              {FIVE_THINGS.map((thing) => (
+                <li key={thing}>{thing}</li>
               ))}
-            </dl>
-          </details>
-        ))}
-      </div>
+            </ol>
+          </Card>
+        </Section>
 
-      <h2
-        className="mb-3 text-sm font-semibold uppercase tracking-wide"
-        style={{ color: 'var(--text-muted)' }}
-      >
-        The five things
-      </h2>
-      <ol className="tile flex list-decimal flex-col gap-2 pl-5">
-        {FIVE_THINGS.map((thing) => (
-          <li key={thing}>{thing}</li>
-        ))}
-      </ol>
-
-      <p className="mt-6 text-sm" style={{ color: 'var(--text-muted)' }}>
-        Draft content, pending sign-off by the Chief Coordinator and the course leads before the 4
-        November training.
-      </p>
+        <p className="text-caption text-text-muted">
+          Draft content, pending sign-off by the Chief Coordinator and the course leads before the 4
+          November training.
+        </p>
+      </Stack>
     </AppShell>
   );
 }

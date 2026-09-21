@@ -10,11 +10,11 @@ import {
 import { auditStationScopeBypass, writeAudit, type AuditContext } from '../../lib/audit.js';
 import type { CaptureActor } from '../../lib/captureActor.js';
 import { AppError, NotFoundError } from '../../lib/errors.js';
-import { logger } from '../../lib/logger.js';
 import { prisma } from '../../lib/prisma.js';
 import { normaliseShortCode } from '../../lib/shortCode.js';
 import { rangeOverlapsFallbackWindow } from '../fallback/repo.js';
 import { requireActiveStation } from '../station/service.js';
+import { dispatch } from '../notification/service.js';
 import {
   createAdjustment,
   createRedemption,
@@ -226,14 +226,20 @@ export async function summariseGifts(query: GiftSummaryQuery): Promise<GiftSumma
 }
 
 /**
- * Push to the Deputy Coordinator (Course Counselling & Mission Complete) and
- * the Chief. Delivery is Phase 3 comms work; until the announcement fan-out is
- * wired to devices this writes a structured log line rather than pretending
- * someone was told.
+ * Tell the Deputy Coordinator and the Chief that stock is running out.
+ *
+ * The deck makes this an IC duty (§5); what actually happens when it is left to
+ * someone noticing is that the first anyone hears of it is a visitor being
+ * turned away at the desk.
  */
 function notifyLowStock(gift: GiftTypeRecord): void {
-  logger.warn(
-    { giftTypeId: gift.id, name: gift.name, remaining: gift.remaining },
-    'gift stock at or below threshold',
-  );
+  void dispatch({
+    kind: 'gift.lowStock',
+    priority: 'OPERATIONAL',
+    title: `${gift.name} is running low`,
+    body: `${gift.remaining} left. Restock, or brief the desk on an alternative.`,
+    url: '/chief',
+    tag: `gift-low:${gift.id}`,
+    audience: { everyone: false, minimumRole: 'DEPUTY_COORDINATOR', volunteerIds: [] },
+  });
 }

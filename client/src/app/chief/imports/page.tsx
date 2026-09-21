@@ -3,6 +3,17 @@
 import { useState, type ReactNode } from 'react';
 import type { ImportResponse } from '@spoh/shared';
 import { AppShell } from '@/components/AppShell';
+import {
+  Button,
+  Callout,
+  Card,
+  CardTitle,
+  ChoiceGroup,
+  Field,
+  Input,
+  Stack,
+  Textarea,
+} from '@/components/ui';
 import { useRequireSession } from '@/features/session/useSession';
 import { ApiError, api } from '@/lib/api';
 
@@ -25,6 +36,7 @@ import { ApiError, api } from '@/lib/api';
  */
 
 type Target = 'registrations' | 'footfall';
+type Source = 'FALLBACK_SHEET' | 'PAPER';
 
 const TEMPLATES: Record<Target, string> = {
   registrations:
@@ -41,7 +53,7 @@ export default function ImportsPage(): ReactNode {
   const session = useRequireSession();
 
   const [target, setTarget] = useState<Target>('registrations');
-  const [source, setSource] = useState<'FALLBACK_SHEET' | 'PAPER'>('FALLBACK_SHEET');
+  const [source, setSource] = useState<Source>('FALLBACK_SHEET');
   const [csv, setCsv] = useState('');
   const [fileName, setFileName] = useState('');
   const [notes, setNotes] = useState('');
@@ -93,223 +105,184 @@ export default function ImportsPage(): ReactNode {
     }
   }
 
+  /** Any change to what is being imported invalidates the dry run. */
+  function invalidatePreview(): void {
+    setPreview(null);
+    setResult(null);
+  }
+
   if (!session) return null;
 
   return (
     <AppShell
-      width="wide"
+      width="reading"
       title="Import fallback data"
       back={{ href: '/chief', label: 'Live operations' }}
     >
-      <p className="mb-5 text-sm" style={{ color: 'var(--text-muted)' }}>
-        Paste the rows from the fallback sheet or the paper tally. Everything imported is tagged
-        with where it came from, and every report will say so.
-      </p>
+      <Stack>
+        <p className="text-text-muted">
+          Paste the rows from the fallback sheet or the paper tally. Everything imported is tagged
+          with where it came from, and every report will say so.
+        </p>
 
-      <fieldset className="mb-4">
-        <legend className="font-semibold">What are you importing?</legend>
-        <div className="mt-2 flex gap-2">
-          {(
-            [
+        <Card as="section" className="flex flex-col gap-lg">
+          <ChoiceGroup
+            legend="What are you importing?"
+            name="import-target"
+            value={target}
+            onChange={(value) => {
+              setTarget(value);
+              invalidatePreview();
+            }}
+            options={[
               { value: 'registrations', label: 'Registrations' },
               { value: 'footfall', label: 'Room entries' },
-            ] as const
-          ).map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => {
-                setTarget(option.value);
-                setPreview(null);
-                setResult(null);
-              }}
-              aria-pressed={target === option.value}
-              className="rounded-full border px-5 py-3"
-              style={{
-                minHeight: 44,
-                borderColor: target === option.value ? 'var(--color-primary)' : 'var(--line)',
-                background: target === option.value ? 'var(--color-primary)' : 'var(--surface)',
-                color: target === option.value ? 'var(--color-on-primary)' : 'var(--text)',
-              }}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      </fieldset>
+            ]}
+          />
 
-      <fieldset className="mb-4">
-        <legend className="font-semibold">Where did it come from?</legend>
-        <div className="mt-2 flex gap-2">
-          {(
-            [
+          <ChoiceGroup
+            legend="Where did it come from?"
+            name="import-source"
+            value={source}
+            onChange={(value) => {
+              setSource(value);
+              invalidatePreview();
+            }}
+            options={[
               { value: 'FALLBACK_SHEET', label: 'Google fallback sheet' },
               { value: 'PAPER', label: 'Paper tally' },
-            ] as const
-          ).map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => setSource(option.value)}
-              aria-pressed={source === option.value}
-              className="rounded-full border px-5 py-3"
-              style={{
-                minHeight: 44,
-                borderColor: source === option.value ? 'var(--color-primary)' : 'var(--line)',
-                background: source === option.value ? 'var(--surface-alt)' : 'var(--surface)',
-              }}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      </fieldset>
-
-      <label htmlFor="csv" className="block font-semibold">
-        Rows (CSV)
-      </label>
-      <p className="mb-2 text-sm" style={{ color: 'var(--text-muted)' }}>
-        Times are ISO-8601 UTC. A 30-minute block start is enough — a tally sheet never had more
-        precision than that, and pretending otherwise would invent it.
-      </p>
-      <textarea
-        id="csv"
-        value={csv}
-        onChange={(event) => {
-          setCsv(event.target.value);
-          setPreview(null);
-          setResult(null);
-        }}
-        rows={8}
-        spellCheck={false}
-        placeholder={TEMPLATES[target]}
-        className="w-full rounded-lg border px-4 py-3 font-mono text-sm"
-        style={{ borderColor: 'var(--line)', background: 'var(--surface)', color: 'var(--text)' }}
-      />
-
-      <button type="button" className="pill-quiet mt-2" onClick={() => setCsv(TEMPLATES[target])}>
-        Insert the template
-      </button>
-
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <div>
-          <label htmlFor="file-name" className="block font-semibold">
-            File name
-          </label>
-          <input
-            id="file-name"
-            value={fileName}
-            onChange={(event) => setFileName(event.target.value)}
-            placeholder="FALLBACK_Registration.csv"
-            className="mt-2 w-full rounded-lg border px-4 py-3"
-            style={{
-              borderColor: 'var(--line)',
-              background: 'var(--surface)',
-              color: 'var(--text)',
-              minHeight: 48,
-            }}
+            ]}
           />
-        </div>
-        <div>
-          <label htmlFor="notes" className="block font-semibold">
-            Notes
-          </label>
-          <input
-            id="notes"
-            value={notes}
-            onChange={(event) => setNotes(event.target.value)}
-            placeholder="Transcribed by the Room A IC"
-            className="mt-2 w-full rounded-lg border px-4 py-3"
-            style={{
-              borderColor: 'var(--line)',
-              background: 'var(--surface)',
-              color: 'var(--text)',
-              minHeight: 48,
-            }}
-          />
-        </div>
-      </div>
 
-      {error ? (
-        <p role="alert" className="mt-4" style={{ color: 'var(--color-alert)' }}>
-          {error}
-        </p>
-      ) : null}
-
-      <button
-        type="button"
-        className="pill mt-5 w-full"
-        style={{ minHeight: 56 }}
-        disabled={csv.trim().length === 0 || pending}
-        onClick={() => void run(false)}
-      >
-        {pending ? 'Working…' : 'Preview — writes nothing'}
-      </button>
-
-      {preview ? (
-        <section className="tile mt-5" aria-live="polite">
-          <h2 className="mb-2 font-semibold">This is what would happen</h2>
-          <ul className="flex flex-col gap-1">
-            <li>
-              Rows read: <strong>{preview.rowsRead}</strong>
-            </li>
-            <li>
-              Records that would be created: <strong>{preview.recordsCreated}</strong>
-            </li>
-            <li>
-              Already imported, would be skipped: <strong>{preview.recordsSkipped}</strong>
-            </li>
-          </ul>
-
-          {preview.issues.length > 0 ? (
-            <div className="mt-3" style={{ color: 'var(--color-warn)' }}>
-              <p className="font-semibold">
-                {preview.issues.length} row{preview.issues.length === 1 ? '' : 's'} could not be
-                read:
-              </p>
-              <ul className="mt-1 flex flex-col gap-1 text-sm">
-                {preview.issues.slice(0, 10).map((issue) => (
-                  <li key={`${issue.rowNumber}:${issue.field}`}>
-                    Row {issue.rowNumber} — {issue.field}: {issue.message}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-
-          <button
-            type="button"
-            className="mt-4 w-full rounded-lg px-5 py-4 font-semibold"
-            style={{ background: 'var(--color-primary)', color: '#ffffff', minHeight: 56 }}
-            disabled={preview.recordsCreated === 0 || pending}
-            onClick={() => void run(true)}
+          <Field
+            id="csv"
+            label="Rows (CSV)"
+            hint="Times are ISO-8601 UTC. A 30-minute block start is enough — a tally sheet never had more precision than that, and pretending otherwise would invent it."
+            error={error}
           >
-            Import {preview.recordsCreated} record
-            {preview.recordsCreated === 1 ? '' : 's'} as{' '}
-            {source === 'PAPER' ? 'paper' : 'fallback sheet'}
-          </button>
-        </section>
-      ) : null}
+            {(props) => (
+              <Textarea
+                {...props}
+                value={csv}
+                onChange={(event) => {
+                  setCsv(event.target.value);
+                  invalidatePreview();
+                }}
+                rows={8}
+                spellCheck={false}
+                placeholder={TEMPLATES[target]}
+                // Monospace and no ligatures: this is transcribed data being
+                // eyeballed against a sheet, and column alignment is how a
+                // missing comma gets spotted.
+                scale="mono"
+              />
+            )}
+          </Field>
 
-      {result ? (
-        <section
-          className="tile mt-5"
-          style={{ borderLeft: '4px solid var(--color-ok)' }}
-          aria-live="polite"
-        >
-          <h2 className="mb-2 font-semibold" style={{ color: 'var(--color-ok)' }}>
-            Imported
-          </h2>
-          <p>
-            {result.recordsCreated} record{result.recordsCreated === 1 ? '' : 's'} created,{' '}
-            {result.recordsSkipped} already present.
-          </p>
-          <p className="mt-2 text-sm" style={{ color: 'var(--text-muted)' }}>
-            Tagged <strong>{result.source}</strong>. Re-running the same rows is safe — nothing will
-            be duplicated.
-          </p>
-        </section>
-      ) : null}
+          <Button
+            variant="quiet"
+            size="sm"
+            className="self-start"
+            onClick={() => {
+              setCsv(TEMPLATES[target]);
+              invalidatePreview();
+            }}
+          >
+            Insert the template
+          </Button>
+
+          <div className="grid gap-md sm:grid-cols-2">
+            <Field id="file-name" label="File name" optional>
+              {(props) => (
+                <Input
+                  {...props}
+                  value={fileName}
+                  onChange={(event) => setFileName(event.target.value)}
+                  placeholder="FALLBACK_Registration.csv"
+                />
+              )}
+            </Field>
+
+            <Field id="notes" label="Notes" optional>
+              {(props) => (
+                <Input
+                  {...props}
+                  value={notes}
+                  onChange={(event) => setNotes(event.target.value)}
+                  placeholder="Transcribed by the Room A IC"
+                />
+              )}
+            </Field>
+          </div>
+
+          <Button
+            size="lg"
+            block
+            disabled={csv.trim().length === 0 || pending}
+            onClick={() => void run(false)}
+          >
+            {pending ? 'Working…' : 'Preview — writes nothing'}
+          </Button>
+        </Card>
+
+        {preview ? (
+          <Card tone="info" as="section" aria-live="polite">
+            <CardTitle>This is what would happen</CardTitle>
+
+            <dl className="mt-sm grid grid-cols-[1fr_auto] gap-x-md gap-y-xxs">
+              <dt>Rows read</dt>
+              <dd className="text-right font-semibold tabular-nums">{preview.rowsRead}</dd>
+
+              <dt>Records that would be created</dt>
+              <dd className="text-right font-semibold tabular-nums">{preview.recordsCreated}</dd>
+
+              <dt>Already imported, would be skipped</dt>
+              <dd className="text-right font-semibold tabular-nums">{preview.recordsSkipped}</dd>
+            </dl>
+
+            {preview.issues.length > 0 ? (
+              <Callout tone="warn" className="mt-md">
+                <p className="font-semibold">
+                  {preview.issues.length} row{preview.issues.length === 1 ? '' : 's'} could not be
+                  read:
+                </p>
+                <ul className="mt-xxs flex flex-col gap-xxs text-caption">
+                  {preview.issues.slice(0, 10).map((issue) => (
+                    <li key={`${issue.rowNumber}:${issue.field}`}>
+                      Row {issue.rowNumber} — {issue.field}: {issue.message}
+                    </li>
+                  ))}
+                </ul>
+              </Callout>
+            ) : null}
+
+            <Button
+              size="lg"
+              block
+              className="mt-md"
+              disabled={preview.recordsCreated === 0 || pending}
+              onClick={() => void run(true)}
+            >
+              Import {preview.recordsCreated} record{preview.recordsCreated === 1 ? '' : 's'} as{' '}
+              {source === 'PAPER' ? 'paper' : 'fallback sheet'}
+            </Button>
+          </Card>
+        ) : null}
+
+        {result ? (
+          <Card tone="ok" as="section" aria-live="polite">
+            <CardTitle>Imported</CardTitle>
+            <p className="mt-xs">
+              {result.recordsCreated} record{result.recordsCreated === 1 ? '' : 's'} created,{' '}
+              {result.recordsSkipped} already present.
+            </p>
+            <p className="mt-xs text-caption text-text-muted">
+              Tagged <strong>{result.source}</strong>. Re-running the same rows is safe — nothing
+              will be duplicated.
+            </p>
+          </Card>
+        ) : null}
+      </Stack>
     </AppShell>
   );
 }

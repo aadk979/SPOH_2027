@@ -9,6 +9,13 @@ export const ERROR_CODES = {
   ACCOUNT_INACTIVE: 'ACCOUNT_INACTIVE',
   FORBIDDEN: 'FORBIDDEN',
   STATION_SCOPE_DENIED: 'STATION_SCOPE_DENIED',
+  /// The refresh cookie is absent, expired, or already rotated.
+  SESSION_EXPIRED: 'SESSION_EXPIRED',
+  /// A rotated refresh token was presented again: the cookie leaked.
+  SESSION_REUSE_DETECTED: 'SESSION_REUSE_DETECTED',
+  /// An admin tried to grant a role at or above their own, or edit their own.
+  ROLE_ESCALATION_DENIED: 'ROLE_ESCALATION_DENIED',
+  SELF_MUTATION_DENIED: 'SELF_MUTATION_DENIED',
 
   // request shape
   VALIDATION_FAILED: 'VALIDATION_FAILED',
@@ -43,10 +50,21 @@ export const ERROR_CODES = {
   FALLBACK_ALREADY_CLOSED: 'FALLBACK_ALREADY_CLOSED',
   ITEM_ALREADY_CLAIMED: 'ITEM_ALREADY_CLAIMED',
   IMPORT_FAILED: 'IMPORT_FAILED',
+  STATION_CODE_TAKEN: 'STATION_CODE_TAKEN',
+  EVENT_DAY_EXISTS: 'EVENT_DAY_EXISTS',
+  GIFT_TYPE_EXISTS: 'GIFT_TYPE_EXISTS',
+  STATION_IN_USE: 'STATION_IN_USE',
+  REPORTING_CYCLE: 'REPORTING_CYCLE',
+  /// A capture write arrived for a station whose shift blocks no longer cover now.
+  INVALID_SETTING: 'INVALID_SETTING',
 
   // infrastructure
   INTERNAL_ERROR: 'INTERNAL_ERROR',
   SERVICE_UNAVAILABLE: 'SERVICE_UNAVAILABLE',
+  /// S3 is not configured, so there is nowhere to put a photo.
+  MEDIA_NOT_CONFIGURED: 'MEDIA_NOT_CONFIGURED',
+  /// Web Push has no VAPID keys; the polls still deliver.
+  PUSH_NOT_CONFIGURED: 'PUSH_NOT_CONFIGURED',
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];

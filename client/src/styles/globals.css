@@ -1,5 +1,15 @@
 @import 'tailwindcss';
 
+/*
+ * The test suite is not a source of classes.
+ *
+ * `tests/tokens.test.ts` names `max-w-sm`, `max-w-field` and `max-w-prose` in
+ * its failure messages — the collisions it exists to prevent — and Tailwind's
+ * scanner cannot tell an assertion message from markup, so it emitted all three
+ * as real (dead, wrong-valued) rules in the production stylesheet.
+ */
+@source not '../../tests';
+
 /**
  * SPOH 2027 design tokens.
  *
@@ -14,6 +24,11 @@
  * design language's weight-300 CTAs, 44px targets and low-contrast greys would
  * cost taps and therefore data. Where the two conflict, BUILD_PLAN §9.4 and
  * §9.7 win and this file records the deviation rather than hiding it.
+ *
+ * Everything below is a Tailwind v4 theme variable, which means every token is
+ * reachable as a utility (`bg-surface`, `text-caption`, `rounded-lg`, `p-lg`).
+ * Components use those utilities. Inline `style` is reserved for values that
+ * are genuinely computed at runtime — a bar width, and nothing else.
  */
 
 @theme {
@@ -25,6 +40,8 @@
 
   --color-ink: #1d1d1f;
   --color-ink-muted: #333333;
+  /* design.md's ink-muted-48. 4.1:1 on white — fine print and disabled labels
+     only, never body text, or the bright-hall contrast floor is breached. */
   --color-ink-subtle: #7a7a7a;
   --color-on-dark: #ffffff;
   --color-on-dark-muted: #cccccc;
@@ -33,6 +50,7 @@
   --color-parchment: #f5f5f7;
   --color-pearl: #fafafc;
   --color-tile-dark: #272729;
+  --color-tile-dark-2: #2a2a2c;
   --color-tile-darker: #252527;
   --color-void: #000000;
 
@@ -52,25 +70,134 @@
   --color-ok: #0f6b3f;
   --color-ok-surface: #e9f5ee;
 
-  /* ── Type ── */
-  --font-display: 'SF Pro Display', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-text: 'SF Pro Text', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /*
+   * Solid fills, and what goes on top of them.
+   *
+   * `--color-alert` above is a FOREGROUND — it lightens in dark mode so alert
+   * text stays legible on a near-black tile. Using that same lightened red as a
+   * fill put white on #ff6961 at 2.5:1, which the axe sweep caught on the
+   * "Report a lost person" button.
+   *
+   * So the fills are their own tokens and do NOT flip with the theme: the deep
+   * red and amber read as danger on a white page and on a black one alike, and
+   * both clear 6:1 against the white that sits on them. Used by the lost-person
+   * banner and by the `danger` and `warn` button variants.
+   */
+  --color-alert-solid: #b3261e;
+  --color-warn-solid: #8a5300;
+  --color-on-alert: #ffffff;
+  --color-on-warn: #ffffff;
 
-  --text-hero: 3.5rem;
-  --text-hero--line-height: 1.07;
-  --text-hero--letter-spacing: -0.005em;
-  --text-display: 2.5rem;
-  --text-display--line-height: 1.1;
-  --text-lead: 1.75rem;
-  --text-lead--line-height: 1.14;
-  --text-tagline: 1.3125rem;
-  --text-tagline--line-height: 1.19;
-  --text-body: 1.0625rem;
-  --text-body--line-height: 1.47;
-  --text-body--letter-spacing: -0.022em;
-  --text-caption: 0.875rem;
-  --text-caption--line-height: 1.43;
-  --text-fine: 0.75rem;
+  /*
+   * ── Semantic roles ──
+   *
+   * Declared here so Tailwind emits `bg-surface`, `text-text-muted` and friends
+   * as real utilities; the values are re-pointed under the dark selectors
+   * below, so one class works in both themes and no component has to know
+   * which is active.
+   */
+  --color-surface: #ffffff;
+  --color-surface-alt: #f5f5f7;
+  --color-surface-sunken: #fafafc;
+  --color-text: #1d1d1f;
+  --color-text-muted: #333333;
+  --color-text-subtle: #7a7a7a;
+  --color-line: #e0e0e0;
+  --color-line-soft: #f0f0f0;
+
+  /*
+   * ── Type ──
+   *
+   * SF Pro is Apple's and cannot be shipped; the CSP allows no external font
+   * host either (`font-src 'self' data:`), so the stack resolves to real SF Pro
+   * on Apple hardware and to the platform UI face everywhere else. That is the
+   * substitution design.md's "Note on Font Substitutes" asks for, minus the
+   * webfont download nobody in a congested hall should have to wait through.
+   */
+  --font-display:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI Variable Display', 'Segoe UI',
+    system-ui, sans-serif;
+  --font-text:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI Variable Text', 'Segoe UI',
+    system-ui, sans-serif;
+
+  /*
+   * ── Scale ──
+   *
+   * design.md's own numbers are NOT used verbatim, and this is the one place
+   * the two documents genuinely part company. That spec describes apple.com —
+   * it says so: density is "unusually low even by contemporary SaaS standards",
+   * and each tile "occupies roughly one viewport". Body at 17px, headlines at
+   * 40-56px and 24px of card padding are correct for a page somebody scrolls
+   * through once. This is a console an IC works inside for six hours, and
+   * transcribed literally it read as a marketing site at 125% zoom.
+   *
+   * So design.md's identity is kept exactly — the single Action Blue, the pill
+   * CTAs, no shadows, no gradients, negative tracking on display sizes, surface
+   * change as the divider — and its scale is stepped down to app density. Body
+   * is 16px on touch and 14px on a mouse (see the `pointer: fine` block), which
+   * is where ops tools actually land.
+   *
+   * `--text-reading` is the exception that keeps design.md's 17px reading pace,
+   * used only where a volunteer is genuinely reading prose: the briefing, the
+   * visitor journey, the body of an announcement.
+   */
+  --text-hero: clamp(1.75rem, 1.2rem + 1.7vw, 2.25rem); /* 28 → 36 */
+  --text-hero--line-height: 1.1;
+  --text-hero--letter-spacing: -0.02em;
+
+  --text-display: clamp(1.5rem, 1.2rem + 1vw, 1.875rem); /* 24 → 30 */
+  --text-display--line-height: 1.15;
+  --text-display--letter-spacing: -0.018em;
+
+  --text-title: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem); /* 20 → 24 */
+  --text-title--line-height: 1.2;
+  --text-title--letter-spacing: -0.015em;
+
+  --text-lead: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem); /* 17 → 20 */
+  --text-lead--line-height: 1.3;
+  --text-lead--letter-spacing: -0.012em;
+
+  /* Card and panel titles. */
+  --text-tagline: 1.125rem; /* 18 */
+  --text-tagline--line-height: 1.3;
+  --text-tagline--letter-spacing: -0.012em;
+
+  /* Long-form prose only — design.md's reading pace, kept where it earns it. */
+  --text-reading: 1.0625rem; /* 17 */
+  --text-reading--line-height: 1.5;
+  --text-reading--letter-spacing: -0.011em;
+
+  --text-body: 1rem; /* 16 on touch; 14 on a mouse */
+  --text-body--line-height: 1.45;
+  --text-body--letter-spacing: -0.011em;
+
+  --text-caption: 0.8125rem; /* 13 */
+  --text-caption--line-height: 1.4;
+  --text-caption--letter-spacing: -0.006em;
+
+  --text-fine: 0.75rem; /* 12 */
+  --text-fine--line-height: 1.4;
+
+  --text-micro: 0.6875rem; /* 11 */
+  --text-micro--line-height: 1.3;
+
+  /*
+   * The dashboard figure. At the 40px this used to be, three stat tiles and
+   * their unit labels no longer fitted a phone screen together — and the unit
+   * is the half that stops somebody adding the three counts to each other.
+   */
+  --text-stat: clamp(1.625rem, 1.35rem + 0.9vw, 2rem); /* 26 → 32 */
+  --text-stat-lg: clamp(2rem, 1.6rem + 1.3vw, 2.75rem); /* 32 → 44 */
+
+  /*
+   * TV mode is read from four metres, so its scale is viewport-relative rather
+   * than fixed: an ops-room display may be 1080p or 4K, and the words have to
+   * stay the same physical size on the wall either way.
+   */
+  --text-tv-stat: clamp(2.5rem, 5.2vw, 6rem);
+  --text-tv-row: clamp(1.125rem, 1.65vw, 2rem);
+  --text-tv-label: clamp(0.875rem, 1vw, 1.25rem);
 
   /* ── Radii ── */
   --radius-xs: 5px;
@@ -78,6 +205,16 @@
   --radius-md: 11px;
   --radius-lg: 18px;
   --radius-pill: 9999px;
+
+  /*
+   * Cards use 12px, not design.md's 18px `{rounded.lg}`.
+   *
+   * 18px is drawn for a 300px-square store tile holding one product photo. On
+   * the 64px-tall row of a roster list the same radius eats the corners and the
+   * page reads as a pile of lozenges. The pill radius on buttons is untouched —
+   * that one IS the brand's action signal.
+   */
+  --radius-card: 12px;
 
   /* ── Spacing rhythm ── */
   --spacing-xxs: 4px;
@@ -89,74 +226,271 @@
   --spacing-xxl: 48px;
   --spacing-section: 80px;
 
+  /* Chrome heights, from design.md's global-nav and sub-nav-frosted. */
+  --spacing-nav: 44px;
+  --spacing-subnav: 52px;
+
+  /*
+   * ── Control sizing ──
+   *
+   * These are the TOUCH values, and they are the default because the phone in a
+   * volunteer's hand is the device that matters most. 44px is the WCAG target
+   * floor, and `--text-control` is 16px because that is the threshold below
+   * which iOS zooms the viewport on focus.
+   *
+   * The `pointer: fine` block compresses all of them for a mouse. That split is
+   * the whole fix: every one of these used to be a touch number applied
+   * identically to a laptop, which is why the ops-room console looked like a
+   * phone app blown up on a projector.
+   */
+  --spacing-control-sm: 36px;
+  --spacing-control: 44px;
+  --spacing-control-lg: 52px;
+  --spacing-field: 48px;
+  --spacing-tile: 64px;
+  --spacing-card: 16px;
+  --text-control: 1rem; /* 16 — never lower on touch: iOS zooms below it */
+
+  /*
+   * ── Content widths ──
+   *
+   * Named here rather than borrowed from Tailwind's `max-w-sm | md | lg | xl`,
+   * because those names read the spacing scale first and the spacing scale
+   * above defines `sm`, `md`, `lg` and `xl` as 12, 17, 24 and 32 PIXELS. A
+   * `max-w-sm` on the IC station picker collapsed it to 12px wide and it took a
+   * screenshot to notice. Every width in the app comes from this block, and no
+   * screen uses a `max-w-<t-shirt-size>` utility.
+   *
+   * ⚠ A name here must collide with NOTHING ELSE, and there are two ways to
+   * collide. Tailwind reports neither, and TypeScript cannot see either.
+   *
+   *  1. `--spacing-*`. `max-w-<name>` resolves against spacing first and wins
+   *     silently — adding `--spacing-field` for input heights turned an
+   *     existing `max-w-field` into a 48px-wide select. Hence `picker`.
+   *
+   *  2. Tailwind's own container scale, which reserves the t-shirt sizes and
+   *     `prose`. A `--container-prose: 40rem` here was dropped outright and
+   *     `max-w-prose` kept the built-in `65ch` — a width that then moved with
+   *     the font size. Hence `panel`.
+   *
+   * `tests/tokens.test.ts` fails the build on both.
+   */
+  --container-picker: 22rem; /* 352px — one control, on its own */
+  --container-form: 26rem; /* 416px — sign-in, the card-code viewfinder */
+  --container-panel: 40rem; /* 640px — a search box, a short form */
+  --container-reading: 48rem; /* 768px — prose and forms: a measure */
+  --container-capture: 56rem; /* 896px — a booth tablet in landscape */
+  --container-wide: 100rem; /* 1600px — dashboards, consoles, reports */
+
   /*
    * The single drop-shadow in the whole system. design.md reserves it for
    * product photography resting on a surface; here it is reserved for the
    * lost-person banner, which is the one element that must lift off the page.
    */
   --shadow-lift: 3px 5px 30px rgba(0, 0, 0, 0.22);
+
+  /* Press feedback, matching design.md's system-wide scale() grammar. */
+  --ease-press: cubic-bezier(0.2, 0, 0.2, 1);
 }
 
 :root {
   color-scheme: light;
-  --surface: var(--color-canvas);
-  --surface-alt: var(--color-parchment);
-  --text: var(--color-ink);
-  --text-muted: var(--color-ink-muted);
-  --line: var(--color-hairline);
 }
 
 /*
- * A dark palette for the ops room display and for anyone whose phone is in
+ * Mouse density.
+ *
+ * A pointing device is precise, so the 44px a thumb needs is just bulk; and
+ * somebody on a laptop is reading a console, not a poster. `pointer: fine` is
+ * the right query rather than a width breakpoint, because a 900px-wide tablet
+ * is still a thumb and a 1280px laptop is still a mouse — the input device is
+ * what this sizing is actually about.
+ *
+ * The capture screens deliberately do NOT participate: `.capture-target` and
+ * `.capture-primary` keep their 88px and 60dvh on every device, because a booth
+ * tablet is driven by a thumb whatever the browser reports (BUILD_PLAN §9.4).
+ */
+@media (pointer: fine) {
+  :root {
+    --text-body: 0.875rem; /* 14 */
+    --text-reading: 1rem; /* 16 */
+    --text-tagline: 1.0625rem; /* 17 */
+    --text-caption: 0.75rem; /* 12 */
+    --text-control: 0.875rem; /* 14 — no viewport-zoom rule to respect here */
+
+    --spacing-control-sm: 28px;
+    --spacing-control: 34px;
+    --spacing-control-lg: 40px;
+    --spacing-field: 34px;
+    --spacing-tile: 52px;
+    --spacing-card: 14px;
+  }
+}
+
+/*
+ * A dark palette for the ops-room display and for anyone whose phone is in
  * dark mode at 09:00 in a bright hall. Roles swap; the blue brightens, because
- * Action Blue disappears against a near-black tile.
+ * Action Blue disappears against a near-black tile — and `on-primary` flips to
+ * ink, because white on Sky Blue is 2.4:1 and would fail the contrast floor
+ * the light theme clears comfortably.
  */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-    --surface: var(--color-tile-darker);
-    --surface-alt: var(--color-tile-dark);
-    --text: var(--color-on-dark);
-    --text-muted: var(--color-on-dark-muted);
-    --line: #3a3a3c;
-    --color-primary: var(--color-primary-on-dark);
+
+    --color-surface: #1c1c1e;
+    --color-surface-alt: #272729;
+    --color-surface-sunken: #151517;
+    --color-text: #ffffff;
+    --color-text-muted: #cccccc;
+    --color-text-subtle: #8e8e93;
+    --color-line: #3a3a3c;
+    --color-line-soft: #2f2f31;
+
+    --color-primary: #2997ff;
+    --color-primary-focus: #70baff;
+    --color-on-primary: #1d1d1f;
+
+    /* Status surfaces become tints of the tile rather than of paper, and the
+       foregrounds lighten to clear 4.5:1 against them. */
+    --color-alert: #ff6961;
+    --color-alert-surface: #3a1c1a;
+    --color-warn: #f0b354;
+    --color-warn-surface: #3a2c14;
+    --color-ok: #4cd07d;
+    --color-ok-surface: #14301f;
   }
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --surface: var(--color-tile-darker);
-  --surface-alt: var(--color-tile-dark);
-  --text: var(--color-on-dark);
-  --text-muted: var(--color-on-dark-muted);
-  --line: #3a3a3c;
-  --color-primary: var(--color-primary-on-dark);
+
+  --color-surface: #1c1c1e;
+  --color-surface-alt: #272729;
+  --color-surface-sunken: #151517;
+  --color-text: #ffffff;
+  --color-text-muted: #cccccc;
+  --color-text-subtle: #8e8e93;
+  --color-line: #3a3a3c;
+  --color-line-soft: #2f2f31;
+
+  --color-primary: #2997ff;
+  --color-primary-focus: #70baff;
+  --color-on-primary: #1d1d1f;
+
+  --color-alert: #ff6961;
+  --color-alert-surface: #3a1c1a;
+  --color-warn: #f0b354;
+  --color-warn-surface: #3a2c14;
+  --color-ok: #4cd07d;
+  --color-ok-surface: #14301f;
 }
 
-html,
-body {
-  background: var(--surface);
-  color: var(--text);
-  font-family: var(--font-text);
-  -webkit-font-smoothing: antialiased;
-}
+@layer base {
+  html {
+    /* The sticky sub-nav would otherwise cover the heading of whatever an
+       in-page anchor jumped to. */
+    scroll-padding-top: calc(var(--spacing-nav) + var(--spacing-subnav));
+    -webkit-text-size-adjust: 100%;
+  }
 
-body {
-  margin: 0;
-  /* Notched phones: the capture buttons must not sit under the home indicator. */
-  padding-bottom: env(safe-area-inset-bottom);
-}
+  /*
+   * The page background only. `html` deliberately keeps the browser's own
+   * font-size.
+   *
+   * Setting the type on `html` AND `body` re-based `rem` and then compounded
+   * against it: `html { font-size: 1.0625rem }` made the root 17px, so `body {
+   * font-size: 1.0625rem }` resolved against the new root and came out at
+   * 18.06px — and every `rem` in the token file silently inherited the same
+   * 6% inflation. That is a large part of why this looked blown up.
+   */
+  html {
+    background: var(--color-surface);
+  }
 
-/* Keyboard focus is always visible — the IC and dashboard screens are operated
-   with a keyboard (BUILD_PLAN §9.7). */
-:focus-visible {
-  outline: 2px solid var(--color-primary-focus);
-  outline-offset: 2px;
+  body {
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-family: var(--font-text);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    letter-spacing: var(--text-body--letter-spacing);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    /* Notched phones: the capture buttons must not sit under the home indicator. */
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /*
+   * Headings carry the display face and design.md's negative tracking. Size is
+   * a utility on each usage; only the voice is set here, so a heading that
+   * forgets its size class still looks like a heading rather than like body.
+   */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.011em;
+    text-wrap: balance;
+  }
+
+  /* Keyboard focus is always visible — the IC and dashboard screens are
+     operated with a keyboard (BUILD_PLAN §9.7).
+     We do not force border-radius here: doing so overwrote element radii,
+     turning pill buttons and cards rectangular on focus. The browser outline
+     naturally follows the element's existing border-radius. */
+  :focus-visible {
+    outline: 2px solid var(--color-primary-focus);
+    outline-offset: 2px;
+  }
+
+  /* Long station names and pasted CSV must wrap rather than widen the page —
+     a horizontal scrollbar on a phone pushes the sync indicator off screen. */
+  p,
+  li,
+  dd,
+  dt,
+  th,
+  td,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    overflow-wrap: break-word;
+  }
+
+  /* Native controls inherit the type scale rather than reverting to 13px. */
+  input,
+  textarea,
+  select,
+  button {
+    font: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
    Capture-screen overrides (BUILD_PLAN §9.4, §9.7)
    Documented deviations from docs/design.md, and the reason for each.
+
+   These two stay as CSS classes rather than becoming React variants: the e2e
+   suite measures `.capture-target` directly, and the 88px floor is a promise
+   about the built artefact rather than about a component's props.
    ────────────────────────────────────────────────────────────────────────── */
 @layer components {
   /**
@@ -166,83 +500,64 @@ body {
    * never gets counted.
    */
   .capture-target {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     min-height: 88px;
     min-width: 88px;
+    padding: var(--spacing-sm);
     font-family: var(--font-display);
     font-weight: 600;
-    font-size: 1.25rem;
+    font-size: clamp(1.0625rem, 0.9rem + 0.9vw, 1.375rem);
     line-height: 1.2;
+    text-align: center;
+    text-wrap: balance;
     border-radius: var(--radius-lg);
-    border: 1px solid var(--line);
-    background: var(--surface-alt);
-    color: var(--text);
+    border: 1px solid var(--color-line);
+    background: var(--color-surface-alt);
+    color: var(--color-text);
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     transition:
-      transform 80ms ease-out,
-      background-color 80ms ease-out;
+      transform 80ms var(--ease-press),
+      background-color 80ms var(--ease-press),
+      border-color 80ms var(--ease-press);
   }
 
   .capture-target:active {
     transform: scale(0.97);
     background: var(--color-primary);
     color: var(--color-on-primary);
+    border-color: var(--color-primary);
   }
 
-  /** The footfall `+`. Sized to be hit one-handed without looking. */
+  /**
+   * The footfall `+`. Sized to be hit one-handed without looking, and held at
+   * 60dvh rather than a fixed height so a booth tablet in landscape gets a
+   * proportionally sized target instead of a letterbox.
+   */
   .capture-primary {
-    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60dvh;
     width: 100%;
     font-family: var(--font-display);
     font-weight: 600;
     font-size: clamp(4rem, 22vw, 9rem);
+    line-height: 1;
     border-radius: var(--radius-lg);
     border: none;
     background: var(--color-primary);
     color: var(--color-on-primary);
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    transition: transform 80ms var(--ease-press);
   }
 
   .capture-primary:active {
     transform: scale(0.99);
     background: var(--color-primary-focus);
-  }
-
-  /**
-   * Reading surfaces keep the design language as written: parchment tiles, no
-   * border, the colour change acting as the divider.
-   */
-  .tile {
-    background: var(--surface-alt);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-  }
-
-  .tile-flat {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-  }
-
-  .pill {
-    border-radius: var(--radius-pill);
-    padding: 11px 22px;
-    background: var(--color-primary);
-    color: var(--color-on-primary);
-    font-size: var(--text-body);
-    min-height: 44px;
-  }
-
-  .pill-quiet {
-    border-radius: var(--radius-pill);
-    padding: 11px 22px;
-    background: var(--color-pearl);
-    color: var(--color-ink-muted);
-    border: 1px solid var(--color-divider);
-    font-size: var(--text-caption);
-    min-height: 44px;
   }
 }
 
@@ -252,5 +567,162 @@ body {
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* App navigation: a stable rail on desktop, reachable tabs on phones. */
+.workspace-body {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  flex: 1;
+}
+.workspace-main {
+  min-width: 0;
+  padding-top: var(--spacing-xl);
+  padding-bottom: var(--spacing-xl);
+}
+.section-nav {
+  position: sticky;
+  top: calc(var(--spacing-nav) + var(--spacing-subnav));
+  align-self: start;
+  padding: 28px 16px;
+  min-height: calc(100dvh - var(--spacing-nav) - var(--spacing-subnav));
+  border-right: 1px solid var(--color-line);
+  background: var(--color-surface-sunken);
+}
+.section-nav-caption {
+  padding: 0 12px 16px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-text-muted);
+}
+.section-nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.section-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  font-weight: 500;
+}
+.section-nav-link:hover {
+  background: var(--color-surface-alt);
+}
+.section-nav-link[aria-current='page'] {
+  background: var(--color-surface);
+  color: var(--color-primary);
+  box-shadow: inset 3px 0 var(--color-primary);
+  font-weight: 650;
+}
+.section-nav-note {
+  margin: 48px 12px 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-line);
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.8;
+}
+.section-nav-note a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-top: 12px;
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 500;
+}
+.section-nav-note a:hover {
+  color: var(--color-primary-focus);
+}
+.workspace-intro {
+  padding: 4px 0 12px;
+}
+.home-focus {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(260px, 1fr);
+  gap: var(--spacing-lg);
+  align-items: start;
+}
+.home-companion {
+  border-top: 3px solid var(--color-primary);
+}
+@media (max-width: 900px) {
+  .workspace-body {
+    display: block;
+  }
+  .workspace-main {
+    padding-top: var(--spacing-lg);
+    padding-bottom: calc(104px + env(safe-area-inset-bottom));
+  }
+  .section-nav {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    min-height: 0;
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+    background: var(--color-surface);
+    border-right: 0;
+    border-top: 1px solid var(--color-line);
+  }
+  .section-nav-caption,
+  .section-nav-note {
+    display: none;
+  }
+  .section-nav-links {
+    flex-direction: row;
+    gap: 2px;
+  }
+  .section-nav-link {
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 2px;
+    min-width: 0;
+    font-size: 11px;
+    text-align: center;
+  }
+  .section-nav-link[aria-current='page'] {
+    background: var(--color-surface-alt);
+    color: var(--color-primary);
+    box-shadow: inset 0 2px var(--color-primary);
+    font-weight: 650;
+  }
+}
+@media (max-width: 640px) {
+  .home-focus {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--spacing-md);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .section-nav-link {
+    transition: none;
+  }
+}
+details > summary span[aria-hidden='true'] {
+  display: inline-block;
+  transition: transform 150ms cubic-bezier(0.2, 0, 0.2, 1);
+}
+details[open] > summary span[aria-hidden='true'] {
+  transform: rotate(90deg);
+}
+@media (min-width: 901px) {
+  .workspace-titlebar {
+    padding-left: 220px;
   }
 }
