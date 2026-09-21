@@ -1,8 +1,10 @@
+import { createHash, randomBytes } from 'node:crypto';
 import { Router, type CookieOptions, type Request, type Response } from 'express';
 import { CreateSessionRequest, ERROR_CODES, type SessionResponse } from '@spoh/shared';
 import { z } from 'zod';
 import { env, isProduction } from '../../config/env.js';
 import { AppError, ForbiddenError, NotFoundError, ValidationError } from '../../lib/errors.js';
+import { logger } from '../../lib/logger.js';
 import { prisma } from '../../lib/prisma.js';
 import { getSettings } from '../../lib/settings.js';
 import { auditContextFrom } from '../../lib/requestContext.js';
@@ -150,6 +152,147 @@ authRouter.post(
     res.status(201).json(opened.response satisfies SessionResponse);
   },
 );
+
+const OAUTH_STATE_COOKIE = 'spoh_oauth_state';
+const OAUTH_VERIFIER_COOKIE = 'spoh_pkce_verifier';
+
+/** Five minutes is generous for a hosted-UI round trip and short enough to not matter if abandoned. */
+function oauthCookieOptions(): CookieOptions {
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: 'lax',
+    path: COOKIE_PATH,
+    maxAge: 5 * 60 * 1000,
+  };
+}
+
+function base64url(input: Buffer): string {
+  return input.toString('base64url');
+}
+
+/**
+ * Hand off to the Cognito Hosted UI.
+ *
+ * Authorization Code + PKCE, even though the app client has no secret to
+ * protect — PKCE is what stops an intercepted code from being redeemed by
+ * anyone other than the browser that started this request. The verifier and
+ * the anti-CSRF state both live in short-lived httpOnly cookies scoped to this
+ * router's path, the same shape as the refresh cookie.
+ */
+authRouter.get('/login', sensitiveRateLimit, (req: Request, res: Response) => {
+  if (!env.COGNITO_DOMAIN || !env.COGNITO_CLIENT_ID || !env.APP_BASE_URL) {
+    throw new AppError(500, ERROR_CODES.INTERNAL_ERROR, 'Hosted sign-in is not configured');
+  }
+
+  const state = base64url(randomBytes(32));
+  const verifier = base64url(randomBytes(32));
+  const challenge = base64url(createHash('sha256').update(verifier).digest());
+
+  res.cookie(OAUTH_STATE_COOKIE, state, oauthCookieOptions());
+  res.cookie(OAUTH_VERIFIER_COOKIE, verifier, oauthCookieOptions());
+
+  const redirectUri = `${env.APP_BASE_URL}/api/v1/auth/callback`;
+  const authorizeUrl = new URL('/oauth2/authorize', env.COGNITO_DOMAIN);
+  authorizeUrl.searchParams.set('client_id', env.COGNITO_CLIENT_ID);
+  authorizeUrl.searchParams.set('response_type', 'code');
+  authorizeUrl.searchParams.set('scope', 'openid email');
+  authorizeUrl.searchParams.set('redirect_uri', redirectUri);
+  authorizeUrl.searchParams.set('state', state);
+  authorizeUrl.searchParams.set('code_challenge', challenge);
+  authorizeUrl.searchParams.set('code_challenge_method', 'S256');
+
+  res.redirect(authorizeUrl.toString());
+});
+
+/**
+ * Cognito redirects back here with a code (or an error). The code is
+ * exchanged server-side, the resulting access token is verified through the
+ * same path every other request goes through, and a session is opened exactly
+ * as `POST /session` would — this route only supplies the credential.
+ */
+authRouter.get('/callback', sensitiveRateLimit, async (req: Request, res: Response) => {
+  const signInUrl = `${env.APP_BASE_URL ?? ''}/sign-in`;
+  const jar = (req as Request & { cookies?: Record<string, unknown> }).cookies ?? {};
+  const expectedState = jar[OAUTH_STATE_COOKIE];
+  const verifier = jar[OAUTH_VERIFIER_COOKIE];
+
+  res.clearCookie(OAUTH_STATE_COOKIE, { ...oauthCookieOptions(), maxAge: undefined });
+  res.clearCookie(OAUTH_VERIFIER_COOKIE, { ...oauthCookieOptions(), maxAge: undefined });
+
+  const { code, state, error } = req.query;
+
+  if (error) {
+    res.redirect(`${signInUrl}?error=${encodeURIComponent(String(error))}`);
+    return;
+  }
+
+  if (
+    typeof code !== 'string' ||
+    typeof state !== 'string' ||
+    typeof expectedState !== 'string' ||
+    typeof verifier !== 'string' ||
+    state !== expectedState
+  ) {
+    res.redirect(`${signInUrl}?error=state`);
+    return;
+  }
+
+  if (!env.COGNITO_DOMAIN || !env.COGNITO_CLIENT_ID || !env.APP_BASE_URL) {
+    throw new AppError(500, ERROR_CODES.INTERNAL_ERROR, 'Hosted sign-in is not configured');
+  }
+
+  const redirectUri = `${env.APP_BASE_URL}/api/v1/auth/callback`;
+  const tokenUrl = new URL('/oauth2/token', env.COGNITO_DOMAIN);
+
+  const tokenResponse = await fetch(tokenUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'authorization_code',
+      client_id: env.COGNITO_CLIENT_ID,
+      code,
+      redirect_uri: redirectUri,
+      code_verifier: verifier,
+    }),
+  });
+
+  if (!tokenResponse.ok) {
+    logger.warn(
+      { status: tokenResponse.status, body: await tokenResponse.text().catch(() => '') },
+      'Cognito token exchange failed',
+    );
+    res.redirect(`${signInUrl}?error=exchange`);
+    return;
+  }
+
+  const tokens = (await tokenResponse.json()) as { access_token?: string };
+  if (!tokens.access_token) {
+    res.redirect(`${signInUrl}?error=exchange`);
+    return;
+  }
+
+  let sub: string;
+  try {
+    const verified = await authProvider.verify(tokens.access_token);
+    sub = verified.sub;
+  } catch {
+    res.redirect(`${signInUrl}?error=verify`);
+    return;
+  }
+
+  try {
+    const opened = await openSession(sub, sessionContext(req), auditContextFrom(req));
+    res.cookie(REFRESH_COOKIE, opened.refreshToken, refreshCookieOptions(opened.expiresAt));
+    res.redirect(`${env.APP_BASE_URL}/home`);
+  } catch (cause) {
+    const code =
+      cause instanceof AppError
+        ? cause.code
+        : ERROR_CODES.INTERNAL_ERROR;
+    res.redirect(`${signInUrl}?error=${encodeURIComponent(code)}`);
+  }
+});
 
 /**
  * Renew. This is what makes a hard refresh survivable without ever putting a

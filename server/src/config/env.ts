@@ -53,6 +53,10 @@ const EnvSchema = z
     COGNITO_REGION: z.string().min(1).default('ap-southeast-1'),
     COGNITO_USER_POOL_ID: z.string().optional(),
     COGNITO_CLIENT_ID: z.string().optional(),
+    /** Hosted UI base, e.g. https://spoh2027-livetest.auth.ap-southeast-1.amazoncognito.com */
+    COGNITO_DOMAIN: z.string().optional(),
+    /** This deployment's own public origin, used to build the OAuth redirect_uri. */
+    APP_BASE_URL: z.string().optional(),
 
     // Exact origins only. A wildcard here would defeat the whole CORS policy.
     CORS_ALLOWED_ORIGINS: CsvList.default(['http://localhost:3000']),
@@ -172,6 +176,20 @@ const EnvSchema = z
           code: 'custom',
           path: ['COGNITO_CLIENT_ID'],
           message: 'required when AUTH_PROVIDER=cognito',
+        });
+      }
+      if (!env.COGNITO_DOMAIN) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['COGNITO_DOMAIN'],
+          message: 'required when AUTH_PROVIDER=cognito — the Hosted UI base URL',
+        });
+      }
+      if (!env.APP_BASE_URL) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['APP_BASE_URL'],
+          message: 'required when AUTH_PROVIDER=cognito — this deployment\'s own public origin',
         });
       }
     }
