@@ -1,0 +1,50 @@
+# Postgres for a deployed box.
+#
+# Differs from the repo-root docker-compose.yml, which is development only:
+#   - bound to 127.0.0.1, so the database is not on the internet even if the
+#     host firewall is wrong
+#   - TLS on, because config/env.ts refuses to start in production without
+#     sslmode=require and that guard should not be weakened for a short hop
+#   - published on 5432, not the dev 5435
+#   - restart: always, so a host reboot brings the database back before PM2
+#     starts asking it questions
+#
+# On the two-box topology, change the port binding to the private IP and
+# nothing else: the TLS is already correct.
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: spoh-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: spoh_app
+      POSTGRES_DB: spoh2027
+      # From the host environment. Never a literal in this file.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    command:
+      - -c
+      - ssl=on
+      - -c
+      - ssl_cert_file=/var/lib/postgresql/server.crt
+      - -c
+      - ssl_key_file=/var/lib/postgresql/server.key
+      # 2 GB box shared with the app tier. Postgres defaults assume it owns
+      # the machine, and here it does not.
+      - -c
+      - shared_buffers=256MB
+      - -c
+      - max_connections=100
+    ports:
+      - '127.0.0.1:5432:5432'
+    volumes:
+      - spoh-pgdata:/var/lib/postgresql/data
+      - /home/ubuntu/pgssl/server.crt:/var/lib/postgresql/server.crt:ro
+      - /home/ubuntu/pgssl/server.key:/var/lib/postgresql/server.key:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U spoh_app -d spoh2027']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  spoh-pgdata:
