@@ -1,5 +1,6 @@
 import { createApp } from './app.js';
 import { env } from './config/env.js';
+import { cloudWatchEnabled, flushCloudWatch } from './lib/cloudwatch.js';
 import { logger } from './lib/logger.js';
 import { disconnectPrisma, pingDatabase } from './lib/prisma.js';
 import { loadSettings } from './lib/settings.js';
@@ -25,7 +26,16 @@ async function main(): Promise<void> {
   const jobs = startScheduledJobs();
 
   const server = app.listen(env.PORT, () => {
-    logger.info({ port: env.PORT, env: env.NODE_ENV }, 'spoh-server listening');
+    logger.info(
+      {
+        port: env.PORT,
+        env: env.NODE_ENV,
+        cloudWatch: cloudWatchEnabled
+          ? { auditLogGroup: env.CLOUDWATCH_AUDIT_LOG_GROUP ?? env.CLOUDWATCH_LOG_GROUP }
+          : 'disabled',
+      },
+      'spoh-server listening',
+    );
   });
 
   // Give in-flight capture writes a chance to finish before the process exits.
@@ -34,7 +44,12 @@ async function main(): Promise<void> {
     jobs.stop();
 
     server.close(() => {
-      void disconnectPrisma().finally(() => process.exit(0));
+      // Drain the log buffer before the connection pool: an audit row written
+      // in the last second of the process is the one most worth keeping, and
+      // flushCloudWatch is bounded so this cannot stall the deploy.
+      void flushCloudWatch()
+        .then(() => disconnectPrisma())
+        .finally(() => process.exit(0));
     });
 
     // Hard limit: a deploy must not hang on a stuck connection.

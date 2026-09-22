@@ -47,6 +47,9 @@ export async function upsertVolunteer(
   const existing = await tx.volunteer.findUnique({ where: { email: data.email } });
 
   if (existing) {
+    // `active` is deliberately not touched. Reinstating somebody is a visible
+    // act with an audit row and an identity-provider call (`reactivateVolunteer`);
+    // a roster file that happens to still list them must not do it by accident.
     const volunteer = await tx.volunteer.update({
       where: { id: existing.id },
       data: {
@@ -55,7 +58,6 @@ export async function upsertVolunteer(
         role: data.role,
         portfolio: data.portfolio ?? existing.portfolio,
         reportsToId: data.reportsToId ?? existing.reportsToId,
-        active: true,
       },
     });
     return { volunteer, created: false };
@@ -162,6 +164,45 @@ export async function findEventDayByDate(
 export async function findStationByCodeTx(
   tx: PrismaTransactionClient,
   code: string,
-): Promise<{ id: string } | null> {
-  return tx.station.findUnique({ where: { code }, select: { id: true } });
+): Promise<{ id: string; name: string; active: boolean } | null> {
+  return tx.station.findUnique({
+    where: { code },
+    select: { id: true, name: true, active: true },
+  });
+}
+
+/**
+ * Would making `managerId` the manager of `volunteerId` close a loop?
+ *
+ * A cycle here is not a cosmetic problem: `GET /me` walks this chain to build
+ * the escalation card, and a loop would spin until the request timed out — on
+ * the boot call every volunteer makes.
+ *
+ * Takes the client so the roster import can ask inside its own transaction,
+ * where the reporting lines it has just written are visible.
+ */
+export async function findReportingCycle(
+  tx: PrismaTransactionClient,
+  volunteerId: string,
+  managerId: string,
+): Promise<'self' | 'loop' | null> {
+  if (volunteerId === managerId) return 'self';
+
+  const seen = new Set<string>([volunteerId]);
+  let cursor: string | null = managerId;
+
+  // Bounded by the roster size; the seen-set makes it terminate on any
+  // pre-existing loop rather than inheriting it.
+  while (cursor) {
+    if (seen.has(cursor)) return 'loop';
+    seen.add(cursor);
+
+    const next: { reportsToId: string | null } | null = await tx.volunteer.findUnique({
+      where: { id: cursor },
+      select: { reportsToId: true },
+    });
+    cursor = next?.reportsToId ?? null;
+  }
+
+  return null;
 }

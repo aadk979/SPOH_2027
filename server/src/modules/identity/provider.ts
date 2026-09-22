@@ -4,6 +4,8 @@ import {
   AdminCreateUserCommand,
   AdminDisableUserCommand,
   AdminEnableUserCommand,
+  AdminGetUserCommand,
+  AdminResetUserPasswordCommand,
   CognitoIdentityProviderClient,
   UsernameExistsException,
 } from '@aws-sdk/client-cognito-identity-provider';
@@ -47,6 +49,16 @@ export interface IdentityProvider {
    * orphan every capture they had already recorded.
    */
   enableUser(email: string): Promise<void>;
+
+  /**
+   * Send the sign-in email again.
+   *
+   * "I never got the email" is the support request of the week before the
+   * event. Somebody who has never set a password gets the invite resent with a
+   * fresh temporary password; somebody who has gets a reset code instead,
+   * because Cognito will not reissue an invite to a confirmed account.
+   */
+  resendInvite(email: string): Promise<'invite' | 'reset' | 'none'>;
 }
 
 /** Cognito group names are PascalCase; `CommitteeRole` values are not. */
@@ -61,6 +73,16 @@ const ROLE_TO_COGNITO_GROUP: Readonly<Record<CommitteeRole, string>> = Object.fr
 
 function createCognitoIdentityProvider(userPoolId: string): IdentityProvider {
   const client = new CognitoIdentityProviderClient({ region: env.COGNITO_REGION });
+
+  async function getUser(email: string): Promise<{ sub: string | undefined; status: string }> {
+    const result = await client.send(
+      new AdminGetUserCommand({ UserPoolId: userPoolId, Username: email }),
+    );
+    return {
+      sub: result.UserAttributes?.find((attr) => attr.Name === 'sub')?.Value,
+      status: result.UserStatus ?? 'UNKNOWN',
+    };
+  }
 
   return {
     name: 'cognito',
@@ -89,18 +111,16 @@ function createCognitoIdentityProvider(userPoolId: string): IdentityProvider {
         created = true;
       } catch (error) {
         if (!(error instanceof UsernameExistsException)) throw error;
-        // Re-provisioning an existing volunteer is a normal operation — a role
-        // change, or a re-run of the roster import — and must not fail.
+        // The account exists but the roster row does not — a re-run of an
+        // import whose transaction failed after the invites went out, or a
+        // volunteer from a previous year's pool. One extra round trip, taken
+        // only on this path, is what makes the re-run safe rather than a 500.
         logger.info({ email }, 'Cognito user already exists; reusing identity');
+        sub = (await getUser(email)).sub;
       }
 
       if (!sub) {
-        // AdminCreateUser does not return attributes for an existing user, and
-        // AdminGetUser would be a second round trip per row during a 200-row
-        // roster import. The caller resolves the existing row by email instead.
-        throw new InternalError(
-          'Cognito did not return a subject for this user; resolve the existing volunteer by email',
-        );
+        throw new InternalError('Cognito did not return a subject for this user');
       }
 
       await client.send(
@@ -120,6 +140,27 @@ function createCognitoIdentityProvider(userPoolId: string): IdentityProvider {
 
     async enableUser(email) {
       await client.send(new AdminEnableUserCommand({ UserPoolId: userPoolId, Username: email }));
+    },
+
+    async resendInvite(email) {
+      const { status } = await getUser(email);
+
+      if (status === 'FORCE_CHANGE_PASSWORD') {
+        await client.send(
+          new AdminCreateUserCommand({
+            UserPoolId: userPoolId,
+            Username: email,
+            MessageAction: 'RESEND',
+            DesiredDeliveryMediums: ['EMAIL'],
+          }),
+        );
+        return 'invite';
+      }
+
+      await client.send(
+        new AdminResetUserPasswordCommand({ UserPoolId: userPoolId, Username: email }),
+      );
+      return 'reset';
     },
   };
 }
@@ -149,6 +190,11 @@ function createLocalIdentityProvider(): IdentityProvider {
     enableUser(email) {
       logger.info({ email }, 'local identity provider: enable is a no-op');
       return Promise.resolve();
+    },
+
+    resendInvite(email) {
+      logger.info({ email }, 'local identity provider: there is no email to resend');
+      return Promise.resolve('none');
     },
   };
 }

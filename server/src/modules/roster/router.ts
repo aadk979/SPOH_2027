@@ -12,7 +12,12 @@ import {
 } from '../../middleware/validate.js';
 import { auditContextFrom } from '../../lib/requestContext.js';
 import { getMe } from '../me/service.js';
-import { getStationRoster, importRoster, provisionVolunteer } from './service.js';
+import {
+  getStationRoster,
+  importRoster,
+  provisionVolunteer,
+  type RosterActor,
+} from './service.js';
 
 /** Roster, provisioning and shift views (BUILD_PLAN §7.2). */
 export const rosterRouter: Router = Router();
@@ -21,6 +26,11 @@ const StationIdParams = z.object({ stationId: Id }).strict();
 const StationRosterQuery = z.object({ eventDayId: Id.optional() }).strict();
 
 rosterRouter.use(requireAuth);
+
+function actorFrom(req: Request): RosterActor {
+  const auth = getAuth(req);
+  return { volunteerId: auth.volunteerId, role: auth.role };
+}
 
 /** My own shifts. Same payload as `/me`, reachable from the shift screen. */
 rosterRouter.get(
@@ -62,7 +72,7 @@ rosterRouter.post(
   validate({ body: ProvisionVolunteerRequest }),
   async (req: Request, res: Response) => {
     const body = validatedBody<ProvisionVolunteerRequest>(req);
-    const result = await provisionVolunteer(body, auditContextFrom(req));
+    const result = await provisionVolunteer(body, actorFrom(req), auditContextFrom(req));
     res.status(201).json(result);
   },
 );
@@ -70,8 +80,9 @@ rosterRouter.post(
 /**
  * Roster import. Defaults to a dry run; `commit: true` writes. DC and above can
  * edit the roster, but only Chief/Admin can create identities — so a DC running
- * this against rows for people who do not yet have accounts will see them
- * reported rather than silently provisioned.
+ * this against rows for people who do not yet have accounts sees them reported
+ * as skipped rather than silently provisioned. The service decides that per
+ * row from the actor's role.
  */
 rosterRouter.post(
   '/import',
@@ -80,7 +91,7 @@ rosterRouter.post(
   validate({ body: RosterImportRequest }),
   async (req: Request, res: Response) => {
     const body = validatedBody<RosterImportRequest>(req);
-    const result = await importRoster(body, auditContextFrom(req));
+    const result = await importRoster(body, actorFrom(req), auditContextFrom(req));
     res.status(200).json(result);
   },
 );

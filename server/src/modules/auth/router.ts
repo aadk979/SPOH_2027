@@ -15,6 +15,7 @@ import {
   requireAuth,
 } from '../../middleware/auth/index.js';
 import { defaultRateLimit, sensitiveRateLimit } from '../../middleware/rateLimit.js';
+import { auditUntrustedOrigin } from '../../middleware/securityAudit.js';
 import { validate, validatedBody, validatedParams } from '../../middleware/validate.js';
 import {
   endSession,
@@ -82,6 +83,12 @@ function assertTrustedOrigin(req: Request): void {
   const origin = req.get('origin');
   if (!origin) return;
   if (env.CORS_ALLOWED_ORIGINS.includes(origin)) return;
+
+  // Recorded before it is thrown: this is never our own misconfiguration —
+  // a browser sent a credential-minting request from somewhere we do not
+  // serve — so it is graded CRITICAL rather than folded in with the ordinary
+  // capability denials the error handler records.
+  auditUntrustedOrigin(req, origin);
 
   throw new ForbiddenError('This request did not come from a known origin');
 }
@@ -286,10 +293,7 @@ authRouter.get('/callback', sensitiveRateLimit, async (req: Request, res: Respon
     res.cookie(REFRESH_COOKIE, opened.refreshToken, refreshCookieOptions(opened.expiresAt));
     res.redirect(`${env.APP_BASE_URL}/home`);
   } catch (cause) {
-    const code =
-      cause instanceof AppError
-        ? cause.code
-        : ERROR_CODES.INTERNAL_ERROR;
+    const code = cause instanceof AppError ? cause.code : ERROR_CODES.INTERNAL_ERROR;
     res.redirect(`${signInUrl}?error=${encodeURIComponent(code)}`);
   }
 });

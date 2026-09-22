@@ -61,7 +61,12 @@ export const RosterImportRow = z
     displayName: z.string().trim().min(1).max(120),
     email: VolunteerEmail,
     phone: VolunteerPhone.optional(),
-    role: CommitteeRole.default('VOLUNTEER'),
+    /**
+     * No default, unlike provisioning. A shift list with no role column must
+     * leave everyone's role alone; defaulting it would demote every IC in the
+     * file to Volunteer. Absent means "keep it, or Volunteer if new".
+     */
+    role: CommitteeRole.optional(),
     portfolio: z.string().trim().max(120).optional(),
     reportsToEmail: VolunteerEmail.optional(),
     stationCode: z.string().trim().max(64).optional(),
@@ -89,13 +94,36 @@ export const RosterImportIssue = z
   .strict();
 export type RosterImportIssue = z.infer<typeof RosterImportIssue>;
 
+/**
+ * What the import did, or would do, with one row.
+ *
+ * A row describes a person and, optionally, one of their shifts, and the two
+ * are decided separately: a person the caller may not touch can still be
+ * given a shift, and a person who is created cannot be rostered at a station
+ * that does not exist. `skip` always has a matching entry in `issues`.
+ */
+export const RosterImportOutcome = z
+  .object({
+    rowNumber: z.number().int().positive(),
+    email: z.string(),
+    person: z.enum(['create', 'update', 'skip']),
+    assignment: z.enum(['create', 'update', 'skip', 'none']),
+  })
+  .strict();
+export type RosterImportOutcome = z.infer<typeof RosterImportOutcome>;
+
 export const RosterImportResponse = z
   .object({
     committed: z.boolean(),
     volunteersCreated: z.number().int().nonnegative(),
     volunteersUpdated: z.number().int().nonnegative(),
+    /** People whose row was refused: see `issues` for why. */
+    volunteersSkipped: z.number().int().nonnegative(),
     assignmentsCreated: z.number().int().nonnegative(),
     assignmentsUpdated: z.number().int().nonnegative(),
+    /** Identity-provider accounts created (and invites sent) by this commit. */
+    identitiesCreated: z.number().int().nonnegative(),
+    outcomes: z.array(RosterImportOutcome),
     issues: z.array(RosterImportIssue),
   })
   .strict();

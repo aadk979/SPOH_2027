@@ -15,7 +15,11 @@ import {
   UpdateVolunteerRequest,
 } from '@spoh/shared';
 import { getAuth, requireAuth } from '../../middleware/auth/index.js';
-import { adminRateLimit, defaultRateLimit } from '../../middleware/rateLimit.js';
+import {
+  adminRateLimit,
+  defaultRateLimit,
+  sensitiveRateLimit,
+} from '../../middleware/rateLimit.js';
 import { requireCapability } from '../../middleware/rbac.js';
 import {
   validate,
@@ -35,10 +39,12 @@ import {
   createStation,
   deactivateVolunteer,
   deleteAssignment,
+  exportRosterCsv,
   getVolunteer,
   listEventDays,
   listVolunteers,
   reactivateVolunteer,
+  resendInvite,
   updateEventDay,
   updateGiftType,
   updateStation,
@@ -82,6 +88,25 @@ adminRouter.get(
   },
 );
 
+/**
+ * The roster as a CSV in the import's own format. Reads the whole table, so it
+ * sits on the sensitive limit with the other whole-event reads. Declared before
+ * `/volunteers/:id` so the path is never mistaken for an id.
+ */
+adminRouter.get(
+  '/volunteers/export.csv',
+  sensitiveRateLimit,
+  requireCapability('user.read'),
+  async (_req: Request, res: Response) => {
+    const csv = await exportRosterCsv();
+    res
+      .status(200)
+      .type('text/csv; charset=utf-8')
+      .set('Content-Disposition', 'attachment; filename="spoh-roster.csv"')
+      .send(csv);
+  },
+);
+
 adminRouter.get(
   '/volunteers/:id',
   defaultRateLimit,
@@ -89,7 +114,24 @@ adminRouter.get(
   validate({ params: IdParams }),
   async (req: Request, res: Response) => {
     const { id } = validatedParams<z.infer<typeof IdParams>>(req);
-    res.status(200).json({ volunteer: await getVolunteer(id) });
+    res.status(200).json(await getVolunteer(id));
+  },
+);
+
+/**
+ * Resending the invite sends an email, so it takes the sensitive limit like
+ * provisioning does — a Chief helping five people who "never got it" is well
+ * within it; a loop is not.
+ */
+adminRouter.post(
+  '/volunteers/:id/resend-invite',
+  sensitiveRateLimit,
+  requireCapability('user.provision'),
+  validate({ params: IdParams }),
+  async (req: Request, res: Response) => {
+    const { id } = validatedParams<z.infer<typeof IdParams>>(req);
+    const result = await resendInvite(id, actorFrom(req), auditContextFrom(req));
+    res.status(200).json(result);
   },
 );
 

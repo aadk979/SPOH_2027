@@ -4,6 +4,7 @@ import { isProduction } from '../config/env.js';
 import { AppError, isAppError } from '../lib/errors.js';
 import { logger } from '../lib/logger.js';
 import { requestIdOf } from './requestId.js';
+import { auditRefusal } from './securityAudit.js';
 
 /**
  * The single place an error becomes an HTTP response (BUILD_PLAN §7.1, §13).
@@ -33,6 +34,16 @@ export const errorHandler: ErrorRequestHandler = (
   } else {
     log.info({ code: normalised.code, statusCode: normalised.statusCode }, 'request rejected');
   }
+
+  // Security-relevant refusals also land in the audit trail, where an admin can
+  // read them next to the changes they sit between. Decides for itself which
+  // statuses qualify, and never throws.
+  auditRefusal(
+    req,
+    normalised.statusCode,
+    normalised.code,
+    normalised.expose ? normalised.message : undefined,
+  );
 
   const body: ErrorBody = {
     error: {

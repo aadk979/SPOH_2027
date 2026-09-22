@@ -55,6 +55,8 @@ export const ERROR_CODES = {
   GIFT_TYPE_EXISTS: 'GIFT_TYPE_EXISTS',
   STATION_IN_USE: 'STATION_IN_USE',
   REPORTING_CYCLE: 'REPORTING_CYCLE',
+  /// Provisioning an email that is already on the roster. Edit the row instead.
+  VOLUNTEER_EXISTS: 'VOLUNTEER_EXISTS',
   /// A capture write arrived for a station whose shift blocks no longer cover now.
   INVALID_SETTING: 'INVALID_SETTING',
 

@@ -1,0 +1,20 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CreateAndWriteOwnLogGroups",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "logs:PutRetentionPolicy",
+        "logs:DescribeLogStreams"
+      ],
+      "Resource": [
+        "arn:aws:logs:ap-southeast-1:665146708212:log-group:/spoh2027/*",
+        "arn:aws:logs:ap-southeast-1:665146708212:log-group:/spoh2027/*:log-stream:*"
+      ]
+    }
+  ]
+}

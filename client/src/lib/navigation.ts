@@ -29,6 +29,20 @@ export const operationLinks: Array<{
     group: 'Manage',
   },
   {
+    href: '/admin/users/import',
+    label: 'Import roster',
+    hint: 'Add people and shifts from a spreadsheet.',
+    capability: 'roster.edit',
+    group: 'Manage',
+  },
+  {
+    href: '/admin/audit',
+    label: 'Audit log',
+    hint: 'Every change and every refused request.',
+    capability: 'audit.read',
+    group: 'Manage',
+  },
+  {
     href: '/admin/settings',
     label: 'Event settings',
     hint: 'Configure shift times and event thresholds.',

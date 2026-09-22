@@ -70,19 +70,19 @@ async function send(path: string, options: ApiRequest, token: string | null): Pr
   }
 }
 
-export async function api<T>(path: string, options: ApiRequest = {}): Promise<T> {
+/**
+ * Send, with one transparent retry after a refresh.
+ *
+ * The access token is short-lived, and a phone that slept through its expiry
+ * wakes up holding a dead one. Renewing and retrying here means the volunteer
+ * sees a capture succeed rather than a sign-in screen.
+ *
+ * Bounded to a single attempt, and skipped for the auth routes themselves —
+ * refreshing in response to a failed refresh is a loop, not a recovery.
+ */
+async function sendWithRefresh(path: string, options: ApiRequest): Promise<Response> {
   let response = await send(path, options, getAccessToken());
 
-  /**
-   * One transparent retry after a refresh.
-   *
-   * The access token is short-lived, and a phone that slept through its expiry
-   * wakes up holding a dead one. Renewing and retrying here means the volunteer
-   * sees a capture succeed rather than a sign-in screen.
-   *
-   * Bounded to a single attempt, and skipped for the auth routes themselves —
-   * refreshing in response to a failed refresh is a loop, not a recovery.
-   */
   if (response.status === 401 && !path.startsWith('/auth/')) {
     const renewed = await refreshSession();
 
@@ -91,25 +91,49 @@ export async function api<T>(path: string, options: ApiRequest = {}): Promise<T>
     }
   }
 
+  return response;
+}
+
+async function throwForStatus(response: Response, payload: unknown): Promise<never> {
+  const body = (payload as ErrorBody | null)?.error ?? {
+    code: 'INTERNAL_ERROR',
+    message: 'Something went wrong',
+    requestId: response.headers.get('x-request-id') ?? 'unknown',
+  };
+
+  // Still unauthenticated after a refresh: the session is genuinely over.
+  // Drop it so the app routes to sign-in rather than retrying forever.
+  if (response.status === 401) clearSession();
+
+  throw new ApiError(response.status, body);
+}
+
+export async function api<T>(path: string, options: ApiRequest = {}): Promise<T> {
+  const response = await sendWithRefresh(path, options);
+
   if (response.status === 204) return undefined as T;
 
   const payload: unknown = await response.json().catch(() => null);
 
-  if (!response.ok) {
-    const body = (payload as ErrorBody | null)?.error ?? {
-      code: 'INTERNAL_ERROR',
-      message: 'Something went wrong',
-      requestId: response.headers.get('x-request-id') ?? 'unknown',
-    };
-
-    // Still unauthenticated after a refresh: the session is genuinely over.
-    // Drop it so the app routes to sign-in rather than retrying forever.
-    if (response.status === 401) clearSession();
-
-    throw new ApiError(response.status, body);
-  }
+  if (!response.ok) await throwForStatus(response, payload);
 
   return payload as T;
+}
+
+/**
+ * A file rather than JSON — the roster export. Same authorization, same
+ * refresh, same error shape on failure; the body comes back as a Blob for the
+ * caller to hand to the browser's download.
+ */
+export async function apiBlob(path: string): Promise<Blob> {
+  const response = await sendWithRefresh(path, {});
+
+  if (!response.ok) {
+    const payload: unknown = await response.json().catch(() => null);
+    await throwForStatus(response, payload);
+  }
+
+  return response.blob();
 }
 
 /** True for errors an outbox flush should retry rather than give up on. */

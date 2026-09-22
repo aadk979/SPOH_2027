@@ -38,6 +38,22 @@ const CsvList = z.string().transform((raw) => [
   ),
 ]);
 
+/**
+ * An optional variable that may be present but blank.
+ *
+ * `.env.example` lists every key with an empty value so a deployment can see
+ * what exists without reading the schema — which means a copied file arrives
+ * carrying `CLOUDWATCH_LOG_GROUP=`. Treating that as `undefined` rather than as
+ * a zero-length string is the difference between "not configured" and a server
+ * that refuses to start.
+ */
+function optional<T extends z.ZodTypeAny>(schema: T) {
+  return z.preprocess(
+    (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+    schema.optional(),
+  );
+}
+
 const EnvSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -112,6 +128,55 @@ const EnvSchema = z
 
     S3_MEDIA_BUCKET: z.string().optional(),
     AWS_REGION: z.string().default('ap-southeast-1'),
+
+    /**
+     * CloudWatch Logs (BUILD_PLAN §8.7).
+     *
+     * Unset means the server logs to stdout only, which is right on a laptop
+     * and wrong on the single box that also holds the database — if it dies,
+     * the journal dies with it, at exactly the moment somebody wants to read
+     * the last ten minutes. Setting a group ships structured logs off-host.
+     *
+     * The audit group is optional and separate so it can carry a long
+     * retention and a tighter resource policy without paying to keep every
+     * request line for the same year. Unset, audit events join the main group.
+     */
+    CLOUDWATCH_LOG_GROUP: optional(z.string().min(1)),
+    CLOUDWATCH_AUDIT_LOG_GROUP: optional(z.string().min(1)),
+    /** Defaults to AWS_REGION. Set only when the log group lives elsewhere. */
+    CLOUDWATCH_REGION: optional(z.string().min(1)),
+    /**
+     * Applied when this process creates the group. CloudWatch only accepts
+     * this fixed set of values, so an arbitrary number is refused at boot
+     * rather than silently ignored by the API.
+     */
+    CLOUDWATCH_RETENTION_DAYS: optional(
+      z.coerce
+        .number()
+        .int()
+        .refine(
+          (days) =>
+            [
+              1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1096, 1827, 2192, 2557,
+              2922, 3288, 3653,
+            ].includes(days),
+          {
+            message:
+              'must be a retention period CloudWatch accepts (1, 3, 5, 7, 14, 30, 90, 365, …)',
+          },
+        ),
+    ),
+    /**
+     * Mirror every application log line to CloudWatch, not just audit events.
+     *
+     * Off by default: at peak the capture endpoints alone produce more request
+     * lines than the audit trail does rows in a day, and PutLogEvents is billed
+     * by ingested byte. The audit trail is the part that must survive the box.
+     */
+    CLOUDWATCH_SHIP_APP_LOGS: z
+      .enum(['true', 'false'])
+      .default('false')
+      .transform((value) => value === 'true'),
     /** Seconds a presigned upload policy stays valid. */
     S3_UPLOAD_TTL_SECONDS: z.coerce.number().int().min(30).max(3600).default(300),
     /** Ceiling written into the presigned policy, so S3 enforces it too. */
@@ -189,7 +254,7 @@ const EnvSchema = z
         ctx.addIssue({
           code: 'custom',
           path: ['APP_BASE_URL'],
-          message: 'required when AUTH_PROVIDER=cognito — this deployment\'s own public origin',
+          message: "required when AUTH_PROVIDER=cognito — this deployment's own public origin",
         });
       }
     }
@@ -263,6 +328,14 @@ const EnvSchema = z
         path: ['VAPID_PUBLIC_KEY'],
         message:
           'set all three of VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY and VAPID_SUBJECT, or none of them',
+      });
+    }
+
+    if (env.CLOUDWATCH_SHIP_APP_LOGS && !env.CLOUDWATCH_LOG_GROUP) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['CLOUDWATCH_LOG_GROUP'],
+        message: 'required when CLOUDWATCH_SHIP_APP_LOGS=true — there is nowhere to ship to',
       });
     }
 

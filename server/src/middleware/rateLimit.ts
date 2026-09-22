@@ -3,6 +3,7 @@ import type { Request } from 'express';
 import { ERROR_CODES } from '@spoh/shared';
 import { env } from '../config/env.js';
 import { requestIdOf } from './requestId.js';
+import { auditRefusal } from './securityAudit.js';
 
 /**
  * Rate limiting (BUILD_PLAN §8.4).
@@ -32,6 +33,10 @@ function build(max: number): RateLimitRequestHandler {
     standardHeaders: 'draft-8',
     legacyHeaders: false,
     handler: (req, res) => {
+      // This handler answers the request itself rather than throwing, so the
+      // error handler never sees it — the audit call has to happen here.
+      auditRefusal(req, 429, ERROR_CODES.RATE_LIMITED);
+
       res.status(429).json({
         error: {
           code: ERROR_CODES.RATE_LIMITED,

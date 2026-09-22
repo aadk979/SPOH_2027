@@ -685,20 +685,40 @@ model ImportBatch {
   @@index([importedAt])
 }
 
+enum AuditSeverity {
+  INFO
+  NOTICE
+  WARNING
+  CRITICAL
+}
+
+enum AuditOutcome {
+  SUCCESS
+  DENIED
+  FAILURE
+}
+
 model AuditLog {
-  id         String   @id @default(cuid())
+  id         String        @id @default(cuid())
   actorId    String?
   actorSub   String?
-  /// "registration.void", "card.reissue"
+  /// "registration.void", "card.reissue", "auth.signInFailed"
   action     String
+  severity   AuditSeverity @default(INFO)
+  outcome    AuditOutcome  @default(SUCCESS)
   entityType String
   entityId   String?
   before     Json?
   after      Json?
+  /// Transport detail. Set on security events, null on change events, which
+  /// describe themselves through before/after instead.
+  method     String?
+  path       String?
+  statusCode Int?
   ip         String?
   userAgent  String?
   requestId  String?
-  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  createdAt  DateTime      @default(now()) @db.Timestamptz(3)
 
   actor Volunteer? @relation(fields: [actorId], references: [id], onDelete: SetNull)
 
@@ -706,6 +726,12 @@ model AuditLog {
   @@index([createdAt])
   @@index([actorId, createdAt])
   @@index([action, createdAt])
+  // The security screen's default view: everything that was refused, newest
+  // first. Without this it is a sequential scan of the busiest table we have.
+  @@index([severity, createdAt])
+  @@index([outcome, createdAt])
+  // Tailing. The live view asks for "rows after this id" every few seconds.
+  @@index([id, createdAt])
 }
 
 /// Makes the client's retry-on-failure loop safe, which is what makes the local

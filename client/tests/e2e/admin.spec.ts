@@ -20,6 +20,10 @@ const BOOTH = 'booth@spoh2027.test';
 
 async function signIn(page: Page, email: string): Promise<void> {
   await page.goto('/sign-in');
+  // Against `next dev` the form is visible before React has attached its
+  // submit handler; a click in that window submits natively and reloads the
+  // page. Wait for the session bootstrap call, which only runs once hydrated.
+  await page.waitForResponse((response) => response.url().includes('/api/v1/auth/refresh'));
   await page.getByLabel('Roster email').fill(email);
   await page.getByRole('button', { name: 'Sign in' }).click();
   await page.waitForURL('**/home');
@@ -143,5 +147,70 @@ test.describe('roster administration', () => {
     // The two times that decide whether the capture screens work at all.
     await expect(page.getByLabel('Morning starts')).toHaveValue('09:30');
     await expect(page.getByLabel('Afternoon ends')).toHaveValue('18:00');
+  });
+});
+
+test.describe('adding people', () => {
+  /**
+   * The form's default role is Volunteer. Somebody typing an email that is
+   * already the Room A IC must be stopped and shown the row, not have the IC
+   * silently demoted. Non-mutating, so it is safe against the seeded database.
+   */
+  test('adding an existing email points the Chief at the existing row', async ({ page }) => {
+    await signIn(page, CHIEF);
+    await page.goto('/admin/users');
+
+    await page.getByRole('button', { name: 'Add a volunteer' }).click();
+    await page.getByLabel('Name', { exact: true }).fill('Somebody New');
+    await page.getByLabel('Email', { exact: true }).fill(BOOTH);
+    await page.getByRole('button', { name: 'Add and send the invite' }).click();
+
+    await expect(
+      page.getByRole('alert').filter({ hasText: 'Already on the roster' }),
+    ).toBeVisible();
+    await page.getByRole('button', { name: 'Show their row' }).click();
+
+    await expect(page.getByLabel('Name or email')).toHaveValue(BOOTH);
+    await expect(page.getByRole('heading', { name: '1 volunteer' })).toBeVisible();
+  });
+
+  /**
+   * The import previews before it writes. The template names people who are
+   * not on the seeded roster, so the preview reports them as new; nothing is
+   * committed, so the seed is untouched for the next run.
+   */
+  test('the roster import previews a pasted file line by line', async ({ page }) => {
+    await signIn(page, CHIEF);
+    await page.goto('/admin/users');
+    await page.getByRole('link', { name: 'Import a file' }).click();
+    await page.waitForURL('**/admin/users/import');
+
+    // A paste the way Excel produces it: tabs, a friendlier header, a
+    // Singapore date and a role abbreviation — plus one broken line.
+    await page
+      .getByLabel(/paste rows/)
+      .fill(
+        [
+          'Full Name\tEmail\tRole\tStation\tDate\tShift',
+          'E2E Import One\te2e-one@spoh2027.test\tIC\tSIGNUP_BOOTH\t7/1/2027\tAM',
+          'E2E Import Two\te2e-two@spoh2027.test\t\tSIGNUP_BOOTH\t7/1/2027\tPM',
+          'E2E Broken\tnot-an-email\t\t\t\t',
+        ].join('\n'),
+      );
+
+    await expect(page.getByText('3 rows read, 2 ready, 1 left out.')).toBeVisible();
+    await expect(page.getByText(/Line 4/)).toBeVisible();
+
+    await page.getByRole('button', { name: 'Preview 2 rows — writes nothing' }).click();
+
+    await expect(page.getByRole('heading', { name: 'This is what would happen' })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: /Import: add 2 people, 2 shifts/ }),
+    ).toBeVisible();
+
+    // Neither person exists afterwards: the preview wrote nothing.
+    await page.goto('/admin/users');
+    await page.getByLabel('Name or email').fill('e2e-one@');
+    await expect(page.getByText('Nobody matches that')).toBeVisible();
   });
 });

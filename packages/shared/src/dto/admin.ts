@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { CommitteeRole, CourseCode, ShiftBlock, StationKind } from '../enums.js';
 import { Id, IsoDate, IsoDateTime, PaginationQuery, ReasonText } from './common.js';
-import { VolunteerPhone, VolunteerRecord } from './roster.js';
+import { ShiftAssignmentRecord, VolunteerPhone, VolunteerRecord } from './roster.js';
 
 /**
  * Administration: the people, the places and the days.
@@ -102,6 +102,37 @@ export const VolunteerMutationResponse = z
   })
   .strict();
 export type VolunteerMutationResponse = z.infer<typeof VolunteerMutationResponse>;
+
+/**
+ * One person, with the shifts they hold. The list endpoint carries only a
+ * count, because 200 rows each dragging their assignments along is a slow
+ * screen; the detail is fetched when a row is opened.
+ */
+export const VolunteerDetailResponse = z
+  .object({
+    volunteer: VolunteerAdminRecord,
+    assignments: z.array(ShiftAssignmentRecord),
+  })
+  .strict();
+export type VolunteerDetailResponse = z.infer<typeof VolunteerDetailResponse>;
+
+/**
+ * "I never got the email" is the most common support request in the week
+ * before the event. What gets sent depends on where the account is:
+ *
+ *  - `invite`   they have never set a password, so the original invite with a
+ *               fresh temporary password is resent.
+ *  - `reset`    they have signed in before, so a password-reset code is sent
+ *               and they use "Forgot password" at the sign-in screen.
+ *  - `none`     the identity provider has no email to send (local dev).
+ */
+export const ResendInviteResponse = z
+  .object({
+    volunteer: VolunteerAdminRecord,
+    delivery: z.enum(['invite', 'reset', 'none']),
+  })
+  .strict();
+export type ResendInviteResponse = z.infer<typeof ResendInviteResponse>;
 
 /** Manual roster edit, for the shifts an import did not cover. */
 export const CreateAssignmentRequest = z

@@ -9,6 +9,7 @@
 export * from './enums.js';
 export * from './capabilities.js';
 export * from './errorCodes.js';
+export * from './rosterCsv.js';
 
 export * from './dto/common.js';
 export * from './dto/station.js';
@@ -32,3 +33,4 @@ export * from './dto/settings.js';
 export * from './dto/notification.js';
 export * from './dto/media.js';
 export * from './dto/attendance.js';
+export * from './dto/audit.js';

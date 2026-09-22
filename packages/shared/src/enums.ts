@@ -104,6 +104,18 @@ export function roleMeets(role: CommitteeRole, minimum: CommitteeRole): boolean 
   return ROLE_PRECEDENCE[role] <= ROLE_PRECEDENCE[minimum];
 }
 
+/**
+ * True when `actor` is strictly more privileged than `subject`.
+ *
+ * The administration rule, in one place for the server that enforces it and
+ * the client that hides the controls: nobody edits, provisions or imports an
+ * account at or above their own level, or `user.provision` would be a
+ * permission to become an Admin.
+ */
+export function outranks(actor: CommitteeRole, subject: CommitteeRole): boolean {
+  return ROLE_PRECEDENCE[actor] < ROLE_PRECEDENCE[subject];
+}
+
 /** The most privileged of a set of group memberships, or undefined if empty. */
 export function highestRole(roles: readonly CommitteeRole[]): CommitteeRole | undefined {
   return roles.reduce<CommitteeRole | undefined>(

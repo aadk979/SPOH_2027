@@ -1,6 +1,7 @@
 import {
   ERROR_CODES,
-  ROLE_PRECEDENCE,
+  outranks,
+  serialiseRosterCsv,
   type CommitteeRole,
   type CreateAssignmentRequest,
   type CreateEventDayRequest,
@@ -10,6 +11,7 @@ import {
   type EventDayRecord,
   type GiftTypeRecord,
   type ListVolunteersQuery,
+  type ResendInviteResponse,
   type ShiftAssignmentRecord,
   type StationSummary,
   type UpdateEventDayRequest,
@@ -17,6 +19,7 @@ import {
   type UpdateStationRequest,
   type UpdateVolunteerRequest,
   type VolunteerAdminRecord,
+  type VolunteerDetailResponse,
   type VolunteerMutationResponse,
 } from '@spoh/shared';
 import type { Prisma } from '../../generated/prisma/client.js';
@@ -29,7 +32,7 @@ import { invalidateVolunteerCache } from '../../middleware/auth/index.js';
 import { identityProvider } from '../identity/provider.js';
 import { revokeAllForVolunteer } from '../auth/service.js';
 import { toStationSummary } from '../station/repo.js';
-import { toAssignmentRecord } from '../roster/repo.js';
+import { findReportingCycle, toAssignmentRecord } from '../roster/repo.js';
 import { toGiftTypeRecord } from '../gift/repo.js';
 
 /**
@@ -49,13 +52,10 @@ import { toGiftTypeRecord } from '../gift/repo.js';
  * an Admin account, sign into it, and hold every capability in the system.
  *
  * Both rules are enforced here rather than in the router, because they depend on
- * the target row and the capability middleware never reads it.
+ * the target row and the capability middleware never reads it. `outranks` is
+ * the shared helper, so the roster import and the client's affordances apply
+ * the same rule.
  */
-
-/** True when `actor` is strictly more privileged than `subject`. */
-function outranks(actor: CommitteeRole, subject: CommitteeRole): boolean {
-  return ROLE_PRECEDENCE[actor] < ROLE_PRECEDENCE[subject];
-}
 
 export interface Actor {
   volunteerId: string;
@@ -162,10 +162,76 @@ export async function listVolunteers(query: ListVolunteersQuery): Promise<{
   };
 }
 
-export async function getVolunteer(id: string): Promise<VolunteerAdminRecord> {
+export async function getVolunteer(id: string): Promise<VolunteerDetailResponse> {
   const row = await prisma.volunteer.findUnique({ where: { id }, select: adminSelect });
   if (!row) throw new NotFoundError('Volunteer');
-  return toAdminRecord(row);
+
+  const assignments = await prisma.shiftAssignment.findMany({
+    where: { volunteerId: id },
+    include: {
+      volunteer: { select: { displayName: true, phone: true } },
+      station: { select: { name: true } },
+      eventDay: { select: { date: true } },
+    },
+    orderBy: [{ eventDay: { date: 'asc' } }, { block: 'asc' }],
+  });
+
+  return { volunteer: toAdminRecord(row), assignments: assignments.map(toAssignmentRecord) };
+}
+
+/**
+ * The whole roster in the import's own format: one row per shift, or one row
+ * for a person with no shifts. Export, fix it up in a spreadsheet, import — the
+ * round trip is how a Chief re-plans a day without retyping 200 names.
+ *
+ * Deactivated people are left out. The import cannot touch them, and a file
+ * that quietly carries them would re-report the same skip every time.
+ */
+export async function exportRosterCsv(): Promise<string> {
+  const volunteers = await prisma.volunteer.findMany({
+    where: { active: true },
+    orderBy: [{ role: 'asc' }, { displayName: 'asc' }],
+    select: {
+      displayName: true,
+      email: true,
+      role: true,
+      phone: true,
+      portfolio: true,
+      reportsTo: { select: { email: true } },
+      shiftAssignments: {
+        select: {
+          roleLabel: true,
+          block: true,
+          station: { select: { code: true } },
+          eventDay: { select: { date: true } },
+        },
+        orderBy: [{ eventDay: { date: 'asc' } }, { block: 'asc' }],
+      },
+    },
+  });
+
+  const rows = volunteers.flatMap((volunteer) => {
+    const person = {
+      displayName: volunteer.displayName,
+      email: volunteer.email,
+      role: volunteer.role,
+      phone: volunteer.phone,
+      portfolio: volunteer.portfolio,
+      reportsToEmail: volunteer.reportsTo?.email ?? null,
+    };
+
+    if (volunteer.shiftAssignments.length === 0) return [person];
+
+    return volunteer.shiftAssignments.map((shift) => ({
+      ...person,
+      stationCode: shift.station.code,
+      eventDate: shift.eventDay.date.toISOString().slice(0, 10),
+      block: shift.block,
+      roleLabel: shift.roleLabel,
+    }));
+  });
+
+  return serialiseRosterCsv(rows);
 }
 
 /** Load the target and apply the two escalation rules. */
@@ -192,39 +258,14 @@ async function loadTarget(id: string, actor: Actor, action: string): Promise<Adm
   return row;
 }
 
-/**
- * Walk the reporting chain to make sure a proposed manager is not downstream of
- * the volunteer being edited.
- *
- * A cycle here is not a cosmetic problem: `GET /me` walks this chain to build
- * the escalation card, and a loop would spin until the request timed out — on
- * the boot call every volunteer makes.
- */
+/** A proposed manager must not be downstream of the volunteer being edited. */
 async function assertNoReportingCycle(volunteerId: string, managerId: string): Promise<void> {
-  if (volunteerId === managerId) {
+  const cycle = await findReportingCycle(prisma, volunteerId, managerId);
+  if (cycle === 'self') {
     throw new AppError(409, ERROR_CODES.REPORTING_CYCLE, 'Somebody cannot report to themselves.');
   }
-
-  const seen = new Set<string>([volunteerId]);
-  let cursor: string | null = managerId;
-
-  // Bounded by the roster size; the seen-set makes it terminate on any
-  // pre-existing loop rather than inheriting it.
-  while (cursor) {
-    if (seen.has(cursor)) {
-      throw new AppError(
-        409,
-        ERROR_CODES.REPORTING_CYCLE,
-        'That reporting line would form a loop.',
-      );
-    }
-    seen.add(cursor);
-
-    const next: { reportsToId: string | null } | null = await prisma.volunteer.findUnique({
-      where: { id: cursor },
-      select: { reportsToId: true },
-    });
-    cursor = next?.reportsToId ?? null;
+  if (cycle === 'loop') {
+    throw new AppError(409, ERROR_CODES.REPORTING_CYCLE, 'That reporting line would form a loop.');
   }
 }
 
@@ -432,6 +473,43 @@ export async function reactivateVolunteer(
   // Sessions are deliberately not restored: the volunteer signs in again, which
   // is what proves they still hold the credential.
   return { volunteer: toAdminRecord(updated), sessionsRevoked: 0, identityChanged };
+}
+
+/**
+ * Send the sign-in email again.
+ *
+ * The same escalation rules as editing, and not out of habit: a password reset
+ * on a confirmed account forces that person to set a new password before their
+ * next sign-in. Aimed at an Admin by a Chief, that is a way to lock the Admin
+ * out at 09:00 on the day — so it is refused for anyone at or above your level.
+ */
+export async function resendInvite(
+  id: string,
+  actor: Actor,
+  audit: AuditContext,
+): Promise<ResendInviteResponse> {
+  const target = await loadTarget(id, actor, 'resend an invite to');
+
+  if (!target.active) {
+    throw new ConflictError(
+      ERROR_CODES.CONFLICT,
+      'That account is deactivated. Restore their access first.',
+    );
+  }
+
+  const delivery = await identityProvider.resendInvite(target.email);
+
+  await prisma.$transaction(async (tx) => {
+    await writeAudit(tx, {
+      ...audit,
+      action: 'user.resendInvite',
+      entityType: 'Volunteer',
+      entityId: id,
+      after: { delivery, hasSignedIn: target.lastSeenAt !== null },
+    });
+  });
+
+  return { volunteer: toAdminRecord(target), delivery };
 }
 
 // ─────────────────────────────────────────────────────────────
