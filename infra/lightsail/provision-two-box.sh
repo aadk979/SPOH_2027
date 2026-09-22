@@ -20,8 +20,13 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 
 say() { printf '\n\033[1m%s\033[0m\n' "$*"; }
 
+# Bootstrap runs over SSH after creation, not as user-data: Lightsail prepends
+# its own `#!/bin/sh`, so a bash script dies on the first bashism with the
+# evidence buried in cloud-init-output.log. See provision-single.sh.
 create() {
   local name=$1 role=$2 userdata=$3
+  # shellcheck disable=SC2034  # kept for the caller's readability
+  : "$userdata"
   if aws lightsail get-instance --region "$REGION" --instance-name "$name" >/dev/null 2>&1; then
     echo "     $name already exists, skipping"
     return
@@ -29,7 +34,7 @@ create() {
   aws lightsail create-instances --region "$REGION" \
     --instance-names "$name" --availability-zone "$AZ" \
     --blueprint-id "$BLUEPRINT" --bundle-id "$BUNDLE" \
-    --user-data file://"$userdata" \
+\
     --tags key=project,value=spoh2027 key=role,value="$role" >/dev/null
   echo "     $name created"
 }
@@ -42,22 +47,22 @@ wait_running() {
   echo " $1 running"
 }
 
-say "1/5  instances ($BUNDLE each)"
-create "$DB_NAME"  db  "$HERE/bootstrap-db.sh"
-create "$APP_NAME" app "$HERE/bootstrap.sh"
+say "1/6  instances ($BUNDLE each)"
+create "$DB_NAME"  db
+create "$APP_NAME" app
 
-say "2/5  waiting"
+say "2/6  waiting"
 wait_running "$DB_NAME"
 wait_running "$APP_NAME"
 
-say "3/5  private addresses"
+say "3/6  private addresses"
 DB_PRIVATE=$(aws lightsail get-instance --region "$REGION" --instance-name "$DB_NAME" \
              --query 'instance.privateIpAddress' --output text)
 APP_PRIVATE=$(aws lightsail get-instance --region "$REGION" --instance-name "$APP_NAME" \
               --query 'instance.privateIpAddress' --output text)
 echo "     db=$DB_PRIVATE  app=$APP_PRIVATE"
 
-say "4/5  firewalls"
+say "4/6  firewalls"
 # App host: public web, SSH.
 aws lightsail put-instance-public-ports --region "$REGION" --instance-name "$APP_NAME" \
   --port-infos \
@@ -73,7 +78,7 @@ aws lightsail put-instance-public-ports --region "$REGION" --instance-name "$DB_
     "fromPort=5432,toPort=5432,protocol=TCP,cidrs=$APP_PRIVATE/32" >/dev/null
 echo "     db reachable from $APP_PRIVATE only"
 
-say "5/5  static IP on the app host"
+say "5/6  static IP on the app host"
 aws lightsail get-static-ip --region "$REGION" --static-ip-name "$STATIC_IP_NAME" >/dev/null 2>&1 \
   || aws lightsail allocate-static-ip --region "$REGION" --static-ip-name "$STATIC_IP_NAME" >/dev/null
 aws lightsail attach-static-ip --region "$REGION" \
@@ -86,6 +91,15 @@ IP=$(aws lightsail get-static-ip --region "$REGION" --static-ip-name "$STATIC_IP
 aws lightsail enable-add-on --region "$REGION" --resource-name "$DB_NAME" \
   --add-on-request 'addOnType=AutoSnapshot,autoSnapshotAddOnRequest={snapshotTimeOfDay=18:00}' \
   >/dev/null 2>&1 || echo "     (auto-snapshot not enabled — set it in the console)"
+
+say "6/6  bootstrap both hosts over SSH"
+# The database box has no public SSH rule of its own, so it is bootstrapped
+# through its public address before the firewall is narrowed, or by hand from
+# the app host afterwards. Run this step before step 4 if you have already
+# locked 22 down on the db box.
+DB_PUBLIC=$(aws lightsail get-instance --region "$REGION" --instance-name "$DB_NAME"             --query 'instance.publicIpAddress' --output text)
+echo "     db..."  && bootstrap "$DB_PUBLIC" "$HERE/bootstrap-db.sh"
+echo "     app..." && bootstrap "$IP"        "$HERE/bootstrap.sh"
 
 echo ""
 echo "  App : $APP_NAME  public $IP  private $APP_PRIVATE"

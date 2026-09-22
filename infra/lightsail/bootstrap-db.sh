@@ -1,11 +1,26 @@
-#!/usr/bin/env bash
+#!/bin/sh
+# shellcheck shell=bash
+#
+# Re-exec under bash.
+#
+# Lightsail PREPENDS its own `#!/bin/sh` to whatever you pass as user-data, so
+# this file's shebang is discarded and the whole thing runs under dash — where
+# `set -o pipefail` is an "Illegal option" and process substitution does not
+# parse. cloud-init then reports `scripts_user` failed and nothing else in here
+# runs, silently, with the only trace in /var/log/cloud-init-output.log.
+#
+# provision-single.sh runs this over SSH instead, for exactly that reason. The
+# guard stays so the script is still correct if it is ever used as user-data.
+if [ -z "${BASH_VERSION:-}" ]; then
+  exec /bin/bash "$0" "$@"
+fi
 #
 # Database-only host for the two-box topology (topology/two-box.md).
 #
 # Postgres and nothing else. No Node, no nginx, no application code — the whole
 # point of the split is that this box has one job and one reason to fail.
 #
-# Runs once as root via Lightsail user-data. Safe to re-run by hand. It does
+# Run as root over SSH by provision-two-box.sh. Safe to re-run by hand. It does
 # not start Postgres: that needs POSTGRES_PASSWORD, which never lives in a
 # file that gets committed. See the tail of this script.
 #
