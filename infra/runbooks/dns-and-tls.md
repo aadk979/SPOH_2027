@@ -2,7 +2,7 @@
 
 ## The manual step
 
-`secure-channel.duckdns.org` is a free duckdns record, updated through their web
+`spoh2027.duckdns.org` is a free duckdns record, updated through their web
 UI. **There is no API token on any server** — the previous box had no updater
 cron and no token in any file. So every hostname cutover has a step a human
 performs, and it is the step that blocks everything after it.
@@ -12,7 +12,7 @@ is on the front page) and put an updater on the box:
 
 ```sh
 # On the host, as ubuntu. The token is a credential: 600, never in git.
-echo 'https://www.duckdns.org/update?domains=secure-channel&token=<TOKEN>&ip=' \
+echo 'https://www.duckdns.org/update?domains=spoh2027&token=<TOKEN>&ip=' \
   > ~/.duckdns-url
 chmod 600 ~/.duckdns-url
 
@@ -34,18 +34,18 @@ new box, because Let's Encrypt validates over HTTP to that address.
 2. **Wait for propagation.** Do not skip this; a failed ACME challenge counts
    against a rate limit that is measured in hours.
    ```sh
-   dig +short secure-channel.duckdns.org @1.1.1.1
+   dig +short spoh2027.duckdns.org @1.1.1.1
    ```
    Repeat until it returns the new address. duckdns TTL is 60s, so this is
    usually quick, but a resolver that cached the old value will still fail.
 3. **Check port 80 reaches the new box** — nginx must be running and serving
    the ACME path before certbot is worth trying.
    ```sh
-   curl -sI http://secure-channel.duckdns.org/ | head -1
+   curl -sI http://spoh2027.duckdns.org/ | head -1
    ```
 4. **Issue the certificate.**
    ```sh
-   sudo certbot --nginx -d secure-channel.duckdns.org \
+   sudo certbot --nginx -d spoh2027.duckdns.org \
      --non-interactive --agree-tos -m <your-email> --redirect
    ```
    `--redirect` adds the port-80 → 443 rule. Certbot edits the nginx site file
@@ -53,10 +53,10 @@ new box, because Let's Encrypt validates over HTTP to that address.
    ever replace the file you must re-run certbot.
 5. **Verify.**
    ```sh
-   echo | openssl s_client -connect secure-channel.duckdns.org:443 \
-     -servername secure-channel.duckdns.org 2>/dev/null \
+   echo | openssl s_client -connect spoh2027.duckdns.org:443 \
+     -servername spoh2027.duckdns.org 2>/dev/null \
      | openssl x509 -noout -subject -dates
-   curl -sf https://secure-channel.duckdns.org/readyz
+   curl -sf https://spoh2027.duckdns.org/readyz
    ```
 
 ## Renewal
@@ -76,7 +76,7 @@ date in a calendar; `sudo certbot certificates` prints it.
 
 ## Why the hostname is load-bearing
 
-Three things are pinned to `secure-channel.duckdns.org` and all three break
+Three things are pinned to `spoh2027.duckdns.org` and all three break
 together if it changes:
 
 | Where                          | What                                   | Fix                                             |

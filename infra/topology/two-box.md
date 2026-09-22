@@ -5,7 +5,7 @@ concurrent users. **$48/month.** Not built yet; this is the design, and
 `runbooks/scale-up.md` is the migration.
 
 ```
-                    duckdns  secure-channel.duckdns.org
+                    duckdns  spoh2027.duckdns.org
                         │
                         ▼
         ┌───────────────────────────┐

@@ -59,7 +59,7 @@ cd ~/app && npm run db:deploy --workspace server
 
 # 5. Start.
 pm2 start spoh-server spoh-client
-curl -sf https://secure-channel.duckdns.org/readyz
+curl -sf https://spoh2027.duckdns.org/readyz
 ```
 
 `ON_ERROR_STOP=1` matters. Without it psql prints errors and carries on, and

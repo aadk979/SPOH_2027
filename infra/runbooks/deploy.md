@@ -48,8 +48,8 @@ pm2 save
 ## Verify, in this order
 
 ```sh
-curl -sf https://secure-channel.duckdns.org/healthz    # process is up
-curl -sf https://secure-channel.duckdns.org/readyz     # database reachable
+curl -sf https://spoh2027.duckdns.org/healthz    # process is up
+curl -sf https://spoh2027.duckdns.org/readyz     # database reachable
 pm2 list                                               # both online, cluster mode
 pm2 logs spoh-server --lines 40 --nostream             # no boot errors
 ```
@@ -73,8 +73,8 @@ secrets or host-specific:
 NODE_ENV=production
 AUTH_PROVIDER=cognito
 DATABASE_URL=postgresql://spoh_app:<pw>@127.0.0.1:5432/spoh2027?sslmode=require&uselibpqcompat=true
-CORS_ALLOWED_ORIGINS=https://secure-channel.duckdns.org
-APP_BASE_URL=https://secure-channel.duckdns.org
+CORS_ALLOWED_ORIGINS=https://spoh2027.duckdns.org
+APP_BASE_URL=https://spoh2027.duckdns.org
 COGNITO_DOMAIN=https://spoh2027-livetest.auth.ap-southeast-1.amazoncognito.com
 COGNITO_USER_POOL_ID=ap-southeast-1_9bwl2nGF7
 COGNITO_CLIENT_ID=23uft7mvtnrno1uunsc5lp0h2v
@@ -92,7 +92,7 @@ wrong, it collapses per-IP rate limiting into one bucket for the whole event.
 time, so it must exist _before_ `npm run build --workspace client`:
 
 ```
-NEXT_PUBLIC_API_BASE_URL=https://secure-channel.duckdns.org
+NEXT_PUBLIC_API_BASE_URL=https://spoh2027.duckdns.org
 NEXT_PUBLIC_ENV_LABEL=live-test
 NEXT_PUBLIC_COGNITO_REGION=ap-southeast-1
 NEXT_PUBLIC_COGNITO_USER_POOL_ID=ap-southeast-1_9bwl2nGF7
@@ -120,7 +120,7 @@ deploy is how you lose the rows written since it ran.
 ## If the Cognito callback breaks
 
 The app client's callback URL is pinned to the hostname:
-`https://secure-channel.duckdns.org/api/v1/auth/callback`. It is a Cognito
+`https://spoh2027.duckdns.org/api/v1/auth/callback`. It is a Cognito
 setting, not an application one, so a hostname change means:
 
 ```sh

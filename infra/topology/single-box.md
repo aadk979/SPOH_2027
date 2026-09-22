@@ -3,7 +3,7 @@
 What runs today. One Lightsail instance carrying every tier.
 
 ```
-                    duckdns  secure-channel.duckdns.org
+                    duckdns  spoh2027.duckdns.org
                         │
                         ▼
               ┌───────────────────────┐

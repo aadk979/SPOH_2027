@@ -54,8 +54,8 @@ address. Then verify without touching DNS, using the `Host` header to reach the
 new box directly:
 
 ```sh
-curl -sf --resolve secure-channel.duckdns.org:443:<new-app-ip> \
-  https://secure-channel.duckdns.org/readyz
+curl -sf --resolve spoh2027.duckdns.org:443:<new-app-ip> \
+  https://spoh2027.duckdns.org/readyz
 ```
 
 TLS will not validate yet — the certificate is still on the old box. Use `-k`
@@ -74,15 +74,15 @@ Everything from here is the cutover. Keep it tight.
 
 ## 6. DNS and certificate
 
-Point `secure-channel.duckdns.org` at the new app box's static IP and issue the
+Point `spoh2027.duckdns.org` at the new app box's static IP and issue the
 certificate — full procedure in `dns-and-tls.md`. Nothing in Cognito or the env
 files changes, because the hostname has not.
 
 ## 7. Verify, then stop
 
 ```sh
-curl -sf https://secure-channel.duckdns.org/healthz
-curl -sf https://secure-channel.duckdns.org/readyz
+curl -sf https://spoh2027.duckdns.org/healthz
+curl -sf https://spoh2027.duckdns.org/readyz
 pm2 list          # cluster mode, both online
 ```
 
