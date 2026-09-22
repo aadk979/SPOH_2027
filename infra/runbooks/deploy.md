@@ -57,6 +57,17 @@ pm2 logs spoh-server --lines 40 --nostream             # no boot errors
 `/readyz` is the one that matters. `/healthz` answers from the process alone
 and will happily say `ok` while the database is unreachable.
 
+Then run the smoke test, which is the step that actually matters:
+
+```sh
+SMOKE_PASSWORD='<chief password>' ./infra/scripts/smoke-test.sh
+```
+
+It exercises 36 endpoints across every module **including a real volunteer
+create, update and deactivate**. Reads pass on a box with no AWS credentials at
+all; only the provisioning path proves Cognito admin access works. A deploy
+verified with `/healthz` and a dashboard is not verified.
+
 Then sign in and load `/admin/audit`. It exercises auth, the database, the
 capability matrix and the new schema in one page, and its banner reports
 whether CloudWatch delivery is working.
@@ -81,6 +92,21 @@ COGNITO_CLIENT_ID=23uft7mvtnrno1uunsc5lp0h2v
 SESSION_SIGNING_SECRET=<32+ chars, NEW per host>
 TRUST_PROXY_HOPS=1
 DATABASE_POOL_MAX=25
+```
+
+**AWS credentials.** Lightsail injects an `AmazonLightsailInstanceRole` through
+instance metadata which the SDK picks up and which has **no permissions on our
+resources** — so provisioning fails with `AccessDeniedException` on
+`cognito-idp:AdminCreateUser` while every read endpoint keeps returning 200.
+Explicit credentials for the `spoh2027-app` IAM user
+(`infra/iam/app-policy.json`) must be in `server/.env`, which is also what
+CloudWatch shipping needs:
+
+```
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+CLOUDWATCH_AUDIT_LOG_GROUP=/spoh2027/audit
+CLOUDWATCH_RETENTION_DAYS=365
 ```
 
 `config/env.ts` validates all of it at boot and refuses to start on anything
