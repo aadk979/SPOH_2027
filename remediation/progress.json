@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T14:45:34.359Z",
+  "updatedAt": "2026-09-25T14:47:43.828Z",
   "current": {
     "phase": "P03",
     "step": "P03.9"
@@ -758,11 +758,16 @@
         {
           "id": "P03.9",
           "title": "Audit-branch code review",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T14:45:34.359Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T14:47:43.828Z",
+          "commits": ["c588817"],
+          "notes": [
+            {
+              "at": "2026-09-25T14:47:43.828Z",
+              "text": "audit branch reviewed: fixes F03-001/F02-002/F03-025; F03-039..042; facts for PF-14"
+            }
+          ]
         },
         {
           "id": "P03.10",
