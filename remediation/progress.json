@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T15:32:29.159Z",
+  "updatedAt": "2026-09-25T15:34:38.025Z",
   "current": {
     "phase": "P04",
-    "step": "P04.3"
+    "step": "P04.4"
   },
   "gates": [
     {
@@ -974,11 +974,18 @@
         {
           "id": "P04.4",
           "title": "Input, output and transport",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-25T15:32:46.698Z",
+          "completedAt": "2026-09-25T15:34:38.024Z",
+          "commits": [
+            "f92ff0d"
+          ],
+          "notes": [
+            {
+              "at": "2026-09-25T15:34:38.025Z",
+              "text": "10 areas reviewed; F04-006 High (NAT sign-in bucket, repro), F04-007 Medium (CSP unsafe-inline), F04-008/009/025 Low; PF-02 security impact small, availability impact = F04-006"
+            }
+          ]
         },
         {
           "id": "P04.5",
