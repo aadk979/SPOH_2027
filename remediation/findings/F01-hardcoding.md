@@ -243,6 +243,63 @@ All five are infra and all need a rebuild. `NODE_ENV` also gates the service wor
 Serving these from the API at runtime instead of inlining them would let one image run in staging
 and production; P05 decides.
 
+## Runtime settings audit (P01.5)
+
+**How settings work today.** 16 keys (`dto/settings.ts:53–91`, defaults `lib/settings.ts:43–69`)
+are stored as JSON rows in `AppSetting`. Each key is validated on its own, and an invalid row falls
+back to the compiled default. The server caches them and reloads every 60 s
+(`jobs/scheduler.ts:31`), so other instances converge within a minute. The client fetches them once
+per page load (`client/src/lib/runtimeSettings.ts:80–104`), so a volunteer sees a change only after
+reloading. Everyone can read them (`own.read`). Only `config.manage` (Chief Coordinator, Admin) can
+write them. A write records one `settings.update` audit row with before and after. There is no
+per-key history, no revert and no scheduling.
+
+**Proposed permissions.** `event.settings.manage` for event-scope keys (Chief Coordinator and above
+for their event), `platform.settings.manage` for platform-scope keys (Admin only). Privacy and
+security keys are Admin only whatever their scope. P11 turns these into Cedar actions.
+
+### Existing keys
+
+| Key                        | Default                  | Bounds today         | Scope                   | Who changes      | Schedule              | History | What changing this does (UI copy)                                                                                                                |
+| -------------------------- | ------------------------ | -------------------- | ----------------------- | ---------------- | --------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `eventName`                | `SPOH 2027`              | 1–80 chars           | —                       | —                | —                     | —       | Retired: becomes `Event.name` (F01-001, F01-002, F01-047).                                                                                       |
+| `shiftBlocks`              | 09:30–14:00, 13:30–18:00 | `HH:MM`, end > start | —                       | —                | —                     | —       | Retired: shift blocks become rows with local start and end (P01.3). Editing a block is a data change with its own audit.                         |
+| `silentStationMinutes`     | 15                       | 1–1440               | event, station override | event admin      | no                    | yes     | "A counted room with no entries for this long during shift hours is flagged on the dashboard." A talk room may need a longer value than a booth. |
+| `staleDeviceMinutes`       | 15                       | 1–1440               | event                   | event admin      | no                    | yes     | "A device that has captured nothing for this long is flagged in the IC console."                                                                 |
+| `implausibleTapsPerMinute` | 20                       | 1–600                | event, station override | event admin      | no                    | yes     | "Registrations per minute above which the IC console flags a device." Plausible rates differ per booth.                                          |
+| `longShiftMinutes`         | 180                      | 1–1440               | event                   | event admin      | no                    | yes     | "Time on station without a break before somebody appears on the welfare list."                                                                   |
+| `lostPersonPurgeHours`     | 24                       | 1–720                | event                   | Admin (privacy)  | no                    | yes     | "How long a resolved lost-person alert keeps its description." Tied to the D-04 personal-data option (F01-049).                                  |
+| `idempotencyRetentionDays` | 7                        | 1–90                 | platform                | Admin            | no                    | yes     | "How long a settled request is remembered, so a retried tap is not counted twice." Shorter than the longest offline outbox would double count.   |
+| `refreshSessionDays`       | 30                       | 1–90                 | platform                | Admin (security) | no                    | yes     | "How long a volunteer stays signed in on a device." Applies to sessions created after the change.                                                |
+| `dashboardPollSeconds`     | 3                        | 1–3600               | platform                | Admin            | via lifecycle (P10.5) | yes     | "How often the live dashboard and the ops-room display reload." Lower costs server load.                                                         |
+| `alertPollSeconds`         | 10                       | 1–3600 (too loose)   | platform                | Admin            | no                    | yes     | "How often every device checks for a lost-person alert. This is the delivery guarantee." Bound should be 5–30 (F01-052).                         |
+| `captureUndoWindowSeconds` | 10                       | 1–3600               | event                   | event admin      | no                    | yes     | "How long a volunteer can undo a tap. After this only an IC can void it."                                                                        |
+| `captureSendGraceSeconds`  | 2                        | 1–3600               | event                   | event admin      | no                    | yes     | "How long a tap waits before its first send, so undo can cancel it outright."                                                                    |
+| `outboxWarningCount`       | 20                       | 1–1000               | event                   | event admin      | no                    | yes     | "Unsent captures on one device before the volunteer is told to find their IC."                                                                   |
+| `outboxWarningAgeMinutes`  | 5                        | 1–1440               | event                   | event admin      | no                    | yes     | "Age of the oldest unsent capture that triggers the same warning."                                                                               |
+
+### New keys from P01.2 and P01.4
+
+| Key (proposed)                                    | Today                                                          | Default            | Bounds                | Scope    | Who changes      | Schedule | UI copy                                                                                               |
+| ------------------------------------------------- | -------------------------------------------------------------- | ------------------ | --------------------- | -------- | ---------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `attendance.campusCidrs`                          | env `ATTENDANCE_SP_CIDRS`                                      | `[]` (QR off)      | valid CIDRs, ≤ 20     | event    | Admin (security) | no       | "Public IP ranges of the venue network. QR attendance only works from inside them."                   |
+| `attendance.campusNetworkLabel`                   | literal `SP Wi-Fi` (F01-009)                                   | `venue Wi-Fi`      | 1–40 chars            | event    | event admin      | no       | "What volunteers call the venue network, shown when QR attendance is refused."                        |
+| `auth.accessTokenTtlSeconds`                      | env `ACCESS_TOKEN_TTL_SECONDS`                                 | 900                | 60–3600               | platform | Admin (security) | no       | "How long an access token lives before the app silently renews it."                                   |
+| `rateLimit.windowSeconds`                         | env `RATE_LIMIT_WINDOW_MS`                                     | 60                 | 10–600                | platform | Admin (security) | no       | "The window the request limits below are counted over."                                               |
+| `rateLimit.max.{default,capture,sensitive,admin}` | env `RATE_LIMIT_MAX_*`                                         | 300, 1200, 20, 60  | ≥ 1; `sensitive` ≤ 60 | platform | Admin (security) | no       | "Requests one client may make per window on this route group." Needs the shared store of P15.2 first. |
+| `media.uploadTtlSeconds`                          | env `S3_UPLOAD_TTL_SECONDS`                                    | 300                | 30–3600               | platform | Admin            | no       | "How long a photo upload link stays valid."                                                           |
+| `media.maxUploadBytes`                            | env `S3_MAX_UPLOAD_BYTES`                                      | 10 MiB             | 1 KiB–50 MiB          | platform | Admin            | no       | "Largest photo a volunteer can attach."                                                               |
+| `push.ttlSeconds.<kind>`                          | literal map (F01-038)                                          | 600/900/1800       | 60–3600               | platform | Admin            | no       | "How long a push service keeps trying to deliver this kind of alert to an offline phone."             |
+| `report.curveBucketMinutes`                       | literal 30 (F01-039)                                           | 30                 | 15, 30 or 60          | event    | event admin      | no       | "Bucket size of the footfall curve and the peak-period answer in the post-event report."              |
+| `incident.pushSeverities`                         | literal `HIGH`, `CRITICAL` (`modules/incident/service.ts:173`) | `HIGH`, `CRITICAL` | subset of severities  | event    | event admin      | no       | "Incident severities that push an alert to ICs as well as appearing in the inbox."                    |
+| `product.countsMayMerge`                          | structural (F01-048, D-04)                                     | `false`            | boolean               | event    | Admin            | no       | Wording decided in P05.                                                                               |
+| `product.visitorPersonalData`                     | structural (F01-049, D-04)                                     | `false`            | boolean               | event    | Admin            | no       | Wording decided in P05; with retention and access rules.                                              |
+
+**Design input for P10.** Settings changes must reach clients without a reload (P10.3 cache bus,
+plus a client refresh), and cross-instance convergence must be faster than 60 s for the security
+keys. No existing key needs its own schedule; poll cadence can follow the event lifecycle (P10.5).
+Every key needs per-key history and revert (P10.2).
+
 ## Defects found during P01
 
 ### F01-046 — Shift labels ignore the configured shift hours
@@ -299,4 +356,17 @@ and production; P05 decides.
 - **Fix:** P08.6 generates the parameter and secret list from the schema; until then, the example
   lists every key.
 - **Phase:** P08.6
+- **Status:** open
+
+### F01-052 — `alertPollSeconds` accepts values that break the alert guarantee
+
+- **Severity:** Low
+- **Area:** `packages/shared/src/dto/settings.ts:51,78,80` (`Seconds`: 1–3600)
+- **Evidence:** The lost-person poll is documented as the delivery guarantee
+  (`modules/lostPerson/service.ts:91`, `modules/lostPerson/router.ts:35`), yet an admin can set it
+  to an hour. `dashboardPollSeconds` has the same bound, so 1 s is also accepted for every device.
+- **Impact:** One mistyped value delays lost-person alerts on every phone by up to an hour, or
+  multiplies server load.
+- **Fix:** Per-key bounds in the registry (5–30 s for alerts, 2–60 s for the dashboard).
+- **Phase:** P10.1
 - **Status:** open
