@@ -345,3 +345,115 @@ because no volunteer screen can request a swap (PF-09) and the IC needs somethin
   setup checklist item.
 - **Phase:** P10.1, P13.1
 - **Status:** open
+
+---
+
+## Journey 4 — Volunteer shift · P02.5
+
+Journeys `volunteer-booth` (20 screens), `volunteer-counter` (4) and `volunteer-first` (6), clock
+frozen in the MORNING block. Setup (`fixtures.mjs volunteer`): the attendance chain up to the IC
+(root admin → IC by PIN) and the IC's current PIN for the booth volunteer to type; `te-vol-2` (never
+signed in) rostered on Mission Complete today; the shift hours moved to 08:00–12:30 and
+12:00–17:00, as an admin would before a dry run. To reach attendance at all, the local
+`server/.env` (gitignored) was given `ATTENDANCE_ROOT_EMAIL=admin@spoh2027.test` and localhost as
+the campus network, and the dev server restarted (F02-017).
+
+| Task                        | Result                                                                                                                                                                                                                                                                                                        | Finding           |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| First sign-in               | Works (`volunteer-first-01…03`). Home shows the shift at **09:30–14:00** although the Morning block is now 08:00–12:30.                                                                                                                                                                                       | F01-046 confirmed |
+| Attendance by PIN           | Works (`volunteer-booth-03…04`): "Marked present · Ivan IC · Secondary PIN".                                                                                                                                                                                                                                  | —                 |
+| Attendance by QR            | Needs a camera; headless shows the viewfinder only. The PIN fallback is on the same screen, which is the right design.                                                                                                                                                                                        | not exercised     |
+| My shift                    | Every assignment on every day, dry runs included (14 cards for Bea), before alerts and sync (`volunteer-booth-02`). The Morning shift the IC swapped away in Journey 3 is simply gone, with no message.                                                                                                       | F02-018, F02-019  |
+| Capture: registration       | Tap, undo, family: all work (`-05…07`). The screen asks for the booth total and gets 403 every time (`/registrations/summary`, IC-only). Copy says "Undo is available for ten seconds" while the window is a setting.                                                                                         | F02-020, F02-021  |
+| Capture: footfall and stamp | Work (`volunteer-counter-02…03`): "Counted one entry" with Undo; card 3WNE71 "Stamped", "6 stations still to visit".                                                                                                                                                                                          | —                 |
+| Capture: redeem             | Opens with the gift list and card entry (`volunteer-first-05…06`).                                                                                                                                                                                                                                            | —                 |
+| Offline outbox              | Offline, three taps show "3 unsynced"; back online, "All synced" within 5 s (`-08…09`).                                                                                                                                                                                                                       | —                 |
+| Failed-tap salvage          | A tap the server refuses shows "1 failed" and a banner on every screen: "the counts can still be recovered from the Shift screen" (`-10`). The salvage panel (Try again, Copy failed captures) exists but sits below all 14 shift cards (`-11`), and nothing clears a parked tap, so the banner never leaves. | F02-022           |
+| Lost person, incident, L&F  | All three forms submit and return (`-12…14`). The reporter's own alert offers "Call Bea Booth" to Bea. The incident, once sent, cannot be seen again by anyone (F02-015).                                                                                                                                     | —                 |
+| Inbox                       | Shows the urgent announcement from Journey 2 (`-16`).                                                                                                                                                                                                                                                         | —                 |
+| Guide, map, journey, brief  | Present and readable (`-17…20`); the brief is marked draft. `MANDATORY_BRIEF_POINTS` (the four points a briefer must cover) is rendered nowhere, because briefing slots have no screen.                                                                                                                       | F02-023           |
+
+### F02-018 — My shift lists every assignment ever, in one flat list
+
+- **Severity:** Low
+- **Type:** confusing · Role: Volunteer
+- **Area:** `client/src/app/shift/page.tsx`, `components/ShiftOverview.tsx`
+- **Evidence:** `volunteer-booth-02`: 14 cards across the sandbox day, two dry runs and five event
+  days, before the alerts and sync sections.
+- **Impact:** On the day, the volunteer scrolls past past and future shifts to reach sync status,
+  which is where F02-022 sends them.
+- **Fix:** Today first, then upcoming, past collapsed; sync status above the list.
+- **Phase:** P14.3
+- **Status:** open
+
+### F02-019 — A swap decision changes someone's shifts without telling them
+
+- **Severity:** Medium
+- **Type:** disconnected · Role: Volunteer
+- **Area:** `server/src/modules/shift/service.ts:121` (`decideSwap`: no announcement or notification)
+- **Evidence:** after the IC approved in Journey 3, Bea's Morning shift disappeared from My shift
+  (`volunteer-booth-02`) and `te-vol-1` gained it; neither inbox shows anything (`-16`).
+- **Impact:** The requester does not know whether to turn up; the person who inherits the shift
+  may never find out.
+- **Fix:** Notify requester and target on approve or reject (inbox and push), and show the
+  decision on the shift card.
+- **Phase:** P14.3
+- **Status:** open
+
+### F02-020 — Screens call endpoints their role may not use
+
+- **Severity:** Low
+- **Type:** inconsistent · Role: Volunteer
+- **Area:** `client/src/app/capture/registration/page.tsx` (`/registrations/summary?groupBy=category`)
+- **Evidence:** `reports/P02/journeys/volunteer-booth.json`: 403 on every load of the registration
+  screen for a volunteer; the "Booth today: N" line the IC sees (`ic-shift-11`) is silently missing.
+- **Impact:** A 403 per page load in the logs, and a screen whose content depends on role without
+  the code saying so. P02.9 lists the other shown-but-denied cases.
+- **Fix:** Gate the query on the capability, or give volunteers a station total they may read.
+- **Phase:** P07, P11.7
+- **Status:** open
+
+### F02-021 — The undo copy hardcodes ten seconds
+
+- **Severity:** Low
+- **Type:** inconsistent · Role: Volunteer
+- **Area:** `client/src/app/capture/registration/page.tsx:138` ("Undo is available for ten
+  seconds"); setting `captureUndoWindowSeconds` (`app/admin/settings/page.tsx:86`)
+- **Evidence:** `volunteer-booth-05`. Same class as F01-046; the P01 sweep did not match the word
+  "ten".
+- **Impact:** Change the setting and the copy is wrong.
+- **Fix:** Render from the setting.
+- **Phase:** P10.1
+- **Status:** open
+
+### F02-022 — A parked capture can be copied but never cleared
+
+- **Severity:** Medium
+- **Type:** confusing · Role: Volunteer, IC
+- **Area:** `client/src/lib/outbox.ts:41,311` (`MAX_ATTEMPTS`, `toClipboardText`); `app/shift/page.tsx`
+  (sync panel at the end)
+- **Evidence:** `volunteer-booth-10…17`: "1 failed" and the amber banner on every screen after one
+  refused tap; the panel offers "Try again now" and "Copy failed captures" but no discard or "done,
+  entered on the fallback sheet".
+- **Impact:** Once the IC has salvaged the count by hand, the volunteer's phone keeps shouting for
+  the rest of the day, which trains everyone to ignore the banner that matters.
+- **Fix:** Link the banner to the panel; move the panel to the top of My shift; add "mark as
+  salvaged" that removes the entry, with an audit note.
+- **Phase:** P14.4
+- **Status:** open
+
+### F02-023 — Briefing slots have no screen, so the mandatory brief points are never shown
+
+- **Severity:** Medium
+- **Type:** needs-API/SQL · Role: Volunteer (briefer), IC
+- **Area:** `GET /roster/briefing-slots`, `POST /roster/briefing-slots/:id/complete` (no caller,
+  PF-09); `packages/shared/src/dto/shift.ts:95` (`MANDATORY_BRIEF_POINTS`, no reader)
+- **Evidence:** no route renders either; the brief page shows the separate "five things" from
+  `client/src/content/brief.ts` (`volunteer-booth-20`).
+- **Impact:** Visitor briefing waves are scheduled in the data but nobody is told when theirs is,
+  and the four points "so a briefer working from memory does not drop one" are never on screen.
+  Two sources of briefing content exist.
+- **Fix:** A briefing slot card on the briefer's home with the points and "done"; move the points
+  into event content (P01.6).
+- **Phase:** P13.3, P14.3
+- **Status:** open
