@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T11:58:50.328Z",
+  "updatedAt": "2026-09-25T12:00:39.406Z",
   "current": {
-    "phase": null,
-    "step": null
+    "phase": "P00",
+    "step": "P00.1"
   },
   "gates": [
     {
@@ -207,11 +207,16 @@
         {
           "id": "P00.1",
           "title": "Reproducible environment",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-25T11:59:09.351Z",
+          "completedAt": "2026-09-25T12:00:39.406Z",
+          "commits": ["a3289c1"],
+          "notes": [
+            {
+              "at": "2026-09-25T12:00:39.406Z",
+              "text": "Recipe re-run end to end (npm ci 29s, build:shared, prisma generate). scripts/dev-db-local.sh verified on a fresh cluster (:5499) and the existing one; referenced from both READMEs."
+            }
+          ]
         },
         {
           "id": "P00.2",
@@ -286,8 +291,8 @@
           "notes": []
         }
       ],
-      "status": "not_started",
-      "startedAt": null,
+      "status": "in_progress",
+      "startedAt": "2026-09-25T11:59:09.351Z",
       "completedAt": null
     },
     {
