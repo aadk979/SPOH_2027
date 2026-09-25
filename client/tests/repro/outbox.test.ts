@@ -71,3 +71,20 @@ describe('outbox retries (P03 repros)', () => {
     expect(await listEntries()).toEqual([]);
   });
 });
+
+describe('outbox ownership on a shared phone (P04 repro)', () => {
+  // F04-003
+  it.skip('does not send one volunteer’s queued capture under the next volunteer’s sign-in', async () => {
+    // Sam taps while offline, signs out and hands the phone to Alex.
+    await capture('queued-by-sam');
+    const { clearSession } = await import('@/lib/session');
+    clearSession();
+
+    // Alex signs in; every request now carries Alex's token, and the server
+    // records Alex as the one who captured it.
+    mockedApi.mockResolvedValue({});
+    await flush({ force: true });
+
+    expect(mockedApi).not.toHaveBeenCalled();
+  });
+});

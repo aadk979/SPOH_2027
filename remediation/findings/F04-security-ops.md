@@ -154,3 +154,119 @@ Likelihood and impact on a 1–5 scale; score = L × I. "Event" means Dry Run #1
 The shape: the most likely harms on event day are **availability and operability** (ranks 1–4),
 not break-ins. The worst confidentiality harm is the one the product explicitly promises against
 (rank 5).
+
+---
+
+## P04.2 — Authentication and sessions
+
+### Controls verified in code
+
+| Control                               | Where                                                         | Result                                                                                                                                                                                                                            |
+| ------------------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| API access token                      | `modules/auth/tokens.ts`                                      | ✅ HS256, algorithm pinned, `iss`/`aud` checked, 15 min, carries only `sub` and `sid`. Role and scope come from the roster on every request.                                                                                      |
+| Signing key in production             | `config/env.ts`, `tokens.ts`                                  | ✅ `SESSION_SIGNING_SECRET` required (≥ 32 chars); two guards.                                                                                                                                                                    |
+| Refresh token                         | `modules/auth/service.ts`                                     | ✅ 256-bit opaque, stored as SHA-256, rotated on every use, 30-day expiry (`refreshSessionDays`).                                                                                                                                 |
+| Reuse detection and family revocation | `rotateSession`                                               | ✅ A rotated token presented again revokes the family and is audited. ⚠️ Concurrent refreshes fork the family (F03-010, re-confirmed); two tabs sign the person out everywhere (F02-032).                                         |
+| Refresh cookie                        | `modules/auth/router.ts:57`                                   | ✅ `httpOnly`, `path=/api/v1/auth`, `SameSite=Lax` in the same-origin topology (`None; Secure` only when cross-site). `Secure` depends on `NODE_ENV=production`, which the audit branch's PM2 file sets.                          |
+| CSRF on cookie routes                 | `assertTrustedOrigin`, JSON-only                              | ✅ POST/DELETE need an allowed `Origin` (or none) and `application/json`, which forces a preflight the allowlist refuses.                                                                                                         |
+| Hosted UI hand-off                    | `/auth/login`, `/auth/callback`                               | ✅ Authorization code + PKCE (S256), 256-bit `state` in a 5-minute httpOnly cookie, compared before the exchange; the token is verified by the same verifier as every request.                                                    |
+| Local provider in production          | `env.ts` superRefine, `localProvider.ts`, `devAuth/router.ts` | ✅ Three guards, all keyed on `NODE_ENV`. A box started with `NODE_ENV=development` and `AUTH_PROVIDER=local` would accept any roster email with no password; the audit branch's PM2 file and runbook set production and Cognito. |
+| Client token handling                 | `client/src/lib/session.ts`                                   | ✅ Access token in memory only, never in storage; one in-flight refresh per tab. `aws-amplify` is a dependency but unused (F03-037), so Cognito tokens never reach the browser.                                                   |
+| Sign-out                              | `signOut()`                                                   | ✅ Clears memory, then revokes the row and clears the cookie. Offline sign-out leaves the row live until expiry (documented). ⚠️ The outbox is not cleared (F04-003).                                                             |
+| Revocation latency                    | `requireAuth` session cache                                   | ⚠️ Up to 60 s per worker after a revoke (F03-009, re-confirmed), and a revoke on one worker never reaches the other (PF-01).                                                                                                      |
+| Deactivation                          | `admin/service.ts:deactivateVolunteer`                        | ✅ Roster flag, every session revoked, Cognito user disabled (optional flag), cache cleared. ⚠️ Cache cleared on the handling worker only (PF-01).                                                                                |
+| Device list and remote sign-out       | `GET/DELETE /auth/sessions`                                   | ✅ Scoped to the caller in the query (guard test in `repro/security.test.ts`). No screen yet (PF-09).                                                                                                                             |
+
+### Cognito pool: what the repo says, and what it cannot
+
+Repo says (audit branch runbook and `server/.env.example`): pool `ap-southeast-1_9bwl2nGF7`,
+public app client `23uft7mvtnrno1uunsc5lp0h2v` (no secret; PKCE), Hosted UI prefix domain
+`spoh2027-livetest.auth.ap-southeast-1.amazoncognito.com`, callback
+`https://spoh2027.duckdns.org/api/v1/auth/callback`, logout `/sign-in`, OAuth flow `code`, scopes
+`openid email`, and explicit auth flows `ALLOW_ADMIN_USER_PASSWORD_AUTH`,
+`ALLOW_REFRESH_TOKEN_AUTH`, `ALLOW_USER_SRP_AUTH`. Accounts are created with `AdminCreateUser`
+and a Cognito-sent invite (`identity/provider.ts`); a comment says self-signup is disabled.
+
+Not in the repo, so turned into owner questions (P04.7, Q-C1…Q-C9): password policy, MFA,
+threat protection (advanced security), token lifetimes, user-existence errors, token revocation,
+self-signup, the email sender and its quota, temporary-password validity, deletion protection.
+
+### Findings
+
+#### F04-001 — The API accepts raw Cognito access tokens, which skip revocation
+
+- **Severity:** Medium
+- **Area:** `server/src/middleware/auth/index.ts:176–189` (`requireAuth`, second token shape)
+- **Evidence:** When a bearer token is not an API-issued token, `requireAuth` verifies it as a
+  Cognito access token and proceeds with no session row. The app client allows
+  `ALLOW_USER_SRP_AUTH` (runbook), so anyone with a volunteer's password and the public client id
+  can obtain such a token outside the Hosted UI and call the API with it.
+- **Impact:** "Sign out this device", the device list and reuse detection do not apply to those
+  tokens; they live for the pool's access-token lifetime (default 60 min, unknown here). It is also
+  a second authentication path to reason about in P11/P12.
+- **Fix:** Accept only API-issued tokens in `requireAuth`; keep provider verification at
+  `POST /auth/session` and the callback. Drop `ALLOW_USER_SRP_AUTH` (and
+  `ALLOW_ADMIN_USER_PASSWORD_AUTH` unless a script needs it) from the app client. Integration tests
+  then mint session tokens instead of provider tokens.
+- **Phase:** P12 (with F03-009/F03-010)
+- **Status:** open
+
+#### F04-002 — The Cognito pool's security settings are unrecorded, and the runbook's client update resets them
+
+- **Severity:** High (to verify, P04.7 Q-C1…Q-C9)
+- **Area:** Cognito pool `ap-southeast-1_9bwl2nGF7`; `infra/runbooks/deploy.md` § "If the Cognito
+  callback breaks" (audit branch)
+- **Evidence:** No pool or client configuration exists as code. The runbook's
+  `update-user-pool-client` call sets callbacks, flows and scopes only; as the runbook itself
+  notes, the API replaces the whole client configuration, so running it resets token validity,
+  `PreventUserExistenceErrors`, `EnableTokenRevocation` and read/write attributes to defaults.
+  Whether admins need MFA is unknown.
+- **Impact:** An Admin or Chief account protected by a password alone is the shortest path to every
+  roster row and every setting (risk 8). An unrecorded pool cannot be rebuilt, reviewed or diffed.
+- **Fix:** Import the pool and client into CDK (P08) with: MFA required for every role above
+  Volunteer (TOTP), threat protection on in enforcement mode, `PreventUserExistenceErrors=ENABLED`,
+  token revocation on, access token 15–60 min, admin-only user creation, deletion protection.
+  Replace the runbook command with a CDK deploy.
+- **Phase:** P08 (as code), P12 (policy)
+- **Status:** open
+
+#### F04-003 — A queued capture is sent under whoever signs in next on that phone
+
+- **Severity:** Medium
+- **Area:** `client/src/lib/outbox.ts` (`enqueue`, `flush`), `client/src/lib/session.ts:signOut`
+- **Evidence:** Outbox entries carry no owner, and `signOut()` leaves them in IndexedDB. The next
+  flush sends them with the current access token, and the server stamps the capture with the
+  current caller (`captureActorFrom(req)`). Repro: `client/tests/repro/outbox.test.ts`, "does not
+  send one volunteer's queued capture under the next volunteer's sign-in" (skipped, fails today).
+- **Impact:** On a shared or handed-over phone, captures are credited to the wrong person (the
+  audit trail says Alex tapped what Sam tapped). If Alex is not rostered at Sam's station the
+  entry is refused with 403 and parked for good (F03-033), so the capture is lost instead.
+- **Fix:** Store the volunteer id on each entry; flush only the current volunteer's entries; on
+  sign-out, show what is still queued and let the person send it first or discard it.
+- **Phase:** P07 (with F03-033)
+- **Status:** open
+
+#### F04-023 — Invites may hit Cognito's default email quota and expire before training
+
+- **Severity:** High (to verify, P04.7 Q-C6, Q-C7)
+- **Area:** `server/src/modules/identity/provider.ts` (`AdminCreateUser` with
+  `DesiredDeliveryMediums: ['EMAIL']`)
+- **Evidence:** Nothing configures an SES sender, and D-08 notes duckdns cannot carry DKIM for
+  SES. A pool on Cognito's default email sender is limited to 50 emails a day per account, and a
+  temporary password expires after 7 days by default.
+- **Impact:** A roster import of a full cohort (200+ people) fails partway once the quota is
+  spent, and anyone invited more than a week before they first sign in cannot use their invite.
+  Both surface on training day (4 Nov).
+- **Fix:** Answer Q-C6/Q-C7 now. If the default sender is in use: provision in batches under the
+  quota, set temporary-password validity to cover the gap to training, and move to SES with a real
+  domain (D-08).
+- **Phase:** P12.2 (SES, D-08); interim action before training
+- **Status:** open
+
+### Re-checked
+
+- **F03-009** (revoked session keeps working up to a minute) and **PF-01** (other workers never
+  hear of it): confirmed by reading `requireAuth`; together they make a revoke best-effort under
+  PM2 cluster mode. Fix stays P06/P10.3.
+- **F03-010** and **F02-032** (refresh races): confirmed; `rotateSession` updates by id without
+  `revokedAt IS NULL`. Fix stays P12.
