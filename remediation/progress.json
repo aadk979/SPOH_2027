@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T13:03:10.205Z",
+  "updatedAt": "2026-09-25T13:03:18.187Z",
   "current": {
     "phase": "P01",
-    "step": "P01.2"
+    "step": "P01.3"
   },
   "gates": [
     {
@@ -392,8 +392,8 @@
         {
           "id": "P01.3",
           "title": "Enum audit",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-25T13:03:18.187Z",
           "completedAt": null,
           "commits": [],
           "notes": []
