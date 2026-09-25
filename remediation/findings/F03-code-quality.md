@@ -281,7 +281,7 @@ pagination, error-code accuracy and audit completeness. Each suspected bug was t
 integration test that asserts the correct behaviour, run against the local test database to prove
 it **fails today for the stated reason** (a setup error does not count), and committed skipped.
 
-- **Repro tests:** `server/tests/integration/repro/` — 8 files, **38 tests**, each tagged with its
+- **Repro tests:** `server/tests/integration/repro/` — 8 files, **38 tests** (P03.5 adds a ninth file with 4), each tagged with its
   finding id. `npm test` stays green because they are skipped.
 - **Proof they fail:** `bash remediation/reports/P03/run-repros.sh [filter]` runs unskipped copies
   and prints each assertion error; on `d4f6399` all 38 fail. Races are written as several rounds
@@ -723,6 +723,52 @@ both cards as issued and both as stamped at each station, and counts the origina
 - **Fix:** mark the original `LOST` (see above) and count journeys, excluding originals with a
   reissue.
 - **Phase:** P06 (P05 confirms the rule)
+- **Status:** open
+
+## Multi-instance correctness · P03.5
+
+### Method
+
+`server/tests/integration/repro/multiInstance.test.ts` loads the app twice with
+`vi.resetModules()`, so each instance has its own copy of every module: the volunteer and session
+caches, the rate-limit counters, the settings cache and the job functions, with one database
+behind both. That is what several PM2 workers or containers are. The file's four tests are skipped
+repros like P03.4's; `run-repros.sh multiInstance` shows all four failing, twice in a row.
+
+| Check                          | Result                                                                                                                                                                                                                                                                                    | Status                       |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| **PF-01** auth caches          | Deactivated through instance A, the volunteer still gets 200 from instance B, which had them cached. A itself refuses at once (its cache is cleared). B follows only when its 60 s entry expires. Same for role changes and for session revocation (F03-009 is the single-instance half). | **Confirmed**                |
+| **PF-02** rate limiter         | Twenty failed sign-ins exhaust instance A's limit (the 21st is 429); instance B answers the 22nd with 404. The effective limit is 20 × instances.                                                                                                                                         | **Confirmed**                |
+| Settings refresh skew          | A settings change made through A is not visible on B (`eventName` still the default). B converges on its next `loadSettings` tick, up to 60 s later. For shift boundaries that is up to a minute of capture permitted or refused on one worker only.                                      | Confirmed as F03-030         |
+| Scheduled jobs on every worker | Every instance runs all four jobs. Two instances purging together write **10** lost-person summaries for **5** alerts. The idempotency and session prunes are bounded deletes and safe to repeat. The settings refresh is per instance by design.                                         | Purge: F03-031; others sound |
+
+#### F03-030 — A settings change reaches other instances up to a minute later
+
+- **Severity:** Medium (Low for thresholds; Medium for shift boundaries, which gate capture)
+- **Area:** `lib/settings.ts` (per-process cache), `jobs/scheduler.ts:31` (`SETTINGS_REFRESH_MS`)
+- **Evidence:** `repro/multiInstance.test.ts`.
+- **Impact:** after moving a shift boundary, a volunteer's capture can succeed on one worker and be
+  refused on the next request to another, for up to 60 s; the admin screen can show the old value
+  if the read lands on another worker. The code documents the trade-off, but it was made for one
+  instance.
+- **Fix:** the cache bus (`LISTEN/NOTIFY`, D-14) invalidates every instance on write.
+- **Phase:** P10.3
+- **Status:** open
+
+#### F03-031 — Every worker runs the lost-person purge, so summaries are written twice
+
+- **Severity:** Medium (the report's lost-person section double-counts)
+- **Area:** `jobs/scheduler.ts:41`, `lostPerson/service.ts` `purgeResolvedAlerts`,
+  `lostPerson/repo.ts:111` `purgeAlert` (creates a summary, then updates the alert, with no check
+  that it is still unpurged)
+- **Evidence:** `repro/multiInstance.test.ts`: two workers purging five alerts → 10 summaries. The
+  scheduler's comment says concurrent runs are safe because the purge is "transactional per
+  alert"; being transactional does not stop two transactions purging the same alert.
+- **Impact:** after the first purge, every resolved lost-person case appears once per worker in the
+  report's lost-person summary and resolution times.
+- **Fix:** claim the alert with `updateMany({ where: { id, purgedAt: null } })` and create the
+  summary only if one row changed; jobs move to the D-09 scheduler with one runner per job.
+- **Phase:** P06 (claim), P10 (scheduler)
 - **Status:** open
 
 ---
