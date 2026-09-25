@@ -270,6 +270,461 @@ written out by hand. The clusters that matter:
 - **Phase:** P06
 - **Status:** open
 
+## Correctness review · P03.4
+
+### Method
+
+Every server module, `lib/` file and middleware was read in full against the checklist:
+transaction boundaries, idempotency keys, races (double redeem, double stamp, concurrent swaps and
+decisions), time boundaries (the 13:30–14:00 overlap, midnight in the event zone), null handling,
+pagination, error-code accuracy and audit completeness. Each suspected bug was then written as an
+integration test that asserts the correct behaviour, run against the local test database to prove
+it **fails today for the stated reason** (a setup error does not count), and committed skipped.
+
+- **Repro tests:** `server/tests/integration/repro/` — 8 files, **38 tests**, each tagged with its
+  finding id. `npm test` stays green because they are skipped.
+- **Proof they fail:** `bash remediation/reports/P03/run-repros.sh [filter]` runs unskipped copies
+  and prints each assertion error; on `d4f6399` all 38 fail. Races are written as several rounds
+  so they lose on every run, not one in three (checked three times each).
+- The phase plan says "run `/code-review` at high effort per module". That skill reviews a diff, and
+  there is no diff here, so the review was done by reading each module against the checklist.
+
+### Per-module result
+
+| Module / unit             | Transactions and races                                             | Time                           | Errors, audit, pagination                          | Findings                                             |
+| ------------------------- | ------------------------------------------------------------------ | ------------------------------ | -------------------------------------------------- | ---------------------------------------------------- |
+| admin                     | checks read outside the tx (deactivate, delete assignment): benign | —                              | rename collisions 500; move audited as create      | F03-002, F03-017, F03-018                            |
+| announcement              | —                                                                  | inbox "today" only             | acknowledgement unaudited; audience rules differ   | F03-014, F03-018, F03-029                            |
+| attendance                | advisory lock per person: sound                                    | minute-of-day (T-03)           | rule failures reported as 403                      | F03-026                                              |
+| audit                     | read only                                                          | —                              | `nextCursor` never null                            | F03-017                                              |
+| auth                      | rotation not conditional (fork); no grace for a second tab         | —                              | revoke leaves cached session live                  | F02-032, F03-009, F03-010                            |
+| dashboard                 | read only                                                          | "today" unbounded, 08:00 start | —                                                  | F02-006, F03-013                                     |
+| fallback                  | imports in one tx; dry run by rollback: sound                      | future rows accepted           | repeated rows collapse                             | F03-012 (F02-006 via imports)                        |
+| footfall                  | —                                                                  | same "today" as dashboard      | —                                                  | F03-013                                              |
+| gift                      | stock and per-card checks read then insert: race                   | —                              | reissued card loses its redemption                 | F03-003, F03-007, F03-019 (context)                  |
+| incident                  | —                                                                  | —                              | any status to any status; `nextCursor` never null  | F03-017, F03-024, F03-029                            |
+| lostFound                 | —                                                                  | —                              | close-out audited as `lostFound.claim`             | F03-018, F03-029                                     |
+| lostPerson                | resolve checked outside tx: double audit possible                  | —                              | acknowledgement unaudited                          | F03-018, F03-029                                     |
+| me                        | check-in conditional: sound; check-out not                         | block test (T-03)              | repeat check-out rewrites the time; 403 for rules  | F03-015, F03-026                                     |
+| media                     | —                                                                  | —                              | `media.upload` in the action list, never written   | F03-018                                              |
+| missionCard               | stamp insert races the unique key; reissue from any status         | —                              | batch audit outside the insert; LOST never written | F03-008, F03-022, F03-027, F03-028                   |
+| notification              | never throws: sound                                                | station = rostered today       | —                                                  | F03-014 (union audience)                             |
+| registration              | group link overwrites card status                                  | same "today"                   | card code folded with `toUpperCase` only           | F03-004, F03-013, F03-020                            |
+| report                    | read only                                                          | range defaults                 | future shifts counted as no-shows                  | F02-027                                              |
+| roster                    | dry run by rollback; placeholder sub collides                      | —                              | roles and reactivation unchecked; counters         | F02-002, F03-001, F03-025                            |
+| shift                     | decisions not conditional; stale requests approvable               | long shifts unbounded          | request audited as a decision; slot rules          | F03-005, F03-006, F03-016, F03-018, F03-023, F03-019 |
+| station                   | —                                                                  | —                              | —                                                  | none                                                 |
+| identity, devAuth, health | —                                                                  | —                              | —                                                  | none (security review is P04)                        |
+| `middleware/idempotency`  | abandoned-key takeover not conditional                             | —                              | key reuse ignores the body                         | F03-011                                              |
+| `middleware/errorHandler` | —                                                                  | —                              | Prisma P2002/P2025 become 500                      | F03-002                                              |
+| `lib/settings`            | `clearSettings` deletes then audits outside a tx                   | —                              | —                                                  | F03-021                                              |
+| `lib/shortCode`, DTO      | —                                                                  | —                              | O/I rejected, L/U accepted                         | F03-020                                              |
+
+**Checked and sound:** attendance (advisory lock, attempt limit, root rules), check-in (conditional
+update), the fallback and roster dry runs (rolled-back transaction), card issue (idempotent by
+status), the 13:30–14:00 overlap (`activeShiftBlocks` returns both blocks, station scope accepts
+either, `getMe` picks the first; no double counting because captures are not tied to a block),
+the lost-person purge (per-alert transaction), and the refresh-token hash storage.
+
+### P02 bugs, reproduced and root-caused
+
+| ID      | Repro                    | Root cause                                                                                                                                                                                                                                                                                                        |
+| ------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| F02-002 | `repro/roster.test.ts`   | `importRoster` gives every new person in a dry run the placeholder `cognitoSub: 'pending'` (`roster/service.ts:132`), and `Volunteer.cognitoSub` is unique, so the second new row violates the constraint inside the rolled-back transaction; the handler maps P2002 to 500 (F03-002).                            |
+| F02-006 | `repro/numbers.test.ts`  | `registrationsSince`, `registrationsByCategory` and `getFunnel({from})` take a lower bound only (`dashboard/repo.ts:12,16`, `dashboard/service.ts:79`). Imports and bulk footfall accept any timestamp, so a row dated tomorrow is "today" and "in the last hour".                                                |
+| F02-027 | `repro/numbers.test.ts`  | `buildVolunteerReport` (`report/service.ts:345`) computes `noShows = assignments − checkedIn` over every assignment in the range, and the default range is the whole event, so every shift not yet worked is a no-show.                                                                                           |
+| F02-032 | `repro/sessions.test.ts` | `rotateSession` (`auth/service.ts:161`) treats any presentation of an already-rotated token as theft and revokes the whole family. A second tab that sent the same cookie a moment later is indistinguishable from a thief. Fix: accept a token rotated within a few seconds and return the same successor (P12). |
+
+### `CardStatus.LOST` — intent confirmed
+
+P02 recorded that `reissueCard` "leaves the original as it was". The code does not: it sets the
+original to **VOIDED** in the same transaction (`missionCard/service.ts:311`). The intent of `LOST`
+is clear from the code's own comment ("Reissue against a lost card", PRODUCT_BRIEF §4.3) and from
+`ONBOARDING_AND_FEATURES.md` §4.3 ("links the new card back to the old via `reissuedFromId` so the
+funnel isn't double-counted"): the original of a reissue was meant to become `LOST`, and the funnel
+was meant to count the journey once. Neither happens: `LOST` is never written, the funnel counts
+both cards as issued and both as stamped at each station, and counts the original as voided
+(F03-028). "Voided" was meant for a spoiled card. P05 confirms the rule; P06 fixes it.
+
+### Findings
+
+#### F03-001 — Roster import and provisioning can grant any role, including Admin
+
+- **Severity:** High (security; P04 re-checks the wider authorization model)
+- **Area:** `roster/service.ts:34` `provisionVolunteer`, `:101` `importRoster`, `roster/repo.ts:35`
+  `upsertVolunteer`
+- **Evidence:** `repro/roster.test.ts`: a Deputy (`roster.edit`) imports one row with their own
+  email and `role: ADMIN` with `commit: true` → 200 and they are an Admin; a Chief provisions a new
+  Admin → 201; importing a deactivated person's email sets `active: true`. `upsertVolunteer`
+  overwrites `role` and `active` for any existing email. None of the rules in `admin/service.ts`
+  (`loadTarget`: not yourself, only people below you, only grant roles below yours) is applied.
+- **Impact:** any Deputy or Chief can make themselves or anyone else an Admin, change the role of
+  someone above them, or undo a deactivation, without the audit showing a role change
+  (`roster.import` records counts only). This defeats the role matrix.
+- **Fix:** one escalation rule in `people/domain/escalation.ts` applied to every path that sets a
+  role or `active` (edit, provision, import); the import never changes `active` and refuses rows
+  whose role is not below the importer's; per-row audit of role changes.
+- **Phase:** P06 (guard, test first), P11 (Cedar policy)
+- **Status:** open
+
+#### F03-002 — Unique-constraint violations are answered with 500
+
+- **Severity:** Medium
+- **Area:** `middleware/errorHandler.ts:54` `normalise`; callers without a pre-check:
+  `admin/service.ts:768` `updateGiftType`, and every check-then-create (`createStation`,
+  `createEventDay`, `createGiftType`) under concurrency
+- **Evidence:** `repro/platform.test.ts`: renaming a gift type onto an existing name → 500
+  `INTERNAL_ERROR`. It is also why F02-002 is a 500.
+- **Impact:** the user sees "Something went wrong" for an ordinary conflict, and the log fills with
+  errors that are not faults.
+- **Fix:** map Prisma `P2002` to 409 (`CONFLICT` or the field's specific code) and `P2025` to 404 in
+  the error handler; keep the pre-checks for their friendly messages.
+- **Phase:** P06
+- **Status:** open
+
+#### F03-003 — A reissued card can be given a second gift with no warning
+
+- **Severity:** Medium
+- **Area:** `gift/service.ts:97` (`existingRedemptionForCard` checks the presented card only),
+  `missionCard/service.ts:254` `reissueCard` (moves stamps, not redemptions)
+- **Evidence:** `repro/capture.test.ts`: redeem on card A, reissue A → B, redeem on B → 201 with
+  no `GIFT_ALREADY_REDEEMED`.
+- **Impact:** "one journey, one gift" fails for exactly the visitor who lost their card; the gift
+  count and stock go down twice.
+- **Fix:** check redemptions across the `reissuedFromId` chain (or move the redemption link on
+  reissue).
+- **Phase:** P06
+- **Status:** open
+
+#### F03-004 — Linking a group to a completed card resets it to ISSUED
+
+- **Severity:** Medium
+- **Area:** `registration/service.ts:128` (`missionCard.update({ status: 'ISSUED', issuedAt })`
+  whatever the current status)
+- **Evidence:** `repro/capture.test.ts`: a COMPLETED card linked by a group registration is ISSUED
+  afterwards, with a new `issuedAt`. No audit row records the change.
+- **Impact:** the funnel's "completed" drops and "issued" moves to a new time; the card has to be
+  completed again.
+- **Fix:** issue only an UNISSUED card (as `issueCard` does), through `missionCards/index.ts`.
+- **Phase:** P06
+- **Status:** open
+
+#### F03-005 — Approving a stale swap request moves someone else's shift
+
+- **Severity:** Medium
+- **Area:** `shift/service.ts:121` `decideSwap`, `shift/repo.ts:67` `applySwap`
+- **Evidence:** `repro/shifts.test.ts`: a volunteer asks two people to take the same shift; the IC
+  approves the first, then the second → 200, and the shift moves from the first taker (who never
+  asked) to the second.
+- **Impact:** a volunteer loses a shift they accepted, with no message (F02-019), and the roster no
+  longer matches who agreed to what.
+- **Fix:** approve only while the assignment still belongs to the requester; cancel the requester's
+  other pending requests for that assignment when one is approved.
+- **Phase:** P06
+- **Status:** open
+
+#### F03-006 — Two decisions on one swap both apply
+
+- **Severity:** Medium
+- **Area:** `shift/service.ts:131` (status read, then an unconditional update)
+- **Evidence:** `repro/shifts.test.ts`: an approval and a rejection sent together both return 200 in
+  five rounds out of five; the swap ends REJECTED or APPROVED depending on commit order, while the
+  shift may already have moved.
+- **Impact:** two ICs acting on the same queue item can leave a rejected swap whose shift has moved.
+- **Fix:** `updateMany({ where: { id, status: 'REQUESTED' } })` and act only when one row changed.
+- **Phase:** P06
+- **Status:** open
+
+#### F03-007 — Simultaneous redemptions oversell stock and give one card several gifts
+
+- **Severity:** Medium
+- **Area:** `gift/service.ts:60`/`:97` (stock and per-card checks read, then insert, at READ COMMITTED)
+- **Evidence:** `repro/capture.test.ts`: four redemptions of the last item at once → 4 created;
+  four redemptions on one card at once → 2 to 4 gifts per card, every run.
+- **Impact:** negative stock and double gifts when two desks, or one double-tap, act at once.
+- **Fix:** lock the gift type row (`SELECT … FOR UPDATE`) or a conditional stock decrement, and a
+  partial unique index on a card's live redemption (or an advisory lock per card).
+- **Phase:** P06
+- **Status:** open
+
+#### F03-008 — Simultaneous stamps of one card at one station fail with 500
+
+- **Severity:** Medium
+- **Area:** `missionCard/service.ts:157` (checks `stampEvents`, then inserts into the unique
+  `(missionCardId, stationId)`)
+- **Evidence:** `repro/capture.test.ts`: three stamps at once → one 201, others 500, every run.
+- **Impact:** a scanner that reads the QR twice shows the volunteer an error for a stamp that was
+  recorded, and stamps are not queued offline (P03.7), so the volunteer may re-stamp by hand.
+- **Fix:** `INSERT … ON CONFLICT DO NOTHING` and report "already stamped" (the warning path).
+- **Phase:** P06
+- **Status:** open
+
+#### F03-009 — Revoking a session leaves its access token working for up to a minute
+
+- **Severity:** Medium (P04 re-checks)
+- **Area:** `auth/service.ts` `revokeOwnSession`, `revokeAllForVolunteer`, `revokeFamily`;
+  `middleware/auth/index.ts:98` `invalidateSessionCache` (no caller)
+- **Evidence:** `repro/sessions.test.ts`: a phone signed out from the laptop keeps getting 200 on
+  `/me` because its session is cached as live for 60 s.
+- **Impact:** "sign this device out" and reuse detection do not take effect immediately, on this
+  worker; on other workers (PF-01) not even when the cache is cleared.
+- **Fix:** call `invalidateSessionCache` from every revoke now; P10.3's cache bus for other workers.
+- **Phase:** P06 (local), P10.3 (cross-instance)
+- **Status:** open
+
+#### F03-010 — Concurrent refreshes fork a session family
+
+- **Severity:** Medium (security; P04 re-checks)
+- **Area:** `auth/service.ts:205` (the old session is revoked with an unconditional update)
+- **Evidence:** `repro/sessions.test.ts`: three refreshes with one cookie at once → three 200s and
+  three live sessions in the family, in five rounds out of five.
+- **Impact:** refresh-token rotation is meant to leave exactly one live token per family, which is
+  what makes reuse detectable. A stolen token replayed at the same moment as the real one gets its
+  own live session.
+- **Fix:** revoke with `updateMany({ where: { id, revokedAt: null } })` and rotate only if one row
+  changed; the loser gets the F02-032 grace answer.
+- **Phase:** P12 (with F02-032)
+- **Status:** open
+
+#### F03-011 — Two retries can both take over an abandoned idempotency key
+
+- **Severity:** Low
+- **Area:** `middleware/idempotency.ts:115` (unconditional `update` of `createdAt`)
+- **Evidence:** `repro/platform.test.ts`: three retries of a key abandoned five minutes ago → one
+  201 and a 500 per round (the second handler hits the table's own unique key).
+- **Impact:** a 500 on a retry after a crash. No double count today, because every capture table
+  also has a unique `idempotencyKey`; a future endpoint without one would double-write.
+- **Fix:** take over with `updateMany({ where: { key, createdAt: existing.createdAt } })` and treat
+  zero rows as "in progress"; store a hash of the body and refuse a reused key with a different body.
+- **Phase:** P06
+- **Status:** open
+
+#### F03-012 — The fallback import merges separate paper tallies
+
+- **Severity:** High (wrong numbers)
+- **Area:** `fallback/service.ts:249` (row key = source + file + station + category + time +
+  occurrence index within the row)
+- **Evidence:** `repro/numbers.test.ts`: two rows for the same desk, category and half hour (counts
+  2 and 3) → 3 registrations, not 5; the second row's first two occurrences are "skipped" as
+  duplicates of the first row's.
+- **Impact:** when two volunteers' sheets cover the same half hour at one desk, the smaller tally
+  disappears, silently: the response reports them as `skipped`, the wording used for a re-import.
+- **Fix:** key by row identity (file + row number) for replay protection, not by content.
+- **Phase:** P06
+- **Status:** open
+
+#### F03-013 — "Today" starts at 08:00 local time
+
+- **Severity:** Low today (the event opens at 09:30); High for any event in another zone or with
+  earlier hours
+- **Area:** `startOfEventDay` in `dashboard/service.ts:48`, `registration/service.ts:40`,
+  `footfall/service.ts:54`: `eventDayAnchor(singaporeDateString(now))` is the `@db.Date` anchor
+  (UTC midnight = 08:00 in Singapore), used as an instant
+- **Evidence:** `repro/numbers.test.ts`: a registration at 07:00 on 7 January (Singapore) is not
+  in that day's dashboard total.
+- **Impact:** anything captured before 08:00 local is in no day's live numbers. P01's T-02 and T-06
+  list both helpers but not their combination.
+- **Fix:** `eventDayWindow(day, event) → {from, to}` in the event zone (P03.3 "one way").
+- **Phase:** P09.6
+- **Status:** open
+
+#### F03-014 — An urgent announcement is pushed to people it does not reach
+
+- **Severity:** Medium
+- **Area:** `announcement/service.ts:179` `pushToDevices`, `notification/service.ts:104`
+  `resolveAudience`, `announcement/repo.ts:59,117`
+- **Evidence:** `repro/numbers.test.ts`: an URGENT announcement to "IC at the booth" reports
+  `audienceCount: 1`; the push resolves **4** recipients. Three rules disagree: the inbox matches the
+  role exactly and the station only if the reader is rostered there **today**; the audience count
+  matches the role exactly and the station on **any** day; the push takes every role **at or above**
+  the target **plus** everyone rostered at the station, and ignores the event day.
+- **Impact:** Deputies, Chiefs and booth volunteers are woken by an urgent push that opens an inbox
+  where the message is not shown; the sender is told a smaller number than were alerted.
+- **Fix:** one audience rule (`announcements/domain/audience.ts`) used by the inbox, the count and
+  the push. Related to F02-009 (no audience chosen).
+- **Phase:** P06 (rule), P14.4 (composer copy)
+- **Status:** open
+
+#### F03-015 — A second check-out overwrites the first
+
+- **Severity:** Low
+- **Area:** `me/service.ts:133` `checkOut`
+- **Evidence:** `repro/shifts.test.ts`: check out, then again 90 minutes later → 200 and
+  `checkedOutAt` moves.
+- **Impact:** the report's hours (check-in to check-out) grow if a volunteer taps again later.
+- **Fix:** conditional update `checkedOutAt: null`, 409 `ALREADY_CHECKED_OUT` otherwise.
+- **Phase:** P06
+- **Status:** open
+
+#### F03-016 — Briefing-slot completion rules are inverted
+
+- **Severity:** Low
+- **Area:** `shift/service.ts:204` `markSlotComplete` (`own.read` in the router)
+- **Evidence:** `repro/shifts.test.ts`: a volunteer (or a Lead) completes an unassigned wave → 200;
+  an IC completing someone else's wave → 403, although the message says "the assigned briefer or
+  an IC".
+- **Impact:** anyone can mark a briefing done; the IC who should cover a missing briefer cannot.
+- **Fix:** briefer or `swap.approve`-level role (a named action in P11).
+- **Phase:** P06, P11.7
+- **Status:** open
+
+#### F03-017 — Pagination cursors do not end, and can skip or repeat
+
+- **Severity:** Low
+- **Area:** `incident/router.ts:60`, `announcement/router.ts:61`, `lostFound/router.ts:55`,
+  `audit/router.ts:73` (`nextCursor` = last id always); `admin/service.ts:156` (cursor on `id` while
+  ordering by name, role or last-seen, with no `id` tiebreaker)
+- **Evidence:** `repro/platform.test.ts`: one incident, `limit=50` → `nextCursor` is set.
+- **Impact:** a client that follows the cursor makes an extra empty request per list; volunteers
+  with equal names or equal "last seen" can appear on two pages or none.
+- **Fix:** the `paginate()` helper from P03.3.
+- **Phase:** P06
+- **Status:** open
+
+#### F03-018 — Audit rows are missing, mislabelled or lack a "before"
+
+- **Severity:** Medium (the house rule is "every mutation audited in the same transaction")
+- **Area:** `lostPerson/service.ts:120` `acknowledge` and `announcement/service.ts:130`
+  `acknowledgeAnnouncement` (no audit); `media/service.ts:92` (`media.upload` never written);
+  `shift/service.ts:107` (a request audited as `swap.decide`); `lostFound/service.ts:177` (close-out
+  as `lostFound.claim`); `missionCard/service.ts:364` (a batch as `card.issue`, in its own
+  transaction after the insert); `admin/service.ts:484` (a move audited as `assignment.create` with
+  no `before`)
+- **Evidence:** `repro/platform.test.ts`: an alert acknowledgement writes no row; a swap request is
+  `swap.decide`; moving a shift records no previous station.
+- **Impact:** post-event reconciliation cannot answer "who acknowledged the alert" or "where was
+  this person rostered before"; filtering the log by action gives wrong answers.
+- **Fix:** the `audited()` wrapper and one action per verb (P03.3); an architecture test that every
+  exported use case that writes goes through it.
+- **Phase:** P06 (P11 generates the action catalogue)
+- **Status:** open
+
+#### F03-019 — Relation loads run concurrently on a transaction connection (PF-20)
+
+- **Severity:** Medium (pg@9 turns the warning into an error)
+- **Area:** `shift/repo.ts:37` `createSwap` and `:44` `findSwapById(tx)` (an `include` of four
+  relations inside `$transaction`); the same shape in `admin/service.ts:459` (`upsert … include`)
+- **Evidence:** `repro/pgConcurrency.test.ts` (alone in its file because pg warns once per
+  process): a swap request emits "Calling client.query() when the client is already executing a
+  query". `--trace-deprecation` shows the source is Prisma's query interpreter
+  (`interpretNode` → `Array.map`) loading the relations in parallel through `PgTransaction`, not the
+  app's own `Promise.all` (the `Promise.all(tx…)` sites PF-20 suspected are serialised by Prisma
+  and do not warn). The full suite shows it from `comms.test.ts` and `rbac.test.ts`, both via swaps.
+- **Impact:** none today; a pg major upgrade makes every swap request fail.
+- **Fix:** inside a transaction, `select` scalar fields only and load relations after commit, or
+  upgrade Prisma once it serialises relation loads in transactions; the repro guards either way.
+- **Phase:** P06
+- **Status:** open. PF-20's remaining item is this.
+
+#### F03-020 — Card-code input disagrees with the printed alphabet
+
+- **Severity:** Low
+- **Area:** `packages/shared/src/dto/missionCard.ts:22` `CardShortCode` (regex excludes I and O,
+  allows L and U); `lib/shortCode.ts:22` alphabet (excludes I, L, O, U); `normaliseShortCode` does
+  not fold look-alikes; `registration/service.ts:116` uses `toUpperCase` only
+- **Evidence:** `repro/capture.test.ts`: `GET /cards/IOOOOO` for card `100000` → 400
+  "Not a valid card code".
+- **Impact:** the alphabet drops I, L, O and U so a scuffed card is read right first time; typing
+  the letter a volunteer sees is refused instead of read as the digit.
+- **Fix:** one `normaliseCardCode` in shared (Crockford decoding: O→0, I/L→1), used by the DTO, the
+  server and `CardCodeInput`.
+- **Phase:** P06/P07
+- **Status:** open
+
+#### F03-021 — Resetting a setting is not atomic with its audit row
+
+- **Severity:** Low (no caller today)
+- **Area:** `lib/settings.ts:199` `clearSettings` (defaults `tx = prisma`)
+- **Evidence:** `repro/platform.test.ts`: when the audit insert fails, the setting is already
+  deleted.
+- **Impact:** none until P10 wires "reset to default"; then an unaudited change.
+- **Fix:** run delete and audit in one transaction and reload after commit.
+- **Phase:** P10.1
+- **Status:** open
+
+#### F03-022 — A card batch can print a code that belongs to another card
+
+- **Severity:** Low (a 1-in-a-billion-per-code collision)
+- **Area:** `missionCard/service.ts:344` `generateBatch` (`createMany` with `skipDuplicates`, CSV
+  built from the generated rows, not the created ones)
+- **Evidence:** `repro/cardBatch.test.ts` forces the generator to return an existing code: the CSV
+  lists it and `created` is one less than the rows printed.
+- **Impact:** two physical cards with one code; one journey stamps both.
+- **Fix:** insert with `RETURNING`, regenerate until `count` codes are new, print only those.
+- **Phase:** P06
+- **Status:** open
+
+#### F03-023 — Long-shift warnings include shifts from earlier days
+
+- **Severity:** Low
+- **Area:** `shift/repo.ts:233` `longRunningShifts` (no date bound)
+- **Evidence:** `repro/shifts.test.ts`: a shift checked in yesterday and never checked out is
+  today's longest shift (1,530 minutes).
+- **Impact:** after day 1, everyone who forgot to check out tops the Chief's list every day.
+- **Fix:** today's assignments only; stale open check-ins become a data-health item.
+- **Phase:** P06
+- **Status:** open
+
+#### F03-024 — Incident status moves freely, including back from RESOLVED
+
+- **Severity:** Low
+- **Area:** `incident/service.ts:128` `changeIncidentStatus`
+- **Evidence:** `repro/platform.test.ts`: RESOLVED → OPEN returns 200.
+- **Impact:** the "incidents open" count can go back up with no reason recorded; there is no
+  resolution time. F02-015 builds the incident screen on this.
+- **Fix:** a state machine (OPEN → ACKNOWLEDGED → RESOLVED, reopen only with a note) and
+  `resolvedAt`.
+- **Phase:** P06, P13.7
+- **Status:** open
+
+#### F03-025 — Import counters count a new person twice
+
+- **Severity:** Low
+- **Area:** `roster/service.ts:142` (every row calls `upsertVolunteer`; the second row for a new
+  email counts as "updated")
+- **Evidence:** `repro/roster.test.ts`: one new person with two shifts → 1 created and 1 updated.
+- **Impact:** the preview tells the Chief an existing volunteer will change when none does.
+- **Fix:** plan per person, not per row (the P03.2 split).
+- **Phase:** P06
+- **Status:** open
+
+#### F03-026 — Rule failures are reported as permission denials
+
+- **Severity:** Low
+- **Area:** 18 `ForbiddenError`s in services, e.g. `me/service.ts:107` (check-in outside the
+  block), `attendance/service.ts` (code invalid or expired, day not configured)
+- **Evidence:** `repro/shifts.test.ts`: checking in to the afternoon shift at 11:30 → 403
+  `FORBIDDEN`.
+- **Impact:** the client shows "not allowed for your role" (F02-030) for "not yet"; logs mix
+  authorization failures with ordinary rule failures.
+- **Fix:** 409/422 with specific codes (P03.3 error decision).
+- **Phase:** P06, P11.8
+- **Status:** open
+
+#### F03-027 — A voided or unissued card can be reissued
+
+- **Severity:** Low
+- **Area:** `missionCard/service.ts:269` (no status check on the original)
+- **Evidence:** `repro/capture.test.ts`: reissuing from a VOIDED card → 201, stamps carried over.
+- **Impact:** a spoiled card's stamps move onto a fresh card.
+- **Fix:** reissue only from ISSUED or COMPLETED.
+- **Phase:** P06
+- **Status:** open
+
+#### F03-028 — A reissued journey is counted twice, and the original as voided
+
+- **Severity:** Medium (wrong numbers)
+- **Area:** `missionCard/repo.ts:97` `issuedWhere`, `:134` `countCardsPerStation`,
+  `missionCard/service.ts:311`
+- **Evidence:** `repro/capture.test.ts`: one card stamped once and reissued → funnel `issued: 2`,
+  `voided: 1`, the booth stage 2.
+- **Impact:** every lost card adds one to "issued" and to each station it reached, and one to
+  "voided".
+- **Fix:** mark the original `LOST` (see above) and count journeys, excluding originals with a
+  reissue.
+- **Phase:** P06 (P05 confirms the rule)
+- **Status:** open
+
 ---
 
 ## Appendix A — Target location of every export
