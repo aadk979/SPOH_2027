@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T15:49:24.322Z",
+  "updatedAt": "2026-09-25T15:50:29.988Z",
   "current": {
     "phase": "P04",
     "step": "P04.9"
@@ -1052,11 +1052,18 @@
         {
           "id": "P04.9",
           "title": "Dependencies",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T15:49:24.322Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T15:50:29.987Z",
+          "commits": [
+            "4e5d521"
+          ],
+          "notes": [
+            {
+              "at": "2026-09-25T15:50:29.988Z",
+              "text": "npm audit 0 (859 pkgs); ~30 outdated (5 majors); 5 pins blocking upgrades documented; licences OK (MPL/LGPL unmodified, buffers undeclared, repo UNLICENSED); F04-022 Low"
+            }
+          ]
         },
         {
           "id": "P04.10",
