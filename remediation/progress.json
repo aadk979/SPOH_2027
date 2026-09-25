@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T13:32:48.036Z",
+  "updatedAt": "2026-09-25T13:46:34.710Z",
   "current": {
     "phase": "P02",
-    "step": "P02.5"
+    "step": "P02.6"
   },
   "gates": [
     {
@@ -547,17 +547,22 @@
         {
           "id": "P02.5",
           "title": "Journey 4: volunteer shift",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T13:32:48.036Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T13:46:34.429Z",
+          "commits": ["641a156"],
+          "notes": [
+            {
+              "at": "2026-09-25T13:46:34.429Z",
+              "text": "volunteer-booth/counter/first; F02-018..023; F01-046 confirmed"
+            }
+          ]
         },
         {
           "id": "P02.6",
           "title": "Journey 5: Lead",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-25T13:46:34.709Z",
           "completedAt": null,
           "commits": [],
           "notes": []
