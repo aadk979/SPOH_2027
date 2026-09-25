@@ -35,18 +35,19 @@ sweep 04-timezone    -e 'Asia/Singapore' -e '\bSGT\b' -e '\+08' -e '8 \* 60' \
 sweep 05-venue-brand -e 'SPOH' -e '\bT19\b' -e 'School of Computing' -e 'Open House' -e '\bSP\b'
 # 4. Course codes
 sweep 06-course-codes -e '\b(DAAA|DCDF|DCS|DCITP)\b'
-# 5. Enum members used as literals outside their definitions (one file per enum)
+# 5. Enum members used as literals outside their definitions (one file per enum): quoted,
+#    `Enum.MEMBER`, or as an object key (label maps such as `SEC_1: 'Sec 1'`)
 enum_members() { awk -v e="$1" '$1=="enum" && $2==e {f=1; next} f && /^}/ {f=0} f && $1 ~ /^[A-Z]/ {print $1}' \
   server/prisma/schema.prisma; }
 for enum in $(awk '$1=="enum" {print $2}' server/prisma/schema.prisma); do
   members=$(enum_members "$enum" | paste -sd'|')
   EXCL='^server/prisma/(migrations/|schema\.prisma$)|^packages/shared/src/enums\.ts$|package-lock\.json$|\.(png|ico)$' \
-    sweep "07-enum-$enum" -e "['\"\`]($members)['\"\`]" -e "\b$enum\.($members)\b"
+    sweep "07-enum-$enum" -e "['\"\`]($members)['\"\`]" -e "\b$enum\.($members)\b" -e "\b($members)\??:\s"
 done
 # 6. Domains, URLs, emails, AWS identifiers
 sweep 08-urls-domains -e 'duckdns' -e '@spoh2027' -e 'https?://' \
                       -e '[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.[A-Za-z.]{2,}' \
-                      -e '\b(ap|us|eu)-[a-z]+-\d\b' -e 'arn:aws' -e '\b\d{12}\b'
+                      -e '\b(ap|us|eu)-[a-z]+-\d' -e 'arn:aws' -e '\b\d{12}\b' -e 'COGNITO_\w*_ID='
 # 7. Magic numbers in services (reviewed by eye in P01.2)
 SCOPE=(server/src/modules)
 EXCL='\.test\.ts$' sweep 09-magic-numbers -e '\b\d{2,}\b'

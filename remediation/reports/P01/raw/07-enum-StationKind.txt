@@ -3,6 +3,7 @@ client/src/app/capture/registration/page.tsx:31:  { value: 'OTHER', label: 'Othe
 client/src/app/safety/incident/new/page.tsx:39:  { value: 'OTHER', label: 'Other' },
 client/src/components/ShiftOverview.tsx:149:  if (can('registration.create') && assignment.station.kind === 'SIGNUP_BOOTH') {
 client/src/components/ShiftOverview.tsx:173:  if (can('gift.redeem') && assignment.station.kind === 'MISSION_COMPLETE') {
+client/src/lib/format.ts:89:  OTHER: 'Other',
 server/prisma/seed.ts:76:    code: 'SIGNUP_BOOTH',
 server/prisma/seed.ts:78:    kind: 'SIGNUP_BOOTH',
 server/prisma/seed.ts:85:    code: 'WELCOME_LOUNGE',

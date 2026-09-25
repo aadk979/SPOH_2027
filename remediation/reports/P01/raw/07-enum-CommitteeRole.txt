@@ -40,7 +40,12 @@ server/src/modules/attendance/service.ts:78:    isExco: person.role !== 'VOLUNTE
 server/src/modules/attendance/service.ts:180:    issuer.role === 'VOLUNTEER' ||
 server/src/modules/attendance/service.ts:311:      if (person.role !== 'VOLUNTEER' && !isRoot(issuer))
 server/src/modules/gift/service.ts:243:    audience: { everyone: false, minimumRole: 'DEPUTY_COORDINATOR', volunteerIds: [] },
+server/src/modules/identity/provider.ts:54:  ADMIN: 'Admin',
+server/src/modules/identity/provider.ts:55:  LEAD: 'Lead',
+server/src/modules/identity/provider.ts:56:  CHIEF_COORDINATOR: 'ChiefCoordinator',
+server/src/modules/identity/provider.ts:57:  DEPUTY_COORDINATOR: 'DeputyCoordinator',
 server/src/modules/identity/provider.ts:58:  IC: 'IC',
+server/src/modules/identity/provider.ts:59:  VOLUNTEER: 'Volunteer',
 server/src/modules/incident/service.ts:191:    audience: { everyone: false, minimumRole: 'IC', volunteerIds: [] },
 server/tests/integration/admin.test.ts:34:  chief = await createVolunteer({ email: 'chief@spoh.test', role: 'CHIEF_COORDINATOR' });
 server/tests/integration/admin.test.ts:35:  admin = await createVolunteer({ email: 'admin@spoh.test', role: 'ADMIN' });

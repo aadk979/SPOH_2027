@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T12:54:29.988Z",
+  "updatedAt": "2026-09-25T12:54:39.596Z",
   "current": {
     "phase": "P01",
-    "step": "P01.1"
+    "step": "P01.2"
   },
   "gates": [
     {
@@ -378,8 +378,8 @@
         {
           "id": "P01.2",
           "title": "Classify every hit",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-25T12:54:39.596Z",
           "completedAt": null,
           "commits": [],
           "notes": []

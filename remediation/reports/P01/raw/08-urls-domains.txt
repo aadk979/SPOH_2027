@@ -1,6 +1,10 @@
 client/.env.example:6:NEXT_PUBLIC_API_BASE_URL=http://localhost:4010
 client/.env.example:11:# below is provisioned in ap-southeast-1 and matches the server's .env.example.
+client/.env.example:13:#   NEXT_PUBLIC_COGNITO_USER_POOL_ID=ap-southeast-1_9bwl2nGF7
+client/.env.example:14:#   NEXT_PUBLIC_COGNITO_CLIENT_ID=23uft7mvtnrno1uunsc5lp0h2v
 client/.env.example:15:NEXT_PUBLIC_COGNITO_REGION=ap-southeast-1
+client/.env.example:16:NEXT_PUBLIC_COGNITO_USER_POOL_ID=
+client/.env.example:17:NEXT_PUBLIC_COGNITO_CLIENT_ID=
 client/next.config.ts:11:const apiOrigin = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4010';
 client/playwright.config.ts:30:    baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:3000',
 client/src/app/sign-in/page.tsx:86:            placeholder="you@spoh2027.test"
@@ -29,6 +33,8 @@ ops/backup/spoh-backup.sh:48:readonly AWS_REGION="${AWS_REGION:-ap-southeast-1}"
 ops/backup/spoh-restore.sh:30:readonly AWS_REGION="${AWS_REGION:-ap-southeast-1}"
 server/.env.example:26:# in ap-southeast-1 — these are public client identifiers, not secrets, and they
 server/.env.example:28:COGNITO_REGION=ap-southeast-1
+server/.env.example:29:COGNITO_USER_POOL_ID=ap-southeast-1_9bwl2nGF7
+server/.env.example:30:COGNITO_CLIENT_ID=23uft7mvtnrno1uunsc5lp0h2v
 server/.env.example:40:CORS_ALLOWED_ORIGINS=http://localhost:3000
 server/.env.example:63:AWS_REGION=ap-southeast-1
 server/.env.example:71:# ATTENDANCE_ROOT_EMAIL=event-root@example.com

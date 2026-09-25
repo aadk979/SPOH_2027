@@ -3,6 +3,9 @@ client/src/app/safety/incident/new/page.tsx:44:  { value: 'MEDIUM', label: 'Medi
 client/src/app/safety/incident/new/page.tsx:45:  { value: 'HIGH', label: 'High', hint: 'Needs an IC now' },
 client/src/app/safety/incident/new/page.tsx:46:  { value: 'CRITICAL', label: 'Critical', hint: 'Call as well as reporting' },
 client/src/app/safety/incident/new/page.tsx:55:  const [severity, setSeverity] = useState<IncidentSeverity>('LOW');
+ops/backup/spoh-backup-check.sh:47:  echo "CRITICAL: no manifest.json in s3://${BACKUP_BUCKET} — the daemon has never completed a run"
+ops/backup/spoh-backup-check.sh:55:[[ -n "$COMPLETED_EPOCH" ]] || { echo "CRITICAL: manifest.json is unreadable"; exit 2; }
+ops/backup/spoh-backup-check.sh:63:CRITICAL: the newest backup is ${AGE_MINUTES} minutes old (limit ${MAX_AGE_MINUTES}).
 server/src/modules/dashboard/repo.ts:41:    prisma.incident.count({ where: { status: { not: 'RESOLVED' }, severity: 'CRITICAL' } }),
 server/src/modules/incident/service.ts:173:  if (incident.severity !== 'HIGH' && incident.severity !== 'CRITICAL') {
 server/tests/integration/rbac.test.ts:114:      severity: 'LOW',

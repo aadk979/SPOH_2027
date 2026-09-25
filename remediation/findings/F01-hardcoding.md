@@ -1,0 +1,167 @@
+# F01 — Hardcoding and configuration inventory
+
+Output of P01 (Audit A). Every value that ties the system to SPOH 2027, to Singapore, to one venue
+or to one deployment, with the place it moves to.
+
+- **Swept commit:** `1e81e6f` on `main`. Product code is unchanged since then.
+- **Raw hits:** `reports/P01/raw/`, produced by `bash remediation/reports/P01/sweep.sh`
+  (patterns, scope and exclusions are in the script and in `reports/P01/README.md`).
+- **Classification:** `node remediation/reports/P01/classify.mjs` assigns every raw hit to one item
+  below or to one false-positive reason, writes `raw/CLASSIFIED.tsv` (one row per hit) and exits 1
+  if any hit is left over. `--where` prints each item's locations. It exits 0: **1271 of 1271 hits
+  are classified.**
+
+## Decisions this audit applies
+
+- **D-02 = A** (one organisation, many events). Organisation identity (name, app name, campus) is a
+  `platform-setting` held on the `Organisation` row. Everything about one event is `event-data`,
+  `event-setting` or `event-content`.
+- **D-04 = configurable per event.** "The three counts never merge" and "no visitor personal data"
+  are **not** `invariant`s. Neither has a literal in the code: both are enforced by structure (three
+  separate tables and DTOs; no personal-data columns; lost-person descriptions purged after
+  `lostPersonPurgeHours`). They become per-event options, designed in P05 and built in P09/P10. See
+  [D-04 items](#d-04-items-no-literal-hit).
+- **D-03 is open.** `CommitteeRole` is classed `invariant` on the recommended answer (A: a fixed
+  catalogue, renameable per event). If D-03 is B, F01-021 becomes `event-data`.
+
+## Hits per class
+
+| Class              | Hits | Items                                                              |
+| ------------------ | ---: | ------------------------------------------------------------------ |
+| `event-data`       |  169 | F01-001, 002, 006, 008, 014, 015, 018–020, 023–028, 045            |
+| `event-setting`    |   14 | F01-009, 037, 039 (and F01-048, 049, which have no literal hit)    |
+| `station-setting`  |    0 | none from the sweep (P01.5 assigns settings to this scope)         |
+| `platform-setting` |   13 | F01-003, 004, 038                                                  |
+| `event-content`    |   28 | F01-005, 007, 010, 012, 013                                        |
+| `infra-config`     |   69 | F01-029–033                                                        |
+| `secret`           |    0 | no secret value is committed; P01.4 classifies the secret env keys |
+| `invariant`        |  159 | F01-021, 022                                                       |
+| `fixture`          |  526 | F01-011, 016, 017, 034, 042–044                                    |
+| `legit-constant`   |  201 | F01-035, 036, 040, 041                                             |
+| false positive     |   92 | FP-comment, FP-meta, FP-match                                      |
+| **Total**          | 1271 |                                                                    |
+
+## Inventory (P01.2)
+
+Locations are `file:lines`; `raw/CLASSIFIED.tsv` has every hit. Paths drop the `server/src/`,
+`client/src/` and `packages/shared/src/` prefixes where the package is obvious from the file
+(`modules/…`, `lib/…` and `middleware/…` are server; `app/…`, `components/…` and `features/…` are
+client; `dto/…` is shared).
+
+### Event identity and branding
+
+| ID      | file:line                                                                                                                                                                                                                            | Literal                                                             | Meaning                                                   | Class              | Target home                                                         | Phase         |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- | --------------------------------------------------------- | ------------------ | ------------------------------------------------------------------- | ------------- |
+| F01-001 | `app/layout.tsx:8`, `app/home/page.tsx:21`, `app/sign-in/page.tsx:110`, `app/tv/page.tsx:98`, `components/GlobalNav.tsx:61`, `components/SectionNav.tsx:57`, `app/admin/settings/page.tsx:292`, `modules/report/export.ts:47,73,363` | `SPOH 2027`, `Open House 2027`                                      | Event name in the page title, nav, TV header, report copy | `event-data`       | `Event.name`; UI and exports read the current event                 | P09.1, P14.6  |
+| F01-002 | `lib/settings.ts:44`, `client/src/lib/runtimeSettings.ts:46`                                                                                                                                                                         | `eventName: 'SPOH 2027'`                                            | Admin-editable name that nothing displays (F01-047)       | `event-data`       | `Event.name`; retire the setting                                    | P09.1, P10.1  |
+| F01-003 | `app/sign-in/page.tsx:112`, `components/SectionNav.tsx:56`                                                                                                                                                                           | `School of Computing`                                               | Organisation name                                         | `platform-setting` | `Organisation.name` (D-02)                                          | P09.1, P14.6  |
+| F01-004 | `client/public/manifest.json:3`, `client/public/sw.js:91`, `app/layout.tsx:11`, `modules/{announcement,incident,lostPerson}/service.ts:194,187,254`                                                                                  | `SPOH Ops`                                                          | App short name in PWA metadata and push titles and bodies | `platform-setting` | `Organisation.appName`                                              | P14.6         |
+| F01-005 | `client/public/manifest.json:2,4`, `app/layout.tsx:9`                                                                                                                                                                                | `SPOH 2027 Operations`, `…Open House, 6-9 January 2027.`            | App name and description with the event's dates           | `event-content`    | Manifest and metadata generated from Organisation and current Event | P13.4, P14.6  |
+| F01-006 | `modules/report/router.ts:46,56`, `app/reports/page.tsx:72`                                                                                                                                                                          | `spoh2027-report-…`                                                 | Report download file name                                 | `event-data`       | `Event.slug`                                                        | P09.1, P09.12 |
+| F01-007 | `app/safety/incident/new/page.tsx:161`, `app/inbox/page.tsx:177`                                                                                                                                                                     | `T19, level 2 walkway`, `DCDF at capacity, ushers hold at Welcome…` | Placeholders naming this venue and its stations           | `event-content`    | Event-neutral placeholder copy (not a ContentDocument)              | P14.8         |
+| F01-008 | `app/chief/imports/page.tsx:44–49`                                                                                                                                                                                                   | `SEC_4,SIGNUP_BOOTH,2027-01-07T03:30…`, `DCDF_STATION,42,…`         | Sample CSV on the import screen                           | `event-data`       | Generated from the event's categories, stations and days            | P13.3         |
+| F01-009 | `app/attendance/page.tsx:138,142,147`, `features/attendance/VerifierCode.tsx:70`, `modules/attendance/service.ts:315`, `server/.env.example:74`                                                                                      | `SP Wi-Fi`, `SP network`, `from SP IT`                              | Name of the venue network that QR attendance requires     | `event-setting`    | `attendance.campusNetworkLabel`, next to the CIDR list (P01.4)      | P10.1, P10.4  |
+| F01-010 | `dto/shift.ts:96` (and lines 92–100)                                                                                                                                                                                                 | `MANDATORY_BRIEF_POINTS`                                            | The four points every briefing must cover                 | `event-content`    | ContentDocument, briefing section                                   | P13.3         |
+| F01-011 | `app/sign-in/page.tsx:86`                                                                                                                                                                                                            | `you@spoh2027.test`                                                 | Dev seed domain shown as the production sign-in hint      | `fixture`          | Neutral placeholder                                                 | P14.8         |
+| F01-012 | `client/src/content/brief.ts` (13 hits: 11–150)                                                                                                                                                                                      | course codes, `T19`, route, safety points, training date            | The volunteer brief (courses, route, FAQs, map levels)    | `event-content`    | ContentDocument (schema drafted in P01.6)                           | P13.3, P13.4  |
+| F01-013 | `app/map/page.tsx:15,28`                                                                                                                                                                                                             | `T19, School of Computing`                                          | Map page copy                                             | `event-content`    | ContentDocument, map section                                        | P13.3         |
+
+### Schedule and taxonomy
+
+| ID      | file:line                                                                                                                                                                                                                                                                              | Literal                                                                  | Meaning                                                   | Class                | Target home                                                         | Phase         |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------- | -------------------- | ------------------------------------------------------------------- | ------------- |
+| F01-014 | `server/prisma/seed.ts:46–63,205,206`                                                                                                                                                                                                                                                  | `2027-01-06…09`, `2026-11-18`, `2027-01-04`, `Sec 4 Tour Day 1`, …       | The real event's days and dry runs, in the dev seed       | `event-data`         | `EventDay` rows under `Event`: admin UI or D-12 migration           | P09.4, P13.3  |
+| F01-015 | `server/prisma/seed.ts:76–144`                                                                                                                                                                                                                                                         | `SIGNUP_BOOTH`, `DAAA Station`, `courseCode: 'DCS'`, `T19 Foyer`, …      | The real event's stations and course codes                | `event-data`         | `Station` rows per event; seed gets a generic fixture event         | P09.2, P09.11 |
+| F01-018 | `app/capture/registration/page.tsx:24–31`, `…/group/page.tsx:25–32`, `client/src/lib/format.ts:82–89`                                                                                                                                                                                  | `SEC_1`…`SEC_5`, `GRADUATED_AWAITING_RESULTS`, `PARENT_GUARDIAN`, labels | Visitor categories and their labels, repeated three times | `event-data`         | `VisitorCategory` table per event (P01.3)                           | P09.2         |
+| F01-019 | `components/ShiftOverview.tsx:149,173`                                                                                                                                                                                                                                                 | `kind === 'SIGNUP_BOOTH'`, `kind === 'MISSION_COMPLETE'`                 | Station kind decides which capture actions a shift shows  | `event-data`         | Station capability flags (P01.3)                                    | P09.2         |
+| F01-020 | `lib/settings.ts:46–50`, `lib/time.ts:33,60,64`, `server/prisma/schema.prisma:90,91`, `client/src/lib/format.ts:60,71`, `app/admin/settings/page.tsx:243`, `config/env.ts:90`, `server/.env.example:67`                                                                                | `MORNING 09:30–14:00`, `AFTERNOON 13:30–18:00`                           | Two fixed shift blocks and their hours                    | `event-data`         | Shift-block table per event; labels from data (F01-046)             | P09.2, P10.1  |
+| F01-045 | `server/prisma/schema.prisma:66–69`, `packages/shared/src/enums.ts:34`                                                                                                                                                                                                                 | `DAAA`, `DCDF`, `DCS`, `DCITP`                                           | The school's four diplomas as an enum                     | `event-data`         | Course (or programme) table per event (P01.3)                       | P09.2         |
+| F01-021 | `packages/shared/src/capabilities.ts:49–54`, `dto/roster.ts:23,64`, `features/admin/useVolunteers.ts:121–126`, `middleware/rbac.ts:97`, `middleware/auth/cognitoProvider.ts:57–62`, `modules/identity/provider.ts:54–59`, `modules/{announcement,attendance,gift,incident}/service.ts` | `'VOLUNTEER'`…`'ADMIN'`, `roleMeets(…, 'IC')`                            | Role catalogue, role checks and Cognito group names       | `invariant` (D-03 A) | Fixed catalogue with per-event labels; checks become Cedar policies | P11.2, P11.5  |
+| F01-022 | 34 files; `raw/CLASSIFIED.tsv`                                                                                                                                                                                                                                                         | `'VOIDED'`, `'URGENT'`, `'HELD'`, `'REQUESTED'`, `'APP'`, `'QR'`, …      | Workflow states, severities, provenance, methods          | `invariant`          | Stay in code as enums, documented (P01.3 verdict per enum)          | P01.3         |
+
+### Time and time zone
+
+| ID      | file:line                                                                                 | Literal                                                             | Meaning                                                             | Class        | Target home                                            | Phase        |
+| ------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------ | ------------------------------------------------------ | ------------ |
+| F01-023 | `lib/time.ts:4,7,19,21,22`                                                                | `EVENT_TIME_ZONE = 'Asia/Singapore'`, `SGT_OFFSET_MINUTES = 8 * 60` | Every server wall-clock computation uses a fixed +8 offset          | `event-data` | `Event.timeZone` (IANA) through `platform/time`        | P09.6        |
+| F01-024 | `modules/report/repo.ts:48,50,54,75,81,153,159,183`                                       | `AT TIME ZONE 'Asia/Singapore'`, UTC `date_trunc('hour')`           | Report day grouping; hour buckets assume a whole-hour offset        | `event-data` | Event tz as a query parameter; bucket in local time    | P09.6        |
+| F01-025 | `modules/report/export.ts:21,29,30,147,231,297,324,373,393,415`                           | `+ 8 * 60 * 60_000`, `(SGT)`                                        | Export shifts timestamps by 8 h and labels columns SGT              | `event-data` | Format in the event tz; label from the tz              | P09.6        |
+| F01-026 | `client/src/lib/format.ts:10,14,24,38`                                                    | `const TZ = 'Asia/Singapore'`                                       | Every client time is rendered in Singapore time                     | `event-data` | Event tz from the client's event context               | P09.6, P09.8 |
+| F01-027 | `dto/common.ts:25`, `dto/settings.ts:24`                                                  | `interpreted in Asia/Singapore`                                     | Contract docs fix the zone of dates and `HH:MM` settings            | `event-data` | "the event's time zone"                                | P09.6        |
+| F01-028 | `ops/backup/spoh-backup.sh:86` (code 88–92), `ops/backup/spoh-backup-check.sh:34` (38–43) | `minute_of_day >= 90 && < 600`                                      | Backup cadence and staleness use 09:30–18:00 SGT as 01:30–10:00 UTC | `event-data` | Superseded by RDS backups (P08.3); else read the event | P08.3        |
+
+### Infrastructure and deployment identity
+
+| ID      | file:line                                                                                                                                                             | Literal                                                                             | Meaning                                                | Class            | Target home                                                   | Phase        |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------ | ---------------- | ------------------------------------------------------------- | ------------ |
+| F01-029 | `server/.env.example:26,29,30`, `client/.env.example:11,13,14`, `config/env.ts:56`                                                                                    | `ap-southeast-1_9bwl2nGF7`, `23uft7mvtnrno1uunsc5lp0h2v`, `spoh2027-livetest.auth…` | The live Cognito pool, app client and hosted-UI domain | `infra-config`   | SSM from CDK outputs; example files hold placeholders         | P08.6, P12.1 |
+| F01-030 | `config/env.ts:53,114`, `server/.env.example:28,63`, `client/.env.example:15`, `server/scripts/{sync-cognito-subs,verify-cognito}.mjs:39,43`                          | `ap-southeast-1`                                                                    | Default region                                         | `infra-config`   | CDK context and SSM; no default in app code                   | P08.1, P08.6 |
+| F01-031 | `ops/backup/*` (44 hits)                                                                                                                                              | `spoh2027-backups-665146708212`, `/etc/spoh/backup.env`, unit names                 | Backup bucket, account id, IAM policy, host paths      | `infra-config`   | CDK storage and RDS automated backups replace the host daemon | P08.3, P08.7 |
+| F01-032 | `client/src/lib/env.ts:21`, `client/next.config.ts:11`, `config/env.ts:62`, `server/.env.example:40`, `client/.env.example:6`, `server/scripts/verify-cognito.mjs:44` | `http://localhost:4010`, `http://localhost:3000`                                    | Dev API base and CORS origin defaults                  | `infra-config`   | Dev-only defaults; production from SSM, guarded               | P08.6        |
+| F01-033 | `modules/auth/tokens.ts:28,29`, `middleware/auth/localProvider.ts:24,25`, `server/scripts/load-test.mjs:80,81`                                                        | `spoh2027-api`, `spoh2027-local-dev`                                                | JWT issuer and audience                                | `infra-config`   | Derived from the deployment's base URL (SSM)                  | P08.6, P12.5 |
+| F01-034 | `server/.env.example:14`, `scripts/dev-db-local.sh:14–80`, `server/scripts/setup-test-db.mjs:16`                                                                      | `spoh2027`, `spoh2027_test`, `5435`                                                 | Dev and test database names and port                   | `fixture`        | Stays (dev only)                                              | —            |
+| F01-035 | `client/src/lib/outbox.ts:21`, `client/public/sw.js:16`                                                                                                               | `DB_NAME = 'spoh2027'`, `spoh2027-shell-v1`                                         | IndexedDB outbox and service-worker cache names        | `legit-constant` | Stays; a rename needs an outbox migration                     | P07          |
+| F01-036 | `lib/shortCode.ts:58`, `app/capture/stamp/page.tsx:83`                                                                                                                | `spoh2027:<uuid>`                                                                   | QR payload prefix, printed on physical cards           | `legit-constant` | Stays; printed cards must keep scanning                       | P09.2        |
+| F01-037 | `server/.env.example:71`                                                                                                                                              | `ATTENDANCE_ROOT_EMAIL=event-root@example.com`                                      | The one person who can mark attendance unverified      | `event-setting`  | Classified in P01.4                                           | P10.4        |
+
+### Numbers in `server/src/modules`
+
+| ID      | file:line                                                               | Literal                                                                          | Meaning                                                                                                                  | Class              | Target home                       | Phase |
+| ------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------ | --------------------------------- | ----- |
+| F01-038 | `modules/notification/service.ts:73–77`                                 | `600`, `900`, `1800`                                                             | Push TTL per notification kind, in seconds                                                                               | `platform-setting` | Settings registry, platform scope | P10.1 |
+| F01-039 | `modules/report/repo.ts:104,111`, `export.ts:135,146`, `service.ts:217` | `/ 1800) * 1800`, `30-minute curve`                                              | Report peak and curve bucket fixed at 30 minutes                                                                         | `event-setting`    | Settings registry, event scope    | P10.1 |
+| F01-040 | 36 files; `raw/CLASSIFIED.tsv`                                          | `res.status(201)`, `new AppError(409, …)`, `status === 410`                      | HTTP status codes                                                                                                        | `legit-constant`   | Stays                             | —     |
+| F01-041 | 25 files; `raw/CLASSIFIED.tsv`                                          | `randomBytes(32)`, `.slice(0, 10)`, `/ 1000`, `.max(64)`, column widths, `> 300` | Crypto sizes, ISO slicing, unit conversion, input bounds, export layout, token max age, 10-digit PIN, "last hour" window | `legit-constant`   | Stays, named where it is not      | P06   |
+
+### Fixtures
+
+| ID      | file:line                                                                                                 | Literal                                                     | Meaning                                         | Class     | Target home                                   | Phase         |
+| ------- | --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- | ----------------------------------------------- | --------- | --------------------------------------------- | ------------- |
+| F01-016 | `server/prisma/seed.ts:163–459` (25 lines)                                                                | `admin@spoh2027.test`, `spoh2027:dev-0001`, …               | Dev people, assignments, reporting lines, cards | `fixture` | Dev seed only                                 | P09.11        |
+| F01-017 | `server/prisma/seed.ts:42,217,218,389`                                                                    | `Date.now() + 8 * 60 * 60 * 1000`, `09:30 to 12:30 SGT`     | Seed computes "today" and footfall in SGT       | `fixture` | Seed uses the event-tz helpers                | P09.6, P09.11 |
+| F01-042 | `modules/devAuth/router.ts:61`                                                                            | `12 * 60 * 60`                                              | Dev sign-in token lifetime                      | `fixture` | Stays (dev only)                              | —             |
+| F01-043 | `server/tests/**`, `client/tests/**`, `server/vitest.config.ts`, `client/playwright.config.ts` (450 hits) | `FROZEN_NOW = 2027-01-07T03:30Z`, `@spoh.test`, enum values | Test data and the frozen clock                  | `fixture` | Stays; P09.6 adds non-Singapore and DST cases | P09.6         |
+| F01-044 | `server/scripts/load-test.mjs`, `server/scripts/verify-cognito.mjs:102` (14 hits)                         | `SIGNUP_BOOTH`, `loadtest.spoh2027.test`, `['IC', 40]`      | Load-test and verification sample data          | `fixture` | Stays; station and role come from arguments   | P16           |
+
+### False positives
+
+| Reason     | Hits | What they are                                                                                                                                       |
+| ---------- | ---: | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FP-comment |   70 | Narrative comments ("at 09:25 on the day", "slide 39", "PRODUCT_BRIEF §10"), example hosts in comments, and one neutral placeholder (`since 11:15`) |
+| FP-meta    |   15 | `SPOH 2027` in `package.json` descriptions and `.env.example` headers; `SPOH_*` variable names; empty `NEXT_PUBLIC_COGNITO_*_ID=` keys              |
+| FP-match   |    7 | `OTHER` of another enum, `CRITICAL:` in backup-check output, `DCS: 120` in a comment, `${CHECKSUM:0:16}`                                            |
+
+### D-04 items (no literal hit)
+
+| ID      | Rule                         | Where it is enforced today                                                                                                                                                  | Class           | Target home                                                 | Phase           |
+| ------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ----------------------------------------------------------- | --------------- |
+| F01-048 | The three counts never merge | Separate `Registration`, `FootfallTick` and `MissionCard` tables and DTOs (`dto/common.ts:43`); reports and tiles keep units apart (`components/dashboard/StatTile.tsx:10`) | `event-setting` | Per-event option (D-04); P05 defines what "merged" may show | P05, P09.12     |
+| F01-049 | No visitor personal data     | DTO shapes (`dto/registration.ts:10`, `dto/lostFound.ts:15`); lost-person descriptions purged after `lostPersonPurgeHours`                                                  | `event-setting` | Per-event option (D-04) with retention and access rules     | P05, P09, P15.7 |
+
+## Defects found during P01
+
+### F01-046 — Shift labels ignore the configured shift hours
+
+- **Severity:** Medium
+- **Area:** `client/src/lib/format.ts:59–61` (`blockLabel`), used by `components/ShiftOverview.tsx:67`
+  and `app/shift/page.tsx:69`
+- **Evidence:** `shiftBlocks` is an admin-editable setting (`app/admin/settings/page.tsx:243`,
+  `server/src/lib/settings.ts:49–50`) and the server uses it for "within shift hours". The client
+  never reads it outside the settings screen: `blockLabel` returns the literal `09:30–14:00` or
+  `13:30–18:00`.
+- **Impact:** After an admin changes the hours, volunteers' shift cards show the old times while
+  attendance and capture follow the new ones.
+- **Fix:** Render labels from the configured blocks (P09.2 makes blocks data).
+- **Phase:** P09.2
+- **Status:** open
+
+### F01-047 — The `eventName` setting is never displayed
+
+- **Severity:** Low
+- **Area:** `client/src/lib/runtimeSettings.ts:46,97`; `app/admin/settings/page.tsx:171–208`
+- **Evidence:** Admins can edit `eventName` (validated, audited, 80 characters), and the client
+  loads it, but no screen reads it. Every visible name is the literal of F01-001.
+- **Impact:** Renaming the event in settings has no visible effect.
+- **Fix:** Replaced by `Event.name` (F01-001, F01-002).
+- **Phase:** P09.1
+- **Status:** open

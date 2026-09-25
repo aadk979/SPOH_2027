@@ -8,6 +8,7 @@ client/src/app/safety/incident/new/page.tsx:37:  { value: 'CROWD_CONCERN', label
 client/src/app/safety/incident/new/page.tsx:38:  { value: 'EQUIPMENT', label: 'Equipment' },
 client/src/app/safety/incident/new/page.tsx:39:  { value: 'OTHER', label: 'Other' },
 client/src/app/safety/incident/new/page.tsx:54:  const [type, setType] = useState<IncidentType>('NEAR_MISS');
+client/src/lib/format.ts:89:  OTHER: 'Other',
 server/prisma/seed.ts:144:    kind: 'OTHER',
 server/src/modules/report/service.ts:285:    nearMisses: byType.get('NEAR_MISS') ?? 0,
 server/tests/helpers/fixtures.ts:57:      kind: 'OTHER',

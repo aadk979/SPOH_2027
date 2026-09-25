@@ -1,6 +1,12 @@
 client/public/sw.js:98:      renotify: payload.priority === 'URGENT',
 client/public/sw.js:99:      requireInteraction: payload.priority === 'URGENT',
 client/src/app/inbox/page.tsx:35:type Priority = 'INFO' | 'OPERATIONAL' | 'URGENT';
+client/src/app/inbox/page.tsx:38:  INFO: 'Information',
+client/src/app/inbox/page.tsx:39:  OPERATIONAL: 'Operational',
+client/src/app/inbox/page.tsx:40:  URGENT: 'Urgent',
+client/src/app/inbox/page.tsx:121:  URGENT: 'alert',
+client/src/app/inbox/page.tsx:122:  OPERATIONAL: 'neutral',
+client/src/app/inbox/page.tsx:123:  INFO: 'neutral',
 client/src/app/inbox/page.tsx:130:  const [priority, setPriority] = useState<Priority>('OPERATIONAL');
 client/src/app/inbox/page.tsx:188:          { value: 'INFO', label: PRIORITY_LABELS.INFO },
 client/src/app/inbox/page.tsx:189:          { value: 'OPERATIONAL', label: PRIORITY_LABELS.OPERATIONAL },
