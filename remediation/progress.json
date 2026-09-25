@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T16:24:05.701Z",
+  "updatedAt": "2026-09-25T16:26:00.249Z",
   "current": {
     "phase": "P05",
-    "step": "P05.4"
+    "step": "P05.5"
   },
   "gates": [
     {
@@ -143,9 +143,9 @@
       "title": "Scheduler engine",
       "owner": "design (P05)",
       "blocks": ["P10"],
-      "status": "open",
-      "answer": null,
-      "answeredAt": null
+      "status": "answered",
+      "answer": "A: Postgres job table (design, ADR-004 §4): ScheduledAction with FOR UPDATE SKIP LOCKED claims, leases, retries, dead-letter, transactional handlers. Proposed until G1.",
+      "answeredAt": "2026-09-25T16:26:00.147Z"
     },
     {
       "id": "D-10",
@@ -1024,11 +1024,16 @@
         {
           "id": "P05.5",
           "title": "ADR-004 Event lifecycle and scheduling (D-09)",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-25T16:24:15.281Z",
+          "completedAt": "2026-09-25T16:26:00.248Z",
+          "commits": ["01e5ed2"],
+          "notes": [
+            {
+              "at": "2026-09-25T16:26:00.249Z",
+              "text": "ADR-004: lifecycle table, rehearsal mode, day boundary, scheduler engine (D-09 A), handler catalogue, job migration"
+            }
+          ]
         },
         {
           "id": "P05.6",
