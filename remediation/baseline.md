@@ -108,3 +108,46 @@ Full lists: `reports/metrics/baseline-main.json`, `reports/metrics/baseline-feat
   AWS endpoints are reachable. There is no `aws` CLI; use the SDK.
 - The repo references Cognito pool `ap-southeast-1_9bwl2nGF7`, backups bucket
   `spoh2027-backups-665146708212` and region `ap-southeast-1`.
+
+## After reconciliation (P00.2)
+
+**D-05: the owner chose to stay on the current branch.** The audit branch is **not** merged. The
+baseline is `main` = `d2497b6` plus the remediation docs. The working branch does **not** contain
+`319d06d`, so P00.2's _Done when_ is replaced by this record.
+
+What that means:
+
+- **The deployed system is ahead of the baseline.** According to its own commits,
+  `spoh2027.duckdns.org` runs `feat/audit-cloudwatch` (`319d06d`). Staging therefore serves
+  features and a schema that this repo does not have. Anything learned by probing staging (P00.9,
+  P02) describes the audit branch, not the code being refactored.
+- **Schema drift.** Migration `20260922000000_audit_severity_and_security_events` (two enums, five
+  `AuditLog` columns, three indexes) exists only on the audit branch. A staging database built from
+  that branch has it applied. Deploying the baseline tag there puts the repo's migrations behind the
+  database's. P04 must verify how `prisma migrate deploy` behaves in that state before anyone relies
+  on the tag as a rollback target for staging.
+- **Not in the tree (5 commits, 61 files, +7,779/−325):**
+  - Server: CloudWatch audit shipping (`lib/cloudwatch.ts`), security-event auditing
+    (`middleware/securityAudit.ts`), audit-log query API (`modules/audit`), roster CSV import and
+    provisioning rework (`modules/roster/service.ts` +433 lines).
+  - Client: admin audit-log screen, roster-import screen, the expanded `admin/users` page.
+  - Shared: `dto/audit.ts`, `rosterCsv.ts`, new enums and error codes.
+  - Tests: +3 files (`roster.test.ts` integration, `auditLog.test.ts`, `rosterCsv.test.ts` unit).
+  - Docs and ops: `docs/USER_MANAGEMENT.md`, `docs/AUDIT_LOG.md`, all of `infra/` (Lightsail
+    provisioning, nginx, PM2, runbooks for deploy, DNS/TLS, restore and scale-up, and
+    `scripts/smoke-test.sh`), and `ops/cloudwatch/`.
+- **Docs re-read from the tree:** of the four files P00.2 names, only `ONBOARDING_AND_FEATURES.md`
+  exists here, and it is `main`'s version. `docs/USER_MANAGEMENT.md`, `docs/AUDIT_LOG.md` and
+  `infra/README.md` exist only on the audit branch. Nothing measured above changes, because the tree
+  is the one measured at planning. The `(audit branch)` rows under _Worst functions_ and _Worst
+  files_ are not in the baseline tree. P00.6 re-measures.
+- **Knock-on effects for later steps:**
+  - P00.3 cannot point at `infra/runbooks/deploy.md` in the tree. It references the audit
+    branch's copy by commit instead.
+  - P00.9's `smoke-test.sh` is not in the tree. It also calls the `aws` CLI (not installed) with
+    Cognito `admin-initiate-auth` (AWS credentials, which D-13 does not allow) and needs
+    `SMOKE_PASSWORD`.
+  - The audit branch's work has to be re-applied or merged later. Every refactor in P06/P07 that
+    touches `admin`, `audit`, `roster`, `lib/audit.ts`, `lib/logger.ts` or `config/env.ts` widens
+    that merge. **This is for the owner to decide before P05:** merge the branch later, re-implement
+    it, or drop it.

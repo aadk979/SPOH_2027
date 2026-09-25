@@ -102,5 +102,20 @@ closed during the audit phase named. IDs are kept when a finding moves into an F
 
 - **Severity:** Low (to verify)
 - **Evidence:** The audit branch topology says the client runs "Next.js standalone", but `main`
-  sets no output mode. Check the audit branch after P00.2.
+  sets no output mode. P00.2 checked: `client/next.config.ts` is identical on both branches and sets
+  no `output`, so the deployed topology document does not match its own code.
 - **Fix in:** P08.4 (container image)
+
+### PF-14 — The deployed system is not the baseline code
+
+- **Severity:** High for the programme
+- **Evidence:** D-05 kept the baseline on `main` (`d2497b6`). Staging (`spoh2027.duckdns.org`) runs
+  `feat/audit-cloudwatch` (`319d06d`), according to that branch's commits: +7,779/−325 lines over 61
+  files, including migration `20260922000000_audit_severity_and_security_events`. See
+  `baseline.md` § _After reconciliation_.
+- **Impact:** The code probed on staging is not the code being refactored. The baseline tag is
+  behind staging's schema, so it is not a clean rollback target for staging. Every P06/P07 change to
+  `admin`, `audit`, `roster`, `lib/audit.ts`, `lib/logger.ts` or `config/env.ts` widens the later
+  merge of the audit branch.
+- **Verify in:** P04 (tag deploy against a migrated DB) · **Decide before:** P05 (owner: merge
+  later, re-implement or drop the audit branch)
