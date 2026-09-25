@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T12:04:01.065Z",
+  "updatedAt": "2026-09-25T12:04:32.735Z",
   "current": {
     "phase": "P00",
-    "step": "P00.3"
+    "step": "P00.4"
   },
   "gates": [
     {
@@ -253,11 +253,16 @@
         {
           "id": "P00.4",
           "title": "Green lint baseline (confirm with owner)",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-25T12:04:07.472Z",
+          "completedAt": "2026-09-25T12:04:32.735Z",
+          "commits": ["ef860f3"],
+          "notes": [
+            {
+              "at": "2026-09-25T12:04:32.735Z",
+              "text": "Owner chose delete. test/ directory removed; npm run lint exits 0."
+            }
+          ]
         },
         {
           "id": "P00.5",
