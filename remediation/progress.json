@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T14:35:01.210Z",
+  "updatedAt": "2026-09-25T14:37:50.948Z",
   "current": {
     "phase": "P03",
     "step": "P03.6"
@@ -716,11 +716,16 @@
         {
           "id": "P03.6",
           "title": "Test gap analysis",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T14:35:01.209Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T14:37:50.948Z",
+          "commits": ["f4daa42"],
+          "notes": [
+            {
+              "at": "2026-09-25T14:37:50.948Z",
+              "text": "test-gaps.mjs: 23/95 routes untested, 81 fns never run, 17/29 screens no e2e; 11 ranked gaps for P06.1/P07.1"
+            }
+          ]
         },
         {
           "id": "P03.7",
