@@ -176,6 +176,10 @@ measured and committed ✅, guards in CI ✅. The AWS inventory is ❌ not recor
   `feat/audit-cloudwatch` (PF-14).
 - **If D-13 is ever widened:** run the P00.8 inventory and the P00.9 smoke test then (P04.7).
 
+**After P00:** everything was merged to `main`, and the owner changed D-11 to "`main` only". The CI
+failures, the audit advisories, the three e2e failures and the harness items were then fixed on
+`main`. See `baseline.md` § _Fixes on `main` after P00_.
+
 ### Deviations from plan
 
 - **P00.2:** no reconciliation, by D-05. The deployed system is ahead of the baseline, including one

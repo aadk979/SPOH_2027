@@ -202,3 +202,20 @@ The README's "13 tests" for e2e is stale: there are 26.
 The server's configured thresholds (80/80/80/70) are not met, so `npm run test:coverage --workspace
 server` exits 1 (PF-18). Other CI facts found here: the _Security checks_ job's `npm audit
 --audit-level=high` fails on the baseline (PF-19), and root `npm test` exits 1 (PF-20).
+
+## Fixes on `main` after P00 (owner request, 2026-09-25)
+
+Pushed straight to `main` (D-11 amended). All suites are green apart from the size and boundary
+guard warnings:
+
+| Check                           | P00 run                 | Now                                           |
+| ------------------------------- | ----------------------- | --------------------------------------------- |
+| CI _Lint, typecheck, build_     | red (`prisma generate`) | fixed (`d1148fd`): placeholder `DATABASE_URL` |
+| CI _Tests_                      | red (no Prisma client)  | fixed (`faa7ff6`): generates the client first |
+| CI _Security checks_ (`audit`)  | red, 4 high 2 moderate  | fixed (`e8e94fb`): 0 vulnerabilities (PF-19)  |
+| e2e (by hand)                   | 23/26                   | 26/26 (`4269c77` PF-16, `7eea32d` PF-15)      |
+| Root `npm test`, `format:check` | both fail               | both pass (`371775c`)                         |
+
+Server coverage is still below its own configured thresholds (PF-18); P06/P07 raise it. Running e2e
+more than about twice a minute against one dev server trips the 20-per-minute sign-in rate limit
+(429). That is the limiter working, not a flake.

@@ -131,6 +131,7 @@ closed during the audit phase named. IDs are kept when a finding moves into an F
 - **Impact:** The scanner-failure → PIN-fallback journey has no working e2e coverage.
 - **Verify in:** P02 (is the label change intended?) · **Fix in:** P07 (update the test to the
   current label, or restore the label)
+- **Status:** Fixed on `main` (`7eea32d`). The test follows the home label and asserts the scanner is attached, not visible.
 
 ### PF-16 — At 320 px, content covers the bottom navigation and controls
 
@@ -144,6 +145,7 @@ closed during the audit phase named. IDs are kept when a finding moves into an F
 - **Impact:** On the smallest phones a volunteer cannot reach Guide from Home, and root cannot rotate
   verifier credentials. Possibly a regression from `c07b5d8` (the laptop layout change).
 - **Verify in:** P02 (phone journeys) · **Fix in:** P14
+- **Status:** Fixed on `main` (`4269c77`). The root cause was the top bar needing 339 px, so 320 px phones zoomed the page out. Below 360 px the Announcements link reads "Inbox".
 
 ### PF-17 — CI does not run the e2e suite
 
@@ -154,6 +156,7 @@ closed during the audit phase named. IDs are kept when a finding moves into an F
 - **Impact:** UI regressions reach staging unnoticed. P06/P07 cannot prove "identical behaviour"
   through the UI.
 - **Fix in:** P08 (pipeline). Until then, P06/P07 run e2e by hand before and after each step.
+- **Status:** Still open. e2e is 26/26 by hand on `main`, and wiring it into CI stays with P08.
 
 ### PF-18 — Coverage thresholds exist but were never enforced, and the baseline misses them
 
@@ -179,6 +182,7 @@ closed during the audit phase named. IDs are kept when a finding moves into an F
 - **Impact:** The security job is red on `main`, so a new high advisory would not stand out.
 - **Verify in:** P04 (runtime reachability: `mysql2` is unused with Postgres) · **Fix in:** P15, or
   a documented, time-boxed audit exception decided in P05
+- **Status:** Fixed on `main` (`e8e94fb`) with npm `overrides`: `deepmerge-ts` ^8.0.2, `mysql2` ^3.24.4 and `uuid` ^11.1.1. `npm audit` reports 0. Drop the overrides once a Prisma release carries the fixes.
 
 ### PF-20 — Test harness rough edges
 
@@ -196,3 +200,4 @@ closed during the audit phase named. IDs are kept when a finding moves into an F
     and `ONBOARDING_AND_FEATURES.md`). CI does not run it.
 - **Verify in:** P03 · **Fix in:** P06 (the transaction pattern) and P07 (shared gets tests or
   `passWithNoTests`)
+- **Status:** Partly fixed (`371775c`): root `npm test` passes and the 14 files are formatted. The pg concurrent-query deprecation is still open for P03.
