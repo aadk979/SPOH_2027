@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T13:12:22.410Z",
+  "updatedAt": "2026-09-25T13:14:17.839Z",
   "current": {
     "phase": "P01",
-    "step": "P01.7"
+    "step": "P01.8"
   },
   "gates": [
     {
@@ -462,11 +462,16 @@
         {
           "id": "P01.8",
           "title": "Summary and hand-off",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-25T13:12:45.666Z",
+          "completedAt": "2026-09-25T13:14:17.839Z",
+          "commits": ["be587ef"],
+          "notes": [
+            {
+              "at": "2026-09-25T13:14:17.839Z",
+              "text": "F01 summary (45 items, 6 top risks, 6 owner questions); PF-04..08 confirmed; F01 linked"
+            }
+          ]
         }
       ],
       "status": "in_progress",
