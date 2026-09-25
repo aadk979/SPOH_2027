@@ -26,7 +26,8 @@ before doing anything else.
    secrets in Secrets Manager, observability, and rehearsed restore.
 
 The two product rules in the root `README.md` (the three counts never merge; no visitor personal
-data) are carried through unchanged unless decision **D-04** says otherwise.
+data) become **per-event options** under decision **D-04**. Today's behaviour stays the default
+until P09/P10 make them configurable.
 
 ---
 

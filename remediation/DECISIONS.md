@@ -39,7 +39,8 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   - **C.** One event per deployment, reset or cloned each year.
 - **Recommendation:** **A**, with an `Organisation` row as the root of the schema so that B becomes
   additive later rather than a migration of every table.
-- **Answer:** _open_
+- **Answer:** **A** (owner, 2026-09-25). Many events in one deployment for one organisation, with an
+  `Organisation` row as the schema root.
 
 ### D-03 — How flexible roles are
 
@@ -62,7 +63,9 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   event, or options per event?
 - **Recommendation:** Fixed for every event. They are why the system is trustworthy. Making them
   toggles makes every report and export conditional.
-- **Answer:** _open_
+- **Answer:** **Configurable per event** (owner, 2026-09-25), against the recommendation. Both rules
+  become per-event options, so P05 and P09 design every report, export and screen for both modes.
+  P01 classifies them as `event-setting`, not `invariant`.
 
 ### D-05 — Which branch is the baseline
 

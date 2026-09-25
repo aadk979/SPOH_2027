@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T12:36:39.453Z",
+  "updatedAt": "2026-09-25T12:51:56.597Z",
   "current": {
     "phase": "P01",
     "step": null
@@ -80,9 +80,9 @@
       "title": "Reuse model (tenancy)",
       "owner": "you",
       "blocks": ["P05", "P09"],
-      "status": "open",
-      "answer": null,
-      "answeredAt": null
+      "status": "answered",
+      "answer": "A: many events in one deployment, one organisation (SP SoC), with an Organisation row as the schema root (owner, 2026-09-25)",
+      "answeredAt": "2026-09-25T12:51:56.322Z"
     },
     {
       "id": "D-03",
@@ -98,9 +98,9 @@
       "title": "Product invariants",
       "owner": "you",
       "blocks": ["P05", "P09"],
-      "status": "open",
-      "answer": null,
-      "answeredAt": null
+      "status": "answered",
+      "answer": "Configurable per event: 'the three counts never merge' and 'no visitor personal data' become per-event options, not fixed invariants (owner, 2026-09-25)",
+      "answeredAt": "2026-09-25T12:51:56.596Z"
     },
     {
       "id": "D-05",
