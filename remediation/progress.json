@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T14:43:06.246Z",
+  "updatedAt": "2026-09-25T14:43:25.386Z",
   "current": {
     "phase": "P03",
-    "step": "P03.7"
+    "step": "P03.8"
   },
   "gates": [
     {
@@ -744,8 +744,8 @@
         {
           "id": "P03.8",
           "title": "Shared package review",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-25T14:43:25.386Z",
           "completedAt": null,
           "commits": [],
           "notes": []

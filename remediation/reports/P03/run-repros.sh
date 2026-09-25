@@ -34,6 +34,7 @@ run_workspace() {
 }
 
 run_workspace server tests/integration/repro
+run_workspace server tests/unit/repro
 run_workspace client tests/repro
 
 [[ ${#copies[@]} -gt 0 ]] || { echo "no repro files match '$filter'"; exit 1; }

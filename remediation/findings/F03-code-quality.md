@@ -949,6 +949,73 @@ without it. **Phase:** P12.
 - **Phase:** P07
 - **Status:** open (measurement, not a bug: no repro)
 
+## Shared package review · P03.8
+
+`packages/shared/src` is 2,865 lines: 22 DTO files, `enums.ts`, `capabilities.ts` and
+`errorCodes.ts`, built to `dist/` and imported by both deployables.
+`node remediation/reports/P03/shared-map.mjs` writes `reports/P03/shared-map.json`: for every
+export, the server modules and client areas that name it.
+
+### DTO → module
+
+| Shared file                                                                                                                                                                              | Used by (server)       | Target home (module map)                                                                               |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------ |
+| `dto/common.ts`                                                                                                                                                                          | 16 modules, middleware | `contracts/platform/` (ids, time, pagination, capture envelope, reason text)                           |
+| `dto/admin.ts`                                                                                                                                                                           | admin                  | splits: `people/`, `stations/`, `eventDays/`, `gifts/` (gift-type admin)                               |
+| `dto/roster.ts`                                                                                                                                                                          | admin, roster          | splits: `people/` (provision, volunteer record), `assignments/` (import, assignment)                   |
+| `dto/me.ts`                                                                                                                                                                              | me                     | `people/` (me), `assignments/` (check-in)                                                              |
+| `dto/shift.ts`                                                                                                                                                                           | shift                  | splits: `swaps/`, `briefings/` (with `MANDATORY_BRIEF_POINTS` → content, P13.3), `assignments/` (gaps) |
+| `dto/settings.ts`                                                                                                                                                                        | admin, lib             | `platform/settings` → **generated** registry (below)                                                   |
+| `dto/dashboard.ts`                                                                                                                                                                       | dashboard              | `dashboard/`, `dataHealth/`                                                                            |
+| `dto/station.ts`                                                                                                                                                                         | admin, station         | `stations/`                                                                                            |
+| other 15 (`announcement`, `attendance`, `auth`, `fallback`, `footfall`, `gift`, `incident`, `lostFound`, `lostPerson`, `media`, `missionCard`, `notification`, `registration`, `report`) | their own module       | same name under `contracts/<domain>/` (auth → identity)                                                |
+| `capabilities.ts`                                                                                                                                                                        | auth, me, middleware   | replaced by the **generated** Cedar action catalogue (P11)                                             |
+| `enums.ts`                                                                                                                                                                               | 9 units                | invariants stay; four become data (below)                                                              |
+| `errorCodes.ts`                                                                                                                                                                          | 15 units               | stays; one typed error per code (P03.3)                                                                |
+
+### Contracts duplicated or drifting between client and server
+
+| What                                | Where the copies are                                                                                                                                                                                                                                                                                                | One source                                                                                                       |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Runtime settings defaults and shape | server `lib/settings.ts` `DEFAULT_SETTINGS`; client `lib/runtimeSettings.ts` `ClientSettings` + `DEFAULT_CLIENT_SETTINGS` (a hand-copied subset); schema in `dto/settings.ts`                                                                                                                                       | generated settings registry: key, scope, schema, default, permission, client-visible flag                        |
+| Category, role and block labels     | client `lib/format.ts`, both registration screens, `features/admin/useVolunteers.ts` role options (F01: labels hardcoded three times)                                                                                                                                                                               | labels from data (P09.2) for event taxonomy; one shared label map for invariants                                 |
+| List envelope                       | server builds `{data, meta:{count, nextCursor}}` by hand in every router; client re-declares it (`VolunteerListResponse`); shared has no `Paginated<T>`                                                                                                                                                             | `Paginated<T>` in `contracts/platform` (P03.3 pagination)                                                        |
+| Audit actions                       | server-only `AuditAction` union (`lib/audit.ts`, 50 actions); the audit-branch screen filters by free text                                                                                                                                                                                                          | generated action catalogue, shared by audit, Cedar and the UI                                                    |
+| What a role may see and do          | server `requireCapability` on 83 routes; client `lib/navigation.ts` and screen checks (F02-025, F02-031); `STATION_SCOPED_CAPABILITIES`/`isStationScoped` in shared are **unused**: station scope is applied by hand on 6 routes, and card issue (`registration.create`) is not scoped although the list says it is | P11: route → action table generated; the client asks `BatchIsAuthorized`                                         |
+| Response shapes                     | response schemas exist for every endpoint, but the server never validates its output and the client uses about half of them as types; `dto/footfall.ts` and `dto/incident.ts` responses are named nowhere in the client                                                                                             | types generated from the schemas; route contract tests (§9) assert them; the client imports types only (F03-037) |
+| `AttendanceMethod`                  | Prisma enum; redeclared inline in `dto/attendance.ts:13`; missing from `enums.ts`, whose header says every Prisma enum is mirrored                                                                                                                                                                                  | `enums.ts`, with a test that keeps the two in step (F03-038)                                                     |
+
+### Generated, not hand-written (`src/generated/`, engineering-standards §5)
+
+1. **Cedar action catalogue** (P11.2): one entry per action, generated from the route table (the
+   capability each route requires) and the audit catalogue (the verb each use case records);
+   replaces `Capability`, `CAPABILITY_MATRIX` and `AuditAction`.
+2. **Settings registry types** (P10.1): the key union, value types, defaults and client-visible
+   subset from one registry file; replaces `RuntimeSettings`, `DEFAULT_SETTINGS` and
+   `DEFAULT_CLIENT_SETTINGS`.
+3. **Enum mirrors**: `enums.ts` generated from `schema.prisma` for the invariants, or at least
+   checked against it (F03-038).
+
+### Enums that become data (from F01 § Enum audit, D-04 applied)
+
+`VisitorCategory`, `StationKind` (becomes station capability flags), `CourseCode` and `ShiftBlock`
+move to event-scoped tables in P09.2; their `z.enum`s in `enums.ts` are replaced by id and code
+strings validated against the event's rows. `CommitteeRole` stays an invariant under D-03 A (open).
+The other ten stay: they are state machines and provenance.
+
+#### F03-038 — `AttendanceMethod` is missing from the shared enums
+
+- **Severity:** Low
+- **Area:** `packages/shared/src/enums.ts` (header: "every Prisma enum is mirrored here"),
+  `dto/attendance.ts:13`
+- **Evidence:** `server/tests/unit/repro/enums.test.ts` compares `schema.prisma` with the shared
+  exports: `AttendanceMethod` is the one mismatch (P01.3 follow-up, confirmed).
+- **Impact:** a fourth method added to Prisma compiles on the server and is rejected by the DTO at
+  run time.
+- **Fix:** add it to `enums.ts`; keep the test.
+- **Phase:** P07.8
+- **Status:** open
+
 ---
 
 ## Appendix A — Target location of every export

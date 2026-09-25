@@ -1,0 +1,1306 @@
+[
+  {
+    "file": "capabilities.ts",
+    "exports": [
+      {
+        "name": "Capability",
+        "server": ["middleware", "types"],
+        "client": ["features/session", "lib/navigation.ts", "lib/session.ts"]
+      },
+      {
+        "name": "CAPABILITY_MATRIX",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "roleHasCapability",
+        "server": ["middleware"],
+        "client": []
+      },
+      {
+        "name": "capabilitiesForRole",
+        "server": ["auth", "me", "middleware"],
+        "client": []
+      },
+      {
+        "name": "STATION_SCOPED_CAPABILITIES",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "isStationScoped",
+        "server": [],
+        "client": []
+      }
+    ],
+    "serverModules": ["auth", "me", "middleware", "types"],
+    "clientAreas": ["features/session", "lib/navigation.ts", "lib/session.ts"],
+    "unused": ["CAPABILITY_MATRIX", "STATION_SCOPED_CAPABILITIES", "isStationScoped"]
+  },
+  {
+    "file": "dto/admin.ts",
+    "exports": [
+      {
+        "name": "ListVolunteersQuery",
+        "server": ["admin"],
+        "client": []
+      },
+      {
+        "name": "VolunteerAdminRecord",
+        "server": ["admin"],
+        "client": ["app/admin", "features/admin"]
+      },
+      {
+        "name": "UpdateVolunteerRequest",
+        "server": ["admin"],
+        "client": ["features/admin"]
+      },
+      {
+        "name": "DeactivateVolunteerRequest",
+        "server": ["admin"],
+        "client": ["features/admin"]
+      },
+      {
+        "name": "VolunteerMutationResponse",
+        "server": ["admin"],
+        "client": ["features/admin"]
+      },
+      {
+        "name": "CreateAssignmentRequest",
+        "server": ["admin"],
+        "client": []
+      },
+      {
+        "name": "StationCode",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "CreateStationRequest",
+        "server": ["admin"],
+        "client": []
+      },
+      {
+        "name": "UpdateStationRequest",
+        "server": ["admin"],
+        "client": []
+      },
+      {
+        "name": "EventDayRecord",
+        "server": ["admin"],
+        "client": []
+      },
+      {
+        "name": "CreateEventDayRequest",
+        "server": ["admin"],
+        "client": []
+      },
+      {
+        "name": "UpdateEventDayRequest",
+        "server": ["admin"],
+        "client": []
+      },
+      {
+        "name": "CreateGiftTypeRequest",
+        "server": ["admin"],
+        "client": []
+      },
+      {
+        "name": "UpdateGiftTypeRequest",
+        "server": ["admin"],
+        "client": []
+      }
+    ],
+    "serverModules": ["admin"],
+    "clientAreas": ["app/admin", "features/admin"],
+    "unused": ["StationCode"]
+  },
+  {
+    "file": "dto/announcement.ts",
+    "exports": [
+      {
+        "name": "AnnouncementTarget",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "CreateAnnouncementRequest",
+        "server": ["announcement"],
+        "client": []
+      },
+      {
+        "name": "AnnouncementRecord",
+        "server": ["announcement"],
+        "client": ["app/inbox"]
+      },
+      {
+        "name": "ListAnnouncementsQuery",
+        "server": ["announcement"],
+        "client": []
+      }
+    ],
+    "serverModules": ["announcement"],
+    "clientAreas": ["app/inbox"],
+    "unused": ["AnnouncementTarget"]
+  },
+  {
+    "file": "dto/attendance.ts",
+    "exports": [
+      {
+        "name": "AttendanceProof",
+        "server": ["attendance"],
+        "client": ["app/attendance"]
+      },
+      {
+        "name": "AttendanceRecord",
+        "server": ["attendance"],
+        "client": ["app/attendance"]
+      },
+      {
+        "name": "AttendanceStatus",
+        "server": ["attendance"],
+        "client": ["app/attendance", "components/ShiftOverview.tsx"]
+      },
+      {
+        "name": "AttendanceChallenge",
+        "server": ["attendance"],
+        "client": ["app/attendance", "features/attendance"]
+      }
+    ],
+    "serverModules": ["attendance"],
+    "clientAreas": ["app/attendance", "components/ShiftOverview.tsx", "features/attendance"],
+    "unused": []
+  },
+  {
+    "file": "dto/auth.ts",
+    "exports": [
+      {
+        "name": "CreateSessionRequest",
+        "server": ["auth"],
+        "client": []
+      },
+      {
+        "name": "SessionResponse",
+        "server": ["auth"],
+        "client": ["lib/session.ts"]
+      },
+      {
+        "name": "SessionSummary",
+        "server": ["auth"],
+        "client": []
+      }
+    ],
+    "serverModules": ["auth"],
+    "clientAreas": ["lib/session.ts"],
+    "unused": []
+  },
+  {
+    "file": "dto/common.ts",
+    "exports": [
+      {
+        "name": "Id",
+        "server": [
+          "admin",
+          "announcement",
+          "app.ts",
+          "audit",
+          "dashboard",
+          "fallback",
+          "footfall",
+          "gift",
+          "incident",
+          "lostFound",
+          "lostPerson",
+          "registration",
+          "roster",
+          "shift"
+        ],
+        "client": []
+      },
+      {
+        "name": "IdempotencyKey",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "IsoDateTime",
+        "server": ["audit"],
+        "client": []
+      },
+      {
+        "name": "IsoDate",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "CaptureEnvelope",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "CountUnit",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "CountValue",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "ErrorBody",
+        "server": ["middleware"],
+        "client": ["lib/api.ts"]
+      },
+      {
+        "name": "PaginationQuery",
+        "server": ["audit"],
+        "client": []
+      },
+      {
+        "name": "TimeRangeQuery",
+        "server": ["fallback", "missionCard"],
+        "client": []
+      },
+      {
+        "name": "collection",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "ReasonText",
+        "server": [],
+        "client": []
+      }
+    ],
+    "serverModules": [
+      "admin",
+      "announcement",
+      "app.ts",
+      "audit",
+      "dashboard",
+      "fallback",
+      "footfall",
+      "gift",
+      "incident",
+      "lostFound",
+      "lostPerson",
+      "middleware",
+      "missionCard",
+      "registration",
+      "roster",
+      "shift"
+    ],
+    "clientAreas": ["lib/api.ts"],
+    "unused": [
+      "IdempotencyKey",
+      "IsoDate",
+      "CaptureEnvelope",
+      "CountUnit",
+      "CountValue",
+      "collection",
+      "ReasonText"
+    ]
+  },
+  {
+    "file": "dto/dashboard.ts",
+    "exports": [
+      {
+        "name": "RegistrationLiveBreakdown",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "FootfallLiveBreakdown",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "CardLiveBreakdown",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "SafetyLiveBreakdown",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "DataHealthResponse",
+        "server": ["dashboard"],
+        "client": []
+      },
+      {
+        "name": "StaffingLiveBreakdown",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "LiveDashboardResponse",
+        "server": ["dashboard"],
+        "client": ["app/chief", "features/dashboard"]
+      },
+      {
+        "name": "StationDashboardResponse",
+        "server": ["dashboard"],
+        "client": ["features/dashboard"]
+      }
+    ],
+    "serverModules": ["dashboard"],
+    "clientAreas": ["app/chief", "features/dashboard"],
+    "unused": [
+      "RegistrationLiveBreakdown",
+      "FootfallLiveBreakdown",
+      "CardLiveBreakdown",
+      "SafetyLiveBreakdown",
+      "StaffingLiveBreakdown"
+    ]
+  },
+  {
+    "file": "dto/fallback.ts",
+    "exports": [
+      {
+        "name": "FallbackTier",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "DeclareFallbackRequest",
+        "server": ["fallback"],
+        "client": []
+      },
+      {
+        "name": "CloseFallbackRequest",
+        "server": ["fallback"],
+        "client": []
+      },
+      {
+        "name": "FallbackWindowRecord",
+        "server": ["fallback"],
+        "client": ["app/chief"]
+      },
+      {
+        "name": "ImportSource",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "RegistrationImportRow",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "FootfallImportRow",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "ImportRequest",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "ImportRegistrationsRequest",
+        "server": ["fallback"],
+        "client": []
+      },
+      {
+        "name": "ImportFootfallRequest",
+        "server": ["fallback"],
+        "client": []
+      },
+      {
+        "name": "ImportIssue",
+        "server": ["fallback"],
+        "client": []
+      },
+      {
+        "name": "ImportResponse",
+        "server": ["fallback"],
+        "client": ["app/chief"]
+      }
+    ],
+    "serverModules": ["fallback"],
+    "clientAreas": ["app/chief"],
+    "unused": [
+      "FallbackTier",
+      "ImportSource",
+      "RegistrationImportRow",
+      "FootfallImportRow",
+      "ImportRequest"
+    ]
+  },
+  {
+    "file": "dto/footfall.ts",
+    "exports": [
+      {
+        "name": "CreateFootfallTickRequest",
+        "server": ["footfall"],
+        "client": []
+      },
+      {
+        "name": "CreateFootfallBulkRequest",
+        "server": ["footfall"],
+        "client": []
+      },
+      {
+        "name": "FootfallTickRecord",
+        "server": ["footfall"],
+        "client": []
+      },
+      {
+        "name": "CreateFootfallTickResponse",
+        "server": ["footfall"],
+        "client": []
+      },
+      {
+        "name": "VoidFootfallTickRequest",
+        "server": ["footfall"],
+        "client": []
+      },
+      {
+        "name": "FootfallBucketSize",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "FootfallSummaryQuery",
+        "server": ["footfall"],
+        "client": []
+      },
+      {
+        "name": "FootfallSummaryBucket",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "FootfallStationSummary",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "FootfallSummaryResponse",
+        "server": ["footfall"],
+        "client": []
+      },
+      {
+        "name": "FootfallLiveStation",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "FootfallLiveResponse",
+        "server": ["footfall"],
+        "client": []
+      }
+    ],
+    "serverModules": ["footfall"],
+    "clientAreas": [],
+    "unused": [
+      "FootfallBucketSize",
+      "FootfallSummaryBucket",
+      "FootfallStationSummary",
+      "FootfallLiveStation"
+    ]
+  },
+  {
+    "file": "dto/gift.ts",
+    "exports": [
+      {
+        "name": "GiftTypeRecord",
+        "server": ["admin", "gift"],
+        "client": ["app/capture"]
+      },
+      {
+        "name": "GiftListResponse",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "RedeemGiftRequest",
+        "server": ["gift"],
+        "client": []
+      },
+      {
+        "name": "GiftRedemptionRecord",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "RedeemGiftResponse",
+        "server": ["gift"],
+        "client": ["app/capture"]
+      },
+      {
+        "name": "AdjustGiftStockRequest",
+        "server": ["gift"],
+        "client": []
+      },
+      {
+        "name": "GiftSummaryQuery",
+        "server": ["gift"],
+        "client": []
+      },
+      {
+        "name": "GiftSummaryRow",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "GiftSummaryResponse",
+        "server": ["gift"],
+        "client": []
+      }
+    ],
+    "serverModules": ["admin", "gift"],
+    "clientAreas": ["app/capture"],
+    "unused": ["GiftListResponse", "GiftRedemptionRecord", "GiftSummaryRow"]
+  },
+  {
+    "file": "dto/incident.ts",
+    "exports": [
+      {
+        "name": "IncidentDescription",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "CreateIncidentRequest",
+        "server": ["incident"],
+        "client": []
+      },
+      {
+        "name": "IncidentFollowUpRecord",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "IncidentRecord",
+        "server": ["incident"],
+        "client": []
+      },
+      {
+        "name": "CreateIncidentFollowUpRequest",
+        "server": ["incident"],
+        "client": []
+      },
+      {
+        "name": "UpdateIncidentStatusRequest",
+        "server": ["incident"],
+        "client": []
+      },
+      {
+        "name": "ListIncidentsQuery",
+        "server": ["incident"],
+        "client": []
+      }
+    ],
+    "serverModules": ["incident"],
+    "clientAreas": [],
+    "unused": ["IncidentDescription", "IncidentFollowUpRecord"]
+  },
+  {
+    "file": "dto/lostFound.ts",
+    "exports": [
+      {
+        "name": "CreateLostFoundRequest",
+        "server": ["lostFound"],
+        "client": []
+      },
+      {
+        "name": "LostFoundRecord",
+        "server": ["lostFound"],
+        "client": ["app/safety"]
+      },
+      {
+        "name": "ListLostFoundQuery",
+        "server": ["lostFound"],
+        "client": []
+      },
+      {
+        "name": "ClaimLostFoundRequest",
+        "server": ["lostFound"],
+        "client": []
+      }
+    ],
+    "serverModules": ["lostFound"],
+    "clientAreas": ["app/safety"],
+    "unused": []
+  },
+  {
+    "file": "dto/lostPerson.ts",
+    "exports": [
+      {
+        "name": "RaiseLostPersonRequest",
+        "server": ["lostPerson"],
+        "client": []
+      },
+      {
+        "name": "LostPersonAlertRecord",
+        "server": ["lostPerson"],
+        "client": []
+      },
+      {
+        "name": "ActiveLostPersonResponse",
+        "server": ["lostPerson"],
+        "client": ["features/lostPerson"]
+      },
+      {
+        "name": "ResolveLostPersonRequest",
+        "server": ["lostPerson"],
+        "client": []
+      },
+      {
+        "name": "LostPersonSummaryRecord",
+        "server": [],
+        "client": []
+      }
+    ],
+    "serverModules": ["lostPerson"],
+    "clientAreas": ["features/lostPerson"],
+    "unused": ["LostPersonSummaryRecord"]
+  },
+  {
+    "file": "dto/me.ts",
+    "exports": [
+      {
+        "name": "ContactCard",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "MyAssignment",
+        "server": ["me"],
+        "client": []
+      },
+      {
+        "name": "MeResponse",
+        "server": ["me"],
+        "client": ["components/ShiftOverview.tsx", "features/session"]
+      },
+      {
+        "name": "CheckInRequest",
+        "server": ["me"],
+        "client": []
+      },
+      {
+        "name": "CheckInResponse",
+        "server": [],
+        "client": []
+      }
+    ],
+    "serverModules": ["me"],
+    "clientAreas": ["components/ShiftOverview.tsx", "features/session"],
+    "unused": ["ContactCard", "CheckInResponse"]
+  },
+  {
+    "file": "dto/media.ts",
+    "exports": [
+      {
+        "name": "UploadPurpose",
+        "server": ["media"],
+        "client": []
+      },
+      {
+        "name": "UploadContentType",
+        "server": [],
+        "client": ["features/media"]
+      },
+      {
+        "name": "CreateUploadRequest",
+        "server": ["media"],
+        "client": []
+      },
+      {
+        "name": "CreateUploadResponse",
+        "server": ["media"],
+        "client": ["features/media"]
+      },
+      {
+        "name": "MediaUrlResponse",
+        "server": ["media"],
+        "client": []
+      }
+    ],
+    "serverModules": ["media"],
+    "clientAreas": ["features/media"],
+    "unused": []
+  },
+  {
+    "file": "dto/missionCard.ts",
+    "exports": [
+      {
+        "name": "CardShortCode",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "CardStampRecord",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "MissionCardRecord",
+        "server": ["missionCard"],
+        "client": ["app/capture"]
+      },
+      {
+        "name": "IssueCardRequest",
+        "server": ["missionCard"],
+        "client": []
+      },
+      {
+        "name": "StampCardRequest",
+        "server": ["missionCard"],
+        "client": []
+      },
+      {
+        "name": "StampCardResponse",
+        "server": ["missionCard"],
+        "client": ["app/capture"]
+      },
+      {
+        "name": "VoidCardRequest",
+        "server": ["missionCard"],
+        "client": []
+      },
+      {
+        "name": "ReissueCardRequest",
+        "server": ["missionCard"],
+        "client": []
+      },
+      {
+        "name": "ReissueCardResponse",
+        "server": ["missionCard"],
+        "client": []
+      },
+      {
+        "name": "GenerateCardBatchRequest",
+        "server": ["missionCard"],
+        "client": []
+      },
+      {
+        "name": "GenerateCardBatchResponse",
+        "server": ["missionCard"],
+        "client": []
+      },
+      {
+        "name": "FunnelStage",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "CardFunnelResponse",
+        "server": ["missionCard"],
+        "client": []
+      },
+      {
+        "name": "CardLookupParams",
+        "server": ["missionCard"],
+        "client": []
+      }
+    ],
+    "serverModules": ["missionCard"],
+    "clientAreas": ["app/capture"],
+    "unused": ["CardShortCode", "CardStampRecord", "FunnelStage"]
+  },
+  {
+    "file": "dto/notification.ts",
+    "exports": [
+      {
+        "name": "PushSubscriptionRequest",
+        "server": ["notification"],
+        "client": []
+      },
+      {
+        "name": "PushSubscriptionResponse",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "PushConfigResponse",
+        "server": [],
+        "client": ["features/notification"]
+      },
+      {
+        "name": "NotificationKind",
+        "server": ["notification"],
+        "client": []
+      },
+      {
+        "name": "NotificationAudience",
+        "server": ["notification"],
+        "client": []
+      },
+      {
+        "name": "NotificationResult",
+        "server": ["notification"],
+        "client": []
+      }
+    ],
+    "serverModules": ["notification"],
+    "clientAreas": ["features/notification"],
+    "unused": ["PushSubscriptionResponse"]
+  },
+  {
+    "file": "dto/registration.ts",
+    "exports": [
+      {
+        "name": "CreateRegistrationRequest",
+        "server": ["registration"],
+        "client": []
+      },
+      {
+        "name": "GroupMember",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "CreateGroupRegistrationRequest",
+        "server": ["registration"],
+        "client": []
+      },
+      {
+        "name": "RegistrationRecord",
+        "server": ["registration"],
+        "client": []
+      },
+      {
+        "name": "CreateRegistrationResponse",
+        "server": ["registration"],
+        "client": []
+      },
+      {
+        "name": "CreateGroupRegistrationResponse",
+        "server": ["registration"],
+        "client": []
+      },
+      {
+        "name": "VoidRegistrationRequest",
+        "server": ["registration"],
+        "client": []
+      },
+      {
+        "name": "RegistrationSummaryQuery",
+        "server": ["registration"],
+        "client": []
+      },
+      {
+        "name": "RegistrationSummaryBucket",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "RegistrationSummaryResponse",
+        "server": ["registration"],
+        "client": ["app/capture"]
+      }
+    ],
+    "serverModules": ["registration"],
+    "clientAreas": ["app/capture"],
+    "unused": ["GroupMember", "RegistrationSummaryBucket"]
+  },
+  {
+    "file": "dto/report.ts",
+    "exports": [
+      {
+        "name": "ReportQuery",
+        "server": ["report"],
+        "client": []
+      },
+      {
+        "name": "RegistrationReport",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "FootfallReport",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "CardReport",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "GiftReport",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "SafetyReport",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "VolunteerReport",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "DataIntegrityReport",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "FullReport",
+        "server": ["report"],
+        "client": ["app/reports"]
+      },
+      {
+        "name": "ReportExportQuery",
+        "server": ["report"],
+        "client": []
+      }
+    ],
+    "serverModules": ["report"],
+    "clientAreas": ["app/reports"],
+    "unused": [
+      "RegistrationReport",
+      "FootfallReport",
+      "CardReport",
+      "GiftReport",
+      "SafetyReport",
+      "VolunteerReport",
+      "DataIntegrityReport"
+    ]
+  },
+  {
+    "file": "dto/roster.ts",
+    "exports": [
+      {
+        "name": "VolunteerEmail",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "VolunteerPhone",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "ProvisionVolunteerRequest",
+        "server": ["roster"],
+        "client": []
+      },
+      {
+        "name": "VolunteerRecord",
+        "server": ["roster"],
+        "client": []
+      },
+      {
+        "name": "ProvisionVolunteerResponse",
+        "server": ["roster"],
+        "client": []
+      },
+      {
+        "name": "RosterImportRow",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "RosterImportRequest",
+        "server": ["roster"],
+        "client": []
+      },
+      {
+        "name": "RosterImportIssue",
+        "server": ["roster"],
+        "client": []
+      },
+      {
+        "name": "RosterImportResponse",
+        "server": ["roster"],
+        "client": []
+      },
+      {
+        "name": "ShiftAssignmentRecord",
+        "server": ["admin", "roster"],
+        "client": []
+      }
+    ],
+    "serverModules": ["admin", "roster"],
+    "clientAreas": [],
+    "unused": ["VolunteerEmail", "VolunteerPhone", "RosterImportRow"]
+  },
+  {
+    "file": "dto/settings.ts",
+    "exports": [
+      {
+        "name": "WallClockTime",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "ShiftBlockWindow",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "ShiftBlockWindows",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "RuntimeSettings",
+        "server": ["lib"],
+        "client": ["app/admin", "lib/runtimeSettings.ts"]
+      },
+      {
+        "name": "UpdateSettingsRequest",
+        "server": ["admin", "lib"],
+        "client": []
+      },
+      {
+        "name": "SettingsResponse",
+        "server": [],
+        "client": ["app/admin", "lib/runtimeSettings.ts"]
+      }
+    ],
+    "serverModules": ["admin", "lib"],
+    "clientAreas": ["app/admin", "lib/runtimeSettings.ts"],
+    "unused": ["WallClockTime", "ShiftBlockWindow", "ShiftBlockWindows"]
+  },
+  {
+    "file": "dto/shift.ts",
+    "exports": [
+      {
+        "name": "CreateSwapRequest",
+        "server": ["shift"],
+        "client": []
+      },
+      {
+        "name": "DecideSwapRequest",
+        "server": ["shift"],
+        "client": []
+      },
+      {
+        "name": "SwapRequestRecord",
+        "server": ["shift"],
+        "client": ["app/ic"]
+      },
+      {
+        "name": "BriefingSlotRecord",
+        "server": ["shift"],
+        "client": []
+      },
+      {
+        "name": "ListBriefingSlotsQuery",
+        "server": ["shift"],
+        "client": []
+      },
+      {
+        "name": "CompleteBriefingSlotRequest",
+        "server": ["shift"],
+        "client": []
+      },
+      {
+        "name": "MANDATORY_BRIEF_POINTS",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "StaffingGap",
+        "server": ["shift"],
+        "client": []
+      },
+      {
+        "name": "StaffingGapsResponse",
+        "server": ["shift"],
+        "client": []
+      },
+      {
+        "name": "LongShiftWarning",
+        "server": ["shift"],
+        "client": []
+      }
+    ],
+    "serverModules": ["shift"],
+    "clientAreas": ["app/ic"],
+    "unused": ["MANDATORY_BRIEF_POINTS"]
+  },
+  {
+    "file": "dto/station.ts",
+    "exports": [
+      {
+        "name": "StationSummary",
+        "server": ["admin", "station"],
+        "client": ["app/chief", "app/ic", "app/inbox"]
+      }
+    ],
+    "serverModules": ["admin", "station"],
+    "clientAreas": ["app/chief", "app/ic", "app/inbox"],
+    "unused": []
+  },
+  {
+    "file": "enums.ts",
+    "exports": [
+      {
+        "name": "VisitorCategory",
+        "server": [],
+        "client": ["app/capture"]
+      },
+      {
+        "name": "StationKind",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "CourseCode",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "CommitteeRole",
+        "server": [
+          "admin",
+          "announcement",
+          "devAuth",
+          "identity",
+          "middleware",
+          "notification",
+          "types"
+        ],
+        "client": ["app/admin", "features/admin", "lib/session.ts"]
+      },
+      {
+        "name": "DataSource",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "ShiftBlock",
+        "server": ["lib"],
+        "client": []
+      },
+      {
+        "name": "SwapStatus",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "IncidentType",
+        "server": [],
+        "client": ["app/safety"]
+      },
+      {
+        "name": "IncidentSeverity",
+        "server": ["incident"],
+        "client": ["app/safety"]
+      },
+      {
+        "name": "IncidentStatus",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "LostPersonStatus",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "LostFoundStatus",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "CardStatus",
+        "server": [],
+        "client": []
+      },
+      {
+        "name": "AnnouncementPriority",
+        "server": ["notification"],
+        "client": []
+      },
+      {
+        "name": "ROLE_PRECEDENCE",
+        "server": ["admin", "notification"],
+        "client": ["app/admin"]
+      },
+      {
+        "name": "roleMeets",
+        "server": ["announcement", "middleware"],
+        "client": []
+      },
+      {
+        "name": "highestRole",
+        "server": ["middleware"],
+        "client": []
+      }
+    ],
+    "serverModules": [
+      "admin",
+      "announcement",
+      "devAuth",
+      "identity",
+      "incident",
+      "lib",
+      "middleware",
+      "notification",
+      "types"
+    ],
+    "clientAreas": ["app/admin", "app/capture", "app/safety", "features/admin", "lib/session.ts"],
+    "unused": [
+      "StationKind",
+      "CourseCode",
+      "DataSource",
+      "SwapStatus",
+      "IncidentStatus",
+      "LostPersonStatus",
+      "LostFoundStatus",
+      "CardStatus"
+    ]
+  },
+  {
+    "file": "errorCodes.ts",
+    "exports": [
+      {
+        "name": "ERROR_CODES",
+        "server": [
+          "admin",
+          "auth",
+          "fallback",
+          "footfall",
+          "gift",
+          "lib",
+          "lostFound",
+          "lostPerson",
+          "me",
+          "media",
+          "middleware",
+          "missionCard",
+          "registration",
+          "shift",
+          "station"
+        ],
+        "client": []
+      },
+      {
+        "name": "ErrorCode",
+        "server": ["lib"],
+        "client": []
+      }
+    ],
+    "serverModules": [
+      "admin",
+      "auth",
+      "fallback",
+      "footfall",
+      "gift",
+      "lib",
+      "lostFound",
+      "lostPerson",
+      "me",
+      "media",
+      "middleware",
+      "missionCard",
+      "registration",
+      "shift",
+      "station"
+    ],
+    "clientAreas": [],
+    "unused": []
+  }
+]
