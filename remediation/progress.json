@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T16:43:15.059Z",
+  "updatedAt": "2026-09-25T16:43:36.921Z",
   "current": {
     "phase": "P05",
     "step": "P05.8"
@@ -1066,11 +1066,16 @@
         {
           "id": "P05.8",
           "title": "ADR-007 Code architecture",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T16:40:25.913Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T16:43:36.920Z",
+          "commits": ["1576672"],
+          "notes": [
+            {
+              "at": "2026-09-25T16:43:36.921Z",
+              "text": "ADR-007; engineering-standards and target-architecture final (target §9 pending ADR-008)"
+            }
+          ]
         },
         {
           "id": "P05.9",
