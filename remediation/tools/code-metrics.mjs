@@ -13,7 +13,8 @@
  *   node remediation/tools/code-metrics.mjs --root ../other-checkout
  */
 import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { join, relative, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
 const args = process.argv.slice(2);
@@ -26,7 +27,7 @@ const FILE_LIMIT = flag('file', 300);
 const asJson = args.includes('--json');
 
 const rootArg = args.indexOf('--root');
-const root = rootArg === -1 ? new URL('../..', import.meta.url).pathname : args[rootArg + 1];
+const root = rootArg === -1 ? fileURLToPath(new URL('../..', import.meta.url)) : args[rootArg + 1];
 const roots = ['server/src', 'client/src', 'packages/shared/src'];
 /** Generated code is not ours to refactor; counting it would bury the signal. */
 const SKIP_DIRS = new Set(['generated', 'node_modules']);
@@ -57,7 +58,8 @@ const files = [];
 for (const base of roots) {
   for (const path of walk(join(root, base))) {
     const text = readFileSync(path, 'utf8');
-    const rel = relative(root, path);
+    // Forward slashes on every OS, so snapshots taken on Windows diff cleanly.
+    const rel = relative(root, path).split(sep).join('/');
     const lineCount = text.split('\n').length;
     files.push({ file: rel, lines: lineCount });
     const source = ts.createSourceFile(path, text, ts.ScriptTarget.Latest, true);

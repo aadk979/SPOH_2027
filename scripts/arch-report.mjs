@@ -38,9 +38,18 @@ async function lintGuardCounts() {
 }
 
 function boundaryCounts() {
+  // The CLI's own entry point under this Node, rather than `npx depcruise`:
+  // on Windows npx is npx.cmd, which execFileSync cannot start without a shell.
   const output = execFileSync(
-    'npx',
-    ['depcruise', ...CRUISE_ROOTS, '--config', '.dependency-cruiser.cjs', '--output-type', 'json'],
+    process.execPath,
+    [
+      'node_modules/dependency-cruiser/bin/dependency-cruiser.mjs',
+      ...CRUISE_ROOTS,
+      '--config',
+      '.dependency-cruiser.cjs',
+      '--output-type',
+      'json',
+    ],
     { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
   );
   const { summary } = JSON.parse(output);
