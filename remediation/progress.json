@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T16:59:21.731Z",
+  "updatedAt": "2026-09-25T16:59:31.472Z",
   "current": {
     "phase": "P05",
     "step": "P05.9"
@@ -1080,11 +1080,16 @@
         {
           "id": "P05.9",
           "title": "ADR-008 AWS topology, environments and cost (D-07, D-08, D-10)",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T16:44:28.474Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T16:59:31.471Z",
+          "commits": ["6f5149c"],
+          "notes": [
+            {
+              "at": "2026-09-25T16:59:31.472Z",
+              "text": "ADR-008 with cost tables from the Price List (fetch-prices.mjs, cost-model.mjs). Recommended topology fits USD 100/month every month; Jan headroom ~USD 3; Q-P9 for Plus/Multi-AZ/WAF. D-07/D-08 assumed."
+            }
+          ]
         },
         {
           "id": "P05.10",
