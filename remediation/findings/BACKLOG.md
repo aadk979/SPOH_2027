@@ -119,16 +119,21 @@ on, and so on). ADR-008 and ADR-006 say where an unsafe answer would change the 
 P05 decides each of these on its recommendation. Each is marked **assumed** in the ADR that uses
 it and is on the P05.11 walkthrough list.
 
-| #    | Question                                                                                                                           | P05 assumes                                                                                                                                | ADR     |
-| ---- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
-| Q-P1 | D-04 follow-up: what may a merged count show, and which visitor personal data may an event collect, kept how long, seen by whom?   | a merged total is shown only beside the three counts, never instead of them; PII fields are an allowlist per event with a retention period | ADR-002 |
-| Q-P2 | Will any event run past midnight?                                                                                                  | yes: shifts may end on the next day, and each event has a day-boundary hour (default 04:00)                                                | ADR-004 |
-| Q-P3 | Is product vocabulary ("Mission Card") renameable per event?                                                                       | yes, through event settings for a short list of labels; routes and code keep the platform terms                                            | ADR-003 |
-| Q-P4 | One locale for every event, or per organisation or event?                                                                          | per event, defaulting to the organisation's locale (`en-SG` for SP)                                                                        | ADR-003 |
-| Q-P5 | D-01 C's fallback needs somewhere to put fixes for the deployed line. D-11 forbids branches. May a `release/january` branch exist? | yes, one exception to D-11, cut from the deployed commit and holding only P06.12 cherry-picks                                              | ADR-009 |
+| #    | Question                                                                                                                                  | P05 assumes                                                                                                                                | ADR     |
+| ---- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
+| Q-P1 | D-04 follow-up: what may a merged count show, and which visitor personal data may an event collect, kept how long, seen by whom?          | a merged total is shown only beside the three counts, never instead of them; PII fields are an allowlist per event with a retention period | ADR-002 |
+| Q-P2 | Will any event run past midnight?                                                                                                         | yes: shifts may end on the next day, and each event has a day-boundary hour (default 04:00)                                                | ADR-004 |
+| Q-P3 | Is product vocabulary ("Mission Card") renameable per event?                                                                              | yes, through event settings for a short list of labels; routes and code keep the platform terms                                            | ADR-003 |
+| Q-P4 | One locale for every event, or per organisation or event?                                                                                 | per event, defaulting to the organisation's locale (`en-SG` for SP)                                                                        | ADR-003 |
+| Q-P5 | D-01 C's fallback needs somewhere to put fixes for the deployed line. D-11 forbids branches. May a `release/january` branch exist?        | yes, one exception to D-11, cut from the deployed commit and holding only P06.12 cherry-picks                                              | ADR-009 |
+| Q-P6 | The lost-person promise to families: may it say backups keep a description for up to 35 days?                                             | _"A description is removed 24 hours after the case is resolved, and backup copies containing it expire within 35 days."_                   | ADR-003 |
+| Q-P7 | May P11.9 create a throwaway AVP policy store in ap-southeast-1 (and delete it in the same session) to measure latency?                   | yes, in P11.9; until then the 50 ms budget is unmeasured                                                                                   | ADR-005 |
+| Q-P8 | May one read-only `describe-user-pool` / `describe-user-pool-client` run before P12.1, or will you answer Q-C1…Q-C9?                      | one of the two, before P12.1                                                                                                               | ADR-006 |
+| Q-P9 | January: keep US$100 (single-AZ database, no WAF, no Cognito threat protection), or allow about US$130 for January only to add all three? | allow it for January only                                                                                                                  | ADR-008 |
 
 Decisions D-07, D-08 and D-12 are also still open. P05 proceeds on their recommendations (see
-`DECISIONS.md`).
+`DECISIONS.md`). The permission changes in `reports/P05/cedar/CHANGES.md` (C1–C13) need the owner's
+approval at G1 as well.
 
 ---
 

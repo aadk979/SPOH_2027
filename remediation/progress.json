@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T17:02:22.973Z",
+  "updatedAt": "2026-09-25T17:05:37.700Z",
   "current": {
     "phase": "P05",
-    "step": "P05.10"
+    "step": "P05.11"
   },
   "gates": [
     {
@@ -1108,11 +1108,16 @@
         {
           "id": "P05.11",
           "title": "Owner review and sign-off",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-25T17:02:54.710Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-09-25T17:05:37.699Z",
+              "text": "Design summary artifact: https://claude.ai/artifact/Ahdqgo11tYz3W9LQh6TpeF. Walkthrough with the owner pending; G1 not recorded."
+            }
+          ]
         }
       ],
       "status": "in_progress",
@@ -2314,6 +2319,10 @@
     {
       "at": "2026-09-25T16:08:17.027Z",
       "text": "Owner answered D-01 (C), D-03 (A), D-10 (US$100/month). feat/audit-cloudwatch stays unmerged; later phases mine it for code. D-07, D-08, D-12 and the P04.7 questions unanswered: P05 proceeds on the recommendations, marked assumed."
+    },
+    {
+      "at": "2026-09-25T17:05:37.617Z",
+      "text": "P05.11: design summary published for owner review: https://claude.ai/artifact/Ahdqgo11tYz3W9LQh6TpeF (private to the owner). Awaiting G1 sign-off."
     }
   ]
 }

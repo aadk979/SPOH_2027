@@ -98,7 +98,11 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
 - **Recommendation:** **A**, with the local Cedar engine also serving as a degraded mode if AVP is
   unreachable during the event. Capture must not stop because a control-plane API throttles.
   Admin actions fail closed.
-- **Answer:** _open_
+- **Answer:** **A, with one change** (design, ADR-005, proposed until G1). AVP `IsAuthorized` is
+  authoritative behind a decision cache (30 s for writes, 60 s for reads) that the bus invalidates.
+  Local Cedar takes over when AVP is degraded, for capture, self-service and safety; correct,
+  manage, configure and platform actions fail closed. **UI affordances use the local engine**,
+  because `BatchIsAuthorized` costs US$150 per million requests.
 
 ### D-07 — Compute and hosting
 
@@ -113,8 +117,14 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
     Postgres. Cheapest (about US$50–80/month) but hand-operated.
 - **Recommendation:** **A** for production, with staging on the same stack at minimum size.
   Figures are to be re-priced in P05 from the AWS Pricing API, not estimated.
-- **Answer:** _open._ P05 assumes the recommendation's shape and re-prices it against the US$100/month
-  ceiling in D-10 (ADR-008, marked **assumed**). To confirm with the owner at P05.11.
+- **Answer:** _open._ ADR-008 (**assumed**) keeps Fargate + RDS but reshapes it to fit D-10:
+  - API Gateway HTTP API with Cloud Map instead of an ALB;
+  - one service serving the API and a static client;
+  - no NAT and no interface endpoints;
+  - RDS single-AZ, resized for event days;
+  - staging parked when idle.
+
+  It costs US$36–97 a month (`reports/P05/pricing/cost.md`). To confirm at P05.11.
 
 ### D-08 — Domain and email
 
@@ -137,7 +147,9 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   - **B.** EventBridge Scheduler invoking an internal endpoint or Lambda.
 - **Recommendation:** **A.** Schedules are event data. They must be listed, edited, cancelled and
   audited in the app, and must work in tests without AWS.
-- **Answer:** _open_
+- **Answer:** **A** (design, ADR-004, proposed until G1). A `ScheduledAction` table claimed with
+  `FOR UPDATE SKIP LOCKED` under a lease. The handler, its completion and its audit row commit
+  together. Retries back off, then dead-letter with an alarm.
 
 ### D-10 — AWS budget and environments
 
@@ -193,4 +205,6 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   - **C.** DynamoDB.
 - **Recommendation:** **A** at this scale (hundreds of users, not hundreds of thousands). No new
   moving part to operate on event day.
-- **Answer:** _open_
+- **Answer:** **A** (design, ADR-003, proposed until G1). Postgres: a `LISTEN`/`NOTIFY` cache bus,
+  published inside the writing transaction, and an `UNLOGGED` rate-limit counter table. ElastiCache
+  and DynamoDB were rejected on cost and moving parts.
