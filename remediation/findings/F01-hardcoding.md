@@ -11,6 +11,63 @@ or to one deployment, with the place it moves to.
   if any hit is left over. `--where` prints each item's locations. It exits 0: **1271 of 1271 hits
   are classified.**
 
+## Summary (P01.8)
+
+**What is tied to one event.** 1271 raw hits classify into 45 items and 3 false-positive reasons,
+plus 2 D-04 items with no literal. Nothing is left unclassified.
+
+| Class              | Items | Hits | What it means for the programme                                                  |
+| ------------------ | ----: | ---: | -------------------------------------------------------------------------------- |
+| `event-data`       |    16 |  169 | Event name, dates, stations, four enums, the time zone: the P09 event model      |
+| `event-setting`    |   3+2 |   14 | Venue network, report bucket, root attendee; the two D-04 options                |
+| `platform-setting` |     3 |   13 | Organisation and app name, push TTLs                                             |
+| `event-content`    |     5 |   28 | Brief, journey, map, briefing points, app description: the P13.3 ContentDocument |
+| `infra-config`     |     5 |   69 | Cognito IDs, region, backup bucket and account, origins, JWT issuer: P08 SSM     |
+| `secret`           |     0 |    0 | No secret is committed. Five env keys are secrets (P01.4)                        |
+| `invariant`        |     2 |  159 | Eleven state and provenance enums; `CommitteeRole` pending D-03                  |
+| `fixture`          |     7 |  526 | Seed, tests, scripts                                                             |
+| `legit-constant`   |     4 |  201 | HTTP codes, units and bounds, client storage keys, the printed QR prefix         |
+| false positive     |     — |   92 | Comments, metadata, pattern collisions                                           |
+
+Beyond the sweep: 34 server and 5 client env keys (P01.4), 16 runtime settings plus 13 proposed
+(P01.5), 11 content items (P01.6) and 16 wall-clock interpretations (P01.7).
+
+**Top risks**
+
+1. **Time is Singapore everywhere that matters** (T-01…T-16). Station scope, attendance and the
+   dashboard decide "is a shift running" from a fixed +8 minute of day. Another zone would open and
+   close capture at the wrong hours, and DST days would add or drop an hour. Some report SQL also
+   depends silently on the database session's zone (T-08).
+2. **Four enums hold event taxonomy** (P01.3). Changing a visitor category, station kind, course or
+   shift block needs a migration and a deploy, and the labels are hardcoded three times.
+3. **Shift labels are already wrong after a settings change** (F01-046). The settings exist so a
+   rehearsal can move without a release, and the dry runs are when that happens.
+4. **D-04 turns two structural rules into options** (F01-048, F01-049). Neither has a literal to
+   move: every report, export, DTO and the journey copy must handle both modes.
+5. **The repo carries one deployment's identity** (F01-029…033): the live Cognito pool and client,
+   the backup bucket and AWS account ID, and a fixed region.
+6. **Volunteer content is compiled and still placeholder** (P01.6). Sign-off before the 4 Nov
+   training means a build and deploy per wording change, and the content must stay available
+   offline once it moves to the API.
+
+**Defects recorded:** F01-046 (Medium), F01-047, F01-050, F01-051, F01-052 (Low). None blocks the
+baseline; each has a fix phase.
+
+**Needs owner input** (for P05; not blocking P02–P04)
+
+| Question                                                                                                                     | Affects                    | Recorded as    |
+| ---------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- |
+| How flexible are roles?                                                                                                      | F01-021, P11               | D-03           |
+| Migrate this event's real days and stations into Event #1, or recreate them in the admin UI?                                 | F01-014, F01-015, P09.4    | D-12           |
+| Under D-04, what may a merged count show, and which visitor personal data may an event collect, kept how long, seen by whom? | F01-048, F01-049, P05, P09 | D-04 follow-up |
+| Will any event run past midnight? If so, blocks need an end on the next day and "today" needs a day-boundary hour.           | T-02, T-03, P09.6          | new, for P05   |
+| Is product vocabulary ("Mission Card") renameable per event, or fixed platform terms?                                        | P01.6, P14.8               | new, for P05   |
+| One locale (`en-SG`) for every event, or per organisation or event?                                                          | T-14, P09.8                | new, for P05   |
+
+Design choices P05 makes with a recommendation (no owner input needed): client configuration
+inlined at build or served at runtime (P01.4), the station-override settings (P01.5), and the rule
+for an ambiguous DST end (P01.7, case 3).
+
 ## Decisions this audit applies
 
 - **D-02 = A** (one organisation, many events). Organisation identity (name, app name, campus) is a

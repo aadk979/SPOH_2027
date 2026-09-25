@@ -36,6 +36,7 @@ closed during the audit phase named. IDs are kept when a finding moves into an F
 - **Severity:** Blocker for reuse
 - **Area:** `server/prisma/schema.prisma` (`EventDay` has no parent), `server/prisma/seed.ts:50–63, 205–206`
 - **Fix in:** P09
+- **Status:** Confirmed in P01. The seed holds the real event's days and stations (F01-014, F01-015), and the event name, dates and venue are compiled into the UI (F01-001…013). D-02 = A: an `Organisation` root with many events.
 
 ### PF-05 — Event taxonomy is enums
 
@@ -43,6 +44,7 @@ closed during the audit phase named. IDs are kept when a finding moves into an F
 - **Area:** `schema.prisma` `VisitorCategory`, `StationKind`, `CourseCode`, `ShiftBlock`; mirrored in
   `packages/shared/src/enums.ts` and client screens
 - **Fix in:** P09.2
+- **Status:** Confirmed in P01.3. Four of fifteen enums become data (`VisitorCategory`, `StationKind` as capability flags, `CourseCode`, `ShiftBlock`); eleven stay invariants, `CommitteeRole` pending D-03. See F01 § Enum audit.
 
 ### PF-06 — Singapore time hardcoded
 
@@ -50,6 +52,7 @@ closed during the audit phase named. IDs are kept when a finding moves into an F
 - **Area:** `server/src/lib/time.ts:21–22`, `server/src/modules/report/repo.ts:54,153,159,183`,
   `server/src/modules/report/export.ts:29`, `client/src/lib/format.ts`
 - **Fix in:** P09.6
+- **Status:** Confirmed and widened in P01.7: 16 places (T-01…T-16), including report SQL that depends on the database session's zone and the client's `en-SG` locale. DST test cases are in F01.
 
 ### PF-07 — Operational settings in env
 
@@ -57,6 +60,7 @@ closed during the audit phase named. IDs are kept when a finding moves into an F
 - **Area:** `ATTENDANCE_ROOT_EMAIL`, `ATTENDANCE_SP_CIDRS`, `SHIFT_HOURS_ALWAYS_OPEN`, `RATE_LIMIT_*`,
   `ACCESS_TOKEN_TTL_SECONDS` in `server/src/config/env.ts`
 - **Fix in:** P10.4
+- **Status:** Confirmed in P01.4. Ten of 34 server keys are settings (nine to the registry, `ATTENDANCE_ROOT_EMAIL` to an event-membership flag); every key needs a restart today. See F01 § Env audit.
 
 ### PF-08 — Event content compiled into the client
 
@@ -64,6 +68,7 @@ closed during the audit phase named. IDs are kept when a finding moves into an F
 - **Area:** `client/src/content/brief.ts`, `client/src/app/{map,journey,brief}/page.tsx`,
   `client/src/app/layout.tsx:9`, `client/public/manifest.json`, `client/public/sw.js` precache list
 - **Fix in:** P13.3 (content model), P14.6 (branding)
+- **Status:** Confirmed in P01.6. Eleven content items, a ContentDocument schema draft and the offline requirement are in F01 § Content audit.
 
 ### PF-09 — Server features with no screen
 
