@@ -15,7 +15,13 @@ so P08/P11/P12/P15 fix the real gaps rather than generic ones.
 
 ## Context for a fresh session
 
-- Use AWS **read-only**. The P00.8 inventory is the starting point.
+- **Do not call AWS and do not query the live staging site.** The owner's answer to D-13 forbids
+  using this container's AWS credentials, and allows staging access only for the P00.9 smoke test.
+  P00.8 (the AWS inventory) was skipped for that reason. Everything in this phase is judged from the
+  repo: code, `.env.example` files, scripts such as `server/scripts/verify-cognito.mjs`,
+  `ops/backup/`, and the Lightsail notes in `infra/` if present.
+- D-04 was answered: the three counts and no-PII rules become **per-event options**, not fixed
+  invariants. The threat model must treat an event with PII enabled as in scope.
 - Existing controls worth keeping:
   - refresh rotation with reuse detection
   - origin check and JSON-only on cookie routes
@@ -91,6 +97,11 @@ so P08/P11/P12/P15 fix the real gaps rather than generic ones.
 - **Done when:** the findings are in F04.
 
 ### P04.7 — AWS account review (read-only)
+
+> **Blocked by D-13: no AWS calls.** Do not use the credentials in this environment. Instead, write
+> the list below into F04 as **questions for the owner**, noting anything the repo itself answers
+> (IAM policy JSON under `ops/`, bucket names, pool ids). Then mark the step `skipped` with that
+> note, unless the owner has since changed D-13.
 
 - **Do:** Review:
   - the IAM users, roles and policies the app uses (least privilege? long-lived keys?)
