@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T13:03:18.187Z",
+  "updatedAt": "2026-09-25T13:05:21.424Z",
   "current": {
     "phase": "P01",
     "step": "P01.3"
@@ -392,11 +392,16 @@
         {
           "id": "P01.3",
           "title": "Enum audit",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T13:03:18.187Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T13:05:21.424Z",
+          "commits": ["ecdac75"],
+          "notes": [
+            {
+              "at": "2026-09-25T13:05:21.424Z",
+              "text": "15 enums: 4 event-data (flags registersVisitors/redeemsGifts), 11 invariant (CommitteeRole pending D-03); dead members noted; F01-050"
+            }
+          ]
         },
         {
           "id": "P01.4",
