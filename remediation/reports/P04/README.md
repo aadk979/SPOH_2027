@@ -37,3 +37,35 @@ git grep -I -h -E '(SECRET|PASSWORD|TOKEN|PRIVATE_KEY|ACCESS_KEY)[A-Z_]*\s*[=:]\
 
 Result on 2026-09-25: 116 commits, no findings; the greps return only `.env.example` files and
 dev/test placeholders.
+
+## Load test and poll probe (P04.8)
+
+Against a scratch database, never the dev one:
+
+```bash
+docker exec spoh2027-postgres psql -U spoh -d postgres -c "CREATE DATABASE spoh2027_p04"
+cd server
+export DATABASE_URL=postgresql://spoh:spoh@localhost:5435/spoh2027_p04
+npx prisma migrate deploy && npx tsx prisma/seed.ts && npm run build
+SPOH_SKIP_DOTENV=1 NODE_ENV=development LOG_LEVEL=warn PORT=4011 AUTH_PROVIDER=local \
+  LOCAL_AUTH_SECRET=dev-only-secret-change-me-at-least-32-chars SHIFT_HOURS_ALWAYS_OPEN=true \
+  node dist/index.js &
+LOAD_TEST_API=http://localhost:4011 LOCAL_AUTH_SECRET=dev-only-secret-change-me-at-least-32-chars \
+  node scripts/load-test.mjs --clients 100 --taps 20 --duration 60     # then --clients 300
+cp ../remediation/reports/P04/poll-probe.mjs ./p04-poll-probe.tmp.mjs && node ./p04-poll-probe.tmp.mjs
+```
+
+`poll-probe.mjs` has to run from `server/` (it imports `jose` from there); it times
+`/dashboard/live` and `/lost-person/active` alone and in bursts. Results: F04 § P04.8.
+
+## PF-14: baseline `migrate deploy` on an audit-migrated database (P04.8)
+
+```bash
+mkdir -p /tmp/pf14 && git archive 319d06d server/prisma | tar -x -C /tmp/pf14
+# a prisma.config.ts in /tmp/pf14/server pointing at spoh2027_pf14_test, then:
+npx prisma migrate deploy --config /tmp/pf14/server/prisma.config.ts      # audit branch's 5 migrations
+DATABASE_URL=…/spoh2027_pf14_test npx prisma migrate deploy               # main: "No pending migrations", exit 0
+TEST_DATABASE_URL=…/spoh2027_pf14_test npx vitest run --project integration   # 292 passed, 49 skipped
+```
+
+The database name must end in `_test` for the integration suite's truncation guard.

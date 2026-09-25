@@ -130,6 +130,11 @@ closed during the audit phase named. IDs are kept when a finding moves into an F
   merge of the audit branch.
 - **Verify in:** P04 (tag deploy against a migrated DB) · **Decide before:** P05 (owner: merge
   later, re-implement or drop the audit branch)
+- **Status:** Verified in P04.8: on a database migrated by the audit branch, `main`'s
+  `prisma migrate deploy` exits 0 ("No pending migrations") and `migrate status` reports up to date
+  without mentioning the unknown migration; `main`'s integration suite passes against it (292 + 49
+  skipped). Baseline audit rows take the new columns' defaults (`INFO`/`SUCCESS`). The baseline is
+  a safe rollback target for staging's schema. The decision on the branch is still open (P05).
 
 ### PF-15 — e2e test drifted from the home screen
 

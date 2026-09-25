@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T15:39:20.148Z",
+  "updatedAt": "2026-09-25T15:39:37.362Z",
   "current": {
     "phase": "P04",
-    "step": "P04.6"
+    "step": "P04.8"
   },
   "gates": [
     {
@@ -1036,8 +1036,8 @@
         {
           "id": "P04.8",
           "title": "Operational readiness",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-25T15:39:37.361Z",
           "completedAt": null,
           "commits": [],
           "notes": []

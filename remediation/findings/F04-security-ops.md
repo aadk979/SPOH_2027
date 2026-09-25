@@ -799,6 +799,177 @@ read-only CLI command, to answer it.
 has leaked into git (P04.5). Q-S2 is the question that settles the bucket side; please answer it
 first.
 
+---
+
+## P04.8 — Operational readiness
+
+### Monitoring and alerting: what pages a human today?
+
+**Nothing.** From the repo:
+
+| Signal                            | Where it goes                                                                                                                         |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| API errors                        | pino JSON to PM2 log files on the box; CloudWatch only on the audit branch, and only if `CLOUDWATCH_SHIP_APP_LOGS=true`               |
+| Backup failure                    | `spoh-backup-failed.service` runs `logger -p daemon.crit …`: a syslog line on the same box. The README says "wire it to a real alert" |
+| Stale backups                     | `spoh-backup-check.sh` exists and is installed, but no timer or cron runs it                                                          |
+| Host down, TLS expired, disk full | no uptime check, no certificate-expiry check, no disk alarm; PM2 logs are not rotated                                                 |
+| Security events                   | written to the audit log; on the audit branch a screen shows them. Nobody is notified                                                 |
+| Push/CloudWatch delivery failing  | a log line (F03-040: one rejected CloudWatch batch stops delivery for good)                                                           |
+
+### Backup and restore
+
+| Measure           | Today                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Design RPO        | 15 min in event hours (09:30–18:00 SGT), 60 min otherwise (`spoh-backup.sh`).                                                                                                                                                                                                                                                                                                                                                         |
+| Actual RPO        | **Unknown.** The daemon needs S3 write access; the backup README says it uses "an instance role", but the deploy runbook says the Lightsail box's role has no permissions on project resources, and the restore runbook says writing to the bucket "needs an IAM instance profile the box does not have". Whether the timer runs at all is Q-I3. The only dumps the runbooks guarantee are manual pre-deploy dumps on the box itself. |
+| Snapshots         | Lightsail automatic snapshots are not mentioned (Q-L2).                                                                                                                                                                                                                                                                                                                                                                               |
+| Restore procedure | Written twice: `ops/backup/spoh-restore.sh` (from S3, checksum-verified, refuses the live DB without `--i-am-sure`) and the audit branch's `restore.md` (from a local dump). Neither has been rehearsed; the README asks for a timed rehearsal at Dry Run #1.                                                                                                                                                                         |
+| Measured here     | `pg_dump                                                                                                                                                                                                                                                                                                                                                                                                                              | gzip -9`of a database holding 7,947 registrations, 7,951 audit rows and 307 volunteers: **0.9 s**, 1.7 MB, 32 tables; restore into an empty database with`ON_ERROR_STOP=1`: **1.0 s**, row counts equal. The database is not what makes a restore slow. |
+| RTO estimate      | Dominated by people: notice (no alert, F04-017), reach a laptop with the SSH key, fetch the dump, stop the app, restore, `db:deploy`, restart, verify a sign-in. Plausibly 20–40 minutes for the person who wrote the runbooks; unknown for anyone else.                                                                                                                                                                              |
+
+### Deploy and rollback
+
+| Step (audit branch `deploy.md`)                                                             | Notes                                                                                                                                                                                                                                                                |
+| ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SSH, `git pull`, `npm ci`, build shared, `db:deploy`, build server and client, `pm2 reload` | Builds happen **on the production box**, on 2 GB with swap, while it serves traffic. On this laptop (16 cores) the builds alone take ~1.7 min (`npm ci` ~60 s, server 13 s, client 22 s); on 2 vCPU with swap, several times that, with the box degraded throughout. |
+| Verification                                                                                | `/healthz`, `/readyz`, PM2 status, logs, then the smoke test (audit-branch only).                                                                                                                                                                                    |
+| Rollback                                                                                    | Check out the previous SHA and **rebuild**: as slow as a deploy. No previous build is kept.                                                                                                                                                                          |
+| Migrations                                                                                  | Additive, applied before the build. **PF-14 verified below.**                                                                                                                                                                                                        |
+| Where the runbooks live                                                                     | Only on `feat/audit-cloudwatch` (D-05 kept it out of `main`). `main` has no deploy, restore or incident runbook.                                                                                                                                                     |
+
+**PF-14 — does the baseline deploy onto a database the audit branch has migrated?** Yes. A
+scratch database was migrated with the audit branch's five migrations
+(`20260922000000_audit_severity_and_security_events` included), then `main`'s
+`prisma migrate deploy` ran against it: exit 0, "No pending migrations to apply", and
+`migrate status` says "Database schema is up to date!" without mentioning the unknown migration.
+`main`'s whole integration suite then passed against that database (292 passed, 49 skipped: the
+same as on a clean one). Rows the baseline writes get the new columns' defaults
+(`severity=INFO`, `outcome=SUCCESS`, `method/path/statusCode` null), so after a rollback, audit
+rows written by the baseline are labelled as successful informational events whatever they were.
+Two cautions: Prisma's silence means drift goes unnoticed, and `prisma migrate dev` against such a
+database would offer to reset it. The README's safety-net procedure stands as written.
+
+### Capacity
+
+`server/scripts/load-test.mjs` (distinct accounts, 20 taps per minute each, p95 budget 300 ms),
+repeated against a built API (`node dist/index.js`, one process, request logging off) and the
+dockerised Postgres 17 on an Intel Core Ultra 9 185H (16 cores, 31 GB). The deployed box has 2 vCPU
+and 2 GB shared with Postgres, so these are an upper bound.
+
+| Clients | Requests | Throughput | Errors | p50   | p95 (steady) | p99    | Max    |
+| ------- | -------- | ---------- | ------ | ----- | ------------ | ------ | ------ |
+| 100     | 1,991    | 31.0/s     | 0      | 17 ms | 25 ms        | 33 ms  | 64 ms  |
+| 300     | 5,956    | 92.8/s     | 0      | 23 ms | 81 ms        | 237 ms | 489 ms |
+
+The script measures captures only. `infra/README.md` itself says polling, not capture, is the
+dominant load (a 3-second dashboard poll, a 10-second alert poll). Probed once on the database the
+300-client run left behind:
+
+| Poll                      | Alone (p50 / p95) | Burst                              |
+| ------------------------- | ----------------- | ---------------------------------- |
+| `GET /dashboard/live`     | 27 / 121 ms       | 30 at once: p50 359 ms, p95 387 ms |
+| `GET /lost-person/active` | 3 / 8 ms          | 100 at once: p50 97 ms, p95 109 ms |
+
+One dashboard poll costs more than ten captures, and 30 coordinators on a 3-second poll is
+10 dashboard requests a second before anyone taps. Nothing has measured the mix on the box that
+will serve it (F04-021).
+
+### Runbooks, event-day on-call, single points of failure
+
+- **Runbooks:** deploy, restore, DNS/TLS and scale-up exist on the audit branch; backup operations
+  in `ops/backup/README.md` on `main`. There is no incident runbook (who decides to switch to paper
+  fallback, who is called, how to reach them) and no runbook for "the box is gone".
+- **On-call path:** none recorded. The runbooks assume one person with the SSH key, the DuckDNS
+  login and AWS access.
+- **Single points of failure:** one Lightsail instance (nginx, API, client, Postgres, backups
+  daemon), one SSH key ("the only copy"), one operator, DNS updated by hand on DuckDNS, TLS issued
+  on the box. The topology document says of itself that it cannot survive a runaway query, cannot
+  serve the event, and cannot restore quickly.
+
+### Findings
+
+#### F04-017 — Nothing pages a human
+
+- **Severity:** High
+- **Area:** `ops/backup/spoh-backup-failed.service`, `ops/backup/install.sh`; no monitoring config anywhere
+- **Evidence:** The table above: every failure signal ends in a log file or syslog on the box
+  that failed, the staleness check is never scheduled, and no uptime, certificate or disk check
+  exists. PM2 logs are not rotated.
+- **Impact:** On event day an outage, a stopped backup or a full disk is discovered by a
+  volunteer, not by the operator; every other risk's impact is multiplied by the time to notice
+  (risk 2).
+- **Fix:** Before Dry Run #1: an external uptime check on `/readyz` (and certificate expiry) that
+  alerts a phone, the staleness check on a timer with the failure hook sending to SNS or email, PM2
+  log rotation. P08.7: CloudWatch alarms (5xx rate, latency, CPU, memory, disk, RDS), an SNS topic
+  to named people, a status page for the committee.
+- **Phase:** interim before Dry Run #1; P08.7
+- **Status:** open
+
+#### F04-018 — Off-site backups are unproven on the deployed host, and restore has never been rehearsed
+
+- **Severity:** High (to verify, Q-I3, Q-L2)
+- **Area:** `ops/backup/` (`README.md` "No credentials on the box. An instance role"),
+  `infra/runbooks/deploy.md`, `infra/runbooks/restore.md` (audit branch)
+- **Evidence:** The backup daemon's documented credential (an instance role) cannot exist on
+  Lightsail, and the two runbooks say the box has no working role. Nothing records the daemon being
+  installed there or a dump arriving in the bucket. The restore has never been timed.
+- **Impact:** If the box or its disk is lost, the newest recoverable copy may be a pre-deploy dump
+  of unknown age, on the lost box itself (risk 4). During the event, lost captures cannot be
+  re-entered.
+- **Fix:** Now: answer Q-I3/Q-L2; if the daemon is not running, give it a scoped credential or
+  turn on Lightsail automatic snapshots, and restore one dump into a scratch database to prove it.
+  P08: RDS with point-in-time recovery. P16: a timed restore rehearsal before Dry Run #1, repeated
+  by someone other than the author.
+- **Phase:** now (verify); P08; P16
+- **Status:** open
+
+#### F04-019 — Everything runs on one small box that its own documentation says cannot serve the event
+
+- **Severity:** High
+- **Area:** `infra/topology/single-box.md`, `infra/README.md` (audit branch)
+- **Evidence:** One `small_3_0` (2 vCPU, 2 GB) runs nginx, the API, the client, Postgres in Docker
+  and the backup daemon; DNS is a DuckDNS record updated by hand; one SSH key exists. The topology
+  file lists "serve the event" and "restore quickly" among what it cannot do, and the scale-up path
+  (two boxes) is not built.
+- **Impact:** Any host failure during the event stops every station at once, and recovery depends
+  on one person (risk 3).
+- **Fix:** D-07 (hosting) and D-10 (budget) decide the target; P08 builds it with a managed
+  database, more than one app instance behind a load balancer, and DNS the team controls (D-08).
+  If January runs on the current topology, at least the two-box split, snapshots and a second
+  person with access.
+- **Phase:** P08 (D-07, D-08, D-10)
+- **Status:** open
+
+#### F04-020 — Deploys build on the production box, rollback is a rebuild, and the runbooks are not on `main`
+
+- **Severity:** Medium
+- **Area:** `infra/runbooks/deploy.md` (audit branch)
+- **Evidence:** The procedure above. No build artefact is produced or kept; rolling back
+  recompiles the previous SHA on the live box. The runbooks exist only on the unmerged audit
+  branch, so a checkout of `main` (the baseline) has no deploy instructions at all.
+- **Impact:** A bad deploy during the event costs a second slow build to undo, on a box that is
+  already short of memory. Whoever deploys the baseline follows a runbook from another branch.
+- **Fix:** P08: CI builds an image once, deploys it, and rolls back by redeploying the previous
+  image. Until then: copy the runbooks to `main` (or decide the audit branch's fate, PF-14) and
+  keep the previous build directory for a fast rollback.
+- **Phase:** P08; PF-14 decision before P05
+- **Status:** open
+
+#### F04-021 — Capacity is measured for captures on a laptop, not for the event's load on its server
+
+- **Severity:** Medium
+- **Area:** `server/scripts/load-test.mjs`
+- **Evidence:** The capture test passes comfortably at 300 clients here, but it simulates no
+  polling, and a dashboard poll costs more than ten captures (table above). The deployed box has a
+  fraction of this machine's CPU and shares it with Postgres, and the dashboard queries grow with
+  the event's data (F03-029 has the per-row lookups).
+- **Impact:** The first realistic load test will be Dry Run #1 itself.
+- **Fix:** Extend the load test with the real mix (captures, 10-second alert poll for everyone,
+  3-second dashboard poll for coordinators, announcements) and run it on staging at the target
+  instance size with a day's worth of data; set the poll intervals from the result.
+- **Phase:** P16 (load), P06 (F03-029), P08 (staging at target size)
+- **Status:** open
+
 <!-- appendices -->
 
 ---
