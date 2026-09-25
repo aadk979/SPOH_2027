@@ -771,6 +771,46 @@ repros like P03.4's; `run-repros.sh multiInstance` shows all four failing, twice
 - **Phase:** P06 (claim), P10 (scheduler)
 - **Status:** open
 
+## Test gaps · P03.6
+
+**Data.** `node remediation/reports/P03/test-gaps.mjs <coverage-final.json>` (the coverage command
+is in the script header) writes `reports/P03/test-gaps.json`: the 95 routes from P02's
+`permissions.json` checked against the integration tests (a quoted occurrence of the path, with or
+without `/api/v1`, counts; the skipped repros do not), the server functions no test executes (a
+fresh whole-`src` coverage run on `d4f6399`, unit + integration), and the 29 client routes checked
+against the e2e specs (a `goto`, `waitForURL` or URL assertion counts). P00's per-file coverage
+(`P00-coverage.json`: server modules 78 % lines, every client screen 0 % unit) is the baseline.
+
+| Measure                           | Count                                                                                                                           |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Routes with no integration test   | **23 of 95**                                                                                                                    |
+| Server functions no test executes | **81** (29 are dead or dev-only, P03.1)                                                                                         |
+| Server use cases with a unit test | **0**: the 6 unit files test `lib/` (time, settings, short codes), the capability matrix, attendance tokens and the no-PII rule |
+| Client screens with no e2e        | **17 of 29**                                                                                                                    |
+| Client unit tests                 | 2 files (outbox, tokens), 21 tests; no `model` helper, hook or component test                                                   |
+
+### Ranked gaps (capture and auth first)
+
+| Rank | Gap                                                                                                                                                                                                                            | Why it matters                                                                                                               | Covered by       |
+| ---: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+|    1 | **Hosted sign-in has no test at all:** `GET /auth/login`, `GET /auth/callback` and the Cognito verifier (`cognitoProvider.verify`, `extractGroups`) are never executed; every test signs in through the local provider         | This is the only sign-in path in staging and production; state/PKCE handling and the callback's error redirects are unproven | P06.1, P12       |
+|    2 | **Capture screens without e2e:** `/capture/stamp`, `/capture/redeem`, `/capture/registration/group`; `/shift` (parked captures, copy, flush)                                                                                   | Three of the four counts and the offline salvage path; only registration and footfall have a journey test                    | P07.1            |
+|    3 | **Corrections untested:** `POST /footfall/ticks/:id/void` (`voidTickById` never runs), `POST /me/check-out`, `GET /attendance` (status)                                                                                        | Voids and check-out change the counts and the hours (F03-015 went unseen)                                                    | P06.1            |
+|    4 | **Concurrency is untested everywhere** except the idempotency middleware                                                                                                                                                       | Every race in P03.4 (F03-006…F03-011) and P03.5 (F03-031) was invisible to the suite                                         | P03 repros → P06 |
+|    5 | **Safety module gaps:** `POST /incidents/:id/status`, `/follow-ups` untested; the whole `lostFound` service never runs (log, list, claim, close-out); `GET /dashboard/data-health` untested                                    | Incident and lost-and-found state are what the Chief acts on; close-out changes item state in bulk                           | P06.1            |
+|    6 | **Multi-instance behaviour** (caches, limits, jobs): only the P03.5 repros                                                                                                                                                     | Production runs more than one worker                                                                                         | P10.3, P15.2     |
+|    7 | **Admin writes untested:** `POST /admin/assignments` (`createAssignment`), `PATCH /admin/event-days/:id`, `updateStation`, `updateGiftType`, `getStationRoster`, `GET /roster/swaps/pending`, `/roster/gaps`, `/gifts/summary` | Setup changes that re-scope capture (stations, days, assignments)                                                            | P06.1            |
+|    8 | **Operations screens without e2e:** `/chief`, `/chief/imports`, `/chief/fallback`, `/ic`, `/reports`, `/inbox`, `/tv`                                                                                                          | Read-mostly, but the dashboard numbers (F02-006) and imports (F03-012) are where wrong numbers surface                       | P07.1            |
+|    9 | **Jobs never run in tests:** `startScheduledJobs`, `pruneIdempotencyRecords`, `pruneRefreshSessions`                                                                                                                           | The purge is tested directly; the prunes delete rows and have no test                                                        | P06.1, P10       |
+|   10 | **Push and media:** `/notifications/*`, `/media/*` untested (need VAPID keys and S3); `pushToDevices` never runs                                                                                                               | Best-effort features; a fake transport makes them testable                                                                   | P06.1            |
+|   11 | **Safety screens without e2e:** `/safety/incident/new`, `/safety/lost-found`, `/safety/lost-found/new`; content screens `/journey` and `/map`                                                                                  | Forms with no journey test; content becomes data in P13.3                                                                    | P07.1            |
+
+**What P06.1/P07.1 characterise first:** ranks 1–3 and 5 on the server (route contract tests with
+the P03.4 repros beside them), ranks 2 and 8 on the client, then the H rows of the P03.2 backlog in
+the order P06/P07 split them. A use case gets its unit test (fake repo, fixed clock, §9) in the
+commit that moves it to `application/`, so "0 use cases with a unit test" closes as the refactor
+goes, not as a separate pass.
+
 ---
 
 ## Appendix A — Target location of every export

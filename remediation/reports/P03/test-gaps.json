@@ -1,0 +1,1321 @@
+{
+  "generatedAt": "2026-09-25T14:36:52.607Z",
+  "routes": {
+    "total": 95,
+    "untested": 23,
+    "list": [
+      {
+        "method": "POST",
+        "path": "/auth/session",
+        "module": "auth",
+        "capability": null,
+        "tested": true,
+        "files": ["admin.test.ts", "auth.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/auth/login",
+        "module": "auth",
+        "capability": null,
+        "tested": false,
+        "files": []
+      },
+      {
+        "method": "GET",
+        "path": "/auth/callback",
+        "module": "auth",
+        "capability": null,
+        "tested": false,
+        "files": []
+      },
+      {
+        "method": "POST",
+        "path": "/auth/refresh",
+        "module": "auth",
+        "capability": null,
+        "tested": true,
+        "files": ["auth.test.ts"]
+      },
+      {
+        "method": "DELETE",
+        "path": "/auth/session",
+        "module": "auth",
+        "capability": null,
+        "tested": true,
+        "files": ["admin.test.ts", "auth.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/auth/sessions",
+        "module": "auth",
+        "capability": null,
+        "tested": true,
+        "files": ["auth.test.ts"]
+      },
+      {
+        "method": "DELETE",
+        "path": "/auth/sessions/:id",
+        "module": "auth",
+        "capability": null,
+        "tested": true,
+        "files": ["auth.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/me",
+        "module": "me",
+        "capability": "own.read",
+        "tested": true,
+        "files": ["admin.test.ts", "auth.test.ts", "rbac.test.ts", "security.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/me/check-in",
+        "module": "me",
+        "capability": "own.read",
+        "tested": true,
+        "files": ["attendance.test.ts", "security.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/me/check-out",
+        "module": "me",
+        "capability": "own.read",
+        "tested": false,
+        "files": []
+      },
+      {
+        "method": "GET",
+        "path": "/attendance",
+        "module": "attendance",
+        "capability": null,
+        "tested": false,
+        "files": []
+      },
+      {
+        "method": "POST",
+        "path": "/attendance/start",
+        "module": "attendance",
+        "capability": null,
+        "tested": true,
+        "files": ["attendance.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/attendance/challenge",
+        "module": "attendance",
+        "capability": null,
+        "tested": true,
+        "files": ["attendance.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/attendance/submit",
+        "module": "attendance",
+        "capability": null,
+        "tested": true,
+        "files": ["attendance.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/stations",
+        "module": "station",
+        "capability": null,
+        "tested": true,
+        "files": ["security.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/registrations",
+        "module": "registration",
+        "capability": "registration.create",
+        "tested": true,
+        "files": [
+          "capture.test.ts",
+          "dashboard.test.ts",
+          "rbac.test.ts",
+          "report.test.ts",
+          "security.test.ts"
+        ]
+      },
+      {
+        "method": "POST",
+        "path": "/registrations/group",
+        "module": "registration",
+        "capability": "registration.create",
+        "tested": true,
+        "files": ["capture.test.ts", "missionCard.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/registrations/:id/void",
+        "module": "registration",
+        "capability": "record.void",
+        "tested": true,
+        "files": ["capture.test.ts", "report.test.ts", "security.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/registrations/summary",
+        "module": "registration",
+        "capability": "dashboard.station.read",
+        "tested": true,
+        "files": ["capture.test.ts", "fallback.test.ts", "rbac.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/footfall/ticks",
+        "module": "footfall",
+        "capability": "footfall.create",
+        "tested": true,
+        "files": ["capture.test.ts", "dashboard.test.ts", "rbac.test.ts", "report.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/footfall/bulk",
+        "module": "footfall",
+        "capability": "count.adjust",
+        "tested": true,
+        "files": ["capture.test.ts", "rbac.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/footfall/ticks/:id/void",
+        "module": "footfall",
+        "capability": "record.void",
+        "tested": false,
+        "files": []
+      },
+      {
+        "method": "GET",
+        "path": "/footfall/summary",
+        "module": "footfall",
+        "capability": "dashboard.station.read",
+        "tested": true,
+        "files": ["capture.test.ts", "fallback.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/footfall/live",
+        "module": "footfall",
+        "capability": "dashboard.station.read",
+        "tested": true,
+        "files": ["capture.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/incidents",
+        "module": "incident",
+        "capability": "incident.report",
+        "tested": true,
+        "files": ["rbac.test.ts", "security.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/incidents",
+        "module": "incident",
+        "capability": "dashboard.station.read",
+        "tested": true,
+        "files": ["rbac.test.ts", "security.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/incidents/:id/follow-ups",
+        "module": "incident",
+        "capability": "incident.resolve",
+        "tested": false,
+        "files": []
+      },
+      {
+        "method": "POST",
+        "path": "/incidents/:id/status",
+        "module": "incident",
+        "capability": "incident.resolve",
+        "tested": false,
+        "files": []
+      },
+      {
+        "method": "POST",
+        "path": "/lost-person",
+        "module": "lostPerson",
+        "capability": "lostPerson.raise",
+        "tested": true,
+        "files": ["lostPerson.test.ts", "rbac.test.ts", "report.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/lost-person/active",
+        "module": "lostPerson",
+        "capability": "own.read",
+        "tested": true,
+        "files": ["lostPerson.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/lost-person/:id/ack",
+        "module": "lostPerson",
+        "capability": "own.read",
+        "tested": true,
+        "files": ["lostPerson.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/lost-person/:id/resolve",
+        "module": "lostPerson",
+        "capability": "lostPerson.resolve",
+        "tested": true,
+        "files": ["lostPerson.test.ts", "report.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/roster/me",
+        "module": "roster",
+        "capability": "own.read",
+        "tested": false,
+        "files": []
+      },
+      {
+        "method": "GET",
+        "path": "/roster/station/:stationId",
+        "module": "roster",
+        "capability": "dashboard.station.read",
+        "tested": false,
+        "files": []
+      },
+      {
+        "method": "POST",
+        "path": "/roster/volunteers",
+        "module": "roster",
+        "capability": "user.provision",
+        "tested": true,
+        "files": ["rbac.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/roster/import",
+        "module": "roster",
+        "capability": "roster.edit",
+        "tested": true,
+        "files": ["rbac.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/roster/swaps",
+        "module": "shift",
+        "capability": "own.read",
+        "tested": true,
+        "files": ["comms.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/roster/swaps",
+        "module": "shift",
+        "capability": "own.read",
+        "tested": true,
+        "files": ["comms.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/roster/swaps/pending",
+        "module": "shift",
+        "capability": "swap.approve",
+        "tested": false,
+        "files": []
+      },
+      {
+        "method": "POST",
+        "path": "/roster/swaps/:id/decide",
+        "module": "shift",
+        "capability": "swap.approve",
+        "tested": true,
+        "files": ["comms.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/roster/briefing-slots",
+        "module": "shift",
+        "capability": "own.read",
+        "tested": true,
+        "files": ["comms.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/roster/briefing-slots/:id/complete",
+        "module": "shift",
+        "capability": "own.read",
+        "tested": true,
+        "files": ["comms.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/roster/gaps",
+        "module": "shift",
+        "capability": "dashboard.event.read",
+        "tested": false,
+        "files": []
+      },
+      {
+        "method": "POST",
+        "path": "/cards/batch",
+        "module": "missionCard",
+        "capability": "user.provision",
+        "tested": true,
+        "files": ["missionCard.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/cards/funnel",
+        "module": "missionCard",
+        "capability": "dashboard.station.read",
+        "tested": true,
+        "files": ["missionCard.test.ts", "security.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/cards/:shortCode",
+        "module": "missionCard",
+        "capability": "card.stamp",
+        "tested": true,
+        "files": ["missionCard.test.ts", "security.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/cards/:shortCode/issue",
+        "module": "missionCard",
+        "capability": "registration.create",
+        "tested": true,
+        "files": ["missionCard.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/cards/:shortCode/stamps",
+        "module": "missionCard",
+        "capability": "card.stamp",
+        "tested": true,
+        "files": ["missionCard.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/cards/:shortCode/void",
+        "module": "missionCard",
+        "capability": "card.reissue",
+        "tested": true,
+        "files": ["missionCard.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/cards/:shortCode/reissue",
+        "module": "missionCard",
+        "capability": "card.reissue",
+        "tested": true,
+        "files": ["missionCard.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/gifts",
+        "module": "gift",
+        "capability": "gift.redeem",
+        "tested": true,
+        "files": ["gift.test.ts", "security.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/gifts/redemptions",
+        "module": "gift",
+        "capability": "gift.redeem",
+        "tested": true,
+        "files": ["gift.test.ts", "missionCard.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/gifts/:id/adjust",
+        "module": "gift",
+        "capability": "count.adjust",
+        "tested": true,
+        "files": ["gift.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/gifts/summary",
+        "module": "gift",
+        "capability": "dashboard.station.read",
+        "tested": false,
+        "files": []
+      },
+      {
+        "method": "POST",
+        "path": "/announcements",
+        "module": "announcement",
+        "capability": "announcement.station.send",
+        "tested": true,
+        "files": ["comms.test.ts", "security.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/announcements",
+        "module": "announcement",
+        "capability": "own.read",
+        "tested": true,
+        "files": ["comms.test.ts", "security.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/announcements/:id/ack",
+        "module": "announcement",
+        "capability": "own.read",
+        "tested": true,
+        "files": ["comms.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/dashboard/live",
+        "module": "dashboard",
+        "capability": "dashboard.event.read",
+        "tested": true,
+        "files": ["dashboard.test.ts", "security.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/dashboard/data-health",
+        "module": "dashboard",
+        "capability": "dashboard.event.read",
+        "tested": false,
+        "files": []
+      },
+      {
+        "method": "GET",
+        "path": "/dashboard/station/:id",
+        "module": "dashboard",
+        "capability": "dashboard.station.read",
+        "tested": true,
+        "files": ["dashboard.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/lost-found",
+        "module": "lostFound",
+        "capability": "lostFound.log",
+        "tested": true,
+        "files": ["security.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/lost-found",
+        "module": "lostFound",
+        "capability": "own.read",
+        "tested": true,
+        "files": ["security.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/lost-found/:id/claim",
+        "module": "lostFound",
+        "capability": "lostFound.log",
+        "tested": false,
+        "files": []
+      },
+      {
+        "method": "POST",
+        "path": "/lost-found/close-out",
+        "module": "lostFound",
+        "capability": "report.generate",
+        "tested": false,
+        "files": []
+      },
+      {
+        "method": "GET",
+        "path": "/reports/summary",
+        "module": "report",
+        "capability": "report.generate",
+        "tested": true,
+        "files": ["report.test.ts", "security.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/reports/export",
+        "module": "report",
+        "capability": "report.generate",
+        "tested": true,
+        "files": ["report.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/audit",
+        "module": "audit",
+        "capability": "audit.read",
+        "tested": true,
+        "files": ["security.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/admin/volunteers",
+        "module": "admin",
+        "capability": "user.read",
+        "tested": true,
+        "files": ["admin.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/admin/volunteers/:id",
+        "module": "admin",
+        "capability": "user.read",
+        "tested": true,
+        "files": ["admin.test.ts"]
+      },
+      {
+        "method": "PATCH",
+        "path": "/admin/volunteers/:id",
+        "module": "admin",
+        "capability": "user.provision",
+        "tested": true,
+        "files": ["admin.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/admin/volunteers/:id/deactivate",
+        "module": "admin",
+        "capability": "user.provision",
+        "tested": true,
+        "files": ["admin.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/admin/volunteers/:id/reactivate",
+        "module": "admin",
+        "capability": "user.provision",
+        "tested": true,
+        "files": ["admin.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/admin/assignments",
+        "module": "admin",
+        "capability": "roster.edit",
+        "tested": false,
+        "files": []
+      },
+      {
+        "method": "DELETE",
+        "path": "/admin/assignments/:id",
+        "module": "admin",
+        "capability": "roster.edit",
+        "tested": true,
+        "files": ["admin.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/admin/stations",
+        "module": "admin",
+        "capability": "config.manage",
+        "tested": true,
+        "files": ["admin.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/admin/stations",
+        "module": "admin",
+        "capability": "config.manage",
+        "tested": true,
+        "files": ["admin.test.ts"]
+      },
+      {
+        "method": "PATCH",
+        "path": "/admin/stations/:id",
+        "module": "admin",
+        "capability": "config.manage",
+        "tested": true,
+        "files": ["admin.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/admin/event-days",
+        "module": "admin",
+        "capability": "user.read",
+        "tested": true,
+        "files": ["admin.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/admin/event-days",
+        "module": "admin",
+        "capability": "config.manage",
+        "tested": true,
+        "files": ["admin.test.ts"]
+      },
+      {
+        "method": "PATCH",
+        "path": "/admin/event-days/:id",
+        "module": "admin",
+        "capability": "config.manage",
+        "tested": false,
+        "files": []
+      },
+      {
+        "method": "POST",
+        "path": "/admin/gift-types",
+        "module": "admin",
+        "capability": "config.manage",
+        "tested": true,
+        "files": ["admin.test.ts"]
+      },
+      {
+        "method": "PATCH",
+        "path": "/admin/gift-types/:id",
+        "module": "admin",
+        "capability": "config.manage",
+        "tested": true,
+        "files": ["admin.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/admin/settings",
+        "module": "admin",
+        "capability": "own.read",
+        "tested": true,
+        "files": ["admin.test.ts"]
+      },
+      {
+        "method": "PATCH",
+        "path": "/admin/settings",
+        "module": "admin",
+        "capability": "config.manage",
+        "tested": true,
+        "files": ["admin.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/notifications/config",
+        "module": "notification",
+        "capability": "own.read",
+        "tested": false,
+        "files": []
+      },
+      {
+        "method": "POST",
+        "path": "/notifications/subscriptions",
+        "module": "notification",
+        "capability": "own.read",
+        "tested": false,
+        "files": []
+      },
+      {
+        "method": "DELETE",
+        "path": "/notifications/subscriptions",
+        "module": "notification",
+        "capability": "own.read",
+        "tested": false,
+        "files": []
+      },
+      {
+        "method": "GET",
+        "path": "/media/config",
+        "module": "media",
+        "capability": "own.read",
+        "tested": false,
+        "files": []
+      },
+      {
+        "method": "POST",
+        "path": "/media/uploads",
+        "module": "media",
+        "capability": "lostFound.log",
+        "tested": false,
+        "files": []
+      },
+      {
+        "method": "GET",
+        "path": "/media/url",
+        "module": "media",
+        "capability": "own.read",
+        "tested": false,
+        "files": []
+      },
+      {
+        "method": "POST",
+        "path": "/fallback/windows",
+        "module": "fallback",
+        "capability": "fallback.declare",
+        "tested": true,
+        "files": ["fallback.test.ts", "report.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/fallback/windows/:id/close",
+        "module": "fallback",
+        "capability": "fallback.declare",
+        "tested": true,
+        "files": ["fallback.test.ts", "report.test.ts"]
+      },
+      {
+        "method": "GET",
+        "path": "/fallback/windows",
+        "module": "fallback",
+        "capability": "dashboard.station.read",
+        "tested": true,
+        "files": ["fallback.test.ts", "report.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/fallback/imports/registrations",
+        "module": "fallback",
+        "capability": "fallback.import",
+        "tested": true,
+        "files": ["fallback.test.ts"]
+      },
+      {
+        "method": "POST",
+        "path": "/fallback/imports/footfall",
+        "module": "fallback",
+        "capability": "fallback.import",
+        "tested": true,
+        "files": ["fallback.test.ts", "report.test.ts"]
+      }
+    ]
+  },
+  "serverFunctions": {
+    "unexecuted": 81,
+    "list": [
+      {
+        "file": "server/src/index.ts",
+        "line": 15,
+        "name": "main"
+      },
+      {
+        "file": "server/src/jobs/scheduler.ts",
+        "line": 37,
+        "name": "startScheduledJobs"
+      },
+      {
+        "file": "server/src/jobs/scheduler.ts",
+        "line": 69,
+        "name": "stop"
+      },
+      {
+        "file": "server/src/jobs/scheduler.ts",
+        "line": 79,
+        "name": "schedule"
+      },
+      {
+        "file": "server/src/lib/errors.ts",
+        "line": 106,
+        "name": "constructor_12"
+      },
+      {
+        "file": "server/src/lib/errors.ts",
+        "line": 112,
+        "name": "constructor_13"
+      },
+      {
+        "file": "server/src/lib/logger.ts",
+        "line": 46,
+        "name": "requestLogger"
+      },
+      {
+        "file": "server/src/lib/settings.ts",
+        "line": 203,
+        "name": "clearSettings"
+      },
+      {
+        "file": "server/src/lib/time.ts",
+        "line": 105,
+        "name": "singaporeHourStart"
+      },
+      {
+        "file": "server/src/middleware/errorHandler.ts",
+        "line": 78,
+        "name": "notFoundHandler"
+      },
+      {
+        "file": "server/src/middleware/errorHandler.ts",
+        "line": 93,
+        "name": "describeCause"
+      },
+      {
+        "file": "server/src/middleware/idempotency.ts",
+        "line": 212,
+        "name": "pruneIdempotencyRecords"
+      },
+      {
+        "file": "server/src/middleware/rbac.ts",
+        "line": 44,
+        "name": "requireMinimumRole"
+      },
+      {
+        "file": "server/src/middleware/auth/cognitoProvider.ts",
+        "line": 17,
+        "name": "createCognitoAuthProvider"
+      },
+      {
+        "file": "server/src/middleware/auth/cognitoProvider.ts",
+        "line": 35,
+        "name": "verify"
+      },
+      {
+        "file": "server/src/middleware/auth/cognitoProvider.ts",
+        "line": 69,
+        "name": "extractGroups"
+      },
+      {
+        "file": "server/src/middleware/auth/index.ts",
+        "line": 98,
+        "name": "invalidateSessionCache"
+      },
+      {
+        "file": "server/src/modules/admin/service.ts",
+        "line": 165,
+        "name": "getVolunteer"
+      },
+      {
+        "file": "server/src/modules/admin/service.ts",
+        "line": 444,
+        "name": "createAssignment"
+      },
+      {
+        "file": "server/src/modules/admin/service.ts",
+        "line": 577,
+        "name": "updateStation"
+      },
+      {
+        "file": "server/src/modules/admin/service.ts",
+        "line": 626,
+        "name": "listEventDays"
+      },
+      {
+        "file": "server/src/modules/admin/service.ts",
+        "line": 694,
+        "name": "updateEventDay"
+      },
+      {
+        "file": "server/src/modules/admin/service.ts",
+        "line": 772,
+        "name": "updateGiftType"
+      },
+      {
+        "file": "server/src/modules/admin/service.ts",
+        "line": 820,
+        "name": "assertCanActOn"
+      },
+      {
+        "file": "server/src/modules/announcement/service.ts",
+        "line": 184,
+        "name": "pushToDevices"
+      },
+      {
+        "file": "server/src/modules/attendance/service.ts",
+        "line": 32,
+        "name": "context"
+      },
+      {
+        "file": "server/src/modules/attendance/service.ts",
+        "line": 56,
+        "name": "attendanceStatus"
+      },
+      {
+        "file": "server/src/modules/auth/router.ts",
+        "line": 160,
+        "name": "oauthCookieOptions"
+      },
+      {
+        "file": "server/src/modules/auth/router.ts",
+        "line": 170,
+        "name": "base64url"
+      },
+      {
+        "file": "server/src/modules/auth/router.ts",
+        "line": 371,
+        "name": "accessTokenTtlSeconds"
+      },
+      {
+        "file": "server/src/modules/auth/router.ts",
+        "line": 376,
+        "name": "refreshSessionDays"
+      },
+      {
+        "file": "server/src/modules/auth/service.ts",
+        "line": 364,
+        "name": "pruneRefreshSessions"
+      },
+      {
+        "file": "server/src/modules/dashboard/repo.ts",
+        "line": 30,
+        "name": "footfallSince"
+      },
+      {
+        "file": "server/src/modules/footfall/repo.ts",
+        "line": 33,
+        "name": "findTickById"
+      },
+      {
+        "file": "server/src/modules/footfall/repo.ts",
+        "line": 37,
+        "name": "voidTick"
+      },
+      {
+        "file": "server/src/modules/footfall/service.ts",
+        "line": 158,
+        "name": "voidTickById"
+      },
+      {
+        "file": "server/src/modules/gift/repo.ts",
+        "line": 123,
+        "name": "summariseRedemptions"
+      },
+      {
+        "file": "server/src/modules/gift/service.ts",
+        "line": 200,
+        "name": "summariseGifts"
+      },
+      {
+        "file": "server/src/modules/identity/provider.ts",
+        "line": 62,
+        "name": "createCognitoIdentityProvider"
+      },
+      {
+        "file": "server/src/modules/identity/provider.ts",
+        "line": 68,
+        "name": "ensureUser"
+      },
+      {
+        "file": "server/src/modules/identity/provider.ts",
+        "line": 117,
+        "name": "disableUser"
+      },
+      {
+        "file": "server/src/modules/identity/provider.ts",
+        "line": 121,
+        "name": "enableUser"
+      },
+      {
+        "file": "server/src/modules/incident/repo.ts",
+        "line": 60,
+        "name": "findIncidentById"
+      },
+      {
+        "file": "server/src/modules/incident/repo.ts",
+        "line": 74,
+        "name": "listIncidents"
+      },
+      {
+        "file": "server/src/modules/incident/repo.ts",
+        "line": 99,
+        "name": "addFollowUp"
+      },
+      {
+        "file": "server/src/modules/incident/repo.ts",
+        "line": 107,
+        "name": "updateIncidentStatus"
+      },
+      {
+        "file": "server/src/modules/incident/service.ts",
+        "line": 84,
+        "name": "getIncident"
+      },
+      {
+        "file": "server/src/modules/incident/service.ts",
+        "line": 90,
+        "name": "listIncidentRecords"
+      },
+      {
+        "file": "server/src/modules/incident/service.ts",
+        "line": 109,
+        "name": "appendFollowUp"
+      },
+      {
+        "file": "server/src/modules/incident/service.ts",
+        "line": 133,
+        "name": "changeIncidentStatus"
+      },
+      {
+        "file": "server/src/modules/lostFound/service.ts",
+        "line": 39,
+        "name": "toRecord"
+      },
+      {
+        "file": "server/src/modules/lostFound/service.ts",
+        "line": 70,
+        "name": "logItem"
+      },
+      {
+        "file": "server/src/modules/lostFound/service.ts",
+        "line": 99,
+        "name": "listItems"
+      },
+      {
+        "file": "server/src/modules/lostFound/service.ts",
+        "line": 120,
+        "name": "claimItem"
+      },
+      {
+        "file": "server/src/modules/lostFound/service.ts",
+        "line": 164,
+        "name": "markUnclaimedAtClose"
+      },
+      {
+        "file": "server/src/modules/me/repo.ts",
+        "line": 45,
+        "name": "setAssignmentCheckIn"
+      },
+      {
+        "file": "server/src/modules/me/repo.ts",
+        "line": 53,
+        "name": "setAssignmentCheckOut"
+      },
+      {
+        "file": "server/src/modules/me/service.ts",
+        "line": 137,
+        "name": "checkOut"
+      },
+      {
+        "file": "server/src/modules/media/service.ts",
+        "line": 47,
+        "name": "mediaEnabled"
+      },
+      {
+        "file": "server/src/modules/media/service.ts",
+        "line": 51,
+        "name": "requireClient"
+      },
+      {
+        "file": "server/src/modules/media/service.ts",
+        "line": 83,
+        "name": "buildKey"
+      },
+      {
+        "file": "server/src/modules/media/service.ts",
+        "line": 92,
+        "name": "createUpload"
+      },
+      {
+        "file": "server/src/modules/media/service.ts",
+        "line": 134,
+        "name": "readUrl"
+      },
+      {
+        "file": "server/src/modules/missionCard/repo.ts",
+        "line": 56,
+        "name": "findCardById"
+      },
+      {
+        "file": "server/src/modules/missionCard/service.ts",
+        "line": 430,
+        "name": "toRecord"
+      },
+      {
+        "file": "server/src/modules/notification/service.ts",
+        "line": 57,
+        "name": "pushEnabled"
+      },
+      {
+        "file": "server/src/modules/notification/service.ts",
+        "line": 61,
+        "name": "pushPublicKey"
+      },
+      {
+        "file": "server/src/modules/notification/service.ts",
+        "line": 257,
+        "name": "subscribeDevice"
+      },
+      {
+        "file": "server/src/modules/notification/service.ts",
+        "line": 282,
+        "name": "unsubscribeDevice"
+      },
+      {
+        "file": "server/src/modules/registration/repo.ts",
+        "line": 120,
+        "name": "groupByTimeBucket"
+      },
+      {
+        "file": "server/src/modules/roster/repo.ts",
+        "line": 89,
+        "name": "toAssignmentRecord"
+      },
+      {
+        "file": "server/src/modules/roster/repo.ts",
+        "line": 109,
+        "name": "listAssignmentsForStation"
+      },
+      {
+        "file": "server/src/modules/roster/repo.ts",
+        "line": 131,
+        "name": "upsertAssignment"
+      },
+      {
+        "file": "server/src/modules/roster/repo.ts",
+        "line": 158,
+        "name": "findEventDayByDate"
+      },
+      {
+        "file": "server/src/modules/roster/repo.ts",
+        "line": 165,
+        "name": "findStationByCodeTx"
+      },
+      {
+        "file": "server/src/modules/roster/service.ts",
+        "line": 272,
+        "name": "getStationRoster"
+      },
+      {
+        "file": "server/src/modules/shift/repo.ts",
+        "line": 54,
+        "name": "listSwaps"
+      },
+      {
+        "file": "server/src/modules/shift/service.ts",
+        "line": 182,
+        "name": "listMySwaps"
+      },
+      {
+        "file": "server/src/modules/shift/service.ts",
+        "line": 186,
+        "name": "listPendingSwaps"
+      },
+      {
+        "file": "server/src/modules/station/repo.ts",
+        "line": 35,
+        "name": "findStationByCode"
+      },
+      {
+        "file": "server/src/modules/station/service.ts",
+        "line": 6,
+        "name": "getActiveStations"
+      }
+    ]
+  },
+  "unitTestFiles": [
+    "tests/unit/attendance.test.ts",
+    "tests/unit/capabilities.test.ts",
+    "tests/unit/noPii.test.ts",
+    "tests/unit/settings.test.ts",
+    "tests/unit/shortCode.test.ts",
+    "tests/unit/time.test.ts"
+  ],
+  "screens": {
+    "total": 29,
+    "withoutE2e": 17,
+    "list": [
+      {
+        "route": "/",
+        "e2e": []
+      },
+      {
+        "route": "/admin/settings",
+        "e2e": ["admin.spec.ts"]
+      },
+      {
+        "route": "/admin/users",
+        "e2e": ["admin.spec.ts"]
+      },
+      {
+        "route": "/attendance",
+        "e2e": ["attendance.spec.ts"]
+      },
+      {
+        "route": "/brief",
+        "e2e": ["navigation.spec.ts"]
+      },
+      {
+        "route": "/capture/footfall",
+        "e2e": ["a11y.spec.ts", "capture.spec.ts"]
+      },
+      {
+        "route": "/capture/redeem",
+        "e2e": []
+      },
+      {
+        "route": "/capture/registration",
+        "e2e": ["a11y.spec.ts", "capture.spec.ts"]
+      },
+      {
+        "route": "/capture/registration/group",
+        "e2e": []
+      },
+      {
+        "route": "/capture/stamp",
+        "e2e": []
+      },
+      {
+        "route": "/chief",
+        "e2e": []
+      },
+      {
+        "route": "/chief/fallback",
+        "e2e": []
+      },
+      {
+        "route": "/chief/imports",
+        "e2e": []
+      },
+      {
+        "route": "/guide",
+        "e2e": ["navigation.spec.ts"]
+      },
+      {
+        "route": "/home",
+        "e2e": [
+          "a11y.spec.ts",
+          "admin.spec.ts",
+          "attendance.spec.ts",
+          "capture.spec.ts",
+          "navigation.spec.ts"
+        ]
+      },
+      {
+        "route": "/ic",
+        "e2e": []
+      },
+      {
+        "route": "/inbox",
+        "e2e": []
+      },
+      {
+        "route": "/journey",
+        "e2e": []
+      },
+      {
+        "route": "/map",
+        "e2e": []
+      },
+      {
+        "route": "/operations",
+        "e2e": ["navigation.spec.ts"]
+      },
+      {
+        "route": "/reports",
+        "e2e": []
+      },
+      {
+        "route": "/safety",
+        "e2e": ["capture.spec.ts", "navigation.spec.ts"]
+      },
+      {
+        "route": "/safety/incident/new",
+        "e2e": []
+      },
+      {
+        "route": "/safety/lost-found",
+        "e2e": []
+      },
+      {
+        "route": "/safety/lost-found/new",
+        "e2e": []
+      },
+      {
+        "route": "/safety/lost-person/new",
+        "e2e": ["capture.spec.ts"]
+      },
+      {
+        "route": "/shift",
+        "e2e": []
+      },
+      {
+        "route": "/sign-in",
+        "e2e": ["a11y.spec.ts", "admin.spec.ts", "capture.spec.ts"]
+      },
+      {
+        "route": "/tv",
+        "e2e": []
+      }
+    ]
+  }
+}
