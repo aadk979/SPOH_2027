@@ -1,0 +1,1965 @@
+{
+  "schemaVersion": 1,
+  "programme": "SPOH platform remediation",
+  "repository": "aadk979/SPOH_2027",
+  "workingBranch": "claude/inspiring-ritchie-203bp3",
+  "baseline": {
+    "commit": "d2497b6",
+    "auditBranchCommit": "319d06d",
+    "measuredAt": "2026-09-25",
+    "file": "baseline.md"
+  },
+  "createdAt": "2026-09-25T11:48:49.640Z",
+  "updatedAt": "2026-09-25T11:49:40.086Z",
+  "current": {
+    "phase": null,
+    "step": null
+  },
+  "gates": [
+    {
+      "id": "G0",
+      "title": "Facts established: baseline and audits",
+      "signoff": false,
+      "status": "pending",
+      "passedAt": null,
+      "note": null
+    },
+    {
+      "id": "G1",
+      "title": "Design signed off by the owner",
+      "signoff": true,
+      "status": "pending",
+      "passedAt": null,
+      "note": null
+    },
+    {
+      "id": "G2",
+      "title": "Clean architecture, identical behaviour",
+      "signoff": false,
+      "status": "pending",
+      "passedAt": null,
+      "note": null
+    },
+    {
+      "id": "G3",
+      "title": "Platform core on staging",
+      "signoff": false,
+      "status": "pending",
+      "passedAt": null,
+      "note": null
+    },
+    {
+      "id": "G4",
+      "title": "Product complete and interlinked",
+      "signoff": false,
+      "status": "pending",
+      "passedAt": null,
+      "note": null
+    },
+    {
+      "id": "G5",
+      "title": "Production ready",
+      "signoff": false,
+      "status": "pending",
+      "passedAt": null,
+      "note": null
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D-01",
+      "title": "Go-live date and release strategy",
+      "owner": "you",
+      "blocks": ["P05", "P16"],
+      "status": "open",
+      "answer": null,
+      "answeredAt": null
+    },
+    {
+      "id": "D-02",
+      "title": "Reuse model (tenancy)",
+      "owner": "you",
+      "blocks": ["P05", "P09"],
+      "status": "open",
+      "answer": null,
+      "answeredAt": null
+    },
+    {
+      "id": "D-03",
+      "title": "How flexible roles are",
+      "owner": "you",
+      "blocks": ["P05", "P11"],
+      "status": "open",
+      "answer": null,
+      "answeredAt": null
+    },
+    {
+      "id": "D-04",
+      "title": "Product invariants",
+      "owner": "you",
+      "blocks": ["P05", "P09"],
+      "status": "open",
+      "answer": null,
+      "answeredAt": null
+    },
+    {
+      "id": "D-05",
+      "title": "Which branch is the baseline",
+      "owner": "you",
+      "blocks": ["P00.2"],
+      "status": "open",
+      "answer": null,
+      "answeredAt": null
+    },
+    {
+      "id": "D-06",
+      "title": "How Verified Permissions is evaluated",
+      "owner": "design (P05)",
+      "blocks": ["P11"],
+      "status": "open",
+      "answer": null,
+      "answeredAt": null
+    },
+    {
+      "id": "D-07",
+      "title": "Compute and hosting",
+      "owner": "you (cost), design (shape)",
+      "blocks": ["P08"],
+      "status": "open",
+      "answer": null,
+      "answeredAt": null
+    },
+    {
+      "id": "D-08",
+      "title": "Domain and email",
+      "owner": "you",
+      "blocks": ["P08.5", "P12.2"],
+      "status": "open",
+      "answer": null,
+      "answeredAt": null
+    },
+    {
+      "id": "D-09",
+      "title": "Scheduler engine",
+      "owner": "design (P05)",
+      "blocks": ["P10"],
+      "status": "open",
+      "answer": null,
+      "answeredAt": null
+    },
+    {
+      "id": "D-10",
+      "title": "AWS budget and environments",
+      "owner": "you",
+      "blocks": ["P05", "P08"],
+      "status": "open",
+      "answer": null,
+      "answeredAt": null
+    },
+    {
+      "id": "D-11",
+      "title": "Branch and review workflow",
+      "owner": "you",
+      "blocks": ["P00.2"],
+      "status": "open",
+      "answer": null,
+      "answeredAt": null
+    },
+    {
+      "id": "D-12",
+      "title": "Existing data",
+      "owner": "you",
+      "blocks": ["P09.4"],
+      "status": "open",
+      "answer": null,
+      "answeredAt": null
+    },
+    {
+      "id": "D-13",
+      "title": "Access for testing",
+      "owner": "you",
+      "blocks": ["P00.8", "P00.9", "P04.7"],
+      "status": "open",
+      "answer": null,
+      "answeredAt": null
+    },
+    {
+      "id": "D-14",
+      "title": "Shared state for rate limits and caches",
+      "owner": "design (P05)",
+      "blocks": ["P10.3", "P15.2"],
+      "status": "open",
+      "answer": null,
+      "answeredAt": null
+    }
+  ],
+  "phases": [
+    {
+      "id": "P00",
+      "title": "Baseline, tooling and branch reconciliation",
+      "file": "phases/P00-baseline.md",
+      "gate": "G0",
+      "dependsOn": [],
+      "decisions": ["D-05", "D-11", "D-13"],
+      "changesBehaviour": "No",
+      "size": "M",
+      "steps": [
+        {
+          "id": "P00.1",
+          "title": "Reproducible environment",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P00.2",
+          "title": "Reconcile branches (needs D-05)",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P00.3",
+          "title": "Safety-net tag (after P00.2)",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P00.4",
+          "title": "Green lint baseline (confirm with owner)",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P00.5",
+          "title": "Full baseline run",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P00.6",
+          "title": "Metrics snapshot",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P00.7",
+          "title": "Architecture guards in report-only mode",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P00.8",
+          "title": "Read-only AWS inventory (needs D-13)",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P00.9",
+          "title": "Staging smoke (needs D-13)",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        }
+      ],
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "P01",
+      "title": "Audit A: hardcoding and configuration inventory",
+      "file": "phases/P01-audit-hardcoding.md",
+      "gate": "G0",
+      "dependsOn": ["P00"],
+      "decisions": ["D-02", "D-04"],
+      "changesBehaviour": "No",
+      "size": "M",
+      "steps": [
+        {
+          "id": "P01.1",
+          "title": "Automated sweep",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P01.2",
+          "title": "Classify every hit",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P01.3",
+          "title": "Enum audit",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P01.4",
+          "title": "Env audit",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P01.5",
+          "title": "Runtime settings audit",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P01.6",
+          "title": "Content audit",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P01.7",
+          "title": "Time and timezone audit",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P01.8",
+          "title": "Summary and hand-off",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        }
+      ],
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "P02",
+      "title": "Audit B: admin and role journeys",
+      "file": "phases/P02-audit-journeys.md",
+      "gate": "G0",
+      "dependsOn": ["P00"],
+      "decisions": [],
+      "changesBehaviour": "No",
+      "size": "L",
+      "steps": [
+        {
+          "id": "P02.1",
+          "title": "Journey harness",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P02.2",
+          "title": "Journey 1: set up a brand-new event from nothing (Admin)",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P02.3",
+          "title": "Journey 2: event day as Chief and Deputy",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P02.4",
+          "title": "Journey 3: IC shift",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P02.5",
+          "title": "Journey 4: volunteer shift",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P02.6",
+          "title": "Journey 5: Lead",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P02.7",
+          "title": "Journey 6: after the event and the next event",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P02.8",
+          "title": "Interlinking matrix",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P02.9",
+          "title": "Permission experience",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P02.10",
+          "title": "Rank and write up",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        }
+      ],
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "P03",
+      "title": "Audit C: code quality, architecture and bugs",
+      "file": "phases/P03-audit-code.md",
+      "gate": "G0",
+      "dependsOn": ["P00"],
+      "decisions": [],
+      "changesBehaviour": "No",
+      "size": "L",
+      "steps": [
+        {
+          "id": "P03.1",
+          "title": "Module map and dependency graph",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P03.2",
+          "title": "Function-level refactor backlog",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P03.3",
+          "title": "Duplication and consistency",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P03.4",
+          "title": "Correctness review per module",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P03.5",
+          "title": "Multi-instance correctness",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P03.6",
+          "title": "Test gap analysis",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P03.7",
+          "title": "Client review",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P03.8",
+          "title": "Shared package review",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P03.9",
+          "title": "Audit-branch code review",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P03.10",
+          "title": "Write up",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        }
+      ],
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "P04",
+      "title": "Audit D: security and AWS production readiness",
+      "file": "phases/P04-audit-security-aws.md",
+      "gate": "G0",
+      "dependsOn": ["P00"],
+      "decisions": ["D-13"],
+      "changesBehaviour": "No",
+      "size": "L",
+      "steps": [
+        {
+          "id": "P04.1",
+          "title": "Threat model",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P04.2",
+          "title": "Authentication and sessions",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P04.3",
+          "title": "Authorization",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P04.4",
+          "title": "Input, output and transport",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P04.5",
+          "title": "Secrets and configuration",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P04.6",
+          "title": "Data protection",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P04.7",
+          "title": "AWS account review (read-only)",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P04.8",
+          "title": "Operational readiness",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P04.9",
+          "title": "Dependencies",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P04.10",
+          "title": "Write up",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        }
+      ],
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "P05",
+      "title": "Target design and sign-off",
+      "file": "phases/P05-design-signoff.md",
+      "gate": "G1",
+      "dependsOn": ["P01", "P02", "P03", "P04"],
+      "decisions": [
+        "D-01",
+        "D-02",
+        "D-03",
+        "D-04",
+        "D-06",
+        "D-07",
+        "D-08",
+        "D-09",
+        "D-10",
+        "D-12",
+        "D-14"
+      ],
+      "changesBehaviour": "No",
+      "size": "M",
+      "steps": [
+        {
+          "id": "P05.1",
+          "title": "Consolidated backlog",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P05.2",
+          "title": "ADR-001 Tenancy, event model and API scoping (D-02)",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P05.3",
+          "title": "ADR-002 Configurable taxonomy (D-04)",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P05.4",
+          "title": "ADR-003 Configuration model (D-14)",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P05.5",
+          "title": "ADR-004 Event lifecycle and scheduling (D-09)",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P05.6",
+          "title": "ADR-005 Authorization on Verified Permissions (D-03, D-06)",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P05.7",
+          "title": "ADR-006 Identity (Cognito)",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P05.8",
+          "title": "ADR-007 Code architecture",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P05.9",
+          "title": "ADR-008 AWS topology, environments and cost (D-07, D-08, D-10)",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P05.10",
+          "title": "ADR-009 Migration and rollout (D-01, D-12)",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P05.11",
+          "title": "Owner review and sign-off",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        }
+      ],
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "P06",
+      "title": "Server modular refactor (no behaviour change)",
+      "file": "phases/P06-server-refactor.md",
+      "gate": "G2",
+      "dependsOn": ["P05"],
+      "decisions": [],
+      "changesBehaviour": "No, pure refactor",
+      "size": "XL",
+      "steps": [
+        {
+          "id": "P06.1",
+          "title": "Characterisation safety net",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P06.2",
+          "title": "Platform layer",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P06.3",
+          "title": "Reference module: `station`",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P06.4",
+          "title": "Dissolve `admin` into domain modules",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P06.5",
+          "title": "Capture modules",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P06.6",
+          "title": "Safety modules",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P06.7",
+          "title": "People and auth modules",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P06.8",
+          "title": "Operations modules",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P06.9",
+          "title": "Composition root and config",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P06.10",
+          "title": "Make the guards blocking",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P06.11",
+          "title": "Verify and report",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        }
+      ],
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "P07",
+      "title": "Client and shared-package refactor (no behaviour change)",
+      "file": "phases/P07-client-refactor.md",
+      "gate": "G2",
+      "dependsOn": ["P05"],
+      "decisions": [],
+      "changesBehaviour": "No, pure refactor",
+      "size": "XL",
+      "steps": [
+        {
+          "id": "P07.1",
+          "title": "Safety net",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P07.2",
+          "title": "Shared layer",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P07.3",
+          "title": "Feature API and query layer",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P07.4",
+          "title": "Thin routes",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P07.5",
+          "title": "Break up long components",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P07.6",
+          "title": "One form pattern",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P07.7",
+          "title": "Navigation registry",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P07.8",
+          "title": "Shared package reorganisation",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P07.9",
+          "title": "Make the guards blocking",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P07.10",
+          "title": "Verify and report",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        }
+      ],
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "P08",
+      "title": "AWS foundation and delivery pipeline",
+      "file": "phases/P08-aws-foundation.md",
+      "gate": "G3",
+      "dependsOn": ["P05"],
+      "decisions": ["D-07", "D-08", "D-10", "D-11"],
+      "changesBehaviour": "Infra only",
+      "size": "L",
+      "steps": [
+        {
+          "id": "P08.1",
+          "title": "CDK app skeleton",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P08.2",
+          "title": "Bootstrap and OIDC",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P08.3",
+          "title": "Network and database",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P08.4",
+          "title": "Containers and compute",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P08.5",
+          "title": "DNS, TLS and edge (needs D-08)",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P08.6",
+          "title": "Secrets and configuration",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P08.7",
+          "title": "Storage",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P08.8",
+          "title": "Observability",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P08.9",
+          "title": "CI/CD",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P08.10",
+          "title": "Staging live and smoke",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P08.11",
+          "title": "Report",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        }
+      ],
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "P09",
+      "title": "Event model and configurable taxonomy",
+      "file": "phases/P09-event-model.md",
+      "gate": "G3",
+      "dependsOn": ["P06", "P07"],
+      "decisions": ["D-02", "D-04", "D-12"],
+      "changesBehaviour": "Yes",
+      "size": "XL",
+      "steps": [
+        {
+          "id": "P09.1",
+          "title": "Expand: Event and scoping columns",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P09.2",
+          "title": "Expand: taxonomy tables",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P09.3",
+          "title": "Expand: Person and EventMembership",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P09.4",
+          "title": "Migrate existing data into Event #1 (needs D-12)",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P09.5",
+          "title": "Switch reads and writes to the new model",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P09.6",
+          "title": "Event timezone everywhere",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P09.7",
+          "title": "Event-scoped API",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P09.8",
+          "title": "Client event context",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P09.9",
+          "title": "Event cloning",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P09.10",
+          "title": "Contract: remove the enums and legacy columns",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P09.11",
+          "title": "Seed and no-hardcoding guard",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P09.12",
+          "title": "Reports and dashboards on taxonomy",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P09.13",
+          "title": "Verify and report",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        }
+      ],
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "P10",
+      "title": "Live configuration, event lifecycle and scheduling",
+      "file": "phases/P10-config-scheduling.md",
+      "gate": "G3",
+      "dependsOn": ["P09"],
+      "decisions": ["D-09", "D-14"],
+      "changesBehaviour": "Yes",
+      "size": "L",
+      "steps": [
+        {
+          "id": "P10.1",
+          "title": "Settings registry",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P10.2",
+          "title": "Storage, resolution and history",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P10.3",
+          "title": "Cache bus (fixes PF-01)",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P10.4",
+          "title": "Move operational config out of env",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P10.5",
+          "title": "Event lifecycle",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P10.6",
+          "title": "Scheduler engine (D-09)",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P10.7",
+          "title": "Schedulable actions",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P10.8",
+          "title": "Admin UI: settings, schedule and lifecycle",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P10.9",
+          "title": "Verify and report",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        }
+      ],
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "P11",
+      "title": "Authorization on Amazon Verified Permissions (PBAC)",
+      "file": "phases/P11-authorization-avp.md",
+      "gate": "G3",
+      "dependsOn": ["P09", "P10"],
+      "decisions": ["D-03", "D-06"],
+      "changesBehaviour": "Yes",
+      "size": "XL",
+      "steps": [
+        {
+          "id": "P11.1",
+          "title": "`packages/access-policies`",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P11.2",
+          "title": "Policies",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P11.3",
+          "title": "Policy test suite",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P11.4",
+          "title": "Authorizer abstraction",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P11.5",
+          "title": "Policy enforcement points",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P11.6",
+          "title": "AVP via CDK",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P11.7",
+          "title": "Admin permissions UI",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P11.8",
+          "title": "Client affordances from policy",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P11.9",
+          "title": "Performance and failure behaviour",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P11.10",
+          "title": "Verify and report",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        }
+      ],
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "P12",
+      "title": "Identity: Cognito hardening and membership lifecycle",
+      "file": "phases/P12-identity-cognito.md",
+      "gate": "G3",
+      "dependsOn": ["P09", "P11"],
+      "decisions": ["D-08"],
+      "changesBehaviour": "Yes",
+      "size": "L",
+      "steps": [
+        {
+          "id": "P12.1",
+          "title": "Pool configuration as code",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P12.2",
+          "title": "SES for invites (needs D-08)",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P12.3",
+          "title": "Membership lifecycle",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P12.4",
+          "title": "Provisioning UX",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P12.5",
+          "title": "Sessions and devices",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P12.6",
+          "title": "Cognito groups",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P12.7",
+          "title": "Verify and report",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        }
+      ],
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "P13",
+      "title": "Admin and event setup experience",
+      "file": "phases/P13-admin-setup.md",
+      "gate": "G4",
+      "dependsOn": ["P10", "P11", "P12"],
+      "decisions": [],
+      "changesBehaviour": "Yes",
+      "size": "XL",
+      "steps": [
+        {
+          "id": "P13.1",
+          "title": "Information architecture",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P13.2",
+          "title": "Create and clone wizard",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P13.3",
+          "title": "Setup sections",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P13.4",
+          "title": "Offline content delivery",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P13.5",
+          "title": "People and assignments",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P13.6",
+          "title": "Go-live readiness",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P13.7",
+          "title": "Screens for every API-only feature",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P13.8",
+          "title": "After the event",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P13.9",
+          "title": "End-to-end journeys",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P13.10",
+          "title": "Report",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        }
+      ],
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "P14",
+      "title": "Interlinking and UX polish",
+      "file": "phases/P14-interlinking-polish.md",
+      "gate": "G4",
+      "dependsOn": ["P13"],
+      "decisions": [],
+      "changesBehaviour": "Yes",
+      "size": "L",
+      "steps": [
+        {
+          "id": "P14.1",
+          "title": "Entity pages",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P14.2",
+          "title": "Dashboard drill-downs",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P14.3",
+          "title": "Search and quick actions",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P14.4",
+          "title": "Consistent states",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P14.5",
+          "title": "Notification centre",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P14.6",
+          "title": "Event branding",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P14.7",
+          "title": "Accessibility",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P14.8",
+          "title": "Copy and help",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P14.9",
+          "title": "Visual regression",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P14.10",
+          "title": "Report",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        }
+      ],
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "P15",
+      "title": "Security hardening and production environment",
+      "file": "phases/P15-security-prod.md",
+      "gate": "G5",
+      "dependsOn": ["P14"],
+      "decisions": ["D-07", "D-08", "D-14"],
+      "changesBehaviour": "Yes",
+      "size": "L",
+      "steps": [
+        {
+          "id": "P15.1",
+          "title": "Close High and Blocker findings",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P15.2",
+          "title": "Shared rate limiting (fixes PF-02)",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P15.3",
+          "title": "Headers, CSP, CORS and cookies",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P15.4",
+          "title": "Isolation and IDOR suite",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P15.5",
+          "title": "Authorization regression and monitoring",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P15.6",
+          "title": "Secrets and credentials",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P15.7",
+          "title": "Data protection and retention",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P15.8",
+          "title": "Production stand-up and cutover",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P15.9",
+          "title": "Security review",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P15.10",
+          "title": "Report",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        }
+      ],
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "P16",
+      "title": "Verification, load, dry-run readiness and handover",
+      "file": "phases/P16-verification.md",
+      "gate": "G5",
+      "dependsOn": ["P15"],
+      "decisions": ["D-01"],
+      "changesBehaviour": "No",
+      "size": "M",
+      "steps": [
+        {
+          "id": "P16.1",
+          "title": "Full regression on staging and prod",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P16.2",
+          "title": "Load test",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P16.3",
+          "title": "Resilience drills",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P16.4",
+          "title": "Restore rehearsal",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P16.5",
+          "title": "Documentation",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P16.6",
+          "title": "Dry-run readiness and go/no-go",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P16.7",
+          "title": "Close the programme",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        }
+      ],
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null
+    }
+  ],
+  "sessionLog": [
+    {
+      "at": "2026-09-25T11:49:40.086Z",
+      "text": "Planning session: programme written (17 phases, 14 decisions), baseline measured on main (lint red only from test/do-inference.mjs; 233 unit, 288 integration, 19 client tests green). Waiting on owner decisions; P00 can start with P00.1/P00.4-P00.7."
+    }
+  ]
+}
