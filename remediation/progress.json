@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T14:33:18.132Z",
+  "updatedAt": "2026-09-25T14:34:52.641Z",
   "current": {
     "phase": "P03",
     "step": "P03.5"
@@ -702,11 +702,16 @@
         {
           "id": "P03.5",
           "title": "Multi-instance correctness",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T14:33:18.132Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T14:34:52.641Z",
+          "commits": ["0fc8049"],
+          "notes": [
+            {
+              "at": "2026-09-25T14:34:52.641Z",
+              "text": "PF-01 and PF-02 confirmed with two-instance repros; F03-030 settings skew, F03-031 purge double summaries"
+            }
+          ]
         },
         {
           "id": "P03.6",
