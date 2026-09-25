@@ -175,4 +175,59 @@ export const journeys = [
       { name: 'TV mode', path: '/tv', settleMs: 1500 },
     ],
   },
+  {
+    id: 'ic-shift',
+    title: 'Journey 3 (P02.4): IC shift (run fixtures.mjs first)',
+    role: ROLE.ic,
+    freeze: 'MORNING',
+    steps: [
+      { name: 'home with an active lost-person alert', path: '/home' },
+      { name: 'operations hub', path: '/operations' },
+      { name: 'IC console', path: '/ic' },
+      {
+        name: 'IC console: Sign-Up Booth',
+        act: async (page) => {
+          await page.getByLabel('Station').selectOption({ label: 'Sign-Up Booth' });
+          await page.waitForTimeout(1000);
+        },
+      },
+      {
+        name: 'approve the swap',
+        act: async (page) => {
+          await page
+            .getByRole('button', { name: /^Approve the swap/ })
+            .first()
+            .click();
+          await page.waitForTimeout(800);
+        },
+      },
+      {
+        name: 'acknowledge the lost-person alert',
+        path: '/home',
+        act: async (page) => {
+          await page
+            .getByRole('button', { name: /^Acknowledge/ })
+            .first()
+            .click();
+          await page.waitForTimeout(800);
+        },
+      },
+      {
+        name: 'resolve the lost-person alert',
+        act: async (page) => {
+          await page
+            .getByRole('button', { name: /^Found/ })
+            .first()
+            .click();
+          await page.waitForTimeout(800);
+        },
+      },
+      { name: 'safety hub: where are incidents?', path: '/safety' },
+      { name: 'guess: /safety/incident', path: '/safety/incident' },
+      { name: 'attendance: issue codes', path: '/attendance' },
+      { name: 'guess: void a registration from capture', path: '/capture/registration' },
+      { name: 'guess: gift stock', path: '/capture/redeem' },
+      { name: 'my shift', path: '/shift' },
+    ],
+  },
 ];

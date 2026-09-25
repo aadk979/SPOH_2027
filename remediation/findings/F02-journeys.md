@@ -230,3 +230,118 @@ lets an admin separate them.
   every role reads it (P03 to root-cause the ordering).
 - **Phase:** P07
 - **Status:** open
+
+---
+
+## Journey 3 — IC shift · P02.4
+
+Journey `ic-shift` (13 screens), clock frozen in the MORNING block. `fixtures.mjs` first raised,
+as the booth volunteer and through the API, a swap request, an incident and a lost-person alert,
+because no volunteer screen can request a swap (PF-09) and the IC needs something to act on.
+
+| Task                         | Result                                                                                                                                                                                                                                                                                                                                | Finding |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| IC console                   | Works once a station is picked (`ic-shift-03…04`). Opens empty every time, even for an IC rostered on one station. "Who is here" lists each person once per block, unlabelled (Ivan IC ×2, Bea Booth ×2), and React warns about duplicate keys (the dev overlay's "4 Issues").                                                        | F02-011 |
+| Per-device anomaly           | "Registrations per device" shows **Chen Chief 17**: the fallback import from Journey 2 is attributed to the Chief as if tapped on a device at this booth (`ic-shift-04`).                                                                                                                                                             | F02-012 |
+| Void a mistaken registration | **No UI** (expected). Only the 10-second undo on the capture screen (`ic-shift-11`); after that, `POST /registrations/:id/void` by API.                                                                                                                                                                                               | F02-013 |
+| Adjust gift stock            | **No UI.** The IC can open Redeem a gift at a booth that gives no gifts (`ic-shift-12`, F01-050) but cannot correct a count; `POST /gifts/:id/adjust` by API.                                                                                                                                                                         | F02-013 |
+| Approve a swap               | Works in one tap (`ic-shift-05`); the assignment moves to the target. But volunteers have no screen to _request_ a swap, so the queue only fills through the API. `SwapStatus.CANCELLED` is never written: nothing can withdraw a request.                                                                                            | F02-014 |
+| Resolve an incident          | **Impossible.** Safety offers "Report an incident" only (`ic-shift-08`); `/safety/incident` is a 404 (`ic-shift-09`). Incidents exist in the UI only as counts on the Chief dashboard. No list, detail, follow-up or status screen. `IncidentStatus.ACKNOWLEDGED` is reachable only by calling `POST /incidents/:id/status` directly. | F02-015 |
+| Resolve a lost-person alert  | Works from the banner on any screen: Acknowledge, then "Found — clear this alert" (`ic-shift-06…07`). The banner stacks one full-width red card per alert above the app bar, so two alerts push the page off a phone screen (`ic-shift-01`).                                                                                          | F02-016 |
+| Issue attendance codes       | **Dead end.** "The root attendance admin has not been configured yet. Contact the event administrator." (`ic-shift-10`). The root is `ATTENDANCE_ROOT_EMAIL` (F01-009), which the dev `.env` leaves commented out, so fixing it needs an env edit and a restart.                                                                      | F02-017 |
+
+### F02-011 — The IC console repeats people per block and forgets the IC's station
+
+- **Severity:** Medium
+- **Type:** confusing · Role: IC
+- **Area:** `client/src/app/ic/page.tsx:69–82` (no default station), `:158` (`key={person.volunteerId}`,
+  no block shown)
+- **Evidence:** `ic-shift-03…04`; console "Encountered two children with the same key" on every
+  load of `/ic` (`reports/P02/journeys/ic-shift.json`).
+- **Impact:** An IC rostered on both blocks sees each person twice with the same "Not arrived", and
+  must pick their own station on every visit. Duplicate keys can make React drop or repeat rows.
+- **Fix:** Default to the IC's current station; group "Who is here" by block; key by assignment.
+- **Phase:** P07 (key), P14.1 (defaults and grouping)
+- **Status:** open
+
+### F02-012 — Imported fallback rows appear as a person's device taps
+
+- **Severity:** Medium
+- **Type:** confusing · Role: IC, Chief
+- **Area:** "Registrations per device" on `app/ic/page.tsx:105`; fallback import records
+  `recordedById` = the importer
+- **Evidence:** `ic-shift-04`: "Chen Chief 17" beside "Bea Booth 12" at Sign-Up Booth. The Chief
+  never tapped at the booth; the 17 rows are the Journey 2 import, dated 2027-01-07 (F02-006).
+- **Impact:** The per-device view exists to spot a device that is mis-tapping; paper counts listed
+  as a person's device make the Chief look like the anomaly.
+- **Fix:** Show imported rows as their own line, labelled with the source, or exclude them.
+- **Phase:** P14.2
+- **Status:** open
+
+### F02-013 — Corrections (void, stock adjust) have no screen
+
+- **Severity:** High
+- **Type:** needs-API/SQL · Role: IC, Chief
+- **Area:** `POST /registrations/:id/void`, `/footfall/ticks/:id/void`, `/gifts/:id/adjust`,
+  `/cards/:code/void|reissue` (PF-09)
+- **Evidence:** `ic-shift-11…12`; no client caller.
+- **Impact:** A mistaken tap noticed after 10 seconds, a miscounted gift box or a spoiled card stays
+  in the event's numbers unless a developer calls the API. The server features (reason, audit,
+  idempotency) are already built.
+- **Fix:** Recent-records list per station with void (reason required); stock adjust on the gift
+  tile; card void and reissue on a card page.
+- **Phase:** P13.7, P14.2
+- **Status:** open
+
+### F02-014 — Volunteers cannot request or withdraw a swap
+
+- **Severity:** Medium
+- **Type:** needs-API/SQL · Role: Volunteer, IC
+- **Area:** `POST /roster/swaps` (no caller); `SwapStatus.CANCELLED` (no writer)
+- **Evidence:** the approval half works (`ic-shift-05`); the request half needed `fixtures.mjs`.
+- **Impact:** Swaps happen over chat and the roster drifts from reality; the IC queue stays empty.
+- **Fix:** "Ask to swap" on each shift card, with withdraw; decide whether CANCELLED is kept.
+- **Phase:** P13.7, P14.3
+- **Status:** open
+
+### F02-015 — Incidents cannot be seen or worked after they are reported
+
+- **Severity:** High
+- **Type:** dead-end · Role: IC, Deputy, Chief
+- **Area:** `GET /incidents`, `POST /incidents/:id/follow-ups`, `POST /incidents/:id/status`
+  (no caller); `app/chief/page.tsx:262,289` (counts only)
+- **Evidence:** `ic-shift-08…09`; the Chief's "2 incidents open" is plain text.
+- **Impact:** An injury reported at the booth is recorded and counted, but nobody can read it,
+  add the follow-up, acknowledge or close it. The open count only grows, so it stops meaning
+  anything by midday.
+- **Fix:** Incident list and detail with follow-ups and status (including ACKNOWLEDGED, or drop it),
+  linked from the dashboard count and from the reporter's station.
+- **Phase:** P13.7, P14.1
+- **Status:** open
+
+### F02-016 — Lost-person alerts stack above the app on phones
+
+- **Severity:** Low
+- **Type:** confusing · Role: all
+- **Area:** `client/src/components/LostPersonBanner.tsx`
+- **Evidence:** `ic-shift-01` (phone): two alerts take the first 380 px, above the app bar.
+- **Impact:** With two or three alerts active the screen a volunteer needs is below the fold. The
+  prominence is right for one alert; it does not scale.
+- **Fix:** One banner with a count and the newest alert, expanding to the list.
+- **Phase:** P14.4
+- **Status:** open
+
+### F02-017 — Attendance is dead until an env var is set and the server restarted
+
+- **Severity:** Medium
+- **Type:** needs-redeploy · Role: IC, all volunteers
+- **Area:** `modules/attendance/service.ts:26,76,178` (`env.ATTENDANCE_ROOT_EMAIL`);
+  `app/attendance/page.tsx:89–92`; inventory item F01-009
+- **Evidence:** `ic-shift-10`: the dev setup (`.env.example`, seed) leaves it unset, so no one can
+  take or verify attendance.
+- **Impact:** The message sends people to "the event administrator", who has no screen to fix it.
+  A new event or a new environment starts with attendance broken.
+- **Fix:** The attendance root becomes an event setting chosen from the roster (F01-009), with a
+  setup checklist item.
+- **Phase:** P10.1, P13.1
+- **Status:** open
