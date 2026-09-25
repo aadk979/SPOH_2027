@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T15:26:55.043Z",
+  "updatedAt": "2026-09-25T15:28:57.426Z",
   "current": {
     "phase": "P04",
-    "step": "P04.1"
+    "step": "P04.2"
   },
   "gates": [
     {
@@ -942,11 +942,18 @@
         {
           "id": "P04.2",
           "title": "Authentication and sessions",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-25T15:27:07.163Z",
+          "completedAt": "2026-09-25T15:28:57.425Z",
+          "commits": [
+            "6e67e81"
+          ],
+          "notes": [
+            {
+              "at": "2026-09-25T15:28:57.426Z",
+              "text": "13 controls verified; F04-001 (Medium), F04-002 (High, to verify), F04-003 (Medium, client repro), F04-023 (High, to verify); F03-009/010, F02-032, PF-01 re-confirmed"
+            }
+          ]
         },
         {
           "id": "P04.3",
