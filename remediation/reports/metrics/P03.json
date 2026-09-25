@@ -1,0 +1,670 @@
+{
+  "generatedAt": "2026-09-25T14:51:24.587Z",
+  "limits": {
+    "functionLines": 50,
+    "fileLines": 300
+  },
+  "totals": {
+    "files": 184,
+    "longFunctions": 97,
+    "longFiles": 18
+  },
+  "longFunctions": [
+    {
+      "file": "client/src/app/reports/page.tsx",
+      "line": 35,
+      "name": "ReportsPage",
+      "lines": 272
+    },
+    {
+      "file": "client/src/app/admin/settings/page.tsx",
+      "line": 151,
+      "name": "AdminSettingsPage",
+      "lines": 237
+    },
+    {
+      "file": "client/src/app/chief/imports/page.tsx",
+      "line": 52,
+      "name": "ImportsPage",
+      "lines": 237
+    },
+    {
+      "file": "client/src/app/attendance/page.tsx",
+      "line": 19,
+      "name": "AttendancePage",
+      "lines": 222
+    },
+    {
+      "file": "client/src/app/capture/registration/group/page.tsx",
+      "line": 35,
+      "name": "GroupRegistrationPage",
+      "lines": 207
+    },
+    {
+      "file": "client/src/app/ic/page.tsx",
+      "line": 35,
+      "name": "IcConsolePage",
+      "lines": 185
+    },
+    {
+      "file": "client/src/app/safety/lost-found/new/page.tsx",
+      "line": 23,
+      "name": "NewLostFoundPage",
+      "lines": 181
+    },
+    {
+      "file": "client/src/app/capture/redeem/page.tsx",
+      "line": 33,
+      "name": "RedeemPage",
+      "lines": 180
+    },
+    {
+      "file": "client/src/app/chief/fallback/page.tsx",
+      "line": 36,
+      "name": "FallbackPage",
+      "lines": 180
+    },
+    {
+      "file": "client/src/app/chief/page.tsx",
+      "line": 62,
+      "name": "DashboardBody",
+      "lines": 180
+    },
+    {
+      "file": "server/src/modules/roster/service.ts",
+      "line": 101,
+      "name": "importRoster",
+      "lines": 159
+    },
+    {
+      "file": "client/src/app/admin/users/page.tsx",
+      "line": 276,
+      "name": "VolunteerEditor",
+      "lines": 147
+    },
+    {
+      "file": "client/src/app/safety/incident/new/page.tsx",
+      "line": 49,
+      "name": "NewIncidentPage",
+      "lines": 144
+    },
+    {
+      "file": "client/src/app/safety/lost-found/page.tsx",
+      "line": 35,
+      "name": "LostFoundPage",
+      "lines": 144
+    },
+    {
+      "file": "client/src/app/safety/lost-person/new/page.tsx",
+      "line": 24,
+      "name": "RaiseLostPersonPage",
+      "lines": 141
+    },
+    {
+      "file": "client/src/app/tv/page.tsx",
+      "line": 25,
+      "name": "TvPage",
+      "lines": 141
+    },
+    {
+      "file": "client/src/app/admin/users/page.tsx",
+      "line": 47,
+      "name": "AdminUsersPage",
+      "lines": 137
+    },
+    {
+      "file": "server/src/modules/report/service.ts",
+      "line": 68,
+      "name": "generateReport",
+      "lines": 128
+    },
+    {
+      "file": "client/src/app/inbox/page.tsx",
+      "line": 127,
+      "name": "Composer",
+      "lines": 123
+    },
+    {
+      "file": "client/src/app/capture/stamp/page.tsx",
+      "line": 27,
+      "name": "StampCapturePage",
+      "lines": 122
+    },
+    {
+      "file": "server/src/modules/gift/service.ts",
+      "line": 48,
+      "name": "redeemGift",
+      "lines": 119
+    },
+    {
+      "file": "client/src/app/capture/registration/page.tsx",
+      "line": 34,
+      "name": "RegistrationCapturePage",
+      "lines": 118
+    },
+    {
+      "file": "client/src/app/shift/page.tsx",
+      "line": 29,
+      "name": "ShiftPage",
+      "lines": 117
+    },
+    {
+      "file": "client/src/features/notification/usePushRegistration.ts",
+      "line": 66,
+      "name": "usePushRegistration",
+      "lines": 116
+    },
+    {
+      "file": "server/src/modules/auth/service.ts",
+      "line": 132,
+      "name": "rotateSession",
+      "lines": 115
+    },
+    {
+      "file": "client/src/app/capture/footfall/page.tsx",
+      "line": 28,
+      "name": "FootfallCapturePage",
+      "lines": 115
+    },
+    {
+      "file": "client/src/components/ShiftOverview.tsx",
+      "line": 23,
+      "name": "ShiftCard",
+      "lines": 113
+    },
+    {
+      "file": "server/src/config/env.ts",
+      "line": 165,
+      "name": "<callback of z .object({ NODE_ENV: z.enum(['dev>",
+      "lines": 112
+    },
+    {
+      "file": "client/src/components/LostPersonBanner.tsx",
+      "line": 35,
+      "name": "LostPersonBanner",
+      "lines": 111
+    },
+    {
+      "file": "client/src/components/ui/Choice.tsx",
+      "line": 34,
+      "name": "ChoiceGroup",
+      "lines": 107
+    },
+    {
+      "file": "client/src/components/CardCodeInput.tsx",
+      "line": 23,
+      "name": "CardCodeInput",
+      "lines": 104
+    },
+    {
+      "file": "client/src/components/AppShell.tsx",
+      "line": 56,
+      "name": "AppShell",
+      "lines": 102
+    },
+    {
+      "file": "server/src/modules/notification/service.ts",
+      "line": 146,
+      "name": "dispatch",
+      "lines": 96
+    },
+    {
+      "file": "client/src/features/attendance/VerifierCode.tsx",
+      "line": 8,
+      "name": "VerifierCode",
+      "lines": 96
+    },
+    {
+      "file": "server/src/modules/roster/service.ts",
+      "line": 136,
+      "name": "apply",
+      "lines": 94
+    },
+    {
+      "file": "client/src/features/media/usePhotoUpload.ts",
+      "line": 46,
+      "name": "usePhotoUpload",
+      "lines": 91
+    },
+    {
+      "file": "server/src/modules/missionCard/service.ts",
+      "line": 125,
+      "name": "stampCard",
+      "lines": 90
+    },
+    {
+      "file": "client/src/components/GlobalNav.tsx",
+      "line": 29,
+      "name": "GlobalNav",
+      "lines": 90
+    },
+    {
+      "file": "server/src/modules/admin/service.ts",
+      "line": 231,
+      "name": "updateVolunteer",
+      "lines": 89
+    },
+    {
+      "file": "server/src/modules/dashboard/service.ts",
+      "line": 198,
+      "name": "getStationDashboard",
+      "lines": 89
+    },
+    {
+      "file": "server/src/modules/gift/service.ts",
+      "line": 56,
+      "name": "<callback of prisma.$transaction>",
+      "lines": 88
+    },
+    {
+      "file": "server/src/modules/attendance/service.ts",
+      "line": 246,
+      "name": "submitAttendance",
+      "lines": 83
+    },
+    {
+      "file": "server/src/modules/missionCard/service.ts",
+      "line": 254,
+      "name": "reissueCard",
+      "lines": 81
+    },
+    {
+      "file": "server/src/modules/report/export.ts",
+      "line": 352,
+      "name": "toCsv",
+      "lines": 80
+    },
+    {
+      "file": "server/src/modules/auth/router.ts",
+      "line": 214,
+      "name": "<callback of authRouter.get>",
+      "lines": 79
+    },
+    {
+      "file": "server/src/modules/dashboard/service.ts",
+      "line": 52,
+      "name": "getLiveDashboard",
+      "lines": 79
+    },
+    {
+      "file": "server/src/modules/registration/service.ts",
+      "line": 100,
+      "name": "recordGroupRegistration",
+      "lines": 79
+    },
+    {
+      "file": "client/src/app/sign-in/page.tsx",
+      "line": 22,
+      "name": "SignInForm",
+      "lines": 79
+    },
+    {
+      "file": "client/src/app/home/page.tsx",
+      "line": 12,
+      "name": "HomePage",
+      "lines": 78
+    },
+    {
+      "file": "server/src/modules/fallback/service.ts",
+      "line": 376,
+      "name": "runImport",
+      "lines": 77
+    },
+    {
+      "file": "server/src/modules/attendance/service.ts",
+      "line": 251,
+      "name": "<callback of prisma.$transaction>",
+      "lines": 75
+    },
+    {
+      "file": "client/src/app/inbox/page.tsx",
+      "line": 43,
+      "name": "InboxPage",
+      "lines": 75
+    },
+    {
+      "file": "server/src/modules/fallback/service.ts",
+      "line": 213,
+      "name": "importRegistrations",
+      "lines": 73
+    },
+    {
+      "file": "client/src/components/LostPersonBanner.tsx",
+      "line": 70,
+      "name": "<callback of alerts.map>",
+      "lines": 73
+    },
+    {
+      "file": "server/src/app.ts",
+      "line": 19,
+      "name": "createApp",
+      "lines": 69
+    },
+    {
+      "file": "client/src/app/chief/page.tsx",
+      "line": 250,
+      "name": "AttentionPanel",
+      "lines": 69
+    },
+    {
+      "file": "client/src/features/capture/useQrScanner.ts",
+      "line": 32,
+      "name": "useQrScanner",
+      "lines": 69
+    },
+    {
+      "file": "server/src/modules/fallback/service.ts",
+      "line": 287,
+      "name": "importFootfall",
+      "lines": 68
+    },
+    {
+      "file": "client/src/app/ic/page.tsx",
+      "line": 222,
+      "name": "SwapQueue",
+      "lines": 67
+    },
+    {
+      "file": "client/src/features/capture/useCapture.ts",
+      "line": 59,
+      "name": "useCapture",
+      "lines": 66
+    },
+    {
+      "file": "server/src/modules/shift/service.ts",
+      "line": 50,
+      "name": "requestSwap",
+      "lines": 65
+    },
+    {
+      "file": "client/src/components/AlertDelivery.tsx",
+      "line": 21,
+      "name": "AlertDelivery",
+      "lines": 65
+    },
+    {
+      "file": "server/src/modules/identity/provider.ts",
+      "line": 62,
+      "name": "createCognitoIdentityProvider",
+      "lines": 64
+    },
+    {
+      "file": "client/src/features/attendance/AttendanceScanner.tsx",
+      "line": 7,
+      "name": "AttendanceScanner",
+      "lines": 64
+    },
+    {
+      "file": "server/src/modules/auth/service.ts",
+      "line": 61,
+      "name": "openSession",
+      "lines": 62
+    },
+    {
+      "file": "server/src/modules/missionCard/service.ts",
+      "line": 145,
+      "name": "<callback of prisma.$transaction>",
+      "lines": 62
+    },
+    {
+      "file": "client/src/components/ui/Choice.tsx",
+      "line": 75,
+      "name": "<callback of options.map>",
+      "lines": 62
+    },
+    {
+      "file": "server/src/modules/missionCard/service.ts",
+      "line": 268,
+      "name": "<callback of prisma.$transaction>",
+      "lines": 60
+    },
+    {
+      "file": "server/src/modules/registration/service.ts",
+      "line": 110,
+      "name": "<callback of prisma.$transaction>",
+      "lines": 60
+    },
+    {
+      "file": "server/src/modules/shift/service.ts",
+      "line": 121,
+      "name": "decideSwap",
+      "lines": 60
+    },
+    {
+      "file": "server/src/middleware/idempotency.ts",
+      "line": 75,
+      "name": "idempotent",
+      "lines": 59
+    },
+    {
+      "file": "server/src/modules/fallback/service.ts",
+      "line": 225,
+      "name": "apply",
+      "lines": 59
+    },
+    {
+      "file": "server/src/modules/report/service.ts",
+      "line": 304,
+      "name": "buildVolunteerReport",
+      "lines": 59
+    },
+    {
+      "file": "server/src/modules/admin/service.ts",
+      "line": 330,
+      "name": "deactivateVolunteer",
+      "lines": 58
+    },
+    {
+      "file": "server/src/modules/admin/service.ts",
+      "line": 441,
+      "name": "createAssignment",
+      "lines": 58
+    },
+    {
+      "file": "server/src/modules/report/service.ts",
+      "line": 245,
+      "name": "buildSafetyReport",
+      "lines": 58
+    },
+    {
+      "file": "client/src/app/brief/page.tsx",
+      "line": 19,
+      "name": "BriefPage",
+      "lines": 58
+    },
+    {
+      "file": "server/src/middleware/idempotency.ts",
+      "line": 76,
+      "name": "<anonymous>",
+      "lines": 57
+    },
+    {
+      "file": "server/src/modules/attendance/service.ts",
+      "line": 92,
+      "name": "markPresent",
+      "lines": 57
+    },
+    {
+      "file": "server/src/modules/shift/service.ts",
+      "line": 55,
+      "name": "<callback of prisma.$transaction>",
+      "lines": 57
+    },
+    {
+      "file": "client/src/app/admin/users/page.tsx",
+      "line": 198,
+      "name": "VolunteerRow",
+      "lines": 57
+    },
+    {
+      "file": "server/src/middleware/auth/index.ts",
+      "line": 169,
+      "name": "requireAuth",
+      "lines": 56
+    },
+    {
+      "file": "server/src/modules/fallback/service.ts",
+      "line": 72,
+      "name": "declareFallback",
+      "lines": 56
+    },
+    {
+      "file": "server/src/modules/roster/service.ts",
+      "line": 34,
+      "name": "provisionVolunteer",
+      "lines": 56
+    },
+    {
+      "file": "client/src/app/safety/page.tsx",
+      "line": 18,
+      "name": "SafetyPage",
+      "lines": 56
+    },
+    {
+      "file": "server/src/middleware/idempotency.ts",
+      "line": 77,
+      "name": "<anonymous>",
+      "lines": 55
+    },
+    {
+      "file": "server/src/modules/fallback/service.ts",
+      "line": 299,
+      "name": "apply",
+      "lines": 54
+    },
+    {
+      "file": "server/src/modules/report/export.ts",
+      "line": 290,
+      "name": "buildIntegrity",
+      "lines": 54
+    },
+    {
+      "file": "server/src/modules/report/export.ts",
+      "line": 214,
+      "name": "buildSafety",
+      "lines": 53
+    },
+    {
+      "file": "client/src/components/ui/Field.tsx",
+      "line": 64,
+      "name": "Field",
+      "lines": 53
+    },
+    {
+      "file": "server/src/middleware/auth/localProvider.ts",
+      "line": 34,
+      "name": "createLocalAuthProvider",
+      "lines": 52
+    },
+    {
+      "file": "server/src/modules/me/service.ts",
+      "line": 80,
+      "name": "checkIn",
+      "lines": 52
+    },
+    {
+      "file": "client/src/components/ShiftOverview.tsx",
+      "line": 141,
+      "name": "RoleTiles",
+      "lines": 52
+    },
+    {
+      "file": "server/src/modules/announcement/service.ts",
+      "line": 32,
+      "name": "sendAnnouncement",
+      "lines": 51
+    },
+    {
+      "file": "server/src/modules/dashboard/repo.ts",
+      "line": 66,
+      "name": "checkedInWithLastCapture",
+      "lines": 51
+    },
+    {
+      "file": "server/src/modules/incident/service.ts",
+      "line": 32,
+      "name": "reportIncident",
+      "lines": 51
+    },
+    {
+      "file": "server/src/modules/missionCard/service.ts",
+      "line": 65,
+      "name": "issueCard",
+      "lines": 51
+    }
+  ],
+  "longFiles": [
+    {
+      "file": "server/src/modules/admin/service.ts",
+      "lines": 825
+    },
+    {
+      "file": "server/src/modules/fallback/service.ts",
+      "lines": 453
+    },
+    {
+      "file": "server/src/modules/report/export.ts",
+      "lines": 439
+    },
+    {
+      "file": "server/src/modules/missionCard/service.ts",
+      "lines": 433
+    },
+    {
+      "file": "client/src/app/admin/settings/page.tsx",
+      "lines": 427
+    },
+    {
+      "file": "client/src/app/admin/users/page.tsx",
+      "lines": 423
+    },
+    {
+      "file": "server/src/modules/auth/service.ts",
+      "lines": 382
+    },
+    {
+      "file": "server/src/modules/auth/router.ts",
+      "lines": 379
+    },
+    {
+      "file": "server/src/modules/report/service.ts",
+      "lines": 363
+    },
+    {
+      "file": "server/src/modules/report/repo.ts",
+      "lines": 358
+    },
+    {
+      "file": "server/src/modules/admin/router.ts",
+      "lines": 334
+    },
+    {
+      "file": "server/src/modules/shift/service.ts",
+      "lines": 333
+    },
+    {
+      "file": "server/src/modules/attendance/service.ts",
+      "lines": 329
+    },
+    {
+      "file": "client/src/lib/outbox.ts",
+      "lines": 328
+    },
+    {
+      "file": "client/src/app/chief/imports/page.tsx",
+      "lines": 325
+    },
+    {
+      "file": "client/src/app/chief/page.tsx",
+      "lines": 319
+    },
+    {
+      "file": "client/src/app/reports/page.tsx",
+      "lines": 307
+    },
+    {
+      "file": "server/src/config/env.ts",
+      "lines": 301
+    }
+  ]
+}

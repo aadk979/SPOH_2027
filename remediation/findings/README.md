@@ -15,7 +15,7 @@ Audit output from P01–P04 and the consolidated backlog from P05.
 ## Finding format
 
 ```markdown
-### F03-012 — Rate limiter uses per-process memory under PM2 cluster
+### F0x-NNN — Rate limiter uses per-process memory under PM2 cluster
 
 - **Severity:** High
 - **Area:** server/src/middleware/rateLimit.ts:28
