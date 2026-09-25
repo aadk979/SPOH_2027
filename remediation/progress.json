@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T14:48:05.880Z",
+  "updatedAt": "2026-09-25T14:49:50.257Z",
   "current": {
     "phase": "P03",
     "step": "P03.10"
@@ -772,11 +772,16 @@
         {
           "id": "P03.10",
           "title": "Write up",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T14:48:05.880Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T14:49:50.257Z",
+          "commits": ["2809bc4"],
+          "notes": [
+            {
+              "at": "2026-09-25T14:49:50.257Z",
+              "text": "F03 summary: 42 findings (3H/20M/19L), 50 skipped repros; PF-01/02/10/13 confirmed, PF-20 traced"
+            }
+          ]
         }
       ],
       "status": "in_progress",
