@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T13:10:05.516Z",
+  "updatedAt": "2026-09-25T13:10:12.692Z",
   "current": {
     "phase": "P01",
-    "step": "P01.6"
+    "step": "P01.7"
   },
   "gates": [
     {
@@ -448,8 +448,8 @@
         {
           "id": "P01.7",
           "title": "Time and timezone audit",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-25T13:10:12.692Z",
           "completedAt": null,
           "commits": [],
           "notes": []
