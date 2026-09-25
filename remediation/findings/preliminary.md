@@ -154,3 +154,42 @@ closed during the audit phase named. IDs are kept when a finding moves into an F
 - **Impact:** UI regressions reach staging unnoticed. P06/P07 cannot prove "identical behaviour"
   through the UI.
 - **Fix in:** P08 (pipeline). Until then, P06/P07 run e2e by hand before and after each step.
+
+### PF-18 — Coverage thresholds exist but were never enforced, and the baseline misses them
+
+- **Severity:** Medium
+- **Area:** `server/vitest.config.ts` (`coverage.thresholds`), `client/vitest.config.mts`
+- **Evidence:** The server config sets v8 thresholds (lines/functions/statements 80, branches 70),
+  but `@vitest/coverage-v8` was not installed, so `--coverage` could never run. P00.6 installed it.
+  The configured scope measures lines 78.4 %, statements 75.4 %, functions 75.0 % and branches
+  60.1 %, all below threshold. The client's unit suite covers 6.5 % of lines, and `packages/shared`
+  has no tests at all. See `reports/metrics/P00-coverage.json`.
+- **Impact:** The documented quality gate has never been a gate. P06/P07 refactor code that has
+  thin direct coverage (routers and `lib/` are outside the configured scope).
+- **Fix in:** P06/P07 (coverage must not drop). The gate itself is decided in P05.
+
+### PF-19 — CI's dependency audit fails on the baseline
+
+- **Severity:** High (to verify exploitability)
+- **Area:** `.github/workflows/ci.yml` _Security checks_ → `npm audit --audit-level=high`
+- **Evidence:** 4 high and 2 moderate advisories on the baseline lockfile, before and after
+  P00.6. The highs come through `prisma` 7.10.0 (`@prisma/config` → `deepmerge-ts`, and `mysql2`).
+  The moderates come through `exceljs` → `uuid`. npm's only offered fix for the highs is a
+  semver-major downgrade to `prisma@6`.
+- **Impact:** The security job is red on `main`, so a new high advisory would not stand out.
+- **Verify in:** P04 (runtime reachability: `mysql2` is unused with Postgres) · **Fix in:** P15, or
+  a documented, time-boxed audit exception decided in P05
+
+### PF-20 — Test harness rough edges
+
+- **Severity:** Low
+- **Evidence:**
+  - Root `npm test` exits 1 because `packages/shared` runs `vitest run` with no test files. CI
+    calls each workspace separately, so it is unaffected.
+  - Integration runs print pg's _"Calling client.query() when the client is already executing a
+    query"_ deprecation. Something issues concurrent queries on one client, possibly
+    `Promise.all` inside a transaction (candidates: `attendance/service.ts:33`,
+    `admin/service.ts:445`, `registration/service.ts:84,220`, `shift/service.ts:266`). pg@9
+    turns this into an error.
+- **Verify in:** P03 · **Fix in:** P06 (the transaction pattern) and P07 (shared gets tests or
+  `passWithNoTests`)

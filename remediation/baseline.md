@@ -185,3 +185,20 @@ Prisma refuses a reset started by an AI agent without the user's recorded consen
 
 CI (`.github/workflows/ci.yml`) does not run e2e, which is how these went unnoticed (PF-17).
 The README's "13 tests" for e2e is stale: there are 26.
+
+## Metrics and coverage snapshot (P00.6)
+
+- **Refactor debt** (`reports/metrics/P00.json`): 184 files, 97 functions > 50 lines, 18 files > 300
+  lines. Identical to `baseline-main.json`, as expected with no code change since planning.
+- **Coverage** (`reports/metrics/P00-coverage.json`, vitest 4.1.11 + `@vitest/coverage-v8`):
+
+| Scope                                           | Lines    | Statements | Functions | Branches |
+| ----------------------------------------------- | -------- | ---------- | --------- | -------- |
+| Server, configured scope (modules + middleware) | 78.4 %   | 75.4 %     | 75.0 %    | 60.1 %   |
+| Server, all of `src/`                           | 76.2 %   | 74.0 %     | 72.0 %    | 59.2 %   |
+| Client, vitest only                             | 6.5 %    | 6.4 %      | 4.3 %     | 2.8 %    |
+| Shared                                          | no tests | —          | —         | —        |
+
+The server's configured thresholds (80/80/80/70) are not met, so `npm run test:coverage --workspace
+server` exits 1 (PF-18). Other CI facts found here: the _Security checks_ job's `npm audit
+--audit-level=high` fails on the baseline (PF-19), and root `npm test` exits 1 (PF-20).

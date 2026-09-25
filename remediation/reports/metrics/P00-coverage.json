@@ -1,0 +1,897 @@
+{
+  "generatedAt": "2026-09-25T12:16:49.783Z",
+  "commit": "dd890b1",
+  "tool": "vitest 4.1.11 + @vitest/coverage-v8 4.1.11",
+  "scopes": {
+    "server (configured scope)": {
+      "command": "npm run test:coverage --workspace server",
+      "scope": "src/modules/**, src/middleware/** excluding router.ts, generated, tests (server/vitest.config.ts)",
+      "suites": "unit + integration, 521 tests",
+      "thresholds": {
+        "lines": 80,
+        "functions": 80,
+        "branches": 70,
+        "statements": 80
+      },
+      "meetsThresholds": false,
+      "totals": {
+        "lines": {
+          "pct": 78.4,
+          "covered": 1489,
+          "total": 1899
+        },
+        "statements": {
+          "pct": 75.41,
+          "covered": 1546,
+          "total": 2050
+        },
+        "functions": {
+          "pct": 74.95,
+          "covered": 395,
+          "total": 527
+        },
+        "branches": {
+          "pct": 60.07,
+          "covered": 787,
+          "total": 1310
+        }
+      }
+    },
+    "server (all of src)": {
+      "command": "cd server && npx vitest run --coverage '--coverage.include=src/**/*.ts' '--coverage.exclude=src/generated/**'",
+      "scope": "src/** excluding generated and tests (routers and lib included)",
+      "suites": "unit + integration, 521 tests",
+      "totals": {
+        "lines": {
+          "pct": 76.19,
+          "covered": 2081,
+          "total": 2731
+        },
+        "statements": {
+          "pct": 73.95,
+          "covered": 2149,
+          "total": 2906
+        },
+        "functions": {
+          "pct": 71.98,
+          "covered": 519,
+          "total": 721
+        },
+        "branches": {
+          "pct": 59.18,
+          "covered": 934,
+          "total": 1578
+        }
+      },
+      "files": {
+        "server/src/app.ts": {
+          "lines": 94.44,
+          "branches": 62.5,
+          "functions": 75
+        },
+        "server/src/config/env.ts": {
+          "lines": 58.82,
+          "branches": 41.66,
+          "functions": 75
+        },
+        "server/src/index.ts": {
+          "lines": 0,
+          "branches": 100,
+          "functions": 0
+        },
+        "server/src/jobs/scheduler.ts": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "server/src/lib/audit.ts": {
+          "lines": 100,
+          "branches": 83.33,
+          "functions": 100
+        },
+        "server/src/lib/campusNetwork.ts": {
+          "lines": 100,
+          "branches": 100,
+          "functions": 100
+        },
+        "server/src/lib/captureActor.ts": {
+          "lines": 100,
+          "branches": 100,
+          "functions": 100
+        },
+        "server/src/lib/errors.ts": {
+          "lines": 90,
+          "branches": 78.57,
+          "functions": 85.71
+        },
+        "server/src/lib/logger.ts": {
+          "lines": 66.66,
+          "branches": 66.66,
+          "functions": 0
+        },
+        "server/src/lib/prisma.ts": {
+          "lines": 71.42,
+          "branches": 50,
+          "functions": 50
+        },
+        "server/src/lib/requestContext.ts": {
+          "lines": 100,
+          "branches": 87.5,
+          "functions": 100
+        },
+        "server/src/lib/settings.ts": {
+          "lines": 81.25,
+          "branches": 44.44,
+          "functions": 90
+        },
+        "server/src/lib/shortCode.ts": {
+          "lines": 100,
+          "branches": 75,
+          "functions": 100
+        },
+        "server/src/lib/time.ts": {
+          "lines": 90,
+          "branches": 87.5,
+          "functions": 90.9
+        },
+        "server/src/middleware/auth/cognitoProvider.ts": {
+          "lines": 6.25,
+          "branches": 0,
+          "functions": 0
+        },
+        "server/src/middleware/auth/index.ts": {
+          "lines": 92.85,
+          "branches": 78.04,
+          "functions": 85.71
+        },
+        "server/src/middleware/auth/localProvider.ts": {
+          "lines": 89.47,
+          "branches": 70,
+          "functions": 100
+        },
+        "server/src/middleware/auth/types.ts": {
+          "lines": 100,
+          "branches": 100,
+          "functions": 100
+        },
+        "server/src/middleware/errorHandler.ts": {
+          "lines": 63.63,
+          "branches": 70.37,
+          "functions": 50
+        },
+        "server/src/middleware/idempotency.ts": {
+          "lines": 73.07,
+          "branches": 69.56,
+          "functions": 81.81
+        },
+        "server/src/middleware/rateLimit.ts": {
+          "lines": 88.88,
+          "branches": 75,
+          "functions": 66.66
+        },
+        "server/src/middleware/rbac.ts": {
+          "lines": 72.09,
+          "branches": 62.5,
+          "functions": 63.63
+        },
+        "server/src/middleware/requestId.ts": {
+          "lines": 100,
+          "branches": 83.33,
+          "functions": 100
+        },
+        "server/src/middleware/validate.ts": {
+          "lines": 100,
+          "branches": 100,
+          "functions": 100
+        },
+        "server/src/modules/admin/router.ts": {
+          "lines": 73.23,
+          "branches": 75,
+          "functions": 61.11
+        },
+        "server/src/modules/admin/service.ts": {
+          "lines": 66.66,
+          "branches": 45.58,
+          "functions": 59.37
+        },
+        "server/src/modules/announcement/repo.ts": {
+          "lines": 100,
+          "branches": 85,
+          "functions": 100
+        },
+        "server/src/modules/announcement/router.ts": {
+          "lines": 100,
+          "branches": 100,
+          "functions": 100
+        },
+        "server/src/modules/announcement/service.ts": {
+          "lines": 93.93,
+          "branches": 71.42,
+          "functions": 90.9
+        },
+        "server/src/modules/attendance/router.ts": {
+          "lines": 91.66,
+          "branches": 100,
+          "functions": 80
+        },
+        "server/src/modules/attendance/service.ts": {
+          "lines": 81.11,
+          "branches": 71.73,
+          "functions": 85.71
+        },
+        "server/src/modules/attendance/tokens.ts": {
+          "lines": 90,
+          "branches": 92.3,
+          "functions": 100
+        },
+        "server/src/modules/audit/router.ts": {
+          "lines": 87.5,
+          "branches": 45.45,
+          "functions": 50
+        },
+        "server/src/modules/auth/router.ts": {
+          "lines": 47.15,
+          "branches": 38.09,
+          "functions": 56.25
+        },
+        "server/src/modules/auth/service.ts": {
+          "lines": 83.87,
+          "branches": 64,
+          "functions": 86.66
+        },
+        "server/src/modules/auth/tokens.ts": {
+          "lines": 85.71,
+          "branches": 62.5,
+          "functions": 100
+        },
+        "server/src/modules/dashboard/repo.ts": {
+          "lines": 85.71,
+          "branches": 0,
+          "functions": 81.25
+        },
+        "server/src/modules/dashboard/router.ts": {
+          "lines": 90,
+          "branches": 100,
+          "functions": 66.66
+        },
+        "server/src/modules/dashboard/service.ts": {
+          "lines": 90,
+          "branches": 74.07,
+          "functions": 77.77
+        },
+        "server/src/modules/devAuth/router.ts": {
+          "lines": 46.15,
+          "branches": 36.36,
+          "functions": 50
+        },
+        "server/src/modules/fallback/repo.ts": {
+          "lines": 100,
+          "branches": 100,
+          "functions": 100
+        },
+        "server/src/modules/fallback/router.ts": {
+          "lines": 88.46,
+          "branches": 37.5,
+          "functions": 80
+        },
+        "server/src/modules/fallback/service.ts": {
+          "lines": 95.6,
+          "branches": 82.75,
+          "functions": 100
+        },
+        "server/src/modules/footfall/repo.ts": {
+          "lines": 88.88,
+          "branches": 68.18,
+          "functions": 84.61
+        },
+        "server/src/modules/footfall/router.ts": {
+          "lines": 80.95,
+          "branches": 100,
+          "functions": 80
+        },
+        "server/src/modules/footfall/service.ts": {
+          "lines": 84.31,
+          "branches": 71.87,
+          "functions": 78.57
+        },
+        "server/src/modules/gift/repo.ts": {
+          "lines": 89.47,
+          "branches": 42.85,
+          "functions": 80
+        },
+        "server/src/modules/gift/router.ts": {
+          "lines": 94.44,
+          "branches": 100,
+          "functions": 75
+        },
+        "server/src/modules/gift/service.ts": {
+          "lines": 84.9,
+          "branches": 65.62,
+          "functions": 63.63
+        },
+        "server/src/modules/health/router.ts": {
+          "lines": 77.77,
+          "branches": 100,
+          "functions": 100
+        },
+        "server/src/modules/identity/provider.ts": {
+          "lines": 37.5,
+          "branches": 16.66,
+          "functions": 44.44
+        },
+        "server/src/modules/incident/repo.ts": {
+          "lines": 54.54,
+          "branches": 9.09,
+          "functions": 22.22
+        },
+        "server/src/modules/incident/router.ts": {
+          "lines": 45.83,
+          "branches": 0,
+          "functions": 25
+        },
+        "server/src/modules/incident/service.ts": {
+          "lines": 32.25,
+          "branches": 22.85,
+          "functions": 33.33
+        },
+        "server/src/modules/lostFound/router.ts": {
+          "lines": 38.88,
+          "branches": 0,
+          "functions": 0
+        },
+        "server/src/modules/lostFound/service.ts": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "server/src/modules/lostPerson/repo.ts": {
+          "lines": 100,
+          "branches": 100,
+          "functions": 100
+        },
+        "server/src/modules/lostPerson/router.ts": {
+          "lines": 100,
+          "branches": 100,
+          "functions": 100
+        },
+        "server/src/modules/lostPerson/service.ts": {
+          "lines": 100,
+          "branches": 74.28,
+          "functions": 100
+        },
+        "server/src/modules/me/repo.ts": {
+          "lines": 52.94,
+          "branches": 37.5,
+          "functions": 66.66
+        },
+        "server/src/modules/me/router.ts": {
+          "lines": 66.66,
+          "branches": 100,
+          "functions": 66.66
+        },
+        "server/src/modules/me/service.ts": {
+          "lines": 58.97,
+          "branches": 62.96,
+          "functions": 66.66
+        },
+        "server/src/modules/media/router.ts": {
+          "lines": 54.54,
+          "branches": 100,
+          "functions": 0
+        },
+        "server/src/modules/media/service.ts": {
+          "lines": 21.42,
+          "branches": 14.28,
+          "functions": 0
+        },
+        "server/src/modules/missionCard/repo.ts": {
+          "lines": 95.83,
+          "branches": 84.61,
+          "functions": 94.11
+        },
+        "server/src/modules/missionCard/router.ts": {
+          "lines": 100,
+          "branches": 100,
+          "functions": 100
+        },
+        "server/src/modules/missionCard/service.ts": {
+          "lines": 93.75,
+          "branches": 76.66,
+          "functions": 94.73
+        },
+        "server/src/modules/notification/router.ts": {
+          "lines": 40,
+          "branches": 0,
+          "functions": 0
+        },
+        "server/src/modules/notification/service.ts": {
+          "lines": 41.07,
+          "branches": 34.37,
+          "functions": 40
+        },
+        "server/src/modules/registration/repo.ts": {
+          "lines": 68.75,
+          "branches": 35,
+          "functions": 84.61
+        },
+        "server/src/modules/registration/router.ts": {
+          "lines": 100,
+          "branches": 100,
+          "functions": 100
+        },
+        "server/src/modules/registration/service.ts": {
+          "lines": 89.36,
+          "branches": 60.86,
+          "functions": 91.66
+        },
+        "server/src/modules/report/export.ts": {
+          "lines": 93.75,
+          "branches": 40,
+          "functions": 80
+        },
+        "server/src/modules/report/repo.ts": {
+          "lines": 92.85,
+          "branches": 85.71,
+          "functions": 77.14
+        },
+        "server/src/modules/report/router.ts": {
+          "lines": 100,
+          "branches": 100,
+          "functions": 100
+        },
+        "server/src/modules/report/service.ts": {
+          "lines": 83.63,
+          "branches": 58.69,
+          "functions": 71.42
+        },
+        "server/src/modules/roster/repo.ts": {
+          "lines": 36.84,
+          "branches": 34.78,
+          "functions": 37.5
+        },
+        "server/src/modules/roster/router.ts": {
+          "lines": 66.66,
+          "branches": 100,
+          "functions": 50
+        },
+        "server/src/modules/roster/service.ts": {
+          "lines": 55.4,
+          "branches": 46.77,
+          "functions": 77.77
+        },
+        "server/src/modules/shift/repo.ts": {
+          "lines": 96,
+          "branches": 68,
+          "functions": 92.3
+        },
+        "server/src/modules/shift/router.ts": {
+          "lines": 82.35,
+          "branches": 100,
+          "functions": 57.14
+        },
+        "server/src/modules/shift/service.ts": {
+          "lines": 91.66,
+          "branches": 78.78,
+          "functions": 78.57
+        },
+        "server/src/modules/station/repo.ts": {
+          "lines": 83.33,
+          "branches": 66.66,
+          "functions": 83.33
+        },
+        "server/src/modules/station/router.ts": {
+          "lines": 60,
+          "branches": 100,
+          "functions": 0
+        },
+        "server/src/modules/station/service.ts": {
+          "lines": 72.72,
+          "branches": 66.66,
+          "functions": 66.66
+        },
+        "server/src/routes.ts": {
+          "lines": 100,
+          "branches": 50,
+          "functions": 100
+        },
+        "server/src/types/express.d.ts": {
+          "lines": 100,
+          "branches": 100,
+          "functions": 100
+        }
+      }
+    },
+    "client": {
+      "command": "npm run test:coverage --workspace client",
+      "scope": "src/**/*.{ts,tsx}; vitest only (Playwright e2e is not measured)",
+      "suites": "unit, 19 tests",
+      "totals": {
+        "lines": {
+          "pct": 6.51,
+          "covered": 104,
+          "total": 1596
+        },
+        "statements": {
+          "pct": 6.41,
+          "covered": 114,
+          "total": 1778
+        },
+        "functions": {
+          "pct": 4.26,
+          "covered": 24,
+          "total": 563
+        },
+        "branches": {
+          "pct": 2.78,
+          "covered": 39,
+          "total": 1401
+        }
+      },
+      "files": {
+        "client/src/app/admin/settings/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/admin/users/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/attendance/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/brief/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/capture/footfall/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/capture/redeem/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/capture/registration/group/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/capture/registration/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/capture/stamp/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/chief/fallback/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/chief/imports/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/chief/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/error.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/guide/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/home/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/ic/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/inbox/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/journey/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/layout.tsx": {
+          "lines": 0,
+          "branches": 100,
+          "functions": 0
+        },
+        "client/src/app/map/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/not-found.tsx": {
+          "lines": 0,
+          "branches": 100,
+          "functions": 0
+        },
+        "client/src/app/operations/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/providers.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/reports/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/safety/incident/new/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/safety/lost-found/new/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/safety/lost-found/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/safety/lost-person/new/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/safety/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/shift/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/sign-in/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/app/tv/page.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/components/AlertDelivery.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/components/AppShell.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/components/CardCodeInput.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/components/dashboard/StatTile.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/components/GlobalNav.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/components/LostPersonBanner.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/components/NavTile.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/components/SectionNav.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/components/ServiceWorkerRegistration.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/components/ShiftOverview.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/components/SyncIndicator.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/components/ui/Button.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/components/ui/Callout.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/components/ui/Card.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/components/ui/Choice.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/components/ui/cx.ts": {
+          "lines": 0,
+          "branches": 100,
+          "functions": 0
+        },
+        "client/src/components/ui/Feedback.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/components/ui/Field.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/components/ui/index.ts": {
+          "lines": 100,
+          "branches": 100,
+          "functions": 100
+        },
+        "client/src/components/ui/Section.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/components/WorkspaceIntro.tsx": {
+          "lines": 0,
+          "branches": 100,
+          "functions": 0
+        },
+        "client/src/content/brief.ts": {
+          "lines": 0,
+          "branches": 100,
+          "functions": 100
+        },
+        "client/src/features/admin/useVolunteers.ts": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/features/attendance/AttendanceScanner.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/features/attendance/VerifierCode.tsx": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/features/capture/useCapture.ts": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/features/capture/useQrScanner.ts": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/features/dashboard/useDashboard.ts": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/features/lostPerson/useActiveAlerts.ts": {
+          "lines": 0,
+          "branches": 100,
+          "functions": 0
+        },
+        "client/src/features/media/usePhotoUpload.ts": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/features/notification/usePushRegistration.ts": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/features/session/useSession.ts": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/lib/api.ts": {
+          "lines": 40.62,
+          "branches": 15.15,
+          "functions": 57.14
+        },
+        "client/src/lib/env.ts": {
+          "lines": 100,
+          "branches": 100,
+          "functions": 100
+        },
+        "client/src/lib/format.ts": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/lib/navigation.ts": {
+          "lines": 0,
+          "branches": 0,
+          "functions": 0
+        },
+        "client/src/lib/outbox.ts": {
+          "lines": 70,
+          "branches": 68.18,
+          "functions": 54.83
+        },
+        "client/src/lib/runtimeSettings.ts": {
+          "lines": 40.9,
+          "branches": 0,
+          "functions": 33.33
+        },
+        "client/src/lib/session.ts": {
+          "lines": 13.84,
+          "branches": 0,
+          "functions": 0
+        }
+      }
+    },
+    "shared": {
+      "note": "packages/shared has no tests of its own; it is exercised only through server tests against its built dist/, which v8 does not attribute to src/."
+    }
+  }
+}
