@@ -138,4 +138,93 @@ clunky" into a ranked list with screenshots.
 
 ## Phase report
 
-_Fill in on completion._
+**Status: done (2026-09-25).** 10 of 10 steps done. No product code changed:
+`git diff 13b19f4..HEAD -- server client packages ops scripts` is empty.
+
+### Summary
+
+`findings/F02-journeys.md` records six role journeys, three denial journeys, the interlinking
+matrix and the per-role permission table, with 118 screens per viewport in `findings/F02-screens/`
+(236 files, largest 111 KB). It holds **32 findings: 1 Blocker, 8 High, 17 Medium, 6 Low**, a
+ranked table and a top-10 narrative for the owner. Headline: no event entity (F02-001); none of the
+eight setup tasks is possible in the UI; two numbers on the live dashboard and in the report are
+wrong (F02-006, F02-027); nothing links to anything (F02-029). P01's F01-046 and F01-047 and PF-09
+are confirmed from the user's side.
+
+| Step   | Status  | Outcome                                                                                                                      |
+| ------ | ------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| P02.1  | ✅ done | `tools/journeys/`: `run.mjs` (paced sign-in, saved session per role and viewport, frozen clock, compressed PNGs, event log)  |
+| P02.2  | ✅ done | Admin: 0 of 8 setup tasks in the UI; API fallback logged (`api-setup.mjs`); F02-001…005, incl. a 500 in the roster dry run   |
+| P02.3  | ✅ done | Chief and Deputy: dashboard, announcement, fallback, import, gaps, report, TV; F02-006…010                                   |
+| P02.4  | ✅ done | IC: console, swaps, lost person, incidents, attendance, corrections; F02-011…017 (`fixtures.mjs ic`)                         |
+| P02.5  | ✅ done | Volunteer: sign-in, attendance by PIN, all capture types, offline, salvage, safety forms, content; F02-018…023               |
+| P02.6  | ✅ done | Lead: reports, export, roster, audit, what shows versus what works; F02-024…026                                              |
+| P02.7  | ✅ done | After the event: close-out, purge, deactivation, archive, clone; 7 requirements for P09.9/P13.8; F02-027, F02-028            |
+| P02.8  | ✅ done | Interlinking matrix for 16 entities: no dynamic route exists; F02-029                                                        |
+| P02.9  | ✅ done | `permissions.mjs`: 95 routes against the matrix, live GET probe per role (server = matrix); per-role table; F02-030, F02-031 |
+| P02.10 | ✅ done | Ranked table, top-10 narrative, P01 follow-ups closed, PF-09 status; F02-032 from the harness build                          |
+
+**Exit criteria:** all six journeys walked on both viewports ✅; every friction point scored and
+evidenced by screenshot, log or command ✅; interlinking matrix and permission table complete ✅.
+
+### Still open (not blocking P03–P04)
+
+- **Before P05:** D-01, D-03 (now also F02-031: the Deputy's roster scope), D-07/D-10, D-08, D-12,
+  the fate of `feat/audit-cloudwatch` (PF-14; F02-024 depends on it), and the owner questions in
+  F01 § Summary. P02 adds none of its own.
+- **For P03:** reproduce F02-032 (refresh reuse across tabs) with a test; confirm the intent of
+  `CardStatus.LOST` (F02-013); root-cause F02-010. F02-002, F02-006 and F02-027 are bugs that need
+  failing tests first.
+
+### Deviations from plan
+
+- **Environment:** the dev DB was built with `db:deploy` + `db:seed` (not `db:reset`). Attendance
+  needs `ATTENDANCE_ROOT_EMAIL`, which the dev `.env` leaves unset (F02-017), so for P02.5 the
+  gitignored local `server/.env` was given `ATTENDANCE_ROOT_EMAIL=admin@spoh2027.test` and
+  localhost as the campus network, and the dev server restarted. It was restored afterwards.
+- **Server time cannot be frozen from the browser.** `freezeInShift` freezes the page clock; the
+  server keeps capture open through the dev `.env`'s `SHIFT_HOURS_ALWAYS_OPEN=true`. Screens that
+  print server times (TV clock, attendance "present at") show real time.
+- **Fixtures through the API.** Things no screen can create (swap request, incident, lost-person
+  alert, a Mission Complete assignment, attendance chain, moved shift hours) are made by
+  `fixtures.mjs <ic|volunteer|reset>`. That is itself evidence for PF-09.
+- **Extra tools the plan did not name:** `api-setup.mjs` (P02.2 log), `fixtures.mjs`,
+  `permissions.mjs` (P02.9, so "server allows" is measured rather than read).
+- **Not exercised:** attendance by QR (needs a camera). The PIN path on the same screen was walked.
+- **Journeys ran against the same dev database in order**, so later screens show earlier journeys'
+  data (the Test Event rows, the 2027-dated import). That is deliberate: it is what the product
+  does with a second event, and several findings come from it.
+- **Checks:** all green: lint (0 errors, the 131 expected guard warnings), typecheck,
+  `format:check`, `npm test` (server 521: 233 unit + 288 integration; client 19) and
+  `npm run build`. e2e was not re-run: no product code changed.
+
+### Metrics before → after
+
+| Measure                      | End of P01      | End of P02 |
+| ---------------------------- | --------------- | ---------- |
+| Lint errors / guard warnings | 0 / 131         | 0 / 131    |
+| Functions > 50 / files > 300 | 97 / 18         | 97 / 18    |
+| Guard counts (`arch:report`) | `P01-arch.json` | identical  |
+| Findings                     | F01: 52 items   | F02: 32    |
+
+Snapshots: `reports/metrics/P02.json` and `P02-arch.json` (identical to P01 apart from timestamps).
+
+### Findings added
+
+F02-001…032 in `findings/F02-journeys.md`. PF-09 confirmed (status in `preliminary.md`). F01-046
+and F01-047 confirmed; no F01 finding re-filed.
+
+### Follow-ups for later phases
+
+- **P06:** fix F02-002, F02-006, F02-027 with failing tests first (wrong numbers and a 500).
+- **P09.9 / P13.8:** the seven close-out and clone requirements in F02 § Journey 6.
+- **P11.7 / P11.8:** the per-role table in F02 § P02.9 and the matrix oddities under it.
+- **P13 / P14:** the interlinking matrix is the specification for P14.1–P14.3; the "no screen"
+  findings (F02-003, 013, 014, 015, 023, 024) are P13.7's list.
+
+### Commits
+
+`b0b5bfa` harness · `a9bb753` journey 1 · `08a91e6` journey 2 · `317d659` journey 3 · `87b37c8`,
+`641a156` journey 4 · `c36786c` journey 5 · `32b3f98` journey 6 · `225370e` matrix · `40d44a7`
+permissions · `fbcb138` summary, plus the `chore(remediation): P02.x done` tracker commits and the
+phase close.
