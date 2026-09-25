@@ -32,8 +32,12 @@ jobs:
       # so it has to exist before anything else compiles.
       - run: npm run build:shared
 
+      # prisma.config.ts refuses to load without DATABASE_URL, even though
+      # generate never connects. A placeholder satisfies it.
       - run: npx prisma generate
         working-directory: server
+        env:
+          DATABASE_URL: postgresql://unused:unused@localhost:5432/unused
 
       - run: npm run lint
 
@@ -114,8 +118,11 @@ jobs:
       - run: npm run build:shared
 
       # The boundary rules resolve imports of the generated Prisma client.
+      # As in the quality job, generate needs only a placeholder DATABASE_URL.
       - run: npx prisma generate
         working-directory: server
+        env:
+          DATABASE_URL: postgresql://unused:unused@localhost:5432/unused
 
       - name: Guard counts
         continue-on-error: true
