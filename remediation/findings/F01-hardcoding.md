@@ -102,7 +102,7 @@ client; `dto/…` is shared).
 | F01-034 | `server/.env.example:14`, `scripts/dev-db-local.sh:14–80`, `server/scripts/setup-test-db.mjs:16`                                                                      | `spoh2027`, `spoh2027_test`, `5435`                                                 | Dev and test database names and port                   | `fixture`        | Stays (dev only)                                              | —            |
 | F01-035 | `client/src/lib/outbox.ts:21`, `client/public/sw.js:16`                                                                                                               | `DB_NAME = 'spoh2027'`, `spoh2027-shell-v1`                                         | IndexedDB outbox and service-worker cache names        | `legit-constant` | Stays; a rename needs an outbox migration                     | P07          |
 | F01-036 | `lib/shortCode.ts:58`, `app/capture/stamp/page.tsx:83`                                                                                                                | `spoh2027:<uuid>`                                                                   | QR payload prefix, printed on physical cards           | `legit-constant` | Stays; printed cards must keep scanning                       | P09.2        |
-| F01-037 | `server/.env.example:71`                                                                                                                                              | `ATTENDANCE_ROOT_EMAIL=event-root@example.com`                                      | The one person who can mark attendance unverified      | `event-setting`  | Classified in P01.4                                           | P10.4        |
+| F01-037 | `server/.env.example:71`                                                                                                                                              | `ATTENDANCE_ROOT_EMAIL=event-root@example.com`                                      | The one person who can mark attendance unverified      | `event-setting`  | An event-membership flag (P01.4)                              | P09.3, P10.4 |
 
 ### Numbers in `server/src/modules`
 
@@ -174,6 +174,75 @@ choose the members. Branches on an `event-data` member become capability flags o
 | `AnnouncementPriority` | `invariant`                 | Delivery behaviour                                   | `modules/announcement/service.ts:79` (`URGENT` pushes), `modules/notification/service.ts:203` (push urgency), `client/public/sw.js:98,99`, `app/inbox/page.tsx:35–194`                                                                                                                                                                                                                                                                                                                                                        |                                                                                                                                                                 |
 | `AttendanceMethod`     | `invariant`                 | Verification protocol                                | `modules/attendance/service.ts:164,182,292,296,313`, `app/attendance/page.tsx:110–169`                                                                                                                                                                                                                                                                                                                                                                                                                                        | Not mirrored in `enums.ts` (see above).                                                                                                                         |
 
+## Env audit (P01.4)
+
+`server/src/config/env.ts` parses `process.env` once at boot and refuses to start on a bad value.
+No other server file reads `process.env`, apart from `SPOH_SKIP_DOTENV` (`env.ts:20`, a test
+harness switch). **Every server key therefore needs a restart to change today**, and every client
+key needs a rebuild, because Next inlines `NEXT_PUBLIC_*` into the bundle.
+
+Classes: **infra** (where things run), **secret**, **setting** (behaviour an admin might change,
+which moves to the settings registry with the scope given). Targets: **SSM** (Parameter Store, from
+CDK outputs in P08.6), **SM** (Secrets Manager), **registry** (P10.1), **env** (stays a plain
+variable in the task definition or on the developer's machine).
+
+### Server (`server/src/config/env.ts`, 34 keys)
+
+| Key                         | Purpose                                           | Default                                                        | Production guard                                  | Class   | Target                                                       |
+| --------------------------- | ------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------- | ------- | ------------------------------------------------------------ |
+| `NODE_ENV`                  | Runtime mode; switches every guard below          | `development`                                                  | —                                                 | infra   | env                                                          |
+| `PORT`                      | API listen port                                   | `4000`                                                         | —                                                 | infra   | env (note: `.env.example` and the client default use `4010`) |
+| `LOG_LEVEL`                 | Pino level                                        | `info`                                                         | —                                                 | infra   | SSM                                                          |
+| `DATABASE_URL`              | Postgres connection, including the password       | required                                                       | must contain `sslmode=require`                    | secret  | SM (RDS-managed secret)                                      |
+| `DATABASE_POOL_MAX`         | Pool size per instance                            | `25`                                                           | 1–100                                             | infra   | SSM, sized with the task count                               |
+| `AUTH_PROVIDER`             | `cognito` or the dev `local` bypass               | `cognito`                                                      | `local` refused                                   | infra   | env                                                          |
+| `LOCAL_AUTH_SECRET`         | HS256 key of the dev provider                     | none                                                           | unusable (provider refused)                       | secret  | dev only; never in AWS                                       |
+| `COGNITO_REGION`            | Region of the user pool                           | `ap-southeast-1`                                               | —                                                 | infra   | SSM                                                          |
+| `COGNITO_USER_POOL_ID`      | User pool                                         | none                                                           | required with `cognito`                           | infra   | SSM                                                          |
+| `COGNITO_CLIENT_ID`         | App client                                        | none                                                           | required with `cognito`                           | infra   | SSM                                                          |
+| `COGNITO_DOMAIN`            | Hosted UI base URL                                | none                                                           | required with `cognito`                           | infra   | SSM                                                          |
+| `APP_BASE_URL`              | Public origin, for the OAuth `redirect_uri`       | none                                                           | required with `cognito`                           | infra   | SSM                                                          |
+| `CORS_ALLOWED_ORIGINS`      | Exact allowed origins                             | `http://localhost:3000`                                        | no `*`; all `https` when the cookie is cross-site | infra   | SSM                                                          |
+| `TRUST_PROXY_HOPS`          | Proxies in front of the API (for client IPs)      | `0`                                                            | 0–5                                               | infra   | SSM (1 behind an ALB)                                        |
+| `SESSION_SIGNING_SECRET`    | Key for the API's own access tokens               | ephemeral per boot                                             | required                                          | secret  | SM, with rotation (P15.6)                                    |
+| `ACCESS_TOKEN_TTL_SECONDS`  | Access-token lifetime                             | `900`                                                          | 60–86400                                          | setting | registry, platform scope                                     |
+| `SESSION_COOKIE_DOMAIN`     | Refresh-cookie domain                             | host-only                                                      | —                                                 | infra   | SSM                                                          |
+| `SESSION_COOKIE_CROSS_SITE` | `SameSite=None` refresh cookie                    | `false`                                                        | needs `https` origins                             | infra   | SSM                                                          |
+| `RATE_LIMIT_WINDOW_MS`      | Rate-limit window                                 | `60000`                                                        | ≥ 1000                                            | setting | registry, platform scope (P15.2)                             |
+| `RATE_LIMIT_MAX_DEFAULT`    | Requests per window, default routes               | `300`                                                          | ≥ 1                                               | setting | registry, platform scope (P15.2)                             |
+| `RATE_LIMIT_MAX_CAPTURE`    | Requests per window, capture routes               | `1200`                                                         | ≥ 1                                               | setting | registry, platform scope (P15.2)                             |
+| `RATE_LIMIT_MAX_SENSITIVE`  | Requests per window, sign-in and provisioning     | `20`                                                           | ≥ 1                                               | setting | registry, platform scope, with a floor (P15.2)               |
+| `RATE_LIMIT_MAX_ADMIN`      | Requests per window, admin routes                 | `60`                                                           | ≥ 1                                               | setting | registry, platform scope (P15.2)                             |
+| `ATTENDANCE_ROOT_EMAIL`     | The one person who may mark attendance unverified | none (feature off)                                             | —                                                 | setting | an event-membership flag (P09.3), not a setting              |
+| `ATTENDANCE_SIGNING_SECRET` | Key for attendance QR tokens                      | derived from `SESSION_SIGNING_SECRET`, else random per process | none of its own (the session key is required)     | secret  | SM                                                           |
+| `ATTENDANCE_SP_CIDRS`       | Venue egress CIDRs that QR attendance requires    | `[]` (QR off)                                                  | each value parsed as a CIDR                       | setting | registry, event scope, with F01-009's label                  |
+| `SHIFT_HOURS_ALWAYS_OPEN`   | Treat every hour as shift hours                   | `false`                                                        | refused                                           | infra   | env, dev only; P10.5 capture windows replace it              |
+| `S3_MEDIA_BUCKET`           | Bucket for incident and lost-and-found photos     | none (uploads off)                                             | —                                                 | infra   | SSM                                                          |
+| `AWS_REGION`                | SDK region                                        | `ap-southeast-1`                                               | —                                                 | infra   | env (set by the ECS runtime)                                 |
+| `S3_UPLOAD_TTL_SECONDS`     | Presigned upload lifetime                         | `300`                                                          | 30–3600                                           | setting | registry, platform scope                                     |
+| `S3_MAX_UPLOAD_BYTES`       | Upload size ceiling                               | 10 MiB                                                         | 1 KiB–50 MiB                                      | setting | registry, platform scope                                     |
+| `VAPID_PUBLIC_KEY`          | Web Push public key                               | none (push off)                                                | all three VAPID keys or none                      | infra   | SSM                                                          |
+| `VAPID_PRIVATE_KEY`         | Web Push private key                              | none                                                           | as above                                          | secret  | SM                                                           |
+| `VAPID_SUBJECT`             | Push contact (`mailto:`)                          | none                                                           | as above                                          | infra   | SSM                                                          |
+
+Totals: 19 infra, 5 secret, 10 setting (9 to the registry, one to membership). The settings match
+PF-07 and are the env-reduction list for P10.4.
+
+### Client (`client/.env.example`, `client/src/lib/env.ts`, `client/next.config.ts`)
+
+| Key                                | Purpose                                                       | Default                 | Guard                                                                         | Class | Target                                                 |
+| ---------------------------------- | ------------------------------------------------------------- | ----------------------- | ----------------------------------------------------------------------------- | ----- | ------------------------------------------------------ |
+| `NEXT_PUBLIC_API_BASE_URL`         | API origin for fetches and the CSP `connect-src`              | `http://localhost:4010` | must parse as a URL                                                           | infra | SSM → build argument (P08.9)                           |
+| `NEXT_PUBLIC_ENV_LABEL`            | Environment badge                                             | `development`           | —                                                                             | infra | build argument                                         |
+| `NEXT_PUBLIC_COGNITO_REGION`       | Region of the pool                                            | none                    | —                                                                             | infra | SSM → build argument                                   |
+| `NEXT_PUBLIC_COGNITO_USER_POOL_ID` | Pool; **blank switches the client to the dev sign-in screen** | blank                   | none: a production build without it shows dev sign-in (the server refuses it) | infra | SSM → build argument; P08.9 fails the build when blank |
+| `NEXT_PUBLIC_COGNITO_CLIENT_ID`    | App client                                                    | blank                   | —                                                                             | infra | SSM → build argument                                   |
+
+All five are infra and all need a rebuild. `NODE_ENV` also gates the service worker
+(`components/ServiceWorkerRegistration.tsx:15`) and the dev CSP (`next.config.ts:12`); Next sets it.
+Serving these from the API at runtime instead of inlining them would let one image run in staging
+and production; P05 decides.
+
 ## Defects found during P01
 
 ### F01-046 — Shift labels ignore the configured shift hours
@@ -214,4 +283,20 @@ choose the members. Branches on an `event-data` member become capability flags o
   visitors against that station through the API. Counts stay correct but land on the wrong station.
 - **Fix:** The `registersVisitors` and `redeemsGifts` flags of P01.3, enforced by the server.
 - **Phase:** P09.2
+- **Status:** open
+
+### F01-051 — `server/.env.example` omits nine keys, one of them required in production
+
+- **Severity:** Low
+- **Area:** `server/.env.example`
+- **Evidence:** `ACCESS_TOKEN_TTL_SECONDS`, `S3_MAX_UPLOAD_BYTES`, `S3_UPLOAD_TTL_SECONDS`,
+  `SESSION_COOKIE_CROSS_SITE`, `SESSION_COOKIE_DOMAIN`, `SESSION_SIGNING_SECRET` and the three
+  `VAPID_*` keys are in the schema but not in the example. `SESSION_SIGNING_SECRET` is required when
+  `NODE_ENV=production`. The server's `PORT` default is `4000`, while the example and the client
+  default use `4010`.
+- **Impact:** A deploy built from the example fails at boot, or runs without push or cookies set
+  for its topology.
+- **Fix:** P08.6 generates the parameter and secret list from the schema; until then, the example
+  lists every key.
+- **Phase:** P08.6
 - **Status:** open
