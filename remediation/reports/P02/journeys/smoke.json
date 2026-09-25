@@ -1,0 +1,99 @@
+{
+  "id": "smoke",
+  "title": "Harness check: sign-in page, then Admin home",
+  "role": "admin@spoh2027.test",
+  "runs": [
+    {
+      "viewport": "phone",
+      "frozenAt": "2026-09-25T02:30:00.000Z",
+      "steps": [
+        {
+          "nn": "01",
+          "name": "home",
+          "path": "/home",
+          "landedOn": "/home",
+          "screenshot": "smoke-01-phone.png",
+          "kb": 30,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "02",
+          "name": "shift",
+          "path": "/shift",
+          "landedOn": "/shift",
+          "screenshot": "smoke-02-phone.png",
+          "kb": 24,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "viewport": "laptop",
+      "frozenAt": "2026-09-25T02:30:00.000Z",
+      "steps": [
+        {
+          "nn": "01",
+          "name": "home",
+          "path": "/home",
+          "landedOn": "/home",
+          "screenshot": "smoke-01-laptop.png",
+          "kb": 37,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "02",
+          "name": "shift",
+          "path": "/shift",
+          "landedOn": "/shift",
+          "screenshot": "smoke-02-laptop.png",
+          "kb": 29,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

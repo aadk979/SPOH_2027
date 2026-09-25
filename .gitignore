@@ -49,3 +49,4 @@ client/next-env.d.ts
 client/test-results/
 client/playwright-report/
 client/blob-report/
+remediation/tools/journeys/.state/

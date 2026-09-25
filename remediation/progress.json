@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T13:14:48.646Z",
+  "updatedAt": "2026-09-25T13:16:42.113Z",
   "current": {
     "phase": "P02",
-    "step": null
+    "step": "P02.1"
   },
   "gates": [
     {
@@ -491,8 +491,8 @@
         {
           "id": "P02.1",
           "title": "Journey harness",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-25T13:16:42.112Z",
           "completedAt": null,
           "commits": [],
           "notes": []
@@ -579,8 +579,8 @@
           "notes": []
         }
       ],
-      "status": "not_started",
-      "startedAt": null,
+      "status": "in_progress",
+      "startedAt": "2026-09-25T13:16:42.112Z",
       "completedAt": null
     },
     {
