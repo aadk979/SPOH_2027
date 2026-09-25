@@ -20,7 +20,99 @@ inconsistent · broken · slow. Severity: Blocker · High · Medium · Low.
 
 ## Summary (P02.10)
 
-_Written in P02.10._
+Six journeys, three denial journeys and a permission probe, walked at Pixel 7 and 1440×900:
+**118 screens per viewport** in `F02-screens/` (236 files, all under 300 KB), logs in
+`reports/P02/`. **32 findings**: 1 Blocker, 8 High, 17 Medium, 6 Low. P01's F01-046 and F01-047
+were confirmed from the user's side, and PF-09 is confirmed (42 of 95 routes have no screen).
+
+### The ten clunkiest things, for the owner
+
+1. **There is no "event".** A second event cannot be created. Anything added for it (days,
+   stations, gifts, people) lands in this year's live dashboard, gaps, funnel and report, because
+   nothing says which event a row belongs to. Next year means a new database. (F02-001)
+2. **Setting up needs a developer.** Of the eight setup tasks for a new event, none can be done in
+   the UI. Five can be done through the API by someone reading the source; three (a third shift,
+   a new station type, different visitor categories) need a migration and a deploy. (F02-003,
+   F02-004)
+3. **Two numbers the committee reads are wrong.** Rows dated in the future count as "today" and
+   "last hour" on the live dashboard and TV: importing the screen's own template moved today's
+   registrations from 12 to 29. And the report counts every shift that has not happened yet as a
+   no-show (95 %). (F02-006, F02-027)
+4. **Nothing links to anything.** No station, person, card, incident or import has a page, and
+   no dashboard number or warning can be tapped. "What happened at DCDF?" is a tour of four
+   screens. (F02-029, F02-007)
+5. **Incidents vanish after they are reported.** They are counted on the Chief's dashboard, but
+   nobody can read one, add a follow-up or close it, so "incidents open" only ever goes up.
+   (F02-015)
+6. **Mistakes cannot be fixed.** After the 10-second undo, a wrong tap, a miscounted gift box or a
+   spoiled card stays in the numbers; void, adjust and reissue exist only in the API. (F02-013)
+7. **The roster is stuck.** The import preview crashes whenever the file has two new people, no
+   screen assigns or moves a shift, and the Deputy, who is allowed to edit the roster, is told
+   they cannot. (F02-002, F02-003, F02-031)
+8. **"No" looks like "broken".** Roles can open screens they cannot use, and the refusal reads as
+   an outage ("could not be loaded"), a network fault ("check your connection") or loads forever.
+   (F02-025, F02-030)
+9. **Shifts change silently.** Volunteers cannot ask to swap, and when an IC approves a swap made
+   another way, the shift disappears from one person and appears on another with no message.
+   The Chief's gap list does not say which shift a gap is in. (F02-014, F02-019, F02-008)
+10. **Event-day safety UI gets in the way.** Two lost-person alerts cover half a phone screen and
+    block buttons under them; an announcement with no audience chosen goes to everyone as an
+    urgent push; attendance is dead until a server setting is added and the server restarted.
+    (F02-016, F02-009, F02-017)
+
+### All findings, ranked
+
+| ID      | Sev     | Type           | Title                                                                | Phase        |
+| ------- | ------- | -------------- | -------------------------------------------------------------------- | ------------ |
+| F02-001 | Blocker | needs-redeploy | No way to create or hold a second event                              | P09.1, P13.1 |
+| F02-006 | High    | broken         | Future-dated records count in today's dashboard                      | P06, P09.4   |
+| F02-027 | High    | broken         | No-shows count shifts that have not happened yet                     | P06          |
+| F02-015 | High    | dead-end       | Incidents cannot be seen or worked after they are reported           | P13.7, P14.1 |
+| F02-013 | High    | needs-API/SQL  | Corrections (void, stock adjust, card reissue) have no screen        | P13.7, P14.2 |
+| F02-003 | High    | needs-API/SQL  | Setup entities have endpoints but no screens                         | P13.2, P13.7 |
+| F02-004 | High    | needs-redeploy | Taxonomy cannot change without a migration                           | P09.2, P09.3 |
+| F02-029 | High    | disconnected   | No entity has its own page; nothing links to anything                | P14.1–P14.3  |
+| F02-002 | High    | broken         | Roster import dry run 500s with two or more new people               | P06          |
+| F02-030 | Medium  | confusing      | Denials reported as outages, network faults or endless loading       | P11.8        |
+| F02-031 | Medium  | inconsistent   | Deputy told they cannot edit the roster, which the server allows     | P11.7, P13.7 |
+| F02-025 | Medium  | confusing      | Screens a role cannot use open anyway and fail on submit             | P11.7, P11.8 |
+| F02-016 | Medium  | confusing      | Lost-person alerts stack, stick and block controls on phones         | P14.4        |
+| F02-009 | Medium  | confusing      | Announcement with no audience chosen goes to the whole event         | P14.4        |
+| F02-017 | Medium  | needs-redeploy | Attendance dead until an env var is set and the server restarted     | P10.1, P13.1 |
+| F02-007 | Medium  | disconnected   | Live dashboard does not drill down                                   | P14.1, P14.2 |
+| F02-008 | Medium  | confusing      | Staffing gaps omit the shift block and cannot be acted on            | P13.7, P14.1 |
+| F02-019 | Medium  | disconnected   | A swap decision changes shifts without telling anyone                | P14.3        |
+| F02-014 | Medium  | needs-API/SQL  | Volunteers cannot request or withdraw a swap                         | P13.7, P14.3 |
+| F02-024 | Medium  | needs-API/SQL  | The audit log has no screen                                          | P13.7, P14.1 |
+| F02-023 | Medium  | needs-API/SQL  | Briefing slots have no screen; mandatory brief points never shown    | P13.3, P14.3 |
+| F02-022 | Medium  | confusing      | A parked capture can be copied but never cleared                     | P14.4        |
+| F02-011 | Medium  | confusing      | IC console repeats people per block and forgets the IC's station     | P07, P14.1   |
+| F02-012 | Medium  | confusing      | Imported fallback rows appear as a person's device taps              | P14.2        |
+| F02-028 | Medium  | confusing      | Lost-person outcomes invisible until the purge runs                  | P14.2        |
+| F02-032 | Medium  | broken         | Two tabs refreshing at once sign the person out everywhere           | P03, P12     |
+| F02-005 | Low     | confusing      | Saving settings marks every field "changed from default"             | P10.1        |
+| F02-010 | Low     | broken         | Every page load sends a settings request before the session is ready | P07          |
+| F02-018 | Low     | confusing      | My shift lists every assignment ever, in one flat list               | P14.3        |
+| F02-020 | Low     | inconsistent   | Screens call endpoints their role may not use (instance of F02-025)  | P07, P11.7   |
+| F02-021 | Low     | inconsistent   | The undo copy hardcodes ten seconds                                  | P10.1        |
+| F02-026 | Low     | inconsistent   | The CSV export is written for machines, not the report's readers     | P14.5        |
+
+**Deduplicated:** the "no screen" cases are one finding per task (setup, corrections, incidents,
+swaps, briefing, audit), not one per endpoint; PF-09 holds the endpoint list. F02-020 is kept apart
+from F02-025 because it costs a 403 on every load of a capture screen.
+
+### P01 follow-ups, closed
+
+| P01 item                                    | What the journeys showed                                                                                                              |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `SwapStatus.CANCELLED` never written        | No one can withdraw a swap; there is no request screen either (F02-014).                                                              |
+| `IncidentStatus.ACKNOWLEDGED` never written | Reachable only by calling `POST /incidents/:id/status` directly; no incident screen (F02-015).                                        |
+| `CardStatus.LOST` never written             | No card screen; `reissueCard` leaves the original as it was, so "lost" is never recorded (F02-013; P03 to confirm intent).            |
+| `LostFoundStatus.DISPOSED` never written    | Close-out stops at `UNCLAIMED_AT_CLOSE`; nothing records an item's fate (Journey 6, requirement 1).                                   |
+| `MANDATORY_BRIEF_POINTS` unrendered         | Briefing slots have no screen, so the points are never shown (F02-023).                                                               |
+| F01-046 hardcoded shift hours               | Confirmed: after moving Morning to 08:00–12:30, home and My shift still say 09:30–14:00 (`volunteer-first-03`, `volunteer-booth-01`). |
+| F01-047 `eventName` never displayed         | Confirmed: renamed to "Test Event 2027", every screen still says SPOH 2027 (`admin-setup-08`).                                        |
+| PF-09 endpoints with no caller              | Confirmed: 42 of 95 routes (`reports/P02/permissions.json`); user-facing gaps as above.                                               |
 
 ---
 
@@ -645,7 +737,7 @@ nothing a user sees links to a related thing. The data model already has the rel
 
 ## Permission experience · P02.9
 
-**Method.** `node remediation/tools/journeys/permissions.mjs` reads all 93 routes with their
+**Method.** `node remediation/tools/journeys/permissions.mjs` reads all 95 routes with their
 `requireCapability` / `requireStationScope`, sets them against `CAPABILITY_MATRIX` (the design:
 "what the role is meant to do"), finds client callers, and probes every parameter-free GET as each
 of the six roles. Output: `reports/P02/permissions.json`. **The server agrees with the matrix on
@@ -701,4 +793,25 @@ that shows them.
 - **Fix:** Separate "edit shifts" (`roster.edit`) from "edit role and access" (`user.provision`) in
   the UI; decide the Deputy's scope under D-03.
 - **Phase:** P11.7, P13.7
+- **Status:** open
+
+---
+
+## Found while building the harness · P02.1
+
+### F02-032 — Two tabs refreshing at once sign the person out everywhere
+
+- **Severity:** Medium
+- **Type:** broken · Role: all
+- **Area:** `server/src/modules/auth/service.ts:161–162` (a rotated token presented again revokes
+  the whole family); `client/src/lib/session.ts` (each tab refreshes on load)
+- **Evidence:** the first harness version refreshed through a side request while the page
+  refreshed on load; the phone session was lost and `RefreshSession` holds a `reuse-detected` row.
+  Two tabs of the app reloading together (a browser restoring tabs, a phone waking with two tabs
+  open) present the same cookie in the same way.
+- **Impact:** The volunteer is signed out on every device, mid-shift, and sign-in is rate-limited.
+  Reuse detection is right for a stolen token; it cannot tell that case from two honest tabs.
+- **Fix:** A short grace window in which the just-rotated token returns the same successor;
+  coordinate refresh across tabs (`BroadcastChannel` or a lock). P03 to reproduce with a test.
+- **Phase:** P03 (repro), P12
 - **Status:** open

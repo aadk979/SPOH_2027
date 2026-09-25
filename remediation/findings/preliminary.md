@@ -80,6 +80,7 @@ closed during the audit phase named. IDs are kept when a finding moves into an F
   `/roster/briefing-slots*`, `/auth/sessions*`, `/audit` (screen on audit branch only),
   `/roster/import` (screen on audit branch only), `/reports/summary` only partially.
 - **Verify in:** P02 · **Fix in:** P13.7
+- **Status:** Confirmed in P02.9. `reports/P02/permissions.json` finds 42 of 95 routes with no client caller (one is the OAuth callback, which needs none). The user-facing gaps are F02-003 (setup), F02-013 (corrections), F02-014 (swap requests), F02-015 (incidents), F02-023 (briefing slots) and F02-024 (audit). `/auth/sessions*` also has no screen. `/roster/import` has no screen and its dry run fails (F02-002).
 
 ### PF-10 — Layering is conventional, not enforced
 
