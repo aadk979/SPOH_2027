@@ -1,0 +1,25 @@
+client/src/app/capture/registration/group/page.tsx:32:  { value: 'OTHER', label: 'Other' },
+client/src/app/capture/registration/page.tsx:31:  { value: 'OTHER', label: 'Other' },
+client/src/app/safety/incident/new/page.tsx:39:  { value: 'OTHER', label: 'Other' },
+client/src/components/ShiftOverview.tsx:149:  if (can('registration.create') && assignment.station.kind === 'SIGNUP_BOOTH') {
+client/src/components/ShiftOverview.tsx:173:  if (can('gift.redeem') && assignment.station.kind === 'MISSION_COMPLETE') {
+server/prisma/seed.ts:76:    code: 'SIGNUP_BOOTH',
+server/prisma/seed.ts:78:    kind: 'SIGNUP_BOOTH',
+server/prisma/seed.ts:85:    code: 'WELCOME_LOUNGE',
+server/prisma/seed.ts:87:    kind: 'WELCOME_LOUNGE',
+server/prisma/seed.ts:96:    kind: 'COURSE_STATION',
+server/prisma/seed.ts:106:    kind: 'COURSE_STATION',
+server/prisma/seed.ts:116:    kind: 'COURSE_STATION',
+server/prisma/seed.ts:124:    code: 'MISSION_COMPLETE',
+server/prisma/seed.ts:126:    kind: 'MISSION_COMPLETE',
+server/prisma/seed.ts:133:    code: 'WELCOME_PARTY',
+server/prisma/seed.ts:135:    kind: 'WELCOME_PARTY',
+server/prisma/seed.ts:144:    kind: 'OTHER',
+server/prisma/seed.ts:194:  { email: 'booth@spoh2027.test', stationCode: 'SIGNUP_BOOTH', roleLabel: 'Registration' },
+server/prisma/seed.ts:196:  { email: 'ic@spoh2027.test', stationCode: 'SIGNUP_BOOTH', roleLabel: 'Booth IC' },
+server/scripts/load-test.mjs:40:const STATION_CODE = process.env.LOAD_TEST_STATION ?? 'SIGNUP_BOOTH';
+server/tests/helpers/fixtures.ts:57:      kind: 'OTHER',
+server/tests/integration/admin.test.ts:420:      .send({ code: 'NEW_LAB', name: 'New Lab', kind: 'COURSE_STATION', countsEntry: true });
+server/tests/integration/admin.test.ts:428:      .send({ code: 'NEW_LAB', name: 'Another', kind: 'OTHER' });
+server/tests/integration/admin.test.ts:438:      .send({ code: 'RENAME_ME', name: 'Station', kind: 'OTHER' })
+server/tests/integration/report.test.ts:163:      .send({ category: 'OTHER', stationId: boothStationId, idempotencyKey: idempotencyKey() });

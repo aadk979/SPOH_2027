@@ -1,0 +1,144 @@
+client/.env.example:6:NEXT_PUBLIC_API_BASE_URL=http://localhost:4010
+client/.env.example:11:# below is provisioned in ap-southeast-1 and matches the server's .env.example.
+client/.env.example:15:NEXT_PUBLIC_COGNITO_REGION=ap-southeast-1
+client/next.config.ts:11:const apiOrigin = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4010';
+client/playwright.config.ts:30:    baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:3000',
+client/src/app/sign-in/page.tsx:86:            placeholder="you@spoh2027.test"
+client/src/components/ui/Field.tsx:155:  "url(\"data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2012%208'%3E%3Cpath%20d='M1%201.5%206%206.5l5-5'%20stroke='%237a7a7a'%20stroke-width='1.75'%20fill='none'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E\")";
+client/src/lib/env.ts:21:  apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4010',
+client/tests/e2e/a11y.spec.ts:82:    await signIn(page, 'booth@spoh2027.test');
+client/tests/e2e/a11y.spec.ts:89:    await signIn(page, 'booth@spoh2027.test');
+client/tests/e2e/a11y.spec.ts:97:    await signIn(page, 'counter@spoh2027.test');
+client/tests/e2e/a11y.spec.ts:105:    await signIn(page, 'booth@spoh2027.test');
+client/tests/e2e/a11y.spec.ts:123:    await signIn(page, 'booth@spoh2027.test');
+client/tests/e2e/admin.spec.ts:18:const CHIEF = 'chief@spoh2027.test';
+client/tests/e2e/admin.spec.ts:19:const BOOTH = 'booth@spoh2027.test';
+client/tests/e2e/admin.spec.ts:78:    await expect(page.getByText('booth@spoh2027.test')).toBeVisible();
+client/tests/e2e/admin.spec.ts:103:    await page.getByLabel('Name or email').fill('admin@spoh2027.test');
+client/tests/e2e/admin.spec.ts:120:    await page.getByLabel('Name or email').fill('chief@spoh2027.test');
+client/tests/e2e/capture.spec.ts:12:const BOOTH = 'booth@spoh2027.test';
+client/tests/e2e/capture.spec.ts:13:const COUNTER = 'counter@spoh2027.test';
+client/tests/e2e/capture.spec.ts:14:const IC = 'ic@spoh2027.test';
+ops/backup/README.md:29:sudo BACKUP_BUCKET=spoh2027-backups-665146708212 \
+ops/backup/iam-policy.json:9:        "arn:aws:s3:::spoh2027-backups-665146708212",
+ops/backup/iam-policy.json:10:        "arn:aws:s3:::spoh2027-backups-665146708212/*"
+ops/backup/install.sh:7:#   sudo BACKUP_BUCKET=spoh2027-backups-665146708212 \
+ops/backup/install.sh:27:readonly AWS_REGION="${AWS_REGION:-ap-southeast-1}"
+ops/backup/spoh-backup-check.sh:29:readonly AWS_REGION="${AWS_REGION:-ap-southeast-1}"
+ops/backup/spoh-backup.sh:48:readonly AWS_REGION="${AWS_REGION:-ap-southeast-1}"
+ops/backup/spoh-restore.sh:30:readonly AWS_REGION="${AWS_REGION:-ap-southeast-1}"
+server/.env.example:26:# in ap-southeast-1 — these are public client identifiers, not secrets, and they
+server/.env.example:28:COGNITO_REGION=ap-southeast-1
+server/.env.example:40:CORS_ALLOWED_ORIGINS=http://localhost:3000
+server/.env.example:63:AWS_REGION=ap-southeast-1
+server/.env.example:71:# ATTENDANCE_ROOT_EMAIL=event-root@example.com
+server/prisma/seed.ts:163:  { email: 'admin@spoh2027.test', displayName: 'Ada Admin', role: 'ADMIN', portfolio: null },
+server/prisma/seed.ts:165:    email: 'lead@spoh2027.test',
+server/prisma/seed.ts:171:    email: 'chief@spoh2027.test',
+server/prisma/seed.ts:177:    email: 'dc@spoh2027.test',
+server/prisma/seed.ts:182:  { email: 'ic@spoh2027.test', displayName: 'Ivan IC', role: 'IC', portfolio: null },
+server/prisma/seed.ts:183:  { email: 'booth@spoh2027.test', displayName: 'Bea Booth', role: 'VOLUNTEER', portfolio: null },
+server/prisma/seed.ts:185:    email: 'counter@spoh2027.test',
+server/prisma/seed.ts:194:  { email: 'booth@spoh2027.test', stationCode: 'SIGNUP_BOOTH', roleLabel: 'Registration' },
+server/prisma/seed.ts:195:  { email: 'counter@spoh2027.test', stationCode: 'DCDF_STATION', roleLabel: 'Counter' },
+server/prisma/seed.ts:196:  { email: 'ic@spoh2027.test', stationCode: 'SIGNUP_BOOTH', roleLabel: 'Booth IC' },
+server/prisma/seed.ts:280:    'admin@spoh2027.test'
+server/prisma/seed.ts:323:    ['booth@spoh2027.test', 'ic@spoh2027.test'],
+server/prisma/seed.ts:324:    ['counter@spoh2027.test', 'ic@spoh2027.test'],
+server/prisma/seed.ts:325:    ['ic@spoh2027.test', 'dc@spoh2027.test'],
+server/prisma/seed.ts:326:    ['dc@spoh2027.test', 'chief@spoh2027.test'],
+server/prisma/seed.ts:459:      '      sign in with POST /api/v1/dev-auth/sign-in { "email": "booth@spoh2027.test" }',
+server/scripts/load-test.mjs:38:const BASE = process.env.LOAD_TEST_API ?? 'http://localhost:4010';
+server/scripts/load-test.mjs:39:const CHIEF_EMAIL = process.env.LOAD_TEST_CHIEF ?? 'chief@spoh2027.test';
+server/scripts/sync-cognito-subs.mjs:39:const region = process.env.COGNITO_REGION ?? 'ap-southeast-1';
+server/scripts/verify-cognito.mjs:19: *   node scripts/verify-cognito.mjs --api https://staging-api.example
+server/scripts/verify-cognito.mjs:43:const REGION = arg('region') ?? process.env.COGNITO_REGION ?? 'ap-southeast-1';
+server/scripts/verify-cognito.mjs:44:const API = arg('api') ?? process.env.VERIFY_API ?? 'http://localhost:4010';
+server/src/config/env.ts:53:    COGNITO_REGION: z.string().min(1).default('ap-southeast-1'),
+server/src/config/env.ts:56:    /** Hosted UI base, e.g. https://spoh2027-livetest.auth.ap-southeast-1.amazoncognito.com */
+server/src/config/env.ts:62:    CORS_ALLOWED_ORIGINS: CsvList.default(['http://localhost:3000']),
+server/src/config/env.ts:114:    AWS_REGION: z.string().default('ap-southeast-1'),
+server/src/config/env.ts:247:      env.CORS_ALLOWED_ORIGINS.some((origin) => origin.startsWith('http://'))
+server/src/modules/health/router.ts:10: * spoh-prod.abc123.ap-southeast-1.rds.amazonaws.com refused".
+server/tests/integration/admin.test.ts:34:  chief = await createVolunteer({ email: 'chief@spoh.test', role: 'CHIEF_COORDINATOR' });
+server/tests/integration/admin.test.ts:35:  admin = await createVolunteer({ email: 'admin@spoh.test', role: 'ADMIN' });
+server/tests/integration/admin.test.ts:36:  ic = await createVolunteer({ email: 'ic@spoh.test', role: 'IC' });
+server/tests/integration/admin.test.ts:37:  volunteer = await createVolunteer({ email: 'vol@spoh.test', role: 'VOLUNTEER' });
+server/tests/integration/admin.test.ts:81:    expect(response.body.data[0].email).toBe('vol@spoh.test');
+server/tests/integration/admin.test.ts:108:      email: 'chief2@spoh.test',
+server/tests/integration/admin.test.ts:155:      .send({ email: 'vol@spoh.test' })
+server/tests/integration/admin.test.ts:176:    await request(app).post('/api/v1/auth/session').send({ email: 'vol@spoh.test' }).expect(201);
+server/tests/integration/admin.test.ts:223:      .send({ email: 'vol@spoh.test' })
+server/tests/integration/admin.test.ts:249:      .send({ email: 'vol@spoh.test' });
+server/tests/integration/admin.test.ts:259:        endpoint: 'https://push.example/abc',
+server/tests/integration/admin.test.ts:323:    await request(app).post('/api/v1/auth/session').send({ email: 'vol@spoh.test' }).expect(201);
+server/tests/integration/attendance.test.ts:45:  root = await createVolunteer({ email: 'root@attendance.test', role: 'ADMIN' });
+server/tests/integration/attendance.test.ts:46:  exco = await createVolunteer({ email: 'exco@attendance.test', role: 'IC' });
+server/tests/integration/attendance.test.ts:47:  volunteer = await createVolunteer({ email: 'volunteer@attendance.test', role: 'VOLUNTEER' });
+server/tests/integration/attendance.test.ts:60:    const admin = await createVolunteer({ email: 'other-admin@test.test', role: 'ADMIN' });
+server/tests/integration/attendance.test.ts:109:    const other = await createVolunteer({ email: 'another-exco@attendance.test', role: 'LEAD' });
+server/tests/integration/auth.test.ts:46:    await createVolunteer({ email: 'ic@spoh.test', role: 'IC', displayName: 'Sam IC' });
+server/tests/integration/auth.test.ts:50:    const response = await openSession('ic@spoh.test');
+server/tests/integration/auth.test.ts:60:    const response = await openSession('ic@spoh.test');
+server/tests/integration/auth.test.ts:70:    const response = await openSession('ic@spoh.test');
+server/tests/integration/auth.test.ts:75:    const response = await openSession('ic@spoh.test');
+server/tests/integration/auth.test.ts:85:    const response = await openSession('stranger@spoh.test');
+server/tests/integration/auth.test.ts:91:      where: { email: 'ic@spoh.test' },
+server/tests/integration/auth.test.ts:95:    const response = await openSession('ic@spoh.test');
+server/tests/integration/auth.test.ts:103:      .set('Origin', 'https://not-us.example')
+server/tests/integration/auth.test.ts:104:      .send({ email: 'ic@spoh.test' });
+server/tests/integration/auth.test.ts:113:    await createVolunteer({ email: 'ic@spoh.test', role: 'IC' });
+server/tests/integration/auth.test.ts:117:    const session = await openSession('ic@spoh.test');
+server/tests/integration/auth.test.ts:128:    const session = await openSession('ic@spoh.test');
+server/tests/integration/auth.test.ts:146:    await createVolunteer({ email: 'ic@spoh.test', role: 'IC' });
+server/tests/integration/auth.test.ts:150:    const session = await openSession('ic@spoh.test');
+server/tests/integration/auth.test.ts:165:    const session = await openSession('ic@spoh.test');
+server/tests/integration/auth.test.ts:184:    const session = await openSession('ic@spoh.test');
+server/tests/integration/auth.test.ts:224:    await createVolunteer({ email: 'ic@spoh.test', role: 'IC' });
+server/tests/integration/auth.test.ts:225:    await createVolunteer({ email: 'other@spoh.test', role: 'IC' });
+server/tests/integration/auth.test.ts:229:    const first = await openSession('ic@spoh.test');
+server/tests/integration/auth.test.ts:230:    await openSession('ic@spoh.test');
+server/tests/integration/auth.test.ts:242:    const mine = await openSession('ic@spoh.test');
+server/tests/integration/auth.test.ts:243:    const theirs = await openSession('other@spoh.test');
+server/tests/integration/auth.test.ts:246:      where: { volunteer: { email: 'other@spoh.test' } },
+server/tests/integration/capture.test.ts:47:  booth = await createVolunteer({ email: 'booth@capture.test', role: 'VOLUNTEER' });
+server/tests/integration/capture.test.ts:48:  counter = await createVolunteer({ email: 'counter@capture.test', role: 'VOLUNTEER' });
+server/tests/integration/capture.test.ts:49:  ic = await createVolunteer({ email: 'ic@capture.test', role: 'IC' });
+server/tests/integration/comms.test.ts:47:  boothVolunteer = await createVolunteer({ email: 'booth@comms.test', role: 'VOLUNTEER' });
+server/tests/integration/comms.test.ts:48:  roomVolunteer = await createVolunteer({ email: 'room@comms.test', role: 'VOLUNTEER' });
+server/tests/integration/comms.test.ts:49:  spare = await createVolunteer({ email: 'spare@comms.test', role: 'VOLUNTEER' });
+server/tests/integration/comms.test.ts:50:  ic = await createVolunteer({ email: 'ic@comms.test', role: 'IC' });
+server/tests/integration/comms.test.ts:51:  chief = await createVolunteer({ email: 'chief@comms.test', role: 'CHIEF_COORDINATOR' });
+server/tests/integration/dashboard.test.ts:52:  booth = await createVolunteer({ email: 'booth@dash.test', role: 'VOLUNTEER' });
+server/tests/integration/dashboard.test.ts:53:  counter = await createVolunteer({ email: 'counter@dash.test', role: 'VOLUNTEER' });
+server/tests/integration/dashboard.test.ts:54:  ic = await createVolunteer({ email: 'ic@dash.test', role: 'IC' });
+server/tests/integration/dashboard.test.ts:55:  chief = await createVolunteer({ email: 'chief@dash.test', role: 'CHIEF_COORDINATOR' });
+server/tests/integration/fallback.test.ts:44:  volunteer = await createVolunteer({ email: 'v@fb.test', role: 'VOLUNTEER' });
+server/tests/integration/fallback.test.ts:45:  ic = await createVolunteer({ email: 'ic@fb.test', role: 'IC' });
+server/tests/integration/fallback.test.ts:46:  dc = await createVolunteer({ email: 'dc@fb.test', role: 'DEPUTY_COORDINATOR' });
+server/tests/integration/fallback.test.ts:47:  chief = await createVolunteer({ email: 'chief@fb.test', role: 'CHIEF_COORDINATOR' });
+server/tests/integration/gift.test.ts:44:  volunteer = await createVolunteer({ email: 'gift@gift.test', role: 'VOLUNTEER' });
+server/tests/integration/gift.test.ts:45:  ic = await createVolunteer({ email: 'ic@gift.test', role: 'IC' });
+server/tests/integration/lostPerson.test.ts:43:  finder = await createVolunteer({ email: 'finder@lost.test', role: 'VOLUNTEER' });
+server/tests/integration/lostPerson.test.ts:44:  searcher = await createVolunteer({ email: 'searcher@lost.test', role: 'VOLUNTEER' });
+server/tests/integration/lostPerson.test.ts:45:  ic = await createVolunteer({ email: 'ic@lost.test', role: 'IC' });
+server/tests/integration/missionCard.test.ts:55:  booth = await createVolunteer({ email: 'booth@card.test', role: 'VOLUNTEER' });
+server/tests/integration/missionCard.test.ts:56:  facilitator = await createVolunteer({ email: 'fac@card.test', role: 'VOLUNTEER' });
+server/tests/integration/missionCard.test.ts:57:  ic = await createVolunteer({ email: 'ic@card.test', role: 'IC' });
+server/tests/integration/missionCard.test.ts:58:  admin = await createVolunteer({ email: 'admin@card.test', role: 'ADMIN' });
+server/tests/integration/rbac.test.ts:143:      rows: [{ displayName: 'Preview Only', email: 'preview@rbac.test', role: 'VOLUNTEER' }],
+server/tests/integration/report.test.ts:49:  booth = await createVolunteer({ email: 'booth@rep.test', role: 'VOLUNTEER' });
+server/tests/integration/report.test.ts:50:  counter = await createVolunteer({ email: 'counter@rep.test', role: 'VOLUNTEER' });
+server/tests/integration/report.test.ts:51:  ic = await createVolunteer({ email: 'ic@rep.test', role: 'IC' });
+server/tests/integration/report.test.ts:52:  chief = await createVolunteer({ email: 'chief@rep.test', role: 'CHIEF_COORDINATOR' });
+server/tests/integration/report.test.ts:53:  lead = await createVolunteer({ email: 'lead@rep.test', role: 'LEAD' });
+server/tests/integration/security.test.ts:40:  volunteer = await createVolunteer({ email: 'v@sec.test', role: 'VOLUNTEER' });
+server/tests/integration/security.test.ts:41:  ic = await createVolunteer({ email: 'ic@sec.test', role: 'IC' });
+server/tests/integration/security.test.ts:42:  chief = await createVolunteer({ email: 'chief@sec.test', role: 'CHIEF_COORDINATOR' });
+server/tests/integration/security.test.ts:180:    const other = await createVolunteer({ email: 'other@sec.test', role: 'VOLUNTEER' });
+server/tests/integration/security.test.ts:195:    const ghost = await createVolunteer({ email: 'ghost@sec.test', role: 'VOLUNTEER' });
+server/tests/integration/security.test.ts:283:    const allowed = await request(app).get('/healthz').set('Origin', 'http://localhost:3000');
+server/tests/integration/security.test.ts:285:    expect(allowed.headers['access-control-allow-origin']).toBe('http://localhost:3000');
+server/tests/integration/security.test.ts:289:    const denied = await request(app).get('/healthz').set('Origin', 'https://evil.example');
+server/vitest.config.ts:40:            ATTENDANCE_ROOT_EMAIL: 'root@attendance.test',
+server/vitest.config.ts:43:            CORS_ALLOWED_ORIGINS: 'http://localhost:3000',

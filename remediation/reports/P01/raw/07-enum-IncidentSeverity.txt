@@ -1,0 +1,9 @@
+client/src/app/safety/incident/new/page.tsx:43:  { value: 'LOW', label: 'Low', hint: 'Noted, no action needed now' },
+client/src/app/safety/incident/new/page.tsx:44:  { value: 'MEDIUM', label: 'Medium', hint: 'Needs attention this shift' },
+client/src/app/safety/incident/new/page.tsx:45:  { value: 'HIGH', label: 'High', hint: 'Needs an IC now' },
+client/src/app/safety/incident/new/page.tsx:46:  { value: 'CRITICAL', label: 'Critical', hint: 'Call as well as reporting' },
+client/src/app/safety/incident/new/page.tsx:55:  const [severity, setSeverity] = useState<IncidentSeverity>('LOW');
+server/src/modules/dashboard/repo.ts:41:    prisma.incident.count({ where: { status: { not: 'RESOLVED' }, severity: 'CRITICAL' } }),
+server/src/modules/incident/service.ts:173:  if (incident.severity !== 'HIGH' && incident.severity !== 'CRITICAL') {
+server/tests/integration/rbac.test.ts:114:      severity: 'LOW',
+server/tests/integration/report.test.ts:389:            severity: 'LOW',

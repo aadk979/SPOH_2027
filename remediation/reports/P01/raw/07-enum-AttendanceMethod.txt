@@ -1,0 +1,39 @@
+client/src/app/attendance/page.tsx:110:                    {present.method === 'ROOT'
+client/src/app/attendance/page.tsx:112:                      : `${present.verifiedByName ?? 'Verifier'} · ${present.method === 'PIN' ? 'Secondary PIN' : 'QR scan'}`}
+client/src/app/attendance/page.tsx:152:                    <AttendanceScanner onScan={(token) => send({ method: 'QR', token })} />
+client/src/app/attendance/page.tsx:169:                        send({ method: 'PIN', pin });
+client/tests/e2e/attendance.spec.ts:54:        method: 'PIN',
+client/tests/e2e/attendance.spec.ts:61:      state.attendance = { id: 'present', presentAt: now, method: 'ROOT', verifiedByName: null };
+client/tests/e2e/attendance.spec.ts:126:    { method: 'PIN', pin: '1111111111' },
+client/tests/e2e/attendance.spec.ts:127:    { method: 'PIN', pin: '1234567890' },
+packages/shared/src/dto/attendance.ts:5:  z.object({ method: z.literal('QR'), token: z.string().min(1).max(2048) }).strict(),
+packages/shared/src/dto/attendance.ts:6:  z.object({ method: z.literal('PIN'), pin: z.string().regex(/^\d{10}$/) }).strict(),
+packages/shared/src/dto/attendance.ts:13:  method: z.enum(['ROOT', 'QR', 'PIN']),
+server/src/modules/attendance/service.ts:164:    return markPresent(tx, person, day.id, 'ROOT', null, audit, now);
+server/src/modules/attendance/service.ts:182:    (present.method === 'ROOT' && !isRoot(issuer))
+server/src/modules/attendance/service.ts:292:      const claims = proof.method === 'QR' ? await verifyAttendanceToken(proof.token, now) : null;
+server/src/modules/attendance/service.ts:296:          : { pinHash: hashPin(proof.method === 'PIN' ? proof.pin : '') },
+server/src/modules/attendance/service.ts:313:      if (proof.method === 'QR' && (!challenge.campusNetwork || !onCampus(audit.ip))) {
+server/tests/integration/attendance.test.ts:34:  expect((await post(exco, '/attendance/submit', { method: 'QR', token: code.token })).status).toBe(
+server/tests/integration/attendance.test.ts:72:        (await post(person, '/attendance/submit', { method: 'QR', token: code.token })).status,
+server/tests/integration/attendance.test.ts:80:      method: 'QR',
+server/tests/integration/attendance.test.ts:84:    expect(response.body.attendance.method).toBe('QR');
+server/tests/integration/attendance.test.ts:111:      (await post(other, '/attendance/submit', { method: 'QR', token: code.token })).status,
+server/tests/integration/attendance.test.ts:113:    expect((await post(other, '/attendance/submit', { method: 'PIN', pin: code.pin })).status).toBe(
+server/tests/integration/attendance.test.ts:117:      (await post(volunteer, '/attendance/submit', { method: 'QR', token: root.token })).status,
+server/tests/integration/attendance.test.ts:125:        await post(volunteer, '/attendance/submit', { method: 'QR', token: code.token }).set(
+server/tests/integration/attendance.test.ts:132:      method: 'PIN',
+server/tests/integration/attendance.test.ts:136:    expect(result.body.attendance.method).toBe('PIN');
+server/tests/integration/attendance.test.ts:144:      (await post(exco, '/attendance/submit', { method: 'QR', token: code.body.token })).status,
+server/tests/integration/attendance.test.ts:147:      (await post(exco, '/attendance/submit', { method: 'PIN', pin: code.body.pin })).status,
+server/tests/integration/attendance.test.ts:154:      (await post(exco, '/attendance/submit', { method: 'QR', token: old.token })).status,
+server/tests/integration/attendance.test.ts:156:    expect((await post(exco, '/attendance/submit', { method: 'PIN', pin: old.pin })).status).toBe(
+server/tests/integration/attendance.test.ts:161:      (await post(volunteer, '/attendance/submit', { method: 'QR', token: current.body.token }))
+server/tests/integration/attendance.test.ts:165:      (await post(volunteer, '/attendance/submit', { method: 'PIN', pin: current.body.pin }))
+server/tests/integration/attendance.test.ts:173:      (await post(volunteer, '/attendance/submit', { method: 'QR', token: code.token })).status,
+server/tests/integration/attendance.test.ts:180:      (await post(volunteer, '/attendance/submit', { method: 'PIN', pin: code.pin })).status,
+server/tests/integration/attendance.test.ts:190:      (await post(volunteer, '/attendance/submit', { method: 'PIN', pin: code.pin })).status,
+server/tests/integration/attendance.test.ts:196:      [1, 2, 3].map(() => post(volunteer, '/attendance/submit', { method: 'PIN', pin: code.pin })),
+server/tests/integration/attendance.test.ts:215:            method: 'PIN',
+server/tests/integration/attendance.test.ts:221:      (await post(volunteer, '/attendance/submit', { method: 'PIN', pin: code.pin })).status,
+server/tests/integration/attendance.test.ts:230:      (await post(volunteer, '/attendance/submit', { method: 'PIN', pin: fresh.body.pin })).status,

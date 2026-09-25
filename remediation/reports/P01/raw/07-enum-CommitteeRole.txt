@@ -1,0 +1,135 @@
+client/src/features/admin/useVolunteers.ts:121:  { value: 'ADMIN', label: 'Admin' },
+client/src/features/admin/useVolunteers.ts:122:  { value: 'LEAD', label: 'Lead' },
+client/src/features/admin/useVolunteers.ts:123:  { value: 'CHIEF_COORDINATOR', label: 'Chief Coordinator' },
+client/src/features/admin/useVolunteers.ts:124:  { value: 'DEPUTY_COORDINATOR', label: 'Deputy Coordinator' },
+client/src/features/admin/useVolunteers.ts:125:  { value: 'IC', label: 'IC' },
+client/src/features/admin/useVolunteers.ts:126:  { value: 'VOLUNTEER', label: 'Volunteer' },
+client/tests/e2e/attendance.spec.ts:9:    role: root ? 'ADMIN' : 'VOLUNTEER',
+client/tests/e2e/navigation.spec.ts:11:    role: leader ? 'CHIEF' : 'VOLUNTEER',
+packages/shared/src/capabilities.ts:49:const V = 'VOLUNTEER' as const;
+packages/shared/src/capabilities.ts:50:const I = 'IC' as const;
+packages/shared/src/capabilities.ts:51:const D = 'DEPUTY_COORDINATOR' as const;
+packages/shared/src/capabilities.ts:52:const C = 'CHIEF_COORDINATOR' as const;
+packages/shared/src/capabilities.ts:53:const L = 'LEAD' as const;
+packages/shared/src/capabilities.ts:54:const A = 'ADMIN' as const;
+packages/shared/src/dto/roster.ts:23:    role: CommitteeRole.default('VOLUNTEER'),
+packages/shared/src/dto/roster.ts:64:    role: CommitteeRole.default('VOLUNTEER'),
+server/prisma/seed.ts:163:  { email: 'admin@spoh2027.test', displayName: 'Ada Admin', role: 'ADMIN', portfolio: null },
+server/prisma/seed.ts:167:    role: 'LEAD',
+server/prisma/seed.ts:173:    role: 'CHIEF_COORDINATOR',
+server/prisma/seed.ts:179:    role: 'DEPUTY_COORDINATOR',
+server/prisma/seed.ts:182:  { email: 'ic@spoh2027.test', displayName: 'Ivan IC', role: 'IC', portfolio: null },
+server/prisma/seed.ts:183:  { email: 'booth@spoh2027.test', displayName: 'Bea Booth', role: 'VOLUNTEER', portfolio: null },
+server/prisma/seed.ts:187:    role: 'VOLUNTEER',
+server/prisma/seed.ts:290:      role: 'ADMIN' as CommitteeRole,
+server/prisma/seed.ts:292:    update: { role: 'ADMIN' as CommitteeRole, active: true },
+server/scripts/load-test.mjs:76:async function signIn(email, role = 'VOLUNTEER') {
+server/scripts/load-test.mjs:120:    role: 'VOLUNTEER',
+server/scripts/load-test.mjs:207:  const chiefToken = await signIn(CHIEF_EMAIL, 'CHIEF_COORDINATOR');
+server/scripts/verify-cognito.mjs:102:    ['IC', 40],
+server/src/middleware/auth/cognitoProvider.ts:57:  Admin: 'ADMIN',
+server/src/middleware/auth/cognitoProvider.ts:58:  Lead: 'LEAD',
+server/src/middleware/auth/cognitoProvider.ts:59:  ChiefCoordinator: 'CHIEF_COORDINATOR',
+server/src/middleware/auth/cognitoProvider.ts:60:  DeputyCoordinator: 'DEPUTY_COORDINATOR',
+server/src/middleware/auth/cognitoProvider.ts:61:  IC: 'IC',
+server/src/middleware/auth/cognitoProvider.ts:62:  Volunteer: 'VOLUNTEER',
+server/src/middleware/rbac.ts:97:        if (roleMeets(auth.role, 'IC')) {
+server/src/modules/announcement/service.ts:45:  if (!stationId && !roleMeets(sender.role, 'DEPUTY_COORDINATOR')) {
+server/src/modules/attendance/service.ts:25:    person.role === 'ADMIN' &&
+server/src/modules/attendance/service.ts:78:    isExco: person.role !== 'VOLUNTEER',
+server/src/modules/attendance/service.ts:180:    issuer.role === 'VOLUNTEER' ||
+server/src/modules/attendance/service.ts:311:      if (person.role !== 'VOLUNTEER' && !isRoot(issuer))
+server/src/modules/gift/service.ts:243:    audience: { everyone: false, minimumRole: 'DEPUTY_COORDINATOR', volunteerIds: [] },
+server/src/modules/identity/provider.ts:58:  IC: 'IC',
+server/src/modules/incident/service.ts:191:    audience: { everyone: false, minimumRole: 'IC', volunteerIds: [] },
+server/tests/integration/admin.test.ts:34:  chief = await createVolunteer({ email: 'chief@spoh.test', role: 'CHIEF_COORDINATOR' });
+server/tests/integration/admin.test.ts:35:  admin = await createVolunteer({ email: 'admin@spoh.test', role: 'ADMIN' });
+server/tests/integration/admin.test.ts:36:  ic = await createVolunteer({ email: 'ic@spoh.test', role: 'IC' });
+server/tests/integration/admin.test.ts:37:  volunteer = await createVolunteer({ email: 'vol@spoh.test', role: 'VOLUNTEER' });
+server/tests/integration/admin.test.ts:90:      .send({ role: 'ADMIN' });
+server/tests/integration/admin.test.ts:109:      role: 'CHIEF_COORDINATOR',
+server/tests/integration/admin.test.ts:115:      .send({ role: 'IC' });
+server/tests/integration/admin.test.ts:124:      .send({ role: 'VOLUNTEER' });
+server/tests/integration/admin.test.ts:161:      .send({ role: 'IC' });
+server/tests/integration/admin.test.ts:164:    expect(response.body.volunteer.role).toBe('IC');
+server/tests/integration/admin.test.ts:207:      .send({ role: 'IC' })
+server/tests/integration/admin.test.ts:215:    expect(entry?.before).toMatchObject({ role: 'VOLUNTEER' });
+server/tests/integration/attendance.test.ts:45:  root = await createVolunteer({ email: 'root@attendance.test', role: 'ADMIN' });
+server/tests/integration/attendance.test.ts:46:  exco = await createVolunteer({ email: 'exco@attendance.test', role: 'IC' });
+server/tests/integration/attendance.test.ts:47:  volunteer = await createVolunteer({ email: 'volunteer@attendance.test', role: 'VOLUNTEER' });
+server/tests/integration/attendance.test.ts:60:    const admin = await createVolunteer({ email: 'other-admin@test.test', role: 'ADMIN' });
+server/tests/integration/attendance.test.ts:65:  it.each<CommitteeRole>(['ADMIN', 'LEAD', 'CHIEF_COORDINATOR', 'DEPUTY_COORDINATOR', 'IC'])(
+server/tests/integration/attendance.test.ts:109:    const other = await createVolunteer({ email: 'another-exco@attendance.test', role: 'LEAD' });
+server/tests/integration/attendance.test.ts:177:      data: { active: true, role: 'VOLUNTEER' },
+server/tests/integration/attendance.test.ts:188:    volunteer = await createVolunteer({ email: volunteer.email, role: 'VOLUNTEER' });
+server/tests/integration/auth.test.ts:46:    await createVolunteer({ email: 'ic@spoh.test', role: 'IC', displayName: 'Sam IC' });
+server/tests/integration/auth.test.ts:113:    await createVolunteer({ email: 'ic@spoh.test', role: 'IC' });
+server/tests/integration/auth.test.ts:124:    expect(me.body.volunteer.role).toBe('IC');
+server/tests/integration/auth.test.ts:146:    await createVolunteer({ email: 'ic@spoh.test', role: 'IC' });
+server/tests/integration/auth.test.ts:224:    await createVolunteer({ email: 'ic@spoh.test', role: 'IC' });
+server/tests/integration/auth.test.ts:225:    await createVolunteer({ email: 'other@spoh.test', role: 'IC' });
+server/tests/integration/capture.test.ts:47:  booth = await createVolunteer({ email: 'booth@capture.test', role: 'VOLUNTEER' });
+server/tests/integration/capture.test.ts:48:  counter = await createVolunteer({ email: 'counter@capture.test', role: 'VOLUNTEER' });
+server/tests/integration/capture.test.ts:49:  ic = await createVolunteer({ email: 'ic@capture.test', role: 'IC' });
+server/tests/integration/comms.test.ts:47:  boothVolunteer = await createVolunteer({ email: 'booth@comms.test', role: 'VOLUNTEER' });
+server/tests/integration/comms.test.ts:48:  roomVolunteer = await createVolunteer({ email: 'room@comms.test', role: 'VOLUNTEER' });
+server/tests/integration/comms.test.ts:49:  spare = await createVolunteer({ email: 'spare@comms.test', role: 'VOLUNTEER' });
+server/tests/integration/comms.test.ts:50:  ic = await createVolunteer({ email: 'ic@comms.test', role: 'IC' });
+server/tests/integration/comms.test.ts:51:  chief = await createVolunteer({ email: 'chief@comms.test', role: 'CHIEF_COORDINATOR' });
+server/tests/integration/comms.test.ts:125:    await send(chief, { body: 'ICs, gather at the desk.', target: { role: 'IC' } });
+server/tests/integration/dashboard.test.ts:52:  booth = await createVolunteer({ email: 'booth@dash.test', role: 'VOLUNTEER' });
+server/tests/integration/dashboard.test.ts:53:  counter = await createVolunteer({ email: 'counter@dash.test', role: 'VOLUNTEER' });
+server/tests/integration/dashboard.test.ts:54:  ic = await createVolunteer({ email: 'ic@dash.test', role: 'IC' });
+server/tests/integration/dashboard.test.ts:55:  chief = await createVolunteer({ email: 'chief@dash.test', role: 'CHIEF_COORDINATOR' });
+server/tests/integration/fallback.test.ts:44:  volunteer = await createVolunteer({ email: 'v@fb.test', role: 'VOLUNTEER' });
+server/tests/integration/fallback.test.ts:45:  ic = await createVolunteer({ email: 'ic@fb.test', role: 'IC' });
+server/tests/integration/fallback.test.ts:46:  dc = await createVolunteer({ email: 'dc@fb.test', role: 'DEPUTY_COORDINATOR' });
+server/tests/integration/fallback.test.ts:47:  chief = await createVolunteer({ email: 'chief@fb.test', role: 'CHIEF_COORDINATOR' });
+server/tests/integration/gift.test.ts:44:  volunteer = await createVolunteer({ email: 'gift@gift.test', role: 'VOLUNTEER' });
+server/tests/integration/gift.test.ts:45:  ic = await createVolunteer({ email: 'ic@gift.test', role: 'IC' });
+server/tests/integration/lostPerson.test.ts:43:  finder = await createVolunteer({ email: 'finder@lost.test', role: 'VOLUNTEER' });
+server/tests/integration/lostPerson.test.ts:44:  searcher = await createVolunteer({ email: 'searcher@lost.test', role: 'VOLUNTEER' });
+server/tests/integration/lostPerson.test.ts:45:  ic = await createVolunteer({ email: 'ic@lost.test', role: 'IC' });
+server/tests/integration/missionCard.test.ts:55:  booth = await createVolunteer({ email: 'booth@card.test', role: 'VOLUNTEER' });
+server/tests/integration/missionCard.test.ts:56:  facilitator = await createVolunteer({ email: 'fac@card.test', role: 'VOLUNTEER' });
+server/tests/integration/missionCard.test.ts:57:  ic = await createVolunteer({ email: 'ic@card.test', role: 'IC' });
+server/tests/integration/missionCard.test.ts:58:  admin = await createVolunteer({ email: 'admin@card.test', role: 'ADMIN' });
+server/tests/integration/rbac.test.ts:33:  'VOLUNTEER',
+server/tests/integration/rbac.test.ts:34:  'IC',
+server/tests/integration/rbac.test.ts:35:  'DEPUTY_COORDINATOR',
+server/tests/integration/rbac.test.ts:36:  'CHIEF_COORDINATOR',
+server/tests/integration/rbac.test.ts:37:  'LEAD',
+server/tests/integration/rbac.test.ts:38:  'ADMIN',
+server/tests/integration/rbac.test.ts:85:    allowed: ['VOLUNTEER', 'IC', 'DEPUTY_COORDINATOR', 'CHIEF_COORDINATOR', 'ADMIN'],
+server/tests/integration/rbac.test.ts:92:    allowed: ['VOLUNTEER', 'IC', 'DEPUTY_COORDINATOR', 'CHIEF_COORDINATOR', 'ADMIN'],
+server/tests/integration/rbac.test.ts:106:    allowed: ['IC', 'DEPUTY_COORDINATOR', 'CHIEF_COORDINATOR', 'ADMIN'],
+server/tests/integration/rbac.test.ts:120:    allowed: ['VOLUNTEER', 'IC', 'DEPUTY_COORDINATOR', 'CHIEF_COORDINATOR', 'LEAD', 'ADMIN'],
+server/tests/integration/rbac.test.ts:130:    allowed: ['VOLUNTEER', 'IC', 'DEPUTY_COORDINATOR', 'CHIEF_COORDINATOR', 'LEAD', 'ADMIN'],
+server/tests/integration/rbac.test.ts:136:    allowed: ['IC', 'DEPUTY_COORDINATOR', 'CHIEF_COORDINATOR', 'LEAD', 'ADMIN'],
+server/tests/integration/rbac.test.ts:143:      rows: [{ displayName: 'Preview Only', email: 'preview@rbac.test', role: 'VOLUNTEER' }],
+server/tests/integration/rbac.test.ts:146:    allowed: ['DEPUTY_COORDINATOR', 'CHIEF_COORDINATOR', 'ADMIN'],
+server/tests/integration/rbac.test.ts:155:      role: 'VOLUNTEER',
+server/tests/integration/rbac.test.ts:157:    allowed: ['CHIEF_COORDINATOR', 'ADMIN'],
+server/tests/integration/rbac.test.ts:163:    allowed: ['VOLUNTEER', 'IC', 'DEPUTY_COORDINATOR', 'CHIEF_COORDINATOR', 'LEAD', 'ADMIN'],
+server/tests/integration/report.test.ts:49:  booth = await createVolunteer({ email: 'booth@rep.test', role: 'VOLUNTEER' });
+server/tests/integration/report.test.ts:50:  counter = await createVolunteer({ email: 'counter@rep.test', role: 'VOLUNTEER' });
+server/tests/integration/report.test.ts:51:  ic = await createVolunteer({ email: 'ic@rep.test', role: 'IC' });
+server/tests/integration/report.test.ts:52:  chief = await createVolunteer({ email: 'chief@rep.test', role: 'CHIEF_COORDINATOR' });
+server/tests/integration/report.test.ts:53:  lead = await createVolunteer({ email: 'lead@rep.test', role: 'LEAD' });
+server/tests/integration/security.test.ts:40:  volunteer = await createVolunteer({ email: 'v@sec.test', role: 'VOLUNTEER' });
+server/tests/integration/security.test.ts:41:  ic = await createVolunteer({ email: 'ic@sec.test', role: 'IC' });
+server/tests/integration/security.test.ts:42:  chief = await createVolunteer({ email: 'chief@sec.test', role: 'CHIEF_COORDINATOR' });
+server/tests/integration/security.test.ts:102:        role: 'ADMIN',
+server/tests/integration/security.test.ts:180:    const other = await createVolunteer({ email: 'other@sec.test', role: 'VOLUNTEER' });
+server/tests/integration/security.test.ts:195:    const ghost = await createVolunteer({ email: 'ghost@sec.test', role: 'VOLUNTEER' });
+server/tests/unit/capabilities.test.ts:23:  'VOLUNTEER',
+server/tests/unit/capabilities.test.ts:24:  'IC',
+server/tests/unit/capabilities.test.ts:25:  'DEPUTY_COORDINATOR',
+server/tests/unit/capabilities.test.ts:26:  'CHIEF_COORDINATOR',
+server/tests/unit/capabilities.test.ts:27:  'LEAD',
+server/tests/unit/capabilities.test.ts:28:  'ADMIN',
+server/tests/unit/capabilities.test.ts:87:    const index = ROLES.indexOf('VOLUNTEER');
+server/tests/unit/capabilities.test.ts:89:    expect([...capabilitiesForRole('VOLUNTEER')].sort()).toEqual([...expected].sort());
+server/tests/unit/capabilities.test.ts:109:    expect(roleMeets('LEAD', 'VOLUNTEER')).toBe(true);
+server/tests/unit/capabilities.test.ts:113:    expect(roleHasCapability('LEAD', 'registration.create')).toBe(false);
+server/tests/unit/capabilities.test.ts:117:    expect(highestRole(['VOLUNTEER', 'IC', 'DEPUTY_COORDINATOR'])).toBe('DEPUTY_COORDINATOR');

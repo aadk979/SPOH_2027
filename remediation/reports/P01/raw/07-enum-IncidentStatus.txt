@@ -1,0 +1,3 @@
+server/src/modules/dashboard/repo.ts:40:    prisma.incident.count({ where: { status: { not: 'RESOLVED' } } }),
+server/src/modules/dashboard/repo.ts:41:    prisma.incident.count({ where: { status: { not: 'RESOLVED' }, severity: 'CRITICAL' } }),
+server/tests/integration/report.test.ts:390:            status: 'OPEN',

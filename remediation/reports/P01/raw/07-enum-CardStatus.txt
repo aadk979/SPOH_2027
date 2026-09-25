@@ -1,0 +1,32 @@
+client/src/app/capture/stamp/page.tsx:156:        {card.status === 'COMPLETED' ? 'Journey complete' : `${card.stamps.length} stamps so far`}
+server/src/modules/gift/service.ts:90:      } else if (card.status === 'VOIDED') {
+server/src/modules/gift/service.ts:95:        cardComplete = card.status === 'COMPLETED';
+server/src/modules/missionCard/repo.ts:99:    status: { not: 'UNISSUED' },
+server/src/modules/missionCard/repo.ts:123:  return prisma.missionCard.count({ where: { ...issuedWhere(filter), status: 'VOIDED' } });
+server/src/modules/missionCard/service.ts:77:    if (existing.status === 'VOIDED') {
+server/src/modules/missionCard/service.ts:85:    if (existing.status === 'UNISSUED') {
+server/src/modules/missionCard/service.ts:86:      await updateCard(tx, existing.id, { status: 'ISSUED', issuedAt: new Date() });
+server/src/modules/missionCard/service.ts:153:    if (existing.status === 'VOIDED') {
+server/src/modules/missionCard/service.ts:174:    if (existing.status === 'UNISSUED') {
+server/src/modules/missionCard/service.ts:175:      await updateCard(tx, existing.id, { status: 'ISSUED', issuedAt: recordedAt });
+server/src/modules/missionCard/service.ts:191:    if (justCompleted && existing.status !== 'COMPLETED') {
+server/src/modules/missionCard/service.ts:192:      await updateCard(tx, existing.id, { status: 'COMPLETED', completedAt: recordedAt });
+server/src/modules/missionCard/service.ts:227:    if (existing.status === 'VOIDED') {
+server/src/modules/missionCard/service.ts:231:    await updateCard(tx, existing.id, { status: 'VOIDED', voidedAt: new Date() });
+server/src/modules/missionCard/service.ts:239:      after: { status: 'VOIDED', reason },
+server/src/modules/missionCard/service.ts:283:    if (replacement.status !== 'UNISSUED') {
+server/src/modules/missionCard/service.ts:292:      status: original.status === 'COMPLETED' ? 'COMPLETED' : 'ISSUED',
+server/src/modules/missionCard/service.ts:311:    await updateCard(tx, original.id, { status: 'VOIDED', voidedAt: now });
+server/src/modules/missionCard/service.ts:395:      countByStatus('COMPLETED', filter),
+server/src/modules/registration/service.ts:122:      } else if (card.status === 'VOIDED') {
+server/src/modules/registration/service.ts:128:          data: { status: 'ISSUED', issuedAt: recordedAt },
+server/src/modules/report/repo.ts:131:      where: { status: 'COMPLETED', completedAt: { gte: range.from, lt: range.to } },
+server/src/modules/report/repo.ts:134:      where: { status: 'VOIDED', voidedAt: { gte: range.from, lt: range.to } },
+server/tests/integration/gift.test.ts:70:      status: 'ISSUED',
+server/tests/integration/missionCard.test.ts:104:    expect(response.body.card.status).toBe('UNISSUED');
+server/tests/integration/missionCard.test.ts:158:    expect(response.body.card.status).toBe('ISSUED');
+server/tests/integration/missionCard.test.ts:167:    expect(last.body.card.status).toBe('COMPLETED');
+server/tests/integration/missionCard.test.ts:218:    expect(response.body.card.status).toBe('ISSUED');
+server/tests/integration/missionCard.test.ts:241:    expect(await prisma.missionCard.count({ where: { status: 'ISSUED' } })).toBe(1);
+server/tests/integration/missionCard.test.ts:262:    expect(original?.status).toBe('VOIDED');
+server/tests/integration/missionCard.test.ts:307:    expect(created.every((card) => card.status === 'UNISSUED')).toBe(true);

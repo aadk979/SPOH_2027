@@ -1,0 +1,23 @@
+client/src/components/LostPersonBanner.tsx:132:                  onClick={() => resolve.mutate({ alertId: alert.id, outcome: 'RESOLVED_FOUND' })}
+client/src/features/lostPerson/useActiveAlerts.ts:54:    { alertId: string; outcome: 'RESOLVED_FOUND' | 'RESOLVED_OTHER' }
+packages/shared/src/dto/lostPerson.ts:61:    outcome: z.enum(['RESOLVED_FOUND', 'RESOLVED_OTHER']),
+server/src/modules/dashboard/repo.ts:47:  return prisma.lostPersonAlert.count({ where: { status: 'ACTIVE' } });
+server/src/modules/lostPerson/repo.ts:53:    where: { status: 'ACTIVE' },
+server/src/modules/lostPerson/repo.ts:90:  outcome: 'RESOLVED_FOUND' | 'RESOLVED_OTHER',
+server/src/modules/lostPerson/repo.ts:103:      status: { not: 'ACTIVE' },
+server/src/modules/lostPerson/repo.ts:117:    outcome: 'RESOLVED_FOUND' | 'RESOLVED_OTHER';
+server/src/modules/lostPerson/service.ts:144:  if (existing.status !== 'ACTIVE') {
+server/src/modules/lostPerson/service.ts:195:    if (alert.status === 'ACTIVE' || !alert.resolvedAt) continue;
+server/src/modules/lostPerson/service.ts:196:    const outcome: 'RESOLVED_FOUND' | 'RESOLVED_OTHER' = alert.status;
+server/src/modules/report/repo.ts:246:        status: { not: 'ACTIVE' },
+server/tests/integration/lostPerson.test.ts:63:    expect(response.body.alert.status).toBe('ACTIVE');
+server/tests/integration/lostPerson.test.ts:141:      .send({ outcome: 'RESOLVED_FOUND' });
+server/tests/integration/lostPerson.test.ts:152:      .send({ outcome: 'RESOLVED_FOUND', note: 'Reunited at the lounge' });
+server/tests/integration/lostPerson.test.ts:167:      .send({ outcome: 'RESOLVED_FOUND' });
+server/tests/integration/lostPerson.test.ts:172:      .send({ outcome: 'RESOLVED_FOUND' });
+server/tests/integration/lostPerson.test.ts:186:      .send({ outcome: 'RESOLVED_FOUND' });
+server/tests/integration/lostPerson.test.ts:204:      .send({ outcome: 'RESOLVED_FOUND' });
+server/tests/integration/lostPerson.test.ts:227:    expect(summaries[0]?.outcome).toBe('RESOLVED_FOUND');
+server/tests/integration/lostPerson.test.ts:237:      .send({ outcome: 'RESOLVED_OTHER' });
+server/tests/integration/report.test.ts:269:      .send({ outcome: 'RESOLVED_FOUND' });
+server/tests/integration/report.test.ts:305:      .send({ outcome: 'RESOLVED_FOUND' });

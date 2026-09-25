@@ -1,0 +1,14 @@
+client/src/app/safety/lost-found/page.tsx:54:      if (heldOnly) params.set('status', 'HELD');
+client/src/app/safety/lost-found/page.tsx:158:              {item.status === 'HELD' ? (
+client/src/app/safety/lost-found/page.tsx:182:    case 'HELD':
+client/src/app/safety/lost-found/page.tsx:184:    case 'CLAIMED':
+client/src/app/safety/lost-found/page.tsx:186:    case 'UNCLAIMED_AT_CLOSE':
+client/src/app/safety/lost-found/page.tsx:188:    case 'DISPOSED':
+client/src/app/safety/lost-found/page.tsx:194:  return status === 'HELD' ? 'warn' : status === 'CLAIMED' ? 'ok' : 'neutral';
+server/src/modules/lostFound/service.ts:125:    if (existing.status === 'CLAIMED') {
+server/src/modules/lostFound/service.ts:136:        status: 'CLAIMED',
+server/src/modules/lostFound/service.ts:150:      after: { status: 'CLAIMED' },
+server/src/modules/lostFound/service.ts:167:      where: { status: 'HELD' },
+server/src/modules/lostFound/service.ts:168:      data: { status: 'UNCLAIMED_AT_CLOSE' },
+server/src/modules/report/repo.ts:265:    claimed: byStatus.get('CLAIMED') ?? 0,
+server/src/modules/report/repo.ts:266:    unclaimed: (byStatus.get('HELD') ?? 0) + (byStatus.get('UNCLAIMED_AT_CLOSE') ?? 0),

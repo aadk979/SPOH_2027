@@ -1,0 +1,26 @@
+client/src/app/chief/imports/page.tsx:39:type Source = 'FALLBACK_SHEET' | 'PAPER';
+client/src/app/chief/imports/page.tsx:56:  const [source, setSource] = useState<Source>('FALLBACK_SHEET');
+client/src/app/chief/imports/page.tsx:152:              { value: 'FALLBACK_SHEET', label: 'Google fallback sheet' },
+client/src/app/chief/imports/page.tsx:153:              { value: 'PAPER', label: 'Paper tally' },
+client/src/app/chief/imports/page.tsx:267:              {source === 'PAPER' ? 'paper' : 'fallback sheet'}
+packages/shared/src/dto/fallback.ts:69:export const ImportSource = z.enum(['FALLBACK_SHEET', 'PAPER']);
+packages/shared/src/dto/footfall.ts:27:  source: z.enum(['FALLBACK_SHEET', 'PAPER', 'MANUAL_ADJUSTMENT']),
+server/src/modules/fallback/service.ts:377:  source: 'FALLBACK_SHEET' | 'PAPER';
+server/src/modules/footfall/service.ts:74:      source: 'APP',
+server/src/modules/gift/service.ts:120:      source: 'APP',
+server/src/modules/missionCard/service.ts:185:      source: 'APP',
+server/src/modules/registration/service.ts:64:      source: 'APP',
+server/src/modules/registration/service.ts:146:        source: 'APP' as const,
+server/tests/integration/capture.test.ts:289:      source: 'PAPER',
+server/tests/integration/capture.test.ts:306:      source: 'FALLBACK_SHEET',
+server/tests/integration/capture.test.ts:313:    expect(rows[0]?.source).toBe('FALLBACK_SHEET');
+server/tests/integration/fallback.test.ts:205:        source: 'FALLBACK_SHEET',
+server/tests/integration/fallback.test.ts:250:    expect(rows.every((row) => row.source === 'FALLBACK_SHEET')).toBe(true);
+server/tests/integration/fallback.test.ts:288:    expect(batch?.source).toBe('FALLBACK_SHEET');
+server/tests/integration/fallback.test.ts:300:        source: 'PAPER',
+server/tests/integration/fallback.test.ts:315:    expect(rows[0]?.source).toBe('PAPER');
+server/tests/integration/rbac.test.ts:102:      source: 'PAPER',
+server/tests/integration/report.test.ts:219:        source: 'PAPER',
+server/tests/integration/report.test.ts:227:    expect(footfallSources.find((row) => row.source === 'APP')?.value).toBe(5);
+server/tests/integration/report.test.ts:228:    expect(footfallSources.find((row) => row.source === 'PAPER')?.value).toBe(40);
+server/tests/integration/report.test.ts:240:        source: 'PAPER',

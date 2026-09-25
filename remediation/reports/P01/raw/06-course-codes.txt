@@ -1,0 +1,29 @@
+client/src/app/capture/footfall/page.tsx:18: * are on DCDF Station this block — a station picker here would be one more
+client/src/app/inbox/page.tsx:177:            placeholder="DCDF at capacity, ushers hold at Welcome Lounge."
+client/src/components/dashboard/StatTile.tsx:77: * station name down to "DCDF Stat…".
+client/src/content/brief.ts:24:    code: 'DCITP',
+client/src/content/brief.ts:36:    code: 'DAAA',
+client/src/content/brief.ts:47:    code: 'DCDF',
+client/src/content/brief.ts:58:    code: 'DCS',
+client/src/content/brief.ts:99:    detail: 'DAAA, DCDF and DCS. A stamp at each — the stamps are the point, not the scan.',
+client/src/content/brief.ts:140:      { label: 'DAAA Station', kind: 'station' },
+client/src/content/brief.ts:141:      { label: 'DCDF Station', kind: 'station' },
+client/src/content/brief.ts:150:      { label: 'DCS Station', kind: 'station' },
+packages/shared/src/dto/notification.ts:68: * "everyone at DCDF Station" means everyone rostered there today, not everyone
+packages/shared/src/enums.ts:34:export const CourseCode = z.enum(['DAAA', 'DCDF', 'DCS', 'DCITP']);
+server/prisma/schema.prisma:66:  DAAA
+server/prisma/schema.prisma:67:  DCDF
+server/prisma/schema.prisma:68:  DCS
+server/prisma/schema.prisma:69:  DCITP
+server/prisma/seed.ts:95:    name: 'DAAA Station',
+server/prisma/seed.ts:97:    courseCode: 'DAAA',
+server/prisma/seed.ts:105:    name: 'DCDF Station',
+server/prisma/seed.ts:107:    courseCode: 'DCDF',
+server/prisma/seed.ts:115:    name: 'DCS Station',
+server/prisma/seed.ts:117:    courseCode: 'DCS',
+server/src/modules/footfall/repo.ts:84: * Bucketed curves per station — the thing last year's "DCS: 120" WhatsApp
+server/src/modules/notification/service.ts:102: * An usher who covered DCDF yesterday should not be woken about it now.
+server/tests/integration/comms.test.ts:77:      body: 'DCDF at capacity, ushers hold at Welcome Lounge.',
+server/tests/integration/missionCard.test.ts:52:  courseId = (await createStation({ code: 'DCS', name: 'DCS Station', issuesStamp: true })).id;
+server/tests/integration/missionCard.test.ts:361:    const stamped = funnel.body.stages.find((stage: { key: string }) => stage.key === 'DCS') as {
+server/tests/integration/missionCard.test.ts:377:    const stage = funnel.body.stages.find((s: { key: string }) => s.key === 'DCS') as {

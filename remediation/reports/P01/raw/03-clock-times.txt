@@ -1,0 +1,66 @@
+client/src/app/admin/users/page.tsx:39: * 09:25 on the day.
+client/src/app/chief/fallback/page.tsx:171:                placeholder="Backend unreachable from the booth since 11:15"
+client/src/app/chief/imports/page.tsx:44:    'SEC_4,SIGNUP_BOOTH,2027-01-07T03:30:00.000Z,12\n' +
+client/src/app/chief/imports/page.tsx:45:    'PARENT_GUARDIAN,SIGNUP_BOOTH,2027-01-07T03:30:00.000Z,5',
+client/src/app/chief/imports/page.tsx:48:    'DCDF_STATION,42,2027-01-07T03:30:00.000Z\n' +
+client/src/app/chief/imports/page.tsx:49:    'DCS_STATION,31,2027-01-07T03:30:00.000Z',
+client/src/lib/format.ts:16:/** 14:05 */
+client/src/lib/format.ts:28:/** 7 Jan, 14:05 */
+client/src/lib/format.ts:60:  return block === 'MORNING' ? '09:30–14:00' : '13:30–18:00';
+client/src/styles/globals.css:332: * dark mode at 09:00 in a bright hall. Roles swap; the blue brightens, because
+client/tests/e2e/admin.spec.ts:144:    await expect(page.getByLabel('Morning starts')).toHaveValue('09:30');
+client/tests/e2e/admin.spec.ts:145:    await expect(page.getByLabel('Afternoon ends')).toHaveValue('18:00');
+client/tests/outbox.test.ts:235:        clientRecordedAt: '2027-01-07T03:30:00.000Z',
+client/tests/outbox.test.ts:237:        lastAttemptAt: '2027-01-07T03:35:00.000Z',
+client/tests/outbox.test.ts:245:      '2027-01-07T03:30:00.000Z',
+ops/backup/spoh-backup-check.sh:34:# Event hours are 09:30-18:00 Singapore = 01:30-10:00 UTC. Inside them a dump is
+ops/backup/spoh-backup.sh:86:# Event hours are 09:30-18:00 Singapore, which is 01:30-10:00 UTC. Inside them
+ops/backup/spoh-backup.sh:148:log "dump ok: ${SIZE} bytes, sha256 ${CHECKSUM:0:16}..."
+packages/shared/src/dto/settings.ts:15: * Changing a value in a redeploy is not the same as changing it at 09:15 on the
+packages/shared/src/dto/settings.ts:44: * boundaries are not. They are allowed to overlap — the 13:30–14:00 handover is
+packages/shared/src/dto/shift.ts:91: * from memory at 11:30 on day two does not drop one.
+server/.env.example:67:# 09:30-18:00 Singapore. Refused when NODE_ENV=production.
+server/prisma/schema.prisma:90:  MORNING // 09:30 - 14:00
+server/prisma/schema.prisma:91:  AFTERNOON // 13:30 - 18:00
+server/prisma/schema.prisma:221:  /// before the event, rather than discovering it at 09:25 on the day.
+server/prisma/seed.ts:42:  return new Date(`${date}T00:00:00.000Z`);
+server/prisma/seed.ts:389:  // 09:30 to 12:30 Singapore time, every 30 minutes. Stored UTC (SGT is UTC+8).
+server/src/config/env.ts:90:     * 09:30-18:00 Singapore means no capture screen works at all. Correct for
+server/src/lib/settings.ts:46:  // BUILD_PLAN §1.1. The blocks overlap between 13:30 and 14:00; that handover
+server/src/lib/settings.ts:49:    MORNING: { start: '09:30', end: '14:00' },
+server/src/lib/settings.ts:50:    AFTERNOON: { start: '13:30', end: '18:00' },
+server/src/lib/time.ts:33: * The blocks may overlap — the 13:30–14:00 handover is intentional and means a
+server/src/lib/time.ts:82:  return new Date(`${dateString}T00:00:00.000Z`);
+server/src/modules/admin/service.ts:41: * paternalism: a Chief who demotes themselves by mistake at 09:00 on 7 January
+server/src/modules/footfall/service.ts:125:      // IC happened to type it in — otherwise the curve grows a spike at 18:00.
+server/src/modules/me/service.ts:21: * app at 09:25 on a congested network should not need four round trips before
+server/src/modules/report/export.ts:21: * and practically useless — "the busiest block started at 03:30" is not a
+server/src/modules/report/repo.ts:48: * The event runs 09:30 to 18:00 local, which is 01:30 to 10:00 UTC, so a UTC
+server/tests/integration/admin.test.ts:370:          MORNING: { start: '06:00', end: '07:00' },
+server/tests/integration/admin.test.ts:371:          AFTERNOON: { start: '19:00', end: '20:00' },
+server/tests/integration/admin.test.ts:376:    expect(getSettings().shiftBlocks.MORNING.start).toBe('06:00');
+server/tests/integration/admin.test.ts:385:          MORNING: { start: '14:00', end: '09:30' },
+server/tests/integration/admin.test.ts:386:          AFTERNOON: { start: '13:30', end: '18:00' },
+server/tests/integration/capture.test.ts:290:      reason: 'Physical clicker total for the 11:00 block',
+server/tests/setup.ts:21:/** 2027-01-07 11:30 Singapore — Open House Day 1, mid-morning block. */
+server/tests/setup.ts:22:export const FROZEN_NOW = new Date('2027-01-07T03:30:00.000Z');
+server/tests/unit/settings.test.ts:27:    // 09:30-14:00 and 13:30-18:00 (BUILD_PLAN §1.1), overlapping deliberately.
+server/tests/unit/settings.test.ts:43:        MORNING: { start: '06:00', end: '07:00' },
+server/tests/unit/settings.test.ts:44:        AFTERNOON: { start: '19:00', end: '20:00' },
+server/tests/unit/settings.test.ts:49:      // 11:30 Singapore: inside the shipped morning block, outside this one.
+server/tests/unit/settings.test.ts:59:        MORNING: { start: '06:00', end: '07:00' },
+server/tests/unit/settings.test.ts:60:        AFTERNOON: { start: '19:00', end: '20:00' },
+server/tests/unit/settings.test.ts:65:      // 06:30 Singapore.
+server/tests/unit/settings.test.ts:89:        MORNING: { start: '14:00', end: '09:30' },
+server/tests/unit/settings.test.ts:90:        AFTERNOON: { start: '13:30', end: '18:00' },
+server/tests/unit/settings.test.ts:99:        MORNING: { start: '9:30am', end: '14:00' },
+server/tests/unit/settings.test.ts:100:        AFTERNOON: { start: '13:30', end: '18:00' },
+server/tests/unit/time.test.ts:21:  it('rolls the date over at 16:00 UTC, which is midnight in Singapore', () => {
+server/tests/unit/time.test.ts:33:    expect(eventDayAnchor('2027-01-07').toISOString()).toBe('2027-01-07T00:00:00.000Z');
+server/tests/unit/time.test.ts:39:    // 03:30 UTC is 11:30 in Singapore.
+server/tests/unit/time.test.ts:49:    // 09:00 SGT — half an hour before the morning block opens.
+server/tests/unit/time.test.ts:57:  it('reports both blocks during the 13:30-14:00 handover', () => {
+server/tests/unit/time.test.ts:58:    // 13:45 SGT. The overlap is intentional: both shifts are genuinely on the
+server/tests/unit/time.test.ts:68:    // 18:00 SGT exactly — the block is half-open, so this is already outside.
+server/tests/unit/time.test.ts:77:      '2027-01-07T03:30:00.000Z',
+server/tests/unit/time.test.ts:83:      '2027-01-07T03:30:00.000Z',

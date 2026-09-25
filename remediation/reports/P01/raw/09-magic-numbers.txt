@@ -1,0 +1,259 @@
+server/src/modules/admin/router.ts:81:    res.status(200).json({ data, meta: { count: data.length, nextCursor } });
+server/src/modules/admin/router.ts:92:    res.status(200).json({ volunteer: await getVolunteer(id) });
+server/src/modules/admin/router.ts:111:    res.status(200).json(result);
+server/src/modules/admin/router.ts:124:    res.status(200).json(result);
+server/src/modules/admin/router.ts:136:    res.status(200).json(result);
+server/src/modules/admin/router.ts:152:    res.status(201).json({ assignment });
+server/src/modules/admin/router.ts:164:    res.status(204).end();
+server/src/modules/admin/router.ts:185:    res.status(200).json({ data: stations, meta: { count: stations.length, nextCursor: null } });
+server/src/modules/admin/router.ts:196:    res.status(201).json({ station: await createStation(body, auditContextFrom(req)) });
+server/src/modules/admin/router.ts:208:    res.status(200).json({ station: await updateStation(id, patch, auditContextFrom(req)) });
+server/src/modules/admin/router.ts:224:    res.status(200).json({ data: days, meta: { count: days.length, nextCursor: null } });
+server/src/modules/admin/router.ts:235:    res.status(201).json({ eventDay: await createEventDay(body, auditContextFrom(req)) });
+server/src/modules/admin/router.ts:247:    res.status(200).json({ eventDay: await updateEventDay(id, patch, auditContextFrom(req)) });
+server/src/modules/admin/router.ts:262:    res.status(201).json({ giftType: await createGiftType(body, auditContextFrom(req)) });
+server/src/modules/admin/router.ts:274:    res.status(200).json({ giftType: await updateGiftType(id, patch, auditContextFrom(req)) });
+server/src/modules/admin/router.ts:303:    res.status(200).json({
+server/src/modules/admin/router.ts:325:    res.status(200).json({
+server/src/modules/admin/service.ts:41: * paternalism: a Chief who demotes themselves by mistake at 09:00 on 7 January
+server/src/modules/admin/service.ts:178:      403,
+server/src/modules/admin/service.ts:186:      403,
+server/src/modules/admin/service.ts:205:    throw new AppError(409, ERROR_CODES.REPORTING_CYCLE, 'Somebody cannot report to themselves.');
+server/src/modules/admin/service.ts:216:        409,
+server/src/modules/admin/service.ts:241:      403,
+server/src/modules/admin/service.ts:634:    date: row.date.toISOString().slice(0, 10),
+server/src/modules/admin/service.ts:681:    date: row.date.toISOString().slice(0, 10),
+server/src/modules/admin/service.ts:723:    date: row.date.toISOString().slice(0, 10),
+server/src/modules/announcement/router.ts:41:    res.status(201).json({ announcement });
+server/src/modules/announcement/router.ts:59:    res.status(200).json({
+server/src/modules/announcement/router.ts:75:    res.status(200).json({ announcement });
+server/src/modules/announcement/service.ts:189:    announcement.body.length > 140 ? `${announcement.body.slice(0, 137)}...` : announcement.body;
+server/src/modules/attendance/service.ts:213:    const pin = randomInt(0, 10_000_000_000).toString().padStart(10, '0');
+server/src/modules/attendance/tokens.ts:10:  env.ATTENDANCE_SIGNING_SECRET ?? env.SESSION_SIGNING_SECRET ?? randomBytes(32),
+server/src/modules/attendance/tokens.ts:31:    .setIssuedAt(Math.floor(now.getTime() / 1000))
+server/src/modules/attendance/tokens.ts:32:    .setExpirationTime(Math.floor((now.getTime() + ATTENDANCE_TTL_MS) / 1000))
+server/src/modules/attendance/tokens.ts:55:      payload.exp - payload.iat > 300 ||
+server/src/modules/attendance/tokens.ts:56:      payload.iat > now.getTime() / 1000
+server/src/modules/audit/router.ts:21:  action: z.string().trim().max(64).optional(),
+server/src/modules/audit/router.ts:22:  entityType: z.string().trim().max(64).optional(),
+server/src/modules/audit/router.ts:60:    res.status(200).json({
+server/src/modules/auth/router.ts:97:    userAgent: req.get('user-agent')?.slice(0, 512) ?? null,
+server/src/modules/auth/router.ts:152:    res.status(201).json(opened.response satisfies SessionResponse);
+server/src/modules/auth/router.ts:166:    maxAge: 5 * 60 * 1000,
+server/src/modules/auth/router.ts:185:    throw new AppError(500, ERROR_CODES.INTERNAL_ERROR, 'Hosted sign-in is not configured');
+server/src/modules/auth/router.ts:188:  const state = base64url(randomBytes(32));
+server/src/modules/auth/router.ts:189:  const verifier = base64url(randomBytes(32));
+server/src/modules/auth/router.ts:242:    throw new AppError(500, ERROR_CODES.INTERNAL_ERROR, 'Hosted sign-in is not configured');
+server/src/modules/auth/router.ts:304:    throw new AppError(401, ERROR_CODES.SESSION_EXPIRED, 'No session to refresh. Sign in.');
+server/src/modules/auth/router.ts:310:    res.status(200).json(rotated.response satisfies SessionResponse);
+server/src/modules/auth/router.ts:326:  res.status(204).end();
+server/src/modules/auth/router.ts:338:  res.status(200).json({ data: sessions, meta: { count: sessions.length, nextCursor: null } });
+server/src/modules/auth/router.ts:341:const SessionIdParams = z.object({ id: z.string().min(1).max(64) }).strict();
+server/src/modules/auth/router.ts:363:    res.status(204).end();
+server/src/modules/auth/service.ts:18: * The refresh token is opaque, stored only as a SHA-256, and rotated on every
+server/src/modules/auth/service.ts:153:    throw new AppError(401, ERROR_CODES.SESSION_EXPIRED, 'Your session has ended. Sign in again.');
+server/src/modules/auth/service.ts:182:      401,
+server/src/modules/auth/service.ts:189:    throw new AppError(401, ERROR_CODES.SESSION_EXPIRED, 'Your session has ended. Sign in again.');
+server/src/modules/auth/tokens.ts:53:  return new Uint8Array(randomBytes(32));
+server/src/modules/auth/tokens.ts:110: * A refresh token: 256 bits of opaque randomness.
+server/src/modules/auth/tokens.ts:117:  return randomBytes(32).toString('base64url');
+server/src/modules/dashboard/repo.ts:82:   * volunteer — 200 registrations x 200 ticks is 40,000 rows to compute one
+server/src/modules/dashboard/router.ts:19: * default rate limit rather than the capture one: 20 clients at 20 polls a
+server/src/modules/dashboard/router.ts:20: * minute is 400 requests, comfortably inside 300 per client per minute.
+server/src/modules/dashboard/router.ts:27:    res.status(200).json(await getLiveDashboard());
+server/src/modules/dashboard/router.ts:36:    res.status(200).json(await getDataHealth());
+server/src/modules/dashboard/router.ts:47:    res.status(200).json(await getStationDashboard(id));
+server/src/modules/dashboard/service.ts:77:    registrationsSince(new Date(now.getTime() - 60 * 60 * 1000)),
+server/src/modules/dashboard/service.ts:252:          perMinute: Math.round(perMinute * 10) / 10,
+server/src/modules/devAuth/router.ts:58:      res.status(200).json({
+server/src/modules/devAuth/router.ts:61:        expiresIn: 12 * 60 * 60,
+server/src/modules/fallback/repo.ts:4: * Fallback-window awareness (PRODUCT_BRIEF §11.4).
+server/src/modules/fallback/router.ts:39: * counted in three places (PRODUCT_BRIEF §11.1).
+server/src/modules/fallback/router.ts:50:    res.status(201).json({ window });
+server/src/modules/fallback/router.ts:62:    res.status(200).json({ window: await closeFallback(id, body, auditContextFrom(req)) });
+server/src/modules/fallback/router.ts:78:    res.status(200).json({ data: windows, meta: { count: windows.length, nextCursor: null } });
+server/src/modules/fallback/router.ts:99:    res.status(result.committed ? 201 : 200).json(result);
+server/src/modules/fallback/router.ts:115:    res.status(result.committed ? 201 : 200).json(result);
+server/src/modules/fallback/service.ts:19: * Fallback windows and reconciliation (PRODUCT_BRIEF §11).
+server/src/modules/fallback/service.ts:90:        409,
+server/src/modules/fallback/service.ts:140:        409,
+server/src/modules/fallback/service.ts:150:        400,
+server/src/modules/fallback/service.ts:203:    .slice(0, 40);
+server/src/modules/footfall/repo.ts:10: * with quantity 240. Counting rows would silently discard the fallback data.
+server/src/modules/footfall/repo.ts:84: * Bucketed curves per station — the thing last year's "DCS: 120" WhatsApp
+server/src/modules/footfall/repo.ts:89: * validated upstream against a fixed set (15, 30, 60), never free text.
+server/src/modules/footfall/repo.ts:98:  const intervalSeconds = bucketMinutes * 60;
+server/src/modules/footfall/router.ts:47:    res.status(201).json(result);
+server/src/modules/footfall/router.ts:54: * be able to add 240 room entries in one request.
+server/src/modules/footfall/router.ts:66:    res.status(201).json(result);
+server/src/modules/footfall/router.ts:79:    res.status(204).send();
+server/src/modules/footfall/router.ts:90:    res.status(200).json(await summariseFootfall(query));
+server/src/modules/footfall/router.ts:99:    res.status(200).json(await getLiveFootfall());
+server/src/modules/footfall/service.ts:104: * IC bulk entry: a physical clicker total at end of shift, or a 30-minute block
+server/src/modules/footfall/service.ts:107: * this hour came from manual counts (PRODUCT_BRIEF §11.4).
+server/src/modules/footfall/service.ts:125:      // IC happened to type it in — otherwise the curve grows a spike at 18:00.
+server/src/modules/footfall/service.ts:163:    throw new AppError(409, ERROR_CODES.ALREADY_VOIDED, 'This tick is already voided');
+server/src/modules/gift/router.ts:35:    res.status(200).json({ data: gifts, meta: { count: gifts.length } });
+server/src/modules/gift/router.ts:49:    res.status(201).json(result);
+server/src/modules/gift/router.ts:63:    res.status(200).json({ giftType });
+server/src/modules/gift/router.ts:73:    res.status(200).json(await summariseGifts(validatedQuery<GiftSummaryQuery>(req)));
+server/src/modules/gift/service.ts:65:     * a silent failure or a 500, so the desk sees "we have run out" and not
+server/src/modules/gift/service.ts:70:        409,
+server/src/modules/gift/service.ts:101:            409,
+server/src/modules/health/router.ts:16:  res.status(200).json({ status: 'ok' });
+server/src/modules/health/router.ts:23:    res.status(200).json({ status: 'ready' });
+server/src/modules/health/router.ts:26:    res.status(503).json({ status: 'not_ready' });
+server/src/modules/identity/provider.ts:99:        // AdminGetUser would be a second round trip per row during a 200-row
+server/src/modules/identity/provider.ts:140:      const sub = `local:${createHash('sha256').update(email).digest('hex').slice(0, 32)}`;
+server/src/modules/incident/router.ts:46:    res.status(201).json({ incident });
+server/src/modules/incident/router.ts:58:    res.status(200).json({
+server/src/modules/incident/router.ts:75:    res.status(201).json({ incident });
+server/src/modules/incident/router.ts:89:    res.status(200).json({ incident });
+server/src/modules/lostFound/router.ts:38:    res.status(201).json({ item });
+server/src/modules/lostFound/router.ts:53:    res.status(200).json({
+server/src/modules/lostFound/router.ts:68:    res.status(200).json({ item: await claimItem(id, body, auditContextFrom(req)) });
+server/src/modules/lostFound/router.ts:79:    res.status(200).json({ markedUnclaimed: count });
+server/src/modules/lostFound/service.ts:20: * Slide 48 tracks lost-and-found cases as a metric. This is the first time the
+server/src/modules/lostFound/service.ts:127:        409,
+server/src/modules/lostPerson/router.ts:30:    res.status(201).json({ alert });
+server/src/modules/lostPerson/router.ts:35: * Polled by every device every 10 seconds while an alert is live, which is why
+server/src/modules/lostPerson/router.ts:44:    res.status(200).json(await getActiveAlerts(auth.volunteerId));
+server/src/modules/lostPerson/router.ts:57:    res.status(200).json({ alert });
+server/src/modules/lostPerson/router.ts:70:    res.status(200).json({ alert });
+server/src/modules/lostPerson/service.ts:91: * The client polls this every 10 seconds. Push is best effort; the poll is the
+server/src/modules/lostPerson/service.ts:146:      409,
+server/src/modules/lostPerson/service.ts:179: * The purge job (BUILD_PLAN §5.9). Runs every 15 minutes and on demand.
+server/src/modules/lostPerson/service.ts:186:  const cutoff = new Date(now.getTime() - getSettings().lostPersonPurgeHours * 60 * 60 * 1000);
+server/src/modules/lostPerson/service.ts:239: * The 10-second poll of `/lost-person/active` remains the delivery guarantee;
+server/src/modules/lostPerson/service.ts:244: * approximate age. Those are the fields the purge exists to destroy after 24
+server/src/modules/me/router.ts:16:  res.status(200).json(await getMe(auth.volunteerId));
+server/src/modules/me/router.ts:27:    res.status(200).json({ assignment });
+server/src/modules/me/router.ts:39:    res.status(200).json({ assignment });
+server/src/modules/me/service.ts:21: * app at 09:25 on a congested network should not need four round trips before
+server/src/modules/me/service.ts:66:    date: assignment.eventDay.date.toISOString().slice(0, 10),
+server/src/modules/me/service.ts:89:      409,
+server/src/modules/me/service.ts:142:      409,
+server/src/modules/media/router.ts:27:    res.status(200).json({ enabled: mediaEnabled() });
+server/src/modules/media/router.ts:42:    res.status(201).json(await createUpload(body));
+server/src/modules/media/router.ts:46:const MediaUrlQuery = z.object({ key: z.string().min(1).max(200) }).strict();
+server/src/modules/media/router.ts:55:    res.status(200).json(await readUrl(key));
+server/src/modules/media/service.ts:21: * phone photo off a request path sized for 100 KB of JSON, and off instances
+server/src/modules/media/service.ts:54:      503,
+server/src/modules/missionCard/repo.ts:63:  // skipDuplicates because short codes are random: a collision in a 5000-card
+server/src/modules/missionCard/router.ts:54:    res.status(201).json(await generateBatch(body, auditContextFrom(req)));
+server/src/modules/missionCard/router.ts:64:    res.status(200).json(await getFunnel(validatedQuery<TimeRangeQuery>(req)));
+server/src/modules/missionCard/router.ts:76:    res.status(200).json({ card: await getCard(shortCode) });
+server/src/modules/missionCard/router.ts:90:    res.status(200).json({ card });
+server/src/modules/missionCard/router.ts:105:    // 200 rather than 201 when nothing new was written: the station had already
+server/src/modules/missionCard/router.ts:107:    res.status(result.stampAdded ? 201 : 200).json(result);
+server/src/modules/missionCard/router.ts:119:    res.status(200).json({ card: await voidCard(shortCode, reason, auditContextFrom(req)) });
+server/src/modules/missionCard/router.ts:131:    res.status(201).json(await reissueCard(shortCode, body, auditContextFrom(req)));
+server/src/modules/missionCard/service.ts:53:  if (!card) throw new AppError(404, ERROR_CODES.CARD_NOT_FOUND, 'No card with that code');
+server/src/modules/missionCard/service.ts:75:    if (!existing) throw new AppError(404, ERROR_CODES.CARD_NOT_FOUND, 'No card with that code');
+server/src/modules/missionCard/service.ts:79:        409,
+server/src/modules/missionCard/service.ts:121: * after a correction is legitimate (PRODUCT_BRIEF §12) — but no second row is
+server/src/modules/missionCard/service.ts:136:      409,
+server/src/modules/missionCard/service.ts:151:    if (!existing) throw new AppError(404, ERROR_CODES.CARD_NOT_FOUND, 'No card with that code');
+server/src/modules/missionCard/service.ts:154:      throw new AppError(409, ERROR_CODES.CARD_VOIDED, 'That card has been voided.');
+server/src/modules/missionCard/service.ts:225:    if (!existing) throw new AppError(404, ERROR_CODES.CARD_NOT_FOUND, 'No card with that code');
+server/src/modules/missionCard/service.ts:228:      throw new AppError(409, ERROR_CODES.CARD_VOIDED, 'That card is already voided.');
+server/src/modules/missionCard/service.ts:263:    throw new AppError(409, ERROR_CODES.CONFLICT, 'The replacement must be a different card.');
+server/src/modules/missionCard/service.ts:274:      throw new AppError(404, ERROR_CODES.CARD_NOT_FOUND, 'No card with that code');
+server/src/modules/missionCard/service.ts:281:      throw new AppError(404, ERROR_CODES.CARD_NOT_FOUND, 'No replacement card with that code');
+server/src/modules/missionCard/service.ts:285:        409,
+server/src/modules/notification/router.ts:33:    res.status(200).json({ enabled: pushEnabled(), publicKey: pushPublicKey() });
+server/src/modules/notification/router.ts:58:      userAgent: req.get('user-agent')?.slice(0, 512) ?? null,
+server/src/modules/notification/router.ts:61:    res.status(201).json({ id, enabled: pushEnabled() });
+server/src/modules/notification/router.ts:65:const UnsubscribeRequest = z.object({ endpoint: z.url().max(2048) }).strict();
+server/src/modules/notification/router.ts:78:    // 204 whether or not a row existed. An unsubscribe that reports "not found"
+server/src/modules/notification/router.ts:80:    res.status(204).end();
+server/src/modules/notification/service.ts:16: * Web Push delivery (RFC 8030 / 8292).
+server/src/modules/notification/service.ts:73:  'lostPerson.raised': 600,
+server/src/modules/notification/service.ts:74:  'lostPerson.resolved': 600,
+server/src/modules/notification/service.ts:75:  'incident.critical': 900,
+server/src/modules/notification/service.ts:76:  'announcement.urgent': 1800,
+server/src/modules/notification/service.ts:77:  'gift.lowStock': 1800,
+server/src/modules/notification/service.ts:208:          // 404 and 410 are the documented way a push service says the
+server/src/modules/notification/service.ts:210:          if (status === 404 || status === 410) {
+server/src/modules/registration/repo.ts:12: * (PRODUCT_BRIEF §11.4).
+server/src/modules/registration/router.ts:53:    res.status(201).json(result);
+server/src/modules/registration/router.ts:72:    res.status(201).json(result);
+server/src/modules/registration/router.ts:85:    res.status(204).send();
+server/src/modules/registration/router.ts:96:    res.status(200).json(await summariseRegistrations(query));
+server/src/modules/registration/service.ts:194:    throw new AppError(409, ERROR_CODES.ALREADY_VOIDED, 'This registration is already voided');
+server/src/modules/report/export.ts:5: * Report export (PRODUCT_BRIEF §10).
+server/src/modules/report/export.ts:21: * and practically useless — "the busiest block started at 03:30" is not a
+server/src/modules/report/export.ts:29:  const shifted = new Date(new Date(iso).getTime() + 8 * 60 * 60_000).toISOString();
+server/src/modules/report/export.ts:30:  return `${shifted.slice(0, 10)} ${shifted.slice(11, 16)}`;
+server/src/modules/report/export.ts:47:  workbook.creator = 'SPOH 2027 Operations';
+server/src/modules/report/export.ts:71:  sheet.columns = [{ width: 110 }];
+server/src/modules/report/export.ts:73:  sheet.addRow(['SPOH 2027 — post-event report']).font = { bold: true, size: 14 };
+server/src/modules/report/export.ts:84:  note.height = 60;
+server/src/modules/report/export.ts:96:    warning.height = 45;
+server/src/modules/report/export.ts:104:  sheet.columns = [{ width: 32 }, { width: 16 }, { width: 16 }];
+server/src/modules/report/export.ts:127:  sheet.columns = [{ width: 32 }, { width: 16 }, { width: 26 }, { width: 16 }];
+server/src/modules/report/export.ts:135:  header(sheet, ['Station', 'Room entries', 'Peak 30-min block (SGT)', 'Peak entries']);
+server/src/modules/report/export.ts:146:  sheet.addRow(['30-minute curve']).font = { bold: true };
+server/src/modules/report/export.ts:160:  sheet.columns = [{ width: 32 }, { width: 16 }, { width: 16 }];
+server/src/modules/report/export.ts:166:  sheet.addRow([`Completion rate: ${(report.cards.completionRate * 100).toFixed(1)}%`]);
+server/src/modules/report/export.ts:192:  sheet.columns = [{ width: 32 }, { width: 16 }, { width: 16 }];
+server/src/modules/report/export.ts:217:    { width: 18 },
+server/src/modules/report/export.ts:218:    { width: 12 },
+server/src/modules/report/export.ts:219:    { width: 14 },
+server/src/modules/report/export.ts:220:    { width: 24 },
+server/src/modules/report/export.ts:221:    { width: 24 },
+server/src/modules/report/export.ts:222:    { width: 70 },
+server/src/modules/report/export.ts:223:    { width: 12 },
+server/src/modules/report/export.ts:270:  sheet.columns = [{ width: 32 }, { width: 16 }, { width: 16 }, { width: 12 }];
+server/src/modules/report/export.ts:276:    `No-shows: ${report.volunteers.noShows} (${(report.volunteers.noShowRate * 100).toFixed(1)}%)`,
+server/src/modules/report/export.ts:292:  sheet.columns = [{ width: 24 }, { width: 24 }, { width: 24 }, { width: 16 }, { width: 50 }];
+server/src/modules/report/export.ts:363:  lines.push('# SPOH 2027 post-event report');
+server/src/modules/report/export.ts:384:  row('Completion rate', `${(report.cards.completionRate * 100).toFixed(1)}%`);
+server/src/modules/report/export.ts:433:/** RFC 4180 quoting. Incident descriptions contain commas and newlines. */
+server/src/modules/report/repo.ts:5: * Reads for the post-event report (PRODUCT_BRIEF §10).
+server/src/modules/report/repo.ts:48: * The event runs 09:30 to 18:00 local, which is 01:30 to 10:00 UTC, so a UTC
+server/src/modules/report/repo.ts:62:    date: row.date.toISOString().slice(0, 10),
+server/src/modules/report/repo.ts:81:    localHour: singaporeHourKey(row.hour).replace('T', ' ') + ':00',
+server/src/modules/report/repo.ts:104:/** 30-minute curve per station — the peak-period analysis the clicker never gave. */
+server/src/modules/report/repo.ts:111:      to_timestamp(floor(extract(epoch FROM "recordedAt") / 1800) * 1800) AS "bucketStart",
+server/src/modules/report/repo.ts:166:    date: row.date.toISOString().slice(0, 10),
+server/src/modules/report/repo.ts:190:    date: row.date.toISOString().slice(0, 10),
+server/src/modules/report/repo.ts:219: * The alert descriptions are nulled 24 hours after resolution, and no report is
+server/src/modules/report/repo.ts:234: * inside the 24-hour retention window, and a report that said "0 cases" because
+server/src/modules/report/router.ts:26:    res.status(200).json(await generateReport(validatedQuery<ReportQuery>(req)));
+server/src/modules/report/router.ts:42:    const stamp = report.generatedAt.slice(0, 10);
+server/src/modules/report/router.ts:47:      res.status(200).send(toCsv(report));
+server/src/modules/report/router.ts:57:    res.status(200).send(workbook);
+server/src/modules/report/service.ts:31: * The post-event report (PRODUCT_BRIEF §10).
+server/src/modules/report/service.ts:34: * slides 13, 28, 34, 43, 47 and 48 — comes out of one call.
+server/src/modules/report/service.ts:217:    // The busiest 30-minute block is the peak-period answer slide 28 asks for.
+server/src/modules/report/service.ts:288:      // Summaries plus alerts still inside the 24-hour retention window. A
+server/src/modules/report/service.ts:353:    totalHours: Math.round((totalMinutes / 60) * 10) / 10,
+server/src/modules/report/service.ts:359:      hours: Math.round((entry.minutes / 60) * 10) / 10,
+server/src/modules/roster/repo.ts:98:    date: row.eventDay.date.toISOString().slice(0, 10),
+server/src/modules/roster/router.ts:33:    res.status(200).json({
+server/src/modules/roster/router.ts:49:    res.status(200).json({ data: roster, meta: { count: roster.length, nextCursor: null } });
+server/src/modules/roster/router.ts:66:    res.status(201).json(result);
+server/src/modules/roster/router.ts:84:    res.status(200).json(result);
+server/src/modules/roster/service.ts:84:  // The auth middleware caches sub -> volunteer for 60 seconds. A role change
+server/src/modules/roster/service.ts:94: * Runs as a dry run unless `commit` is set. Importing 200 volunteers is exactly
+server/src/modules/roster/service.ts:114:  // Cognito, and holding a database transaction open across 200 of them would
+server/src/modules/shift/repo.ts:23:    date: swap.assignment.eventDay.date.toISOString().slice(0, 10),
+server/src/modules/shift/repo.ts:126:    date: slot.eventDay.date.toISOString().slice(0, 10),
+server/src/modules/shift/repo.ts:230: * signal from slide 39. A break nobody records is a break nobody can be
+server/src/modules/shift/router.ts:52:    res.status(201).json({ swap });
+server/src/modules/shift/router.ts:64:    res.status(200).json({ data: swaps, meta: { count: swaps.length, nextCursor: null } });
+server/src/modules/shift/router.ts:75:    res.status(200).json({ data: swaps, meta: { count: swaps.length, nextCursor: null } });
+server/src/modules/shift/router.ts:89:    res.status(200).json({ swap });
+server/src/modules/shift/router.ts:106:    res.status(200).json({ data: slots, meta: { count: slots.length, nextCursor: null } });
+server/src/modules/shift/router.ts:120:    res.status(200).json({ slot });
+server/src/modules/shift/router.ts:130:    res.status(200).json(await getStaffingGaps());
+server/src/modules/shift/service.ts:44: * Three hours is the threshold from slide 39, and it is the shipped default;
+server/src/modules/shift/service.ts:70:      throw new AppError(409, ERROR_CODES.CONFLICT, 'You cannot swap a shift with yourself');
+server/src/modules/shift/service.ts:89:        409,
+server/src/modules/shift/service.ts:133:        409,
+server/src/modules/shift/service.ts:152:          409,
+server/src/modules/shift/service.ts:215:      409,
+server/src/modules/station/router.ts:16:  res.status(200).json({ data: stations, meta: { count: stations.length, nextCursor: null } });
+server/src/modules/station/service.ts:24:      409,
+server/src/modules/station/service.ts:43:      409,

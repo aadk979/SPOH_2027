@@ -1,0 +1,16 @@
+client/public/sw.js:98:      renotify: payload.priority === 'URGENT',
+client/public/sw.js:99:      requireInteraction: payload.priority === 'URGENT',
+client/src/app/inbox/page.tsx:35:type Priority = 'INFO' | 'OPERATIONAL' | 'URGENT';
+client/src/app/inbox/page.tsx:130:  const [priority, setPriority] = useState<Priority>('OPERATIONAL');
+client/src/app/inbox/page.tsx:188:          { value: 'INFO', label: PRIORITY_LABELS.INFO },
+client/src/app/inbox/page.tsx:189:          { value: 'OPERATIONAL', label: PRIORITY_LABELS.OPERATIONAL },
+client/src/app/inbox/page.tsx:190:          { value: 'URGENT', label: PRIORITY_LABELS.URGENT },
+client/src/app/inbox/page.tsx:194:      {priority === 'URGENT' ? (
+packages/shared/src/dto/announcement.ts:28:    priority: AnnouncementPriority.default('INFO'),
+server/src/modules/announcement/service.ts:79:  if (announcement.priority === 'URGENT') pushToDevices(announcement);
+server/src/modules/announcement/service.ts:193:    priority: 'URGENT',
+server/src/modules/gift/service.ts:238:    priority: 'OPERATIONAL',
+server/src/modules/incident/service.ts:185:    priority: 'URGENT',
+server/src/modules/lostPerson/service.ts:252:    priority: 'URGENT',
+server/src/modules/lostPerson/service.ts:271:    priority: 'OPERATIONAL',
+server/src/modules/notification/service.ts:203:            urgency: input.priority === 'URGENT' ? 'high' : 'normal',

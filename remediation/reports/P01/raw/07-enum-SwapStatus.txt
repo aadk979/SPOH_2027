@@ -1,0 +1,17 @@
+client/src/app/ic/page.tsx:232:  async function decide(id: string, decision: 'APPROVED' | 'REJECTED'): Promise<void> {
+client/src/app/ic/page.tsx:269:                onClick={() => void decide(swap.id, 'APPROVED')}
+client/src/app/ic/page.tsx:277:                onClick={() => void decide(swap.id, 'REJECTED')}
+packages/shared/src/dto/shift.ts:27:    decision: z.enum(['APPROVED', 'REJECTED']),
+server/src/modules/shift/repo.ts:81:    data: { status: 'APPROVED', decidedById: input.decidedById, decidedAt: new Date() },
+server/src/modules/shift/repo.ts:92:    data: { status: 'REJECTED', decidedById, decidedAt: new Date() },
+server/src/modules/shift/service.ts:107:      after: { status: 'REQUESTED', assignmentId: assignment.id, targetId: target.id },
+server/src/modules/shift/service.ts:131:    if (swap.status !== 'REQUESTED') {
+server/src/modules/shift/service.ts:139:    if (request.decision === 'REJECTED') {
+server/src/modules/shift/service.ts:187:  return (await listSwaps({ status: 'REQUESTED' })).map(toSwapRecord);
+server/tests/integration/comms.test.ts:218:    expect(response.body.swap.status).toBe('REQUESTED');
+server/tests/integration/comms.test.ts:262:      .send({ decision: 'APPROVED' });
+server/tests/integration/comms.test.ts:265:    expect(decided.body.swap.status).toBe('APPROVED');
+server/tests/integration/comms.test.ts:285:      .send({ decision: 'REJECTED' });
+server/tests/integration/comms.test.ts:300:      .send({ decision: 'APPROVED' });
+server/tests/integration/comms.test.ts:314:      .send({ decision: 'APPROVED' });
+server/tests/integration/comms.test.ts:319:      .send({ decision: 'REJECTED' });

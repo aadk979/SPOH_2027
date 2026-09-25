@@ -1,0 +1,12 @@
+client/src/lib/format.ts:60:  return block === 'MORNING' ? '09:30–14:00' : '13:30–18:00';
+client/src/lib/format.ts:71:  return block === 'MORNING' ? 'morning' : 'afternoon';
+server/prisma/seed.ts:356:      for (const block of ['MORNING', 'AFTERNOON'] as ShiftBlock[]) {
+server/scripts/load-test.mjs:124:    block: 'MORNING',
+server/scripts/load-test.mjs:136:      rows: rows.map((row) => ({ ...row, block: 'AFTERNOON' })),
+server/tests/helpers/fixtures.ts:102:  const block = input.block ?? 'MORNING';
+server/tests/helpers/fixtures.ts:135:  for (const block of ['MORNING', 'AFTERNOON'] as ShiftBlock[]) {
+server/tests/integration/admin.test.ts:492:        block: 'MORNING',
+server/tests/unit/settings.test.ts:66:      expect(activeShiftBlocks(new Date('2027-01-06T22:30:00Z'), false)).toEqual(['MORNING']);
+server/tests/unit/time.test.ts:54:    expect(at('2027-01-07T03:30:00Z')).toEqual(['MORNING']);
+server/tests/unit/time.test.ts:60:    expect(at('2027-01-07T05:45:00Z').sort()).toEqual(['AFTERNOON', 'MORNING']);
+server/tests/unit/time.test.ts:64:    expect(at('2027-01-07T08:00:00Z')).toEqual(['AFTERNOON']);

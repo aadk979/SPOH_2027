@@ -1,0 +1,144 @@
+client/.env.example:1:# SPOH 2027 client configuration.
+client/package.json:5:  "description": "SPOH 2027 volunteer PWA — Next.js App Router.",
+client/public/manifest.json:2:  "name": "SPOH 2027 Operations",
+client/public/manifest.json:4:  "description": "Volunteer operations for the SP School of Computing Open House, 6-9 January 2027.",
+client/public/sw.js:16:const CACHE = 'spoh2027-shell-v1';
+client/src/app/admin/settings/page.tsx:292:                      placeholder="SPOH 2027"
+client/src/app/capture/stamp/page.tsx:83:   * The QR payload is opaque (`spoh2027:<uuid>`), so a scanned code is looked
+client/src/app/chief/imports/page.tsx:44:    'SEC_4,SIGNUP_BOOTH,2027-01-07T03:30:00.000Z,12\n' +
+client/src/app/chief/imports/page.tsx:45:    'PARENT_GUARDIAN,SIGNUP_BOOTH,2027-01-07T03:30:00.000Z,5',
+client/src/app/chief/imports/page.tsx:48:    'DCDF_STATION,42,2027-01-07T03:30:00.000Z\n' +
+client/src/app/chief/imports/page.tsx:49:    'DCS_STATION,31,2027-01-07T03:30:00.000Z',
+client/src/app/home/page.tsx:21:          eyebrow="SPOH 2027 · Volunteer workspace"
+client/src/app/layout.tsx:8:  title: 'SPOH 2027 Ops',
+client/src/app/layout.tsx:9:  description: 'Volunteer operations for the SP School of Computing Open House, 6–9 January 2027.',
+client/src/app/reports/page.tsx:72:      anchor.download = `spoh2027-report-${new Date().toISOString().slice(0, 10)}.${format}`;
+client/src/app/sign-in/page.tsx:86:            placeholder="you@spoh2027.test"
+client/src/app/sign-in/page.tsx:110:      <h1 className="text-display">SPOH 2027</h1>
+client/src/app/tv/page.tsx:98:          <h1 className="text-tv-row font-semibold">SPOH 2027 · {data.eventDayLabel ?? 'Ops'}</h1>
+client/src/components/GlobalNav.tsx:61:        SPOH 2027
+client/src/components/SectionNav.tsx:57:        <p>Open House 2027</p>
+client/src/content/brief.ts:11: * course leads before the 4 Nov 2026 Student Ambassador training, which is when
+client/src/lib/outbox.ts:21:const DB_NAME = 'spoh2027';
+client/src/lib/runtimeSettings.ts:46:  eventName: 'SPOH 2027',
+client/src/styles/globals.css:14: * SPOH 2027 design tokens.
+client/tests/e2e/a11y.spec.ts:82:    await signIn(page, 'booth@spoh2027.test');
+client/tests/e2e/a11y.spec.ts:89:    await signIn(page, 'booth@spoh2027.test');
+client/tests/e2e/a11y.spec.ts:97:    await signIn(page, 'counter@spoh2027.test');
+client/tests/e2e/a11y.spec.ts:105:    await signIn(page, 'booth@spoh2027.test');
+client/tests/e2e/a11y.spec.ts:123:    await signIn(page, 'booth@spoh2027.test');
+client/tests/e2e/admin.spec.ts:18:const CHIEF = 'chief@spoh2027.test';
+client/tests/e2e/admin.spec.ts:19:const BOOTH = 'booth@spoh2027.test';
+client/tests/e2e/admin.spec.ts:78:    await expect(page.getByText('booth@spoh2027.test')).toBeVisible();
+client/tests/e2e/admin.spec.ts:103:    await page.getByLabel('Name or email').fill('admin@spoh2027.test');
+client/tests/e2e/admin.spec.ts:120:    await page.getByLabel('Name or email').fill('chief@spoh2027.test');
+client/tests/e2e/capture.spec.ts:12:const BOOTH = 'booth@spoh2027.test';
+client/tests/e2e/capture.spec.ts:13:const COUNTER = 'counter@spoh2027.test';
+client/tests/e2e/capture.spec.ts:14:const IC = 'ic@spoh2027.test';
+client/tests/outbox.test.ts:44:  if (remaining.length > 0) indexedDB.deleteDatabase('spoh2027');
+client/tests/outbox.test.ts:235:        clientRecordedAt: '2027-01-07T03:30:00.000Z',
+client/tests/outbox.test.ts:237:        lastAttemptAt: '2027-01-07T03:35:00.000Z',
+client/tests/outbox.test.ts:245:      '2027-01-07T03:30:00.000Z',
+ops/backup/README.md:29:sudo BACKUP_BUCKET=spoh2027-backups-665146708212 \
+ops/backup/README.md:30:     DATABASE_URL='postgresql://spoh_app:...@localhost:5432/spoh2027' \
+ops/backup/README.md:53:./spoh-restore.sh --latest --into spoh2027_restore_check
+ops/backup/README.md:60:./spoh-restore.sh --latest --into spoh2027 --i-am-sure
+ops/backup/README.md:71:dumps/2027/01/07/spoh2027-20270107T033000Z.sql.gz
+ops/backup/iam-policy.json:9:        "arn:aws:s3:::spoh2027-backups-665146708212",
+ops/backup/iam-policy.json:10:        "arn:aws:s3:::spoh2027-backups-665146708212/*"
+ops/backup/install.sh:3:# SPOH 2027 — install the backup daemon on the app instance.
+ops/backup/install.sh:7:#   sudo BACKUP_BUCKET=spoh2027-backups-665146708212 \
+ops/backup/install.sh:8:#        DATABASE_URL='postgresql://spoh_app:...@localhost:5432/spoh2027' \
+ops/backup/install.sh:61:# SPOH 2027 backup configuration. Root-readable only.
+ops/backup/install.sh:109:echo "  ${INSTALL_DIR}/spoh-restore.sh --latest --into spoh2027_restore_check"
+ops/backup/spoh-backup-check.sh:3:# SPOH 2027 — is the backup daemon actually alive?
+ops/backup/spoh-backup-failed.service:2:Description=SPOH 2027 backup failure notice
+ops/backup/spoh-backup.service:2:Description=SPOH 2027 database backup to S3
+ops/backup/spoh-backup.sh:3:# SPOH 2027 — database backup.
+ops/backup/spoh-backup.sh:117:readonly FILE_NAME="spoh2027-${STAMP}.sql.gz"
+ops/backup/spoh-backup.timer:2:Description=Run the SPOH 2027 database backup every 15 minutes
+ops/backup/spoh-restore.sh:3:# SPOH 2027 — database restore.
+ops/backup/spoh-restore.sh:11:#   spoh-restore.sh --latest --into spoh2027_restore_check   # rehearsal
+ops/backup/spoh-restore.sh:12:#   spoh-restore.sh --latest --into spoh2027 --i-am-sure     # the real thing
+ops/backup/spoh-restore.sh:13:#   spoh-restore.sh --key dumps/2027/01/07/spoh2027-... --into spoh2027_scratch
+packages/shared/package.json:5:  "description": "Single definition of every DTO shared by the SPOH 2027 server and client.",
+scripts/dev-db-local.sh:65:    # SUPERUSER because the integration suite creates and drops spoh2027_test itself.
+scripts/dev-db-local.sh:69:  if [ "$(psql_admin "SELECT 1 FROM pg_database WHERE datname='spoh2027'")" != 1 ]; then
+scripts/dev-db-local.sh:70:    psql_admin "CREATE DATABASE spoh2027 OWNER spoh"
+scripts/dev-db-local.sh:71:    echo "created database spoh2027"
+scripts/dev-db-local.sh:80:    echo "DATABASE_URL=postgresql://spoh:spoh@localhost:$PORT/spoh2027"
+server/.env.example:1:# SPOH 2027 server configuration.
+server/.env.example:14:DATABASE_URL=postgresql://spoh:spoh@localhost:5435/spoh2027
+server/package.json:5:  "description": "SPOH 2027 operations API — Express + Prisma + Postgres.",
+server/prisma/schema.prisma:1:// SPOH 2027 Event Operations System — data model.
+server/prisma/seed.ts:50:  { date: '2027-01-06', label: 'Sec 4 Tour Day 1', isPublicDay: false, isTourDay: true },
+server/prisma/seed.ts:52:    date: '2027-01-07',
+server/prisma/seed.ts:58:    date: '2027-01-08',
+server/prisma/seed.ts:63:  { date: '2027-01-09', label: 'Open House Day 3', isPublicDay: true, isTourDay: false },
+server/prisma/seed.ts:163:  { email: 'admin@spoh2027.test', displayName: 'Ada Admin', role: 'ADMIN', portfolio: null },
+server/prisma/seed.ts:165:    email: 'lead@spoh2027.test',
+server/prisma/seed.ts:171:    email: 'chief@spoh2027.test',
+server/prisma/seed.ts:177:    email: 'dc@spoh2027.test',
+server/prisma/seed.ts:182:  { email: 'ic@spoh2027.test', displayName: 'Ivan IC', role: 'IC', portfolio: null },
+server/prisma/seed.ts:183:  { email: 'booth@spoh2027.test', displayName: 'Bea Booth', role: 'VOLUNTEER', portfolio: null },
+server/prisma/seed.ts:185:    email: 'counter@spoh2027.test',
+server/prisma/seed.ts:194:  { email: 'booth@spoh2027.test', stationCode: 'SIGNUP_BOOTH', roleLabel: 'Registration' },
+server/prisma/seed.ts:195:  { email: 'counter@spoh2027.test', stationCode: 'DCDF_STATION', roleLabel: 'Counter' },
+server/prisma/seed.ts:196:  { email: 'ic@spoh2027.test', stationCode: 'SIGNUP_BOOTH', roleLabel: 'Booth IC' },
+server/prisma/seed.ts:205:  { date: '2026-11-18', label: 'Dry Run #1', isPublicDay: false, isTourDay: false },
+server/prisma/seed.ts:206:  { date: '2027-01-04', label: 'Dry Run #2', isPublicDay: false, isTourDay: false },
+server/prisma/seed.ts:280:    'admin@spoh2027.test'
+server/prisma/seed.ts:282:  const displayName = process.env.SEED_ADMIN_NAME ?? 'SPOH 2027 Administrator';
+server/prisma/seed.ts:323:    ['booth@spoh2027.test', 'ic@spoh2027.test'],
+server/prisma/seed.ts:324:    ['counter@spoh2027.test', 'ic@spoh2027.test'],
+server/prisma/seed.ts:325:    ['ic@spoh2027.test', 'dc@spoh2027.test'],
+server/prisma/seed.ts:326:    ['dc@spoh2027.test', 'chief@spoh2027.test'],
+server/prisma/seed.ts:436:      qrPayload: `spoh2027:dev-${String(index + 1).padStart(4, '0')}`,
+server/prisma/seed.ts:459:      '      sign in with POST /api/v1/dev-auth/sign-in { "email": "booth@spoh2027.test" }',
+server/scripts/load-test.mjs:39:const CHIEF_EMAIL = process.env.LOAD_TEST_CHIEF ?? 'chief@spoh2027.test';
+server/scripts/load-test.mjs:43:const LOAD_EMAIL_DOMAIN = 'loadtest.spoh2027.test';
+server/scripts/load-test.mjs:80:    .setIssuer('spoh2027-local-dev')
+server/scripts/load-test.mjs:81:    .setAudience('spoh2027-api')
+server/scripts/setup-test-db.mjs:16:const DEFAULT_URL = 'postgresql://spoh:spoh@localhost:5435/spoh2027_test';
+server/src/config/env.ts:56:    /** Hosted UI base, e.g. https://spoh2027-livetest.auth.ap-southeast-1.amazoncognito.com */
+server/src/lib/settings.ts:44:  eventName: 'SPOH 2027',
+server/src/lib/shortCode.ts:58:  return `spoh2027:${randomUUID()}`;
+server/src/middleware/auth/localProvider.ts:24:const ISSUER = 'spoh2027-local-dev';
+server/src/middleware/auth/localProvider.ts:25:const AUDIENCE = 'spoh2027-api';
+server/src/modules/auth/tokens.ts:28:const ISSUER = 'spoh2027-api';
+server/src/modules/auth/tokens.ts:29:const AUDIENCE = 'spoh2027-api';
+server/src/modules/report/export.ts:47:  workbook.creator = 'SPOH 2027 Operations';
+server/src/modules/report/export.ts:73:  sheet.addRow(['SPOH 2027 — post-event report']).font = { bold: true, size: 14 };
+server/src/modules/report/export.ts:363:  lines.push('# SPOH 2027 post-event report');
+server/src/modules/report/router.ts:46:      res.setHeader('Content-Disposition', `attachment; filename="spoh2027-report-${stamp}.csv"`);
+server/src/modules/report/router.ts:56:    res.setHeader('Content-Disposition', `attachment; filename="spoh2027-report-${stamp}.xlsx"`);
+server/tests/integration/admin.test.ts:453:      .send({ date: '2027-01-10', label: 'Extra Day' });
+server/tests/integration/admin.test.ts:460:      .send({ date: '2027-01-10', label: 'Clash' });
+server/tests/integration/attendance.test.ts:186:    vi.setSystemTime(new Date('2027-01-08T03:30:00Z'));
+server/tests/integration/gift.test.ts:69:      qrPayload: `spoh2027:test-${CARD}`,
+server/tests/integration/missionCard.test.ts:84:      qrPayload: `spoh2027:test-${shortCode}`,
+server/tests/setup.ts:21:/** 2027-01-07 11:30 Singapore — Open House Day 1, mid-morning block. */
+server/tests/setup.ts:22:export const FROZEN_NOW = new Date('2027-01-07T03:30:00.000Z');
+server/tests/unit/attendance.test.ts:36:  const now = new Date('2027-01-07T03:30:00Z');
+server/tests/unit/settings.test.ts:50:      expect(activeShiftBlocks(new Date('2027-01-07T03:30:00Z'), false)).toEqual([]);
+server/tests/unit/settings.test.ts:66:      expect(activeShiftBlocks(new Date('2027-01-06T22:30:00Z'), false)).toEqual(['MORNING']);
+server/tests/unit/settings.test.ts:119:    expect(singaporeHourKey(new Date('2027-01-07T03:00:00Z'))).toBe('2027-01-07T11');
+server/tests/unit/settings.test.ts:123:    expect(singaporeHourKey(new Date('2027-01-06T17:00:00Z'))).toBe('2027-01-07T01');
+server/tests/unit/shortCode.test.ts:58:    expect(payload).toMatch(/^spoh2027:[0-9a-f-]{36}$/);
+server/tests/unit/time.test.ts:22:    expect(singaporeDateString(new Date('2027-01-06T15:59:59Z'))).toBe('2027-01-06');
+server/tests/unit/time.test.ts:23:    expect(singaporeDateString(new Date('2027-01-06T16:00:00Z'))).toBe('2027-01-07');
+server/tests/unit/time.test.ts:27:    expect(singaporeDateString(new Date('2027-01-07T03:30:00Z'))).toBe('2027-01-07');
+server/tests/unit/time.test.ts:33:    expect(eventDayAnchor('2027-01-07').toISOString()).toBe('2027-01-07T00:00:00.000Z');
+server/tests/unit/time.test.ts:40:    expect(singaporeMinuteOfDay(new Date('2027-01-07T03:30:00Z'))).toBe(11 * 60 + 30);
+server/tests/unit/time.test.ts:50:    expect(at('2027-01-07T01:00:00Z')).toEqual([]);
+server/tests/unit/time.test.ts:54:    expect(at('2027-01-07T03:30:00Z')).toEqual(['MORNING']);
+server/tests/unit/time.test.ts:60:    expect(at('2027-01-07T05:45:00Z').sort()).toEqual(['AFTERNOON', 'MORNING']);
+server/tests/unit/time.test.ts:64:    expect(at('2027-01-07T08:00:00Z')).toEqual(['AFTERNOON']);
+server/tests/unit/time.test.ts:70:    expect(at('2027-01-07T10:00:00Z')).toEqual([]);
+server/tests/unit/time.test.ts:76:    expect(floorToBucket(new Date('2027-01-07T03:44:59Z'), 30).toISOString()).toBe(
+server/tests/unit/time.test.ts:77:      '2027-01-07T03:30:00.000Z',
+server/tests/unit/time.test.ts:82:    expect(floorToBucket(new Date('2027-01-07T03:30:00Z'), 30).toISOString()).toBe(
+server/tests/unit/time.test.ts:83:      '2027-01-07T03:30:00.000Z',
+server/tests/unit/time.test.ts:90:    expect(minutesBetween(new Date('2027-01-07T03:00:00Z'), new Date('2027-01-07T03:07:59Z'))).toBe(
+server/tests/unit/time.test.ts:96:    expect(minutesBetween(new Date('2027-01-07T04:00:00Z'), new Date('2027-01-07T03:00:00Z'))).toBe(
+server/vitest.config.ts:38:              'postgresql://spoh:spoh@localhost:5435/spoh2027_test',

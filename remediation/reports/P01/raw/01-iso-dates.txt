@@ -1,0 +1,40 @@
+client/src/app/chief/imports/page.tsx:44:    'SEC_4,SIGNUP_BOOTH,2027-01-07T03:30:00.000Z,12\n' +
+client/src/app/chief/imports/page.tsx:45:    'PARENT_GUARDIAN,SIGNUP_BOOTH,2027-01-07T03:30:00.000Z,5',
+client/src/app/chief/imports/page.tsx:48:    'DCDF_STATION,42,2027-01-07T03:30:00.000Z\n' +
+client/src/app/chief/imports/page.tsx:49:    'DCS_STATION,31,2027-01-07T03:30:00.000Z',
+client/tests/outbox.test.ts:235:        clientRecordedAt: '2027-01-07T03:30:00.000Z',
+client/tests/outbox.test.ts:237:        lastAttemptAt: '2027-01-07T03:35:00.000Z',
+client/tests/outbox.test.ts:245:      '2027-01-07T03:30:00.000Z',
+ops/backup/iam-policy.json:2:  "Version": "2012-10-17",
+server/prisma/seed.ts:50:  { date: '2027-01-06', label: 'Sec 4 Tour Day 1', isPublicDay: false, isTourDay: true },
+server/prisma/seed.ts:52:    date: '2027-01-07',
+server/prisma/seed.ts:58:    date: '2027-01-08',
+server/prisma/seed.ts:63:  { date: '2027-01-09', label: 'Open House Day 3', isPublicDay: true, isTourDay: false },
+server/prisma/seed.ts:205:  { date: '2026-11-18', label: 'Dry Run #1', isPublicDay: false, isTourDay: false },
+server/prisma/seed.ts:206:  { date: '2027-01-04', label: 'Dry Run #2', isPublicDay: false, isTourDay: false },
+server/tests/integration/admin.test.ts:453:      .send({ date: '2027-01-10', label: 'Extra Day' });
+server/tests/integration/admin.test.ts:460:      .send({ date: '2027-01-10', label: 'Clash' });
+server/tests/integration/attendance.test.ts:186:    vi.setSystemTime(new Date('2027-01-08T03:30:00Z'));
+server/tests/setup.ts:21:/** 2027-01-07 11:30 Singapore — Open House Day 1, mid-morning block. */
+server/tests/setup.ts:22:export const FROZEN_NOW = new Date('2027-01-07T03:30:00.000Z');
+server/tests/unit/attendance.test.ts:36:  const now = new Date('2027-01-07T03:30:00Z');
+server/tests/unit/settings.test.ts:50:      expect(activeShiftBlocks(new Date('2027-01-07T03:30:00Z'), false)).toEqual([]);
+server/tests/unit/settings.test.ts:66:      expect(activeShiftBlocks(new Date('2027-01-06T22:30:00Z'), false)).toEqual(['MORNING']);
+server/tests/unit/settings.test.ts:119:    expect(singaporeHourKey(new Date('2027-01-07T03:00:00Z'))).toBe('2027-01-07T11');
+server/tests/unit/settings.test.ts:123:    expect(singaporeHourKey(new Date('2027-01-06T17:00:00Z'))).toBe('2027-01-07T01');
+server/tests/unit/time.test.ts:22:    expect(singaporeDateString(new Date('2027-01-06T15:59:59Z'))).toBe('2027-01-06');
+server/tests/unit/time.test.ts:23:    expect(singaporeDateString(new Date('2027-01-06T16:00:00Z'))).toBe('2027-01-07');
+server/tests/unit/time.test.ts:27:    expect(singaporeDateString(new Date('2027-01-07T03:30:00Z'))).toBe('2027-01-07');
+server/tests/unit/time.test.ts:33:    expect(eventDayAnchor('2027-01-07').toISOString()).toBe('2027-01-07T00:00:00.000Z');
+server/tests/unit/time.test.ts:40:    expect(singaporeMinuteOfDay(new Date('2027-01-07T03:30:00Z'))).toBe(11 * 60 + 30);
+server/tests/unit/time.test.ts:50:    expect(at('2027-01-07T01:00:00Z')).toEqual([]);
+server/tests/unit/time.test.ts:54:    expect(at('2027-01-07T03:30:00Z')).toEqual(['MORNING']);
+server/tests/unit/time.test.ts:60:    expect(at('2027-01-07T05:45:00Z').sort()).toEqual(['AFTERNOON', 'MORNING']);
+server/tests/unit/time.test.ts:64:    expect(at('2027-01-07T08:00:00Z')).toEqual(['AFTERNOON']);
+server/tests/unit/time.test.ts:70:    expect(at('2027-01-07T10:00:00Z')).toEqual([]);
+server/tests/unit/time.test.ts:76:    expect(floorToBucket(new Date('2027-01-07T03:44:59Z'), 30).toISOString()).toBe(
+server/tests/unit/time.test.ts:77:      '2027-01-07T03:30:00.000Z',
+server/tests/unit/time.test.ts:82:    expect(floorToBucket(new Date('2027-01-07T03:30:00Z'), 30).toISOString()).toBe(
+server/tests/unit/time.test.ts:83:      '2027-01-07T03:30:00.000Z',
+server/tests/unit/time.test.ts:90:    expect(minutesBetween(new Date('2027-01-07T03:00:00Z'), new Date('2027-01-07T03:07:59Z'))).toBe(
+server/tests/unit/time.test.ts:96:    expect(minutesBetween(new Date('2027-01-07T04:00:00Z'), new Date('2027-01-07T03:00:00Z'))).toBe(

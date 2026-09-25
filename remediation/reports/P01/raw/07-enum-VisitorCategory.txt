@@ -1,0 +1,57 @@
+client/src/app/capture/registration/group/page.tsx:25:  { value: 'SEC_1', label: 'Sec 1' },
+client/src/app/capture/registration/group/page.tsx:26:  { value: 'SEC_2', label: 'Sec 2' },
+client/src/app/capture/registration/group/page.tsx:27:  { value: 'SEC_3', label: 'Sec 3' },
+client/src/app/capture/registration/group/page.tsx:28:  { value: 'SEC_4', label: 'Sec 4' },
+client/src/app/capture/registration/group/page.tsx:29:  { value: 'SEC_5', label: 'Sec 5' },
+client/src/app/capture/registration/group/page.tsx:30:  { value: 'GRADUATED_AWAITING_RESULTS', label: 'Graduated' },
+client/src/app/capture/registration/group/page.tsx:31:  { value: 'PARENT_GUARDIAN', label: 'Parent / Guardian' },
+client/src/app/capture/registration/group/page.tsx:32:  { value: 'OTHER', label: 'Other' },
+client/src/app/capture/registration/page.tsx:24:  { value: 'SEC_1', label: 'Sec 1' },
+client/src/app/capture/registration/page.tsx:25:  { value: 'SEC_2', label: 'Sec 2' },
+client/src/app/capture/registration/page.tsx:26:  { value: 'SEC_3', label: 'Sec 3' },
+client/src/app/capture/registration/page.tsx:27:  { value: 'SEC_4', label: 'Sec 4' },
+client/src/app/capture/registration/page.tsx:28:  { value: 'SEC_5', label: 'Sec 5' },
+client/src/app/capture/registration/page.tsx:29:  { value: 'GRADUATED_AWAITING_RESULTS', label: 'Graduated' },
+client/src/app/capture/registration/page.tsx:30:  { value: 'PARENT_GUARDIAN', label: 'Parent / Guardian' },
+client/src/app/capture/registration/page.tsx:31:  { value: 'OTHER', label: 'Other' },
+client/src/app/safety/incident/new/page.tsx:39:  { value: 'OTHER', label: 'Other' },
+client/tests/outbox.test.ts:76:      category: 'SEC_4',
+server/prisma/seed.ts:144:    kind: 'OTHER',
+server/scripts/load-test.mjs:173:          category: 'SEC_4',
+server/tests/helpers/fixtures.ts:57:      kind: 'OTHER',
+server/tests/integration/admin.test.ts:289:        category: 'SEC_4',
+server/tests/integration/admin.test.ts:428:      .send({ code: 'NEW_LAB', name: 'Another', kind: 'OTHER' });
+server/tests/integration/admin.test.ts:438:      .send({ code: 'RENAME_ME', name: 'Station', kind: 'OTHER' })
+server/tests/integration/capture.test.ts:58:  category = 'SEC_4',
+server/tests/integration/capture.test.ts:81:    await tapRegistration(booth, 'SEC_4');
+server/tests/integration/capture.test.ts:82:    await tapRegistration(booth, 'PARENT_GUARDIAN');
+server/tests/integration/capture.test.ts:114:    const first = await tapRegistration(booth, 'SEC_4', key);
+server/tests/integration/capture.test.ts:115:    const second = await tapRegistration(booth, 'SEC_4', key);
+server/tests/integration/capture.test.ts:128:    await tapRegistration(booth, 'SEC_4', key);
+server/tests/integration/capture.test.ts:177:          { category: 'SEC_4', count: 1 },
+server/tests/integration/capture.test.ts:178:          { category: 'PARENT_GUARDIAN', count: 2 },
+server/tests/integration/capture.test.ts:200:        members: [{ category: 'SEC_4', count: 2 }],
+server/tests/integration/capture.test.ts:216:    const created = await tapRegistration(booth, 'SEC_4');
+server/tests/integration/capture.test.ts:242:    const created = await tapRegistration(booth, 'SEC_4');
+server/tests/integration/capture.test.ts:260:    const created = await tapRegistration(booth, 'SEC_4');
+server/tests/integration/capture.test.ts:338:    await tapRegistration(booth, 'SEC_4');
+server/tests/integration/capture.test.ts:368:        category: 'SEC_4',
+server/tests/integration/capture.test.ts:380:    await tapRegistration(booth, 'SEC_4');
+server/tests/integration/dashboard.test.ts:101:      .send({ category: 'SEC_4', stationId: boothStationId, idempotencyKey: idempotencyKey() });
+server/tests/integration/dashboard.test.ts:125:      .send({ category: 'SEC_4', stationId: boothStationId, idempotencyKey: idempotencyKey() });
+server/tests/integration/dashboard.test.ts:272:        .send({ category: 'SEC_4', stationId: boothStationId, idempotencyKey: idempotencyKey() });
+server/tests/integration/dashboard.test.ts:278:      .send({ category: 'SEC_1', stationId: boothStationId, idempotencyKey: idempotencyKey() });
+server/tests/integration/fallback.test.ts:209:            category: 'SEC_4',
+server/tests/integration/fallback.test.ts:215:            category: 'PARENT_GUARDIAN',
+server/tests/integration/fallback.test.ts:251:    expect(rows.filter((row) => row.category === 'SEC_4')).toHaveLength(3);
+server/tests/integration/fallback.test.ts:269:          category: 'SEC_4',
+server/tests/integration/missionCard.test.ts:206:          { category: 'SEC_4', count: 1 },
+server/tests/integration/missionCard.test.ts:207:          { category: 'PARENT_GUARDIAN', count: 2 },
+server/tests/integration/rbac.test.ts:84:    body: () => ({ category: 'SEC_4', stationId, idempotencyKey: idempotencyKey() }),
+server/tests/integration/report.test.ts:74:  for (const category of ['SEC_4', 'SEC_4', 'PARENT_GUARDIAN'] as const) {
+server/tests/integration/report.test.ts:163:      .send({ category: 'OTHER', stationId: boothStationId, idempotencyKey: idempotencyKey() });
+server/tests/integration/security.test.ts:100:        category: 'SEC_4',
+server/tests/integration/security.test.ts:114:      .send({ category: 'SEC_4', stationId, idempotencyKey: 'not-a-uuid' });
+server/tests/integration/security.test.ts:173:      .send({ category: 'SEC_4', stationId, idempotencyKey: idempotencyKey() });
+server/tests/integration/security.test.ts:221:      .send({ category: 'SEC_4', stationId: 'no-such-station', idempotencyKey: idempotencyKey() });
+server/tests/integration/security.test.ts:250:      .send({ category: 'SEC_4', stationId, idempotencyKey: idempotencyKey() });

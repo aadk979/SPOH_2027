@@ -1,0 +1,33 @@
+client/src/lib/format.ts:10: * Every time is rendered in Asia/Singapore explicitly. A volunteer's phone may
+client/src/lib/format.ts:14:const TZ = 'Asia/Singapore';
+client/src/lib/format.ts:24:    timeZone: TZ,
+client/src/lib/format.ts:38:    timeZone: TZ,
+packages/shared/src/dto/common.ts:25:/** Calendar date, `YYYY-MM-DD`, interpreted in Asia/Singapore for display. */
+packages/shared/src/dto/settings.ts:24:/** Local wall-clock time in Asia/Singapore, `HH:MM` on a 24-hour clock. */
+server/prisma/seed.ts:217:  // Singapore is UTC+8 year round, so shifting by 8h gives the local date.
+server/prisma/seed.ts:218:  const today = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 10);
+server/prisma/seed.ts:389:  // 09:30 to 12:30 Singapore time, every 30 minutes. Stored UTC (SGT is UTC+8).
+server/src/lib/time.ts:4: * Everything is stored and transported as UTC. `Asia/Singapore` exists here
+server/src/lib/time.ts:7: * a record falls in when a report groups by hour. Singapore is UTC+8 year round
+server/src/lib/time.ts:19:export const EVENT_TIME_ZONE = 'Asia/Singapore';
+server/src/lib/time.ts:21:/** UTC+8, fixed. Singapore has observed no daylight saving since 1935. */
+server/src/lib/time.ts:22:const SGT_OFFSET_MINUTES = 8 * 60;
+server/src/modules/report/export.ts:29:  const shifted = new Date(new Date(iso).getTime() + 8 * 60 * 60_000).toISOString();
+server/src/modules/report/export.ts:135:  header(sheet, ['Station', 'Room entries', 'Peak 30-min block (SGT)', 'Peak entries']);
+server/src/modules/report/export.ts:147:  sheet.addRow(['Block start (SGT)', 'Station', 'Room entries']).font = { bold: true };
+server/src/modules/report/export.ts:231:    'Occurred (SGT)',
+server/src/modules/report/export.ts:297:  sheet.addRow(['Tier', 'Started (SGT)', 'Ended (SGT)', 'Minutes', 'Scope and reason']).font = {
+server/src/modules/report/export.ts:324:  sheet.addRow(['Imported (SGT)', 'Source', 'Target', 'Rows', 'File / notes']).font = {
+server/src/modules/report/export.ts:373:  row('Station', 'Room entries', 'Peak block (SGT)', 'Peak value');
+server/src/modules/report/export.ts:393:  row('Type', 'Severity', 'Status', 'Station', 'Occurred (SGT)', 'What happened');
+server/src/modules/report/export.ts:415:  row('Tier', 'Started (SGT)', 'Ended (SGT)', 'Minutes', 'Scope and reason');
+server/src/modules/report/repo.ts:50: * anything ran in the evening. `AT TIME ZONE` states the intent.
+server/src/modules/report/repo.ts:54:    SELECT date_trunc('day', "recordedAt" AT TIME ZONE 'Asia/Singapore') AS date,
+server/src/modules/report/repo.ts:75:  // Truncation stays in UTC deliberately: Singapore is UTC+8 exactly, so the
+server/src/modules/report/repo.ts:153:          SELECT date_trunc('day', "issuedAt" AT TIME ZONE 'Asia/Singapore') AS date,
+server/src/modules/report/repo.ts:159:          SELECT date_trunc('day', "completedAt" AT TIME ZONE 'Asia/Singapore') AS date,
+server/src/modules/report/repo.ts:183:    SELECT date_trunc('day', "recordedAt" AT TIME ZONE 'Asia/Singapore') AS date,
+server/tests/unit/settings.test.ts:114:   * The bucket boundaries were always right — Singapore is UTC+8 exactly — but
+server/tests/unit/time.test.ts:49:    // 09:00 SGT — half an hour before the morning block opens.
+server/tests/unit/time.test.ts:58:    // 13:45 SGT. The overlap is intentional: both shifts are genuinely on the
+server/tests/unit/time.test.ts:68:    // 18:00 SGT exactly — the block is half-open, so this is already outside.

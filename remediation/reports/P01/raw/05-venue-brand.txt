@@ -1,0 +1,72 @@
+client/.env.example:1:# SPOH 2027 client configuration.
+client/package.json:5:  "description": "SPOH 2027 volunteer PWA — Next.js App Router.",
+client/public/manifest.json:2:  "name": "SPOH 2027 Operations",
+client/public/manifest.json:3:  "short_name": "SPOH Ops",
+client/public/manifest.json:4:  "description": "Volunteer operations for the SP School of Computing Open House, 6-9 January 2027.",
+client/public/sw.js:91:  const title = payload.title || 'SPOH Ops';
+client/src/app/admin/settings/page.tsx:292:                      placeholder="SPOH 2027"
+client/src/app/attendance/page.tsx:138:                    Both phones should be on SP Wi-Fi.
+client/src/app/attendance/page.tsx:142:                      SP network verification is not configured yet. Use your verifier’s secondary
+client/src/app/attendance/page.tsx:147:                      This phone is outside the configured SP network. Connect to SP Wi-Fi or use
+client/src/app/home/page.tsx:21:          eyebrow="SPOH 2027 · Volunteer workspace"
+client/src/app/layout.tsx:8:  title: 'SPOH 2027 Ops',
+client/src/app/layout.tsx:9:  description: 'Volunteer operations for the SP School of Computing Open House, 6–9 January 2027.',
+client/src/app/layout.tsx:11:  appleWebApp: { capable: true, statusBarStyle: 'default', title: 'SPOH Ops' },
+client/src/app/map/page.tsx:15: * T19 floor plan images sit alongside this once the committee supplies them,
+client/src/app/map/page.tsx:28:        T19, School of Computing. Safety points are listed on every level.
+client/src/app/safety/incident/new/page.tsx:161:                  : 'T19, level 2 walkway'
+client/src/app/sign-in/page.tsx:110:      <h1 className="text-display">SPOH 2027</h1>
+client/src/app/sign-in/page.tsx:112:        School of Computing Open House · volunteer operations
+client/src/app/tv/page.tsx:98:          <h1 className="text-tv-row font-semibold">SPOH 2027 · {data.eventDayLabel ?? 'Ops'}</h1>
+client/src/components/GlobalNav.tsx:61:        SPOH 2027
+client/src/components/SectionNav.tsx:56:        <p className="font-semibold">School of Computing</p>
+client/src/components/SectionNav.tsx:57:        <p>Open House 2027</p>
+client/src/content/brief.ts:85:  { step: 1, title: 'Arrive', detail: 'Visitors reach T19 and are greeted at the Welcome Party.' },
+client/src/content/brief.ts:119: * ⚠ PLACEHOLDER. The real T19 floor plan images and exact room numbers are
+client/src/content/brief.ts:127:      { label: 'Welcome Party — T19 foyer', kind: 'station' },
+client/src/content/brief.ts:134:      { label: 'Assembly point — open plaza outside T19', kind: 'safety' },
+client/src/features/attendance/VerifierCode.tsx:70:              Connect this phone to SP Wi-Fi and generate a fresh code to enable QR verification.
+client/src/lib/runtimeSettings.ts:46:  eventName: 'SPOH 2027',
+client/src/styles/globals.css:14: * SPOH 2027 design tokens.
+client/tests/e2e/attendance.spec.ts:12:    eventDay: { id: 'event-day', label: 'Open House' },
+ops/backup/install.sh:3:# SPOH 2027 — install the backup daemon on the app instance.
+ops/backup/install.sh:61:# SPOH 2027 backup configuration. Root-readable only.
+ops/backup/spoh-backup-check.sh:3:# SPOH 2027 — is the backup daemon actually alive?
+ops/backup/spoh-backup-check.sh:20:readonly CONFIG_FILE="${SPOH_BACKUP_CONFIG:-/etc/spoh/backup.env}"
+ops/backup/spoh-backup-failed.service:2:Description=SPOH 2027 backup failure notice
+ops/backup/spoh-backup-failed.service:11:ExecStart=/usr/bin/logger -t spoh-backup -p daemon.crit "SPOH BACKUP FAILED on %H - the database is running unprotected. Check: journalctl -u spoh-backup -n 50"
+ops/backup/spoh-backup.service:2:Description=SPOH 2027 database backup to S3
+ops/backup/spoh-backup.sh:3:# SPOH 2027 — database backup.
+ops/backup/spoh-backup.sh:36:readonly CONFIG_FILE="${SPOH_BACKUP_CONFIG:-/etc/spoh/backup.env}"
+ops/backup/spoh-backup.timer:2:Description=Run the SPOH 2027 database backup every 15 minutes
+ops/backup/spoh-restore.sh:3:# SPOH 2027 — database restore.
+ops/backup/spoh-restore.sh:21:readonly CONFIG_FILE="${SPOH_BACKUP_CONFIG:-/etc/spoh/backup.env}"
+packages/shared/package.json:5:  "description": "Single definition of every DTO shared by the SPOH 2027 server and client.",
+packages/shared/src/dto/shift.ts:96:  'Welcome, and what the School of Computing is.',
+scripts/dev-db-local.sh:13:# Overrides: PG_BIN (dir with initdb/pg_ctl), SPOH_PG_DIR (cluster home),
+scripts/dev-db-local.sh:14:# SPOH_PG_PORT (default 5435). Idempotent: `start` on a running cluster only
+scripts/dev-db-local.sh:19:PORT="${SPOH_PG_PORT:-5435}"
+scripts/dev-db-local.sh:20:HOME_DIR="${SPOH_PG_DIR:-/var/lib/postgresql/spoh-baseline}"
+server/.env.example:1:# SPOH 2027 server configuration.
+server/.env.example:74:# Campus PUBLIC egress CIDRs from SP IT, comma-separated (IPv4 and/or IPv6).
+server/package.json:5:  "description": "SPOH 2027 operations API — Express + Prisma + Postgres.",
+server/prisma/schema.prisma:1:// SPOH 2027 Event Operations System — data model.
+server/prisma/schema.prisma:158:  /// "Sec 4 Tour Day 1", "Open House Day 2"
+server/prisma/seed.ts:46: * The event window (PRODUCT_BRIEF header): Sec 4 tours 6–8 Jan, SP Open House
+server/prisma/seed.ts:53:    label: 'Sec 4 Tour Day 2 / Open House Day 1',
+server/prisma/seed.ts:59:    label: 'Sec 4 Tour Day 3 / Open House Day 2 / Discovery Evening',
+server/prisma/seed.ts:63:  { date: '2027-01-09', label: 'Open House Day 3', isPublicDay: true, isTourDay: false },
+server/prisma/seed.ts:143:    name: 'T19 Foyer',
+server/prisma/seed.ts:282:  const displayName = process.env.SEED_ADMIN_NAME ?? 'SPOH 2027 Administrator';
+server/src/config/env.ts:20:  if (process.env.SPOH_SKIP_DOTENV === '1') return;
+server/src/lib/settings.ts:44:  eventName: 'SPOH 2027',
+server/src/modules/announcement/service.ts:194:    title: 'Urgent — SPOH Ops',
+server/src/modules/attendance/service.ts:315:          'Both phones must use the configured SP network for QR attendance. Ask your verifier for their secondary PIN instead.',
+server/src/modules/incident/service.ts:187:    body: `${what} at ${incident.stationName ?? 'an unlisted location'}. Open SPOH Ops.`,
+server/src/modules/lostPerson/service.ts:254:    body: 'A lost person alert is active. Open SPOH Ops for the description.',
+server/src/modules/report/export.ts:47:  workbook.creator = 'SPOH 2027 Operations';
+server/src/modules/report/export.ts:73:  sheet.addRow(['SPOH 2027 — post-event report']).font = { bold: true, size: 14 };
+server/src/modules/report/export.ts:363:  lines.push('# SPOH 2027 post-event report');
+server/tests/setup.ts:21:/** 2027-01-07 11:30 Singapore — Open House Day 1, mid-morning block. */
+server/vitest.config.ts:28:           * at the database a developer has been working in. `SPOH_SKIP_DOTENV`
+server/vitest.config.ts:35:            SPOH_SKIP_DOTENV: '1',

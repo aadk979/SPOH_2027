@@ -1,0 +1,18 @@
+client/src/app/capture/registration/group/page.tsx:32:  { value: 'OTHER', label: 'Other' },
+client/src/app/capture/registration/page.tsx:31:  { value: 'OTHER', label: 'Other' },
+client/src/app/safety/incident/new/page.tsx:33:  { value: 'INJURY', label: 'Injury' },
+client/src/app/safety/incident/new/page.tsx:34:  { value: 'ILLNESS', label: 'Illness' },
+client/src/app/safety/incident/new/page.tsx:35:  { value: 'NEAR_MISS', label: 'Near miss' },
+client/src/app/safety/incident/new/page.tsx:36:  { value: 'SAFETY_CONCERN', label: 'Safety concern' },
+client/src/app/safety/incident/new/page.tsx:37:  { value: 'CROWD_CONCERN', label: 'Crowd concern' },
+client/src/app/safety/incident/new/page.tsx:38:  { value: 'EQUIPMENT', label: 'Equipment' },
+client/src/app/safety/incident/new/page.tsx:39:  { value: 'OTHER', label: 'Other' },
+client/src/app/safety/incident/new/page.tsx:54:  const [type, setType] = useState<IncidentType>('NEAR_MISS');
+server/prisma/seed.ts:144:    kind: 'OTHER',
+server/src/modules/report/service.ts:285:    nearMisses: byType.get('NEAR_MISS') ?? 0,
+server/tests/helpers/fixtures.ts:57:      kind: 'OTHER',
+server/tests/integration/admin.test.ts:428:      .send({ code: 'NEW_LAB', name: 'Another', kind: 'OTHER' });
+server/tests/integration/admin.test.ts:438:      .send({ code: 'RENAME_ME', name: 'Station', kind: 'OTHER' })
+server/tests/integration/rbac.test.ts:113:      type: 'NEAR_MISS',
+server/tests/integration/report.test.ts:163:      .send({ category: 'OTHER', stationId: boothStationId, idempotencyKey: idempotencyKey() });
+server/tests/integration/report.test.ts:388:            type: 'NEAR_MISS',
