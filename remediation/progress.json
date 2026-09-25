@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T16:15:17.916Z",
+  "updatedAt": "2026-09-25T16:16:24.556Z",
   "current": {
     "phase": "P05",
     "step": "P05.1"
@@ -968,11 +968,16 @@
         {
           "id": "P05.1",
           "title": "Consolidated backlog",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T16:12:24.170Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T16:16:24.555Z",
+          "commits": ["87bf2e0"],
+          "notes": [
+            {
+              "at": "2026-09-25T16:16:24.556Z",
+              "text": "BACKLOG.md: 116 rows / 108 unique open (1 B, 22 H, 52 M, 33 L), every ID homed (check-backlog.mjs). New steps P06.12, P06.13, P07.11, P09.14; P08/P15 edits."
+            }
+          ]
         },
         {
           "id": "P05.2",
