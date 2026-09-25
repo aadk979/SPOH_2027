@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T13:53:56.572Z",
+  "updatedAt": "2026-09-25T13:56:58.782Z",
   "current": {
     "phase": "P02",
-    "step": "P02.9"
+    "step": "P02.10"
   },
   "gates": [
     {
@@ -603,17 +603,22 @@
         {
           "id": "P02.9",
           "title": "Permission experience",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T13:53:56.572Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T13:56:58.494Z",
+          "commits": ["40d44a7"],
+          "notes": [
+            {
+              "at": "2026-09-25T13:56:58.494Z",
+              "text": "per-role table; server = matrix; F02-030..031"
+            }
+          ]
         },
         {
           "id": "P02.10",
           "title": "Rank and write up",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-25T13:56:58.782Z",
           "completedAt": null,
           "commits": [],
           "notes": []
