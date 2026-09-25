@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T12:51:56.597Z",
+  "updatedAt": "2026-09-25T12:54:29.988Z",
   "current": {
     "phase": "P01",
-    "step": null
+    "step": "P01.1"
   },
   "gates": [
     {
@@ -364,11 +364,16 @@
         {
           "id": "P01.1",
           "title": "Automated sweep",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-25T12:52:15.547Z",
+          "completedAt": "2026-09-25T12:54:29.988Z",
+          "commits": ["a58c8a9"],
+          "notes": [
+            {
+              "at": "2026-09-25T12:54:29.988Z",
+              "text": "sweep.sh + raw/ (9 pattern groups, 1223 hits)"
+            }
+          ]
         },
         {
           "id": "P01.2",
@@ -434,8 +439,8 @@
           "notes": []
         }
       ],
-      "status": "not_started",
-      "startedAt": null,
+      "status": "in_progress",
+      "startedAt": "2026-09-25T12:52:15.252Z",
       "completedAt": null
     },
     {
