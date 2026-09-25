@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T13:07:13.081Z",
+  "updatedAt": "2026-09-25T13:08:39.523Z",
   "current": {
     "phase": "P01",
     "step": "P01.5"
@@ -420,11 +420,16 @@
         {
           "id": "P01.5",
           "title": "Runtime settings audit",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T13:07:13.081Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T13:08:39.523Z",
+          "commits": ["4a36ee9"],
+          "notes": [
+            {
+              "at": "2026-09-25T13:08:39.523Z",
+              "text": "16 keys (2 retire to data, 14 scoped event/platform/station-override) + 13 proposed keys; F01-052"
+            }
+          ]
         },
         {
           "id": "P01.6",
