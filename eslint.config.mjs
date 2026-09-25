@@ -12,6 +12,22 @@ import prettier from 'eslint-config-prettier';
  *    independently deployable; they may share only `@spoh/shared`.
  *  - the `no-explicit-any` error (BUILD_PLAN §13) forces `unknown` + narrowing.
  */
+
+/**
+ * @param {{ functionLines: number }} limits
+ * @returns {import('eslint').Linter.RulesRecord}
+ */
+function sizeGuards({ functionLines }) {
+  const lines = { skipBlankLines: true, skipComments: true };
+  return {
+    'max-lines-per-function': ['warn', { max: functionLines, ...lines, IIFEs: true }],
+    'max-lines': ['warn', { max: 300, ...lines }],
+    complexity: ['warn', 10],
+    'max-depth': ['warn', 3],
+    'max-params': ['warn', 3],
+  };
+}
+
 export default tseslint.config(
   {
     ignores: [
@@ -121,6 +137,29 @@ export default tseslint.config(
       globals: { ...globals.serviceworker },
       sourceType: 'script',
     },
+  },
+
+  // Size and complexity guards: the hard limits from
+  // remediation/standards/engineering-standards.md §2. Warnings for now, so lint
+  // reports the refactor debt without failing; P06/P07 flip them to errors.
+  {
+    files: ['server/src/**/*.ts', 'packages/shared/src/**/*.ts', 'client/src/**/*.ts'],
+    rules: sizeGuards({ functionLines: 50 }),
+  },
+  {
+    // React components get 80 lines; a .tsx file is where they live.
+    files: ['client/src/**/*.tsx'],
+    rules: sizeGuards({ functionLines: 80 }),
+  },
+  {
+    // Routes only compose feature screens.
+    files: ['client/src/app/**/page.tsx'],
+    rules: { 'max-lines': ['warn', { max: 60, skipBlankLines: true, skipComments: true }] },
+  },
+  {
+    // Exempt by the standard: tests and static data files.
+    files: ['**/*.test.{ts,tsx}', '**/tests/**', 'client/src/content/**'],
+    rules: Object.fromEntries(Object.keys(sizeGuards({ functionLines: 0 })).map((r) => [r, 'off'])),
   },
 
   // Config, scripts, seeds and tests legitimately write to stdout.

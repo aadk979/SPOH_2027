@@ -96,6 +96,37 @@ jobs:
       - name: Client tests
         run: npm run test --workspace client
 
+  architecture:
+    # Report-only until the remediation refactor (P06/P07) brings the counts to
+    # zero and flips the guards to errors. Prints the distance to the target
+    # architecture on every PR; never fails the build.
+    name: Architecture report
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build:shared
+
+      # The boundary rules resolve imports of the generated Prisma client.
+      - run: npx prisma generate
+        working-directory: server
+
+      - name: Guard counts
+        continue-on-error: true
+        run: |
+          npm run --silent arch:report | tee arch-report.txt
+          { echo '```'; cat arch-report.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Boundary violations
+        continue-on-error: true
+        run: npm run arch:check
+
   security:
     name: Security checks
     runs-on: ubuntu-latest

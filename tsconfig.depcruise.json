@@ -1,0 +1,12 @@
+{
+  "//": "Module resolution for dependency-cruiser only (npm run arch:check); not a build config.",
+  "compilerOptions": {
+    "allowJs": true,
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "paths": { "@/*": ["./client/src/*"] }
+  },
+  "include": ["server/src", "client/src", "packages/shared/src"],
+  "exclude": ["**/node_modules", "server/src/generated"]
+}

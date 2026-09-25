@@ -20,6 +20,8 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "arch:check": "depcruise server/src client/src packages/shared/src --config .dependency-cruiser.cjs --output-type err",
+    "arch:report": "node scripts/arch-report.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "npm run test --workspaces --if-present",
@@ -38,6 +40,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@vitest/coverage-v8": "^4.1.11",
+    "dependency-cruiser": "^18.4.0",
     "eslint": "^10.9.1",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.11.0",
