@@ -81,7 +81,9 @@ After this phase a second event can exist beside the first without code, seed or
 ### P09.5 — Switch reads and writes to the new model
 
 - **Do:**
-  1. Repos read and write the FK columns and filter by `eventId`.
+  1. Repos read and write the FK columns and filter by `eventId`: every event-owned repository
+     function takes an `EventScope`, and the `platform/db` extension throws on a query without it
+     (ADR-001 §2).
   2. DTOs carry ids plus labels, not enum values.
   3. Station behaviour comes from type capability flags, not `kind === 'SIGNUP_BOOTH'`.
   4. Shift "running now" uses `Shift` rows in the event's timezone.
@@ -105,8 +107,9 @@ After this phase a second event can exist beside the first without code, seed or
   1. Mount the domain routers under `/api/v1/events/:eventId/…` (per ADR-001).
   2. Event-context middleware resolves the event and the caller's membership, rejecting unknown or
      inaccessible events.
-  3. Keep old paths as thin redirects to Event #1 for one release, for queued outbox items and old
-     clients.
+  3. Keep old paths for one release as aliases of Event #1's paths (an internal rewrite, not an
+     HTTP redirect, so queued POSTs keep their body and idempotency key), for queued outbox items
+     and old clients (ADR-001, ADR-009).
   4. Add a **cross-event isolation suite**: for every route, a caller in event A using ids from
      event B gets 404.
 - **Done when:** the isolation suite passes for 100% of routes, generated from the route inventory.
@@ -133,7 +136,8 @@ After this phase a second event can exist beside the first without code, seed or
 - **Do:**
   1. After a release runs on the new columns, drop the enum columns and enum types that became data.
   2. Keep the invariant enums (DataSource, etc.).
-  3. Remove the redirects added in P09.7 once the outbox upgrade window has passed (ADR-009).
+  3. Remove the aliases added in P09.7 once the outbox upgrade window has passed (ADR-009).
+  4. Make `eventId` `NOT NULL` and add the composite `(eventId, parentId)` foreign keys (ADR-001 §2).
 - **Done when:** the schema has no event taxonomy enums.
 
 ### P09.11 — Seed and no-hardcoding guard
@@ -183,7 +187,7 @@ After this phase a second event can exist beside the first without code, seed or
 
 - **Silent count drift during migration.** Mitigation: the P09.4 totals script runs against a
   restored production backup before staging, and again after the contract step.
-- **Queued offline captures from old clients.** Mitigation: the redirects plus the outbox upgrade
+- **Queued offline captures from old clients.** Mitigation: the aliases plus the outbox upgrade
   (P09.7/P09.8), with the window set in ADR-009.
 
 ## Phase report
