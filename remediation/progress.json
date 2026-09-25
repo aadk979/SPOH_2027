@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T13:14:17.839Z",
+  "updatedAt": "2026-09-25T13:14:48.646Z",
   "current": {
-    "phase": "P01",
-    "step": "P01.8"
+    "phase": "P02",
+    "step": null
   },
   "gates": [
     {
@@ -474,9 +474,9 @@
           ]
         }
       ],
-      "status": "in_progress",
+      "status": "done",
       "startedAt": "2026-09-25T12:52:15.252Z",
-      "completedAt": null
+      "completedAt": "2026-09-25T13:14:48.645Z"
     },
     {
       "id": "P02",
