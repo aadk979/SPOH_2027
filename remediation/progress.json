@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T12:54:39.596Z",
+  "updatedAt": "2026-09-25T13:03:10.205Z",
   "current": {
     "phase": "P01",
     "step": "P01.2"
@@ -378,11 +378,16 @@
         {
           "id": "P01.2",
           "title": "Classify every hit",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T12:54:39.596Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T13:03:10.205Z",
+          "commits": ["1531f88"],
+          "notes": [
+            {
+              "at": "2026-09-25T13:03:10.205Z",
+              "text": "F01 inventory: 45 items + 2 D-04 items, 3 FP reasons; classify.mjs exits 0 on 1271/1271; defects F01-046/047"
+            }
+          ]
         },
         {
           "id": "P01.3",
