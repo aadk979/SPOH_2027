@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T14:12:55.698Z",
+  "updatedAt": "2026-09-25T14:16:39.845Z",
   "current": {
     "phase": "P03",
     "step": "P03.2"
@@ -660,11 +660,16 @@
         {
           "id": "P03.2",
           "title": "Function-level refactor backlog",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T14:12:55.698Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T14:16:39.845Z",
+          "commits": ["a26403c"],
+          "notes": [
+            {
+              "at": "2026-09-25T14:16:39.845Z",
+              "text": "97/97 flagged functions have a split plan (backlog.mjs, F03 Appendix B); 18 long files mapped"
+            }
+          ]
         },
         {
           "id": "P03.3",
