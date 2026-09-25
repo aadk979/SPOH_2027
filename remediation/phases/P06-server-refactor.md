@@ -19,7 +19,7 @@ must be clean.
 
 - **The worklist is `findings/F03-code-quality.md`**: the module table (target home per function)
   and the function-level split plan. Follow it; do not redesign on the fly.
-- Standards: `engineering-standards.md` §1–§3 and §9–§11.
+- Standards: `engineering-standards.md` §1–§3 and §9–§12.
 - **Invariant:** the route inventory snapshot (P06.1) and all test suites must be identical before
   and after each refactor commit. Behaviour changes only in `fix(...)` commits, each closing one
   finding from `findings/BACKLOG.md` and un-skipping its repro test in the same commit. Nothing

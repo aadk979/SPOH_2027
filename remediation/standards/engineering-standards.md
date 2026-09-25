@@ -1,5 +1,7 @@
 # Engineering standards
 
+**Status: final** (P05.8, ADR-007), pending the owner's sign-off at G1. It is binding from P06.
+
 The rules every phase follows. P06/P07 make the measurable ones blocking in lint and CI. Until then
 they apply to all new and touched code.
 
@@ -56,9 +58,9 @@ server/src/modules/<domain>/
 └── jobs.ts               (optional) scheduled handlers this module registers
 ```
 
-Cross-cutting code lives in `server/src/platform/`: `db`, `http` (middleware), `access` (the
-authorizer), `audit`, `idempotency`, `settings`, `scheduler`, `events` (cache bus), `time`, `logger`,
-`errors`, `aws`.
+Cross-cutting code lives in `server/src/platform/`: `db`, `http` (middleware, event context),
+`identity`, `access` (the authorizer), `audit`, `idempotency`, `settings`, `scheduler`, `events`
+(cache bus), `ratelimit`, `time`, `logger`, `errors`, `aws`.
 
 **Import rules** (dependency-cruiser + ESLint, blocking from P06):
 
@@ -73,6 +75,13 @@ authorizer), `audit`, `idempotency`, `settings`, `scheduler`, `events` (cache bu
 - Express types are imported **only** in `http/` and `platform/http`.
 - A use case owns its transaction and passes `tx` down. Repos never open transactions.
 - Audit and idempotency are applied by the use case (or a wrapper), never by the router.
+- **Every repository function for an event-owned model takes an `EventScope` first.** The
+  `platform/db` extension refuses a query without it (ADR-001 §2). Id lookups are
+  `{ eventId, id }`, never `{ id }` alone.
+- **Authorization** is `authorize(action, resolveResource)` on the route, or an
+  `authorizer.isAuthorized` call in the use case when the decision depends on loaded data
+  (ADR-005). Nothing else decides who may do what.
+- The rule ids that enforce this table are listed in ADR-007 §3.
 
 ## 4. Client shape
 
@@ -94,8 +103,15 @@ client/src/
 
 - No `fetch`/`api()` outside `features/*/api.ts` and `shared/lib`.
 - `shared/ui` never imports from `features`. Features import each other only through `index.ts`.
-- One form pattern: a zod schema from `@spoh/shared` plus the shared form hook and field components.
-- One navigation registry drives every nav surface.
+- One form pattern: a zod schema from `@spoh/shared` plus `useZodForm` and the `Field` and
+  `Choice` components (ADR-007 §2).
+- One navigation registry drives every nav surface. Visibility comes from `/me/permissions`, never
+  from a role check in the client (ADR-005).
+- Event screens live under `app/e/[event]/…`. Every query key starts with the `eventId`
+  (ADR-001 §5).
+- Offline: the outbox queues registration, footfall, stamps, redemptions and incident reports.
+  Each entry records `eventId`, path, `personId` and `clientRecordedAt`. Lost-person alerts are
+  never queued (ADR-007 §5).
 
 ## 5. Shared package
 
@@ -112,7 +128,7 @@ client/src/
 - **Env holds infrastructure and secrets only:** database URL, AWS resource IDs, `NODE_ENV`, port,
   log level, origins. In AWS these come from Secrets Manager and SSM, not files on disk.
 - **Behaviour an admin might change** is a registered setting with a scope (platform, event or
-  station), a schema, a default, a description, a permission and a history.
+  station), a schema, a default, a description, a permission and a history (ADR-003 §1).
 
 ## 7. Time
 
@@ -120,6 +136,9 @@ client/src/
   `platform/time`.
 - Every wall-clock interpretation takes the **event's IANA timezone**. There are no fixed offsets
   and no `AT TIME ZONE` literals.
+- Conversions go through `@spoh/shared/time` (`date-fns` + `@date-fns/tz`), which fixes the DST
+  rules: an ambiguous time takes the earlier offset, and a skipped time moves forward (ADR-007 §2).
+  "Today" is the event day window starting at `dayBoundaryMinutes` (ADR-004 §3).
 - Store instants as `timestamptz`, and store event-local dates as `date` together with the event's tz.
 
 ## 8. Errors and validation
@@ -127,6 +146,8 @@ client/src/
 - Validate at the boundary with zod schemas from `@spoh/shared`. Past the boundary, types are trusted.
 - Throw typed `AppError`s with codes from `errorCodes.ts`. Never throw strings and never swallow errors.
   A `catch` either handles the error meaningfully or rethrows it with context.
+- A rule failure (outside the check-in window, a stale swap) is **not** a permission denial. Only
+  the authorizer produces 403s, with the determining policy's reason code (F03-026, ADR-005 §7).
 - Users see actionable messages. Logs get the detail and the request id.
 
 ## 9. Tests
@@ -142,6 +163,8 @@ client/src/
 | client UI    | Testing Library for components, Playwright for journeys (phone + laptop) |
 | architecture | dependency-cruiser rules, size lint, no-hardcoding check                 |
 
+- **Coverage never drops.** `reports/metrics/coverage-floor.json` holds per-package floors, CI
+  enforces them, and each phase close raises them. The targets by G5 are in ADR-007 §4.
 - Behaviour-preserving refactors land only with the suites green before **and** after each commit.
 - A bug fix lands with a test that fails without it.
 - Integration tests never depend on the wall clock. They freeze time inside the event's timezone.
@@ -153,7 +176,24 @@ client/src/
 - Update `progress.json` through `tools/progress.mjs` after every step, and push to `main`. There are
   no feature branches, pull requests or tags (D-11).
 
-## 11. Definition of done (a step)
+## 11. One way to do it (F03 § P03.3, binding)
+
+| Concern        | The one way                                                                                            |
+| -------------- | ------------------------------------------------------------------------------------------------------ |
+| Record mappers | pure and synchronous in `data/mappers.ts`; related data loaded with the list (no N+1)                  |
+| Pagination     | keyset on `(sortKey, id)`, with `nextCursor: null` at the end                                          |
+| Errors         | one typed error per code; unique violations mapped to 409                                              |
+| Time           | the injected `Clock`; `@spoh/shared/time` for zones                                                    |
+| Audit          | `audited(tx, …)` in the mutation's transaction, curated `before`/`after`, one action name per mutation |
+| Idempotency    | `withIdempotency` on every write a client may retry; PII endpoints store no response body              |
+| Transactions   | the use case owns `tx`; no reads outside it that its writes depend on; no `Promise.all` on `tx`        |
+| Envelopes      | lists `{ data, meta }`, entities `{ data }`                                                            |
+| Rate limits    | a limit class per route, from the registry                                                             |
+| Query keys     | one key factory per feature, prefixed by `eventId`                                                     |
+| Forms          | `useZodForm` with the shared request schema                                                            |
+| Data fetching  | `features/<domain>/api.ts` and `queries.ts` only                                                       |
+
+## 12. Definition of done (a step)
 
 1. The step's **Done when** criteria are met.
 2. Lint, typecheck and all affected suites are green. For refactors, all suites are green.

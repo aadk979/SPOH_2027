@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T16:40:15.146Z",
+  "updatedAt": "2026-09-25T16:43:15.059Z",
   "current": {
     "phase": "P05",
-    "step": "P05.7"
+    "step": "P05.8"
   },
   "gates": [
     {
@@ -1066,8 +1066,8 @@
         {
           "id": "P05.8",
           "title": "ADR-007 Code architecture",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-25T16:40:25.913Z",
           "completedAt": null,
           "commits": [],
           "notes": []

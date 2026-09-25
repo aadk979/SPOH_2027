@@ -116,8 +116,11 @@ This can run in parallel with P06.
      input matches the printed alphabet), F03-035 (a replaced push subscription reaches the
      server), F03-036 (capture screens precached), and F03-037 (unused dependencies removed, and
      shared schemas no longer shipped on every route).
-  2. F03-034: queue offline the captures ADR-007 lists (stamps and redemptions are queued;
-     incidents and lost-person alerts are not queued but say plainly that they need a connection).
+  2. F03-034, per ADR-007 §5: queue stamps, redemptions (over-stock ones sync as flagged) and
+     incident reports (with the "tell your IC now" banner). Lost-person alerts are **never**
+     queued: offline, they show the escalation script and an explicit "send now". Outbox entries
+     carry `eventId`, path, `personId` and `clientRecordedAt`. Remove the unused `zustand` and
+     `aws-amplify` (F03-037).
   3. One `fix(...)` commit per finding, test first, after the feature it touches has moved (P07.3–P07.5).
 - **Done when:** no BACKLOG row with home P07.11 is open, and every client repro is un-skipped and green.
 

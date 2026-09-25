@@ -1,131 +1,160 @@
-# Target architecture (draft; finalised in P05)
+# Target architecture
 
-This is the shape the programme builds towards. Everything marked **(ADR)** is decided in P05 and
-may change there. After sign-off this file is updated to match the ADRs and becomes binding.
+**Status: final** (P05.8, 2026-09-26), pending the owner's sign-off at G1. It is binding from P06.
+Each section names the ADR in `docs/adr/` that decided it. A change needs a new ADR, not an edit
+here. §9 is finalised by ADR-008 (P05.9).
 
 ---
 
 ## 1. Domains
 
-| Context         | Modules                                                            | Owns                                             |
-| --------------- | ------------------------------------------------------------------ | ------------------------------------------------ |
-| **Platform**    | identity, access, settings, scheduler, audit, notifications, media | who you are, what you may do, config, time, logs |
-| **Event setup** | events, eventDays, shifts, stations, taxonomy, content             | the shape of an event: created, cloned, archived |
-| **People**      | people, memberships, assignments, attendance, swaps, briefings     | who is working, where, when                      |
-| **Capture**     | registration, footfall, missionCards, gifts                        | the three counts plus redemption                 |
-| **Safety**      | incidents, lostPersons, lostFound                                  | incidents and people/items                       |
-| **Operations**  | dashboard, dataHealth, announcements, fallback, reports            | watching, telling, recovering, reporting         |
+| Context         | Modules                                                                          | Owns                                             |
+| --------------- | -------------------------------------------------------------------------------- | ------------------------------------------------ |
+| **Platform**    | identity, access, settings, scheduler, audit, notifications, media, organisation | who you are, what you may do, config, time, logs |
+| **Event setup** | events, eventDays, shifts, stations, taxonomy, content                           | the shape of an event: created, cloned, archived |
+| **People**      | people, memberships, assignments, attendance, swaps, briefings                   | who is working, where, when                      |
+| **Capture**     | registration, footfall, missionCards, gifts                                      | the three counts plus redemption                 |
+| **Safety**      | incidents, lostPersons, lostFound                                                | incidents and people/items                       |
+| **Operations**  | dashboard, dataHealth, announcements, fallback, reports                          | watching, telling, recovering, reporting         |
 
 Today's `admin`, `me`, `roster` and `shift` modules dissolve into these. `admin` is a UI area,
 not a domain.
 
-## 2. Data model (ADR-001, ADR-002)
+## 2. Data model (ADR-001, ADR-002, ADR-003, ADR-004)
 
 ```
-Organisation ─┬─ Event (slug, name, venue, timezone, status, branding)
-              │    ├─ EventDay (date, label, flags)
-              │    ├─ ShiftTemplate (name, start, end) ─ Shift (day × template)
-              │    ├─ Station (name, code, type, capabilities, location)
-              │    ├─ CaptureCategory (code, label, order)          ← was enum VisitorCategory
-              │    ├─ StationType / StationTag                       ← was StationKind / CourseCode
-              │    ├─ GiftType, CardBatch, MissionCard
-              │    ├─ ContentDocument (guide, brief, journey, map; S3 assets)
-              │    ├─ EventMembership (person, role, portfolio, reportsTo)
-              │    ├─ Assignment (membership × shift × station), Attendance, Swap, BriefingSlot
-              │    ├─ Registration, FootfallTick, CardStampEvent, GiftRedemption (eventId on every row)
-              │    ├─ Incident, LostPersonAlert/Summary, LostFoundItem
-              │    ├─ Announcement, FallbackWindow, ImportBatch
-              │    ├─ Setting (scope: event | station), ScheduledAction
-              │    └─ RolePermission (role × action set → Cedar policy id)
-              ├─ Person (identity sub, name, email, phone) — global, reused across events
-              └─ Setting (scope: platform)
-AuditLog, IdempotencyRecord, RefreshSession, PushSubscription — platform tables, carry eventId where relevant
+Organisation ─┬─ OrganisationMembership (person, MEMBER | PLATFORM_ADMIN)
+              ├─ Person (cognitoSub, name, email, phone, active) — reused across events
+              ├─ Setting (scope: platform) + SettingChange
+              └─ Event (slug, name, venue, timezone, locale, status, dayBoundaryMinutes, branding)
+                   ├─ EventDay ─ Shift (materialised instants) ─ ShiftTemplate (HH:MM, endsNextDay)
+                   ├─ StationType (capability flags) ─ Station ─ StationTag (many-to-many)
+                   ├─ CaptureCategory (code, label, order, active)
+                   ├─ EventMembership (person, role, portfolio, reportsTo, status, mfaRequired)
+                   ├─ RolePermission (role × action → Cedar Role.grants), role labels
+                   ├─ ShiftAssignment (membership × shift × station), Attendance, SwapRequest, BriefingSlot
+                   ├─ Registration, FootfallTick, MissionCard, CardStampEvent, GiftType, GiftRedemption
+                   ├─ Incident, LostPersonAlert/Summary, LostFoundItem
+                   ├─ Announcement, FallbackWindow, ImportBatch
+                   ├─ VisitorField + VisitorRecord (only when visitorDataMode = allowlist)
+                   ├─ ContentDocument (draft/published versions; published copies in S3)
+                   ├─ Setting (scope: event | station) + SettingChange
+                   └─ ScheduledAction
+Platform tables: AuditLog (eventId nullable), IdempotencyRecord (eventId nullable),
+RefreshSession and PushSubscription (per person), RateLimitCounter (unlogged)
 ```
 
-- Every event-owned row carries `eventId`. Repos filter by it, and indexes lead with it.
-- The API is path-scoped: `/api/v1/events/:eventId/registrations` **(ADR)**. A request can never
-  address two events.
-- Client routes live under an event segment (`/e/[event]/…`) **(ADR)**, with an event switcher for
-  people who hold memberships in more than one event.
+- **Every event-owned row carries `eventId`**, children included. References are composite
+  `(eventId, parentId)` foreign keys, so a row cannot point into another event. Repository
+  functions take an `EventScope`, and a Prisma extension refuses an unscoped query (ADR-001 §2).
+- **Codes are stable, labels are free.** Referenced taxonomy rows are deactivated, never deleted
+  (ADR-002 §1). The invariant enums are listed in ADR-002 §2.
+- **Every personal column declares a data class**, which drives retention, readers and logging
+  (ADR-002 §5, ADR-003 §8).
+- Capture rows carry `rehearsal` (ADR-004 §2).
 
-## 3. Request lifecycle
+## 3. Request lifecycle (ADR-001, ADR-003, ADR-005)
 
 ```
-request ─▶ requestId ─▶ authenticate (Cognito JWT / local in dev)
-        ─▶ resolve event + membership (cached, invalidated on the cache bus)
-        ─▶ validate (zod)
-        ─▶ authorize: PEP builds {principal, action, resource, context}
-                      ─▶ Authorizer (AVP, or local Cedar in dev/test/degraded)
-        ─▶ use case: tx { idempotency ▸ domain rules ▸ repo writes ▸ audit } ▸ post-commit events
-        ─▶ response (typed DTO)
+request ─▶ requestId ─▶ rate limit (Postgres counter; per person, or per IP on failures for sign-in)
+        ─▶ authenticate (API-issued token only; local provider in dev)
+        ─▶ event context: /api/v1/events/:eventId → event + active membership (cached, bus-invalidated),
+           404 for an unknown or inaccessible event
+        ─▶ validate (zod, from @spoh/shared)
+        ─▶ authorize: EntityBuilder → {principal, action, resource, context}
+                      → DecisionCache → AvpAuthorizer (or LocalCedarAuthorizer when degraded, per group)
+        ─▶ use case: tx { idempotency ▸ domain rules ▸ repo writes (EventScope) ▸ audit ▸ pg_notify } ▸ post-commit effects
+        ─▶ response ({ data } or { data, meta }; X-Settings-Version header)
 ```
 
 ## 4. Authorization (ADR-005)
 
-- **Cedar schema**: entity types `Person`, `Role`, `Event`, `Station`, `EventDay`, plus resource
-  types per domain (`Registration`, `Incident`, …). **Actions** are the capability catalogue,
-  grouped (`Capture`, `Correct`, `Safety`, `Manage`, `Configure`, `Report`).
-- **Principal attributes** (built per request): `rank`, `memberships`, `onShiftStations` (live),
-  `attendanceVerifiedToday`.
-- **Context**: `eventPhase`, `onTrustedNetwork`, `now`.
-- **Policy layers**:
-  1. role policies (editable per event, D-03)
-  2. station-scope policy (capture only where you are on shift; roles flagged `anyStation` bypass)
-  3. **locked guardrails** as `forbid` policies (no acting on yourself or a peer/superior, no
-     granting rank ≥ your own, no capture when the event is CLOSED/ARCHIVED, no config writes
-     outside SETUP/REHEARSAL for non-admins…)
-- Policies are source-controlled in `packages/access-policies/`, deployed to the AVP policy store by
-  CDK, and tested locally with Cedar WASM. Admin edits go through the app, which writes AVP and an
-  audit row.
-- The client asks `/me/permissions` (BatchIsAuthorized) for affordances and never evaluates policy itself.
+- **Cedar schema** in `packages/access-policies`: `Membership` principals in events, `Person`
+  principals for platform actions. Resources are `in` their `Event` (and `Station`). There are 65
+  actions in 8 functional groups (`Capture`, `Correct`, `Safety`, `Self`, `Report`, `Manage`,
+  `Configure`, `Platform`), plus `Editable` and `Write`.
+- **Policy layers:**
+  1. generated per-action grants, driven by the per-event role's `grants` (**data**:
+     `RolePermission`);
+  2. station scope;
+  3. locked guardrail `forbid`s;
 
-## 5. Configuration and scheduling (ADR-003, ADR-004)
+  plus self-service, the attendance gate and platform admin.
 
-- A **settings registry** of typed definitions (key, scope, schema, default, description, unit,
-  required action) is generated into `@spoh/shared` for the admin UI.
-- Resolution order: station override → event → platform → compiled default. Every write keeps
-  history and can be reverted.
-- The **cache bus** is Postgres `LISTEN/NOTIFY` on `settings`, `access`, `membership` and `session`
-  channels, so every instance invalidates within about a second. A periodic refresh is the backstop.
-- **Event lifecycle**: `DRAFT → READY → REHEARSAL → LIVE → CLOSED → ARCHIVED`, with guarded
-  transitions and side effects.
-- The **scheduler** is a `ScheduledAction` table with a worker (`SKIP LOCKED`, retries, idempotent
-  handlers, audit). Modules register handlers.
+- The app **never writes policies**. CDK deploys the static set to the AVP store per environment,
+  and the image bundles the same files.
+- **Server decisions:** AVP `IsAuthorized` behind a 30 s decision cache. Local Cedar is used when
+  AVP is degraded, for `Capture`, `Self` and `Safety`. `Correct`, `Manage`, `Configure` and
+  `Platform` fail closed.
+- **UI affordances:** `/events/:id/me/permissions` on the local engine, never `BatchIsAuthorized`
+  (US$150 per million). The client never evaluates policy itself.
+- Intentional changes from the old matrix: `remediation/reports/P05/cedar/CHANGES.md` (C1–C13).
 
-## 6. Server tree
+## 5. Configuration, lifecycle and scheduling (ADR-003, ADR-004)
+
+- The **settings registry** (key, scopes, schema with bounds, default, copy, class, `lockedIn`,
+  `schedulable`, `clientVisible`) is the only definition of a setting, generated into
+  `@spoh/shared/generated/settings`. Resolution: station → event → platform → compiled default.
+  Writes are optimistic (`expectedVersion`). History is append-only, with revert and reset.
+- **Cache bus:** Postgres `LISTEN`/`NOTIFY` on `settings`, `access`, `membership`, `session` and
+  `event.state`, published inside the writing transaction. If the listener is lost, membership and
+  session caches bypass and the settings TTL drops to 5 s. A 60 s full refresh is the backstop.
+- **Env holds infrastructure and secrets only.** SSM and Secrets Manager inject them in AWS.
+  Client configuration is served at run time, so one image runs in every environment.
+- **Lifecycle:** `DRAFT → READY ⇄ REHEARSAL`, `READY → LIVE → CLOSED → ARCHIVED`, with
+  `CLOSED → LIVE` within 48 h. Guards and the go-live checklist are the same functions. After the
+  close, queued captures recorded before it sync during a grace period.
+- **Scheduler:** `ScheduledAction` claimed with `FOR UPDATE SKIP LOCKED` under a lease. The handler,
+  its completion and its audit commit together. Retries back off, then dead-letter with an alarm.
+  External effects are post-commit and idempotent. Per-instance **local ticks** are only for cache
+  maintenance.
+- **Retention** per data class, run by scheduler handlers. Long-term backups are taken only after
+  the purge (ADR-003 §8).
+
+## 6. Server tree (ADR-007)
 
 ```
 server/src/
-├── main.ts                    process entry: config → platform → app → listen → jobs
+├── main.ts                    process entry: config → platform → app → listen → worker
 ├── app/                       composition root: createApp, route registry, module wiring
 ├── config/                    env schema (infra + secrets only), split per concern
 ├── platform/
-│   ├── db/  http/  access/  audit/  idempotency/  settings/  scheduler/
-│   ├── events/ (cache bus)  time/  logger/  errors/  aws/
-└── modules/<domain>/          see engineering-standards §3
+│   ├── db/ (Prisma client + EventScope extension)   http/ (middleware, event context)
+│   ├── identity/ (token verification, session open, MFA gate)
+│   ├── access/ (Authorizer: AVP + local Cedar, EntityBuilder, DecisionCache)
+│   ├── audit/  idempotency/  settings/ (registry, resolver)  scheduler/ (worker, local ticks)
+│   ├── events/ (cache bus)  ratelimit/  time/ (Clock, EventClock)  logger/  errors/  aws/
+└── modules/<domain>/          index.ts · http/ · application/ · domain/ · data/ · jobs.ts
 ```
 
-## 7. Client tree
+## 7. Client tree (ADR-001, ADR-005, ADR-007)
 
 ```
 client/src/
-├── app/                       thin routes; /e/[event]/… segment (ADR)
-├── features/<domain>/         api.ts, queries.ts, screens/, components/, model/, index.ts
-├── shared/ui  shared/lib  shared/hooks
-└── navigation/registry.ts     single source for every nav surface
+├── app/                       thin routes: /sign-in, /events, /account, /e/[event]/…
+├── features/<domain>/         api.ts, queries.ts (keys prefixed by eventId), screens/, components/, model/, index.ts
+├── shared/ui  shared/lib (api client, session with tab locks, outbox, runtime config)  shared/hooks  shared/shell
+└── navigation/registry.ts     the one source for every nav surface; visibility from /me/permissions
 ```
 
-## 8. Packages
+Offline: registration, footfall, stamps, redemptions and incident reports queue. Lost-person
+alerts never do (ADR-007 §5). The service worker precaches the shell, the capture screens and the
+published content version. It never caches `/api/`.
+
+## 8. Packages (ADR-005, ADR-007)
 
 ```
 packages/
-├── shared/            contracts (zod DTOs by domain), errorCodes, invariant enums, generated/
-└── access-policies/   schema.cedarschema, policies/*.cedar, templates/, tests (Cedar WASM)
+├── shared/            contracts (zod DTOs by domain), errorCodes, invariants/, time/, generated/
+└── access-policies/   schema.cedarschema, policies/*.cedar, tools/generate-grants, default-grants.json, CHANGES.md, tests
 infra/
-└── cdk/               CDK app: stacks per concern, stages per environment
+└── cdk/               CDK app: stacks per concern, stages per environment (ADR-008)
 ```
 
-## 9. AWS topology (ADR-008; D-07 option A shown)
+## 9. AWS topology (ADR-008)
+
+To be finalised by ADR-008 (P05.9) against D-10's US$100/month ceiling. The draft below showed
+D-07 option A and is superseded by ADR-008.
 
 ```
 Route 53 ─ ACM ─ CloudFront + WAF
