@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T12:18:45.654Z",
+  "updatedAt": "2026-09-25T12:24:18.903Z",
   "current": {
     "phase": "P00",
-    "step": "P00.6"
+    "step": "P00.7"
   },
   "gates": [
     {
@@ -295,11 +295,16 @@
         {
           "id": "P00.7",
           "title": "Architecture guards in report-only mode",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-25T12:18:55.600Z",
+          "completedAt": "2026-09-25T12:24:18.903Z",
+          "commits": ["00e16a0"],
+          "notes": [
+            {
+              "at": "2026-09-25T12:24:18.903Z",
+              "text": "Size guards (warn): 56 fn, 28 file, 28 complexity, 3 depth, 16 params = 131. Boundaries (warn): 57 prisma-outside-data, 33 cross-module internals, 32 express-outside-http, 22 api-outside-feature-api, 5 feature-cross-imports = 149; 0 cycles. CI job 'Architecture report' added (non-failing). Snapshot reports/metrics/P00-arch.json."
+            }
+          ]
         },
         {
           "id": "P00.8",
