@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T13:28:56.370Z",
+  "updatedAt": "2026-09-25T13:32:48.036Z",
   "current": {
     "phase": "P02",
-    "step": "P02.4"
+    "step": "P02.5"
   },
   "gates": [
     {
@@ -533,17 +533,22 @@
         {
           "id": "P02.4",
           "title": "Journey 3: IC shift",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T13:28:56.370Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T13:32:47.745Z",
+          "commits": ["317d659"],
+          "notes": [
+            {
+              "at": "2026-09-25T13:32:47.746Z",
+              "text": "ic-shift; F02-011..017"
+            }
+          ]
         },
         {
           "id": "P02.5",
           "title": "Journey 4: volunteer shift",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-25T13:32:48.036Z",
           "completedAt": null,
           "commits": [],
           "notes": []
