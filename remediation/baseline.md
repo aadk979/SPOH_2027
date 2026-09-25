@@ -123,9 +123,9 @@ What that means:
   P02) describes the audit branch, not the code being refactored.
 - **Schema drift.** Migration `20260922000000_audit_severity_and_security_events` (two enums, five
   `AuditLog` columns, three indexes) exists only on the audit branch. A staging database built from
-  that branch has it applied. Deploying the baseline tag there puts the repo's migrations behind the
+  that branch has it applied. Deploying the baseline ref there puts the repo's migrations behind the
   database's. P04 must verify how `prisma migrate deploy` behaves in that state before anyone relies
-  on the tag as a rollback target for staging.
+  on the baseline ref as a rollback target for staging.
 - **Not in the tree (5 commits, 61 files, +7,779/−325):**
   - Server: CloudWatch audit shipping (`lib/cloudwatch.ts`), security-event auditing
     (`middleware/securityAudit.ts`), audit-log query API (`modules/audit`), roster CSV import and

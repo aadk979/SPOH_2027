@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T12:25:09.111Z",
+  "updatedAt": "2026-09-25T12:31:19.080Z",
   "current": {
-    "phase": "P00",
-    "step": "P00.7"
+    "phase": "P01",
+    "step": null
   },
   "gates": [
     {
@@ -235,9 +235,9 @@
         {
           "id": "P00.3",
           "title": "Safety-net tag (after P00.2)",
-          "status": "blocked",
+          "status": "done",
           "startedAt": "2026-09-25T12:01:49.193Z",
-          "completedAt": "2026-09-25T12:02:35.375Z",
+          "completedAt": "2026-09-25T12:30:54.815Z",
           "commits": ["153b116"],
           "notes": [
             {
@@ -247,6 +247,10 @@
             {
               "at": "2026-09-25T12:04:01.064Z",
               "text": "Tag push refused: HTTP 403 on git-receive-pack for refs/tags/* (branch pushes work). Tag exists only in this container. Owner to create it: git tag -a baseline/pre-remediation d2497b6 -m 'Safety net before the platform remediation programme' && git push origin baseline/pre-remediation (or a GitHub release on d2497b6). Rollback docs are committed (153b116)."
+            },
+            {
+              "at": "2026-09-25T12:30:54.816Z",
+              "text": "Tag push refused (403) and no tag-creating API is available, so baseline/pre-remediation was created as a BRANCH at d2497b6 via the GitHub API (from main while main == d2497b6), on the owner's instruction to sort it out. Verified: origin/baseline/pre-remediation == d2497b6. README 'Safety net' updated."
             }
           ]
         },
@@ -309,35 +313,43 @@
         {
           "id": "P00.8",
           "title": "Read-only AWS inventory (needs D-13)",
-          "status": "blocked",
+          "status": "skipped",
           "startedAt": null,
-          "completedAt": null,
+          "completedAt": "2026-09-25T12:30:55.093Z",
           "commits": [],
           "notes": [
             {
               "at": "2026-09-25T12:24:33.259Z",
               "text": "D-13: owner did not allow use of this container's AWS credentials, so no read-only inventory was taken. Unblock by allowing read-only AWS use (then run the SDK calls listed in the step) or by the owner supplying the inventory."
+            },
+            {
+              "at": "2026-09-25T12:30:55.093Z",
+              "text": "Skipped: D-13 disallows this container's AWS credentials, and the SDK inventory needs them. Carried to P04.7 (blocked by the same answer). Revisit only if the owner amends D-13."
             }
           ]
         },
         {
           "id": "P00.9",
           "title": "Staging smoke (needs D-13)",
-          "status": "blocked",
+          "status": "skipped",
           "startedAt": null,
-          "completedAt": null,
+          "completedAt": "2026-09-25T12:30:55.386Z",
           "commits": [],
           "notes": [
             {
               "at": "2026-09-25T12:24:33.502Z",
               "text": "D-13 allows the smoke test, but it cannot run here: (1) infra/scripts/smoke-test.sh exists only on feat/audit-cloudwatch, which D-05 kept out (runnable via git show 319d06d:infra/scripts/smoke-test.sh); (2) it signs in with 'aws cognito-idp admin-initiate-auth', which needs the aws CLI (not installed) and AWS credentials (D-13 disallows); (3) SMOKE_PASSWORD (chief@spoh2027.test) is not set. Unblock: allow AWS creds for that one call + provide SMOKE_PASSWORD as an env secret, or the owner runs it and shares the output."
+            },
+            {
+              "at": "2026-09-25T12:30:55.386Z",
+              "text": "Skipped: cannot run under D-05/D-13. smoke-test.sh is audit-branch only, signs in via aws cognito-idp admin-initiate-auth (aws CLI absent; AWS creds disallowed), and needs SMOKE_PASSWORD, which is not available. Deployed-state check deferred to P04; revisit if the owner amends D-13."
             }
           ]
         }
       ],
-      "status": "in_progress",
+      "status": "done",
       "startedAt": "2026-09-25T11:59:09.351Z",
-      "completedAt": null
+      "completedAt": "2026-09-25T12:31:19.080Z"
     },
     {
       "id": "P01",

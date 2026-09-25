@@ -109,29 +109,31 @@ Dry Run #2 on **4 Jan 2027** and the event on **6–9 Jan 2027**. The recommende
 | 3 Oct      | G0: audits written, decisions answered                                  |
 | 7 Oct      | G1: design signed off                                                   |
 | 16 Oct     | G2: refactor complete; staging on AWS live (P08)                        |
-| **28 Oct** | **Go/no-go**: G3 green on staging, or train on the baseline tag instead |
+| **28 Oct** | **Go/no-go**: G3 green on staging, or train on the baseline ref instead |
 | 11 Nov     | G4: admin setup and polish                                              |
 | 16 Nov     | G5 core: security hardening, prod stood up, restore rehearsed           |
 | 18 Nov     | Dry Run #1 on the new platform                                          |
 | Dec        | Fixes from Dry Run #1, remaining P14/P16 items                          |
 
-The baseline tag `baseline/pre-remediation` (created in P00) stays deployable throughout as the
+The baseline ref `baseline/pre-remediation` (created in P00) stays deployable throughout as the
 safety net. The event never depends on the programme finishing.
 
-### Safety net: deploying the baseline tag
+### Safety net: deploying the baseline ref
 
-`baseline/pre-remediation` points at `d2497b6`, which is `main` before any remediation change (D-05
-kept the baseline on `main`). **Status:** not yet on origin. This session's GitHub access refused
-the tag push (HTTP 403), so the owner creates it: `git tag -a baseline/pre-remediation d2497b6` and
-`git push origin baseline/pre-remediation`. Until it exists, `d2497b6` is the rollback target. It holds product code only, with no `remediation/` directory.
+`baseline/pre-remediation` is a **branch** at `d2497b6`, which is `main` before any remediation
+change (D-05 kept the baseline on `main`). It holds product code only, with no `remediation/`
+directory. It is a branch rather than a tag because this session's GitHub access refuses tag pushes
+(HTTP 403). It was created through the GitHub API from `main` while `main` was `d2497b6`. Treat it as
+read-only: never commit or push to it. The commit `d2497b6` is the real rollback target, and
+`git rev-parse origin/baseline/pre-remediation` must print it.
 
 The deploy runbook is **not in this tree**. It lives on the audit branch:
 `git show 319d06d:infra/runbooks/deploy.md`. To run January on the baseline, follow that runbook's
-_Steps_ with `<branch>` = `baseline/pre-remediation`, with two differences:
+_Steps_ with `<branch>` = `baseline/pre-remediation` (or `d2497b6`), with two differences:
 
 1. **Do not run step 4 (`npm run db:deploy`) against a database that the audit branch has
    migrated**, which includes staging. That database has
-   `20260922000000_audit_severity_and_security_events` applied, and the tag does not know that
+   `20260922000000_audit_severity_and_security_events` applied, and the baseline does not know that
    migration. The migration only adds enum types, nullable or defaulted `AuditLog` columns and indexes,
    so the baseline build runs against it unchanged, as the runbook's _Rolling back_ section says. Never reverse the migration: that
    loses the audit rows written since. Whether `prisma migrate deploy` tolerates the unknown
@@ -139,10 +141,10 @@ _Steps_ with `<branch>` = `baseline/pre-remediation`, with two differences:
 2. **Verification:** `/healthz` and `/readyz` as in the runbook. The runbook's smoke test is also
    audit-branch only (`git show 319d06d:infra/scripts/smoke-test.sh`), and it expects the
    audit-branch endpoints `/api/v1/audit/facets` and `/api/v1/audit/sink`, which the baseline does
-   not serve. Expect those checks to fail against the tag.
+   not serve. Expect those checks to fail against the baseline.
 
-On a **fresh** host or database the tag deploys with the runbook unchanged, `db:deploy` included.
-Going from the tag back to the audit branch is an ordinary deploy of `319d06d`.
+On a **fresh** host or database the baseline deploys with the runbook unchanged, `db:deploy` included.
+Going from the baseline back to the audit branch is an ordinary deploy of `319d06d`.
 
 ---
 

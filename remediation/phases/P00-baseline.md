@@ -144,8 +144,7 @@ node remediation/tools/code-metrics.mjs
 
 ## Phase report
 
-**Status: 6 of 9 steps done, 3 blocked. The phase is not closed.** P01–P04 wait on P00, so nothing
-moves until the owner acts on the blockers below (2026-09-25).
+**Status: done (2026-09-25).** 7 steps done and 2 skipped because D-13 rules them out.
 
 ### Summary
 
@@ -153,40 +152,39 @@ The environment is reproducible (`scripts/dev-db-local.sh`), and lint is green f
 since `22e38ae`. Every suite has been measured, including e2e and coverage for the first time. The
 architecture guards run in report-only mode locally and in CI. The baseline is `main` (`d2497b6`),
 not the deployed audit branch: that was the owner's choice (D-05), and its consequences are recorded
-as PF-14.
+as PF-14. The safety net `baseline/pre-remediation` is on origin as a branch at `d2497b6`.
 
-| Step  | Status     | Outcome                                                                                                               |
-| ----- | ---------- | --------------------------------------------------------------------------------------------------------------------- |
-| P00.1 | ✅ done    | Recipe re-run end to end; `scripts/dev-db-local.sh` verified on a fresh cluster                                       |
-| P00.2 | ✅ done\*  | \*By D-05, no fast-forward. `baseline.md` § _After reconciliation_ replaces "contains `319d06d`"                      |
-| P00.3 | ⛔ blocked | Tag `baseline/pre-remediation` → `d2497b6` made locally, but the push got HTTP 403. Docs written                      |
-| P00.4 | ✅ done    | `test/do-inference.mjs` deleted (owner's choice); `npm run lint` exits 0                                              |
-| P00.5 | ✅ done    | All green except e2e: 23/26, with 3 real failures (PF-15, PF-16)                                                      |
-| P00.6 | ✅ done    | `P00.json` and `P00-coverage.json`; coverage provider installed                                                       |
-| P00.7 | ✅ done    | ESLint guards and dependency-cruiser (warn); `arch:check`, `arch:report`; CI job                                      |
-| P00.8 | ⛔ blocked | D-13 did not allow AWS credentials                                                                                    |
-| P00.9 | ⛔ blocked | Smoke test allowed, but the script is audit-branch only and needs the `aws` CLI, AWS credentials and `SMOKE_PASSWORD` |
+| Step  | Status    | Outcome                                                                                                |
+| ----- | --------- | ------------------------------------------------------------------------------------------------------ |
+| P00.1 | ✅ done   | Recipe re-run end to end; `scripts/dev-db-local.sh` verified on a fresh cluster                        |
+| P00.2 | ✅ done\* | \*By D-05, no fast-forward. `baseline.md` § _After reconciliation_ replaces "contains `319d06d`"       |
+| P00.3 | ✅ done\* | \*A branch, not a tag: tag pushes get HTTP 403 here. Created via the GitHub API; rollback docs written |
+| P00.4 | ✅ done   | `test/do-inference.mjs` deleted (owner's choice); `npm run lint` exits 0                               |
+| P00.5 | ✅ done   | All green except e2e: 23/26, with 3 real failures (PF-15, PF-16)                                       |
+| P00.6 | ✅ done   | `P00.json` and `P00-coverage.json`; coverage provider installed                                        |
+| P00.7 | ✅ done   | ESLint guards and dependency-cruiser (warn); `arch:check`, `arch:report`; CI job                       |
+| P00.8 | ⏭ skipped | D-13 did not allow AWS credentials. Carried to P04.7, which has the same condition                     |
+| P00.9 | ⏭ skipped | Not runnable under D-05/D-13 (audit-branch script, `aws` CLI, AWS credentials, chief password)         |
 
-### Owner actions needed to close P00
+**Exit criteria:** reconciled (by decision) and tagged (as a branch) ✅, lint green ✅, suites
+measured and committed ✅, guards in CI ✅. The AWS inventory is ❌ not recorded, by D-13.
 
-1. **P00.3:** push the tag from a machine with normal GitHub access:
-   `git fetch origin && git tag -a baseline/pre-remediation d2497b6 -m "Safety net before the platform remediation programme" && git push origin baseline/pre-remediation`.
-   This session can push branches but not tags.
-2. **P00.8:** allow read-only use of this container's AWS credentials (amend D-13), or mark the step
-   skipped. If skipped, P04.7 carries the inventory, and it is blocked by the same answer.
-3. **P00.9:** either allow AWS credentials for the one Cognito `admin-initiate-auth` call and set
-   `SMOKE_PASSWORD` as an environment secret, or run
-   `git show 319d06d:infra/scripts/smoke-test.sh | SMOKE_PASSWORD=… bash` yourself and share the
-   output, or mark the step skipped.
-4. **Before P05:** decide what happens to `feat/audit-cloudwatch` (merge later, re-implement or drop;
-   PF-14). Also answer D-01–D-04, D-07/D-10, D-08 and D-12, which are still open.
+### Still open (not blocking P00)
+
+- **Before P01:** D-02 and D-04, which P01's classification depends on.
+- **Before P05:** D-01, D-03, D-07/D-10, D-08 and D-12, plus what happens to
+  `feat/audit-cloudwatch` (PF-14).
+- **If D-13 is ever widened:** run the P00.8 inventory and the P00.9 smoke test then (P04.7).
 
 ### Deviations from plan
 
 - **P00.2:** no reconciliation, by D-05. The deployed system is ahead of the baseline, including one
   migration (PF-14).
-- **P00.3:** the rollback docs point at the audit branch's runbook by commit and warn against
-  `db:deploy` on a database the audit branch has migrated.
+- **P00.3:** `baseline/pre-remediation` is a branch, because this session cannot push tags (HTTP 403)
+  and no available API creates one. It was cut from `main` while `main` was `d2497b6`. The rollback
+  docs point at the audit branch's runbook by commit and warn against `db:deploy` on a database the
+  audit branch has migrated.
+- **P00.8 / P00.9:** skipped under D-13. There is no AWS inventory and no smoke test of staging.
 - **P00.5:** Playwright 1.62 cannot use the container's Chromium build without help, so
   `client/playwright.config.ts` gained an opt-in `PLAYWRIGHT_CHROMIUM_EXECUTABLE`. `db:reset` is
   refused for agents, so the dev DB was built with `db:deploy` and `db:seed` instead. The dev server
@@ -231,4 +229,4 @@ and PF-13 is checked.
 `ef82b25` decisions · `a3289c1` dev DB script · `616c70c` reconciliation record · `153b116` rollback
 docs · `dca2dff` P00.3 blocked · `ef860f3` delete do-inference · `9300b43` Playwright executable ·
 `4aa2e7b` baseline run · `c14d352` coverage tooling · `0322a8b` metrics snapshot · `dd21015` guards ·
-`00e16a0` guard docs, plus the `chore(remediation): P00.x done` tracker commits.
+`00e16a0` guard docs, plus the `chore(remediation): P00.x done` tracker commits and the phase close.

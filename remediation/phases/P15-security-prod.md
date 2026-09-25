@@ -92,7 +92,7 @@ stand up production from the same CDK code, and move off the Lightsail box witho
 
 - **Do:**
   1. Walk the OWASP ASVS L2 checklist.
-  2. Run `/security-review` on the full diff since the baseline tag, and a dependency audit.
+  2. Run `/security-review` on the full diff since the baseline ref `baseline/pre-remediation` (`d2497b6`), and a dependency audit.
   3. Fix the findings.
 - **Done when:** the checklist is recorded in F04 § _Final_, with no open High items.
 

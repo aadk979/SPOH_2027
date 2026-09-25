@@ -114,7 +114,7 @@ closed during the audit phase named. IDs are kept when a finding moves into an F
   `feat/audit-cloudwatch` (`319d06d`), according to that branch's commits: +7,779/−325 lines over 61
   files, including migration `20260922000000_audit_severity_and_security_events`. See
   `baseline.md` § _After reconciliation_.
-- **Impact:** The code probed on staging is not the code being refactored. The baseline tag is
+- **Impact:** The code probed on staging is not the code being refactored. The baseline ref (`baseline/pre-remediation`) is
   behind staging's schema, so it is not a clean rollback target for staging. Every P06/P07 change to
   `admin`, `audit`, `roster`, `lib/audit.ts`, `lib/logger.ts` or `config/env.ts` widens the later
   merge of the audit branch.
