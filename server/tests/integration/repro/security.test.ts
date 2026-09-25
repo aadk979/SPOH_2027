@@ -3,6 +3,7 @@ import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../../src/app.js';
 import { prisma } from '../../../src/lib/prisma.js';
+import { PURGE_AFTER_HOURS, purgeResolvedAlerts } from '../../../src/modules/lostPerson/service.js';
 import { resetDatabase } from '../../helpers/db.js';
 import {
   assignToStationAllBlocks,
@@ -29,6 +30,8 @@ let icA: TestVolunteer;
 let icB: TestVolunteer;
 let chief: TestVolunteer;
 
+const DESCRIPTION = 'Girl, about 8, separated from her class near the library.';
+
 beforeAll(() => {
   app = createApp();
 });
@@ -54,6 +57,40 @@ beforeEach(async () => {
     await assignToStationAllBlocks({ volunteerId: who.id, stationId, eventDayId });
   }
   await prisma.volunteer.update({ where: { id: volunteerB.id }, data: { phone: '+65 9000 0000' } });
+});
+
+describe('data retention (P04.6)', () => {
+  // F04-013
+  it.skip('keeps no lost-person description once the alert is purged', async () => {
+    const raised = await request(app)
+      .post('/api/v1/lost-person')
+      .set('Authorization', bearer(volunteerA))
+      .send({
+        descriptionText: DESCRIPTION,
+        approxAge: 'about 8',
+        clothingText: 'red jacket',
+        lastSeenStationId: stationA,
+        idempotencyKey: idempotencyKey(),
+      });
+    expect(raised.status).toBe(201);
+    const alertId = raised.body.alert.id as string;
+
+    const resolved = await request(app)
+      .post(`/api/v1/lost-person/${alertId}/resolve`)
+      .set('Authorization', bearer(icA))
+      .send({ outcome: 'RESOLVED_FOUND' });
+    expect(resolved.status).toBe(200);
+    await prisma.lostPersonAlert.update({
+      where: { id: alertId },
+      data: { resolvedAt: new Date(Date.now() - (PURGE_AFTER_HOURS + 1) * 3_600_000) },
+    });
+    expect(await purgeResolvedAlerts()).toBe(1);
+
+    // The alert row is clean; the stored idempotent response must be too.
+    const replays = await prisma.idempotencyRecord.findMany();
+    expect(JSON.stringify(replays)).not.toContain('red jacket');
+    expect(JSON.stringify(replays)).not.toContain(DESCRIPTION);
+  });
 });
 
 describe('rate limits (P04.4)', () => {

@@ -609,6 +609,119 @@ The Cognito app client is public (no client secret), which is correct for PKCE.
 - **Phase:** now (one flag); P08.5 (D-08)
 - **Status:** open
 
+---
+
+## P04.6 — Data protection
+
+### PII inventory
+
+| Data                                   | Where                                                                                                                                                                                     | Who reads it                                                                      | Retention today                                                                       |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Volunteer name, email, phone           | `Volunteer`                                                                                                                                                                               | the person; D/C/L/A (`user.read`); ICs see phones for **every** station (F04-004) | forever                                                                               |
+| Volunteer email in audit               | `AuditLog.after` for `user.provision`; the raw patch (phone, name, email) for `user.update`                                                                                               | C/L/A (`audit.read`)                                                              | forever (F04-014)                                                                     |
+| Volunteer email in logs                | `identity/provider.ts:94,145,150` (`logger.info({ email })`)                                                                                                                              | whoever reads the PM2 logs or CloudWatch                                          | PM2 files: no rotation configured (repo says); CloudWatch 365 days if shipped         |
+| Cognito identity                       | Cognito pool (email, name, sub, password hash)                                                                                                                                            | pool admins, the IAM key (F04-010)                                                | until deleted in Cognito; nothing deletes it                                          |
+| IP address and user agent              | `AuditLog.ip/userAgent`, `RefreshSession.ip/userAgent`, `PushSubscription.userAgent`, request logs                                                                                        | C/L/A for audit; the person for sessions                                          | audit forever; sessions 7 days after revocation or expiry; logs as above              |
+| Lost-person description, age, clothing | `LostPersonAlert`                                                                                                                                                                         | every signed-in person while active                                               | nulled 24 h after resolution (setting, 1–720 h) ✅ — **but copies survive** (F04-013) |
+| Lost-person copy in replay store       | `IdempotencyRecord.responseBody` for `POST /lost-person`                                                                                                                                  | nobody through the API                                                            | 7 days (setting, up to 90) (F04-013)                                                  |
+| Lost-and-found holder notes and photos | `LostFoundItem.holderNote`, `photoKey` → S3 media bucket                                                                                                                                  | every signed-in person                                                            | forever; unattached uploads never cleaned (F04-014)                                   |
+| Incident descriptions and follow-ups   | `Incident.description`, `IncidentFollowUp`                                                                                                                                                | IC and above                                                                      | forever; free text, may name visitors or volunteers                                   |
+| Briefing and import notes              | `BriefingSlot.notes`, `ImportBatch.fileName/notes`                                                                                                                                        | coordinators                                                                      | forever                                                                               |
+| Everything above, in bulk              | `pg_dump` every 15 min to S3 (repo says: versioned, Glacier IR at 30 days, expiry at 400); pre-deploy dumps in `~/predeploy-backups` on the box, copied to laptops by the restore runbook | whoever holds the backup credential or the box                                    | 400 days in S3; forever on the box and laptops (F04-013, F04-014)                     |
+| Visitor PII (D-04, future)             | nothing collects it today; registrations are category counts                                                                                                                              | —                                                                                 | —                                                                                     |
+
+### Controls checked
+
+| Control                  | Result                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Lost-person purge        | ✅ Every 15 min, one transaction per alert, summary first, audit row without the description (`lostPerson/service.ts:76`), push payload without it. ⚠️ Runs on every worker (F03-031). ⚠️ Does not reach replays, dumps or WAL (F04-013).                                                                                                                                                                                           |
+| Backup encryption        | Unknown. The upload sets no `--sse`, so the bucket default applies (SSE-S3 since 2023, unless the bucket says otherwise; Q-S1). Pre-deploy dumps on the box and laptops are plain gzip.                                                                                                                                                                                                                                             |
+| Backup access            | Policy allows Put/Get/List on the bucket, no Delete (✅), versioning on (repo says). Who holds the credential is unknown (F04-018). No Object Lock (Q-S2), so versioning protects against overwrite but not a deletion by an account admin.                                                                                                                                                                                         |
+| Audit integrity          | ⚠️ Same transaction as the change (✅), but the app role can update and delete audit rows, and the off-host copy exists only on the audit branch, where the app itself sets the retention (F04-015).                                                                                                                                                                                                                                |
+| Audit retention          | Forever in Postgres; 365 days in CloudWatch on the audit branch (`CLOUDWATCH_RETENTION_DAYS`). No policy says either is right.                                                                                                                                                                                                                                                                                                      |
+| CloudWatch log retention | Set by the app at runtime (`logs:PutRetentionPolicy`), 365 days by default, audit branch only. On `main` nothing ships.                                                                                                                                                                                                                                                                                                             |
+| Data residency           | Everything the repo names is `ap-southeast-1`: Lightsail `ap-southeast-1a`, Cognito (pool prefix), CloudWatch, S3 calls. The backup and media **buckets' own regions** are not in the repo (Q-S4). Outside Singapore: Web Push services receive encrypted payloads and device endpoints; Let's Encrypt and DuckDNS see hostnames only; GitHub holds the source. Cognito's default email sender, if used, is operated by AWS (Q-C6). |
+| Legal basis and regime   | Not recorded. Whether the PDPA or public-sector data rules apply to this organiser decides breach-notification duties and retention limits (Q-D1).                                                                                                                                                                                                                                                                                  |
+
+### Findings
+
+#### F04-013 — Lost-person descriptions outlive the promised purge
+
+- **Severity:** High
+- **Area:** `server/src/middleware/idempotency.ts:146–177` (stores the response body),
+  `server/src/modules/lostPerson/router.ts` (`idempotent('POST /lost-person')`),
+  `ops/backup/spoh-backup.sh`
+- **Evidence:** The purge nulls the alert's fields 24 h after resolution, but the create response
+  (description, age, clothing) is also stored in `IdempotencyRecord.responseBody` and kept for
+  `idempotencyRetentionDays` (7, up to 90). Repro: `repro/security.test.ts`, "keeps no
+  lost-person description once the alert is purged" (skipped; fails on the replay row today).
+  Separately, every 15-minute dump taken while the alert was live keeps the description for 400
+  days, and pre-deploy dumps are kept on the box and copied to laptops with no expiry.
+- **Impact:** The product promises parents that a description of their child is transient, and
+  the promise holds only for the one table the purge knows about (risk 5). Under D-04 the same
+  gap applies to any visitor PII an event collects.
+- **Fix:** P06: do not store response bodies for PII-bearing endpoints (store the id and replay
+  by reading the row, which the purge cleans), or purge the replay row with the alert. P08: a
+  backup retention decision per data class (for example 35 days of PITR on RDS, not 400 days of
+  dumps), encrypted with a key that can be scheduled for deletion; no pre-deploy dumps on laptops.
+  P05 records the decision and the wording of the promise.
+- **Phase:** P06 (replay store), P08 (backups), P05 (decision)
+- **Status:** open
+
+#### F04-014 — Nothing else has a retention period
+
+- **Severity:** Medium
+- **Area:** `Volunteer`, `AuditLog`, `LostFoundItem`, the media bucket, `RefreshSession`, PM2 logs,
+  `~/predeploy-backups`
+- **Evidence:** The inventory above: apart from lost-person fields, idempotency rows and expired
+  sessions, nothing is ever deleted. Volunteer emails reach audit rows and log lines. Presigned
+  uploads are never tied to a record, so abandoned photos stay in the bucket. The bootstrap
+  installs no log rotation for PM2.
+- **Impact:** Students' contact details and IP addresses accumulate across events with no end
+  date, which conflicts with a reusable multi-event platform (D-02) and with most data-protection
+  regimes' limitation rules (Q-D1). The unrotated logs are also a disk-full outage waiting to
+  happen (F04-017).
+- **Fix:** A retention schedule per data class, decided in P05, enforced by jobs in P09/P10 (event
+  close-out anonymises roster PII not needed next year; audit payloads carry ids, not emails);
+  S3 lifecycle on the media prefix and a "confirm upload" step that attaches the key; log
+  rotation (P08: CloudWatch with a set retention).
+- **Phase:** P05 (schedule), P09.9/P13.8 (close-out), P08 (logs, lifecycle)
+- **Status:** open
+
+#### F04-015 — The audit log can be edited, and shortened, by what it audits
+
+- **Severity:** Medium
+- **Area:** `server/src/lib/audit.ts`; `infra/config/docker-compose.db.yml` (one `spoh_app` role);
+  `infra/iam/app-policy.json` (`logs:PutRetentionPolicy`, `logs:CreateLogGroup`) (audit branch)
+- **Evidence:** The app connects as the database owner that runs the migrations, so it (or anyone
+  with its password, F04-011) can `UPDATE` or `DELETE` audit rows. The only off-host copy is
+  CloudWatch on the unmerged audit branch, and there the app creates its own log group and sets
+  its own retention.
+- **Impact:** After a compromise or a dispute ("who voided these registrations?"), the record can
+  be rewritten by the same credentials that made the change (risk 14).
+- **Fix:** A runtime role with `INSERT`/`SELECT` only on `AuditLog` (migrations under a separate
+  owner role); CloudWatch log groups, retention and a subscription or export created by CDK, not
+  by the app; drop the two log permissions from the app policy.
+- **Phase:** P08 (roles, log groups), P15 (verification)
+- **Status:** open
+
+#### F04-016 — There is no data-classification model for events that turn PII on
+
+- **Severity:** Medium
+- **Area:** design (D-04); `server/prisma/schema.prisma`
+- **Evidence:** D-04 made "no visitor PII" a per-event option. Today the only PII handling is
+  hand-written for one entity (the lost-person purge); nothing marks which columns are personal
+  data, which event setting allows them, how long they live, or how they are exported.
+- **Impact:** The first event that enables visitor details will store them in tables and exports
+  built for counts, with no purge, no redaction in CSV/XLSX exports (F02-026), no way to answer
+  an access or erasure request, and backups that keep them for 400 days.
+- **Fix:** P05 designs a classification (for example `none`/`contact`/`sensitive`) per field,
+  per-event retention settings, export redaction by role, and a purge job per class; P09 builds
+  it with the event model; P13 surfaces it in event setup ("this event collects visitor contact
+  details until …").
+- **Phase:** P05 (design), P09 (model), P13 (setup screen)
+- **Status:** open
+
 <!-- appendices -->
 
 ---
