@@ -21,6 +21,9 @@ This can run in parallel with P06.
 - Every route must look and behave the same. Visual snapshots taken in P07.1 are the check.
 - Read `client/AGENTS.md` first: this Next.js version differs from training data, so check
   `node_modules/next/dist/docs/` before touching routing or config.
+- Behaviour changes only in P07.11's labelled `fix` commits, one per BACKLOG row, each un-skipping
+  its repro. The outbox fixes F03-033 and F04-003 land earlier, in P06.12, on the unrefactored
+  code. P07.2 moves them with their tests.
 
 ## Steps
 
@@ -104,6 +107,20 @@ This can run in parallel with P06.
   2. Keep the public index stable, and re-export the capability matrix until P11 replaces it.
 - **Done when:** the shared package mirrors the server modules and the builds are green.
 
+### P07.11 — Client correctness fixes
+
+- **Do:**
+  1. Fix every client finding in BACKLOG with home P07.11: F02-010 and F03-032 (settings load
+     after the session, and again after an in-app sign-in), F02-011 (the IC console's row key and
+     default station), F02-020 (no call to an endpoint the role may not use), F03-020 (card-code
+     input matches the printed alphabet), F03-035 (a replaced push subscription reaches the
+     server), F03-036 (capture screens precached), and F03-037 (unused dependencies removed, and
+     shared schemas no longer shipped on every route).
+  2. F03-034: queue offline the captures ADR-007 lists (stamps and redemptions are queued;
+     incidents and lost-person alerts are not queued but say plainly that they need a connection).
+  3. One `fix(...)` commit per finding, test first, after the feature it touches has moved (P07.3–P07.5).
+- **Done when:** no BACKLOG row with home P07.11 is open, and every client repro is un-skipped and green.
+
 ### P07.9 — Make the guards blocking
 
 - **Do:**
@@ -132,7 +149,8 @@ node remediation/tools/code-metrics.mjs     # client: 0 components > 80, 0 files
 
 ## Exit criteria
 
-- Zero client size or boundary violations, and visual snapshots unchanged.
+- Zero client size or boundary violations, and visual snapshots unchanged apart from P07.11's
+  labelled fixes.
 - All suites green, and bundle size within ±5%.
 
 ## Phase report

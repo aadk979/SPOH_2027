@@ -63,8 +63,9 @@ stand up production from the same CDK code, and move off the Lightsail box witho
 - **Do:**
   1. Rotation for DB credentials (Secrets Manager) and the signing secrets (a dual-key window).
   2. Remove IAM user keys from every host (PF-12). Retire the Lightsail IAM user after cutover.
-  3. Enable CloudTrail, GuardDuty and Security Hub foundational checks if P04.7 found them off
-     (with the owner's approval, because of cost).
+  3. Enable CloudTrail, GuardDuty and Security Hub foundational checks per the owner's answers
+     to the P04.7 questions (Q-A1, Q-G1, Q-G2 in BACKLOG § Owner questions), with the owner's
+     approval because of cost.
 - **Done when:** no long-lived application keys exist, and rotation is rehearsed once.
 
 ### P15.7 — Data protection and retention

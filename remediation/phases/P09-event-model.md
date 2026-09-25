@@ -21,7 +21,9 @@ After this phase a second event can exist beside the first without code, seed or
 - Worklist: `findings/F01-hardcoding.md`, the rows classed `event-data` and the timezone list.
 - Migrations follow **expand → migrate → contract** across separate deploys. Each is reversible
   until the contract step.
-- Invariant tests (three counts, no PII) must stay green throughout. They are the product.
+- The two product rules (the three counts never merge; no visitor personal data) are per-event
+  options under D-04, built in P09.14. Until then, and afterwards in the default mode, their tests
+  must stay green throughout: the default mode is today's behaviour.
 
 ## Steps
 
@@ -149,6 +151,21 @@ After this phase a second event can exist beside the first without code, seed or
   `unit` discriminators, and state rehearsal/fallback provenance.
 - **Done when:** the report and dashboard suites pass for Event #1 (same numbers as baseline) and
   for a cloned event.
+
+### P09.14 — Per-event product rules (D-04)
+
+- **Do:** Per ADR-002:
+  1. Two event settings: `countsMode` (`separate`, the default, or `separateWithTotal`) and
+     `visitorDataMode` (`none`, the default, or `allowlist`), with the data classification from
+     ADR-002 (F04-016).
+  2. With `separateWithTotal`, reports, exports and dashboards add a total **beside** the three
+     counts, labelled as a sum, never replacing them (F01-048).
+  3. With `allowlist`, only the fields the event enables are collected, each with its
+     classification, retention period and the roles that may read it (F01-049). Retention runs
+     through the P10.7 purge handlers.
+  4. Tests for both modes: every report, export and DTO, and the journey copy.
+- **Done when:** both modes pass their tests, and an event with the defaults behaves exactly as
+  Event #1 did at baseline.
 
 ### P09.13 — Verify and report
 

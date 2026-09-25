@@ -1,12 +1,12 @@
 # P06 — Server modular refactor (no behaviour change)
 
-| Field             | Value                 |
-| ----------------- | --------------------- |
-| Gate              | G2                    |
-| Depends on        | P05                   |
-| Decisions         | —                     |
-| Changes behaviour | **No**, pure refactor |
-| Size              | XL                    |
+| Field             | Value                                                  |
+| ----------------- | ------------------------------------------------------ |
+| Gate              | G2                                                     |
+| Depends on        | P05                                                    |
+| Decisions         | —                                                      |
+| Changes behaviour | **No**, except labelled `fix` commits (P06.12, P06.13) |
+| Size              | XL                                                     |
 
 ## Purpose
 
@@ -21,13 +21,33 @@ must be clean.
   and the function-level split plan. Follow it; do not redesign on the fly.
 - Standards: `engineering-standards.md` §1–§3 and §9–§11.
 - **Invariant:** the route inventory snapshot (P06.1) and all test suites must be identical before
-  and after each commit. Bug fixes found along the way are **not** made here. They are recorded
-  and fixed in a separate commit, flagged in the report, and only if trivial and covered by the
-  F03 repro test.
-- Order: the reference module first (station), then the high-traffic capture modules, then the rest.
-  Each module is a separate series of commits: characterise → move → split → tidy.
+  and after each refactor commit. Behaviour changes only in `fix(...)` commits, each closing one
+  finding from `findings/BACKLOG.md` and un-skipping its repro test in the same commit. Nothing
+  else changes behaviour: a bug found along the way that is not in the backlog is added to it
+  first.
+- **Order:** P06.12 runs **first** (it was added in P05.1 and keeps a higher number so that
+  existing references to P06.1–P06.11 stay valid). It fixes the January safety-net list on the
+  unrefactored code, so that each fix can be cherry-picked onto the deployed line (D-01 C, ADR-009).
+  Then the reference module (station), the high-traffic capture modules, then the rest. Each
+  module is a separate series of commits: characterise → move → split → tidy → its P06.13 fixes.
+- The worklist of bugs is `findings/BACKLOG.md` (rows with home P06.12 or P06.13).
 
 ## Steps
+
+### P06.12 — Critical fixes first (January safety net)
+
+- **Do:**
+  1. Before any code moves, fix each finding in BACKLOG § _January safety net_ on the current
+     code: F03-001, F02-002, F02-006, F02-027, F03-012, F04-013, F04-006 (a separate sign-in limit
+     keyed on failures), F03-033, F04-003 and F01-046.
+  2. One `fix(...)` commit per finding. Write the test first (un-skip the P03/P04 repro, or write
+     one) and see it fail. Change no structure: these commits must cherry-pick cleanly.
+  3. For each commit, try `git cherry-pick --no-commit` onto the deployed line (`319d06d`) in a
+     scratch worktree, then abort. Record the result in `reports/P06/january-fixes.md`: applies,
+     conflicts (with the resolution), or already fixed there (F03-001's import path, F02-002).
+     Nothing is pushed to another branch until the owner answers Q-P5 (ADR-009).
+- **Done when:** every listed finding is fixed on `main` with its test green, and
+  `january-fixes.md` records the cherry-pick status of each.
 
 ### P06.1 — Characterisation safety net
 
@@ -140,7 +160,23 @@ must be clean.
      (server, db, auth, aws, attendance) composed at boot.
   4. Modules register their scheduled jobs through `platform/scheduler`, which still wraps
      `setInterval` until P10.
+  5. `server/.env.example` lists every key the schema reads, marked required or optional
+     (F01-051).
 - **Done when:** the entry path is readable top-down in under a minute.
+
+### P06.13 — Correctness fixes
+
+- **Do:**
+  1. Fix every server finding in BACKLOG with home P06.13, in the module order of this phase: each
+     module's fixes land right after that module's refactor step, so the fix is made once, in the
+     new structure.
+  2. One `fix(...)` commit per finding, test first, un-skipping its repro. Races (F03-006, F03-007,
+     F03-008, F03-011, F03-031) are fixed with a conditional write, a unique constraint or a row
+     lock, never with an in-process mutex.
+  3. F03-028 follows the lost-card rule in ADR-002. F03-018's missing audit rows follow the house
+     rule (every mutation audited in its transaction).
+- **Done when:** no BACKLOG row with home P06.13 is open, every server repro that belongs to P06
+  is un-skipped and green, and the report lists each fix with its commit.
 
 ### P06.10 — Make the guards blocking
 
@@ -172,12 +208,13 @@ node remediation/tools/code-metrics.mjs     # server/shared: 0 functions > 50, 0
 
 - Zero server/shared size, complexity or boundary violations.
 - The route inventory is unchanged, and all suites are green with no test deleted or weakened.
+- No BACKLOG row with home P06.12 or P06.13 is open.
 - Load test p95 is within 10% of baseline.
 
 ## Risks
 
 - **Scope creep into behaviour changes.** Mitigation: any behaviour change is a separate, labelled
-  commit tied to an F03 finding, or deferred to P09+.
+  `fix` commit tied to a BACKLOG row (P06.12, P06.13), or deferred to P09+.
 - **Merge pain if others commit to `server/` meanwhile.** Mitigation: agree a freeze with the owner
   for the length of this phase (D-11).
 

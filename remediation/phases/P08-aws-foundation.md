@@ -51,6 +51,8 @@ code in P15.
   2. The NAT decision per ADR-008 (VPC endpoints for ECR, Secrets Manager, SSM, Logs, S3 and AVP).
   3. RDS Postgres 17: staging `db.t4g.micro`, single-AZ. A parameter group with `rds.force_ssl=1`,
      PITR 7 days, an AWS Backup plan, KMS, and a deletion-protected, retained snapshot on delete.
+  4. Database roles: a migration role that owns the schema, and an app role that can insert and
+     read `AuditLog` but not update or delete it, and cannot change its retention (F04-015).
 - **Done when:** staging RDS is reachable only from app tasks.
 
 ### P08.4 — Containers and compute
@@ -110,7 +112,11 @@ code in P15.
   1. The existing checks.
   2. Build images, push to ECR, run migrations, and deploy **staging** on merge to `main`.
   3. **prod** only by manual approval (GitHub environment protection).
-  4. Rollback = redeploy the previous image tag. Documented and rehearsed once.
+  4. Rollback = redeploy the previous image tag. Documented and rehearsed once (F04-020).
+  5. e2e runs in CI against a seeded database (PF-17), and the coverage gate from ADR-007 is
+     enforced (PF-18).
+  6. Dependabot for npm, GitHub Actions and Docker base images, with the upgrade pins documented
+     (F04-022).
 - **Done when:** a merge to `main` reaches staging without manual steps.
 
 ### P08.10 — Staging live and smoke
@@ -119,7 +125,8 @@ code in P15.
   1. Adapt `infra/scripts/smoke-test.sh` to take a base URL and run it in the pipeline after
      deploy.
   2. Seed staging with a dev fixture event.
-  3. Produce a cost report (Cost Explorer after 3 days, and the Pricing API forecast).
+  3. Produce a cost report: Cost Explorer after 3 days, against the ADR-008 forecast, which is
+     priced from the public Price List offer files.
 - **Done when:** smoke is green in the pipeline, and cost is within D-10.
 
 ### P08.11 — Report
