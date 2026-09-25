@@ -72,7 +72,8 @@ code in P15.
   1. A Route 53 hosted zone (or delegated subdomain) and an ACM certificate.
   2. CloudFront in front of the ALB with WAF (AWS managed rule groups and rate-based rules).
   3. Security headers on responses.
-  4. Update the Cognito app client callback/logout URLs for staging.
+  4. Staging's own Cognito pool (ADR-006 §1) with its callback and logout URLs. The production
+     pool is referenced by id only and is not modified here.
 - **Done when:** `https://staging.<domain>` works end to end, including Cognito sign-in.
 
 ### P08.6 — Secrets and configuration

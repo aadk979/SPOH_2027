@@ -18,7 +18,10 @@ immediate effect everywhere.
 
 - Design: ADR-006. Person and EventMembership exist from P09.3.
 - The pool `ap-southeast-1_9bwl2nGF7` is live and holds real identities. **Never replace it.** Any
-  CDK change to it is reviewed with `cdk diff` and confirmed with the owner.
+  CDK change to it is reviewed with `cdk diff` and confirmed with the owner. It becomes
+  **production's** pool. Staging has its own CDK-created pool with synthetic users (ADR-006 §1).
+- Importing needs the pool's current settings (Q-C1…Q-C9), or the owner's approval of one
+  read-only describe (Q-P8).
 - The audit branch brought roster CSV import (`packages/shared/src/rosterCsv.ts`) and a provisioning UI.
 
 ## Steps
@@ -39,7 +42,9 @@ immediate effect everywhere.
 - **Do:**
   1. SES domain identity with DKIM, and a configuration set with bounce and complaint handling.
   2. Cognito sends through SES.
-  3. Invite and reset templates carry the organisation and event name.
+  3. Cognito's invite and reset templates carry the organisation's name (one template per pool).
+     The app sends the event-specific membership email ("you're on the SPOH 2028 team") itself
+     through SES (ADR-006 §4).
   4. Leave the SES sandbox for production.
 - **Done when:** a staging invite arrives, branded, passing DKIM.
 
@@ -84,8 +89,8 @@ immediate effect everywhere.
 ### P12.6 — Cognito groups
 
 - **Do:**
-  1. Per ADR-006: stop creating role groups, since the roster and policies are authoritative.
-     Keep a single `PlatformAdmin` group, if the ADR says so, for break-glass console visibility.
+  1. Per ADR-006 §7: stop creating role groups, since memberships and policies are
+     authoritative. No group is kept. Platform-admin status lives in `OrganisationMembership`.
   2. A migration script removes stale group memberships (dry-run first).
 - **Done when:** no code reads Cognito groups for authorization.
 
