@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T13:05:27.029Z",
+  "updatedAt": "2026-09-25T13:07:07.383Z",
   "current": {
     "phase": "P01",
     "step": "P01.4"
@@ -406,11 +406,16 @@
         {
           "id": "P01.4",
           "title": "Env audit",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T13:05:27.029Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T13:07:07.383Z",
+          "commits": ["d7e892f"],
+          "notes": [
+            {
+              "at": "2026-09-25T13:07:07.383Z",
+              "text": "server 34 keys: 19 infra / 5 secret / 10 setting; client 5 infra; all restart/rebuild; F01-051"
+            }
+          ]
         },
         {
           "id": "P01.5",
