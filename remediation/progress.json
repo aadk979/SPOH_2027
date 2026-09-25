@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T14:45:26.024Z",
+  "updatedAt": "2026-09-25T14:45:34.359Z",
   "current": {
     "phase": "P03",
-    "step": "P03.8"
+    "step": "P03.9"
   },
   "gates": [
     {
@@ -758,8 +758,8 @@
         {
           "id": "P03.9",
           "title": "Audit-branch code review",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-25T14:45:34.359Z",
           "completedAt": null,
           "commits": [],
           "notes": []

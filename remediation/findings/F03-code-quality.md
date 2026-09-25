@@ -1016,6 +1016,118 @@ The other ten stay: they are state machines and provenance.
 - **Phase:** P07.8
 - **Status:** open
 
+## Audit-branch code review · P03.9
+
+`origin/feat/audit-cloudwatch` is `main` (`d2497b6`) plus five commits, +7,779/−325 lines in 61
+files. Read-only review of the application code, on `319d06d`: CloudWatch shipping
+(`lib/cloudwatch.ts`), the audit writer and security events (`lib/audit.ts`,
+`middleware/securityAudit.ts`), the audit log API (`modules/audit/router.ts`, `actions.ts`), the
+roster CSV (`packages/shared/src/rosterCsv.ts`, `modules/roster/service.ts`) and the three new
+screens. The `infra/` and `ops/cloudwatch/` files (Lightsail, IAM, nginx, runbooks) are P04's.
+`d6fb169`'s own message says it "also carries the in-progress user-management and roster-import
+work that was already uncommitted in the tree".
+
+**Repro tests.** The code under review is not on `main`, so a test here cannot exercise it. Each
+finding below says what its test asserts; the test is written with the code when the branch's fate
+is decided (PF-14): in P06 if the branch is merged, or against the re-implementation otherwise.
+
+### What the branch gets right, and fixes that `main` still needs
+
+- **The roster import and provisioning are rewritten with the escalation rules**: an import folds
+  rows into people, refuses your own account, deactivated accounts, anyone at or above you and any
+  role at or above yours, and only a Chief or Admin may create accounts; provisioning refuses an
+  existing email (409) and roles at or above the caller's. That fixes **F03-001**, **F02-002**
+  (placeholder `pending:<email>`) and **F03-025** on the branch. `main` still has all three, so P06
+  fixes them test-first whatever happens to the branch.
+- **Audit pagination** uses `limit + 1` and an `id` tiebreak, fixing F03-017 for `/audit`.
+- **Refusals are audited** (401, 403, 429, 5xx) with a per-minute dedupe, so a denial storm is one
+  row per actor and route per minute, not one per request.
+- **CSV export neutralises formula cells** (`=`, `+`, `-`, `@`) and round-trips the import format.
+- **Tests:** +1,204 lines (a 670-line roster integration suite, CSV and audit-log unit tests, an
+  admin e2e addition).
+
+### Costs
+
+- **Size:** the refactor debt grows: 108 functions over 50 lines (from 97) and 22 files over 300
+  (from 18); `admin/service.ts` 903 lines, `admin/users/page.tsx` 966, a 265-line `AuditLogPage`
+  (`baseline.md`). Every P06/P07 split of `admin`, `roster`, `audit` and `lib/` widens the later
+  merge (PF-14).
+- **Layering:** the audit router queries Prisma directly (now 295 lines); the security-audit hook
+  lives in the error handler and the rate limiter.
+
+### Findings
+
+#### F03-039 — Audit events reach CloudWatch before their transaction commits
+
+- **Severity:** Medium (the external copy can record changes that never happened)
+- **Area:** branch `server/src/lib/audit.ts:218` (`shipAuditEvent` right after `auditLog.create`
+  inside `writeAudit`, which runs inside the caller's transaction)
+- **Evidence:** by reading: `writeAudit` is called mid-transaction by every use case; the event is
+  queued for shipping immediately. Any later failure in the same transaction (a constraint
+  violation, F03-002; a failed stock check after the audit write) rolls the row back but not the
+  shipped event.
+- **Impact:** CloudWatch, meant as the copy that survives the database, holds events the database
+  does not; reconciliation cannot tell which is right.
+- **Fix:** ship after commit (collect events on the transaction and flush in the use-case wrapper,
+  P03.3 `audited()`), or ship from the database (an outbox table read by the shipper).
+- **Test to write:** a use case that audits and then fails ships nothing.
+- **Phase:** P06 (if merged) / the re-implementation
+- **Status:** open
+
+#### F03-040 — One rejected batch stops CloudWatch delivery for good
+
+- **Severity:** Medium
+- **Area:** branch `server/src/lib/cloudwatch.ts:171` (every non-duplicate error puts the batch back
+  at the head of the buffer and retries it) and `:108` (truncation counts characters, not bytes)
+- **Evidence:** by reading: a batch CloudWatch refuses permanently (an `InvalidParameterException`
+  for an event over 256 KB after multi-byte truncation, or a timestamp outside the accepted range)
+  is retried forever at the head of the queue; everything behind it waits, and once the buffer
+  holds 10,000 events the newest are dropped.
+- **Impact:** audit and application logs stop reaching CloudWatch silently (only
+  `/audit/sink`'s `lastError` shows it) from the first bad event until a restart.
+- **Fix:** truncate by bytes; on a non-retryable error split the batch and drop (and count) the
+  offending event; alarm on `dropped` and `lastError`.
+- **Test to write:** a batch the fake client rejects as invalid is not retried, and the next batch
+  is delivered.
+- **Phase:** P06 (if merged); P08.7 replaces hand shipping with the CloudWatch agent or FireLens
+- **Status:** open
+
+#### F03-041 — The audit log's live tail can skip rows
+
+- **Severity:** Low
+- **Area:** branch `server/src/modules/audit/router.ts:158` (`sinceId` tail: rows after the anchor's
+  `createdAt`)
+- **Evidence:** by reading: `createdAt` is set at insert, inside the writer's transaction. A long
+  transaction that inserted before the anchor but commits after the client has moved past it
+  lands behind the anchor and is never delivered to that tail.
+- **Impact:** the live view can miss an event (the paged view still shows it).
+- **Fix:** tail by a commit-ordered sequence (a `bigserial` assigned at commit time through an
+  outbox, or `pg_logical`), or re-read a short overlap window and de-duplicate by id.
+- **Test to write:** a row inserted inside a transaction that commits after a later row is still
+  delivered by the tail.
+- **Phase:** P06 / P13.7 (audit screen, F02-024)
+- **Status:** open
+
+#### F03-042 — Security-event dedupe is per worker
+
+- **Severity:** Low (P04 re-checks the write load)
+- **Area:** branch `server/src/middleware/securityAudit.ts` (in-memory `windows` map)
+- **Evidence:** by reading: the same shape as PF-01/PF-02. With N workers, a refusal storm writes up
+  to N rows per actor and route per minute, and the "suppressed" counts are split across them.
+- **Impact:** noisier security log and N× writes under attack; counts understate per row.
+- **Fix:** the shared store chosen in D-14.
+- **Phase:** P15.2
+- **Status:** open
+
+### For the owner's decision on the branch (PF-14, before P05)
+
+The branch's application code is sound in intent and ahead of `main` on the three roster bugs, but
+it carries the four defects above, adds refactor debt and is partly work-in-progress. Its
+infrastructure half (Lightsail, PM2, nginx) is superseded by P08 if D-07 is A or B. Merging it
+before P06 means refactoring the larger code once; not merging it means re-implementing the audit
+screen (F02-024), CloudWatch delivery and the CSV import against these findings. This is the
+`feat/audit-cloudwatch` question already on the list for P05; P03 adds these facts, not a decision.
+
 ---
 
 ## Appendix A — Target location of every export
