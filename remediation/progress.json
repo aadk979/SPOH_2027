@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T15:35:54.595Z",
+  "updatedAt": "2026-09-25T15:38:13.753Z",
   "current": {
     "phase": "P04",
-    "step": "P04.5"
+    "step": "P04.6"
   },
   "gates": [
     {
@@ -1006,11 +1006,18 @@
         {
           "id": "P04.6",
           "title": "Data protection",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-25T15:36:20.111Z",
+          "completedAt": "2026-09-25T15:38:13.752Z",
+          "commits": [
+            "dd17a53"
+          ],
+          "notes": [
+            {
+              "at": "2026-09-25T15:38:13.753Z",
+              "text": "PII inventory (12 classes); F04-013 High (description in IdempotencyRecord 7-90 d + 400 d dumps, repro), F04-014/015/016 Medium; residency ap-southeast-1 except bucket regions (Q-S4); legal regime is Q-D1"
+            }
+          ]
         },
         {
           "id": "P04.7",
