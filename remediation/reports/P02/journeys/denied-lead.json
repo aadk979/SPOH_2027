@@ -1,0 +1,135 @@
+{
+  "id": "denied-lead",
+  "title": "P02.9: what a Lead sees when the server says no",
+  "role": "lead@spoh2027.test",
+  "runs": [
+    {
+      "viewport": "phone",
+      "frozenAt": null,
+      "steps": [
+        {
+          "nn": "01",
+          "name": "declare fallback",
+          "path": "/chief/fallback",
+          "landedOn": "/chief/fallback",
+          "screenshot": "denied-lead-01-phone.png",
+          "kb": 27,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/fallback/windows"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            }
+          ]
+        },
+        {
+          "nn": "02",
+          "name": "log a found item",
+          "path": "/safety/lost-found/new",
+          "landedOn": "/safety/lost-found/new",
+          "screenshot": "denied-lead-02-phone.png",
+          "kb": 21,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/lost-found"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "viewport": "laptop",
+      "frozenAt": null,
+      "steps": [
+        {
+          "nn": "01",
+          "name": "declare fallback",
+          "path": "/chief/fallback",
+          "landedOn": "/chief/fallback",
+          "screenshot": "denied-lead-01-laptop.png",
+          "kb": 35,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/fallback/windows"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            }
+          ]
+        },
+        {
+          "nn": "02",
+          "name": "log a found item",
+          "path": "/safety/lost-found/new",
+          "landedOn": "/safety/lost-found/new",
+          "screenshot": "denied-lead-02-laptop.png",
+          "kb": 26,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/lost-found"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

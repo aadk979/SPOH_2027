@@ -640,3 +640,65 @@ nothing a user sees links to a related thing. The data model already has the rel
   every name and number links to its page.
 - **Phase:** P14.1–P14.3
 - **Status:** open
+
+---
+
+## Permission experience · P02.9
+
+**Method.** `node remediation/tools/journeys/permissions.mjs` reads all 93 routes with their
+`requireCapability` / `requireStationScope`, sets them against `CAPABILITY_MATRIX` (the design:
+"what the role is meant to do"), finds client callers, and probes every parameter-free GET as each
+of the six roles. Output: `reports/P02/permissions.json`. **The server agrees with the matrix on
+every probed GET**; the mismatches are all in the client. What each role's UI offers comes from
+the journeys plus three denial journeys (`denied-lead`, `denied-deputy`, `denied-volunteer`).
+
+The route guard on every page checks only that someone is signed in; menus and a few controls
+check capabilities (`lib/navigation.ts`, `ShiftOverview`, `LostPersonBanner`, `admin/*`,
+`inbox`). So "shown but denied" is always "open by URL or from a static link, refused on load or
+submit".
+
+| Role      | Hidden but allowed                                                                                                                                                           | Shown but denied                                                                                                                                                                                            | Allowed, no screen (capabilities)                                                                                                                                          | Denial without explanation                                                                                                                                                                                                                       |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Volunteer | —                                                                                                                                                                            | By URL: live dashboard, IC console, Volunteers, reports, fallback form, TV (`denied-volunteer-02…07`). Registration screen's booth total (403 each load, F02-020).                                          | Request a swap (`own.read`, F02-014); briefing slots (F02-023); look up a card.                                                                                            | Dashboard: "could not be loaded — capture is unaffected"; reports: "try again in a moment"; IC console and TV: skeletons and "Connecting…" forever; Volunteers: "You can see the roster" above "0 volunteers". Only Operations explains (`-01`). |
+| IC        | `GET /fallback/windows` (the IC may read fallback windows, but Fallback is not in the IC's menu)                                                                             | —                                                                                                                                                                                                           | Void a record, adjust counts, void and reissue cards (`record.void`, `count.adjust`, `card.reissue`, F02-013); list and resolve incidents (`incident.resolve`, F02-015).   | —                                                                                                                                                                                                                                                |
+| Deputy    | **Edit the roster** (`roster.edit`: import, add and remove assignments): the Volunteers screen tells the Deputy "You can see the roster but not change it" (`deputy-day-08`) | Fallback import page opens by URL, refused on Preview (`denied-deputy-01`).                                                                                                                                 | Roster edit, gaps (`GET /roster/gaps`), data health, lost-and-found close-out, and everything the IC lacks above.                                                          | Import: "You do not have permission to perform this action (FORBIDDEN)", with no hint that a Chief can do it.                                                                                                                                    |
+| Chief     | —                                                                                                                                                                            | —                                                                                                                                                                                                           | Stations, event days, gift types (`config.manage`), provision a volunteer and print a card batch (`user.provision`), audit (`audit.read`), and all of the above (F02-003). | —                                                                                                                                                                                                                                                |
+| Lead      | —                                                                                                                                                                            | Fallback form by URL and from the Chief's admin links; Log a found item (Safety links to Lost and found); IC console's swap queue (403 on load); home's attendance and "check with your IC" copy (F02-025). | **Audit log** (`audit.read`, F02-024); lost-and-found close-out (`report.generate`).                                                                                       | Fallback: "You do not have permission to perform this action". Found item: "**Could not save. Check your connection and try again.**" — a permission denial presented as a network fault (`denied-lead-02`).                                     |
+| Admin     | —                                                                                                                                                                            | —                                                                                                                                                                                                           | Same as Chief. Attendance root depends on an env var, not on the role (F02-017).                                                                                           | —                                                                                                                                                                                                                                                |
+
+**Matrix oddities for P11** (the design, not the client): printing a Mission Card batch is gated by
+`user.provision`; reading event days needs `user.read` while reading stations needs
+`config.manage`; lost-and-found close-out is `report.generate`, so a Lead may close out items they
+may not log; `own.read` gates writes (`POST /roster/swaps`, briefing-slot completion, alert
+acknowledgement). The IC may read fallback windows but may not declare them, and has no screen
+that shows them.
+
+### F02-030 — Denials are reported as outages, network faults or endless loading
+
+- **Severity:** Medium
+- **Type:** confusing · Role: all
+- **Area:** error handling in `app/chief/page.tsx`, `app/reports/page.tsx`, `app/ic/page.tsx`,
+  `app/tv/page.tsx`, `app/safety/lost-found/new/page.tsx`, `app/admin/users/page.tsx`
+- **Evidence:** the last column above; `denied-volunteer-02…07`, `denied-lead-02`.
+- **Impact:** A 403 reads as "the system is down" or "your connection is bad". The volunteer retries
+  or calls for help; the Lead thinks the found item is queued. Only the Operations hub and the
+  settings screen say "this is not for your role".
+- **Fix:** One client mapping for 403: "Your role (X) cannot do this. Ask a Y." with the capability
+  name from `details.required`; never a retry prompt for a 403.
+- **Phase:** P11.8
+- **Status:** open
+
+### F02-031 — The Deputy is told they cannot edit the roster, which the server allows
+
+- **Severity:** Medium
+- **Type:** inconsistent · Role: Deputy
+- **Area:** `client/src/app/admin/users/page.tsx:71` (edit gated on `user.provision`) versus
+  `roster.edit` (`D, C, A`) on `/roster/import` and `/admin/assignments`
+- **Evidence:** `deputy-day-08`; `reports/P02/permissions.json`.
+- **Impact:** The matrix gives the Deputy roster editing ("a DC runs their own portfolio's
+  people") but every screen hides it, and the one message on the subject says the opposite. The
+  Deputy escalates to the Chief for work they are meant to do.
+- **Fix:** Separate "edit shifts" (`roster.edit`) from "edit role and access" (`user.provision`) in
+  the UI; decide the Deputy's scope under D-03.
+- **Phase:** P11.7, P13.7
+- **Status:** open

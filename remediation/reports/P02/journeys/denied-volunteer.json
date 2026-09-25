@@ -1,0 +1,425 @@
+{
+  "id": "denied-volunteer",
+  "title": "P02.9: committee screens opened by a volunteer",
+  "role": "booth@spoh2027.test",
+  "runs": [
+    {
+      "viewport": "phone",
+      "frozenAt": null,
+      "steps": [
+        {
+          "nn": "01",
+          "name": "operations hub",
+          "path": "/operations",
+          "landedOn": "/operations",
+          "screenshot": "denied-volunteer-01-phone.png",
+          "kb": 17,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "02",
+          "name": "live dashboard",
+          "path": "/chief",
+          "landedOn": "/chief",
+          "screenshot": "denied-volunteer-02-phone.png",
+          "kb": 11,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/dashboard/live"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            }
+          ]
+        },
+        {
+          "nn": "03",
+          "name": "IC console",
+          "path": "/ic",
+          "landedOn": "/ic",
+          "screenshot": "denied-volunteer-03-phone.png",
+          "kb": 10,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/roster/swaps/pending"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            },
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/dashboard/station/cmugx0p0e0007ni7dhugzw0ct"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            }
+          ]
+        },
+        {
+          "nn": "04",
+          "name": "volunteers",
+          "path": "/admin/users",
+          "landedOn": "/admin/users",
+          "screenshot": "denied-volunteer-04-phone.png",
+          "kb": 21,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/admin/volunteers?active=true&sort=name&limit=100"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            }
+          ]
+        },
+        {
+          "nn": "05",
+          "name": "reports",
+          "path": "/reports",
+          "landedOn": "/reports",
+          "screenshot": "denied-volunteer-05-phone.png",
+          "kb": 10,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/reports/summary"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            }
+          ]
+        },
+        {
+          "nn": "06",
+          "name": "fallback",
+          "path": "/chief/fallback",
+          "landedOn": "/chief/fallback",
+          "screenshot": "denied-volunteer-06-phone.png",
+          "kb": 24,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/fallback/windows"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            }
+          ]
+        },
+        {
+          "nn": "07",
+          "name": "TV",
+          "path": "/tv",
+          "landedOn": "/tv",
+          "screenshot": "denied-volunteer-07-phone.png",
+          "kb": 2,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/dashboard/live"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "viewport": "laptop",
+      "frozenAt": null,
+      "steps": [
+        {
+          "nn": "01",
+          "name": "operations hub",
+          "path": "/operations",
+          "landedOn": "/operations",
+          "screenshot": "denied-volunteer-01-laptop.png",
+          "kb": 21,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "02",
+          "name": "live dashboard",
+          "path": "/chief",
+          "landedOn": "/chief",
+          "screenshot": "denied-volunteer-02-laptop.png",
+          "kb": 16,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/dashboard/live"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            }
+          ]
+        },
+        {
+          "nn": "03",
+          "name": "IC console",
+          "path": "/ic",
+          "landedOn": "/ic",
+          "screenshot": "denied-volunteer-03-laptop.png",
+          "kb": 14,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/roster/swaps/pending"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            },
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/dashboard/station/cmugx0p0e0007ni7dhugzw0ct"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            }
+          ]
+        },
+        {
+          "nn": "04",
+          "name": "volunteers",
+          "path": "/admin/users",
+          "landedOn": "/admin/users",
+          "screenshot": "denied-volunteer-04-laptop.png",
+          "kb": 25,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/admin/volunteers?active=true&sort=name&limit=100"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            }
+          ]
+        },
+        {
+          "nn": "05",
+          "name": "reports",
+          "path": "/reports",
+          "landedOn": "/reports",
+          "screenshot": "denied-volunteer-05-laptop.png",
+          "kb": 16,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/reports/summary"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            }
+          ]
+        },
+        {
+          "nn": "06",
+          "name": "fallback",
+          "path": "/chief/fallback",
+          "landedOn": "/chief/fallback",
+          "screenshot": "denied-volunteer-06-laptop.png",
+          "kb": 29,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/fallback/windows"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            }
+          ]
+        },
+        {
+          "nn": "07",
+          "name": "TV",
+          "path": "/tv",
+          "landedOn": "/tv",
+          "screenshot": "denied-volunteer-07-laptop.png",
+          "kb": 3,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/dashboard/live"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

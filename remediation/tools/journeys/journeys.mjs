@@ -493,4 +493,59 @@ export const journeys = [
       { name: 'settings: nothing event-scoped', path: '/admin/settings' },
     ],
   },
+  {
+    id: 'denied-lead',
+    title: 'P02.9: what a Lead sees when the server says no',
+    role: ROLE.lead,
+    steps: [
+      {
+        name: 'declare fallback',
+        path: '/chief/fallback',
+        act: async (page) => {
+          await page.getByLabel('What has happened?').fill('Testing a denial');
+          await page.getByRole('button', { name: /^Declare Tier/ }).click();
+          await settle(page, 1200);
+        },
+      },
+      {
+        name: 'log a found item',
+        path: '/safety/lost-found/new',
+        act: async (page) => {
+          await page.getByLabel('What is it?').fill('Umbrella');
+          await submit(page);
+          await settle(page, 1200);
+        },
+      },
+    ],
+  },
+  {
+    id: 'denied-deputy',
+    title: 'P02.9: what a Deputy sees when the server says no',
+    role: ROLE.deputy,
+    steps: [
+      {
+        name: 'preview a fallback import',
+        path: '/chief/imports',
+        act: async (page) => {
+          await page.getByRole('button', { name: 'Insert the template' }).click();
+          await page.getByRole('button', { name: /^Preview/ }).click();
+          await settle(page, 1200);
+        },
+      },
+    ],
+  },
+  {
+    id: 'denied-volunteer',
+    title: 'P02.9: committee screens opened by a volunteer',
+    role: ROLE.booth,
+    steps: [
+      { name: 'operations hub', path: '/operations' },
+      { name: 'live dashboard', path: '/chief' },
+      { name: 'IC console', path: '/ic' },
+      { name: 'volunteers', path: '/admin/users' },
+      { name: 'reports', path: '/reports' },
+      { name: 'fallback', path: '/chief/fallback' },
+      { name: 'TV', path: '/tv' },
+    ],
+  },
 ];

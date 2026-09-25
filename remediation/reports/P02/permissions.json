@@ -1,0 +1,1844 @@
+{
+  "roles": {
+    "VOLUNTEER": "booth@spoh2027.test",
+    "IC": "ic@spoh2027.test",
+    "DEPUTY_COORDINATOR": "dc@spoh2027.test",
+    "CHIEF_COORDINATOR": "chief@spoh2027.test",
+    "LEAD": "lead@spoh2027.test",
+    "ADMIN": "admin@spoh2027.test"
+  },
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/auth/session",
+      "module": "auth",
+      "capability": null,
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": null,
+        "IC": null,
+        "DEPUTY_COORDINATOR": null,
+        "CHIEF_COORDINATOR": null,
+        "LEAD": null,
+        "ADMIN": null
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/auth/login",
+      "module": "auth",
+      "capability": null,
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": null,
+        "IC": null,
+        "DEPUTY_COORDINATOR": null,
+        "CHIEF_COORDINATOR": null,
+        "LEAD": null,
+        "ADMIN": null
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/auth/callback",
+      "module": "auth",
+      "capability": null,
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": null,
+        "IC": null,
+        "DEPUTY_COORDINATOR": null,
+        "CHIEF_COORDINATOR": null,
+        "LEAD": null,
+        "ADMIN": null
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/auth/refresh",
+      "module": "auth",
+      "capability": null,
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": null,
+        "IC": null,
+        "DEPUTY_COORDINATOR": null,
+        "CHIEF_COORDINATOR": null,
+        "LEAD": null,
+        "ADMIN": null
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "DELETE",
+      "path": "/auth/session",
+      "module": "auth",
+      "capability": null,
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": null,
+        "IC": null,
+        "DEPUTY_COORDINATOR": null,
+        "CHIEF_COORDINATOR": null,
+        "LEAD": null,
+        "ADMIN": null
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/auth/sessions",
+      "module": "auth",
+      "capability": null,
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": null,
+        "IC": null,
+        "DEPUTY_COORDINATOR": null,
+        "CHIEF_COORDINATOR": null,
+        "LEAD": null,
+        "ADMIN": null
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "DELETE",
+      "path": "/auth/sessions/:id",
+      "module": "auth",
+      "capability": null,
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": null,
+        "IC": null,
+        "DEPUTY_COORDINATOR": null,
+        "CHIEF_COORDINATOR": null,
+        "LEAD": null,
+        "ADMIN": null
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/me",
+      "module": "me",
+      "capability": "own.read",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 200,
+        "IC": 200,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/me/check-in",
+      "module": "me",
+      "capability": "own.read",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/me/check-out",
+      "module": "me",
+      "capability": "own.read",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/attendance",
+      "module": "attendance",
+      "capability": null,
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": null,
+        "IC": null,
+        "DEPUTY_COORDINATOR": null,
+        "CHIEF_COORDINATOR": null,
+        "LEAD": null,
+        "ADMIN": null
+      },
+      "live": {
+        "VOLUNTEER": 200,
+        "IC": 200,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/attendance/start",
+      "module": "attendance",
+      "capability": null,
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": null,
+        "IC": null,
+        "DEPUTY_COORDINATOR": null,
+        "CHIEF_COORDINATOR": null,
+        "LEAD": null,
+        "ADMIN": null
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/attendance/challenge",
+      "module": "attendance",
+      "capability": null,
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": null,
+        "IC": null,
+        "DEPUTY_COORDINATOR": null,
+        "CHIEF_COORDINATOR": null,
+        "LEAD": null,
+        "ADMIN": null
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/attendance/submit",
+      "module": "attendance",
+      "capability": null,
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": null,
+        "IC": null,
+        "DEPUTY_COORDINATOR": null,
+        "CHIEF_COORDINATOR": null,
+        "LEAD": null,
+        "ADMIN": null
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/stations",
+      "module": "station",
+      "capability": null,
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": null,
+        "IC": null,
+        "DEPUTY_COORDINATOR": null,
+        "CHIEF_COORDINATOR": null,
+        "LEAD": null,
+        "ADMIN": null
+      },
+      "live": {
+        "VOLUNTEER": 200,
+        "IC": 200,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/registrations",
+      "module": "registration",
+      "capability": "registration.create",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/registrations/group",
+      "module": "registration",
+      "capability": "registration.create",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/registrations/:id/void",
+      "module": "registration",
+      "capability": "record.void",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/registrations/summary",
+      "module": "registration",
+      "capability": "dashboard.station.read",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 403,
+        "IC": 200,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/footfall/ticks",
+      "module": "footfall",
+      "capability": "footfall.create",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/footfall/bulk",
+      "module": "footfall",
+      "capability": "count.adjust",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/footfall/ticks/:id/void",
+      "module": "footfall",
+      "capability": "record.void",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/footfall/summary",
+      "module": "footfall",
+      "capability": "dashboard.station.read",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 403,
+        "IC": 200,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/footfall/live",
+      "module": "footfall",
+      "capability": "dashboard.station.read",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 403,
+        "IC": 200,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/incidents",
+      "module": "incident",
+      "capability": "incident.report",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/incidents",
+      "module": "incident",
+      "capability": "dashboard.station.read",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 403,
+        "IC": 200,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/incidents/:id/follow-ups",
+      "module": "incident",
+      "capability": "incident.resolve",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/incidents/:id/status",
+      "module": "incident",
+      "capability": "incident.resolve",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/lost-person",
+      "module": "lostPerson",
+      "capability": "lostPerson.raise",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/lost-person/active",
+      "module": "lostPerson",
+      "capability": "own.read",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 200,
+        "IC": 200,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/lost-person/:id/ack",
+      "module": "lostPerson",
+      "capability": "own.read",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/lost-person/:id/resolve",
+      "module": "lostPerson",
+      "capability": "lostPerson.resolve",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/roster/me",
+      "module": "roster",
+      "capability": "own.read",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 200,
+        "IC": 200,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/roster/station/:stationId",
+      "module": "roster",
+      "capability": "dashboard.station.read",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/roster/volunteers",
+      "module": "roster",
+      "capability": "user.provision",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": false,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/roster/import",
+      "module": "roster",
+      "capability": "roster.edit",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/roster/swaps",
+      "module": "shift",
+      "capability": "own.read",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/roster/swaps",
+      "module": "shift",
+      "capability": "own.read",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 200,
+        "IC": 200,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/roster/swaps/pending",
+      "module": "shift",
+      "capability": "swap.approve",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 403,
+        "IC": 200,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 403,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/roster/swaps/:id/decide",
+      "module": "shift",
+      "capability": "swap.approve",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/roster/briefing-slots",
+      "module": "shift",
+      "capability": "own.read",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 200,
+        "IC": 200,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/roster/briefing-slots/:id/complete",
+      "module": "shift",
+      "capability": "own.read",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/roster/gaps",
+      "module": "shift",
+      "capability": "dashboard.event.read",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 403,
+        "IC": 403,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/cards/batch",
+      "module": "missionCard",
+      "capability": "user.provision",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": false,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/cards/funnel",
+      "module": "missionCard",
+      "capability": "dashboard.station.read",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 403,
+        "IC": 200,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/cards/:shortCode",
+      "module": "missionCard",
+      "capability": "card.stamp",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/cards/:shortCode/issue",
+      "module": "missionCard",
+      "capability": "registration.create",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/cards/:shortCode/stamps",
+      "module": "missionCard",
+      "capability": "card.stamp",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/cards/:shortCode/void",
+      "module": "missionCard",
+      "capability": "card.reissue",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/cards/:shortCode/reissue",
+      "module": "missionCard",
+      "capability": "card.reissue",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/gifts",
+      "module": "gift",
+      "capability": "gift.redeem",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 200,
+        "IC": 200,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 403,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/gifts/redemptions",
+      "module": "gift",
+      "capability": "gift.redeem",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/gifts/:id/adjust",
+      "module": "gift",
+      "capability": "count.adjust",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/gifts/summary",
+      "module": "gift",
+      "capability": "dashboard.station.read",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 403,
+        "IC": 200,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/announcements",
+      "module": "announcement",
+      "capability": "announcement.station.send",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/announcements",
+      "module": "announcement",
+      "capability": "own.read",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 200,
+        "IC": 200,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/announcements/:id/ack",
+      "module": "announcement",
+      "capability": "own.read",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/dashboard/live",
+      "module": "dashboard",
+      "capability": "dashboard.event.read",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 403,
+        "IC": 403,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/dashboard/data-health",
+      "module": "dashboard",
+      "capability": "dashboard.event.read",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 403,
+        "IC": 403,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/dashboard/station/:id",
+      "module": "dashboard",
+      "capability": "dashboard.station.read",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/lost-found",
+      "module": "lostFound",
+      "capability": "lostFound.log",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/lost-found",
+      "module": "lostFound",
+      "capability": "own.read",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 200,
+        "IC": 200,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/lost-found/:id/claim",
+      "module": "lostFound",
+      "capability": "lostFound.log",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/lost-found/close-out",
+      "module": "lostFound",
+      "capability": "report.generate",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/reports/summary",
+      "module": "report",
+      "capability": "report.generate",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 403,
+        "IC": 403,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/reports/export",
+      "module": "report",
+      "capability": "report.generate",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 403,
+        "IC": 403,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/audit",
+      "module": "audit",
+      "capability": "audit.read",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": false,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 403,
+        "IC": 403,
+        "DEPUTY_COORDINATOR": 403,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/admin/volunteers",
+      "module": "admin",
+      "capability": "user.read",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 403,
+        "IC": 403,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/admin/volunteers/:id",
+      "module": "admin",
+      "capability": "user.read",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/volunteers/:id",
+      "module": "admin",
+      "capability": "user.provision",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": false,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/admin/volunteers/:id/deactivate",
+      "module": "admin",
+      "capability": "user.provision",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": false,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/admin/volunteers/:id/reactivate",
+      "module": "admin",
+      "capability": "user.provision",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": false,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/admin/assignments",
+      "module": "admin",
+      "capability": "roster.edit",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "DELETE",
+      "path": "/admin/assignments/:id",
+      "module": "admin",
+      "capability": "roster.edit",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/admin/stations",
+      "module": "admin",
+      "capability": "config.manage",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": false,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 403,
+        "IC": 403,
+        "DEPUTY_COORDINATOR": 403,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 403,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/admin/stations",
+      "module": "admin",
+      "capability": "config.manage",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": false,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/stations/:id",
+      "module": "admin",
+      "capability": "config.manage",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": false,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/admin/event-days",
+      "module": "admin",
+      "capability": "user.read",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 403,
+        "IC": 403,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "module": "admin",
+      "capability": "config.manage",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": false,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "module": "admin",
+      "capability": "config.manage",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": false,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/admin/gift-types",
+      "module": "admin",
+      "capability": "config.manage",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": false,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/gift-types/:id",
+      "module": "admin",
+      "capability": "config.manage",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": false,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/admin/settings",
+      "module": "admin",
+      "capability": "own.read",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 200,
+        "IC": 200,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/settings",
+      "module": "admin",
+      "capability": "config.manage",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": false,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/notifications/config",
+      "module": "notification",
+      "capability": "own.read",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 200,
+        "IC": 200,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/notifications/subscriptions",
+      "module": "notification",
+      "capability": "own.read",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "DELETE",
+      "path": "/notifications/subscriptions",
+      "module": "notification",
+      "capability": "own.read",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/media/config",
+      "module": "media",
+      "capability": "own.read",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 200,
+        "IC": 200,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/media/uploads",
+      "module": "media",
+      "capability": "lostFound.log",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/media/url",
+      "module": "media",
+      "capability": "own.read",
+      "caller": false,
+      "allowed": {
+        "VOLUNTEER": true,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 400,
+        "IC": 400,
+        "DEPUTY_COORDINATOR": 400,
+        "CHIEF_COORDINATOR": 400,
+        "LEAD": 400,
+        "ADMIN": 400
+      },
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/fallback/windows",
+      "module": "fallback",
+      "capability": "fallback.declare",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/fallback/windows/:id/close",
+      "module": "fallback",
+      "capability": "fallback.declare",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "GET",
+      "path": "/fallback/windows",
+      "module": "fallback",
+      "capability": "dashboard.station.read",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": true,
+        "DEPUTY_COORDINATOR": true,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": true,
+        "ADMIN": true
+      },
+      "live": {
+        "VOLUNTEER": 403,
+        "IC": 200,
+        "DEPUTY_COORDINATOR": 200,
+        "CHIEF_COORDINATOR": 200,
+        "LEAD": 200,
+        "ADMIN": 200
+      },
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/fallback/imports/registrations",
+      "module": "fallback",
+      "capability": "fallback.import",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": false,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    },
+    {
+      "method": "POST",
+      "path": "/fallback/imports/footfall",
+      "module": "fallback",
+      "capability": "fallback.import",
+      "caller": true,
+      "allowed": {
+        "VOLUNTEER": false,
+        "IC": false,
+        "DEPUTY_COORDINATOR": false,
+        "CHIEF_COORDINATOR": true,
+        "LEAD": false,
+        "ADMIN": true
+      },
+      "live": {},
+      "mismatch": []
+    }
+  ]
+}
