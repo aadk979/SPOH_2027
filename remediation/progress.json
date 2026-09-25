@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T13:56:58.782Z",
+  "updatedAt": "2026-09-25T13:58:32.636Z",
   "current": {
     "phase": "P02",
     "step": "P02.10"
@@ -617,11 +617,16 @@
         {
           "id": "P02.10",
           "title": "Rank and write up",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T13:56:58.782Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T13:58:32.635Z",
+          "commits": ["fbcb138"],
+          "notes": [
+            {
+              "at": "2026-09-25T13:58:32.636Z",
+              "text": "summary, ranking, top 10; 236 screenshots all < 300 KB"
+            }
+          ]
         }
       ],
       "status": "in_progress",
