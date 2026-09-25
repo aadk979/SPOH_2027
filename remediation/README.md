@@ -205,8 +205,14 @@ npm run test --workspace client               # 19 at baseline
 node remediation/tools/code-metrics.mjs       # refactor debt
 ```
 
-End-to-end tests use the pre-installed Chromium (`PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers`).
-Never run `playwright install`.
+End-to-end tests use the pre-installed Chromium. Playwright 1.62 pins a newer build than the one in
+`/opt/pw-browsers`, so point it at the installed binary. Never run `playwright install`.
+
+```bash
+(cd server && npm run db:deploy && npm run db:seed)        # never db:reset: Prisma blocks it for agents
+env -u AWS_ACCESS_KEY_ID -u AWS_SECRET_ACCESS_KEY npm run dev &   # API :4010, client :3000
+CI=1 PLAYWRIGHT_CHROMIUM_EXECUTABLE=/opt/pw-browsers/chromium npm run test:e2e --workspace client
+```
 
 AWS credentials are present in this container's environment. Audits (P00, P04) use them
 **read-only**. Nothing is created in AWS before P08, and only after G1.

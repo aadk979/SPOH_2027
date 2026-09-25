@@ -120,3 +120,37 @@ closed during the audit phase named. IDs are kept when a finding moves into an F
   merge of the audit branch.
 - **Verify in:** P04 (tag deploy against a migrated DB) · **Decide before:** P05 (owner: merge
   later, re-implement or drop the audit branch)
+
+### PF-15 — e2e test drifted from the home screen
+
+- **Severity:** Low
+- **Area:** `client/tests/e2e/attendance.spec.ts:111`
+- **Evidence:** The test clicks a "Submit attendance / verify team" link on `/home`. Home renders
+  "Attendance & verification" (P00.5 page snapshot), and the old label now exists only on `/shift`
+  (`client/src/app/shift/page.tsx:60`). It fails on retry too.
+- **Impact:** The scanner-failure → PIN-fallback journey has no working e2e coverage.
+- **Verify in:** P02 (is the label change intended?) · **Fix in:** P07 (update the test to the
+  current label, or restore the label)
+
+### PF-16 — At 320 px, content covers the bottom navigation and controls
+
+- **Severity:** Medium (to verify on devices)
+- **Area:** `/home` (`.home-companion` card), `/attendance` root verifier panel, the section nav
+- **Evidence:** Two e2e tests at a 320 × 740 viewport (P00.5), both failing on retry:
+  `navigation.spec.ts:41`: in dark mode `/home` overflows horizontally (text clipped at the left
+  edge) and `.home-companion` intercepts taps on the "Guide" nav link.
+  `attendance.spec.ts:130`: "Generate fresh QR / PIN" is intercepted by the "Expires in 5:00"
+  caption and then by the section nav.
+- **Impact:** On the smallest phones a volunteer cannot reach Guide from Home, and root cannot rotate
+  verifier credentials. Possibly a regression from `c07b5d8` (the laptop layout change).
+- **Verify in:** P02 (phone journeys) · **Fix in:** P14
+
+### PF-17 — CI does not run the e2e suite
+
+- **Severity:** Medium
+- **Area:** `.github/workflows/ci.yml`
+- **Evidence:** No job runs Playwright. PF-15 and PF-16 were found only by running e2e by hand in
+  P00.5. The README's "13 tests" is also stale: `playwright test --list` reports 26.
+- **Impact:** UI regressions reach staging unnoticed. P06/P07 cannot prove "identical behaviour"
+  through the UI.
+- **Fix in:** P08 (pipeline). Until then, P06/P07 run e2e by hand before and after each step.

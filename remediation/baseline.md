@@ -151,3 +151,37 @@ What that means:
     touches `admin`, `audit`, `roster`, `lib/audit.ts`, `lib/logger.ts` or `config/env.ts` widens
     that merge. **This is for the owner to decide before P05:** merge the branch later, re-implement
     it, or drop it.
+
+## Full baseline run (P00.5)
+
+Run on 2026-09-25 against the reconciled tree (`main` + remediation docs, `test/do-inference.mjs`
+deleted in P00.4). Node 22.22, Postgres 16.13 on :5435, Chromium 141 (pre-installed
+`/opt/pw-browsers/chromium`). Wall-clock times include npm and tool start-up.
+
+| Check                   | Result                     | Time  | Notes                                                                        |
+| ----------------------- | -------------------------- | ----- | ---------------------------------------------------------------------------- |
+| `npm run lint`          | ✅ 0 problems              | 4 s   | Was 8 errors before P00.4                                                    |
+| `npm run typecheck`     | ✅ pass                    | 8 s   | shared, server, client                                                       |
+| Server unit             | ✅ 233 passed (6 files)    | 2 s   | Same count as planning                                                       |
+| Server integration      | ✅ 288 passed (13)         | 35 s  | vitest 32.3 s; creates `spoh2027_test` itself                                |
+| Client unit             | ✅ 19 passed (2 files)     | 1 s   |                                                                              |
+| `npm run build`         | ✅ pass                    | 24 s  | shared, server (tsc), client (Next 16.3.4, 30 routes, all static)            |
+| Client e2e (Playwright) | ❌ **23 passed, 3 failed** | 256 s | Run with `CI=1` (1 retry): all three failed on retry too, so none is a flake |
+
+**How e2e was run:** dev DB migrated with `db:deploy` and seeded with `db:seed`, then `npm run dev`
+with the AWS credentials removed from the environment (D-13), and
+`CI=1 PLAYWRIGHT_CHROMIUM_EXECUTABLE=/opt/pw-browsers/chromium npm run test:e2e --workspace client`.
+Playwright 1.62.1 pins Chromium build 1234, and the container ships 1194. The new env var in
+`client/playwright.config.ts` points Playwright at the installed binary. `db:reset` was not used:
+Prisma refuses a reset started by an AI agent without the user's recorded consent.
+
+**e2e failures** (details in `findings/preliminary.md`):
+
+| Test                                                                   | Cause                                                                                                                                            | Finding |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
+| `attendance.spec.ts:106` scanner failure retains PIN fallback          | Test expects a "Submit attendance / verify team" link on `/home`; home now shows "Attendance & verification" (the old label is only on `/shift`) | PF-15   |
+| `attendance.spec.ts:130` root … verifier credentials on a narrow phone | At 320 px, "Generate fresh QR / PIN" is covered by the "Expires in 5:00" caption and the bottom section nav, so it cannot be tapped              | PF-16   |
+| `navigation.spec.ts:41` sections reachable at 320 px (dark)            | At 320 px, `/home` overflows horizontally and the `.home-companion` card sits over the bottom nav, so "Guide" cannot be tapped                   | PF-16   |
+
+CI (`.github/workflows/ci.yml`) does not run e2e, which is how these went unnoticed (PF-17).
+The README's "13 tests" for e2e is stale: there are 26.
