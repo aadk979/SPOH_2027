@@ -1,0 +1,481 @@
+strict digraph "dependency-cruiser output"{
+    rankdir="LR" splines="true" overlap="false" nodesep="0.16" ranksep="0.18" fontname="Helvetica-bold" fontsize="9" style="rounded,bold,filled" fillcolor="#ffffff" compound="true"
+    node [shape="box" style="rounded, filled" height="0.2" color="black" fillcolor="#ffffcc" fontcolor="black" fontname="Helvetica" fontsize="9"]
+    edge [arrowhead="normal" arrowsize="0.6" penwidth="2.0" color="#00000033" fontname="Helvetica" fontsize="9"]
+
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" "server/src/app.ts" [label=<app.ts> tooltip="app.ts" URL="server/src/app.ts" fillcolor="#ddfeff"] } }
+    "server/src/app.ts" -> "server/src/config/env.ts"
+    "server/src/app.ts" -> "server/src/lib/logger.ts"
+    "server/src/app.ts" -> "server/src/middleware/errorHandler.ts"
+    "server/src/app.ts" -> "server/src/middleware/requestId.ts"
+    "server/src/app.ts" -> "server/src/modules/health/router.ts"
+    "server/src/app.ts" -> "server/src/routes.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/config" {label="config" "server/src/config/env.ts" [label=<env.ts> tooltip="env.ts" URL="server/src/config/env.ts" fillcolor="#ddfeff"] } } }
+    "server/src/config/env.ts" -> "server/src/lib/campusNetwork.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" "server/src/index.ts" [label=<index.ts> tooltip="index.ts" URL="server/src/index.ts" fillcolor="#ddfeff"] } }
+    "server/src/index.ts" -> "server/src/app.ts"
+    "server/src/index.ts" -> "server/src/config/env.ts"
+    "server/src/index.ts" -> "server/src/jobs/scheduler.ts"
+    "server/src/index.ts" -> "server/src/lib/logger.ts"
+    "server/src/index.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/index.ts" -> "server/src/lib/settings.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/jobs" {label="jobs" "server/src/jobs/scheduler.ts" [label=<scheduler.ts> tooltip="scheduler.ts" URL="server/src/jobs/scheduler.ts" fillcolor="#ddfeff"] } } }
+    "server/src/jobs/scheduler.ts" -> "server/src/lib/logger.ts"
+    "server/src/jobs/scheduler.ts" -> "server/src/lib/settings.ts"
+    "server/src/jobs/scheduler.ts" -> "server/src/middleware/idempotency.ts"
+    "server/src/jobs/scheduler.ts" -> "server/src/modules/auth/service.ts"
+    "server/src/jobs/scheduler.ts" -> "server/src/modules/lostPerson/service.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/lib" {label="lib" "server/src/lib/audit.ts" [label=<audit.ts> tooltip="audit.ts" URL="server/src/lib/audit.ts" fillcolor="#ddfeff"] } } }
+    "server/src/lib/audit.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" arrowhead="onormal" penwidth="1.0" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/lib" {label="lib" "server/src/lib/campusNetwork.ts" [label=<campusNetwork.ts> tooltip="campusNetwork.ts" URL="server/src/lib/campusNetwork.ts" fillcolor="#ddfeff"] } } }
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/lib" {label="lib" "server/src/lib/captureActor.ts" [label=<captureActor.ts> tooltip="captureActor.ts" URL="server/src/lib/captureActor.ts" fillcolor="#ddfeff"] } } }
+    "server/src/lib/captureActor.ts" -> "server/src/middleware/auth/index.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/lib" {label="lib" "server/src/lib/errors.ts" [label=<errors.ts> tooltip="errors.ts" URL="server/src/lib/errors.ts" fillcolor="#ddfeff"] } } }
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/lib" {label="lib" "server/src/lib/logger.ts" [label=<logger.ts> tooltip="logger.ts" URL="server/src/lib/logger.ts" fillcolor="#ddfeff"] } } }
+    "server/src/lib/logger.ts" -> "server/src/config/env.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/lib" {label="lib" "server/src/lib/prisma.ts" [label=<prisma.ts> tooltip="prisma.ts" URL="server/src/lib/prisma.ts" fillcolor="#ddfeff"] } } }
+    "server/src/lib/prisma.ts" -> "server/src/config/env.ts"
+    "server/src/lib/prisma.ts" -> "server/src/lib/logger.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/lib" {label="lib" "server/src/lib/requestContext.ts" [label=<requestContext.ts> tooltip="requestContext.ts" URL="server/src/lib/requestContext.ts" fillcolor="#ddfeff"] } } }
+    "server/src/lib/requestContext.ts" -> "server/src/middleware/requestId.ts"
+    "server/src/lib/requestContext.ts" -> "server/src/lib/audit.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/lib" {label="lib" "server/src/lib/settings.ts" [label=<settings.ts> tooltip="settings.ts" URL="server/src/lib/settings.ts" fillcolor="#ddfeff"] } } }
+    "server/src/lib/settings.ts" -> "server/src/lib/audit.ts"
+    "server/src/lib/settings.ts" -> "server/src/lib/logger.ts"
+    "server/src/lib/settings.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/lib" {label="lib" "server/src/lib/shortCode.ts" [label=<shortCode.ts> tooltip="shortCode.ts" URL="server/src/lib/shortCode.ts" fillcolor="#ddfeff"] } } }
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/lib" {label="lib" "server/src/lib/time.ts" [label=<time.ts> tooltip="time.ts" URL="server/src/lib/time.ts" fillcolor="#ddfeff"] } } }
+    "server/src/lib/time.ts" -> "server/src/config/env.ts"
+    "server/src/lib/time.ts" -> "server/src/lib/settings.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/middleware" {label="middleware" subgraph "cluster_server/src/middleware/auth" {label="auth" "server/src/middleware/auth/cognitoProvider.ts" [label=<cognitoProvider.ts> tooltip="cognitoProvider.ts" URL="server/src/middleware/auth/cognitoProvider.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/middleware/auth/cognitoProvider.ts" -> "server/src/lib/errors.ts"
+    "server/src/middleware/auth/cognitoProvider.ts" -> "server/src/lib/logger.ts"
+    "server/src/middleware/auth/cognitoProvider.ts" -> "server/src/middleware/auth/types.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/middleware" {label="middleware" subgraph "cluster_server/src/middleware/auth" {label="auth" "server/src/middleware/auth/index.ts" [label=<index.ts> tooltip="index.ts" URL="server/src/middleware/auth/index.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/middleware/auth/index.ts" -> "server/src/config/env.ts"
+    "server/src/middleware/auth/index.ts" -> "server/src/lib/errors.ts"
+    "server/src/middleware/auth/index.ts" -> "server/src/lib/logger.ts"
+    "server/src/middleware/auth/index.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/middleware/auth/index.ts" -> "server/src/modules/auth/tokens.ts"
+    "server/src/middleware/auth/index.ts" -> "server/src/types/express.d.ts" [arrowhead="onormal" penwidth="1.0"]
+    "server/src/middleware/auth/index.ts" -> "server/src/middleware/requestId.ts"
+    "server/src/middleware/auth/index.ts" -> "server/src/middleware/auth/cognitoProvider.ts"
+    "server/src/middleware/auth/index.ts" -> "server/src/middleware/auth/localProvider.ts"
+    "server/src/middleware/auth/index.ts" -> "server/src/middleware/auth/types.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/middleware" {label="middleware" subgraph "cluster_server/src/middleware/auth" {label="auth" "server/src/middleware/auth/localProvider.ts" [label=<localProvider.ts> tooltip="localProvider.ts" URL="server/src/middleware/auth/localProvider.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/middleware/auth/localProvider.ts" -> "server/src/lib/errors.ts"
+    "server/src/middleware/auth/localProvider.ts" -> "server/src/lib/logger.ts"
+    "server/src/middleware/auth/localProvider.ts" -> "server/src/middleware/auth/types.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/middleware" {label="middleware" subgraph "cluster_server/src/middleware/auth" {label="auth" "server/src/middleware/auth/types.ts" [label=<types.ts> tooltip="types.ts" URL="server/src/middleware/auth/types.ts" fillcolor="#ddfeff"] } } } }
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/middleware" {label="middleware" "server/src/middleware/errorHandler.ts" [label=<errorHandler.ts> tooltip="errorHandler.ts" URL="server/src/middleware/errorHandler.ts" fillcolor="#ddfeff"] } } }
+    "server/src/middleware/errorHandler.ts" -> "server/src/config/env.ts"
+    "server/src/middleware/errorHandler.ts" -> "server/src/lib/errors.ts"
+    "server/src/middleware/errorHandler.ts" -> "server/src/lib/logger.ts"
+    "server/src/middleware/errorHandler.ts" -> "server/src/middleware/requestId.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/middleware" {label="middleware" "server/src/middleware/idempotency.ts" [label=<idempotency.ts> tooltip="idempotency.ts" URL="server/src/middleware/idempotency.ts" fillcolor="#ddfeff"] } } }
+    "server/src/middleware/idempotency.ts" -> "server/src/lib/errors.ts"
+    "server/src/middleware/idempotency.ts" -> "server/src/lib/logger.ts"
+    "server/src/middleware/idempotency.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/middleware/idempotency.ts" -> "server/src/lib/settings.ts"
+    "server/src/middleware/idempotency.ts" -> "server/src/middleware/auth/index.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/middleware" {label="middleware" "server/src/middleware/rateLimit.ts" [label=<rateLimit.ts> tooltip="rateLimit.ts" URL="server/src/middleware/rateLimit.ts" fillcolor="#ddfeff"] } } }
+    "server/src/middleware/rateLimit.ts" -> "server/src/config/env.ts"
+    "server/src/middleware/rateLimit.ts" -> "server/src/middleware/requestId.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/middleware" {label="middleware" "server/src/middleware/rbac.ts" [label=<rbac.ts> tooltip="rbac.ts" URL="server/src/middleware/rbac.ts" fillcolor="#ddfeff"] } } }
+    "server/src/middleware/rbac.ts" -> "server/src/lib/errors.ts"
+    "server/src/middleware/rbac.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/middleware/rbac.ts" -> "server/src/lib/time.ts"
+    "server/src/middleware/rbac.ts" -> "server/src/middleware/auth/index.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/middleware" {label="middleware" "server/src/middleware/requestId.ts" [label=<requestId.ts> tooltip="requestId.ts" URL="server/src/middleware/requestId.ts" fillcolor="#ddfeff"] } } }
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/middleware" {label="middleware" "server/src/middleware/validate.ts" [label=<validate.ts> tooltip="validate.ts" URL="server/src/middleware/validate.ts" fillcolor="#ddfeff"] } } }
+    "server/src/middleware/validate.ts" -> "server/src/lib/errors.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/admin" {label="admin" "server/src/modules/admin/router.ts" [label=<router.ts> tooltip="router.ts" URL="server/src/modules/admin/router.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/admin/router.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/admin/router.ts" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/admin/router.ts" -> "server/src/lib/settings.ts"
+    "server/src/modules/admin/router.ts" -> "server/src/middleware/auth/index.ts"
+    "server/src/modules/admin/router.ts" -> "server/src/middleware/rateLimit.ts"
+    "server/src/modules/admin/router.ts" -> "server/src/middleware/rbac.ts"
+    "server/src/modules/admin/router.ts" -> "server/src/middleware/validate.ts"
+    "server/src/modules/admin/router.ts" -> "server/src/modules/station/repo.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/admin/router.ts" -> "server/src/modules/admin/service.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/admin" {label="admin" "server/src/modules/admin/service.ts" [label=<service.ts> tooltip="service.ts" URL="server/src/modules/admin/service.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/admin/service.ts" -> "server/src/lib/audit.ts"
+    "server/src/modules/admin/service.ts" -> "server/src/lib/errors.ts"
+    "server/src/modules/admin/service.ts" -> "server/src/lib/logger.ts"
+    "server/src/modules/admin/service.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/admin/service.ts" -> "server/src/lib/time.ts"
+    "server/src/modules/admin/service.ts" -> "server/src/middleware/auth/index.ts"
+    "server/src/modules/admin/service.ts" -> "server/src/modules/auth/service.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/admin/service.ts" -> "server/src/modules/gift/repo.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/admin/service.ts" -> "server/src/modules/identity/provider.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/admin/service.ts" -> "server/src/modules/roster/repo.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/admin/service.ts" -> "server/src/modules/station/repo.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/announcement" {label="announcement" "server/src/modules/announcement/repo.ts" [label=<repo.ts> tooltip="repo.ts" URL="server/src/modules/announcement/repo.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/announcement/repo.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/announcement" {label="announcement" "server/src/modules/announcement/router.ts" [label=<router.ts> tooltip="router.ts" URL="server/src/modules/announcement/router.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/announcement/router.ts" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/announcement/router.ts" -> "server/src/middleware/auth/index.ts"
+    "server/src/modules/announcement/router.ts" -> "server/src/middleware/rateLimit.ts"
+    "server/src/modules/announcement/router.ts" -> "server/src/middleware/rbac.ts"
+    "server/src/modules/announcement/router.ts" -> "server/src/middleware/validate.ts"
+    "server/src/modules/announcement/router.ts" -> "server/src/modules/announcement/service.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/announcement" {label="announcement" "server/src/modules/announcement/service.ts" [label=<service.ts> tooltip="service.ts" URL="server/src/modules/announcement/service.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/announcement/service.ts" -> "server/src/lib/audit.ts"
+    "server/src/modules/announcement/service.ts" -> "server/src/lib/errors.ts"
+    "server/src/modules/announcement/service.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/announcement/service.ts" -> "server/src/lib/time.ts"
+    "server/src/modules/announcement/service.ts" -> "server/src/modules/notification/service.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/announcement/service.ts" -> "server/src/modules/station/repo.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/announcement/service.ts" -> "server/src/modules/announcement/repo.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/attendance" {label="attendance" "server/src/modules/attendance/router.ts" [label=<router.ts> tooltip="router.ts" URL="server/src/modules/attendance/router.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/attendance/router.ts" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/attendance/router.ts" -> "server/src/middleware/auth/index.ts"
+    "server/src/modules/attendance/router.ts" -> "server/src/middleware/rateLimit.ts"
+    "server/src/modules/attendance/router.ts" -> "server/src/middleware/validate.ts"
+    "server/src/modules/attendance/router.ts" -> "server/src/modules/attendance/service.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/attendance" {label="attendance" "server/src/modules/attendance/service.ts" [label=<service.ts> tooltip="service.ts" URL="server/src/modules/attendance/service.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/attendance/service.ts" -> "server/src/config/env.ts"
+    "server/src/modules/attendance/service.ts" -> "server/src/lib/audit.ts"
+    "server/src/modules/attendance/service.ts" -> "server/src/lib/campusNetwork.ts"
+    "server/src/modules/attendance/service.ts" -> "server/src/lib/errors.ts"
+    "server/src/modules/attendance/service.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/attendance/service.ts" -> "server/src/lib/time.ts"
+    "server/src/modules/attendance/service.ts" -> "server/src/modules/attendance/tokens.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/attendance" {label="attendance" "server/src/modules/attendance/tokens.ts" [label=<tokens.ts> tooltip="tokens.ts" URL="server/src/modules/attendance/tokens.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/attendance/tokens.ts" -> "server/src/config/env.ts"
+    "server/src/modules/attendance/tokens.ts" -> "server/src/lib/errors.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/audit" {label="audit" "server/src/modules/audit/router.ts" [label=<router.ts> tooltip="router.ts" URL="server/src/modules/audit/router.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/audit/router.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/audit/router.ts" -> "server/src/middleware/auth/index.ts"
+    "server/src/modules/audit/router.ts" -> "server/src/middleware/rateLimit.ts"
+    "server/src/modules/audit/router.ts" -> "server/src/middleware/rbac.ts"
+    "server/src/modules/audit/router.ts" -> "server/src/middleware/validate.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/auth" {label="auth" "server/src/modules/auth/router.ts" [label=<router.ts> tooltip="router.ts" URL="server/src/modules/auth/router.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/auth/router.ts" -> "server/src/config/env.ts"
+    "server/src/modules/auth/router.ts" -> "server/src/lib/errors.ts"
+    "server/src/modules/auth/router.ts" -> "server/src/lib/logger.ts"
+    "server/src/modules/auth/router.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/auth/router.ts" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/auth/router.ts" -> "server/src/lib/settings.ts"
+    "server/src/modules/auth/router.ts" -> "server/src/middleware/auth/index.ts"
+    "server/src/modules/auth/router.ts" -> "server/src/middleware/rateLimit.ts"
+    "server/src/modules/auth/router.ts" -> "server/src/middleware/validate.ts"
+    "server/src/modules/auth/router.ts" -> "server/src/modules/auth/service.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/auth" {label="auth" "server/src/modules/auth/service.ts" [label=<service.ts> tooltip="service.ts" URL="server/src/modules/auth/service.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/auth/service.ts" -> "server/src/lib/audit.ts"
+    "server/src/modules/auth/service.ts" -> "server/src/lib/errors.ts"
+    "server/src/modules/auth/service.ts" -> "server/src/lib/logger.ts"
+    "server/src/modules/auth/service.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/auth/service.ts" -> "server/src/lib/settings.ts"
+    "server/src/modules/auth/service.ts" -> "server/src/middleware/auth/index.ts"
+    "server/src/modules/auth/service.ts" -> "server/src/modules/auth/tokens.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/auth" {label="auth" "server/src/modules/auth/tokens.ts" [label=<tokens.ts> tooltip="tokens.ts" URL="server/src/modules/auth/tokens.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/auth/tokens.ts" -> "server/src/config/env.ts"
+    "server/src/modules/auth/tokens.ts" -> "server/src/lib/errors.ts"
+    "server/src/modules/auth/tokens.ts" -> "server/src/lib/logger.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/dashboard" {label="dashboard" "server/src/modules/dashboard/repo.ts" [label=<repo.ts> tooltip="repo.ts" URL="server/src/modules/dashboard/repo.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/dashboard/repo.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/dashboard" {label="dashboard" "server/src/modules/dashboard/router.ts" [label=<router.ts> tooltip="router.ts" URL="server/src/modules/dashboard/router.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/dashboard/router.ts" -> "server/src/middleware/auth/index.ts"
+    "server/src/modules/dashboard/router.ts" -> "server/src/middleware/rateLimit.ts"
+    "server/src/modules/dashboard/router.ts" -> "server/src/middleware/rbac.ts"
+    "server/src/modules/dashboard/router.ts" -> "server/src/middleware/validate.ts"
+    "server/src/modules/dashboard/router.ts" -> "server/src/modules/dashboard/service.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/dashboard" {label="dashboard" "server/src/modules/dashboard/service.ts" [label=<service.ts> tooltip="service.ts" URL="server/src/modules/dashboard/service.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/dashboard/service.ts" -> "server/src/lib/errors.ts"
+    "server/src/modules/dashboard/service.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/dashboard/service.ts" -> "server/src/lib/settings.ts"
+    "server/src/modules/dashboard/service.ts" -> "server/src/lib/time.ts"
+    "server/src/modules/dashboard/service.ts" -> "server/src/modules/footfall/service.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/dashboard/service.ts" -> "server/src/modules/gift/service.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/dashboard/service.ts" -> "server/src/modules/missionCard/service.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/dashboard/service.ts" -> "server/src/modules/shift/service.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/dashboard/service.ts" -> "server/src/modules/station/repo.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/dashboard/service.ts" -> "server/src/modules/dashboard/repo.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/devAuth" {label="devAuth" "server/src/modules/devAuth/router.ts" [label=<router.ts> tooltip="router.ts" URL="server/src/modules/devAuth/router.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/devAuth/router.ts" -> "server/src/config/env.ts"
+    "server/src/modules/devAuth/router.ts" -> "server/src/lib/errors.ts"
+    "server/src/modules/devAuth/router.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/devAuth/router.ts" -> "server/src/middleware/auth/index.ts"
+    "server/src/modules/devAuth/router.ts" -> "server/src/middleware/rateLimit.ts"
+    "server/src/modules/devAuth/router.ts" -> "server/src/middleware/validate.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/fallback" {label="fallback" "server/src/modules/fallback/repo.ts" [label=<repo.ts> tooltip="repo.ts" URL="server/src/modules/fallback/repo.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/fallback/repo.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/fallback" {label="fallback" "server/src/modules/fallback/router.ts" [label=<router.ts> tooltip="router.ts" URL="server/src/modules/fallback/router.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/fallback/router.ts" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/fallback/router.ts" -> "server/src/middleware/auth/index.ts"
+    "server/src/modules/fallback/router.ts" -> "server/src/middleware/rateLimit.ts"
+    "server/src/modules/fallback/router.ts" -> "server/src/middleware/rbac.ts"
+    "server/src/modules/fallback/router.ts" -> "server/src/middleware/validate.ts"
+    "server/src/modules/fallback/router.ts" -> "server/src/modules/fallback/service.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/fallback" {label="fallback" "server/src/modules/fallback/service.ts" [label=<service.ts> tooltip="service.ts" URL="server/src/modules/fallback/service.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/fallback/service.ts" -> "server/src/lib/audit.ts"
+    "server/src/modules/fallback/service.ts" -> "server/src/lib/errors.ts"
+    "server/src/modules/fallback/service.ts" -> "server/src/lib/logger.ts"
+    "server/src/modules/fallback/service.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/fallback/service.ts" -> "server/src/lib/time.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/footfall" {label="footfall" "server/src/modules/footfall/repo.ts" [label=<repo.ts> tooltip="repo.ts" URL="server/src/modules/footfall/repo.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/footfall/repo.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/footfall" {label="footfall" "server/src/modules/footfall/router.ts" [label=<router.ts> tooltip="router.ts" URL="server/src/modules/footfall/router.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/footfall/router.ts" -> "server/src/lib/captureActor.ts"
+    "server/src/modules/footfall/router.ts" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/footfall/router.ts" -> "server/src/middleware/auth/index.ts"
+    "server/src/modules/footfall/router.ts" -> "server/src/middleware/idempotency.ts"
+    "server/src/modules/footfall/router.ts" -> "server/src/middleware/rateLimit.ts"
+    "server/src/modules/footfall/router.ts" -> "server/src/middleware/rbac.ts"
+    "server/src/modules/footfall/router.ts" -> "server/src/middleware/validate.ts"
+    "server/src/modules/footfall/router.ts" -> "server/src/modules/footfall/service.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/footfall" {label="footfall" "server/src/modules/footfall/service.ts" [label=<service.ts> tooltip="service.ts" URL="server/src/modules/footfall/service.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/footfall/service.ts" -> "server/src/lib/audit.ts"
+    "server/src/modules/footfall/service.ts" -> "server/src/lib/captureActor.ts" [arrowhead="onormal" penwidth="1.0"]
+    "server/src/modules/footfall/service.ts" -> "server/src/lib/errors.ts"
+    "server/src/modules/footfall/service.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/footfall/service.ts" -> "server/src/lib/settings.ts"
+    "server/src/modules/footfall/service.ts" -> "server/src/lib/time.ts"
+    "server/src/modules/footfall/service.ts" -> "server/src/modules/fallback/repo.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/footfall/service.ts" -> "server/src/modules/station/repo.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/footfall/service.ts" -> "server/src/modules/station/service.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/footfall/service.ts" -> "server/src/modules/footfall/repo.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/gift" {label="gift" "server/src/modules/gift/repo.ts" [label=<repo.ts> tooltip="repo.ts" URL="server/src/modules/gift/repo.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/gift/repo.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/gift" {label="gift" "server/src/modules/gift/router.ts" [label=<router.ts> tooltip="router.ts" URL="server/src/modules/gift/router.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/gift/router.ts" -> "server/src/lib/captureActor.ts"
+    "server/src/modules/gift/router.ts" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/gift/router.ts" -> "server/src/middleware/auth/index.ts"
+    "server/src/modules/gift/router.ts" -> "server/src/middleware/idempotency.ts"
+    "server/src/modules/gift/router.ts" -> "server/src/middleware/rateLimit.ts"
+    "server/src/modules/gift/router.ts" -> "server/src/middleware/rbac.ts"
+    "server/src/modules/gift/router.ts" -> "server/src/middleware/validate.ts"
+    "server/src/modules/gift/router.ts" -> "server/src/modules/gift/service.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/gift" {label="gift" "server/src/modules/gift/service.ts" [label=<service.ts> tooltip="service.ts" URL="server/src/modules/gift/service.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/gift/service.ts" -> "server/src/lib/audit.ts"
+    "server/src/modules/gift/service.ts" -> "server/src/lib/captureActor.ts" [arrowhead="onormal" penwidth="1.0"]
+    "server/src/modules/gift/service.ts" -> "server/src/lib/errors.ts"
+    "server/src/modules/gift/service.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/gift/service.ts" -> "server/src/lib/shortCode.ts"
+    "server/src/modules/gift/service.ts" -> "server/src/modules/fallback/repo.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/gift/service.ts" -> "server/src/modules/notification/service.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/gift/service.ts" -> "server/src/modules/station/service.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/gift/service.ts" -> "server/src/modules/gift/repo.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/health" {label="health" "server/src/modules/health/router.ts" [label=<router.ts> tooltip="router.ts" URL="server/src/modules/health/router.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/health/router.ts" -> "server/src/lib/logger.ts"
+    "server/src/modules/health/router.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/identity" {label="identity" "server/src/modules/identity/provider.ts" [label=<provider.ts> tooltip="provider.ts" URL="server/src/modules/identity/provider.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/identity/provider.ts" -> "server/src/config/env.ts"
+    "server/src/modules/identity/provider.ts" -> "server/src/lib/errors.ts"
+    "server/src/modules/identity/provider.ts" -> "server/src/lib/logger.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/incident" {label="incident" "server/src/modules/incident/repo.ts" [label=<repo.ts> tooltip="repo.ts" URL="server/src/modules/incident/repo.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/incident/repo.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/incident" {label="incident" "server/src/modules/incident/router.ts" [label=<router.ts> tooltip="router.ts" URL="server/src/modules/incident/router.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/incident/router.ts" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/incident/router.ts" -> "server/src/middleware/auth/index.ts"
+    "server/src/modules/incident/router.ts" -> "server/src/middleware/idempotency.ts"
+    "server/src/modules/incident/router.ts" -> "server/src/middleware/rateLimit.ts"
+    "server/src/modules/incident/router.ts" -> "server/src/middleware/rbac.ts"
+    "server/src/modules/incident/router.ts" -> "server/src/middleware/validate.ts"
+    "server/src/modules/incident/router.ts" -> "server/src/modules/incident/service.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/incident" {label="incident" "server/src/modules/incident/service.ts" [label=<service.ts> tooltip="service.ts" URL="server/src/modules/incident/service.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/incident/service.ts" -> "server/src/lib/audit.ts"
+    "server/src/modules/incident/service.ts" -> "server/src/lib/errors.ts"
+    "server/src/modules/incident/service.ts" -> "server/src/lib/logger.ts"
+    "server/src/modules/incident/service.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/incident/service.ts" -> "server/src/modules/notification/service.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/incident/service.ts" -> "server/src/modules/incident/repo.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/lostFound" {label="lostFound" "server/src/modules/lostFound/router.ts" [label=<router.ts> tooltip="router.ts" URL="server/src/modules/lostFound/router.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/lostFound/router.ts" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/lostFound/router.ts" -> "server/src/middleware/auth/index.ts"
+    "server/src/modules/lostFound/router.ts" -> "server/src/middleware/rateLimit.ts"
+    "server/src/modules/lostFound/router.ts" -> "server/src/middleware/rbac.ts"
+    "server/src/modules/lostFound/router.ts" -> "server/src/middleware/validate.ts"
+    "server/src/modules/lostFound/router.ts" -> "server/src/modules/lostFound/service.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/lostFound" {label="lostFound" "server/src/modules/lostFound/service.ts" [label=<service.ts> tooltip="service.ts" URL="server/src/modules/lostFound/service.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/lostFound/service.ts" -> "server/src/lib/audit.ts"
+    "server/src/modules/lostFound/service.ts" -> "server/src/lib/errors.ts"
+    "server/src/modules/lostFound/service.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/lostPerson" {label="lostPerson" "server/src/modules/lostPerson/repo.ts" [label=<repo.ts> tooltip="repo.ts" URL="server/src/modules/lostPerson/repo.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/lostPerson/repo.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/lostPerson" {label="lostPerson" "server/src/modules/lostPerson/router.ts" [label=<router.ts> tooltip="router.ts" URL="server/src/modules/lostPerson/router.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/lostPerson/router.ts" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/lostPerson/router.ts" -> "server/src/middleware/auth/index.ts"
+    "server/src/modules/lostPerson/router.ts" -> "server/src/middleware/idempotency.ts"
+    "server/src/modules/lostPerson/router.ts" -> "server/src/middleware/rateLimit.ts"
+    "server/src/modules/lostPerson/router.ts" -> "server/src/middleware/rbac.ts"
+    "server/src/modules/lostPerson/router.ts" -> "server/src/middleware/validate.ts"
+    "server/src/modules/lostPerson/router.ts" -> "server/src/modules/lostPerson/service.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/lostPerson" {label="lostPerson" "server/src/modules/lostPerson/service.ts" [label=<service.ts> tooltip="service.ts" URL="server/src/modules/lostPerson/service.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/lostPerson/service.ts" -> "server/src/lib/audit.ts"
+    "server/src/modules/lostPerson/service.ts" -> "server/src/lib/errors.ts"
+    "server/src/modules/lostPerson/service.ts" -> "server/src/lib/logger.ts"
+    "server/src/modules/lostPerson/service.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/lostPerson/service.ts" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/lostPerson/service.ts" -> "server/src/lib/settings.ts"
+    "server/src/modules/lostPerson/service.ts" -> "server/src/lib/time.ts"
+    "server/src/modules/lostPerson/service.ts" -> "server/src/modules/notification/service.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/lostPerson/service.ts" -> "server/src/modules/station/repo.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/lostPerson/service.ts" -> "server/src/modules/lostPerson/repo.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/me" {label="me" "server/src/modules/me/repo.ts" [label=<repo.ts> tooltip="repo.ts" URL="server/src/modules/me/repo.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/me/repo.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/me" {label="me" "server/src/modules/me/router.ts" [label=<router.ts> tooltip="router.ts" URL="server/src/modules/me/router.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/me/router.ts" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/me/router.ts" -> "server/src/middleware/auth/index.ts"
+    "server/src/modules/me/router.ts" -> "server/src/middleware/rbac.ts"
+    "server/src/modules/me/router.ts" -> "server/src/middleware/validate.ts"
+    "server/src/modules/me/router.ts" -> "server/src/modules/me/service.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/me" {label="me" "server/src/modules/me/service.ts" [label=<service.ts> tooltip="service.ts" URL="server/src/modules/me/service.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/me/service.ts" -> "server/src/lib/audit.ts"
+    "server/src/modules/me/service.ts" -> "server/src/lib/errors.ts"
+    "server/src/modules/me/service.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/me/service.ts" -> "server/src/lib/time.ts"
+    "server/src/modules/me/service.ts" -> "server/src/modules/station/repo.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/me/service.ts" -> "server/src/modules/me/repo.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/media" {label="media" "server/src/modules/media/router.ts" [label=<router.ts> tooltip="router.ts" URL="server/src/modules/media/router.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/media/router.ts" -> "server/src/middleware/auth/index.ts"
+    "server/src/modules/media/router.ts" -> "server/src/middleware/rateLimit.ts"
+    "server/src/modules/media/router.ts" -> "server/src/middleware/rbac.ts"
+    "server/src/modules/media/router.ts" -> "server/src/middleware/validate.ts"
+    "server/src/modules/media/router.ts" -> "server/src/modules/media/service.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/media" {label="media" "server/src/modules/media/service.ts" [label=<service.ts> tooltip="service.ts" URL="server/src/modules/media/service.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/media/service.ts" -> "server/src/config/env.ts"
+    "server/src/modules/media/service.ts" -> "server/src/lib/errors.ts"
+    "server/src/modules/media/service.ts" -> "server/src/lib/logger.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/missionCard" {label="missionCard" "server/src/modules/missionCard/repo.ts" [label=<repo.ts> tooltip="repo.ts" URL="server/src/modules/missionCard/repo.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/missionCard/repo.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/missionCard" {label="missionCard" "server/src/modules/missionCard/router.ts" [label=<router.ts> tooltip="router.ts" URL="server/src/modules/missionCard/router.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/missionCard/router.ts" -> "server/src/lib/captureActor.ts"
+    "server/src/modules/missionCard/router.ts" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/missionCard/router.ts" -> "server/src/middleware/auth/index.ts"
+    "server/src/modules/missionCard/router.ts" -> "server/src/middleware/idempotency.ts"
+    "server/src/modules/missionCard/router.ts" -> "server/src/middleware/rateLimit.ts"
+    "server/src/modules/missionCard/router.ts" -> "server/src/middleware/rbac.ts"
+    "server/src/modules/missionCard/router.ts" -> "server/src/middleware/validate.ts"
+    "server/src/modules/missionCard/router.ts" -> "server/src/modules/missionCard/service.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/missionCard" {label="missionCard" "server/src/modules/missionCard/service.ts" [label=<service.ts> tooltip="service.ts" URL="server/src/modules/missionCard/service.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/missionCard/service.ts" -> "server/src/lib/audit.ts"
+    "server/src/modules/missionCard/service.ts" -> "server/src/lib/captureActor.ts" [arrowhead="onormal" penwidth="1.0"]
+    "server/src/modules/missionCard/service.ts" -> "server/src/lib/errors.ts"
+    "server/src/modules/missionCard/service.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/missionCard/service.ts" -> "server/src/lib/shortCode.ts"
+    "server/src/modules/missionCard/service.ts" -> "server/src/modules/fallback/repo.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/missionCard/service.ts" -> "server/src/modules/station/repo.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/missionCard/service.ts" -> "server/src/modules/station/service.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/missionCard/service.ts" -> "server/src/modules/missionCard/repo.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/notification" {label="notification" "server/src/modules/notification/router.ts" [label=<router.ts> tooltip="router.ts" URL="server/src/modules/notification/router.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/notification/router.ts" -> "server/src/middleware/auth/index.ts"
+    "server/src/modules/notification/router.ts" -> "server/src/middleware/rateLimit.ts"
+    "server/src/modules/notification/router.ts" -> "server/src/middleware/rbac.ts"
+    "server/src/modules/notification/router.ts" -> "server/src/middleware/validate.ts"
+    "server/src/modules/notification/router.ts" -> "server/src/modules/notification/service.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/notification" {label="notification" "server/src/modules/notification/service.ts" [label=<service.ts> tooltip="service.ts" URL="server/src/modules/notification/service.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/notification/service.ts" -> "server/src/config/env.ts"
+    "server/src/modules/notification/service.ts" -> "server/src/lib/logger.ts"
+    "server/src/modules/notification/service.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/notification/service.ts" -> "server/src/lib/time.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/registration" {label="registration" "server/src/modules/registration/repo.ts" [label=<repo.ts> tooltip="repo.ts" URL="server/src/modules/registration/repo.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/registration/repo.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/registration/repo.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" arrowhead="onormal" penwidth="1.0" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/registration" {label="registration" "server/src/modules/registration/router.ts" [label=<router.ts> tooltip="router.ts" URL="server/src/modules/registration/router.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/registration/router.ts" -> "server/src/lib/captureActor.ts"
+    "server/src/modules/registration/router.ts" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/registration/router.ts" -> "server/src/middleware/auth/index.ts"
+    "server/src/modules/registration/router.ts" -> "server/src/middleware/idempotency.ts"
+    "server/src/modules/registration/router.ts" -> "server/src/middleware/rateLimit.ts"
+    "server/src/modules/registration/router.ts" -> "server/src/middleware/rbac.ts"
+    "server/src/modules/registration/router.ts" -> "server/src/middleware/validate.ts"
+    "server/src/modules/registration/router.ts" -> "server/src/modules/registration/service.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/registration" {label="registration" "server/src/modules/registration/service.ts" [label=<service.ts> tooltip="service.ts" URL="server/src/modules/registration/service.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/registration/service.ts" -> "server/src/lib/audit.ts"
+    "server/src/modules/registration/service.ts" -> "server/src/lib/captureActor.ts" [arrowhead="onormal" penwidth="1.0"]
+    "server/src/modules/registration/service.ts" -> "server/src/lib/errors.ts"
+    "server/src/modules/registration/service.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/registration/service.ts" -> "server/src/lib/time.ts"
+    "server/src/modules/registration/service.ts" -> "server/src/modules/fallback/repo.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/registration/service.ts" -> "server/src/modules/station/service.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/registration/service.ts" -> "server/src/modules/registration/repo.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/report" {label="report" "server/src/modules/report/export.ts" [label=<export.ts> tooltip="export.ts" URL="server/src/modules/report/export.ts" fillcolor="#ddfeff"] } } } }
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/report" {label="report" "server/src/modules/report/repo.ts" [label=<repo.ts> tooltip="repo.ts" URL="server/src/modules/report/repo.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/report/repo.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/report/repo.ts" -> "server/src/lib/time.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/report" {label="report" "server/src/modules/report/router.ts" [label=<router.ts> tooltip="router.ts" URL="server/src/modules/report/router.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/report/router.ts" -> "server/src/middleware/auth/index.ts"
+    "server/src/modules/report/router.ts" -> "server/src/middleware/rateLimit.ts"
+    "server/src/modules/report/router.ts" -> "server/src/middleware/rbac.ts"
+    "server/src/modules/report/router.ts" -> "server/src/middleware/validate.ts"
+    "server/src/modules/report/router.ts" -> "server/src/modules/report/export.ts"
+    "server/src/modules/report/router.ts" -> "server/src/modules/report/service.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/report" {label="report" "server/src/modules/report/service.ts" [label=<service.ts> tooltip="service.ts" URL="server/src/modules/report/service.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/report/service.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/report/service.ts" -> "server/src/lib/time.ts"
+    "server/src/modules/report/service.ts" -> "server/src/modules/fallback/service.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/report/service.ts" -> "server/src/modules/gift/service.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/report/service.ts" -> "server/src/modules/station/repo.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/report/service.ts" -> "server/src/modules/report/repo.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/roster" {label="roster" "server/src/modules/roster/repo.ts" [label=<repo.ts> tooltip="repo.ts" URL="server/src/modules/roster/repo.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/roster/repo.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/roster" {label="roster" "server/src/modules/roster/router.ts" [label=<router.ts> tooltip="router.ts" URL="server/src/modules/roster/router.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/roster/router.ts" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/roster/router.ts" -> "server/src/middleware/auth/index.ts"
+    "server/src/modules/roster/router.ts" -> "server/src/middleware/rateLimit.ts"
+    "server/src/modules/roster/router.ts" -> "server/src/middleware/rbac.ts"
+    "server/src/modules/roster/router.ts" -> "server/src/middleware/validate.ts"
+    "server/src/modules/roster/router.ts" -> "server/src/modules/me/service.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/roster/router.ts" -> "server/src/modules/roster/service.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/roster" {label="roster" "server/src/modules/roster/service.ts" [label=<service.ts> tooltip="service.ts" URL="server/src/modules/roster/service.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/roster/service.ts" -> "server/src/lib/audit.ts"
+    "server/src/modules/roster/service.ts" -> "server/src/lib/errors.ts"
+    "server/src/modules/roster/service.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/roster/service.ts" -> "server/src/lib/time.ts"
+    "server/src/modules/roster/service.ts" -> "server/src/middleware/auth/index.ts"
+    "server/src/modules/roster/service.ts" -> "server/src/modules/identity/provider.ts" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/roster/service.ts" -> "server/src/modules/roster/repo.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/shift" {label="shift" "server/src/modules/shift/repo.ts" [label=<repo.ts> tooltip="repo.ts" URL="server/src/modules/shift/repo.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/shift/repo.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/shift/repo.ts" -> "server/src/lib/time.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/shift" {label="shift" "server/src/modules/shift/router.ts" [label=<router.ts> tooltip="router.ts" URL="server/src/modules/shift/router.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/shift/router.ts" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/shift/router.ts" -> "server/src/middleware/auth/index.ts"
+    "server/src/modules/shift/router.ts" -> "server/src/middleware/rateLimit.ts"
+    "server/src/modules/shift/router.ts" -> "server/src/middleware/rbac.ts"
+    "server/src/modules/shift/router.ts" -> "server/src/middleware/validate.ts"
+    "server/src/modules/shift/router.ts" -> "server/src/modules/shift/service.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/shift" {label="shift" "server/src/modules/shift/service.ts" [label=<service.ts> tooltip="service.ts" URL="server/src/modules/shift/service.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/shift/service.ts" -> "server/src/lib/audit.ts"
+    "server/src/modules/shift/service.ts" -> "server/src/lib/errors.ts"
+    "server/src/modules/shift/service.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/shift/service.ts" -> "server/src/lib/settings.ts"
+    "server/src/modules/shift/service.ts" -> "server/src/lib/time.ts"
+    "server/src/modules/shift/service.ts" -> "server/src/modules/shift/repo.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/station" {label="station" "server/src/modules/station/repo.ts" [label=<repo.ts> tooltip="repo.ts" URL="server/src/modules/station/repo.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/station/repo.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/station" {label="station" "server/src/modules/station/router.ts" [label=<router.ts> tooltip="router.ts" URL="server/src/modules/station/router.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/station/router.ts" -> "server/src/middleware/auth/index.ts"
+    "server/src/modules/station/router.ts" -> "server/src/modules/station/service.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" subgraph "cluster_server/src/modules/station" {label="station" "server/src/modules/station/service.ts" [label=<service.ts> tooltip="service.ts" URL="server/src/modules/station/service.ts" fillcolor="#ddfeff"] } } } }
+    "server/src/modules/station/service.ts" -> "server/src/lib/errors.ts"
+    "server/src/modules/station/service.ts" -> "server/src/modules/station/repo.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" "server/src/routes.ts" [label=<routes.ts> tooltip="routes.ts" URL="server/src/routes.ts" fillcolor="#ddfeff"] } }
+    "server/src/routes.ts" -> "server/src/config/env.ts"
+    "server/src/routes.ts" -> "server/src/modules/admin/router.ts"
+    "server/src/routes.ts" -> "server/src/modules/announcement/router.ts"
+    "server/src/routes.ts" -> "server/src/modules/attendance/router.ts"
+    "server/src/routes.ts" -> "server/src/modules/audit/router.ts"
+    "server/src/routes.ts" -> "server/src/modules/auth/router.ts"
+    "server/src/routes.ts" -> "server/src/modules/dashboard/router.ts"
+    "server/src/routes.ts" -> "server/src/modules/devAuth/router.ts"
+    "server/src/routes.ts" -> "server/src/modules/fallback/router.ts"
+    "server/src/routes.ts" -> "server/src/modules/footfall/router.ts"
+    "server/src/routes.ts" -> "server/src/modules/gift/router.ts"
+    "server/src/routes.ts" -> "server/src/modules/incident/router.ts"
+    "server/src/routes.ts" -> "server/src/modules/lostFound/router.ts"
+    "server/src/routes.ts" -> "server/src/modules/lostPerson/router.ts"
+    "server/src/routes.ts" -> "server/src/modules/me/router.ts"
+    "server/src/routes.ts" -> "server/src/modules/media/router.ts"
+    "server/src/routes.ts" -> "server/src/modules/missionCard/router.ts"
+    "server/src/routes.ts" -> "server/src/modules/notification/router.ts"
+    "server/src/routes.ts" -> "server/src/modules/registration/router.ts"
+    "server/src/routes.ts" -> "server/src/modules/report/router.ts"
+    "server/src/routes.ts" -> "server/src/modules/roster/router.ts"
+    "server/src/routes.ts" -> "server/src/modules/shift/router.ts"
+    "server/src/routes.ts" -> "server/src/modules/station/router.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/types" {label="types" "server/src/types/express.d.ts" [label=<express.d.ts> tooltip="express.d.ts" URL="server/src/types/express.d.ts" fillcolor="#ddfeff"] } } }
+}

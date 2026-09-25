@@ -1,0 +1,3919 @@
+[
+  {
+    "unit": "app",
+    "outbound": [
+      "config/env",
+      "lib/logger",
+      "middleware/errorHandler",
+      "middleware/requestId",
+      "modules/health",
+      "routes"
+    ],
+    "inbound": ["index"],
+    "violations": {},
+    "exports": [
+      {
+        "file": "app.ts",
+        "line": 19,
+        "name": "createApp",
+        "kind": "function",
+        "lines": 69,
+        "target": "app/createApp.ts"
+      }
+    ]
+  },
+  {
+    "unit": "config/env",
+    "outbound": ["lib/campusNetwork"],
+    "inbound": [
+      "app",
+      "index",
+      "lib/logger",
+      "lib/prisma",
+      "lib/time",
+      "middleware/auth",
+      "middleware/errorHandler",
+      "middleware/rateLimit",
+      "modules/attendance",
+      "modules/auth",
+      "modules/devAuth",
+      "modules/identity",
+      "modules/media",
+      "modules/notification",
+      "routes"
+    ],
+    "violations": {},
+    "exports": [
+      {
+        "file": "config/env.ts",
+        "line": 284,
+        "name": "parseEnv",
+        "kind": "function",
+        "lines": 12,
+        "target": "config/ (test seam; keep, add a test)"
+      },
+      {
+        "file": "config/env.ts",
+        "line": 297,
+        "name": "env",
+        "kind": "const",
+        "lines": 1,
+        "target": "config/env.ts"
+      },
+      {
+        "file": "config/env.ts",
+        "line": 299,
+        "name": "isProduction",
+        "kind": "const",
+        "lines": 1,
+        "target": "config/isProduction.ts"
+      },
+      {
+        "file": "config/env.ts",
+        "line": 300,
+        "name": "isTest",
+        "kind": "const",
+        "lines": 1,
+        "target": "config/isTest.ts"
+      }
+    ]
+  },
+  {
+    "unit": "index",
+    "outbound": ["app", "config/env", "jobs/scheduler", "lib/logger", "lib/prisma", "lib/settings"],
+    "inbound": [],
+    "violations": {
+      "server-prisma-only-in-data": 1
+    },
+    "exports": []
+  },
+  {
+    "unit": "jobs/scheduler",
+    "outbound": [
+      "lib/logger",
+      "lib/settings",
+      "middleware/idempotency",
+      "modules/auth",
+      "modules/lostPerson"
+    ],
+    "inbound": ["index"],
+    "violations": {},
+    "exports": [
+      {
+        "file": "jobs/scheduler.ts",
+        "line": 37,
+        "name": "startScheduledJobs",
+        "kind": "function",
+        "lines": 37,
+        "target": "platform/scheduler/startScheduledJobs.ts"
+      }
+    ]
+  },
+  {
+    "unit": "lib/audit",
+    "outbound": ["lib/prisma"],
+    "inbound": [
+      "lib/requestContext",
+      "lib/settings",
+      "modules/admin",
+      "modules/announcement",
+      "modules/attendance",
+      "modules/auth",
+      "modules/fallback",
+      "modules/footfall",
+      "modules/gift",
+      "modules/incident",
+      "modules/lostFound",
+      "modules/lostPerson",
+      "modules/me",
+      "modules/missionCard",
+      "modules/registration",
+      "modules/roster",
+      "modules/shift"
+    ],
+    "violations": {
+      "server-prisma-only-in-data": 1
+    },
+    "exports": [
+      {
+        "file": "lib/audit.ts",
+        "line": 93,
+        "name": "writeAudit",
+        "kind": "function",
+        "lines": 16,
+        "target": "platform/audit/writeAudit.ts"
+      },
+      {
+        "file": "lib/audit.ts",
+        "line": 120,
+        "name": "auditStationScopeBypass",
+        "kind": "function",
+        "lines": 15,
+        "target": "platform/audit/writeAudit.ts"
+      }
+    ]
+  },
+  {
+    "unit": "lib/campusNetwork",
+    "outbound": [],
+    "inbound": ["config/env", "modules/attendance"],
+    "violations": {},
+    "exports": [
+      {
+        "file": "lib/campusNetwork.ts",
+        "line": 3,
+        "name": "parseCidr",
+        "kind": "function",
+        "lines": 20,
+        "target": "modules/attendance/domain/campusNetwork.ts"
+      },
+      {
+        "file": "lib/campusNetwork.ts",
+        "line": 24,
+        "name": "isCampusIp",
+        "kind": "function",
+        "lines": 13,
+        "target": "modules/attendance/domain/campusNetwork.ts"
+      }
+    ]
+  },
+  {
+    "unit": "lib/captureActor",
+    "outbound": ["middleware/auth"],
+    "inbound": ["modules/footfall", "modules/gift", "modules/missionCard", "modules/registration"],
+    "violations": {
+      "server-express-only-in-http": 1
+    },
+    "exports": [
+      {
+        "file": "lib/captureActor.ts",
+        "line": 21,
+        "name": "captureActorFrom",
+        "kind": "function",
+        "lines": 7,
+        "target": "platform/http/captureActor.ts"
+      }
+    ]
+  },
+  {
+    "unit": "lib/errors",
+    "outbound": [],
+    "inbound": [
+      "middleware/auth",
+      "middleware/errorHandler",
+      "middleware/idempotency",
+      "middleware/rbac",
+      "middleware/validate",
+      "modules/admin",
+      "modules/announcement",
+      "modules/attendance",
+      "modules/auth",
+      "modules/dashboard",
+      "modules/devAuth",
+      "modules/fallback",
+      "modules/footfall",
+      "modules/gift",
+      "modules/identity",
+      "modules/incident",
+      "modules/lostFound",
+      "modules/lostPerson",
+      "modules/me",
+      "modules/media",
+      "modules/missionCard",
+      "modules/registration",
+      "modules/roster",
+      "modules/shift",
+      "modules/station"
+    ],
+    "violations": {},
+    "exports": [
+      {
+        "file": "lib/errors.ts",
+        "line": 11,
+        "name": "AppError",
+        "kind": "class",
+        "lines": 23,
+        "target": "platform/errors/index.ts"
+      },
+      {
+        "file": "lib/errors.ts",
+        "line": 35,
+        "name": "ValidationError",
+        "kind": "class",
+        "lines": 5,
+        "target": "platform/errors/index.ts"
+      },
+      {
+        "file": "lib/errors.ts",
+        "line": 41,
+        "name": "UnauthenticatedError",
+        "kind": "class",
+        "lines": 5,
+        "target": "platform/errors/index.ts"
+      },
+      {
+        "file": "lib/errors.ts",
+        "line": 52,
+        "name": "NotProvisionedError",
+        "kind": "class",
+        "lines": 5,
+        "target": "platform/errors/index.ts"
+      },
+      {
+        "file": "lib/errors.ts",
+        "line": 58,
+        "name": "AccountInactiveError",
+        "kind": "class",
+        "lines": 5,
+        "target": "platform/errors/index.ts"
+      },
+      {
+        "file": "lib/errors.ts",
+        "line": 64,
+        "name": "ForbiddenError",
+        "kind": "class",
+        "lines": 5,
+        "target": "platform/errors/index.ts"
+      },
+      {
+        "file": "lib/errors.ts",
+        "line": 71,
+        "name": "StationScopeError",
+        "kind": "class",
+        "lines": 5,
+        "target": "platform/errors/index.ts"
+      },
+      {
+        "file": "lib/errors.ts",
+        "line": 77,
+        "name": "NotFoundError",
+        "kind": "class",
+        "lines": 5,
+        "target": "platform/errors/index.ts"
+      },
+      {
+        "file": "lib/errors.ts",
+        "line": 83,
+        "name": "ConflictError",
+        "kind": "class",
+        "lines": 5,
+        "target": "platform/errors/index.ts"
+      },
+      {
+        "file": "lib/errors.ts",
+        "line": 89,
+        "name": "IdempotencyKeyReuseError",
+        "kind": "class",
+        "lines": 9,
+        "target": "platform/errors/index.ts"
+      },
+      {
+        "file": "lib/errors.ts",
+        "line": 99,
+        "name": "RateLimitedError",
+        "kind": "class",
+        "lines": 5,
+        "target": "platform/errors/index.ts"
+      },
+      {
+        "file": "lib/errors.ts",
+        "line": 105,
+        "name": "InternalError",
+        "kind": "class",
+        "lines": 5,
+        "target": "platform/errors/index.ts"
+      },
+      {
+        "file": "lib/errors.ts",
+        "line": 111,
+        "name": "ServiceUnavailableError",
+        "kind": "class",
+        "lines": 5,
+        "target": "delete (no production caller)"
+      },
+      {
+        "file": "lib/errors.ts",
+        "line": 117,
+        "name": "isAppError",
+        "kind": "function",
+        "lines": 3,
+        "target": "platform/errors/index.ts"
+      }
+    ]
+  },
+  {
+    "unit": "lib/logger",
+    "outbound": ["config/env"],
+    "inbound": [
+      "app",
+      "index",
+      "jobs/scheduler",
+      "lib/prisma",
+      "lib/settings",
+      "middleware/auth",
+      "middleware/errorHandler",
+      "middleware/idempotency",
+      "modules/admin",
+      "modules/auth",
+      "modules/fallback",
+      "modules/health",
+      "modules/identity",
+      "modules/incident",
+      "modules/lostPerson",
+      "modules/media",
+      "modules/notification"
+    ],
+    "violations": {},
+    "exports": [
+      {
+        "file": "lib/logger.ts",
+        "line": 32,
+        "name": "logger",
+        "kind": "const",
+        "lines": 12,
+        "target": "platform/logger/index.ts"
+      },
+      {
+        "file": "lib/logger.ts",
+        "line": 46,
+        "name": "requestLogger",
+        "kind": "function",
+        "lines": 3,
+        "target": "delete (no production caller)"
+      }
+    ]
+  },
+  {
+    "unit": "lib/prisma",
+    "outbound": ["config/env", "lib/logger"],
+    "inbound": [
+      "index",
+      "lib/audit",
+      "lib/settings",
+      "middleware/auth",
+      "middleware/idempotency",
+      "middleware/rbac",
+      "modules/admin",
+      "modules/announcement",
+      "modules/attendance",
+      "modules/audit",
+      "modules/auth",
+      "modules/dashboard",
+      "modules/devAuth",
+      "modules/fallback",
+      "modules/footfall",
+      "modules/gift",
+      "modules/health",
+      "modules/incident",
+      "modules/lostFound",
+      "modules/lostPerson",
+      "modules/me",
+      "modules/missionCard",
+      "modules/notification",
+      "modules/registration",
+      "modules/report",
+      "modules/roster",
+      "modules/shift",
+      "modules/station"
+    ],
+    "violations": {},
+    "exports": [
+      {
+        "file": "lib/prisma.ts",
+        "line": 23,
+        "name": "prisma",
+        "kind": "const",
+        "lines": 9,
+        "target": "platform/db/client.ts"
+      },
+      {
+        "file": "lib/prisma.ts",
+        "line": 41,
+        "name": "pingDatabase",
+        "kind": "function",
+        "lines": 3,
+        "target": "platform/db/client.ts"
+      },
+      {
+        "file": "lib/prisma.ts",
+        "line": 45,
+        "name": "disconnectPrisma",
+        "kind": "function",
+        "lines": 3,
+        "target": "platform/db/client.ts"
+      }
+    ]
+  },
+  {
+    "unit": "lib/requestContext",
+    "outbound": ["lib/audit", "middleware/requestId"],
+    "inbound": [
+      "modules/admin",
+      "modules/announcement",
+      "modules/attendance",
+      "modules/auth",
+      "modules/fallback",
+      "modules/footfall",
+      "modules/gift",
+      "modules/incident",
+      "modules/lostFound",
+      "modules/lostPerson",
+      "modules/me",
+      "modules/missionCard",
+      "modules/registration",
+      "modules/roster",
+      "modules/shift"
+    ],
+    "violations": {
+      "server-express-only-in-http": 1
+    },
+    "exports": [
+      {
+        "file": "lib/requestContext.ts",
+        "line": 12,
+        "name": "auditContextFrom",
+        "kind": "function",
+        "lines": 10,
+        "target": "platform/http/auditContext.ts"
+      },
+      {
+        "file": "lib/requestContext.ts",
+        "line": 24,
+        "name": "SYSTEM_AUDIT_CONTEXT",
+        "kind": "const",
+        "lines": 7,
+        "target": "platform/http/auditContext.ts"
+      }
+    ]
+  },
+  {
+    "unit": "lib/settings",
+    "outbound": ["lib/audit", "lib/logger", "lib/prisma"],
+    "inbound": [
+      "index",
+      "jobs/scheduler",
+      "lib/time",
+      "middleware/idempotency",
+      "modules/admin",
+      "modules/auth",
+      "modules/dashboard",
+      "modules/footfall",
+      "modules/lostPerson",
+      "modules/shift"
+    ],
+    "violations": {
+      "server-prisma-only-in-data": 1
+    },
+    "exports": [
+      {
+        "file": "lib/settings.ts",
+        "line": 43,
+        "name": "DEFAULT_SETTINGS",
+        "kind": "const",
+        "lines": 27,
+        "target": "platform/settings/DEFAULT_SETTINGS.ts"
+      },
+      {
+        "file": "lib/settings.ts",
+        "line": 84,
+        "name": "getSettings",
+        "kind": "function",
+        "lines": 3,
+        "target": "platform/settings/getSettings.ts"
+      },
+      {
+        "file": "lib/settings.ts",
+        "line": 89,
+        "name": "settingsMeta",
+        "kind": "function",
+        "lines": 11,
+        "target": "platform/settings/settingsMeta.ts"
+      },
+      {
+        "file": "lib/settings.ts",
+        "line": 109,
+        "name": "loadSettings",
+        "kind": "function",
+        "lines": 50,
+        "target": "platform/settings/loadSettings.ts"
+      },
+      {
+        "file": "lib/settings.ts",
+        "line": 166,
+        "name": "updateSettings",
+        "kind": "function",
+        "lines": 31,
+        "target": "platform/settings/updateSettings.ts"
+      },
+      {
+        "file": "lib/settings.ts",
+        "line": 199,
+        "name": "clearSettings",
+        "kind": "function",
+        "lines": 15,
+        "target": "platform/settings/ (no caller: P10 revert uses it or it goes)"
+      },
+      {
+        "file": "lib/settings.ts",
+        "line": 219,
+        "name": "overrideSettingsForTest",
+        "kind": "function",
+        "lines": 7,
+        "target": "platform/settings/testing.ts (no caller)"
+      }
+    ]
+  },
+  {
+    "unit": "lib/shortCode",
+    "outbound": [],
+    "inbound": ["modules/gift", "modules/missionCard"],
+    "violations": {},
+    "exports": [
+      {
+        "file": "lib/shortCode.ts",
+        "line": 24,
+        "name": "SHORT_CODE_SPACE",
+        "kind": "const",
+        "lines": 1,
+        "target": "delete (no production caller)"
+      },
+      {
+        "file": "lib/shortCode.ts",
+        "line": 34,
+        "name": "generateShortCode",
+        "kind": "function",
+        "lines": 14,
+        "target": "modules/missionCards/domain/shortCode.ts"
+      },
+      {
+        "file": "lib/shortCode.ts",
+        "line": 57,
+        "name": "generateQrPayload",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/missionCards/domain/shortCode.ts"
+      },
+      {
+        "file": "lib/shortCode.ts",
+        "line": 62,
+        "name": "normaliseShortCode",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/missionCards/domain/shortCode.ts"
+      }
+    ]
+  },
+  {
+    "unit": "lib/time",
+    "outbound": ["config/env", "lib/settings"],
+    "inbound": [
+      "middleware/rbac",
+      "modules/admin",
+      "modules/announcement",
+      "modules/attendance",
+      "modules/dashboard",
+      "modules/fallback",
+      "modules/footfall",
+      "modules/lostPerson",
+      "modules/me",
+      "modules/notification",
+      "modules/registration",
+      "modules/report",
+      "modules/roster",
+      "modules/shift"
+    ],
+    "violations": {},
+    "exports": [
+      {
+        "file": "lib/time.ts",
+        "line": 19,
+        "name": "EVENT_TIME_ZONE",
+        "kind": "const",
+        "lines": 1,
+        "target": "retired by P09 (Event.timeZone)"
+      },
+      {
+        "file": "lib/time.ts",
+        "line": 36,
+        "name": "shiftBlockRanges",
+        "kind": "function",
+        "lines": 13,
+        "target": "platform/time/ (internal)"
+      },
+      {
+        "file": "lib/time.ts",
+        "line": 57,
+        "name": "SHIFT_BLOCKS",
+        "kind": "const",
+        "lines": 12,
+        "target": "delete (no production caller) (compiled defaults; P09 block rows)"
+      },
+      {
+        "file": "lib/time.ts",
+        "line": 71,
+        "name": "singaporeDateString",
+        "kind": "function",
+        "lines": 4,
+        "target": "platform/time/singaporeDateString.ts"
+      },
+      {
+        "file": "lib/time.ts",
+        "line": 81,
+        "name": "eventDayAnchor",
+        "kind": "function",
+        "lines": 3,
+        "target": "platform/time/eventDayAnchor.ts"
+      },
+      {
+        "file": "lib/time.ts",
+        "line": 86,
+        "name": "singaporeMinuteOfDay",
+        "kind": "function",
+        "lines": 4,
+        "target": "platform/time/ (internal)"
+      },
+      {
+        "file": "lib/time.ts",
+        "line": 99,
+        "name": "singaporeHourKey",
+        "kind": "function",
+        "lines": 4,
+        "target": "platform/time/singaporeHourKey.ts"
+      },
+      {
+        "file": "lib/time.ts",
+        "line": 105,
+        "name": "singaporeHourStart",
+        "kind": "function",
+        "lines": 5,
+        "target": "delete (no production caller)"
+      },
+      {
+        "file": "lib/time.ts",
+        "line": 121,
+        "name": "activeShiftBlocks",
+        "kind": "function",
+        "lines": 13,
+        "target": "platform/time/activeShiftBlocks.ts"
+      },
+      {
+        "file": "lib/time.ts",
+        "line": 136,
+        "name": "floorToBucket",
+        "kind": "function",
+        "lines": 4,
+        "target": "delete (no production caller)"
+      },
+      {
+        "file": "lib/time.ts",
+        "line": 141,
+        "name": "BUCKET_MINUTES",
+        "kind": "const",
+        "lines": 5,
+        "target": "platform/time/BUCKET_MINUTES.ts"
+      },
+      {
+        "file": "lib/time.ts",
+        "line": 148,
+        "name": "minutesBetween",
+        "kind": "function",
+        "lines": 3,
+        "target": "platform/time/minutesBetween.ts"
+      }
+    ]
+  },
+  {
+    "unit": "middleware/auth",
+    "outbound": [
+      "config/env",
+      "lib/errors",
+      "lib/logger",
+      "lib/prisma",
+      "middleware/requestId",
+      "modules/auth",
+      "types/express.d"
+    ],
+    "inbound": [
+      "lib/captureActor",
+      "middleware/idempotency",
+      "middleware/rbac",
+      "modules/admin",
+      "modules/announcement",
+      "modules/attendance",
+      "modules/audit",
+      "modules/auth",
+      "modules/dashboard",
+      "modules/devAuth",
+      "modules/fallback",
+      "modules/footfall",
+      "modules/gift",
+      "modules/incident",
+      "modules/lostFound",
+      "modules/lostPerson",
+      "modules/me",
+      "modules/media",
+      "modules/missionCard",
+      "modules/notification",
+      "modules/registration",
+      "modules/report",
+      "modules/roster",
+      "modules/shift",
+      "modules/station"
+    ],
+    "violations": {
+      "server-express-only-in-http": 1,
+      "server-prisma-only-in-data": 1
+    },
+    "exports": [
+      {
+        "file": "middleware/auth/cognitoProvider.ts",
+        "line": 14,
+        "name": "createCognitoAuthProvider",
+        "kind": "function",
+        "lines": 37,
+        "target": "platform/access/authenticate.ts"
+      },
+      {
+        "file": "middleware/auth/index.ts",
+        "line": 18,
+        "name": "AuthProvider",
+        "kind": "re-export",
+        "lines": 1,
+        "target": "platform/access/authenticate.ts"
+      },
+      {
+        "file": "middleware/auth/index.ts",
+        "line": 18,
+        "name": "VerifiedToken",
+        "kind": "re-export",
+        "lines": 1,
+        "target": "platform/access/authenticate.ts"
+      },
+      {
+        "file": "middleware/auth/index.ts",
+        "line": 40,
+        "name": "authProvider",
+        "kind": "const",
+        "lines": 6,
+        "target": "platform/access/authenticate.ts"
+      },
+      {
+        "file": "middleware/auth/index.ts",
+        "line": 51,
+        "name": "localAuthIssuer",
+        "kind": "const",
+        "lines": 1,
+        "target": "platform/access/authenticate.ts"
+      },
+      {
+        "file": "middleware/auth/index.ts",
+        "line": 88,
+        "name": "invalidateVolunteerCache",
+        "kind": "function",
+        "lines": 8,
+        "target": "platform/access/authenticate.ts"
+      },
+      {
+        "file": "middleware/auth/index.ts",
+        "line": 98,
+        "name": "invalidateSessionCache",
+        "kind": "function",
+        "lines": 4,
+        "target": "platform/access/ (no caller: F03 bug, revokes should call it; P10.3 cache bus)"
+      },
+      {
+        "file": "middleware/auth/index.ts",
+        "line": 169,
+        "name": "requireAuth",
+        "kind": "function",
+        "lines": 56,
+        "target": "platform/access/authenticate.ts"
+      },
+      {
+        "file": "middleware/auth/index.ts",
+        "line": 227,
+        "name": "getAuth",
+        "kind": "function",
+        "lines": 8,
+        "target": "platform/access/authenticate.ts"
+      },
+      {
+        "file": "middleware/auth/localProvider.ts",
+        "line": 34,
+        "name": "createLocalAuthProvider",
+        "kind": "function",
+        "lines": 52,
+        "target": "platform/access/authenticate.ts"
+      }
+    ]
+  },
+  {
+    "unit": "middleware/errorHandler",
+    "outbound": ["config/env", "lib/errors", "lib/logger", "middleware/requestId"],
+    "inbound": ["app"],
+    "violations": {
+      "server-express-only-in-http": 1
+    },
+    "exports": [
+      {
+        "file": "middleware/errorHandler.ts",
+        "line": 16,
+        "name": "errorHandler",
+        "kind": "function",
+        "lines": 36,
+        "target": "platform/http/errorHandler.ts"
+      },
+      {
+        "file": "middleware/errorHandler.ts",
+        "line": 78,
+        "name": "notFoundHandler",
+        "kind": "function",
+        "lines": 10,
+        "target": "platform/http/errorHandler.ts"
+      },
+      {
+        "file": "middleware/errorHandler.ts",
+        "line": 93,
+        "name": "describeCause",
+        "kind": "function",
+        "lines": 4,
+        "target": "delete (no production caller)"
+      }
+    ]
+  },
+  {
+    "unit": "middleware/idempotency",
+    "outbound": ["lib/errors", "lib/logger", "lib/prisma", "lib/settings", "middleware/auth"],
+    "inbound": [
+      "jobs/scheduler",
+      "modules/footfall",
+      "modules/gift",
+      "modules/incident",
+      "modules/lostPerson",
+      "modules/missionCard",
+      "modules/registration"
+    ],
+    "violations": {
+      "server-express-only-in-http": 1,
+      "server-prisma-only-in-data": 1
+    },
+    "exports": [
+      {
+        "file": "middleware/idempotency.ts",
+        "line": 75,
+        "name": "idempotent",
+        "kind": "function",
+        "lines": 59,
+        "target": "platform/idempotency/idempotent.ts"
+      },
+      {
+        "file": "middleware/idempotency.ts",
+        "line": 210,
+        "name": "IDEMPOTENCY_RETENTION_DAYS",
+        "kind": "const",
+        "lines": 1,
+        "target": "delete (no production caller)"
+      },
+      {
+        "file": "middleware/idempotency.ts",
+        "line": 212,
+        "name": "pruneIdempotencyRecords",
+        "kind": "function",
+        "lines": 8,
+        "target": "platform/idempotency/pruneIdempotencyRecords.ts"
+      }
+    ]
+  },
+  {
+    "unit": "middleware/rateLimit",
+    "outbound": ["config/env", "middleware/requestId"],
+    "inbound": [
+      "modules/admin",
+      "modules/announcement",
+      "modules/attendance",
+      "modules/audit",
+      "modules/auth",
+      "modules/dashboard",
+      "modules/devAuth",
+      "modules/fallback",
+      "modules/footfall",
+      "modules/gift",
+      "modules/incident",
+      "modules/lostFound",
+      "modules/lostPerson",
+      "modules/media",
+      "modules/missionCard",
+      "modules/notification",
+      "modules/registration",
+      "modules/report",
+      "modules/roster",
+      "modules/shift"
+    ],
+    "violations": {
+      "server-express-only-in-http": 1
+    },
+    "exports": [
+      {
+        "file": "middleware/rateLimit.ts",
+        "line": 47,
+        "name": "defaultRateLimit",
+        "kind": "const",
+        "lines": 1,
+        "target": "platform/http/rateLimit.ts"
+      },
+      {
+        "file": "middleware/rateLimit.ts",
+        "line": 50,
+        "name": "captureRateLimit",
+        "kind": "const",
+        "lines": 1,
+        "target": "platform/http/rateLimit.ts"
+      },
+      {
+        "file": "middleware/rateLimit.ts",
+        "line": 59,
+        "name": "sensitiveRateLimit",
+        "kind": "const",
+        "lines": 1,
+        "target": "platform/http/rateLimit.ts"
+      },
+      {
+        "file": "middleware/rateLimit.ts",
+        "line": 70,
+        "name": "adminRateLimit",
+        "kind": "const",
+        "lines": 1,
+        "target": "platform/http/rateLimit.ts"
+      }
+    ]
+  },
+  {
+    "unit": "middleware/rbac",
+    "outbound": ["lib/errors", "lib/prisma", "lib/time", "middleware/auth"],
+    "inbound": [
+      "modules/admin",
+      "modules/announcement",
+      "modules/audit",
+      "modules/dashboard",
+      "modules/fallback",
+      "modules/footfall",
+      "modules/gift",
+      "modules/incident",
+      "modules/lostFound",
+      "modules/lostPerson",
+      "modules/me",
+      "modules/media",
+      "modules/missionCard",
+      "modules/notification",
+      "modules/registration",
+      "modules/report",
+      "modules/roster",
+      "modules/shift"
+    ],
+    "violations": {
+      "server-express-only-in-http": 1,
+      "server-prisma-only-in-data": 1
+    },
+    "exports": [
+      {
+        "file": "middleware/rbac.ts",
+        "line": 22,
+        "name": "requireCapability",
+        "kind": "function",
+        "lines": 16,
+        "target": "platform/access/requireCapability.ts"
+      },
+      {
+        "file": "middleware/rbac.ts",
+        "line": 44,
+        "name": "requireMinimumRole",
+        "kind": "function",
+        "lines": 10,
+        "target": "delete (no production caller)"
+      },
+      {
+        "file": "middleware/rbac.ts",
+        "line": 59,
+        "name": "stationIdFromBody",
+        "kind": "function",
+        "lines": 6,
+        "target": "platform/access/ (internal default)"
+      },
+      {
+        "file": "middleware/rbac.ts",
+        "line": 66,
+        "name": "stationIdFromParams",
+        "kind": "function",
+        "lines": 6,
+        "target": "delete (no production caller)"
+      },
+      {
+        "file": "middleware/rbac.ts",
+        "line": 80,
+        "name": "requireStationScope",
+        "kind": "function",
+        "lines": 36,
+        "target": "platform/access/requireStationScope.ts"
+      }
+    ]
+  },
+  {
+    "unit": "middleware/requestId",
+    "outbound": [],
+    "inbound": [
+      "app",
+      "lib/requestContext",
+      "middleware/auth",
+      "middleware/errorHandler",
+      "middleware/rateLimit"
+    ],
+    "violations": {
+      "server-express-only-in-http": 1
+    },
+    "exports": [
+      {
+        "file": "middleware/requestId.ts",
+        "line": 17,
+        "name": "requestId",
+        "kind": "function",
+        "lines": 7,
+        "target": "platform/http/requestId.ts"
+      },
+      {
+        "file": "middleware/requestId.ts",
+        "line": 32,
+        "name": "requestIdOf",
+        "kind": "function",
+        "lines": 3,
+        "target": "platform/http/requestId.ts"
+      }
+    ]
+  },
+  {
+    "unit": "middleware/validate",
+    "outbound": ["lib/errors"],
+    "inbound": [
+      "modules/admin",
+      "modules/announcement",
+      "modules/attendance",
+      "modules/audit",
+      "modules/auth",
+      "modules/dashboard",
+      "modules/devAuth",
+      "modules/fallback",
+      "modules/footfall",
+      "modules/gift",
+      "modules/incident",
+      "modules/lostFound",
+      "modules/lostPerson",
+      "modules/me",
+      "modules/media",
+      "modules/missionCard",
+      "modules/notification",
+      "modules/registration",
+      "modules/report",
+      "modules/roster",
+      "modules/shift"
+    ],
+    "violations": {
+      "server-express-only-in-http": 1
+    },
+    "exports": [
+      {
+        "file": "middleware/validate.ts",
+        "line": 21,
+        "name": "validate",
+        "kind": "function",
+        "lines": 31,
+        "target": "platform/http/validate.ts"
+      },
+      {
+        "file": "middleware/validate.ts",
+        "line": 70,
+        "name": "validatedBody",
+        "kind": "function",
+        "lines": 3,
+        "target": "platform/http/validate.ts"
+      },
+      {
+        "file": "middleware/validate.ts",
+        "line": 75,
+        "name": "validatedQuery",
+        "kind": "function",
+        "lines": 3,
+        "target": "platform/http/validate.ts"
+      },
+      {
+        "file": "middleware/validate.ts",
+        "line": 80,
+        "name": "validatedParams",
+        "kind": "function",
+        "lines": 3,
+        "target": "platform/http/validate.ts"
+      }
+    ]
+  },
+  {
+    "unit": "modules/admin",
+    "outbound": [
+      "lib/audit",
+      "lib/errors",
+      "lib/logger",
+      "lib/prisma",
+      "lib/requestContext",
+      "lib/settings",
+      "lib/time",
+      "middleware/auth",
+      "middleware/rateLimit",
+      "middleware/rbac",
+      "middleware/validate",
+      "modules/auth",
+      "modules/gift",
+      "modules/identity",
+      "modules/roster",
+      "modules/station"
+    ],
+    "inbound": ["routes"],
+    "violations": {
+      "server-express-only-in-http": 1,
+      "server-module-internals-private": 6,
+      "server-prisma-only-in-data": 2
+    },
+    "exports": [
+      {
+        "file": "modules/admin/router.ts",
+        "line": 58,
+        "name": "adminRouter",
+        "kind": "const",
+        "lines": 1,
+        "target": "split: people, assignments, stations, eventDays, gifts http/routes.ts; settings → platform/settings/http"
+      },
+      {
+        "file": "modules/admin/service.ts",
+        "line": 126,
+        "name": "listVolunteers",
+        "kind": "function",
+        "lines": 38,
+        "target": "modules/people/application/listPeople.ts"
+      },
+      {
+        "file": "modules/admin/service.ts",
+        "line": 165,
+        "name": "getVolunteer",
+        "kind": "function",
+        "lines": 5,
+        "target": "modules/people/application/getPerson.ts"
+      },
+      {
+        "file": "modules/admin/service.ts",
+        "line": 231,
+        "name": "updateVolunteer",
+        "kind": "function",
+        "lines": 89,
+        "target": "modules/people/application/updatePerson.ts"
+      },
+      {
+        "file": "modules/admin/service.ts",
+        "line": 330,
+        "name": "deactivateVolunteer",
+        "kind": "function",
+        "lines": 58,
+        "target": "modules/people/application/deactivatePerson.ts"
+      },
+      {
+        "file": "modules/admin/service.ts",
+        "line": 389,
+        "name": "reactivateVolunteer",
+        "kind": "function",
+        "lines": 47,
+        "target": "modules/people/application/reactivatePerson.ts"
+      },
+      {
+        "file": "modules/admin/service.ts",
+        "line": 441,
+        "name": "createAssignment",
+        "kind": "function",
+        "lines": 58,
+        "target": "modules/assignments/application/assignShift.ts"
+      },
+      {
+        "file": "modules/admin/service.ts",
+        "line": 500,
+        "name": "deleteAssignment",
+        "kind": "function",
+        "lines": 28,
+        "target": "modules/assignments/application/unassignShift.ts"
+      },
+      {
+        "file": "modules/admin/service.ts",
+        "line": 533,
+        "name": "createStation",
+        "kind": "function",
+        "lines": 39,
+        "target": "modules/stations/application/createStation.ts"
+      },
+      {
+        "file": "modules/admin/service.ts",
+        "line": 573,
+        "name": "updateStation",
+        "kind": "function",
+        "lines": 48,
+        "target": "modules/stations/application/updateStation.ts"
+      },
+      {
+        "file": "modules/admin/service.ts",
+        "line": 626,
+        "name": "listEventDays",
+        "kind": "function",
+        "lines": 16,
+        "target": "modules/eventDays/application/listEventDays.ts"
+      },
+      {
+        "file": "modules/admin/service.ts",
+        "line": 643,
+        "name": "createEventDay",
+        "kind": "function",
+        "lines": 46,
+        "target": "modules/eventDays/application/createEventDay.ts"
+      },
+      {
+        "file": "modules/admin/service.ts",
+        "line": 690,
+        "name": "updateEventDay",
+        "kind": "function",
+        "lines": 41,
+        "target": "modules/eventDays/application/updateEventDay.ts"
+      },
+      {
+        "file": "modules/admin/service.ts",
+        "line": 736,
+        "name": "createGiftType",
+        "kind": "function",
+        "lines": 31,
+        "target": "modules/gifts/application/createGiftType.ts"
+      },
+      {
+        "file": "modules/admin/service.ts",
+        "line": 768,
+        "name": "updateGiftType",
+        "kind": "function",
+        "lines": 50,
+        "target": "modules/gifts/application/updateGiftType.ts"
+      },
+      {
+        "file": "modules/admin/service.ts",
+        "line": 820,
+        "name": "assertCanActOn",
+        "kind": "function",
+        "lines": 5,
+        "target": "delete (no production caller); the rule lives in modules/people/domain/escalation.ts"
+      }
+    ]
+  },
+  {
+    "unit": "modules/announcement",
+    "outbound": [
+      "lib/audit",
+      "lib/errors",
+      "lib/prisma",
+      "lib/requestContext",
+      "lib/time",
+      "middleware/auth",
+      "middleware/rateLimit",
+      "middleware/rbac",
+      "middleware/validate",
+      "modules/notification",
+      "modules/station"
+    ],
+    "inbound": ["routes"],
+    "violations": {
+      "server-express-only-in-http": 1,
+      "server-module-internals-private": 2,
+      "server-prisma-only-in-data": 2
+    },
+    "exports": [
+      {
+        "file": "modules/announcement/repo.ts",
+        "line": 16,
+        "name": "toAnnouncementRecord",
+        "kind": "function",
+        "lines": 22,
+        "target": "modules/announcements/data/mappers.ts"
+      },
+      {
+        "file": "modules/announcement/repo.ts",
+        "line": 39,
+        "name": "createAnnouncement",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/announcements/data/repo.ts"
+      },
+      {
+        "file": "modules/announcement/repo.ts",
+        "line": 46,
+        "name": "findAnnouncementById",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/announcements/data/repo.ts"
+      },
+      {
+        "file": "modules/announcement/repo.ts",
+        "line": 59,
+        "name": "listForRecipient",
+        "kind": "function",
+        "lines": 33,
+        "target": "modules/announcements/data/repo.ts"
+      },
+      {
+        "file": "modules/announcement/repo.ts",
+        "line": 93,
+        "name": "acknowledgedIds",
+        "kind": "function",
+        "lines": 13,
+        "target": "modules/announcements/data/repo.ts"
+      },
+      {
+        "file": "modules/announcement/repo.ts",
+        "line": 108,
+        "name": "acknowledge",
+        "kind": "function",
+        "lines": 7,
+        "target": "modules/announcements/data/repo.ts"
+      },
+      {
+        "file": "modules/announcement/repo.ts",
+        "line": 117,
+        "name": "countAudience",
+        "kind": "function",
+        "lines": 22,
+        "target": "modules/announcements/data/repo.ts"
+      },
+      {
+        "file": "modules/announcement/router.ts",
+        "line": 17,
+        "name": "announcementRouter",
+        "kind": "const",
+        "lines": 1,
+        "target": "modules/announcements/http/routes.ts + handlers.ts"
+      },
+      {
+        "file": "modules/announcement/service.ts",
+        "line": 32,
+        "name": "sendAnnouncement",
+        "kind": "function",
+        "lines": 51,
+        "target": "modules/announcements/application/sendAnnouncement.ts"
+      },
+      {
+        "file": "modules/announcement/service.ts",
+        "line": 84,
+        "name": "listInbox",
+        "kind": "function",
+        "lines": 45,
+        "target": "modules/announcements/application/listInbox.ts"
+      },
+      {
+        "file": "modules/announcement/service.ts",
+        "line": 130,
+        "name": "acknowledgeAnnouncement",
+        "kind": "function",
+        "lines": 14,
+        "target": "modules/announcements/application/acknowledgeAnnouncement.ts"
+      }
+    ]
+  },
+  {
+    "unit": "modules/attendance",
+    "outbound": [
+      "config/env",
+      "lib/audit",
+      "lib/campusNetwork",
+      "lib/errors",
+      "lib/prisma",
+      "lib/requestContext",
+      "lib/time",
+      "middleware/auth",
+      "middleware/rateLimit",
+      "middleware/validate"
+    ],
+    "inbound": ["routes"],
+    "violations": {
+      "server-express-only-in-http": 1,
+      "server-prisma-only-in-data": 1
+    },
+    "exports": [
+      {
+        "file": "modules/attendance/router.ts",
+        "line": 9,
+        "name": "attendanceRouter",
+        "kind": "const",
+        "lines": 1,
+        "target": "modules/attendance/http/routes.ts + handlers.ts"
+      },
+      {
+        "file": "modules/attendance/service.ts",
+        "line": 53,
+        "name": "attendanceStatus",
+        "kind": "function",
+        "lines": 33,
+        "target": "modules/attendance/application/attendanceStatus.ts"
+      },
+      {
+        "file": "modules/attendance/service.ts",
+        "line": 150,
+        "name": "startAttendance",
+        "kind": "function",
+        "lines": 17,
+        "target": "modules/attendance/application/startAttendance.ts"
+      },
+      {
+        "file": "modules/attendance/service.ts",
+        "line": 200,
+        "name": "issueChallenge",
+        "kind": "function",
+        "lines": 45,
+        "target": "modules/attendance/application/issueChallenge.ts"
+      },
+      {
+        "file": "modules/attendance/service.ts",
+        "line": 246,
+        "name": "submitAttendance",
+        "kind": "function",
+        "lines": 83,
+        "target": "modules/attendance/application/submitAttendance.ts"
+      },
+      {
+        "file": "modules/attendance/tokens.ts",
+        "line": 6,
+        "name": "ATTENDANCE_TTL_MS",
+        "kind": "const",
+        "lines": 1,
+        "target": "modules/attendance/domain/tokens.ts"
+      },
+      {
+        "file": "modules/attendance/tokens.ts",
+        "line": 15,
+        "name": "hashPin",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/attendance/domain/tokens.ts"
+      },
+      {
+        "file": "modules/attendance/tokens.ts",
+        "line": 19,
+        "name": "signAttendanceToken",
+        "kind": "function",
+        "lines": 16,
+        "target": "modules/attendance/domain/tokens.ts"
+      },
+      {
+        "file": "modules/attendance/tokens.ts",
+        "line": 36,
+        "name": "verifyAttendanceToken",
+        "kind": "function",
+        "lines": 28,
+        "target": "modules/attendance/domain/tokens.ts"
+      }
+    ]
+  },
+  {
+    "unit": "modules/audit",
+    "outbound": [
+      "lib/prisma",
+      "middleware/auth",
+      "middleware/rateLimit",
+      "middleware/rbac",
+      "middleware/validate"
+    ],
+    "inbound": ["routes"],
+    "violations": {
+      "server-express-only-in-http": 1,
+      "server-prisma-only-in-data": 1
+    },
+    "exports": [
+      {
+        "file": "modules/audit/router.ts",
+        "line": 18,
+        "name": "auditRouter",
+        "kind": "const",
+        "lines": 1,
+        "target": "platform/audit/http/routes.ts + application/listAuditEntries.ts + data/repo.ts"
+      }
+    ]
+  },
+  {
+    "unit": "modules/auth",
+    "outbound": [
+      "config/env",
+      "lib/audit",
+      "lib/errors",
+      "lib/logger",
+      "lib/prisma",
+      "lib/requestContext",
+      "lib/settings",
+      "middleware/auth",
+      "middleware/rateLimit",
+      "middleware/validate"
+    ],
+    "inbound": ["jobs/scheduler", "middleware/auth", "modules/admin", "routes"],
+    "violations": {
+      "server-express-only-in-http": 1,
+      "server-prisma-only-in-data": 2
+    },
+    "exports": [
+      {
+        "file": "modules/auth/router.ts",
+        "line": 50,
+        "name": "authRouter",
+        "kind": "const",
+        "lines": 1,
+        "target": "modules/identity/http/routes.ts + handlers.ts"
+      },
+      {
+        "file": "modules/auth/router.ts",
+        "line": 368,
+        "name": "REFRESH_COOKIE_NAME",
+        "kind": "const",
+        "lines": 1,
+        "target": "delete (no production caller)"
+      },
+      {
+        "file": "modules/auth/router.ts",
+        "line": 371,
+        "name": "accessTokenTtlSeconds",
+        "kind": "function",
+        "lines": 3,
+        "target": "delete (no production caller)"
+      },
+      {
+        "file": "modules/auth/router.ts",
+        "line": 376,
+        "name": "refreshSessionDays",
+        "kind": "function",
+        "lines": 3,
+        "target": "delete (no production caller)"
+      },
+      {
+        "file": "modules/auth/service.ts",
+        "line": 61,
+        "name": "openSession",
+        "kind": "function",
+        "lines": 62,
+        "target": "modules/identity/application/openSession.ts"
+      },
+      {
+        "file": "modules/auth/service.ts",
+        "line": 132,
+        "name": "rotateSession",
+        "kind": "function",
+        "lines": 115,
+        "target": "modules/identity/application/rotateSession.ts"
+      },
+      {
+        "file": "modules/auth/service.ts",
+        "line": 249,
+        "name": "revokeFamily",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/identity/data/repo.ts (internal; not exported)"
+      },
+      {
+        "file": "modules/auth/service.ts",
+        "line": 257,
+        "name": "endSession",
+        "kind": "function",
+        "lines": 29,
+        "target": "modules/identity/application/endSession.ts"
+      },
+      {
+        "file": "modules/auth/service.ts",
+        "line": 294,
+        "name": "revokeAllForVolunteer",
+        "kind": "function",
+        "lines": 8,
+        "target": "modules/identity/application/revokeAllForVolunteer.ts"
+      },
+      {
+        "file": "modules/auth/service.ts",
+        "line": 303,
+        "name": "listSessions",
+        "kind": "function",
+        "lines": 25,
+        "target": "modules/identity/application/listSessions.ts"
+      },
+      {
+        "file": "modules/auth/service.ts",
+        "line": 335,
+        "name": "revokeOwnSession",
+        "kind": "function",
+        "lines": 24,
+        "target": "modules/identity/application/revokeOwnSession.ts"
+      },
+      {
+        "file": "modules/auth/service.ts",
+        "line": 364,
+        "name": "pruneRefreshSessions",
+        "kind": "function",
+        "lines": 18,
+        "target": "modules/identity/jobs.ts"
+      },
+      {
+        "file": "modules/auth/tokens.ts",
+        "line": 64,
+        "name": "issueAccessToken",
+        "kind": "function",
+        "lines": 17,
+        "target": "modules/identity/domain/tokens.ts"
+      },
+      {
+        "file": "modules/auth/tokens.ts",
+        "line": 89,
+        "name": "verifyAccessToken",
+        "kind": "function",
+        "lines": 19,
+        "target": "modules/identity/domain/tokens.ts"
+      },
+      {
+        "file": "modules/auth/tokens.ts",
+        "line": 116,
+        "name": "generateRefreshToken",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/identity/domain/tokens.ts"
+      },
+      {
+        "file": "modules/auth/tokens.ts",
+        "line": 121,
+        "name": "hashRefreshToken",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/identity/domain/tokens.ts"
+      },
+      {
+        "file": "modules/auth/tokens.ts",
+        "line": 125,
+        "name": "newFamilyId",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/identity/domain/tokens.ts"
+      }
+    ]
+  },
+  {
+    "unit": "modules/dashboard",
+    "outbound": [
+      "lib/errors",
+      "lib/prisma",
+      "lib/settings",
+      "lib/time",
+      "middleware/auth",
+      "middleware/rateLimit",
+      "middleware/rbac",
+      "middleware/validate",
+      "modules/footfall",
+      "modules/gift",
+      "modules/missionCard",
+      "modules/shift",
+      "modules/station"
+    ],
+    "inbound": ["routes"],
+    "violations": {
+      "server-express-only-in-http": 1,
+      "server-module-internals-private": 5,
+      "server-prisma-only-in-data": 2
+    },
+    "exports": [
+      {
+        "file": "modules/dashboard/repo.ts",
+        "line": 12,
+        "name": "registrationsSince",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/dashboard/data/repo.ts"
+      },
+      {
+        "file": "modules/dashboard/repo.ts",
+        "line": 16,
+        "name": "registrationsByCategory",
+        "kind": "function",
+        "lines": 13,
+        "target": "modules/dashboard/data/repo.ts"
+      },
+      {
+        "file": "modules/dashboard/repo.ts",
+        "line": 30,
+        "name": "footfallSince",
+        "kind": "function",
+        "lines": 7,
+        "target": "delete (no production caller)"
+      },
+      {
+        "file": "modules/dashboard/repo.ts",
+        "line": 38,
+        "name": "openIncidentCounts",
+        "kind": "function",
+        "lines": 7,
+        "target": "modules/dashboard/data/repo.ts"
+      },
+      {
+        "file": "modules/dashboard/repo.ts",
+        "line": 46,
+        "name": "activeLostPersonCount",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/dashboard/data/repo.ts"
+      },
+      {
+        "file": "modules/dashboard/repo.ts",
+        "line": 50,
+        "name": "openFallbackWindowExists",
+        "kind": "function",
+        "lines": 7,
+        "target": "modules/dashboard/data/repo.ts"
+      },
+      {
+        "file": "modules/dashboard/repo.ts",
+        "line": 66,
+        "name": "checkedInWithLastCapture",
+        "kind": "function",
+        "lines": 51,
+        "target": "modules/dashboard/data/repo.ts"
+      },
+      {
+        "file": "modules/dashboard/repo.ts",
+        "line": 118,
+        "name": "checkedInCount",
+        "kind": "function",
+        "lines": 5,
+        "target": "modules/dashboard/data/repo.ts"
+      },
+      {
+        "file": "modules/dashboard/repo.ts",
+        "line": 124,
+        "name": "onShiftCount",
+        "kind": "function",
+        "lines": 5,
+        "target": "modules/dashboard/data/repo.ts"
+      },
+      {
+        "file": "modules/dashboard/repo.ts",
+        "line": 131,
+        "name": "registrationsByDevice",
+        "kind": "function",
+        "lines": 29,
+        "target": "modules/dashboard/data/repo.ts"
+      },
+      {
+        "file": "modules/dashboard/repo.ts",
+        "line": 161,
+        "name": "footfallByDevice",
+        "kind": "function",
+        "lines": 20,
+        "target": "modules/dashboard/data/repo.ts"
+      },
+      {
+        "file": "modules/dashboard/repo.ts",
+        "line": 182,
+        "name": "stampsAtStation",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/dashboard/data/repo.ts"
+      },
+      {
+        "file": "modules/dashboard/router.ts",
+        "line": 11,
+        "name": "dashboardRouter",
+        "kind": "const",
+        "lines": 1,
+        "target": "modules/dashboard/http/routes.ts + handlers.ts"
+      },
+      {
+        "file": "modules/dashboard/service.ts",
+        "line": 52,
+        "name": "getLiveDashboard",
+        "kind": "function",
+        "lines": 79,
+        "target": "modules/dashboard/application/getLiveDashboard.ts"
+      },
+      {
+        "file": "modules/dashboard/service.ts",
+        "line": 140,
+        "name": "getDataHealth",
+        "kind": "function",
+        "lines": 50,
+        "target": "modules/dataHealth/application/getDataHealth.ts"
+      },
+      {
+        "file": "modules/dashboard/service.ts",
+        "line": 198,
+        "name": "getStationDashboard",
+        "kind": "function",
+        "lines": 89,
+        "target": "modules/dashboard/application/getStationDashboard.ts"
+      },
+      {
+        "file": "modules/dashboard/service.ts",
+        "line": 288,
+        "name": "SILENT_STATION_MINUTES",
+        "kind": "re-export",
+        "lines": 1,
+        "target": "delete (no production caller) (re-export; read the setting)"
+      },
+      {
+        "file": "modules/dashboard/service.ts",
+        "line": 288,
+        "name": "STALE_DEVICE_MINUTES",
+        "kind": "re-export",
+        "lines": 1,
+        "target": "delete (no production caller) (read the setting)"
+      }
+    ]
+  },
+  {
+    "unit": "modules/devAuth",
+    "outbound": [
+      "config/env",
+      "lib/errors",
+      "lib/prisma",
+      "middleware/auth",
+      "middleware/rateLimit",
+      "middleware/validate"
+    ],
+    "inbound": ["routes"],
+    "violations": {
+      "server-express-only-in-http": 1,
+      "server-prisma-only-in-data": 1
+    },
+    "exports": [
+      {
+        "file": "modules/devAuth/router.ts",
+        "line": 20,
+        "name": "createDevAuthRouter",
+        "kind": "function",
+        "lines": 49,
+        "target": "modules/identity/http/devRoutes.ts"
+      }
+    ]
+  },
+  {
+    "unit": "modules/fallback",
+    "outbound": [
+      "lib/audit",
+      "lib/errors",
+      "lib/logger",
+      "lib/prisma",
+      "lib/requestContext",
+      "lib/time",
+      "middleware/auth",
+      "middleware/rateLimit",
+      "middleware/rbac",
+      "middleware/validate"
+    ],
+    "inbound": [
+      "modules/footfall",
+      "modules/gift",
+      "modules/missionCard",
+      "modules/registration",
+      "modules/report",
+      "routes"
+    ],
+    "violations": {
+      "server-express-only-in-http": 1,
+      "server-prisma-only-in-data": 2
+    },
+    "exports": [
+      {
+        "file": "modules/fallback/repo.ts",
+        "line": 13,
+        "name": "rangeOverlapsFallbackWindow",
+        "kind": "function",
+        "lines": 25,
+        "target": "modules/fallback/index.ts (public: used by four capture modules)"
+      },
+      {
+        "file": "modules/fallback/router.ts",
+        "line": 30,
+        "name": "fallbackRouter",
+        "kind": "const",
+        "lines": 1,
+        "target": "modules/fallback/http/routes.ts + handlers.ts"
+      },
+      {
+        "file": "modules/fallback/service.ts",
+        "line": 72,
+        "name": "declareFallback",
+        "kind": "function",
+        "lines": 56,
+        "target": "modules/fallback/application/declareFallback.ts"
+      },
+      {
+        "file": "modules/fallback/service.ts",
+        "line": 129,
+        "name": "closeFallback",
+        "kind": "function",
+        "lines": 47,
+        "target": "modules/fallback/application/closeFallback.ts"
+      },
+      {
+        "file": "modules/fallback/service.ts",
+        "line": 177,
+        "name": "listFallbackWindows",
+        "kind": "function",
+        "lines": 14,
+        "target": "modules/fallback/application/listFallbackWindows.ts"
+      },
+      {
+        "file": "modules/fallback/service.ts",
+        "line": 213,
+        "name": "importRegistrations",
+        "kind": "function",
+        "lines": 73,
+        "target": "modules/fallback/application/importRegistrations.ts"
+      },
+      {
+        "file": "modules/fallback/service.ts",
+        "line": 287,
+        "name": "importFootfall",
+        "kind": "function",
+        "lines": 68,
+        "target": "modules/fallback/application/importFootfall.ts"
+      }
+    ]
+  },
+  {
+    "unit": "modules/footfall",
+    "outbound": [
+      "lib/audit",
+      "lib/captureActor",
+      "lib/errors",
+      "lib/prisma",
+      "lib/requestContext",
+      "lib/settings",
+      "lib/time",
+      "middleware/auth",
+      "middleware/idempotency",
+      "middleware/rateLimit",
+      "middleware/rbac",
+      "middleware/validate",
+      "modules/fallback",
+      "modules/station"
+    ],
+    "inbound": ["modules/dashboard", "routes"],
+    "violations": {
+      "server-express-only-in-http": 1,
+      "server-module-internals-private": 3,
+      "server-prisma-only-in-data": 2
+    },
+    "exports": [
+      {
+        "file": "modules/footfall/repo.ts",
+        "line": 13,
+        "name": "toFootfallTickRecord",
+        "kind": "function",
+        "lines": 12,
+        "target": "modules/footfall/data/mappers.ts"
+      },
+      {
+        "file": "modules/footfall/repo.ts",
+        "line": 26,
+        "name": "createTick",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/footfall/data/repo.ts"
+      },
+      {
+        "file": "modules/footfall/repo.ts",
+        "line": 33,
+        "name": "findTickById",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/footfall/data/repo.ts"
+      },
+      {
+        "file": "modules/footfall/repo.ts",
+        "line": 37,
+        "name": "voidTick",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/footfall/data/repo.ts"
+      },
+      {
+        "file": "modules/footfall/repo.ts",
+        "line": 46,
+        "name": "sumForStationSince",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/footfall/data/repo.ts"
+      },
+      {
+        "file": "modules/footfall/repo.ts",
+        "line": 50,
+        "name": "sumForRecorderSince",
+        "kind": "function",
+        "lines": 7,
+        "target": "modules/footfall/data/repo.ts"
+      },
+      {
+        "file": "modules/footfall/repo.ts",
+        "line": 79,
+        "name": "sumMatching",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/footfall/data/repo.ts"
+      },
+      {
+        "file": "modules/footfall/repo.ts",
+        "line": 91,
+        "name": "sumByBucket",
+        "kind": "function",
+        "lines": 28,
+        "target": "modules/footfall/data/repo.ts"
+      },
+      {
+        "file": "modules/footfall/repo.ts",
+        "line": 125,
+        "name": "liveStationStats",
+        "kind": "function",
+        "lines": 24,
+        "target": "modules/footfall/data/repo.ts"
+      },
+      {
+        "file": "modules/footfall/router.ts",
+        "line": 31,
+        "name": "footfallRouter",
+        "kind": "const",
+        "lines": 1,
+        "target": "modules/footfall/http/routes.ts + handlers.ts"
+      },
+      {
+        "file": "modules/footfall/service.ts",
+        "line": 52,
+        "name": "SILENT_STATION_MINUTES",
+        "kind": "const",
+        "lines": 1,
+        "target": "read platform/settings (constant retired)"
+      },
+      {
+        "file": "modules/footfall/service.ts",
+        "line": 58,
+        "name": "recordTick",
+        "kind": "function",
+        "lines": 44,
+        "target": "modules/footfall/application/recordTick.ts"
+      },
+      {
+        "file": "modules/footfall/service.ts",
+        "line": 109,
+        "name": "recordBulk",
+        "kind": "function",
+        "lines": 48,
+        "target": "modules/footfall/application/recordBulk.ts"
+      },
+      {
+        "file": "modules/footfall/service.ts",
+        "line": 158,
+        "name": "voidTickById",
+        "kind": "function",
+        "lines": 21,
+        "target": "modules/footfall/application/voidTickById.ts"
+      },
+      {
+        "file": "modules/footfall/service.ts",
+        "line": 180,
+        "name": "summariseFootfall",
+        "kind": "function",
+        "lines": 43,
+        "target": "modules/footfall/application/summariseFootfall.ts"
+      },
+      {
+        "file": "modules/footfall/service.ts",
+        "line": 229,
+        "name": "getLiveFootfall",
+        "kind": "function",
+        "lines": 29,
+        "target": "modules/footfall/application/getLiveFootfall.ts"
+      }
+    ]
+  },
+  {
+    "unit": "modules/gift",
+    "outbound": [
+      "lib/audit",
+      "lib/captureActor",
+      "lib/errors",
+      "lib/prisma",
+      "lib/requestContext",
+      "lib/shortCode",
+      "middleware/auth",
+      "middleware/idempotency",
+      "middleware/rateLimit",
+      "middleware/rbac",
+      "middleware/validate",
+      "modules/fallback",
+      "modules/notification",
+      "modules/station"
+    ],
+    "inbound": ["modules/admin", "modules/dashboard", "modules/report", "routes"],
+    "violations": {
+      "server-express-only-in-http": 1,
+      "server-module-internals-private": 3,
+      "server-prisma-only-in-data": 2
+    },
+    "exports": [
+      {
+        "file": "modules/gift/repo.ts",
+        "line": 20,
+        "name": "toGiftTypeRecord",
+        "kind": "function",
+        "lines": 16,
+        "target": "modules/gifts/data/mappers.ts"
+      },
+      {
+        "file": "modules/gift/repo.ts",
+        "line": 37,
+        "name": "listGiftTypes",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/gifts/data/repo.ts"
+      },
+      {
+        "file": "modules/gift/repo.ts",
+        "line": 44,
+        "name": "findGiftType",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/gifts/data/repo.ts"
+      },
+      {
+        "file": "modules/gift/repo.ts",
+        "line": 52,
+        "name": "giftTotals",
+        "kind": "function",
+        "lines": 25,
+        "target": "modules/gifts/data/repo.ts"
+      },
+      {
+        "file": "modules/gift/repo.ts",
+        "line": 78,
+        "name": "totalsForGiftType",
+        "kind": "function",
+        "lines": 11,
+        "target": "modules/gifts/data/repo.ts"
+      },
+      {
+        "file": "modules/gift/repo.ts",
+        "line": 90,
+        "name": "createRedemption",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/gifts/data/repo.ts"
+      },
+      {
+        "file": "modules/gift/repo.ts",
+        "line": 97,
+        "name": "createAdjustment",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/gifts/data/repo.ts"
+      },
+      {
+        "file": "modules/gift/repo.ts",
+        "line": 105,
+        "name": "existingRedemptionForCard",
+        "kind": "function",
+        "lines": 9,
+        "target": "modules/gifts/data/repo.ts"
+      },
+      {
+        "file": "modules/gift/repo.ts",
+        "line": 121,
+        "name": "summariseRedemptions",
+        "kind": "function",
+        "lines": 22,
+        "target": "modules/gifts/data/repo.ts"
+      },
+      {
+        "file": "modules/gift/router.ts",
+        "line": 19,
+        "name": "giftRouter",
+        "kind": "const",
+        "lines": 1,
+        "target": "modules/gifts/http/routes.ts + handlers.ts"
+      },
+      {
+        "file": "modules/gift/service.ts",
+        "line": 40,
+        "name": "listGifts",
+        "kind": "function",
+        "lines": 7,
+        "target": "modules/gifts/application/listGifts.ts"
+      },
+      {
+        "file": "modules/gift/service.ts",
+        "line": 48,
+        "name": "redeemGift",
+        "kind": "function",
+        "lines": 119,
+        "target": "modules/gifts/application/redeemGift.ts"
+      },
+      {
+        "file": "modules/gift/service.ts",
+        "line": 168,
+        "name": "adjustStock",
+        "kind": "function",
+        "lines": 31,
+        "target": "modules/gifts/application/adjustStock.ts"
+      },
+      {
+        "file": "modules/gift/service.ts",
+        "line": 200,
+        "name": "summariseGifts",
+        "kind": "function",
+        "lines": 27,
+        "target": "modules/gifts/application/summariseGifts.ts"
+      }
+    ]
+  },
+  {
+    "unit": "modules/health",
+    "outbound": ["lib/logger", "lib/prisma"],
+    "inbound": ["app"],
+    "violations": {
+      "server-express-only-in-http": 1,
+      "server-prisma-only-in-data": 1
+    },
+    "exports": [
+      {
+        "file": "modules/health/router.ts",
+        "line": 12,
+        "name": "healthRouter",
+        "kind": "const",
+        "lines": 1,
+        "target": "platform/http/health.ts"
+      }
+    ]
+  },
+  {
+    "unit": "modules/identity",
+    "outbound": ["config/env", "lib/errors", "lib/logger"],
+    "inbound": ["modules/admin", "modules/roster"],
+    "violations": {},
+    "exports": [
+      {
+        "file": "modules/identity/provider.ts",
+        "line": 156,
+        "name": "identityProvider",
+        "kind": "const",
+        "lines": 4,
+        "target": "platform/aws/cognito.ts behind modules/identity/index.ts"
+      }
+    ]
+  },
+  {
+    "unit": "modules/incident",
+    "outbound": [
+      "lib/audit",
+      "lib/errors",
+      "lib/logger",
+      "lib/prisma",
+      "lib/requestContext",
+      "middleware/auth",
+      "middleware/idempotency",
+      "middleware/rateLimit",
+      "middleware/rbac",
+      "middleware/validate",
+      "modules/notification"
+    ],
+    "inbound": ["routes"],
+    "violations": {
+      "server-express-only-in-http": 1,
+      "server-module-internals-private": 1,
+      "server-prisma-only-in-data": 2
+    },
+    "exports": [
+      {
+        "file": "modules/incident/repo.ts",
+        "line": 20,
+        "name": "toIncidentRecord",
+        "kind": "function",
+        "lines": 32,
+        "target": "modules/incidents/data/mappers.ts"
+      },
+      {
+        "file": "modules/incident/repo.ts",
+        "line": 53,
+        "name": "createIncident",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/incidents/data/repo.ts"
+      },
+      {
+        "file": "modules/incident/repo.ts",
+        "line": 60,
+        "name": "findIncidentById",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/incidents/data/repo.ts"
+      },
+      {
+        "file": "modules/incident/repo.ts",
+        "line": 74,
+        "name": "listIncidents",
+        "kind": "function",
+        "lines": 21,
+        "target": "modules/incidents/data/repo.ts"
+      },
+      {
+        "file": "modules/incident/repo.ts",
+        "line": 96,
+        "name": "addFollowUp",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/incidents/data/repo.ts"
+      },
+      {
+        "file": "modules/incident/repo.ts",
+        "line": 103,
+        "name": "updateIncidentStatus",
+        "kind": "function",
+        "lines": 7,
+        "target": "modules/incidents/data/repo.ts"
+      },
+      {
+        "file": "modules/incident/router.ts",
+        "line": 29,
+        "name": "incidentRouter",
+        "kind": "const",
+        "lines": 1,
+        "target": "modules/incidents/http/routes.ts + handlers.ts"
+      },
+      {
+        "file": "modules/incident/service.ts",
+        "line": 32,
+        "name": "reportIncident",
+        "kind": "function",
+        "lines": 51,
+        "target": "modules/incidents/application/reportIncident.ts"
+      },
+      {
+        "file": "modules/incident/service.ts",
+        "line": 84,
+        "name": "getIncident",
+        "kind": "function",
+        "lines": 5,
+        "target": "modules/incidents/application/getIncident.ts (no route yet; F02-015 gives it one)"
+      },
+      {
+        "file": "modules/incident/service.ts",
+        "line": 90,
+        "name": "listIncidentRecords",
+        "kind": "function",
+        "lines": 13,
+        "target": "modules/incidents/application/listIncidentRecords.ts"
+      },
+      {
+        "file": "modules/incident/service.ts",
+        "line": 104,
+        "name": "appendFollowUp",
+        "kind": "function",
+        "lines": 23,
+        "target": "modules/incidents/application/appendFollowUp.ts"
+      },
+      {
+        "file": "modules/incident/service.ts",
+        "line": 128,
+        "name": "changeIncidentStatus",
+        "kind": "function",
+        "lines": 28,
+        "target": "modules/incidents/application/changeIncidentStatus.ts"
+      }
+    ]
+  },
+  {
+    "unit": "modules/lostFound",
+    "outbound": [
+      "lib/audit",
+      "lib/errors",
+      "lib/prisma",
+      "lib/requestContext",
+      "middleware/auth",
+      "middleware/rateLimit",
+      "middleware/rbac",
+      "middleware/validate"
+    ],
+    "inbound": ["routes"],
+    "violations": {
+      "server-express-only-in-http": 1,
+      "server-prisma-only-in-data": 1
+    },
+    "exports": [
+      {
+        "file": "modules/lostFound/router.ts",
+        "line": 22,
+        "name": "lostFoundRouter",
+        "kind": "const",
+        "lines": 1,
+        "target": "modules/lostFound/http/routes.ts + handlers.ts"
+      },
+      {
+        "file": "modules/lostFound/service.ts",
+        "line": 66,
+        "name": "logItem",
+        "kind": "function",
+        "lines": 32,
+        "target": "modules/lostFound/application/logItem.ts"
+      },
+      {
+        "file": "modules/lostFound/service.ts",
+        "line": 99,
+        "name": "listItems",
+        "kind": "function",
+        "lines": 16,
+        "target": "modules/lostFound/application/listItems.ts"
+      },
+      {
+        "file": "modules/lostFound/service.ts",
+        "line": 116,
+        "name": "claimItem",
+        "kind": "function",
+        "lines": 42,
+        "target": "modules/lostFound/application/claimItem.ts"
+      },
+      {
+        "file": "modules/lostFound/service.ts",
+        "line": 164,
+        "name": "markUnclaimedAtClose",
+        "kind": "function",
+        "lines": 20,
+        "target": "modules/lostFound/application/markUnclaimedAtClose.ts"
+      }
+    ]
+  },
+  {
+    "unit": "modules/lostPerson",
+    "outbound": [
+      "lib/audit",
+      "lib/errors",
+      "lib/logger",
+      "lib/prisma",
+      "lib/requestContext",
+      "lib/settings",
+      "lib/time",
+      "middleware/auth",
+      "middleware/idempotency",
+      "middleware/rateLimit",
+      "middleware/rbac",
+      "middleware/validate",
+      "modules/notification",
+      "modules/station"
+    ],
+    "inbound": ["jobs/scheduler", "routes"],
+    "violations": {
+      "server-express-only-in-http": 1,
+      "server-module-internals-private": 2,
+      "server-prisma-only-in-data": 2
+    },
+    "exports": [
+      {
+        "file": "modules/lostPerson/repo.ts",
+        "line": 14,
+        "name": "toAlertRecord",
+        "kind": "function",
+        "lines": 25,
+        "target": "modules/lostPersons/data/mappers.ts"
+      },
+      {
+        "file": "modules/lostPerson/repo.ts",
+        "line": 40,
+        "name": "createAlert",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/lostPersons/data/repo.ts"
+      },
+      {
+        "file": "modules/lostPerson/repo.ts",
+        "line": 47,
+        "name": "findAlertById",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/lostPersons/data/repo.ts"
+      },
+      {
+        "file": "modules/lostPerson/repo.ts",
+        "line": 51,
+        "name": "listActiveAlerts",
+        "kind": "function",
+        "lines": 7,
+        "target": "modules/lostPersons/data/repo.ts"
+      },
+      {
+        "file": "modules/lostPerson/repo.ts",
+        "line": 60,
+        "name": "acknowledgedAlertIds",
+        "kind": "function",
+        "lines": 13,
+        "target": "modules/lostPersons/data/repo.ts"
+      },
+      {
+        "file": "modules/lostPerson/repo.ts",
+        "line": 79,
+        "name": "acknowledgeAlert",
+        "kind": "function",
+        "lines": 7,
+        "target": "modules/lostPersons/data/repo.ts"
+      },
+      {
+        "file": "modules/lostPerson/repo.ts",
+        "line": 87,
+        "name": "resolveAlert",
+        "kind": "function",
+        "lines": 11,
+        "target": "modules/lostPersons/data/repo.ts"
+      },
+      {
+        "file": "modules/lostPerson/repo.ts",
+        "line": 100,
+        "name": "findPurgeCandidates",
+        "kind": "function",
+        "lines": 10,
+        "target": "modules/lostPersons/data/repo.ts"
+      },
+      {
+        "file": "modules/lostPerson/repo.ts",
+        "line": 111,
+        "name": "purgeAlert",
+        "kind": "function",
+        "lines": 33,
+        "target": "modules/lostPersons/data/repo.ts"
+      },
+      {
+        "file": "modules/lostPerson/router.ts",
+        "line": 13,
+        "name": "lostPersonRouter",
+        "kind": "const",
+        "lines": 1,
+        "target": "modules/lostPersons/http/routes.ts + handlers.ts"
+      },
+      {
+        "file": "modules/lostPerson/service.ts",
+        "line": 53,
+        "name": "PURGE_AFTER_HOURS",
+        "kind": "const",
+        "lines": 1,
+        "target": "read platform/settings (constant retired)"
+      },
+      {
+        "file": "modules/lostPerson/service.ts",
+        "line": 55,
+        "name": "raiseAlert",
+        "kind": "function",
+        "lines": 34,
+        "target": "modules/lostPersons/application/raiseAlert.ts"
+      },
+      {
+        "file": "modules/lostPerson/service.ts",
+        "line": 94,
+        "name": "getActiveAlerts",
+        "kind": "function",
+        "lines": 21,
+        "target": "modules/lostPersons/application/getActiveAlerts.ts"
+      },
+      {
+        "file": "modules/lostPerson/service.ts",
+        "line": 120,
+        "name": "acknowledge",
+        "kind": "function",
+        "lines": 14,
+        "target": "modules/lostPersons/application/acknowledge.ts"
+      },
+      {
+        "file": "modules/lostPerson/service.ts",
+        "line": 136,
+        "name": "resolve",
+        "kind": "function",
+        "lines": 41,
+        "target": "modules/lostPersons/application/resolve.ts"
+      },
+      {
+        "file": "modules/lostPerson/service.ts",
+        "line": 185,
+        "name": "purgeResolvedAlerts",
+        "kind": "function",
+        "lines": 40,
+        "target": "modules/lostPersons/jobs.ts"
+      }
+    ]
+  },
+  {
+    "unit": "modules/me",
+    "outbound": [
+      "lib/audit",
+      "lib/errors",
+      "lib/prisma",
+      "lib/requestContext",
+      "lib/time",
+      "middleware/auth",
+      "middleware/rbac",
+      "middleware/validate",
+      "modules/station"
+    ],
+    "inbound": ["modules/roster", "routes"],
+    "violations": {
+      "server-express-only-in-http": 1,
+      "server-module-internals-private": 1,
+      "server-prisma-only-in-data": 2
+    },
+    "exports": [
+      {
+        "file": "modules/me/repo.ts",
+        "line": 15,
+        "name": "findVolunteerById",
+        "kind": "function",
+        "lines": 14,
+        "target": "modules/people/data/repo.ts"
+      },
+      {
+        "file": "modules/me/repo.ts",
+        "line": 31,
+        "name": "listAssignmentsForVolunteer",
+        "kind": "function",
+        "lines": 9,
+        "target": "modules/assignments/data/repo.ts"
+      },
+      {
+        "file": "modules/me/repo.ts",
+        "line": 41,
+        "name": "findAssignmentById",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/assignments/data/repo.ts"
+      },
+      {
+        "file": "modules/me/repo.ts",
+        "line": 45,
+        "name": "setAssignmentCheckIn",
+        "kind": "function",
+        "lines": 7,
+        "target": "delete (no production caller)"
+      },
+      {
+        "file": "modules/me/repo.ts",
+        "line": 53,
+        "name": "setAssignmentCheckOut",
+        "kind": "function",
+        "lines": 7,
+        "target": "delete (no production caller)"
+      },
+      {
+        "file": "modules/me/repo.ts",
+        "line": 66,
+        "name": "buildEscalationChain",
+        "kind": "function",
+        "lines": 44,
+        "target": "modules/people/application/escalationChain.ts (walk) + data/repo.ts (one query)"
+      },
+      {
+        "file": "modules/me/router.ts",
+        "line": 10,
+        "name": "meRouter",
+        "kind": "const",
+        "lines": 1,
+        "target": "modules/people/http/routes.ts + handlers.ts"
+      },
+      {
+        "file": "modules/me/service.ts",
+        "line": 24,
+        "name": "getMe",
+        "kind": "function",
+        "lines": 37,
+        "target": "modules/people/application/getMe.ts"
+      },
+      {
+        "file": "modules/me/service.ts",
+        "line": 62,
+        "name": "toMyAssignment",
+        "kind": "function",
+        "lines": 13,
+        "target": "modules/assignments/data/mappers.ts"
+      },
+      {
+        "file": "modules/me/service.ts",
+        "line": 80,
+        "name": "checkIn",
+        "kind": "function",
+        "lines": 52,
+        "target": "modules/assignments/application/checkIn.ts"
+      },
+      {
+        "file": "modules/me/service.ts",
+        "line": 133,
+        "name": "checkOut",
+        "kind": "function",
+        "lines": 35,
+        "target": "modules/assignments/application/checkOut.ts"
+      },
+      {
+        "file": "modules/me/service.ts",
+        "line": 188,
+        "name": "setAssignmentCheckIn",
+        "kind": "re-export",
+        "lines": 1,
+        "target": "delete (no production caller) (re-export)"
+      },
+      {
+        "file": "modules/me/service.ts",
+        "line": 188,
+        "name": "setAssignmentCheckOut",
+        "kind": "re-export",
+        "lines": 1,
+        "target": "delete (no production caller) (re-export)"
+      }
+    ]
+  },
+  {
+    "unit": "modules/media",
+    "outbound": [
+      "config/env",
+      "lib/errors",
+      "lib/logger",
+      "middleware/auth",
+      "middleware/rateLimit",
+      "middleware/rbac",
+      "middleware/validate"
+    ],
+    "inbound": ["routes"],
+    "violations": {
+      "server-express-only-in-http": 1
+    },
+    "exports": [
+      {
+        "file": "modules/media/router.ts",
+        "line": 17,
+        "name": "mediaRouter",
+        "kind": "const",
+        "lines": 1,
+        "target": "modules/media/http/routes.ts + handlers.ts"
+      },
+      {
+        "file": "modules/media/service.ts",
+        "line": 47,
+        "name": "mediaEnabled",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/media/application/mediaEnabled.ts"
+      },
+      {
+        "file": "modules/media/service.ts",
+        "line": 92,
+        "name": "createUpload",
+        "kind": "function",
+        "lines": 34,
+        "target": "modules/media/application/createUpload.ts"
+      },
+      {
+        "file": "modules/media/service.ts",
+        "line": 134,
+        "name": "readUrl",
+        "kind": "function",
+        "lines": 14,
+        "target": "modules/media/application/readUrl.ts"
+      }
+    ]
+  },
+  {
+    "unit": "modules/missionCard",
+    "outbound": [
+      "lib/audit",
+      "lib/captureActor",
+      "lib/errors",
+      "lib/prisma",
+      "lib/requestContext",
+      "lib/shortCode",
+      "middleware/auth",
+      "middleware/idempotency",
+      "middleware/rateLimit",
+      "middleware/rbac",
+      "middleware/validate",
+      "modules/fallback",
+      "modules/station"
+    ],
+    "inbound": ["modules/dashboard", "routes"],
+    "violations": {
+      "server-express-only-in-http": 1,
+      "server-module-internals-private": 3,
+      "server-prisma-only-in-data": 2
+    },
+    "exports": [
+      {
+        "file": "modules/missionCard/repo.ts",
+        "line": 17,
+        "name": "toMissionCardRecord",
+        "kind": "function",
+        "lines": 28,
+        "target": "modules/missionCards/data/mappers.ts"
+      },
+      {
+        "file": "modules/missionCard/repo.ts",
+        "line": 46,
+        "name": "findCardByShortCode",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/missionCards/data/repo.ts"
+      },
+      {
+        "file": "modules/missionCard/repo.ts",
+        "line": 53,
+        "name": "findCardById",
+        "kind": "function",
+        "lines": 6,
+        "target": "delete (no production caller)"
+      },
+      {
+        "file": "modules/missionCard/repo.ts",
+        "line": 60,
+        "name": "createCardBatch",
+        "kind": "function",
+        "lines": 9,
+        "target": "modules/missionCards/data/repo.ts"
+      },
+      {
+        "file": "modules/missionCard/repo.ts",
+        "line": 70,
+        "name": "updateCard",
+        "kind": "function",
+        "lines": 7,
+        "target": "modules/missionCards/data/repo.ts"
+      },
+      {
+        "file": "modules/missionCard/repo.ts",
+        "line": 78,
+        "name": "createStamp",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/missionCards/data/repo.ts"
+      },
+      {
+        "file": "modules/missionCard/repo.ts",
+        "line": 85,
+        "name": "countStampsForCard",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/missionCards/data/repo.ts"
+      },
+      {
+        "file": "modules/missionCard/repo.ts",
+        "line": 111,
+        "name": "countIssued",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/missionCards/data/repo.ts"
+      },
+      {
+        "file": "modules/missionCard/repo.ts",
+        "line": 115,
+        "name": "countByStatus",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/missionCards/data/repo.ts"
+      },
+      {
+        "file": "modules/missionCard/repo.ts",
+        "line": 122,
+        "name": "countVoided",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/missionCards/data/repo.ts"
+      },
+      {
+        "file": "modules/missionCard/repo.ts",
+        "line": 134,
+        "name": "countCardsPerStation",
+        "kind": "function",
+        "lines": 12,
+        "target": "modules/missionCards/data/repo.ts"
+      },
+      {
+        "file": "modules/missionCard/repo.ts",
+        "line": 147,
+        "name": "countRedeemedCards",
+        "kind": "function",
+        "lines": 13,
+        "target": "modules/missionCards/data/repo.ts"
+      },
+      {
+        "file": "modules/missionCard/router.ts",
+        "line": 38,
+        "name": "missionCardRouter",
+        "kind": "const",
+        "lines": 1,
+        "target": "modules/missionCards/http/routes.ts + handlers.ts"
+      },
+      {
+        "file": "modules/missionCard/service.ts",
+        "line": 51,
+        "name": "getCard",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/missionCards/application/getCard.ts"
+      },
+      {
+        "file": "modules/missionCard/service.ts",
+        "line": 65,
+        "name": "issueCard",
+        "kind": "function",
+        "lines": 51,
+        "target": "modules/missionCards/application/issueCard.ts"
+      },
+      {
+        "file": "modules/missionCard/service.ts",
+        "line": 125,
+        "name": "stampCard",
+        "kind": "function",
+        "lines": 90,
+        "target": "modules/missionCards/application/stampCard.ts"
+      },
+      {
+        "file": "modules/missionCard/service.ts",
+        "line": 216,
+        "name": "voidCard",
+        "kind": "function",
+        "lines": 29,
+        "target": "modules/missionCards/application/voidCard.ts"
+      },
+      {
+        "file": "modules/missionCard/service.ts",
+        "line": 254,
+        "name": "reissueCard",
+        "kind": "function",
+        "lines": 81,
+        "target": "modules/missionCards/application/reissueCard.ts"
+      },
+      {
+        "file": "modules/missionCard/service.ts",
+        "line": 344,
+        "name": "generateBatch",
+        "kind": "function",
+        "lines": 33,
+        "target": "modules/missionCards/application/generateBatch.ts"
+      },
+      {
+        "file": "modules/missionCard/service.ts",
+        "line": 383,
+        "name": "getFunnel",
+        "kind": "function",
+        "lines": 45,
+        "target": "modules/missionCards/application/getFunnel.ts"
+      },
+      {
+        "file": "modules/missionCard/service.ts",
+        "line": 430,
+        "name": "toRecord",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/missionCards/data/mappers.ts"
+      }
+    ]
+  },
+  {
+    "unit": "modules/notification",
+    "outbound": [
+      "config/env",
+      "lib/logger",
+      "lib/prisma",
+      "lib/time",
+      "middleware/auth",
+      "middleware/rateLimit",
+      "middleware/rbac",
+      "middleware/validate"
+    ],
+    "inbound": [
+      "modules/announcement",
+      "modules/gift",
+      "modules/incident",
+      "modules/lostPerson",
+      "routes"
+    ],
+    "violations": {
+      "server-express-only-in-http": 1,
+      "server-prisma-only-in-data": 1
+    },
+    "exports": [
+      {
+        "file": "modules/notification/router.ts",
+        "line": 17,
+        "name": "notificationRouter",
+        "kind": "const",
+        "lines": 1,
+        "target": "modules/notifications/http/routes.ts + handlers.ts"
+      },
+      {
+        "file": "modules/notification/service.ts",
+        "line": 57,
+        "name": "pushEnabled",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/notifications/application/pushEnabled.ts"
+      },
+      {
+        "file": "modules/notification/service.ts",
+        "line": 61,
+        "name": "pushPublicKey",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/notifications/application/pushPublicKey.ts"
+      },
+      {
+        "file": "modules/notification/service.ts",
+        "line": 146,
+        "name": "dispatch",
+        "kind": "function",
+        "lines": 96,
+        "target": "modules/notifications/application/dispatch.ts"
+      },
+      {
+        "file": "modules/notification/service.ts",
+        "line": 251,
+        "name": "subscribeDevice",
+        "kind": "function",
+        "lines": 29,
+        "target": "modules/notifications/application/subscribeDevice.ts"
+      },
+      {
+        "file": "modules/notification/service.ts",
+        "line": 282,
+        "name": "unsubscribeDevice",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/notifications/application/unsubscribeDevice.ts"
+      }
+    ]
+  },
+  {
+    "unit": "modules/registration",
+    "outbound": [
+      "lib/audit",
+      "lib/captureActor",
+      "lib/errors",
+      "lib/prisma",
+      "lib/requestContext",
+      "lib/time",
+      "middleware/auth",
+      "middleware/idempotency",
+      "middleware/rateLimit",
+      "middleware/rbac",
+      "middleware/validate",
+      "modules/fallback",
+      "modules/station"
+    ],
+    "inbound": ["routes"],
+    "violations": {
+      "server-express-only-in-http": 1,
+      "server-module-internals-private": 2,
+      "server-prisma-only-in-data": 2
+    },
+    "exports": [
+      {
+        "file": "modules/registration/repo.ts",
+        "line": 15,
+        "name": "toRegistrationRecord",
+        "kind": "function",
+        "lines": 13,
+        "target": "modules/registration/data/mappers.ts"
+      },
+      {
+        "file": "modules/registration/repo.ts",
+        "line": 29,
+        "name": "createRegistration",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/registration/data/repo.ts"
+      },
+      {
+        "file": "modules/registration/repo.ts",
+        "line": 36,
+        "name": "createRegistrationsForGroup",
+        "kind": "function",
+        "lines": 8,
+        "target": "modules/registration/data/repo.ts"
+      },
+      {
+        "file": "modules/registration/repo.ts",
+        "line": 45,
+        "name": "findRegistrationById",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/registration/data/repo.ts"
+      },
+      {
+        "file": "modules/registration/repo.ts",
+        "line": 49,
+        "name": "voidRegistration",
+        "kind": "function",
+        "lines": 10,
+        "target": "modules/registration/data/repo.ts"
+      },
+      {
+        "file": "modules/registration/repo.ts",
+        "line": 61,
+        "name": "countForStationSince",
+        "kind": "function",
+        "lines": 5,
+        "target": "modules/registration/data/repo.ts"
+      },
+      {
+        "file": "modules/registration/repo.ts",
+        "line": 68,
+        "name": "countForRecorderSince",
+        "kind": "function",
+        "lines": 9,
+        "target": "modules/registration/data/repo.ts"
+      },
+      {
+        "file": "modules/registration/repo.ts",
+        "line": 99,
+        "name": "groupByCategory",
+        "kind": "function",
+        "lines": 11,
+        "target": "modules/registration/data/repo.ts"
+      },
+      {
+        "file": "modules/registration/repo.ts",
+        "line": 117,
+        "name": "groupByTimeBucket",
+        "kind": "function",
+        "lines": 31,
+        "target": "modules/registration/data/repo.ts"
+      },
+      {
+        "file": "modules/registration/repo.ts",
+        "line": 149,
+        "name": "countMatching",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/registration/data/repo.ts"
+      },
+      {
+        "file": "modules/registration/router.ts",
+        "line": 30,
+        "name": "registrationRouter",
+        "kind": "const",
+        "lines": 1,
+        "target": "modules/registration/http/routes.ts + handlers.ts"
+      },
+      {
+        "file": "modules/registration/service.ts",
+        "line": 44,
+        "name": "recordRegistration",
+        "kind": "function",
+        "lines": 47,
+        "target": "modules/registration/application/recordRegistration.ts"
+      },
+      {
+        "file": "modules/registration/service.ts",
+        "line": 100,
+        "name": "recordGroupRegistration",
+        "kind": "function",
+        "lines": 79,
+        "target": "modules/registration/application/recordGroupRegistration.ts"
+      },
+      {
+        "file": "modules/registration/service.ts",
+        "line": 185,
+        "name": "voidRegistrationById",
+        "kind": "function",
+        "lines": 25,
+        "target": "modules/registration/application/voidRegistrationById.ts"
+      },
+      {
+        "file": "modules/registration/service.ts",
+        "line": 211,
+        "name": "summariseRegistrations",
+        "kind": "function",
+        "lines": 32,
+        "target": "modules/registration/application/summariseRegistrations.ts"
+      }
+    ]
+  },
+  {
+    "unit": "modules/report",
+    "outbound": [
+      "lib/prisma",
+      "lib/time",
+      "middleware/auth",
+      "middleware/rateLimit",
+      "middleware/rbac",
+      "middleware/validate",
+      "modules/fallback",
+      "modules/gift",
+      "modules/station"
+    ],
+    "inbound": ["routes"],
+    "violations": {
+      "server-express-only-in-http": 1,
+      "server-module-internals-private": 3,
+      "server-prisma-only-in-data": 2
+    },
+    "exports": [
+      {
+        "file": "modules/report/export.ts",
+        "line": 45,
+        "name": "toXlsx",
+        "kind": "function",
+        "lines": 17,
+        "target": "modules/reports/application/export/xlsx/ (one file per sheet)"
+      },
+      {
+        "file": "modules/report/export.ts",
+        "line": 352,
+        "name": "toCsv",
+        "kind": "function",
+        "lines": 80,
+        "target": "modules/reports/application/export/csv.ts"
+      },
+      {
+        "file": "modules/report/repo.ts",
+        "line": 21,
+        "name": "registrationTotals",
+        "kind": "function",
+        "lines": 23,
+        "target": "modules/reports/data/repo.ts"
+      },
+      {
+        "file": "modules/report/repo.ts",
+        "line": 52,
+        "name": "registrationsByDay",
+        "kind": "function",
+        "lines": 14,
+        "target": "modules/reports/data/repo.ts"
+      },
+      {
+        "file": "modules/report/repo.ts",
+        "line": 67,
+        "name": "registrationsByHour",
+        "kind": "function",
+        "lines": 18,
+        "target": "modules/reports/data/repo.ts"
+      },
+      {
+        "file": "modules/report/repo.ts",
+        "line": 86,
+        "name": "footfallTotals",
+        "kind": "function",
+        "lines": 7,
+        "target": "modules/reports/data/repo.ts"
+      },
+      {
+        "file": "modules/report/repo.ts",
+        "line": 94,
+        "name": "footfallBySource",
+        "kind": "function",
+        "lines": 9,
+        "target": "modules/reports/data/repo.ts"
+      },
+      {
+        "file": "modules/report/repo.ts",
+        "line": 105,
+        "name": "footfallCurve",
+        "kind": "function",
+        "lines": 19,
+        "target": "modules/reports/data/repo.ts"
+      },
+      {
+        "file": "modules/report/repo.ts",
+        "line": 125,
+        "name": "cardTotals",
+        "kind": "function",
+        "lines": 15,
+        "target": "modules/reports/data/repo.ts"
+      },
+      {
+        "file": "modules/report/repo.ts",
+        "line": 149,
+        "name": "cardsByDay",
+        "kind": "function",
+        "lines": 21,
+        "target": "modules/reports/data/repo.ts"
+      },
+      {
+        "file": "modules/report/repo.ts",
+        "line": 171,
+        "name": "cardsPerStation",
+        "kind": "function",
+        "lines": 9,
+        "target": "modules/reports/data/repo.ts"
+      },
+      {
+        "file": "modules/report/repo.ts",
+        "line": 181,
+        "name": "giftRedemptionsByDay",
+        "kind": "function",
+        "lines": 13,
+        "target": "modules/reports/data/repo.ts"
+      },
+      {
+        "file": "modules/report/repo.ts",
+        "line": 195,
+        "name": "giftRedemptionsByStation",
+        "kind": "function",
+        "lines": 9,
+        "target": "modules/reports/data/repo.ts"
+      },
+      {
+        "file": "modules/report/repo.ts",
+        "line": 205,
+        "name": "incidentsInRange",
+        "kind": "function",
+        "lines": 10,
+        "target": "modules/reports/data/repo.ts"
+      },
+      {
+        "file": "modules/report/repo.ts",
+        "line": 223,
+        "name": "lostPersonSummaries",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/reports/data/repo.ts"
+      },
+      {
+        "file": "modules/report/repo.ts",
+        "line": 237,
+        "name": "unpurgedLostPersonCount",
+        "kind": "function",
+        "lines": 16,
+        "target": "modules/reports/data/repo.ts"
+      },
+      {
+        "file": "modules/report/repo.ts",
+        "line": 254,
+        "name": "lostFoundCounts",
+        "kind": "function",
+        "lines": 15,
+        "target": "modules/reports/data/repo.ts"
+      },
+      {
+        "file": "modules/report/repo.ts",
+        "line": 270,
+        "name": "volunteerAttendance",
+        "kind": "function",
+        "lines": 12,
+        "target": "modules/reports/data/repo.ts"
+      },
+      {
+        "file": "modules/report/repo.ts",
+        "line": 283,
+        "name": "importBatches",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/reports/data/repo.ts"
+      },
+      {
+        "file": "modules/report/repo.ts",
+        "line": 291,
+        "name": "recordsBySource",
+        "kind": "function",
+        "lines": 47,
+        "target": "modules/reports/data/repo.ts"
+      },
+      {
+        "file": "modules/report/repo.ts",
+        "line": 339,
+        "name": "voidedCounts",
+        "kind": "function",
+        "lines": 19,
+        "target": "modules/reports/data/repo.ts"
+      },
+      {
+        "file": "modules/report/router.ts",
+        "line": 11,
+        "name": "reportRouter",
+        "kind": "const",
+        "lines": 1,
+        "target": "modules/reports/http/routes.ts + handlers.ts"
+      },
+      {
+        "file": "modules/report/service.ts",
+        "line": 68,
+        "name": "generateReport",
+        "kind": "function",
+        "lines": 128,
+        "target": "modules/reports/application/generateReport.ts"
+      }
+    ]
+  },
+  {
+    "unit": "modules/roster",
+    "outbound": [
+      "lib/audit",
+      "lib/errors",
+      "lib/prisma",
+      "lib/requestContext",
+      "lib/time",
+      "middleware/auth",
+      "middleware/rateLimit",
+      "middleware/rbac",
+      "middleware/validate",
+      "modules/identity",
+      "modules/me"
+    ],
+    "inbound": ["modules/admin", "routes"],
+    "violations": {
+      "server-express-only-in-http": 1,
+      "server-module-internals-private": 2,
+      "server-prisma-only-in-data": 2
+    },
+    "exports": [
+      {
+        "file": "modules/roster/repo.ts",
+        "line": 14,
+        "name": "toVolunteerRecord",
+        "kind": "function",
+        "lines": 13,
+        "target": "modules/people/data/mappers.ts"
+      },
+      {
+        "file": "modules/roster/repo.ts",
+        "line": 28,
+        "name": "findVolunteerByEmail",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/people/data/repo.ts"
+      },
+      {
+        "file": "modules/roster/repo.ts",
+        "line": 35,
+        "name": "upsertVolunteer",
+        "kind": "function",
+        "lines": 43,
+        "target": "modules/people/data/repo.ts"
+      },
+      {
+        "file": "modules/roster/repo.ts",
+        "line": 89,
+        "name": "toAssignmentRecord",
+        "kind": "function",
+        "lines": 16,
+        "target": "modules/assignments/data/mappers.ts"
+      },
+      {
+        "file": "modules/roster/repo.ts",
+        "line": 106,
+        "name": "listAssignmentsForStation",
+        "kind": "function",
+        "lines": 10,
+        "target": "modules/assignments/data/repo.ts"
+      },
+      {
+        "file": "modules/roster/repo.ts",
+        "line": 122,
+        "name": "upsertAssignment",
+        "kind": "function",
+        "lines": 32,
+        "target": "modules/assignments/data/repo.ts"
+      },
+      {
+        "file": "modules/roster/repo.ts",
+        "line": 155,
+        "name": "findEventDayByDate",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/assignments/data/repo.ts"
+      },
+      {
+        "file": "modules/roster/repo.ts",
+        "line": 162,
+        "name": "findStationByCodeTx",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/assignments/data/repo.ts"
+      },
+      {
+        "file": "modules/roster/router.ts",
+        "line": 18,
+        "name": "rosterRouter",
+        "kind": "const",
+        "lines": 1,
+        "target": "split: people/http (POST /volunteers), assignments/http (import, station roster, GET /me alias)"
+      },
+      {
+        "file": "modules/roster/service.ts",
+        "line": 34,
+        "name": "provisionVolunteer",
+        "kind": "function",
+        "lines": 56,
+        "target": "modules/people/application/provisionPerson.ts"
+      },
+      {
+        "file": "modules/roster/service.ts",
+        "line": 101,
+        "name": "importRoster",
+        "kind": "function",
+        "lines": 159,
+        "target": "modules/assignments/application/importRoster/ (planImport.ts + applyImport.ts)"
+      },
+      {
+        "file": "modules/roster/service.ts",
+        "line": 269,
+        "name": "getStationRoster",
+        "kind": "function",
+        "lines": 10,
+        "target": "modules/assignments/application/getStationRoster.ts"
+      }
+    ]
+  },
+  {
+    "unit": "modules/shift",
+    "outbound": [
+      "lib/audit",
+      "lib/errors",
+      "lib/prisma",
+      "lib/requestContext",
+      "lib/settings",
+      "lib/time",
+      "middleware/auth",
+      "middleware/rateLimit",
+      "middleware/rbac",
+      "middleware/validate"
+    ],
+    "inbound": ["modules/dashboard", "routes"],
+    "violations": {
+      "server-express-only-in-http": 1,
+      "server-prisma-only-in-data": 2
+    },
+    "exports": [
+      {
+        "file": "modules/shift/repo.ts",
+        "line": 18,
+        "name": "toSwapRecord",
+        "kind": "function",
+        "lines": 18,
+        "target": "modules/swaps/data/mappers.ts"
+      },
+      {
+        "file": "modules/shift/repo.ts",
+        "line": 37,
+        "name": "createSwap",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/swaps/data/repo.ts"
+      },
+      {
+        "file": "modules/shift/repo.ts",
+        "line": 44,
+        "name": "findSwapById",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/swaps/data/repo.ts"
+      },
+      {
+        "file": "modules/shift/repo.ts",
+        "line": 51,
+        "name": "listSwaps",
+        "kind": "function",
+        "lines": 15,
+        "target": "modules/swaps/data/repo.ts"
+      },
+      {
+        "file": "modules/shift/repo.ts",
+        "line": 67,
+        "name": "applySwap",
+        "kind": "function",
+        "lines": 17,
+        "target": "modules/swaps/data/repo.ts"
+      },
+      {
+        "file": "modules/shift/repo.ts",
+        "line": 85,
+        "name": "rejectSwap",
+        "kind": "function",
+        "lines": 10,
+        "target": "modules/swaps/data/repo.ts"
+      },
+      {
+        "file": "modules/shift/repo.ts",
+        "line": 97,
+        "name": "hasAssignmentInBlock",
+        "kind": "function",
+        "lines": 14,
+        "target": "modules/swaps/data/repo.ts"
+      },
+      {
+        "file": "modules/shift/repo.ts",
+        "line": 119,
+        "name": "toBriefingSlotRecord",
+        "kind": "function",
+        "lines": 23,
+        "target": "modules/briefings/data/mappers.ts"
+      },
+      {
+        "file": "modules/shift/repo.ts",
+        "line": 143,
+        "name": "listBriefingSlots",
+        "kind": "function",
+        "lines": 13,
+        "target": "modules/briefings/data/repo.ts"
+      },
+      {
+        "file": "modules/shift/repo.ts",
+        "line": 157,
+        "name": "findSlotById",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/briefings/data/repo.ts"
+      },
+      {
+        "file": "modules/shift/repo.ts",
+        "line": 161,
+        "name": "completeSlot",
+        "kind": "function",
+        "lines": 10,
+        "target": "modules/briefings/data/repo.ts"
+      },
+      {
+        "file": "modules/shift/repo.ts",
+        "line": 177,
+        "name": "staffingByStation",
+        "kind": "function",
+        "lines": 50,
+        "target": "modules/assignments/data/repo.ts"
+      },
+      {
+        "file": "modules/shift/repo.ts",
+        "line": 233,
+        "name": "longRunningShifts",
+        "kind": "function",
+        "lines": 11,
+        "target": "modules/assignments/data/repo.ts"
+      },
+      {
+        "file": "modules/shift/router.ts",
+        "line": 36,
+        "name": "shiftRouter",
+        "kind": "const",
+        "lines": 1,
+        "target": "split: swaps/http, briefings/http, assignments/http (gaps)"
+      },
+      {
+        "file": "modules/shift/service.ts",
+        "line": 48,
+        "name": "LONG_SHIFT_MINUTES",
+        "kind": "const",
+        "lines": 1,
+        "target": "delete (no production caller) (read the setting)"
+      },
+      {
+        "file": "modules/shift/service.ts",
+        "line": 50,
+        "name": "requestSwap",
+        "kind": "function",
+        "lines": 65,
+        "target": "modules/swaps/application/requestSwap.ts"
+      },
+      {
+        "file": "modules/shift/service.ts",
+        "line": 121,
+        "name": "decideSwap",
+        "kind": "function",
+        "lines": 60,
+        "target": "modules/swaps/application/decideSwap.ts"
+      },
+      {
+        "file": "modules/shift/service.ts",
+        "line": 182,
+        "name": "listMySwaps",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/swaps/application/listMySwaps.ts"
+      },
+      {
+        "file": "modules/shift/service.ts",
+        "line": 186,
+        "name": "listPendingSwaps",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/swaps/application/listPendingSwaps.ts"
+      },
+      {
+        "file": "modules/shift/service.ts",
+        "line": 190,
+        "name": "getBriefingSlots",
+        "kind": "function",
+        "lines": 13,
+        "target": "modules/briefings/application/listBriefingSlots.ts"
+      },
+      {
+        "file": "modules/shift/service.ts",
+        "line": 204,
+        "name": "markSlotComplete",
+        "kind": "function",
+        "lines": 40,
+        "target": "modules/briefings/application/completeBriefingSlot.ts"
+      },
+      {
+        "file": "modules/shift/service.ts",
+        "line": 252,
+        "name": "getStaffingGaps",
+        "kind": "function",
+        "lines": 47,
+        "target": "modules/assignments/application/getStaffingGaps.ts"
+      },
+      {
+        "file": "modules/shift/service.ts",
+        "line": 300,
+        "name": "getLongShifts",
+        "kind": "function",
+        "lines": 33,
+        "target": "modules/assignments/application/getLongShifts.ts"
+      }
+    ]
+  },
+  {
+    "unit": "modules/station",
+    "outbound": ["lib/errors", "lib/prisma", "middleware/auth"],
+    "inbound": [
+      "modules/admin",
+      "modules/announcement",
+      "modules/dashboard",
+      "modules/footfall",
+      "modules/gift",
+      "modules/lostPerson",
+      "modules/me",
+      "modules/missionCard",
+      "modules/registration",
+      "modules/report",
+      "routes"
+    ],
+    "violations": {
+      "server-express-only-in-http": 1,
+      "server-prisma-only-in-data": 1
+    },
+    "exports": [
+      {
+        "file": "modules/station/repo.ts",
+        "line": 7,
+        "name": "toStationSummary",
+        "kind": "function",
+        "lines": 14,
+        "target": "modules/stations/data/mappers.ts"
+      },
+      {
+        "file": "modules/station/repo.ts",
+        "line": 22,
+        "name": "listStations",
+        "kind": "function",
+        "lines": 8,
+        "target": "modules/stations/data/repo.ts"
+      },
+      {
+        "file": "modules/station/repo.ts",
+        "line": 31,
+        "name": "findStationById",
+        "kind": "function",
+        "lines": 3,
+        "target": "modules/stations/data/repo.ts"
+      },
+      {
+        "file": "modules/station/repo.ts",
+        "line": 35,
+        "name": "findStationByCode",
+        "kind": "function",
+        "lines": 3,
+        "target": "delete (no production caller)"
+      },
+      {
+        "file": "modules/station/repo.ts",
+        "line": 40,
+        "name": "listStampingStations",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/stations/data/repo.ts"
+      },
+      {
+        "file": "modules/station/repo.ts",
+        "line": 48,
+        "name": "listCountedStations",
+        "kind": "function",
+        "lines": 6,
+        "target": "modules/stations/data/repo.ts"
+      },
+      {
+        "file": "modules/station/router.ts",
+        "line": 10,
+        "name": "stationRouter",
+        "kind": "const",
+        "lines": 1,
+        "target": "modules/stations/http/routes.ts + handlers.ts"
+      },
+      {
+        "file": "modules/station/service.ts",
+        "line": 6,
+        "name": "getActiveStations",
+        "kind": "function",
+        "lines": 4,
+        "target": "modules/stations/application/getActiveStations.ts"
+      },
+      {
+        "file": "modules/station/service.ts",
+        "line": 18,
+        "name": "requireActiveStation",
+        "kind": "function",
+        "lines": 14,
+        "target": "modules/stations/application/requireActiveStation.ts"
+      },
+      {
+        "file": "modules/station/service.ts",
+        "line": 38,
+        "name": "requireCountedStation",
+        "kind": "function",
+        "lines": 13,
+        "target": "modules/stations/application/requireCountedStation.ts"
+      }
+    ]
+  },
+  {
+    "unit": "routes",
+    "outbound": [
+      "config/env",
+      "modules/admin",
+      "modules/announcement",
+      "modules/attendance",
+      "modules/audit",
+      "modules/auth",
+      "modules/dashboard",
+      "modules/devAuth",
+      "modules/fallback",
+      "modules/footfall",
+      "modules/gift",
+      "modules/incident",
+      "modules/lostFound",
+      "modules/lostPerson",
+      "modules/me",
+      "modules/media",
+      "modules/missionCard",
+      "modules/notification",
+      "modules/registration",
+      "modules/report",
+      "modules/roster",
+      "modules/shift",
+      "modules/station"
+    ],
+    "inbound": ["app"],
+    "violations": {},
+    "exports": [
+      {
+        "file": "routes.ts",
+        "line": 33,
+        "name": "apiRouter",
+        "kind": "const",
+        "lines": 1,
+        "target": "app/routes.ts"
+      }
+    ]
+  },
+  {
+    "unit": "types/express.d",
+    "outbound": [],
+    "inbound": ["middleware/auth"],
+    "violations": {},
+    "exports": []
+  }
+]

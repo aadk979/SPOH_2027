@@ -1,0 +1,287 @@
+strict digraph "dependency-cruiser output"{
+    rankdir="LR" splines="true" overlap="false" nodesep="0.16" ranksep="0.18" fontname="Helvetica-bold" fontsize="9" style="rounded,bold,filled" fillcolor="#ffffff" compound="true"
+    node [shape="box" style="rounded, filled" height="0.2" color="black" fillcolor="#ffffcc" fontcolor="black" fontname="Helvetica" fontsize="9"]
+    edge [arrowhead="normal" arrowsize="0.6" penwidth="2.0" color="#00000033" fontname="Helvetica" fontsize="9"]
+
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" "server/src/app.ts" [label=<app.ts> tooltip="app.ts" URL="server/src/app.ts" fillcolor="#ddfeff"] } }
+    "server/src/app.ts" -> "server/src/config"
+    "server/src/app.ts" -> "server/src/lib/logger.ts"
+    "server/src/app.ts" -> "server/src/middleware"
+    "server/src/app.ts" -> "server/src/modules/health"
+    "server/src/app.ts" -> "server/src/routes.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" "server/src/config" [label=<config> tooltip="config" URL="server/src/config" shape="box3d"] } }
+    "server/src/config" -> "server/src/lib/campusNetwork.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" "server/src/generated" [label=<generated> tooltip="generated" URL="server/src/generated" shape="box3d"] } }
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" "server/src/index.ts" [label=<index.ts> tooltip="index.ts" URL="server/src/index.ts" fillcolor="#ddfeff"] } }
+    "server/src/index.ts" -> "server/src/app.ts"
+    "server/src/index.ts" -> "server/src/config"
+    "server/src/index.ts" -> "server/src/jobs"
+    "server/src/index.ts" -> "server/src/lib/logger.ts"
+    "server/src/index.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/index.ts" -> "server/src/lib/settings.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" "server/src/jobs" [label=<jobs> tooltip="jobs" URL="server/src/jobs" shape="box3d"] } }
+    "server/src/jobs" -> "server/src/lib/logger.ts"
+    "server/src/jobs" -> "server/src/lib/settings.ts"
+    "server/src/jobs" -> "server/src/middleware"
+    "server/src/jobs" -> "server/src/modules/auth"
+    "server/src/jobs" -> "server/src/modules/lostPerson"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/lib" {label="lib" "server/src/lib/audit.ts" [label=<audit.ts> tooltip="audit.ts" URL="server/src/lib/audit.ts" fillcolor="#ddfeff"] } } }
+    "server/src/lib/audit.ts" -> "server/src/generated" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" arrowhead="onormal" penwidth="1.0" fontcolor="orange" color="orange"]
+    "server/src/lib/audit.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" arrowhead="onormal" penwidth="1.0" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/lib" {label="lib" "server/src/lib/campusNetwork.ts" [label=<campusNetwork.ts> tooltip="campusNetwork.ts" URL="server/src/lib/campusNetwork.ts" fillcolor="#ddfeff"] } } }
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/lib" {label="lib" "server/src/lib/captureActor.ts" [label=<captureActor.ts> tooltip="captureActor.ts" URL="server/src/lib/captureActor.ts" fillcolor="#ddfeff"] } } }
+    "server/src/lib/captureActor.ts" -> "server/src/middleware"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/lib" {label="lib" "server/src/lib/errors.ts" [label=<errors.ts> tooltip="errors.ts" URL="server/src/lib/errors.ts" fillcolor="#ddfeff"] } } }
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/lib" {label="lib" "server/src/lib/logger.ts" [label=<logger.ts> tooltip="logger.ts" URL="server/src/lib/logger.ts" fillcolor="#ddfeff"] } } }
+    "server/src/lib/logger.ts" -> "server/src/config"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/lib" {label="lib" "server/src/lib/prisma.ts" [label=<prisma.ts> tooltip="prisma.ts" URL="server/src/lib/prisma.ts" fillcolor="#ddfeff"] } } }
+    "server/src/lib/prisma.ts" -> "server/src/config"
+    "server/src/lib/prisma.ts" -> "server/src/generated"
+    "server/src/lib/prisma.ts" -> "server/src/lib/logger.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/lib" {label="lib" "server/src/lib/requestContext.ts" [label=<requestContext.ts> tooltip="requestContext.ts" URL="server/src/lib/requestContext.ts" fillcolor="#ddfeff"] } } }
+    "server/src/lib/requestContext.ts" -> "server/src/middleware"
+    "server/src/lib/requestContext.ts" -> "server/src/lib/audit.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/lib" {label="lib" "server/src/lib/settings.ts" [label=<settings.ts> tooltip="settings.ts" URL="server/src/lib/settings.ts" fillcolor="#ddfeff"] } } }
+    "server/src/lib/settings.ts" -> "server/src/lib/audit.ts"
+    "server/src/lib/settings.ts" -> "server/src/lib/logger.ts"
+    "server/src/lib/settings.ts" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/lib" {label="lib" "server/src/lib/shortCode.ts" [label=<shortCode.ts> tooltip="shortCode.ts" URL="server/src/lib/shortCode.ts" fillcolor="#ddfeff"] } } }
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/lib" {label="lib" "server/src/lib/time.ts" [label=<time.ts> tooltip="time.ts" URL="server/src/lib/time.ts" fillcolor="#ddfeff"] } } }
+    "server/src/lib/time.ts" -> "server/src/config"
+    "server/src/lib/time.ts" -> "server/src/lib/settings.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" "server/src/middleware" [label=<middleware> tooltip="middleware" URL="server/src/middleware" shape="box3d"] } }
+    "server/src/middleware" -> "server/src/config"
+    "server/src/middleware" -> "server/src/lib/errors.ts"
+    "server/src/middleware" -> "server/src/lib/logger.ts"
+    "server/src/middleware" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/middleware" -> "server/src/modules/auth"
+    "server/src/middleware" -> "server/src/types" [arrowhead="onormal" penwidth="1.0"]
+    "server/src/middleware" -> "server/src/lib/time.ts"
+    "server/src/middleware" -> "server/src/lib/settings.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" "server/src/modules/admin" [label=<admin> tooltip="admin" URL="server/src/modules/admin" shape="box3d"] } } }
+    "server/src/modules/admin" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/admin" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/admin" -> "server/src/lib/settings.ts"
+    "server/src/modules/admin" -> "server/src/middleware"
+    "server/src/modules/admin" -> "server/src/modules/station" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/admin" -> "server/src/generated" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" arrowhead="onormal" penwidth="1.0" fontcolor="orange" color="orange"]
+    "server/src/modules/admin" -> "server/src/lib/audit.ts"
+    "server/src/modules/admin" -> "server/src/lib/errors.ts"
+    "server/src/modules/admin" -> "server/src/lib/logger.ts"
+    "server/src/modules/admin" -> "server/src/lib/time.ts"
+    "server/src/modules/admin" -> "server/src/modules/auth" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/admin" -> "server/src/modules/gift" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/admin" -> "server/src/modules/identity" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/admin" -> "server/src/modules/roster" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" "server/src/modules/announcement" [label=<announcement> tooltip="announcement" URL="server/src/modules/announcement" shape="box3d"] } } }
+    "server/src/modules/announcement" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/announcement" -> "server/src/middleware"
+    "server/src/modules/announcement" -> "server/src/lib/audit.ts"
+    "server/src/modules/announcement" -> "server/src/lib/errors.ts"
+    "server/src/modules/announcement" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/announcement" -> "server/src/lib/time.ts"
+    "server/src/modules/announcement" -> "server/src/modules/notification" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/announcement" -> "server/src/modules/station" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/announcement" -> "server/src/generated" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" arrowhead="onormal" penwidth="1.0" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" "server/src/modules/attendance" [label=<attendance> tooltip="attendance" URL="server/src/modules/attendance" shape="box3d"] } } }
+    "server/src/modules/attendance" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/attendance" -> "server/src/middleware"
+    "server/src/modules/attendance" -> "server/src/config"
+    "server/src/modules/attendance" -> "server/src/lib/audit.ts"
+    "server/src/modules/attendance" -> "server/src/lib/campusNetwork.ts"
+    "server/src/modules/attendance" -> "server/src/lib/errors.ts"
+    "server/src/modules/attendance" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/attendance" -> "server/src/lib/time.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" "server/src/modules/audit" [label=<audit> tooltip="audit" URL="server/src/modules/audit" shape="box3d"] } } }
+    "server/src/modules/audit" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/audit" -> "server/src/middleware"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" "server/src/modules/auth" [label=<auth> tooltip="auth" URL="server/src/modules/auth" shape="box3d"] } } }
+    "server/src/modules/auth" -> "server/src/config"
+    "server/src/modules/auth" -> "server/src/lib/errors.ts"
+    "server/src/modules/auth" -> "server/src/lib/logger.ts"
+    "server/src/modules/auth" -> "server/src/lib/audit.ts"
+    "server/src/modules/auth" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/auth" -> "server/src/lib/settings.ts"
+    "server/src/modules/auth" -> "server/src/middleware"
+    "server/src/modules/auth" -> "server/src/lib/requestContext.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" "server/src/modules/dashboard" [label=<dashboard> tooltip="dashboard" URL="server/src/modules/dashboard" shape="box3d"] } } }
+    "server/src/modules/dashboard" -> "server/src/middleware"
+    "server/src/modules/dashboard" -> "server/src/lib/errors.ts"
+    "server/src/modules/dashboard" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/dashboard" -> "server/src/lib/settings.ts"
+    "server/src/modules/dashboard" -> "server/src/lib/time.ts"
+    "server/src/modules/dashboard" -> "server/src/modules/footfall" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/dashboard" -> "server/src/modules/gift" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/dashboard" -> "server/src/modules/missionCard" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/dashboard" -> "server/src/modules/shift" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/dashboard" -> "server/src/modules/station" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" "server/src/modules/devAuth" [label=<devAuth> tooltip="devAuth" URL="server/src/modules/devAuth" shape="box3d"] } } }
+    "server/src/modules/devAuth" -> "server/src/config"
+    "server/src/modules/devAuth" -> "server/src/lib/errors.ts"
+    "server/src/modules/devAuth" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/devAuth" -> "server/src/middleware"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" "server/src/modules/fallback" [label=<fallback> tooltip="fallback" URL="server/src/modules/fallback" shape="box3d"] } } }
+    "server/src/modules/fallback" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/fallback" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/fallback" -> "server/src/middleware"
+    "server/src/modules/fallback" -> "server/src/lib/audit.ts"
+    "server/src/modules/fallback" -> "server/src/lib/errors.ts"
+    "server/src/modules/fallback" -> "server/src/lib/logger.ts"
+    "server/src/modules/fallback" -> "server/src/lib/time.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" "server/src/modules/footfall" [label=<footfall> tooltip="footfall" URL="server/src/modules/footfall" shape="box3d"] } } }
+    "server/src/modules/footfall" -> "server/src/lib/audit.ts"
+    "server/src/modules/footfall" -> "server/src/lib/captureActor.ts" [arrowhead="onormal" penwidth="1.0"]
+    "server/src/modules/footfall" -> "server/src/lib/errors.ts"
+    "server/src/modules/footfall" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/footfall" -> "server/src/lib/settings.ts"
+    "server/src/modules/footfall" -> "server/src/lib/time.ts"
+    "server/src/modules/footfall" -> "server/src/modules/fallback" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/footfall" -> "server/src/modules/station" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/footfall" -> "server/src/generated" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" arrowhead="onormal" penwidth="1.0" fontcolor="orange" color="orange"]
+    "server/src/modules/footfall" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/footfall" -> "server/src/middleware"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" "server/src/modules/gift" [label=<gift> tooltip="gift" URL="server/src/modules/gift" shape="box3d"] } } }
+    "server/src/modules/gift" -> "server/src/generated" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" arrowhead="onormal" penwidth="1.0" fontcolor="orange" color="orange"]
+    "server/src/modules/gift" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/gift" -> "server/src/lib/audit.ts"
+    "server/src/modules/gift" -> "server/src/lib/captureActor.ts" [arrowhead="onormal" penwidth="1.0"]
+    "server/src/modules/gift" -> "server/src/lib/errors.ts"
+    "server/src/modules/gift" -> "server/src/lib/shortCode.ts"
+    "server/src/modules/gift" -> "server/src/modules/fallback" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/gift" -> "server/src/modules/notification" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/gift" -> "server/src/modules/station" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/gift" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/gift" -> "server/src/middleware"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" "server/src/modules/health" [label=<health> tooltip="health" URL="server/src/modules/health" shape="box3d"] } } }
+    "server/src/modules/health" -> "server/src/lib/logger.ts"
+    "server/src/modules/health" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" "server/src/modules/identity" [label=<identity> tooltip="identity" URL="server/src/modules/identity" shape="box3d"] } } }
+    "server/src/modules/identity" -> "server/src/config"
+    "server/src/modules/identity" -> "server/src/lib/errors.ts"
+    "server/src/modules/identity" -> "server/src/lib/logger.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" "server/src/modules/incident" [label=<incident> tooltip="incident" URL="server/src/modules/incident" shape="box3d"] } } }
+    "server/src/modules/incident" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/incident" -> "server/src/middleware"
+    "server/src/modules/incident" -> "server/src/lib/audit.ts"
+    "server/src/modules/incident" -> "server/src/lib/errors.ts"
+    "server/src/modules/incident" -> "server/src/lib/logger.ts"
+    "server/src/modules/incident" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/incident" -> "server/src/modules/notification" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/incident" -> "server/src/generated" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" arrowhead="onormal" penwidth="1.0" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" "server/src/modules/lostFound" [label=<lostFound> tooltip="lostFound" URL="server/src/modules/lostFound" shape="box3d"] } } }
+    "server/src/modules/lostFound" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/lostFound" -> "server/src/middleware"
+    "server/src/modules/lostFound" -> "server/src/lib/audit.ts"
+    "server/src/modules/lostFound" -> "server/src/lib/errors.ts"
+    "server/src/modules/lostFound" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" "server/src/modules/lostPerson" [label=<lostPerson> tooltip="lostPerson" URL="server/src/modules/lostPerson" shape="box3d"] } } }
+    "server/src/modules/lostPerson" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/lostPerson" -> "server/src/middleware"
+    "server/src/modules/lostPerson" -> "server/src/lib/audit.ts"
+    "server/src/modules/lostPerson" -> "server/src/lib/errors.ts"
+    "server/src/modules/lostPerson" -> "server/src/lib/logger.ts"
+    "server/src/modules/lostPerson" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/lostPerson" -> "server/src/lib/settings.ts"
+    "server/src/modules/lostPerson" -> "server/src/lib/time.ts"
+    "server/src/modules/lostPerson" -> "server/src/modules/notification" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/lostPerson" -> "server/src/modules/station" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/lostPerson" -> "server/src/generated" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" arrowhead="onormal" penwidth="1.0" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" "server/src/modules/me" [label=<me> tooltip="me" URL="server/src/modules/me" shape="box3d"] } } }
+    "server/src/modules/me" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/me" -> "server/src/middleware"
+    "server/src/modules/me" -> "server/src/lib/audit.ts"
+    "server/src/modules/me" -> "server/src/lib/errors.ts"
+    "server/src/modules/me" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/me" -> "server/src/lib/time.ts"
+    "server/src/modules/me" -> "server/src/modules/station" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/me" -> "server/src/generated" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" arrowhead="onormal" penwidth="1.0" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" "server/src/modules/media" [label=<media> tooltip="media" URL="server/src/modules/media" shape="box3d"] } } }
+    "server/src/modules/media" -> "server/src/middleware"
+    "server/src/modules/media" -> "server/src/config"
+    "server/src/modules/media" -> "server/src/lib/errors.ts"
+    "server/src/modules/media" -> "server/src/lib/logger.ts"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" "server/src/modules/missionCard" [label=<missionCard> tooltip="missionCard" URL="server/src/modules/missionCard" shape="box3d"] } } }
+    "server/src/modules/missionCard" -> "server/src/lib/audit.ts"
+    "server/src/modules/missionCard" -> "server/src/lib/captureActor.ts" [arrowhead="onormal" penwidth="1.0"]
+    "server/src/modules/missionCard" -> "server/src/lib/errors.ts"
+    "server/src/modules/missionCard" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/missionCard" -> "server/src/lib/shortCode.ts"
+    "server/src/modules/missionCard" -> "server/src/modules/fallback" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/missionCard" -> "server/src/modules/station" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/missionCard" -> "server/src/generated" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" arrowhead="onormal" penwidth="1.0" fontcolor="orange" color="orange"]
+    "server/src/modules/missionCard" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/missionCard" -> "server/src/middleware"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" "server/src/modules/notification" [label=<notification> tooltip="notification" URL="server/src/modules/notification" shape="box3d"] } } }
+    "server/src/modules/notification" -> "server/src/config"
+    "server/src/modules/notification" -> "server/src/lib/logger.ts"
+    "server/src/modules/notification" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/notification" -> "server/src/lib/time.ts"
+    "server/src/modules/notification" -> "server/src/middleware"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" "server/src/modules/registration" [label=<registration> tooltip="registration" URL="server/src/modules/registration" shape="box3d"] } } }
+    "server/src/modules/registration" -> "server/src/lib/captureActor.ts"
+    "server/src/modules/registration" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/registration" -> "server/src/middleware"
+    "server/src/modules/registration" -> "server/src/lib/audit.ts"
+    "server/src/modules/registration" -> "server/src/lib/errors.ts"
+    "server/src/modules/registration" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/registration" -> "server/src/lib/time.ts"
+    "server/src/modules/registration" -> "server/src/modules/fallback" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/registration" -> "server/src/modules/station" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/registration" -> "server/src/generated" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" arrowhead="onormal" penwidth="1.0" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" "server/src/modules/report" [label=<report> tooltip="report" URL="server/src/modules/report" shape="box3d"] } } }
+    "server/src/modules/report" -> "server/src/middleware"
+    "server/src/modules/report" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/report" -> "server/src/lib/time.ts"
+    "server/src/modules/report" -> "server/src/modules/fallback" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/report" -> "server/src/modules/gift" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/report" -> "server/src/modules/station" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" "server/src/modules/roster" [label=<roster> tooltip="roster" URL="server/src/modules/roster" shape="box3d"] } } }
+    "server/src/modules/roster" -> "server/src/generated" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" arrowhead="onormal" penwidth="1.0" fontcolor="orange" color="orange"]
+    "server/src/modules/roster" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/roster" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/roster" -> "server/src/middleware"
+    "server/src/modules/roster" -> "server/src/modules/me" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    "server/src/modules/roster" -> "server/src/lib/audit.ts"
+    "server/src/modules/roster" -> "server/src/lib/errors.ts"
+    "server/src/modules/roster" -> "server/src/lib/time.ts"
+    "server/src/modules/roster" -> "server/src/modules/identity" [xlabel="server-module-internals-private" tooltip="server-module-internals-private" fontcolor="orange" color="orange"]
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" "server/src/modules/shift" [label=<shift> tooltip="shift" URL="server/src/modules/shift" shape="box3d"] } } }
+    "server/src/modules/shift" -> "server/src/lib/audit.ts"
+    "server/src/modules/shift" -> "server/src/lib/errors.ts"
+    "server/src/modules/shift" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/shift" -> "server/src/lib/settings.ts"
+    "server/src/modules/shift" -> "server/src/lib/time.ts"
+    "server/src/modules/shift" -> "server/src/generated" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" arrowhead="onormal" penwidth="1.0" fontcolor="orange" color="orange"]
+    "server/src/modules/shift" -> "server/src/lib/requestContext.ts"
+    "server/src/modules/shift" -> "server/src/middleware"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" subgraph "cluster_server/src/modules" {label="modules" "server/src/modules/station" [label=<station> tooltip="station" URL="server/src/modules/station" shape="box3d"] } } }
+    "server/src/modules/station" -> "server/src/generated" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" arrowhead="onormal" penwidth="1.0" fontcolor="orange" color="orange"]
+    "server/src/modules/station" -> "server/src/lib/prisma.ts" [xlabel="server-prisma-only-in-data" tooltip="server-prisma-only-in-data" fontcolor="orange" color="orange"]
+    "server/src/modules/station" -> "server/src/lib/errors.ts"
+    "server/src/modules/station" -> "server/src/middleware"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" "server/src/routes.ts" [label=<routes.ts> tooltip="routes.ts" URL="server/src/routes.ts" fillcolor="#ddfeff"] } }
+    "server/src/routes.ts" -> "server/src/config"
+    "server/src/routes.ts" -> "server/src/modules/admin"
+    "server/src/routes.ts" -> "server/src/modules/announcement"
+    "server/src/routes.ts" -> "server/src/modules/attendance"
+    "server/src/routes.ts" -> "server/src/modules/audit"
+    "server/src/routes.ts" -> "server/src/modules/auth"
+    "server/src/routes.ts" -> "server/src/modules/dashboard"
+    "server/src/routes.ts" -> "server/src/modules/devAuth"
+    "server/src/routes.ts" -> "server/src/modules/fallback"
+    "server/src/routes.ts" -> "server/src/modules/footfall"
+    "server/src/routes.ts" -> "server/src/modules/gift"
+    "server/src/routes.ts" -> "server/src/modules/incident"
+    "server/src/routes.ts" -> "server/src/modules/lostFound"
+    "server/src/routes.ts" -> "server/src/modules/lostPerson"
+    "server/src/routes.ts" -> "server/src/modules/me"
+    "server/src/routes.ts" -> "server/src/modules/media"
+    "server/src/routes.ts" -> "server/src/modules/missionCard"
+    "server/src/routes.ts" -> "server/src/modules/notification"
+    "server/src/routes.ts" -> "server/src/modules/registration"
+    "server/src/routes.ts" -> "server/src/modules/report"
+    "server/src/routes.ts" -> "server/src/modules/roster"
+    "server/src/routes.ts" -> "server/src/modules/shift"
+    "server/src/routes.ts" -> "server/src/modules/station"
+    subgraph "cluster_server" {label="server" subgraph "cluster_server/src" {label="src" "server/src/types" [label=<types> tooltip="types" URL="server/src/types" shape="box3d"] } }
+}
