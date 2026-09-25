@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T13:16:42.113Z",
+  "updatedAt": "2026-09-25T13:19:50.537Z",
   "current": {
     "phase": "P02",
     "step": "P02.1"
@@ -491,11 +491,16 @@
         {
           "id": "P02.1",
           "title": "Journey harness",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T13:16:42.112Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T13:19:50.537Z",
+          "commits": ["b0b5bfa"],
+          "notes": [
+            {
+              "at": "2026-09-25T13:19:50.537Z",
+              "text": "run.mjs + lib.mjs + journeys.mjs; smoke journey captured"
+            }
+          ]
         },
         {
           "id": "P02.2",
