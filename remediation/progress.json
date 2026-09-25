@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T16:59:31.472Z",
+  "updatedAt": "2026-09-25T17:01:58.210Z",
   "current": {
     "phase": "P05",
-    "step": "P05.9"
+    "step": "P05.10"
   },
   "gates": [
     {
@@ -1094,8 +1094,8 @@
         {
           "id": "P05.10",
           "title": "ADR-009 Migration and rollout (D-01, D-12)",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-25T17:00:25.562Z",
           "completedAt": null,
           "commits": [],
           "notes": []
@@ -1821,7 +1821,7 @@
       "title": "Identity: Cognito hardening and membership lifecycle",
       "file": "phases\\P12-identity-cognito.md",
       "gate": "G3",
-      "dependsOn": ["P09", "P11"],
+      "dependsOn": ["P08", "P09", "P11"],
       "decisions": ["D-08"],
       "changesBehaviour": "Yes",
       "size": "L",
@@ -1883,6 +1883,15 @@
         {
           "id": "P12.7",
           "title": "Verify and report",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P12.8",
+          "title": "Go/no-go (28 Oct) and production cutover",
           "status": "not_started",
           "startedAt": null,
           "completedAt": null,
@@ -2179,7 +2188,7 @@
         },
         {
           "id": "P15.8",
-          "title": "Production stand-up and cutover",
+          "title": "Production hardening and decommissioning",
           "status": "not_started",
           "startedAt": null,
           "completedAt": null,

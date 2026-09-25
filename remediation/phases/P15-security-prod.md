@@ -77,17 +77,18 @@ stand up production from the same CDK code, and move off the Lightsail box witho
   3. Export and erasure of a person's data on request.
 - **Done when:** retention tests pass with time travel, and there is a documented data map.
 
-### P15.8 — Production stand-up and cutover
+### P15.8 — Production hardening and decommissioning
 
-- **Do:**
-  1. Deploy the prod stage (sizing per ADR-008).
-  2. Rehearse on staging: restore the latest Lightsail backup into RDS, run the P09 migrations, and
-     verify totals with the P09.4 script.
-  3. Write the cutover runbook: freeze, final dump, restore, verify, DNS switch, smoke, and a
-     rollback path to the Lightsail box.
-  4. Execute it in a window the owner chooses.
-- **Done when:** production serves the event domain, the totals match, and Lightsail is kept
-  read-only until the owner approves decommissioning.
+- **Do:** Production was created at the 28 Oct go (P12.8, ADR-009 §5). Here:
+  1. Re-check production against ADR-008 (sizing, alarms, budget, backups) after training and Dry
+     Run #1.
+  2. With the owner's approval: decommission the Lightsail box (final snapshot kept), its IAM user
+     (PF-12, F04-010), the DuckDNS record and updater (F04-012), and the old Cognito app client.
+  3. Write the production runbook: deploy, roll back, scale for event days, restore.
+- **Done when:** nothing of the old deployment is running, and the runbook is walked once with the
+  owner.
+- **If the 28 Oct decision was no-go:** this step instead stands production up and cuts over, per
+  ADR-009 §5, in a window the owner chooses before the next event.
 
 ### P15.9 — Security review
 

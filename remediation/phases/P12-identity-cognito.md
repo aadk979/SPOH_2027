@@ -1,12 +1,12 @@
 # P12 — Identity: Cognito hardening and membership lifecycle
 
-| Field             | Value    |
-| ----------------- | -------- |
-| Gate              | G3       |
-| Depends on        | P09, P11 |
-| Decisions         | D-08     |
-| Changes behaviour | **Yes**  |
-| Size              | L        |
+| Field             | Value         |
+| ----------------- | ------------- |
+| Gate              | G3            |
+| Depends on        | P08, P09, P11 |
+| Decisions         | D-08          |
+| Changes behaviour | **Yes**       |
+| Size              | L             |
 
 ## Purpose
 
@@ -99,6 +99,20 @@ immediate effect everywhere.
 - **Do:** Run all suites plus a real Cognito sign-in e2e on staging (MFA enrolment for an admin
   test user), and write the report.
 - **Done when:** the exit criteria hold.
+
+### P12.8 — Go/no-go (28 Oct) and production cutover
+
+- **Do:**
+  1. Check the twelve criteria in ADR-009 §2 on staging, with evidence per item, and walk the owner
+     through them. The owner decides. Record it: `progress.mjs log` plus a note on this step.
+  2. **On go:** create production from the same CDK (ADR-008 §3). Rehearse the cutover once on
+     staging, then run it (ADR-009 §5): announce, drain, freeze (nginx), final dump, restore,
+     migrate, `verify-totals`, smoke, switch. Every step is confirmed with the owner first.
+  3. **On no-go:** deploy `release/january` (the P06.12 cherry-picks, Q-P5) to Lightsail with the
+     audit branch's runbook, after the owner approves. The programme continues without the
+     calendar.
+- **Done when:** the decision is recorded, and either production serves the new address with
+  identical totals, or the fallback line is deployed.
 
 ## Exit criteria
 

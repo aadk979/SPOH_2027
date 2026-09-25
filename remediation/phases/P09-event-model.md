@@ -29,7 +29,9 @@ After this phase a second event can exist beside the first without code, seed or
 
 ### P09.1 — Expand: Event and scoping columns
 
-- **Do:**
+- **Do:** 0. Adopt the audit branch's migration `20260922000000_audit_severity_and_security_events`
+  **byte for byte** (same folder name and SQL), with its `schema.prisma` fields, so the
+  production database's history equals `main`'s (ADR-009 §4).
   1. Add `Organisation` (per D-02) and `Event` (slug, name, venue, timezone, status, branding JSON,
      dates are derived from days).
   2. Add a nullable `eventId` on every event-owned table (per the ADR-001 list), plus composite
@@ -136,8 +138,9 @@ After this phase a second event can exist beside the first without code, seed or
 - **Do:**
   1. After a release runs on the new columns, drop the enum columns and enum types that became data.
   2. Keep the invariant enums (DataSource, etc.).
-  3. Remove the aliases added in P09.7 once the outbox upgrade window has passed (ADR-009).
-  4. Make `eventId` `NOT NULL` and add the composite `(eventId, parentId)` foreign keys (ADR-001 §2).
+  3. Make `eventId` `NOT NULL` and add the composite `(eventId, parentId)` foreign keys (ADR-001 §2).
+  4. Keep the P09.7 aliases: they stay until seven days after the event closes, and P16.7 removes
+     them (ADR-009 §6).
 - **Done when:** the schema has no event taxonomy enums.
 
 ### P09.11 — Seed and no-hardcoding guard

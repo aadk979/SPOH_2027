@@ -86,7 +86,10 @@ documentation that lets someone else run it next year. Close the programme.
   1. A final metrics snapshot vs baseline: size and complexity debt, coverage, test counts,
      p95, cost.
   2. The programme report, and the remaining backlog handed to normal issues.
-  3. Archive `remediation/`, keeping it in the repo as history.
+  3. Remove the old-path aliases (P09.7) seven days after the event closes (ADR-009 §6), with the
+     alias contract test deleted in the same commit.
+  4. Delete `release/january` if it was created (Q-P5).
+  5. Archive `remediation/`, keeping it in the repo as history.
 - **Done when:** the programme report is written, and all phases are `done`.
 
 ## Exit criteria

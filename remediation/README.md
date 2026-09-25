@@ -100,21 +100,25 @@ P00 ─┬─ P01 ─┐
 
 P01–P04 can run in any order after P00. P08 can start as soon as P05 is signed off.
 
-### Proposed calendar (depends on D-01)
+### Calendar (D-01 = C; ADR-009)
 
 The hard dates are volunteer training on **4 Nov 2026**, Dry Run #1 on **18 Nov 2026**,
-Dry Run #2 on **4 Jan 2027** and the event on **6–9 Jan 2027**. The recommended plan (D-01 option C):
+Dry Run #2 on **4 Jan 2027** and the event on **6–9 Jan 2027**.
 
-| By         | Target                                                                  |
-| ---------- | ----------------------------------------------------------------------- |
-| 3 Oct      | G0: audits written, decisions answered                                  |
-| 7 Oct      | G1: design signed off                                                   |
-| 16 Oct     | G2: refactor complete; staging on AWS live (P08)                        |
-| **28 Oct** | **Go/no-go**: G3 green on staging, or train on the baseline ref instead |
-| 11 Nov     | G4: admin setup and polish                                              |
-| 16 Nov     | G5 core: security hardening, prod stood up, restore rehearsed           |
-| 18 Nov     | Dry Run #1 on the new platform                                          |
-| Dec        | Fixes from Dry Run #1, remaining P14/P16 items                          |
+| By         | Target                                                                                       |
+| ---------- | -------------------------------------------------------------------------------------------- |
+| 26 Sep     | G0 done; decisions D-01, D-03, D-10 answered                                                 |
+| 7 Oct      | G1: design signed off                                                                        |
+| 8–10 Oct   | P06.12: January safety-net fixes on the unrefactored code (needed whichever way 28 Oct goes) |
+| 16 Oct     | G2: refactor complete; staging on AWS live (P08, in parallel)                                |
+| **28 Oct** | **Go/no-go** (P12.8, ADR-009 §2): twelve criteria on staging                                 |
+| 29–31 Oct  | Go: production created and cut over. No-go: `release/january` deployed to Lightsail          |
+| 4 Nov      | Training: on production in `REHEARSAL` (go), or on today's system (no-go)                    |
+| 18 Nov     | Dry Run #1                                                                                   |
+| Nov–Dec    | P13–P16 (go), or the programme continues toward the next event (no-go)                       |
+
+ADR-009 §1 reads this schedule honestly: a go on 28 Oct is possible but not likely, so the no-go
+path is prepared from the start.
 
 The baseline ref `baseline/pre-remediation` (created in P00) stays deployable throughout as the
 safety net. The event never depends on the programme finishing.
