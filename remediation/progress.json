@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T14:43:25.386Z",
+  "updatedAt": "2026-09-25T14:45:26.024Z",
   "current": {
     "phase": "P03",
     "step": "P03.8"
@@ -744,11 +744,16 @@
         {
           "id": "P03.8",
           "title": "Shared package review",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T14:43:25.386Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T14:45:26.024Z",
+          "commits": ["998f301"],
+          "notes": [
+            {
+              "at": "2026-09-25T14:45:26.024Z",
+              "text": "shared-map.mjs; DTO→module table, 7 duplications, generated artefacts, enums to data; F03-038"
+            }
+          ]
         },
         {
           "id": "P03.9",
