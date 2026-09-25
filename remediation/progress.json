@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T12:01:41.180Z",
+  "updatedAt": "2026-09-25T12:02:35.375Z",
   "current": {
     "phase": "P00",
-    "step": "P00.2"
+    "step": "P00.3"
   },
   "gates": [
     {
@@ -235,11 +235,16 @@
         {
           "id": "P00.3",
           "title": "Safety-net tag (after P00.2)",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-25T12:01:49.193Z",
+          "completedAt": "2026-09-25T12:02:35.375Z",
+          "commits": ["153b116"],
+          "notes": [
+            {
+              "at": "2026-09-25T12:02:35.375Z",
+              "text": "Tag baseline/pre-remediation -> d2497b6 pushed to origin. Rollback instructions in README 'Safety net' reference the audit branch runbook by commit (319d06d) and warn against db:deploy on a DB the audit branch migrated."
+            }
+          ]
         },
         {
           "id": "P00.4",
