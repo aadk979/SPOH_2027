@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T12:13:57.531Z",
+  "updatedAt": "2026-09-25T12:18:45.654Z",
   "current": {
     "phase": "P00",
-    "step": "P00.5"
+    "step": "P00.6"
   },
   "gates": [
     {
@@ -281,11 +281,16 @@
         {
           "id": "P00.6",
           "title": "Metrics snapshot",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-25T12:14:17.655Z",
+          "completedAt": "2026-09-25T12:18:45.653Z",
+          "commits": ["0322a8b"],
+          "notes": [
+            {
+              "at": "2026-09-25T12:18:45.654Z",
+              "text": "P00.json (184 files, 97 fn>50, 18 files>300) and P00-coverage.json committed. Installed @vitest/coverage-v8 + test:coverage scripts (c14d352). Server below its thresholds (PF-18); CI audit red on baseline (PF-19)."
+            }
+          ]
         },
         {
           "id": "P00.7",
