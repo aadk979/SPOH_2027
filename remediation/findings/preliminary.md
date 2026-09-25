@@ -29,6 +29,7 @@ closed during the audit phase named. IDs are kept when a finding moves into an F
 - **Evidence:** 8 `no-console` errors. The file is a DigitalOcean AI inference smoke test unrelated
   to the product, added in `22e38ae`. CI's lint job fails on it.
 - **Fix in:** P00.4 (after the owner confirms it can go)
+- **Status:** Fixed in P00.4. The owner chose deletion, and `npm run lint` exits 0.
 
 ### PF-04 — No Event entity; one event per database
 
