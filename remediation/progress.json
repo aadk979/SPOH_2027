@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T12:00:39.406Z",
+  "updatedAt": "2026-09-25T12:01:41.180Z",
   "current": {
     "phase": "P00",
-    "step": "P00.1"
+    "step": "P00.2"
   },
   "gates": [
     {
@@ -221,11 +221,16 @@
         {
           "id": "P00.2",
           "title": "Reconcile branches (needs D-05)",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-25T12:01:18.242Z",
+          "completedAt": "2026-09-25T12:01:41.180Z",
+          "commits": ["616c70c"],
+          "notes": [
+            {
+              "at": "2026-09-25T12:01:41.180Z",
+              "text": "Deviation by D-05: no fast-forward; branch does not contain 319d06d. Replaced by baseline.md 'After reconciliation' + PF-14. Owner must decide the audit branch's fate before P05."
+            }
+          ]
         },
         {
           "id": "P00.3",
