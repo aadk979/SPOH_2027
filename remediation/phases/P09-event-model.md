@@ -158,18 +158,19 @@ After this phase a second event can exist beside the first without code, seed or
 
 ### P09.14 — Per-event product rules (D-04)
 
-- **Do:** Per ADR-002:
-  1. Two event settings: `countsMode` (`separate`, the default, or `separateWithTotal`) and
-     `visitorDataMode` (`none`, the default, or `allowlist`), with the data classification from
-     ADR-002 (F04-016).
-  2. With `separateWithTotal`, reports, exports and dashboards add a total **beside** the three
-     counts, labelled as a sum, never replacing them (F01-048).
-  3. With `allowlist`, only the fields the event enables are collected, each with its
-     classification, retention period and the roles that may read it (F01-049). Retention runs
-     through the P10.7 purge handlers.
-  4. Tests for both modes: every report, export and DTO, and the journey copy.
-- **Done when:** both modes pass their tests, and an event with the defaults behaves exactly as
-  Event #1 did at baseline.
+- **Do:** Per ADR-002 §4 and §5:
+  1. Two event settings: `countsMode` (`separate`, the default, or `headline`) and
+     `visitorDataMode` (`none`, the default, or `allowlist`).
+  2. With `headline`, reports, exports and dashboards show one headline figure taken from **one**
+     chosen count and labelled with its source, always above the three counts. No mode ever adds
+     counts together (F01-048).
+  3. With `allowlist`, the event's `VisitorField`s define what may be collected. Values go only to
+     `VisitorRecord`, each field with its classification, retention and reader roles (F01-049).
+     Retention runs through the P10.7 purge handlers.
+  4. The `/// @class` data classification on every personal column, with its test (F04-016).
+  5. Tests for both modes of both settings: every report, export and DTO, and the journey copy.
+- **Done when:** both modes of both settings pass their tests, and an event with the defaults
+  behaves exactly as Event #1 did at baseline.
 
 ### P09.13 — Verify and report
 
