@@ -1,0 +1,1273 @@
+{
+  "duplicates": [
+    {
+      "firstFile": {
+        "end": 102,
+        "endLoc": {
+          "column": 25,
+          "line": 102,
+          "position": 3231
+        },
+        "name": "app/capture/redeem/page.tsx",
+        "start": 93,
+        "startLoc": {
+          "column": 38,
+          "line": 93,
+          "position": 2944
+        }
+      },
+      "format": "tsx",
+      "fragment": "    [station, selected, pending, gifts],\n  );\n\n  const onDecode = useCallback(\n    (text: string): void => {\n      const cleaned = text.trim();\n      const shortCode = /^[0-9A-HJ-NP-Z]{6}$/i.test(cleaned)\n        ? cleaned.toUpperCase()\n        : cleaned.split(':').pop()?.slice(0, 6).toUpperCase();\n      if (shortCode) void redeem(shortCode);",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 10,
+      "secondFile": {
+        "end": 97,
+        "endLoc": {
+          "column": 25,
+          "line": 97,
+          "position": 3739
+        },
+        "name": "app/capture/stamp/page.tsx",
+        "start": 79,
+        "startLoc": {
+          "column": 21,
+          "line": 79,
+          "position": 3016
+        }
+      },
+      "tokens": 70
+    },
+    {
+      "firstFile": {
+        "end": 35,
+        "endLoc": {
+          "column": 23,
+          "line": 35,
+          "position": 1395
+        },
+        "name": "app/capture/registration/group/page.tsx",
+        "start": 9,
+        "startLoc": {
+          "column": 38,
+          "line": 9,
+          "position": 412
+        }
+      },
+      "format": "tsx",
+      "fragment": "import { enqueue } from '@/lib/outbox';\n\n/**\n * Group registration (PRODUCT_BRIEF §2.2).\n *\n * A family of four arriving together is four humans and one Mission Card. This\n * screen writes four registration records and links one card, which is how the\n * family-of-four problem gets handled honestly rather than fudged into\n * whichever number happens to look better.\n *\n * Unlike the single-tap screen this one does have a confirm step — the\n * volunteer is building a composition, not recording an event, and getting it\n * wrong costs four rows rather than one.\n */\n\nconst CATEGORIES: Array<{ value: VisitorCategory; label: string }> = [\n  { value: 'SEC_1', label: 'Sec 1' },\n  { value: 'SEC_2', label: 'Sec 2' },\n  { value: 'SEC_3', label: 'Sec 3' },\n  { value: 'SEC_4', label: 'Sec 4' },\n  { value: 'SEC_5', label: 'Sec 5' },\n  { value: 'GRADUATED_AWAITING_RESULTS', label: 'Graduated' },\n  { value: 'PARENT_GUARDIAN', label: 'Parent / Guardian' },\n  { value: 'OTHER', label: 'Other' },\n];\n\nexport default function GroupRegistrationPage(): ReactNode {",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 27,
+      "secondFile": {
+        "end": 34,
+        "endLoc": {
+          "column": 23,
+          "line": 34,
+          "position": 1431
+        },
+        "name": "app/capture/registration/page.tsx",
+        "start": 12,
+        "startLoc": {
+          "column": 42,
+          "line": 12,
+          "position": 594
+        }
+      },
+      "tokens": 103
+    },
+    {
+      "firstFile": {
+        "end": 59,
+        "endLoc": {
+          "column": 7,
+          "line": 59,
+          "position": 1947
+        },
+        "name": "app/chief/fallback/page.tsx",
+        "start": 50,
+        "startLoc": {
+          "column": 3,
+          "line": 50,
+          "position": 1729
+        }
+      },
+      "format": "tsx",
+      "fragment": "  });\n\n  const stations = useQuery({\n    queryKey: ['stations'],\n    queryFn: async () => (await api<{ data: StationSummary[] }>('/stations')).data,\n    enabled: session !== null,\n    staleTime: 5 * 60_000,\n  });\n\n  const declare = useMutation({",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 10,
+      "secondFile": {
+        "end": 47,
+        "endLoc": {
+          "column": 7,
+          "line": 47,
+          "position": 1536
+        },
+        "name": "app/ic/page.tsx",
+        "start": 38,
+        "startLoc": {
+          "column": 64,
+          "line": 38,
+          "position": 1318
+        }
+      },
+      "tokens": 55
+    },
+    {
+      "firstFile": {
+        "end": 84,
+        "endLoc": {
+          "column": 16,
+          "line": 84,
+          "position": 2827
+        },
+        "name": "app/ic/page.tsx",
+        "start": 76,
+        "startLoc": {
+          "column": 50,
+          "line": 76,
+          "position": 2572
+        }
+      },
+      "format": "tsx",
+      "fragment": "              <option value=\"\">Choose a station…</option>\n              {(stations.data ?? []).map((station) => (\n                <option key={station.id} value={station.id}>\n                  {station.name}\n                </option>\n              ))}\n            </Select>\n          )}\n        </Field>",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 9,
+      "secondFile": {
+        "end": 237,
+        "endLoc": {
+          "column": 16,
+          "line": 237,
+          "position": 7966
+        },
+        "name": "app/inbox/page.tsx",
+        "start": 229,
+        "startLoc": {
+          "column": 14,
+          "line": 229,
+          "position": 7711
+        }
+      },
+      "tokens": 65
+    },
+    {
+      "firstFile": {
+        "end": 64,
+        "endLoc": {
+          "column": 35,
+          "line": 64,
+          "position": 2441
+        },
+        "name": "app/safety/incident/new/page.tsx",
+        "start": 57,
+        "startLoc": {
+          "column": 38,
+          "line": 57,
+          "position": 2103
+        }
+      },
+      "format": "tsx",
+      "fragment": "  const [locationNote, setLocationNote] = useState('');\n  const [pending, setPending] = useState(false);\n  const [descriptionError, setDescriptionError] = useState<string | null>(null);\n  const [formError, setFormError] = useState<string | null>(null);\n\n  async function submit(event: FormEvent): Promise<void> {\n    event.preventDefault();\n    if (description.trim().length < 10) {",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 8,
+      "secondFile": {
+        "end": 38,
+        "endLoc": {
+          "column": 35,
+          "line": 38,
+          "position": 1651
+        },
+        "name": "app/safety/lost-person/new/page.tsx",
+        "start": 31,
+        "startLoc": {
+          "column": 30,
+          "line": 31,
+          "position": 1313
+        }
+      },
+      "tokens": 83
+    },
+    {
+      "firstFile": {
+        "end": 192,
+        "endLoc": {
+          "column": 31,
+          "line": 192,
+          "position": 6730
+        },
+        "name": "app/safety/lost-found/new/page.tsx",
+        "start": 181,
+        "startLoc": {
+          "column": 33,
+          "line": 181,
+          "position": 6481
+        }
+      },
+      "format": "tsx",
+      "fragment": "            Recorded as found at {me.currentAssignment.station.name}.\n          </p>\n        ) : null}\n\n        {formError ? (\n          <Callout tone=\"alert\" role=\"alert\">\n            {formError}\n          </Callout>\n        ) : null}\n\n        <div>\n          <Button type=\"submit\" size=\"lg\" block disabled={pending || itemLabel.trim().length < 2}>",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 12,
+      "secondFile": {
+        "end": 147,
+        "endLoc": {
+          "column": 25,
+          "line": 147,
+          "position": 5052
+        },
+        "name": "app/safety/lost-person/new/page.tsx",
+        "start": 135,
+        "startLoc": {
+          "column": 42,
+          "line": 135,
+          "position": 4791
+        }
+      },
+      "tokens": 55
+    },
+    {
+      "firstFile": {
+        "end": 352,
+        "endLoc": {
+          "column": 32,
+          "line": 352,
+          "position": 13814
+        },
+        "name": "styles/globals.css",
+        "start": 338,
+        "startLoc": {
+          "column": 34,
+          "line": 338,
+          "position": 13434
+        }
+      },
+      "format": "css",
+      "fragment": "  :root:not([data-theme='light']) {\n    color-scheme: dark;\n\n    --color-surface: #1c1c1e;\n    --color-surface-alt: #272729;\n    --color-surface-sunken: #151517;\n    --color-text: #ffffff;\n    --color-text-muted: #cccccc;\n    --color-text-subtle: #8e8e93;\n    --color-line: #3a3a3c;\n    --color-line-soft: #2f2f31;\n\n    --color-primary: #2997ff;\n    --color-primary-focus: #70baff;\n    --color-on-primary: #1d1d1f;",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 15,
+      "secondFile": {
+        "end": 379,
+        "endLoc": {
+          "column": 30,
+          "line": 379,
+          "position": 14525
+        },
+        "name": "styles/globals.css",
+        "start": 365,
+        "startLoc": {
+          "column": 25,
+          "line": 365,
+          "position": 14169
+        }
+      },
+      "tokens": 127
+    },
+    {
+      "firstFile": {
+        "end": 362,
+        "endLoc": {
+          "column": 3,
+          "line": 362,
+          "position": 14140
+        },
+        "name": "styles/globals.css",
+        "start": 356,
+        "startLoc": {
+          "column": 4,
+          "line": 356,
+          "position": 13957
+        }
+      },
+      "format": "css",
+      "fragment": "    --color-alert: #ff6961;\n    --color-alert-surface: #3a1c1a;\n    --color-warn: #f0b354;\n    --color-warn-surface: #3a2c14;\n    --color-ok: #4cd07d;\n    --color-ok-surface: #14301f;\n  }",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 7,
+      "secondFile": {
+        "end": 387,
+        "endLoc": {
+          "column": 1,
+          "line": 387,
+          "position": 14700
+        },
+        "name": "styles/globals.css",
+        "start": 381,
+        "startLoc": {
+          "column": 2,
+          "line": 381,
+          "position": 14529
+        }
+      },
+      "tokens": 65
+    },
+    {
+      "firstFile": {
+        "end": 26,
+        "endLoc": {
+          "column": 6,
+          "line": 26,
+          "position": 1043
+        },
+        "name": "dto/dashboard.ts",
+        "start": 20,
+        "startLoc": {
+          "column": 41,
+          "line": 20,
+          "position": 827
+        }
+      },
+      "format": "typescript",
+      "fragment": "export const RegistrationLiveBreakdown = z\n  .object({\n    unit: z.literal('registrations'),\n    todayTotal: z.number().int().nonnegative(),\n    byCategory: z.array(\n      z.object({ key: z.string(), value: z.number().int().nonnegative() }).strict(),\n    ),",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 7,
+      "secondFile": {
+        "end": 144,
+        "endLoc": {
+          "column": 10,
+          "line": 144,
+          "position": 4951
+        },
+        "name": "dto/dashboard.ts",
+        "start": 138,
+        "startLoc": {
+          "column": 19,
+          "line": 138,
+          "position": 4711
+        }
+      },
+      "tokens": 73
+    },
+    {
+      "firstFile": {
+        "end": 50,
+        "endLoc": {
+          "column": 45,
+          "line": 50,
+          "position": 1844
+        },
+        "name": "dto/dashboard.ts",
+        "start": 45,
+        "startLoc": {
+          "column": 31,
+          "line": 45,
+          "position": 1662
+        }
+      },
+      "format": "typescript",
+      "fragment": "export const CardLiveBreakdown = z\n  .object({\n    unit: z.literal('cards'),\n    issued: z.number().int().nonnegative(),\n    completed: z.number().int().nonnegative(),\n    redeemed: z.number().int().nonnegative(),",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 6,
+      "secondFile": {
+        "end": 171,
+        "endLoc": {
+          "column": 45,
+          "line": 171,
+          "position": 5894
+        },
+        "name": "dto/missionCard.ts",
+        "start": 166,
+        "startLoc": {
+          "column": 32,
+          "line": 166,
+          "position": 5712
+        }
+      },
+      "tokens": 63
+    },
+    {
+      "firstFile": {
+        "end": 104,
+        "endLoc": {
+          "column": 11,
+          "line": 104,
+          "position": 3343
+        },
+        "name": "dto/gift.ts",
+        "start": 97,
+        "startLoc": {
+          "column": 30,
+          "line": 97,
+          "position": 3184
+        }
+      },
+      "format": "typescript",
+      "fragment": "export const GiftSummaryRow = z\n  .object({\n    giftTypeId: Id,\n    giftTypeName: z.string(),\n    redeemed: z.number().int().nonnegative(),\n    remaining: z.number().int(),\n  })\n  .strict();",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 8,
+      "secondFile": {
+        "end": 129,
+        "endLoc": {
+          "column": 17,
+          "line": 129,
+          "position": 4517
+        },
+        "name": "dto/report.ts",
+        "start": 122,
+        "startLoc": {
+          "column": 6,
+          "line": 122,
+          "position": 4316
+        }
+      },
+      "tokens": 51
+    },
+    {
+      "firstFile": {
+        "end": 25,
+        "endLoc": {
+          "column": 46,
+          "line": 25,
+          "position": 1002
+        },
+        "name": "dto/roster.ts",
+        "start": 18,
+        "startLoc": {
+          "column": 39,
+          "line": 18,
+          "position": 723
+        }
+      },
+      "format": "typescript",
+      "fragment": "export const ProvisionVolunteerRequest = z\n  .object({\n    displayName: z.string().trim().min(1).max(120),\n    email: VolunteerEmail,\n    phone: VolunteerPhone.optional(),\n    role: CommitteeRole.default('VOLUNTEER'),\n    portfolio: z.string().trim().max(120).optional(),\n    reportsToEmail: VolunteerEmail.optional(),",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 8,
+      "secondFile": {
+        "end": 66,
+        "endLoc": {
+          "column": 46,
+          "line": 66,
+          "position": 2322
+        },
+        "name": "dto/roster.ts",
+        "start": 59,
+        "startLoc": {
+          "column": 29,
+          "line": 59,
+          "position": 2043
+        }
+      },
+      "tokens": 78
+    },
+    {
+      "firstFile": {
+        "end": 112,
+        "endLoc": {
+          "column": 50,
+          "line": 112,
+          "position": 4082
+        },
+        "name": "middleware/auth/index.ts",
+        "start": 107,
+        "startLoc": {
+          "column": 2,
+          "line": 107,
+          "position": 3868
+        }
+      },
+      "format": "typescript",
+      "fragment": "  const volunteer = await prisma.volunteer.findUnique({\n    where: { cognitoSub: sub },\n    select: { id: true, displayName: true, role: true, active: true },\n  });\n\n  if (!volunteer) throw new NotProvisionedError();",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 6,
+      "secondFile": {
+        "end": 48,
+        "endLoc": {
+          "column": 50,
+          "line": 48,
+          "position": 1850
+        },
+        "name": "modules/auth/service.ts",
+        "start": 43,
+        "startLoc": {
+          "column": 2,
+          "line": 43,
+          "position": 1636
+        }
+      },
+      "tokens": 53
+    },
+    {
+      "firstFile": {
+        "end": 640,
+        "endLoc": {
+          "column": 3,
+          "line": 640,
+          "position": 22309
+        },
+        "name": "modules/admin/service.ts",
+        "start": 632,
+        "startLoc": {
+          "column": 28,
+          "line": 632,
+          "position": 22061
+        }
+      },
+      "format": "typescript",
+      "fragment": "  return rows.map((row) => ({\n    id: row.id,\n    date: row.date.toISOString().slice(0, 10),\n    label: row.label,\n    isPublicDay: row.isPublicDay,\n    isTourDay: row.isTourDay,\n    assignmentCount: row._count.shiftAssignments,\n    createdAt: row.createdAt.toISOString(),\n  }));",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 9,
+      "secondFile": {
+        "end": 687,
+        "endLoc": {
+          "column": 3,
+          "line": 687,
+          "position": 23537
+        },
+        "name": "modules/admin/service.ts",
+        "start": 679,
+        "startLoc": {
+          "column": 9,
+          "line": 679,
+          "position": 23289
+        }
+      },
+      "tokens": 61
+    },
+    {
+      "firstFile": {
+        "end": 690,
+        "endLoc": {
+          "column": 21,
+          "line": 690,
+          "position": 23563
+        },
+        "name": "modules/admin/service.ts",
+        "start": 676,
+        "startLoc": {
+          "column": 18,
+          "line": 676,
+          "position": 23271
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return created;\n  });\n\n  return {\n    id: row.id,\n    date: row.date.toISOString().slice(0, 10),\n    label: row.label,\n    isPublicDay: row.isPublicDay,\n    isTourDay: row.isTourDay,\n    assignmentCount: row._count.shiftAssignments,\n    createdAt: row.createdAt.toISOString(),\n  };\n}\n\nexport async function updateEventDay(",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 15,
+      "secondFile": {
+        "end": 736,
+        "endLoc": {
+          "column": 21,
+          "line": 736,
+          "position": 25171
+        },
+        "name": "modules/admin/service.ts",
+        "start": 718,
+        "startLoc": {
+          "column": 18,
+          "line": 718,
+          "position": 24490
+        }
+      },
+      "tokens": 71
+    },
+    {
+      "firstFile": {
+        "end": 14,
+        "endLoc": {
+          "column": 8,
+          "line": 14,
+          "position": 559
+        },
+        "name": "modules/announcement/router.ts",
+        "start": 3,
+        "startLoc": {
+          "column": 63,
+          "line": 3,
+          "position": 151
+        }
+      },
+      "format": "typescript",
+      "fragment": "import { CreateAnnouncementRequest, Id, ListAnnouncementsQuery } from '@spoh/shared';\nimport { getAuth, requireAuth } from '../../middleware/auth/index.js';\nimport { defaultRateLimit } from '../../middleware/rateLimit.js';\nimport { requireCapability } from '../../middleware/rbac.js';\nimport {\n  validate,\n  validatedBody,\n  validatedParams,\n  validatedQuery,\n} from '../../middleware/validate.js';\nimport { auditContextFrom } from '../../lib/requestContext.js';\nimport { acknowledgeAnnouncement, listInbox, sendAnnouncement } from './service.js';",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 12,
+      "secondFile": {
+        "end": 19,
+        "endLoc": {
+          "column": 8,
+          "line": 19,
+          "position": 584
+        },
+        "name": "modules/lostFound/router.ts",
+        "start": 8,
+        "startLoc": {
+          "column": 0,
+          "line": 8,
+          "position": 176
+        }
+      },
+      "tokens": 50
+    },
+    {
+      "firstFile": {
+        "end": 74,
+        "endLoc": {
+          "column": 9,
+          "line": 74,
+          "position": 2474
+        },
+        "name": "modules/announcement/router.ts",
+        "start": 68,
+        "startLoc": {
+          "column": 18,
+          "line": 68,
+          "position": 2255
+        }
+      },
+      "format": "typescript",
+      "fragment": "  defaultRateLimit,\n  requireCapability('own.read'),\n  validate({ params: IdParams }),\n  async (req: Request, res: Response) => {\n    const auth = getAuth(req);\n    const { id } = validatedParams<z.infer<typeof IdParams>>(req);\n    const announcement = await acknowledgeAnnouncement(id, auth.volunteerId);",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 7,
+      "secondFile": {
+        "end": 56,
+        "endLoc": {
+          "column": 9,
+          "line": 56,
+          "position": 2095
+        },
+        "name": "modules/lostPerson/router.ts",
+        "start": 50,
+        "startLoc": {
+          "column": 18,
+          "line": 50,
+          "position": 1876
+        }
+      },
+      "tokens": 55
+    },
+    {
+      "firstFile": {
+        "end": 161,
+        "endLoc": {
+          "column": 9,
+          "line": 161,
+          "position": 5174
+        },
+        "name": "modules/attendance/service.ts",
+        "start": 154,
+        "startLoc": {
+          "column": 9,
+          "line": 154,
+          "position": 4853
+        }
+      },
+      "format": "typescript",
+      "fragment": "  return prisma.$transaction(async (tx) => {\n    await lockPerson(tx, volunteerId);\n    const now = new Date();\n    const person = await tx.volunteer.findUniqueOrThrow({ where: { id: volunteerId } });\n    const day = await tx.eventDay.findUnique({\n      where: { date: eventDayAnchor(singaporeDateString(now)) },\n    });\n    if (!isRoot(person))",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 8,
+      "secondFile": {
+        "end": 258,
+        "endLoc": {
+          "column": 9,
+          "line": 258,
+          "position": 8419
+        },
+        "name": "modules/attendance/service.ts",
+        "start": 251,
+        "startLoc": {
+          "column": 23,
+          "line": 251,
+          "position": 8098
+        }
+      },
+      "tokens": 78
+    },
+    {
+      "firstFile": {
+        "end": 87,
+        "endLoc": {
+          "column": 25,
+          "line": 87,
+          "position": 3009
+        },
+        "name": "modules/auth/service.ts",
+        "start": 77,
+        "startLoc": {
+          "column": 8,
+          "line": 77,
+          "position": 2780
+        }
+      },
+      "format": "typescript",
+      "fragment": "        familyId,\n        userAgent: context.userAgent,\n        ip: context.ip,\n        expiresAt,\n      },\n      select: { id: true },\n    });\n\n    await tx.volunteer.update({\n      where: { id: volunteer.id },\n      data: { lastSeenAt: new Date() },",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 11,
+      "secondFile": {
+        "end": 220,
+        "endLoc": {
+          "column": 80,
+          "line": 220,
+          "position": 6976
+        },
+        "name": "modules/auth/service.ts",
+        "start": 212,
+        "startLoc": {
+          "column": 27,
+          "line": 212,
+          "position": 6759
+        }
+      },
+      "tokens": 52
+    },
+    {
+      "firstFile": {
+        "end": 132,
+        "endLoc": {
+          "column": 21,
+          "line": 132,
+          "position": 4138
+        },
+        "name": "modules/auth/service.ts",
+        "start": 106,
+        "startLoc": {
+          "column": 16,
+          "line": 106,
+          "position": 3406
+        }
+      },
+      "format": "typescript",
+      "fragment": "    refreshToken,\n    expiresAt,\n    response: {\n      accessToken: token,\n      tokenType: 'Bearer',\n      expiresIn,\n      volunteer: {\n        id: volunteer.id,\n        displayName: volunteer.displayName,\n        role: volunteer.role,\n      },\n      capabilities: capabilitiesForRole(volunteer.role),\n      // Overwritten by the router if the cookie could not actually be set.\n      refreshAvailable: true,\n    },\n  };\n}\n\n/**\n * Rotate a refresh token.\n *\n * Every failure mode returns the same generic outcome to the client — an\n * expired session — except detected reuse, which is worth distinguishing so the\n * client can stop retrying and the volunteer is told to sign in again rather\n * than sitting on a loop.\n */\nexport async function rotateSession(",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 27,
+      "secondFile": {
+        "end": 249,
+        "endLoc": {
+          "column": 21,
+          "line": 249,
+          "position": 7601
+        },
+        "name": "modules/auth/service.ts",
+        "start": 231,
+        "startLoc": {
+          "column": 27,
+          "line": 231,
+          "position": 7173
+        }
+      },
+      "tokens": 60
+    },
+    {
+      "firstFile": {
+        "end": 21,
+        "endLoc": {
+          "column": 8,
+          "line": 21,
+          "position": 654
+        },
+        "name": "modules/fallback/router.ts",
+        "start": 10,
+        "startLoc": {
+          "column": 0,
+          "line": 10,
+          "position": 226
+        }
+      },
+      "format": "typescript",
+      "fragment": "} from '@spoh/shared';\nimport { getAuth, requireAuth } from '../../middleware/auth/index.js';\nimport { defaultRateLimit, sensitiveRateLimit } from '../../middleware/rateLimit.js';\nimport { requireCapability } from '../../middleware/rbac.js';\nimport {\n  validate,\n  validatedBody,\n  validatedParams,\n  validatedQuery,\n} from '../../middleware/validate.js';\nimport { auditContextFrom } from '../../lib/requestContext.js';\nimport {",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 12,
+      "secondFile": {
+        "end": 14,
+        "endLoc": {
+          "column": 8,
+          "line": 14,
+          "position": 576
+        },
+        "name": "modules/roster/router.ts",
+        "start": 3,
+        "startLoc": {
+          "column": 60,
+          "line": 3,
+          "position": 148
+        }
+      },
+      "tokens": 52
+    },
+    {
+      "firstFile": {
+        "end": 243,
+        "endLoc": {
+          "column": 13,
+          "line": 243,
+          "position": 7444
+        },
+        "name": "modules/fallback/service.ts",
+        "start": 221,
+        "startLoc": {
+          "column": 31,
+          "line": 221,
+          "position": 6827
+        }
+      },
+      "format": "typescript",
+      "fragment": "    targetTable: 'Registration',\n    fileName: request.fileName ?? null,\n    notes: request.notes ?? null,\n    context,\n    apply: async (tx, issues) => {\n      const stations = await stationCodeMap(tx);\n      let created = 0;\n      let skipped = 0;\n\n      for (const [index, row] of request.rows.entries()) {\n        const rowNumber = index + 1;\n        const stationId = stations.get(row.stationCode.toUpperCase());\n\n        if (!stationId) {\n          issues.push({\n            rowNumber,\n            field: 'stationCode',\n            message: `Unknown station code ${row.stationCode}`,\n          });\n          continue;\n        }\n\n        const recordedAt = new Date(row.recordedAt ?? (row.timeBlockStart as string));",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 23,
+      "secondFile": {
+        "end": 317,
+        "endLoc": {
+          "column": 13,
+          "line": 317,
+          "position": 9632
+        },
+        "name": "modules/fallback/service.ts",
+        "start": 295,
+        "startLoc": {
+          "column": 31,
+          "line": 295,
+          "position": 9015
+        }
+      },
+      "tokens": 121
+    },
+    {
+      "firstFile": {
+        "end": 79,
+        "endLoc": {
+          "column": 21,
+          "line": 79,
+          "position": 2510
+        },
+        "name": "modules/footfall/repo.ts",
+        "start": 64,
+        "startLoc": {
+          "column": 74,
+          "line": 64,
+          "position": 2169
+        }
+      },
+      "format": "typescript",
+      "fragment": "function whereFrom(filter: FootfallFilter): Prisma.FootfallTickWhereInput {\n  return {\n    voided: false,\n    ...(filter.stationId ? { stationId: filter.stationId } : {}),\n    ...(filter.from || filter.to\n      ? {\n          recordedAt: {\n            ...(filter.from ? { gte: filter.from } : {}),\n            ...(filter.to ? { lt: filter.to } : {}),\n          },\n        }\n      : {}),\n  };\n}\n\nexport async function sumMatching(filter: FootfallFilter): Promise<number> {",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 16,
+      "secondFile": {
+        "end": 99,
+        "endLoc": {
+          "column": 21,
+          "line": 99,
+          "position": 3091
+        },
+        "name": "modules/registration/repo.ts",
+        "start": 84,
+        "startLoc": {
+          "column": 85,
+          "line": 84,
+          "position": 2750
+        }
+      },
+      "tokens": 89
+    },
+    {
+      "firstFile": {
+        "end": 76,
+        "endLoc": {
+          "column": 3,
+          "line": 76,
+          "position": 2484
+        },
+        "name": "modules/footfall/repo.ts",
+        "start": 65,
+        "startLoc": {
+          "column": 9,
+          "line": 65,
+          "position": 2180
+        }
+      },
+      "format": "typescript",
+      "fragment": "  return {\n    voided: false,\n    ...(filter.stationId ? { stationId: filter.stationId } : {}),\n    ...(filter.from || filter.to\n      ? {\n          recordedAt: {\n            ...(filter.from ? { gte: filter.from } : {}),\n            ...(filter.to ? { lt: filter.to } : {}),\n          },\n        }\n      : {}),\n  };",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 12,
+      "secondFile": {
+        "end": 137,
+        "endLoc": {
+          "column": 5,
+          "line": 137,
+          "position": 4175
+        },
+        "name": "modules/gift/repo.ts",
+        "start": 126,
+        "startLoc": {
+          "column": 11,
+          "line": 126,
+          "position": 3849
+        }
+      },
+      "tokens": 82
+    },
+    {
+      "firstFile": {
+        "end": 22,
+        "endLoc": {
+          "column": 8,
+          "line": 22,
+          "position": 774
+        },
+        "name": "modules/footfall/router.ts",
+        "start": 8,
+        "startLoc": {
+          "column": 25,
+          "line": 8,
+          "position": 210
+        }
+      },
+      "format": "typescript",
+      "fragment": "  VoidFootfallTickRequest,\n} from '@spoh/shared';\nimport { requireAuth } from '../../middleware/auth/index.js';\nimport { idempotent } from '../../middleware/idempotency.js';\nimport { captureRateLimit, defaultRateLimit } from '../../middleware/rateLimit.js';\nimport { requireCapability, requireStationScope } from '../../middleware/rbac.js';\nimport {\n  validate,\n  validatedBody,\n  validatedParams,\n  validatedQuery,\n} from '../../middleware/validate.js';\nimport { captureActorFrom } from '../../lib/captureActor.js';\nimport { auditContextFrom } from '../../lib/requestContext.js';\nimport {",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 15,
+      "secondFile": {
+        "end": 22,
+        "endLoc": {
+          "column": 8,
+          "line": 22,
+          "position": 783
+        },
+        "name": "modules/registration/router.ts",
+        "start": 8,
+        "startLoc": {
+          "column": 25,
+          "line": 8,
+          "position": 219
+        }
+      },
+      "tokens": 67
+    },
+    {
+      "firstFile": {
+        "end": 22,
+        "endLoc": {
+          "column": 8,
+          "line": 22,
+          "position": 774
+        },
+        "name": "modules/footfall/router.ts",
+        "start": 10,
+        "startLoc": {
+          "column": 9,
+          "line": 10,
+          "position": 244
+        }
+      },
+      "format": "typescript",
+      "fragment": "import { requireAuth } from '../../middleware/auth/index.js';\nimport { idempotent } from '../../middleware/idempotency.js';\nimport { captureRateLimit, defaultRateLimit } from '../../middleware/rateLimit.js';\nimport { requireCapability, requireStationScope } from '../../middleware/rbac.js';\nimport {\n  validate,\n  validatedBody,\n  validatedParams,\n  validatedQuery,\n} from '../../middleware/validate.js';\nimport { captureActorFrom } from '../../lib/captureActor.js';\nimport { auditContextFrom } from '../../lib/requestContext.js';\nimport {",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 13,
+      "secondFile": {
+        "end": 16,
+        "endLoc": {
+          "column": 8,
+          "line": 16,
+          "position": 732
+        },
+        "name": "modules/gift/router.ts",
+        "start": 4,
+        "startLoc": {
+          "column": 18,
+          "line": 4,
+          "position": 202
+        }
+      },
+      "tokens": 60
+    },
+    {
+      "firstFile": {
+        "end": 189,
+        "endLoc": {
+          "column": 9,
+          "line": 189,
+          "position": 6022
+        },
+        "name": "modules/footfall/service.ts",
+        "start": 183,
+        "startLoc": {
+          "column": 31,
+          "line": 183,
+          "position": 5827
+        }
+      },
+      "format": "typescript",
+      "fragment": "  const filter: FootfallFilter = {\n    ...(query.stationId ? { stationId: query.stationId } : {}),\n    ...(query.from ? { from: new Date(query.from) } : {}),\n    ...(query.to ? { to: new Date(query.to) } : {}),\n  };\n\n  const [total, containsFallbackData, stations, rows] = await Promise.all([",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 7,
+      "secondFile": {
+        "end": 207,
+        "endLoc": {
+          "column": 9,
+          "line": 207,
+          "position": 6757
+        },
+        "name": "modules/gift/service.ts",
+        "start": 201,
+        "startLoc": {
+          "column": 15,
+          "line": 201,
+          "position": 6562
+        }
+      },
+      "tokens": 68
+    },
+    {
+      "firstFile": {
+        "end": 189,
+        "endLoc": {
+          "column": 36,
+          "line": 189,
+          "position": 6049
+        },
+        "name": "modules/footfall/service.ts",
+        "start": 184,
+        "startLoc": {
+          "column": 62,
+          "line": 184,
+          "position": 5893
+        }
+      },
+      "format": "typescript",
+      "fragment": "    ...(query.stationId ? { stationId: query.stationId } : {}),\n    ...(query.from ? { from: new Date(query.from) } : {}),\n    ...(query.to ? { to: new Date(query.to) } : {}),\n  };\n\n  const [total, containsFallbackData, stations, rows] = await Promise.all([",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 6,
+      "secondFile": {
+        "end": 220,
+        "endLoc": {
+          "column": 36,
+          "line": 220,
+          "position": 7476
+        },
+        "name": "modules/registration/service.ts",
+        "start": 215,
+        "startLoc": {
+          "column": 62,
+          "line": 215,
+          "position": 7320
+        }
+      },
+      "tokens": 52
+    },
+    {
+      "firstFile": {
+        "end": 207,
+        "endLoc": {
+          "column": 9,
+          "line": 207,
+          "position": 6757
+        },
+        "name": "modules/gift/service.ts",
+        "start": 200,
+        "startLoc": {
+          "column": 90,
+          "line": 200,
+          "position": 6543
+        }
+      },
+      "format": "typescript",
+      "fragment": "export async function summariseGifts(query: GiftSummaryQuery): Promise<GiftSummaryResponse> {\n  const filter = {\n    ...(query.stationId ? { stationId: query.stationId } : {}),\n    ...(query.from ? { from: new Date(query.from) } : {}),\n    ...(query.to ? { to: new Date(query.to) } : {}),\n  };\n\n  const [rows, gifts, containsFallbackData] = await Promise.all([",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 8,
+      "secondFile": {
+        "end": 220,
+        "endLoc": {
+          "column": 9,
+          "line": 220,
+          "position": 7449
+        },
+        "name": "modules/registration/service.ts",
+        "start": 213,
+        "startLoc": {
+          "column": 38,
+          "line": 213,
+          "position": 7235
+        }
+      },
+      "tokens": 72
+    },
+    {
+      "firstFile": {
+        "end": 19,
+        "endLoc": {
+          "column": 8,
+          "line": 19,
+          "position": 584
+        },
+        "name": "modules/lostFound/router.ts",
+        "start": 7,
+        "startLoc": {
+          "column": 20,
+          "line": 7,
+          "position": 174
+        }
+      },
+      "format": "typescript",
+      "fragment": "  ListLostFoundQuery,\n} from '@spoh/shared';\nimport { getAuth, requireAuth } from '../../middleware/auth/index.js';\nimport { defaultRateLimit } from '../../middleware/rateLimit.js';\nimport { requireCapability } from '../../middleware/rbac.js';\nimport {\n  validate,\n  validatedBody,\n  validatedParams,\n  validatedQuery,\n} from '../../middleware/validate.js';\nimport { auditContextFrom } from '../../lib/requestContext.js';\nimport { claimItem, listItems, logItem, markUnclaimedAtClose } from './service.js';",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 13,
+      "secondFile": {
+        "end": 20,
+        "endLoc": {
+          "column": 8,
+          "line": 20,
+          "position": 610
+        },
+        "name": "modules/shift/router.ts",
+        "start": 8,
+        "startLoc": {
+          "column": 24,
+          "line": 8,
+          "position": 200
+        }
+      },
+      "tokens": 51
+    },
+    {
+      "firstFile": {
+        "end": 26,
+        "endLoc": {
+          "column": 28,
+          "line": 26,
+          "position": 1018
+        },
+        "name": "modules/me/router.ts",
+        "start": 20,
+        "startLoc": {
+          "column": 13,
+          "line": 20,
+          "position": 778
+        }
+      },
+      "format": "typescript",
+      "fragment": "  '/check-in',\n  requireCapability('own.read'),\n  validate({ body: CheckInRequest }),\n  async (req: Request, res: Response) => {\n    const auth = getAuth(req);\n    const { assignmentId } = validatedBody<CheckInRequest>(req);\n    const assignment = await checkIn(auth.volunteerId, assignmentId, auditContextFrom(req));",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 7,
+      "secondFile": {
+        "end": 38,
+        "endLoc": {
+          "column": 28,
+          "line": 38,
+          "position": 1403
+        },
+        "name": "modules/me/router.ts",
+        "start": 32,
+        "startLoc": {
+          "column": 14,
+          "line": 32,
+          "position": 1163
+        }
+      },
+      "tokens": 52
+    },
+    {
+      "firstFile": {
+        "end": 80,
+        "endLoc": {
+          "column": 32,
+          "line": 80,
+          "position": 2872
+        },
+        "name": "modules/missionCard/service.ts",
+        "start": 73,
+        "startLoc": {
+          "column": 15,
+          "line": 73,
+          "position": 2540
+        }
+      },
+      "format": "typescript",
+      "fragment": "  const card = await prisma.$transaction(async (tx) => {\n    const existing = await tx.missionCard.findUnique({ where: { shortCode } });\n    if (!existing) throw new AppError(404, ERROR_CODES.CARD_NOT_FOUND, 'No card with that code');\n\n    if (existing.status === 'VOIDED') {\n      throw new AppError(\n        409,\n        ERROR_CODES.CARD_VOIDED,",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 8,
+      "secondFile": {
+        "end": 228,
+        "endLoc": {
+          "column": 54,
+          "line": 228,
+          "position": 7717
+        },
+        "name": "modules/missionCard/service.ts",
+        "start": 223,
+        "startLoc": {
+          "column": 2,
+          "line": 223,
+          "position": 7402
+        }
+      },
+      "tokens": 67
+    }
+  ],
+  "statistics": {
+    "detectionDate": "2026-09-25T14:16:48.679Z",
+    "formats": {
+      "css": {
+        "clones": 2,
+        "duplicatedLines": 22,
+        "duplicatedTokens": 192,
+        "lines": 728,
+        "newClones": 0,
+        "newDuplicatedLines": 0,
+        "percentage": 3.021978021978022,
+        "percentageTokens": 1.2558869701726845,
+        "sources": 1,
+        "tokens": 15288
+      },
+      "tsx": {
+        "clones": 6,
+        "duplicatedLines": 76,
+        "duplicatedTokens": 431,
+        "lines": 7938,
+        "newClones": 0,
+        "newDuplicatedLines": 0,
+        "percentage": 0.9574200050390527,
+        "percentageTokens": 1.126561764859637,
+        "sources": 54,
+        "tokens": 38258
+      },
+      "typescript": {
+        "clones": 24,
+        "duplicatedLines": 264,
+        "duplicatedTokens": 1578,
+        "lines": 18733,
+        "newClones": 0,
+        "newDuplicatedLines": 0,
+        "percentage": 1.4092777451556078,
+        "percentageTokens": 1.661909827174016,
+        "sources": 129,
+        "tokens": 94951
+      }
+    },
+    "total": {
+      "clones": 32,
+      "duplicatedLines": 362,
+      "duplicatedTokens": 2201,
+      "lines": 27399,
+      "newClones": 0,
+      "newDuplicatedLines": 0,
+      "percentage": 1.3212161027774736,
+      "percentageTokens": 1.4821848252826655,
+      "sources": 184,
+      "tokens": 148497
+    }
+  }
+}

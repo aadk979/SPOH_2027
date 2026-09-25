@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T14:16:39.845Z",
+  "updatedAt": "2026-09-25T14:16:48.288Z",
   "current": {
     "phase": "P03",
-    "step": "P03.2"
+    "step": "P03.3"
   },
   "gates": [
     {
@@ -674,8 +674,8 @@
         {
           "id": "P03.3",
           "title": "Duplication and consistency",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-25T14:16:48.288Z",
           "completedAt": null,
           "commits": [],
           "notes": []
