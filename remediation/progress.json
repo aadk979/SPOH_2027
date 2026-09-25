@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T12:04:32.735Z",
+  "updatedAt": "2026-09-25T12:13:57.531Z",
   "current": {
     "phase": "P00",
-    "step": "P00.4"
+    "step": "P00.5"
   },
   "gates": [
     {
@@ -267,11 +267,16 @@
         {
           "id": "P00.5",
           "title": "Full baseline run",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-25T12:04:41.802Z",
+          "completedAt": "2026-09-25T12:13:57.531Z",
+          "commits": ["4aa2e7b"],
+          "notes": [
+            {
+              "at": "2026-09-25T12:13:57.531Z",
+              "text": "All suites recorded in baseline.md 'Full baseline run'. Green: lint, typecheck, unit 233, integration 288, client 19, build. e2e 23/26; failures -> PF-15, PF-16, PF-17. Playwright needs PLAYWRIGHT_CHROMIUM_EXECUTABLE here (commit 9300b43)."
+            }
+          ]
         },
         {
           "id": "P00.6",
