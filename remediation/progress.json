@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T16:26:00.249Z",
+  "updatedAt": "2026-09-25T16:26:10.676Z",
   "current": {
     "phase": "P05",
-    "step": "P05.5"
+    "step": "P05.6"
   },
   "gates": [
     {
@@ -70,7 +70,10 @@
       "id": "D-01",
       "title": "Go-live date and release strategy",
       "owner": "you",
-      "blocks": ["P05", "P16"],
+      "blocks": [
+        "P05",
+        "P16"
+      ],
       "status": "answered",
       "answer": "C: staged, with a go/no-go on 28 Oct 2026. G3 green on staging by 28 Oct means 4 Nov training runs on the new platform; otherwise training and January run on baseline/pre-remediation plus critical fixes and the programme continues for the next event (owner, 2026-09-26)",
       "answeredAt": "2026-09-25T16:08:16.762Z"
@@ -79,7 +82,10 @@
       "id": "D-02",
       "title": "Reuse model (tenancy)",
       "owner": "you",
-      "blocks": ["P05", "P09"],
+      "blocks": [
+        "P05",
+        "P09"
+      ],
       "status": "answered",
       "answer": "A: many events in one deployment, one organisation (SP SoC), with an Organisation row as the schema root (owner, 2026-09-25)",
       "answeredAt": "2026-09-25T12:51:56.322Z"
@@ -88,7 +94,10 @@
       "id": "D-03",
       "title": "How flexible roles are",
       "owner": "you",
-      "blocks": ["P05", "P11"],
+      "blocks": [
+        "P05",
+        "P11"
+      ],
       "status": "answered",
       "answer": "A: fixed role catalogue (Volunteer, IC, Deputy, Chief, Lead, Admin), renameable per event; admins edit each role's permitted actions per event; guardrail policies locked (owner, 2026-09-26)",
       "answeredAt": "2026-09-25T16:08:16.853Z"
@@ -97,7 +106,10 @@
       "id": "D-04",
       "title": "Product invariants",
       "owner": "you",
-      "blocks": ["P05", "P09"],
+      "blocks": [
+        "P05",
+        "P09"
+      ],
       "status": "answered",
       "answer": "Configurable per event: 'the three counts never merge' and 'no visitor personal data' become per-event options, not fixed invariants (owner, 2026-09-25)",
       "answeredAt": "2026-09-25T12:51:56.596Z"
@@ -106,7 +118,9 @@
       "id": "D-05",
       "title": "Which branch is the baseline",
       "owner": "you",
-      "blocks": ["P00.2"],
+      "blocks": [
+        "P00.2"
+      ],
       "status": "answered",
       "answer": "Stay on the current working branch. Do NOT fast-forward to origin/feat/audit-cloudwatch; its 5 commits (CloudWatch audit, audit-log/roster-import screens, Lightsail infra, smoke test) stay out of the baseline. (owner, 2026-09-25)",
       "answeredAt": "2026-09-25T11:58:49.597Z"
@@ -115,7 +129,9 @@
       "id": "D-06",
       "title": "How Verified Permissions is evaluated",
       "owner": "design (P05)",
-      "blocks": ["P11"],
+      "blocks": [
+        "P11"
+      ],
       "status": "open",
       "answer": null,
       "answeredAt": null
@@ -124,7 +140,9 @@
       "id": "D-07",
       "title": "Compute and hosting",
       "owner": "you (cost), design (shape)",
-      "blocks": ["P08"],
+      "blocks": [
+        "P08"
+      ],
       "status": "open",
       "answer": null,
       "answeredAt": null
@@ -133,7 +151,10 @@
       "id": "D-08",
       "title": "Domain and email",
       "owner": "you",
-      "blocks": ["P08.5", "P12.2"],
+      "blocks": [
+        "P08.5",
+        "P12.2"
+      ],
       "status": "open",
       "answer": null,
       "answeredAt": null
@@ -142,7 +163,9 @@
       "id": "D-09",
       "title": "Scheduler engine",
       "owner": "design (P05)",
-      "blocks": ["P10"],
+      "blocks": [
+        "P10"
+      ],
       "status": "answered",
       "answer": "A: Postgres job table (design, ADR-004 §4): ScheduledAction with FOR UPDATE SKIP LOCKED claims, leases, retries, dead-letter, transactional handlers. Proposed until G1.",
       "answeredAt": "2026-09-25T16:26:00.147Z"
@@ -151,7 +174,10 @@
       "id": "D-10",
       "title": "AWS budget and environments",
       "owner": "you",
-      "blocks": ["P05", "P08"],
+      "blocks": [
+        "P05",
+        "P08"
+      ],
       "status": "answered",
       "answer": "US$100/month ceiling (owner, 2026-09-26). Environments not stated: P05 assumes the ceiling covers all environments, staging + production, no ephemeral dev stack (assumed, to confirm at P05.11)",
       "answeredAt": "2026-09-25T16:08:16.944Z"
@@ -160,7 +186,9 @@
       "id": "D-11",
       "title": "Branch and review workflow",
       "owner": "you",
-      "blocks": ["P00.2"],
+      "blocks": [
+        "P00.2"
+      ],
       "status": "answered",
       "answer": "Amended by the owner (2026-09-25): work directly on main. No feature branches, no pull requests, no tags. Commit each step to main and push to main. (Originally A: one PR per phase; PR #1 carried the plan and P00 and was merged.)",
       "answeredAt": "2026-09-25T12:36:39.453Z"
@@ -169,7 +197,9 @@
       "id": "D-12",
       "title": "Existing data",
       "owner": "you",
-      "blocks": ["P09.4"],
+      "blocks": [
+        "P09.4"
+      ],
       "status": "open",
       "answer": null,
       "answeredAt": null
@@ -178,7 +208,11 @@
       "id": "D-13",
       "title": "Access for testing",
       "owner": "you",
-      "blocks": ["P00.8", "P00.9", "P04.7"],
+      "blocks": [
+        "P00.8",
+        "P00.9",
+        "P04.7"
+      ],
       "status": "answered",
       "answer": "Partial. Allowed: P00.9 may run infra/scripts/smoke-test.sh against staging. NOT allowed: other audit requests to the live staging site, and use of this container's AWS credentials (so P00.8 and P04.7 stay blocked). (owner, 2026-09-25)",
       "answeredAt": "2026-09-25T11:58:50.328Z"
@@ -187,7 +221,10 @@
       "id": "D-14",
       "title": "Shared state for rate limits and caches",
       "owner": "design (P05)",
-      "blocks": ["P10.3", "P15.2"],
+      "blocks": [
+        "P10.3",
+        "P15.2"
+      ],
       "status": "answered",
       "answer": "A: Postgres (design, ADR-003 §3-4): LISTEN/NOTIFY cache bus and an UNLOGGED rate-limit counter table; ElastiCache and DynamoDB rejected on cost and moving parts. Proposed until G1.",
       "answeredAt": "2026-09-25T16:24:05.627Z"
@@ -200,7 +237,11 @@
       "file": "phases\\P00-baseline.md",
       "gate": "G0",
       "dependsOn": [],
-      "decisions": ["D-05", "D-11", "D-13"],
+      "decisions": [
+        "D-05",
+        "D-11",
+        "D-13"
+      ],
       "changesBehaviour": "No",
       "size": "M",
       "steps": [
@@ -210,7 +251,9 @@
           "status": "done",
           "startedAt": "2026-09-25T11:59:09.351Z",
           "completedAt": "2026-09-25T12:00:39.406Z",
-          "commits": ["a3289c1"],
+          "commits": [
+            "a3289c1"
+          ],
           "notes": [
             {
               "at": "2026-09-25T12:00:39.406Z",
@@ -224,7 +267,9 @@
           "status": "done",
           "startedAt": "2026-09-25T12:01:18.242Z",
           "completedAt": "2026-09-25T12:01:41.180Z",
-          "commits": ["616c70c"],
+          "commits": [
+            "616c70c"
+          ],
           "notes": [
             {
               "at": "2026-09-25T12:01:41.180Z",
@@ -238,7 +283,9 @@
           "status": "done",
           "startedAt": "2026-09-25T12:01:49.193Z",
           "completedAt": "2026-09-25T12:30:54.815Z",
-          "commits": ["153b116"],
+          "commits": [
+            "153b116"
+          ],
           "notes": [
             {
               "at": "2026-09-25T12:02:35.375Z",
@@ -260,7 +307,9 @@
           "status": "done",
           "startedAt": "2026-09-25T12:04:07.472Z",
           "completedAt": "2026-09-25T12:04:32.735Z",
-          "commits": ["ef860f3"],
+          "commits": [
+            "ef860f3"
+          ],
           "notes": [
             {
               "at": "2026-09-25T12:04:32.735Z",
@@ -274,7 +323,9 @@
           "status": "done",
           "startedAt": "2026-09-25T12:04:41.802Z",
           "completedAt": "2026-09-25T12:13:57.531Z",
-          "commits": ["4aa2e7b"],
+          "commits": [
+            "4aa2e7b"
+          ],
           "notes": [
             {
               "at": "2026-09-25T12:13:57.531Z",
@@ -288,7 +339,9 @@
           "status": "done",
           "startedAt": "2026-09-25T12:14:17.655Z",
           "completedAt": "2026-09-25T12:18:45.653Z",
-          "commits": ["0322a8b"],
+          "commits": [
+            "0322a8b"
+          ],
           "notes": [
             {
               "at": "2026-09-25T12:18:45.654Z",
@@ -302,7 +355,10 @@
           "status": "done",
           "startedAt": "2026-09-25T12:18:55.600Z",
           "completedAt": "2026-09-25T12:24:33.000Z",
-          "commits": ["00e16a0", "dd21015"],
+          "commits": [
+            "00e16a0",
+            "dd21015"
+          ],
           "notes": [
             {
               "at": "2026-09-25T12:24:18.903Z",
@@ -356,8 +412,13 @@
       "title": "Audit A: hardcoding and configuration inventory",
       "file": "phases\\P01-audit-hardcoding.md",
       "gate": "G0",
-      "dependsOn": ["P00"],
-      "decisions": ["D-02", "D-04"],
+      "dependsOn": [
+        "P00"
+      ],
+      "decisions": [
+        "D-02",
+        "D-04"
+      ],
       "changesBehaviour": "No",
       "size": "M",
       "steps": [
@@ -367,7 +428,9 @@
           "status": "done",
           "startedAt": "2026-09-25T12:52:15.547Z",
           "completedAt": "2026-09-25T12:54:29.988Z",
-          "commits": ["a58c8a9"],
+          "commits": [
+            "a58c8a9"
+          ],
           "notes": [
             {
               "at": "2026-09-25T12:54:29.988Z",
@@ -381,7 +444,9 @@
           "status": "done",
           "startedAt": "2026-09-25T12:54:39.596Z",
           "completedAt": "2026-09-25T13:03:10.205Z",
-          "commits": ["1531f88"],
+          "commits": [
+            "1531f88"
+          ],
           "notes": [
             {
               "at": "2026-09-25T13:03:10.205Z",
@@ -395,7 +460,9 @@
           "status": "done",
           "startedAt": "2026-09-25T13:03:18.187Z",
           "completedAt": "2026-09-25T13:05:21.424Z",
-          "commits": ["ecdac75"],
+          "commits": [
+            "ecdac75"
+          ],
           "notes": [
             {
               "at": "2026-09-25T13:05:21.424Z",
@@ -409,7 +476,9 @@
           "status": "done",
           "startedAt": "2026-09-25T13:05:27.029Z",
           "completedAt": "2026-09-25T13:07:07.383Z",
-          "commits": ["d7e892f"],
+          "commits": [
+            "d7e892f"
+          ],
           "notes": [
             {
               "at": "2026-09-25T13:07:07.383Z",
@@ -423,7 +492,9 @@
           "status": "done",
           "startedAt": "2026-09-25T13:07:13.081Z",
           "completedAt": "2026-09-25T13:08:39.523Z",
-          "commits": ["4a36ee9"],
+          "commits": [
+            "4a36ee9"
+          ],
           "notes": [
             {
               "at": "2026-09-25T13:08:39.523Z",
@@ -437,7 +508,9 @@
           "status": "done",
           "startedAt": "2026-09-25T13:08:45.469Z",
           "completedAt": "2026-09-25T13:10:05.516Z",
-          "commits": ["b447bce"],
+          "commits": [
+            "b447bce"
+          ],
           "notes": [
             {
               "at": "2026-09-25T13:10:05.516Z",
@@ -451,7 +524,9 @@
           "status": "done",
           "startedAt": "2026-09-25T13:10:12.692Z",
           "completedAt": "2026-09-25T13:12:22.410Z",
-          "commits": ["2ed5dc9"],
+          "commits": [
+            "2ed5dc9"
+          ],
           "notes": [
             {
               "at": "2026-09-25T13:12:22.410Z",
@@ -465,7 +540,9 @@
           "status": "done",
           "startedAt": "2026-09-25T13:12:45.666Z",
           "completedAt": "2026-09-25T13:14:17.839Z",
-          "commits": ["be587ef"],
+          "commits": [
+            "be587ef"
+          ],
           "notes": [
             {
               "at": "2026-09-25T13:14:17.839Z",
@@ -483,7 +560,9 @@
       "title": "Audit B: admin and role journeys",
       "file": "phases\\P02-audit-journeys.md",
       "gate": "G0",
-      "dependsOn": ["P00"],
+      "dependsOn": [
+        "P00"
+      ],
       "decisions": [],
       "changesBehaviour": "No",
       "size": "L",
@@ -494,7 +573,9 @@
           "status": "done",
           "startedAt": "2026-09-25T13:16:42.112Z",
           "completedAt": "2026-09-25T13:19:50.537Z",
-          "commits": ["b0b5bfa"],
+          "commits": [
+            "b0b5bfa"
+          ],
           "notes": [
             {
               "at": "2026-09-25T13:19:50.537Z",
@@ -508,7 +589,9 @@
           "status": "done",
           "startedAt": "2026-09-25T13:19:58.268Z",
           "completedAt": "2026-09-25T13:23:55.369Z",
-          "commits": ["a9bb753"],
+          "commits": [
+            "a9bb753"
+          ],
           "notes": [
             {
               "at": "2026-09-25T13:23:55.369Z",
@@ -522,7 +605,9 @@
           "status": "done",
           "startedAt": "2026-09-25T13:23:55.678Z",
           "completedAt": "2026-09-25T13:28:56.045Z",
-          "commits": ["08a91e6"],
+          "commits": [
+            "08a91e6"
+          ],
           "notes": [
             {
               "at": "2026-09-25T13:28:56.045Z",
@@ -536,7 +621,9 @@
           "status": "done",
           "startedAt": "2026-09-25T13:28:56.370Z",
           "completedAt": "2026-09-25T13:32:47.745Z",
-          "commits": ["317d659"],
+          "commits": [
+            "317d659"
+          ],
           "notes": [
             {
               "at": "2026-09-25T13:32:47.746Z",
@@ -550,7 +637,9 @@
           "status": "done",
           "startedAt": "2026-09-25T13:32:48.036Z",
           "completedAt": "2026-09-25T13:46:34.429Z",
-          "commits": ["641a156"],
+          "commits": [
+            "641a156"
+          ],
           "notes": [
             {
               "at": "2026-09-25T13:46:34.429Z",
@@ -564,7 +653,9 @@
           "status": "done",
           "startedAt": "2026-09-25T13:46:34.709Z",
           "completedAt": "2026-09-25T13:50:44.839Z",
-          "commits": ["c36786c"],
+          "commits": [
+            "c36786c"
+          ],
           "notes": [
             {
               "at": "2026-09-25T13:50:44.839Z",
@@ -578,7 +669,9 @@
           "status": "done",
           "startedAt": "2026-09-25T13:50:45.116Z",
           "completedAt": "2026-09-25T13:53:11.778Z",
-          "commits": ["32b3f98"],
+          "commits": [
+            "32b3f98"
+          ],
           "notes": [
             {
               "at": "2026-09-25T13:53:11.779Z",
@@ -592,7 +685,9 @@
           "status": "done",
           "startedAt": "2026-09-25T13:53:12.064Z",
           "completedAt": "2026-09-25T13:53:56.272Z",
-          "commits": ["225370e"],
+          "commits": [
+            "225370e"
+          ],
           "notes": [
             {
               "at": "2026-09-25T13:53:56.272Z",
@@ -606,7 +701,9 @@
           "status": "done",
           "startedAt": "2026-09-25T13:53:56.572Z",
           "completedAt": "2026-09-25T13:56:58.494Z",
-          "commits": ["40d44a7"],
+          "commits": [
+            "40d44a7"
+          ],
           "notes": [
             {
               "at": "2026-09-25T13:56:58.494Z",
@@ -620,7 +717,9 @@
           "status": "done",
           "startedAt": "2026-09-25T13:56:58.782Z",
           "completedAt": "2026-09-25T13:58:32.635Z",
-          "commits": ["fbcb138"],
+          "commits": [
+            "fbcb138"
+          ],
           "notes": [
             {
               "at": "2026-09-25T13:58:32.636Z",
@@ -638,7 +737,9 @@
       "title": "Audit C: code quality, architecture and bugs",
       "file": "phases\\P03-audit-code.md",
       "gate": "G0",
-      "dependsOn": ["P00"],
+      "dependsOn": [
+        "P00"
+      ],
       "decisions": [],
       "changesBehaviour": "No",
       "size": "L",
@@ -649,7 +750,9 @@
           "status": "done",
           "startedAt": "2026-09-25T14:04:22.630Z",
           "completedAt": "2026-09-25T14:12:43.669Z",
-          "commits": ["6a40065"],
+          "commits": [
+            "6a40065"
+          ],
           "notes": [
             {
               "at": "2026-09-25T14:12:43.669Z",
@@ -663,7 +766,9 @@
           "status": "done",
           "startedAt": "2026-09-25T14:12:55.698Z",
           "completedAt": "2026-09-25T14:16:39.845Z",
-          "commits": ["a26403c"],
+          "commits": [
+            "a26403c"
+          ],
           "notes": [
             {
               "at": "2026-09-25T14:16:39.845Z",
@@ -677,7 +782,9 @@
           "status": "done",
           "startedAt": "2026-09-25T14:16:48.288Z",
           "completedAt": "2026-09-25T14:19:02.392Z",
-          "commits": ["979eb53"],
+          "commits": [
+            "979eb53"
+          ],
           "notes": [
             {
               "at": "2026-09-25T14:19:02.392Z",
@@ -691,7 +798,9 @@
           "status": "done",
           "startedAt": "2026-09-25T14:19:10.257Z",
           "completedAt": "2026-09-25T14:32:54.429Z",
-          "commits": ["4ae80c7"],
+          "commits": [
+            "4ae80c7"
+          ],
           "notes": [
             {
               "at": "2026-09-25T14:32:54.429Z",
@@ -705,7 +814,9 @@
           "status": "done",
           "startedAt": "2026-09-25T14:33:18.132Z",
           "completedAt": "2026-09-25T14:34:52.641Z",
-          "commits": ["0fc8049"],
+          "commits": [
+            "0fc8049"
+          ],
           "notes": [
             {
               "at": "2026-09-25T14:34:52.641Z",
@@ -719,7 +830,9 @@
           "status": "done",
           "startedAt": "2026-09-25T14:35:01.209Z",
           "completedAt": "2026-09-25T14:37:50.948Z",
-          "commits": ["f4daa42"],
+          "commits": [
+            "f4daa42"
+          ],
           "notes": [
             {
               "at": "2026-09-25T14:37:50.948Z",
@@ -733,7 +846,9 @@
           "status": "done",
           "startedAt": "2026-09-25T14:38:00.660Z",
           "completedAt": "2026-09-25T14:43:06.245Z",
-          "commits": ["53ce12e"],
+          "commits": [
+            "53ce12e"
+          ],
           "notes": [
             {
               "at": "2026-09-25T14:43:06.246Z",
@@ -747,7 +862,9 @@
           "status": "done",
           "startedAt": "2026-09-25T14:43:25.386Z",
           "completedAt": "2026-09-25T14:45:26.024Z",
-          "commits": ["998f301"],
+          "commits": [
+            "998f301"
+          ],
           "notes": [
             {
               "at": "2026-09-25T14:45:26.024Z",
@@ -761,7 +878,9 @@
           "status": "done",
           "startedAt": "2026-09-25T14:45:34.359Z",
           "completedAt": "2026-09-25T14:47:43.828Z",
-          "commits": ["c588817"],
+          "commits": [
+            "c588817"
+          ],
           "notes": [
             {
               "at": "2026-09-25T14:47:43.828Z",
@@ -775,7 +894,9 @@
           "status": "done",
           "startedAt": "2026-09-25T14:48:05.880Z",
           "completedAt": "2026-09-25T14:49:50.257Z",
-          "commits": ["2809bc4"],
+          "commits": [
+            "2809bc4"
+          ],
           "notes": [
             {
               "at": "2026-09-25T14:49:50.257Z",
@@ -793,8 +914,12 @@
       "title": "Audit D: security and AWS production readiness",
       "file": "phases\\P04-audit-security-aws.md",
       "gate": "G0",
-      "dependsOn": ["P00"],
-      "decisions": ["D-13"],
+      "dependsOn": [
+        "P00"
+      ],
+      "decisions": [
+        "D-13"
+      ],
       "changesBehaviour": "No",
       "size": "L",
       "steps": [
@@ -804,7 +929,9 @@
           "status": "done",
           "startedAt": "2026-09-25T15:12:32.384Z",
           "completedAt": "2026-09-25T15:26:55.042Z",
-          "commits": ["dbcd5a9"],
+          "commits": [
+            "dbcd5a9"
+          ],
           "notes": [
             {
               "at": "2026-09-25T15:26:55.043Z",
@@ -818,7 +945,9 @@
           "status": "done",
           "startedAt": "2026-09-25T15:27:07.163Z",
           "completedAt": "2026-09-25T15:28:57.425Z",
-          "commits": ["6e67e81"],
+          "commits": [
+            "6e67e81"
+          ],
           "notes": [
             {
               "at": "2026-09-25T15:28:57.426Z",
@@ -832,7 +961,9 @@
           "status": "done",
           "startedAt": "2026-09-25T15:29:15.805Z",
           "completedAt": "2026-09-25T15:32:29.158Z",
-          "commits": ["04b3611"],
+          "commits": [
+            "04b3611"
+          ],
           "notes": [
             {
               "at": "2026-09-25T15:32:29.159Z",
@@ -846,7 +977,9 @@
           "status": "done",
           "startedAt": "2026-09-25T15:32:46.698Z",
           "completedAt": "2026-09-25T15:34:38.024Z",
-          "commits": ["f92ff0d"],
+          "commits": [
+            "f92ff0d"
+          ],
           "notes": [
             {
               "at": "2026-09-25T15:34:38.025Z",
@@ -860,7 +993,9 @@
           "status": "done",
           "startedAt": "2026-09-25T15:35:04.706Z",
           "completedAt": "2026-09-25T15:35:54.594Z",
-          "commits": ["89a1926"],
+          "commits": [
+            "89a1926"
+          ],
           "notes": [
             {
               "at": "2026-09-25T15:35:54.595Z",
@@ -874,7 +1009,9 @@
           "status": "done",
           "startedAt": "2026-09-25T15:36:20.111Z",
           "completedAt": "2026-09-25T15:38:13.752Z",
-          "commits": ["dd17a53"],
+          "commits": [
+            "dd17a53"
+          ],
           "notes": [
             {
               "at": "2026-09-25T15:38:13.753Z",
@@ -902,7 +1039,9 @@
           "status": "done",
           "startedAt": "2026-09-25T15:39:37.361Z",
           "completedAt": "2026-09-25T15:49:06.279Z",
-          "commits": ["5070209"],
+          "commits": [
+            "5070209"
+          ],
           "notes": [
             {
               "at": "2026-09-25T15:49:06.280Z",
@@ -916,7 +1055,9 @@
           "status": "done",
           "startedAt": "2026-09-25T15:49:24.322Z",
           "completedAt": "2026-09-25T15:50:29.987Z",
-          "commits": ["4e5d521"],
+          "commits": [
+            "4e5d521"
+          ],
           "notes": [
             {
               "at": "2026-09-25T15:50:29.988Z",
@@ -930,7 +1071,9 @@
           "status": "done",
           "startedAt": "2026-09-25T15:50:46.488Z",
           "completedAt": "2026-09-25T15:52:07.370Z",
-          "commits": ["a6ad515"],
+          "commits": [
+            "a6ad515"
+          ],
           "notes": [
             {
               "at": "2026-09-25T15:52:07.372Z",
@@ -948,7 +1091,12 @@
       "title": "Target design and sign-off",
       "file": "phases\\P05-design-signoff.md",
       "gate": "G1",
-      "dependsOn": ["P01", "P02", "P03", "P04"],
+      "dependsOn": [
+        "P01",
+        "P02",
+        "P03",
+        "P04"
+      ],
       "decisions": [
         "D-01",
         "D-02",
@@ -971,7 +1119,9 @@
           "status": "done",
           "startedAt": "2026-09-25T16:12:24.170Z",
           "completedAt": "2026-09-25T16:16:24.555Z",
-          "commits": ["87bf2e0"],
+          "commits": [
+            "87bf2e0"
+          ],
           "notes": [
             {
               "at": "2026-09-25T16:16:24.556Z",
@@ -985,7 +1135,9 @@
           "status": "done",
           "startedAt": "2026-09-25T16:16:33.055Z",
           "completedAt": "2026-09-25T16:19:24.381Z",
-          "commits": ["f28b815"],
+          "commits": [
+            "f28b815"
+          ],
           "notes": [
             {
               "at": "2026-09-25T16:19:24.382Z",
@@ -999,7 +1151,9 @@
           "status": "done",
           "startedAt": "2026-09-25T16:19:33.011Z",
           "completedAt": "2026-09-25T16:21:25.428Z",
-          "commits": ["9cfb868"],
+          "commits": [
+            "9cfb868"
+          ],
           "notes": [
             {
               "at": "2026-09-25T16:21:25.429Z",
@@ -1013,7 +1167,9 @@
           "status": "done",
           "startedAt": "2026-09-25T16:21:37.017Z",
           "completedAt": "2026-09-25T16:24:05.700Z",
-          "commits": ["630cb37"],
+          "commits": [
+            "630cb37"
+          ],
           "notes": [
             {
               "at": "2026-09-25T16:24:05.701Z",
@@ -1027,7 +1183,9 @@
           "status": "done",
           "startedAt": "2026-09-25T16:24:15.281Z",
           "completedAt": "2026-09-25T16:26:00.248Z",
-          "commits": ["01e5ed2"],
+          "commits": [
+            "01e5ed2"
+          ],
           "notes": [
             {
               "at": "2026-09-25T16:26:00.249Z",
@@ -1038,8 +1196,8 @@
         {
           "id": "P05.6",
           "title": "ADR-005 Authorization on Verified Permissions (D-03, D-06)",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-25T16:26:10.674Z",
           "completedAt": null,
           "commits": [],
           "notes": []
@@ -1099,7 +1257,9 @@
       "title": "Server modular refactor (no behaviour change)",
       "file": "phases\\P06-server-refactor.md",
       "gate": "G2",
-      "dependsOn": ["P05"],
+      "dependsOn": [
+        "P05"
+      ],
       "decisions": [],
       "changesBehaviour": "No, except labelled `fix` commits (P06.12, P06.13)",
       "size": "XL",
@@ -1231,7 +1391,9 @@
       "title": "Client and shared-package refactor (no behaviour change)",
       "file": "phases\\P07-client-refactor.md",
       "gate": "G2",
-      "dependsOn": ["P05"],
+      "dependsOn": [
+        "P05"
+      ],
       "decisions": [],
       "changesBehaviour": "No, pure refactor",
       "size": "XL",
@@ -1345,8 +1507,15 @@
       "title": "AWS foundation and delivery pipeline",
       "file": "phases\\P08-aws-foundation.md",
       "gate": "G3",
-      "dependsOn": ["P05"],
-      "decisions": ["D-07", "D-08", "D-10", "D-11"],
+      "dependsOn": [
+        "P05"
+      ],
+      "decisions": [
+        "D-07",
+        "D-08",
+        "D-10",
+        "D-11"
+      ],
       "changesBehaviour": "Infra only",
       "size": "L",
       "steps": [
@@ -1459,8 +1628,15 @@
       "title": "Event model and configurable taxonomy",
       "file": "phases\\P09-event-model.md",
       "gate": "G3",
-      "dependsOn": ["P06", "P07"],
-      "decisions": ["D-02", "D-04", "D-12"],
+      "dependsOn": [
+        "P06",
+        "P07"
+      ],
+      "decisions": [
+        "D-02",
+        "D-04",
+        "D-12"
+      ],
       "changesBehaviour": "Yes",
       "size": "XL",
       "steps": [
@@ -1600,8 +1776,13 @@
       "title": "Live configuration, event lifecycle and scheduling",
       "file": "phases\\P10-config-scheduling.md",
       "gate": "G3",
-      "dependsOn": ["P09"],
-      "decisions": ["D-09", "D-14"],
+      "dependsOn": [
+        "P09"
+      ],
+      "decisions": [
+        "D-09",
+        "D-14"
+      ],
       "changesBehaviour": "Yes",
       "size": "L",
       "steps": [
@@ -1696,8 +1877,14 @@
       "title": "Authorization on Amazon Verified Permissions (PBAC)",
       "file": "phases\\P11-authorization-avp.md",
       "gate": "G3",
-      "dependsOn": ["P09", "P10"],
-      "decisions": ["D-03", "D-06"],
+      "dependsOn": [
+        "P09",
+        "P10"
+      ],
+      "decisions": [
+        "D-03",
+        "D-06"
+      ],
       "changesBehaviour": "Yes",
       "size": "XL",
       "steps": [
@@ -1801,8 +1988,13 @@
       "title": "Identity: Cognito hardening and membership lifecycle",
       "file": "phases\\P12-identity-cognito.md",
       "gate": "G3",
-      "dependsOn": ["P09", "P11"],
-      "decisions": ["D-08"],
+      "dependsOn": [
+        "P09",
+        "P11"
+      ],
+      "decisions": [
+        "D-08"
+      ],
       "changesBehaviour": "Yes",
       "size": "L",
       "steps": [
@@ -1879,7 +2071,11 @@
       "title": "Admin and event setup experience",
       "file": "phases\\P13-admin-setup.md",
       "gate": "G4",
-      "dependsOn": ["P10", "P11", "P12"],
+      "dependsOn": [
+        "P10",
+        "P11",
+        "P12"
+      ],
       "decisions": [],
       "changesBehaviour": "Yes",
       "size": "XL",
@@ -1984,7 +2180,9 @@
       "title": "Interlinking and UX polish",
       "file": "phases\\P14-interlinking-polish.md",
       "gate": "G4",
-      "dependsOn": ["P13"],
+      "dependsOn": [
+        "P13"
+      ],
       "decisions": [],
       "changesBehaviour": "Yes",
       "size": "L",
@@ -2089,8 +2287,14 @@
       "title": "Security hardening and production environment",
       "file": "phases\\P15-security-prod.md",
       "gate": "G5",
-      "dependsOn": ["P14"],
-      "decisions": ["D-07", "D-08", "D-14"],
+      "dependsOn": [
+        "P14"
+      ],
+      "decisions": [
+        "D-07",
+        "D-08",
+        "D-14"
+      ],
       "changesBehaviour": "Yes",
       "size": "L",
       "steps": [
@@ -2194,8 +2398,12 @@
       "title": "Verification, load, dry-run readiness and handover",
       "file": "phases\\P16-verification.md",
       "gate": "G5",
-      "dependsOn": ["P15"],
-      "decisions": ["D-01"],
+      "dependsOn": [
+        "P15"
+      ],
+      "decisions": [
+        "D-01"
+      ],
       "changesBehaviour": "No",
       "size": "M",
       "steps": [

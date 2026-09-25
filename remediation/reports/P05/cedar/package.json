@@ -1,0 +1,12 @@
+{
+  "name": "spoh-p05-cedar-bench",
+  "private": true,
+  "description": "P05.6: validates the draft Cedar schema and sample policies locally. Not a workspace; P11.1 moves this into packages/access-policies.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test \"tests/*.test.mjs\""
+  },
+  "dependencies": {
+    "@cedar-policy/cedar-wasm": "4.13.0"
+  }
+}

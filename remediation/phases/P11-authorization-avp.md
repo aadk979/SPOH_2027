@@ -18,6 +18,11 @@ decision and every UI affordance comes from the same policies.
 ## Context for a fresh session
 
 - Design: ADR-005 (schema, policy layout, evaluation strategy, failure mode, admin editing).
+- **Start from the P05 bench:** `remediation/reports/P05/cedar/` holds the draft schema, the five
+  policy files, the grants generator, `default-grants.json`, `CHANGES.md` (C1–C13, approved at
+  G1) and 51 passing tests. P11.1 moves them; it does not redesign them.
+- Role permissions are **data** (`RolePermission` rows → the `Role` entity's `grants`), not
+  template-linked policies. The app never writes to the policy store (ADR-005 §2).
 - Current model to reproduce, then deliberately improve:
   - `packages/shared/src/capabilities.ts` (26 capabilities × 6 roles)
   - `platform/access` (was `middleware/rbac.ts`): `requireCapability`, `requireStationScope`
@@ -44,7 +49,8 @@ decision and every UI affordance comes from the same policies.
 ### P11.2 — Policies
 
 - **Do:** Write, in separate files:
-  1. **role policies**, one per catalogue role, as templates linked per event (D-03 A)
+  1. **role policies**: one generated static permit per `Editable` action, allowed when the
+     principal's per-event role `grants` it (D-03 A, ADR-005 §2)
   2. **station scope**: capture actions require `resource.station in principal.onShiftStations`
      unless the role has `anyStation`
   3. **attendance gate**: issuing attendance codes requires `principal.attendanceVerifiedToday`
@@ -100,15 +106,18 @@ decision and every UI affordance comes from the same policies.
   1. Add a policy store per environment (validation `STRICT`), the schema, static policies and
      templates to `infra/cdk`, deployed from `packages/access-policies`.
   2. A drift check in CI compares the deployed policies with the repo.
-  3. Template-linked (per-event) policies are data, owned by the app, and excluded from drift.
+  3. The store holds only static policies from the repo. Per-event permissions are
+     `RolePermission` rows, so drift is "store ≠ repo" with no exclusions. The app's IAM role
+     has `IsAuthorized` only, never `CreatePolicy`.
 - **Done when:** staging's store matches the repo, and the drift check is green.
 
 ### P11.7 — Admin permissions UI
 
 - **Do:** In the event workspace:
   - the roles list, showing what each role can do in plain language grouped by action group
-  - toggles per action for editable roles, which write template-linked policies through AVP plus
-    an audit row
+  - toggles per `Editable` action above the action's minimum role, which write `RolePermission`
+    rows plus an audit row and publish on the `access` bus channel (only platform admins hold
+    `Permissions.Edit`)
   - guardrails shown read-only with their explanation
   - a **simulator** answering "Can ⟨person⟩ do ⟨action⟩ on ⟨resource⟩ now?" with the decision and
     the determining policies, and "What can ⟨person⟩ do?" through a batch request
@@ -118,7 +127,9 @@ decision and every UI affordance comes from the same policies.
 ### P11.8 — Client affordances from policy
 
 - **Do:**
-  1. `GET /events/:id/me/permissions` returns the allowed actions (batch-evaluated, cached).
+  1. `GET /events/:id/me/permissions` returns the allowed actions, evaluated by the
+     `LocalCedarAuthorizer` on the same policy set, **not** `BatchIsAuthorized`, which costs
+     US$150 per million (ADR-005 §6).
   2. The navigation registry and screens use it.
   3. Remove all client use of `CAPABILITY_MATRIX`, then delete the matrix.
   4. Denied actions show why (from the decision) instead of a generic 403.
