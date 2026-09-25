@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T15:35:04.706Z",
+  "updatedAt": "2026-09-25T15:35:54.595Z",
   "current": {
     "phase": "P04",
     "step": "P04.5"
@@ -990,11 +990,18 @@
         {
           "id": "P04.5",
           "title": "Secrets and configuration",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T15:35:04.706Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T15:35:54.594Z",
+          "commits": [
+            "89a1926"
+          ],
+          "notes": [
+            {
+              "at": "2026-09-25T15:35:54.595Z",
+              "text": "gitleaks (116 commits, all refs) + 4 history greps: no leak; 14 secrets inventoried with rotation and blast radius; F04-010 High (PF-12 confirmed), F04-011 Medium, F04-012 Medium"
+            }
+          ]
         },
         {
           "id": "P04.6",
