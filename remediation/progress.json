@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T17:01:58.210Z",
+  "updatedAt": "2026-09-25T17:02:22.973Z",
   "current": {
     "phase": "P05",
     "step": "P05.10"
@@ -1094,11 +1094,16 @@
         {
           "id": "P05.10",
           "title": "ADR-009 Migration and rollout (D-01, D-12)",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T17:00:25.562Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T17:02:22.973Z",
+          "commits": ["346d4e7"],
+          "notes": [
+            {
+              "at": "2026-09-25T17:02:22.973Z",
+              "text": "ADR-009: schedule read, go/no-go criteria, no-go path (Q-P5), Event #1 migration (D-12 assumed), cutover at go, outbox window, migration rules. New step P12.8."
+            }
+          ]
         },
         {
           "id": "P05.11",
