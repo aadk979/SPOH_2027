@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T13:19:58.268Z",
+  "updatedAt": "2026-09-25T13:23:55.678Z",
   "current": {
     "phase": "P02",
-    "step": "P02.2"
+    "step": "P02.3"
   },
   "gates": [
     {
@@ -505,17 +505,22 @@
         {
           "id": "P02.2",
           "title": "Journey 1: set up a brand-new event from nothing (Admin)",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T13:19:58.268Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T13:23:55.369Z",
+          "commits": ["a9bb753"],
+          "notes": [
+            {
+              "at": "2026-09-25T13:23:55.369Z",
+              "text": "0 of 8 setup tasks possible in UI; F02-001..005"
+            }
+          ]
         },
         {
           "id": "P02.3",
           "title": "Journey 2: event day as Chief and Deputy",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-25T13:23:55.678Z",
           "completedAt": null,
           "commits": [],
           "notes": []
