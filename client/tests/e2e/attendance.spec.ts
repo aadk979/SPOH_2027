@@ -108,8 +108,10 @@ test('scanner failure retains PIN fallback, rejects invalid PIN, then shows serv
 }) => {
   const { submissions } = await attendanceSession(page);
   await page.goto('/home');
-  await page.getByRole('link', { name: 'Submit attendance / verify team' }).click();
-  await expect(page.getByLabel('Attendance QR scanner')).toBeVisible();
+  await page.getByRole('link', { name: 'Attendance & verification' }).click();
+  // Attached, not visible: the scanner hides its video once the camera fails,
+  // which here is immediately, so visibility would be a race.
+  await expect(page.getByLabel('Attendance QR scanner')).toBeAttached();
   await expect(page.getByText(/Camera access failed/)).toBeVisible();
   const submit = page.getByRole('button', { name: 'Submit attendance with PIN' });
   await expect(submit).toBeDisabled();
