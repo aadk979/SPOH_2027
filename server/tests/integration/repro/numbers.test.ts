@@ -132,6 +132,29 @@ describe('dashboard, report and import numbers (P03 repros)', () => {
     expect(await prisma.registration.count()).toBe(5);
   });
 
+  // F02-011
+  it.skip('lists a person rostered in both blocks so the two rows can be told apart', async () => {
+    const ic = await createVolunteer({ email: 'ic@numbers.test', role: 'IC' });
+    await assignToStation({ volunteerId: volunteer.id, stationId, eventDayId: dayId });
+    await assignToStation({
+      volunteerId: volunteer.id,
+      stationId,
+      eventDayId: dayId,
+      block: 'AFTERNOON',
+    });
+
+    const response = await request(app)
+      .get(`/api/v1/dashboard/station/${stationId}`)
+      .set('Authorization', bearer(ic));
+    expect(response.status).toBe(200);
+
+    // The IC console keys "Who is here" by volunteerId: two identical rows are
+    // a duplicate React key and a person listed twice with nothing to say why.
+    const rows = (response.body.roster as unknown[]).map((row) => JSON.stringify(row));
+    expect(rows).toHaveLength(2);
+    expect(new Set(rows).size).toBe(2);
+  });
+
   // F03-014
   it.skip('pushes an urgent announcement to the same people it says it reaches', async () => {
     const booth = (await createStation({ code: 'BOOTH' })).id;

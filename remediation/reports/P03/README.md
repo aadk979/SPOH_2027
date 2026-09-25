@@ -9,7 +9,7 @@ run from the repo root. Product code is unchanged by P03.
 | `jscpd-report.json`                 | P03.3 | `npx jscpd@5.3.2 server/src client/src packages/shared/src --ignore "**/generated/**,**/*.test.ts,**/*.test.tsx" --min-tokens 50 --reporters json --output <dir>`, then prettier                                       |
 | `server-files.dot` / `.svg`         | P03.1 | `npx depcruise server/src --config .dependency-cruiser.cjs --include-only '^server/src' --exclude '^server/src/generated' --output-type dot`                                                                           |
 | `module-map.json` / `module-map.md` | P03.1 | `node remediation/reports/P03/module-map.mjs` (uses `exports.mjs`; exits 1 if an export has no target), then `npx prettier --write remediation/reports/P03`                                                            |
-| `run-repros.sh`                     | P03.4 | `bash remediation/reports/P03/run-repros.sh [filter]`: runs `server/tests/integration/repro/*` with `.skip` removed; before a fix every repro fails                                                                    |
+| `run-repros.sh`                     | P03.4 | `bash remediation/reports/P03/run-repros.sh [filter]`: runs `server/tests/integration/repro/*` and `client/tests/repro/*` with `.skip` removed; before a fix every repro fails                                         |
 | `test-gaps.json`                    | P03.6 | coverage run in `test-gaps.mjs`'s header, then `node remediation/reports/P03/test-gaps.mjs <coverage-final.json>`                                                                                                      |
 
 **Rendering the SVGs.** This container has no Graphviz binary, so the `.dot` files are rendered

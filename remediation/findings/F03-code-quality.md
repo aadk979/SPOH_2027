@@ -281,7 +281,7 @@ pagination, error-code accuracy and audit completeness. Each suspected bug was t
 integration test that asserts the correct behaviour, run against the local test database to prove
 it **fails today for the stated reason** (a setup error does not count), and committed skipped.
 
-- **Repro tests:** `server/tests/integration/repro/` — 8 files, **38 tests** (P03.5 adds a ninth file with 4), each tagged with its
+- **Repro tests:** `server/tests/integration/repro/` — 8 files, **38 tests** (P03.5 adds a ninth file with 4, P03.7 one more test for F02-011), each tagged with its
   finding id. `npm test` stays green because they are skipped.
 - **Proof they fail:** `bash remediation/reports/P03/run-repros.sh [filter]` runs unskipped copies
   and prints each assertion error; on `d4f6399` all 38 fail. Races are written as several rounds
@@ -810,6 +810,144 @@ the P03.4 repros beside them), ranks 2 and 8 on the client, then the H rows of t
 the order P06/P07 split them. A use case gets its unit test (fake repo, fixed clock, §9) in the
 commit that moves it to `application/`, so "0 use cases with a unit test" closes as the refactor
 goes, not as a separate pass.
+
+## Client review · P03.7
+
+Read: `lib/` (api, session, outbox, runtimeSettings), `app/providers.tsx`, the nine `features/`
+hooks, every screen's data and mutation code, `public/sw.js` and `next.config.ts`. Built with
+`npm run build --workspace client` (Next 16, Turbopack) and measured `.next/static/chunks`.
+Client repros are in `client/tests/repro/` (3 files, 8 tests, skipped); `run-repros.sh` runs them
+with the server's.
+
+| Area                        | What the client does                                                                                                                                                                                                                                                                                                                                        | Result                                       |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| Data fetching               | 13 files call `api()` in components; 9 hooks in `features/`; one `api()` wrapper with one silent refresh-and-retry on 401                                                                                                                                                                                                                                   | P03.3 decision (features/*/api.ts + queries) |
+| Query keys and invalidation | 17 literal keys; mutations invalidate by string. Gaps: check-in invalidates `['me']` but not `['attendance']`; a swap decision refetches the queue but not the station board it changes; saving settings does not refresh the runtime-settings cache (F03-032)                                                                                              | P03.3 key factories; F03-032                 |
+| Forms                       | hand-rolled state and validation everywhere; no shared schema used                                                                                                                                                                                                                                                                                          | P03.3 decision                               |
+| Error and empty states      | six screens with queries have no error branch (`/capture/redeem`, `/capture/registration`, `/chief/fallback`, `/ic`, `/inbox`, `/reports`): a failed load looks empty or loads forever                                                                                                                                                                      | F02-030 (not re-filed)                       |
+| Session                     | in-memory access token, httpOnly refresh cookie, single in-flight refresh per tab; bootstrap races under StrictMode; no cross-tab coordination                                                                                                                                                                                                              | F02-010, F02-032 (client half)               |
+| Outbox                      | durable IndexedDB queue, backoff, grace window, parked failures; gives up for good on 401 and 409-in-progress; stamps, redemptions, incidents and lost-person alerts bypass it                                                                                                                                                                              | F03-033, F03-034                             |
+| Service worker              | network-first for every same-origin GET, runtime-caches what it fetched, six-URL precache, fixed cache name                                                                                                                                                                                                                                                 | F03-035, F03-036                             |
+| Bundle                      | 43 JS chunks, **2,152 KB raw / 613 KB gzip** in total. The QR decoder (`@zxing`, 121 KB gz) loads only on `/attendance`, `/capture/redeem`, `/capture/stamp`. Every route loads a **83 KB gz** chunk that is mostly `zod` and the shared schemas, which the client never validates with. `aws-amplify` and `zustand` are dependencies that nothing imports. | F03-037                                      |
+
+### F02-010 — root cause
+
+`Providers` runs `bootstrapSession().then(loadClientSettings)` in an effect. `bootstrapSession`
+sets a module flag and returns **immediately** on a second call instead of returning the first
+call's promise (`lib/session.ts`, `bootstrapped`). React StrictMode runs the effect twice in
+development (`reactStrictMode: true`), so the second `.then` calls `GET /admin/settings` with no
+token while the first refresh is in flight; `api()` gets 401, joins that refresh and retries. In a
+production build the effect runs once and the early request does not happen, which is why it was
+seen on the dev server. Repro: `client/tests/repro/session.test.ts`. Fix: memoise the bootstrap
+promise. **Phase:** P07.
+
+### F02-011 — root cause
+
+`GET /dashboard/station/:id` returns roster rows of `{volunteerId, volunteerName, roleLabel,
+checkedInAt, checkedOutAt}`, one per **assignment**, with no assignment id and no block; the IC
+console renders them keyed by `volunteerId` (`app/ic/page.tsx:158`). A person rostered in both
+blocks is two identical rows with one React key. Repro (server side, where the missing fields
+are): `repro/numbers.test.ts`. Fix: return `assignmentId` and `block`, key by `assignmentId`, and
+group by person (F02-011's UX half). **Phase:** P06/P07.
+
+### F02-032 — client half
+
+`refreshSession()` shares one in-flight refresh **within a tab**. Two tabs (or the PWA and a
+browser tab) each refresh on their own timer or 401 and present the same cookie, which the server
+reads as token theft (server half: F02-032 repro in `repro/sessions.test.ts`). Fix on the client:
+serialise refreshes across tabs with the Web Locks API (`navigator.locks.request('spoh-refresh')`)
+and share the result over a `BroadcastChannel`; the server's grace window (P12) covers browsers
+without it. **Phase:** P12.
+
+#### F03-032 — Runtime settings load once per page load, and not after an in-app sign-in
+
+- **Severity:** Medium
+- **Area:** `lib/runtimeSettings.ts` `loadClientSettings`, `app/providers.tsx:54`
+- **Evidence:** `client/tests/repro/session.test.ts`: on the sign-in screen the load gets 401 and
+  leaves the defaults; signing in navigates client-side (`router.replace`), nothing calls
+  `loadClientSettings` again, and the event name, undo window, poll intervals and outbox warning
+  thresholds stay at the compiled defaults until a full reload. Nothing ever reloads them after
+  a settings change either.
+- **Impact:** a volunteer who signs in on the day runs on defaults, whatever the Chief configured;
+  a Chief who lengthens the undo window during a dry run sees it nowhere without reloads.
+- **Fix:** settings as a query keyed on the session (refetch on sign-in, on focus and on a
+  settings-changed event); P10's live configuration pushes changes.
+- **Phase:** P07 (load on sign-in), P10.1 (live updates)
+- **Status:** open
+
+#### F03-033 — The outbox parks retryable captures for good
+
+- **Severity:** High (captures silently leave the counts)
+- **Area:** `lib/outbox.ts` `flush` (`givingUp = !isRetryable(error) || …`), `lib/api.ts`
+  `isRetryable` (only 5xx, 429 and network errors)
+- **Evidence:** `client/tests/repro/outbox.test.ts`: a queued capture that meets a 401 (the access
+  token lapsed while offline and the refresh failed) is marked `failed`, and stays failed after
+  the volunteer signs in again; one that meets 409 `IDEMPOTENCY_IN_PROGRESS` (the server restarted
+  mid-request, so the key is reserved for up to 60 s) is marked `failed` at once. `flush` skips
+  failed entries, and F02-022 found that a parked capture can only be copied, never retried.
+- **Impact:** a phone that was offline longer than the access-token lifetime, or any deploy during
+  capture, turns queued taps into parked ones that never reach the server unless someone copies
+  and re-enters them by hand.
+- **Fix:** keep 401 entries pending and flush after the next sign-in; treat
+  `IDEMPOTENCY_IN_PROGRESS` as retry-after; give parked entries a "send again" action (P14.4).
+- **Phase:** P07
+- **Status:** open
+
+#### F03-034 — Stamps, redemptions, incidents and lost-person alerts are online-only
+
+- **Severity:** Medium (design gap for P05, not a defect against a written rule)
+- **Area:** `app/capture/stamp/page.tsx:46`, `app/capture/redeem/page.tsx:59`,
+  `app/safety/incident/new/page.tsx:74`, `app/safety/lost-person/new/page.tsx:50` (direct `api()`
+  with a fresh key per attempt)
+- **Evidence:** registrations and footfall go through the outbox; these four do not. Offline, the
+  stamp screen says "Could not reach the server. Stamp the card and carry on."
+- **Impact:** the digital stamp is lost, so the funnel undercounts every station that had a network
+  gap; a retried redemption gets a new key, so a timed-out-but-recorded redemption can be recorded
+  twice without a card code.
+- **Fix:** P05 decides which captures must queue; the ones that do go through the outbox with a
+  key that survives retries.
+- **Phase:** P05 (decision), P07
+- **Status:** open
+
+#### F03-035 — A replaced push subscription is never sent to the server
+
+- **Severity:** Low
+- **Area:** `public/sw.js` `pushsubscriptionchange`
+- **Evidence:** `client/tests/repro/serviceWorker.test.ts`: the worker resubscribes but makes no
+  request, so the server keeps the old endpoint, gets 410 on the next push and deletes it.
+- **Impact:** a device stops receiving urgent pushes after the browser rotates its subscription,
+  with no sign on the device ("Alerts on" still shows).
+- **Fix:** post the new subscription to open clients, which re-register it with the API.
+- **Phase:** P07
+- **Status:** open
+
+#### F03-036 — The capture screens are not precached
+
+- **Severity:** Medium
+- **Area:** `public/sw.js` `SHELL`, `CACHE = 'spoh2027-shell-v1'`
+- **Evidence:** `client/tests/repro/serviceWorker.test.ts`: install caches `/`, `/home`, `/map`,
+  `/journey`, `/brief` and the manifest; no capture screen, `/shift`, or JS chunk. Everything else
+  is cached only after it is fetched online once. The cache name never changes, so chunks from
+  every past build accumulate.
+- **Impact:** a volunteer who first opens a capture screen while the venue Wi-Fi is down gets the
+  home page instead: the offline design does not hold on first use.
+- **Fix:** precache the capture routes and their chunks from the build manifest, versioned per
+  build; cache-first for hashed `/_next/static` assets.
+- **Phase:** P07
+- **Status:** open
+
+#### F03-037 — Every route ships the shared schemas; two dependencies are unused
+
+- **Severity:** Low
+- **Area:** `client/package.json` (`aws-amplify`, `zustand`); value imports from `@spoh/shared`
+- **Evidence:** the 83 KB gz chunk on every route is mostly `zod` and schema construction; the
+  client's only `zod` use is `lib/env.ts`. `grep -r "aws-amplify\|zustand" client/src` finds
+  nothing.
+- **Impact:** first load on a phone on venue Wi-Fi; two dependencies to patch for nothing.
+- **Fix:** import types only (or a `@spoh/shared/constants` entry without schemas) until P07's forms
+  use the schemas; remove the two unused dependencies.
+- **Phase:** P07
+- **Status:** open (measurement, not a bug: no repro)
 
 ---
 
