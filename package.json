@@ -2,7 +2,7 @@
   "name": "spoh2027",
   "private": true,
   "version": "0.1.0",
-  "description": "SPOH 2027 Event Operations System — Singapore Polytechnic School of Computing Open House",
+  "description": "SPOH 2027 Event Operations System \u2014 Singapore Polytechnic School of Computing Open House",
   "license": "UNLICENSED",
   "engines": {
     "node": ">=22 <27"
@@ -48,5 +48,10 @@
     "prettier": "^3.9.6",
     "typescript": "6.0.3",
     "typescript-eslint": "^8.69.0"
+  },
+  "overrides": {
+    "deepmerge-ts": "^8.0.2",
+    "mysql2": "^3.24.4",
+    "uuid": "^11.1.1"
   }
 }
