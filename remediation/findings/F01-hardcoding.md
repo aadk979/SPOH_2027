@@ -300,6 +300,83 @@ plus a client refresh), and cross-instance convergence must be faster than 60 s 
 keys. No existing key needs its own schedule; poll cadence can follow the event lifecycle (P10.5).
 Every key needs per-key history and revert (P10.2).
 
+## Content audit (P01.6)
+
+Everything a volunteer reads that belongs to one event. All of it is compiled into the client
+bundle today, so changing a word needs a build and a deploy.
+
+| Item                       | Where                                                                                     | Structure today                                                                             | Read on                                | Notes                                                                                                                        |
+| -------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Course one-liners and FAQs | `content/brief.ts:15–69` (`COURSES`)                                                      | 4 × `{ code, name, oneLiner, askedOften: { question, answer }[] }`                          | `/brief`                               | Placeholder, pending sign-off. Keyed by `CourseCode` (P01.3).                                                                |
+| Escalation script          | `content/brief.ts:71–72`                                                                  | one string, read aloud                                                                      | `/brief` (leads the page)              |                                                                                                                              |
+| The five things            | `content/brief.ts:74–81` (`FIVE_THINGS`)                                                  | 5 strings                                                                                   | `/brief`                               | Its comment says "personalised per role at render time"; the page renders the same list for everyone.                        |
+| Visitor journey            | `content/brief.ts:83–111` (`VISITOR_JOURNEY`), `app/journey/page.tsx:45–48`               | 6 × `{ step, title, detail }`, plus one closing note                                        | `/journey`                             | The note ("nobody should add them together") states the D-04 counts rule, so it depends on that option.                      |
+| Floor map                  | `content/brief.ts:113–156` (`FLOOR_MAP`), `app/map/page.tsx:28`                           | 3 levels × `{ label, kind: station \| facility \| safety }`, plus an intro line             | `/map`                                 | Placeholder. Floor-plan images are planned (`app/map/page.tsx:15`) but absent. Station points are free text, not links.      |
+| Mandatory briefing points  | `dto/shift.ts:90–100` (`MANDATORY_BRIEF_POINTS`)                                          | 4 strings                                                                                   | nothing                                | Placeholder. Exported from the shared package but rendered nowhere: no screen shows it (briefing slots are API-only, PF-09). |
+| Draft notice               | `app/brief/page.tsx:70–71`                                                                | literal: "pending sign-off … before the 4 November training"                                | `/brief`                               | Missed by the sweep (no year). Becomes the document's draft/published status.                                                |
+| App identity               | `app/layout.tsx:8–11,20`; `client/public/manifest.json`; `client/public/icons/*` (3 PNGs) | title, description with dates, short name, `#0066cc` theme, `#ffffff` background, 3 icons   | install prompt, home screen, tab title | F01-001, F01-004, F01-005. Organisation branding plus event name and dates.                                                  |
+| Push default title         | `client/public/sw.js:91`                                                                  | `SPOH Ops`                                                                                  | notifications                          | F01-004.                                                                                                                     |
+| Offline precache           | `client/public/sw.js:16,18`                                                               | cache `spoh2027-shell-v1`; `['/', '/home', '/map', '/journey', '/brief', '/manifest.json']` | offline                                | Content is inside JS chunks, cached network-first on first visit. A page never opened online is not available offline.       |
+| Product vocabulary         | "Mission Card", "Mission Complete", "Welcome Lounge" across `app/**`                      | literals in copy                                                                            | everywhere                             | "Mission Complete" and "Welcome Lounge" are station names (data). Whether "Mission Card" is renameable is a P14.8 question.  |
+
+### ContentDocument schema (draft for P13.3)
+
+One document per event, versioned, with a `draft` or `published` status. Every text field is plain
+text with a length limit (line breaks allowed, no markup), so nothing renders HTML and every screen
+keeps its layout. References point at event rows, so renaming a station updates the map and the
+journey.
+
+```ts
+type Text<Max extends number> = string; // plain text, trimmed, 1..Max characters
+type Ref<T> = string; // id of a row in this event
+
+interface EventContent {
+  schemaVersion: 1;
+  brief: {
+    escalationScript: Text<400>;
+    fiveThings: Array<{ text: Text<160>; roles?: RoleKey[] }>; // 1–7 items; roles narrows who sees one
+    programmes: Array<{
+      programmeId: Ref<Programme>; // code and name come from the Programme row (P01.3)
+      oneLiner: Text<200>;
+      faqs: Array<{ question: Text<120>; answer: Text<300> }>; // 0–5
+    }>;
+  };
+  journey: {
+    steps: Array<{ title: Text<40>; detail: Text<200>; stationIds?: Ref<Station>[] }>; // 1–10
+    note?: Text<300>; // the counts note; its default wording follows the D-04 option
+  };
+  map: {
+    intro: Text<200>;
+    levels: Array<{
+      label: Text<40>;
+      image?: { mediaKey: string; alt: Text<200> }; // S3 object, served same-origin
+      points: Array<{
+        label: Text<80>;
+        kind: 'station' | 'facility' | 'safety';
+        stationId?: Ref<Station>;
+      }>;
+    }>;
+  };
+  briefing: { mandatoryPoints: Text<160>[] }; // 1–8
+}
+```
+
+Branding is not in the document. It is `Organisation` data (`name`, `appName`, `shortName`,
+`themeColor`, `backgroundColor`, three icon media keys) plus `Event` data (`name`, `slug`, dates,
+`timeZone`). The web manifest and page metadata are generated from those two rows (P14.6).
+
+### Offline requirement (P13.4)
+
+- The published document and its map images must work with no network, like the compiled content
+  today. The service worker's rule "never cache `/api/`" (`sw.js:9–13,45`) would otherwise make
+  content disappear offline.
+- Serve each published version at an immutable same-origin URL (for example
+  `/content/<eventId>/<version>.json`), precache it at install and again when a new version is
+  published, and keep the previous version until the new one is stored.
+- Precache `/brief`, `/journey` and `/map` with their content, rather than relying on a first
+  online visit.
+- Budget: the document plus images under 2 MB, so a first load on a congested network finishes.
+
 ## Defects found during P01
 
 ### F01-046 — Shift labels ignore the configured shift hours

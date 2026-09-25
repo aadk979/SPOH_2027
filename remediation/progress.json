@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T13:08:39.523Z",
+  "updatedAt": "2026-09-25T13:08:45.469Z",
   "current": {
     "phase": "P01",
-    "step": "P01.5"
+    "step": "P01.6"
   },
   "gates": [
     {
@@ -434,8 +434,8 @@
         {
           "id": "P01.6",
           "title": "Content audit",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-25T13:08:45.469Z",
           "completedAt": null,
           "commits": [],
           "notes": []
