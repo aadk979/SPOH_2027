@@ -150,7 +150,8 @@ client/src/
 
 - Small commits, each green, each carrying a `Remediation-Step: P06.3` trailer.
 - One logical change per commit. Moves and edits go in separate commits so reviews can diff moves as renames.
-- Update `progress.json` through `tools/progress.mjs` after every step, and push.
+- Update `progress.json` through `tools/progress.mjs` after every step, and push to `main`. There are
+  no feature branches, pull requests or tags (D-11).
 
 ## 11. Definition of done (a step)
 

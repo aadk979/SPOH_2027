@@ -153,7 +153,7 @@ Going from the baseline back to the audit branch is an ordinary deploy of `319d0
 1. **Get oriented**
    ```bash
    cd /home/user/SPOH_2027
-   git fetch origin && git status          # be on the working branch named in progress.json
+   git fetch origin && git checkout main && git pull origin main   # all work happens on main (D-11)
    node remediation/tools/progress.mjs status
    ```
 2. **Read, in order:** this file → `DECISIONS.md` (check nothing you need is still open) →
@@ -167,13 +167,18 @@ Going from the baseline back to the audit branch is an ordinary deploy of `319d0
    git commit -m "refactor(station): …" -m "Remediation-Step: P06.3"
    node remediation/tools/progress.mjs done P06.3 --commit $(git rev-parse --short HEAD) --note "what changed"
    git add remediation/progress.json && git commit -m "chore(remediation): P06.3 done"
-   git push -u origin <branch>
+   git push origin main
    ```
 5. **At the end of a phase:** fill in the phase file's **Phase report** section, snapshot metrics to
    `reports/metrics/<phase>.json`, run `progress.mjs done P06`, commit, push, then tell the owner
    the phase is done and that this is a good moment to clear context.
 6. **Never** start a phase whose dependencies are not `done`, never pass G1 without the owner's
    recorded sign-off, and never change behaviour in P06/P07.
+
+**Git workflow (D-11): `main` only.** Commit each step to `main` and push to `main`. Do not create
+branches, pull requests or tags. If the environment assigns a session branch, still commit to `main`
+and run `git push origin main`. If that push is refused, stop and tell the owner rather than working
+around it.
 
 If `progress.json` and the git history disagree, trust git: inspect the commits carrying the
 `Remediation-Step:` trailer (`git log --grep "Remediation-Step"`), then correct the JSON.

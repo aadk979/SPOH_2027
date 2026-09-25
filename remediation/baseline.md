@@ -7,7 +7,7 @@ Measured during planning, before any code change. P00 re-measures after branch r
 
 | Item                       | Value                                                                                  |
 | -------------------------- | -------------------------------------------------------------------------------------- |
-| Working branch             | `claude/inspiring-ritchie-203bp3` = `main` = `d2497b6`                                 |
+| Working branch             | `main` = `d2497b6` at planning (all work is on `main`, D-11)                           |
 | Unmerged branch            | `origin/feat/audit-cloudwatch` = `319d06d` = `main` + 5 commits, fast-forwards cleanly |
 | Deployed (per its commits) | `spoh2027.duckdns.org`, single Lightsail `small_3_0`, PM2 cluster, Postgres in Docker  |
 | Source lines (src only)    | ≈ 26,700 across 184 files (server, client, shared; generated code excluded)            |

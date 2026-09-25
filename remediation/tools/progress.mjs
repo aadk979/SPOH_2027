@@ -119,7 +119,7 @@ function emptyState() {
     schemaVersion: 1,
     programme: 'SPOH platform remediation',
     repository: 'aadk979/SPOH_2027',
-    workingBranch: 'claude/inspiring-ritchie-203bp3',
+    workingBranch: 'main',
     baseline: {
       commit: 'd2497b6',
       auditBranchCommit: '319d06d',

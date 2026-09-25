@@ -143,7 +143,9 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   - **A.** One pull request per phase into `main`, reviewed by you, merged before the next phase starts.
   - **B.** Continuous work on the working branch, with a PR at each gate.
 - **Recommendation:** **A.** Each phase is a reviewable, revertible unit.
-- **Answer:** **A**: one pull request per phase into `main` (owner, 2026-09-25).
+- **Answer:** **Work directly on `main`** (owner, amended 2026-09-25). No feature branches, pull
+  requests or tags. Every step is committed to `main` and pushed to `main`. The first answer, A, was
+  used once: PR #1 carried the plan and P00 and was merged.
 
 ### D-12 — Existing data
 

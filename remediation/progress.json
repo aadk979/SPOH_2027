@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "programme": "SPOH platform remediation",
   "repository": "aadk979/SPOH_2027",
-  "workingBranch": "claude/inspiring-ritchie-203bp3",
+  "workingBranch": "main",
   "baseline": {
     "commit": "d2497b6",
     "auditBranchCommit": "319d06d",
@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T12:31:19.080Z",
+  "updatedAt": "2026-09-25T12:36:39.453Z",
   "current": {
     "phase": "P01",
     "step": null
@@ -162,8 +162,8 @@
       "owner": "you",
       "blocks": ["P00.2"],
       "status": "answered",
-      "answer": "A: one pull request per phase into main, reviewed by the owner and merged before the next phase starts. (owner, 2026-09-25)",
-      "answeredAt": "2026-09-25T11:58:50.039Z"
+      "answer": "Amended by the owner (2026-09-25): work directly on main. No feature branches, no pull requests, no tags. Commit each step to main and push to main. (Originally A: one PR per phase; PR #1 carried the plan and P00 and was merged.)",
+      "answeredAt": "2026-09-25T12:36:39.453Z"
     },
     {
       "id": "D-12",
