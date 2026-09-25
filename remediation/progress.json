@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T16:43:36.921Z",
+  "updatedAt": "2026-09-25T16:59:21.731Z",
   "current": {
     "phase": "P05",
-    "step": "P05.8"
+    "step": "P05.9"
   },
   "gates": [
     {
@@ -1080,8 +1080,8 @@
         {
           "id": "P05.9",
           "title": "ADR-008 AWS topology, environments and cost (D-07, D-08, D-10)",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-25T16:44:28.474Z",
           "completedAt": null,
           "commits": [],
           "notes": []

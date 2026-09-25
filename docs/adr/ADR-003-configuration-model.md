@@ -172,9 +172,9 @@ changes:
   limits, so nothing renders HTML.
 - **Publishing** freezes a version. It writes `content/<eventId>/<version>.json` and the map
   images to the S3 content bucket and bumps the event's content version. The client and service
-  worker load it from the same-origin, immutable path `/content/<eventId>/<version>.json` (served
-  from S3 by the edge, ADR-008). The existing rule that the service worker never caches `/api/`
-  stays intact.
+  worker load it from the same-origin, immutable path `/content/<eventId>/<version>.json`. The app
+  container serves it from S3 with `Cache-Control: immutable`; ADR-008 has no CDN. The existing
+  rule that the service worker never caches `/api/` stays intact.
 - The service worker precaches the latest published version and its images, keeps the previous
   one until the new one is stored, and precaches the brief, journey and map screens (P13.4). The
   budget is 2 MB in total.

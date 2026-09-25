@@ -1,8 +1,8 @@
 # Target architecture
 
-**Status: final** (P05.8, 2026-09-26), pending the owner's sign-off at G1. It is binding from P06.
-Each section names the ADR in `docs/adr/` that decided it. A change needs a new ADR, not an edit
-here. §9 is finalised by ADR-008 (P05.9).
+**Status: final** (P05.8 and P05.9, 2026-09-26), pending the owner's sign-off at G1. It is binding
+from P06. Each section names the ADR in `docs/adr/` that decided it. A change needs a new ADR, not
+an edit here.
 
 ---
 
@@ -153,21 +153,22 @@ infra/
 
 ## 9. AWS topology (ADR-008)
 
-To be finalised by ADR-008 (P05.9) against D-10's US$100/month ceiling. The draft below showed
-D-07 option A and is superseded by ADR-008.
+Chosen to fit D-10's US$100/month for staging and production together. Costs are in
+`remediation/reports/P05/pricing/cost.md`.
 
 ```
-Route 53 ─ ACM ─ CloudFront + WAF
-                     │
-                    ALB (HTTPS)
-             ┌───────┴────────┐
-      ECS Fargate: api   ECS Fargate: web (Next.js standalone)
-             │  ▲
-             │  └─ Secrets Manager (DB creds, signing keys, VAPID) · SSM Parameter Store
-             ├─▶ RDS Postgres 17 (PITR, AWS Backup, KMS)
-             ├─▶ Amazon Verified Permissions (policy store per env)
-             ├─▶ Cognito user pool (imported, retained) ─ SES (DKIM) for invites
-             ├─▶ S3: media · content · exports · backups (BPA, KMS, lifecycle)
-             └─▶ CloudWatch: logs (app, audit) · metrics · alarms ─▶ SNS (email/SMS)
-GitHub Actions ─ OIDC ─▶ ECR push ─▶ migrate task ─▶ ECS deploy (staging auto, prod approved)
+Route 53 ─ ACM ─ API Gateway HTTP API (custom domain, stage throttling)
+                        │ VPC link
+                 Cloud Map ─▶ ECS Fargate ARM64 "app" (API + static client, one image)
+                                public subnets, inbound only from the VPC link; no NAT, no interface endpoints
+                        ├─▶ RDS PostgreSQL 17 (t4g.micro; t4g.small on event days; single-AZ; PITR; AWS Backup)
+                        ├─▶ Verified Permissions (policy store per env) · Cognito (prod: existing pool; staging: own)
+                        ├─▶ S3 (gateway endpoint): media · content · exports · backups (imported)
+                        ├─▶ Secrets Manager · SSM · SES (DKIM)
+                        └─▶ CloudWatch Logs (app 30 d, audit 400 d) · 12 alarms ─▶ SNS (email, SMS in event weeks)
+GitHub Actions ─ OIDC ─▶ ECR ─▶ migrate task ─▶ ECS deploy (staging on push; prod after approval)
+Staging: parked when idle. Budget alerts at 80 % and 100 % of US$100.
 ```
+
+Priced options, not in the baseline: Cognito Plus, RDS Multi-AZ for event week, and WAF (with
+CloudFront Pro), under Q-P9.

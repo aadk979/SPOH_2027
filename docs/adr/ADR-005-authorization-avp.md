@@ -152,7 +152,8 @@ UI affordances: GET /events/:id/me/permissions ─▶ LocalCedarAuthorizer only 
 - **Server decisions: AVP is authoritative** (D-06 A). `AvpAuthorizer` calls single
   `IsAuthorized` with the entities the builder assembled. The **decision cache** keys on
   (principal, action, resource, context bucket) plus the versions of the membership and role
-  grants. It lives 30 s, and the `access` and `membership` bus channels invalidate it (ADR-003).
+  grants. It lives 30 s for `Write` actions and 60 s for reads, and the `access` and `membership`
+  bus channels invalidate it at once (ADR-003), so a longer TTL never outlives a revocation.
   The context bucket includes `eventPhase` and the current shift boundary, so a shift change or
   a lifecycle transition never serves a stale decision.
 - **UI affordances do not use AVP.** Batch authorization costs US$150 per million requests, 30
@@ -192,9 +193,10 @@ UI affordances: GET /events/:id/me/permissions ─▶ LocalCedarAuthorizer only 
     - captures: about 10/s.
   - **January volume:** about 45 event hours (Dry Run #2 and four event days), so about **8 M
     requests**.
-  - **Cost:** a 30 s cache answers at least two of every three identical polls. At a 70 % hit
-    rate, that is 2.4 M `IsAuthorized` calls, **about US$12**. The worst case, with no cache
-    hits, is US$40.
+  - **Cost:** with the 60 s TTL for reads, about 95 % of dashboard polls, 83 % of alert polls
+    and 90 % of repeated captures hit the cache, which blends to about 86 %. At 80 %, used as the
+    safe figure, that is 1.6 M `IsAuthorized` calls, **about US$8** (ADR-008 §6). The worst
+    case, with no cache hits, is US$40.
   - **Off-season:** cents.
 
   ADR-008 carries the figure, and P16.2 replaces the estimate with a measurement.

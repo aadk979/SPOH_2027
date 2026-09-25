@@ -1,0 +1,531 @@
+{
+  "fetchedAt": "2026-09-25T16:52:57.090Z",
+  "region": "ap-southeast-1",
+  "prices": {
+    "fargate.arm.vcpuHour": {
+      "usd": 0.04045,
+      "unit": "hours",
+      "description": "AWS Fargate - ARM - vCPU - Asia Pacific (Singapore)",
+      "usagetype": "APS1-Fargate-ARM-vCPU-Hours:perCPU",
+      "offer": "AmazonECS",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonECS/20260911124425/ap-southeast-1/index.json",
+      "version": "20260911124425",
+      "publicationDate": "2026-09-11T12:44:25Z"
+    },
+    "fargate.arm.gbHour": {
+      "usd": 0.00442,
+      "unit": "hours",
+      "description": "AWS Fargate - ARM - Memory - Asia Pacific (Singapore)",
+      "usagetype": "APS1-Fargate-ARM-GB-Hours",
+      "offer": "AmazonECS",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonECS/20260911124425/ap-southeast-1/index.json",
+      "version": "20260911124425",
+      "publicationDate": "2026-09-11T12:44:25Z"
+    },
+    "vpc.publicIpv4Hour": {
+      "usd": 0.005,
+      "unit": "Hrs",
+      "description": "$0.005 per In-use public IPv4 address per hour",
+      "usagetype": "APS1-PublicIPv4:InUseAddress",
+      "offer": "AmazonVPC",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonVPC/20260917190528/ap-southeast-1/index.json",
+      "version": "20260917190528",
+      "publicationDate": "2026-09-17T19:05:28Z"
+    },
+    "vpc.interfaceEndpointHour": {
+      "usd": 0.013,
+      "unit": "Hrs",
+      "description": "$0.013 per VPC Endpoint Hour",
+      "usagetype": "APS1-VpcEndpoint-Hours",
+      "offer": "AmazonVPC",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonVPC/20260917190528/ap-southeast-1/index.json",
+      "version": "20260917190528",
+      "publicationDate": "2026-09-17T19:05:28Z"
+    },
+    "elb.albHour": {
+      "usd": 0.0252,
+      "unit": "Hrs",
+      "description": "$0.0252 per Application LoadBalancer-hour (or partial hour)",
+      "usagetype": "APS1-LoadBalancerUsage",
+      "offer": "AWSELB",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSELB/20260911124544/ap-southeast-1/index.json",
+      "version": "20260911124544",
+      "publicationDate": "2026-09-11T12:45:44Z"
+    },
+    "elb.albLcuHour": {
+      "usd": 0.008,
+      "unit": "LCU-Hrs",
+      "description": "$0.008 per used Application load balancer capacity unit-hour (or partial hour)",
+      "usagetype": "APS1-LCUUsage",
+      "offer": "AWSELB",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSELB/20260911124544/ap-southeast-1/index.json",
+      "version": "20260911124544",
+      "publicationDate": "2026-09-11T12:45:44Z"
+    },
+    "apigw.httpRequest": {
+      "usd": 0.00000125,
+      "unit": "Requests",
+      "description": "$1.25/million requests - API Gateway HTTP API (first 300 million)",
+      "usagetype": "APS1-ApiGatewayHttpRequest",
+      "offer": "AmazonApiGateway",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonApiGateway/20260921231404/ap-southeast-1/index.json",
+      "version": "20260921231404",
+      "publicationDate": "2026-09-21T23:14:04Z"
+    },
+    "cloudmap.resourceMonth": {
+      "usd": 0.1,
+      "unit": "CloudMapResource",
+      "description": "$0.10 per resource-month",
+      "usagetype": "APS1-Cloud-Map-Resources",
+      "offer": "AWSCloudMap",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSCloudMap/20260911124531/ap-southeast-1/index.json",
+      "version": "20260911124531",
+      "publicationDate": "2026-09-11T12:45:31Z"
+    },
+    "cloudmap.apiCall": {
+      "usd": 0.000001,
+      "unit": "CloudMapAPICall",
+      "description": "$1.00 per million API calls",
+      "usagetype": "APS1-Cloud-Map-DIR-API-Calls",
+      "offer": "AWSCloudMap",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSCloudMap/20260911124531/ap-southeast-1/index.json",
+      "version": "20260911124531",
+      "publicationDate": "2026-09-11T12:45:31Z"
+    },
+    "rds.pg.t4gMicro.singleAzHour": {
+      "usd": 0.025,
+      "unit": "Hrs",
+      "description": "$ 0.025 per RDS db.t4g.micro Single-AZ instance hour (or partial hour) running PostgreSQL",
+      "usagetype": "APS1-InstanceUsage:db.t4g.micro",
+      "offer": "AmazonRDS",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonRDS/20260924211011/ap-southeast-1/index.json",
+      "version": "20260924211011",
+      "publicationDate": "2026-09-24T21:10:11Z"
+    },
+    "rds.pg.t4gSmall.singleAzHour": {
+      "usd": 0.051,
+      "unit": "Hrs",
+      "description": "$ 0.051 per RDS db.t4g.small Single-AZ instance hour (or partial hour) running PostgreSQL",
+      "usagetype": "APS1-InstanceUsage:db.t4g.small",
+      "offer": "AmazonRDS",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonRDS/20260924211011/ap-southeast-1/index.json",
+      "version": "20260924211011",
+      "publicationDate": "2026-09-24T21:10:11Z"
+    },
+    "rds.pg.t4gSmall.multiAzHour": {
+      "usd": 0.102,
+      "unit": "Hrs",
+      "description": "$ 0.102 per RDS db.t4g.small Multi-AZ instance hour (or partial hour) running PostgreSQL",
+      "usagetype": "APS1-Multi-AZUsage:db.t4g.small",
+      "offer": "AmazonRDS",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonRDS/20260924211011/ap-southeast-1/index.json",
+      "version": "20260924211011",
+      "publicationDate": "2026-09-24T21:10:11Z"
+    },
+    "rds.pg.t4gMedium.singleAzHour": {
+      "usd": 0.102,
+      "unit": "Hrs",
+      "description": "$ 0.102 per RDS db.t4g.medium Single-AZ instance hour (or partial hour) running PostgreSQL",
+      "usagetype": "APS1-InstanceUsage:db.t4g.medium",
+      "offer": "AmazonRDS",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonRDS/20260924211011/ap-southeast-1/index.json",
+      "version": "20260924211011",
+      "publicationDate": "2026-09-24T21:10:11Z"
+    },
+    "rds.gp3.singleAzGbMonth": {
+      "usd": 0.138,
+      "unit": "GB-Mo",
+      "description": "$0.138 per GB-month of provisioned GP3 storage running PostgreSQL",
+      "usagetype": "APS1-RDS:GP3-Storage",
+      "offer": "AmazonRDS",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonRDS/20260924211011/ap-southeast-1/index.json",
+      "version": "20260924211011",
+      "publicationDate": "2026-09-24T21:10:11Z"
+    },
+    "rds.gp3.multiAzGbMonth": {
+      "usd": 0.276,
+      "unit": "GB-Mo",
+      "description": "$0.276 per GB-month of provisioned GP3 storage for Multi-AZ deployments",
+      "usagetype": "APS1-RDS:Multi-AZ-GP3-Storage",
+      "offer": "AmazonRDS",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonRDS/20260924211011/ap-southeast-1/index.json",
+      "version": "20260924211011",
+      "publicationDate": "2026-09-24T21:10:11Z"
+    },
+    "rds.backupGbMonth": {
+      "usd": 0.095,
+      "unit": "GB-Mo",
+      "description": "$0.095 per additional GB-month of backup storage exceeding free allocation running PostgreSQL",
+      "usagetype": "APS1-RDS:ChargedBackupUsage",
+      "offer": "AmazonRDS",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonRDS/20260924211011/ap-southeast-1/index.json",
+      "version": "20260924211011",
+      "publicationDate": "2026-09-24T21:10:11Z"
+    },
+    "cognito.plusMau": {
+      "usd": 0.02,
+      "unit": "CognitoUserPoolsMAU",
+      "description": "Cognito Plus ap-southeast-1 tier 1 pricing",
+      "usagetype": "APS1-CognitoPlusMAU",
+      "offer": "AmazonCognito",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonCognito/20260911124417/ap-southeast-1/index.json",
+      "version": "20260911124417",
+      "publicationDate": "2026-09-11T12:44:17Z"
+    },
+    "cognito.essentialsMau": {
+      "usd": 0.015,
+      "unit": "CognitoUserPoolsMAU",
+      "description": "Cognito Essentials ap-southeast-1 tier 1 pricing",
+      "usagetype": "APS1-CognitoEssentialsMAU",
+      "offer": "AmazonCognito",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonCognito/20260911124417/ap-southeast-1/index.json",
+      "version": "20260911124417",
+      "publicationDate": "2026-09-11T12:44:17Z"
+    },
+    "cognito.freeTierMau": {
+      "usd": 0,
+      "unit": "CognitoUserPoolsMAU",
+      "description": "Cognito  global free tier pricing",
+      "usagetype": "Global-CognitoFreeTierMAU",
+      "offer": "AmazonCognito",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonCognito/20260911124417/ap-southeast-1/index.json",
+      "version": "20260911124417",
+      "publicationDate": "2026-09-11T12:44:17Z"
+    },
+    "avp.singleRequest": {
+      "usd": 0.000005,
+      "unit": "API Requests",
+      "description": "5 USD per million Single Authorization Requests",
+      "usagetype": "APS1-SingleAuthorizationRequest-API-Requests",
+      "offer": "AmazonVerifiedPermissions",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonVerifiedPermissions/20260911124513/ap-southeast-1/index.json",
+      "version": "20260911124513",
+      "publicationDate": "2026-09-11T12:45:13Z"
+    },
+    "avp.batchRequest": {
+      "usd": 0.00015,
+      "unit": "API Requests",
+      "description": "150 USD per million Batch Authorization Requests for Amazon Verified Permissions in Asia Pacific (Singapore)",
+      "usagetype": "APS1-AuthorizationRequest-API-Requests",
+      "offer": "AmazonVerifiedPermissions",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonVerifiedPermissions/20260911124513/ap-southeast-1/index.json",
+      "version": "20260911124513",
+      "publicationDate": "2026-09-11T12:45:13Z"
+    },
+    "waf.webAclMonth": {
+      "usd": 5,
+      "unit": "Month",
+      "description": "$5.00 per web ACL created (prorated hourly)",
+      "usagetype": "APS1-WebACLV2",
+      "offer": "awswaf",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/awswaf/20260914163921/ap-southeast-1/index.json",
+      "version": "20260914163921",
+      "publicationDate": "2026-09-14T16:39:21Z"
+    },
+    "waf.ruleMonth": {
+      "usd": 1,
+      "unit": "Month",
+      "description": "$1.00 per rule created (prorated hourly)",
+      "usagetype": "APS1-RuleV2",
+      "offer": "awswaf",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/awswaf/20260914163921/ap-southeast-1/index.json",
+      "version": "20260914163921",
+      "publicationDate": "2026-09-14T16:39:21Z"
+    },
+    "waf.request": {
+      "usd": 6e-7,
+      "unit": "Request",
+      "description": "$0.60 per million requests processed (48KB)",
+      "usagetype": "APS1-RequestV2-48KB",
+      "offer": "awswaf",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/awswaf/20260914163921/ap-southeast-1/index.json",
+      "version": "20260914163921",
+      "publicationDate": "2026-09-14T16:39:21Z"
+    },
+    "route53.hostedZoneMonth": {
+      "usd": 0.5,
+      "unit": "HostedZone",
+      "description": "$0.50 per Hosted Zone for the first 25 Hosted Zones",
+      "usagetype": "HostedZone",
+      "offer": "AmazonRoute53",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonRoute53/20260911124504/aws-other/index.json",
+      "version": "20260911124504",
+      "publicationDate": "2026-09-11T12:45:04Z"
+    },
+    "route53.query": {
+      "usd": 4e-7,
+      "unit": "Queries",
+      "description": "$0.40 per 1,000,000 queries for the first 1 Billion queries",
+      "usagetype": "DNS-Queries",
+      "offer": "AmazonRoute53",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonRoute53/20260911124504/aws-other/index.json",
+      "version": "20260911124504",
+      "publicationDate": "2026-09-11T12:45:04Z"
+    },
+    "secrets.secretMonth": {
+      "usd": 0.4,
+      "unit": "Secrets",
+      "description": "$0.40 per Secret",
+      "usagetype": "APS1-AWSSecretsManager-Secret",
+      "offer": "AWSSecretsManager",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSSecretsManager/20260911124610/ap-southeast-1/index.json",
+      "version": "20260911124610",
+      "publicationDate": "2026-09-11T12:46:10Z"
+    },
+    "cloudwatch.logIngestGb": {
+      "usd": 0.7,
+      "unit": "GB",
+      "description": "$0.70 per GB custom log data ingested in Standard log class - Asia Pacific (Singapore)",
+      "usagetype": "APS1-DataProcessing-Bytes",
+      "offer": "AmazonCloudWatch",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonCloudWatch/20260922021715/ap-southeast-1/index.json",
+      "version": "20260922021715",
+      "publicationDate": "2026-09-22T02:17:15Z"
+    },
+    "cloudwatch.logStorageGbMonth": {
+      "usd": 0.03,
+      "unit": "GB-Mo",
+      "description": "$0.03 per GB-mo of log storage - Asia Pacific (Singapore)",
+      "usagetype": "APS1-TimedStorage-ByteHrs",
+      "offer": "AmazonCloudWatch",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonCloudWatch/20260922021715/ap-southeast-1/index.json",
+      "version": "20260922021715",
+      "publicationDate": "2026-09-22T02:17:15Z"
+    },
+    "cloudwatch.alarmMonth": {
+      "usd": 0.1,
+      "unit": "Alarms",
+      "description": "$0.10 per alarm metric month (standard resolution) - Asia Pacific (Singapore)",
+      "usagetype": "APS1-CW:AlarmMonitorUsage",
+      "offer": "AmazonCloudWatch",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonCloudWatch/20260922021715/ap-southeast-1/index.json",
+      "version": "20260922021715",
+      "publicationDate": "2026-09-22T02:17:15Z"
+    },
+    "cloudwatch.metricMonth": {
+      "usd": 0.3,
+      "unit": "Metrics",
+      "description": "$0.30 per metric-month for the first 10,000 metrics - Asia Pacific (Singapore)",
+      "usagetype": "APS1-CW:MetricMonitorUsage",
+      "offer": "AmazonCloudWatch",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonCloudWatch/20260922021715/ap-southeast-1/index.json",
+      "version": "20260922021715",
+      "publicationDate": "2026-09-22T02:17:15Z"
+    },
+    "s3.standardGbMonth": {
+      "usd": 0.025,
+      "unit": "GB-Mo",
+      "description": "$0.025 per GB - first 50 TB / month of storage used",
+      "usagetype": "APS1-TimedStorage-ByteHrs",
+      "offer": "AmazonS3",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/20260918174747/ap-southeast-1/index.json",
+      "version": "20260918174747",
+      "publicationDate": "2026-09-18T17:47:47Z"
+    },
+    "ecr.storageGbMonth": {
+      "usd": 0.1,
+      "unit": "GB-Mo",
+      "description": "$0.10 per GB-month of data storage",
+      "usagetype": "APS1-TimedStorage-ByteHrs",
+      "offer": "AmazonECR",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonECR/20260911124425/ap-southeast-1/index.json",
+      "version": "20260911124425",
+      "publicationDate": "2026-09-11T12:44:25Z"
+    },
+    "kms.keyMonth": {
+      "usd": 1,
+      "unit": "Keys",
+      "description": "$1 per customer managed KMS key version in Asia Pacific (Singapore)",
+      "usagetype": "ap-southeast-1-KMS-Keys",
+      "offer": "awskms",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/awskms/20260911124601/ap-southeast-1/index.json",
+      "version": "20260911124601",
+      "publicationDate": "2026-09-11T12:46:01Z"
+    },
+    "ses.recipient": {
+      "usd": 0.0001,
+      "unit": "Count",
+      "description": "USD0.0001 per Count for Recipients:Send in Asia Pacific (Singapore)",
+      "usagetype": "APS1-Recipients",
+      "offer": "AmazonSES",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonSES/20260911124507/ap-southeast-1/index.json",
+      "version": "20260911124507",
+      "publicationDate": "2026-09-11T12:45:07Z"
+    },
+    "dataTransfer.outGb": {
+      "usd": 0.12,
+      "unit": "GB",
+      "description": "$0.120 per GB - first 10 TB / month data transfer out beyond the global free tier",
+      "usagetype": "APS1-DataTransfer-Out-Bytes",
+      "offer": "AWSDataTransfer",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/20260916132208/ap-southeast-1/index.json",
+      "version": "20260916132208",
+      "publicationDate": "2026-09-16T13:22:08Z"
+    },
+    "lightsail.bundle2gbHour": {
+      "usd": 0.01612,
+      "unit": "Hrs",
+      "description": "$0.01612 / Hour of 2GB bundle Instance including public IPv4 address",
+      "usagetype": "APS1-BundleUsage:2GB",
+      "offer": "AmazonLightsail",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonLightsail/20260915151951/ap-southeast-1/index.json",
+      "version": "20260915151951",
+      "publicationDate": "2026-09-15T15:19:51Z"
+    },
+    "lightsail.bundle4gbHour": {
+      "usd": 0.03225,
+      "unit": "Hrs",
+      "description": "$0.03225 / Hour of 4GB bundle Instance including public IPv4 address",
+      "usagetype": "APS1-BundleUsage:4GB",
+      "offer": "AmazonLightsail",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonLightsail/20260915151951/ap-southeast-1/index.json",
+      "version": "20260915151951",
+      "publicationDate": "2026-09-15T15:19:51Z"
+    },
+    "lightsail.db1gbHour": {
+      "usd": 0.02016,
+      "unit": "Hrs",
+      "description": "$0.0202 / Hour of 1GB Standard Database bundle",
+      "usagetype": "APS1-DatabaseUsage:1GB",
+      "offer": "AmazonLightsail",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonLightsail/20260915151951/ap-southeast-1/index.json",
+      "version": "20260915151951",
+      "publicationDate": "2026-09-15T15:19:51Z"
+    },
+    "lightsail.db1gbHaHour": {
+      "usd": 0.04032,
+      "unit": "Hrs",
+      "description": "$0.0403 / Hour of 1GB High Availability Database bundle",
+      "usagetype": "APS1-DatabaseUsage:1GB_ha",
+      "offer": "AmazonLightsail",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonLightsail/20260915151951/ap-southeast-1/index.json",
+      "version": "20260915151951",
+      "publicationDate": "2026-09-15T15:19:51Z"
+    },
+    "lightsail.lbHour": {
+      "usd": 0.024193548,
+      "unit": "Hrs",
+      "description": "$0.0242 / Hour of Load Balancer usage - Asia Pacific (Singapore)",
+      "usagetype": "APS1-LoadBalancerUsage",
+      "offer": "AmazonLightsail",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonLightsail/20260915151951/ap-southeast-1/index.json",
+      "version": "20260915151951",
+      "publicationDate": "2026-09-15T15:19:51Z"
+    },
+    "apprunner.vcpuHour": {
+      "usd": 0.0809,
+      "unit": "vCPU-hour",
+      "description": "USD0.0809 per vCPU-hour for AppRunner-vCPU-hours:RunService in Asia Pacific (Singapore)",
+      "usagetype": "APS1-AppRunner-vCPU-hours",
+      "offer": "AWSAppRunner",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSAppRunner/20260911124525/ap-southeast-1/index.json",
+      "version": "20260911124525",
+      "publicationDate": "2026-09-11T12:45:25Z"
+    },
+    "apprunner.gbHour": {
+      "usd": 0.00885,
+      "unit": "hours",
+      "description": "USD0.00885 per hours for AppRunner-GB-hours:RunService in Asia Pacific (Singapore)",
+      "usagetype": "APS1-AppRunner-GB-hours",
+      "offer": "AWSAppRunner",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSAppRunner/20260911124525/ap-southeast-1/index.json",
+      "version": "20260911124525",
+      "publicationDate": "2026-09-11T12:45:25Z"
+    },
+    "cloudfront.plan.Free": {
+      "usd": 0,
+      "unit": "Month",
+      "description": "$0.00 per Free plan",
+      "quotas": {
+        "Requests": "1000000 Requests",
+        "DataTransfer": "100 GB",
+        "S3Storage": "5 GB"
+      },
+      "overage": "NO_OVERAGE_THROTTLE",
+      "offer": "CloudFrontPlans",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/CloudFrontPlans/20260911124622/aws-other/index.json",
+      "version": "20260911124622",
+      "publicationDate": "2026-09-11T12:46:22Z"
+    },
+    "cloudfront.plan.Business": {
+      "usd": 200,
+      "unit": "Month",
+      "description": "$200.00 per Business plan",
+      "quotas": {
+        "Requests": "125000000 Requests",
+        "DataTransfer": "51200 GB",
+        "S3Storage": "1024 GB"
+      },
+      "overage": "NO_OVERAGE_THROTTLE",
+      "offer": "CloudFrontPlans",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/CloudFrontPlans/20260911124622/aws-other/index.json",
+      "version": "20260911124622",
+      "publicationDate": "2026-09-11T12:46:22Z"
+    },
+    "cloudfront.plan.Pro": {
+      "usd": 15,
+      "unit": "Month",
+      "description": "$15.00 per Pro plan",
+      "quotas": {
+        "Requests": "10000000 Requests",
+        "DataTransfer": "51200 GB",
+        "S3Storage": "50 GB"
+      },
+      "overage": "NO_OVERAGE_THROTTLE",
+      "offer": "CloudFrontPlans",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/CloudFrontPlans/20260911124622/aws-other/index.json",
+      "version": "20260911124622",
+      "publicationDate": "2026-09-11T12:46:22Z"
+    },
+    "ec2.natGatewayHour": {
+      "usd": 0.059,
+      "unit": "Hrs",
+      "description": "$0.059 per NAT Gateway Hour",
+      "usagetype": "APS1-NatGateway-Hours",
+      "offer": "AmazonEC2",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20260924165117/ap-southeast-1/index.csv",
+      "version": "20260924165117",
+      "publicationDate": "2026-09-24T16:51:17Z"
+    },
+    "ec2.natGatewayGb": {
+      "usd": 0.059,
+      "unit": "GB",
+      "description": "$0.059 per GB Data Processed by NAT Gateways",
+      "usagetype": "APS1-NatGateway-Bytes",
+      "offer": "AmazonEC2",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20260924165117/ap-southeast-1/index.csv",
+      "version": "20260924165117",
+      "publicationDate": "2026-09-24T16:51:17Z"
+    },
+    "ec2.t4gSmallLinuxHour": {
+      "usd": 0.0212,
+      "unit": "Hrs",
+      "description": "$0.0212 per On Demand Linux t4g.small Instance Hour",
+      "usagetype": "APS1-BoxUsage:t4g.small",
+      "offer": "AmazonEC2",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20260924165117/ap-southeast-1/index.csv",
+      "version": "20260924165117",
+      "publicationDate": "2026-09-24T16:51:17Z"
+    },
+    "ec2.t4gMediumLinuxHour": {
+      "usd": 0.0424,
+      "unit": "Hrs",
+      "description": "$0.0424 per On Demand Linux t4g.medium Instance Hour",
+      "usagetype": "APS1-BoxUsage:t4g.medium",
+      "offer": "AmazonEC2",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20260924165117/ap-southeast-1/index.csv",
+      "version": "20260924165117",
+      "publicationDate": "2026-09-24T16:51:17Z"
+    },
+    "ebs.gp3GbMonth": {
+      "usd": 0.096,
+      "unit": "GB-Mo",
+      "description": "$0.096 per GB-month of General Purpose (gp3) provisioned storage - Asia Pacific (Singapore)",
+      "usagetype": "APS1-EBS:VolumeUsage.gp3",
+      "offer": "AmazonEC2",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20260924165117/ap-southeast-1/index.csv",
+      "version": "20260924165117",
+      "publicationDate": "2026-09-24T16:51:17Z"
+    }
+  }
+}
