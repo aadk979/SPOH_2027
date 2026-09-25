@@ -142,9 +142,11 @@ export default function TvPage(): ReactNode {
           {data.registrations.byCategory.length === 0 ? (
             <li className="text-tv-row text-on-dark-muted">No registrations recorded yet today.</li>
           ) : (
-            data.registrations.byCategory.slice(0, 6).map((row) => (
-              <TvRow key={row.key} label={readableCategory(row.key)} value={row.value} />
-            ))
+            data.registrations.byCategory
+              .slice(0, 6)
+              .map((row) => (
+                <TvRow key={row.key} label={readableCategory(row.key)} value={row.value} />
+              ))
           )}
         </TvPanel>
       </div>

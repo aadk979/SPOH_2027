@@ -197,7 +197,10 @@ export default function GroupRegistrationPage(): ReactNode {
                 onPaste={(event) => {
                   event.preventDefault();
                   const pasted = event.clipboardData.getData('text');
-                  const cleaned = pasted.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 6);
+                  const cleaned = pasted
+                    .replace(/[^a-zA-Z0-9]/g, '')
+                    .toUpperCase()
+                    .slice(0, 6);
                   setShortCode(cleaned);
                 }}
                 maxLength={6}
@@ -222,7 +225,9 @@ export default function GroupRegistrationPage(): ReactNode {
             size="lg"
             block
             disabled={
-              total === 0 || saving || (shortCode.trim().length > 0 && shortCode.trim().length !== 6)
+              total === 0 ||
+              saving ||
+              (shortCode.trim().length > 0 && shortCode.trim().length !== 6)
             }
           >
             {total === 0

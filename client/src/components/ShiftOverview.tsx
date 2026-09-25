@@ -101,11 +101,7 @@ export function ShiftCard({ me }: { me: MeResponse }): ReactNode {
                 >
                   {checkOut.isPending ? 'Ending…' : 'Confirm end shift'}
                 </Button>
-                <Button
-                  variant="quiet"
-                  size="sm"
-                  onClick={() => setConfirmingCheckOut(false)}
-                >
+                <Button variant="quiet" size="sm" onClick={() => setConfirmingCheckOut(false)}>
                   Cancel
                 </Button>
               </div>

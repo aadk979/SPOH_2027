@@ -36,7 +36,9 @@ export default function RaiseLostPersonPage(): ReactNode {
   async function submit(event: FormEvent): Promise<void> {
     event.preventDefault();
     if (description.trim().length < 3) {
-      setDescriptionError('Please provide a description of who we are looking for (at least 3 characters).');
+      setDescriptionError(
+        'Please provide a description of who we are looking for (at least 3 characters).',
+      );
       return;
     }
 

@@ -189,7 +189,7 @@ const EnvSchema = z
         ctx.addIssue({
           code: 'custom',
           path: ['APP_BASE_URL'],
-          message: 'required when AUTH_PROVIDER=cognito — this deployment\'s own public origin',
+          message: "required when AUTH_PROVIDER=cognito — this deployment's own public origin",
         });
       }
     }

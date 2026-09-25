@@ -25,6 +25,7 @@ There is no registration form. `client/src/app/sign-in/page.tsx` explicitly has 
 `POST /api/v1/roster/volunteers` (capability: `user.provision`, Chief/Admin only, heavily rate-limited because it sends real invite emails and mints identities).
 
 Flow (`server/src/modules/roster/service.ts::provisionVolunteer`):
+
 1. Look up `reportsToEmail` if given (must already be on the roster, or the request is rejected).
 2. Look up whether a `Volunteer` row already exists for that email.
 3. **If new:** call `identityProvider.ensureUser({ email, displayName, role })`, which:
@@ -40,14 +41,16 @@ Flow (`server/src/modules/roster/service.ts::provisionVolunteer`):
 `POST /api/v1/roster/import` (capability: `roster.edit` — wider than provisioning, see §3.4). Body is a list of rows (email, displayName, role, phone, portfolio, reportsToEmail, and optionally stationCode/eventDate/block to also create a shift assignment in the same pass).
 
 Key mechanics (`importRoster` in the same file):
+
 - **Dry-run by default.** Unless `commit: true` is set, the entire import runs inside a database transaction that is deliberately thrown away (`DryRunRollback`) at the end — so a 200-row import can be previewed, including which rows would fail, without writing anything.
-- **Two passes.** Pass 1 creates/updates every volunteer row so that pass 2 can resolve `reportsToEmail` references to people who appear *later* in the same file.
-- **Identities are minted outside the transaction** (Cognito calls are network I/O; holding a DB transaction open across 200 of them would be a long lock for no benefit). On a dry run no real identity is created — a `'pending'` placeholder is used purely so the preview can report what *would* happen.
+- **Two passes.** Pass 1 creates/updates every volunteer row so that pass 2 can resolve `reportsToEmail` references to people who appear _later_ in the same file.
+- **Identities are minted outside the transaction** (Cognito calls are network I/O; holding a DB transaction open across 200 of them would be a long lock for no benefit). On a dry run no real identity is created — a `'pending'` placeholder is used purely so the preview can report what _would_ happen.
 - Per-row issues (unknown station code, malformed shift row, unresolvable manager) are collected into an `issues[]` array rather than aborting the whole batch.
 - On commit, one `ImportBatch` row and one audit-log entry are written recording counts (`volunteersCreated`, `volunteersUpdated`, `assignmentsCreated`, `assignmentsUpdated`).
 - Client surface: `client/src/app/chief/imports/page.tsx`.
 
 **Escalation guardrails on both paths** (`server/src/modules/admin/service.ts`):
+
 - An admin cannot edit or deactivate **their own** account (`SELF_MUTATION_DENIED`) — a Chief who fat-fingers their own demotion at 9am on event day has no one to undo it.
 - An admin cannot act on, or grant, a role **at or above their own rank** (`ROLE_ESCALATION_DENIED`) — otherwise `user.provision` would effectively be "permission to become Admin."
 - Changing `reportsToId` is checked for cycles (`assertNoReportingCycle`) because `GET /me` walks that chain and a loop would hang the request every volunteer makes at boot.
@@ -61,6 +64,7 @@ Key mechanics (`importRoster` in the same file):
 ### 2.5 Session mechanics (what "signed in" actually means)
 
 `server/src/modules/auth/service.ts` + `server/src/modules/auth/router.ts`:
+
 - On sign-in the server returns a **short-lived access token** (kept only in an in-memory JS variable on the client — never `localStorage`) and sets an **httpOnly `spoh_refresh` cookie**, scoped narrowly to `/api/v1/auth` so it's never attached to a capture request.
 - **Refresh rotation with reuse detection:** every `/auth/refresh` call revokes the old refresh-token row and issues a new one in the same `familyId`. If an already-rotated token is ever presented again, the server assumes the cookie leaked, revokes the **entire family** (every device), and forces re-sign-in — because there's no way to tell which of the two holders is the attacker.
 - **CSRF defense** on the cookie-bearing endpoints: an explicit `Origin` allowlist check (`assertTrustedOrigin`) plus JSON-content-type (which forces a CORS preflight a form POST can't trigger).
@@ -95,40 +99,41 @@ The code is explicit that a simpler "is this role at least X" precedence check w
 
 So `CAPABILITY_MATRIX` is a literal `Record<Capability, CommitteeRole[]>` — 25 capabilities, each with an explicit allow-list of roles, with **absence = hard deny**:
 
-| Capability | Volunteer | IC | Deputy Coord. | Chief Coord. | Lead | Admin |
-|---|:-:|:-:|:-:|:-:|:-:|:-:|
-| `registration.create` | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
-| `footfall.create` | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
-| `card.stamp` | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
-| `gift.redeem` | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
-| `record.void` | ❌ | ✅ | ✅ | ✅ | ❌ | ✅ |
-| `count.adjust` | ❌ | ✅ | ✅ | ✅ | ❌ | ✅ |
-| `card.reissue` | ❌ | ✅ | ✅ | ✅ | ❌ | ✅ |
-| `incident.report` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `incident.resolve` | ❌ | ✅ | ✅ | ✅ | ❌ | ✅ |
-| `lostPerson.raise` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `lostPerson.resolve` | ❌ | ✅ | ✅ | ✅ | ❌ | ✅ |
-| `lostFound.log` | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
-| `own.read` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `dashboard.station.read` | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `dashboard.event.read` | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
-| `swap.approve` | ❌ | ✅ | ✅ | ✅ | ❌ | ✅ |
-| `roster.edit` | ❌ | ❌ | ✅ | ✅ | ❌ | ✅ |
-| `announcement.station.send` | ❌ | ✅ | ✅ | ✅ | ❌ | ✅ |
-| `announcement.event.send` | ❌ | ❌ | ✅ | ✅ | ❌ | ✅ |
-| `fallback.declare` | ❌ | ❌ | ✅ | ✅ | ❌ | ✅ |
-| `fallback.import` | ❌ | ❌ | ❌ | ✅ | ❌ | ✅ |
-| `report.generate` | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
-| `user.read` | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
-| `user.provision` | ❌ | ❌ | ❌ | ✅ | ❌ | ✅ |
-| `config.manage` | ❌ | ❌ | ❌ | ✅ | ❌ | ✅ |
-| `audit.read` | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
+| Capability                  | Volunteer | IC  | Deputy Coord. | Chief Coord. | Lead | Admin |
+| --------------------------- | :-------: | :-: | :-----------: | :----------: | :--: | :---: |
+| `registration.create`       |    ✅     | ✅  |      ✅       |      ✅      |  ❌  |  ✅   |
+| `footfall.create`           |    ✅     | ✅  |      ✅       |      ✅      |  ❌  |  ✅   |
+| `card.stamp`                |    ✅     | ✅  |      ✅       |      ✅      |  ❌  |  ✅   |
+| `gift.redeem`               |    ✅     | ✅  |      ✅       |      ✅      |  ❌  |  ✅   |
+| `record.void`               |    ❌     | ✅  |      ✅       |      ✅      |  ❌  |  ✅   |
+| `count.adjust`              |    ❌     | ✅  |      ✅       |      ✅      |  ❌  |  ✅   |
+| `card.reissue`              |    ❌     | ✅  |      ✅       |      ✅      |  ❌  |  ✅   |
+| `incident.report`           |    ✅     | ✅  |      ✅       |      ✅      |  ✅  |  ✅   |
+| `incident.resolve`          |    ❌     | ✅  |      ✅       |      ✅      |  ❌  |  ✅   |
+| `lostPerson.raise`          |    ✅     | ✅  |      ✅       |      ✅      |  ✅  |  ✅   |
+| `lostPerson.resolve`        |    ❌     | ✅  |      ✅       |      ✅      |  ❌  |  ✅   |
+| `lostFound.log`             |    ✅     | ✅  |      ✅       |      ✅      |  ❌  |  ✅   |
+| `own.read`                  |    ✅     | ✅  |      ✅       |      ✅      |  ✅  |  ✅   |
+| `dashboard.station.read`    |    ❌     | ✅  |      ✅       |      ✅      |  ✅  |  ✅   |
+| `dashboard.event.read`      |    ❌     | ❌  |      ✅       |      ✅      |  ✅  |  ✅   |
+| `swap.approve`              |    ❌     | ✅  |      ✅       |      ✅      |  ❌  |  ✅   |
+| `roster.edit`               |    ❌     | ❌  |      ✅       |      ✅      |  ❌  |  ✅   |
+| `announcement.station.send` |    ❌     | ✅  |      ✅       |      ✅      |  ❌  |  ✅   |
+| `announcement.event.send`   |    ❌     | ❌  |      ✅       |      ✅      |  ❌  |  ✅   |
+| `fallback.declare`          |    ❌     | ❌  |      ✅       |      ✅      |  ❌  |  ✅   |
+| `fallback.import`           |    ❌     | ❌  |      ❌       |      ✅      |  ❌  |  ✅   |
+| `report.generate`           |    ❌     | ❌  |      ✅       |      ✅      |  ✅  |  ✅   |
+| `user.read`                 |    ❌     | ❌  |      ✅       |      ✅      |  ✅  |  ✅   |
+| `user.provision`            |    ❌     | ❌  |      ❌       |      ✅      |  ❌  |  ✅   |
+| `config.manage`             |    ❌     | ❌  |      ❌       |      ✅      |  ❌  |  ✅   |
+| `audit.read`                |    ❌     | ❌  |      ❌       |      ✅      |  ✅  |  ✅   |
 
 Roles are effectively three tiers with distinct shapes, not a clean ladder:
+
 - **Volunteer** — pure capture (register, count, stamp, redeem) plus reporting incidents/lost persons.
 - **IC** (in-charge of a station) — everything a Volunteer does, plus voiding/adjusting/reissuing at their station, resolving incidents/lost persons, station dashboard, approving swaps, sending station announcements.
 - **Deputy Coordinator / Chief Coordinator** — portfolio/event-wide oversight: roster editing, event-wide announcements, fallback declaration, provisioning (Chief only), config (Chief only).
-- **Lead** — a deliberately *sideways* role: outranks Volunteer numerically but holds almost none of the capture capabilities. It exists for reporting/oversight (`report.generate`, `dashboard.event.read`, `audit.read`, `user.read`) plus the two universally-open ones (`incident.report`, `lostPerson.raise`).
+- **Lead** — a deliberately _sideways_ role: outranks Volunteer numerically but holds almost none of the capture capabilities. It exists for reporting/oversight (`report.generate`, `dashboard.event.read`, `audit.read`, `user.read`) plus the two universally-open ones (`incident.report`, `lostPerson.raise`).
 - **Admin** — held by every capability; the superuser/break-glass role.
 
 Role precedence (`ROLE_PRECEDENCE`/`roleMeets`) is used **only** for two narrow, non-authorization purposes: picking the highest Cognito group for display, and the admin-service escalation guardrails in §2.3 (`outranks`). It is explicitly documented as "never use this in place of `requireCapability`."
@@ -136,6 +141,7 @@ Role precedence (`ROLE_PRECEDENCE`/`roleMeets`) is used **only** for two narrow,
 ### 3.3 Layer 2 — station scope (the one attribute-based piece)
 
 Four "capture" capabilities (`registration.create`, `footfall.create`, `card.stamp`, `gift.redeem`) are **also** gated by `requireStationScope` (`server/src/middleware/rbac.ts`), which checks:
+
 - Is there a `ShiftAssignment` row for `(this volunteer, this station, an event day matching today in Singapore time, a shift block that is running right now)`?
 
 This is genuinely attribute-based (subject × resource × time), but it's scoped to exactly four write endpoints, checked against the live database (not baked into the token, because station assignment changes hourly), and role plays into it only as a **bypass**: IC-and-above can write to any station (they're the ones who fix a station that's gone wrong), and that bypass is explicitly recorded on `req.auth.stationScopeBypass` so it shows up in reconciliation rather than being indistinguishable from a normal on-shift write.
@@ -161,70 +167,90 @@ And a second one:
 > **No visitor personal data, ever**, except the transient `LostPersonAlert` (purged to an anonymized `LostPersonSummary` on resolution — a CI test enforces this).
 
 ### 4.1 Registration (`registration.create` / `record.void`)
+
 Count #1: sign-up-booth taps against one of 8 `VisitorCategory` buttons (Sec 1–5, graduated-awaiting-results, parent/guardian, other). Optionally links to a `groupId` (a family sharing one Mission Card) and a `missionCardId` (best-effort; a failed card link must never block the count). Station-scoped write; IC+ can void with a reason. Client: `client/src/app/capture/registration/` (single + `group/` variants).
 
 ### 4.2 Footfall (`footfall.create` / `count.adjust` / `record.void`)
+
 Count #2: room-entry taps at `countsEntry` stations. `quantity` defaults to 1 but can be >1 for manual clicker totals or fallback block entries. Never joined to Registration. Client: `client/src/app/capture/footfall/`.
 
 ### 4.3 Mission Card (`registration.create` to link, `card.stamp`, `card.reissue`)
+
 Count #3, and the event's "passport game": a printed card with a short code + QR (`MissionCard`), stamped once per `issuesStamp` station (`CardStampEvent`, unique on `(missionCardId, stationId)`), progressing `UNISSUED → ISSUED → COMPLETED`. `card.reissue` (IC+) handles lost/damaged cards, linking the new card back to the old via `reissuedFromId` so the funnel isn't double-counted. `missionCard/service.ts` also computes the live **funnel** (issued/completed/redeemed + per-stage counts) consumed by the dashboard. Client: `client/src/app/capture/stamp/`.
 
 ### 4.4 Gifts (`gift.redeem` / `count.adjust`)
+
 Redemption against a `GiftType` with `initialStock` and `lowStockThreshold`; stock is derived (`initialStock − redemptions + manual adjustments`), never a mutable counter column — `GiftStockAdjustment` rows carry a signed `delta` and a reason, so every stock change is itself an audit trail. Client: `client/src/app/capture/redeem/`.
 
 ### 4.5 Safety — Incidents (`incident.report` / `incident.resolve`)
+
 Any signed-in committee member (including Lead) can report an `Incident` (type/severity/status, optional station, free-text description — "describes the event, not the person"). IC+ resolves and adds `IncidentFollowUp` notes. Client: `client/src/app/safety/incident/new/`.
 
 ### 4.6 Safety — Lost Person (`lostPerson.raise` / `lostPerson.resolve`)
+
 The one place visitor-adjacent PII briefly exists: `LostPersonAlert` (approx age, free-text description/clothing, last-seen station/time). Anyone can raise it and everyone acknowledges (`LostPersonAck`, drives `LostPersonBanner.tsx` as an event-wide banner). IC+ resolves it, at which point the alert is purged and replaced by a `LostPersonSummary` row that keeps only aggregate/analytics fields (raised/resolved timestamps, resolution minutes, outcome, ack count) — every report reads the summary, never the alert. Client: `client/src/app/safety/lost-person/new/`, `client/src/features/lostPerson/useActiveAlerts.ts`.
 
 ### 4.7 Safety — Lost & Found (`lostFound.log`)
+
 Physical items (not people): `LostFoundItem` with status `HELD → CLAIMED / UNCLAIMED_AT_CLOSE / DISPOSED`, optional photo via S3 (see §4.13). Client: `client/src/app/safety/lost-found/`.
 
 ### 4.8 Roster & Shifts (`roster.edit`, `swap.approve`, `own.read`, `dashboard.event.read`)
+
 `ShiftAssignment` ties a volunteer to a station/day/block (`MORNING`/`AFTERNOON`), with check-in/out timestamps. `ShiftSwapRequest` lets a volunteer propose swapping with a named target; IC+ approves/rejects. `BriefingSlot` schedules pre-event briefing waves. The dashboard's staffing panel surfaces **staffing gaps** (stations with no one rostered for the current block) and **long shifts** (someone checked in far longer than their block) computed live in `shift/service.ts`. Client: `client/src/app/shift/`, `client/src/app/brief/`.
 
 ### 4.9 Live Dashboard (`dashboard.station.read`, `dashboard.event.read`)
+
 No WebSockets — a single JSON payload polled every 3 seconds ("under twenty dashboard clients... polling is dramatically simpler to operate and debug at 10am on 7 January"). Two views:
+
 - **Event-wide** (`getLiveDashboard`): today's registrations (total + by category + last-hour), footfall by station, the Mission Card funnel, gift stock, safety counts (open/critical incidents, active lost-person alerts), staffing (on-shift/checked-in/gaps/long-shifts), and **data health**.
 - **Station-scoped** (`getStationDashboard`, IC's own station): the same figures broken down **per device/volunteer**, including a `rateAnomaly` flag when someone's taps-per-minute exceeds a configurable threshold — "usually means someone is tapping to catch up rather than counting as visitors arrive," which is how double-counting becomes visible before it becomes a reconciliation headache.
 - **Data health** (`getDataHealth`): silent stations (no footfall in N minutes during event hours), stale devices (checked-in but no capture recently), and whether a fallback window is currently open. This is described in the code as mattering "more than any server metric" — the API can be perfectly healthy while a room silently stops counting.
-Client: `client/src/app/ic/`, `client/src/app/chief/`, `client/src/app/tv/` (a big-screen view), `client/src/features/dashboard/useDashboard.ts`.
+  Client: `client/src/app/ic/`, `client/src/app/chief/`, `client/src/app/tv/` (a big-screen view), `client/src/features/dashboard/useDashboard.ts`.
 
 ### 4.10 Announcements (`announcement.station.send`, `announcement.event.send`)
+
 Broadcast messages with a `priority` (`INFO`/`OPERATIONAL`/`URGENT`), optionally targeted by role/station/event-day, optionally requiring acknowledgement (`AnnouncementAck`). IC sends station-scoped, DC/Chief send event-wide. Client: `client/src/app/inbox/`.
 
 ### 4.11 Fallback & Reconciliation (`fallback.declare`, `fallback.import`)
+
 A structured "we're degraded, here's how" mechanism (`fallback/service.ts`), for when the app itself can't be trusted at a station (tier 3 = Google Sheets, tier 4 = paper):
+
 - **Declare** a `FallbackWindow` (event-wide or per-station) — only DC/Chief, "individual volunteers deciding to switch systems is how the same visitor ends up counted in three places." Only one open window per scope is allowed at a time.
 - **Close** it later, computing `durationMinutes`.
 - **Import** the paper/sheet data back in afterward (`fallback.import`, Chief/Admin only) via `importRegistrations`/`importFootfall`: dry-run by default, content-derived idempotency keys (so re-running a failed import after a partial failure creates nothing new), every imported row tagged `DataSource = FALLBACK_SHEET | PAPER` so no report can mistake it for a live app tap, and any report covering an overlapping time range is required to say the data is approximate rather than silently blend it.
-Client: `client/src/app/chief/fallback/`.
+  Client: `client/src/app/chief/fallback/`.
 
 ### 4.12 Reports (`report.generate`)
+
 Post-event / mid-event export generation (`report/service.ts`, `report/export.ts`) — aggregates the three counts, safety summaries, staffing — for DC/Chief/Lead/Admin. Client: `client/src/app/reports/`.
 
 ### 4.13 Media (`own.read` to get an upload URL, `lostFound.log` to attach)
+
 Presigned S3 access only — the file itself never passes through the API server (`media/service.ts`, `media/router.ts`). Used for lost-and-found item photos.
 
 ### 4.14 Push Notifications (`own.read`)
+
 Web Push (RFC 8030) subscription management (`PushSubscription` model, `notification/service.ts`). Best-effort delivery — the live dashboard poll is the actual contract, push is a convenience layer on top. A subscription is dropped after repeated delivery failures or an explicit 404/410 from the push service.
 
 ### 4.15 Audit Log (`audit.read`)
+
 Every mutating action across every module writes an `AuditLog` row (actor, action string like `registration.void`/`card.reissue`, entity type/id, before/after JSON snapshots, IP, user-agent, request id) via a shared `writeAudit()` helper called inside the same DB transaction as the mutation. `actorId` is `SetNull` on delete (audit must outlive the roster) while `actorSub` is retained so a removed volunteer's actions stay attributable. Readable by Chief/Lead/Admin. Client: part of `client/src/app/chief/`.
 
 ### 4.16 Admin (`user.read`/`user.provision`/`roster.edit`/`config.manage`)
+
 Split deliberately by capability rather than by page (`admin/router.ts`):
+
 - **Volunteers** — list/get (`user.read`), edit/deactivate/reactivate (`user.provision`).
 - **Assignments** — create/delete (`roster.edit`).
 - **Stations** — list (including inactive)/create/update (`config.manage`); toggling `issuesStamp` changes what "complete" means for every card in flight, so it's audited.
 - **Event Days** — list (`user.read`, since roster import needs it), create/update (`config.manage`).
 - **Gift Types** — create/update (`config.manage`).
 - **Runtime Settings** (`AppSetting` table) — shift-block times, silence thresholds, implausible-tap-rate, retention windows. Readable by anyone signed in (`own.read` — "the tuning of a school open house, not a secret"), writable only by `config.manage`. Lets a coordinator retune the system during a dry run without a redeploy; unset keys fall back to compiled defaults.
-Client: `client/src/app/admin/users/`, `client/src/app/admin/settings/`.
+  Client: `client/src/app/admin/users/`, `client/src/app/admin/settings/`.
 
 ### 4.17 Client architecture notes (PWA / offline)
-- **Offline write buffer** (`client/src/lib/outbox.ts`), explicitly *not* "offline-first architecture" but ordinary resilience for ordinary failure modes (sleep mid-tap, a dead Wi-Fi spot). Every capture is enqueued to IndexedDB **before** the network attempt (optimistic UI), tagged with the idempotency key it will always retry under (so the server collapses replays to one row — a flaky connection can never inflate a count). A 2-second "undo grace" delays the first send so a mis-tap can be cancelled client-side before it's ever transmitted; only an IC can void an already-settled record. Backoff on failure (1s→2s→4s→…→30s capped), parked as `failed` after 10 attempts for an IC to salvage by hand via a diagnostics panel (`toClipboardText`). Flush triggers: coming back online, tab regaining visibility, and a 15s backstop interval.
+
+- **Offline write buffer** (`client/src/lib/outbox.ts`), explicitly _not_ "offline-first architecture" but ordinary resilience for ordinary failure modes (sleep mid-tap, a dead Wi-Fi spot). Every capture is enqueued to IndexedDB **before** the network attempt (optimistic UI), tagged with the idempotency key it will always retry under (so the server collapses replays to one row — a flaky connection can never inflate a count). A 2-second "undo grace" delays the first send so a mis-tap can be cancelled client-side before it's ever transmitted; only an IC can void an already-settled record. Backoff on failure (1s→2s→4s→…→30s capped), parked as `failed` after 10 attempts for an IC to salvage by hand via a diagnostics panel (`toClipboardText`). Flush triggers: coming back online, tab regaining visibility, and a 15s backstop interval.
 - **Session recovery** — see §2.5.
 - **Service worker** (`client/public/sw.js`) — PWA installability/caching shell.
 

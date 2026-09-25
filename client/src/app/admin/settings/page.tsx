@@ -324,12 +324,12 @@ export default function AdminSettingsPage(): ReactNode {
                 {NUMERIC_FIELDS.map((field) => {
                   const isChanged = overridden.has(field.key);
                   return (
-                    <Card key={field.key} variant="flat" className={isChanged ? 'border-primary/40' : undefined}>
-                      <Field
-                        id={field.key}
-                        label={field.label}
-                        hint={field.hint}
-                      >
+                    <Card
+                      key={field.key}
+                      variant="flat"
+                      className={isChanged ? 'border-primary/40' : undefined}
+                    >
+                      <Field id={field.key} label={field.label} hint={field.hint}>
                         {(props) => (
                           <div className="flex items-center gap-sm">
                             <Input

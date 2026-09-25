@@ -166,5 +166,7 @@ export function ButtonLink({
     );
   }
 
-  return <Link href={href} className={classes} {...rest} tabIndex={tabIndex} onClick={handleClick} />;
+  return (
+    <Link href={href} className={classes} {...rest} tabIndex={tabIndex} onClick={handleClick} />
+  );
 }

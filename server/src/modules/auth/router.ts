@@ -286,10 +286,7 @@ authRouter.get('/callback', sensitiveRateLimit, async (req: Request, res: Respon
     res.cookie(REFRESH_COOKIE, opened.refreshToken, refreshCookieOptions(opened.expiresAt));
     res.redirect(`${env.APP_BASE_URL}/home`);
   } catch (cause) {
-    const code =
-      cause instanceof AppError
-        ? cause.code
-        : ERROR_CODES.INTERNAL_ERROR;
+    const code = cause instanceof AppError ? cause.code : ERROR_CODES.INTERNAL_ERROR;
     res.redirect(`${signInUrl}?error=${encodeURIComponent(code)}`);
   }
 });

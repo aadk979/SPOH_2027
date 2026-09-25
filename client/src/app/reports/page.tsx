@@ -175,7 +175,10 @@ export default function ReportsPage(): ReactNode {
                       key={row.key}
                       label={readableCategory(row.key)}
                       value={row.value}
-                      max={Math.max(1, ...data.registrations.byCategory.map((entry) => entry.value))}
+                      max={Math.max(
+                        1,
+                        ...data.registrations.byCategory.map((entry) => entry.value),
+                      )}
                     />
                   ))
                 )}
@@ -198,8 +201,8 @@ export default function ReportsPage(): ReactNode {
                         // Under its own bar, not at a fixed 160px indent that
                         // landed under the neighbouring station on a phone.
                         <p className="mt-xxs text-caption text-text-muted">
-                          Busiest 30 minutes: {formatTime(row.peakBlockStart)} · {row.peakBlockValue}{' '}
-                          entries
+                          Busiest 30 minutes: {formatTime(row.peakBlockStart)} ·{' '}
+                          {row.peakBlockValue} entries
                         </p>
                       ) : null}
                     </div>

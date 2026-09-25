@@ -73,10 +73,7 @@ export function ChoiceGroup<T extends string>({
         )}
       >
         {options.map((option) => (
-          <label
-            key={option.value}
-            className={cx(layout === 'list' ? 'block' : 'inline-flex')}
-          >
+          <label key={option.value} className={cx(layout === 'list' ? 'block' : 'inline-flex')}>
             <input
               type="radio"
               name={name}

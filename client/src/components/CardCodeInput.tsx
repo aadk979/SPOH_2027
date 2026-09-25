@@ -49,7 +49,10 @@ export function CardCodeInput({
   function handlePaste(event: React.ClipboardEvent<HTMLInputElement>): void {
     event.preventDefault();
     const pasted = event.clipboardData.getData('text');
-    const cleaned = pasted.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 6);
+    const cleaned = pasted
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .toUpperCase()
+      .slice(0, 6);
     setCode(cleaned);
     if (error) setError(null);
   }

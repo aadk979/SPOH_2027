@@ -11,7 +11,6 @@ export default function ErrorBoundary({
   error: Error & { digest?: string };
   reset(): void;
 }): ReactNode {
-
   return (
     <AppShell title="Something went wrong" back={{ href: '/home', label: 'Home' }} width="reading">
       <Stack>
