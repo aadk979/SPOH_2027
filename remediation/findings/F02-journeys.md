@@ -1,0 +1,136 @@
+# F02 — Admin and role journeys
+
+Output of P02 (Audit B). Each role's journeys walked on the local dev server at Pixel 7 and
+1440×900, with every point where the product is clunky, confusing, disconnected or impossible
+without the API, SQL, the seed or a redeploy.
+
+- **Walked on:** `main`, product code as of `13b19f4` (unchanged by P02). Local dev server and dev
+  database only (D-13): `scripts/dev-db-local.sh start`, `db:deploy` + `db:seed`, `npm run dev`.
+- **Harness:** `node remediation/tools/journeys/run.mjs <journey>` (`--list` names them). Each run
+  writes `F02-screens/<journey>-<nn>-<phone|laptop>.png` and a log of landed URLs, failed API calls
+  and console errors to `reports/P02/journeys/<journey>.json`.
+- **Clock:** journeys that capture freeze the page clock an hour into the MORNING block today
+  (`freezeInShift`); the dev server keeps capture open with `SHIFT_HOURS_ALWAYS_OPEN=true`.
+- **API fallback:** `node remediation/tools/journeys/api-setup.mjs` does what Journey 1 cannot do in
+  the UI and logs status and time per call to `reports/P02/setup-via-api.json`.
+- F01 findings are referenced by ID, not re-filed. Finding format and severity: `README.md`.
+
+**Scoring.** Type: dead-end · needs-API/SQL · needs-redeploy · confusing · disconnected ·
+inconsistent · broken · slow. Severity: Blocker · High · Medium · Low.
+
+## Summary (P02.10)
+
+_Written in P02.10._
+
+---
+
+## Journey 1 — Set up "Test Event 2027" from nothing (Admin) · P02.2
+
+**Target:** a second event with 2 days, 3 shifts, 5 stations, 6 visitor categories, 2 gifts and
+20 volunteers with assignments, using only the UI. Journey `admin-setup` (16 screens per
+viewport); API fallback `api-setup.mjs`.
+
+**Result:** none of the eight setup tasks can be done in the UI. Five can be done through the
+API by someone who reads the source; three cannot be done without a migration and a deploy.
+Whatever is created through the API joins the SPOH 2027 data, because there is no event to put
+it in.
+
+### Step log
+
+| #   | Task                   | In the UI                                                                                                                                                          | What I did instead                                                                                                                                                          | Took                                | Blocker class                               |
+| --- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ------------------------------------------- |
+| 1   | Create the event       | **No.** There is no event entity. Operations offers Volunteers and Event settings only (`admin-setup-02`). Guessing `/admin` gives a 404 (`admin-setup-11`).       | Nothing possible. The only event-level field is the `eventName` setting, which renames SPOH 2027 itself (`admin-setup-07`).                                                 | —                                   | needs-redeploy (schema: P09.1)              |
+| 2   | Rename it              | Yes, Event settings → Event name → Save (`admin-setup-07`).                                                                                                        | —                                                                                                                                                                           | 1 min                               | broken: the name is shown nowhere (F01-047) |
+| 3   | Two event days         | **No** screen. `/admin/event-days` is a 404 (`admin-setup-13`).                                                                                                    | `POST /admin/event-days` ×2 → 201.                                                                                                                                          | ~0.1 s per call; ~5 min to find DTO | needs-API (PF-09)                           |
+| 4   | Three shifts           | **No.** Settings show exactly two blocks, Morning and Afternoon (`admin-setup-06`).                                                                                | `PATCH /admin/settings` with an `EVENING` block → 400 _Invalid request body_. `ShiftBlock` is a Postgres enum (F01-020).                                                    | —                                   | needs-redeploy (migration)                  |
+| 5   | Five stations          | **No** screen. `/admin/stations` is a 404 (`admin-setup-12`).                                                                                                      | `POST /admin/stations` ×5 → 201. A station of a new kind (`CAFE`) → 400: `StationKind` is an enum (F01-019).                                                                | ~0.1 s per call; ~5 min to find DTO | needs-API (PF-09); new kinds need-redeploy  |
+| 6   | Six visitor categories | **No.** Categories appear only as capture buttons.                                                                                                                 | Nothing possible: `VisitorCategory` is a Postgres enum of 8 fixed school levels (F01-018).                                                                                  | —                                   | needs-redeploy (migration)                  |
+| 7   | Two gifts              | **No** screen. `/admin/gifts` is a 404 (`admin-setup-14`).                                                                                                         | `POST /admin/gift-types` ×2 → 201.                                                                                                                                          | ~0.1 s per call                     | needs-API (PF-09)                           |
+| 8   | 20 volunteers + shifts | **No** add, import or assign. Volunteers lists people and edits role, phone, portfolio and access only (`admin-setup-03…05`); "14 shifts" is a number, not a link. | `POST /roster/import` dry run → **500** (F02-002). The same rows with `commit: true` → 200, 20 volunteers and 20 assignments. Manual assignment: `POST /admin/assignments`. | ~0.3 s; ~10 min to write the rows   | needs-API (PF-09); dry run broken           |
+
+Totals: the API calls took 0.43 s together. Writing them took about 30 minutes with the source
+open; a non-developer admin cannot do any of it.
+
+**Afterwards** (`admin-setup-15`): the Chief's live dashboard for today lists `TE Registration`
+among SPOH's silent stations, and the Mission Card funnel lists `TE Lab A`. `GET /stations` returns
+13 stations and `GET /admin/event-days` 9 days in one list, both events mixed. The imported
+volunteers show "Never signed in" with no sign of which event they belong to (`admin-setup-04`).
+
+### Findings
+
+### F02-001 — There is no way to create or hold a second event
+
+- **Severity:** Blocker (for the programme's goal; not for January on the baseline)
+- **Type:** needs-redeploy · Role: Admin
+- **Area:** `server/prisma/schema.prisma` (no `Event`), `client/src/lib/navigation.ts:1–60`
+- **Evidence:** `admin-setup-02`, `admin-setup-11…15`; `reports/P02/setup-via-api.json`.
+- **Impact:** Every day, station, gift and volunteer is global. A second event's rows appear on
+  the live event's dashboard, funnel and station lists, and the only way to "start fresh" is a new
+  database. Confirms F01-014 and F01-015 from the user's side.
+- **Fix:** The `Event` entity with scoped days, stations, gifts and memberships; an admin setup
+  flow with clone (D-02 A).
+- **Phase:** P09.1, P09.9, P13.1, P13.8
+- **Status:** open
+
+### F02-002 — Roster import dry run fails with 500 when the file has two or more new people
+
+- **Severity:** High
+- **Type:** broken · Role: Admin, Chief, Deputy
+- **Area:** `server/src/modules/roster/service.ts:132,143` (placeholder sub), `roster/repo.ts:64`
+- **Evidence:** `api-setup.mjs` → `POST /roster/import` with 20 new emails and `commit: false`
+  returns 500. Server log: `P2002 Unique constraint failed on Volunteer_cognitoSub_key`. The dry
+  run gives every new row the same placeholder `cognitoSub: 'pending'`, so the second create
+  collides inside the rolled-back transaction.
+- **Impact:** The preview that exists "to see the diff before it happens" cannot be used for the
+  normal case, a first import. The commit path works, so an admin either imports blind or gives up.
+  (There is no import screen on `main`; the audit branch adds one, which would hit this.)
+- **Fix:** A unique placeholder per row in the dry run (for example `pending:<email>`), with an
+  integration test importing two new people with `commit: false`.
+- **Phase:** P06 (bug fix with test, before the roster import screen in P13)
+- **Status:** open
+
+### F02-003 — Setup entities have endpoints but no screens
+
+- **Severity:** High
+- **Type:** needs-API/SQL · Role: Admin
+- **Area:** `modules/admin/router.ts:144–287` (assignments, stations, event days, gift types),
+  `modules/roster/router.ts:58–90` (provision, import)
+- **Evidence:** `admin-setup-12…14` (404s); Operations links (`admin-setup-02`); no client caller
+  (PF-09).
+- **Impact:** Adding a station, a day, a gift or a person, or assigning a shift, needs someone
+  with API access and the DTOs. Before a dry run, that person is a developer.
+- **Fix:** Setup screens per entity, reachable from one "Event setup" hub.
+- **Phase:** P13.2, P13.7
+- **Status:** open
+
+### F02-004 — Taxonomy cannot change without a migration
+
+- **Severity:** High
+- **Type:** needs-redeploy · Role: Admin
+- **Area:** `ShiftBlock`, `StationKind`, `VisitorCategory` enums (F01-018, F01-019, F01-020)
+- **Evidence:** `PATCH /admin/settings` with a third block → 400; a station with `kind: 'CAFE'` →
+  400; no endpoint for categories.
+- **Impact:** Three shifts, a new station type or a different audience (for example adult
+  learners instead of secondary school levels) needs a developer, a migration and a deploy.
+- **Fix:** Taxonomy as event data (F01 § Enums).
+- **Phase:** P09.2, P09.3
+- **Status:** open
+
+### F02-005 — Saving settings marks every field as "changed from default", with no way back
+
+- **Severity:** Low
+- **Type:** confusing · Role: Admin
+- **Area:** `client/src/app/admin/settings/page.tsx:196–240` (`onSave` sends every field),
+  `server/src/lib/settings.ts:89` (`overriddenKeys` = every stored key)
+- **Evidence:** `admin-setup-07` (after renaming only the event, "Station silence 15 minutes
+  (changed from default)", and the default is 15). Afterwards all 15 keys are rows in `AppSetting`.
+- **Impact:** The bold "changed" marker, meant to show what differs from what shipped, flags
+  everything after the first save, and there is no "reset to default".
+- **Fix:** Send only edited fields; compare to the default when flagging; add per-field reset
+  (P10.1 settings history and revert).
+- **Phase:** P10.1
+- **Status:** open
+
+Also seen in this journey, recorded elsewhere: **F01-047** confirmed (`admin-setup-08`: the header
+and home still say "SPOH 2027" after the rename to "Test Event 2027"); the settings copy fixes the
+zone as "Singapore time" (`admin-setup-06`, F01-027).

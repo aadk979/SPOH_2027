@@ -1,0 +1,671 @@
+{
+  "id": "admin-setup",
+  "title": "Journey 1 (P02.2): Admin sets up \"Test Event 2027\" from nothing",
+  "role": "admin@spoh2027.test",
+  "runs": [
+    {
+      "viewport": "phone",
+      "frozenAt": null,
+      "steps": [
+        {
+          "nn": "01",
+          "name": "home",
+          "path": "/home",
+          "landedOn": "/home",
+          "screenshot": "admin-setup-01-phone.png",
+          "kb": 30,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "02",
+          "name": "operations hub",
+          "path": "/operations",
+          "landedOn": "/operations",
+          "screenshot": "admin-setup-02-phone.png",
+          "kb": 24,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "03",
+          "name": "volunteers list",
+          "path": "/admin/users",
+          "landedOn": "/admin/users",
+          "screenshot": "admin-setup-03-phone.png",
+          "kb": 104,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "04",
+          "name": "imported test volunteers",
+          "path": "/admin/users",
+          "landedOn": "/admin/users",
+          "screenshot": "admin-setup-04-phone.png",
+          "kb": 82,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "05",
+          "name": "manage a volunteer",
+          "path": null,
+          "landedOn": "/admin/users",
+          "screenshot": "admin-setup-05-phone.png",
+          "kb": 96,
+          "error": null,
+          "events": []
+        },
+        {
+          "nn": "06",
+          "name": "event settings",
+          "path": "/admin/settings",
+          "landedOn": "/admin/settings",
+          "screenshot": "admin-setup-06-phone.png",
+          "kb": 85,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "07",
+          "name": "rename the event",
+          "path": "/admin/settings",
+          "landedOn": "/admin/settings",
+          "screenshot": "admin-setup-07-phone.png",
+          "kb": 99,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "08",
+          "name": "home after the rename",
+          "path": "/home",
+          "landedOn": "/home",
+          "screenshot": "admin-setup-08-phone.png",
+          "kb": 30,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "09",
+          "name": "my shift after the rename",
+          "path": "/shift",
+          "landedOn": "/shift",
+          "screenshot": "admin-setup-09-phone.png",
+          "kb": 24,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "10",
+          "name": "restore the event name",
+          "path": "/admin/settings",
+          "landedOn": "/admin/settings",
+          "screenshot": "admin-setup-10-phone.png",
+          "kb": 99,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "11",
+          "name": "guess: /admin",
+          "path": "/admin",
+          "landedOn": "/admin",
+          "screenshot": "admin-setup-11-phone.png",
+          "kb": 16,
+          "error": null,
+          "events": [
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+            },
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "12",
+          "name": "guess: /admin/stations",
+          "path": "/admin/stations",
+          "landedOn": "/admin/stations",
+          "screenshot": "admin-setup-12-phone.png",
+          "kb": 16,
+          "error": null,
+          "events": [
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+            },
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "13",
+          "name": "guess: /admin/event-days",
+          "path": "/admin/event-days",
+          "landedOn": "/admin/event-days",
+          "screenshot": "admin-setup-13-phone.png",
+          "kb": 16,
+          "error": null,
+          "events": [
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+            },
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "14",
+          "name": "guess: /admin/gifts",
+          "path": "/admin/gifts",
+          "landedOn": "/admin/gifts",
+          "screenshot": "admin-setup-14-phone.png",
+          "kb": 16,
+          "error": null,
+          "events": [
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+            },
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "15",
+          "name": "live operations with both events",
+          "path": "/chief",
+          "landedOn": "/chief",
+          "screenshot": "admin-setup-15-phone.png",
+          "kb": 79,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "16",
+          "name": "reports",
+          "path": "/reports",
+          "landedOn": "/reports",
+          "screenshot": "admin-setup-16-phone.png",
+          "kb": 57,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "viewport": "laptop",
+      "frozenAt": null,
+      "steps": [
+        {
+          "nn": "01",
+          "name": "home",
+          "path": "/home",
+          "landedOn": "/home",
+          "screenshot": "admin-setup-01-laptop.png",
+          "kb": 37,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "02",
+          "name": "operations hub",
+          "path": "/operations",
+          "landedOn": "/operations",
+          "screenshot": "admin-setup-02-laptop.png",
+          "kb": 32,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "03",
+          "name": "volunteers list",
+          "path": "/admin/users",
+          "landedOn": "/admin/users",
+          "screenshot": "admin-setup-03-laptop.png",
+          "kb": 109,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "04",
+          "name": "imported test volunteers",
+          "path": "/admin/users",
+          "landedOn": "/admin/users",
+          "screenshot": "admin-setup-04-laptop.png",
+          "kb": 86,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "05",
+          "name": "manage a volunteer",
+          "path": null,
+          "landedOn": "/admin/users",
+          "screenshot": "admin-setup-05-laptop.png",
+          "kb": 99,
+          "error": null,
+          "events": []
+        },
+        {
+          "nn": "06",
+          "name": "event settings",
+          "path": "/admin/settings",
+          "landedOn": "/admin/settings",
+          "screenshot": "admin-setup-06-laptop.png",
+          "kb": 104,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "07",
+          "name": "rename the event",
+          "path": "/admin/settings",
+          "landedOn": "/admin/settings",
+          "screenshot": "admin-setup-07-laptop.png",
+          "kb": 102,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "08",
+          "name": "home after the rename",
+          "path": "/home",
+          "landedOn": "/home",
+          "screenshot": "admin-setup-08-laptop.png",
+          "kb": 37,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "09",
+          "name": "my shift after the rename",
+          "path": "/shift",
+          "landedOn": "/shift",
+          "screenshot": "admin-setup-09-laptop.png",
+          "kb": 29,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "10",
+          "name": "restore the event name",
+          "path": "/admin/settings",
+          "landedOn": "/admin/settings",
+          "screenshot": "admin-setup-10-laptop.png",
+          "kb": 102,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "11",
+          "name": "guess: /admin",
+          "path": "/admin",
+          "landedOn": "/admin",
+          "screenshot": "admin-setup-11-laptop.png",
+          "kb": 21,
+          "error": null,
+          "events": [
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+            },
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "12",
+          "name": "guess: /admin/stations",
+          "path": "/admin/stations",
+          "landedOn": "/admin/stations",
+          "screenshot": "admin-setup-12-laptop.png",
+          "kb": 21,
+          "error": null,
+          "events": [
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+            },
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "13",
+          "name": "guess: /admin/event-days",
+          "path": "/admin/event-days",
+          "landedOn": "/admin/event-days",
+          "screenshot": "admin-setup-13-laptop.png",
+          "kb": 21,
+          "error": null,
+          "events": [
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+            },
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "14",
+          "name": "guess: /admin/gifts",
+          "path": "/admin/gifts",
+          "landedOn": "/admin/gifts",
+          "screenshot": "admin-setup-14-laptop.png",
+          "kb": 21,
+          "error": null,
+          "events": [
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+            },
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "15",
+          "name": "live operations with both events",
+          "path": "/chief",
+          "landedOn": "/chief",
+          "screenshot": "admin-setup-15-laptop.png",
+          "kb": 91,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "16",
+          "name": "reports",
+          "path": "/reports",
+          "landedOn": "/reports",
+          "screenshot": "admin-setup-16-laptop.png",
+          "kb": 61,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

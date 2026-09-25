@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T13:19:50.537Z",
+  "updatedAt": "2026-09-25T13:19:58.268Z",
   "current": {
     "phase": "P02",
-    "step": "P02.1"
+    "step": "P02.2"
   },
   "gates": [
     {
@@ -505,8 +505,8 @@
         {
           "id": "P02.2",
           "title": "Journey 1: set up a brand-new event from nothing (Admin)",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-25T13:19:58.268Z",
           "completedAt": null,
           "commits": [],
           "notes": []

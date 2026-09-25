@@ -1,0 +1,172 @@
+{
+  "ranAt": "2026-09-25T13:21:07.316Z",
+  "results": [
+    {
+      "label": "sign in as admin (dev auth)",
+      "method": "POST",
+      "url": "/dev-auth/sign-in",
+      "status": 200,
+      "ms": 35,
+      "message": null
+    },
+    {
+      "label": "create event \"Test Event 2027\"",
+      "status": null,
+      "message": "no endpoint: there is no Event entity"
+    },
+    {
+      "label": "rename the event (the only \"event\" field)",
+      "method": "PATCH",
+      "url": "/admin/settings",
+      "status": 200,
+      "ms": 23,
+      "message": null
+    },
+    {
+      "label": "restore the event name",
+      "method": "PATCH",
+      "url": "/admin/settings",
+      "status": 200,
+      "ms": 12,
+      "message": null
+    },
+    {
+      "label": "event day 2027-03-06",
+      "method": "POST",
+      "url": "/admin/event-days",
+      "status": 201,
+      "ms": 14,
+      "message": null
+    },
+    {
+      "label": "event day 2027-03-07",
+      "method": "POST",
+      "url": "/admin/event-days",
+      "status": 201,
+      "ms": 10,
+      "message": null
+    },
+    {
+      "label": "a third shift block (EVENING)",
+      "method": "PATCH",
+      "url": "/admin/settings",
+      "status": 400,
+      "ms": 5,
+      "message": "Invalid request body"
+    },
+    {
+      "label": "station TE_REGISTRATION",
+      "method": "POST",
+      "url": "/admin/stations",
+      "status": 201,
+      "ms": 26,
+      "message": null
+    },
+    {
+      "label": "station TE_LOUNGE",
+      "method": "POST",
+      "url": "/admin/stations",
+      "status": 201,
+      "ms": 10,
+      "message": null
+    },
+    {
+      "label": "station TE_LAB_A",
+      "method": "POST",
+      "url": "/admin/stations",
+      "status": 201,
+      "ms": 10,
+      "message": null
+    },
+    {
+      "label": "station TE_LAB_B",
+      "method": "POST",
+      "url": "/admin/stations",
+      "status": 201,
+      "ms": 8,
+      "message": null
+    },
+    {
+      "label": "station TE_EXIT",
+      "method": "POST",
+      "url": "/admin/stations",
+      "status": 201,
+      "ms": 9,
+      "message": null
+    },
+    {
+      "label": "a sixth-kind station (kind outside the enum)",
+      "method": "POST",
+      "url": "/admin/stations",
+      "status": 400,
+      "ms": 4,
+      "message": "Invalid request body"
+    },
+    {
+      "label": "six visitor categories",
+      "status": null,
+      "message": "no endpoint: VisitorCategory is a Postgres enum"
+    },
+    {
+      "label": "gift \"TE Lanyard\"",
+      "method": "POST",
+      "url": "/admin/gift-types",
+      "status": 201,
+      "ms": 11,
+      "message": null
+    },
+    {
+      "label": "gift \"TE Sticker\"",
+      "method": "POST",
+      "url": "/admin/gift-types",
+      "status": 201,
+      "ms": 9,
+      "message": null
+    },
+    {
+      "label": "roster import, 20 rows (dry run)",
+      "method": "POST",
+      "url": "/roster/import",
+      "status": 500,
+      "ms": 57,
+      "message": "Something went wrong"
+    },
+    {
+      "label": "roster import, 20 rows (commit)",
+      "method": "POST",
+      "url": "/roster/import",
+      "status": 200,
+      "ms": 160,
+      "message": null
+    },
+    {
+      "label": "provision te-vol-1@spoh2027.test one by one",
+      "method": "POST",
+      "url": "/roster/volunteers",
+      "status": 201,
+      "ms": 14,
+      "message": null
+    },
+    {
+      "label": "list stations after setup",
+      "method": "GET",
+      "url": "/stations",
+      "status": 200,
+      "ms": 5,
+      "message": null
+    },
+    {
+      "label": "list event days after setup",
+      "method": "GET",
+      "url": "/admin/event-days",
+      "status": 200,
+      "ms": 5,
+      "message": null
+    },
+    {
+      "label": "what a volunteer now sees",
+      "status": null,
+      "message": "13 stations and 9 event days in one list: both events mixed"
+    }
+  ]
+}

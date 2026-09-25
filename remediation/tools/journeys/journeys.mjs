@@ -27,4 +27,55 @@ export const journeys = [
       { name: 'shift', path: '/shift' },
     ],
   },
+  {
+    id: 'admin-setup',
+    title: 'Journey 1 (P02.2): Admin sets up "Test Event 2027" from nothing',
+    role: ROLE.admin,
+    steps: [
+      { name: 'home', path: '/home' },
+      { name: 'operations hub', path: '/operations' },
+      { name: 'volunteers list', path: '/admin/users' },
+      {
+        name: 'imported test volunteers',
+        path: '/admin/users',
+        act: async (page) => {
+          await page.getByLabel('Name or email').fill('te-vol');
+          await page.waitForTimeout(800);
+        },
+      },
+      {
+        name: 'manage a volunteer',
+        act: async (page) => {
+          await page.getByRole('button', { name: 'Manage' }).first().click();
+        },
+      },
+      { name: 'event settings', path: '/admin/settings' },
+      {
+        name: 'rename the event',
+        path: '/admin/settings',
+        act: async (page) => {
+          await page.getByLabel('Event name').fill('Test Event 2027');
+          await page.getByRole('button', { name: 'Save settings' }).click();
+          await page.waitForTimeout(800);
+        },
+      },
+      { name: 'home after the rename', path: '/home' },
+      { name: 'my shift after the rename', path: '/shift' },
+      {
+        name: 'restore the event name',
+        path: '/admin/settings',
+        act: async (page) => {
+          await page.getByLabel('Event name').fill('SPOH 2027');
+          await page.getByRole('button', { name: 'Save settings' }).click();
+          await page.waitForTimeout(800);
+        },
+      },
+      { name: 'guess: /admin', path: '/admin' },
+      { name: 'guess: /admin/stations', path: '/admin/stations' },
+      { name: 'guess: /admin/event-days', path: '/admin/event-days' },
+      { name: 'guess: /admin/gifts', path: '/admin/gifts' },
+      { name: 'live operations with both events', path: '/chief' },
+      { name: 'reports', path: '/reports' },
+    ],
+  },
 ];
