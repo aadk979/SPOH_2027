@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T13:46:34.710Z",
+  "updatedAt": "2026-09-25T13:50:45.117Z",
   "current": {
     "phase": "P02",
-    "step": "P02.6"
+    "step": "P02.7"
   },
   "gates": [
     {
@@ -561,17 +561,22 @@
         {
           "id": "P02.6",
           "title": "Journey 5: Lead",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T13:46:34.709Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T13:50:44.839Z",
+          "commits": ["c36786c"],
+          "notes": [
+            {
+              "at": "2026-09-25T13:50:44.839Z",
+              "text": "lead journey; F02-024..026"
+            }
+          ]
         },
         {
           "id": "P02.7",
           "title": "Journey 6: after the event and the next event",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-25T13:50:45.116Z",
           "completedAt": null,
           "commits": [],
           "notes": []
