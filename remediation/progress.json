@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T14:00:30.262Z",
+  "updatedAt": "2026-09-25T14:12:43.669Z",
   "current": {
     "phase": "P03",
-    "step": null
+    "step": "P03.1"
   },
   "gates": [
     {
@@ -646,11 +646,16 @@
         {
           "id": "P03.1",
           "title": "Module map and dependency graph",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-25T14:04:22.630Z",
+          "completedAt": "2026-09-25T14:12:43.669Z",
+          "commits": ["6a40065"],
+          "notes": [
+            {
+              "at": "2026-09-25T14:12:43.669Z",
+              "text": "F03 module map: 24 modules + platform units, 359 exports each with a target (module-map.mjs), graphs in reports/P03, PF-10 measured 57/32/33, 27 dead exports"
+            }
+          ]
         },
         {
           "id": "P03.2",
@@ -734,8 +739,8 @@
           "notes": []
         }
       ],
-      "status": "not_started",
-      "startedAt": null,
+      "status": "in_progress",
+      "startedAt": "2026-09-25T14:04:22.631Z",
       "completedAt": null
     },
     {
