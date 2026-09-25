@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T12:24:18.903Z",
+  "updatedAt": "2026-09-25T12:25:09.111Z",
   "current": {
     "phase": "P00",
     "step": "P00.7"
@@ -297,8 +297,8 @@
           "title": "Architecture guards in report-only mode",
           "status": "done",
           "startedAt": "2026-09-25T12:18:55.600Z",
-          "completedAt": "2026-09-25T12:24:18.903Z",
-          "commits": ["00e16a0"],
+          "completedAt": "2026-09-25T12:24:33.000Z",
+          "commits": ["00e16a0", "dd21015"],
           "notes": [
             {
               "at": "2026-09-25T12:24:18.903Z",
@@ -309,20 +309,30 @@
         {
           "id": "P00.8",
           "title": "Read-only AWS inventory (needs D-13)",
-          "status": "not_started",
+          "status": "blocked",
           "startedAt": null,
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-09-25T12:24:33.259Z",
+              "text": "D-13: owner did not allow use of this container's AWS credentials, so no read-only inventory was taken. Unblock by allowing read-only AWS use (then run the SDK calls listed in the step) or by the owner supplying the inventory."
+            }
+          ]
         },
         {
           "id": "P00.9",
           "title": "Staging smoke (needs D-13)",
-          "status": "not_started",
+          "status": "blocked",
           "startedAt": null,
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-09-25T12:24:33.502Z",
+              "text": "D-13 allows the smoke test, but it cannot run here: (1) infra/scripts/smoke-test.sh exists only on feat/audit-cloudwatch, which D-05 kept out (runnable via git show 319d06d:infra/scripts/smoke-test.sh); (2) it signs in with 'aws cognito-idp admin-initiate-auth', which needs the aws CLI (not installed) and AWS credentials (D-13 disallows); (3) SMOKE_PASSWORD (chief@spoh2027.test) is not set. Unblock: allow AWS creds for that one call + provide SMOKE_PASSWORD as an env secret, or the owner runs it and shares the output."
+            }
+          ]
         }
       ],
       "status": "in_progress",
@@ -1999,6 +2009,10 @@
     {
       "at": "2026-09-25T11:49:40.086Z",
       "text": "Planning session: programme written (17 phases, 14 decisions), baseline measured on main (lint red only from test/do-inference.mjs; 233 unit, 288 integration, 19 client tests green). Waiting on owner decisions; P00 can start with P00.1/P00.4-P00.7."
+    },
+    {
+      "at": "2026-09-25T12:25:08.796Z",
+      "text": "P00 paused at 6/9: P00.3 (tag push 403), P00.8 (D-13 no AWS creds), P00.9 (smoke test not runnable) blocked on owner. Phase report written. P01-P04 wait on P00."
     }
   ]
 }

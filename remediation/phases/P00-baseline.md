@@ -144,4 +144,91 @@ node remediation/tools/code-metrics.mjs
 
 ## Phase report
 
-_Fill in on completion: summary, deviations from plan, metrics before → after, follow-ups, commits._
+**Status: 6 of 9 steps done, 3 blocked. The phase is not closed.** P01–P04 wait on P00, so nothing
+moves until the owner acts on the blockers below (2026-09-25).
+
+### Summary
+
+The environment is reproducible (`scripts/dev-db-local.sh`), and lint is green for the first time
+since `22e38ae`. Every suite has been measured, including e2e and coverage for the first time. The
+architecture guards run in report-only mode locally and in CI. The baseline is `main` (`d2497b6`),
+not the deployed audit branch: that was the owner's choice (D-05), and its consequences are recorded
+as PF-14.
+
+| Step  | Status     | Outcome                                                                                                               |
+| ----- | ---------- | --------------------------------------------------------------------------------------------------------------------- |
+| P00.1 | ✅ done    | Recipe re-run end to end; `scripts/dev-db-local.sh` verified on a fresh cluster                                       |
+| P00.2 | ✅ done\*  | \*By D-05, no fast-forward. `baseline.md` § _After reconciliation_ replaces "contains `319d06d`"                      |
+| P00.3 | ⛔ blocked | Tag `baseline/pre-remediation` → `d2497b6` made locally, but the push got HTTP 403. Docs written                      |
+| P00.4 | ✅ done    | `test/do-inference.mjs` deleted (owner's choice); `npm run lint` exits 0                                              |
+| P00.5 | ✅ done    | All green except e2e: 23/26, with 3 real failures (PF-15, PF-16)                                                      |
+| P00.6 | ✅ done    | `P00.json` and `P00-coverage.json`; coverage provider installed                                                       |
+| P00.7 | ✅ done    | ESLint guards and dependency-cruiser (warn); `arch:check`, `arch:report`; CI job                                      |
+| P00.8 | ⛔ blocked | D-13 did not allow AWS credentials                                                                                    |
+| P00.9 | ⛔ blocked | Smoke test allowed, but the script is audit-branch only and needs the `aws` CLI, AWS credentials and `SMOKE_PASSWORD` |
+
+### Owner actions needed to close P00
+
+1. **P00.3:** push the tag from a machine with normal GitHub access:
+   `git fetch origin && git tag -a baseline/pre-remediation d2497b6 -m "Safety net before the platform remediation programme" && git push origin baseline/pre-remediation`.
+   This session can push branches but not tags.
+2. **P00.8:** allow read-only use of this container's AWS credentials (amend D-13), or mark the step
+   skipped. If skipped, P04.7 carries the inventory, and it is blocked by the same answer.
+3. **P00.9:** either allow AWS credentials for the one Cognito `admin-initiate-auth` call and set
+   `SMOKE_PASSWORD` as an environment secret, or run
+   `git show 319d06d:infra/scripts/smoke-test.sh | SMOKE_PASSWORD=… bash` yourself and share the
+   output, or mark the step skipped.
+4. **Before P05:** decide what happens to `feat/audit-cloudwatch` (merge later, re-implement or drop;
+   PF-14). Also answer D-01–D-04, D-07/D-10, D-08 and D-12, which are still open.
+
+### Deviations from plan
+
+- **P00.2:** no reconciliation, by D-05. The deployed system is ahead of the baseline, including one
+  migration (PF-14).
+- **P00.3:** the rollback docs point at the audit branch's runbook by commit and warn against
+  `db:deploy` on a database the audit branch has migrated.
+- **P00.5:** Playwright 1.62 cannot use the container's Chromium build without help, so
+  `client/playwright.config.ts` gained an opt-in `PLAYWRIGHT_CHROMIUM_EXECUTABLE`. `db:reset` is
+  refused for agents, so the dev DB was built with `db:deploy` and `db:seed` instead. The dev server
+  ran with the AWS credentials removed from its environment (D-13).
+- **P00.6:** `@vitest/coverage-v8` had never been installed, so coverage could not run. It is now a
+  root dev dependency, with `test:coverage` scripts.
+- **P00.7:** added `scripts/arch-report.mjs` (counts per rule) and `tsconfig.depcruise.json` (client
+  alias resolution), neither of which the plan named.
+
+### Metrics before → after
+
+| Measure                       | Planning (`main`) | End of P00                                 |
+| ----------------------------- | ----------------- | ------------------------------------------ |
+| Lint errors                   | 8                 | **0** (plus 131 guard warnings, new)       |
+| Server unit / integration     | 233 / 288         | 233 / 288                                  |
+| Client unit                   | 19                | 19                                         |
+| Client e2e                    | not run           | 23 of 26 passing                           |
+| Build                         | not run           | pass (24 s)                                |
+| Functions > 50 / files > 300  | 97 / 18           | 97 / 18 (no product code changed)          |
+| Coverage, server (configured) | not measurable    | lines 78.4 %, branches 60.1 % (below gate) |
+| Coverage, client              | not measurable    | lines 6.5 %                                |
+| Boundary violations           | ≈ 30 cross-module | 149 across 5 rules, 0 cycles               |
+
+Snapshots: `reports/metrics/P00.json`, `P00-coverage.json` and `P00-arch.json`.
+
+### Findings added
+
+PF-14 (deployed ≠ baseline), PF-15 (stale e2e test), PF-16 (320 px overlap), PF-17 (no e2e in CI),
+PF-18 (coverage gate never enforced), PF-19 (CI dependency audit red on `main`) and PF-20 (harness
+rough edges: root `npm test`, pg concurrent-query deprecation, 14 unformatted files). PF-03 is fixed
+and PF-13 is checked.
+
+### Follow-ups for later phases
+
+- P03: PF-20's concurrent `client.query()` inside transactions. P04: PF-19's exploitability, and
+  whether `prisma migrate deploy` tolerates the audit-branch migration (PF-14).
+- P06/P07: run e2e by hand before and after each step until P08 puts it in CI (PF-17), and flip the
+  P00.7 guards to errors as each count reaches zero.
+
+### Commits
+
+`ef82b25` decisions · `a3289c1` dev DB script · `616c70c` reconciliation record · `153b116` rollback
+docs · `dca2dff` P00.3 blocked · `ef860f3` delete do-inference · `9300b43` Playwright executable ·
+`4aa2e7b` baseline run · `c14d352` coverage tooling · `0322a8b` metrics snapshot · `dd21015` guards ·
+`00e16a0` guard docs, plus the `chore(remediation): P00.x done` tracker commits.
