@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T13:08:45.469Z",
+  "updatedAt": "2026-09-25T13:10:05.516Z",
   "current": {
     "phase": "P01",
     "step": "P01.6"
@@ -434,11 +434,16 @@
         {
           "id": "P01.6",
           "title": "Content audit",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T13:08:45.469Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T13:10:05.516Z",
+          "commits": ["b447bce"],
+          "notes": [
+            {
+              "at": "2026-09-25T13:10:05.516Z",
+              "text": "11 content items; ContentDocument draft (brief/journey/map/briefing, plain text + refs); branding on Organisation/Event; offline needs versioned same-origin content"
+            }
+          ]
         },
         {
           "id": "P01.7",
