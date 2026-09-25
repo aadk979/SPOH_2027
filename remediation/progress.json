@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T12:02:35.375Z",
+  "updatedAt": "2026-09-25T12:04:01.065Z",
   "current": {
     "phase": "P00",
     "step": "P00.3"
@@ -235,7 +235,7 @@
         {
           "id": "P00.3",
           "title": "Safety-net tag (after P00.2)",
-          "status": "done",
+          "status": "blocked",
           "startedAt": "2026-09-25T12:01:49.193Z",
           "completedAt": "2026-09-25T12:02:35.375Z",
           "commits": ["153b116"],
@@ -243,6 +243,10 @@
             {
               "at": "2026-09-25T12:02:35.375Z",
               "text": "Tag baseline/pre-remediation -> d2497b6 pushed to origin. Rollback instructions in README 'Safety net' reference the audit branch runbook by commit (319d06d) and warn against db:deploy on a DB the audit branch migrated."
+            },
+            {
+              "at": "2026-09-25T12:04:01.064Z",
+              "text": "Tag push refused: HTTP 403 on git-receive-pack for refs/tags/* (branch pushes work). Tag exists only in this container. Owner to create it: git tag -a baseline/pre-remediation d2497b6 -m 'Safety net before the platform remediation programme' && git push origin baseline/pre-remediation (or a GitHub release on d2497b6). Rollback docs are committed (153b116)."
             }
           ]
         },

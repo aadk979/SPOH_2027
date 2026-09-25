@@ -121,7 +121,9 @@ safety net. The event never depends on the programme finishing.
 ### Safety net: deploying the baseline tag
 
 `baseline/pre-remediation` points at `d2497b6`, which is `main` before any remediation change (D-05
-kept the baseline on `main`). It holds product code only, with no `remediation/` directory.
+kept the baseline on `main`). **Status:** not yet on origin. This session's GitHub access refused
+the tag push (HTTP 403), so the owner creates it: `git tag -a baseline/pre-remediation d2497b6` and
+`git push origin baseline/pre-remediation`. Until it exists, `d2497b6` is the rollback target. It holds product code only, with no `remediation/` directory.
 
 The deploy runbook is **not in this tree**. It lives on the audit branch:
 `git show 319d06d:infra/runbooks/deploy.md`. To run January on the baseline, follow that runbook's
