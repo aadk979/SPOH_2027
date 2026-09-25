@@ -1,0 +1,587 @@
+{
+  "id": "chief-day",
+  "title": "Journey 2 (P02.3): event day as Chief",
+  "role": "chief@spoh2027.test",
+  "runs": [
+    {
+      "viewport": "phone",
+      "frozenAt": "2026-09-25T02:30:00.000Z",
+      "steps": [
+        {
+          "nn": "01",
+          "name": "home",
+          "path": "/home",
+          "landedOn": "/home",
+          "screenshot": "chief-day-01-phone.png",
+          "kb": 30,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "02",
+          "name": "operations hub",
+          "path": "/operations",
+          "landedOn": "/operations",
+          "screenshot": "chief-day-02-phone.png",
+          "kb": 24,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "03",
+          "name": "live dashboard",
+          "path": "/chief",
+          "landedOn": "/chief",
+          "screenshot": "chief-day-03-phone.png",
+          "kb": 79,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "04",
+          "name": "try to drill into a silent station",
+          "path": "/chief",
+          "landedOn": "/chief",
+          "screenshot": "chief-day-04-phone.png",
+          "kb": 79,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "05",
+          "name": "IC console as the drill-down",
+          "path": "/ic",
+          "landedOn": "/ic",
+          "screenshot": "chief-day-05-phone.png",
+          "kb": 12,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "06",
+          "name": "compose an urgent announcement",
+          "path": "/inbox",
+          "landedOn": "/inbox",
+          "screenshot": "chief-day-06-phone.png",
+          "kb": 24,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "07",
+          "name": "send it",
+          "path": null,
+          "landedOn": "/inbox",
+          "screenshot": "chief-day-07-phone.png",
+          "kb": 23,
+          "error": null,
+          "events": []
+        },
+        {
+          "nn": "08",
+          "name": "declare fallback",
+          "path": "/chief/fallback",
+          "landedOn": "/chief/fallback",
+          "screenshot": "chief-day-08-phone.png",
+          "kb": 31,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "09",
+          "name": "close fallback",
+          "path": "/chief/fallback",
+          "landedOn": "/chief/fallback",
+          "screenshot": "chief-day-09-phone.png",
+          "kb": 25,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "10",
+          "name": "import fallback data: preview",
+          "path": "/chief/imports",
+          "landedOn": "/chief/imports",
+          "screenshot": "chief-day-10-phone.png",
+          "kb": 40,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "11",
+          "name": "import fallback data: commit",
+          "path": null,
+          "landedOn": "/chief/imports",
+          "screenshot": "chief-day-11-phone.png",
+          "kb": 39,
+          "error": null,
+          "events": []
+        },
+        {
+          "nn": "12",
+          "name": "dashboard after fallback and import",
+          "path": "/chief",
+          "landedOn": "/chief",
+          "screenshot": "chief-day-12-phone.png",
+          "kb": 80,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "13",
+          "name": "guess: roster gaps",
+          "path": "/roster",
+          "landedOn": "/roster",
+          "screenshot": "chief-day-13-phone.png",
+          "kb": 15,
+          "error": null,
+          "events": [
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+            },
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "14",
+          "name": "report",
+          "path": "/reports",
+          "landedOn": "/reports",
+          "screenshot": "chief-day-14-phone.png",
+          "kb": 64,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "15",
+          "name": "TV mode",
+          "path": "/tv",
+          "landedOn": "/tv",
+          "screenshot": "chief-day-15-phone.png",
+          "kb": 24,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "viewport": "laptop",
+      "frozenAt": "2026-09-25T02:30:00.000Z",
+      "steps": [
+        {
+          "nn": "01",
+          "name": "home",
+          "path": "/home",
+          "landedOn": "/home",
+          "screenshot": "chief-day-01-laptop.png",
+          "kb": 36,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "02",
+          "name": "operations hub",
+          "path": "/operations",
+          "landedOn": "/operations",
+          "screenshot": "chief-day-02-laptop.png",
+          "kb": 32,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "03",
+          "name": "live dashboard",
+          "path": "/chief",
+          "landedOn": "/chief",
+          "screenshot": "chief-day-03-laptop.png",
+          "kb": 92,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "04",
+          "name": "try to drill into a silent station",
+          "path": "/chief",
+          "landedOn": "/chief",
+          "screenshot": "chief-day-04-laptop.png",
+          "kb": 92,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "05",
+          "name": "IC console as the drill-down",
+          "path": "/ic",
+          "landedOn": "/ic",
+          "screenshot": "chief-day-05-laptop.png",
+          "kb": 17,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "06",
+          "name": "compose an urgent announcement",
+          "path": "/inbox",
+          "landedOn": "/inbox",
+          "screenshot": "chief-day-06-laptop.png",
+          "kb": 30,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "07",
+          "name": "send it",
+          "path": null,
+          "landedOn": "/inbox",
+          "screenshot": "chief-day-07-laptop.png",
+          "kb": 34,
+          "error": null,
+          "events": []
+        },
+        {
+          "nn": "08",
+          "name": "declare fallback",
+          "path": "/chief/fallback",
+          "landedOn": "/chief/fallback",
+          "screenshot": "chief-day-08-laptop.png",
+          "kb": 38,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "09",
+          "name": "close fallback",
+          "path": "/chief/fallback",
+          "landedOn": "/chief/fallback",
+          "screenshot": "chief-day-09-laptop.png",
+          "kb": 35,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "10",
+          "name": "import fallback data: preview",
+          "path": "/chief/imports",
+          "landedOn": "/chief/imports",
+          "screenshot": "chief-day-10-laptop.png",
+          "kb": 46,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "11",
+          "name": "import fallback data: commit",
+          "path": null,
+          "landedOn": "/chief/imports",
+          "screenshot": "chief-day-11-laptop.png",
+          "kb": 46,
+          "error": "locator.click: Timeout 30000ms exceeded.",
+          "events": []
+        },
+        {
+          "nn": "12",
+          "name": "dashboard after fallback and import",
+          "path": "/chief",
+          "landedOn": "/chief",
+          "screenshot": "chief-day-12-laptop.png",
+          "kb": 92,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "13",
+          "name": "guess: roster gaps",
+          "path": "/roster",
+          "landedOn": "/roster",
+          "screenshot": "chief-day-13-laptop.png",
+          "kb": 21,
+          "error": null,
+          "events": [
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+            },
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "14",
+          "name": "report",
+          "path": "/reports",
+          "landedOn": "/reports",
+          "screenshot": "chief-day-14-laptop.png",
+          "kb": 69,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "15",
+          "name": "TV mode",
+          "path": "/tv",
+          "landedOn": "/tv",
+          "screenshot": "chief-day-15-laptop.png",
+          "kb": 31,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

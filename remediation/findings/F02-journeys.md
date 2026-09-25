@@ -134,3 +134,99 @@ volunteers show "Never signed in" with no sign of which event they belong to (`a
 Also seen in this journey, recorded elsewhere: **F01-047** confirmed (`admin-setup-08`: the header
 and home still say "SPOH 2027" after the rename to "Test Event 2027"); the settings copy fixes the
 zone as "Singapore time" (`admin-setup-06`, F01-027).
+
+---
+
+## Journey 2 — Event day as Chief and Deputy · P02.3
+
+Journeys `chief-day` (15 screens) and `deputy-day` (10 screens), client clock frozen at 10:30 in
+the MORNING block. The dev database still holds the Journey 1 rows, which is realistic: nothing
+lets an admin separate them.
+
+| Task                        | Chief                                                                                                                                                                                              | Deputy                                                                                   |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Live dashboard              | Works (`chief-day-03`). Needs-attention list, three separate counts, funnel, gifts, staffing.                                                                                                      | Same screen (`deputy-day-03`).                                                           |
+| Drill into a silent station | **Dead end.** The warnings and station rows are plain text (`chief-day-04`). The IC console is the only per-station view, and it starts from an empty "Choose a station" (`chief-day-05`). F02-007 | Same.                                                                                    |
+| Urgent announcement         | Works in two taps (`chief-day-06…07`), but with no station chosen and "whole event" unticked it went to everyone. F02-009                                                                          | Same form (`deputy-day-05`).                                                             |
+| Declare and close fallback  | Works (`chief-day-08…09`). The report then flags both windows (`deputy-day-09`).                                                                                                                   | Works; Deputy holds `fallback.declare`.                                                  |
+| Import fallback data        | Works: template, preview, commit (`chief-day-10…11`); re-running is refused as "already imported" (laptop run). The imported rows then inflate **today's** dashboard. F02-006                      | Not in the Deputy's menu, but the page opens by URL and only fails on submit. See P02.9. |
+| Fix a roster gap mid-day    | **Impossible.** The gap list names stations without their block and links nowhere (`chief-day-12`); there is no assignment screen (F02-003). `/roster` is a 404 (`chief-day-13`). F02-008          | Same, and the Volunteers screen tells the Deputy it is read-only (`deputy-day-08`).      |
+| Read the report             | Works (`chief-day-14`); fallback caveat shown.                                                                                                                                                     | Works (`deputy-day-09`).                                                                 |
+| TV mode                     | Works (`chief-day-15`). Clock is the server's `asOf`, not the device's.                                                                                                                            | Works.                                                                                   |
+
+### F02-006 — Future-dated records count in today's dashboard
+
+- **Severity:** High
+- **Type:** broken · Role: Chief, Deputy, anyone reading the dashboard or TV
+- **Area:** `server/src/modules/dashboard/repo.ts:13,21,32` (`recordedAt: { gte: since }` with no
+  upper bound); `modules/fallback/service.ts:317–343` (accepts any `timeBlockStart`)
+- **Evidence:** importing the screen's own template (rows dated `2027-01-07T03:30Z`) on
+  2026-09-25 moved today's "Registered" from 12 to 29 and "in the last hour" from 9 to 26
+  (`chief-day-03` → `chief-day-12`, `chief-day-15`). The rows are stored with `recordedAt`
+  2027-01-07 (`source = FALLBACK_SHEET`).
+- **Impact:** A typo in a fallback sheet's date (a wrong year, a wrong day) silently inflates the
+  live numbers, and "last hour" stops meaning the last hour. The template ships a fixed date
+  (F01-008), so copying it unedited on a dry run does exactly this.
+- **Fix:** Bound every "today" and "since" window above by now or the end of the day; reject import
+  rows outside the event day being reconciled (or outside any event day), with a row-level issue.
+- **Phase:** P06 (bug fix with test); import validation in P09.4
+- **Status:** open
+
+### F02-007 — The live dashboard does not drill down
+
+- **Severity:** Medium
+- **Type:** disconnected · Role: Chief, Deputy
+- **Area:** `client/src/app/chief/page.tsx:71–160` (no links); `app/ic/page.tsx:210`
+- **Evidence:** `chief-day-04` (clicking "DAAA Station has recorded nothing at all today" does
+  nothing); `chief-day-05`.
+- **Impact:** The one question the needs-attention list raises, "who is on that station and what
+  have they done", takes a trip to Operations → IC console → pick the station again.
+- **Fix:** Every station, count and warning links to the station page with the filter applied.
+- **Phase:** P14.1, P14.2
+- **Status:** open
+
+### F02-008 — Staffing gaps omit the shift block and cannot be acted on
+
+- **Severity:** Medium
+- **Type:** confusing · Role: Chief, Deputy
+- **Area:** `client/src/app/chief/page.tsx:176–193` (renders `stationName` and severity; the DTO's
+  `block` is dropped)
+- **Evidence:** `chief-day-12` (laptop): 26 gaps, each station twice ("TE Registration nobody
+  rostered" ×2) with nothing saying which is Morning and which Afternoon, including stations of
+  the other event and stations nobody works today.
+- **Impact:** The Chief cannot tell whether a gap is now or this afternoon, and cannot fix it from
+  the list (no assignment screen, F02-003).
+- **Fix:** Show the block, sort current block first, link each gap to "assign someone".
+- **Phase:** P13.7, P14.1
+- **Status:** open
+
+### F02-009 — An announcement with no audience chosen goes to the whole event
+
+- **Severity:** Medium
+- **Type:** confusing · Role: Chief, Deputy, IC
+- **Area:** `client/src/app/inbox/page.tsx:152–154` (`stationId || me?.currentAssignment?.station.id
+|| null`); `modules/announcement/service.ts:199` (`null` station and role = everyone)
+- **Evidence:** `chief-day-06…07`: Urgent, "Send to the whole event" unticked, "Send to" left on
+  "Choose a station…". The stored row has no target; it reached every volunteer as an urgent push.
+- **Impact:** The checkbox suggests event-wide is opt-in, but for anyone without a current station
+  (Chief, Deputy, Admin) the default is everyone. Urgent is the priority that pushes to phones.
+- **Fix:** Require an explicit audience; show "Sends to: …" with the resolved audience and count
+  before Send.
+- **Phase:** P14.4
+- **Status:** open
+
+### F02-010 — Every page load sends a settings request before the session is ready
+
+- **Severity:** Low
+- **Type:** broken · Role: all
+- **Area:** `client/src/app/providers.tsx:54`, `client/src/lib/runtimeSettings.ts:80–105`
+- **Evidence:** every step of every journey logs `401 /api/v1/admin/settings`
+  (`reports/P02/journeys/*.json`). Request order on a reload: `POST /auth/refresh` and
+  `GET /admin/settings` (no `Authorization`) leave together; the settings call 401s, then succeeds
+  after the refresh.
+- **Impact:** One failed request and one retry per page load for every user; 401s in the server log
+  that are not attacks, which will hide real ones once P15 alarms on them.
+- **Fix:** Load settings only after the session is ready; move the endpoint out of `/admin` since
+  every role reads it (P03 to root-cause the ordering).
+- **Phase:** P07
+- **Status:** open

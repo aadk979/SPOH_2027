@@ -78,4 +78,101 @@ export const journeys = [
       { name: 'reports', path: '/reports' },
     ],
   },
+  {
+    id: 'chief-day',
+    title: 'Journey 2 (P02.3): event day as Chief',
+    role: ROLE.chief,
+    freeze: 'MORNING',
+    steps: [
+      { name: 'home', path: '/home' },
+      { name: 'operations hub', path: '/operations' },
+      { name: 'live dashboard', path: '/chief' },
+      {
+        name: 'try to drill into a silent station',
+        path: '/chief',
+        act: async (page) => {
+          await page
+            .getByText(/has recorded nothing/)
+            .first()
+            .click({ timeout: 3000 });
+        },
+      },
+      { name: 'IC console as the drill-down', path: '/ic' },
+      {
+        name: 'compose an urgent announcement',
+        path: '/inbox',
+        act: async (page) => {
+          await page
+            .getByLabel('Message')
+            .fill('Lift B is out of service. Send visitors to Lift A.');
+          await page.getByText('Urgent', { exact: false }).first().click();
+        },
+      },
+      {
+        name: 'send it',
+        act: async (page) => {
+          await page.getByRole('button', { name: 'Send', exact: true }).click();
+          await page.waitForTimeout(800);
+        },
+      },
+      {
+        name: 'declare fallback',
+        path: '/chief/fallback',
+        act: async (page) => {
+          await page.getByLabel('What has happened?').fill('Wi-Fi down on level 5');
+          await page.getByRole('button', { name: /^Declare Tier/ }).click();
+          await page.waitForTimeout(800);
+        },
+      },
+      {
+        name: 'close fallback',
+        path: '/chief/fallback',
+        act: async (page) => {
+          await page
+            .getByRole('button', { name: /^Close the Tier/ })
+            .first()
+            .click();
+          await page.waitForTimeout(800);
+        },
+      },
+      {
+        name: 'import fallback data: preview',
+        path: '/chief/imports',
+        act: async (page) => {
+          await page.getByRole('button', { name: 'Insert the template' }).click();
+          await page.getByRole('button', { name: /^Preview/ }).click();
+          await page.waitForTimeout(800);
+        },
+      },
+      {
+        name: 'import fallback data: commit',
+        act: async (page) => {
+          await page.getByRole('button', { name: /^Import \d+ record/ }).click();
+          await page.waitForTimeout(800);
+        },
+      },
+      { name: 'dashboard after fallback and import', path: '/chief' },
+      { name: 'guess: roster gaps', path: '/roster' },
+      { name: 'report', path: '/reports' },
+      { name: 'TV mode', path: '/tv', settleMs: 1500 },
+    ],
+  },
+  {
+    id: 'deputy-day',
+    title: 'Journey 2 (P02.3): event day as Deputy',
+    role: ROLE.deputy,
+    freeze: 'MORNING',
+    steps: [
+      { name: 'home', path: '/home' },
+      { name: 'operations hub', path: '/operations' },
+      { name: 'live dashboard', path: '/chief' },
+      { name: 'IC console', path: '/ic' },
+      { name: 'announcements', path: '/inbox' },
+      { name: 'fallback', path: '/chief/fallback' },
+      { name: 'imports', path: '/chief/imports' },
+      { name: 'volunteers', path: '/admin/users' },
+      { name: 'report', path: '/reports' },
+      { name: 'TV mode', path: '/tv', settleMs: 1500 },
+    ],
+  },
 ];
