@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T15:58:17.526Z",
+  "updatedAt": "2026-09-25T16:08:17.028Z",
   "current": {
     "phase": null,
     "step": null
@@ -71,9 +71,9 @@
       "title": "Go-live date and release strategy",
       "owner": "you",
       "blocks": ["P05", "P16"],
-      "status": "open",
-      "answer": null,
-      "answeredAt": null
+      "status": "answered",
+      "answer": "C: staged, with a go/no-go on 28 Oct 2026. G3 green on staging by 28 Oct means 4 Nov training runs on the new platform; otherwise training and January run on baseline/pre-remediation plus critical fixes and the programme continues for the next event (owner, 2026-09-26)",
+      "answeredAt": "2026-09-25T16:08:16.762Z"
     },
     {
       "id": "D-02",
@@ -89,9 +89,9 @@
       "title": "How flexible roles are",
       "owner": "you",
       "blocks": ["P05", "P11"],
-      "status": "open",
-      "answer": null,
-      "answeredAt": null
+      "status": "answered",
+      "answer": "A: fixed role catalogue (Volunteer, IC, Deputy, Chief, Lead, Admin), renameable per event; admins edit each role's permitted actions per event; guardrail policies locked (owner, 2026-09-26)",
+      "answeredAt": "2026-09-25T16:08:16.853Z"
     },
     {
       "id": "D-04",
@@ -152,9 +152,9 @@
       "title": "AWS budget and environments",
       "owner": "you",
       "blocks": ["P05", "P08"],
-      "status": "open",
-      "answer": null,
-      "answeredAt": null
+      "status": "answered",
+      "answer": "US$100/month ceiling (owner, 2026-09-26). Environments not stated: P05 assumes the ceiling covers all environments, staging + production, no ephemeral dev stack (assumed, to confirm at P05.11)",
+      "answeredAt": "2026-09-25T16:08:16.944Z"
     },
     {
       "id": "D-11",
@@ -2215,6 +2215,10 @@
     {
       "at": "2026-09-25T12:25:08.796Z",
       "text": "P00 paused at 6/9: P00.3 (tag push 403), P00.8 (D-13 no AWS creds), P00.9 (smoke test not runnable) blocked on owner. Phase report written. P01-P04 wait on P00."
+    },
+    {
+      "at": "2026-09-25T16:08:17.027Z",
+      "text": "Owner answered D-01 (C), D-03 (A), D-10 (US$100/month). feat/audit-cloudwatch stays unmerged; later phases mine it for code. D-07, D-08, D-12 and the P04.7 questions unanswered: P05 proceeds on the recommendations, marked assumed."
     }
   ]
 }

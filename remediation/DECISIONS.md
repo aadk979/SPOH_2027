@@ -25,7 +25,9 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
     28 Oct to train volunteers on it on 4 Nov. Otherwise training and January run on the baseline tag
     plus critical fixes, and the programme continues for the next event.
 - **Recommendation:** **C.** It commits to the ambitious date without betting the event on it.
-- **Answer:** _open_
+- **Answer:** **C** (owner, 2026-09-26). Staged, with a go/no-go on 28 Oct. If G3 is green on staging by
+  then, 4 Nov training runs on the new platform. Otherwise training and January run on
+  `baseline/pre-remediation` plus critical fixes, and the programme continues for the next event.
 
 ### D-02 — Reuse model (tenancy)
 
@@ -53,7 +55,8 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   - **C.** Fixed roles and fixed permissions. This is today's model, moved to Cedar.
 - **Recommendation:** **A.** Most of the flexibility, and far fewer ways to lock yourself out or
   hand volunteers admin powers. B can be added on the same Cedar model later.
-- **Answer:** _open_
+- **Answer:** **A** (owner, 2026-09-26). A fixed role catalogue, renameable per event. Admins edit which
+  actions each role may perform, per event, and the guardrail policies are locked.
 
 ### D-04 — Product invariants
 
@@ -77,6 +80,9 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   `spoh2027.duckdns.org`.
 - **Recommendation:** Fast-forward the working branch to it, so the programme starts from what is deployed.
 - **Answer:** **Stay on the current branch** (owner, 2026-09-25). The audit branch is not merged, so its CloudWatch audit shipping, audit-log and roster-import screens, Lightsail infra, runbooks and `infra/scripts/smoke-test.sh` are not in the baseline. P00.2 records this instead of fast-forwarding.
+  **Follow-up** (owner, 2026-09-26): the audit branch stays unmerged and is not dropped. Later phases
+  mine it for code (CloudWatch audit shipping, security events, the audit-log and roster-import
+  screens, infra runbooks), reworked to the target design, rather than merging it.
 
 ### D-06 — How Verified Permissions is evaluated
 
@@ -107,7 +113,8 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
     Postgres. Cheapest (about US$50–80/month) but hand-operated.
 - **Recommendation:** **A** for production, with staging on the same stack at minimum size.
   Figures are to be re-priced in P05 from the AWS Pricing API, not estimated.
-- **Answer:** _open_
+- **Answer:** _open._ P05 assumes the recommendation's shape and re-prices it against the US$100/month
+  ceiling in D-10 (ADR-008, marked **assumed**). To confirm with the owner at P05.11.
 
 ### D-08 — Domain and email
 
@@ -116,7 +123,9 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
 - **Question:** Which domain should production use (a school subdomain, or one you register in Route 53)?
   Can we send invite emails from it through SES? duckdns cannot carry DKIM for SES.
 - **Recommendation:** A real domain in Route 53 with ACM certificates and SES with DKIM.
-- **Answer:** _open_
+- **Answer:** _open._ P05 assumes the recommendation: a domain registered in Route 53, ACM certificates,
+  and SES with DKIM for invites (ADR-006 and ADR-008, marked **assumed**). The domain name itself is
+  still needed before P08.5. To confirm with the owner at P05.11.
 
 ### D-09 — Scheduler engine
 
@@ -136,7 +145,9 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
 - **Blocks:** P05, P08
 - **Question:** What is the monthly ceiling? Do you want staging and production (recommended), plus
   an optional ephemeral dev stack?
-- **Answer:** _open_
+- **Answer:** **US$100/month** (owner, 2026-09-26). The owner did not say which environments. P05
+  assumes the ceiling covers every environment together, with staging and production and no ephemeral
+  dev stack (marked **assumed** in ADR-008). To confirm with the owner at P05.11.
 
 ### D-11 — Branch and review workflow
 
@@ -158,7 +169,8 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   Event #1, or should the new platform start empty and have the event set up through the new admin UI?
 - **Recommendation:** Migrate. The roster and the Cognito identities are real, and re-inviting
   everyone is avoidable friction.
-- **Answer:** _open_
+- **Answer:** _open._ P05 assumes the recommendation: migrate the current data into "SPOH 2027" as
+  Event #1 (ADR-009, marked **assumed**). To confirm with the owner at P05.11.
 
 ### D-13 — Access for testing
 
