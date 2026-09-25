@@ -73,7 +73,7 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   and Lightsail infrastructure and runbooks. Its commit messages describe it as what runs on
   `spoh2027.duckdns.org`.
 - **Recommendation:** Fast-forward the working branch to it, so the programme starts from what is deployed.
-- **Answer:** _open_
+- **Answer:** **Stay on the current branch** (owner, 2026-09-25). The audit branch is not merged, so its CloudWatch audit shipping, audit-log and roster-import screens, Lightsail infra, runbooks and `infra/scripts/smoke-test.sh` are not in the baseline. P00.2 records this instead of fast-forwarding.
 
 ### D-06 — How Verified Permissions is evaluated
 
@@ -143,7 +143,7 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   - **A.** One pull request per phase into `main`, reviewed by you, merged before the next phase starts.
   - **B.** Continuous work on the working branch, with a PR at each gate.
 - **Recommendation:** **A.** Each phase is a reviewable, revertible unit.
-- **Answer:** _open_
+- **Answer:** **A**: one pull request per phase into `main` (owner, 2026-09-25).
 
 ### D-12 — Existing data
 
@@ -164,7 +164,7 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   - May audits use the AWS credentials present in this environment, read-only?
   - May P00.9 run `infra/scripts/smoke-test.sh`, which creates and deactivates a test volunteer?
 - **Recommendation:** Yes to read-only, and yes to the smoke test on staging only.
-- **Answer:** _open_
+- **Answer:** **Partial** (owner, 2026-09-25). Allowed: P00.9 may run the smoke test against staging. Not allowed: other audit requests to the live staging site, or use of this container's AWS credentials, so P00.8 and P04.7 stay blocked.
 
 ### D-14 — Shared state for rate limits and caches
 

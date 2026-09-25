@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T11:49:40.086Z",
+  "updatedAt": "2026-09-25T11:58:50.328Z",
   "current": {
     "phase": null,
     "step": null
@@ -107,9 +107,9 @@
       "title": "Which branch is the baseline",
       "owner": "you",
       "blocks": ["P00.2"],
-      "status": "open",
-      "answer": null,
-      "answeredAt": null
+      "status": "answered",
+      "answer": "Stay on the current working branch. Do NOT fast-forward to origin/feat/audit-cloudwatch; its 5 commits (CloudWatch audit, audit-log/roster-import screens, Lightsail infra, smoke test) stay out of the baseline. (owner, 2026-09-25)",
+      "answeredAt": "2026-09-25T11:58:49.597Z"
     },
     {
       "id": "D-06",
@@ -161,9 +161,9 @@
       "title": "Branch and review workflow",
       "owner": "you",
       "blocks": ["P00.2"],
-      "status": "open",
-      "answer": null,
-      "answeredAt": null
+      "status": "answered",
+      "answer": "A: one pull request per phase into main, reviewed by the owner and merged before the next phase starts. (owner, 2026-09-25)",
+      "answeredAt": "2026-09-25T11:58:50.039Z"
     },
     {
       "id": "D-12",
@@ -179,9 +179,9 @@
       "title": "Access for testing",
       "owner": "you",
       "blocks": ["P00.8", "P00.9", "P04.7"],
-      "status": "open",
-      "answer": null,
-      "answeredAt": null
+      "status": "answered",
+      "answer": "Partial. Allowed: P00.9 may run infra/scripts/smoke-test.sh against staging. NOT allowed: other audit requests to the live staging site, and use of this container's AWS credentials (so P00.8 and P04.7 stay blocked). (owner, 2026-09-25)",
+      "answeredAt": "2026-09-25T11:58:50.328Z"
     },
     {
       "id": "D-14",
