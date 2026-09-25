@@ -118,6 +118,30 @@ Dry Run #2 on **4 Jan 2027** and the event on **6–9 Jan 2027**. The recommende
 The baseline tag `baseline/pre-remediation` (created in P00) stays deployable throughout as the
 safety net. The event never depends on the programme finishing.
 
+### Safety net: deploying the baseline tag
+
+`baseline/pre-remediation` points at `d2497b6`, which is `main` before any remediation change (D-05
+kept the baseline on `main`). It holds product code only, with no `remediation/` directory.
+
+The deploy runbook is **not in this tree**. It lives on the audit branch:
+`git show 319d06d:infra/runbooks/deploy.md`. To run January on the baseline, follow that runbook's
+_Steps_ with `<branch>` = `baseline/pre-remediation`, with two differences:
+
+1. **Do not run step 4 (`npm run db:deploy`) against a database that the audit branch has
+   migrated**, which includes staging. That database has
+   `20260922000000_audit_severity_and_security_events` applied, and the tag does not know that
+   migration. The migration only adds enum types, nullable or defaulted `AuditLog` columns and indexes,
+   so the baseline build runs against it unchanged, as the runbook's _Rolling back_ section says. Never reverse the migration: that
+   loses the audit rows written since. Whether `prisma migrate deploy` tolerates the unknown
+   migration is to be verified in P04 (PF-14).
+2. **Verification:** `/healthz` and `/readyz` as in the runbook. The runbook's smoke test is also
+   audit-branch only (`git show 319d06d:infra/scripts/smoke-test.sh`), and it expects the
+   audit-branch endpoints `/api/v1/audit/facets` and `/api/v1/audit/sink`, which the baseline does
+   not serve. Expect those checks to fail against the tag.
+
+On a **fresh** host or database the tag deploys with the runbook unchanged, `db:deploy` included.
+Going from the tag back to the audit branch is an ordinary deploy of `319d06d`.
+
 ---
 
 ## Resuming (read this first in a fresh session)
