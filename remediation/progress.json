@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T15:38:13.753Z",
+  "updatedAt": "2026-09-25T15:39:20.148Z",
   "current": {
     "phase": "P04",
     "step": "P04.6"
@@ -1022,11 +1022,16 @@
         {
           "id": "P04.7",
           "title": "AWS account review (read-only)",
-          "status": "not_started",
+          "status": "skipped",
           "startedAt": null,
-          "completedAt": null,
+          "completedAt": "2026-09-25T15:39:20.147Z",
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-09-25T15:39:20.148Z",
+              "text": "Skipped: D-13 forbids this environment's AWS credentials. The checklist is in F04 § P04.7 as 33 owner questions (Q-I1..5, Q-S1..4, Q-C1..9, Q-L1..3, Q-W1..2, Q-A1..2, Q-G1..2, Q-B1, Q-R1..2, Q-H1..2, Q-D1) with repo-known facts; written in 45211fd. Q-S2 (public access) and Q-R1 (root MFA) first. Revisit only if the owner amends D-13 or answers."
+            }
+          ]
         },
         {
           "id": "P04.8",
