@@ -592,3 +592,51 @@ From what this journey could not do:
   today" list without descriptions after the purge.
 - **Phase:** P14.2
 - **Status:** open
+
+---
+
+## Interlinking matrix · P02.8
+
+Built from the journeys and checked against the client: `client/src/app` has **no dynamic route**
+(no `[id]` segment anywhere), and the only in-app links are the 25 fixed paths of the navigation
+and section tiles. The only link _from an entity_ is `tel:` on a person's phone number.
+
+"Appears on" lists where a user sees the entity. "Own page" is whether it can be opened by itself.
+"Navigate to" is what you can reach from it. **Bold** marks the gaps P14.1–P14.3 have to close.
+
+| Entity            | Appears on                                                                                                                                                                                       | Own page                                                               | Navigate to           | Gap                                                                                                  |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- | --------------------- | ---------------------------------------------------------------------------------------------------- |
+| Event day         | Home shift card, My shift, attendance header, Chief "Today — …", TV header                                                                                                                       | **No** (no list either; API only, F02-003)                             | **nothing**           | No day view: that day's shifts, numbers, fallback windows                                            |
+| Shift (block)     | Home card, My shift, Chief "on shift" count, staffing gaps (unlabelled, F02-008), IC "who is here" (unlabelled, F02-011)                                                                         | **No**                                                                 | **nothing**           | Block is not even named on the Chief and IC screens                                                  |
+| Station           | Home card, capture titles, Chief needs-attention, room entries, funnel, gaps; IC picker; TV; announcement and fallback pickers; incident, lost-person, L&F "at …"; report                        | **No** (the IC console is the nearest, reached by picking from a list) | **nothing** (F02-007) | Station page: roster, live counts, device totals, recent records, incidents, fallback                |
+| Volunteer         | Volunteers list (inline Manage), IC "who is here", per-device totals, swap queue, announcement author, lost-person reporter, safety contacts, fallback "declared by", settings "last changed by" | **Partial**: inline expand in Volunteers, Chief/Admin/Deputy/Lead only | `tel:` only           | **Person page**: shifts, attendance, records captured, reports raised; "N shifts" chip is not a link |
+| Assignment        | as Shift; Volunteers "N shifts" chip; swap queue                                                                                                                                                 | **No**                                                                 | **nothing**           | Cannot be created, moved or removed in the UI (F02-003); swaps silent (F02-019)                      |
+| Registration      | Counts: Chief, TV, IC, report, capture "this device"                                                                                                                                             | **No** (no list)                                                       | **nothing**           | **Recent records list** per station and device, with void (F02-013)                                  |
+| Footfall tick     | Counts: Chief, TV, IC, report, capture                                                                                                                                                           | **No**                                                                 | **nothing**           | Same as registration                                                                                 |
+| Mission Card      | Stamp result after a scan (code, stamps, stations left); funnel counts                                                                                                                           | **No** (result disappears on the next scan)                            | **nothing**           | **Card page** by code: history, void, reissue (F02-013)                                              |
+| Gift type         | Redeem list with stock; Chief gift tiles; report                                                                                                                                                 | **No**                                                                 | **nothing**           | Stock history and adjust (F02-013)                                                                   |
+| Incident          | Chief "N incidents open" (text); report count                                                                                                                                                    | **No** (no list, F02-015)                                              | **nothing**           | **Incident list and page** with follow-ups and status                                                |
+| Lost-person alert | Banner on every screen while active; report count                                                                                                                                                | **No** (no history; vanishes on resolve, F02-028)                      | `tel:` reporter       | Resolved-today list; link from banner to "last seen" station                                         |
+| Lost-found item   | L&F list (search, Mark claimed); report count                                                                                                                                                    | **No** (card in list)                                                  | **nothing**           | Item page with photo, claim details, close-out fate                                                  |
+| Announcement      | Inbox, sender's "Your messages"                                                                                                                                                                  | **No**                                                                 | **nothing**           | Who has acknowledged (the count exists for lost-person alerts, not announcements)                    |
+| Fallback window   | Fallback screen (open and closed lists); report caveat                                                                                                                                           | **No**                                                                 | **nothing**           | Report caveat should link to the window and its imports                                              |
+| Import batch      | Import screen result card, until you leave                                                                                                                                                       | **No** (no list of batches)                                            | **nothing**           | **Batch list**: who imported what, for which window, and undo                                        |
+| Audit row         | **Nowhere** (F02-024)                                                                                                                                                                            | **No**                                                                 | —                     | Audit screen with a link to the entity each row changed                                              |
+
+**Reading across:** every dashboard number is a dead end (F02-007), no entity has a page, and
+nothing a user sees links to a related thing. The data model already has the relationships
+(station → assignments → volunteer → records), so this is a client gap, not a schema gap.
+
+### F02-029 — No entity has its own page, and nothing links to anything
+
+- **Severity:** High
+- **Type:** disconnected · Role: all committee roles
+- **Area:** `client/src/app/**` (no dynamic routes)
+- **Evidence:** the matrix above; every journey.
+- **Impact:** This is the "features aren't interconnected" complaint in one line. Every question
+  that starts from a thing ("what happened at DCDF this morning?", "what has Cal done today?",
+  "which windows did this import cover?") becomes a search across screens, or cannot be answered.
+- **Fix:** Pages for station, person, card, incident, lost-found item, import batch and event day;
+  every name and number links to its page.
+- **Phase:** P14.1–P14.3
+- **Status:** open
