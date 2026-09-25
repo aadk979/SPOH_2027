@@ -970,6 +970,69 @@ will serve it (F04-021).
 - **Phase:** P16 (load), P06 (F03-029), P08 (staging at target size)
 - **Status:** open
 
+---
+
+## P04.9 — Dependencies
+
+### `npm audit`
+
+**0 vulnerabilities** (859 packages: 484 production, 337 dev, 117 optional), with and without
+`--omit=dev`. This depends on the three `overrides` in the root `package.json` added for PF-19
+(`deepmerge-ts ^8.0.2`, `mysql2 ^3.24.4`, `uuid ^11.1.1`). CI runs
+`npm audit --audit-level=high` (`ci.yml:159`).
+
+### `npm outdated`
+
+| Kind                              | Packages                                                                                                                                                                                                                                                                                                                |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Patch/minor within range          | AWS SDK v3 (3.1123 → 3.1140), `next` 16.3.4 → 16.3.6, `react`/`react-dom` 19.2.8 → 19.3.0, `@tanstack/react-query`, `zod` 4.5.4 → 4.6.5, `jose` 6.2.10 → 6.2.12, `eslint`, `typescript-eslint`, `prettier`, `postcss`, `happy-dom`, `supertest`, `tsx`, `@playwright/test` 1.62 → 1.63, `aws-amplify` (unused, F03-037) |
+| Major behind                      | `typescript` 6.0.3 → 7.0.2, `@vitest/coverage-v8` 4 → 5 (with `vitest`), `@testing-library/jest-dom` 6 → 7, `@types/supertest` 6 → 7, `@types/node` 24 → 26                                                                                                                                                             |
+| Pre-release ahead                 | `prisma` 8.0.0-rc.17 is the newest tag; 7.10.0 is current stable                                                                                                                                                                                                                                                        |
+| Installed newer than `latest` tag | `dependency-cruiser` 18.4.0 (latest 17.4.3), `npm-run-all2` 9.0.3 (latest 8.0.4): installed from a newer dist-tag; harmless, worth knowing before an upgrade tool "downgrades" them                                                                                                                                     |
+
+### Versions that block upgrades
+
+| Pin                                             | Why it is pinned                                                                                                                              | What unblocks it                                                                                              |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `prisma` and `@prisma/client` exactly `7.10.0`  | client, CLI and generated code must match; the PF-19 overrides patch its transitive advisories                                                | a Prisma release that carries the fixes, then drop the overrides (PF-19 says so)                              |
+| `typescript` exactly `6.0.3` in four workspaces | one compiler for the monorepo; `typescript-eslint` 8.x and Next 16 support ranges                                                             | TS 7 support in `typescript-eslint` and Next; do it as its own step, not inside a refactor                    |
+| `vitest` 4 with `@vitest/coverage-v8` 4         | the two upgrade together                                                                                                                      | a single test-tooling upgrade step (P06/P07 need the suites stable, so after G2)                              |
+| Node: engines `>=22 <27`; the box installs 22   | `bootstrap.sh` pins NodeSource 22; some dependency declares `^22.13 \|\| ^24 \|\| >=26`, so odd releases (25 on this machine) warn at install | pick one LTS for all environments in P08 (22 or 24) and set `.nvmrc`, CI and the image from it                |
+| `exceljs` `^4.4.0`                              | the XLSX export; it pulls `archiver`/`unzipper` with deprecated `glob@7`, `inflight`, `rimraf@2`, `fstream`                                   | only writes files, never parses input, so exposure is low; replace if a maintained writer is preferred in P06 |
+
+### Licences
+
+`license-checker-rseidelsohn` over all 708 installed packages: MIT 507, Apache-2.0 104, ISC 50,
+BSD-3/2-Clause 20, MPL-2.0 6, Unlicense 3, BlueOak 2, and one each of 0BSD, CC-BY-4.0 and
+MIT-AND-Zlib. The ones worth a note, all acceptable for an internal deployment:
+
+| Package                    | Licence                         | Path                                | Note                                                                       |
+| -------------------------- | ------------------------------- | ----------------------------------- | -------------------------------------------------------------------------- |
+| `web-push` 3.6.7           | MPL-2.0                         | server, production                  | file-level copyleft; used unmodified                                       |
+| `lightningcss`, `axe-core` | MPL-2.0                         | client build / tests                | build and test tooling                                                     |
+| `sharp` (`@img/*`)         | Apache-2.0 + LGPL-3.0 (libvips) | client, via Next image optimisation | dynamically linked, unmodified                                             |
+| `jszip` 3.10.1             | MIT or GPL-3.0                  | server, via `exceljs`               | used under MIT                                                             |
+| `elkjs` 0.11.1             | EPL-2.0                         | server dev, via `prisma` → Studio   | not shipped in the runtime                                                 |
+| `buffers` 0.1.1            | none declared                   | server, via `exceljs` → `unzipper`  | unknown licence in a production path; replace with `exceljs`, or accept    |
+| `@spoh/*`, `spoh2027`      | `UNLICENSED`                    | this repo                           | nothing states who owns the code for reuse by other events or teams (Q-R2) |
+
+### Findings
+
+#### F04-022 — No automated dependency updates, and the upgrade path is undocumented
+
+- **Severity:** Low
+- **Area:** `.github/` (workflows only), root and workspace `package.json`
+- **Evidence:** No Dependabot or Renovate configuration. `npm audit` gates CI at "high", which
+  catches known advisories but not the ~30 packages drifting behind (patch releases of `next`,
+  `jose`, the AWS SDK and `zod` included). The pins above are explained only in PF-19 and in
+  commit messages.
+- **Impact:** Patch releases (including security fixes that never become an npm advisory) arrive
+  only when someone remembers; before January the lockfile will be months old.
+- **Fix:** Dependabot (or Renovate) grouped weekly for patch/minor, security updates immediately,
+  majors by hand; a short `docs/dependencies.md` listing the pins and what unblocks each.
+- **Phase:** P08 (pipeline); P15 (security updates policy)
+- **Status:** open
+
 <!-- appendices -->
 
 ---

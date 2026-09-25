@@ -69,3 +69,12 @@ TEST_DATABASE_URL=…/spoh2027_pf14_test npx vitest run --project integration   
 ```
 
 The database name must end in `_test` for the integration suite's truncation guard.
+
+## Dependencies (P04.9)
+
+```bash
+npm audit && npm audit --omit=dev
+npm outdated
+npx --yes license-checker-rseidelsohn@4 --json --out licenses.json   # all workspaces, hoisted
+npm ls <package> --all                                                # where a licence comes from
+```

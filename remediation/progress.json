@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T15:49:06.280Z",
+  "updatedAt": "2026-09-25T15:49:24.322Z",
   "current": {
     "phase": "P04",
-    "step": "P04.8"
+    "step": "P04.9"
   },
   "gates": [
     {
@@ -1052,8 +1052,8 @@
         {
           "id": "P04.9",
           "title": "Dependencies",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-25T15:49:24.322Z",
           "completedAt": null,
           "commits": [],
           "notes": []
