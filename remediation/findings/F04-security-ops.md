@@ -23,7 +23,87 @@ Finding format and severity scale: [`README.md`](README.md). IDs `F04-001…` ar
 
 ## Summary (P04.10)
 
-_Filled in at P04.10._
+**25 findings: 0 Blocker, 8 High (3 of them to verify against the account), 11 Medium, 6 Low.**
+Six have a skipped repro test that fails today; four ownership checks that hold now have guard
+tests. **No secret has leaked into git** (gitleaks over all 116 commits plus targeted greps), and
+**nothing in the repo points to a public bucket**. Whether a bucket is public can only be
+answered from the account (Q-S2).
+
+The shape of the risk: the most likely event-day harms are **availability and operability**, not
+intrusion. People on one campus network cannot all sign in at once (F04-006). Nothing tells a
+human when something breaks (F04-017). One small box runs everything (F04-019), and off-site
+backups were never proven on it (F04-018). The worst **confidentiality** gap breaks the product's
+own promise: lost-person descriptions survive the purge in a replay table and in 400 days of
+dumps (F04-013). **Security** gaps: long-lived IAM keys that can reset any volunteer's password,
+usable from anywhere (F04-010); a Cognito pool whose MFA and hardening are unrecorded (F04-002);
+invites that may hit Cognito's email quota before training (F04-023).
+
+### Needs action before the programme (raised with the owner now)
+
+None of these waits for P05. Each is a question to answer or a setting to change on the current
+deployment.
+
+| #   | Action                                                                                                                                                   | Why                                                   | Finding / question |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ------------------ |
+| 1   | Answer Q-S2 (Block Public Access, account and buckets) and Q-R1 (root MFA, no root keys).                                                                | the two account-level facts that would be emergencies | Q-S2, Q-R1         |
+| 2   | Confirm that dumps are landing in the backup bucket (Q-I3) and that snapshots exist (Q-L2); if not, fix it and restore one dump into a scratch database. | the data has no proven off-box copy                   | F04-018            |
+| 3   | Before 4 Nov training: raise the sign-in rate limit on the deployed box (or give `/auth/login` and `/auth/callback` their own limit).                    | a room of people signing in is refused                | F04-006            |
+| 4   | Before bulk invites: check Cognito's email sender and temporary-password validity (Q-C6, Q-C7).                                                          | invites may stop at 50 a day and expire after 7 days  | F04-023            |
+| 5   | Before Dry Run #1: an external uptime check on `/readyz` and the backup staleness check, both alerting a phone.                                          | nobody is paged today                                 | F04-017            |
+| 6   | Restrict the IAM key to the box's IP, rotate it, and record its age.                                                                                     | the key works from anywhere                           | F04-010            |
+| 7   | If the DuckDNS updater is installed, remove `curl -k`.                                                                                                   | the token crosses unverified TLS                      | F04-012            |
+
+### All findings, ranked
+
+| ID      | Sev    | Title                                                                              | Phase                            | Repro                               |
+| ------- | ------ | ---------------------------------------------------------------------------------- | -------------------------------- | ----------------------------------- |
+| F04-006 | High   | One campus network can sign in only about ten people a minute                      | config before training; P15.2    | `repro/security.test.ts`            |
+| F04-017 | High   | Nothing pages a human                                                              | interim before Dry Run #1; P08.7 | —                                   |
+| F04-018 | High   | Off-site backups unproven on the deployed host; restore never rehearsed (verify)   | now; P08; P16                    | —                                   |
+| F04-019 | High   | Everything runs on one small box that cannot serve the event                       | P08 (D-07, D-08, D-10)           | —                                   |
+| F04-013 | High   | Lost-person descriptions outlive the promised purge                                | P06, P08, P05                    | `repro/security.test.ts`            |
+| F04-010 | High   | Long-lived IAM user key on the host (PF-12)                                        | P08.6, P15.6; interim now        | —                                   |
+| F04-002 | High   | Cognito pool settings unrecorded; the runbook's client update resets them (verify) | P08, P12                         | —                                   |
+| F04-023 | High   | Invites may hit Cognito's email quota and expire before training (verify)          | P12.2; interim before training   | —                                   |
+| F04-003 | Medium | A queued capture is sent under whoever signs in next on that phone                 | P07                              | `client/tests/repro/outbox.test.ts` |
+| F04-004 | Medium | An IC can read any station's roster, phone numbers included                        | P11, P06                         | `repro/security.test.ts`            |
+| F04-001 | Medium | Raw Cognito access tokens are accepted and skip revocation                         | P12                              | —                                   |
+| F04-007 | Medium | Production CSP allows inline script; an XSS would own the session                  | P15                              | —                                   |
+| F04-015 | Medium | The audit log can be edited, and its retention shortened, by the app               | P08, P15                         | —                                   |
+| F04-014 | Medium | Nothing but lost-person fields has a retention period                              | P05, P09.9/P13.8, P08            | —                                   |
+| F04-016 | Medium | No data-classification model for events that turn PII on (D-04)                    | P05, P09, P13                    | —                                   |
+| F04-011 | Medium | Every secret is a plaintext line on one box, with no owner or rotation             | P08, P06, P07, P16               | —                                   |
+| F04-012 | Medium | The DuckDNS updater sends its token with `curl -k`                                 | now; P08.5 (D-08)                | —                                   |
+| F04-020 | Medium | Deploys build on the production box; rollback is a rebuild; runbooks off `main`    | P08; PF-14 decision              | —                                   |
+| F04-021 | Medium | Capacity measured for captures on a laptop, not the event's mix on its server      | P16, P06, P08                    | —                                   |
+| F04-005 | Low    | Acknowledging an announcement returns it to people outside its audience            | P06                              | `repro/security.test.ts`            |
+| F04-024 | Low    | An IC can send an urgent announcement to any station                               | P06, P11                         | `repro/security.test.ts`            |
+| F04-008 | Low    | Six routes unthrottled; `/readyz` queries the database for anyone                  | P08, P06                         | —                                   |
+| F04-009 | Low    | The PIN fallback lets someone mark attendance from anywhere                        | P10, P13                         | —                                   |
+| F04-025 | Low    | A push endpoint can be any URL                                                     | P06, P15                         | —                                   |
+| F04-022 | Low    | No automated dependency updates; upgrade pins undocumented                         | P08, P15                         | —                                   |
+
+Re-checked, not re-filed: PF-01, PF-02 (security impact small, availability = F04-006), PF-12
+(= F04-010), PF-14 (verified: the baseline deploys onto staging's schema), F03-001 (the escalation
+path; guardrail missing on the import), F03-009, F03-010, F02-032, F03-031, F03-040.
+
+### What held up
+
+Worth keeping through the refactor, each checked in code:
+
+- Roles read from the roster on every request, never from the token.
+- Strict zod schemas on every input.
+- API-issued, short, thin access tokens.
+- Opaque refresh tokens: hashed, rotated, with reuse detection.
+- PKCE with `state` on the Hosted UI hand-off.
+- An exact CORS allowlist, and an Origin check on cookie routes.
+- Generic errors that carry request ids.
+- Three guards on the local auth provider.
+- The attendance QR/PIN design.
+- Presigned uploads with size and type conditions.
+- Audit in the same transaction.
+- A lost-person purge that keeps the description out of audit rows and push payloads.
+- The ownership checks on shifts, swaps and sessions.
 
 ---
 
