@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T13:10:12.692Z",
+  "updatedAt": "2026-09-25T13:12:22.410Z",
   "current": {
     "phase": "P01",
     "step": "P01.7"
@@ -448,11 +448,16 @@
         {
           "id": "P01.7",
           "title": "Time and timezone audit",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T13:10:12.692Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T13:12:22.410Z",
+          "commits": ["2ed5dc9"],
+          "notes": [
+            {
+              "at": "2026-09-25T13:12:22.410Z",
+              "text": "T-01..T-16 (incl. implicit DB-session tz in date_trunc, UTC report filename, en-SG locale); DST hazards; 12 zone test cases verified with zoneinfo"
+            }
+          ]
         },
         {
           "id": "P01.8",
