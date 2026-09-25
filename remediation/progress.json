@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T13:50:45.117Z",
+  "updatedAt": "2026-09-25T13:53:12.064Z",
   "current": {
     "phase": "P02",
-    "step": "P02.7"
+    "step": "P02.8"
   },
   "gates": [
     {
@@ -575,17 +575,22 @@
         {
           "id": "P02.7",
           "title": "Journey 6: after the event and the next event",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T13:50:45.116Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T13:53:11.778Z",
+          "commits": ["32b3f98"],
+          "notes": [
+            {
+              "at": "2026-09-25T13:53:11.779Z",
+              "text": "after-event; requirements for P09.9/P13.8; F02-027..028"
+            }
+          ]
         },
         {
           "id": "P02.8",
           "title": "Interlinking matrix",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-25T13:53:12.064Z",
           "completedAt": null,
           "commits": [],
           "notes": []
