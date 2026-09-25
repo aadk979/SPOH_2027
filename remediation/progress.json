@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T13:53:12.064Z",
+  "updatedAt": "2026-09-25T13:53:56.572Z",
   "current": {
     "phase": "P02",
-    "step": "P02.8"
+    "step": "P02.9"
   },
   "gates": [
     {
@@ -589,17 +589,22 @@
         {
           "id": "P02.8",
           "title": "Interlinking matrix",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T13:53:12.064Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T13:53:56.272Z",
+          "commits": ["225370e"],
+          "notes": [
+            {
+              "at": "2026-09-25T13:53:56.272Z",
+              "text": "matrix for 16 entities; F02-029"
+            }
+          ]
         },
         {
           "id": "P02.9",
           "title": "Permission experience",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-25T13:53:56.572Z",
           "completedAt": null,
           "commits": [],
           "notes": []
