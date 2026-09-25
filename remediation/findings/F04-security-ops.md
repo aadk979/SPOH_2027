@@ -512,6 +512,103 @@ protection). The availability effect is the one that matters, and it is the flip
 - **Phase:** P06 (validation), P15 (egress policy)
 - **Status:** open
 
+---
+
+## P04.5 — Secrets and configuration
+
+### Leak scan
+
+**No leaked secret.** gitleaks 8.30.1 over every ref in the local clone (`--log-opts=--all`:
+`main`, `baseline/pre-remediation`, `feat/audit-cloudwatch` and the session branch; 116 commits,
+4.5 MB) found nothing. Rules miss things, so four targeted history greps were run too: files ever
+committed whose name looks like a secret (`.env*`, `*.pem`, `*.key`, `id_*`, `credentials`), AWS
+key ids (`AKIA…`/`ASIA…`), PEM private-key headers, and `SECRET|PASSWORD|TOKEN|PRIVATE_KEY|ACCESS_KEY`
+assignments with a literal value. The only hits are the two `.env.example` files and dev/test
+placeholders (`LOCAL_AUTH_SECRET=dev-only-secret-change-me…`, `test-only-secret…`,
+`ci-only-secret…`, `attendance-test-secret…`), all refused in production by `config/env.ts`.
+
+Committed but **not secret**: AWS account id `665146708212`, Cognito pool and app-client ids, the
+Hosted UI domain and bucket names (audit branch). They help an attacker aim, not enter; F01 already
+moves them to configuration. Commands: `reports/P04/README.md`.
+
+### Where each secret lives, and what it opens
+
+"Repo says" throughout: the locations come from the audit branch's runbooks, since the host was not
+inspected (D-13).
+
+| Secret                              | Lives                                                                                  | Rotation today                                                                                                                                  | Blast radius                                                                                                                                                                            |
+| ----------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| IAM user `spoh2027-app` access keys | `server/.env` on the box (deploy runbook, PF-12)                                       | manual: new key, edit `.env`, restart, delete old; no schedule, no record of age                                                                | Cognito admin on the whole pool (create, enable, disable, reset passwords, change groups, list users) and write/retention on `/spoh2027/*` logs, **from any network** (F04-010)         |
+| Backup credentials                  | unknown: the backup README says "instance role", which Lightsail cannot give (F04-018) | unknown                                                                                                                                         | write and read every dump in the backup bucket: the whole database, PII included                                                                                                        |
+| Postgres password (`spoh_app`)      | `server/.env`, the compose environment (`POSTGRES_PASSWORD`), `/etc/spoh/backup.env`   | `ALTER ROLE`, then edit three places and restart; no procedure written                                                                          | owner of every table: read and rewrite all data, audit log included (F04-015)                                                                                                           |
+| `SESSION_SIGNING_SECRET`            | `server/.env`                                                                          | change and restart: every access token dies within 15 min, refresh cookies survive (opaque, in the DB), so people are silently re-issued tokens | mint an access token for anyone; `requireAuth` checks that the `sid` is a live session but not that it belongs to the `sub`, so the forger's own session id suffices (F04-011)          |
+| `ATTENDANCE_SIGNING_SECRET`         | `server/.env`; optional, falls back to a key derived from `SESSION_SIGNING_SECRET`     | as above; live QR codes (5 min) and PINs die                                                                                                    | forge attendance QR codes                                                                                                                                                               |
+| VAPID private key                   | `server/.env` (if push is on)                                                          | a new pair means every device re-subscribes                                                                                                     | send any notification to every subscribed phone; the service worker opens whatever absolute URL the payload names (`client/public/sw.js:116`), so a phishing push is one step (F04-011) |
+| Refresh tokens                      | Postgres, SHA-256 only                                                                 | rotated on every use                                                                                                                            | none from the table alone                                                                                                                                                               |
+| SSH private key `spoh-deploy-key`   | one operator laptop; `provision-single.sh` says "the only copy"                        | re-import a key pair; the instance keeps the old one until edited                                                                               | `ubuntu` with sudo on the only box: all of the above                                                                                                                                    |
+| DuckDNS token                       | the owner's DuckDNS account; `~/.duckdns-url` on the box if the updater was installed  | regenerate in the DuckDNS UI                                                                                                                    | repoint `spoh2027.duckdns.org`, pass Let's Encrypt's HTTP challenge, serve a trusted fake site (F04-012)                                                                                |
+| TLS private key                     | `/etc/letsencrypt` on the box                                                          | certbot renews every 60–90 days                                                                                                                 | impersonate the site to anyone whose traffic can be intercepted                                                                                                                         |
+| Postgres TLS key                    | `/home/ubuntu/pgssl` (self-signed, 10 years)                                           | regenerate and restart the container                                                                                                            | none on loopback                                                                                                                                                                        |
+| Git read access for deploys         | unknown: the box runs `git pull`; if the repo is private it holds a credential (Q-H3)  | unknown                                                                                                                                         | read the source (and, for a PAT with write scope, push to `main`)                                                                                                                       |
+| CI                                  | only `secrets.GITHUB_TOKEN` (`.github/workflows/ci.yml:165`)                           | automatic                                                                                                                                       | job-scoped                                                                                                                                                                              |
+| `LOCAL_AUTH_SECRET`                 | dev and CI only; placeholders in git                                                   | n/a                                                                                                                                             | refused when `NODE_ENV=production`                                                                                                                                                      |
+
+The Cognito app client is public (no client secret), which is correct for PKCE.
+
+### Findings
+
+#### F04-010 — The app authenticates to AWS with a long-lived IAM user key on the host
+
+- **Severity:** High
+- **Area:** `infra/runbooks/deploy.md` § "AWS credentials", `infra/iam/app-policy.json` (audit branch)
+- **Evidence:** PF-12 confirmed from the repo. The runbook explains that the Lightsail instance role
+  has no permissions on the project's resources, so `AWS_ACCESS_KEY_ID` and
+  `AWS_SECRET_ACCESS_KEY` for the `spoh2027-app` IAM user go in `server/.env`. The attached policy
+  grants `AdminCreateUser`, `AdminResetUserPassword`, `AdminAddUserToGroup`,
+  `AdminRemoveUserFromGroup`, `AdminEnableUser`, `AdminDisableUser`, `AdminGetUser` and
+  `ListUsers` on the pool, and log-group writes including `PutRetentionPolicy`. No condition
+  limits the source IP.
+- **Impact:** Anyone who reads `.env` once (a backup of the box, a copied folder, a support
+  session, a compromised dependency) holds working keys until someone rotates them, from anywhere
+  in the world, and can reset any volunteer's password (risk 6).
+- **Fix:** P08.6: task roles on ECS (no static keys). Until then: add an `aws:SourceIp` condition
+  for the box's static IP, record the key's age and rotate it before training, alarm on its use
+  from other addresses (needs CloudTrail, Q-A2), and drop `PutRetentionPolicy`/`CreateLogGroup`
+  (F04-015).
+- **Phase:** P08.6, P15.6; interim before training
+- **Status:** open
+
+#### F04-011 — Every secret is a line in a plaintext file on the one box, with no owner or rotation
+
+- **Severity:** Medium
+- **Area:** `server/.env`, `/etc/spoh/backup.env`, the compose environment; `middleware/auth/index.ts:172`
+- **Evidence:** The table above. No secret has a recorded owner, age or rotation procedure; the
+  database password is in three places; all processes run as `ubuntu`. Two hardening gaps make a
+  single leaked secret go further than it must: a forged access token needs only the forger's own
+  live session id (the `sid` is not bound to the `sub`), and the service worker opens absolute
+  URLs from push payloads.
+- **Impact:** Handover to next year's team means copying a file. Rotation after a suspected leak
+  is guesswork, and one host compromise is every credential at once.
+- **Fix:** Secrets Manager / SSM Parameter Store with per-secret owners and rotation (P08); a
+  written rotation runbook (P16). Now: check in `requireAuth` that the session row's volunteer is
+  the token's subject (P06); open only same-origin URLs from notifications (P07).
+- **Phase:** P08 (store), P06 and P07 (hardening), P16 (runbook)
+- **Status:** open
+
+#### F04-012 — The DuckDNS updater sends its token without checking the certificate
+
+- **Severity:** Medium
+- **Area:** `infra/runbooks/dns-and-tls.md` § "The manual step" (audit branch)
+- **Evidence:** The documented cron job runs `curl -fsS -k … -K ~/.duckdns-url`; `-k` disables
+  TLS verification for the request that carries the token. The hostname is on a free dynamic-DNS
+  service with no MFA or audit trail on the account side (unknown, Q-H4).
+- **Impact:** Whoever can intercept the box's outbound HTTPS gets the token, then the hostname,
+  then a valid certificate for it (risk 13).
+- **Fix:** Remove `-k` now if the updater is installed. With D-08: a Route 53 domain with DNSSEC
+  or at least registrar MFA; ACM certificates.
+- **Phase:** now (one flag); P08.5 (D-08)
+- **Status:** open
+
 <!-- appendices -->
 
 ---
