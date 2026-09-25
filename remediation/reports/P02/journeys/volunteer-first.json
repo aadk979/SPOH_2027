@@ -1,0 +1,295 @@
+{
+  "id": "volunteer-first",
+  "title": "Journey 4 (P02.5): a volunteer signs in for the first time",
+  "role": null,
+  "runs": [
+    {
+      "viewport": "phone",
+      "frozenAt": "2026-09-25T02:30:00.000Z",
+      "steps": [
+        {
+          "nn": "01",
+          "name": "landing, signed out",
+          "path": "/",
+          "landedOn": "/sign-in",
+          "screenshot": "volunteer-first-01-phone.png",
+          "kb": 11,
+          "error": null,
+          "events": [
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+            },
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/auth/refresh"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/auth/refresh"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "02",
+          "name": "sign-in",
+          "path": "/sign-in",
+          "landedOn": "/sign-in",
+          "screenshot": "volunteer-first-02-phone.png",
+          "kb": 11,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/auth/refresh"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/auth/refresh"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "03",
+          "name": "sign in as a new volunteer",
+          "path": null,
+          "landedOn": "/home",
+          "screenshot": "volunteer-first-03-phone.png",
+          "kb": 48,
+          "error": null,
+          "events": []
+        },
+        {
+          "nn": "04",
+          "name": "my shift",
+          "path": "/shift",
+          "landedOn": "/shift",
+          "screenshot": "volunteer-first-04-phone.png",
+          "kb": 37,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "05",
+          "name": "redeem at Mission Complete",
+          "path": "/capture/redeem",
+          "landedOn": "/capture/redeem",
+          "screenshot": "volunteer-first-05-phone.png",
+          "kb": 28,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "06",
+          "name": "redeem: enter a card",
+          "path": null,
+          "landedOn": "/capture/redeem",
+          "screenshot": "volunteer-first-06-phone.png",
+          "kb": 31,
+          "error": null,
+          "events": []
+        }
+      ]
+    },
+    {
+      "viewport": "laptop",
+      "frozenAt": "2026-09-25T02:30:00.000Z",
+      "steps": [
+        {
+          "nn": "01",
+          "name": "landing, signed out",
+          "path": "/",
+          "landedOn": "/sign-in",
+          "screenshot": "volunteer-first-01-laptop.png",
+          "kb": 12,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/auth/refresh"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/auth/refresh"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "02",
+          "name": "sign-in",
+          "path": "/sign-in",
+          "landedOn": "/sign-in",
+          "screenshot": "volunteer-first-02-laptop.png",
+          "kb": 12,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/auth/refresh"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/auth/refresh"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "03",
+          "name": "sign in as a new volunteer",
+          "path": null,
+          "landedOn": "/home",
+          "screenshot": "volunteer-first-03-laptop.png",
+          "kb": 56,
+          "error": null,
+          "events": []
+        },
+        {
+          "nn": "04",
+          "name": "my shift",
+          "path": "/shift",
+          "landedOn": "/shift",
+          "screenshot": "volunteer-first-04-laptop.png",
+          "kb": 47,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "05",
+          "name": "redeem at Mission Complete",
+          "path": "/capture/redeem",
+          "landedOn": "/capture/redeem",
+          "screenshot": "volunteer-first-05-laptop.png",
+          "kb": 38,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "06",
+          "name": "redeem: enter a card",
+          "path": null,
+          "landedOn": "/capture/redeem",
+          "screenshot": "volunteer-first-06-laptop.png",
+          "kb": 34,
+          "error": null,
+          "events": []
+        }
+      ]
+    }
+  ]
+}

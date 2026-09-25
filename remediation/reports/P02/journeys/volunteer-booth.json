@@ -1,0 +1,899 @@
+{
+  "id": "volunteer-booth",
+  "title": "Journey 4 (P02.5): booth volunteer shift (run fixtures.mjs volunteer first)",
+  "role": "booth@spoh2027.test",
+  "runs": [
+    {
+      "viewport": "phone",
+      "frozenAt": "2026-09-25T01:00:00.000Z",
+      "steps": [
+        {
+          "nn": "01",
+          "name": "home",
+          "path": "/home",
+          "landedOn": "/home",
+          "screenshot": "volunteer-booth-01-phone.png",
+          "kb": 30,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "02",
+          "name": "my shift",
+          "path": "/shift",
+          "landedOn": "/shift",
+          "screenshot": "volunteer-booth-02-phone.png",
+          "kb": 40,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "03",
+          "name": "attendance",
+          "path": "/attendance",
+          "landedOn": "/attendance",
+          "screenshot": "volunteer-booth-03-phone.png",
+          "kb": 20,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "04",
+          "name": "attendance by PIN",
+          "path": null,
+          "landedOn": "/attendance",
+          "screenshot": "volunteer-booth-04-phone.png",
+          "kb": 11,
+          "error": null,
+          "events": []
+        },
+        {
+          "nn": "05",
+          "name": "register a visitor",
+          "path": "/capture/registration",
+          "landedOn": "/capture/registration",
+          "screenshot": "volunteer-booth-05-phone.png",
+          "kb": 15,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/registrations/summary?groupBy=category&stationId=cmugx0p0e0007ni7dhugzw0ct"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            }
+          ]
+        },
+        {
+          "nn": "06",
+          "name": "undo it",
+          "path": null,
+          "landedOn": "/capture/registration",
+          "screenshot": "volunteer-booth-06-phone.png",
+          "kb": 16,
+          "error": null,
+          "events": []
+        },
+        {
+          "nn": "07",
+          "name": "a family arriving together",
+          "path": "/capture/registration/group",
+          "landedOn": "/capture/registration/group",
+          "screenshot": "volunteer-booth-07-phone.png",
+          "kb": 20,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "08",
+          "name": "offline: three taps queue",
+          "path": "/capture/registration",
+          "landedOn": "/capture/registration",
+          "screenshot": "volunteer-booth-08-phone.png",
+          "kb": 16,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/registrations/summary?groupBy=category&stationId=cmugx0p0e0007ni7dhugzw0ct"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+            }
+          ]
+        },
+        {
+          "nn": "09",
+          "name": "back online: queue drains",
+          "path": null,
+          "landedOn": "/capture/registration",
+          "screenshot": "volunteer-booth-09-phone.png",
+          "kb": 15,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/registrations/summary?groupBy=category&stationId=cmugx0p0e0007ni7dhugzw0ct"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            }
+          ]
+        },
+        {
+          "nn": "10",
+          "name": "a tap the server refuses",
+          "path": "/capture/registration",
+          "landedOn": "/capture/registration",
+          "screenshot": "volunteer-booth-10-phone.png",
+          "kb": 18,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/registrations/summary?groupBy=category&stationId=cmugx0p0e0007ni7dhugzw0ct"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            },
+            {
+              "kind": "api",
+              "status": 422,
+              "url": "/api/v1/registrations"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 422 (Unprocessable Entity)"
+            }
+          ]
+        },
+        {
+          "nn": "11",
+          "name": "salvage on my shift",
+          "path": "/shift",
+          "landedOn": "/shift",
+          "screenshot": "volunteer-booth-11-phone.png",
+          "kb": 51,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "12",
+          "name": "raise a lost person",
+          "path": "/safety/lost-person/new",
+          "landedOn": "/home",
+          "screenshot": "volunteer-booth-12-phone.png",
+          "kb": 41,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "13",
+          "name": "report an incident",
+          "path": "/safety/incident/new",
+          "landedOn": "/home",
+          "screenshot": "volunteer-booth-13-phone.png",
+          "kb": 41,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "14",
+          "name": "log a found item",
+          "path": "/safety/lost-found/new",
+          "landedOn": "/safety/lost-found",
+          "screenshot": "volunteer-booth-14-phone.png",
+          "kb": 28,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "15",
+          "name": "lost and found list",
+          "path": "/safety/lost-found",
+          "landedOn": "/safety/lost-found",
+          "screenshot": "volunteer-booth-15-phone.png",
+          "kb": 28,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "16",
+          "name": "inbox",
+          "path": "/inbox",
+          "landedOn": "/inbox",
+          "screenshot": "volunteer-booth-16-phone.png",
+          "kb": 24,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "17",
+          "name": "guide",
+          "path": "/guide",
+          "landedOn": "/guide",
+          "screenshot": "volunteer-booth-17-phone.png",
+          "kb": 30,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "18",
+          "name": "map",
+          "path": "/map",
+          "landedOn": "/map",
+          "screenshot": "volunteer-booth-18-phone.png",
+          "kb": 37,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "19",
+          "name": "visitor journey",
+          "path": "/journey",
+          "landedOn": "/journey",
+          "screenshot": "volunteer-booth-19-phone.png",
+          "kb": 41,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "20",
+          "name": "brief",
+          "path": "/brief",
+          "landedOn": "/brief",
+          "screenshot": "volunteer-booth-20-phone.png",
+          "kb": 43,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "viewport": "laptop",
+      "frozenAt": "2026-09-25T01:00:00.000Z",
+      "steps": [
+        {
+          "nn": "01",
+          "name": "home",
+          "path": "/home",
+          "landedOn": "/home",
+          "screenshot": "volunteer-booth-01-laptop.png",
+          "kb": 46,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "02",
+          "name": "my shift",
+          "path": "/shift",
+          "landedOn": "/shift",
+          "screenshot": "volunteer-booth-02-laptop.png",
+          "kb": 66,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "03",
+          "name": "attendance",
+          "path": "/attendance",
+          "landedOn": "/attendance",
+          "screenshot": "volunteer-booth-03-laptop.png",
+          "kb": 25,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "04",
+          "name": "attendance by PIN",
+          "path": null,
+          "landedOn": "/attendance",
+          "screenshot": "volunteer-booth-04-laptop.png",
+          "kb": 25,
+          "error": "locator.fill: Timeout 30000ms exceeded.",
+          "events": []
+        },
+        {
+          "nn": "05",
+          "name": "register a visitor",
+          "path": "/capture/registration",
+          "landedOn": "/capture/registration",
+          "screenshot": "volunteer-booth-05-laptop.png",
+          "kb": 29,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/registrations/summary?groupBy=category&stationId=cmugx0p0e0007ni7dhugzw0ct"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            }
+          ]
+        },
+        {
+          "nn": "06",
+          "name": "undo it",
+          "path": null,
+          "landedOn": "/capture/registration",
+          "screenshot": "volunteer-booth-06-laptop.png",
+          "kb": 30,
+          "error": null,
+          "events": []
+        },
+        {
+          "nn": "07",
+          "name": "a family arriving together",
+          "path": "/capture/registration/group",
+          "landedOn": "/capture/registration/group",
+          "screenshot": "volunteer-booth-07-laptop.png",
+          "kb": 40,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "08",
+          "name": "offline: three taps queue",
+          "path": "/capture/registration",
+          "landedOn": "/capture/registration",
+          "screenshot": "volunteer-booth-08-laptop.png",
+          "kb": 29,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/registrations/summary?groupBy=category&stationId=cmugx0p0e0007ni7dhugzw0ct"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+            }
+          ]
+        },
+        {
+          "nn": "09",
+          "name": "back online: queue drains",
+          "path": null,
+          "landedOn": "/capture/registration",
+          "screenshot": "volunteer-booth-09-laptop.png",
+          "kb": 29,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/registrations/summary?groupBy=category&stationId=cmugx0p0e0007ni7dhugzw0ct"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            }
+          ]
+        },
+        {
+          "nn": "10",
+          "name": "a tap the server refuses",
+          "path": "/capture/registration",
+          "landedOn": "/capture/registration",
+          "screenshot": "volunteer-booth-10-laptop.png",
+          "kb": 32,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            },
+            {
+              "kind": "api",
+              "status": 403,
+              "url": "/api/v1/registrations/summary?groupBy=category&stationId=cmugx0p0e0007ni7dhugzw0ct"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+            },
+            {
+              "kind": "api",
+              "status": 422,
+              "url": "/api/v1/registrations"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 422 (Unprocessable Entity)"
+            }
+          ]
+        },
+        {
+          "nn": "11",
+          "name": "salvage on my shift",
+          "path": "/shift",
+          "landedOn": "/shift",
+          "screenshot": "volunteer-booth-11-laptop.png",
+          "kb": 75,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "12",
+          "name": "raise a lost person",
+          "path": "/safety/lost-person/new",
+          "landedOn": "/home",
+          "screenshot": "volunteer-booth-12-laptop.png",
+          "kb": 54,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "13",
+          "name": "report an incident",
+          "path": "/safety/incident/new",
+          "landedOn": "/home",
+          "screenshot": "volunteer-booth-13-laptop.png",
+          "kb": 54,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "14",
+          "name": "log a found item",
+          "path": "/safety/lost-found/new",
+          "landedOn": "/safety/lost-found",
+          "screenshot": "volunteer-booth-14-laptop.png",
+          "kb": 42,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "15",
+          "name": "lost and found list",
+          "path": "/safety/lost-found",
+          "landedOn": "/safety/lost-found",
+          "screenshot": "volunteer-booth-15-laptop.png",
+          "kb": 42,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "16",
+          "name": "inbox",
+          "path": "/inbox",
+          "landedOn": "/inbox",
+          "screenshot": "volunteer-booth-16-laptop.png",
+          "kb": 37,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "17",
+          "name": "guide",
+          "path": "/guide",
+          "landedOn": "/guide",
+          "screenshot": "volunteer-booth-17-laptop.png",
+          "kb": 42,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "18",
+          "name": "map",
+          "path": "/map",
+          "landedOn": "/map",
+          "screenshot": "volunteer-booth-18-laptop.png",
+          "kb": 51,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "19",
+          "name": "visitor journey",
+          "path": "/journey",
+          "landedOn": "/journey",
+          "screenshot": "volunteer-booth-19-laptop.png",
+          "kb": 56,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        },
+        {
+          "nn": "20",
+          "name": "brief",
+          "path": "/brief",
+          "landedOn": "/brief",
+          "screenshot": "volunteer-booth-20-laptop.png",
+          "kb": 59,
+          "error": null,
+          "events": [
+            {
+              "kind": "api",
+              "status": 401,
+              "url": "/api/v1/admin/settings"
+            },
+            {
+              "kind": "console",
+              "text": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

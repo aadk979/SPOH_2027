@@ -47,7 +47,7 @@ function assertLocal() {
   }
 }
 
-async function paceSignIn() {
+export async function paceSignIn() {
   const file = path.join(STATE_DIR, 'sign-ins.json');
   const now = Date.now();
   const recent = existsSync(file)
@@ -88,11 +88,11 @@ function stateFile(email, viewportName) {
 export async function openSession(browser, { email, viewportName }) {
   assertLocal();
   await mkdir(STATE_DIR, { recursive: true });
-  const file = stateFile(email, viewportName);
+  const file = email ? stateFile(email, viewportName) : null;
   const context = await browser.newContext({
     ...VIEWPORTS[viewportName],
     baseURL: BASE_URL,
-    storageState: existsSync(file) ? file : undefined,
+    storageState: file && existsSync(file) ? file : undefined,
   });
   const page = await context.newPage();
   const tokens = { access: null };

@@ -6,6 +6,13 @@
  * `freeze` pins the client clock inside a shift block (see lib.mjs).
  */
 
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { STATE_DIR, paceSignIn } from './lib.mjs';
+
+const submit = (page) => page.locator('main button[type=submit]').first().click();
+const settle = (page, ms = 800) => page.waitForTimeout(ms);
+
 const ROLE = {
   admin: 'admin@spoh2027.test',
   lead: 'lead@spoh2027.test',
@@ -228,6 +235,189 @@ export const journeys = [
       { name: 'guess: void a registration from capture', path: '/capture/registration' },
       { name: 'guess: gift stock', path: '/capture/redeem' },
       { name: 'my shift', path: '/shift' },
+    ],
+  },
+  {
+    id: 'volunteer-first',
+    title: 'Journey 4 (P02.5): a volunteer signs in for the first time',
+    role: null,
+    freeze: 'MORNING',
+    steps: [
+      { name: 'landing, signed out', path: '/' },
+      { name: 'sign-in', path: '/sign-in' },
+      {
+        name: 'sign in as a new volunteer',
+        act: async (page) => {
+          await paceSignIn();
+          await page.getByLabel('Roster email').fill('te-vol-2@spoh2027.test');
+          await page.getByRole('button', { name: 'Sign in' }).click();
+          await page.waitForURL('**/home');
+        },
+      },
+      { name: 'my shift', path: '/shift' },
+      { name: 'redeem at Mission Complete', path: '/capture/redeem' },
+      {
+        name: 'redeem: enter a card',
+        act: async (page) => {
+          await page.getByRole('button', { name: /Mission Complete Badge/ }).click();
+          await page.getByPlaceholder('Card code').fill('3WNE72');
+        },
+      },
+    ],
+  },
+  {
+    id: 'volunteer-booth',
+    title: 'Journey 4 (P02.5): booth volunteer shift (run fixtures.mjs volunteer first)',
+    role: ROLE.booth,
+    freeze: 'MORNING',
+    steps: [
+      { name: 'home', path: '/home' },
+      { name: 'my shift', path: '/shift' },
+      { name: 'attendance', path: '/attendance' },
+      {
+        name: 'attendance by PIN',
+        act: async (page) => {
+          const { pin } = JSON.parse(readFileSync(path.join(STATE_DIR, 'pin.json'), 'utf8'));
+          await page.getByLabel('Secondary verification PIN').fill(pin);
+          await page.getByRole('button', { name: 'Submit attendance with PIN' }).click();
+          await settle(page, 1500);
+        },
+      },
+      {
+        name: 'register a visitor',
+        path: '/capture/registration',
+        act: async (page) => {
+          await page
+            .getByRole('button', { name: /^Sec 4/ })
+            .first()
+            .click();
+          await settle(page, 300);
+        },
+      },
+      {
+        name: 'undo it',
+        act: async (page) => {
+          await page.getByRole('button', { name: /Undo/ }).first().click();
+          await settle(page);
+        },
+      },
+      { name: 'a family arriving together', path: '/capture/registration/group' },
+      {
+        name: 'offline: three taps queue',
+        path: '/capture/registration',
+        act: async (page) => {
+          await page.context().setOffline(true);
+          for (let i = 0; i < 3; i += 1) {
+            await page
+              .getByRole('button', { name: /^Sec 3/ })
+              .first()
+              .click();
+            await settle(page, 300);
+          }
+          await settle(page, 3000);
+        },
+      },
+      {
+        name: 'back online: queue drains',
+        act: async (page) => {
+          await page.context().setOffline(false);
+          await settle(page, 5000);
+        },
+      },
+      {
+        name: 'a tap the server refuses',
+        path: '/capture/registration',
+        act: async (page) => {
+          await page.route('**/api/v1/registrations', (route) =>
+            route.fulfill({
+              status: 422,
+              contentType: 'application/json',
+              body: JSON.stringify({
+                error: { code: 'VALIDATION_FAILED', message: 'Refused by the journey harness' },
+              }),
+            }),
+          );
+          await page
+            .getByRole('button', { name: /^Sec 1/ })
+            .first()
+            .click();
+          await settle(page, 4000);
+        },
+      },
+      {
+        name: 'salvage on my shift',
+        path: '/shift',
+        act: async (page) => {
+          await page.unrouteAll();
+        },
+      },
+      {
+        name: 'raise a lost person',
+        path: '/safety/lost-person/new',
+        act: async (page) => {
+          await page
+            .getByLabel('What has happened, and who are we looking for?')
+            .fill('Girl, ponytail, looking for her brother near the booth');
+          await page.getByLabel('Approximate age').fill('about 10');
+          await submit(page);
+          await settle(page, 1500);
+        },
+      },
+      {
+        name: 'report an incident',
+        path: '/safety/incident/new',
+        act: async (page) => {
+          await page.getByText('Near miss', { exact: false }).first().click();
+          await page
+            .getByLabel('What happened?')
+            .fill('Stack of chairs nearly fell on a visitor by the queue barrier.');
+          await submit(page);
+          await settle(page, 1500);
+        },
+      },
+      {
+        name: 'log a found item',
+        path: '/safety/lost-found/new',
+        act: async (page) => {
+          await page.getByLabel('What is it?').fill('Blue water bottle with stickers');
+          await page.getByLabel('Where is it being kept?').fill('Sign-Up Booth drawer');
+          await submit(page);
+          await settle(page, 1500);
+        },
+      },
+      { name: 'lost and found list', path: '/safety/lost-found' },
+      { name: 'inbox', path: '/inbox' },
+      { name: 'guide', path: '/guide' },
+      { name: 'map', path: '/map' },
+      { name: 'visitor journey', path: '/journey' },
+      { name: 'brief', path: '/brief' },
+    ],
+  },
+  {
+    id: 'volunteer-counter',
+    title: 'Journey 4 (P02.5): counter and stamp volunteer at DCDF Station',
+    role: ROLE.counter,
+    freeze: 'MORNING',
+    steps: [
+      { name: 'home', path: '/home' },
+      {
+        name: 'count an entry',
+        path: '/capture/footfall',
+        act: async (page) => {
+          await page.getByRole('button', { name: /^Count one entry/ }).click();
+          await settle(page, 300);
+        },
+      },
+      {
+        name: 'stamp a card by code',
+        path: '/capture/stamp',
+        act: async (page) => {
+          await page.getByPlaceholder('Card code').fill('3WNE71');
+          await submit(page);
+          await settle(page, 1500);
+        },
+      },
+      { name: 'guess: registration from a course station', path: '/capture/registration' },
     ],
   },
 ];
