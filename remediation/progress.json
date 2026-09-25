@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T15:39:37.362Z",
+  "updatedAt": "2026-09-25T15:49:06.280Z",
   "current": {
     "phase": "P04",
     "step": "P04.8"
@@ -1036,11 +1036,18 @@
         {
           "id": "P04.8",
           "title": "Operational readiness",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T15:39:37.361Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T15:49:06.279Z",
+          "commits": [
+            "5070209"
+          ],
+          "notes": [
+            {
+              "at": "2026-09-25T15:49:06.280Z",
+              "text": "Load test local 100/300 clients: p95 25/81 ms, 0 errors (upper bound, laptop); dashboard poll p50 359 ms at 30 concurrent; dump/restore ~1 s each; PF-14 verified (baseline deploy + suite OK on audit-migrated DB). F04-017/018/019 High, F04-020/021 Medium"
+            }
+          ]
         },
         {
           "id": "P04.9",
