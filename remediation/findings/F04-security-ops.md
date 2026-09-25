@@ -549,7 +549,7 @@ inspected (D-13).
 | DuckDNS token                       | the owner's DuckDNS account; `~/.duckdns-url` on the box if the updater was installed  | regenerate in the DuckDNS UI                                                                                                                    | repoint `spoh2027.duckdns.org`, pass Let's Encrypt's HTTP challenge, serve a trusted fake site (F04-012)                                                                                |
 | TLS private key                     | `/etc/letsencrypt` on the box                                                          | certbot renews every 60–90 days                                                                                                                 | impersonate the site to anyone whose traffic can be intercepted                                                                                                                         |
 | Postgres TLS key                    | `/home/ubuntu/pgssl` (self-signed, 10 years)                                           | regenerate and restart the container                                                                                                            | none on loopback                                                                                                                                                                        |
-| Git read access for deploys         | unknown: the box runs `git pull`; if the repo is private it holds a credential (Q-H3)  | unknown                                                                                                                                         | read the source (and, for a PAT with write scope, push to `main`)                                                                                                                       |
+| Git read access for deploys         | unknown: the box runs `git pull`; if the repo is private it holds a credential (Q-H1)  | unknown                                                                                                                                         | read the source (and, for a PAT with write scope, push to `main`)                                                                                                                       |
 | CI                                  | only `secrets.GITHUB_TOKEN` (`.github/workflows/ci.yml:165`)                           | automatic                                                                                                                                       | job-scoped                                                                                                                                                                              |
 | `LOCAL_AUTH_SECRET`                 | dev and CI only; placeholders in git                                                   | n/a                                                                                                                                             | refused when `NODE_ENV=production`                                                                                                                                                      |
 
@@ -601,7 +601,7 @@ The Cognito app client is public (no client secret), which is correct for PKCE.
 - **Area:** `infra/runbooks/dns-and-tls.md` § "The manual step" (audit branch)
 - **Evidence:** The documented cron job runs `curl -fsS -k … -K ~/.duckdns-url`; `-k` disables
   TLS verification for the request that carries the token. The hostname is on a free dynamic-DNS
-  service with no MFA or audit trail on the account side (unknown, Q-H4).
+  service with no MFA or audit trail on the account side (unknown, Q-H2).
 - **Impact:** Whoever can intercept the box's outbound HTTPS gets the token, then the hostname,
   then a valid certificate for it (risk 13).
 - **Fix:** Remove `-k` now if the updater is installed. With D-08: a Route 53 domain with DNSSEC
@@ -721,6 +721,83 @@ The Cognito app client is public (no client secret), which is correct for PKCE.
   details until …").
 - **Phase:** P05 (design), P09 (model), P13 (setup screen)
 - **Status:** open
+
+---
+
+## P04.7 — AWS account review (questions for the owner)
+
+**Skipped under D-13.** No AWS call was made and this environment's credentials were not used.
+The checklist became the questions below. "Repo says" is what the repository (mostly the audit
+branch) already answers; each question is what only the account can. Answers can go straight into
+this table; the findings they confirm or close are named. Each has an AWS console path, or a
+read-only CLI command, to answer it.
+
+### IAM
+
+| ID   | Question                                                                                                                                                                                          | Repo says                                                                    | Confirms or closes |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------ |
+| Q-I1 | Which IAM users and roles does the app use? How old is `spoh2027-app`'s access key, and has it been used from anywhere but the box's static IP? Does it have any policy beyond `app-policy.json`? | `spoh2027-app` with `infra/iam/app-policy.json`; keys in `server/.env`       | F04-010            |
+| Q-I2 | Is `S3_MEDIA_BUCKET` set on staging? The app policy has no S3 permissions, so where would upload and read permissions come from?                                                                  | the audit branch's `.env.example` leaves it empty                            | F04-010, P04.4     |
+| Q-I3 | What credential does the backup daemon use (Lightsail cannot attach a custom role)? Is `spoh-backup.timer` installed and running?                                                                 | backup README says "an instance role"; restore runbook says the box has none | F04-018            |
+| Q-I4 | How do people sign in to the account: IAM Identity Center, or IAM users with long-lived keys? Who has administrator access?                                                                       | —                                                                            | F04-010, P08       |
+| Q-I5 | Is IAM Access Analyzer on, and does it report anything shared outside the account?                                                                                                                | —                                                                            | P15                |
+
+### S3
+
+| ID   | Question                                                                                                                   | Repo says                                                           | Confirms or closes  |
+| ---- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------- |
+| Q-S1 | `spoh2027-backups-665146708212`: default encryption (SSE-S3 or KMS)? A bucket policy that denies non-TLS requests?         | versioning on, Glacier IR at 30 days, expiry at 400 (backup README) | F04-013             |
+| Q-S2 | **Is Block Public Access on at account level and on every bucket?** Is Object Lock or MFA delete on for the backup bucket? | backup policy grants no `DeleteObject` ✅                           | public-bucket check |
+| Q-S3 | Does a media bucket exist? Its name, public access, encryption, CORS rules (browser POST needs them) and lifecycle.        | code expects `lost-found/…` keys; env unset                         | F04-014             |
+| Q-S4 | Which region is each bucket in?                                                                                            | scripts default to `ap-southeast-1`                                 | residency (P04.6)   |
+
+### Cognito (pool `ap-southeast-1_9bwl2nGF7`, client `23uft7mvtnrno1uunsc5lp0h2v`)
+
+| ID   | Question                                                                                                | Repo says                                                                                         | Confirms or closes |
+| ---- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------ |
+| Q-C1 | Password policy (length, classes)?                                                                      | —                                                                                                 | F04-002            |
+| Q-C2 | MFA: off, optional or required? Enforced for Admin/Chief/Deputy/Lead?                                   | —                                                                                                 | F04-002            |
+| Q-C3 | Threat protection (advanced security): plan tier and mode (audit or enforced)?                          | —                                                                                                 | F04-002, PF-02     |
+| Q-C4 | App client token validity (access, ID, refresh) and "enable token revocation"?                          | the API issues its own 15-minute token; the Cognito token is used once at sign-in                 | F04-001, F04-002   |
+| Q-C5 | "Prevent user existence errors" on?                                                                     | —                                                                                                 | F04-002            |
+| Q-C6 | Email configuration: Cognito default sender (50 emails a day) or SES? From which address?               | invites via `AdminCreateUser`; D-08 says duckdns cannot carry SES DKIM                            | F04-023            |
+| Q-C7 | Temporary password validity (days)?                                                                     | —                                                                                                 | F04-023            |
+| Q-C8 | Self-registration disabled (`AllowAdminCreateUserOnly`)?                                                | a comment in `identity/provider.ts` says so                                                       | F04-002            |
+| Q-C9 | Deletion protection on? Any callback or logout URLs besides the duckdns ones (for example `localhost`)? | callback and logout URLs in `deploy.md`; flows `ADMIN_USER_PASSWORD`, `REFRESH_TOKEN`, `USER_SRP` | F04-001, F04-002   |
+
+### Lightsail, CloudWatch, CloudTrail, detection, cost
+
+| ID   | Question                                                                                                            | Repo says                                                                     | Confirms or closes |
+| ---- | ------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------ |
+| Q-L1 | Instance firewall today: is 22 still open to `0.0.0.0/0`? Anything besides 22/80/443?                               | `provision-single.sh` opens 22/80/443 to all and advises narrowing 22 by hand | threat model B5    |
+| Q-L2 | Are automatic snapshots on for the instance? When was the last one?                                                 | not mentioned                                                                 | F04-018            |
+| Q-L3 | Which bundle runs today, and is it the only instance?                                                               | `small_3_0`, single box                                                       | F04-019            |
+| Q-W1 | Which log groups exist under `/spoh2027/`, and with what retention? Is `CLOUDWATCH_AUDIT_LOG_GROUP` set on staging? | default 365 days, set by the app (audit branch)                               | F04-015            |
+| Q-W2 | Is there any CloudWatch alarm, health check or SNS topic that notifies a person?                                    | none in the repo                                                              | F04-017            |
+| Q-A1 | Is CloudTrail on (multi-region trail, log file validation, delivered to a bucket the app cannot write)?             | none in the repo                                                              | F04-010, F04-015   |
+| Q-A2 | Is anything alerting on IAM key use from new addresses, root sign-in, or policy changes?                            | none                                                                          | F04-010            |
+| Q-G1 | GuardDuty on in `ap-southeast-1`? Any open findings?                                                                | none                                                                          | P15                |
+| Q-G2 | Security Hub on, with which standards? Current failed controls?                                                     | none                                                                          | P15                |
+| Q-B1 | Is an AWS Budget set, at what amount, notifying whom? Is Cost Anomaly Detection on?                                 | cost tables in `infra/README.md`; D-10 open                                   | D-10, P08          |
+
+### Account ownership and root
+
+| ID   | Question                                                                                                                       | Repo says | Confirms or closes |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------ | --------- | ------------------ |
+| Q-R1 | **Does the root user have MFA, and no access keys?**                                                                           | —         | P15                |
+| Q-R2 | Whose account is `665146708212`: a personal one, or the school's? Who else can recover it, and are the alternate contacts set? | —         | handover (P16)     |
+
+### Outside AWS
+
+| ID   | Question                                                                                                          | Repo says                                            | Confirms or closes |
+| ---- | ----------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | ------------------ |
+| Q-H1 | Is the GitHub repository private? If so, what credential does the box use for `git pull`, and with which scopes?  | the box runs `git fetch`/`git pull` (deploy runbook) | F04-011            |
+| Q-H2 | Does the DuckDNS account have MFA? Is the updater cron installed, and with `-k`?                                  | runbook documents the updater with `curl -k`         | F04-012            |
+| Q-D1 | Which data-protection regime applies to the organiser (PDPA, or public-sector data rules)? Who is the data owner? | —                                                    | F04-014, F04-016   |
+
+**Public buckets and leaked secrets:** nothing in the repo suggests a public bucket, and no secret
+has leaked into git (P04.5). Q-S2 is the question that settles the bucket side; please answer it
+first.
 
 <!-- appendices -->
 
