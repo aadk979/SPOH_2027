@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T16:21:25.429Z",
+  "updatedAt": "2026-09-25T16:24:05.701Z",
   "current": {
     "phase": "P05",
-    "step": "P05.3"
+    "step": "P05.4"
   },
   "gates": [
     {
@@ -188,9 +188,9 @@
       "title": "Shared state for rate limits and caches",
       "owner": "design (P05)",
       "blocks": ["P10.3", "P15.2"],
-      "status": "open",
-      "answer": null,
-      "answeredAt": null
+      "status": "answered",
+      "answer": "A: Postgres (design, ADR-003 §3-4): LISTEN/NOTIFY cache bus and an UNLOGGED rate-limit counter table; ElastiCache and DynamoDB rejected on cost and moving parts. Proposed until G1.",
+      "answeredAt": "2026-09-25T16:24:05.627Z"
     }
   ],
   "phases": [
@@ -1010,11 +1010,16 @@
         {
           "id": "P05.4",
           "title": "ADR-003 Configuration model (D-14)",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-25T16:21:37.017Z",
+          "completedAt": "2026-09-25T16:24:05.700Z",
+          "commits": ["630cb37"],
+          "notes": [
+            {
+              "at": "2026-09-25T16:24:05.701Z",
+              "text": "ADR-003: registry, storage/history, cache bus + failure modes, D-14 A, env reduction, runtime client config, content, retention schedule"
+            }
+          ]
         },
         {
           "id": "P05.5",
