@@ -88,7 +88,11 @@ export function GlobalNav(): ReactNode {
               pathname === '/inbox' && 'font-semibold text-primary-on-dark',
             )}
           >
-            Announcements
+            {/* The whole bar must fit 320 px without scrolling: wider content
+                makes phones zoom the page out, which throws off every tap on the
+                fixed bottom nav. The short label is the one that fits. */}
+            <span className="max-[359px]:hidden">Announcements</span>
+            <span className="hidden max-[359px]:inline">Inbox</span>
           </Link>
           {/* The name is confirmation you are on your own account, not a link.
               Hidden on the narrowest phones, where the sign-out target matters
