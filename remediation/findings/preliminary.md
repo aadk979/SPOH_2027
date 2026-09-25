@@ -12,6 +12,7 @@ closed during the audit phase named. IDs are kept when a finding moves into an F
 - **Impact:** Deactivating a volunteer or changing a role may not apply on other workers for up to
   60 s. This contradicts "deactivation takes effect immediately".
 - **Verify in:** P03.5 · **Fix in:** P10.3 (cache bus)
+- **Status:** Confirmed in P03.5. With two app instances on one database, a volunteer deactivated through one instance keeps getting 200 from the other until its 60 s cache entry expires (`server/tests/integration/repro/multiInstance.test.ts`, skipped repro). Session revocation has the same gap even on one instance (F03-009). Fix stays P10.3.
 
 ### PF-02 — Rate limiter uses the default in-memory store
 
@@ -21,6 +22,7 @@ closed during the audit phase named. IDs are kept when a finding moves into an F
 - **Impact:** Effective limits are multiplied by the worker count, and the sensitive limits
   (sign-in, provisioning) are weaker than configured.
 - **Verify in:** P03.5 / P04.4 · **Fix in:** P15.2
+- **Status:** Confirmed in P03.5: after 20 refused sign-ins on one instance the second instance still answers (`repro/multiInstance.test.ts`); the effective limit is 20 × instances. P04.4 re-checks the security impact; fix stays P15.2.
 
 ### PF-03 — Lint is red on `main`
 
@@ -88,6 +90,7 @@ closed during the audit phase named. IDs are kept when a finding moves into an F
 - **Evidence:** Prisma in 5 routers and all 18 services. About 30 direct cross-module imports of
   `service.ts`/`repo.ts`. `admin/service.ts` spans five domains (825 lines; 903 on the audit branch).
 - **Fix in:** P06
+- **Status:** Confirmed and measured in P03.1: 57 Prisma edges outside a data layer (5 routers; 18 of 20 services), 32 Express edges outside `http/`, 33 cross-module internal imports, no module `index.ts`, three modules (`roster`, `shift`, `me`) sharing one domain. Module map and the target of every export: F03 § P03.1.
 
 ### PF-11 — Documentation drift
 
@@ -112,6 +115,7 @@ closed during the audit phase named. IDs are kept when a finding moves into an F
   sets no output mode. P00.2 checked: `client/next.config.ts` is identical on both branches and sets
   no `output`, so the deployed topology document does not match its own code.
 - **Fix in:** P08.4 (container image)
+- **Status:** Confirmed in P03.7: `client/next.config.ts` on `main` sets no `output`, and `next build` produces no `.next/standalone`. Fix stays P08.4.
 
 ### PF-14 — The deployed system is not the baseline code
 
@@ -206,4 +210,4 @@ closed during the audit phase named. IDs are kept when a finding moves into an F
     and `ONBOARDING_AND_FEATURES.md`). CI does not run it.
 - **Verify in:** P03 · **Fix in:** P06 (the transaction pattern) and P07 (shared gets tests or
   `passWithNoTests`)
-- **Status:** Partly fixed (`371775c`): root `npm test` passes and the 14 files are formatted. The pg concurrent-query deprecation is still open for P03.
+- **Status:** The pg concurrent-query deprecation is traced in P03.4 (F03-019): it comes from Prisma's query interpreter loading an `include`'s relations in parallel inside `$transaction` (swap requests), not from the app's `Promise.all(tx…)`; `repro/pgConcurrency.test.ts` reproduces it. The rest of PF-20 is fixed (`371775c`).

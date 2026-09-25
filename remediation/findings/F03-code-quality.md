@@ -5,7 +5,7 @@ per-function refactor backlog for P06/P07, duplication and "one way to do it" de
 found by a correctness review (each with a committed, skipped repro test), multi-instance checks,
 test gaps, and reviews of the client, the shared package and the audit branch.
 
-- **Reviewed:** `main`, product code as of `d4f6399` (unchanged by P03). Local dev and test
+- **Reviewed:** `main`, product code as of `d4f6399` (unchanged by P03: `git diff d4f6399..HEAD -- server/src client/src packages ops scripts` is empty; only tests were added). Local dev and test
   databases only (D-13).
 - **Tools and outputs:** `reports/P03/` (see its `README.md` for every command).
 - **Repro tests:** committed as `it.skip` / `describe.skip`, each tagged `// F03-xxx` (or the
@@ -16,7 +16,105 @@ test gaps, and reviews of the client, the shared package and the audit branch.
 
 ## Summary (P03.10)
 
-_Written at P03.10._
+**42 findings: 3 High, 20 Medium, 19 Low**, plus six P02 bugs reproduced and root-caused
+(F02-002, F02-006, F02-010, F02-011, F02-027, F02-032) and PF-01, PF-02, PF-10, PF-13 confirmed.
+**50 skipped repro tests** (43 server integration, 1 server unit, 6 client) each fail today for the
+stated reason; `bash remediation/reports/P03/run-repros.sh` proves it and P06/P07 un-skip them as
+they fix. Seven findings have no repro, each for a stated reason: F03-029 and F03-037 are
+measurements, F03-034 is a design question for P05, and F03-039…042 are in audit-branch code that
+is not on `main`.
+
+| Area                       | Result                                                                                                                                       |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Module map (P03.1)         | 24 modules and 18 platform units; **359 exported declarations, each with a target**; 27 dead exports; graphs in `reports/P03/`               |
+| Refactor backlog (P03.2)   | **97 of 97** functions over the P00 limits have a split plan (risk H 35, M 37, L 25); 18 long files mapped                                   |
+| Duplication (P03.3)        | 1.3 % cloned lines; the debt is inconsistency: 12 patterns with one way chosen                                                               |
+| Correctness (P03.4, P03.5) | 28 bugs (5 of them races, written to lose every run); 4 multi-instance defects (PF-01, PF-02, F03-030, F03-031)                              |
+| Test gaps (P03.6)          | 23 of 95 routes untested, 81 server functions never run, 0 use cases with a unit test, 17 of 29 screens without e2e; hosted sign-in untested |
+| Client (P03.7)             | outbox, session and service-worker defects; 613 KB gzip of JS, 83 KB of it unused schemas on every route                                     |
+| Shared (P03.8)             | DTO → module map; 7 duplicated contracts; 3 generated artefacts; 4 enums become data                                                         |
+| Audit branch (P03.9)       | fixes F03-001, F02-002, F03-025; adds F03-039…042 and refactor debt                                                                          |
+
+### The top structural problems, for the owner
+
+1. **Rules live in one path, not in the domain.** The escalation rules exist in the admin screen's
+   service and nowhere else, so the roster import lets a Deputy make themselves an Admin
+   (F03-001). Check-in, swaps and briefings each enforce their own version of "whose shift is
+   this" (F03-005, F03-016). P06 moves each rule into one domain function that every path calls.
+2. **Check-then-write without a guard.** Stock, per-card gifts, stamps, swap decisions, session
+   rotation, idempotency takeover and the purge all read, decide, then write, so two requests at
+   once both win (F03-006, F03-007, F03-008, F03-010, F03-011, F03-031). Each needs a conditional write or a lock; the repros
+   lose every run today.
+3. **One process is assumed; production runs several.** Caches, rate limits, settings, security
+   dedupe and scheduled jobs are per process (PF-01, PF-02, F03-030, F03-031, F03-042). P10.3
+   (cache bus), P15.2 (shared limits) and D-09 (one runner per job) remove the assumption.
+4. **Numbers the committee reads are wrong in more places than P02 saw.** Beyond F02-006 and
+   F02-027: paper tallies merge on import (F03-012), lost cards count twice (F03-028), a group
+   link un-completes a card (F03-004), urgent pushes reach people the inbox hides (F03-014), and
+   the report's lost-person section doubles with two workers (F03-031).
+5. **Offline capture has holes.** Queued taps are parked for good after a session lapse or a
+   restart (F03-033); stamps, redemptions, incidents and alerts do not queue at all (F03-034);
+   capture screens are not precached (F03-036).
+6. **Boundaries are convention.** 57 Prisma and 33 cross-module edges, three modules sharing one
+   domain, a five-domain `admin` service (PF-10). The module map and backlog are P06/P07's worklist.
+7. **The riskiest paths are the least tested.** Hosted sign-in, the whole lost-and-found service,
+   corrections and every race had no test (P03.6).
+
+### All findings, ranked
+
+| ID      | Sev    | Title                                                                     | Phase                                                                               | Repro                 |
+| ------- | ------ | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | --------------------- |
+| F03-001 | High   | Roster import and provisioning can grant any role, including Admin        | P06 (guard, test first), P11 (Cedar policy)                                         | roster.test.ts        |
+| F03-012 | High   | The fallback import merges separate paper tallies                         | P06                                                                                 | numbers.test.ts       |
+| F03-033 | High   | The outbox parks retryable captures for good                              | P07                                                                                 | outbox.test.ts        |
+| F03-002 | Medium | Unique-constraint violations are answered with 500                        | P06                                                                                 | platform.test.ts      |
+| F03-003 | Medium | A reissued card can be given a second gift with no warning                | P06                                                                                 | capture.test.ts       |
+| F03-004 | Medium | Linking a group to a completed card resets it to ISSUED                   | P06                                                                                 | capture.test.ts       |
+| F03-005 | Medium | Approving a stale swap request moves someone else's shift                 | P06                                                                                 | shifts.test.ts        |
+| F03-006 | Medium | Two decisions on one swap both apply                                      | P06                                                                                 | shifts.test.ts        |
+| F03-007 | Medium | Simultaneous redemptions oversell stock and give one card several gifts   | P06                                                                                 | capture.test.ts       |
+| F03-008 | Medium | Simultaneous stamps of one card at one station fail with 500              | P06                                                                                 | capture.test.ts       |
+| F03-009 | Medium | Revoking a session leaves its access token working for up to a minute     | P06 (local), P10.3 (cross-instance)                                                 | sessions.test.ts      |
+| F03-010 | Medium | Concurrent refreshes fork a session family                                | P12 (with F02-032)                                                                  | sessions.test.ts      |
+| F03-014 | Medium | An urgent announcement is pushed to people it does not reach              | P06 (rule), P14.4 (composer copy)                                                   | numbers.test.ts       |
+| F03-018 | Medium | Audit rows are missing, mislabelled or lack a "before"                    | P06 (P11 generates the action catalogue)                                            | platform.test.ts      |
+| F03-019 | Medium | Relation loads run concurrently on a transaction connection (PF-20)       | P06                                                                                 | pgConcurrency.test.ts |
+| F03-028 | Medium | A reissued journey is counted twice, and the original as voided           | P06 (P05 confirms the rule)                                                         | capture.test.ts       |
+| F03-030 | Medium | A settings change reaches other instances up to a minute later            | P10.3                                                                               | multiInstance.test.ts |
+| F03-031 | Medium | Every worker runs the lost-person purge, so summaries are written twice   | P06 (claim), P10 (scheduler)                                                        | multiInstance.test.ts |
+| F03-032 | Medium | Runtime settings load once per page load, and not after an in-app sign-in | P07 (load on sign-in), P10.1 (live updates)                                         | session.test.ts       |
+| F03-034 | Medium | Stamps, redemptions, incidents and lost-person alerts are online-only     | P05 (decision), P07                                                                 | —                     |
+| F03-036 | Medium | The capture screens are not precached                                     | P07                                                                                 | serviceWorker.test.ts |
+| F03-039 | Medium | Audit events reach CloudWatch before their transaction commits            | P06 (if merged) / the re-implementation                                             | —                     |
+| F03-040 | Medium | One rejected batch stops CloudWatch delivery for good                     | P06 (if merged); P08.7 replaces hand shipping with the CloudWatch agent or FireLens | —                     |
+| F03-011 | Low    | Two retries can both take over an abandoned idempotency key               | P06                                                                                 | platform.test.ts      |
+| F03-013 | Low    | "Today" starts at 08:00 local time                                        | P09.6                                                                               | numbers.test.ts       |
+| F03-015 | Low    | A second check-out overwrites the first                                   | P06                                                                                 | shifts.test.ts        |
+| F03-016 | Low    | Briefing-slot completion rules are inverted                               | P06, P11.7                                                                          | shifts.test.ts        |
+| F03-017 | Low    | Pagination cursors do not end, and can skip or repeat                     | P06                                                                                 | platform.test.ts      |
+| F03-020 | Low    | Card-code input disagrees with the printed alphabet                       | P06/P07                                                                             | capture.test.ts       |
+| F03-021 | Low    | Resetting a setting is not atomic with its audit row                      | P10.1                                                                               | platform.test.ts      |
+| F03-022 | Low    | A card batch can print a code that belongs to another card                | P06                                                                                 | cardBatch.test.ts     |
+| F03-023 | Low    | Long-shift warnings include shifts from earlier days                      | P06                                                                                 | shifts.test.ts        |
+| F03-024 | Low    | Incident status moves freely, including back from RESOLVED                | P06, P13.7                                                                          | platform.test.ts      |
+| F03-025 | Low    | Import counters count a new person twice                                  | P06                                                                                 | roster.test.ts        |
+| F03-026 | Low    | Rule failures are reported as permission denials                          | P06, P11.8                                                                          | shifts.test.ts        |
+| F03-027 | Low    | A voided or unissued card can be reissued                                 | P06                                                                                 | capture.test.ts       |
+| F03-029 | Low    | Record mappers query per row (N+1) on polled lists                        | P06                                                                                 | —                     |
+| F03-035 | Low    | A replaced push subscription is never sent to the server                  | P07                                                                                 | serviceWorker.test.ts |
+| F03-037 | Low    | Every route ships the shared schemas; two dependencies are unused         | P07                                                                                 | —                     |
+| F03-038 | Low    | `AttendanceMethod` is missing from the shared enums                       | P07.8                                                                               | enums.test.ts         |
+| F03-041 | Low    | The audit log's live tail can skip rows                                   | P06 / P13.7 (audit screen, F02-024)                                                 | —                     |
+| F03-042 | Low    | Security-event dedupe is per worker                                       | P15.2                                                                               | —                     |
+
+### For P05 (no new owner decision)
+
+- **`feat/audit-cloudwatch` (PF-14):** P03.9 lists what the branch fixes and what it adds; the
+  decision stays with the owner before P05.
+- **F03-034:** which captures must queue offline (stamps, redemptions, incidents, alerts) is a
+  design choice for P05.
+- **F03-028:** P05 confirms the lost-card rule (original becomes `LOST`; the funnel counts
+  journeys).
 
 ---
 

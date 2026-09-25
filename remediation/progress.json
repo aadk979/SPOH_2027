@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T14:47:43.828Z",
+  "updatedAt": "2026-09-25T14:48:05.880Z",
   "current": {
     "phase": "P03",
-    "step": "P03.9"
+    "step": "P03.10"
   },
   "gates": [
     {
@@ -772,8 +772,8 @@
         {
           "id": "P03.10",
           "title": "Write up",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-25T14:48:05.880Z",
           "completedAt": null,
           "commits": [],
           "notes": []

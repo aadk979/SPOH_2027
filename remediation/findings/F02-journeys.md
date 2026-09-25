@@ -103,16 +103,16 @@ from F02-025 because it costs a 403 on every load of a capture screen.
 
 ### P01 follow-ups, closed
 
-| P01 item                                    | What the journeys showed                                                                                                              |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `SwapStatus.CANCELLED` never written        | No one can withdraw a swap; there is no request screen either (F02-014).                                                              |
-| `IncidentStatus.ACKNOWLEDGED` never written | Reachable only by calling `POST /incidents/:id/status` directly; no incident screen (F02-015).                                        |
-| `CardStatus.LOST` never written             | No card screen; `reissueCard` leaves the original as it was, so "lost" is never recorded (F02-013; P03 to confirm intent).            |
-| `LostFoundStatus.DISPOSED` never written    | Close-out stops at `UNCLAIMED_AT_CLOSE`; nothing records an item's fate (Journey 6, requirement 1).                                   |
-| `MANDATORY_BRIEF_POINTS` unrendered         | Briefing slots have no screen, so the points are never shown (F02-023).                                                               |
-| F01-046 hardcoded shift hours               | Confirmed: after moving Morning to 08:00–12:30, home and My shift still say 09:30–14:00 (`volunteer-first-03`, `volunteer-booth-01`). |
-| F01-047 `eventName` never displayed         | Confirmed: renamed to "Test Event 2027", every screen still says SPOH 2027 (`admin-setup-08`).                                        |
-| PF-09 endpoints with no caller              | Confirmed: 42 of 95 routes (`reports/P02/permissions.json`); user-facing gaps as above.                                               |
+| P01 item                                    | What the journeys showed                                                                                                                              |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SwapStatus.CANCELLED` never written        | No one can withdraw a swap; there is no request screen either (F02-014).                                                                              |
+| `IncidentStatus.ACKNOWLEDGED` never written | Reachable only by calling `POST /incidents/:id/status` directly; no incident screen (F02-015).                                                        |
+| `CardStatus.LOST` never written             | No card screen; "lost" is never recorded (F02-013). P03 correction: `reissueCard` sets the original to VOIDED, not LOST; intent confirmed in F03-028. |
+| `LostFoundStatus.DISPOSED` never written    | Close-out stops at `UNCLAIMED_AT_CLOSE`; nothing records an item's fate (Journey 6, requirement 1).                                                   |
+| `MANDATORY_BRIEF_POINTS` unrendered         | Briefing slots have no screen, so the points are never shown (F02-023).                                                                               |
+| F01-046 hardcoded shift hours               | Confirmed: after moving Morning to 08:00–12:30, home and My shift still say 09:30–14:00 (`volunteer-first-03`, `volunteer-booth-01`).                 |
+| F01-047 `eventName` never displayed         | Confirmed: renamed to "Test Event 2027", every screen still says SPOH 2027 (`admin-setup-08`).                                                        |
+| PF-09 endpoints with no caller              | Confirmed: 42 of 95 routes (`reports/P02/permissions.json`); user-facing gaps as above.                                                               |
 
 ---
 

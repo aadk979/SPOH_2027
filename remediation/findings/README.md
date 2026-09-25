@@ -2,15 +2,15 @@
 
 Audit output from P01–P04 and the consolidated backlog from P05.
 
-| File                                     | Written in | Contents                                                                  |
-| ---------------------------------------- | ---------- | ------------------------------------------------------------------------- |
-| [`preliminary.md`](preliminary.md)       | planning   | issues seen while planning; each is verified or closed in an audit        |
-| [`F01-hardcoding.md`](F01-hardcoding.md) | P01 (done) | every event-specific / fixed value, classified, with its target home      |
-| [`F02-journeys.md`](F02-journeys.md)     | P02 (done) | role journeys, dead ends, missing screens, the interlinking matrix        |
-| [`F02-screens/`](F02-screens/)           | P02 (done) | screenshots referenced from F02 (phone + laptop)                          |
-| `F03-code-quality.md`                    | P03        | bugs with repros, the per-function refactor backlog, test gaps            |
-| `F04-security-ops.md`                    | P04        | threat model, security findings, AWS and operational readiness            |
-| `BACKLOG.md`                             | P05        | every open finding, deduplicated, prioritised, mapped to a phase and step |
+| File                                         | Written in | Contents                                                                  |
+| -------------------------------------------- | ---------- | ------------------------------------------------------------------------- |
+| [`preliminary.md`](preliminary.md)           | planning   | issues seen while planning; each is verified or closed in an audit        |
+| [`F01-hardcoding.md`](F01-hardcoding.md)     | P01 (done) | every event-specific / fixed value, classified, with its target home      |
+| [`F02-journeys.md`](F02-journeys.md)         | P02 (done) | role journeys, dead ends, missing screens, the interlinking matrix        |
+| [`F02-screens/`](F02-screens/)               | P02 (done) | screenshots referenced from F02 (phone + laptop)                          |
+| [`F03-code-quality.md`](F03-code-quality.md) | P03 (done) | bugs with repros, the per-function refactor backlog, test gaps            |
+| `F04-security-ops.md`                        | P04        | threat model, security findings, AWS and operational readiness            |
+| `BACKLOG.md`                                 | P05        | every open finding, deduplicated, prioritised, mapped to a phase and step |
 
 ## Finding format
 
