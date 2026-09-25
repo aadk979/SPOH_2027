@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T14:19:10.257Z",
+  "updatedAt": "2026-09-25T14:32:54.429Z",
   "current": {
     "phase": "P03",
     "step": "P03.4"
@@ -688,11 +688,16 @@
         {
           "id": "P03.4",
           "title": "Correctness review per module",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-25T14:19:10.257Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-25T14:32:54.429Z",
+          "commits": ["4ae80c7"],
+          "notes": [
+            {
+              "at": "2026-09-25T14:32:54.429Z",
+              "text": "24 modules + platform reviewed; F03-001..028 (1 High security, 1 High numbers, 12 Medium, 14 Low) with 38 skipped repros; F02-002/006/027/032 reproduced and root-caused"
+            }
+          ]
         },
         {
           "id": "P03.5",
