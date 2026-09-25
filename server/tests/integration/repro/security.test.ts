@@ -56,6 +56,24 @@ beforeEach(async () => {
   await prisma.volunteer.update({ where: { id: volunteerB.id }, data: { phone: '+65 9000 0000' } });
 });
 
+describe('rate limits (P04.4)', () => {
+  // F04-006
+  it.skip('lets a morning rush of volunteers sign in from one campus address', async () => {
+    const statuses: number[] = [];
+    for (let i = 0; i < 30; i += 1) {
+      const person = await createVolunteer({ email: `rush${i}@p04.test`, role: 'VOLUNTEER' });
+      const response = await request(app)
+        .post('/api/v1/auth/session')
+        .send({ email: person.email });
+      statuses.push(response.status);
+    }
+
+    // Thirty different people behind one NAT egress: none of them is an
+    // attacker. Every request here comes from the same test client address.
+    expect(statuses.filter((status) => status === 429)).toHaveLength(0);
+  });
+});
+
 describe('access by id across stations (P04.3)', () => {
   // F04-004
   it.skip("does not give an IC another station's roster phone numbers", async () => {

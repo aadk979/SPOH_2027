@@ -403,6 +403,115 @@ Nothing is event-scoped today (PF-04), so there is no cross-event boundary to te
 - **Phase:** P06 (rule), P11 (policy)
 - **Status:** open
 
+---
+
+## P04.4 — Input, output and transport
+
+### Review
+
+| Area                  | Result                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Validation coverage   | ✅ Every route that takes a body, query or param validates it (Appendix A, "Validated"). Every `*Request`, `*Query` and `*Params` schema in `@spoh/shared` is `.strict()` (the two import schemas through their factory), so unknown keys such as `role` or `volunteerId` are refused. Body limit 100 kB (`app.ts`).                                                                                                                                                               |
+| Error leakage         | ✅ One error handler; non-`AppError`s become a generic 500 with the request id, the cause only in the log. 404s echo method and path, validation errors echo zod paths and messages; neither carries internals. Known gap: unique violations answer 500 instead of 409 (F03-002).                                                                                                                                                                                                  |
+| Helmet on the API     | ✅ `default-src 'none'; frame-ancestors 'none'`, HSTS one year with subdomains in production (no `preload`), `Referrer-Policy: strict-origin-when-cross-origin`, `Cross-Origin-Resource-Policy: same-site`, `x-powered-by` off.                                                                                                                                                                                                                                                    |
+| Client headers        | ⚠️ CSP from `next.config.ts` allows `script-src 'self' 'unsafe-inline'` in production (F04-007). `nosniff`, referrer policy, `Permissions-Policy` (camera self only) and HSTS are set. No `dangerouslySetInnerHTML`, `innerHTML` or `eval` in `client/src`.                                                                                                                                                                                                                        |
+| CORS                  | ✅ Exact allowlist, `credentials: true`, wildcard refused in production, requests without `Origin` allowed (same-origin and non-browser callers). Methods and headers are listed, not reflected.                                                                                                                                                                                                                                                                                   |
+| Rate limits           | ⚠️ Authenticated routes are keyed on the subject (the limiter runs after router-level `requireAuth`); the unauthenticated auth routes fall back to the client IP, so a campus NAT shares one bucket (F04-006). Limits are per worker (PF-02). Six routes have none (F04-008).                                                                                                                                                                                                      |
+| Proxy trust           | ✅ `TRUST_PROXY_HOPS` from config, not `true`; nginx appends `X-Forwarded-For` (repo says `TRUST_PROXY_HOPS=1`). Left at the default `0` behind nginx, every client is `127.0.0.1`: one rate-limit bucket for the whole event and QR attendance refused for everyone (the campus-IP check reads `req.ip`).                                                                                                                                                                         |
+| S3 presigned uploads  | ✅ Presigned POST with a server-built key (`lost-found/yyyy/mm/dd/<uuid>.<ext>`), `content-length-range` 1…`S3_MAX_UPLOAD_BYTES` (10 MB), `Content-Type` pinned to jpeg/png/webp, 300 s expiry. Reads are presigned GETs for the same prefix, 300 s. Gaps: no server-side-encryption condition (bucket default applies, Q-S3), nothing ties an upload to a record, so abandoned uploads are never cleaned (F04-014), and the app's IAM policy has no S3 permissions at all (Q-I2). |
+| Web Push              | ✅ VAPID, payloads encrypted to the device; lost-person pushes carry no description. ⚠️ An urgent announcement's preview is in the payload and shows on lock screens. ⚠️ The endpoint is any URL, so the server will POST to whatever a volunteer registers (F04-025).                                                                                                                                                                                                             |
+| QR and PIN attendance | ✅ HS256 token with a domain-separated key, `jti` bound to a stored challenge, 5-minute expiry checked twice, issuer re-validated at use, the verifier cannot verify themselves, 5 attempts per 5 minutes per person under an advisory lock, a 10-digit PIN stored as an HMAC, rotation invalidates the previous QR and PIN. ⚠️ The PIN path has no on-campus requirement (F04-009).                                                                                               |
+| Transport             | ✅ TLS at nginx with certbot's defaults (repo says). Postgres TLS on loopback with `sslmode=require`, which encrypts but does not verify the server; fine on loopback, not once the database is on another host (P08: `verify-full` or RDS's CA).                                                                                                                                                                                                                                  |
+
+### PF-02 re-checked for security impact
+
+Confirmed in P03.5 that limits multiply by the worker count. For security the effect is small:
+passwords are checked by Cognito, not by the API, so the sensitive limit guards the Hosted UI
+hand-off, dev sign-in (local only) and the attendance endpoints, which have their own
+per-person attempt counter. Brute force against passwords is Cognito's to stop (Q-C3, threat
+protection). The availability effect is the one that matters, and it is the flip side of F04-006.
+
+### Findings
+
+#### F04-006 — One campus network can sign in only about ten people a minute
+
+- **Severity:** High
+- **Area:** `server/src/middleware/rateLimit.ts:17–24` (IP fallback), `modules/auth/router.ts`
+  (`/auth/session`, `/auth/login`, `/auth/callback` on `sensitiveRateLimit`)
+- **Evidence:** Unauthenticated requests are keyed by IP, and the sign-in routes share the
+  sensitive ceiling of 20 per minute. A Hosted UI sign-in costs two requests (`/login` and
+  `/callback`), so one NAT address gets about ten sign-ins a minute per worker. Repro:
+  `repro/security.test.ts`, "lets a morning rush of volunteers sign in from one campus address":
+  thirty volunteers from one address, the 21st onwards get 429 (skipped, fails today).
+- **Impact:** At a briefing where everyone is told to sign in, most of the room is refused and
+  retries keep the bucket full. The file's own comment warns about shared Wi-Fi egress, but only
+  the authenticated routes avoid it. Risk 1.
+- **Fix:** Before training (4 Nov): raise `RATE_LIMIT_MAX_SENSITIVE` for the deployed box, or move
+  `/auth/login` and `/auth/callback` to their own higher limit. In P15.2: key sign-in limits on
+  failures (not successes), per account where known, with a shared store (PF-02).
+- **Phase:** config change before training; P15.2
+- **Status:** open
+
+#### F04-007 — The production CSP allows inline script, and an XSS would own the session
+
+- **Severity:** Medium
+- **Area:** `client/next.config.ts:14–31`
+- **Evidence:** `script-src 'self' 'unsafe-inline'` in production (the comment explains why:
+  Next's inline bootstrap scripts). The access token is in page memory, and same-origin script can
+  call `POST /api/v1/auth/refresh` with the httpOnly cookie attached and read the new token. No
+  injection sink was found in `client/src`.
+- **Impact:** CSP is the second line of defence and is currently absent for script; one XSS
+  (a dependency, a future rich-text field) would act as the victim for as long as their tab is
+  open.
+- **Fix:** Nonce-based CSP with `'strict-dynamic'` through Next middleware (accepting dynamic
+  rendering on authenticated pages), or hashes for the static bootstrap. Add a CSP report
+  endpoint.
+- **Phase:** P15
+- **Status:** open
+
+#### F04-008 — Six routes are unthrottled, and `/readyz` queries the database on every call
+
+- **Severity:** Low
+- **Area:** `server/src/modules/health/router.ts`, `modules/me/router.ts`,
+  `modules/station/router.ts`
+- **Evidence:** Appendix A: `/healthz`, `/readyz`, `GET /me`, `POST /me/check-in`,
+  `POST /me/check-out` and `GET /stations` have no limiter. `/readyz` is public through nginx
+  (`location = /readyz`) and runs `SELECT 1` each time.
+- **Impact:** Anyone on the internet can make the API spend a pool connection per request; the
+  authenticated three are bounded by the caller's own session.
+- **Fix:** Serve `/readyz` only to the load balancer or from a short cache; add the default limit
+  to the other four.
+- **Phase:** P08 (health checks behind the ALB), P06 (limits)
+- **Status:** open
+
+#### F04-009 — The PIN fallback lets someone mark attendance from anywhere
+
+- **Severity:** Low
+- **Area:** `server/src/modules/attendance/service.ts:314` (campus check applies to `QR` only)
+- **Evidence:** The QR path requires both phones on the configured SP network; the PIN path
+  requires nothing about location, by design, so it works when the campus Wi-Fi does not.
+- **Impact:** A verifier who reads their PIN out over chat verifies someone who is not there;
+  attendance and the check-in that follows (F02-017) become claims, not observations.
+- **Fix:** Make it an event setting (PIN allowed off-campus: yes/no), record the network on each
+  attendance row, and flag off-campus PIN attendance in the IC console.
+- **Phase:** P10 (setting), P13 (console)
+- **Status:** open
+
+#### F04-025 — A push endpoint can be any URL, so the server will POST wherever a volunteer asks
+
+- **Severity:** Low
+- **Area:** `packages/shared/src/dto/notification.ts:23` (`endpoint: z.url()`),
+  `server/src/modules/notification/service.ts:192–215`
+- **Evidence:** Any `http(s)` URL is stored as a subscription, with no limit on how many one person
+  registers. Every dispatch POSTs to all of a recipient's endpoints in parallel with no timeout.
+- **Impact:** A blind server-side request primitive (POST, encrypted body, no response returned)
+  towards loopback or private addresses, and a way to make each lost-person alert fan out into
+  thousands of outbound requests from the one box.
+- **Fix:** Accept only `https` endpoints on the known push services (FCM, Mozilla, Apple, Windows),
+  cap subscriptions per person, and set a send timeout.
+- **Phase:** P06 (validation), P15 (egress policy)
+- **Status:** open
+
 <!-- appendices -->
 
 ---
