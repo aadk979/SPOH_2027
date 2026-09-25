@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T15:28:57.426Z",
+  "updatedAt": "2026-09-25T15:32:29.159Z",
   "current": {
     "phase": "P04",
-    "step": "P04.2"
+    "step": "P04.3"
   },
   "gates": [
     {
@@ -958,11 +958,18 @@
         {
           "id": "P04.3",
           "title": "Authorization",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-25T15:29:15.805Z",
+          "completedAt": "2026-09-25T15:32:29.158Z",
+          "commits": [
+            "04b3611"
+          ],
+          "notes": [
+            {
+              "at": "2026-09-25T15:32:29.159Z",
+              "text": "98 routes inventoried (routes.mjs, F04 Appendix A); 12 out-of-middleware rules listed for P11; IDOR: 4 fail (F04-004 Medium, F04-005 Low x2, F04-024 Low), 4 ownership guards hold; event-scoping requirements written"
+            }
+          ]
         },
         {
           "id": "P04.4",
