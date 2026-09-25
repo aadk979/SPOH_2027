@@ -165,16 +165,8 @@ cp -n server/.env.example server/.env
 cp -n client/.env.example client/.env.local
 (cd server && npx prisma generate)
 
-# Local Postgres on :5435 (matches server/.env.example)
-PG=/usr/lib/postgresql/16/bin; D=/var/lib/postgresql/spoh-baseline
-if [ ! -d $D/data ]; then
-  mkdir -p $D && chown postgres:postgres $D
-  su postgres -c "$PG/initdb -D $D/data -U postgres -A trust"
-fi
-su postgres -c "$PG/pg_ctl -D $D/data -o '-p 5435 -k /tmp -c listen_addresses=localhost' -l $D/pg.log start"
-psql -h localhost -p 5435 -U postgres -tc "SELECT 1 FROM pg_roles WHERE rolname='spoh'" | grep -q 1 \
-  || psql -h localhost -p 5435 -U postgres -c "CREATE ROLE spoh LOGIN SUPERUSER PASSWORD 'spoh'" \
-          -c "CREATE DATABASE spoh2027 OWNER spoh"
+# Local Postgres on :5435 (matches server/.env.example); idempotent, initialises on first run
+scripts/dev-db-local.sh start
 ```
 
 Checks (all green at baseline apart from lint, see `baseline.md`):

@@ -58,7 +58,7 @@ npm run build:shared          # both apps import @spoh/shared from its built out
 cp server/.env.example server/.env
 cp client/.env.example client/.env.local
 
-npm run db:up                 # Postgres 17 on localhost:5435
+npm run db:up                 # Postgres 17 on localhost:5435 (no Docker? see below)
 npm run db:migrate --workspace server
 npm run db:seed --workspace server
 
@@ -76,6 +76,11 @@ Open <http://localhost:3000> and sign in with a seeded roster email:
 | `chief@spoh2027.test`   | Chief Coordinator  | —             |
 | `lead@spoh2027.test`    | Lead               | —             |
 | `admin@spoh2027.test`   | Admin              | —             |
+
+> **No Docker?** `scripts/dev-db-local.sh start` runs the same database on the
+> same port from the system's Postgres binaries (16 or 17): it initialises a
+> cluster on first run and creates the `spoh` role and `spoh2027` database.
+> `stop` and `status` do what they say.
 
 > **Port note.** The dev database is published on **5435** and the API on
 > **4010** rather than the conventional 5432/4000, because both of those are
