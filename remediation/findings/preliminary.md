@@ -191,5 +191,8 @@ closed during the audit phase named. IDs are kept when a finding moves into an F
     `Promise.all` inside a transaction (candidates: `attendance/service.ts:33`,
     `admin/service.ts:445`, `registration/service.ts:84,220`, `shift/service.ts:266`). pg@9
     turns this into an error.
+  - `npm run format:check` fails on 14 files that are already on `main` (for example
+    `server/src/config/env.ts`, `server/src/modules/auth/router.ts`, `client/src/app/reports/page.tsx`
+    and `ONBOARDING_AND_FEATURES.md`). CI does not run it.
 - **Verify in:** P03 · **Fix in:** P06 (the transaction pattern) and P07 (shared gets tests or
   `passWithNoTests`)

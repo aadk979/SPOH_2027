@@ -202,7 +202,9 @@ npm run lint && npm run typecheck
 npm run test:unit --workspace server          # 233 at baseline
 npm run test:integration --workspace server   # 288 at baseline, creates spoh2027_test itself
 npm run test --workspace client               # 19 at baseline
-node remediation/tools/code-metrics.mjs       # refactor debt
+node remediation/tools/code-metrics.mjs       # refactor debt (raw line counts)
+npm run arch:report                           # guard counts per rule (size + boundaries)
+npm run arch:check                            # every boundary violation
 ```
 
 End-to-end tests use the pre-installed Chromium. Playwright 1.62 pins a newer build than the one in

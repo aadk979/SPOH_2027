@@ -35,7 +35,10 @@ Tests, migrations, generated code and static data files are exempt. A limit may 
 one line only with a `-- reason` comment explaining why the split would make it worse. Reviewers
 treat every such comment as a question.
 
-Measure with `node remediation/tools/code-metrics.mjs` (defaults: function 50, file 300).
+Measure with `npm run arch:report`, which counts the ESLint guards for these limits (warnings
+until P06/P07) and the §3/§4 boundary rules. The ESLint guards follow this table and skip blank and
+comment lines. `node remediation/tools/code-metrics.mjs` counts raw lines (defaults: function 50,
+file 300), so its numbers run higher. Both are tracked in `reports/metrics/`.
 
 ## 3. Server module shape
 
