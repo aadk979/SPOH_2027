@@ -454,4 +454,43 @@ export const journeys = [
       { name: 'my shift', path: '/shift' },
     ],
   },
+  {
+    id: 'after-event',
+    title: 'Journey 6 (P02.7): after the event, and the next one (Chief)',
+    role: ROLE.chief,
+    steps: [
+      { name: 'lost and found: still held', path: '/safety/lost-found' },
+      {
+        name: 'lost and found: every item',
+        path: '/safety/lost-found',
+        act: async (page) => {
+          await page.getByLabel('Only items still held').uncheck();
+          await settle(page);
+        },
+      },
+      { name: 'final report', path: '/reports' },
+      {
+        name: 'deactivate one volunteer',
+        path: '/admin/users',
+        act: async (page) => {
+          await page.getByLabel('Name or email').fill('te-vol-20');
+          await settle(page);
+          await page.getByRole('button', { name: 'Manage' }).first().click();
+          await page.getByLabel('Reason').fill('Event over');
+          await page.getByRole('button', { name: /^Deactivate/ }).click();
+          await settle(page, 1200);
+        },
+      },
+      {
+        name: 'roster including deactivated',
+        path: '/admin/users',
+        act: async (page) => {
+          await page.getByLabel('Include deactivated').check();
+          await settle(page);
+        },
+      },
+      { name: 'operations: no archive, no new event', path: '/operations' },
+      { name: 'settings: nothing event-scoped', path: '/admin/settings' },
+    ],
+  },
 ];

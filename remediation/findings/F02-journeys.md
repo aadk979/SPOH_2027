@@ -526,3 +526,69 @@ The Lead holds `own.read`, `dashboard.station.read`, `dashboard.event.read`, `re
 - **Fix:** Labels next to codes; proper CSV quoting instead of replacing commas.
 - **Phase:** P14.5
 - **Status:** open
+
+---
+
+## Journey 6 — After the event, and the next one · P02.7
+
+Journey `after-event` (7 screens) as Chief; `POST /lost-found/close-out` by API.
+
+| Task                      | Result                                                                                                                                                                                                                                                            |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Lost-and-found close-out  | **No UI.** The list offers "Mark claimed" per item only (`after-event-01…02`). By API (Chief, `report.generate`): `{"markedUnclaimed": 2}`, both items now `UNCLAIMED_AT_CLOSE`. `DISPOSED` is never written: nothing records what happened to an unclaimed item. |
+| Final export              | Works (Journey 5). The report shows **61 no-shows, 95.3 % of assignments** (`after-event-03`): shifts on days still to come count as missed. F02-027                                                                                                              |
+| Lost-person purge         | Invisible. A resolved alert leaves every screen at once; there is no list of resolved cases and no sign of the purge. The report shows "8 cases · none": the median and outcomes come only from purged summaries, so they are empty for 24 hours. F02-028         |
+| Deactivate the roster     | One person at a time: search, Manage, reason, Deactivate (4 actions; about 100 for this roster). The success message vanishes with the row, because the list hides deactivated people (`after-event-04…05`). No bulk action, no "end of event" for memberships.   |
+| Archive the event         | **Not possible** (expected): no event entity (F02-001).                                                                                                                                                                                                           |
+| Start next year from this | **Not possible** (expected). The only route is a new database with an edited seed, or reusing this one and editing days, stations and gifts by API while this year's data stays mixed in (Journey 1).                                                             |
+
+### Requirements for P09.9 (clone) and P13.8 (close-out)
+
+From what this journey could not do:
+
+1. **Close-out is one guided flow**, in this order: close open fallback windows; resolve or close
+   open incidents (F02-015); run lost-and-found close-out, then record each unclaimed item's fate
+   (keep `DISPOSED`, with who and how); confirm lost-person alerts are resolved and show when their
+   descriptions will be purged; freeze the report; move the event to CLOSED.
+2. **The final report is frozen per event**, with its date range and the fallback caveat, and is
+   re-downloadable after CLOSED without recomputation drift.
+3. **Memberships end with the event**, in one action with a reason, instead of deactivating people.
+   A person stays in the organisation (D-02 A) and can be invited to the next event.
+4. **Archive** makes an event read-only and hides it from volunteers' screens; reports and audit
+   stay readable to Lead, Chief and Admin.
+5. **Clone** ("SPOH 2028 from SPOH 2027") copies days shifted by a chosen offset, shift templates,
+   stations and their capabilities, categories, gifts with stock reset, content, settings (including
+   the attendance root, F02-017) and role permissions; copies no records, and offers "invite the
+   same people" as an option (as P09.9 states).
+6. **Both events can be open at once** without their numbers, gaps or stations mixing (F02-001).
+7. **Every count is bounded to the event and to now** (F02-006, F02-027), so a report run mid-event
+   or before a dry run means what it says.
+
+### F02-027 — No-shows count shifts that have not happened yet
+
+- **Severity:** High
+- **Type:** broken · Role: Lead, Chief
+- **Area:** `server/src/modules/report/service.ts:344–352` (`noShows = assignments - checkedIn`);
+  `report/repo.ts:271` (every assignment in the range, past or future)
+- **Evidence:** `after-event-03`: 64 assignments, 61 no-shows (95.3 %), on 25 Sept, with dry-run and
+  January assignments included.
+- **Impact:** The report is read after each dry run and each event day; until the last day it
+  reports most volunteers as no-shows. On staging after Dry Run #1 it would count every January
+  shift.
+- **Fix:** Count only assignments whose block has ended; report "not yet due" separately.
+- **Phase:** P06 (bug fix with test)
+- **Status:** open
+
+### F02-028 — Lost-person outcomes are invisible until the purge runs
+
+- **Severity:** Medium
+- **Type:** confusing · Role: IC, Chief, Lead
+- **Area:** `server/src/modules/report/service.ts:255–293` (median and outcomes from purged
+  summaries only); `components/LostPersonBanner.tsx` (active alerts only)
+- **Evidence:** `after-event-03`: "Lost person 8 cases · none" with all 8 resolved as found.
+- **Impact:** For 24 hours after a case the report cannot say how long searches took or how they
+  ended, and no screen lists today's cases, so a Chief debriefing that evening has nothing to read.
+- **Fix:** Compute timings and outcomes from resolved alerts as well as summaries; a "resolved
+  today" list without descriptions after the purge.
+- **Phase:** P14.2
+- **Status:** open
