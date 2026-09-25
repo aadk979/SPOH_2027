@@ -1,3 +1,4 @@
+/* eslint-disable no-console -- journey steps print evidence to the runner's stdout */
 /**
  * Journey definitions for P02. Each journey is one role walking named steps.
  *
@@ -418,6 +419,39 @@ export const journeys = [
         },
       },
       { name: 'guess: registration from a course station', path: '/capture/registration' },
+    ],
+  },
+  {
+    id: 'lead',
+    title: 'Journey 5 (P02.6): Lead reads reports, the roster and the audit trail',
+    role: ROLE.lead,
+    steps: [
+      { name: 'home', path: '/home' },
+      { name: 'operations hub', path: '/operations' },
+      { name: 'live dashboard', path: '/chief' },
+      { name: 'IC console', path: '/ic' },
+      { name: 'report', path: '/reports' },
+      {
+        name: 'export CSV',
+        path: '/reports',
+        act: async (page) => {
+          const response = page.waitForResponse(/\/reports\/export/, { timeout: 20_000 });
+          await page.getByRole('button', { name: 'Download CSV' }).click();
+          const res = await response;
+          // The page reads the body as a blob, so Playwright cannot report its size.
+          console.log(`     export ${res.status()} ${res.headers()['content-disposition'] ?? ''}`);
+          await settle(page, 1000);
+        },
+      },
+      { name: 'volunteers (read-only)', path: '/admin/users' },
+      { name: 'guess: audit log', path: '/audit' },
+      { name: 'guess: /admin/audit', path: '/admin/audit' },
+      { name: 'event settings by URL', path: '/admin/settings' },
+      { name: 'fallback by URL', path: '/chief/fallback' },
+      { name: 'safety hub', path: '/safety' },
+      { name: 'log a found item by URL', path: '/safety/lost-found/new' },
+      { name: 'announcements', path: '/inbox' },
+      { name: 'my shift', path: '/shift' },
     ],
   },
 ];

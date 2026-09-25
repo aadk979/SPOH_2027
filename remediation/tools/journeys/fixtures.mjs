@@ -99,8 +99,12 @@ const SETS = {
     });
   },
 
-  /** Put the shift hours back to the shipped defaults. */
+  /** Shift hours back to the shipped defaults; active lost-person alerts resolved. */
   async reset() {
+    const ic = await signIn('ic@spoh2027.test');
+    for (const alert of (await call(ic, 'GET', '/lost-person/active')).alerts) {
+      await call(ic, 'POST', `/lost-person/${alert.id}/resolve`, { outcome: 'RESOLVED_FOUND' });
+    }
     const admin = await signIn('admin@spoh2027.test');
     await call(admin, 'PATCH', '/admin/settings', {
       shiftBlocks: {

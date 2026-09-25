@@ -321,12 +321,14 @@ because no volunteer screen can request a swap (PF-09) and the IC needs somethin
 
 ### F02-016 — Lost-person alerts stack above the app on phones
 
-- **Severity:** Low
+- **Severity:** Medium
 - **Type:** confusing · Role: all
 - **Area:** `client/src/components/LostPersonBanner.tsx`
-- **Evidence:** `ic-shift-01` (phone): two alerts take the first 380 px, above the app bar.
-- **Impact:** With two or three alerts active the screen a volunteer needs is below the fold. The
-  prominence is right for one alert; it does not scale.
+- **Evidence:** `ic-shift-01` (phone): two alerts take the first 380 px, above the app bar. The
+  stack is `sticky top-0`, so it stays: in Journey 5 on a phone, the Lead's "Download CSV" could not
+  be clicked because `<div class="sticky top-0 z-40">` intercepts pointer events (Playwright log).
+- **Impact:** With two alerts active, half a phone screen is covered on every page and controls
+  under it cannot be tapped. The prominence is right for one alert; it does not scale.
 - **Fix:** One banner with a count and the newest alert, expanding to the list.
 - **Phase:** P14.4
 - **Status:** open
@@ -456,4 +458,71 @@ the campus network, and the dev server restarted (F02-017).
 - **Fix:** A briefing slot card on the briefer's home with the points and "done"; move the points
   into event content (P01.6).
 - **Phase:** P13.3, P14.3
+- **Status:** open
+
+---
+
+## Journey 5 — Lead · P02.6
+
+Journey `lead` (15 screens). Before it, `fixtures.mjs reset` resolved the lost-person alerts left
+by Journey 4, because on a phone their sticky banners blocked the export button (F02-016).
+
+The Lead holds `own.read`, `dashboard.station.read`, `dashboard.event.read`, `report.generate`,
+`user.read`, `audit.read`, `incident.report` and `lostPerson.raise`.
+
+| Task                    | Result                                                                                                                                                                                                                                      | Finding |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| Reports                 | Works (`lead-05`): the three counts with the caveat, fallback windows flagged. Covers the whole database: both events and the 2027-dated import (F02-001, F02-006).                                                                         | —       |
+| Export                  | CSV and XLSX download (`GET /reports/export` 200, `spoh2027-report-2026-09-25.csv`). The CSV prints raw codes (`SEC_4`, `PARENT_GUARDIAN`) and the caveat with its commas turned into semicolons ("three separate counts; which measure…"). | F02-026 |
+| Volunteer list          | Read-only, and says so (`lead-07`). No link from a person to their shifts or records.                                                                                                                                                       | P02.8   |
+| Audit log               | **No screen.** `/audit` and `/admin/audit` are 404s (`lead-08…09`) although `GET /audit` returns 200 for the Lead. `audit.read` is the Lead's reason to exist in the matrix. (The audit branch has a screen; D-05 kept it out.)             | F02-024 |
+| Live dashboard, IC view | Both open (`lead-03…04`). The IC console fetches the swap queue and gets 403 (Lead lacks `swap.approve`).                                                                                                                                   | F02-025 |
+| Settings                | Opens read-only with an explanation (`lead-10`). The right pattern.                                                                                                                                                                         | —       |
+| Fallback, found item    | Both forms open by URL and look usable (`lead-11`, `lead-13`); the server refuses the fallback declaration (403). Safety links the Lead to "Lost and found" although the Lead cannot log items.                                             | F02-025 |
+| Home                    | "You are not on shift right now. No shifts are assigned to you yet. Check with your IC." plus an attendance button (`lead-01`): volunteer copy for a committee member who has no IC.                                                        | F02-025 |
+
+### F02-024 — The audit log has no screen
+
+- **Severity:** Medium
+- **Type:** needs-API/SQL · Role: Lead, Chief, Admin
+- **Area:** `GET /audit` (`modules/audit/router.ts:31`, no caller, PF-09); the screen exists only on
+  `feat/audit-cloudwatch` (D-05, PF-14)
+- **Evidence:** `lead-08…09`; `GET /audit` → 200 for the Lead.
+- **Impact:** Every mutation is audited in the same transaction, but no one can read the trail
+  without the API. "Who changed the shift hours?" is answered only on the settings screen's "last
+  changed by".
+- **Fix:** An audit screen with entity links (P02.8), on `main`; decide the audit branch's fate
+  (open question before P05).
+- **Phase:** P13.7, P14.1
+- **Status:** open
+
+### F02-025 — Screens a role cannot use open anyway and fail on submit
+
+- **Severity:** Medium
+- **Type:** confusing · Role: Lead, Deputy, Volunteer
+- **Area:** route guards check sign-in only (`useRequireSession`); menus check capabilities
+  (`client/src/lib/navigation.ts`)
+- **Evidence:** Lead: fallback form (`lead-11`, submit → 403), log found item (`lead-13`), IC
+  console swap queue (403). Deputy: fallback import (`deputy-day-07`, needs `fallback.import`).
+  Volunteer: registration summary (F02-020). The settings screen does this well (read-only with a
+  note, `lead-10`); the others do not.
+- **Impact:** A role follows a link or a colleague's URL, fills a form, and gets "Could not…" at the
+  end. Denials are not explained. The complete per-role table is in P02.9.
+- **Fix:** One capability-aware route guard and the settings pattern (read-only with a reason)
+  everywhere; role-appropriate home copy.
+- **Phase:** P11.7, P11.8
+- **Status:** open
+
+### F02-026 — The CSV export is written for machines, not for the report's readers
+
+- **Severity:** Low
+- **Type:** inconsistent · Role: Lead
+- **Area:** `server/src/modules/report/export.ts` (codes, comma replacement); file name and title
+  from F01-006
+- **Evidence:** `GET /reports/export?format=csv` for the Lead (header, caveat and first table shown
+  above).
+- **Impact:** The Lead pastes the CSV into the post-event report and has to relabel every category
+  and repair the caveat, the one sentence that must survive intact.
+- **Fix:** Labels next to codes; proper CSV quoting instead of replacing commas.
+- **Phase:** P14.5
 - **Status:** open
