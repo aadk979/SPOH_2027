@@ -273,9 +273,11 @@ export async function volunteerAttendance(range: Range) {
     select: {
       volunteerId: true,
       stationId: true,
+      block: true,
       checkedInAt: true,
       checkedOutAt: true,
       station: { select: { name: true } },
+      eventDay: { select: { date: true } },
     },
   });
 }

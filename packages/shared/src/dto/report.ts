@@ -190,7 +190,11 @@ export const VolunteerReport = z
     volunteersActive: z.number().int().nonnegative(),
     assignments: z.number().int().nonnegative(),
     checkedIn: z.number().int().nonnegative(),
+    /** Shifts whose block has ended with nobody checked in. */
     noShows: z.number().int().nonnegative(),
+    /** Shifts not yet ended and not checked in: neither attended nor missed. */
+    notYetDue: z.number().int().nonnegative(),
+    /** No-shows as a share of the shifts that are due (ended, or checked in). */
     noShowRate: z.number().min(0).max(1),
     totalHours: z.number().nonnegative(),
     byStation: z.array(

@@ -80,7 +80,7 @@ describe('dashboard, report and import numbers (P03 repros)', () => {
   });
 
   // F02-027
-  it.skip('does not count shifts that have not happened yet as no-shows', async () => {
+  it('does not count shifts that have not happened yet as no-shows', async () => {
     const tomorrow = await prisma.eventDay.create({
       data: { date: new Date('2027-01-08T00:00:00.000Z'), label: 'Day 2' },
     });
