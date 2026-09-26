@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-26T16:04:40.867Z",
+  "updatedAt": "2026-09-26T16:17:32.664Z",
   "current": {
     "phase": "P06",
-    "step": "P06.12"
+    "step": "P06.1"
   },
   "gates": [
     {
@@ -1159,11 +1159,20 @@
         {
           "id": "P06.1",
           "title": "Characterisation safety net",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-26T16:04:53.217Z",
+          "completedAt": "2026-09-26T16:17:32.663Z",
+          "commits": ["8311230", "c09bcb0"],
+          "notes": [
+            {
+              "at": "2026-09-26T16:17:32.576Z",
+              "text": "route-inventory.mjs + routes-before.json (98 routes); named middleware"
+            },
+            {
+              "at": "2026-09-26T16:17:32.664Z",
+              "text": "30 new integration tests (hosted sign-in, 21 untested routes, prunes); server lines 78.4->85.5 %"
+            }
+          ]
         },
         {
           "id": "P06.2",
