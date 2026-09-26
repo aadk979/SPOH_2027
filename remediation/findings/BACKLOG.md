@@ -131,9 +131,11 @@ it and is on the P05.11 walkthrough list.
 | Q-P8 | May one read-only `describe-user-pool` / `describe-user-pool-client` run before P12.1, or will you answer Q-C1…Q-C9?                      | one of the two, before P12.1                                                                                                               | ADR-006 |
 | Q-P9 | January: keep US$100 (single-AZ database, no WAF, no Cognito threat protection), or allow about US$130 for January only to add all three? | allow it for January only                                                                                                                  | ADR-008 |
 
-Decisions D-07, D-08 and D-12 are also still open. P05 proceeds on their recommendations (see
-`DECISIONS.md`). The permission changes in `reports/P05/cedar/CHANGES.md` (C1–C13) need the owner's
-approval at G1 as well.
+**Accepted at G1 (2026-09-26).** The owner delegated these to the recommendations above, so each
+is answered as the "P05 assumes" column says. Q-P5, Q-P7 and Q-P8 are yes; under the amended D-13
+the agent runs Q-P8's read-only describe itself before P12.1. D-07, D-08 and D-12 and the
+permission changes in `reports/P05/cedar/CHANGES.md` (C1–C13) were accepted the same way (see
+`DECISIONS.md` § G1).
 
 ---
 

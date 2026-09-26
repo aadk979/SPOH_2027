@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-25T17:05:37.700Z",
+  "updatedAt": "2026-09-26T15:26:06.881Z",
   "current": {
     "phase": "P05",
     "step": "P05.11"
@@ -28,9 +28,9 @@
       "id": "G1",
       "title": "Design signed off by the owner",
       "signoff": true,
-      "status": "pending",
-      "passedAt": null,
-      "note": null
+      "status": "passed",
+      "passedAt": "2026-09-26T15:26:02.370Z",
+      "note": "approved 2026-09-26 by the owner; open items delegated to the ADR recommendations"
     },
     {
       "id": "G2",
@@ -125,18 +125,18 @@
       "title": "Compute and hosting",
       "owner": "you (cost), design (shape)",
       "blocks": ["P08"],
-      "status": "open",
-      "answer": null,
-      "answeredAt": null
+      "status": "answered",
+      "answer": "ADR-008 lean topology (owner, G1 2026-09-26): API Gateway HTTP API + Cloud Map, one Fargate ARM service serving the API and a static-export client; RDS Postgres 17 db.t4g.micro single-AZ, resized for event days; no NAT, no interface endpoints; staging parked when idle",
+      "answeredAt": "2026-09-26T15:26:02.442Z"
     },
     {
       "id": "D-08",
       "title": "Domain and email",
       "owner": "you",
       "blocks": ["P08.5", "P12.2"],
-      "status": "open",
-      "answer": null,
-      "answeredAt": null
+      "status": "answered",
+      "answer": "A domain registered in Route 53, with ACM certificates and SES + DKIM (owner, G1 2026-09-26). Domain name not yet named: CDK config carries a placeholder, flagged in the P08 report; P08.5 and P12.2 use the placeholder and the owner supplies the name before cutover",
+      "answeredAt": "2026-09-26T15:26:02.540Z"
     },
     {
       "id": "D-09",
@@ -153,8 +153,8 @@
       "owner": "you",
       "blocks": ["P05", "P08"],
       "status": "answered",
-      "answer": "US$100/month ceiling (owner, 2026-09-26). Environments not stated: P05 assumes the ceiling covers all environments, staging + production, no ephemeral dev stack (assumed, to confirm at P05.11)",
-      "answeredAt": "2026-09-25T16:08:16.944Z"
+      "answer": "US$100/month covers staging + production together; no ephemeral dev stack (owner, 2026-09-26, confirmed at G1). Q-P9: about US$130 allowed for January 2027 only, for Cognito Plus, RDS Multi-AZ for event week and WAF (ADR-008 §6); US$100 applies to every other month",
+      "answeredAt": "2026-09-26T15:26:02.618Z"
     },
     {
       "id": "D-11",
@@ -170,9 +170,9 @@
       "title": "Existing data",
       "owner": "you",
       "blocks": ["P09.4"],
-      "status": "open",
-      "answer": null,
-      "answeredAt": null
+      "status": "answered",
+      "answer": "Migrate the existing data into SPOH 2027 as Event #1 (owner, G1 2026-09-26; ADR-001, ADR-009)",
+      "answeredAt": "2026-09-26T15:26:02.698Z"
     },
     {
       "id": "D-13",
@@ -180,8 +180,8 @@
       "owner": "you",
       "blocks": ["P00.8", "P00.9", "P04.7"],
       "status": "answered",
-      "answer": "Partial. Allowed: P00.9 may run infra/scripts/smoke-test.sh against staging. NOT allowed: other audit requests to the live staging site, and use of this container's AWS credentials (so P00.8 and P04.7 stay blocked). (owner, 2026-09-25)",
-      "answeredAt": "2026-09-25T11:58:50.328Z"
+      "answer": "Amended (owner, G1 2026-09-26): the agent may use the AWS CLI and this environment's AWS credentials; creating billable resources stays within ADR-008's cost plan; nothing on the live Lightsail site is changed without the owner. Unchanged from 2026-09-25: P00.9 may run the smoke test against staging",
+      "answeredAt": "2026-09-26T15:26:06.880Z"
     },
     {
       "id": "D-14",

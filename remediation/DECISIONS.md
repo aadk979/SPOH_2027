@@ -11,6 +11,31 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
 
 ---
 
+### G1 — Design sign-off
+
+- **Answer:** **Approved 2026-09-26 by the owner.** The owner delegated every open item to the
+  recommendations already written in the ADRs, so everything marked **assumed** in ADR-001…009 is
+  accepted, and all nine ADRs are **Accepted**. What that settles:
+  - D-07, D-08, D-10, D-12 and the D-13 amendment, below.
+  - The product questions in `findings/BACKLOG.md` § Product questions, **as written**:
+    - Q-P1: a merged total shows only beside the three counts; visitor PII is a per-event allowlist
+      with a retention period.
+    - Q-P2: shifts may cross midnight, with a day-boundary hour (default 04:00).
+    - Q-P3: a short list of product labels is renameable per event.
+    - Q-P4: locale per event, defaulting to the organisation's (`en-SG`).
+    - Q-P5: **yes**. `release/january` may exist, cut from `319d06d`, for P06.12 cherry-picks only.
+    - Q-P6: the lost-person wording in ADR-003 §8.
+    - Q-P7: **yes**. P11.9 may create a throwaway AVP policy store and delete it in the same session.
+    - Q-P8: **yes**. With D-13 amended, the agent runs the read-only `describe-user-pool` and
+      `describe-user-pool-client` itself before P12.1.
+    - Q-P9: about US$130 for January 2027 only (see D-10).
+  - The PIN fallback default (`attendance.pinAllowedOffNetwork` off for new events, ADR-003 §1), PF-11 (ADR-007 §7: the missing brief and build plan are
+    not recovered) and the permission changes C1–C13 in `reports/P05/cedar/CHANGES.md`.
+- **From now on** the ADRs in `docs/adr/` and `standards/*.md` are binding. Changing a design means
+  an ADR edit, noted in the phase report.
+
+---
+
 ### D-01 — Go-live date and release strategy
 
 - **Owner:** you
@@ -98,7 +123,7 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
 - **Recommendation:** **A**, with the local Cedar engine also serving as a degraded mode if AVP is
   unreachable during the event. Capture must not stop because a control-plane API throttles.
   Admin actions fail closed.
-- **Answer:** **A, with one change** (design, ADR-005, proposed until G1). AVP `IsAuthorized` is
+- **Answer:** **A, with one change** (design, ADR-005, accepted at G1). AVP `IsAuthorized` is
   authoritative behind a decision cache (30 s for writes, 60 s for reads) that the bus invalidates.
   Local Cedar takes over when AVP is degraded, for capture, self-service and safety; correct,
   manage, configure and platform actions fail closed. **UI affordances use the local engine**,
@@ -117,14 +142,14 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
     Postgres. Cheapest (about US$50–80/month) but hand-operated.
 - **Recommendation:** **A** for production, with staging on the same stack at minimum size.
   Figures are to be re-priced in P05 from the AWS Pricing API, not estimated.
-- **Answer:** _open._ ADR-008 (**assumed**) keeps Fargate + RDS but reshapes it to fit D-10:
+- **Answer:** **The ADR-008 lean topology** (owner, G1, 2026-09-26). Fargate + RDS, reshaped to fit D-10:
   - API Gateway HTTP API with Cloud Map instead of an ALB;
-  - one service serving the API and a static client;
+  - one Fargate ARM service serving the API and a static-export client;
+  - RDS Postgres 17 `db.t4g.micro`, single-AZ, resized for event days;
   - no NAT and no interface endpoints;
-  - RDS single-AZ, resized for event days;
   - staging parked when idle.
 
-  It costs US$36–97 a month (`reports/P05/pricing/cost.md`). To confirm at P05.11.
+  It costs US$36–97 a month (`reports/P05/pricing/cost.md`).
 
 ### D-08 — Domain and email
 
@@ -133,9 +158,10 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
 - **Question:** Which domain should production use (a school subdomain, or one you register in Route 53)?
   Can we send invite emails from it through SES? duckdns cannot carry DKIM for SES.
 - **Recommendation:** A real domain in Route 53 with ACM certificates and SES with DKIM.
-- **Answer:** _open._ P05 assumes the recommendation: a domain registered in Route 53, ACM certificates,
-  and SES with DKIM for invites (ADR-006 and ADR-008, marked **assumed**). The domain name itself is
-  still needed before P08.5. To confirm with the owner at P05.11.
+- **Answer:** **A domain in Route 53, with ACM certificates and SES + DKIM** (owner, G1, 2026-09-26).
+  The owner has not named the domain yet. The CDK config carries a placeholder, which the P08 report
+  flags. P08.5 and P12.2 build against the placeholder, and the owner supplies the name before
+  cutover.
 
 ### D-09 — Scheduler engine
 
@@ -147,7 +173,7 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   - **B.** EventBridge Scheduler invoking an internal endpoint or Lambda.
 - **Recommendation:** **A.** Schedules are event data. They must be listed, edited, cancelled and
   audited in the app, and must work in tests without AWS.
-- **Answer:** **A** (design, ADR-004, proposed until G1). A `ScheduledAction` table claimed with
+- **Answer:** **A** (design, ADR-004, accepted at G1). A `ScheduledAction` table claimed with
   `FOR UPDATE SKIP LOCKED` under a lease. The handler, its completion and its audit row commit
   together. Retries back off, then dead-letter with an alarm.
 
@@ -157,9 +183,10 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
 - **Blocks:** P05, P08
 - **Question:** What is the monthly ceiling? Do you want staging and production (recommended), plus
   an optional ephemeral dev stack?
-- **Answer:** **US$100/month** (owner, 2026-09-26). The owner did not say which environments. P05
-  assumes the ceiling covers every environment together, with staging and production and no ephemeral
-  dev stack (marked **assumed** in ADR-008). To confirm with the owner at P05.11.
+- **Answer:** **US$100/month** (owner, 2026-09-26), covering staging and production together, with
+  no ephemeral dev stack (confirmed at G1). **Q-P9:** about US$130 is allowed for **January 2027
+  only**, to add Cognito Plus, RDS Multi-AZ for event week and WAF (ADR-008 §6). US$100 applies to
+  every other month.
 
 ### D-11 — Branch and review workflow
 
@@ -181,8 +208,8 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   Event #1, or should the new platform start empty and have the event set up through the new admin UI?
 - **Recommendation:** Migrate. The roster and the Cognito identities are real, and re-inviting
   everyone is avoidable friction.
-- **Answer:** _open._ P05 assumes the recommendation: migrate the current data into "SPOH 2027" as
-  Event #1 (ADR-009, marked **assumed**). To confirm with the owner at P05.11.
+- **Answer:** **Migrate** (owner, G1, 2026-09-26). The current data becomes "SPOH 2027", Event #1
+  (ADR-001, ADR-009).
 
 ### D-13 — Access for testing
 
@@ -194,6 +221,9 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   - May P00.9 run `infra/scripts/smoke-test.sh`, which creates and deactivates a test volunteer?
 - **Recommendation:** Yes to read-only, and yes to the smoke test on staging only.
 - **Answer:** **Partial** (owner, 2026-09-25). Allowed: P00.9 may run the smoke test against staging. Not allowed: other audit requests to the live staging site, or use of this container's AWS credentials, so P00.8 and P04.7 stay blocked.
+  **Amended** (owner, G1, 2026-09-26): the agent may use the AWS CLI and this environment's AWS
+  credentials. Creating billable resources stays within ADR-008's cost plan. Nothing on the live
+  Lightsail site is changed without the owner.
 
 ### D-14 — Shared state for rate limits and caches
 
@@ -205,6 +235,6 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   - **C.** DynamoDB.
 - **Recommendation:** **A** at this scale (hundreds of users, not hundreds of thousands). No new
   moving part to operate on event day.
-- **Answer:** **A** (design, ADR-003, proposed until G1). Postgres: a `LISTEN`/`NOTIFY` cache bus,
+- **Answer:** **A** (design, ADR-003, accepted at G1). Postgres: a `LISTEN`/`NOTIFY` cache bus,
   published inside the writing transaction, and an `UNLOGGED` rate-limit counter table. ElastiCache
   and DynamoDB were rejected on cost and moving parts.
