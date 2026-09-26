@@ -9,7 +9,6 @@ import {
   type RosterImportResponse,
   type ShiftAssignmentRecord,
 } from '@spoh/shared';
-import type { Volunteer } from '../../generated/prisma/client.js';
 import { writeAudit, type AuditContext } from '../../platform/audit/index.js';
 import { AppError, NotFoundError, ValidationError } from '../../platform/errors/index.js';
 import { prisma } from '../../platform/db/client.js';
@@ -25,6 +24,7 @@ import {
   toVolunteerRecord,
   upsertAssignment,
   upsertVolunteer,
+  type Volunteer,
 } from './repo.js';
 
 /**

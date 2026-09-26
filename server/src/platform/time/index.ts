@@ -16,6 +16,8 @@ import type { ShiftBlock } from '@spoh/shared';
 import { env } from '../../config/env.js';
 import { getSettings, DEFAULT_SETTINGS } from '../settings/index.js';
 
+export { fixedClock, systemClock, type Clock } from './clock.js';
+
 export const EVENT_TIME_ZONE = 'Asia/Singapore';
 
 /** UTC+8, fixed. Singapore has observed no daylight saving since 1935. */

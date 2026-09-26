@@ -2,10 +2,12 @@ import { describe, expect, it } from 'vitest';
 import {
   activeShiftBlocks,
   eventDayAnchor,
+  fixedClock,
   floorToBucket,
   minutesBetween,
   singaporeDateString,
   singaporeMinuteOfDay,
+  systemClock,
 } from '../../src/platform/time/index.js';
 
 /**
@@ -96,5 +98,23 @@ describe('minutesBetween', () => {
     expect(minutesBetween(new Date('2027-01-07T04:00:00Z'), new Date('2027-01-07T03:00:00Z'))).toBe(
       0,
     );
+  });
+});
+
+describe('Clock', () => {
+  it('a fixed clock returns its instant, as a fresh Date each time', () => {
+    const instant = new Date('2027-01-07T03:30:00.000Z');
+    const clock = fixedClock(instant);
+
+    const first = clock.now();
+    first.setUTCFullYear(2000);
+
+    expect(clock.now().toISOString()).toBe(instant.toISOString());
+  });
+
+  it('the system clock reads the process clock', () => {
+    const before = Date.now();
+    const now = systemClock.now().getTime();
+    expect(now).toBeGreaterThanOrEqual(before);
   });
 });

@@ -1,5 +1,7 @@
 import type { ShiftAssignmentRecord, VolunteerRecord } from '@spoh/shared';
 import type { Prisma, Volunteer } from '../../generated/prisma/client.js';
+
+export type { Volunteer };
 import { prisma, type PrismaTransactionClient } from '../../platform/db/client.js';
 
 /**
