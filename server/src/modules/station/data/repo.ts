@@ -1,6 +1,6 @@
 import type { StationSummary } from '@spoh/shared';
-import type { Station } from '../../generated/prisma/client.js';
-import { prisma } from '../../platform/db/client.js';
+import type { Station } from '../../../generated/prisma/client.js';
+import { prisma } from '../../../platform/db/client.js';
 
 /** Data access for stations. Pure persistence — no authorization, no policy. */
 

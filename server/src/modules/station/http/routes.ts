@@ -1,6 +1,6 @@
 import { Router, type Request, type Response } from 'express';
-import { requireAuth } from '../../platform/identity/index.js';
-import { getActiveStations } from './service.js';
+import { requireAuth } from '../../../platform/identity/index.js';
+import { getActiveStations } from '../application/stationGuards.js';
 
 /**
  * Station reference data. Every authenticated caller may read it — it is the

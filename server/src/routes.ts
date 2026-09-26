@@ -20,7 +20,7 @@ import { registrationRouter } from './modules/registration/router.js';
 import { reportRouter } from './modules/report/router.js';
 import { rosterRouter } from './modules/roster/router.js';
 import { shiftRouter } from './modules/shift/router.js';
-import { stationRouter } from './modules/station/router.js';
+import { stationRouter } from './modules/station/http/routes.js';
 import { createDevAuthRouter } from './modules/devAuth/router.js';
 
 /**

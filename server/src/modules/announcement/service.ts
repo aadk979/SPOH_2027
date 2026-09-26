@@ -9,7 +9,7 @@ import { writeAudit, type AuditContext } from '../../platform/audit/index.js';
 import { ForbiddenError, NotFoundError } from '../../platform/errors/index.js';
 import { prisma } from '../../platform/db/client.js';
 import { eventDayAnchor, singaporeDateString } from '../../platform/time/index.js';
-import { findStationById } from '../station/repo.js';
+import { findStationById } from '../station/data/repo.js';
 import { dispatch } from '../notification/service.js';
 import {
   acknowledge,

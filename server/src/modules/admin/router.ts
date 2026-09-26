@@ -26,8 +26,8 @@ import {
 import { auditContextFrom } from '../../platform/http/auditContext.js';
 import { prisma } from '../../platform/db/client.js';
 import { getSettings, settingsMeta, updateSettings } from '../../platform/settings/index.js';
-import { listStations } from '../station/repo.js';
-import { toStationSummary } from '../station/repo.js';
+import { listStations } from '../station/data/repo.js';
+import { toStationSummary } from '../station/data/repo.js';
 import {
   createAssignment,
   createEventDay,

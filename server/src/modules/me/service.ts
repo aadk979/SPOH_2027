@@ -7,7 +7,7 @@ import {
   eventDayAnchor,
   singaporeDateString,
 } from '../../platform/time/index.js';
-import { toStationSummary } from '../station/repo.js';
+import { toStationSummary } from '../station/data/repo.js';
 import {
   buildEscalationChain,
   findAssignmentById,

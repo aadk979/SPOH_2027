@@ -3,7 +3,7 @@ import { minutesBetween, shiftBlockEndsAt } from '../../platform/time/index.js';
 import { prisma } from '../../platform/db/client.js';
 import { listFallbackWindows } from '../fallback/service.js';
 import { listGifts } from '../gift/service.js';
-import { listStations } from '../station/repo.js';
+import { listStations } from '../station/data/repo.js';
 import {
   cardTotals,
   cardsByDay,

@@ -1,7 +1,7 @@
 import { ERROR_CODES, type StationSummary } from '@spoh/shared';
-import { AppError, NotFoundError } from '../../platform/errors/index.js';
-import type { Station } from '../../generated/prisma/client.js';
-import { findStationById, listStations, toStationSummary } from './repo.js';
+import { AppError, NotFoundError } from '../../../platform/errors/index.js';
+import type { Station } from '../../../generated/prisma/client.js';
+import { findStationById, listStations, toStationSummary } from '../data/repo.js';
 
 export async function getActiveStations(): Promise<StationSummary[]> {
   const stations = await listStations();
