@@ -1,4 +1,3 @@
-import type { RegistrationRecord } from '@spoh/shared';
 import type { Prisma, Registration } from '../../../generated/prisma/client.js';
 import { prisma } from '../../../platform/db/client.js';
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
@@ -11,20 +10,6 @@ import type { PrismaTransactionClient } from '../../../platform/db/client.js';
  * change the number, and deleting the evidence should not be how that happens
  * (PRODUCT_BRIEF §11.4).
  */
-
-export function toRegistrationRecord(row: Registration): RegistrationRecord {
-  return {
-    id: row.id,
-    category: row.category,
-    stationId: row.stationId,
-    groupId: row.groupId,
-    missionCardId: row.missionCardId,
-    source: row.source,
-    recordedAt: row.recordedAt.toISOString(),
-    clientRecordedAt: row.clientRecordedAt?.toISOString() ?? null,
-    voided: row.voided,
-  };
-}
 
 export async function createRegistration(
   tx: PrismaTransactionClient,

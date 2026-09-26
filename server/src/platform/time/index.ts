@@ -84,6 +84,16 @@ export function eventDayAnchor(dateString: string): Date {
   return new Date(`${dateString}T00:00:00.000Z`);
 }
 
+/**
+ * The boundary of "today" for session and booth totals: the event day's anchor
+ * for the date `instant` falls on in Singapore. It is the instant Postgres
+ * stores for that `@db.Date`, which is 08:00 local, so "today" starts at 08:00
+ * (F03-013); P09.6 replaces it with the event's own day boundary.
+ */
+export function startOfEventDay(instant: Date = new Date()): Date {
+  return eventDayAnchor(singaporeDateString(instant));
+}
+
 /** Minutes since local midnight in Singapore. */
 export function singaporeMinuteOfDay(instant: Date = new Date()): number {
   const shifted = new Date(instant.getTime() + SGT_OFFSET_MINUTES * 60_000);

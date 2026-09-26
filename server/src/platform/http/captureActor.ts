@@ -1,5 +1,8 @@
 import type { Request } from 'express';
+import type { AuditContext } from '../audit/index.js';
 import { getAuth } from '../identity/index.js';
+import type { Clock } from '../time/clock.js';
+import { auditContextFrom } from './auditContext.js';
 
 /**
  * Who is performing a capture write.
@@ -16,6 +19,18 @@ export interface CaptureActor {
    * distinguishable during reconciliation.
    */
   stationScopeBypass?: { stationId: string };
+}
+
+/** What a capture use case needs besides its input: who, the audit trail, and now. */
+export interface CaptureContext {
+  actor: CaptureActor;
+  audit: AuditContext;
+  /** Defaults to the system clock; tests pass a fixed one. */
+  clock?: Clock;
+}
+
+export function captureContextFrom(req: Request): CaptureContext {
+  return { actor: captureActorFrom(req), audit: auditContextFrom(req) };
 }
 
 export function captureActorFrom(req: Request): CaptureActor {
