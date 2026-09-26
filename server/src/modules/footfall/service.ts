@@ -229,7 +229,10 @@ export async function summariseFootfall(
 export async function getLiveFootfall(now = new Date()): Promise<FootfallLiveResponse> {
   const silentAfter = getSettings().silentStationMinutes;
   const since = startOfEventDay(now);
-  const [stations, stats] = await Promise.all([listCountedStations(), liveStationStats(since)]);
+  const [stations, stats] = await Promise.all([
+    listCountedStations(),
+    liveStationStats(since, now),
+  ]);
 
   const statsByStation = new Map(stats.map((row) => [row.stationId, row]));
 

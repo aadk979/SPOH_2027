@@ -7,18 +7,26 @@ import { prisma } from '../../lib/prisma.js';
  * deliberately small and separate so the live payload can assemble them in
  * parallel — the dashboard is polled every three seconds and must not become
  * the most expensive thing the database does on event day.
+ *
+ * Every window is bounded above by `until` (the request's "now") as well as
+ * below (F02-006). A fallback row typed with tomorrow's date, or copied from
+ * the template's fixed date, would otherwise count as today and as the last
+ * hour for as long as it sits in the future.
  */
 
-export async function registrationsSince(since: Date): Promise<number> {
-  return prisma.registration.count({ where: { voided: false, recordedAt: { gte: since } } });
+export async function registrationsSince(since: Date, until: Date): Promise<number> {
+  return prisma.registration.count({
+    where: { voided: false, recordedAt: { gte: since, lte: until } },
+  });
 }
 
 export async function registrationsByCategory(
   since: Date,
+  until: Date,
 ): Promise<Array<{ key: string; value: number }>> {
   const rows = await prisma.registration.groupBy({
     by: ['category'],
-    where: { voided: false, recordedAt: { gte: since } },
+    where: { voided: false, recordedAt: { gte: since, lte: until } },
     _count: { _all: true },
   });
 
@@ -27,9 +35,9 @@ export async function registrationsByCategory(
     .sort((a, b) => b.value - a.value);
 }
 
-export async function footfallSince(since: Date): Promise<number> {
+export async function footfallSince(since: Date, until: Date): Promise<number> {
   const result = await prisma.footfallTick.aggregate({
-    where: { voided: false, recordedAt: { gte: since } },
+    where: { voided: false, recordedAt: { gte: since, lte: until } },
     _sum: { quantity: true },
   });
   return result._sum.quantity ?? 0;
@@ -67,6 +75,7 @@ export async function checkedInWithLastCapture(input: {
   eventDayId: string;
   blocks: string[];
   since: Date;
+  until: Date;
 }): Promise<
   Array<{
     volunteerId: string;
@@ -99,11 +108,14 @@ export async function checkedInWithLastCapture(input: {
       s."name"        AS "stationName",
       GREATEST(
         (SELECT MAX(r."recordedAt") FROM "Registration"   r
-          WHERE r."recordedById" = v."id" AND r."recordedAt" >= ${input.since}),
+          WHERE r."recordedById" = v."id"
+            AND r."recordedAt" >= ${input.since} AND r."recordedAt" <= ${input.until}),
         (SELECT MAX(f."recordedAt") FROM "FootfallTick"   f
-          WHERE f."recordedById" = v."id" AND f."recordedAt" >= ${input.since}),
+          WHERE f."recordedById" = v."id"
+            AND f."recordedAt" >= ${input.since} AND f."recordedAt" <= ${input.until}),
         (SELECT MAX(c."recordedAt") FROM "CardStampEvent" c
-          WHERE c."recordedById" = v."id" AND c."recordedAt" >= ${input.since})
+          WHERE c."recordedById" = v."id"
+            AND c."recordedAt" >= ${input.since} AND c."recordedAt" <= ${input.until})
       ) AS "lastCaptureAt"
     FROM "ShiftAssignment" a
     JOIN "Volunteer" v ON v."id" = a."volunteerId"
@@ -131,6 +143,7 @@ export async function onShiftCount(eventDayId: string, blocks: string[]): Promis
 export async function registrationsByDevice(
   stationId: string,
   since: Date,
+  until: Date,
 ): Promise<
   Array<{ volunteerId: string; volunteerName: string; value: number; firstAt: Date; lastAt: Date }>
 > {
@@ -151,7 +164,8 @@ export async function registrationsByDevice(
       MAX(r."recordedAt") AS "lastAt"
     FROM "Registration" r
     JOIN "Volunteer" v ON v."id" = r."recordedById"
-    WHERE r."voided" = false AND r."stationId" = ${stationId} AND r."recordedAt" >= ${since}
+    WHERE r."voided" = false AND r."stationId" = ${stationId}
+      AND r."recordedAt" >= ${since} AND r."recordedAt" <= ${until}
     GROUP BY v."id", v."displayName"
     ORDER BY value DESC`;
 
@@ -161,6 +175,7 @@ export async function registrationsByDevice(
 export async function footfallByDevice(
   stationId: string,
   since: Date,
+  until: Date,
 ): Promise<Array<{ volunteerId: string; volunteerName: string; value: number; lastAt: Date }>> {
   const rows = await prisma.$queryRaw<
     Array<{ volunteerId: string; volunteerName: string; value: bigint; lastAt: Date }>
@@ -172,13 +187,20 @@ export async function footfallByDevice(
       MAX(f."recordedAt")       AS "lastAt"
     FROM "FootfallTick" f
     JOIN "Volunteer" v ON v."id" = f."recordedById"
-    WHERE f."voided" = false AND f."stationId" = ${stationId} AND f."recordedAt" >= ${since}
+    WHERE f."voided" = false AND f."stationId" = ${stationId}
+      AND f."recordedAt" >= ${since} AND f."recordedAt" <= ${until}
     GROUP BY v."id", v."displayName"
     ORDER BY value DESC`;
 
   return rows.map((row) => ({ ...row, value: Number(row.value) }));
 }
 
-export async function stampsAtStation(stationId: string, since: Date): Promise<number> {
-  return prisma.cardStampEvent.count({ where: { stationId, recordedAt: { gte: since } } });
+export async function stampsAtStation(
+  stationId: string,
+  since: Date,
+  until: Date,
+): Promise<number> {
+  return prisma.cardStampEvent.count({
+    where: { stationId, recordedAt: { gte: since, lte: until } },
+  });
 }
