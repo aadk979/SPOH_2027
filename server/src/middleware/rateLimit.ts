@@ -1,4 +1,9 @@
-import { ipKeyGenerator, rateLimit, type RateLimitRequestHandler } from 'express-rate-limit';
+import {
+  ipKeyGenerator,
+  rateLimit,
+  type Options,
+  type RateLimitRequestHandler,
+} from 'express-rate-limit';
 import type { Request } from 'express';
 import { ERROR_CODES } from '@spoh/shared';
 import { env } from '../config/env.js';
@@ -24,7 +29,7 @@ function keyGenerator(req: Request): string {
   return `ip:${ipKeyGenerator(req.ip ?? 'unknown')}`;
 }
 
-function build(max: number): RateLimitRequestHandler {
+function build(max: number, extra: Partial<Options> = {}): RateLimitRequestHandler {
   return rateLimit({
     windowMs: env.RATE_LIMIT_WINDOW_MS,
     limit: max,
@@ -40,6 +45,7 @@ function build(max: number): RateLimitRequestHandler {
         },
       });
     },
+    ...extra,
   });
 }
 
@@ -52,11 +58,25 @@ export const captureRateLimit = build(env.RATE_LIMIT_MAX_CAPTURE);
 /**
  * Anything that mints a credential, sends an email, or reads the whole event.
  *
- * Provisioning, roster and fallback imports, report generation, sign-in. Kept
+ * Provisioning, roster and fallback imports, report generation. Kept
  * deliberately tight: these are slow, and none of them is something a human
  * does twenty times a minute.
  */
 export const sensitiveRateLimit = build(env.RATE_LIMIT_MAX_SENSITIVE);
+
+/**
+ * Sign-in: `POST /auth/session`, `GET /auth/login` and `GET /auth/callback`.
+ *
+ * Counts failures only (F04-006). Before sign-in there is no subject, so the
+ * key is the IP, and a room of volunteers told to sign in at a briefing shares
+ * one campus egress: on the sensitive ceiling, counting every request, the
+ * 21st person in a minute was refused and retries kept the bucket full. A
+ * successful sign-in costs nothing here; twenty failures a minute from one
+ * address still stop a password-guessing loop.
+ */
+export const signInRateLimit = build(env.RATE_LIMIT_MAX_SENSITIVE, {
+  skipSuccessfulRequests: true,
+});
 
 /**
  * Administration writes.

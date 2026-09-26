@@ -14,7 +14,7 @@ import {
   localAuthIssuer,
   requireAuth,
 } from '../../middleware/auth/index.js';
-import { defaultRateLimit, sensitiveRateLimit } from '../../middleware/rateLimit.js';
+import { defaultRateLimit, signInRateLimit } from '../../middleware/rateLimit.js';
 import { validate, validatedBody, validatedParams } from '../../middleware/validate.js';
 import {
   endSession,
@@ -109,7 +109,7 @@ function sessionContext(req: Request): { userAgent: string | null; ip: string | 
  */
 authRouter.post(
   '/session',
-  sensitiveRateLimit,
+  signInRateLimit,
   validate({ body: CreateSessionRequest }),
   async (req: Request, res: Response) => {
     assertTrustedOrigin(req);
@@ -180,7 +180,7 @@ function base64url(input: Buffer): string {
  * the anti-CSRF state both live in short-lived httpOnly cookies scoped to this
  * router's path, the same shape as the refresh cookie.
  */
-authRouter.get('/login', sensitiveRateLimit, (req: Request, res: Response) => {
+authRouter.get('/login', signInRateLimit, (req: Request, res: Response) => {
   if (!env.COGNITO_DOMAIN || !env.COGNITO_CLIENT_ID || !env.APP_BASE_URL) {
     throw new AppError(500, ERROR_CODES.INTERNAL_ERROR, 'Hosted sign-in is not configured');
   }
@@ -211,7 +211,7 @@ authRouter.get('/login', sensitiveRateLimit, (req: Request, res: Response) => {
  * same path every other request goes through, and a session is opened exactly
  * as `POST /session` would — this route only supplies the credential.
  */
-authRouter.get('/callback', sensitiveRateLimit, async (req: Request, res: Response) => {
+authRouter.get('/callback', signInRateLimit, async (req: Request, res: Response) => {
   const signInUrl = `${env.APP_BASE_URL ?? ''}/sign-in`;
   const jar = (req as Request & { cookies?: Record<string, unknown> }).cookies ?? {};
   const expectedState = jar[OAUTH_STATE_COOKIE];

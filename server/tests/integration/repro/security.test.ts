@@ -151,7 +151,7 @@ describe('data retention (P04.6)', () => {
 
 describe('rate limits (P04.4)', () => {
   // F04-006
-  it.skip('lets a morning rush of volunteers sign in from one campus address', async () => {
+  it('lets a morning rush of volunteers sign in from one campus address', async () => {
     const statuses: number[] = [];
     for (let i = 0; i < 30; i += 1) {
       const person = await createVolunteer({ email: `rush${i}@p04.test`, role: 'VOLUNTEER' });
@@ -268,5 +268,22 @@ describe('access by id across stations (P04.3)', () => {
       .send({ stationId: stationB, idempotencyKey: idempotencyKey() });
 
     expect(response.status).toBe(403);
+  });
+});
+
+// Last in the file: it fills the sign-in limiter's bucket for the test address.
+describe('sign-in limit (P04.4)', () => {
+  // F04-006
+  it('still refuses a run of failed sign-ins from one address', async () => {
+    const statuses: number[] = [];
+    for (let i = 0; i < 21; i += 1) {
+      const response = await request(app)
+        .post('/api/v1/auth/session')
+        .send({ email: `nobody${i}@p04.test` });
+      statuses.push(response.status);
+    }
+
+    expect(statuses.slice(0, 20).every((status) => status !== 429)).toBe(true);
+    expect(statuses[20]).toBe(429);
   });
 });
