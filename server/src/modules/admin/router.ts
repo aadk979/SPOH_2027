@@ -1,4 +1,4 @@
-import { Router, type Request, type Response } from 'express';
+import { type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
   CreateAssignmentRequest,
@@ -26,8 +26,7 @@ import {
 import { auditContextFrom } from '../../platform/http/auditContext.js';
 import { prisma } from '../../platform/db/client.js';
 import { getSettings, settingsMeta, updateSettings } from '../../platform/settings/index.js';
-import { listStations } from '../station/data/repo.js';
-import { toStationSummary } from '../station/data/repo.js';
+import { listStations, toStationSummary } from '../station/index.js';
 import {
   createAssignment,
   createEventDay,

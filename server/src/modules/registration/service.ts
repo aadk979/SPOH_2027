@@ -18,7 +18,7 @@ import { AppError, NotFoundError } from '../../platform/errors/index.js';
 import { prisma } from '../../platform/db/client.js';
 import { eventDayAnchor, singaporeDateString } from '../../platform/time/index.js';
 import { rangeOverlapsFallbackWindow } from '../fallback/repo.js';
-import { requireActiveStation } from '../station/application/stationGuards.js';
+import { requireActiveStation } from '../station/index.js';
 import {
   countForRecorderSince,
   countForStationSince,

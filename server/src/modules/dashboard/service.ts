@@ -14,7 +14,7 @@ import {
 import { getLiveFootfall, SILENT_STATION_MINUTES } from '../footfall/service.js';
 import { listGifts } from '../gift/service.js';
 import { getFunnel } from '../missionCard/service.js';
-import { findStationById } from '../station/data/repo.js';
+import { findStationById } from '../station/index.js';
 import { getLongShifts, getStaffingGaps } from '../shift/service.js';
 import { DEFAULT_SETTINGS, getSettings } from '../../platform/settings/index.js';
 import {

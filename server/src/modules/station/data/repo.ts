@@ -1,53 +1,43 @@
-import type { StationSummary } from '@spoh/shared';
 import type { Station } from '../../../generated/prisma/client.js';
-import { prisma } from '../../../platform/db/client.js';
+import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 
-/** Data access for stations. Pure persistence — no authorization, no policy. */
+/**
+ * Data access for stations. Prisma queries only: no authorization, no policy.
+ * Each query takes the client to run on, so a use case can pass its
+ * transaction; it defaults to the shared client for plain reads.
+ */
 
-export function toStationSummary(station: Station): StationSummary {
-  return {
-    id: station.id,
-    code: station.code,
-    name: station.name,
-    kind: station.kind,
-    courseCode: station.courseCode,
-    floor: station.floor,
-    countsEntry: station.countsEntry,
-    issuesStamp: station.issuesStamp,
-    active: station.active,
-    sortOrder: station.sortOrder,
-  };
-}
+export type { Station };
+
+const ORDER = [{ sortOrder: 'asc' as const }, { name: 'asc' as const }];
 
 export async function listStations(
   options: { includeInactive?: boolean } = {},
+  db: PrismaTransactionClient = prisma,
 ): Promise<Station[]> {
-  return prisma.station.findMany({
+  return db.station.findMany({
     where: options.includeInactive ? {} : { active: true },
-    orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+    orderBy: ORDER,
   });
 }
 
-export async function findStationById(id: string): Promise<Station | null> {
-  return prisma.station.findUnique({ where: { id } });
-}
-
-export async function findStationByCode(code: string): Promise<Station | null> {
-  return prisma.station.findUnique({ where: { code } });
+export async function findStationById(
+  id: string,
+  db: PrismaTransactionClient = prisma,
+): Promise<Station | null> {
+  return db.station.findUnique({ where: { id } });
 }
 
 /** Stations that stamp a Mission Card — the journey the funnel measures. */
-export async function listStampingStations(): Promise<Station[]> {
-  return prisma.station.findMany({
-    where: { active: true, issuesStamp: true },
-    orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
-  });
+export async function listStampingStations(
+  db: PrismaTransactionClient = prisma,
+): Promise<Station[]> {
+  return db.station.findMany({ where: { active: true, issuesStamp: true }, orderBy: ORDER });
 }
 
 /** Stations whose room entries are counted — the footfall rooms. */
-export async function listCountedStations(): Promise<Station[]> {
-  return prisma.station.findMany({
-    where: { active: true, countsEntry: true },
-    orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
-  });
+export async function listCountedStations(
+  db: PrismaTransactionClient = prisma,
+): Promise<Station[]> {
+  return db.station.findMany({ where: { active: true, countsEntry: true }, orderBy: ORDER });
 }

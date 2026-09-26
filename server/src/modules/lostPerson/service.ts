@@ -11,7 +11,7 @@ import { logger } from '../../platform/logger/index.js';
 import { prisma } from '../../platform/db/client.js';
 import { minutesBetween } from '../../platform/time/index.js';
 import { SYSTEM_AUDIT_CONTEXT } from '../../platform/http/auditContext.js';
-import { findStationById } from '../station/data/repo.js';
+import { findStationById } from '../station/index.js';
 import { DEFAULT_SETTINGS, getSettings } from '../../platform/settings/index.js';
 import { dispatch } from '../notification/service.js';
 import {

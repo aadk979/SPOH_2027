@@ -33,7 +33,7 @@ import { writeAudit, type AuditContext } from '../../platform/audit/index.js';
 import { invalidateVolunteerCache } from '../../platform/identity/index.js';
 import { identityProvider } from '../identity/provider.js';
 import { revokeAllForVolunteer } from '../auth/service.js';
-import { toStationSummary } from '../station/data/repo.js';
+import { toStationSummary } from '../station/index.js';
 import { toAssignmentRecord } from '../roster/repo.js';
 import { toGiftTypeRecord } from '../gift/repo.js';
 

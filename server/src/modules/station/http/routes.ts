@@ -1,6 +1,6 @@
-import { Router, type Request, type Response } from 'express';
+import { Router } from 'express';
 import { requireAuth } from '../../../platform/identity/index.js';
-import { getActiveStations } from '../application/stationGuards.js';
+import { listStationsHandler } from './handlers.js';
 
 /**
  * Station reference data. Every authenticated caller may read it — it is the
@@ -11,7 +11,4 @@ export const stationRouter: Router = Router();
 
 stationRouter.use(requireAuth);
 
-stationRouter.get('/', async (_req: Request, res: Response) => {
-  const stations = await getActiveStations();
-  res.status(200).json({ data: stations, meta: { count: stations.length, nextCursor: null } });
-});
+stationRouter.get('/', listStationsHandler);
