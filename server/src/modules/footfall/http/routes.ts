@@ -7,25 +7,25 @@ import {
   Id,
   VoidFootfallTickRequest,
 } from '@spoh/shared';
-import { requireAuth } from '../../platform/identity/index.js';
-import { idempotent } from '../../platform/idempotency/index.js';
-import { captureRateLimit, defaultRateLimit } from '../../platform/http/rateLimit.js';
-import { requireCapability, requireStationScope } from '../../platform/access/index.js';
+import { requireAuth } from '../../../platform/identity/index.js';
+import { idempotent } from '../../../platform/idempotency/index.js';
+import { captureRateLimit, defaultRateLimit } from '../../../platform/http/rateLimit.js';
+import { requireCapability, requireStationScope } from '../../../platform/access/index.js';
 import {
   validate,
   validatedBody,
   validatedParams,
   validatedQuery,
-} from '../../platform/http/validate.js';
-import { captureActorFrom } from '../../platform/http/captureActor.js';
-import { auditContextFrom } from '../../platform/http/auditContext.js';
+} from '../../../platform/http/validate.js';
+import { captureActorFrom } from '../../../platform/http/captureActor.js';
+import { auditContextFrom } from '../../../platform/http/auditContext.js';
 import {
   getLiveFootfall,
   recordBulk,
   recordTick,
   summariseFootfall,
   voidTickById,
-} from './service.js';
+} from '../application/footfall.js';
 
 /** COUNT 2 — the clicker replacement (BUILD_PLAN §7.2). */
 export const footfallRouter: Router = Router();

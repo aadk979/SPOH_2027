@@ -3,7 +3,7 @@ import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app.js';
 import { prisma } from '../../src/platform/db/client.js';
-import { SILENT_STATION_MINUTES } from '../../src/modules/footfall/service.js';
+import { SILENT_STATION_MINUTES } from '../../src/modules/footfall/application/footfall.js';
 import { resetDatabase } from '../helpers/db.js';
 import {
   assignToStationAllBlocks,
