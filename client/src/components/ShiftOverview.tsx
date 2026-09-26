@@ -19,10 +19,12 @@ import {
 
 import { api } from '@/lib/api';
 import { blockLabel, formatTime, readableRole } from '@/lib/format';
+import { useClientSettings } from '@/lib/runtimeSettings';
 
 export function ShiftCard({ me }: { me: MeResponse }): ReactNode {
   const queryClient = useQueryClient();
   const assignment = me.currentAssignment;
+  const { shiftBlocks } = useClientSettings();
   const [confirmingCheckOut, setConfirmingCheckOut] = useState(false);
   const attendance = useQuery({
     queryKey: ['attendance'],
@@ -64,7 +66,7 @@ export function ShiftCard({ me }: { me: MeResponse }): ReactNode {
   return (
     <Card>
       <p className="text-caption font-semibold tracking-[0.06em] text-text-muted uppercase">
-        {assignment.dayLabel} · {blockLabel(assignment.block)}
+        {assignment.dayLabel} · {blockLabel(assignment.block, shiftBlocks)}
       </p>
 
       {/* The station name is the largest thing on the home screen, because it

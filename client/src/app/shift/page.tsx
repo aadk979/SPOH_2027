@@ -17,6 +17,7 @@ import {
 import { useMe, useRequireSession } from '@/features/session/useSession';
 import { blockLabel, formatTime } from '@/lib/format';
 import { flush, toClipboardText } from '@/lib/outbox';
+import { useClientSettings } from '@/lib/runtimeSettings';
 
 /**
  * My shift, plus the sync diagnostics panel (BUILD_PLAN §9.5).
@@ -30,6 +31,7 @@ export default function ShiftPage(): ReactNode {
   const session = useRequireSession();
   const { data: me } = useMe();
   const entries = useOutboxEntries();
+  const { shiftBlocks } = useClientSettings();
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState(false);
 
@@ -66,7 +68,8 @@ export default function ShiftPage(): ReactNode {
                 <Card as="li" variant="flat" key={assignment.id}>
                   <p className="font-semibold">{assignment.station.name}</p>
                   <p className="text-caption text-text-muted">
-                    {assignment.dayLabel} · {blockLabel(assignment.block)} · {assignment.roleLabel}
+                    {assignment.dayLabel} · {blockLabel(assignment.block, shiftBlocks)} ·{' '}
+                    {assignment.roleLabel}
                   </p>
                   {assignment.checkedInAt ? (
                     <StatusText tone="ok" className="mt-xxs block">

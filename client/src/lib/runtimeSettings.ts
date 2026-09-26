@@ -1,6 +1,7 @@
 'use client';
 
-import type { RuntimeSettings, SettingsResponse } from '@spoh/shared';
+import { useSyncExternalStore } from 'react';
+import type { RuntimeSettings, SettingsResponse, ShiftBlockWindows } from '@spoh/shared';
 import { api } from './api';
 
 /**
@@ -32,6 +33,8 @@ export interface ClientSettings {
   silentStationMinutes: number;
   staleDeviceMinutes: number;
   eventName: string;
+  /** The configured shift hours, which the shift labels print (F01-046). */
+  shiftBlocks: ShiftBlockWindows;
 }
 
 export const DEFAULT_CLIENT_SETTINGS: Readonly<ClientSettings> = Object.freeze({
@@ -44,6 +47,10 @@ export const DEFAULT_CLIENT_SETTINGS: Readonly<ClientSettings> = Object.freeze({
   silentStationMinutes: 15,
   staleDeviceMinutes: 15,
   eventName: 'SPOH 2027',
+  shiftBlocks: {
+    MORNING: { start: '09:30', end: '14:00' },
+    AFTERNOON: { start: '13:30', end: '18:00' },
+  },
 });
 
 let cache: Readonly<ClientSettings> = DEFAULT_CLIENT_SETTINGS;
@@ -57,6 +64,15 @@ export function getClientSettings(): Readonly<ClientSettings> {
 export function subscribeToSettings(listener: () => void): () => void {
   listeners.add(listener);
   return () => listeners.delete(listener);
+}
+
+/** The settings for a component that must re-render when they arrive. */
+export function useClientSettings(): Readonly<ClientSettings> {
+  return useSyncExternalStore(
+    subscribeToSettings,
+    getClientSettings,
+    () => DEFAULT_CLIENT_SETTINGS,
+  );
 }
 
 /** Milliseconds, for the many places that want a timer rather than a number. */
@@ -95,6 +111,7 @@ export async function loadClientSettings(): Promise<void> {
       silentStationMinutes: settings.silentStationMinutes,
       staleDeviceMinutes: settings.staleDeviceMinutes,
       eventName: settings.eventName,
+      shiftBlocks: settings.shiftBlocks,
     });
 
     for (const listener of listeners) listener();

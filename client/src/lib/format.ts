@@ -1,3 +1,5 @@
+import type { ShiftBlock, ShiftBlockWindows } from '@spoh/shared';
+
 /**
  * Display formatting.
  *
@@ -55,9 +57,14 @@ export function formatDuration(minutes: number | null | undefined): string {
   return hours > 0 ? `${hours}h${rounded % 60}m` : `${rounded}m`;
 }
 
-/** The two shift blocks, as the roster prints them. */
-export function blockLabel(block: string): string {
-  return block === 'MORNING' ? '09:30–14:00' : '13:30–18:00';
+/**
+ * A shift block as the roster prints it, from the configured hours: an admin
+ * moves them for a dry run, and a label compiled into the client then showed
+ * the old times while attendance followed the new ones (F01-046).
+ */
+export function blockLabel(block: ShiftBlock, blocks: ShiftBlockWindows): string {
+  const window = blocks[block];
+  return `${window.start}–${window.end}`;
 }
 
 /**
