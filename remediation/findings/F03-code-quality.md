@@ -106,6 +106,7 @@ is not on `main`.
 | F03-038 | Low    | `AttendanceMethod` is missing from the shared enums                       | P07.8                                                                               | enums.test.ts         |
 | F03-041 | Low    | The audit log's live tail can skip rows                                   | P06 / P13.7 (audit screen, F02-024)                                                 | —                     |
 | F03-042 | Low    | Security-event dedupe is per worker                                       | P15.2                                                                               | —                     |
+| F03-043 | Medium | A Deputy's roster import creates accounts (found in P06.12)               | P06.13                                                                              | —                     |
 
 ### For P05 (no new owner decision)
 
@@ -1227,6 +1228,29 @@ screen (F02-024), CloudWatch delivery and the CSV import against these findings.
 `feat/audit-cloudwatch` question already on the list for P05; P03 adds these facts, not a decision.
 
 ---
+
+## Found after the audit
+
+Filed while fixing other findings, so that every behaviour change still has a backlog row
+(P06 _Context_).
+
+#### F03-043 — A Deputy's roster import creates accounts
+
+- **Severity:** Medium (authorization)
+- **Area:** `roster/service.ts` `importRoster` (identity minting), `roster/router.ts` (`/import`
+  on `roster.edit`)
+- **Evidence:** by reading, found in P06.12 while fixing F03-001. The router's comment says a
+  Deputy's import "will see [new people] reported rather than silently provisioned", because only
+  Chief and Admin hold `user.provision`. The service mints a Cognito identity and creates the
+  volunteer for every new email, whoever imports. Since F03-001 the new account's role must be
+  below the importer's, so this is not an escalation, but it creates accounts and sends invites
+  without the capability that governs both.
+- **Impact:** a Deputy can add people to the committee, and send them invites, which the role
+  matrix reserves for Chief and Admin.
+- **Fix:** without `user.provision`, report new people as issues and create nothing (as the
+  audit branch does); P11.2 makes it `People.Provision` versus `Roster.Edit` (ADR-005, C5).
+- **Phase:** P06.13, with the roster module (P06.7)
+- **Status:** open
 
 ## Appendix A — Target location of every export
 

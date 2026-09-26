@@ -151,6 +151,12 @@ _Steps_ with `<branch>` = `baseline/pre-remediation` (or `d2497b6`), with two di
 On a **fresh** host or database the baseline deploys with the runbook unchanged, `db:deploy` included.
 Going from the baseline back to the audit branch is an ordinary deploy of `319d06d`.
 
+**The no-go line is `release/january`** (Q-P5, ADR-009 §3): `319d06d` plus the P06.12 safety-net
+fixes, cherry-picked with `-x` and verified on the branch. It is the one branch besides `main` and
+the baseline, and it only ever receives P06.12 cherry-picks. What each fix changes on deploy is in
+`reports/P06/january-fixes.md` § _Before deploying_. Deploy it with the audit branch's runbook
+(`git show 319d06d:infra/runbooks/deploy.md`), `<branch>` = `release/january`.
+
 ---
 
 ## Resuming (read this first in a fresh session)

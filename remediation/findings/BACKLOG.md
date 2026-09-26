@@ -41,6 +41,8 @@ The 116 rows include 8 that restate or group other rows (PF-06, PF-07, PF-08, PF
 F01-047, F02-020, F03-042). They keep their own row so that every ID has a home, and are marked
 _umbrella_ or _see_ in **Also**. The other **108** are the unique open findings.
 
+**Filed after P05.1:** F03-043 (Medium, P06.13), found in P06.12. The counts above are as of P05.1.
+
 | Severity | Rows | Unique | Earliest home           |
 | -------- | ---: | -----: | ----------------------- |
 | Blocker  |    1 |      1 | P09.1                   |
@@ -179,92 +181,93 @@ immediate defect and the later step makes it structural.
 
 ### High
 
-| ID      | Title                                                                                      | Home   | Also                                                             | Status |
-| ------- | ------------------------------------------------------------------------------------------ | ------ | ---------------------------------------------------------------- | ------ |
-| F03-001 | Roster import and provisioning can grant any role, including Admin                         | P06.12 | P11.2 (guardrail `forbid`), P12.3                                | open   |
-| F02-006 | Future-dated records count in today's dashboard                                            | P06.12 | P09.4 (import validation)                                        | open   |
-| F02-027 | No-shows count shifts that have not happened yet                                           | P06.12 | P09.12                                                           | open   |
-| F03-012 | The fallback import merges separate paper tallies                                          | P06.12 | P06.8                                                            | open   |
-| F02-002 | Roster import dry run fails with 500 when the file has two or more new people              | P06.12 | P06.7 (plan/apply), P12.4                                        | open   |
-| F04-013 | Lost-person descriptions outlive the promised purge                                        | P06.12 | P08.7 (backup lifecycle), P15.7; rule in ADR-003                 | open   |
-| F04-006 | One campus network can sign in only about ten people a minute                              | P06.12 | owner action A3; P15.2                                           | open   |
-| F03-033 | The outbox parks retryable captures for good                                               | P06.12 | P07.11 (tests move with the outbox split)                        | open   |
-| F04-017 | Nothing pages a human                                                                      | P08.8  | owner action A5; P16.3                                           | open   |
-| F04-018 | Off-site backups are unproven on the deployed host; restore never rehearsed (to verify)    | P08.3  | owner action A2; P16.4                                           | open   |
-| F04-019 | Everything runs on one small box that cannot serve the event                               | P08.4  | ADR-008; P15.8 (cutover)                                         | open   |
-| F04-010 | The app authenticates to AWS with a long-lived IAM user key (merges PF-12)                 | P08.6  | owner action A6; P15.6                                           | open   |
-| F04-002 | Cognito pool security settings unrecorded; runbook's client update resets them (to verify) | P12.1  | Q-C1…Q-C9; P08.6                                                 | open   |
-| F04-023 | Invites may hit Cognito's email quota and expire before training (to verify)               | P12.2  | owner action A4; D-08                                            | open   |
-| F02-004 | Taxonomy cannot change without a migration                                                 | P09.2  | P09.10; merges PF-05                                             | open   |
-| PF-06   | Singapore time hardcoded                                                                   | P09.6  | _umbrella_ of F01-023…028 and F03-013                            | open   |
-| PF-08   | Event content compiled into the client                                                     | P13.3  | P13.4 (offline); _umbrella_ of F01-005, 007, 010, 012, 013       | open   |
-| PF-01   | Per-process caches are stale across instances                                              | P10.3  | F03-009, F03-030                                                 | open   |
-| PF-02   | Rate limiter uses the default in-memory store                                              | P15.2  | F04-006, F03-042                                                 | open   |
-| F02-003 | Setup entities have endpoints but no screens                                               | P13.3  | P13.2                                                            | open   |
-| F02-013 | Corrections (void, stock adjust, card reissue) have no screen                              | P13.7  | P13.3 (cards), P14.2                                             | open   |
-| F02-015 | Incidents cannot be seen or worked after they are reported                                 | P13.7  | P14.1                                                            | open   |
-| PF-09   | Server features with no screen (42 of 95 routes)                                           | P13.7  | _umbrella_ of F02-003, 013, 014, 015, 023, 024                   | open   |
-| F02-029 | No entity has its own page, and nothing links to anything                                  | P14.1  | P14.2, P14.3                                                     | open   |
-| PF-14   | The deployed system is not the baseline code                                               | P05.10 | _decided_: D-05 follow-up (mine, do not merge); F04-020; ADR-009 | open   |
+| ID      | Title                                                                                      | Home   | Also                                                             | Status          |
+| ------- | ------------------------------------------------------------------------------------------ | ------ | ---------------------------------------------------------------- | --------------- |
+| F03-001 | Roster import and provisioning can grant any role, including Admin                         | P06.12 | P11.2 (guardrail `forbid`), P12.3                                | fixed `55b6430` |
+| F02-006 | Future-dated records count in today's dashboard                                            | P06.12 | P09.4 (import validation)                                        | fixed `f0e75ff` |
+| F02-027 | No-shows count shifts that have not happened yet                                           | P06.12 | P09.12                                                           | fixed `0e316a9` |
+| F03-012 | The fallback import merges separate paper tallies                                          | P06.12 | P06.8                                                            | fixed `b5b0846` |
+| F02-002 | Roster import dry run fails with 500 when the file has two or more new people              | P06.12 | P06.7 (plan/apply), P12.4                                        | fixed `e64661d` |
+| F04-013 | Lost-person descriptions outlive the promised purge                                        | P06.12 | P08.7 (backup lifecycle), P15.7; rule in ADR-003                 | fixed `a899f0e` |
+| F04-006 | One campus network can sign in only about ten people a minute                              | P06.12 | owner action A3; P15.2                                           | fixed `6437125` |
+| F03-033 | The outbox parks retryable captures for good                                               | P06.12 | P07.11 (tests move with the outbox split)                        | fixed `bd97343` |
+| F04-017 | Nothing pages a human                                                                      | P08.8  | owner action A5; P16.3                                           | open            |
+| F04-018 | Off-site backups are unproven on the deployed host; restore never rehearsed (to verify)    | P08.3  | owner action A2; P16.4                                           | open            |
+| F04-019 | Everything runs on one small box that cannot serve the event                               | P08.4  | ADR-008; P15.8 (cutover)                                         | open            |
+| F04-010 | The app authenticates to AWS with a long-lived IAM user key (merges PF-12)                 | P08.6  | owner action A6; P15.6                                           | open            |
+| F04-002 | Cognito pool security settings unrecorded; runbook's client update resets them (to verify) | P12.1  | Q-C1…Q-C9; P08.6                                                 | open            |
+| F04-023 | Invites may hit Cognito's email quota and expire before training (to verify)               | P12.2  | owner action A4; D-08                                            | open            |
+| F02-004 | Taxonomy cannot change without a migration                                                 | P09.2  | P09.10; merges PF-05                                             | open            |
+| PF-06   | Singapore time hardcoded                                                                   | P09.6  | _umbrella_ of F01-023…028 and F03-013                            | open            |
+| PF-08   | Event content compiled into the client                                                     | P13.3  | P13.4 (offline); _umbrella_ of F01-005, 007, 010, 012, 013       | open            |
+| PF-01   | Per-process caches are stale across instances                                              | P10.3  | F03-009, F03-030                                                 | open            |
+| PF-02   | Rate limiter uses the default in-memory store                                              | P15.2  | F04-006, F03-042                                                 | open            |
+| F02-003 | Setup entities have endpoints but no screens                                               | P13.3  | P13.2                                                            | open            |
+| F02-013 | Corrections (void, stock adjust, card reissue) have no screen                              | P13.7  | P13.3 (cards), P14.2                                             | open            |
+| F02-015 | Incidents cannot be seen or worked after they are reported                                 | P13.7  | P14.1                                                            | open            |
+| PF-09   | Server features with no screen (42 of 95 routes)                                           | P13.7  | _umbrella_ of F02-003, 013, 014, 015, 023, 024                   | open            |
+| F02-029 | No entity has its own page, and nothing links to anything                                  | P14.1  | P14.2, P14.3                                                     | open            |
+| PF-14   | The deployed system is not the baseline code                                               | P05.10 | _decided_: D-05 follow-up (mine, do not merge); F04-020; ADR-009 | open            |
 
 ### Medium
 
-| ID      | Title                                                                           | Home   | Also                                                          | Status |
-| ------- | ------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------- | ------ |
-| F04-003 | A queued capture is sent under whoever signs in next on that phone              | P06.12 | P07.11                                                        | open   |
-| F01-046 | Shift labels ignore the configured shift hours                                  | P06.12 | P09.2 (templates replace the setting)                         | open   |
-| F03-002 | Unique-constraint violations are answered with 500                              | P06.13 | P06.2                                                         | open   |
-| F03-003 | A reissued card can be given a second gift with no warning                      | P06.13 | P06.5                                                         | open   |
-| F03-004 | Linking a group to a completed card resets it to ISSUED                         | P06.13 | P06.5                                                         | open   |
-| F03-005 | Approving a stale swap request moves someone else's shift                       | P06.13 | P06.7                                                         | open   |
-| F03-006 | Two decisions on one swap both apply                                            | P06.13 | P06.7                                                         | open   |
-| F03-007 | Simultaneous redemptions oversell stock and give one card several gifts         | P06.13 | P06.5                                                         | open   |
-| F03-008 | Simultaneous stamps of one card at one station fail with 500                    | P06.13 | P06.5                                                         | open   |
-| F03-009 | Revoking a session leaves its access token working for up to a minute           | P06.13 | P10.3 (cross-instance)                                        | open   |
-| F03-014 | An urgent announcement is pushed to people it does not reach                    | P06.13 | P14.4 (composer copy)                                         | open   |
-| F03-018 | Audit rows are missing, mislabelled or lack a "before"                          | P06.13 | P11.1 (generated action catalogue)                            | open   |
-| F03-019 | Relation loads run concurrently on a transaction connection (merges PF-20)      | P06.13 | P06.7                                                         | open   |
-| F03-028 | A reissued journey is counted twice, and the original as voided                 | P06.13 | rule confirmed in ADR-002                                     | open   |
-| F03-031 | Every worker runs the lost-person purge, so summaries are written twice         | P06.13 | P10.7 (scheduler)                                             | open   |
-| F04-004 | An IC can read any station's roster, phone numbers included                     | P06.13 | P11.2 (station-scoped reads)                                  | open   |
-| PF-10   | Layering is conventional, not enforced                                          | P06.10 | P06.3–P06.9, P07.9; _umbrella_ of the F03 module map          | open   |
-| PF-18   | Coverage thresholds exist but were never enforced                               | P08.9  | P06.1, P07.1 (no drop); gate set in ADR-007                   | open   |
-| F02-011 | The IC console repeats people per block and forgets the IC's station            | P07.11 | P14.1 (defaults, grouping)                                    | open   |
-| F03-032 | Runtime settings load once per page load, and not after an in-app sign-in       | P07.11 | P10.8 (live updates)                                          | open   |
-| F03-034 | Stamps, redemptions, incidents and lost-person alerts are online-only           | P07.11 | decided in ADR-007                                            | open   |
-| F03-036 | The capture screens are not precached                                           | P07.11 | P13.4                                                         | open   |
-| PF-17   | CI does not run the e2e suite                                                   | P08.9  | —                                                             | open   |
-| F04-015 | The audit log can be edited, and its retention shortened, by the app            | P08.3  | P08.8 (log group), P15.7                                      | open   |
-| F04-011 | Every secret is a plaintext line on one box, with no owner or rotation          | P08.6  | P06.7 (`sid`↔`sub`), P15.6, P16.5                             | open   |
-| F04-012 | The DuckDNS updater sends its token with `curl -k`                              | P08.5  | owner action A7 (interim)                                     | open   |
-| F04-020 | Deploys build on the production box; rollback is a rebuild; runbooks off `main` | P08.9  | PF-14                                                         | open   |
-| F03-039 | Audit events reach CloudWatch before their transaction commits (audit branch)   | P08.8  | ADR-003 (post-commit shipping) if the branch's code is reused | open   |
-| F03-040 | One rejected batch stops CloudWatch delivery for good (audit branch)            | P08.8  | the log agent replaces hand shipping (ADR-008)                | open   |
-| PF-07   | Operational settings in env                                                     | P10.4  | _umbrella_ of F02-017 and the F01 env audit                   | open   |
-| F02-017 | Attendance is dead until an env var is set and the server restarted             | P10.4  | P13.3 (attendance setup)                                      | open   |
-| F03-030 | A settings change reaches other instances up to a minute later                  | P10.3  | —                                                             | open   |
-| F04-014 | Nothing but lost-person fields has a retention period                           | P10.7  | P15.7; schedule in ADR-003                                    | open   |
-| F04-016 | No data-classification model for events that turn PII on (D-04)                 | P09.14 | P13.3; model in ADR-002                                       | open   |
-| F02-025 | Screens a role cannot use open anyway and fail on submit                        | P11.8  | P11.7                                                         | open   |
-| F02-030 | Denials are reported as outages, network faults or endless loading              | P11.8  | P14.4                                                         | open   |
-| F02-031 | The Deputy is told they cannot edit the roster, which the server allows         | P11.7  | P13.5                                                         | open   |
-| F03-010 | Concurrent refreshes fork a session family                                      | P12.5  | F02-032                                                       | open   |
-| F02-032 | Two tabs refreshing at once sign the person out everywhere                      | P12.5  | F03-010                                                       | open   |
-| F04-001 | Raw Cognito access tokens are accepted and skip revocation                      | P12.5  | F03-009                                                       | open   |
-| F02-008 | Staffing gaps omit the shift block and cannot be acted on                       | P13.5  | P14.1                                                         | open   |
-| F02-014 | Volunteers cannot request or withdraw a swap                                    | P13.7  | P13.5 (swap queue)                                            | open   |
-| F02-023 | Briefing slots have no screen, so the mandatory brief points are never shown    | P13.5  | P13.3 (content)                                               | open   |
-| F02-024 | The audit log has no screen                                                     | P13.7  | reuse of the audit-branch screen (D-05 follow-up)             | open   |
-| F02-007 | The live dashboard does not drill down                                          | P14.2  | P14.1                                                         | open   |
-| F02-012 | Imported fallback rows appear as a person's device taps                         | P14.2  | P09.12 (provenance)                                           | open   |
-| F02-028 | Lost-person outcomes are invisible until the purge runs                         | P14.2  | —                                                             | open   |
-| F02-009 | An announcement with no audience chosen goes to the whole event                 | P14.4  | —                                                             | open   |
-| F02-016 | Lost-person alerts stack above the app on phones                                | P14.4  | —                                                             | open   |
-| F02-022 | A parked capture can be copied but never cleared                                | P14.4  | P07.11 (outbox)                                               | open   |
-| F02-019 | A swap decision changes someone's shifts without telling them                   | P14.5  | remapped from P14.3: the notification centre owns it          | open   |
-| F04-007 | Production CSP allows inline script; an XSS would own the session               | P15.3  | —                                                             | open   |
-| F04-021 | Capacity measured for captures on a laptop, not the event's mix on its server   | P16.2  | P08.10 (staging at target size)                               | open   |
-| PF-11   | Documentation drift                                                             | P16.5  | ADR-007 (the missing brief and build plan)                    | open   |
+| ID      | Title                                                                           | Home   | Also                                                          | Status          |
+| ------- | ------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------- | --------------- |
+| F04-003 | A queued capture is sent under whoever signs in next on that phone              | P06.12 | P07.11                                                        | fixed `d0148a5` |
+| F01-046 | Shift labels ignore the configured shift hours                                  | P06.12 | P09.2 (templates replace the setting)                         | fixed `c64552b` |
+| F03-002 | Unique-constraint violations are answered with 500                              | P06.13 | P06.2                                                         | open            |
+| F03-003 | A reissued card can be given a second gift with no warning                      | P06.13 | P06.5                                                         | open            |
+| F03-004 | Linking a group to a completed card resets it to ISSUED                         | P06.13 | P06.5                                                         | open            |
+| F03-005 | Approving a stale swap request moves someone else's shift                       | P06.13 | P06.7                                                         | open            |
+| F03-006 | Two decisions on one swap both apply                                            | P06.13 | P06.7                                                         | open            |
+| F03-007 | Simultaneous redemptions oversell stock and give one card several gifts         | P06.13 | P06.5                                                         | open            |
+| F03-008 | Simultaneous stamps of one card at one station fail with 500                    | P06.13 | P06.5                                                         | open            |
+| F03-009 | Revoking a session leaves its access token working for up to a minute           | P06.13 | P10.3 (cross-instance)                                        | open            |
+| F03-014 | An urgent announcement is pushed to people it does not reach                    | P06.13 | P14.4 (composer copy)                                         | open            |
+| F03-018 | Audit rows are missing, mislabelled or lack a "before"                          | P06.13 | P11.1 (generated action catalogue)                            | open            |
+| F03-019 | Relation loads run concurrently on a transaction connection (merges PF-20)      | P06.13 | P06.7                                                         | open            |
+| F03-028 | A reissued journey is counted twice, and the original as voided                 | P06.13 | rule confirmed in ADR-002                                     | open            |
+| F03-031 | Every worker runs the lost-person purge, so summaries are written twice         | P06.13 | P10.7 (scheduler)                                             | open            |
+| F04-004 | An IC can read any station's roster, phone numbers included                     | P06.13 | P11.2 (station-scoped reads)                                  | open            |
+| F03-043 | A Deputy's roster import creates accounts (filed in P06.12)                     | P06.13 | P06.7; P11.2 (`People.Provision`, C5)                         | open            |
+| PF-10   | Layering is conventional, not enforced                                          | P06.10 | P06.3–P06.9, P07.9; _umbrella_ of the F03 module map          | open            |
+| PF-18   | Coverage thresholds exist but were never enforced                               | P08.9  | P06.1, P07.1 (no drop); gate set in ADR-007                   | open            |
+| F02-011 | The IC console repeats people per block and forgets the IC's station            | P07.11 | P14.1 (defaults, grouping)                                    | open            |
+| F03-032 | Runtime settings load once per page load, and not after an in-app sign-in       | P07.11 | P10.8 (live updates)                                          | open            |
+| F03-034 | Stamps, redemptions, incidents and lost-person alerts are online-only           | P07.11 | decided in ADR-007                                            | open            |
+| F03-036 | The capture screens are not precached                                           | P07.11 | P13.4                                                         | open            |
+| PF-17   | CI does not run the e2e suite                                                   | P08.9  | —                                                             | open            |
+| F04-015 | The audit log can be edited, and its retention shortened, by the app            | P08.3  | P08.8 (log group), P15.7                                      | open            |
+| F04-011 | Every secret is a plaintext line on one box, with no owner or rotation          | P08.6  | P06.7 (`sid`↔`sub`), P15.6, P16.5                             | open            |
+| F04-012 | The DuckDNS updater sends its token with `curl -k`                              | P08.5  | owner action A7 (interim)                                     | open            |
+| F04-020 | Deploys build on the production box; rollback is a rebuild; runbooks off `main` | P08.9  | PF-14                                                         | open            |
+| F03-039 | Audit events reach CloudWatch before their transaction commits (audit branch)   | P08.8  | ADR-003 (post-commit shipping) if the branch's code is reused | open            |
+| F03-040 | One rejected batch stops CloudWatch delivery for good (audit branch)            | P08.8  | the log agent replaces hand shipping (ADR-008)                | open            |
+| PF-07   | Operational settings in env                                                     | P10.4  | _umbrella_ of F02-017 and the F01 env audit                   | open            |
+| F02-017 | Attendance is dead until an env var is set and the server restarted             | P10.4  | P13.3 (attendance setup)                                      | open            |
+| F03-030 | A settings change reaches other instances up to a minute later                  | P10.3  | —                                                             | open            |
+| F04-014 | Nothing but lost-person fields has a retention period                           | P10.7  | P15.7; schedule in ADR-003                                    | open            |
+| F04-016 | No data-classification model for events that turn PII on (D-04)                 | P09.14 | P13.3; model in ADR-002                                       | open            |
+| F02-025 | Screens a role cannot use open anyway and fail on submit                        | P11.8  | P11.7                                                         | open            |
+| F02-030 | Denials are reported as outages, network faults or endless loading              | P11.8  | P14.4                                                         | open            |
+| F02-031 | The Deputy is told they cannot edit the roster, which the server allows         | P11.7  | P13.5                                                         | open            |
+| F03-010 | Concurrent refreshes fork a session family                                      | P12.5  | F02-032                                                       | open            |
+| F02-032 | Two tabs refreshing at once sign the person out everywhere                      | P12.5  | F03-010                                                       | open            |
+| F04-001 | Raw Cognito access tokens are accepted and skip revocation                      | P12.5  | F03-009                                                       | open            |
+| F02-008 | Staffing gaps omit the shift block and cannot be acted on                       | P13.5  | P14.1                                                         | open            |
+| F02-014 | Volunteers cannot request or withdraw a swap                                    | P13.7  | P13.5 (swap queue)                                            | open            |
+| F02-023 | Briefing slots have no screen, so the mandatory brief points are never shown    | P13.5  | P13.3 (content)                                               | open            |
+| F02-024 | The audit log has no screen                                                     | P13.7  | reuse of the audit-branch screen (D-05 follow-up)             | open            |
+| F02-007 | The live dashboard does not drill down                                          | P14.2  | P14.1                                                         | open            |
+| F02-012 | Imported fallback rows appear as a person's device taps                         | P14.2  | P09.12 (provenance)                                           | open            |
+| F02-028 | Lost-person outcomes are invisible until the purge runs                         | P14.2  | —                                                             | open            |
+| F02-009 | An announcement with no audience chosen goes to the whole event                 | P14.4  | —                                                             | open            |
+| F02-016 | Lost-person alerts stack above the app on phones                                | P14.4  | —                                                             | open            |
+| F02-022 | A parked capture can be copied but never cleared                                | P14.4  | P07.11 (outbox)                                               | open            |
+| F02-019 | A swap decision changes someone's shifts without telling them                   | P14.5  | remapped from P14.3: the notification centre owns it          | open            |
+| F04-007 | Production CSP allows inline script; an XSS would own the session               | P15.3  | —                                                             | open            |
+| F04-021 | Capacity measured for captures on a laptop, not the event's mix on its server   | P16.2  | P08.10 (staging at target size)                               | open            |
+| PF-11   | Documentation drift                                                             | P16.5  | ADR-007 (the missing brief and build plan)                    | open            |
 
 ### Low
 
