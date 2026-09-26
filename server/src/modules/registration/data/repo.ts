@@ -1,7 +1,7 @@
 import type { RegistrationRecord } from '@spoh/shared';
-import type { Prisma, Registration } from '../../generated/prisma/client.js';
-import { prisma } from '../../platform/db/client.js';
-import type { PrismaTransactionClient } from '../../platform/db/client.js';
+import type { Prisma, Registration } from '../../../generated/prisma/client.js';
+import { prisma } from '../../../platform/db/client.js';
+import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 
 /**
  * Data access for COUNT 1 — registrations.

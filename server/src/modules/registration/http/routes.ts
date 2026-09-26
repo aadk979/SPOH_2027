@@ -7,24 +7,24 @@ import {
   RegistrationSummaryQuery,
   VoidRegistrationRequest,
 } from '@spoh/shared';
-import { requireAuth } from '../../platform/identity/index.js';
-import { idempotent } from '../../platform/idempotency/index.js';
-import { captureRateLimit, defaultRateLimit } from '../../platform/http/rateLimit.js';
-import { requireCapability, requireStationScope } from '../../platform/access/index.js';
+import { requireAuth } from '../../../platform/identity/index.js';
+import { idempotent } from '../../../platform/idempotency/index.js';
+import { captureRateLimit, defaultRateLimit } from '../../../platform/http/rateLimit.js';
+import { requireCapability, requireStationScope } from '../../../platform/access/index.js';
 import {
   validate,
   validatedBody,
   validatedParams,
   validatedQuery,
-} from '../../platform/http/validate.js';
-import { captureActorFrom } from '../../platform/http/captureActor.js';
-import { auditContextFrom } from '../../platform/http/auditContext.js';
+} from '../../../platform/http/validate.js';
+import { captureActorFrom } from '../../../platform/http/captureActor.js';
+import { auditContextFrom } from '../../../platform/http/auditContext.js';
 import {
   recordGroupRegistration,
   recordRegistration,
   summariseRegistrations,
   voidRegistrationById,
-} from './service.js';
+} from '../application/registrations.js';
 
 /** COUNT 1 — the sign-up booth (BUILD_PLAN §7.2). */
 export const registrationRouter: Router = Router();

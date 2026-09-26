@@ -16,7 +16,7 @@ import { lostFoundRouter } from './modules/lostFound/router.js';
 import { lostPersonRouter } from './modules/lostPerson/router.js';
 import { meRouter } from './modules/me/router.js';
 import { missionCardRouter } from './modules/missionCard/router.js';
-import { registrationRouter } from './modules/registration/router.js';
+import { registrationRouter } from './modules/registration/http/routes.js';
 import { reportRouter } from './modules/report/router.js';
 import { rosterRouter } from './modules/roster/router.js';
 import { shiftRouter } from './modules/shift/router.js';

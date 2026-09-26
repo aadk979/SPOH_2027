@@ -12,13 +12,13 @@ import {
   auditStationScopeBypass,
   writeAudit,
   type AuditContext,
-} from '../../platform/audit/index.js';
-import type { CaptureActor } from '../../platform/http/captureActor.js';
-import { AppError, NotFoundError } from '../../platform/errors/index.js';
-import { prisma } from '../../platform/db/client.js';
-import { eventDayAnchor, singaporeDateString } from '../../platform/time/index.js';
-import { rangeOverlapsFallbackWindow } from '../fallback/repo.js';
-import { requireActiveStation } from '../station/index.js';
+} from '../../../platform/audit/index.js';
+import type { CaptureActor } from '../../../platform/http/captureActor.js';
+import { AppError, NotFoundError } from '../../../platform/errors/index.js';
+import { prisma } from '../../../platform/db/client.js';
+import { eventDayAnchor, singaporeDateString } from '../../../platform/time/index.js';
+import { rangeOverlapsFallbackWindow } from '../../fallback/repo.js';
+import { requireActiveStation } from '../../station/index.js';
 import {
   countForRecorderSince,
   countForStationSince,
@@ -30,7 +30,7 @@ import {
   groupByTimeBucket,
   toRegistrationRecord,
   voidRegistration,
-} from './repo.js';
+} from '../data/repo.js';
 
 /**
  * COUNT 1 — registrations (PRODUCT_BRIEF §0.1, §2).
