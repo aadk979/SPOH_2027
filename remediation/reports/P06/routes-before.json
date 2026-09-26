@@ -34,11 +34,7 @@
     {
       "method": "GET",
       "path": "/api/v1/admin/event-days",
-      "middleware": [
-        "requireAuth",
-        "defaultRateLimit",
-        "requireCapability(user.read)"
-      ],
+      "middleware": ["requireAuth", "defaultRateLimit", "requireCapability(user.read)"],
       "capability": "user.read"
     },
     {
@@ -88,11 +84,7 @@
     {
       "method": "GET",
       "path": "/api/v1/admin/settings",
-      "middleware": [
-        "requireAuth",
-        "defaultRateLimit",
-        "requireCapability(own.read)"
-      ],
+      "middleware": ["requireAuth", "defaultRateLimit", "requireCapability(own.read)"],
       "capability": "own.read"
     },
     {
@@ -109,11 +101,7 @@
     {
       "method": "GET",
       "path": "/api/v1/admin/stations",
-      "middleware": [
-        "requireAuth",
-        "defaultRateLimit",
-        "requireCapability(config.manage)"
-      ],
+      "middleware": ["requireAuth", "defaultRateLimit", "requireCapability(config.manage)"],
       "capability": "config.manage"
     },
     {
@@ -229,42 +217,25 @@
     {
       "method": "GET",
       "path": "/api/v1/attendance",
-      "middleware": [
-        "requireAuth",
-        "noStore",
-        "defaultRateLimit"
-      ],
+      "middleware": ["requireAuth", "noStore", "defaultRateLimit"],
       "capability": null
     },
     {
       "method": "POST",
       "path": "/api/v1/attendance/challenge",
-      "middleware": [
-        "requireAuth",
-        "noStore",
-        "sensitiveRateLimit"
-      ],
+      "middleware": ["requireAuth", "noStore", "sensitiveRateLimit"],
       "capability": null
     },
     {
       "method": "POST",
       "path": "/api/v1/attendance/start",
-      "middleware": [
-        "requireAuth",
-        "noStore",
-        "sensitiveRateLimit"
-      ],
+      "middleware": ["requireAuth", "noStore", "sensitiveRateLimit"],
       "capability": null
     },
     {
       "method": "POST",
       "path": "/api/v1/attendance/submit",
-      "middleware": [
-        "requireAuth",
-        "noStore",
-        "sensitiveRateLimit",
-        "validate(body)"
-      ],
+      "middleware": ["requireAuth", "noStore", "sensitiveRateLimit", "validate(body)"],
       "capability": null
     },
     {
@@ -281,61 +252,43 @@
     {
       "method": "GET",
       "path": "/api/v1/auth/callback",
-      "middleware": [
-        "signInRateLimit"
-      ],
+      "middleware": ["signInRateLimit"],
       "capability": null
     },
     {
       "method": "GET",
       "path": "/api/v1/auth/login",
-      "middleware": [
-        "signInRateLimit"
-      ],
+      "middleware": ["signInRateLimit"],
       "capability": null
     },
     {
       "method": "POST",
       "path": "/api/v1/auth/refresh",
-      "middleware": [
-        "defaultRateLimit"
-      ],
+      "middleware": ["defaultRateLimit"],
       "capability": null
     },
     {
       "method": "DELETE",
       "path": "/api/v1/auth/session",
-      "middleware": [
-        "defaultRateLimit"
-      ],
+      "middleware": ["defaultRateLimit"],
       "capability": null
     },
     {
       "method": "POST",
       "path": "/api/v1/auth/session",
-      "middleware": [
-        "signInRateLimit",
-        "validate(body)"
-      ],
+      "middleware": ["signInRateLimit", "validate(body)"],
       "capability": null
     },
     {
       "method": "GET",
       "path": "/api/v1/auth/sessions",
-      "middleware": [
-        "requireAuth",
-        "defaultRateLimit"
-      ],
+      "middleware": ["requireAuth", "defaultRateLimit"],
       "capability": null
     },
     {
       "method": "DELETE",
       "path": "/api/v1/auth/sessions/:id",
-      "middleware": [
-        "requireAuth",
-        "defaultRateLimit",
-        "validate(params)"
-      ],
+      "middleware": ["requireAuth", "defaultRateLimit", "validate(params)"],
       "capability": null
     },
     {
@@ -421,21 +374,13 @@
     {
       "method": "GET",
       "path": "/api/v1/dashboard/data-health",
-      "middleware": [
-        "requireAuth",
-        "defaultRateLimit",
-        "requireCapability(dashboard.event.read)"
-      ],
+      "middleware": ["requireAuth", "defaultRateLimit", "requireCapability(dashboard.event.read)"],
       "capability": "dashboard.event.read"
     },
     {
       "method": "GET",
       "path": "/api/v1/dashboard/live",
-      "middleware": [
-        "requireAuth",
-        "defaultRateLimit",
-        "requireCapability(dashboard.event.read)"
-      ],
+      "middleware": ["requireAuth", "defaultRateLimit", "requireCapability(dashboard.event.read)"],
       "capability": "dashboard.event.read"
     },
     {
@@ -452,10 +397,7 @@
     {
       "method": "POST",
       "path": "/api/v1/dev-auth/sign-in",
-      "middleware": [
-        "sensitiveRateLimit",
-        "validate(body)"
-      ],
+      "middleware": ["sensitiveRateLimit", "validate(body)"],
       "capability": null
     },
     {
@@ -574,11 +516,7 @@
     {
       "method": "GET",
       "path": "/api/v1/gifts",
-      "middleware": [
-        "requireAuth",
-        "defaultRateLimit",
-        "requireCapability(gift.redeem)"
-      ],
+      "middleware": ["requireAuth", "defaultRateLimit", "requireCapability(gift.redeem)"],
       "capability": "gift.redeem"
     },
     {
@@ -697,11 +635,7 @@
     {
       "method": "POST",
       "path": "/api/v1/lost-found/close-out",
-      "middleware": [
-        "requireAuth",
-        "defaultRateLimit",
-        "requireCapability(report.generate)"
-      ],
+      "middleware": ["requireAuth", "defaultRateLimit", "requireCapability(report.generate)"],
       "capability": "report.generate"
     },
     {
@@ -741,50 +675,31 @@
     {
       "method": "GET",
       "path": "/api/v1/lost-person/active",
-      "middleware": [
-        "requireAuth",
-        "captureRateLimit",
-        "requireCapability(own.read)"
-      ],
+      "middleware": ["requireAuth", "captureRateLimit", "requireCapability(own.read)"],
       "capability": "own.read"
     },
     {
       "method": "GET",
       "path": "/api/v1/me",
-      "middleware": [
-        "requireAuth",
-        "requireCapability(own.read)"
-      ],
+      "middleware": ["requireAuth", "requireCapability(own.read)"],
       "capability": "own.read"
     },
     {
       "method": "POST",
       "path": "/api/v1/me/check-in",
-      "middleware": [
-        "requireAuth",
-        "requireCapability(own.read)",
-        "validate(body)"
-      ],
+      "middleware": ["requireAuth", "requireCapability(own.read)", "validate(body)"],
       "capability": "own.read"
     },
     {
       "method": "POST",
       "path": "/api/v1/me/check-out",
-      "middleware": [
-        "requireAuth",
-        "requireCapability(own.read)",
-        "validate(body)"
-      ],
+      "middleware": ["requireAuth", "requireCapability(own.read)", "validate(body)"],
       "capability": "own.read"
     },
     {
       "method": "GET",
       "path": "/api/v1/media/config",
-      "middleware": [
-        "requireAuth",
-        "defaultRateLimit",
-        "requireCapability(own.read)"
-      ],
+      "middleware": ["requireAuth", "defaultRateLimit", "requireCapability(own.read)"],
       "capability": "own.read"
     },
     {
@@ -812,11 +727,7 @@
     {
       "method": "GET",
       "path": "/api/v1/notifications/config",
-      "middleware": [
-        "requireAuth",
-        "defaultRateLimit",
-        "requireCapability(own.read)"
-      ],
+      "middleware": ["requireAuth", "defaultRateLimit", "requireCapability(own.read)"],
       "capability": "own.read"
     },
     {
@@ -936,11 +847,7 @@
     {
       "method": "GET",
       "path": "/api/v1/roster/gaps",
-      "middleware": [
-        "requireAuth",
-        "defaultRateLimit",
-        "requireCapability(dashboard.event.read)"
-      ],
+      "middleware": ["requireAuth", "defaultRateLimit", "requireCapability(dashboard.event.read)"],
       "capability": "dashboard.event.read"
     },
     {
@@ -957,11 +864,7 @@
     {
       "method": "GET",
       "path": "/api/v1/roster/me",
-      "middleware": [
-        "requireAuth",
-        "defaultRateLimit",
-        "requireCapability(own.read)"
-      ],
+      "middleware": ["requireAuth", "defaultRateLimit", "requireCapability(own.read)"],
       "capability": "own.read"
     },
     {
@@ -978,11 +881,7 @@
     {
       "method": "GET",
       "path": "/api/v1/roster/swaps",
-      "middleware": [
-        "requireAuth",
-        "defaultRateLimit",
-        "requireCapability(own.read)"
-      ],
+      "middleware": ["requireAuth", "defaultRateLimit", "requireCapability(own.read)"],
       "capability": "own.read"
     },
     {
@@ -1010,11 +909,7 @@
     {
       "method": "GET",
       "path": "/api/v1/roster/swaps/pending",
-      "middleware": [
-        "requireAuth",
-        "defaultRateLimit",
-        "requireCapability(swap.approve)"
-      ],
+      "middleware": ["requireAuth", "defaultRateLimit", "requireCapability(swap.approve)"],
       "capability": "swap.approve"
     },
     {
@@ -1031,22 +926,10 @@
     {
       "method": "GET",
       "path": "/api/v1/stations",
-      "middleware": [
-        "requireAuth"
-      ],
+      "middleware": ["requireAuth"],
       "capability": null
     },
-    {
-      "method": "GET",
-      "path": "/healthz",
-      "middleware": [],
-      "capability": null
-    },
-    {
-      "method": "GET",
-      "path": "/readyz",
-      "middleware": [],
-      "capability": null
-    }
+    { "method": "GET", "path": "/healthz", "middleware": [], "capability": null },
+    { "method": "GET", "path": "/readyz", "middleware": [], "capability": null }
   ]
 }

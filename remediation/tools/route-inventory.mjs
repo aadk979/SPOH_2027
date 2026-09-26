@@ -175,9 +175,10 @@ if (compareWith) {
 
 const out = flag('--out') ?? DEFAULT_OUT;
 mkdirSync(dirname(out), { recursive: true });
-writeFileSync(
-  out,
-  `${JSON.stringify({ generatedBy: 'route-inventory.mjs', ...result }, null, 2)}\n`,
-);
+// Formatted as the repo formats JSON, so the committed snapshot passes format:check.
+const { format, resolveConfig } = await import('prettier');
+const json = JSON.stringify({ generatedBy: 'route-inventory.mjs', ...result });
+const config = (await resolveConfig(out)) ?? {};
+writeFileSync(out, await format(json, { ...config, filepath: out }));
 console.log(`${result.routes.length} routes → ${out}`);
 process.exit(0);
