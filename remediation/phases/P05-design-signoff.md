@@ -156,4 +156,86 @@ cites the findings it resolves.
 
 ## Phase report
 
-_Fill in on completion._
+**Status: done (2026-09-26).** 11 of 11 steps done. G1 passed: the owner approved the design on
+2026-09-26 and delegated every open item to the ADRs' recommendations. No product code changed:
+`git diff 87bf2e0^..HEAD -- server/src client/src packages ops` is empty. P05 wrote the backlog,
+nine ADRs in `docs/adr/`, the final standards, a Cedar test bench (`reports/P05/cedar/`) and a
+pricing model built from the public Price List (`reports/P05/pricing/`).
+
+### Summary
+
+`findings/BACKLOG.md` ranks **116 rows, 108 unique open findings: 1 Blocker, 22 High, 52 Medium,
+33 Low**, each with a home step (`check-backlog.mjs` proves it). The audits added four steps:
+P06.12 (the January safety net), P06.13 (correctness fixes after each module's refactor), P07.11
+(client fixes) and P09.14 (the D-04 per-event product rules). ADR-001…009 cover tenancy, taxonomy,
+configuration, lifecycle and scheduling, authorization on AVP, identity, code architecture, AWS
+topology and cost, and migration and rollout. The design summary for the owner is
+<https://claude.ai/artifact/Ahdqgo11tYz3W9LQh6TpeF>.
+
+| Step   | Status  | Outcome                                                                                                                  |
+| ------ | ------- | ------------------------------------------------------------------------------------------------------------------------ |
+| P05.1  | ✅ done | backlog: 116 rows, 108 unique open, every ID homed; new steps P06.12, P06.13, P07.11, P09.14; P08 and P15 edits          |
+| P05.2  | ✅ done | ADR-001: Organisation root, Event, memberships, `eventId` on every event-owned table, path-scoped API, cloning, ERD      |
+| P05.3  | ✅ done | ADR-002: taxonomy tables, the enums that stay as invariants, enum-to-row migration, D-04 modes, data classification      |
+| P05.4  | ✅ done | ADR-003: settings registry, history and revert, `LISTEN/NOTIFY` bus (D-14 A), env reduction, retention schedule          |
+| P05.5  | ✅ done | ADR-004: lifecycle, rehearsal mode, day boundary, `ScheduledAction` engine (D-09 A), handler catalogue                   |
+| P05.6  | ✅ done | ADR-005: Cedar schema, 5 policy files, grants as data, 51 Cedar WASM tests passing; AVP latency deferred to P11.9 (Q-P7) |
+| P05.7  | ✅ done | ADR-006: pool per environment, MFA tiers, SES invites, membership lifecycle, sessions, groups retired                    |
+| P05.8  | ✅ done | ADR-007: layering, libraries, offline capture; both standards files final                                                |
+| P05.9  | ✅ done | ADR-008: HTTP API + Cloud Map, one Fargate ARM service, RDS single-AZ; US$36–97/month from the Price List                |
+| P05.10 | ✅ done | ADR-009: Event #1 migration, expand → migrate → contract, outbox compatibility, cutover, the twelve 28 Oct criteria      |
+| P05.11 | ✅ done | design summary published; G1 approved 2026-09-26; ADRs Accepted                                                          |
+
+**Exit criteria:** all ADRs accepted ✅; backlog complete ✅; standards final ✅; sign-off recorded ✅.
+
+### Decisions at G1
+
+Recorded in `progress.json` and `DECISIONS.md` § G1: D-07 (the ADR-008 lean topology), D-08 (a
+Route 53 domain with ACM and SES + DKIM; **the domain name is still a placeholder**, flagged for
+P08), D-10 (US$100 for staging + production; Q-P9 allows about US$130 in January 2027 only), D-12
+(migrate as Event #1), and D-13 amended (the agent may use the AWS CLI and this environment's
+credentials within ADR-008's cost plan; the live Lightsail site is not changed without the owner).
+Q-P1…Q-P9, the PIN default, PF-11 and C1–C13 are accepted as written. The items marked
+**assumed** in the ADRs stay marked, as a record of what was accepted by delegation.
+
+### Deviations from plan
+
+- **The walkthrough (P05.11 step 2) did not happen as a meeting.** The owner read the published
+  summary and approved it with a blanket delegation to the recommendations, so no ADR changed at
+  sign-off.
+- **AVP latency was not measured** (P05.6 asked for it). D-13 forbade AWS calls at the time. Q-P7
+  moves the measurement to P11.9, and the 50 ms budget in ADR-005 is unmeasured until then.
+- **Prices come from the public Price List offer files**, not the Pricing API (D-13 at the time).
+  P08.10 replaces the usage assumptions with Cost Explorer data.
+- **Checks at phase end:** lint 0 errors (the same 131 guard warnings), typecheck clean, prettier
+  clean, server 525 passed + 50 skipped, client 19 passed + 7 skipped: identical to P04.
+  `arch:report` ran under a temporary Node 24.
+
+### Metrics before → after
+
+| Measure                      | End of P04                        | End of P05                 |
+| ---------------------------- | --------------------------------- | -------------------------- |
+| Lint errors / guard warnings | 0 / 131                           | 0 / 131                    |
+| Functions > 50 / files > 300 | 97 / 18                           | 97 / 18                    |
+| Guard counts (`arch:report`) | `P04-arch.json`                   | identical                  |
+| Tests (server / client)      | 525 + 50 skipped / 19 + 7 skipped | identical                  |
+| Open findings                | 171 filed                         | 108 unique open, all homed |
+
+Snapshots: `reports/metrics/P05.json` and `P05-arch.json` (identical to P04 apart from timestamps).
+
+### Follow-ups for later phases
+
+- **P06.12 first:** the ten January safety-net fixes, cherry-picked onto `release/january` from
+  `319d06d` (Q-P5).
+- **P08:** the static-export spike first (ADR-008 §2). If it fails, the January budget breaks and the
+  owner is told. The domain is a placeholder until the owner names it (D-08).
+- **P11.9:** the throwaway AVP store for latency (Q-P7). **Before P12.1:** the read-only Cognito
+  describe (Q-P8).
+- **P12.8:** the 28 Oct go/no-go. The owner makes that call on the prepared evidence.
+
+### Commits
+
+`87bf2e0` backlog · `f28b815` ADR-001 · `9cfb868` ADR-002 · `630cb37` ADR-003 · `01e5ed2` ADR-004 ·
+`d5f8ea4` ADR-005 · `949d915` ADR-006 · `1576672` ADR-007 · `6f5149c` ADR-008 · `346d4e7` ADR-009 ·
+`2422df9` design summary · `9cfe023` G1 decisions · `f66b131` ADRs accepted, plus the
+`chore(remediation): P05.x done` tracker commits and the phase close.
