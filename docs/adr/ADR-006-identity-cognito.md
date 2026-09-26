@@ -1,11 +1,11 @@
 # ADR-006 — Identity on Cognito
 
-| Field     | Value                                                                                                                                                                                                                          |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Status    | Proposed (P05.7, 2026-09-26)                                                                                                                                                                                                   |
-| Decisions | D-08: a domain registered in Route 53 and SES with DKIM (**assumed**, the domain name is still needed). The Cognito pool's current settings (Q-C1…Q-C9) are unknown under D-13, so the hardening below is a target, not a diff |
-| Resolves  | F04-001, F04-002, F04-023, F02-032, F03-010, F03-009 (the session half), F01-029, F01-033; P02 § Journey 6 requirement 3 (memberships end with the event)                                                                      |
-| Builds in | P08.6, P12.1–P12.7                                                                                                                                                                                                             |
+| Field     | Value                                                                                                                                                                                                                                                                                                  |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Status    | Accepted (G1, 2026-09-26; written in P05.7)                                                                                                                                                                                                                                                            |
+| Decisions | D-08: a domain registered in Route 53 and SES with DKIM (**assumed**, the domain name is still needed). The Cognito pool's current settings (Q-C1…Q-C9) are unknown under D-13, so the hardening below is a target, not a diff. Items marked **assumed** were accepted by the owner's delegation at G1 |
+| Resolves  | F04-001, F04-002, F04-023, F02-032, F03-010, F03-009 (the session half), F01-029, F01-033; P02 § Journey 6 requirement 3 (memberships end with the event)                                                                                                                                              |
+| Builds in | P08.6, P12.1–P12.7                                                                                                                                                                                                                                                                                     |
 
 ## Context
 

@@ -1,11 +1,11 @@
 # ADR-009 — Migration, rollout and the 28 October go/no-go
 
-| Field     | Value                                                                                                                                                                                     |
-| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Status    | Proposed (P05.10, 2026-09-26)                                                                                                                                                             |
-| Decisions | D-01 = C, staged with a go/no-go on 28 Oct (owner). D-12 = migrate as Event #1 (**assumed**). Q-P5: a `release/january` branch for the fallback line, one exception to D-11 (**assumed**) |
-| Resolves  | PF-14 (the migration history), F02-001's data path, F04-020 (cutover without a rebuild on the box), F03-033 and F04-003 across the upgrade, F02 § Journey 6 requirement 7 for Event #1    |
-| Builds in | P06.12, P09.1, P09.4, P09.7, P09.8, P09.10, P12.8 (new), P15.8, P16.6, P16.7                                                                                                              |
+| Field     | Value                                                                                                                                                                                                                                                             |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Status    | Accepted (G1, 2026-09-26; written in P05.10)                                                                                                                                                                                                                      |
+| Decisions | D-01 = C, staged with a go/no-go on 28 Oct (owner). D-12 = migrate as Event #1 (**assumed**). Q-P5: a `release/january` branch for the fallback line, one exception to D-11 (**assumed**). Items marked **assumed** were accepted by the owner's delegation at G1 |
+| Resolves  | PF-14 (the migration history), F02-001's data path, F04-020 (cutover without a rebuild on the box), F03-033 and F04-003 across the upgrade, F02 § Journey 6 requirement 7 for Event #1                                                                            |
+| Builds in | P06.12, P09.1, P09.4, P09.7, P09.8, P09.10, P12.8 (new), P15.8, P16.6, P16.7                                                                                                                                                                                      |
 
 ## Context
 

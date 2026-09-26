@@ -2,8 +2,8 @@
 
 | Field     | Value                                                                                                                                                                               |
 | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Status    | Proposed (P05.2, 2026-09-26)                                                                                                                                                        |
-| Decisions | D-02 = A (owner). D-12 = migrate as Event #1 (**assumed**, see [Migration](#migration))                                                                                             |
+| Status    | Accepted (G1, 2026-09-26; written in P05.2)                                                                                                                                         |
+| Decisions | D-02 = A (owner). D-12 = migrate as Event #1 (**assumed**, see [Migration](#migration)). Items marked **assumed** were accepted by the owner's delegation at G1                     |
 | Resolves  | F02-001 (merges PF-04); F04 § P04.3 "What changes when data becomes event-scoped" (items 1–6); F02 § Journey 6 requirements 3, 5, 6, 7; F01-001, F01-002, F01-003, F01-006, F01-014 |
 | Builds in | P09.1, P09.3, P09.4, P09.5, P09.7, P09.8, P09.9, P09.10                                                                                                                             |
 

@@ -1,11 +1,11 @@
 # ADR-002 — Configurable taxonomy and per-event product rules
 
-| Field     | Value                                                                                                                                                                     |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Status    | Proposed (P05.3, 2026-09-26)                                                                                                                                              |
-| Decisions | D-04 = configurable per event (owner). D-03 = A (owner). Q-P1, what a merged count may show and which visitor data is allowed: **assumed**                                |
-| Resolves  | F02-004 (merges PF-05); F01-015, F01-018, F01-019, F01-020, F01-045; F01-046; F01-050; F01-048, F01-049; F04-016; F03-028 (the lost-card rule); F03-038 (the mirror test) |
-| Builds in | P09.2, P09.5, P09.10, P09.12, P09.14                                                                                                                                      |
+| Field     | Value                                                                                                                                                                                                              |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Status    | Accepted (G1, 2026-09-26; written in P05.3)                                                                                                                                                                        |
+| Decisions | D-04 = configurable per event (owner). D-03 = A (owner). Q-P1, what a merged count may show and which visitor data is allowed: **assumed**. Items marked **assumed** were accepted by the owner's delegation at G1 |
+| Resolves  | F02-004 (merges PF-05); F01-015, F01-018, F01-019, F01-020, F01-045; F01-046; F01-050; F01-048, F01-049; F04-016; F03-028 (the lost-card rule); F03-038 (the mirror test)                                          |
+| Builds in | P09.2, P09.5, P09.10, P09.12, P09.14                                                                                                                                                                               |
 
 ## Context
 

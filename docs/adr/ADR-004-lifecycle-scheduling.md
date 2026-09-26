@@ -1,11 +1,11 @@
 # ADR-004 — Event lifecycle and scheduling
 
-| Field     | Value                                                                                                                                                        |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Status    | Proposed (P05.5, 2026-09-26)                                                                                                                                 |
-| Decisions | D-09 = A, a Postgres job table (design). Q-P2 (events past midnight, with a day-boundary hour): **assumed**                                                  |
-| Resolves  | F03-031; F03-013; PF-07's `SHIFT_HOURS_ALWAYS_OPEN`; F02 § Journey 6 requirements 1, 2, 4; F02-028 (the purge becomes visible); F04-014 (the purge handlers) |
-| Builds in | P10.5, P10.6, P10.7, P10.8, P13.6, P13.8                                                                                                                     |
+| Field     | Value                                                                                                                                                                               |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Status    | Accepted (G1, 2026-09-26; written in P05.5)                                                                                                                                         |
+| Decisions | D-09 = A, a Postgres job table (design). Q-P2 (events past midnight, with a day-boundary hour): **assumed**. Items marked **assumed** were accepted by the owner's delegation at G1 |
+| Resolves  | F03-031; F03-013; PF-07's `SHIFT_HOURS_ALWAYS_OPEN`; F02 § Journey 6 requirements 1, 2, 4; F02-028 (the purge becomes visible); F04-014 (the purge handlers)                        |
+| Builds in | P10.5, P10.6, P10.7, P10.8, P13.6, P13.8                                                                                                                                            |
 
 ## Context
 

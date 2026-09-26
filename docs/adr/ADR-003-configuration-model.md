@@ -2,8 +2,8 @@
 
 | Field     | Value                                                                                                                                                                                                                                         |
 | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Status    | Proposed (P05.4, 2026-09-26)                                                                                                                                                                                                                  |
-| Decisions | D-14 = A, Postgres (design). Q-P3 (renameable vocabulary) and Q-P4 (locale per event): **assumed**. The wording of the lost-person promise: **assumed**                                                                                       |
+| Status    | Accepted (G1, 2026-09-26; written in P05.4)                                                                                                                                                                                                   |
+| Decisions | D-14 = A, Postgres (design). Q-P3 (renameable vocabulary) and Q-P4 (locale per event): **assumed**. The wording of the lost-person promise: **assumed**. Items marked **assumed** were accepted by the owner's delegation at G1               |
 | Resolves  | PF-01, PF-07, F03-030, F03-009 (cross-instance half), F03-021, F03-032 (live half), F02-005, F02-017, F02-021, F01-052, F01-009, F01-037, F01-038, F01-039, F04-009, F04-011, F04-013 (rule), F04-014, PF-02 and F03-042 (the store), F01-051 |
 | Builds in | P08.6, P10.1, P10.2, P10.3, P10.4, P10.7, P10.8, P13.3, P13.4, P15.2, P15.7                                                                                                                                                                   |
 

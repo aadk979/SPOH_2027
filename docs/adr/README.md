@@ -5,15 +5,15 @@ the programme, which is why they are here and not under `remediation/`.
 
 | ADR                                         | Decision                                      | Owner decisions  | Status   |
 | ------------------------------------------- | --------------------------------------------- | ---------------- | -------- |
-| [ADR-001](ADR-001-tenancy-event-model.md)   | Tenancy, event model and API scoping          | D-02, D-12       | Proposed |
-| [ADR-002](ADR-002-configurable-taxonomy.md) | Configurable taxonomy and per-event rules     | D-04             | Proposed |
-| [ADR-003](ADR-003-configuration-model.md)   | Configuration model, cache bus, retention     | D-14             | Proposed |
-| [ADR-004](ADR-004-lifecycle-scheduling.md)  | Event lifecycle and scheduling                | D-09             | Proposed |
-| [ADR-005](ADR-005-authorization-avp.md)     | Authorization on Amazon Verified Permissions  | D-03, D-06       | Proposed |
-| [ADR-006](ADR-006-identity-cognito.md)      | Identity on Cognito                           | D-08             | Proposed |
-| [ADR-007](ADR-007-code-architecture.md)     | Code architecture, libraries, offline capture | —                | Proposed |
-| [ADR-008](ADR-008-aws-topology-cost.md)     | AWS topology, environments and cost           | D-07, D-08, D-10 | Proposed |
-| [ADR-009](ADR-009-migration-rollout.md)     | Migration, rollout and the 28 Oct go/no-go    | D-01, D-12       | Proposed |
+| [ADR-001](ADR-001-tenancy-event-model.md)   | Tenancy, event model and API scoping          | D-02, D-12       | Accepted |
+| [ADR-002](ADR-002-configurable-taxonomy.md) | Configurable taxonomy and per-event rules     | D-04             | Accepted |
+| [ADR-003](ADR-003-configuration-model.md)   | Configuration model, cache bus, retention     | D-14             | Accepted |
+| [ADR-004](ADR-004-lifecycle-scheduling.md)  | Event lifecycle and scheduling                | D-09             | Accepted |
+| [ADR-005](ADR-005-authorization-avp.md)     | Authorization on Amazon Verified Permissions  | D-03, D-06       | Accepted |
+| [ADR-006](ADR-006-identity-cognito.md)      | Identity on Cognito                           | D-08             | Accepted |
+| [ADR-007](ADR-007-code-architecture.md)     | Code architecture, libraries, offline capture | —                | Accepted |
+| [ADR-008](ADR-008-aws-topology-cost.md)     | AWS topology, environments and cost           | D-07, D-08, D-10 | Accepted |
+| [ADR-009](ADR-009-migration-rollout.md)     | Migration, rollout and the 28 Oct go/no-go    | D-01, D-12       | Accepted |
 
 ## Format
 
@@ -24,6 +24,12 @@ recommendation the owner has not confirmed as **assumed**.
 ## Status
 
 - **Proposed:** written, awaiting the owner's sign-off at gate G1 (P05.11).
+
+ADR-001…009 were **accepted at G1 on 2026-09-26**. The owner approved the design and delegated
+every open item to the ADRs' recommendations, so each choice marked **assumed** in them was
+accepted as written (see `remediation/DECISIONS.md` § G1). The **assumed** markers stay in the text
+as a record of which choices the owner made by delegation.
+
 - **Accepted:** signed off. Binding on every later phase. A change needs a new ADR that
   supersedes this one.
 - **Superseded by ADR-0xx:** kept for history.

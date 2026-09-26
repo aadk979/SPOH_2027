@@ -1,6 +1,6 @@
 # Engineering standards
 
-**Status: final** (P05.8, ADR-007), pending the owner's sign-off at G1. It is binding from P06.
+**Status: final** (P05.8, ADR-007), signed off by the owner at G1 (2026-09-26). It is binding from P06.
 
 The rules every phase follows. P06/P07 make the measurable ones blocking in lint and CI. Until then
 they apply to all new and touched code.

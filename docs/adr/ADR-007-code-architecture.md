@@ -1,11 +1,11 @@
 # ADR-007 — Code architecture, libraries and offline capture
 
-| Field     | Value                                                                                                                                                              |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Status    | Proposed (P05.8, 2026-09-26)                                                                                                                                       |
-| Decisions | none from the owner. Recovering the missing brief and build plan (PF-11): **assumed** not needed                                                                   |
-| Resolves  | PF-10 (the rules), PF-18 (the gate), PF-11 (the decision), F03-034 (which captures queue offline), F03 § P03.3's twelve "one way" patterns (made binding), F03-037 |
-| Builds in | P06, P07 (structure and guards), P08.9 (the CI gate), P09.6 (time), P07.6 (forms), P07.11 (offline)                                                                |
+| Field     | Value                                                                                                                                                                    |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Status    | Accepted (G1, 2026-09-26; written in P05.8)                                                                                                                              |
+| Decisions | none from the owner. Recovering the missing brief and build plan (PF-11): **assumed** not needed. Items marked **assumed** were accepted by the owner's delegation at G1 |
+| Resolves  | PF-10 (the rules), PF-18 (the gate), PF-11 (the decision), F03-034 (which captures queue offline), F03 § P03.3's twelve "one way" patterns (made binding), F03-037       |
+| Builds in | P06, P07 (structure and guards), P08.9 (the CI gate), P09.6 (time), P07.6 (forms), P07.11 (offline)                                                                      |
 
 ## Context
 

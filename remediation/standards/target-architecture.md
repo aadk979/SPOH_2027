@@ -1,6 +1,6 @@
 # Target architecture
 
-**Status: final** (P05.8 and P05.9, 2026-09-26), pending the owner's sign-off at G1. It is binding
+**Status: final** (P05.8 and P05.9, 2026-09-26), signed off by the owner at G1 (2026-09-26). It is binding
 from P06. Each section names the ADR in `docs/adr/` that decided it. A change needs a new ADR, not
 an edit here.
 

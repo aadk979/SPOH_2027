@@ -1,12 +1,12 @@
 # ADR-005 — Authorization on Amazon Verified Permissions
 
-| Field     | Value                                                                                                                                                                                                                                    |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Status    | Proposed (P05.6, 2026-09-26)                                                                                                                                                                                                             |
-| Decisions | D-03 = A (owner). D-06 = A, with local evaluation for UI affordances (design). The AVP latency measurement is **not done**: it needs an AWS policy store, which D-13 rules out (question Q-P7)                                           |
-| Resolves  | F03-001 (the structural fix), F04-004, F04-005, F04-024, F03-016, F02-020, F02-025, F02-030, F02-031 (with P11.7 and P11.8), F01-021; the matrix oddities in F02 § P02.9 and F03 § P03.1; the 12 rules outside middleware in F04 § P04.3 |
-| Evidence  | [`remediation/reports/P05/cedar/`](../../remediation/reports/P05/cedar/): the schema, 5 hand-written policy files plus the generated grants, and **51 passing local tests** (Cedar WASM 4.13.0)                                          |
-| Builds in | P11.1–P11.10, P15.5                                                                                                                                                                                                                      |
+| Field     | Value                                                                                                                                                                                                                                                                  |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Status    | Accepted (G1, 2026-09-26; written in P05.6)                                                                                                                                                                                                                            |
+| Decisions | D-03 = A (owner). D-06 = A, with local evaluation for UI affordances (design). The AVP latency measurement is **not done**: it needs an AWS policy store, which D-13 rules out (question Q-P7). Items marked **assumed** were accepted by the owner's delegation at G1 |
+| Resolves  | F03-001 (the structural fix), F04-004, F04-005, F04-024, F03-016, F02-020, F02-025, F02-030, F02-031 (with P11.7 and P11.8), F01-021; the matrix oddities in F02 § P02.9 and F03 § P03.1; the 12 rules outside middleware in F04 § P04.3                               |
+| Evidence  | [`remediation/reports/P05/cedar/`](../../remediation/reports/P05/cedar/): the schema, 5 hand-written policy files plus the generated grants, and **51 passing local tests** (Cedar WASM 4.13.0)                                                                        |
+| Builds in | P11.1–P11.10, P15.5                                                                                                                                                                                                                                                    |
 
 ## Context
 
