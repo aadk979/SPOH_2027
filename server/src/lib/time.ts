@@ -132,6 +132,15 @@ export function activeShiftBlocks(
   });
 }
 
+/**
+ * The instant a shift block ends on an event day, from the configured hours.
+ * `eventDate` is the day's `@db.Date` anchor (UTC midnight of the local date).
+ */
+export function shiftBlockEndsAt(eventDate: Date, block: ShiftBlock): Date {
+  const { endMinute } = shiftBlockRanges()[block];
+  return new Date(eventDate.getTime() + (endMinute - SGT_OFFSET_MINUTES) * 60_000);
+}
+
 /** Truncate an instant down to a bucket boundary, for footfall curves. */
 export function floorToBucket(instant: Date, bucketMinutes: number): Date {
   const ms = bucketMinutes * 60_000;

@@ -1,6 +1,6 @@
 import type { Express } from 'express';
 import request from 'supertest';
-import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FullReport } from '@spoh/shared';
 import { createApp } from '../../src/app.js';
 import { prisma } from '../../src/lib/prisma.js';
@@ -328,12 +328,28 @@ describe('volunteer hours', () => {
     expect(result.volunteers.totalHours).toBe(0);
   });
 
-  it('reports no-shows as a rate', async () => {
+  it('reports no-shows as a rate once the shifts have ended', async () => {
+    // 23:00 Singapore: both blocks of the day are over.
+    vi.setSystemTime(new Date('2027-01-07T15:00:00.000Z'));
+    try {
+      const result = await report();
+
+      expect(result.volunteers.assignments).toBe(4);
+      expect(result.volunteers.checkedIn).toBe(0);
+      expect(result.volunteers.noShows).toBe(4);
+      expect(result.volunteers.noShowRate).toBe(1);
+    } finally {
+      vi.setSystemTime(FROZEN_NOW);
+    }
+  });
+
+  // F02-027
+  it('reports shifts that have not ended as not yet due, not as no-shows', async () => {
     const result = await report();
 
-    expect(result.volunteers.assignments).toBe(4);
-    expect(result.volunteers.checkedIn).toBe(0);
-    expect(result.volunteers.noShowRate).toBe(1);
+    expect(result.volunteers.noShows).toBe(0);
+    expect(result.volunteers.notYetDue).toBe(4);
+    expect(result.volunteers.noShowRate).toBe(0);
   });
 });
 

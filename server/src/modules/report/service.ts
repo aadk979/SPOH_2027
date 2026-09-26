@@ -1,5 +1,5 @@
-import type { FullReport, ReportQuery } from '@spoh/shared';
-import { minutesBetween } from '../../lib/time.js';
+import type { FullReport, ReportQuery, ShiftBlock } from '@spoh/shared';
+import { minutesBetween, shiftBlockEndsAt } from '../../lib/time.js';
 import { prisma } from '../../lib/prisma.js';
 import { listFallbackWindows } from '../fallback/service.js';
 import { listGifts } from '../gift/service.js';
@@ -173,7 +173,7 @@ export async function generateReport(query: ReportQuery): Promise<FullReport> {
 
     safety: buildSafetyReport(incidents, lostPerson, unpurged, lostFound),
 
-    volunteers: await buildVolunteerReport(attendance, stationName),
+    volunteers: await buildVolunteerReport(attendance, stationName, new Date()),
 
     dataIntegrity: {
       containsFallbackData: windows.length > 0,
@@ -301,9 +301,19 @@ function buildSafetyReport(
   };
 }
 
+/**
+ * A shift nobody checked in to is a no-show only once its block is over
+ * (F02-027). Until then it is not yet due: run after a dry run, the report
+ * would otherwise count every January shift as missed.
+ */
+function hasEnded(assignment: { eventDay: { date: Date }; block: ShiftBlock }, now: Date): boolean {
+  return shiftBlockEndsAt(assignment.eventDay.date, assignment.block) <= now;
+}
+
 async function buildVolunteerReport(
   attendance: Awaited<ReturnType<typeof volunteerAttendance>>,
   stationName: Map<string, string>,
+  now: Date,
 ): Promise<FullReport['volunteers']> {
   const volunteersActive = await prisma.volunteer.count({ where: { active: true } });
 
@@ -342,14 +352,18 @@ async function buildVolunteerReport(
   }
 
   const assignments = attendance.length;
-  const noShows = assignments - checkedIn;
+  const missed = attendance.filter((assignment) => !assignment.checkedInAt);
+  const noShows = missed.filter((assignment) => hasEnded(assignment, now)).length;
+  const notYetDue = missed.length - noShows;
+  const due = assignments - notYetDue;
 
   return {
     volunteersActive,
     assignments,
     checkedIn,
     noShows,
-    noShowRate: assignments === 0 ? 0 : noShows / assignments,
+    notYetDue,
+    noShowRate: due === 0 ? 0 : noShows / due,
     totalHours: Math.round((totalMinutes / 60) * 10) / 10,
     byStation: [...byStation.entries()].map(([stationId, entry]) => ({
       stationId,

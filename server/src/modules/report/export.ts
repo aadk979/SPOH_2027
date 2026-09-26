@@ -275,6 +275,7 @@ function buildVolunteers(workbook: ExcelJS.Workbook, report: FullReport): void {
   sheet.addRow([
     `No-shows: ${report.volunteers.noShows} (${(report.volunteers.noShowRate * 100).toFixed(1)}%)`,
   ]);
+  sheet.addRow([`Not yet due: ${report.volunteers.notYetDue}`]);
   sheet.addRow([`Total hours: ${report.volunteers.totalHours}`]);
   sheet.addRow([
     'Hours count check-in to check-out. Anyone who never checked out contributes zero rather than an open-ended figure.',
@@ -409,6 +410,7 @@ export function toCsv(report: FullReport): string {
   row('Assignments', report.volunteers.assignments);
   row('Checked in', report.volunteers.checkedIn);
   row('No-shows', report.volunteers.noShows);
+  row('Not yet due', report.volunteers.notYetDue);
   row('Total hours', report.volunteers.totalHours);
 
   section('Data integrity');
