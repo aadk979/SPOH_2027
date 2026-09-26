@@ -4,6 +4,7 @@ import { ForbiddenError, StationScopeError, ValidationError } from '../lib/error
 import { prisma } from '../lib/prisma.js';
 import { activeShiftBlocks, eventDayAnchor, singaporeDateString } from '../lib/time.js';
 import { getAuth } from './auth/index.js';
+import { named } from '../lib/named.js';
 
 /**
  * Authorization, in two layers (BUILD_PLAN §6.3).
@@ -20,20 +21,23 @@ import { getAuth } from './auth/index.js';
 
 /** Layer 1. The primary authorization middleware. */
 export function requireCapability(capability: Capability): RequestHandler {
-  return (req: Request, _res: Response, next: NextFunction): void => {
-    const auth = getAuth(req);
+  return named(
+    `requireCapability(${capability})`,
+    (req: Request, _res: Response, next: NextFunction): void => {
+      const auth = getAuth(req);
 
-    if (!roleHasCapability(auth.role, capability)) {
-      next(
-        new ForbiddenError('You do not have permission to perform this action', {
-          required: capability,
-        }),
-      );
-      return;
-    }
+      if (!roleHasCapability(auth.role, capability)) {
+        next(
+          new ForbiddenError('You do not have permission to perform this action', {
+            required: capability,
+          }),
+        );
+        return;
+      }
 
-    next();
-  };
+      next();
+    },
+  );
 }
 
 /**
@@ -42,14 +46,17 @@ export function requireCapability(capability: Capability): RequestHandler {
  * someone more senior". Never use this in place of `requireCapability`.
  */
 export function requireMinimumRole(minimum: CommitteeRole): RequestHandler {
-  return (req: Request, _res: Response, next: NextFunction): void => {
-    const auth = getAuth(req);
-    if (!roleMeets(auth.role, minimum)) {
-      next(new ForbiddenError('You do not have permission to perform this action'));
-      return;
-    }
-    next();
-  };
+  return named(
+    `requireMinimumRole(${minimum})`,
+    (req: Request, _res: Response, next: NextFunction): void => {
+      const auth = getAuth(req);
+      if (!roleMeets(auth.role, minimum)) {
+        next(new ForbiddenError('You do not have permission to perform this action'));
+        return;
+      }
+      next();
+    },
+  );
 }
 
 /** Pulls the target station id out of a validated request. */
@@ -80,7 +87,7 @@ export const stationIdFromParams =
 export function requireStationScope(
   extract: StationIdExtractor = stationIdFromBody,
 ): RequestHandler {
-  return (req: Request, _res: Response, next: NextFunction): void => {
+  return named('requireStationScope', (req: Request, _res: Response, next: NextFunction): void => {
     void (async () => {
       try {
         const auth = getAuth(req);
@@ -111,7 +118,7 @@ export function requireStationScope(
         next(error);
       }
     })();
-  };
+  });
 }
 
 /**

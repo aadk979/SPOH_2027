@@ -5,6 +5,7 @@ import { logger } from '../lib/logger.js';
 import { prisma } from '../lib/prisma.js';
 import { getSettings, DEFAULT_SETTINGS } from '../lib/settings.js';
 import { getAuth } from './auth/index.js';
+import { named } from '../lib/named.js';
 
 /**
  * Idempotency for every create endpoint (BUILD_PLAN §7.4).
@@ -91,6 +92,10 @@ interface Reservation {
 }
 
 export function idempotent(endpointName: string, options: IdempotentOptions = {}): RequestHandler {
+  return named(`idempotent(${endpointName})`, idempotencyMiddleware(endpointName, options));
+}
+
+function idempotencyMiddleware(endpointName: string, options: IdempotentOptions): RequestHandler {
   return (req: Request, res: Response, next: NextFunction): void => {
     void (async () => {
       try {

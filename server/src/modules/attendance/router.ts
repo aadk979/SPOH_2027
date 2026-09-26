@@ -7,7 +7,7 @@ import { auditContextFrom } from '../../lib/requestContext.js';
 import { attendanceStatus, issueChallenge, startAttendance, submitAttendance } from './service.js';
 
 export const attendanceRouter: Router = Router();
-attendanceRouter.use(requireAuth, (_req, res, next) => {
+attendanceRouter.use(requireAuth, function noStore(_req, res, next) {
   res.set('Cache-Control', 'no-store');
   next();
 });

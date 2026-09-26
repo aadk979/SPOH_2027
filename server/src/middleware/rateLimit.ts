@@ -8,6 +8,7 @@ import type { Request } from 'express';
 import { ERROR_CODES } from '@spoh/shared';
 import { env } from '../config/env.js';
 import { requestIdOf } from './requestId.js';
+import { named } from '../lib/named.js';
 
 /**
  * Rate limiting (BUILD_PLAN §8.4).
@@ -50,10 +51,10 @@ function build(max: number, extra: Partial<Options> = {}): RateLimitRequestHandl
 }
 
 /** Everything that is not a capture write or an auth-adjacent action. */
-export const defaultRateLimit = build(env.RATE_LIMIT_MAX_DEFAULT);
+export const defaultRateLimit = named('defaultRateLimit', build(env.RATE_LIMIT_MAX_DEFAULT));
 
 /** Registration taps and footfall ticks. */
-export const captureRateLimit = build(env.RATE_LIMIT_MAX_CAPTURE);
+export const captureRateLimit = named('captureRateLimit', build(env.RATE_LIMIT_MAX_CAPTURE));
 
 /**
  * Anything that mints a credential, sends an email, or reads the whole event.
@@ -62,7 +63,7 @@ export const captureRateLimit = build(env.RATE_LIMIT_MAX_CAPTURE);
  * deliberately tight: these are slow, and none of them is something a human
  * does twenty times a minute.
  */
-export const sensitiveRateLimit = build(env.RATE_LIMIT_MAX_SENSITIVE);
+export const sensitiveRateLimit = named('sensitiveRateLimit', build(env.RATE_LIMIT_MAX_SENSITIVE));
 
 /**
  * Sign-in: `POST /auth/session`, `GET /auth/login` and `GET /auth/callback`.
@@ -74,9 +75,10 @@ export const sensitiveRateLimit = build(env.RATE_LIMIT_MAX_SENSITIVE);
  * successful sign-in costs nothing here; twenty failures a minute from one
  * address still stop a password-guessing loop.
  */
-export const signInRateLimit = build(env.RATE_LIMIT_MAX_SENSITIVE, {
-  skipSuccessfulRequests: true,
-});
+export const signInRateLimit = named(
+  'signInRateLimit',
+  build(env.RATE_LIMIT_MAX_SENSITIVE, { skipSuccessfulRequests: true }),
+);
 
 /**
  * Administration writes.
@@ -87,4 +89,4 @@ export const signInRateLimit = build(env.RATE_LIMIT_MAX_SENSITIVE, {
  * stop an admin halfway through and look like a broken screen; the default
  * ceiling is looser than a privileged write deserves.
  */
-export const adminRateLimit = build(env.RATE_LIMIT_MAX_ADMIN);
+export const adminRateLimit = named('adminRateLimit', build(env.RATE_LIMIT_MAX_ADMIN));

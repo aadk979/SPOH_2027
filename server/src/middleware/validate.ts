@@ -1,6 +1,7 @@
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import type { z } from 'zod';
 import { ValidationError } from '../lib/errors.js';
+import { named } from '../lib/named.js';
 
 /**
  * Zod validation for every route (BUILD_PLAN §8.3).
@@ -19,7 +20,8 @@ export interface ValidationTargets {
 }
 
 export function validate(targets: ValidationTargets): RequestHandler {
-  return (req: Request, _res: Response, next: NextFunction): void => {
+  const name = `validate(${Object.keys(targets).join(',')})`;
+  return named(name, (req: Request, _res: Response, next: NextFunction): void => {
     try {
       if (targets.body) req.body = parseOrThrow(targets.body, req.body, 'body');
 
@@ -47,7 +49,7 @@ export function validate(targets: ValidationTargets): RequestHandler {
     } catch (error) {
       next(error);
     }
-  };
+  });
 }
 
 function parseOrThrow(schema: z.ZodType, value: unknown, location: string): unknown {

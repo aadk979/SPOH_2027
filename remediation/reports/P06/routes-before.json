@@ -1,0 +1,1052 @@
+{
+  "generatedBy": "route-inventory.mjs",
+  "global": [
+    "requestId",
+    "helmetMiddleware",
+    "corsMiddleware",
+    "result",
+    "jsonParser",
+    "cookieParser"
+  ],
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/assignments",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(roster.edit)",
+        "validate(body)"
+      ],
+      "capability": "roster.edit"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/admin/assignments/:id",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(roster.edit)",
+        "validate(params)"
+      ],
+      "capability": "roster.edit"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/event-days",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(user.read)"
+      ],
+      "capability": "user.read"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/event-days",
+      "middleware": [
+        "requireAuth",
+        "adminRateLimit",
+        "requireCapability(config.manage)",
+        "validate(body)"
+      ],
+      "capability": "config.manage"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/admin/event-days/:id",
+      "middleware": [
+        "requireAuth",
+        "adminRateLimit",
+        "requireCapability(config.manage)",
+        "validate(params,body)"
+      ],
+      "capability": "config.manage"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/gift-types",
+      "middleware": [
+        "requireAuth",
+        "adminRateLimit",
+        "requireCapability(config.manage)",
+        "validate(body)"
+      ],
+      "capability": "config.manage"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/admin/gift-types/:id",
+      "middleware": [
+        "requireAuth",
+        "adminRateLimit",
+        "requireCapability(config.manage)",
+        "validate(params,body)"
+      ],
+      "capability": "config.manage"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/settings",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(own.read)"
+      ],
+      "capability": "own.read"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/admin/settings",
+      "middleware": [
+        "requireAuth",
+        "adminRateLimit",
+        "requireCapability(config.manage)",
+        "validate(body)"
+      ],
+      "capability": "config.manage"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/stations",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(config.manage)"
+      ],
+      "capability": "config.manage"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/stations",
+      "middleware": [
+        "requireAuth",
+        "adminRateLimit",
+        "requireCapability(config.manage)",
+        "validate(body)"
+      ],
+      "capability": "config.manage"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/admin/stations/:id",
+      "middleware": [
+        "requireAuth",
+        "adminRateLimit",
+        "requireCapability(config.manage)",
+        "validate(params,body)"
+      ],
+      "capability": "config.manage"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/volunteers",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(user.read)",
+        "validate(query)"
+      ],
+      "capability": "user.read"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/volunteers/:id",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(user.read)",
+        "validate(params)"
+      ],
+      "capability": "user.read"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/admin/volunteers/:id",
+      "middleware": [
+        "requireAuth",
+        "adminRateLimit",
+        "requireCapability(user.provision)",
+        "validate(params,body)"
+      ],
+      "capability": "user.provision"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/volunteers/:id/deactivate",
+      "middleware": [
+        "requireAuth",
+        "adminRateLimit",
+        "requireCapability(user.provision)",
+        "validate(params,body)"
+      ],
+      "capability": "user.provision"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/volunteers/:id/reactivate",
+      "middleware": [
+        "requireAuth",
+        "adminRateLimit",
+        "requireCapability(user.provision)",
+        "validate(params)"
+      ],
+      "capability": "user.provision"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/announcements",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(own.read)",
+        "validate(query)"
+      ],
+      "capability": "own.read"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/announcements",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(announcement.station.send)",
+        "validate(body)"
+      ],
+      "capability": "announcement.station.send"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/announcements/:id/ack",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(own.read)",
+        "validate(params)"
+      ],
+      "capability": "own.read"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/attendance",
+      "middleware": [
+        "requireAuth",
+        "noStore",
+        "defaultRateLimit"
+      ],
+      "capability": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/attendance/challenge",
+      "middleware": [
+        "requireAuth",
+        "noStore",
+        "sensitiveRateLimit"
+      ],
+      "capability": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/attendance/start",
+      "middleware": [
+        "requireAuth",
+        "noStore",
+        "sensitiveRateLimit"
+      ],
+      "capability": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/attendance/submit",
+      "middleware": [
+        "requireAuth",
+        "noStore",
+        "sensitiveRateLimit",
+        "validate(body)"
+      ],
+      "capability": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/audit",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(audit.read)",
+        "validate(query)"
+      ],
+      "capability": "audit.read"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/callback",
+      "middleware": [
+        "signInRateLimit"
+      ],
+      "capability": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/login",
+      "middleware": [
+        "signInRateLimit"
+      ],
+      "capability": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "middleware": [
+        "defaultRateLimit"
+      ],
+      "capability": null
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/auth/session",
+      "middleware": [
+        "defaultRateLimit"
+      ],
+      "capability": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/session",
+      "middleware": [
+        "signInRateLimit",
+        "validate(body)"
+      ],
+      "capability": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/sessions",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit"
+      ],
+      "capability": null
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/auth/sessions/:id",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "validate(params)"
+      ],
+      "capability": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/cards/:shortCode",
+      "middleware": [
+        "requireAuth",
+        "captureRateLimit",
+        "requireCapability(card.stamp)",
+        "validate(params)"
+      ],
+      "capability": "card.stamp"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/cards/:shortCode/issue",
+      "middleware": [
+        "requireAuth",
+        "captureRateLimit",
+        "requireCapability(registration.create)",
+        "validate(params,body)",
+        "idempotent(POST /cards/:shortCode/issue)"
+      ],
+      "capability": "registration.create"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/cards/:shortCode/reissue",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(card.reissue)",
+        "validate(params,body)"
+      ],
+      "capability": "card.reissue"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/cards/:shortCode/stamps",
+      "middleware": [
+        "requireAuth",
+        "captureRateLimit",
+        "requireCapability(card.stamp)",
+        "validate(params,body)",
+        "requireStationScope",
+        "idempotent(POST /cards/:shortCode/stamps)"
+      ],
+      "capability": "card.stamp"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/cards/:shortCode/void",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(card.reissue)",
+        "validate(params,body)"
+      ],
+      "capability": "card.reissue"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/cards/batch",
+      "middleware": [
+        "requireAuth",
+        "sensitiveRateLimit",
+        "requireCapability(user.provision)",
+        "validate(body)"
+      ],
+      "capability": "user.provision"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/cards/funnel",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(dashboard.station.read)",
+        "validate(query)"
+      ],
+      "capability": "dashboard.station.read"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard/data-health",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(dashboard.event.read)"
+      ],
+      "capability": "dashboard.event.read"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard/live",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(dashboard.event.read)"
+      ],
+      "capability": "dashboard.event.read"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/dashboard/station/:id",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(dashboard.station.read)",
+        "validate(params)"
+      ],
+      "capability": "dashboard.station.read"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/dev-auth/sign-in",
+      "middleware": [
+        "sensitiveRateLimit",
+        "validate(body)"
+      ],
+      "capability": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/fallback/imports/footfall",
+      "middleware": [
+        "requireAuth",
+        "sensitiveRateLimit",
+        "requireCapability(fallback.import)",
+        "validate(body)"
+      ],
+      "capability": "fallback.import"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/fallback/imports/registrations",
+      "middleware": [
+        "requireAuth",
+        "sensitiveRateLimit",
+        "requireCapability(fallback.import)",
+        "validate(body)"
+      ],
+      "capability": "fallback.import"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/fallback/windows",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(dashboard.station.read)",
+        "validate(query)"
+      ],
+      "capability": "dashboard.station.read"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/fallback/windows",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(fallback.declare)",
+        "validate(body)"
+      ],
+      "capability": "fallback.declare"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/fallback/windows/:id/close",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(fallback.declare)",
+        "validate(params,body)"
+      ],
+      "capability": "fallback.declare"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/footfall/bulk",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(count.adjust)",
+        "validate(body)",
+        "requireStationScope",
+        "idempotent(POST /footfall/bulk)"
+      ],
+      "capability": "count.adjust"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/footfall/live",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(dashboard.station.read)"
+      ],
+      "capability": "dashboard.station.read"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/footfall/summary",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(dashboard.station.read)",
+        "validate(query)"
+      ],
+      "capability": "dashboard.station.read"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/footfall/ticks",
+      "middleware": [
+        "requireAuth",
+        "captureRateLimit",
+        "requireCapability(footfall.create)",
+        "validate(body)",
+        "requireStationScope",
+        "idempotent(POST /footfall/ticks)"
+      ],
+      "capability": "footfall.create"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/footfall/ticks/:id/void",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(record.void)",
+        "validate(params,body)"
+      ],
+      "capability": "record.void"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/gifts",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(gift.redeem)"
+      ],
+      "capability": "gift.redeem"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/gifts/:id/adjust",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(count.adjust)",
+        "validate(params,body)"
+      ],
+      "capability": "count.adjust"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/gifts/redemptions",
+      "middleware": [
+        "requireAuth",
+        "captureRateLimit",
+        "requireCapability(gift.redeem)",
+        "validate(body)",
+        "requireStationScope",
+        "idempotent(POST /gifts/redemptions)"
+      ],
+      "capability": "gift.redeem"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/gifts/summary",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(dashboard.station.read)",
+        "validate(query)"
+      ],
+      "capability": "dashboard.station.read"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/incidents",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(dashboard.station.read)",
+        "validate(query)"
+      ],
+      "capability": "dashboard.station.read"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/incidents",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(incident.report)",
+        "validate(body)",
+        "idempotent(POST /incidents)"
+      ],
+      "capability": "incident.report"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/incidents/:id/follow-ups",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(incident.resolve)",
+        "validate(params,body)"
+      ],
+      "capability": "incident.resolve"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/incidents/:id/status",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(incident.resolve)",
+        "validate(params,body)"
+      ],
+      "capability": "incident.resolve"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/lost-found",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(own.read)",
+        "validate(query)"
+      ],
+      "capability": "own.read"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/lost-found",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(lostFound.log)",
+        "validate(body)"
+      ],
+      "capability": "lostFound.log"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/lost-found/:id/claim",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(lostFound.log)",
+        "validate(params,body)"
+      ],
+      "capability": "lostFound.log"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/lost-found/close-out",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(report.generate)"
+      ],
+      "capability": "report.generate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/lost-person",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(lostPerson.raise)",
+        "validate(body)",
+        "idempotent(POST /lost-person)"
+      ],
+      "capability": "lostPerson.raise"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/lost-person/:id/ack",
+      "middleware": [
+        "requireAuth",
+        "captureRateLimit",
+        "requireCapability(own.read)",
+        "validate(params)"
+      ],
+      "capability": "own.read"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/lost-person/:id/resolve",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(lostPerson.resolve)",
+        "validate(params,body)"
+      ],
+      "capability": "lostPerson.resolve"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/lost-person/active",
+      "middleware": [
+        "requireAuth",
+        "captureRateLimit",
+        "requireCapability(own.read)"
+      ],
+      "capability": "own.read"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me",
+      "middleware": [
+        "requireAuth",
+        "requireCapability(own.read)"
+      ],
+      "capability": "own.read"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/me/check-in",
+      "middleware": [
+        "requireAuth",
+        "requireCapability(own.read)",
+        "validate(body)"
+      ],
+      "capability": "own.read"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/me/check-out",
+      "middleware": [
+        "requireAuth",
+        "requireCapability(own.read)",
+        "validate(body)"
+      ],
+      "capability": "own.read"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/config",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(own.read)"
+      ],
+      "capability": "own.read"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/media/uploads",
+      "middleware": [
+        "requireAuth",
+        "sensitiveRateLimit",
+        "requireCapability(lostFound.log)",
+        "validate(body)"
+      ],
+      "capability": "lostFound.log"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/url",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(own.read)",
+        "validate(query)"
+      ],
+      "capability": "own.read"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/config",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(own.read)"
+      ],
+      "capability": "own.read"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/notifications/subscriptions",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(own.read)",
+        "validate(body)"
+      ],
+      "capability": "own.read"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/notifications/subscriptions",
+      "middleware": [
+        "requireAuth",
+        "captureRateLimit",
+        "requireCapability(own.read)",
+        "validate(body)"
+      ],
+      "capability": "own.read"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/registrations",
+      "middleware": [
+        "requireAuth",
+        "captureRateLimit",
+        "requireCapability(registration.create)",
+        "validate(body)",
+        "requireStationScope",
+        "idempotent(POST /registrations)"
+      ],
+      "capability": "registration.create"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/registrations/:id/void",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(record.void)",
+        "validate(params,body)"
+      ],
+      "capability": "record.void"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/registrations/group",
+      "middleware": [
+        "requireAuth",
+        "captureRateLimit",
+        "requireCapability(registration.create)",
+        "validate(body)",
+        "requireStationScope",
+        "idempotent(POST /registrations/group)"
+      ],
+      "capability": "registration.create"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/registrations/summary",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(dashboard.station.read)",
+        "validate(query)"
+      ],
+      "capability": "dashboard.station.read"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reports/export",
+      "middleware": [
+        "requireAuth",
+        "sensitiveRateLimit",
+        "requireCapability(report.generate)",
+        "validate(query)"
+      ],
+      "capability": "report.generate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reports/summary",
+      "middleware": [
+        "requireAuth",
+        "sensitiveRateLimit",
+        "requireCapability(report.generate)",
+        "validate(query)"
+      ],
+      "capability": "report.generate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/roster/briefing-slots",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(own.read)",
+        "validate(query)"
+      ],
+      "capability": "own.read"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/roster/briefing-slots/:id/complete",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(own.read)",
+        "validate(params,body)"
+      ],
+      "capability": "own.read"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/roster/gaps",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(dashboard.event.read)"
+      ],
+      "capability": "dashboard.event.read"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/roster/import",
+      "middleware": [
+        "requireAuth",
+        "sensitiveRateLimit",
+        "requireCapability(roster.edit)",
+        "validate(body)"
+      ],
+      "capability": "roster.edit"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/roster/me",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(own.read)"
+      ],
+      "capability": "own.read"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/roster/station/:stationId",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(dashboard.station.read)",
+        "validate(params,query)"
+      ],
+      "capability": "dashboard.station.read"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/roster/swaps",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(own.read)"
+      ],
+      "capability": "own.read"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/roster/swaps",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(own.read)",
+        "validate(body)"
+      ],
+      "capability": "own.read"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/roster/swaps/:id/decide",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(swap.approve)",
+        "validate(params,body)"
+      ],
+      "capability": "swap.approve"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/roster/swaps/pending",
+      "middleware": [
+        "requireAuth",
+        "defaultRateLimit",
+        "requireCapability(swap.approve)"
+      ],
+      "capability": "swap.approve"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/roster/volunteers",
+      "middleware": [
+        "requireAuth",
+        "sensitiveRateLimit",
+        "requireCapability(user.provision)",
+        "validate(body)"
+      ],
+      "capability": "user.provision"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/stations",
+      "middleware": [
+        "requireAuth"
+      ],
+      "capability": null
+    },
+    {
+      "method": "GET",
+      "path": "/healthz",
+      "middleware": [],
+      "capability": null
+    },
+    {
+      "method": "GET",
+      "path": "/readyz",
+      "middleware": [],
+      "capability": null
+    }
+  ]
+}
