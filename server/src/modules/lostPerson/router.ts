@@ -7,12 +7,32 @@ import { captureRateLimit, defaultRateLimit } from '../../middleware/rateLimit.j
 import { requireCapability } from '../../middleware/rbac.js';
 import { validate, validatedBody, validatedParams } from '../../middleware/validate.js';
 import { auditContextFrom } from '../../lib/requestContext.js';
-import { acknowledge, getActiveAlerts, raiseAlert, resolve } from './service.js';
+import {
+  acknowledge,
+  getActiveAlerts,
+  getAlert,
+  raiseAlert,
+  RAISE_ENDPOINT,
+  resolve,
+} from './service.js';
 
 /** Lost person: raise, broadcast, acknowledge, resolve (BUILD_PLAN §7.2). */
 export const lostPersonRouter: Router = Router();
 
 const IdParams = z.object({ id: Id }).strict();
+
+/**
+ * The create response describes a person, so its replay copy holds only the
+ * alert id and a retry re-reads the alert (F04-013). A replay after the purge
+ * returns the alert without its description, as every other read does.
+ */
+const raiseReplay = {
+  store: (body: unknown) => ({ alertId: (body as { alert: { id: string } }).alert.id }),
+  replay: async (req: Request, stored: unknown) => {
+    const { alertId } = stored as { alertId: string };
+    return { alert: await getAlert(alertId, getAuth(req).volunteerId) };
+  },
+};
 
 lostPersonRouter.use(requireAuth);
 
@@ -22,7 +42,7 @@ lostPersonRouter.post(
   defaultRateLimit,
   requireCapability('lostPerson.raise'),
   validate({ body: RaiseLostPersonRequest }),
-  idempotent('POST /lost-person'),
+  idempotent(RAISE_ENDPOINT, { redacted: raiseReplay }),
   async (req: Request, res: Response) => {
     const auth = getAuth(req);
     const body = validatedBody<RaiseLostPersonRequest>(req);

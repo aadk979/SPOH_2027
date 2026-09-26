@@ -61,7 +61,7 @@ beforeEach(async () => {
 
 describe('data retention (P04.6)', () => {
   // F04-013
-  it.skip('keeps no lost-person description once the alert is purged', async () => {
+  it('keeps no lost-person description once the alert is purged', async () => {
     const raised = await request(app)
       .post('/api/v1/lost-person')
       .set('Authorization', bearer(volunteerA))
@@ -90,6 +90,62 @@ describe('data retention (P04.6)', () => {
     const replays = await prisma.idempotencyRecord.findMany();
     expect(JSON.stringify(replays)).not.toContain('red jacket');
     expect(JSON.stringify(replays)).not.toContain(DESCRIPTION);
+  });
+
+  // F04-013
+  it('replays a raised alert from the row, without its description after the purge', async () => {
+    const key = idempotencyKey();
+    const raise = (): request.Test =>
+      request(app)
+        .post('/api/v1/lost-person')
+        .set('Authorization', bearer(volunteerA))
+        .send({ descriptionText: DESCRIPTION, lastSeenStationId: stationA, idempotencyKey: key });
+
+    const first = await raise();
+    expect(first.status).toBe(201);
+    const replayed = await raise();
+    expect(replayed.status).toBe(201);
+    expect(replayed.body.alert.id).toBe(first.body.alert.id);
+    expect(replayed.body.alert.descriptionText).toBe(DESCRIPTION);
+
+    await prisma.lostPersonAlert.update({
+      where: { id: first.body.alert.id as string },
+      data: {
+        status: 'RESOLVED_FOUND',
+        resolvedAt: new Date(Date.now() - (PURGE_AFTER_HOURS + 1) * 3_600_000),
+      },
+    });
+    await purgeResolvedAlerts();
+
+    const afterPurge = await raise();
+    expect(afterPurge.status).toBe(201);
+    expect(afterPurge.body.alert.id).toBe(first.body.alert.id);
+    expect(afterPurge.body.alert.descriptionText).toBeNull();
+  });
+
+  // F04-013
+  it('scrubs a replay row stored before replays were redacted when its alert is purged', async () => {
+    const raised = await request(app)
+      .post('/api/v1/lost-person')
+      .set('Authorization', bearer(volunteerA))
+      .send({ descriptionText: DESCRIPTION, idempotencyKey: idempotencyKey() });
+    const alert = raised.body.alert as { id: string };
+    // What the old code stored: the whole create response.
+    await prisma.idempotencyRecord.updateMany({
+      data: { responseBody: { alert: raised.body.alert } },
+    });
+
+    await prisma.lostPersonAlert.update({
+      where: { id: alert.id },
+      data: {
+        status: 'RESOLVED_FOUND',
+        resolvedAt: new Date(Date.now() - (PURGE_AFTER_HOURS + 1) * 3_600_000),
+      },
+    });
+    await purgeResolvedAlerts();
+
+    const replays = await prisma.idempotencyRecord.findMany();
+    expect(replays.map((row) => row.responseBody)).toEqual([{ alertId: alert.id }]);
   });
 });
 

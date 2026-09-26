@@ -64,6 +64,24 @@ interface IdempotentBody {
   idempotencyKey?: unknown;
 }
 
+/**
+ * For an endpoint whose response carries personal data (F04-013, ADR-003 §8).
+ *
+ * The stored response outlives the row it describes: records are kept for
+ * `idempotencyRetentionDays`, and a purge that nulls a lost-person description
+ * cannot reach a copy of it in this table. Such an endpoint stores only what
+ * `store` returns (the created id), and a replay rebuilds the response from
+ * the row as it is now, after any purge.
+ */
+export interface RedactedReplay {
+  store(body: unknown): object;
+  replay(req: Request, stored: unknown): Promise<unknown>;
+}
+
+interface IdempotentOptions {
+  redacted?: RedactedReplay;
+}
+
 interface Reservation {
   endpoint: string;
   actorSub: string;
@@ -72,7 +90,7 @@ interface Reservation {
   createdAt: Date;
 }
 
-export function idempotent(endpointName: string): RequestHandler {
+export function idempotent(endpointName: string, options: IdempotentOptions = {}): RequestHandler {
   return (req: Request, res: Response, next: NextFunction): void => {
     void (async () => {
       try {
@@ -118,18 +136,27 @@ export function idempotent(endpointName: string): RequestHandler {
             });
           } else {
             logger.debug({ requestId: req.id, endpoint: endpointName }, 'idempotent replay');
-            res.status(existing.statusCode).json(existing.responseBody);
+            res.status(existing.statusCode).json(await replayBody(req, existing, options));
             return;
           }
         }
 
-        captureResponse(req, res, key);
+        captureResponse(req, res, { key, redacted: options.redacted });
         next();
       } catch (error) {
         next(error);
       }
     })();
   };
+}
+
+/** The stored response, or for a redacted endpoint the response rebuilt from the row. */
+async function replayBody(
+  req: Request,
+  existing: Reservation,
+  { redacted }: IdempotentOptions,
+): Promise<unknown> {
+  return redacted ? redacted.replay(req, existing.responseBody) : existing.responseBody;
 }
 
 /**
@@ -164,7 +191,11 @@ async function reserve(
  * defers the actual send until the settle resolves or times out. The handler has
  * already returned by then and nothing else writes to this response.
  */
-function captureResponse(req: Request, res: Response, key: string): void {
+function captureResponse(
+  req: Request,
+  res: Response,
+  { key, redacted }: { key: string; redacted: RedactedReplay | undefined },
+): void {
   const originalJson = res.json.bind(res);
 
   res.json = (body: unknown): Response => {
@@ -174,7 +205,7 @@ function captureResponse(req: Request, res: Response, key: string): void {
       statusCode >= 200 && statusCode < 300
         ? prisma.idempotencyRecord.update({
             where: { key },
-            data: { statusCode, responseBody: body as object },
+            data: { statusCode, responseBody: redacted ? redacted.store(body) : (body as object) },
           })
         : prisma.idempotencyRecord.delete({ where: { key } });
 

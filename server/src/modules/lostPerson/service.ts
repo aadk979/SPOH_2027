@@ -52,6 +52,9 @@ import {
  */
 export const PURGE_AFTER_HOURS = DEFAULT_SETTINGS.lostPersonPurgeHours;
 
+/** The idempotency endpoint name of `POST /lost-person`. */
+export const RAISE_ENDPOINT = 'POST /lost-person';
+
 export async function raiseAlert(
   request: RaiseLostPersonRequest,
   raisedById: string,
@@ -85,6 +88,13 @@ export async function raiseAlert(
   broadcast(alert);
 
   return decorate(alert, raisedById);
+}
+
+/** One alert as the viewer sees it now: after a purge, without its description. */
+export async function getAlert(alertId: string, viewerId: string): Promise<LostPersonAlertRecord> {
+  const alert = await findAlertById(alertId);
+  if (!alert) throw new NotFoundError('Lost person alert');
+  return decorate(alert, viewerId);
 }
 
 /**
@@ -204,6 +214,16 @@ export async function purgeResolvedAlerts(now = new Date()): Promise<number> {
         outcome,
         ackCount: alert._count.acknowledgements,
         resolutionMinutes: minutesBetween(alert.raisedAt, resolvedAt),
+      });
+
+      // A create response stored before replays were redacted still holds the
+      // description (F04-013). Reduce it to the id the redacted replay reads.
+      await tx.idempotencyRecord.updateMany({
+        where: {
+          endpoint: RAISE_ENDPOINT,
+          responseBody: { path: ['alert', 'id'], equals: alert.id },
+        },
+        data: { responseBody: { alertId: alert.id } },
       });
 
       await writeAudit(tx, {
