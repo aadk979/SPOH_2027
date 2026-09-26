@@ -1,8 +1,9 @@
 'use client';
 
 import { openDB, type IDBPDatabase } from 'idb';
-import { api, isRetryable } from './api';
+import { ApiError, api, isRetryable } from './api';
 import { getClientSettings, ms } from './runtimeSettings';
+import { getSession, subscribeToSession } from './session';
 
 /**
  * The local write buffer (BUILD_PLAN §9.5).
@@ -209,22 +210,8 @@ export async function flush(options: FlushOptions = {}): Promise<void> {
         await api(entry.endpoint, { method: 'POST', body: entry.body });
         await database.delete(STORE, entry.id);
       } catch (error) {
-        const attempts = entry.attempts + 1;
-        const message = error instanceof Error ? error.message : 'Unknown error';
-
-        // A 4xx will fail identically forever — retrying it burns battery and
-        // hides the real problem. Park it for the diagnostics panel instead.
-        const givingUp = !isRetryable(error) || attempts >= MAX_ATTEMPTS;
-
-        await database.put(STORE, {
-          ...entry,
-          attempts,
-          lastAttemptAt: new Date().toISOString(),
-          status: givingUp ? 'failed' : 'pending',
-          lastError: message,
-        } satisfies OutboxEntry);
-
-        if (!givingUp) scheduleFlush(backoffFor(attempts));
+        const next = await recordFailure(entry, error);
+        if (next === 'stop') break;
       }
 
       await notify();
@@ -232,6 +219,52 @@ export async function flush(options: FlushOptions = {}): Promise<void> {
   } finally {
     flushing = false;
   }
+}
+
+/**
+ * Record a failed send and say whether the flush should go on.
+ *
+ * A 4xx will fail identically forever — retrying it burns battery and hides
+ * the real problem, so it is parked for the diagnostics panel. A 401 is the
+ * exception: see `holdUntilSignIn`.
+ */
+async function recordFailure(entry: OutboxEntry, error: unknown): Promise<'stop' | 'continue'> {
+  if (error instanceof ApiError && error.isUnauthenticated) {
+    await holdUntilSignIn(entry, error.message);
+    return 'stop';
+  }
+
+  const attempts = entry.attempts + 1;
+  const givingUp = !isRetryable(error) || attempts >= MAX_ATTEMPTS;
+
+  const database = await db();
+  await database.put(STORE, {
+    ...entry,
+    attempts,
+    lastAttemptAt: new Date().toISOString(),
+    status: givingUp ? 'failed' : 'pending',
+    lastError: error instanceof Error ? error.message : 'Unknown error',
+  } satisfies OutboxEntry);
+
+  if (!givingUp) scheduleFlush(backoffFor(attempts));
+  return 'continue';
+}
+
+/**
+ * A 401 reaches the outbox only after `api` has tried a refresh: the token
+ * lapsed while the phone was offline and the session is over. The capture is
+ * fine; the sign-in is not. Park it as pending, without spending an attempt,
+ * and stop this flush, because every entry behind it would get the same answer.
+ * The flush that follows the next sign-in sends it (F03-033).
+ */
+async function holdUntilSignIn(entry: OutboxEntry, message: string): Promise<void> {
+  const database = await db();
+  await database.put(STORE, {
+    ...entry,
+    status: 'pending',
+    lastError: message,
+  } satisfies OutboxEntry);
+  await notify();
 }
 
 function backoffFor(attempts: number): number {
@@ -284,6 +317,10 @@ export function startOutboxFlushLoop(): () => void {
   window.addEventListener('online', onOnline);
   document.addEventListener('visibilitychange', onVisible);
   const interval = setInterval(() => void flush(), 15_000);
+  // Captures held by a lapsed session go as soon as someone signs back in.
+  const unsubscribe = subscribeToSession(() => {
+    if (getSession()) void flush();
+  });
 
   void flush();
 
@@ -291,6 +328,7 @@ export function startOutboxFlushLoop(): () => void {
     window.removeEventListener('online', onOnline);
     document.removeEventListener('visibilitychange', onVisible);
     clearInterval(interval);
+    unsubscribe();
   };
 }
 

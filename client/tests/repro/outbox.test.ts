@@ -34,7 +34,7 @@ function capture(key: string): Promise<unknown> {
 
 describe('outbox retries (P03 repros)', () => {
   // F03-033
-  it.skip('sends a capture queued before the session expired once the volunteer signs back in', async () => {
+  it('sends a capture queued before the session expired once the volunteer signs back in', async () => {
     await capture('expired-session');
 
     // The access token lapsed while the phone was offline and the refresh
@@ -52,7 +52,7 @@ describe('outbox retries (P03 repros)', () => {
   });
 
   // F03-033
-  it.skip('retries a capture the server is still settling after a restart', async () => {
+  it('retries a capture the server is still settling after a restart', async () => {
     await capture('server-restarted');
 
     // The server died mid-request; its reservation answers "in progress" for
