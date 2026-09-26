@@ -124,6 +124,7 @@ export async function sumByBucket(
  */
 export async function liveStationStats(
   since: Date,
+  until: Date,
 ): Promise<
   Array<{ stationId: string; total: number; lastActivityAt: Date | null; counters: number }>
 > {
@@ -136,7 +137,7 @@ export async function liveStationStats(
       MAX("recordedAt")                              AS "lastActivityAt",
       COUNT(DISTINCT "recordedById")::bigint         AS counters
     FROM "FootfallTick"
-    WHERE "voided" = false AND "recordedAt" >= ${since}
+    WHERE "voided" = false AND "recordedAt" >= ${since} AND "recordedAt" <= ${until}
     GROUP BY "stationId"`;
 
   return rows.map((row) => ({

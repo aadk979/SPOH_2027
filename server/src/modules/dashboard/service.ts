@@ -72,11 +72,11 @@ export async function getLiveDashboard(now = new Date()): Promise<LiveDashboardR
     longShifts,
     dataHealth,
   ] = await Promise.all([
-    registrationsSince(since),
-    registrationsByCategory(since),
-    registrationsSince(new Date(now.getTime() - 60 * 60 * 1000)),
+    registrationsSince(since, now),
+    registrationsByCategory(since, now),
+    registrationsSince(new Date(now.getTime() - 60 * 60 * 1000), now),
     getLiveFootfall(now),
-    getFunnel({ from: since.toISOString() }),
+    getFunnel({ from: since.toISOString(), to: now.toISOString() }),
     listGifts(),
     openIncidentCounts(),
     activeLostPersonCount(),
@@ -163,7 +163,7 @@ export async function getDataHealth(now = new Date()): Promise<DataHealthRespons
 
   const staleDevices =
     withinEventHours && eventDay
-      ? (await checkedInWithLastCapture({ eventDayId: eventDay.id, blocks, since }))
+      ? (await checkedInWithLastCapture({ eventDayId: eventDay.id, blocks, since, until: now }))
           .map((row) => ({
             volunteerId: row.volunteerId,
             volunteerName: row.volunteerName,
@@ -207,9 +207,9 @@ export async function getStationDashboard(
   const today = eventDayAnchor(singaporeDateString(now));
 
   const [registrationDevices, footfallDevices, stamps, roster, categories] = await Promise.all([
-    registrationsByDevice(stationId, since),
-    footfallByDevice(stationId, since),
-    stampsAtStation(stationId, since),
+    registrationsByDevice(stationId, since, now),
+    footfallByDevice(stationId, since, now),
+    stampsAtStation(stationId, since, now),
     prisma.shiftAssignment.findMany({
       where: { stationId, eventDay: { date: today } },
       select: {
@@ -223,7 +223,7 @@ export async function getStationDashboard(
     }),
     prisma.registration.groupBy({
       by: ['category'],
-      where: { stationId, voided: false, recordedAt: { gte: since } },
+      where: { stationId, voided: false, recordedAt: { gte: since, lte: now } },
       _count: { _all: true },
     }),
   ]);

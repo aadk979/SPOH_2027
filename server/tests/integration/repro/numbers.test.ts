@@ -61,7 +61,7 @@ function liveDashboard(): request.Test {
 
 describe('dashboard, report and import numbers (P03 repros)', () => {
   // F02-006
-  it.skip('leaves rows dated tomorrow out of today and the last hour', async () => {
+  it('leaves rows dated tomorrow out of today and the last hour', async () => {
     await registrationAt('2027-01-07T03:00:00.000Z'); // 11:00 today
     await registrationAt('2027-01-08T03:00:00.000Z'); // 11:00 tomorrow
 
