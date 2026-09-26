@@ -1,6 +1,6 @@
-import { logger } from '../lib/logger.js';
-import { loadSettings } from '../lib/settings.js';
-import { pruneIdempotencyRecords } from '../middleware/idempotency.js';
+import { logger } from '../platform/logger/index.js';
+import { loadSettings } from '../platform/settings/index.js';
+import { pruneIdempotencyRecords } from '../platform/idempotency/index.js';
 import { purgeResolvedAlerts } from '../modules/lostPerson/service.js';
 import { pruneRefreshSessions } from '../modules/auth/service.js';
 

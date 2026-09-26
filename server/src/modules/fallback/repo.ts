@@ -1,4 +1,4 @@
-import { prisma } from '../../lib/prisma.js';
+import { prisma } from '../../platform/db/client.js';
 
 /**
  * Fallback-window awareness (PRODUCT_BRIEF §11.4).

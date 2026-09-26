@@ -20,12 +20,17 @@ import {
   type VolunteerMutationResponse,
 } from '@spoh/shared';
 import type { Prisma } from '../../generated/prisma/client.js';
-import { AppError, ConflictError, ForbiddenError, NotFoundError } from '../../lib/errors.js';
-import { logger } from '../../lib/logger.js';
-import { prisma } from '../../lib/prisma.js';
-import { eventDayAnchor } from '../../lib/time.js';
-import { writeAudit, type AuditContext } from '../../lib/audit.js';
-import { invalidateVolunteerCache } from '../../middleware/auth/index.js';
+import {
+  AppError,
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+} from '../../platform/errors/index.js';
+import { logger } from '../../platform/logger/index.js';
+import { prisma } from '../../platform/db/client.js';
+import { eventDayAnchor } from '../../platform/time/index.js';
+import { writeAudit, type AuditContext } from '../../platform/audit/index.js';
+import { invalidateVolunteerCache } from '../../platform/identity/index.js';
 import { identityProvider } from '../identity/provider.js';
 import { revokeAllForVolunteer } from '../auth/service.js';
 import { toStationSummary } from '../station/repo.js';

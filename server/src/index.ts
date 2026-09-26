@@ -1,8 +1,8 @@
 import { createApp } from './app.js';
 import { env } from './config/env.js';
-import { logger } from './lib/logger.js';
-import { disconnectPrisma, pingDatabase } from './lib/prisma.js';
-import { loadSettings } from './lib/settings.js';
+import { logger } from './platform/logger/index.js';
+import { disconnectPrisma, pingDatabase } from './platform/db/client.js';
+import { loadSettings } from './platform/settings/index.js';
 import { startScheduledJobs } from './jobs/scheduler.js';
 
 /**

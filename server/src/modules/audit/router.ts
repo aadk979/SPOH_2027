@@ -1,11 +1,11 @@
 import { Router, type Request, type Response } from 'express';
 import { z } from 'zod';
 import { Id, IsoDateTime, PaginationQuery } from '@spoh/shared';
-import { requireAuth } from '../../middleware/auth/index.js';
-import { defaultRateLimit } from '../../middleware/rateLimit.js';
-import { requireCapability } from '../../middleware/rbac.js';
-import { validate, validatedQuery } from '../../middleware/validate.js';
-import { prisma } from '../../lib/prisma.js';
+import { requireAuth } from '../../platform/identity/index.js';
+import { defaultRateLimit } from '../../platform/http/rateLimit.js';
+import { requireCapability } from '../../platform/access/index.js';
+import { validate, validatedQuery } from '../../platform/http/validate.js';
+import { prisma } from '../../platform/db/client.js';
 
 /**
  * The audit log (BUILD_PLAN §7.2, §8.7).

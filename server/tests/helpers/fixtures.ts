@@ -1,10 +1,10 @@
 import { createHash, randomUUID } from 'node:crypto';
 import type { CommitteeRole, ShiftBlock } from '@spoh/shared';
 import { env } from '../../src/config/env.js';
-import { prisma } from '../../src/lib/prisma.js';
-import { createLocalAuthProvider } from '../../src/middleware/auth/localProvider.js';
-import { invalidateVolunteerCache } from '../../src/middleware/auth/index.js';
-import { eventDayAnchor, singaporeDateString } from '../../src/lib/time.js';
+import { prisma } from '../../src/platform/db/client.js';
+import { createLocalAuthProvider } from '../../src/platform/identity/localProvider.js';
+import { invalidateVolunteerCache } from '../../src/platform/identity/index.js';
+import { eventDayAnchor, singaporeDateString } from '../../src/platform/time/index.js';
 
 /**
  * Fixtures for the integration suite.

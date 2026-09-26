@@ -1,10 +1,10 @@
 import { Router, type Request, type Response } from 'express';
 import { z } from 'zod';
 import { PushSubscriptionRequest } from '@spoh/shared';
-import { getAuth, requireAuth } from '../../middleware/auth/index.js';
-import { captureRateLimit, defaultRateLimit } from '../../middleware/rateLimit.js';
-import { requireCapability } from '../../middleware/rbac.js';
-import { validate, validatedBody } from '../../middleware/validate.js';
+import { getAuth, requireAuth } from '../../platform/identity/index.js';
+import { captureRateLimit, defaultRateLimit } from '../../platform/http/rateLimit.js';
+import { requireCapability } from '../../platform/access/index.js';
+import { validate, validatedBody } from '../../platform/http/validate.js';
 import { pushEnabled, pushPublicKey, subscribeDevice, unsubscribeDevice } from './service.js';
 
 /**

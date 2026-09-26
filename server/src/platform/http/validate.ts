@@ -1,7 +1,7 @@
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import type { z } from 'zod';
-import { ValidationError } from '../lib/errors.js';
-import { named } from '../lib/named.js';
+import { ValidationError } from '../errors/index.js';
+import { named } from './named.js';
 
 /**
  * Zod validation for every route (BUILD_PLAN §8.3).

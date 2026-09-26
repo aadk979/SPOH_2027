@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../../../src/app.js';
-import { prisma } from '../../../src/lib/prisma.js';
+import { prisma } from '../../../src/platform/db/client.js';
 import { resetDatabase } from '../../helpers/db.js';
 import { bearer, createVolunteer } from '../../helpers/fixtures.js';
 
@@ -13,8 +13,9 @@ import { bearer, createVolunteer } from '../../helpers/fixtures.js';
 
 const codes = vi.hoisted(() => ({ next: [] as string[] }));
 
-vi.mock('../../../src/lib/shortCode.js', async (importOriginal) => {
-  const original = await importOriginal<typeof import('../../../src/lib/shortCode.js')>();
+vi.mock('../../../src/modules/missionCard/shortCode.js', async (importOriginal) => {
+  const original =
+    await importOriginal<typeof import('../../../src/modules/missionCard/shortCode.js')>();
   return {
     ...original,
     generateShortCode: () => codes.next.shift() ?? original.generateShortCode(),

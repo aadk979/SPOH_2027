@@ -1,6 +1,6 @@
 import type { Request } from 'express';
-import { requestIdOf } from '../middleware/requestId.js';
-import type { AuditContext } from './audit.js';
+import { requestIdOf } from './requestId.js';
+import type { AuditContext } from '../audit/index.js';
 
 /**
  * Derives the audit context from a request.

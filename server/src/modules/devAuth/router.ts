@@ -2,11 +2,11 @@ import { Router, type Request, type Response } from 'express';
 import { z } from 'zod';
 import { CommitteeRole } from '@spoh/shared';
 import { env } from '../../config/env.js';
-import { ForbiddenError, NotFoundError } from '../../lib/errors.js';
-import { prisma } from '../../lib/prisma.js';
-import { sensitiveRateLimit } from '../../middleware/rateLimit.js';
-import { localAuthIssuer } from '../../middleware/auth/index.js';
-import { validate, validatedBody } from '../../middleware/validate.js';
+import { ForbiddenError, NotFoundError } from '../../platform/errors/index.js';
+import { prisma } from '../../platform/db/client.js';
+import { sensitiveRateLimit } from '../../platform/http/rateLimit.js';
+import { localAuthIssuer } from '../../platform/identity/index.js';
+import { validate, validatedBody } from '../../platform/http/validate.js';
 
 /**
  * Development sign-in.

@@ -5,9 +5,9 @@ import {
   type ListLostFoundQuery,
   type LostFoundRecord,
 } from '@spoh/shared';
-import { writeAudit, type AuditContext } from '../../lib/audit.js';
-import { AppError, NotFoundError } from '../../lib/errors.js';
-import { prisma } from '../../lib/prisma.js';
+import { writeAudit, type AuditContext } from '../../platform/audit/index.js';
+import { AppError, NotFoundError } from '../../platform/errors/index.js';
+import { prisma } from '../../platform/db/client.js';
 
 /**
  * Lost and found (PRODUCT_BRIEF §7.2).

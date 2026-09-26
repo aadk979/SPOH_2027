@@ -1,9 +1,9 @@
 import { Router, type Request, type Response } from 'express';
 import { ReportExportQuery, ReportQuery } from '@spoh/shared';
-import { requireAuth } from '../../middleware/auth/index.js';
-import { sensitiveRateLimit } from '../../middleware/rateLimit.js';
-import { requireCapability } from '../../middleware/rbac.js';
-import { validate, validatedQuery } from '../../middleware/validate.js';
+import { requireAuth } from '../../platform/identity/index.js';
+import { sensitiveRateLimit } from '../../platform/http/rateLimit.js';
+import { requireCapability } from '../../platform/access/index.js';
+import { validate, validatedQuery } from '../../platform/http/validate.js';
 import { toCsv, toXlsx } from './export.js';
 import { generateReport } from './service.js';
 

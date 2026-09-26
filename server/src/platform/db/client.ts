@@ -1,7 +1,7 @@
 import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient } from '../generated/prisma/client.js';
-import { env, isTest } from '../config/env.js';
-import { logger } from './logger.js';
+import { PrismaClient } from '../../generated/prisma/client.js';
+import { env, isTest } from '../../config/env.js';
+import { logger } from '../logger/index.js';
 
 /**
  * The single Prisma client for the process.

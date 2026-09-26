@@ -1,10 +1,10 @@
 import { Router, type Request, type Response } from 'express';
 import { z } from 'zod';
 import { Id } from '@spoh/shared';
-import { requireAuth } from '../../middleware/auth/index.js';
-import { defaultRateLimit } from '../../middleware/rateLimit.js';
-import { requireCapability } from '../../middleware/rbac.js';
-import { validate, validatedParams } from '../../middleware/validate.js';
+import { requireAuth } from '../../platform/identity/index.js';
+import { defaultRateLimit } from '../../platform/http/rateLimit.js';
+import { requireCapability } from '../../platform/access/index.js';
+import { validate, validatedParams } from '../../platform/http/validate.js';
 import { getDataHealth, getLiveDashboard, getStationDashboard } from './service.js';
 
 /** The live operations dashboard (BUILD_PLAN §7.2). */

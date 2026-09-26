@@ -1,5 +1,5 @@
-import type { Prisma } from '../generated/prisma/client.js';
-import type { PrismaTransactionClient } from './prisma.js';
+import type { Prisma } from '../../generated/prisma/client.js';
+import type { PrismaTransactionClient } from '../db/client.js';
 
 /**
  * Audit logging (BUILD_PLAN §8.7).

@@ -1,4 +1,4 @@
-import { prisma } from '../../lib/prisma.js';
+import { prisma } from '../../platform/db/client.js';
 
 /**
  * Reads for the live dashboard (PRODUCT_BRIEF §9).

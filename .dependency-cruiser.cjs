@@ -18,7 +18,7 @@
 const MODULE = '^server/src/modules/[^/]+/';
 const PRISMA = [
   '^server/src/generated/prisma/',
-  '^server/src/lib/prisma[.]ts$',
+  '^server/src/platform/db/',
   '^node_modules/@prisma/',
 ];
 const EXPRESS = ['^node_modules/(@types/)?express(-serve-static-core)?/'];
@@ -57,11 +57,11 @@ module.exports = {
     },
     {
       name: 'server-prisma-only-in-data',
-      comment: 'Prisma is imported only by modules/*/data/ and platform/db (today: lib/prisma.ts).',
+      comment: 'Prisma is imported only by modules/*/data/ and platform/db.',
       severity: 'warn',
       from: {
         path: '^server/src/',
-        pathNot: [`${MODULE}data/`, '^server/src/platform/db/', '^server/src/lib/prisma[.]ts$'],
+        pathNot: [`${MODULE}data/`, '^server/src/platform/db/'],
       },
       to: { path: PRISMA },
     },
@@ -103,13 +103,7 @@ module.exports = {
       severity: 'warn',
       from: { path: `${MODULE}domain/` },
       to: {
-        path: [
-          `${MODULE}(http|application|data)/`,
-          '^server/src/platform/',
-          '^server/src/lib/',
-          ...PRISMA,
-          ...EXPRESS,
-        ],
+        path: [`${MODULE}(http|application|data)/`, '^server/src/platform/', ...PRISMA, ...EXPRESS],
         pathNot: ['^server/src/platform/(time|errors)([.]ts$|/)'],
       },
     },

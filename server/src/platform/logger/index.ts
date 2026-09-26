@@ -1,5 +1,5 @@
 import { pino, type Logger } from 'pino';
-import { env, isProduction, isTest } from '../config/env.js';
+import { env, isProduction, isTest } from '../../config/env.js';
 
 /**
  * Structured logging (BUILD_PLAN §8.7).

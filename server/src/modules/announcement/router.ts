@@ -1,16 +1,16 @@
 import { Router, type Request, type Response } from 'express';
 import { z } from 'zod';
 import { CreateAnnouncementRequest, Id, ListAnnouncementsQuery } from '@spoh/shared';
-import { getAuth, requireAuth } from '../../middleware/auth/index.js';
-import { defaultRateLimit } from '../../middleware/rateLimit.js';
-import { requireCapability } from '../../middleware/rbac.js';
+import { getAuth, requireAuth } from '../../platform/identity/index.js';
+import { defaultRateLimit } from '../../platform/http/rateLimit.js';
+import { requireCapability } from '../../platform/access/index.js';
 import {
   validate,
   validatedBody,
   validatedParams,
   validatedQuery,
-} from '../../middleware/validate.js';
-import { auditContextFrom } from '../../lib/requestContext.js';
+} from '../../platform/http/validate.js';
+import { auditContextFrom } from '../../platform/http/auditContext.js';
 import { acknowledgeAnnouncement, listInbox, sendAnnouncement } from './service.js';
 
 /** Targeted announcements with acknowledgement tracking (BUILD_PLAN §7.2). */

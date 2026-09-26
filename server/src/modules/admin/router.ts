@@ -14,18 +14,18 @@ import {
   UpdateStationRequest,
   UpdateVolunteerRequest,
 } from '@spoh/shared';
-import { getAuth, requireAuth } from '../../middleware/auth/index.js';
-import { adminRateLimit, defaultRateLimit } from '../../middleware/rateLimit.js';
-import { requireCapability } from '../../middleware/rbac.js';
+import { getAuth, requireAuth } from '../../platform/identity/index.js';
+import { adminRateLimit, defaultRateLimit } from '../../platform/http/rateLimit.js';
+import { requireCapability } from '../../platform/access/index.js';
 import {
   validate,
   validatedBody,
   validatedParams,
   validatedQuery,
-} from '../../middleware/validate.js';
-import { auditContextFrom } from '../../lib/requestContext.js';
-import { prisma } from '../../lib/prisma.js';
-import { getSettings, settingsMeta, updateSettings } from '../../lib/settings.js';
+} from '../../platform/http/validate.js';
+import { auditContextFrom } from '../../platform/http/auditContext.js';
+import { prisma } from '../../platform/db/client.js';
+import { getSettings, settingsMeta, updateSettings } from '../../platform/settings/index.js';
 import { listStations } from '../station/repo.js';
 import { toStationSummary } from '../station/repo.js';
 import {

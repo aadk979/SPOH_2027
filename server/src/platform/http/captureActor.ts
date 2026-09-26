@@ -1,5 +1,5 @@
 import type { Request } from 'express';
-import { getAuth } from '../middleware/auth/index.js';
+import { getAuth } from '../identity/index.js';
 
 /**
  * Who is performing a capture write.

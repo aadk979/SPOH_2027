@@ -7,11 +7,15 @@ import {
   type RedeemGiftRequest,
   type RedeemGiftResponse,
 } from '@spoh/shared';
-import { auditStationScopeBypass, writeAudit, type AuditContext } from '../../lib/audit.js';
-import type { CaptureActor } from '../../lib/captureActor.js';
-import { AppError, NotFoundError } from '../../lib/errors.js';
-import { prisma } from '../../lib/prisma.js';
-import { normaliseShortCode } from '../../lib/shortCode.js';
+import {
+  auditStationScopeBypass,
+  writeAudit,
+  type AuditContext,
+} from '../../platform/audit/index.js';
+import type { CaptureActor } from '../../platform/http/captureActor.js';
+import { AppError, NotFoundError } from '../../platform/errors/index.js';
+import { prisma } from '../../platform/db/client.js';
+import { normaliseShortCode } from '../missionCard/shortCode.js';
 import { rangeOverlapsFallbackWindow } from '../fallback/repo.js';
 import { requireActiveStation } from '../station/service.js';
 import { dispatch } from '../notification/service.js';

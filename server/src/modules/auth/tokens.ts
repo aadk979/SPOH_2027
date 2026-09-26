@@ -1,8 +1,8 @@
 import { randomBytes, randomUUID, createHash } from 'node:crypto';
 import { SignJWT, jwtVerify } from 'jose';
 import { env, isProduction } from '../../config/env.js';
-import { UnauthenticatedError } from '../../lib/errors.js';
-import { logger } from '../../lib/logger.js';
+import { UnauthenticatedError } from '../../platform/errors/index.js';
+import { logger } from '../../platform/logger/index.js';
 
 /**
  * The API's own access token.

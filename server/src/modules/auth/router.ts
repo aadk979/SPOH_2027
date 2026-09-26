@@ -3,19 +3,24 @@ import { Router, type CookieOptions, type Request, type Response } from 'express
 import { CreateSessionRequest, ERROR_CODES, type SessionResponse } from '@spoh/shared';
 import { z } from 'zod';
 import { env, isProduction } from '../../config/env.js';
-import { AppError, ForbiddenError, NotFoundError, ValidationError } from '../../lib/errors.js';
-import { logger } from '../../lib/logger.js';
-import { prisma } from '../../lib/prisma.js';
-import { getSettings } from '../../lib/settings.js';
-import { auditContextFrom } from '../../lib/requestContext.js';
+import {
+  AppError,
+  ForbiddenError,
+  NotFoundError,
+  ValidationError,
+} from '../../platform/errors/index.js';
+import { logger } from '../../platform/logger/index.js';
+import { prisma } from '../../platform/db/client.js';
+import { getSettings } from '../../platform/settings/index.js';
+import { auditContextFrom } from '../../platform/http/auditContext.js';
 import {
   authProvider,
   getAuth,
   localAuthIssuer,
   requireAuth,
-} from '../../middleware/auth/index.js';
-import { defaultRateLimit, signInRateLimit } from '../../middleware/rateLimit.js';
-import { validate, validatedBody, validatedParams } from '../../middleware/validate.js';
+} from '../../platform/identity/index.js';
+import { defaultRateLimit, signInRateLimit } from '../../platform/http/rateLimit.js';
+import { validate, validatedBody, validatedParams } from '../../platform/http/validate.js';
 import {
   endSession,
   listSessions,

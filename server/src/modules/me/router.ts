@@ -1,9 +1,9 @@
 import { Router, type Request, type Response } from 'express';
 import { CheckInRequest } from '@spoh/shared';
-import { getAuth, requireAuth } from '../../middleware/auth/index.js';
-import { requireCapability } from '../../middleware/rbac.js';
-import { validate, validatedBody } from '../../middleware/validate.js';
-import { auditContextFrom } from '../../lib/requestContext.js';
+import { getAuth, requireAuth } from '../../platform/identity/index.js';
+import { requireCapability } from '../../platform/access/index.js';
+import { validate, validatedBody } from '../../platform/http/validate.js';
+import { auditContextFrom } from '../../platform/http/auditContext.js';
 import { checkIn, checkOut, getMe } from './service.js';
 
 /** Caller profile and shift attendance (BUILD_PLAN §7.2). */

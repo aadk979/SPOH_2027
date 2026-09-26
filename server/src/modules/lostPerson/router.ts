@@ -1,12 +1,12 @@
 import { Router, type Request, type Response } from 'express';
 import { z } from 'zod';
 import { Id, RaiseLostPersonRequest, ResolveLostPersonRequest } from '@spoh/shared';
-import { getAuth, requireAuth } from '../../middleware/auth/index.js';
-import { idempotent } from '../../middleware/idempotency.js';
-import { captureRateLimit, defaultRateLimit } from '../../middleware/rateLimit.js';
-import { requireCapability } from '../../middleware/rbac.js';
-import { validate, validatedBody, validatedParams } from '../../middleware/validate.js';
-import { auditContextFrom } from '../../lib/requestContext.js';
+import { getAuth, requireAuth } from '../../platform/identity/index.js';
+import { idempotent } from '../../platform/idempotency/index.js';
+import { captureRateLimit, defaultRateLimit } from '../../platform/http/rateLimit.js';
+import { requireCapability } from '../../platform/access/index.js';
+import { validate, validatedBody, validatedParams } from '../../platform/http/validate.js';
+import { auditContextFrom } from '../../platform/http/auditContext.js';
 import {
   acknowledge,
   getActiveAlerts,

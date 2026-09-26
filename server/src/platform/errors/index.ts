@@ -3,7 +3,7 @@ import { ERROR_CODES, type ErrorCode } from '@spoh/shared';
 /**
  * The error hierarchy (BUILD_PLAN §13).
  *
- * Handlers throw these; `middleware/errorHandler.ts` is the only place that
+ * Handlers throw these; `platform/http/errorHandler.ts` is the only place that
  * turns one into an HTTP response. Nothing in the codebase calls
  * `res.status(500).send(err.message)` — that is how SQL text and stack traces
  * end up on a volunteer's phone.

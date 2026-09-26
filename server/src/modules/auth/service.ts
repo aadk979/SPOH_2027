@@ -4,12 +4,16 @@ import {
   type SessionResponse,
   type SessionSummary,
 } from '@spoh/shared';
-import { AppError, AccountInactiveError, NotProvisionedError } from '../../lib/errors.js';
-import { logger } from '../../lib/logger.js';
-import { prisma } from '../../lib/prisma.js';
-import { getSettings } from '../../lib/settings.js';
-import { writeAudit, type AuditContext } from '../../lib/audit.js';
-import { invalidateVolunteerCache } from '../../middleware/auth/index.js';
+import {
+  AppError,
+  AccountInactiveError,
+  NotProvisionedError,
+} from '../../platform/errors/index.js';
+import { logger } from '../../platform/logger/index.js';
+import { prisma } from '../../platform/db/client.js';
+import { getSettings } from '../../platform/settings/index.js';
+import { writeAudit, type AuditContext } from '../../platform/audit/index.js';
+import { invalidateVolunteerCache } from '../../platform/identity/index.js';
 import { generateRefreshToken, hashRefreshToken, issueAccessToken, newFamilyId } from './tokens.js';
 
 /**

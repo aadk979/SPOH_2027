@@ -1,5 +1,5 @@
 import { env } from '../../src/config/env.js';
-import { prisma } from '../../src/lib/prisma.js';
+import { prisma } from '../../src/platform/db/client.js';
 
 /**
  * Test database helpers.

@@ -1,7 +1,7 @@
 import { createHmac, randomBytes } from 'node:crypto';
 import { jwtVerify, SignJWT } from 'jose';
 import { env } from '../../config/env.js';
-import { ForbiddenError } from '../../lib/errors.js';
+import { ForbiddenError } from '../../platform/errors/index.js';
 
 export const ATTENDANCE_TTL_MS = 5 * 60_000;
 // Domain-separated key: an attendance QR can never authenticate an API session.

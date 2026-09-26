@@ -27,7 +27,7 @@
 
 // Prisma 7 moves the connection URL out of the schema: Migrate reads it from
 // `prisma.config.ts`, and the runtime client receives a driver adapter instead
-// (see src/lib/prisma.ts). Nothing about the data model changes.
+// (see src/platform/db/client.ts). Nothing about the data model changes.
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -721,7 +721,7 @@ model IdempotencyRecord {
   @@index([createdAt])
 }
 
-/// Runtime configuration (see server/src/lib/settings.ts).
+/// Runtime configuration (see server/src/platform/settings/index.ts).
 ///
 /// Shift block times, silence thresholds, the implausible-tap rate and the
 /// retention windows were constants compiled into the server. Every one of them

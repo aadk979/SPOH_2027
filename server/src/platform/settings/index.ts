@@ -1,7 +1,7 @@
 import { RuntimeSettings, type UpdateSettingsRequest } from '@spoh/shared';
-import { prisma, type PrismaTransactionClient } from './prisma.js';
-import { logger } from './logger.js';
-import { writeAudit, type AuditContext } from './audit.js';
+import { prisma, type PrismaTransactionClient } from '../db/client.js';
+import { logger } from '../logger/index.js';
+import { writeAudit, type AuditContext } from '../audit/index.js';
 
 /**
  * Runtime settings.

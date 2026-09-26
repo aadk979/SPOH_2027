@@ -1,7 +1,7 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { CommitteeRole } from '@spoh/shared';
-import { UnauthenticatedError } from '../../lib/errors.js';
-import { logger } from '../../lib/logger.js';
+import { UnauthenticatedError } from '../errors/index.js';
+import { logger } from '../logger/index.js';
 import type { AuthProvider, VerifiedToken } from './types.js';
 
 /**

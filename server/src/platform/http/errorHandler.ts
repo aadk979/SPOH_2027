@@ -1,8 +1,8 @@
 import type { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
 import { ERROR_CODES, type ErrorBody } from '@spoh/shared';
-import { isProduction } from '../config/env.js';
-import { AppError, isAppError } from '../lib/errors.js';
-import { logger } from '../lib/logger.js';
+import { isProduction } from '../../config/env.js';
+import { AppError, isAppError } from '../errors/index.js';
+import { logger } from '../logger/index.js';
 import { requestIdOf } from './requestId.js';
 
 /**

@@ -8,11 +8,15 @@ import {
   type RegistrationSummaryQuery,
   type RegistrationSummaryResponse,
 } from '@spoh/shared';
-import { auditStationScopeBypass, writeAudit, type AuditContext } from '../../lib/audit.js';
-import type { CaptureActor } from '../../lib/captureActor.js';
-import { AppError, NotFoundError } from '../../lib/errors.js';
-import { prisma } from '../../lib/prisma.js';
-import { eventDayAnchor, singaporeDateString } from '../../lib/time.js';
+import {
+  auditStationScopeBypass,
+  writeAudit,
+  type AuditContext,
+} from '../../platform/audit/index.js';
+import type { CaptureActor } from '../../platform/http/captureActor.js';
+import { AppError, NotFoundError } from '../../platform/errors/index.js';
+import { prisma } from '../../platform/db/client.js';
+import { eventDayAnchor, singaporeDateString } from '../../platform/time/index.js';
 import { rangeOverlapsFallbackWindow } from '../fallback/repo.js';
 import { requireActiveStation } from '../station/service.js';
 import {

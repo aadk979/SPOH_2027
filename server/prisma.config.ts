@@ -7,7 +7,7 @@ import { defineConfig } from 'prisma/config';
  * The connection URL lives here rather than in `schema.prisma` (Prisma 7 removed
  * `datasource.url`). This file is read by the Prisma CLI only — Migrate, Studio
  * and `db seed`. The application runtime never loads it; the server builds its
- * own pooled adapter in `src/lib/prisma.ts` from the zod-validated env.
+ * own pooled adapter in `src/platform/db/client.ts` from the zod-validated env.
  *
  * `DATABASE_URL` is deliberately read raw here instead of through
  * `src/config/env.ts`, because the CLI must work in contexts where the full

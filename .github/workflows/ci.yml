@@ -89,7 +89,7 @@ jobs:
       - run: npm run build:shared
 
       # Prisma 7's migrate no longer generates the client, and src/generated
-      # is not committed, so the suites cannot load lib/prisma.ts without this.
+      # is not committed, so the suites cannot load platform/db/client.ts without this.
       - run: npx prisma generate
         working-directory: server
 

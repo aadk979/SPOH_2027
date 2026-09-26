@@ -6,11 +6,15 @@ import type {
   AttendanceStatus,
 } from '@spoh/shared';
 import { env } from '../../config/env.js';
-import { writeAudit, type AuditContext } from '../../lib/audit.js';
-import { isCampusIp } from '../../lib/campusNetwork.js';
-import { AppError, ForbiddenError, RateLimitedError } from '../../lib/errors.js';
-import { prisma, type PrismaTransactionClient } from '../../lib/prisma.js';
-import { activeShiftBlocks, eventDayAnchor, singaporeDateString } from '../../lib/time.js';
+import { writeAudit, type AuditContext } from '../../platform/audit/index.js';
+import { isCampusIp } from './campusNetwork.js';
+import { AppError, ForbiddenError, RateLimitedError } from '../../platform/errors/index.js';
+import { prisma, type PrismaTransactionClient } from '../../platform/db/client.js';
+import {
+  activeShiftBlocks,
+  eventDayAnchor,
+  singaporeDateString,
+} from '../../platform/time/index.js';
 import {
   ATTENDANCE_TTL_MS,
   hashPin,

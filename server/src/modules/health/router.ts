@@ -1,6 +1,6 @@
 import { Router, type Request, type Response } from 'express';
-import { pingDatabase } from '../../lib/prisma.js';
-import { logger } from '../../lib/logger.js';
+import { pingDatabase } from '../../platform/db/client.js';
+import { logger } from '../../platform/logger/index.js';
 
 /**
  * Liveness and readiness (BUILD_PLAN §7.2).

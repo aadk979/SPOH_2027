@@ -10,16 +10,16 @@ import {
   type StaffingGapsResponse,
   type SwapRequestRecord,
 } from '@spoh/shared';
-import { writeAudit, type AuditContext } from '../../lib/audit.js';
-import { AppError, ForbiddenError, NotFoundError } from '../../lib/errors.js';
-import { prisma } from '../../lib/prisma.js';
-import { DEFAULT_SETTINGS, getSettings } from '../../lib/settings.js';
+import { writeAudit, type AuditContext } from '../../platform/audit/index.js';
+import { AppError, ForbiddenError, NotFoundError } from '../../platform/errors/index.js';
+import { prisma } from '../../platform/db/client.js';
+import { DEFAULT_SETTINGS, getSettings } from '../../platform/settings/index.js';
 import {
   activeShiftBlocks,
   eventDayAnchor,
   minutesBetween,
   singaporeDateString,
-} from '../../lib/time.js';
+} from '../../platform/time/index.js';
 import {
   applySwap,
   completeSlot,

@@ -1,6 +1,6 @@
 import type { MissionCardRecord } from '@spoh/shared';
 import type { Prisma } from '../../generated/prisma/client.js';
-import { prisma, type PrismaTransactionClient } from '../../lib/prisma.js';
+import { prisma, type PrismaTransactionClient } from '../../platform/db/client.js';
 
 /** Data access for COUNT 3 — Mission Cards. */
 

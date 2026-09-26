@@ -5,10 +5,10 @@ import {
   AccountInactiveError,
   NotProvisionedError,
   UnauthenticatedError,
-} from '../../lib/errors.js';
-import { logger } from '../../lib/logger.js';
-import { prisma } from '../../lib/prisma.js';
-import { requestIdOf } from '../requestId.js';
+} from '../errors/index.js';
+import { logger } from '../logger/index.js';
+import { prisma } from '../db/client.js';
+import { requestIdOf } from '../http/requestId.js';
 import type { RequestAuth } from '../../types/express.js';
 import { verifyAccessToken } from '../../modules/auth/tokens.js';
 import { createCognitoAuthProvider } from './cognitoProvider.js';

@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { AttendanceProof } from '@spoh/shared';
-import { getAuth, requireAuth } from '../../middleware/auth/index.js';
-import { defaultRateLimit, sensitiveRateLimit } from '../../middleware/rateLimit.js';
-import { validate, validatedBody } from '../../middleware/validate.js';
-import { auditContextFrom } from '../../lib/requestContext.js';
+import { getAuth, requireAuth } from '../../platform/identity/index.js';
+import { defaultRateLimit, sensitiveRateLimit } from '../../platform/http/rateLimit.js';
+import { validate, validatedBody } from '../../platform/http/validate.js';
+import { auditContextFrom } from '../../platform/http/auditContext.js';
 import { attendanceStatus, issueChallenge, startAttendance, submitAttendance } from './service.js';
 
 export const attendanceRouter: Router = Router();

@@ -6,9 +6,9 @@ import {
 } from 'express-rate-limit';
 import type { Request } from 'express';
 import { ERROR_CODES } from '@spoh/shared';
-import { env } from '../config/env.js';
+import { env } from '../../config/env.js';
 import { requestIdOf } from './requestId.js';
-import { named } from '../lib/named.js';
+import { named } from './named.js';
 
 /**
  * Rate limiting (BUILD_PLAN §8.4).

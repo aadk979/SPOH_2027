@@ -1,5 +1,5 @@
 import type { Prisma } from '../../generated/prisma/client.js';
-import { prisma } from '../../lib/prisma.js';
+import { prisma } from '../../platform/db/client.js';
 
 /** Data access for the caller's own profile, roster and escalation chain. */
 

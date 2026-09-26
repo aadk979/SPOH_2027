@@ -1,5 +1,5 @@
-import { prisma } from '../../lib/prisma.js';
-import { singaporeHourKey } from '../../lib/time.js';
+import { prisma } from '../../platform/db/client.js';
+import { singaporeHourKey } from '../../platform/time/index.js';
 
 /**
  * Reads for the post-event report (PRODUCT_BRIEF §10).

@@ -1,7 +1,7 @@
 import type { Express } from 'express';
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { prisma } from '../../../src/lib/prisma.js';
+import { prisma } from '../../../src/platform/db/client.js';
 import { resetDatabase } from '../../helpers/db.js';
 import { bearer, createVolunteer, type TestVolunteer } from '../../helpers/fixtures.js';
 
@@ -26,7 +26,7 @@ async function startInstance(): Promise<Instance> {
   vi.resetModules();
   const { createApp } = await import('../../../src/app.js');
   const { purgeResolvedAlerts } = await import('../../../src/modules/lostPerson/service.js');
-  const { disconnectPrisma } = await import('../../../src/lib/prisma.js');
+  const { disconnectPrisma } = await import('../../../src/platform/db/client.js');
   return { app: createApp(), purgeResolvedAlerts, disconnect: disconnectPrisma };
 }
 

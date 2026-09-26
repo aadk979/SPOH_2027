@@ -1,6 +1,6 @@
 import type { FootfallTickRecord } from '@spoh/shared';
 import type { FootfallTick, Prisma } from '../../generated/prisma/client.js';
-import { prisma, type PrismaTransactionClient } from '../../lib/prisma.js';
+import { prisma, type PrismaTransactionClient } from '../../platform/db/client.js';
 
 /**
  * Data access for COUNT 2 — footfall.

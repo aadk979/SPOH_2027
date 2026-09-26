@@ -1,6 +1,6 @@
 import type { GiftTypeRecord } from '@spoh/shared';
 import type { GiftType, Prisma } from '../../generated/prisma/client.js';
-import { prisma, type PrismaTransactionClient } from '../../lib/prisma.js';
+import { prisma, type PrismaTransactionClient } from '../../platform/db/client.js';
 
 /**
  * Data access for gifts (PRODUCT_BRIEF §5).

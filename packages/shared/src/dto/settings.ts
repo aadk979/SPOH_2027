@@ -6,7 +6,7 @@ import { Id, IsoDateTime } from './common.js';
  * Runtime settings.
  *
  * Everything here used to be a constant compiled into the server: the shift
- * block boundaries in `lib/time.ts`, the fifteen-minute silence threshold, the
+ * block boundaries in `platform/time`, the fifteen-minute silence threshold, the
  * implausible-tap rate, the welfare cutoff, the retention windows. Each one is a
  * number somebody wants to change during a dry run — and the shift boundaries in
  * particular decide whether a capture screen works at all, because station
@@ -16,7 +16,7 @@ import { Id, IsoDateTime } from './common.js';
  * morning of a rehearsal, so they are stored, versioned by the audit log, and
  * served to both the server and the client from one place.
  *
- * Defaults live in `server/src/lib/settings.ts` and every field is optional on
+ * Defaults live in `server/src/platform/settings/index.ts` and every field is optional on
  * the way in, so an empty settings table is a working system and a partial
  * update only touches what it names.
  */

@@ -1,11 +1,11 @@
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import { ERROR_CODES } from '@spoh/shared';
-import { AppError, IdempotencyKeyReuseError, ValidationError } from '../lib/errors.js';
-import { logger } from '../lib/logger.js';
-import { prisma } from '../lib/prisma.js';
-import { getSettings, DEFAULT_SETTINGS } from '../lib/settings.js';
-import { getAuth } from './auth/index.js';
-import { named } from '../lib/named.js';
+import { AppError, IdempotencyKeyReuseError, ValidationError } from '../errors/index.js';
+import { logger } from '../logger/index.js';
+import { prisma } from '../db/client.js';
+import { getSettings, DEFAULT_SETTINGS } from '../settings/index.js';
+import { getAuth } from '../identity/index.js';
+import { named } from '../http/named.js';
 
 /**
  * Idempotency for every create endpoint (BUILD_PLAN §7.4).

@@ -3,20 +3,20 @@ import type {
   LiveDashboardResponse,
   StationDashboardResponse,
 } from '@spoh/shared';
-import { NotFoundError } from '../../lib/errors.js';
-import { prisma } from '../../lib/prisma.js';
+import { NotFoundError } from '../../platform/errors/index.js';
+import { prisma } from '../../platform/db/client.js';
 import {
   activeShiftBlocks,
   eventDayAnchor,
   minutesBetween,
   singaporeDateString,
-} from '../../lib/time.js';
+} from '../../platform/time/index.js';
 import { getLiveFootfall, SILENT_STATION_MINUTES } from '../footfall/service.js';
 import { listGifts } from '../gift/service.js';
 import { getFunnel } from '../missionCard/service.js';
 import { findStationById } from '../station/repo.js';
 import { getLongShifts, getStaffingGaps } from '../shift/service.js';
-import { DEFAULT_SETTINGS, getSettings } from '../../lib/settings.js';
+import { DEFAULT_SETTINGS, getSettings } from '../../platform/settings/index.js';
 import {
   activeLostPersonCount,
   checkedInCount,

@@ -1,7 +1,7 @@
 import type { BriefingSlotRecord, SwapRequestRecord } from '@spoh/shared';
 import type { Prisma } from '../../generated/prisma/client.js';
-import { minutesBetween } from '../../lib/time.js';
-import { prisma, type PrismaTransactionClient } from '../../lib/prisma.js';
+import { minutesBetween } from '../../platform/time/index.js';
+import { prisma, type PrismaTransactionClient } from '../../platform/db/client.js';
 
 /** Data access for swaps, briefing waves and staffing (PRODUCT_BRIEF §6). */
 

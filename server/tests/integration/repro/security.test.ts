@@ -2,7 +2,7 @@ import type { Express } from 'express';
 import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../../src/app.js';
-import { prisma } from '../../../src/lib/prisma.js';
+import { prisma } from '../../../src/platform/db/client.js';
 import { PURGE_AFTER_HOURS, purgeResolvedAlerts } from '../../../src/modules/lostPerson/service.js';
 import { resetDatabase } from '../../helpers/db.js';
 import {

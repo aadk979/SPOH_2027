@@ -7,18 +7,18 @@ import {
   RegistrationSummaryQuery,
   VoidRegistrationRequest,
 } from '@spoh/shared';
-import { requireAuth } from '../../middleware/auth/index.js';
-import { idempotent } from '../../middleware/idempotency.js';
-import { captureRateLimit, defaultRateLimit } from '../../middleware/rateLimit.js';
-import { requireCapability, requireStationScope } from '../../middleware/rbac.js';
+import { requireAuth } from '../../platform/identity/index.js';
+import { idempotent } from '../../platform/idempotency/index.js';
+import { captureRateLimit, defaultRateLimit } from '../../platform/http/rateLimit.js';
+import { requireCapability, requireStationScope } from '../../platform/access/index.js';
 import {
   validate,
   validatedBody,
   validatedParams,
   validatedQuery,
-} from '../../middleware/validate.js';
-import { captureActorFrom } from '../../lib/captureActor.js';
-import { auditContextFrom } from '../../lib/requestContext.js';
+} from '../../platform/http/validate.js';
+import { captureActorFrom } from '../../platform/http/captureActor.js';
+import { auditContextFrom } from '../../platform/http/auditContext.js';
 import {
   recordGroupRegistration,
   recordRegistration,

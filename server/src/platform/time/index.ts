@@ -13,8 +13,8 @@
  * and always populated, so nothing here became async.
  */
 import type { ShiftBlock } from '@spoh/shared';
-import { env } from '../config/env.js';
-import { getSettings, DEFAULT_SETTINGS } from './settings.js';
+import { env } from '../../config/env.js';
+import { getSettings, DEFAULT_SETTINGS } from '../settings/index.js';
 
 export const EVENT_TIME_ZONE = 'Asia/Singapore';
 

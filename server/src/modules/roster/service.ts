@@ -10,11 +10,11 @@ import {
   type ShiftAssignmentRecord,
 } from '@spoh/shared';
 import type { Volunteer } from '../../generated/prisma/client.js';
-import { writeAudit, type AuditContext } from '../../lib/audit.js';
-import { AppError, NotFoundError, ValidationError } from '../../lib/errors.js';
-import { prisma } from '../../lib/prisma.js';
-import { eventDayAnchor } from '../../lib/time.js';
-import { invalidateVolunteerCache } from '../../middleware/auth/index.js';
+import { writeAudit, type AuditContext } from '../../platform/audit/index.js';
+import { AppError, NotFoundError, ValidationError } from '../../platform/errors/index.js';
+import { prisma } from '../../platform/db/client.js';
+import { eventDayAnchor } from '../../platform/time/index.js';
+import { invalidateVolunteerCache } from '../../platform/identity/index.js';
 import { identityProvider } from '../identity/provider.js';
 import {
   findEventDayByDate,

@@ -4,9 +4,9 @@ import express, { type Express } from 'express';
 import helmet from 'helmet';
 import { pinoHttp } from 'pino-http';
 import { env, isProduction } from './config/env.js';
-import { logger } from './lib/logger.js';
-import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
-import { requestId } from './middleware/requestId.js';
+import { logger } from './platform/logger/index.js';
+import { errorHandler, notFoundHandler } from './platform/http/errorHandler.js';
+import { requestId } from './platform/http/requestId.js';
 import { healthRouter } from './modules/health/router.js';
 import { apiRouter } from './routes.js';
 

@@ -52,7 +52,7 @@ export default defineConfig({
     ],
     coverage: {
       provider: 'v8',
-      include: ['src/modules/**/*.ts', 'src/middleware/**/*.ts'],
+      include: ['src/modules/**/*.ts', 'src/platform/**/*.ts'],
       exclude: ['src/generated/**', '**/*.test.ts', 'src/modules/**/router.ts'],
       thresholds: { lines: 80, functions: 80, branches: 70, statements: 80 },
       reporter: ['text', 'lcov'],

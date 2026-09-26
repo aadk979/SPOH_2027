@@ -1,8 +1,8 @@
 import request from 'supertest';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app.js';
-import { prisma } from '../../src/lib/prisma.js';
-import { getSettings, loadSettings } from '../../src/lib/settings.js';
+import { prisma } from '../../src/platform/db/client.js';
+import { getSettings, loadSettings } from '../../src/platform/settings/index.js';
 import { resetDatabase } from '../helpers/db.js';
 import {
   bearer,

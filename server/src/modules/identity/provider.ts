@@ -9,8 +9,8 @@ import {
 } from '@aws-sdk/client-cognito-identity-provider';
 import type { CommitteeRole } from '@spoh/shared';
 import { env } from '../../config/env.js';
-import { InternalError } from '../../lib/errors.js';
-import { logger } from '../../lib/logger.js';
+import { InternalError } from '../../platform/errors/index.js';
+import { logger } from '../../platform/logger/index.js';
 
 /**
  * Account provisioning (BUILD_PLAN §6.1).

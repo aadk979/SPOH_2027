@@ -14,7 +14,7 @@
  *
  * Unlike `reports/P04/routes.mjs`, which parses the router files, this reads
  * the live router stack, so it survives the files moving. Middleware factories
- * name their closures (`server/src/lib/named.ts`) so a chain reads
+ * name their closures (`server/src/platform/http/named.ts`) so a chain reads
  * `requireCapability(report.generate)`, not `<anonymous>`. The route handler
  * itself (the last function) is counted, not named: P06 turns anonymous
  * handlers into named ones, which is not a change of behaviour.

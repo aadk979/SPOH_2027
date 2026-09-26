@@ -6,7 +6,7 @@ import {
   minutesBetween,
   singaporeDateString,
   singaporeMinuteOfDay,
-} from '../../src/lib/time.js';
+} from '../../src/platform/time/index.js';
 
 /**
  * Time handling (BUILD_PLAN §3.3).

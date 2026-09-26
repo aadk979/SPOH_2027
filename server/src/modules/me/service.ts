@@ -1,8 +1,12 @@
 import { capabilitiesForRole, ERROR_CODES, type MeResponse, type MyAssignment } from '@spoh/shared';
-import { AppError, ForbiddenError, NotFoundError } from '../../lib/errors.js';
-import { writeAudit, type AuditContext } from '../../lib/audit.js';
-import { prisma } from '../../lib/prisma.js';
-import { activeShiftBlocks, eventDayAnchor, singaporeDateString } from '../../lib/time.js';
+import { AppError, ForbiddenError, NotFoundError } from '../../platform/errors/index.js';
+import { writeAudit, type AuditContext } from '../../platform/audit/index.js';
+import { prisma } from '../../platform/db/client.js';
+import {
+  activeShiftBlocks,
+  eventDayAnchor,
+  singaporeDateString,
+} from '../../platform/time/index.js';
 import { toStationSummary } from '../station/repo.js';
 import {
   buildEscalationChain,

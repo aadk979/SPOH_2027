@@ -5,10 +5,10 @@ import {
   type CreateAnnouncementRequest,
   type ListAnnouncementsQuery,
 } from '@spoh/shared';
-import { writeAudit, type AuditContext } from '../../lib/audit.js';
-import { ForbiddenError, NotFoundError } from '../../lib/errors.js';
-import { prisma } from '../../lib/prisma.js';
-import { eventDayAnchor, singaporeDateString } from '../../lib/time.js';
+import { writeAudit, type AuditContext } from '../../platform/audit/index.js';
+import { ForbiddenError, NotFoundError } from '../../platform/errors/index.js';
+import { prisma } from '../../platform/db/client.js';
+import { eventDayAnchor, singaporeDateString } from '../../platform/time/index.js';
 import { findStationById } from '../station/repo.js';
 import { dispatch } from '../notification/service.js';
 import {

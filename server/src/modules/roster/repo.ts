@@ -1,6 +1,6 @@
 import type { ShiftAssignmentRecord, VolunteerRecord } from '@spoh/shared';
 import type { Prisma, Volunteer } from '../../generated/prisma/client.js';
-import { prisma, type PrismaTransactionClient } from '../../lib/prisma.js';
+import { prisma, type PrismaTransactionClient } from '../../platform/db/client.js';
 
 /**
  * Data access for the committee roster.

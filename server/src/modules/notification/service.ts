@@ -8,9 +8,9 @@ import {
   ROLE_PRECEDENCE,
 } from '@spoh/shared';
 import { env } from '../../config/env.js';
-import { logger } from '../../lib/logger.js';
-import { prisma } from '../../lib/prisma.js';
-import { eventDayAnchor, singaporeDateString } from '../../lib/time.js';
+import { logger } from '../../platform/logger/index.js';
+import { prisma } from '../../platform/db/client.js';
+import { eventDayAnchor, singaporeDateString } from '../../platform/time/index.js';
 
 /**
  * Web Push delivery (RFC 8030 / 8292).

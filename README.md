@@ -93,7 +93,7 @@ The Cognito User Pool for this event **does not exist yet**. Rather than block
 every other phase on it, authentication is a pluggable provider:
 
 ```
-middleware/auth/
+server/src/platform/identity/
 ├── types.ts             the contract: a token in, { sub, groups } out
 ├── cognitoProvider.ts   staging and production — aws-jwt-verify
 └── localProvider.ts     development only — HS256 tokens it signs itself

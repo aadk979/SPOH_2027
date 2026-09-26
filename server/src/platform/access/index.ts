@@ -1,10 +1,10 @@
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import { type Capability, roleHasCapability, roleMeets, type CommitteeRole } from '@spoh/shared';
-import { ForbiddenError, StationScopeError, ValidationError } from '../lib/errors.js';
-import { prisma } from '../lib/prisma.js';
-import { activeShiftBlocks, eventDayAnchor, singaporeDateString } from '../lib/time.js';
-import { getAuth } from './auth/index.js';
-import { named } from '../lib/named.js';
+import { ForbiddenError, StationScopeError, ValidationError } from '../errors/index.js';
+import { prisma } from '../db/client.js';
+import { activeShiftBlocks, eventDayAnchor, singaporeDateString } from '../time/index.js';
+import { getAuth } from '../identity/index.js';
+import { named } from '../http/named.js';
 
 /**
  * Authorization, in two layers (BUILD_PLAN §6.3).

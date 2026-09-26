@@ -3,7 +3,7 @@ import request from 'supertest';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../../src/app.js';
 import { env } from '../../src/config/env.js';
-import { prisma } from '../../src/lib/prisma.js';
+import { prisma } from '../../src/platform/db/client.js';
 import { resetDatabase } from '../helpers/db.js';
 import { createVolunteer, type TestVolunteer } from '../helpers/fixtures.js';
 

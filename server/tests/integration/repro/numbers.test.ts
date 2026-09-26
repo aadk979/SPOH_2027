@@ -2,8 +2,8 @@ import type { Express } from 'express';
 import request from 'supertest';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../../../src/app.js';
-import { logger } from '../../../src/lib/logger.js';
-import { prisma } from '../../../src/lib/prisma.js';
+import { logger } from '../../../src/platform/logger/index.js';
+import { prisma } from '../../../src/platform/db/client.js';
 import { resetDatabase } from '../../helpers/db.js';
 import {
   assignToStation,

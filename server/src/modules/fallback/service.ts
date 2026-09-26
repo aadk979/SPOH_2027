@@ -9,11 +9,11 @@ import {
   type ImportRegistrationsRequest,
   type ImportResponse,
 } from '@spoh/shared';
-import { writeAudit, type AuditContext } from '../../lib/audit.js';
-import { AppError, NotFoundError } from '../../lib/errors.js';
-import { logger } from '../../lib/logger.js';
-import { prisma, type PrismaTransactionClient } from '../../lib/prisma.js';
-import { minutesBetween } from '../../lib/time.js';
+import { writeAudit, type AuditContext } from '../../platform/audit/index.js';
+import { AppError, NotFoundError } from '../../platform/errors/index.js';
+import { logger } from '../../platform/logger/index.js';
+import { prisma, type PrismaTransactionClient } from '../../platform/db/client.js';
+import { minutesBetween } from '../../platform/time/index.js';
 
 /**
  * Fallback windows and reconciliation (PRODUCT_BRIEF §11).

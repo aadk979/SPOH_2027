@@ -10,8 +10,8 @@ import {
   type UploadPurpose,
 } from '@spoh/shared';
 import { env } from '../../config/env.js';
-import { AppError, NotFoundError, ValidationError } from '../../lib/errors.js';
-import { logger } from '../../lib/logger.js';
+import { AppError, NotFoundError, ValidationError } from '../../platform/errors/index.js';
+import { logger } from '../../platform/logger/index.js';
 
 /**
  * Media storage.

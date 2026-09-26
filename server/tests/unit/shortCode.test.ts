@@ -4,7 +4,7 @@ import {
   generateQrPayload,
   generateShortCode,
   normaliseShortCode,
-} from '../../src/lib/shortCode.js';
+} from '../../src/modules/missionCard/shortCode.js';
 
 /**
  * Mission Card identifiers (PRODUCT_BRIEF §4.4).

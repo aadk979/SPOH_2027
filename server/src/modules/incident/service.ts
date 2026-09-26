@@ -5,10 +5,10 @@ import type {
   ListIncidentsQuery,
   UpdateIncidentStatusRequest,
 } from '@spoh/shared';
-import { writeAudit, type AuditContext } from '../../lib/audit.js';
-import { NotFoundError } from '../../lib/errors.js';
-import { logger } from '../../lib/logger.js';
-import { prisma } from '../../lib/prisma.js';
+import { writeAudit, type AuditContext } from '../../platform/audit/index.js';
+import { NotFoundError } from '../../platform/errors/index.js';
+import { logger } from '../../platform/logger/index.js';
+import { prisma } from '../../platform/db/client.js';
 import { dispatch } from '../notification/service.js';
 import type { IncidentSeverity } from '@spoh/shared';
 import {

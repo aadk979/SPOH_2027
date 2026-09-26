@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { RuntimeSettings, UpdateSettingsRequest } from '@spoh/shared';
-import { DEFAULT_SETTINGS, getSettings, overrideSettingsForTest } from '../../src/lib/settings.js';
-import { activeShiftBlocks, shiftBlockRanges, singaporeHourKey } from '../../src/lib/time.js';
+import {
+  DEFAULT_SETTINGS,
+  getSettings,
+  overrideSettingsForTest,
+} from '../../src/platform/settings/index.js';
+import {
+  activeShiftBlocks,
+  shiftBlockRanges,
+  singaporeHourKey,
+} from '../../src/platform/time/index.js';
 
 /**
  * Runtime settings.

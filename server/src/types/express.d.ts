@@ -41,7 +41,7 @@ declare global {
        *
        * The correlation id lives on `req.id`, declared by pino-http as its
        * `ReqId` union — read it through `requestIdOf()` in
-       * `middleware/requestId.ts` rather than assuming a string.
+       * `platform/http/requestId.ts` rather than assuming a string.
        */
       auth?: RequestAuth;
     }

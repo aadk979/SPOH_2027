@@ -2,7 +2,7 @@ import type { Express } from 'express';
 import request from 'supertest';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../../../src/app.js';
-import { prisma } from '../../../src/lib/prisma.js';
+import { prisma } from '../../../src/platform/db/client.js';
 import { getLongShifts } from '../../../src/modules/shift/service.js';
 import { resetDatabase } from '../../helpers/db.js';
 import { FROZEN_NOW } from '../../setup.js';

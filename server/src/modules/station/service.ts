@@ -1,5 +1,5 @@
 import { ERROR_CODES, type StationSummary } from '@spoh/shared';
-import { AppError, NotFoundError } from '../../lib/errors.js';
+import { AppError, NotFoundError } from '../../platform/errors/index.js';
 import type { Station } from '../../generated/prisma/client.js';
 import { findStationById, listStations, toStationSummary } from './repo.js';
 

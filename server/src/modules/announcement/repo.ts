@@ -1,6 +1,6 @@
 import type { AnnouncementRecord, CommitteeRole } from '@spoh/shared';
 import type { Prisma } from '../../generated/prisma/client.js';
-import { prisma, type PrismaTransactionClient } from '../../lib/prisma.js';
+import { prisma, type PrismaTransactionClient } from '../../platform/db/client.js';
 
 /** Data access for announcements (PRODUCT_BRIEF §8). */
 

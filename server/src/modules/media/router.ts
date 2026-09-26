@@ -1,10 +1,10 @@
 import { Router, type Request, type Response } from 'express';
 import { z } from 'zod';
 import { CreateUploadRequest } from '@spoh/shared';
-import { requireAuth } from '../../middleware/auth/index.js';
-import { defaultRateLimit, sensitiveRateLimit } from '../../middleware/rateLimit.js';
-import { requireCapability } from '../../middleware/rbac.js';
-import { validate, validatedBody, validatedQuery } from '../../middleware/validate.js';
+import { requireAuth } from '../../platform/identity/index.js';
+import { defaultRateLimit, sensitiveRateLimit } from '../../platform/http/rateLimit.js';
+import { requireCapability } from '../../platform/access/index.js';
+import { validate, validatedBody, validatedQuery } from '../../platform/http/validate.js';
 import { createUpload, mediaEnabled, readUrl } from './service.js';
 
 /**

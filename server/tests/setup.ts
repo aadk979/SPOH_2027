@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, vi } from 'vitest';
-import { disconnectPrisma, pingDatabase } from '../src/lib/prisma.js';
+import { disconnectPrisma, pingDatabase } from '../src/platform/db/client.js';
 
 /**
  * Integration test setup.

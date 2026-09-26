@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { isCampusIp, parseCidr } from '../../src/lib/campusNetwork.js';
+import { isCampusIp, parseCidr } from '../../src/modules/attendance/campusNetwork.js';
 
 vi.mock('../../src/config/env.js', () => ({
   env: { ATTENDANCE_SIGNING_SECRET: 'attendance-test-secret-at-least-32-characters' },

@@ -1,5 +1,5 @@
 import { Router, type Request, type Response } from 'express';
-import { requireAuth } from '../../middleware/auth/index.js';
+import { requireAuth } from '../../platform/identity/index.js';
 import { getActiveStations } from './service.js';
 
 /**
