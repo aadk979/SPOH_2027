@@ -55,7 +55,6 @@ export async function upsertVolunteer(
         role: data.role,
         portfolio: data.portfolio ?? existing.portfolio,
         reportsToId: data.reportsToId ?? existing.reportsToId,
-        active: true,
       },
     });
     return { volunteer, created: false };

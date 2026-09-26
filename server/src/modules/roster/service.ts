@@ -1,13 +1,17 @@
-import type {
-  ProvisionVolunteerRequest,
-  ProvisionVolunteerResponse,
-  RosterImportIssue,
-  RosterImportRequest,
-  RosterImportResponse,
-  ShiftAssignmentRecord,
+import {
+  ERROR_CODES,
+  ROLE_PRECEDENCE,
+  type CommitteeRole,
+  type ProvisionVolunteerRequest,
+  type ProvisionVolunteerResponse,
+  type RosterImportIssue,
+  type RosterImportRequest,
+  type RosterImportResponse,
+  type ShiftAssignmentRecord,
 } from '@spoh/shared';
+import type { Volunteer } from '../../generated/prisma/client.js';
 import { writeAudit, type AuditContext } from '../../lib/audit.js';
-import { NotFoundError, ValidationError } from '../../lib/errors.js';
+import { AppError, NotFoundError, ValidationError } from '../../lib/errors.js';
 import { prisma } from '../../lib/prisma.js';
 import { eventDayAnchor } from '../../lib/time.js';
 import { invalidateVolunteerCache } from '../../middleware/auth/index.js';
@@ -29,10 +33,58 @@ import {
  * Provisioning creates the identity and the `Volunteer` row together, so a
  * volunteer who can sign in is by construction a volunteer who is on the
  * roster — an account with no roster row gets `NOT_PROVISIONED` at the door.
+ *
+ * Both entry points take the acting administrator, because the escalation
+ * rules in `admin/service.ts` apply here too (F03-001): not your own account,
+ * nobody at or above you, and no role at or above yours. Otherwise a Deputy
+ * with `roster.edit` could make themselves an Admin with a one-row CSV.
  */
+
+export interface RosterActor {
+  volunteerId: string;
+  role: CommitteeRole;
+}
+
+/** True when `actor` is strictly more privileged than `subject`. */
+function outranks(actor: CommitteeRole, subject: CommitteeRole): boolean {
+  return ROLE_PRECEDENCE[actor] < ROLE_PRECEDENCE[subject];
+}
+
+/**
+ * Refuse a role grant or an edit of `existing` that the actor may not make.
+ * `where` names the row in an import, so the refusal says which line to fix.
+ */
+function assertMayManage(
+  actor: RosterActor,
+  change: { role: CommitteeRole; existing: Volunteer | null },
+  where = '',
+): void {
+  if (change.existing?.id === actor.volunteerId) {
+    throw new AppError(
+      403,
+      ERROR_CODES.SELF_MUTATION_DENIED,
+      `${where}You cannot change your own account. Ask another administrator.`,
+    );
+  }
+  if (!outranks(actor.role, change.role)) {
+    throw new AppError(
+      403,
+      ERROR_CODES.ROLE_ESCALATION_DENIED,
+      `${where}You cannot grant a role at or above your own.`,
+    );
+  }
+  if (change.existing && !outranks(actor.role, change.existing.role)) {
+    throw new AppError(
+      403,
+      ERROR_CODES.ROLE_ESCALATION_DENIED,
+      `${where}You cannot change an account at or above your own level.`,
+    );
+  }
+}
 
 export async function provisionVolunteer(
   request: ProvisionVolunteerRequest,
+  actor: RosterActor,
   audit: AuditContext,
 ): Promise<ProvisionVolunteerResponse> {
   const reportsTo = request.reportsToEmail
@@ -46,6 +98,7 @@ export async function provisionVolunteer(
   }
 
   const existing = await findVolunteerByEmail(request.email);
+  assertMayManage(actor, { role: request.role, existing });
 
   // Only mint an identity for someone who does not have one. Re-provisioning is
   // a normal operation (a role change, a corrected phone number) and must not
@@ -100,9 +153,11 @@ export async function provisionVolunteer(
  */
 export async function importRoster(
   request: RosterImportRequest,
+  actor: RosterActor,
   audit: AuditContext,
 ): Promise<RosterImportResponse> {
   const issues: RosterImportIssue[] = [];
+  const existingByEmail = await loadExistingForImport(request, actor);
   const counters = {
     volunteersCreated: 0,
     volunteersUpdated: 0,
@@ -116,7 +171,7 @@ export async function importRoster(
   const identities = new Map<string, string>();
   for (const row of request.rows) {
     if (identities.has(row.email)) continue;
-    const existing = await findVolunteerByEmail(row.email);
+    const existing = existingByEmail.get(row.email);
     if (existing) {
       identities.set(row.email, existing.cognitoSub);
     } else if (request.commit) {
@@ -139,6 +194,21 @@ export async function importRoster(
     const byEmail = new Map<string, string>();
 
     for (const [index, row] of request.rows.entries()) {
+      // A deactivated account is restored through the admin screen, where the
+      // reason it was deactivated is on show, not by appearing in a CSV.
+      const existing = existingByEmail.get(row.email);
+      if (existing && !existing.active) {
+        if (!byEmail.has(row.email)) {
+          byEmail.set(row.email, DEACTIVATED);
+          issues.push({
+            rowNumber: index + 1,
+            field: 'email',
+            message: `${row.email} is deactivated. Restore their access before importing them.`,
+          });
+        }
+        continue;
+      }
+
       const { volunteer, created } = await upsertVolunteer(tx, {
         cognitoSub: identities.get(row.email) ?? 'pending',
         displayName: row.displayName,
@@ -152,7 +222,17 @@ export async function importRoster(
       if (created) counters.volunteersCreated += 1;
       else counters.volunteersUpdated += 1;
 
-      void index;
+      // `roster.import` records counts only, so a role change gets its own row.
+      if (existing && existing.role !== volunteer.role) {
+        await writeAudit(tx, {
+          ...audit,
+          action: 'user.update',
+          entityType: 'Volunteer',
+          entityId: volunteer.id,
+          before: { role: existing.role },
+          after: { role: volunteer.role },
+        });
+      }
     }
 
     for (const [index, row] of request.rows.entries()) {
@@ -160,7 +240,13 @@ export async function importRoster(
 
       if (row.reportsToEmail) {
         const managerId = byEmail.get(row.reportsToEmail);
-        if (!managerId) {
+        if (managerId === DEACTIVATED) {
+          issues.push({
+            rowNumber,
+            field: 'reportsToEmail',
+            message: `${row.reportsToEmail} is deactivated and cannot be a manager`,
+          });
+        } else if (!managerId) {
           issues.push({
             rowNumber,
             field: 'reportsToEmail',
@@ -213,7 +299,7 @@ export async function importRoster(
       }
 
       const volunteerId = byEmail.get(row.email);
-      if (!volunteerId) continue;
+      if (!volunteerId || volunteerId === DEACTIVATED) continue;
 
       const result = await upsertAssignment(tx, {
         volunteerId,
@@ -256,6 +342,30 @@ export async function importRoster(
   }
 
   return { committed: request.commit, ...counters, issues };
+}
+
+/** Marks a deactivated person in the import's email → id map. */
+const DEACTIVATED = 'deactivated';
+
+/**
+ * Load every existing account the file names, refusing the whole import if any
+ * row would breach the escalation rules. All or nothing: a half-applied roster
+ * is worse than none, and the importer fixes the file and re-runs the preview.
+ */
+async function loadExistingForImport(
+  request: RosterImportRequest,
+  actor: RosterActor,
+): Promise<Map<string, Volunteer>> {
+  const existingByEmail = new Map<string, Volunteer>();
+  for (const [index, row] of request.rows.entries()) {
+    if (!existingByEmail.has(row.email)) {
+      const existing = await findVolunteerByEmail(row.email);
+      if (existing) existingByEmail.set(row.email, existing);
+    }
+    const existing = existingByEmail.get(row.email) ?? null;
+    assertMayManage(actor, { role: row.role, existing }, `Row ${index + 1}: `);
+  }
+  return existingByEmail;
 }
 
 /** Sentinel used to roll back the dry-run transaction. Never surfaces. */

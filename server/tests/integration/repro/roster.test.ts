@@ -61,7 +61,7 @@ describe('roster import and provisioning (P03 repros)', () => {
   });
 
   // F03-001
-  it.skip('does not let a Deputy make their own account an Admin through the import', async () => {
+  it('does not let a Deputy make their own account an Admin through the import', async () => {
     const response = await importRoster(
       deputy,
       [{ displayName: 'Deputy', email: deputy.email, role: 'ADMIN' }],
@@ -74,7 +74,7 @@ describe('roster import and provisioning (P03 repros)', () => {
   });
 
   // F03-001
-  it.skip('does not let a Chief provision an Admin account', async () => {
+  it('does not let a Chief provision an Admin account', async () => {
     const response = await request(app)
       .post('/api/v1/roster/volunteers')
       .set('Authorization', bearer(chief))
@@ -85,7 +85,7 @@ describe('roster import and provisioning (P03 repros)', () => {
   });
 
   // F03-001
-  it.skip('does not reactivate a deactivated account because its email is in the file', async () => {
+  it('does not reactivate a deactivated account because its email is in the file', async () => {
     const leaver = await createVolunteer({ email: 'leaver@roster.test', role: 'VOLUNTEER' });
     await prisma.volunteer.update({
       where: { id: leaver.id },
@@ -96,6 +96,24 @@ describe('roster import and provisioning (P03 repros)', () => {
 
     const row = await prisma.volunteer.findUniqueOrThrow({ where: { id: leaver.id } });
     expect(row.active).toBe(false);
+  });
+
+  // F03-001
+  it('audits a role change made through the import under the changed person', async () => {
+    const volunteer = await createVolunteer({ email: 'promoted@roster.test', role: 'VOLUNTEER' });
+
+    const response = await importRoster(
+      chief,
+      [{ displayName: 'Promoted', email: volunteer.email, role: 'IC' }],
+      true,
+    );
+
+    expect(response.status).toBe(200);
+    const entry = await prisma.auditLog.findFirst({
+      where: { action: 'user.update', entityId: volunteer.id },
+    });
+    expect(entry?.before).toEqual({ role: 'VOLUNTEER' });
+    expect(entry?.after).toEqual({ role: 'IC' });
   });
 
   // F03-025
