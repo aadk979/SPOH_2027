@@ -103,7 +103,7 @@ describe('dashboard, report and import numbers (P03 repros)', () => {
   });
 
   // F03-012
-  it.skip('imports two paper tallies for the same station, category and time as separate rows', async () => {
+  it('imports two paper tallies for the same station, category and time as separate rows', async () => {
     const response = await request(app)
       .post('/api/v1/fallback/imports/registrations')
       .set('Authorization', bearer(chief))
@@ -130,6 +130,26 @@ describe('dashboard, report and import numbers (P03 repros)', () => {
 
     expect(response.status).toBe(201);
     expect(await prisma.registration.count()).toBe(5);
+  });
+
+  // F03-012
+  it('imports two footfall tallies for the same station and time as separate rows', async () => {
+    const rows = [
+      { stationCode: 'DESK', timeBlockStart: '2027-01-07T02:00:00.000Z', quantity: 4 },
+      { stationCode: 'DESK', timeBlockStart: '2027-01-07T02:00:00.000Z', quantity: 6 },
+    ];
+    const post = (): request.Test =>
+      request(app)
+        .post('/api/v1/fallback/imports/footfall')
+        .set('Authorization', bearer(chief))
+        .send({ source: 'PAPER', commit: true, fileName: 'door-sheets.csv', rows });
+
+    expect((await post()).status).toBe(201);
+    // Re-running the same file is still safe.
+    expect((await post()).body.recordsCreated).toBe(0);
+
+    const total = await prisma.footfallTick.aggregate({ _sum: { quantity: true } });
+    expect(total._sum.quantity).toBe(10);
   });
 
   // F02-011
