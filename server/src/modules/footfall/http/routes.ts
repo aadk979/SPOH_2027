@@ -1,4 +1,4 @@
-import { Router, type Request, type Response } from 'express';
+import { Router } from 'express';
 import { z } from 'zod';
 import {
   CreateFootfallBulkRequest,
@@ -11,21 +11,14 @@ import { requireAuth } from '../../../platform/identity/index.js';
 import { idempotent } from '../../../platform/idempotency/index.js';
 import { captureRateLimit, defaultRateLimit } from '../../../platform/http/rateLimit.js';
 import { requireCapability, requireStationScope } from '../../../platform/access/index.js';
+import { validate } from '../../../platform/http/validate.js';
 import {
-  validate,
-  validatedBody,
-  validatedParams,
-  validatedQuery,
-} from '../../../platform/http/validate.js';
-import { captureActorFrom } from '../../../platform/http/captureActor.js';
-import { auditContextFrom } from '../../../platform/http/auditContext.js';
-import {
-  getLiveFootfall,
-  recordBulk,
-  recordTick,
-  summariseFootfall,
-  voidTickById,
-} from '../application/footfall.js';
+  liveFootfallHandler,
+  recordBulkHandler,
+  recordTickHandler,
+  summariseFootfallHandler,
+  voidTickHandler,
+} from './handlers.js';
 
 /** COUNT 2 — the clicker replacement (BUILD_PLAN §7.2). */
 export const footfallRouter: Router = Router();
@@ -41,11 +34,7 @@ footfallRouter.post(
   validate({ body: CreateFootfallTickRequest }),
   requireStationScope(),
   idempotent('POST /footfall/ticks'),
-  async (req: Request, res: Response) => {
-    const body = validatedBody<CreateFootfallTickRequest>(req);
-    const result = await recordTick(body, captureActorFrom(req), auditContextFrom(req));
-    res.status(201).json(result);
-  },
+  recordTickHandler,
 );
 
 /**
@@ -60,11 +49,7 @@ footfallRouter.post(
   validate({ body: CreateFootfallBulkRequest }),
   requireStationScope(),
   idempotent('POST /footfall/bulk'),
-  async (req: Request, res: Response) => {
-    const body = validatedBody<CreateFootfallBulkRequest>(req);
-    const result = await recordBulk(body, captureActorFrom(req), auditContextFrom(req));
-    res.status(201).json(result);
-  },
+  recordBulkHandler,
 );
 
 footfallRouter.post(
@@ -72,12 +57,7 @@ footfallRouter.post(
   defaultRateLimit,
   requireCapability('record.void'),
   validate({ params: IdParams, body: VoidFootfallTickRequest }),
-  async (req: Request, res: Response) => {
-    const { id } = validatedParams<z.infer<typeof IdParams>>(req);
-    const { reason } = validatedBody<VoidFootfallTickRequest>(req);
-    await voidTickById(id, reason, auditContextFrom(req));
-    res.status(204).send();
-  },
+  voidTickHandler,
 );
 
 footfallRouter.get(
@@ -85,17 +65,12 @@ footfallRouter.get(
   defaultRateLimit,
   requireCapability('dashboard.station.read'),
   validate({ query: FootfallSummaryQuery }),
-  async (req: Request, res: Response) => {
-    const query = validatedQuery<FootfallSummaryQuery>(req);
-    res.status(200).json(await summariseFootfall(query));
-  },
+  summariseFootfallHandler,
 );
 
 footfallRouter.get(
   '/live',
   defaultRateLimit,
   requireCapability('dashboard.station.read'),
-  async (_req: Request, res: Response) => {
-    res.status(200).json(await getLiveFootfall());
-  },
+  liveFootfallHandler,
 );

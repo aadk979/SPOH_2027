@@ -1,4 +1,3 @@
-import type { FootfallTickRecord } from '@spoh/shared';
 import type { FootfallTick, Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 
@@ -9,19 +8,6 @@ import { prisma, type PrismaTransactionClient } from '../../../platform/db/clien
  * quantity 1, but a clicker total keyed in by an IC at end of shift is one row
  * with quantity 240. Counting rows would silently discard the fallback data.
  */
-
-export function toFootfallTickRecord(row: FootfallTick): FootfallTickRecord {
-  return {
-    id: row.id,
-    stationId: row.stationId,
-    quantity: row.quantity,
-    source: row.source,
-    recordedAt: row.recordedAt.toISOString(),
-    clientRecordedAt: row.clientRecordedAt?.toISOString() ?? null,
-    timeBlockStart: row.timeBlockStart?.toISOString() ?? null,
-    voided: row.voided,
-  };
-}
 
 export async function createTick(
   tx: PrismaTransactionClient,

@@ -9,7 +9,7 @@ import { notificationRouter } from './modules/notification/router.js';
 import { auditRouter } from './modules/audit/router.js';
 import { dashboardRouter } from './modules/dashboard/router.js';
 import { fallbackRouter } from './modules/fallback/router.js';
-import { footfallRouter } from './modules/footfall/http/routes.js';
+import { footfallRouter } from './modules/footfall/index.js';
 import { giftRouter } from './modules/gift/router.js';
 import { incidentRouter } from './modules/incident/router.js';
 import { lostFoundRouter } from './modules/lostFound/router.js';
