@@ -3,7 +3,7 @@
 import { openDB, type IDBPDatabase } from 'idb';
 import { ApiError, api, isRetryable } from './api';
 import { getClientSettings, ms } from './runtimeSettings';
-import { getSession, subscribeToSession } from './session';
+import { currentVolunteerId, getSession, subscribeToSession } from './session';
 
 /**
  * The local write buffer (BUILD_PLAN §9.5).
@@ -37,6 +37,11 @@ export interface OutboxEntry {
   status: OutboxStatus;
   /** Last error message, surfaced on the shift diagnostics panel. */
   lastError: string | null;
+  /**
+   * The volunteer signed in when the tap was made. Absent on entries queued by
+   * a build that did not record it; those go under whoever is signed in.
+   */
+  ownerId?: string | null;
 }
 
 /** After this many attempts an entry is parked for an IC to salvage by hand. */
@@ -135,6 +140,7 @@ export async function enqueue(input: {
     lastAttemptAt: null,
     status: 'pending',
     lastError: null,
+    ownerId: currentVolunteerId(),
   };
 
   const database = await db();
@@ -194,7 +200,7 @@ export async function flush(options: FlushOptions = {}): Promise<void> {
   try {
     const database = await db();
     const entries = ((await database.getAll(STORE)) as OutboxEntry[])
-      .filter((entry) => entry.status !== 'failed')
+      .filter((entry) => entry.status !== 'failed' && isSendableNow(entry))
       .sort((a, b) => a.clientRecordedAt.localeCompare(b.clientRecordedAt));
 
     for (const entry of entries) {
@@ -219,6 +225,19 @@ export async function flush(options: FlushOptions = {}): Promise<void> {
   } finally {
     flushing = false;
   }
+}
+
+/**
+ * Only the person who made a capture may send it (F04-003).
+ *
+ * The server credits a capture to whoever's token carries it. On a phone
+ * handed from Sam to Alex, sending Sam's queued taps under Alex's sign-in
+ * would put Alex's name on them, or have them refused at a station Alex is
+ * not rostered on. They wait, visible on the diagnostics panel, until Sam
+ * signs in again.
+ */
+function isSendableNow(entry: OutboxEntry): boolean {
+  return entry.ownerId == null || entry.ownerId === currentVolunteerId();
 }
 
 /**

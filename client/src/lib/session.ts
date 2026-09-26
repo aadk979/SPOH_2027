@@ -26,6 +26,8 @@ import { clientEnv } from './env';
 
 export interface Session {
   accessToken: string;
+  /** `Volunteer.id`: whose captures the outbox may send under this session. */
+  volunteerId: string;
   displayName: string;
   role: CommitteeRole;
   capabilities: Capability[];
@@ -45,6 +47,20 @@ export type SessionStatus = 'unknown' | 'ready';
 
 let session: Session | null = null;
 let status: SessionStatus = 'unknown';
+
+/**
+ * Who is signed in on this device, kept when the access token merely expires.
+ *
+ * `getSession()` drops an expired token, but the person holding the phone has
+ * not changed: a tap made offline after expiry is still theirs. Only an
+ * explicit sign-in or sign-out changes it (F04-003).
+ */
+let volunteerId: string | null = null;
+
+/** The volunteer this device is signed in as, or null after a sign-out. */
+export function currentVolunteerId(): string | null {
+  return volunteerId;
+}
 
 type Listener = () => void;
 const listeners = new Set<Listener>();
@@ -110,6 +126,7 @@ function scheduleSilentRefresh(expiresAt: number): void {
 
 export function setSession(next: Session | null): void {
   session = next;
+  volunteerId = next?.volunteerId ?? null;
   status = 'ready';
 
   if (next?.refreshAvailable) scheduleSilentRefresh(next.expiresAt);
@@ -129,6 +146,7 @@ export function clearSession(): void {
 export function sessionFromResponse(response: SessionResponse): Session {
   return {
     accessToken: response.accessToken,
+    volunteerId: response.volunteer.id,
     displayName: response.volunteer.displayName,
     role: response.volunteer.role,
     capabilities: response.capabilities,

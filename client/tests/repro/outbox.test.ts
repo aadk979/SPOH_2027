@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '@/lib/api';
 import { cancel, enqueue, flush, listEntries } from '@/lib/outbox';
+import { clearSession, setSession, type Session } from '@/lib/session';
 
 /**
  * P03 bug reproduction: the outbox gives up for good on answers that are not
@@ -73,18 +74,49 @@ describe('outbox retries (P03 repros)', () => {
 });
 
 describe('outbox ownership on a shared phone (P04 repro)', () => {
+  function signedInAs(volunteerId: string, displayName: string): Session {
+    return {
+      accessToken: `token-${volunteerId}`,
+      volunteerId,
+      displayName,
+      role: 'VOLUNTEER',
+      capabilities: [],
+      expiresAt: Date.now() + 3_600_000,
+      refreshAvailable: false,
+    };
+  }
+
+  afterEach(() => {
+    clearSession();
+  });
+
   // F04-003
-  it.skip('does not send one volunteer’s queued capture under the next volunteer’s sign-in', async () => {
+  it('does not send one volunteer’s queued capture under the next volunteer’s sign-in', async () => {
     // Sam taps while offline, signs out and hands the phone to Alex.
+    setSession(signedInAs('sam', 'Sam'));
     await capture('queued-by-sam');
-    const { clearSession } = await import('@/lib/session');
     clearSession();
 
     // Alex signs in; every request now carries Alex's token, and the server
     // records Alex as the one who captured it.
+    setSession(signedInAs('alex', 'Alex'));
     mockedApi.mockResolvedValue({});
     await flush({ force: true });
 
     expect(mockedApi).not.toHaveBeenCalled();
+  });
+
+  // F04-003
+  it('sends a volunteer’s queued capture once they sign in again', async () => {
+    setSession(signedInAs('sam', 'Sam'));
+    await capture('queued-by-sam-again');
+    clearSession();
+
+    setSession(signedInAs('sam', 'Sam'));
+    mockedApi.mockResolvedValue({});
+    await flush({ force: true });
+
+    expect(mockedApi).toHaveBeenCalledTimes(1);
+    expect(await listEntries()).toEqual([]);
   });
 });
