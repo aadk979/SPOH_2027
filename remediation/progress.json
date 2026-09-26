@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-26T16:17:32.664Z",
+  "updatedAt": "2026-09-26T16:31:57.686Z",
   "current": {
     "phase": "P06",
-    "step": "P06.1"
+    "step": "P06.2"
   },
   "gates": [
     {
@@ -1177,11 +1177,20 @@
         {
           "id": "P06.2",
           "title": "Platform layer",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-26T16:18:56.685Z",
+          "completedAt": "2026-09-26T16:31:57.686Z",
+          "commits": ["6c182ce", "bb511dc"],
+          "notes": [
+            {
+              "at": "2026-09-26T16:31:57.601Z",
+              "text": "lib/ and middleware/ moved into platform/{db,logger,errors,audit,time,settings,http,idempotency,access,identity}; campusNetwork, shortCode to their modules"
+            },
+            {
+              "at": "2026-09-26T16:31:57.686Z",
+              "text": "Clock interface; missionCard index.ts; inventory unchanged (98); express-in-http 32->26"
+            }
+          ]
         },
         {
           "id": "P06.3",
