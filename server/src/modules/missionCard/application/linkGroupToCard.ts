@@ -1,4 +1,4 @@
-import type { PrismaTransactionClient } from '../../platform/db/client.js';
+import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 
 /**
  * Link a group registration to the Mission Card the booth handed over, inside

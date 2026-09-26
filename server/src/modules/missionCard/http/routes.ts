@@ -8,22 +8,22 @@ import {
   TimeRangeQuery,
   VoidCardRequest,
 } from '@spoh/shared';
-import { requireAuth } from '../../platform/identity/index.js';
-import { idempotent } from '../../platform/idempotency/index.js';
+import { requireAuth } from '../../../platform/identity/index.js';
+import { idempotent } from '../../../platform/idempotency/index.js';
 import {
   captureRateLimit,
   defaultRateLimit,
   sensitiveRateLimit,
-} from '../../platform/http/rateLimit.js';
-import { requireCapability, requireStationScope } from '../../platform/access/index.js';
+} from '../../../platform/http/rateLimit.js';
+import { requireCapability, requireStationScope } from '../../../platform/access/index.js';
 import {
   validate,
   validatedBody,
   validatedParams,
   validatedQuery,
-} from '../../platform/http/validate.js';
-import { captureActorFrom } from '../../platform/http/captureActor.js';
-import { auditContextFrom } from '../../platform/http/auditContext.js';
+} from '../../../platform/http/validate.js';
+import { captureActorFrom } from '../../../platform/http/captureActor.js';
+import { auditContextFrom } from '../../../platform/http/auditContext.js';
 import {
   generateBatch,
   getCard,
@@ -32,7 +32,7 @@ import {
   reissueCard,
   stampCard,
   voidCard,
-} from './service.js';
+} from '../application/missionCards.js';
 
 /** COUNT 3 — Mission Cards (BUILD_PLAN §7.2). */
 export const missionCardRouter: Router = Router();

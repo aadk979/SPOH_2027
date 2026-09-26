@@ -13,9 +13,9 @@ import { bearer, createVolunteer } from '../../helpers/fixtures.js';
 
 const codes = vi.hoisted(() => ({ next: [] as string[] }));
 
-vi.mock('../../../src/modules/missionCard/shortCode.js', async (importOriginal) => {
+vi.mock('../../../src/modules/missionCard/domain/shortCode.js', async (importOriginal) => {
   const original =
-    await importOriginal<typeof import('../../../src/modules/missionCard/shortCode.js')>();
+    await importOriginal<typeof import('../../../src/modules/missionCard/domain/shortCode.js')>();
   return {
     ...original,
     generateShortCode: () => codes.next.shift() ?? original.generateShortCode(),

@@ -14,13 +14,13 @@ import {
   auditStationScopeBypass,
   writeAudit,
   type AuditContext,
-} from '../../platform/audit/index.js';
-import type { CaptureActor } from '../../platform/http/captureActor.js';
-import { AppError, NotFoundError } from '../../platform/errors/index.js';
-import { prisma } from '../../platform/db/client.js';
-import { generateQrPayload, generateShortCode, normaliseShortCode } from './shortCode.js';
-import { rangeOverlapsFallbackWindow } from '../fallback/repo.js';
-import { listStampingStations, requireActiveStation } from '../station/index.js';
+} from '../../../platform/audit/index.js';
+import type { CaptureActor } from '../../../platform/http/captureActor.js';
+import { AppError, NotFoundError } from '../../../platform/errors/index.js';
+import { prisma } from '../../../platform/db/client.js';
+import { generateQrPayload, generateShortCode, normaliseShortCode } from '../domain/shortCode.js';
+import { rangeOverlapsFallbackWindow } from '../../fallback/repo.js';
+import { listStampingStations, requireActiveStation } from '../../station/index.js';
 import {
   countByStatus,
   countCardsPerStation,
@@ -34,7 +34,7 @@ import {
   toMissionCardRecord,
   updateCard,
   type CardWithContext,
-} from './repo.js';
+} from '../data/repo.js';
 
 /**
  * COUNT 3 — Mission Cards (PRODUCT_BRIEF §4).
