@@ -184,7 +184,10 @@ export async function importRoster(
     } else {
       // Dry run: no identity is created, so use a placeholder that is never
       // written. It exists only so the preview can report what would happen.
-      identities.set(row.email, 'pending');
+      // It is unique per person because the preview really inserts the rows
+      // (then rolls back), and `cognitoSub` is unique: one shared placeholder
+      // failed the preview with a 500 as soon as a file had two new people.
+      identities.set(row.email, `pending:${row.email}`);
     }
   }
 
@@ -210,7 +213,7 @@ export async function importRoster(
       }
 
       const { volunteer, created } = await upsertVolunteer(tx, {
-        cognitoSub: identities.get(row.email) ?? 'pending',
+        cognitoSub: identities.get(row.email) ?? `pending:${row.email}`,
         displayName: row.displayName,
         email: row.email,
         phone: row.phone ?? null,

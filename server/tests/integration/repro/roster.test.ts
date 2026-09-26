@@ -46,7 +46,7 @@ function importRoster(actor: TestVolunteer, rows: unknown[], commit: boolean): r
 
 describe('roster import and provisioning (P03 repros)', () => {
   // F02-002
-  it.skip('previews a file with two new people instead of failing with a 500', async () => {
+  it('previews a file with two new people instead of failing with a 500', async () => {
     const response = await importRoster(
       chief,
       [
