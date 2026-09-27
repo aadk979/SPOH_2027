@@ -364,4 +364,39 @@ describe('list reads (F03-029)', () => {
     expect(calls).toBe(1);
     stationLookups.forEach((spy) => spy.mockRestore());
   });
+
+  it('names the stations of a page of lost-and-found items in one query', async () => {
+    for (const code of ['F1', 'F2', 'F3']) {
+      const station = await createStation({ code, name: `Floor ${code}` });
+      await as(ic).post('/lost-found', {
+        itemLabel: `Bottle at ${code}`,
+        foundStationId: station.id,
+      });
+    }
+
+    const stationLookups = [
+      vi.spyOn(prisma.station, 'findUnique'),
+      vi.spyOn(prisma.station, 'findMany'),
+    ];
+    const response = await as(ic).get('/lost-found');
+
+    expect(response.status).toBe(200);
+    expect(response.body.data).toHaveLength(3);
+    const calls = stationLookups.reduce((sum, spy) => sum + spy.mock.calls.length, 0);
+    expect(calls).toBe(1);
+    stationLookups.forEach((spy) => spy.mockRestore());
+  });
+});
+
+describe('audit actions (F03-018)', () => {
+  it.skip('audits a lost-and-found close-out as lostFound.closeOut, not as a claim', async () => {
+    await as(ic).post('/lost-found', { itemLabel: 'Umbrella' });
+
+    expect((await as(chief).post('/lost-found/close-out')).status).toBe(200);
+
+    const entry = await prisma.auditLog.findFirst({
+      where: { entityType: 'LostFoundItem', entityId: null },
+    });
+    expect(entry?.action).toBe('lostFound.closeOut');
+  });
 });
