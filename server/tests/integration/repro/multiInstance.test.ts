@@ -97,7 +97,7 @@ describe('two instances, one database (P03.5 repros)', () => {
   });
 
   // F03-031
-  it.skip('purges each resolved lost-person alert once when every worker runs the job', async () => {
+  it('purges each resolved lost-person alert once when every worker runs the job', async () => {
     const resolvedAt = new Date(Date.now() - 48 * 60 * 60 * 1000);
     for (let i = 0; i < 5; i += 1) {
       await prisma.lostPersonAlert.create({

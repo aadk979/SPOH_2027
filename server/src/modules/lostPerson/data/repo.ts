@@ -89,9 +89,17 @@ export async function purgeAlert(
     ackCount: number;
     resolutionMinutes: number;
   },
-): Promise<void> {
-  // The anonymised summary is created first, so the descriptive fields are
-  // never nulled without a replacement record existing in the same transaction.
+): Promise<boolean> {
+  // Claim the alert first, conditionally: every worker runs the purge, and the
+  // one whose update finds it unpurged does the work; the others get 0 rows and
+  // stop, so each alert gets one summary (F03-031). The summary follows in the
+  // same transaction, so the fields are never nulled without one.
+  const { count } = await tx.lostPersonAlert.updateMany({
+    where: { id: alert.id, purgedAt: null },
+    data: { approxAge: null, descriptionText: null, clothingText: null, purgedAt: new Date() },
+  });
+  if (count === 0) return false;
+
   await tx.lostPersonSummary.create({
     data: {
       raisedAt: alert.raisedAt,
@@ -101,16 +109,7 @@ export async function purgeAlert(
       ackCount: alert.ackCount,
     },
   });
-
-  await tx.lostPersonAlert.update({
-    where: { id: alert.id },
-    data: {
-      approxAge: null,
-      descriptionText: null,
-      clothingText: null,
-      purgedAt: new Date(),
-    },
-  });
+  return true;
 }
 
 /**

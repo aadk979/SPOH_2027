@@ -19,8 +19,8 @@ async function purgeOne(
   alert: Candidate & { resolvedAt: Date },
   outcome: 'RESOLVED_FOUND' | 'RESOLVED_OTHER',
 ) {
-  await prisma.$transaction(async (tx) => {
-    await purgeAlert(tx, {
+  return prisma.$transaction(async (tx) => {
+    const claimed = await purgeAlert(tx, {
       id: alert.id,
       raisedAt: alert.raisedAt,
       resolvedAt: alert.resolvedAt,
@@ -28,6 +28,7 @@ async function purgeOne(
       ackCount: alert._count.acknowledgements,
       resolutionMinutes: minutesBetween(alert.raisedAt, alert.resolvedAt),
     });
+    if (!claimed) return false;
     await scrubLegacyReplay(tx, { endpoint: RAISE_ENDPOINT, alertId: alert.id });
     await writeAudit(tx, {
       ...SYSTEM_AUDIT_CONTEXT,
@@ -36,6 +37,7 @@ async function purgeOne(
       entityId: alert.id,
       after: { purged: true },
     });
+    return true;
   });
 }
 
@@ -53,8 +55,8 @@ export async function purgeResolvedAlerts(now = new Date()): Promise<number> {
     // Defensive: the query already filters on these, but the purge is the one
     // operation that destroys data and it should not rely on a filter alone.
     if (alert.status === 'ACTIVE' || !alert.resolvedAt) continue;
-    await purgeOne({ ...alert, resolvedAt: alert.resolvedAt }, alert.status);
-    purged += 1;
+    // Another worker may have purged it first; only this worker's purges count.
+    if (await purgeOne({ ...alert, resolvedAt: alert.resolvedAt }, alert.status)) purged += 1;
   }
 
   if (purged > 0) logger.info({ purged }, 'purged resolved lost-person alerts');
