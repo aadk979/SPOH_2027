@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-27T03:08:18.169Z",
+  "updatedAt": "2026-09-27T04:53:12.559Z",
   "current": {
     "phase": "P06",
-    "step": "P06.5"
+    "step": "P06.6"
   },
   "gates": [
     {
@@ -1236,11 +1236,16 @@
         {
           "id": "P06.6",
           "title": "Safety modules",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-27T03:41:42.735Z",
+          "completedAt": "2026-09-27T04:53:12.558Z",
+          "commits": ["c7bb222"],
+          "notes": [
+            {
+              "at": "2026-09-27T04:53:12.559Z",
+              "text": "incident, lostPerson (purge as a module job), lostFound (new data layer): layered, rules unit-tested, public APIs; 0 guard/boundary warnings in the safety modules"
+            }
+          ]
         },
         {
           "id": "P06.7",
