@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-27T04:53:12.559Z",
+  "updatedAt": "2026-09-27T05:26:48.328Z",
   "current": {
     "phase": "P06",
-    "step": "P06.6"
+    "step": "P06.4"
   },
   "gates": [
     {
@@ -1213,11 +1213,16 @@
         {
           "id": "P06.4",
           "title": "Dissolve `admin` into domain modules",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-27T04:53:23.152Z",
+          "completedAt": "2026-09-27T05:26:48.327Z",
+          "commits": ["367e248"],
+          "notes": [
+            {
+              "at": "2026-09-27T05:26:48.328Z",
+              "text": "admin/service.ts (831 lines) dissolved into people, assignments, eventDays, settings and the station and gift modules; admin is route composition; URLs and middleware unchanged"
+            }
+          ]
         },
         {
           "id": "P06.5",
