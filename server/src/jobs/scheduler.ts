@@ -1,7 +1,7 @@
 import { logger } from '../platform/logger/index.js';
 import { loadSettings } from '../platform/settings/index.js';
 import { pruneIdempotencyRecords } from '../platform/idempotency/index.js';
-import { purgeResolvedAlerts } from '../modules/lostPerson/service.js';
+import { purgeResolvedAlerts } from '../modules/lostPerson/application/alerts.js';
 import { pruneRefreshSessions } from '../modules/auth/service.js';
 
 /**

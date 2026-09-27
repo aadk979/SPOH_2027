@@ -1,12 +1,12 @@
 import { Router, type Request, type Response } from 'express';
 import { z } from 'zod';
 import { Id, RaiseLostPersonRequest, ResolveLostPersonRequest } from '@spoh/shared';
-import { getAuth, requireAuth } from '../../platform/identity/index.js';
-import { idempotent } from '../../platform/idempotency/index.js';
-import { captureRateLimit, defaultRateLimit } from '../../platform/http/rateLimit.js';
-import { requireCapability } from '../../platform/access/index.js';
-import { validate, validatedBody, validatedParams } from '../../platform/http/validate.js';
-import { auditContextFrom } from '../../platform/http/auditContext.js';
+import { getAuth, requireAuth } from '../../../platform/identity/index.js';
+import { idempotent } from '../../../platform/idempotency/index.js';
+import { captureRateLimit, defaultRateLimit } from '../../../platform/http/rateLimit.js';
+import { requireCapability } from '../../../platform/access/index.js';
+import { validate, validatedBody, validatedParams } from '../../../platform/http/validate.js';
+import { auditContextFrom } from '../../../platform/http/auditContext.js';
 import {
   acknowledge,
   getActiveAlerts,
@@ -14,7 +14,7 @@ import {
   raiseAlert,
   RAISE_ENDPOINT,
   resolve,
-} from './service.js';
+} from '../application/alerts.js';
 
 /** Lost person: raise, broadcast, acknowledge, resolve (BUILD_PLAN §7.2). */
 export const lostPersonRouter: Router = Router();
