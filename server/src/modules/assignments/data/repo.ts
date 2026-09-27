@@ -42,6 +42,15 @@ export async function findAssignmentTargets(ids: {
   return { volunteer, station, eventDay };
 }
 
+/** Whether this person is rostered at this station on any day. */
+export async function isRosteredAt(volunteerId: string, stationId: string): Promise<boolean> {
+  const row = await prisma.shiftAssignment.findFirst({
+    where: { volunteerId, stationId },
+    select: { id: true },
+  });
+  return row !== null;
+}
+
 export async function stationExists(stationId: string): Promise<boolean> {
   return (
     (await prisma.station.findUnique({ where: { id: stationId }, select: { id: true } })) !== null

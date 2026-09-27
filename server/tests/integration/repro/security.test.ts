@@ -169,7 +169,7 @@ describe('rate limits (P04.4)', () => {
 
 describe('access by id across stations (P04.3)', () => {
   // F04-004
-  it.skip("does not give an IC another station's roster phone numbers", async () => {
+  it("does not give an IC another station's roster phone numbers", async () => {
     const response = await request(app)
       .get(`/api/v1/roster/station/${stationB}`)
       .set('Authorization', bearer(icA));
