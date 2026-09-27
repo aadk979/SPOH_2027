@@ -43,32 +43,34 @@ export async function listSwaps(filter: {
   });
 }
 
-export async function applySwap(
+/**
+ * Record the decision, conditionally: only a request still REQUESTED is
+ * decided. Of two decisions racing on one swap, the second finds nothing to
+ * update and is refused, so both can never apply (F03-006).
+ */
+export async function claimDecision(
   tx: PrismaTransactionClient,
-  input: { swapId: string; assignmentId: string; targetId: string; decidedById: string },
-): Promise<void> {
-  // The assignment moves to the target volunteer. The unique key
-  // (volunteer, day, block) means a target already working that block would
-  // collide — the service checks for that before we get here.
-  await tx.shiftAssignment.update({
-    where: { id: input.assignmentId },
-    data: { volunteerId: input.targetId, checkedInAt: null, checkedOutAt: null },
+  decision: { swapId: string; status: 'APPROVED' | 'REJECTED'; decidedById: string },
+): Promise<boolean> {
+  const { count } = await tx.shiftSwapRequest.updateMany({
+    where: { id: decision.swapId, status: 'REQUESTED' },
+    data: { status: decision.status, decidedById: decision.decidedById, decidedAt: new Date() },
   });
-
-  await tx.shiftSwapRequest.update({
-    where: { id: input.swapId },
-    data: { status: 'APPROVED', decidedById: input.decidedById, decidedAt: new Date() },
-  });
+  return count === 1;
 }
 
-export async function rejectSwap(
+/**
+ * Move the assignment to the target volunteer. The unique key (volunteer, day,
+ * block) means a target already working that block would collide — the use
+ * case checks for that before it gets here.
+ */
+export async function moveAssignment(
   tx: PrismaTransactionClient,
-  swapId: string,
-  decidedById: string,
+  move: { assignmentId: string; targetId: string },
 ): Promise<void> {
-  await tx.shiftSwapRequest.update({
-    where: { id: swapId },
-    data: { status: 'REJECTED', decidedById, decidedAt: new Date() },
+  await tx.shiftAssignment.update({
+    where: { id: move.assignmentId },
+    data: { volunteerId: move.targetId, checkedInAt: null, checkedOutAt: null },
   });
 }
 

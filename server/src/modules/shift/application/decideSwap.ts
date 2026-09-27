@@ -5,20 +5,22 @@ import { NotFoundError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { toSwapRecord } from '../data/mappers.js';
 import {
-  applySwap,
+  claimDecision,
   findSwapById,
   hasAssignmentInBlock,
-  rejectSwap,
+  moveAssignment,
   type SwapWithContext,
 } from '../data/repo.js';
 import { assertSwapPending, assertTargetFree } from '../domain/swapRules.js';
+import { ERROR_CODES } from '@spoh/shared';
+import { AppError } from '../../../platform/errors/index.js';
 
 /**
  * Approving moves the assignment and clears the check-in state — the new
  * person has not arrived yet, and inheriting someone else's check-in would
  * make the attendance view lie.
  */
-async function approve(tx: PrismaTransactionClient, swap: SwapWithContext, deciderId: string) {
+async function approve(tx: PrismaTransactionClient, swap: SwapWithContext) {
   // Re-checked at approval: the target may have picked up another shift in the
   // time between the request and the decision.
   assertTargetFree(
@@ -29,14 +31,8 @@ async function approve(tx: PrismaTransactionClient, swap: SwapWithContext, decid
     }),
     'That volunteer has since been assigned to this block. The swap cannot be approved.',
   );
-  await applySwap(tx, {
-    swapId: swap.id,
-    assignmentId: swap.assignmentId,
-    targetId: swap.targetId,
-    decidedById: deciderId,
-  });
+  await moveAssignment(tx, { assignmentId: swap.assignmentId, targetId: swap.targetId });
 }
-
 /** An IC approves or rejects a swap request. */
 export async function decideSwap(
   swapId: string,
@@ -48,8 +44,15 @@ export async function decideSwap(
     if (!swap) throw new NotFoundError('Swap request');
     assertSwapPending(swap);
 
-    if (request.decision === 'REJECTED') await rejectSwap(tx, swapId, deciderId);
-    else await approve(tx, swap, deciderId);
+    const claimed = await claimDecision(tx, {
+      swapId,
+      status: request.decision,
+      decidedById: deciderId,
+    });
+    if (!claimed) {
+      throw new AppError(409, ERROR_CODES.SWAP_NOT_PENDING, 'This swap has already been decided');
+    }
+    if (request.decision === 'APPROVED') await approve(tx, swap);
 
     await writeAudit(tx, {
       ...audit,

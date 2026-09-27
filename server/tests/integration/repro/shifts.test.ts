@@ -86,7 +86,7 @@ describe('shifts and swaps (P03 repros)', () => {
   });
 
   // F03-006
-  it.skip('applies exactly one of two simultaneous decisions on a swap', async () => {
+  it('applies exactly one of two simultaneous decisions on a swap', async () => {
     // A race: five rounds make it lose every run.
     const statuses: number[][] = [];
     for (let round = 0; round < 5; round += 1) {
