@@ -1,6 +1,7 @@
 import type { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
 import { ERROR_CODES, type ErrorBody } from '@spoh/shared';
 import { isProduction } from '../../config/env.js';
+import { fromDatabaseError } from '../db/errors.js';
 import { AppError, isAppError } from '../errors/index.js';
 import { logger } from '../logger/index.js';
 import { requestIdOf } from './requestId.js';
@@ -53,6 +54,9 @@ export const errorHandler: ErrorRequestHandler = (
 /** Map anything thrown into the AppError shape. */
 function normalise(error: unknown): AppError {
   if (isAppError(error)) return error;
+
+  const fromDatabase = fromDatabaseError(error);
+  if (fromDatabase) return fromDatabase;
 
   // Express's own body-parser errors arrive as plain Errors with a status.
   if (error instanceof Error && 'type' in error && error.type === 'entity.too.large') {

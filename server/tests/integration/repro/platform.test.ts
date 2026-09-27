@@ -45,7 +45,7 @@ beforeEach(async () => {
 
 describe('cross-cutting rules (P03 repros)', () => {
   // F03-002
-  it.skip('answers a rename onto an existing gift type with 409, not 500', async () => {
+  it('answers a rename onto an existing gift type with 409, not 500', async () => {
     await prisma.giftType.create({ data: { name: 'Tote Bag', initialStock: 1 } });
     const badge = await prisma.giftType.create({ data: { name: 'Badge', initialStock: 1 } });
 
