@@ -11,7 +11,7 @@ import {
   moveAssignment,
   type SwapWithContext,
 } from '../data/repo.js';
-import { assertSwapPending, assertTargetFree } from '../domain/swapRules.js';
+import { assertStillRequesters, assertSwapPending, assertTargetFree } from '../domain/swapRules.js';
 import { ERROR_CODES } from '@spoh/shared';
 import { AppError } from '../../../platform/errors/index.js';
 
@@ -21,6 +21,7 @@ import { AppError } from '../../../platform/errors/index.js';
  * make the attendance view lie.
  */
 async function approve(tx: PrismaTransactionClient, swap: SwapWithContext) {
+  assertStillRequesters(swap);
   // Re-checked at approval: the target may have picked up another shift in the
   // time between the request and the decision.
   assertTargetFree(

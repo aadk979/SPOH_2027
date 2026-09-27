@@ -70,7 +70,7 @@ async function presentToday(volunteer: TestVolunteer): Promise<void> {
 
 describe('shifts and swaps (P03 repros)', () => {
   // F03-005
-  it.skip('does not move a shift away from someone who never agreed, on a stale swap request', async () => {
+  it('does not move a shift away from someone who never agreed, on a stale swap request', async () => {
     const shift = await assignToStation({ volunteerId: owner.id, stationId, eventDayId: dayId });
     const toFirst = (await askSwap(shift.id, first)).body.swap.id as string;
     const toSecond = (await askSwap(shift.id, second)).body.swap.id as string;

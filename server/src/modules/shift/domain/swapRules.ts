@@ -21,6 +21,24 @@ export function assertTargetFree(busy: boolean, message: string): void {
   if (busy) throw new AppError(409, ERROR_CODES.CONFLICT, message);
 }
 
+/**
+ * The shift must still belong to the person who asked to give it away. Once
+ * one of their requests is approved, their other requests for the same shift
+ * would hand someone else's shift away (F03-005).
+ */
+export function assertStillRequesters(swap: {
+  requesterId: string;
+  assignment: { volunteerId: string };
+}): void {
+  if (swap.assignment.volunteerId !== swap.requesterId) {
+    throw new AppError(
+      409,
+      ERROR_CODES.CONFLICT,
+      'That shift has since moved to someone else. This swap can no longer be approved.',
+    );
+  }
+}
+
 export function assertSwapPending(swap: { status: string }): void {
   if (swap.status !== 'REQUESTED') {
     throw new AppError(
