@@ -204,7 +204,7 @@ describe('roster import and provisioning (P03 repros)', () => {
   });
 
   // F03-043
-  it.skip("does not create accounts from a Deputy's import", async () => {
+  it("does not create accounts from a Deputy's import", async () => {
     const response = await importRoster(
       deputy,
       [{ displayName: 'Stranger', email: 'stranger@roster.test' }],

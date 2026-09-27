@@ -20,7 +20,7 @@ export async function importRoster(
   actor: RosterActor,
 ): Promise<RosterImportResponse> {
   const snapshot = await loadImportSnapshot(request, actor);
-  const plan = planRosterImport(request.rows, snapshot);
+  const plan = planRosterImport(request.rows, snapshot, { mayCreate: actor.mayProvision });
   if (!request.commit) return { committed: false, ...plan.counters, issues: plan.issues };
 
   const identities = await mintIdentities(request.rows, snapshot.accounts);

@@ -10,7 +10,12 @@ import { provisionVolunteer } from '../application/provisionVolunteer.js';
 
 function actorFrom(req: Request): RosterActor {
   const auth = getAuth(req);
-  return { volunteerId: auth.volunteerId, role: auth.role, audit: auditContextFrom(req) };
+  return {
+    volunteerId: auth.volunteerId,
+    role: auth.role,
+    audit: auditContextFrom(req),
+    mayProvision: auth.capabilities.includes('user.provision'),
+  };
 }
 
 /** My own shifts. Same payload as `/me`, reachable from the shift screen. */

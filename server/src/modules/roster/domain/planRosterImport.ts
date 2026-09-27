@@ -55,6 +55,8 @@ export interface RosterImportPlan {
 }
 
 const DEACTIVATED = 'deactivated' as const;
+/** A new person the importer may not create (F03-043). */
+const NOT_ADDED = 'not-added' as const;
 
 /** What the second pass reads and writes as it walks the rows. */
 interface PlanState {
@@ -117,22 +119,37 @@ function planPerson(
 
 function planPeople(
   rows: readonly RosterImportRow[],
-  snapshot: ImportSnapshot,
+  context: { snapshot: ImportSnapshot; mayCreate: boolean },
   plan: RosterImportPlan,
 ) {
   const seen = new Map<string, string>();
   for (const [index, row] of rows.entries()) {
-    const existing = snapshot.existing.get(row.email);
+    const existing = context.snapshot.existing.get(row.email);
     const first = !seen.has(row.email);
     if (existing && !existing.active) {
       if (first) plan.issues.push(deactivatedPerson(row.email, index + 1));
       seen.set(row.email, DEACTIVATED);
       continue;
     }
+    // Creating people and sending invites is `user.provision`, which roster
+    // editing does not carry: without it, a new person is reported, not created.
+    if (!existing && !context.mayCreate) {
+      if (first) plan.issues.push(notAdded(row.email, index + 1));
+      seen.set(row.email, NOT_ADDED);
+      continue;
+    }
     seen.set(row.email, 'active');
     planPerson(row, { existing, first, plan });
   }
   return seen;
+}
+
+function notAdded(email: string, rowNumber: number) {
+  return {
+    rowNumber,
+    field: 'email',
+    message: `${email} is not on the roster. Only a Chief or Admin can add new people.`,
+  };
 }
 
 function deactivatedPerson(email: string, rowNumber: number) {
@@ -157,6 +174,7 @@ function findManager(
   lookup: { seen: ReadonlyMap<string, string>; snapshot: ImportSnapshot },
 ): { id: string | null } | typeof DEACTIVATED | null {
   const inFile = lookup.seen.get(email);
+  if (inFile === NOT_ADDED) return null;
   if (inFile) return inFile === DEACTIVATED ? DEACTIVATED : { id: null };
   const onRoster = lookup.snapshot.rosterManagers.get(email);
   if (!onRoster) return null;
@@ -246,12 +264,13 @@ function planAssignment(state: PlanState, at: RowAt) {
 export function planRosterImport(
   rows: readonly RosterImportRow[],
   snapshot: ImportSnapshot,
+  options: { mayCreate: boolean } = { mayCreate: true },
 ): RosterImportPlan {
   const plan = emptyPlan();
   const state: PlanState = {
     snapshot,
     plan,
-    seen: planPeople(rows, snapshot, plan),
+    seen: planPeople(rows, { snapshot, mayCreate: options.mayCreate }, plan),
     planned: new Set(),
   };
   for (const [index, row] of rows.entries()) {

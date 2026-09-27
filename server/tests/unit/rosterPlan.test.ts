@@ -104,4 +104,13 @@ describe('planRosterImport', () => {
       assignmentsCreated: 2,
     });
   });
+
+  it('reports new people instead of creating them without user.provision (F03-043)', () => {
+    const plan = planRosterImport([row({ email: 'new@x', ...shift })], snapshot(), {
+      mayCreate: false,
+    });
+    expect(plan.people).toHaveLength(0);
+    expect(plan.assignments).toHaveLength(0);
+    expect(plan.issues.map((issue) => issue.field)).toEqual(['email']);
+  });
 });
