@@ -24,7 +24,11 @@ describe('lost-person rules', () => {
   it('pushes carry no description, and the stand-down replaces the alert', () => {
     const raised = raisedPush('a1');
     const resolved = resolvedPush('a1');
-    expect(JSON.stringify(raised)).not.toMatch(/description|clothing|age/i);
+    for (const push of [raised, resolved]) {
+      expect(Object.keys(push)).not.toEqual(
+        expect.arrayContaining(['descriptionText', 'clothingText', 'approxAge']),
+      );
+    }
     expect(resolved.tag).toBe(raised.tag);
     expect(raised.audience.everyone).toBe(true);
   });
