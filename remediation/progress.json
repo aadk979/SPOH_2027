@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-26T16:38:52.527Z",
+  "updatedAt": "2026-09-27T03:08:18.169Z",
   "current": {
     "phase": "P06",
-    "step": "P06.3"
+    "step": "P06.5"
   },
   "gates": [
     {
@@ -1222,11 +1222,16 @@
         {
           "id": "P06.5",
           "title": "Capture modules",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-26T16:39:06.124Z",
+          "completedAt": "2026-09-27T03:08:18.169Z",
+          "commits": ["656f787"],
+          "notes": [
+            {
+              "at": "2026-09-27T03:08:18.169Z",
+              "text": "registration, footfall, missionCard, gift: layered, one use case per file, domain rules with unit tests, public APIs; 0 guard warnings in the capture modules; module-internals 33->7; prisma rule aligned to ADR-007 (95bcff0)"
+            }
+          ]
         },
         {
           "id": "P06.6",
