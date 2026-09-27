@@ -195,7 +195,7 @@ describe('cross-cutting rules (P03 repros)', () => {
   });
 
   // F03-024
-  it.skip('does not reopen a resolved incident silently', async () => {
+  it('does not reopen a resolved incident silently', async () => {
     const incident = await request(app)
       .post('/api/v1/incidents')
       .set('Authorization', bearer(volunteer))

@@ -4,6 +4,7 @@ import { prisma } from '../../../platform/db/client.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { addFollowUp, findIncidentById, updateIncidentStatus } from '../data/repo.js';
+import { assertIncidentTransition } from '../domain/statusTransitions.js';
 import { getIncident } from './incidentRecord.js';
 
 /** Move an incident through its status, with an optional note in its log. */
@@ -14,6 +15,7 @@ export async function changeIncidentStatus(
 ): Promise<IncidentRecord> {
   const existing = await findIncidentById(incidentId);
   if (!existing) throw new NotFoundError('Incident');
+  assertIncidentTransition(existing.status, request.status, request.note);
 
   await prisma.$transaction(async (tx) => {
     await updateIncidentStatus(tx, incidentId, request.status);
