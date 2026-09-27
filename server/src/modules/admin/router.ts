@@ -1,4 +1,4 @@
-import { type Request, type Response, Router } from 'express';
+import { Router } from 'express';
 import { z } from 'zod';
 import {
   CreateAssignmentRequest,
@@ -14,29 +14,22 @@ import {
   UpdateStationRequest,
   UpdateVolunteerRequest,
 } from '@spoh/shared';
-import { getAuth, requireAuth } from '../../platform/identity/index.js';
+import { requireAuth } from '../../platform/identity/index.js';
 import { adminRateLimit, defaultRateLimit } from '../../platform/http/rateLimit.js';
 import { requireCapability } from '../../platform/access/index.js';
-import {
-  validate,
-  validatedBody,
-  validatedParams,
-  validatedQuery,
-} from '../../platform/http/validate.js';
-import { auditContextFrom } from '../../platform/http/auditContext.js';
+import { validate } from '../../platform/http/validate.js';
 import {
   createStationHandler,
   listAllStationsHandler,
   updateStationHandler,
 } from '../station/index.js';
 import {
-  deactivateVolunteer,
-  getVolunteer,
-  listVolunteers,
-  reactivateVolunteer,
-  updateVolunteer,
-  type Actor,
-} from './service.js';
+  deactivateVolunteerHandler,
+  getVolunteerHandler,
+  listVolunteersHandler,
+  reactivateVolunteerHandler,
+  updateVolunteerHandler,
+} from '../people/index.js';
 import { createAssignmentHandler, deleteAssignmentHandler } from '../assignments/index.js';
 import { getSettingsHandler, updateSettingsHandler } from '../settings/index.js';
 import { createGiftTypeHandler, updateGiftTypeHandler } from '../gift/index.js';
@@ -61,11 +54,6 @@ const IdParams = z.object({ id: Id }).strict();
 
 adminRouter.use(requireAuth);
 
-function actorFrom(req: Request): Actor {
-  const auth = getAuth(req);
-  return { volunteerId: auth.volunteerId, role: auth.role };
-}
-
 // ─────────────────────────────────────────────────────────────
 // VOLUNTEERS
 // ─────────────────────────────────────────────────────────────
@@ -75,11 +63,7 @@ adminRouter.get(
   defaultRateLimit,
   requireCapability('user.read'),
   validate({ query: ListVolunteersQuery }),
-  async (req: Request, res: Response) => {
-    const query = validatedQuery<ListVolunteersQuery>(req);
-    const { data, nextCursor } = await listVolunteers(query);
-    res.status(200).json({ data, meta: { count: data.length, nextCursor } });
-  },
+  listVolunteersHandler,
 );
 
 adminRouter.get(
@@ -87,10 +71,7 @@ adminRouter.get(
   defaultRateLimit,
   requireCapability('user.read'),
   validate({ params: IdParams }),
-  async (req: Request, res: Response) => {
-    const { id } = validatedParams<z.infer<typeof IdParams>>(req);
-    res.status(200).json({ volunteer: await getVolunteer(id) });
-  },
+  getVolunteerHandler,
 );
 
 /**
@@ -104,12 +85,7 @@ adminRouter.patch(
   adminRateLimit,
   requireCapability('user.provision'),
   validate({ params: IdParams, body: UpdateVolunteerRequest }),
-  async (req: Request, res: Response) => {
-    const { id } = validatedParams<z.infer<typeof IdParams>>(req);
-    const patch = validatedBody<UpdateVolunteerRequest>(req);
-    const result = await updateVolunteer(id, patch, actorFrom(req), auditContextFrom(req));
-    res.status(200).json(result);
-  },
+  updateVolunteerHandler,
 );
 
 adminRouter.post(
@@ -117,12 +93,7 @@ adminRouter.post(
   adminRateLimit,
   requireCapability('user.provision'),
   validate({ params: IdParams, body: DeactivateVolunteerRequest }),
-  async (req: Request, res: Response) => {
-    const { id } = validatedParams<z.infer<typeof IdParams>>(req);
-    const body = validatedBody<DeactivateVolunteerRequest>(req);
-    const result = await deactivateVolunteer(id, body, actorFrom(req), auditContextFrom(req));
-    res.status(200).json(result);
-  },
+  deactivateVolunteerHandler,
 );
 
 adminRouter.post(
@@ -130,11 +101,7 @@ adminRouter.post(
   adminRateLimit,
   requireCapability('user.provision'),
   validate({ params: IdParams }),
-  async (req: Request, res: Response) => {
-    const { id } = validatedParams<z.infer<typeof IdParams>>(req);
-    const result = await reactivateVolunteer(id, actorFrom(req), auditContextFrom(req));
-    res.status(200).json(result);
-  },
+  reactivateVolunteerHandler,
 );
 
 // ─────────────────────────────────────────────────────────────
