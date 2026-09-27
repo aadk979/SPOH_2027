@@ -11,14 +11,14 @@ import {
   auditStationScopeBypass,
   writeAudit,
   type AuditContext,
-} from '../../platform/audit/index.js';
-import type { CaptureActor } from '../../platform/http/captureActor.js';
-import { AppError, NotFoundError } from '../../platform/errors/index.js';
-import { prisma } from '../../platform/db/client.js';
-import { normaliseShortCode } from '../missionCard/index.js';
-import { rangeOverlapsFallbackWindow } from '../fallback/repo.js';
-import { requireActiveStation } from '../station/index.js';
-import { dispatch } from '../notification/service.js';
+} from '../../../platform/audit/index.js';
+import type { CaptureActor } from '../../../platform/http/captureActor.js';
+import { AppError, NotFoundError } from '../../../platform/errors/index.js';
+import { prisma } from '../../../platform/db/client.js';
+import { normaliseShortCode } from '../../missionCard/index.js';
+import { rangeOverlapsFallbackWindow } from '../../fallback/repo.js';
+import { requireActiveStation } from '../../station/index.js';
+import { dispatch } from '../../notification/service.js';
 import {
   createAdjustment,
   createRedemption,
@@ -29,7 +29,7 @@ import {
   summariseRedemptions,
   toGiftTypeRecord,
   totalsForGiftType,
-} from './repo.js';
+} from '../data/repo.js';
 
 /**
  * Gift redemption and inventory (PRODUCT_BRIEF §5).

@@ -35,7 +35,7 @@ import { identityProvider } from '../identity/provider.js';
 import { revokeAllForVolunteer } from '../auth/service.js';
 import { toStationSummary } from '../station/index.js';
 import { toAssignmentRecord } from '../roster/repo.js';
-import { toGiftTypeRecord } from '../gift/repo.js';
+import { toGiftTypeRecord } from '../gift/data/repo.js';
 
 /**
  * Administration.
