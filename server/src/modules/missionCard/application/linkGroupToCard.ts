@@ -26,6 +26,11 @@ export async function linkGroupToCard(
     };
   }
 
-  await updateCard(tx, card.id, { status: 'ISSUED', issuedAt: link.issuedAt });
+  // Only a card the booth has not issued yet becomes ISSUED. A card already on
+  // its journey keeps its status: linking a completed card reset it to ISSUED
+  // and its visitor lost their completion (F03-004).
+  if (card.status === 'UNISSUED') {
+    await updateCard(tx, card.id, { status: 'ISSUED', issuedAt: link.issuedAt });
+  }
   return { cardId: card.id, linkError: null };
 }

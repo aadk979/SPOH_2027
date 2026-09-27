@@ -112,7 +112,7 @@ describe('Mission Cards, gifts and group registration (P03 repros)', () => {
   });
 
   // F03-004
-  it.skip('leaves a completed card completed when a group registration links it', async () => {
+  it('leaves a completed card completed when a group registration links it', async () => {
     await card('CCC333', 'COMPLETED');
 
     const response = await request(app)
