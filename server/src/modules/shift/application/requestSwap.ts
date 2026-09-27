@@ -44,7 +44,8 @@ export async function requestSwap(
     });
     await writeAudit(tx, {
       ...audit,
-      action: 'swap.decide',
+      // Its own action: a request was audited as a decision (F03-018).
+      action: 'swap.request',
       entityType: 'ShiftSwapRequest',
       entityId: row.id,
       after: { status: 'REQUESTED', assignmentId: assignment.id, targetId: target.id },

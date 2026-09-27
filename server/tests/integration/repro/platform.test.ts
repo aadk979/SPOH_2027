@@ -136,7 +136,7 @@ describe('cross-cutting rules (P03 repros)', () => {
   });
 
   // F03-018
-  it.skip('audits a swap request under its own action, not as a decision', async () => {
+  it('audits a swap request under its own action, not as a decision', async () => {
     const shift = await assignToStation({
       volunteerId: volunteer.id,
       stationId,
