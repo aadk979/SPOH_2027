@@ -95,55 +95,73 @@ export function idempotent(endpointName: string, options: IdempotentOptions = {}
   return named(`idempotent(${endpointName})`, idempotencyMiddleware(endpointName, options));
 }
 
+interface KeyContext {
+  req: Request;
+  res: Response;
+  key: string;
+  endpointName: string;
+  options: IdempotentOptions;
+}
+
+/**
+ * A reservation whose process never finished: take it over rather than leave
+ * the capture permanently unretryable. Conditional, so that of several retries
+ * racing here only the one whose update still sees the stale reservation wins;
+ * each of them used to run the handler (F03-011).
+ */
+async function takeOverAbandoned(ctx: KeyContext, existing: Reservation): Promise<boolean> {
+  logger.warn(
+    { requestId: ctx.req.id, endpoint: ctx.endpointName, key: ctx.key },
+    'taking over an abandoned idempotency reservation',
+  );
+  const { count } = await prisma.idempotencyRecord.updateMany({
+    where: { key: ctx.key, statusCode: IN_PROGRESS, createdAt: existing.createdAt },
+    data: { createdAt: new Date() },
+  });
+  return count === 1;
+}
+
+/**
+ * Someone already holds this key. Returns the error to answer with, `'replayed'`
+ * once the stored response has been sent, or null when this request took over
+ * an abandoned reservation and should run the handler.
+ */
+async function resolveExisting(
+  ctx: KeyContext,
+  existing: Reservation,
+  actorSub: string,
+): Promise<AppError | 'replayed' | null> {
+  if (existing.endpoint !== ctx.endpointName || existing.actorSub !== actorSub) {
+    return new IdempotencyKeyReuseError();
+  }
+  if (existing.statusCode !== IN_PROGRESS) {
+    logger.debug({ requestId: ctx.req.id, endpoint: ctx.endpointName }, 'idempotent replay');
+    ctx.res.status(existing.statusCode).json(await replayBody(ctx.req, existing, ctx.options));
+    return 'replayed';
+  }
+  const abandoned = Date.now() - existing.createdAt.getTime() > STALE_RESERVATION_MS;
+  if (abandoned && (await takeOverAbandoned(ctx, existing))) return null;
+  return inProgress();
+}
+
 function idempotencyMiddleware(endpointName: string, options: IdempotentOptions): RequestHandler {
   return (req: Request, res: Response, next: NextFunction): void => {
     void (async () => {
       try {
         const auth = getAuth(req);
         const key = (req.body as IdempotentBody | undefined)?.idempotencyKey;
-
         if (typeof key !== 'string' || key.length === 0) {
           next(new ValidationError('idempotencyKey is required'));
           return;
         }
 
         const existing = await reserve(key, endpointName, auth.sub);
-
-        if (existing) {
-          if (existing.endpoint !== endpointName || existing.actorSub !== auth.sub) {
-            next(new IdempotencyKeyReuseError());
-            return;
-          }
-
-          if (existing.statusCode === IN_PROGRESS) {
-            const abandoned = Date.now() - existing.createdAt.getTime() > STALE_RESERVATION_MS;
-
-            if (!abandoned) {
-              next(
-                new AppError(
-                  409,
-                  ERROR_CODES.IDEMPOTENCY_IN_PROGRESS,
-                  'An identical request is already being processed. Retry shortly.',
-                ),
-              );
-              return;
-            }
-
-            // The process that claimed this key never finished. Take it over
-            // rather than leaving the capture permanently unretryable.
-            logger.warn(
-              { requestId: req.id, endpoint: endpointName, key },
-              'taking over an abandoned idempotency reservation',
-            );
-            await prisma.idempotencyRecord.update({
-              where: { key },
-              data: { createdAt: new Date() },
-            });
-          } else {
-            logger.debug({ requestId: req.id, endpoint: endpointName }, 'idempotent replay');
-            res.status(existing.statusCode).json(await replayBody(req, existing, options));
-            return;
-          }
+        const ctx: KeyContext = { req, res, key, endpointName, options };
+        const outcome = existing ? await resolveExisting(ctx, existing, auth.sub) : null;
+        if (outcome === 'replayed') return;
+        if (outcome) {
+          next(outcome);
+          return;
         }
 
         captureResponse(req, res, { key, redacted: options.redacted });
@@ -153,6 +171,14 @@ function idempotencyMiddleware(endpointName: string, options: IdempotentOptions)
       }
     })();
   };
+}
+
+function inProgress(): AppError {
+  return new AppError(
+    409,
+    ERROR_CODES.IDEMPOTENCY_IN_PROGRESS,
+    'An identical request is already being processed. Retry shortly.',
+  );
 }
 
 /** The stored response, or for a redacted endpoint the response rebuilt from the row. */

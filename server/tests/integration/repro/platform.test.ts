@@ -59,9 +59,10 @@ describe('cross-cutting rules (P03 repros)', () => {
   });
 
   // F03-011
-  it.skip('lets only one retry take over an abandoned idempotency reservation', async () => {
+  it('lets only one retry take over an abandoned idempotency reservation', async () => {
     await assignToStationAllBlocks({ volunteerId: volunteer.id, stationId, eventDayId: dayId });
     const statuses: number[] = [];
+    const codes: string[] = [];
 
     // A race: five abandoned keys, each retried three times at once.
     for (let round = 0; round < 5; round += 1) {
@@ -85,10 +86,18 @@ describe('cross-cutting rules (P03 repros)', () => {
         ),
       );
       statuses.push(...retries.map((response) => response.status));
+      codes.push(
+        ...retries
+          .filter((response) => response.status === 409)
+          .map((response) => response.body.error.code as string),
+      );
     }
 
     expect(statuses.filter((status) => status >= 500)).toEqual([]);
     expect(await prisma.registration.count()).toBe(5);
+    // The losers are told the key is being processed; none of them ran the
+    // handler and collided with the winner's row.
+    expect(codes.every((code) => code === 'IDEMPOTENCY_IN_PROGRESS')).toBe(true);
   });
 
   // F03-017
