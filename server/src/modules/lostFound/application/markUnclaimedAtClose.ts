@@ -13,7 +13,8 @@ export async function markUnclaimedAtClose(audit: AuditContext): Promise<number>
     if (count > 0) {
       await writeAudit(tx, {
         ...audit,
-        action: 'lostFound.claim',
+        // Its own action: it was audited as a claim, which it is not (F03-018).
+        action: 'lostFound.closeOut',
         entityType: 'LostFoundItem',
         entityId: null,
         after: { markedUnclaimedAtClose: count },

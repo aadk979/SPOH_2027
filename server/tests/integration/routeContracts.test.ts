@@ -389,7 +389,7 @@ describe('list reads (F03-029)', () => {
 });
 
 describe('audit actions (F03-018)', () => {
-  it.skip('audits a lost-and-found close-out as lostFound.closeOut, not as a claim', async () => {
+  it('audits a lost-and-found close-out as lostFound.closeOut, not as a claim', async () => {
     await as(ic).post('/lost-found', { itemLabel: 'Umbrella' });
 
     expect((await as(chief).post('/lost-found/close-out')).status).toBe(200);
