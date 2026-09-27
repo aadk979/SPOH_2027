@@ -3,7 +3,7 @@ import request from 'supertest';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../../../src/app.js';
 import { prisma } from '../../../src/platform/db/client.js';
-import { getLongShifts } from '../../../src/modules/shift/application/shifts.js';
+import { getLongShifts } from '../../../src/modules/shift/index.js';
 import { resetDatabase } from '../../helpers/db.js';
 import { FROZEN_NOW } from '../../setup.js';
 import {

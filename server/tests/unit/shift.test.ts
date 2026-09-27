@@ -1,0 +1,82 @@
+import { describe, expect, it } from 'vitest';
+import { assertMayComplete, assertSlotOpen } from '../../src/modules/shift/domain/briefingRules.js';
+import { longShiftWarnings, staffingGaps } from '../../src/modules/shift/domain/staffing.js';
+import {
+  assertNotSelf,
+  assertOwnShift,
+  assertSwapPending,
+  assertTargetFree,
+} from '../../src/modules/shift/domain/swapRules.js';
+
+/** Shift rules (P06.7): swaps, briefings and staffing, without a database. */
+
+const codeOf = (run: () => unknown): string | undefined => {
+  try {
+    run();
+    return undefined;
+  } catch (error) {
+    return (error as { code?: string }).code;
+  }
+};
+
+describe('swap rules', () => {
+  it('lets a volunteer give away only their own shift, to someone else', () => {
+    expect(codeOf(() => assertOwnShift({ volunteerId: 'a' }, 'b'))).toBe('FORBIDDEN');
+    expect(codeOf(() => assertNotSelf('a', 'a'))).toBe('CONFLICT');
+    expect(codeOf(() => assertTargetFree(true, 'busy'))).toBe('CONFLICT');
+    expect(codeOf(() => assertSwapPending({ status: 'APPROVED' }))).toBe('SWAP_NOT_PENDING');
+    expect(codeOf(() => assertSwapPending({ status: 'REQUESTED' }))).toBeUndefined();
+  });
+});
+
+describe('briefing rules', () => {
+  it('completes an open slot, by its briefer or when it has none', () => {
+    expect(codeOf(() => assertSlotOpen({ completedAt: new Date() }))).toBe(
+      'SLOT_ALREADY_COMPLETED',
+    );
+    expect(codeOf(() => assertMayComplete({ briefierId: 'x' }, 'y'))).toBe('FORBIDDEN');
+    expect(codeOf(() => assertMayComplete({ briefierId: null }, 'y'))).toBeUndefined();
+  });
+});
+
+describe('staffingGaps', () => {
+  it('names each kind of gap and skips a fully checked-in station', () => {
+    const gaps = staffingGaps({
+      blocks: ['MORNING'],
+      stations: [
+        { id: 'a', name: 'A' },
+        { id: 'b', name: 'B' },
+        { id: 'c', name: 'C' },
+        { id: 'd', name: 'D' },
+      ],
+      staffing: [
+        { stationId: 'b', block: 'MORNING', assigned: 2, checkedIn: 0 },
+        { stationId: 'c', block: 'MORNING', assigned: 2, checkedIn: 1 },
+        { stationId: 'd', block: 'MORNING', assigned: 2, checkedIn: 2 },
+      ],
+    });
+    expect(gaps.map((gap) => [gap.stationId, gap.severity, gap.missing])).toEqual([
+      ['a', 'UNSTAFFED', 0],
+      ['b', 'NOBODY_CHECKED_IN', 2],
+      ['c', 'PARTIAL', 1],
+    ]);
+  });
+});
+
+describe('longShiftWarnings', () => {
+  it('warns once per person, from their earliest check-in, longest first', () => {
+    const now = new Date('2027-01-07T08:00:00.000Z');
+    const at = (hoursAgo: number) => new Date(now.getTime() - hoursAgo * 3_600_000);
+    const row = (volunteerId: string, hoursAgo: number) => ({
+      volunteerId,
+      checkedInAt: at(hoursAgo),
+      volunteer: { displayName: volunteerId },
+      station: { name: 'Room' },
+    });
+    const warnings = longShiftWarnings([row('a', 4), row('a', 3), row('b', 5)], now);
+    expect(warnings.map((w) => [w.volunteerId, w.minutesOnStation])).toEqual([
+      ['b', 300],
+      ['a', 240],
+    ]);
+  });
+});

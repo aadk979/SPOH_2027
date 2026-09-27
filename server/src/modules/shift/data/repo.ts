@@ -1,6 +1,4 @@
-import type { BriefingSlotRecord, SwapRequestRecord } from '@spoh/shared';
 import type { Prisma } from '../../../generated/prisma/client.js';
-import { minutesBetween } from '../../../platform/time/index.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 
 /** Data access for swaps, briefing waves and staffing (PRODUCT_BRIEF §6). */
@@ -14,25 +12,6 @@ const swapInclude = {
 } satisfies Prisma.ShiftSwapRequestInclude;
 
 export type SwapWithContext = Prisma.ShiftSwapRequestGetPayload<{ include: typeof swapInclude }>;
-
-export function toSwapRecord(swap: SwapWithContext): SwapRequestRecord {
-  return {
-    id: swap.id,
-    assignmentId: swap.assignmentId,
-    stationName: swap.assignment.station.name,
-    date: swap.assignment.eventDay.date.toISOString().slice(0, 10),
-    block: swap.assignment.block,
-    requesterId: swap.requesterId,
-    requesterName: swap.requester.displayName,
-    targetId: swap.targetId,
-    targetName: swap.target.displayName,
-    status: swap.status,
-    reason: swap.reason,
-    decidedById: swap.decidedById,
-    decidedAt: swap.decidedAt?.toISOString() ?? null,
-    createdAt: swap.createdAt.toISOString(),
-  };
-}
 
 export async function createSwap(
   tx: PrismaTransactionClient,
@@ -115,30 +94,6 @@ const slotInclude = {
 } satisfies Prisma.BriefingSlotInclude;
 
 export type SlotWithContext = Prisma.BriefingSlotGetPayload<{ include: typeof slotInclude }>;
-
-export function toBriefingSlotRecord(
-  slot: SlotWithContext,
-  context: { viewerId: string; now: Date },
-): BriefingSlotRecord {
-  return {
-    id: slot.id,
-    eventDayId: slot.eventDayId,
-    date: slot.eventDay.date.toISOString().slice(0, 10),
-    startsAt: slot.startsAt.toISOString(),
-    briefierId: slot.briefierId,
-    briefierName: slot.briefier?.displayName ?? null,
-    waveSize: slot.waveSize,
-    completedAt: slot.completedAt?.toISOString() ?? null,
-    notes: slot.notes,
-    isMine: slot.briefierId === context.viewerId,
-    // Negative once the slot has started, which is what lets the client show
-    // "you're up next" and "you're on now" as different states.
-    minutesUntilStart:
-      slot.startsAt > context.now
-        ? minutesBetween(context.now, slot.startsAt)
-        : -minutesBetween(slot.startsAt, context.now),
-  };
-}
 
 export async function listBriefingSlots(filter: {
   eventDayId?: string;
@@ -239,5 +194,31 @@ export async function longRunningShifts(cutoff: Date) {
       volunteer: { select: { displayName: true } },
       station: { select: { name: true } },
     },
+  });
+}
+
+/** The assignment a swap would give away. */
+export async function findAssignmentForSwap(tx: PrismaTransactionClient, id: string) {
+  return tx.shiftAssignment.findUnique({
+    where: { id },
+    select: { id: true, volunteerId: true, eventDayId: true, block: true },
+  });
+}
+
+export async function findVolunteerActive(tx: PrismaTransactionClient, id: string) {
+  return tx.volunteer.findUnique({ where: { id }, select: { id: true, active: true } });
+}
+
+export async function findEventDayId(date: Date): Promise<string | null> {
+  const day = await prisma.eventDay.findUnique({ where: { date }, select: { id: true } });
+  return day?.id ?? null;
+}
+
+/** Active stations in their display order, for the staffing grid. */
+export async function listStaffedStations() {
+  return prisma.station.findMany({
+    where: { active: true },
+    select: { id: true, name: true },
+    orderBy: { sortOrder: 'asc' },
   });
 }
