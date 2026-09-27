@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { attendanceRouter } from './modules/attendance/router.js';
 import { env } from './config/env.js';
 import { announcementRouter } from './modules/announcement/router.js';
-import { adminRouter } from './modules/admin/router.js';
+import { adminRouter } from './modules/admin/index.js';
 import { authRouter } from './modules/auth/router.js';
 import { mediaRouter } from './modules/media/router.js';
 import { notificationRouter } from './modules/notification/router.js';

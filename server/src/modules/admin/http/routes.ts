@@ -14,30 +14,30 @@ import {
   UpdateStationRequest,
   UpdateVolunteerRequest,
 } from '@spoh/shared';
-import { requireAuth } from '../../platform/identity/index.js';
-import { adminRateLimit, defaultRateLimit } from '../../platform/http/rateLimit.js';
-import { requireCapability } from '../../platform/access/index.js';
-import { validate } from '../../platform/http/validate.js';
+import { requireAuth } from '../../../platform/identity/index.js';
+import { adminRateLimit, defaultRateLimit } from '../../../platform/http/rateLimit.js';
+import { requireCapability } from '../../../platform/access/index.js';
+import { validate } from '../../../platform/http/validate.js';
 import {
   createStationHandler,
   listAllStationsHandler,
   updateStationHandler,
-} from '../station/index.js';
+} from '../../station/index.js';
 import {
   deactivateVolunteerHandler,
   getVolunteerHandler,
   listVolunteersHandler,
   reactivateVolunteerHandler,
   updateVolunteerHandler,
-} from '../people/index.js';
-import { createAssignmentHandler, deleteAssignmentHandler } from '../assignments/index.js';
-import { getSettingsHandler, updateSettingsHandler } from '../settings/index.js';
-import { createGiftTypeHandler, updateGiftTypeHandler } from '../gift/index.js';
+} from '../../people/index.js';
+import { createAssignmentHandler, deleteAssignmentHandler } from '../../assignments/index.js';
+import { getSettingsHandler, updateSettingsHandler } from '../../settings/index.js';
+import { createGiftTypeHandler, updateGiftTypeHandler } from '../../gift/index.js';
 import {
   createEventDayHandler,
   listEventDaysHandler,
   updateEventDayHandler,
-} from '../eventDays/index.js';
+} from '../../eventDays/index.js';
 
 /**
  * Administration: the people, the places, the days and the dials.
