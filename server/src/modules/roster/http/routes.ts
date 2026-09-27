@@ -1,14 +1,14 @@
 import { Router, type Request, type Response } from 'express';
 import { z } from 'zod';
 import { Id, ProvisionVolunteerRequest, RosterImportRequest } from '@spoh/shared';
-import { getAuth, requireAuth } from '../../platform/identity/index.js';
-import { defaultRateLimit, sensitiveRateLimit } from '../../platform/http/rateLimit.js';
-import { requireCapability } from '../../platform/access/index.js';
-import { validate, validatedBody } from '../../platform/http/validate.js';
-import { auditContextFrom } from '../../platform/http/auditContext.js';
-import { getMe } from '../me/service.js';
-import { stationRosterHandler } from '../assignments/index.js';
-import { importRoster, provisionVolunteer, type RosterActor } from './service.js';
+import { getAuth, requireAuth } from '../../../platform/identity/index.js';
+import { defaultRateLimit, sensitiveRateLimit } from '../../../platform/http/rateLimit.js';
+import { requireCapability } from '../../../platform/access/index.js';
+import { validate, validatedBody } from '../../../platform/http/validate.js';
+import { auditContextFrom } from '../../../platform/http/auditContext.js';
+import { getMe } from '../../me/service.js';
+import { stationRosterHandler } from '../../assignments/index.js';
+import { importRoster, provisionVolunteer, type RosterActor } from '../application/roster.js';
 
 /** Roster, provisioning and shift views (BUILD_PLAN §7.2). */
 export const rosterRouter: Router = Router();

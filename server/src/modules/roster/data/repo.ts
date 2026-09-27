@@ -1,8 +1,8 @@
 import type { VolunteerRecord } from '@spoh/shared';
-import type { Prisma, Volunteer } from '../../generated/prisma/client.js';
+import type { Prisma, Volunteer } from '../../../generated/prisma/client.js';
 
 export type { Volunteer };
-import { prisma, type PrismaTransactionClient } from '../../platform/db/client.js';
+import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 
 /**
  * Data access for the committee roster.

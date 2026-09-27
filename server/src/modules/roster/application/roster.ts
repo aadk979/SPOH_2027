@@ -8,12 +8,12 @@ import {
   type RosterImportRequest,
   type RosterImportResponse,
 } from '@spoh/shared';
-import { writeAudit, type AuditContext } from '../../platform/audit/index.js';
-import { AppError, ValidationError } from '../../platform/errors/index.js';
-import { prisma } from '../../platform/db/client.js';
-import { eventDayAnchor } from '../../platform/time/index.js';
-import { invalidateVolunteerCache } from '../../platform/identity/index.js';
-import { identityProvider } from '../identity/provider.js';
+import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
+import { AppError, ValidationError } from '../../../platform/errors/index.js';
+import { prisma } from '../../../platform/db/client.js';
+import { eventDayAnchor } from '../../../platform/time/index.js';
+import { invalidateVolunteerCache } from '../../../platform/identity/index.js';
+import { identityProvider } from '../../identity/provider.js';
 import {
   findEventDayByDate,
   findStationByCodeTx,
@@ -22,7 +22,7 @@ import {
   upsertAssignment,
   upsertVolunteer,
   type Volunteer,
-} from './repo.js';
+} from '../data/repo.js';
 
 /**
  * Roster management and account provisioning (BUILD_PLAN §6.1, §7.2).
