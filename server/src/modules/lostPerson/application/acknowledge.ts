@@ -1,5 +1,8 @@
 import type { LostPersonAlertRecord } from '@spoh/shared';
+import { writeAudit } from '../../../platform/audit/index.js';
+import { prisma } from '../../../platform/db/client.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
+import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { acknowledgeAlert, findAlertById } from '../data/repo.js';
 import { getAlert } from './alertRecord.js';
 
@@ -9,10 +12,22 @@ import { getAlert } from './alertRecord.js';
  */
 export async function acknowledge(
   alertId: string,
-  volunteerId: string,
+  { volunteerId, audit }: ActorContext,
 ): Promise<LostPersonAlertRecord> {
   const alert = await findAlertById(alertId);
   if (!alert) throw new NotFoundError('Lost person alert');
-  await acknowledgeAlert(alertId, volunteerId);
+
+  await prisma.$transaction(async (tx) => {
+    // A second tap is a no-op, and writes no second audit row (F03-018).
+    if (!(await acknowledgeAlert(tx, { alertId, volunteerId }))) return;
+    await writeAudit(tx, {
+      ...audit,
+      action: 'lostPerson.acknowledge',
+      entityType: 'LostPersonAlert',
+      entityId: alertId,
+      after: { acknowledgedBy: volunteerId },
+    });
+  });
+
   return getAlert(alertId, volunteerId);
 }

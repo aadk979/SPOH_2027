@@ -49,12 +49,12 @@ export async function acknowledgedAlertIds(
  * so two taps on a flaky connection cannot inflate the acknowledgement count
  * the Safety IC is reading to judge floor coverage.
  */
-export async function acknowledgeAlert(alertId: string, volunteerId: string): Promise<void> {
-  await prisma.lostPersonAck.upsert({
-    where: { alertId_volunteerId: { alertId, volunteerId } },
-    create: { alertId, volunteerId },
-    update: {},
-  });
+export async function acknowledgeAlert(
+  tx: PrismaTransactionClient,
+  ack: { alertId: string; volunteerId: string },
+): Promise<boolean> {
+  const { count } = await tx.lostPersonAck.createMany({ data: [ack], skipDuplicates: true });
+  return count === 1;
 }
 
 export async function resolveAlert(

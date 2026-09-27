@@ -34,7 +34,7 @@ export async function activeAlertsHandler(req: Request, res: Response): Promise<
 }
 
 export async function acknowledgeHandler(req: Request, res: Response): Promise<void> {
-  res.status(200).json({ alert: await acknowledge(idOf(req), getAuth(req).volunteerId) });
+  res.status(200).json({ alert: await acknowledge(idOf(req), actorContextFrom(req)) });
 }
 
 export async function resolveHandler(req: Request, res: Response): Promise<void> {

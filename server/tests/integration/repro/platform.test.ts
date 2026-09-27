@@ -119,7 +119,7 @@ describe('cross-cutting rules (P03 repros)', () => {
   });
 
   // F03-018
-  it.skip('audits a lost-person acknowledgement', async () => {
+  it('audits a lost-person acknowledgement', async () => {
     const alert = await request(app)
       .post('/api/v1/lost-person')
       .set('Authorization', bearer(volunteer))
