@@ -15,7 +15,7 @@ import { getLiveFootfall, SILENT_STATION_MINUTES } from '../footfall/index.js';
 import { listGifts } from '../gift/index.js';
 import { getFunnel } from '../missionCard/index.js';
 import { findStationById } from '../station/index.js';
-import { getLongShifts, getStaffingGaps } from '../shift/service.js';
+import { getLongShifts, getStaffingGaps } from '../shift/application/shifts.js';
 import { DEFAULT_SETTINGS, getSettings } from '../../platform/settings/index.js';
 import {
   activeLostPersonCount,

@@ -7,16 +7,16 @@ import {
   Id,
   ListBriefingSlotsQuery,
 } from '@spoh/shared';
-import { getAuth, requireAuth } from '../../platform/identity/index.js';
-import { defaultRateLimit } from '../../platform/http/rateLimit.js';
-import { requireCapability } from '../../platform/access/index.js';
+import { getAuth, requireAuth } from '../../../platform/identity/index.js';
+import { defaultRateLimit } from '../../../platform/http/rateLimit.js';
+import { requireCapability } from '../../../platform/access/index.js';
 import {
   validate,
   validatedBody,
   validatedParams,
   validatedQuery,
-} from '../../platform/http/validate.js';
-import { auditContextFrom } from '../../platform/http/auditContext.js';
+} from '../../../platform/http/validate.js';
+import { auditContextFrom } from '../../../platform/http/auditContext.js';
 import {
   decideSwap,
   getBriefingSlots,
@@ -25,7 +25,7 @@ import {
   listPendingSwaps,
   markSlotComplete,
   requestSwap,
-} from './service.js';
+} from '../application/shifts.js';
 
 /**
  * Swaps, briefing waves and staffing gaps.

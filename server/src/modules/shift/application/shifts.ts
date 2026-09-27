@@ -10,16 +10,16 @@ import {
   type StaffingGapsResponse,
   type SwapRequestRecord,
 } from '@spoh/shared';
-import { writeAudit, type AuditContext } from '../../platform/audit/index.js';
-import { AppError, ForbiddenError, NotFoundError } from '../../platform/errors/index.js';
-import { prisma } from '../../platform/db/client.js';
-import { DEFAULT_SETTINGS, getSettings } from '../../platform/settings/index.js';
+import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
+import { AppError, ForbiddenError, NotFoundError } from '../../../platform/errors/index.js';
+import { prisma } from '../../../platform/db/client.js';
+import { DEFAULT_SETTINGS, getSettings } from '../../../platform/settings/index.js';
 import {
   activeShiftBlocks,
   eventDayAnchor,
   minutesBetween,
   singaporeDateString,
-} from '../../platform/time/index.js';
+} from '../../../platform/time/index.js';
 import {
   applySwap,
   completeSlot,
@@ -34,7 +34,7 @@ import {
   staffingByStation,
   toBriefingSlotRecord,
   toSwapRecord,
-} from './repo.js';
+} from '../data/repo.js';
 
 /** Swaps, briefing waves and staffing gaps (PRODUCT_BRIEF §6). */
 
