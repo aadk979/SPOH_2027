@@ -1,4 +1,4 @@
-import type { ShiftAssignmentRecord, VolunteerRecord } from '@spoh/shared';
+import type { VolunteerRecord } from '@spoh/shared';
 import type { Prisma, Volunteer } from '../../generated/prisma/client.js';
 
 export type { Volunteer };
@@ -75,44 +75,6 @@ export async function upsertVolunteer(
   });
 
   return { volunteer, created: true };
-}
-
-const assignmentInclude = {
-  volunteer: { select: { displayName: true, phone: true } },
-  station: { select: { name: true } },
-  eventDay: { select: { date: true } },
-} satisfies Prisma.ShiftAssignmentInclude;
-
-export type AssignmentWithNames = Prisma.ShiftAssignmentGetPayload<{
-  include: typeof assignmentInclude;
-}>;
-
-export function toAssignmentRecord(row: AssignmentWithNames): ShiftAssignmentRecord {
-  return {
-    id: row.id,
-    volunteerId: row.volunteerId,
-    volunteerName: row.volunteer.displayName,
-    volunteerPhone: row.volunteer.phone,
-    stationId: row.stationId,
-    stationName: row.station.name,
-    eventDayId: row.eventDayId,
-    date: row.eventDay.date.toISOString().slice(0, 10),
-    block: row.block,
-    roleLabel: row.roleLabel,
-    checkedInAt: row.checkedInAt?.toISOString() ?? null,
-    checkedOutAt: row.checkedOutAt?.toISOString() ?? null,
-  };
-}
-
-export async function listAssignmentsForStation(
-  stationId: string,
-  eventDayId?: string,
-): Promise<AssignmentWithNames[]> {
-  return prisma.shiftAssignment.findMany({
-    where: { stationId, ...(eventDayId ? { eventDayId } : {}) },
-    include: assignmentInclude,
-    orderBy: [{ eventDay: { date: 'asc' } }, { block: 'asc' }, { roleLabel: 'asc' }],
-  });
 }
 
 /**

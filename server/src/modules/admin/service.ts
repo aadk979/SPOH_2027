@@ -2,10 +2,8 @@ import {
   ERROR_CODES,
   ROLE_PRECEDENCE,
   type CommitteeRole,
-  type CreateAssignmentRequest,
   type DeactivateVolunteerRequest,
   type ListVolunteersQuery,
-  type ShiftAssignmentRecord,
   type UpdateVolunteerRequest,
   type VolunteerAdminRecord,
   type VolunteerMutationResponse,
@@ -23,7 +21,6 @@ import { writeAudit, type AuditContext } from '../../platform/audit/index.js';
 import { invalidateVolunteerCache } from '../../platform/identity/index.js';
 import { identityProvider } from '../identity/provider.js';
 import { revokeAllForVolunteer } from '../auth/service.js';
-import { toAssignmentRecord } from '../roster/repo.js';
 import { pageArgs, toPage } from '../../platform/db/pagination.js';
 
 /**
@@ -427,98 +424,6 @@ export async function reactivateVolunteer(
   // Sessions are deliberately not restored: the volunteer signs in again, which
   // is what proves they still hold the credential.
   return { volunteer: toAdminRecord(updated), sessionsRevoked: 0, identityChanged };
-}
-
-// ─────────────────────────────────────────────────────────────
-// ASSIGNMENTS
-// ─────────────────────────────────────────────────────────────
-
-export async function createAssignment(
-  request: CreateAssignmentRequest,
-  audit: AuditContext,
-): Promise<ShiftAssignmentRecord> {
-  const [volunteer, station, eventDay] = await Promise.all([
-    prisma.volunteer.findUnique({ where: { id: request.volunteerId }, select: { active: true } }),
-    prisma.station.findUnique({ where: { id: request.stationId }, select: { active: true } }),
-    prisma.eventDay.findUnique({ where: { id: request.eventDayId }, select: { id: true } }),
-  ]);
-
-  if (!volunteer?.active) throw new NotFoundError('Volunteer');
-  if (!station?.active) throw new NotFoundError('Station');
-  if (!eventDay) throw new NotFoundError('Event day');
-
-  // The unique key is (volunteer, day, block): one person cannot be in two
-  // places in the same block. Upsert rather than fail, because "move them to
-  // the other station" is the operation an IC actually wants.
-  const row = await prisma.$transaction(async (tx) => {
-    const assignment = await tx.shiftAssignment.upsert({
-      where: {
-        volunteerId_eventDayId_block: {
-          volunteerId: request.volunteerId,
-          eventDayId: request.eventDayId,
-          block: request.block,
-        },
-      },
-      create: {
-        volunteerId: request.volunteerId,
-        stationId: request.stationId,
-        eventDayId: request.eventDayId,
-        block: request.block,
-        roleLabel: request.roleLabel,
-      },
-      update: { stationId: request.stationId, roleLabel: request.roleLabel },
-      include: {
-        volunteer: { select: { displayName: true, phone: true } },
-        station: { select: { name: true } },
-        eventDay: { select: { date: true } },
-      },
-    });
-
-    await writeAudit(tx, {
-      ...audit,
-      action: 'assignment.create',
-      entityType: 'ShiftAssignment',
-      entityId: assignment.id,
-      after: {
-        volunteerId: request.volunteerId,
-        stationId: request.stationId,
-        block: request.block,
-      },
-    });
-
-    return assignment;
-  });
-
-  return toAssignmentRecord(row);
-}
-
-export async function deleteAssignment(id: string, audit: AuditContext): Promise<void> {
-  const existing = await prisma.shiftAssignment.findUnique({
-    where: { id },
-    select: { id: true, volunteerId: true, stationId: true, block: true, checkedInAt: true },
-  });
-
-  if (!existing) throw new NotFoundError('Shift assignment');
-
-  if (existing.checkedInAt) {
-    // Deleting an assignment somebody worked would erase the attendance record
-    // the post-event report counts. Correct the roster, do not rewrite history.
-    throw new ConflictError(
-      ERROR_CODES.CONFLICT,
-      'That volunteer has already checked in for this shift. Check them out instead of removing it.',
-    );
-  }
-
-  await prisma.$transaction(async (tx) => {
-    await tx.shiftAssignment.delete({ where: { id } });
-    await writeAudit(tx, {
-      ...audit,
-      action: 'assignment.delete',
-      entityType: 'ShiftAssignment',
-      entityId: id,
-      before: { ...existing },
-    });
-  });
 }
 
 /** Guard used by the router so a forbidden action never reaches the service. */

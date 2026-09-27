@@ -30,15 +30,14 @@ import {
   updateStationHandler,
 } from '../station/index.js';
 import {
-  createAssignment,
   deactivateVolunteer,
-  deleteAssignment,
   getVolunteer,
   listVolunteers,
   reactivateVolunteer,
   updateVolunteer,
   type Actor,
 } from './service.js';
+import { createAssignmentHandler, deleteAssignmentHandler } from '../assignments/index.js';
 import { getSettingsHandler, updateSettingsHandler } from '../settings/index.js';
 import { createGiftTypeHandler, updateGiftTypeHandler } from '../gift/index.js';
 import {
@@ -147,11 +146,7 @@ adminRouter.post(
   defaultRateLimit,
   requireCapability('roster.edit'),
   validate({ body: CreateAssignmentRequest }),
-  async (req: Request, res: Response) => {
-    const body = validatedBody<CreateAssignmentRequest>(req);
-    const assignment = await createAssignment(body, auditContextFrom(req));
-    res.status(201).json({ assignment });
-  },
+  createAssignmentHandler,
 );
 
 adminRouter.delete(
@@ -159,11 +154,7 @@ adminRouter.delete(
   defaultRateLimit,
   requireCapability('roster.edit'),
   validate({ params: IdParams }),
-  async (req: Request, res: Response) => {
-    const { id } = validatedParams<z.infer<typeof IdParams>>(req);
-    await deleteAssignment(id, auditContextFrom(req));
-    res.status(204).end();
-  },
+  deleteAssignmentHandler,
 );
 
 // ─────────────────────────────────────────────────────────────

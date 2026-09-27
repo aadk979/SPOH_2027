@@ -4,15 +4,11 @@ import { Id, ProvisionVolunteerRequest, RosterImportRequest } from '@spoh/shared
 import { getAuth, requireAuth } from '../../platform/identity/index.js';
 import { defaultRateLimit, sensitiveRateLimit } from '../../platform/http/rateLimit.js';
 import { requireCapability } from '../../platform/access/index.js';
-import {
-  validate,
-  validatedBody,
-  validatedParams,
-  validatedQuery,
-} from '../../platform/http/validate.js';
+import { validate, validatedBody } from '../../platform/http/validate.js';
 import { auditContextFrom } from '../../platform/http/auditContext.js';
 import { getMe } from '../me/service.js';
-import { getStationRoster, importRoster, provisionVolunteer, type RosterActor } from './service.js';
+import { stationRosterHandler } from '../assignments/index.js';
+import { importRoster, provisionVolunteer, type RosterActor } from './service.js';
 
 /** Roster, provisioning and shift views (BUILD_PLAN §7.2). */
 export const rosterRouter: Router = Router();
@@ -47,12 +43,7 @@ rosterRouter.get(
   defaultRateLimit,
   requireCapability('dashboard.station.read'),
   validate({ params: StationIdParams, query: StationRosterQuery }),
-  async (req: Request, res: Response) => {
-    const { stationId } = validatedParams<z.infer<typeof StationIdParams>>(req);
-    const { eventDayId } = validatedQuery<z.infer<typeof StationRosterQuery>>(req);
-    const roster = await getStationRoster(stationId, eventDayId);
-    res.status(200).json({ data: roster, meta: { count: roster.length, nextCursor: null } });
-  },
+  stationRosterHandler,
 );
 
 /**

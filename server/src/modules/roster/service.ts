@@ -7,10 +7,9 @@ import {
   type RosterImportIssue,
   type RosterImportRequest,
   type RosterImportResponse,
-  type ShiftAssignmentRecord,
 } from '@spoh/shared';
 import { writeAudit, type AuditContext } from '../../platform/audit/index.js';
-import { AppError, NotFoundError, ValidationError } from '../../platform/errors/index.js';
+import { AppError, ValidationError } from '../../platform/errors/index.js';
 import { prisma } from '../../platform/db/client.js';
 import { eventDayAnchor } from '../../platform/time/index.js';
 import { invalidateVolunteerCache } from '../../platform/identity/index.js';
@@ -19,8 +18,6 @@ import {
   findEventDayByDate,
   findStationByCodeTx,
   findVolunteerByEmail,
-  listAssignmentsForStation,
-  toAssignmentRecord,
   toVolunteerRecord,
   upsertAssignment,
   upsertVolunteer,
@@ -377,15 +374,4 @@ class DryRunRollback extends Error {
     super('roster import dry run');
     this.name = 'DryRunRollback';
   }
-}
-
-export async function getStationRoster(
-  stationId: string,
-  eventDayId?: string,
-): Promise<ShiftAssignmentRecord[]> {
-  const station = await prisma.station.findUnique({ where: { id: stationId } });
-  if (!station) throw new NotFoundError('Station');
-
-  const assignments = await listAssignmentsForStation(stationId, eventDayId);
-  return assignments.map(toAssignmentRecord);
 }
