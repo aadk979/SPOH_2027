@@ -30,6 +30,31 @@ async function checkCard(tx: PrismaTransactionClient, request: RedeemGiftRequest
   });
 }
 
+type Redemption = Awaited<ReturnType<typeof createRedemption>>;
+
+function toResponse(result: {
+  redemption: Redemption;
+  record: RedeemGiftResponse['giftType'];
+  check: CardCheck;
+}): RedeemGiftResponse {
+  const { redemption, record, check } = result;
+  return {
+    redemption: {
+      id: redemption.id,
+      giftTypeId: redemption.giftTypeId,
+      giftTypeName: record.name,
+      missionCardId: redemption.missionCardId,
+      stationId: redemption.stationId,
+      source: redemption.source,
+      recordedAt: redemption.recordedAt.toISOString(),
+      voided: redemption.voided,
+    },
+    giftType: record,
+    cardComplete: check.cardComplete,
+    warning: check.warning,
+  };
+}
+
 /** Hand over a gift at the Mission Complete desk and record it. */
 export async function redeemGift(
   request: RedeemGiftRequest,
@@ -78,21 +103,5 @@ export async function redeemGift(
   // Low stock alerts are an IC duty in the deck; automating it beats relying on
   // someone noticing (§5).
   if (result.record.lowStock) notifyLowStock(result.record);
-
-  const { redemption, record, check } = result;
-  return {
-    redemption: {
-      id: redemption.id,
-      giftTypeId: redemption.giftTypeId,
-      giftTypeName: record.name,
-      missionCardId: redemption.missionCardId,
-      stationId: redemption.stationId,
-      source: redemption.source,
-      recordedAt: redemption.recordedAt.toISOString(),
-      voided: redemption.voided,
-    },
-    giftType: record,
-    cardComplete: check.cardComplete,
-    warning: check.warning,
-  };
+  return toResponse(result);
 }

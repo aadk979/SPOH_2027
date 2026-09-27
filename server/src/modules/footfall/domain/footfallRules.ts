@@ -32,20 +32,28 @@ export function bucketsByStation(
  * One counted room on the live board. No activity at all today counts as
  * silent: that is exactly the case where a counter never opened the app.
  */
+interface StationStats {
+  total: number;
+  lastActivityAt: Date | null;
+  counters: number;
+}
+
+const NO_ACTIVITY: StationStats = { total: 0, lastActivityAt: null, counters: 0 };
+
 export function liveStationRow(
   station: { id: string; name: string },
-  stats: { total: number; lastActivityAt: Date | null; counters: number } | undefined,
+  stats: StationStats | undefined,
   at: { now: Date; silentAfterMinutes: number },
 ) {
-  const lastActivityAt = stats?.lastActivityAt ?? null;
+  const { total, lastActivityAt, counters } = stats ?? NO_ACTIVITY;
   const minutesSince = lastActivityAt ? minutesBetween(lastActivityAt, at.now) : null;
   return {
     stationId: station.id,
     stationName: station.name,
-    todayTotal: stats?.total ?? 0,
-    lastActivityAt: lastActivityAt?.toISOString() ?? null,
+    todayTotal: total,
+    lastActivityAt: lastActivityAt ? lastActivityAt.toISOString() : null,
     minutesSinceLastActivity: minutesSince,
-    activeCounterCount: stats?.counters ?? 0,
+    activeCounterCount: counters,
     silent: minutesSince === null || minutesSince >= at.silentAfterMinutes,
   };
 }
