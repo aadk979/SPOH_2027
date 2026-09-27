@@ -109,15 +109,18 @@ function planPeople(
       }
       continue;
     }
-    const created = !existing && !seen.has(row.email);
+    const first = !seen.has(row.email);
+    const created = !existing && first;
     seen.set(row.email, 'active');
     plan.people.push({
       row,
       created,
       roleChangedFrom: existing && existing.role !== row.role ? existing.role : null,
     });
-    if (created) plan.counters.volunteersCreated += 1;
-    else plan.counters.volunteersUpdated += 1;
+    // Counted once per person, not per row: a new volunteer with two shifts is
+    // one volunteer created, not one created and one updated (F03-025).
+    if (first && created) plan.counters.volunteersCreated += 1;
+    else if (first) plan.counters.volunteersUpdated += 1;
   }
   return seen;
 }

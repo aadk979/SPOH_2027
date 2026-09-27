@@ -91,4 +91,16 @@ describe('planRosterImport', () => {
     expect(plan.links).toEqual([{ email: 'g@x', managerEmail: 'h@x', personDeactivated: false }]);
     expect(plan.issues.map((issue) => issue.rowNumber)).toEqual([3]);
   });
+
+  it('counts people once each, however many rows they have (F03-025)', () => {
+    const plan = planRosterImport(
+      [row({ email: 'n@x', ...shift }), row({ email: 'n@x', ...shift, block: 'AFTERNOON' })],
+      snapshot(),
+    );
+    expect(plan.counters).toMatchObject({
+      volunteersCreated: 1,
+      volunteersUpdated: 0,
+      assignmentsCreated: 2,
+    });
+  });
 });
