@@ -10,7 +10,7 @@ import { auditRouter } from './modules/audit/router.js';
 import { dashboardRouter } from './modules/dashboard/router.js';
 import { fallbackRouter } from './modules/fallback/router.js';
 import { footfallRouter } from './modules/footfall/index.js';
-import { giftRouter } from './modules/gift/http/routes.js';
+import { giftRouter } from './modules/gift/index.js';
 import { incidentRouter } from './modules/incident/router.js';
 import { lostFoundRouter } from './modules/lostFound/router.js';
 import { lostPersonRouter } from './modules/lostPerson/router.js';

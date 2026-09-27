@@ -9,7 +9,7 @@ import { writeAudit, type AuditContext } from '../../platform/audit/index.js';
 import { NotFoundError } from '../../platform/errors/index.js';
 import { logger } from '../../platform/logger/index.js';
 import { prisma } from '../../platform/db/client.js';
-import { dispatch } from '../notification/service.js';
+import { dispatch } from '../notification/index.js';
 import type { IncidentSeverity } from '@spoh/shared';
 import {
   addFollowUp,

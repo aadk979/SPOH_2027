@@ -12,7 +12,7 @@ import {
   singaporeDateString,
 } from '../../platform/time/index.js';
 import { getLiveFootfall, SILENT_STATION_MINUTES } from '../footfall/index.js';
-import { listGifts } from '../gift/application/gifts.js';
+import { listGifts } from '../gift/index.js';
 import { getFunnel } from '../missionCard/index.js';
 import { findStationById } from '../station/index.js';
 import { getLongShifts, getStaffingGaps } from '../shift/service.js';

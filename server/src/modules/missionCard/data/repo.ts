@@ -44,6 +44,11 @@ export async function findCardWithStampStations(tx: PrismaTransactionClient, sho
   });
 }
 
+/** A card's id and status, for the redemption cross-check. */
+export async function findCardStatus(tx: PrismaTransactionClient, shortCode: string) {
+  return tx.missionCard.findUnique({ where: { shortCode }, select: { id: true, status: true } });
+}
+
 /** The card with its full stamp rows, for carrying a journey to a replacement. */
 export async function findCardWithStamps(tx: PrismaTransactionClient, shortCode: string) {
   return tx.missionCard.findUnique({ where: { shortCode }, include: { stampEvents: true } });

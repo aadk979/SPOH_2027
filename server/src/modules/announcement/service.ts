@@ -10,7 +10,7 @@ import { ForbiddenError, NotFoundError } from '../../platform/errors/index.js';
 import { prisma } from '../../platform/db/client.js';
 import { eventDayAnchor, singaporeDateString } from '../../platform/time/index.js';
 import { findStationById } from '../station/index.js';
-import { dispatch } from '../notification/service.js';
+import { dispatch } from '../notification/index.js';
 import {
   acknowledge,
   acknowledgedIds,

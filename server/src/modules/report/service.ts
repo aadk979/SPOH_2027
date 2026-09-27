@@ -2,7 +2,7 @@ import type { FullReport, ReportQuery, ShiftBlock } from '@spoh/shared';
 import { minutesBetween, shiftBlockEndsAt } from '../../platform/time/index.js';
 import { prisma } from '../../platform/db/client.js';
 import { listFallbackWindows } from '../fallback/service.js';
-import { listGifts } from '../gift/application/gifts.js';
+import { listGifts } from '../gift/index.js';
 import { listStations } from '../station/index.js';
 import {
   cardTotals,

@@ -1,4 +1,3 @@
-import type { GiftTypeRecord } from '@spoh/shared';
 import type { GiftType, Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 
@@ -15,23 +14,6 @@ import { prisma, type PrismaTransactionClient } from '../../../platform/db/clien
 export interface GiftTotals {
   redeemed: number;
   adjustment: number;
-}
-
-export function toGiftTypeRecord(gift: GiftType, totals: GiftTotals): GiftTypeRecord {
-  const remaining = gift.initialStock + totals.adjustment - totals.redeemed;
-
-  return {
-    id: gift.id,
-    name: gift.name,
-    initialStock: gift.initialStock,
-    lowStockThreshold: gift.lowStockThreshold,
-    active: gift.active,
-    remaining,
-    redeemed: totals.redeemed,
-    adjustment: totals.adjustment,
-    lowStock: remaining <= gift.lowStockThreshold,
-    outOfStock: remaining <= 0,
-  };
 }
 
 export async function listGiftTypes(includeInactive = false): Promise<GiftType[]> {
