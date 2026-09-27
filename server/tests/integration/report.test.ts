@@ -5,7 +5,7 @@ import type { FullReport } from '@spoh/shared';
 import { createApp } from '../../src/app.js';
 import { prisma } from '../../src/platform/db/client.js';
 import { toCsv } from '../../src/modules/report/export.js';
-import { purgeResolvedAlerts } from '../../src/modules/lostPerson/application/alerts.js';
+import { purgeResolvedAlerts } from '../../src/modules/lostPerson/index.js';
 import { resetDatabase } from '../helpers/db.js';
 import {
   assignToStationAllBlocks,

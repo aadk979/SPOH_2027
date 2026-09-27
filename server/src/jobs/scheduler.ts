@@ -1,7 +1,7 @@
 import { logger } from '../platform/logger/index.js';
 import { loadSettings } from '../platform/settings/index.js';
 import { pruneIdempotencyRecords } from '../platform/idempotency/index.js';
-import { purgeResolvedAlerts } from '../modules/lostPerson/application/alerts.js';
+import { lostPersonJobs } from '../modules/lostPerson/index.js';
 import { pruneRefreshSessions } from '../modules/auth/service.js';
 
 /**
@@ -16,7 +16,6 @@ import { pruneRefreshSessions } from '../modules/auth/service.js';
  * election is needed.
  */
 
-const PURGE_INTERVAL_MS = 15 * 60 * 1000;
 const PRUNE_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
 /**
@@ -38,9 +37,11 @@ export function startScheduledJobs(): StoppableJobs {
   const timers: NodeJS.Timeout[] = [];
 
   timers.push(
-    schedule('lost-person purge', PURGE_INTERVAL_MS, async () => {
-      await purgeResolvedAlerts();
-    }),
+    ...lostPersonJobs.map((job) =>
+      schedule(job.name, job.intervalMs, async () => {
+        await job.run();
+      }),
+    ),
   );
 
   timers.push(

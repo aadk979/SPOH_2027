@@ -1,4 +1,3 @@
-import type { LostPersonAlertRecord } from '@spoh/shared';
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 
@@ -10,32 +9,6 @@ const alertInclude = {
 } satisfies Prisma.LostPersonAlertInclude;
 
 export type AlertWithContext = Prisma.LostPersonAlertGetPayload<{ include: typeof alertInclude }>;
-
-export function toAlertRecord(
-  alert: AlertWithContext,
-  context: { stationName: string | null; ackedByMe: boolean },
-): LostPersonAlertRecord {
-  return {
-    id: alert.id,
-    status: alert.status,
-    approxAge: alert.approxAge,
-    descriptionText: alert.descriptionText,
-    clothingText: alert.clothingText,
-    lastSeenStationId: alert.lastSeenStationId,
-    lastSeenStationName: context.stationName,
-    lastSeenAt: alert.lastSeenAt?.toISOString() ?? null,
-    raisedById: alert.raisedById,
-    raisedByName: alert.raisedBy.displayName,
-    // The reporter's number travels with the alert on purpose: the standing
-    // instruction is that calling beats tapping, and a searcher who finds the
-    // child needs to reach the person who raised it without leaving the screen.
-    raisedByPhone: alert.raisedBy.phone,
-    raisedAt: alert.raisedAt.toISOString(),
-    resolvedAt: alert.resolvedAt?.toISOString() ?? null,
-    ackCount: alert._count.acknowledgements,
-    ackedByMe: context.ackedByMe,
-  };
-}
 
 export async function createAlert(
   tx: PrismaTransactionClient,
@@ -86,13 +59,11 @@ export async function acknowledgeAlert(alertId: string, volunteerId: string): Pr
 
 export async function resolveAlert(
   tx: PrismaTransactionClient,
-  id: string,
-  outcome: 'RESOLVED_FOUND' | 'RESOLVED_OTHER',
-  at: Date,
+  resolution: { id: string; outcome: 'RESOLVED_FOUND' | 'RESOLVED_OTHER'; at: Date },
 ): Promise<void> {
   await tx.lostPersonAlert.update({
-    where: { id },
-    data: { status: outcome, resolvedAt: at },
+    where: { id: resolution.id },
+    data: { status: resolution.outcome, resolvedAt: resolution.at },
   });
 }
 
@@ -139,5 +110,22 @@ export async function purgeAlert(
       clothingText: null,
       purgedAt: new Date(),
     },
+  });
+}
+
+/**
+ * A create response stored before replays were redacted still holds the
+ * description (F04-013). Reduce it to the id the redacted replay reads.
+ */
+export async function scrubLegacyReplay(
+  tx: PrismaTransactionClient,
+  replay: { endpoint: string; alertId: string },
+): Promise<void> {
+  await tx.idempotencyRecord.updateMany({
+    where: {
+      endpoint: replay.endpoint,
+      responseBody: { path: ['alert', 'id'], equals: replay.alertId },
+    },
+    data: { responseBody: { alertId: replay.alertId } },
   });
 }

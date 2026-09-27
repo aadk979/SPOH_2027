@@ -1,38 +1,24 @@
-import { Router, type Request, type Response } from 'express';
+import { Router } from 'express';
 import { z } from 'zod';
 import { Id, RaiseLostPersonRequest, ResolveLostPersonRequest } from '@spoh/shared';
-import { getAuth, requireAuth } from '../../../platform/identity/index.js';
 import { idempotent } from '../../../platform/idempotency/index.js';
 import { captureRateLimit, defaultRateLimit } from '../../../platform/http/rateLimit.js';
 import { requireCapability } from '../../../platform/access/index.js';
-import { validate, validatedBody, validatedParams } from '../../../platform/http/validate.js';
-import { auditContextFrom } from '../../../platform/http/auditContext.js';
+import { requireAuth } from '../../../platform/identity/index.js';
+import { validate } from '../../../platform/http/validate.js';
+import { RAISE_ENDPOINT } from '../application/constants.js';
 import {
-  acknowledge,
-  getActiveAlerts,
-  getAlert,
-  raiseAlert,
-  RAISE_ENDPOINT,
-  resolve,
-} from '../application/alerts.js';
+  acknowledgeHandler,
+  activeAlertsHandler,
+  raiseAlertHandler,
+  raiseReplay,
+  resolveHandler,
+} from './handlers.js';
 
 /** Lost person: raise, broadcast, acknowledge, resolve (BUILD_PLAN §7.2). */
 export const lostPersonRouter: Router = Router();
 
 const IdParams = z.object({ id: Id }).strict();
-
-/**
- * The create response describes a person, so its replay copy holds only the
- * alert id and a retry re-reads the alert (F04-013). A replay after the purge
- * returns the alert without its description, as every other read does.
- */
-const raiseReplay = {
-  store: (body: unknown) => ({ alertId: (body as { alert: { id: string } }).alert.id }),
-  replay: async (req: Request, stored: unknown) => {
-    const { alertId } = stored as { alertId: string };
-    return { alert: await getAlert(alertId, getAuth(req).volunteerId) };
-  },
-};
 
 lostPersonRouter.use(requireAuth);
 
@@ -43,12 +29,7 @@ lostPersonRouter.post(
   requireCapability('lostPerson.raise'),
   validate({ body: RaiseLostPersonRequest }),
   idempotent(RAISE_ENDPOINT, { redacted: raiseReplay }),
-  async (req: Request, res: Response) => {
-    const auth = getAuth(req);
-    const body = validatedBody<RaiseLostPersonRequest>(req);
-    const alert = await raiseAlert(body, auth.volunteerId, auditContextFrom(req));
-    res.status(201).json({ alert });
-  },
+  raiseAlertHandler,
 );
 
 /**
@@ -59,10 +40,7 @@ lostPersonRouter.get(
   '/active',
   captureRateLimit,
   requireCapability('own.read'),
-  async (req: Request, res: Response) => {
-    const auth = getAuth(req);
-    res.status(200).json(await getActiveAlerts(auth.volunteerId));
-  },
+  activeAlertsHandler,
 );
 
 lostPersonRouter.post(
@@ -70,12 +48,7 @@ lostPersonRouter.post(
   captureRateLimit,
   requireCapability('own.read'),
   validate({ params: IdParams }),
-  async (req: Request, res: Response) => {
-    const auth = getAuth(req);
-    const { id } = validatedParams<z.infer<typeof IdParams>>(req);
-    const alert = await acknowledge(id, auth.volunteerId);
-    res.status(200).json({ alert });
-  },
+  acknowledgeHandler,
 );
 
 lostPersonRouter.post(
@@ -83,10 +56,5 @@ lostPersonRouter.post(
   defaultRateLimit,
   requireCapability('lostPerson.resolve'),
   validate({ params: IdParams, body: ResolveLostPersonRequest }),
-  async (req: Request, res: Response) => {
-    const { id } = validatedParams<z.infer<typeof IdParams>>(req);
-    const body = validatedBody<ResolveLostPersonRequest>(req);
-    const alert = await resolve(id, body, auditContextFrom(req));
-    res.status(200).json({ alert });
-  },
+  resolveHandler,
 );
