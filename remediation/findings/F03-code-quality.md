@@ -107,6 +107,7 @@ is not on `main`.
 | F03-041 | Low    | The audit log's live tail can skip rows                                   | P06 / P13.7 (audit screen, F02-024)                                                 | —                     |
 | F03-042 | Low    | Security-event dedupe is per worker                                       | P15.2                                                                               | —                     |
 | F03-043 | Medium | A Deputy's roster import creates accounts (found in P06.12)               | P06.13                                                                              | —                     |
+| F03-044 | Medium | The roster import cannot name a manager who is already on the roster      | P06.13                                                                              | —                     |
 
 ### For P05 (no new owner decision)
 
@@ -1249,6 +1250,26 @@ Filed while fixing other findings, so that every behaviour change still has a ba
   matrix reserves for Chief and Admin.
 - **Fix:** without `user.provision`, report new people as issues and create nothing (as the
   audit branch does); P11.2 makes it `People.Provision` versus `Roster.Edit` (ADR-005, C5).
+- **Phase:** P06.13, with the roster module (P06.7)
+- **Status:** open
+
+#### F03-044 — The roster import cannot name a manager who is already on the roster
+
+- **Severity:** Medium
+- **Area:** `roster/domain/planRosterImport.ts` (was `roster/service.ts` `importRoster`, pass two)
+- **Evidence:** found in P06.7 while writing the import as a plan. Three faults, all in how the
+  import treats people across rows:
+  1. `reportsToEmail` is looked up only among the file's own rows. A new cohort that reports to
+     ICs already on the roster gets "No volunteer with email … in this file or on the roster" on
+     every row, and no manager link, although the message says the roster was searched.
+  2. A deactivated person's row that names a manager fails the whole import with a 404, preview
+     and commit alike (the link update targets a person the import skipped).
+  3. A role change is audited once per row, so a promoted person with three shifts gets three
+     identical `user.update` rows.
+- **Impact:** importing a new intake under existing ICs, the normal case before an event, cannot
+  set anyone's manager; one stale row stops a 200-row import; the audit log over-counts changes.
+- **Fix:** resolve managers from the file or the roster (an inactive one is an issue); skip the
+  link for a person the import skips; audit a role change once per person.
 - **Phase:** P06.13, with the roster module (P06.7)
 - **Status:** open
 

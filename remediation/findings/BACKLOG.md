@@ -41,7 +41,8 @@ The 116 rows include 8 that restate or group other rows (PF-06, PF-07, PF-08, PF
 F01-047, F02-020, F03-042). They keep their own row so that every ID has a home, and are marked
 _umbrella_ or _see_ in **Also**. The other **108** are the unique open findings.
 
-**Filed after P05.1:** F03-043 (Medium, P06.13), found in P06.12. The counts above are as of P05.1.
+**Filed after P05.1:** F03-043 (Medium, P06.13), found in P06.12; F03-044 (Medium, P06.13), found
+in P06.7. The counts above are as of P05.1.
 
 | Severity | Rows | Unique | Earliest home           |
 | -------- | ---: | -----: | ----------------------- |
@@ -230,6 +231,7 @@ immediate defect and the later step makes it structural.
 | F03-031 | Every worker runs the lost-person purge, so summaries are written twice         | P06.13 | P10.7 (scheduler)                                             | open            |
 | F04-004 | An IC can read any station's roster, phone numbers included                     | P06.13 | P11.2 (station-scoped reads)                                  | open            |
 | F03-043 | A Deputy's roster import creates accounts (filed in P06.12)                     | P06.13 | P06.7; P11.2 (`People.Provision`, C5)                         | open            |
+| F03-044 | The roster import cannot name a manager already on the roster (filed in P06.7)  | P06.13 | P13.5 (roster screen)                                         | open            |
 | PF-10   | Layering is conventional, not enforced                                          | P06.10 | P06.3–P06.9, P07.9; _umbrella_ of the F03 module map          | open            |
 | PF-18   | Coverage thresholds exist but were never enforced                               | P08.9  | P06.1, P07.1 (no drop); gate set in ADR-007                   | open            |
 | F02-011 | The IC console repeats people per block and forgets the IC's station            | P07.11 | P14.1 (defaults, grouping)                                    | open            |
