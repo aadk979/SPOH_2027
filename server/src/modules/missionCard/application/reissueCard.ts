@@ -69,7 +69,9 @@ export async function reissueCard(
       reissuedFromId: original.id,
     });
     await copyStamps(tx, original, replacement.id);
-    await updateCard(tx, original.id, { status: 'VOIDED', voidedAt: now });
+    // LOST, not VOIDED (ADR-002 §3): the journey goes on with the replacement,
+    // so the original is neither a spoiled card nor a second journey.
+    await updateCard(tx, original.id, { status: 'LOST' });
 
     await writeAudit(tx, {
       ...audit,

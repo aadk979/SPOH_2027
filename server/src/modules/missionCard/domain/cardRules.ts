@@ -15,8 +15,13 @@ export function requireCard<T>(card: T | null, message = 'No card with that code
   return card;
 }
 
+/** A voided card, or an original replaced after it was lost, is out of use. */
+export function isOutOfUse(status: CardStatus): boolean {
+  return status === 'VOIDED' || status === 'LOST';
+}
+
 export function assertCardNotVoided(card: { status: CardStatus }, message: string): void {
-  if (card.status === 'VOIDED') throw new AppError(409, ERROR_CODES.CARD_VOIDED, message);
+  if (isOutOfUse(card.status)) throw new AppError(409, ERROR_CODES.CARD_VOIDED, message);
 }
 
 export function assertStationStamps(station: { name: string; issuesStamp: boolean }): void {
@@ -40,7 +45,7 @@ export function assertDifferentCards(originalCode: string, replacementCode: stri
  * card's stamps belong to nobody, and an unissued card has none (F03-027).
  */
 export function assertReissuable(original: { status: CardStatus }): void {
-  if (original.status === 'VOIDED' || original.status === 'LOST') {
+  if (isOutOfUse(original.status)) {
     throw new AppError(
       409,
       ERROR_CODES.CARD_VOIDED,

@@ -49,7 +49,7 @@ export function checkPresentedCard(presented: {
       warning: 'That card code was not found. The gift was still recorded.',
     };
   }
-  if (card.status === 'VOIDED') {
+  if (card.status === 'VOIDED' || card.status === 'LOST') {
     return {
       missionCardId: card.id,
       cardComplete: null,

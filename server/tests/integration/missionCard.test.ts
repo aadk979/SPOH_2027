@@ -244,7 +244,7 @@ describe('issuing at the booth', () => {
 
 /** PRODUCT_BRIEF §4.3 — the lost-card case. */
 describe('reissue', () => {
-  it('carries the stamps over and voids the original in one transaction', async () => {
+  it('carries the stamps over and marks the original LOST in one transaction', async () => {
     await stamp(facilitator, CARD_A, courseId);
 
     const response = await request(app)
@@ -259,7 +259,8 @@ describe('reissue', () => {
 
     // The original must be dead, or one journey could be redeemed twice.
     const original = await prisma.missionCard.findUnique({ where: { shortCode: CARD_A } });
-    expect(original?.status).toBe('VOIDED');
+    // LOST, not VOIDED: the journey continues on the replacement (ADR-002 §3).
+    expect(original?.status).toBe('LOST');
     expect(response.body.card.reissuedFromId).toBe(original?.id);
   });
 

@@ -1,5 +1,6 @@
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import { findCardRow, updateCard } from '../data/repo.js';
+import { isOutOfUse } from '../domain/cardRules.js';
 
 /**
  * Link a group registration to the Mission Card the booth handed over, inside
@@ -19,7 +20,7 @@ export async function linkGroupToCard(
   if (!card) {
     return { cardId: null, linkError: 'Card not found. The registrations were still recorded.' };
   }
-  if (card.status === 'VOIDED') {
+  if (isOutOfUse(card.status)) {
     return {
       cardId: null,
       linkError: 'That card has been voided. The registrations were still recorded.',

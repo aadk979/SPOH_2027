@@ -124,8 +124,9 @@ export async function footfallCurve(range: Range) {
 
 export async function cardTotals(range: Range) {
   const [issued, completed, voided] = await Promise.all([
+    // A lost original's journey continues on its replacement (ADR-002 §3).
     prisma.missionCard.count({
-      where: { issuedAt: { gte: range.from, lt: range.to } },
+      where: { issuedAt: { gte: range.from, lt: range.to }, status: { not: 'LOST' } },
     }),
     prisma.missionCard.count({
       where: { status: 'COMPLETED', completedAt: { gte: range.from, lt: range.to } },
@@ -154,6 +155,7 @@ export async function cardsByDay(range: Range, column: 'issuedAt' | 'completedAt
                  COUNT(*)::bigint AS value
           FROM "MissionCard"
           WHERE "issuedAt" >= ${range.from} AND "issuedAt" < ${range.to}
+            AND "status" <> 'LOST'
           GROUP BY date ORDER BY date ASC`
       : await prisma.$queryRaw<Array<{ date: Date; value: bigint }>>`
           SELECT date_trunc('day', "completedAt" AT TIME ZONE 'Asia/Singapore') AS date,
@@ -170,10 +172,12 @@ export async function cardsByDay(range: Range, column: 'issuedAt' | 'completedAt
 
 export async function cardsPerStation(range: Range) {
   const rows = await prisma.$queryRaw<Array<{ stationId: string; cards: bigint }>>`
-    SELECT "stationId", COUNT(DISTINCT "missionCardId")::bigint AS cards
-    FROM "CardStampEvent"
-    WHERE "recordedAt" >= ${range.from} AND "recordedAt" < ${range.to}
-    GROUP BY "stationId"`;
+    SELECT s."stationId", COUNT(DISTINCT s."missionCardId")::bigint AS cards
+    FROM "CardStampEvent" s
+    JOIN "MissionCard" c ON c."id" = s."missionCardId"
+    WHERE s."recordedAt" >= ${range.from} AND s."recordedAt" < ${range.to}
+      AND c."status" <> 'LOST'
+    GROUP BY s."stationId"`;
 
   return rows.map((row) => ({ stationId: row.stationId, cards: Number(row.cards) }));
 }

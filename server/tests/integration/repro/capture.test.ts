@@ -141,7 +141,7 @@ describe('Mission Cards, gifts and group registration (P03 repros)', () => {
   });
 
   // F03-028
-  it.skip('counts a reissued journey once in the card funnel', async () => {
+  it('counts a reissued journey once in the card funnel', async () => {
     await card('FFF666', 'ISSUED');
     await card('GGG777', 'UNISSUED');
     expect((await stamp('FFF666', boothAId)).status).toBe(201);

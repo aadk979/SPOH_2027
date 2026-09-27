@@ -107,9 +107,14 @@ export interface CardFunnelFilter {
   to?: Date;
 }
 
+/**
+ * Cards that stand for a journey: issued, and not an original that was lost
+ * and reissued. The replacement carries the original's issue time and stamps,
+ * so each chain of reissues counts once (ADR-002 §3, F03-028).
+ */
 function issuedWhere(filter: CardFunnelFilter): Prisma.MissionCardWhereInput {
   return {
-    status: { not: 'UNISSUED' },
+    status: { notIn: ['UNISSUED', 'LOST'] },
     ...(filter.from || filter.to
       ? {
           issuedAt: {
@@ -149,10 +154,12 @@ export async function countCardsPerStation(filter: CardFunnelFilter): Promise<Ma
   const to = filter.to ?? new Date(8.64e15);
 
   const rows = await prisma.$queryRaw<Array<{ stationId: string; cards: bigint }>>`
-    SELECT "stationId", COUNT(DISTINCT "missionCardId")::bigint AS cards
-    FROM "CardStampEvent"
-    WHERE "recordedAt" >= ${from} AND "recordedAt" < ${to}
-    GROUP BY "stationId"`;
+    SELECT s."stationId", COUNT(DISTINCT s."missionCardId")::bigint AS cards
+    FROM "CardStampEvent" s
+    JOIN "MissionCard" c ON c."id" = s."missionCardId"
+    WHERE s."recordedAt" >= ${from} AND s."recordedAt" < ${to}
+      AND c."status" <> 'LOST'
+    GROUP BY s."stationId"`;
 
   return new Map(rows.map((row) => [row.stationId, Number(row.cards)]));
 }

@@ -22,7 +22,7 @@ const NO_CARD: CardCheck = { missionCardId: null, cardComplete: null, warning: n
 async function checkCard(tx: PrismaTransactionClient, request: RedeemGiftRequest) {
   if (!request.cardShortCode) return NO_CARD;
   const card = await findCardForRedemption(tx, request.cardShortCode);
-  const usable = card && card.status !== 'VOIDED';
+  const usable = card && card.status !== 'VOIDED' && card.status !== 'LOST';
   return checkPresentedCard({
     card,
     alreadyRedeemed: usable ? (await existingRedemptionForCard(tx, card.id)) !== null : false,
