@@ -160,7 +160,7 @@ describe('Mission Cards, gifts and group registration (P03 repros)', () => {
   });
 
   // F03-020
-  it.skip('reads a typed O as 0 and I as 1 in a card code, as the printed alphabet intends', async () => {
+  it('reads a typed O as 0 and I as 1 in a card code, as the printed alphabet intends', async () => {
     await card('100000', 'ISSUED');
 
     const response = await request(app)

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { CARD_CODE_LENGTH, normaliseCardCode } from '../cardCode.js';
 import { CardStatus, DataSource } from '../enums.js';
 import { CaptureEnvelope, Id, IsoDateTime, ReasonText } from './common.js';
 
@@ -17,14 +18,18 @@ import { CaptureEnvelope, Id, IsoDateTime, ReasonText } from './common.js';
 /**
  * Six characters from an ambiguity-free alphabet. Printed on the card, and the
  * fallback when a QR is damaged — so a volunteer has to be able to read it off
- * a scuffed card and type it correctly on the first try.
+ * a scuffed card and type it correctly on the first try. A typed O, I or L is
+ * read as the digit the card shows (F03-020).
  */
 export const CardShortCode = z
   .string()
-  .trim()
-  .toUpperCase()
-  .length(6)
-  .regex(/^[0-9A-HJ-NP-Z]{6}$/, 'Not a valid card code');
+  .transform(normaliseCardCode)
+  .pipe(
+    z
+      .string()
+      .length(CARD_CODE_LENGTH)
+      .regex(/^[0-9A-HJKMNP-TV-Z]+$/, 'Not a valid card code'),
+  );
 export type CardShortCode = z.infer<typeof CardShortCode>;
 
 export const CardStampRecord = z

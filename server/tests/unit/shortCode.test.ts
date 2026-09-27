@@ -71,4 +71,8 @@ describe('normaliseShortCode', () => {
     expect(normaliseShortCode('AAA-111')).toBe('AAA111');
     expect(normaliseShortCode('aaa 111')).toBe('AAA111');
   });
+
+  it('reads the look-alikes as the digits the card shows (F03-020)', () => {
+    expect(normaliseShortCode('io0l1o')).toBe('100110');
+  });
 });

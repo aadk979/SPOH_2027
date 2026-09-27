@@ -9,6 +9,7 @@
 export * from './enums.js';
 export * from './capabilities.js';
 export * from './errorCodes.js';
+export * from './cardCode.js';
 
 export * from './dto/common.js';
 export * from './dto/station.js';

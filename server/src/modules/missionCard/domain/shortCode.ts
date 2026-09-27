@@ -1,4 +1,5 @@
 import { randomBytes, randomUUID } from 'node:crypto';
+import { CARD_CODE_ALPHABET, CARD_CODE_LENGTH, normaliseCardCode } from '@spoh/shared';
 
 /**
  * Mission Card identifiers (PRODUCT_BRIEF §4.4).
@@ -9,16 +10,9 @@ import { randomBytes, randomUUID } from 'node:crypto';
  * device, and still resolve to the same journey.
  */
 
-/**
- * Crockford-style alphabet with I, L, O and U removed.
- *
- * I/1, O/0 and L/1 are the pairs a volunteer will confuse when reading a
- * scuffed card under hall lighting, and the short code is the fallback for
- * exactly the case where the QR will not scan — so it has to be readable on the
- * first try. U is dropped because it makes accidental words less likely.
- */
-const ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
-const CODE_LENGTH = 6;
+/** The printed alphabet (`@spoh/shared` cardCode.ts says why I, L, O and U are missing). */
+const ALPHABET = CARD_CODE_ALPHABET;
+const CODE_LENGTH = CARD_CODE_LENGTH;
 
 /** 32^6 ≈ 1.07 billion. At a few thousand cards, collisions are negligible. */
 export const SHORT_CODE_SPACE = ALPHABET.length ** CODE_LENGTH;
@@ -58,7 +52,7 @@ export function generateQrPayload(): string {
   return `spoh2027:${randomUUID()}`;
 }
 
-/** Normalise anything a volunteer typed or a scanner read into a short code. */
+/** Normalise anything a volunteer typed or a scanner read into a short code (F03-020). */
 export function normaliseShortCode(input: string): string {
-  return input.trim().toUpperCase().replace(/[\s-]/g, '');
+  return normaliseCardCode(input);
 }
