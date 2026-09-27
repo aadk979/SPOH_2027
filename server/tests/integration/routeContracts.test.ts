@@ -1,6 +1,6 @@
 import type { Express } from 'express';
 import request from 'supertest';
-import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../../src/app.js';
 import { prisma } from '../../src/platform/db/client.js';
 import { resetDatabase } from '../helpers/db.js';
@@ -309,5 +309,32 @@ describe('an assignment helper sanity check', () => {
   it('rosters the fixture volunteers in both blocks', async () => {
     await assignToStation({ volunteerId: chief.id, stationId, eventDayId });
     expect(await prisma.shiftAssignment.count({ where: { stationId } })).toBe(5);
+  });
+});
+
+describe('list reads (F03-029)', () => {
+  it('loads follow-up authors for a page of incidents in one query, not one per incident', async () => {
+    for (const description of ['Spill by the lift', 'Loose cable at the desk', 'Door stuck']) {
+      const reported = await as(volunteer).post('/incidents', {
+        idempotencyKey: idempotencyKey(),
+        type: 'NEAR_MISS',
+        severity: 'LOW',
+        stationId,
+        description,
+        occurredAt: FROZEN_NOW.toISOString(),
+      });
+      await as(ic).post(`/incidents/${reported.body.incident.id as string}/follow-ups`, {
+        note: 'Looked at it',
+      });
+    }
+
+    const authorLookups = vi.spyOn(prisma.volunteer, 'findMany');
+    const response = await as(ic).get('/incidents');
+
+    expect(response.status).toBe(200);
+    expect(response.body.data).toHaveLength(3);
+    expect(response.body.data[0].followUps[0].authorName).toBe('ic@contracts.test');
+    expect(authorLookups).toHaveBeenCalledTimes(1);
+    authorLookups.mockRestore();
   });
 });

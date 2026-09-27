@@ -1,7 +1,7 @@
 import type { IncidentRecord, ListIncidentsQuery } from '@spoh/shared';
 import { toPage, type Page } from '../../../platform/db/pagination.js';
 import { listIncidents } from '../data/repo.js';
-import { toRecordWithAuthors } from './incidentRecord.js';
+import { toRecordsWithAuthors } from './incidentRecord.js';
 
 export async function listIncidentRecords(
   query: ListIncidentsQuery,
@@ -18,7 +18,7 @@ export async function listIncidentRecords(
 
   const page = toPage(rows, query.limit);
   return {
-    data: await Promise.all(page.data.map(toRecordWithAuthors)),
+    data: await toRecordsWithAuthors(page.data),
     nextCursor: page.nextCursor,
   };
 }
