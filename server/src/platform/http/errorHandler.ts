@@ -14,7 +14,7 @@ import { requestIdOf } from './requestId.js';
  *  - every error is logged with the request id, so the generic client message
  *    can always be traced back to the real cause
  */
-// eslint-disable-next-line max-params -- Express recognises error middleware by its four parameters
+/* eslint-disable max-params -- Express recognises error middleware by its four parameters */
 export const errorHandler: ErrorRequestHandler = (
   error: unknown,
   req: Request,
@@ -51,6 +51,7 @@ export const errorHandler: ErrorRequestHandler = (
 
   res.status(normalised.statusCode).json(body);
 };
+/* eslint-enable max-params */
 
 /** Map anything thrown into the AppError shape. */
 function normalise(error: unknown): AppError {
