@@ -1,4 +1,5 @@
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
+import { findCardRow, updateCard } from '../data/repo.js';
 
 /**
  * Link a group registration to the Mission Card the booth handed over, inside
@@ -13,10 +14,7 @@ export async function linkGroupToCard(
   tx: PrismaTransactionClient,
   link: { shortCode: string; issuedAt: Date },
 ): Promise<{ cardId: string | null; linkError: string | null }> {
-  const card = await tx.missionCard.findUnique({
-    where: { shortCode: link.shortCode.toUpperCase() },
-    select: { id: true, status: true },
-  });
+  const card = await findCardRow(tx, link.shortCode.toUpperCase());
 
   if (!card) {
     return { cardId: null, linkError: 'Card not found. The registrations were still recorded.' };
@@ -28,9 +26,6 @@ export async function linkGroupToCard(
     };
   }
 
-  await tx.missionCard.update({
-    where: { id: card.id },
-    data: { status: 'ISSUED', issuedAt: link.issuedAt },
-  });
+  await updateCard(tx, card.id, { status: 'ISSUED', issuedAt: link.issuedAt });
   return { cardId: card.id, linkError: null };
 }

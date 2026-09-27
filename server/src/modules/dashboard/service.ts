@@ -13,7 +13,7 @@ import {
 } from '../../platform/time/index.js';
 import { getLiveFootfall, SILENT_STATION_MINUTES } from '../footfall/index.js';
 import { listGifts } from '../gift/service.js';
-import { getFunnel } from '../missionCard/application/missionCards.js';
+import { getFunnel } from '../missionCard/index.js';
 import { findStationById } from '../station/index.js';
 import { getLongShifts, getStaffingGaps } from '../shift/service.js';
 import { DEFAULT_SETTINGS, getSettings } from '../../platform/settings/index.js';

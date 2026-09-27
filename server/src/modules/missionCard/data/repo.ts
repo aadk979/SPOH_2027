@@ -1,4 +1,3 @@
-import type { MissionCardRecord } from '@spoh/shared';
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 
@@ -14,35 +13,6 @@ const cardInclude = {
 
 export type CardWithContext = Prisma.MissionCardGetPayload<{ include: typeof cardInclude }>;
 
-export function toMissionCardRecord(
-  card: CardWithContext,
-  stampingStationIds: readonly string[],
-): MissionCardRecord {
-  const visited = new Set(card.stampEvents.map((stamp) => stamp.stationId));
-
-  return {
-    id: card.id,
-    shortCode: card.shortCode,
-    status: card.status,
-    issuedAt: card.issuedAt?.toISOString() ?? null,
-    completedAt: card.completedAt?.toISOString() ?? null,
-    voidedAt: card.voidedAt?.toISOString() ?? null,
-    reissuedFromId: card.reissuedFromId,
-    batchLabel: card.batchLabel,
-    stamps: card.stampEvents.map((stamp) => ({
-      id: stamp.id,
-      stationId: stamp.stationId,
-      stationName: stamp.station.name,
-      recordedAt: stamp.recordedAt.toISOString(),
-      recordedByName: stamp.recordedBy.displayName,
-      source: stamp.source,
-    })),
-    // What the facilitator needs to tell the visitor: where to go next.
-    remainingStationIds: stampingStationIds.filter((id) => !visited.has(id)),
-    redeemed: card.redemptions.length > 0,
-  };
-}
-
 export async function findCardByShortCode(
   shortCode: string,
   tx: PrismaTransactionClient = prisma,
@@ -55,6 +25,44 @@ export async function findCardById(
   tx: PrismaTransactionClient = prisma,
 ): Promise<CardWithContext | null> {
   return tx.missionCard.findUnique({ where: { id }, include: cardInclude });
+}
+
+/** The bare card row, for a write that only needs its status. */
+export async function findCardRow(tx: PrismaTransactionClient, shortCode: string) {
+  return tx.missionCard.findUnique({ where: { shortCode } });
+}
+
+export async function findCardRowById(id: string) {
+  return prisma.missionCard.findUnique({ where: { id } });
+}
+
+/** The card with the stations it has been stamped at, for a stamp. */
+export async function findCardWithStampStations(tx: PrismaTransactionClient, shortCode: string) {
+  return tx.missionCard.findUnique({
+    where: { shortCode },
+    include: { stampEvents: { select: { stationId: true } } },
+  });
+}
+
+/** The card with its full stamp rows, for carrying a journey to a replacement. */
+export async function findCardWithStamps(tx: PrismaTransactionClient, shortCode: string) {
+  return tx.missionCard.findUnique({ where: { shortCode }, include: { stampEvents: true } });
+}
+
+/**
+ * Attach a card to the group registered a moment earlier at the booth. It
+ * writes Registration rows, which the registration module owns, but lives
+ * here: registration already imports this module to link a card at group
+ * registration, and importing back would be a cycle.
+ */
+export async function attachGroupRegistrations(
+  tx: PrismaTransactionClient,
+  link: { groupId: string; cardId: string },
+): Promise<void> {
+  await tx.registration.updateMany({
+    where: { groupId: link.groupId, missionCardId: null },
+    data: { missionCardId: link.cardId },
+  });
 }
 
 export async function createCardBatch(
