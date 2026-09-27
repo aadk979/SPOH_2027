@@ -1,7 +1,7 @@
 import type { IncidentRecord } from '@spoh/shared';
-import type { Prisma } from '../../generated/prisma/client.js';
-import { pageArgs } from '../../platform/db/pagination.js';
-import { prisma, type PrismaTransactionClient } from '../../platform/db/client.js';
+import type { Prisma } from '../../../generated/prisma/client.js';
+import { pageArgs } from '../../../platform/db/pagination.js';
+import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 
 /** Data access for incident reports (PRODUCT_BRIEF §7.1). */
 

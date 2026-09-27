@@ -5,11 +5,11 @@ import type {
   ListIncidentsQuery,
   UpdateIncidentStatusRequest,
 } from '@spoh/shared';
-import { writeAudit, type AuditContext } from '../../platform/audit/index.js';
-import { NotFoundError } from '../../platform/errors/index.js';
-import { logger } from '../../platform/logger/index.js';
-import { prisma } from '../../platform/db/client.js';
-import { dispatch } from '../notification/index.js';
+import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
+import { NotFoundError } from '../../../platform/errors/index.js';
+import { logger } from '../../../platform/logger/index.js';
+import { prisma } from '../../../platform/db/client.js';
+import { dispatch } from '../../notification/index.js';
 import type { IncidentSeverity } from '@spoh/shared';
 import {
   addFollowUp,
@@ -18,8 +18,8 @@ import {
   listIncidents,
   toIncidentRecord,
   updateIncidentStatus,
-} from './repo.js';
-import { toPage, type Page } from '../../platform/db/pagination.js';
+} from '../data/repo.js';
+import { toPage, type Page } from '../../../platform/db/pagination.js';
 
 /**
  * Incident reporting (PRODUCT_BRIEF §7.1).
