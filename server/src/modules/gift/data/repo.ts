@@ -23,6 +23,15 @@ export async function listGiftTypes(includeInactive = false): Promise<GiftType[]
   });
 }
 
+/**
+ * Lock the gift type's row for the rest of the transaction, so simultaneous
+ * redemptions of one gift read the stock one after the other and the last
+ * one cannot be handed out twice (F03-007).
+ */
+export async function lockGiftType(tx: PrismaTransactionClient, id: string): Promise<void> {
+  await tx.$queryRaw`SELECT "id" FROM "GiftType" WHERE "id" = ${id} FOR UPDATE`;
+}
+
 export async function findGiftType(
   id: string,
   tx: PrismaTransactionClient = prisma,

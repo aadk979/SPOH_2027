@@ -11,6 +11,7 @@ import {
   createRedemption,
   existingRedemptionForCards,
   findGiftType,
+  lockGiftType,
   totalsForGiftType,
 } from '../data/repo.js';
 import { assertInStock, checkPresentedCard, type CardCheck } from '../domain/redemptionRules.js';
@@ -67,6 +68,8 @@ export async function redeemGift(
   const recordedAt = clock.now();
 
   const result = await prisma.$transaction(async (tx) => {
+    // Gift type first, then the card (in checkCard): one order, so no deadlock.
+    await lockGiftType(tx, request.giftTypeId);
     const giftType = await findGiftType(request.giftTypeId, tx);
     if (!giftType) throw new NotFoundError('Gift type');
     const before = await totalsForGiftType(tx, giftType.id);

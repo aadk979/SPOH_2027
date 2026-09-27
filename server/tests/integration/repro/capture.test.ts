@@ -186,7 +186,7 @@ describe('Mission Cards, gifts and group registration (P03 repros)', () => {
   });
 
   // F03-007
-  it.skip('never hands out more gifts than are in stock under simultaneous redemptions', async () => {
+  it('never hands out more gifts than are in stock under simultaneous redemptions', async () => {
     await prisma.giftType.update({ where: { id: giftId }, data: { initialStock: 1 } });
 
     const responses = await Promise.all([redeem({}), redeem({}), redeem({}), redeem({})]);
@@ -195,7 +195,7 @@ describe('Mission Cards, gifts and group registration (P03 repros)', () => {
   });
 
   // F03-007
-  it.skip('never records two gifts for one card under simultaneous redemptions', async () => {
+  it('never records two gifts for one card under simultaneous redemptions', async () => {
     // A race: one round does not always lose it, five rounds of four do.
     const codes = ['JJJ901', 'JJJ902', 'JJJ903', 'JJJ904', 'JJJ905'];
     for (const code of codes) {
