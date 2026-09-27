@@ -16,11 +16,10 @@
 
 /** Server module internals: modules/<domain>/<layer>/… */
 const MODULE = '^server/src/modules/[^/]+/';
-const PRISMA = [
-  '^server/src/generated/prisma/',
-  '^server/src/platform/db/',
-  '^node_modules/@prisma/',
-];
+/** The Prisma client itself: allowed only in data/ and platform/db (ADR-007 §3). */
+const PRISMA_CLIENT = ['^server/src/generated/prisma/', '^node_modules/@prisma/'];
+/** The client or its wrapper: what http/ and domain/ may not reach at all. */
+const PRISMA = [...PRISMA_CLIENT, '^server/src/platform/db/'];
 const EXPRESS = ['^node_modules/(@types/)?express(-serve-static-core)?/'];
 
 /** @type {import('dependency-cruiser').IConfiguration} */
@@ -57,13 +56,16 @@ module.exports = {
     },
     {
       name: 'server-prisma-only-in-data',
-      comment: 'Prisma is imported only by modules/*/data/ and platform/db.',
+      comment:
+        'The Prisma client (@prisma/client, the generated client) is imported only by ' +
+        'modules/*/data/ and platform/db. A use case opens its transaction through ' +
+        'platform/db and passes tx to its repo (ADR-007 §3 prisma-in-data-only).',
       severity: 'warn',
       from: {
         path: '^server/src/',
         pathNot: [`${MODULE}data/`, '^server/src/platform/db/'],
       },
-      to: { path: PRISMA },
+      to: { path: PRISMA_CLIENT },
     },
     {
       name: 'server-express-only-in-http',
