@@ -15,6 +15,7 @@ const snapshot = (overrides: Partial<ImportSnapshot> = {}): ImportSnapshot => ({
   stationIdByCode: new Map([['DESK', 's-desk']]),
   eventDayIdByDate: new Map([['2027-01-07', 'd-1']]),
   heldSlots: new Set(),
+  rosterManagers: new Map(),
   ...overrides,
 });
 
@@ -88,7 +89,7 @@ describe('planRosterImport', () => {
       ],
       snapshot(),
     );
-    expect(plan.links).toEqual([{ email: 'g@x', managerEmail: 'h@x', personDeactivated: false }]);
+    expect(plan.links).toEqual([{ email: 'g@x', managerEmail: 'h@x', managerId: null }]);
     expect(plan.issues.map((issue) => issue.rowNumber)).toEqual([3]);
   });
 

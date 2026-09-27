@@ -148,4 +148,72 @@ describe('roster import and provisioning (P03 repros)', () => {
     expect(response.body.volunteersUpdated).toBe(0);
     expect(response.body.assignmentsCreated).toBe(2);
   });
+
+  // F03-044
+  it('links a new volunteer to a manager already on the roster', async () => {
+    const ic = await createVolunteer({ email: 'ic@roster.test', role: 'IC' });
+
+    const response = await importRoster(
+      chief,
+      [{ displayName: 'New', email: 'newbie@roster.test', reportsToEmail: ic.email }],
+      true,
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.body.issues).toEqual([]);
+    const newbie = await prisma.volunteer.findUniqueOrThrow({
+      where: { email: 'newbie@roster.test' },
+    });
+    expect(newbie.reportsToId).toBe(ic.id);
+  });
+
+  // F03-044
+  it('skips a deactivated person whose row names a manager, instead of failing the import', async () => {
+    const leaver = await createVolunteer({ email: 'gone@roster.test', role: 'VOLUNTEER' });
+    await prisma.volunteer.update({ where: { id: leaver.id }, data: { active: false } });
+
+    const response = await importRoster(
+      chief,
+      [
+        { displayName: 'Gone', email: leaver.email, reportsToEmail: 'boss@roster.test' },
+        { displayName: 'Boss', email: 'boss@roster.test', role: 'IC' },
+      ],
+      false,
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.body.issues.map((issue: { field: string }) => issue.field)).toEqual(['email']);
+  });
+
+  // F03-044
+  it('audits a role change once per person, not once per row', async () => {
+    const promoted = await createVolunteer({ email: 'up@roster.test', role: 'VOLUNTEER' });
+
+    await importRoster(
+      chief,
+      [
+        { displayName: 'Up', email: promoted.email, role: 'IC' },
+        { displayName: 'Up', email: promoted.email, role: 'IC' },
+      ],
+      true,
+    );
+
+    expect(
+      await prisma.auditLog.count({ where: { action: 'user.update', entityId: promoted.id } }),
+    ).toBe(1);
+  });
+
+  // F03-043
+  it.skip("does not create accounts from a Deputy's import", async () => {
+    const response = await importRoster(
+      deputy,
+      [{ displayName: 'Stranger', email: 'stranger@roster.test' }],
+      true,
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.body.volunteersCreated).toBe(0);
+    expect(response.body.issues[0]?.field).toBe('email');
+    expect(await prisma.volunteer.count({ where: { email: 'stranger@roster.test' } })).toBe(0);
+  });
 });

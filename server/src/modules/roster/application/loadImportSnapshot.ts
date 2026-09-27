@@ -3,6 +3,7 @@ import {
   eventDayIdsByDate,
   existingSlots,
   findVolunteerByEmail,
+  findVolunteersByEmails,
   stationIdsByCode,
   type Volunteer,
 } from '../data/repo.js';
@@ -37,10 +38,22 @@ export async function loadImportSnapshot(
   actor: RosterActor,
 ): Promise<ImportSnapshot & { accounts: ReadonlyMap<string, Volunteer> }> {
   const accounts = await loadExisting(request, actor);
-  const [stationIdByCode, eventDayIdByDate, heldSlots] = await Promise.all([
+  const inFile = new Set(request.rows.map((row) => row.email));
+  const managerEmails = request.rows.flatMap((row) =>
+    row.reportsToEmail && !inFile.has(row.reportsToEmail) ? [row.reportsToEmail] : [],
+  );
+  const [stationIdByCode, eventDayIdByDate, heldSlots, rosterManagers] = await Promise.all([
     stationIdsByCode(),
     eventDayIdsByDate(),
     existingSlots([...accounts.values()].map((account) => account.id)),
+    findVolunteersByEmails([...new Set(managerEmails)]),
   ]);
-  return { existing: accounts, accounts, stationIdByCode, eventDayIdByDate, heldSlots };
+  return {
+    existing: accounts,
+    accounts,
+    stationIdByCode,
+    eventDayIdByDate,
+    heldSlots,
+    rosterManagers,
+  };
 }

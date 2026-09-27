@@ -1,7 +1,6 @@
-import { ERROR_CODES, type RosterImportRequest, type RosterImportResponse } from '@spoh/shared';
+import type { RosterImportRequest, RosterImportResponse } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
-import { AppError } from '../../../platform/errors/index.js';
 import { invalidateVolunteerCache } from '../../../platform/identity/index.js';
 import { planRosterImport } from '../domain/planRosterImport.js';
 import { applyRosterImport } from './applyRosterImport.js';
@@ -22,11 +21,6 @@ export async function importRoster(
 ): Promise<RosterImportResponse> {
   const snapshot = await loadImportSnapshot(request, actor);
   const plan = planRosterImport(request.rows, snapshot);
-  // As before the plan existed, preview and commit alike: a deactivated
-  // person's row with a manager fails the import.
-  if (plan.links.some((link) => link.personDeactivated)) {
-    throw new AppError(404, ERROR_CODES.NOT_FOUND, 'Not found');
-  }
   if (!request.commit) return { committed: false, ...plan.counters, issues: plan.issues };
 
   const identities = await mintIdentities(request.rows, snapshot.accounts);

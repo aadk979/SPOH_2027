@@ -46,7 +46,7 @@ export async function applyRosterImport(
   for (const link of plan.links) {
     await setManager(tx, {
       volunteerId: ids.get(link.email) as string,
-      managerId: ids.get(link.managerEmail) as string,
+      managerId: link.managerId ?? (ids.get(link.managerEmail) as string),
     });
   }
   for (const step of plan.assignments) {

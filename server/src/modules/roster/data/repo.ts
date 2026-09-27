@@ -100,6 +100,15 @@ export async function upsertAssignment(
   return { created: true };
 }
 
+/** The accounts with these emails, by email. */
+export async function findVolunteersByEmails(
+  emails: readonly string[],
+): Promise<Map<string, Volunteer>> {
+  if (emails.length === 0) return new Map();
+  const rows = await prisma.volunteer.findMany({ where: { email: { in: [...emails] } } });
+  return new Map(rows.map((row) => [row.email, row]));
+}
+
 /** Every event day, keyed by its date (YYYY-MM-DD), for matching import rows. */
 export async function eventDayIdsByDate(): Promise<Map<string, string>> {
   const days = await prisma.eventDay.findMany({ select: { id: true, date: true } });

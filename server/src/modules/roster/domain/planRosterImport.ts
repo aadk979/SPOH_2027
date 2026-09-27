@@ -14,6 +14,8 @@ export interface ImportSnapshot {
   eventDayIdByDate: ReadonlyMap<string, string>;
   /** Slots existing volunteers hold, as volunteerId|eventDayId|block. */
   heldSlots: ReadonlySet<string>;
+  /** Managers the file names who are on the roster but not in the file, by email. */
+  rosterManagers: ReadonlyMap<string, { id: string; active: boolean }>;
 }
 
 export interface PersonStep {
@@ -26,8 +28,8 @@ export interface PersonStep {
 export interface LinkStep {
   email: string;
   managerEmail: string;
-  /** The row's own person is deactivated: applying this link fails (see the import). */
-  personDeactivated: boolean;
+  /** Set when the manager is already on the roster rather than in the file. */
+  managerId: string | null;
 }
 
 export interface AssignmentStep {
@@ -52,7 +54,7 @@ export interface RosterImportPlan {
   };
 }
 
-const DEACTIVATED = 'deactivated';
+const DEACTIVATED = 'deactivated' as const;
 
 /** What the second pass reads and writes as it walks the rows. */
 interface PlanState {
@@ -90,6 +92,29 @@ function emptyPlan(): RosterImportPlan {
  * not by appearing in a CSV. Returns each email's status: 'active' or
  * 'deactivated'.
  */
+function planPerson(
+  row: RosterImportRow,
+  context: {
+    existing: { role: CommitteeRole } | undefined;
+    first: boolean;
+    plan: RosterImportPlan;
+  },
+) {
+  const { existing, first, plan } = context;
+  const created = !existing && first;
+  plan.people.push({
+    row,
+    created,
+    // Audited once per person, at their first row (F03-044).
+    roleChangedFrom: first && existing && existing.role !== row.role ? existing.role : null,
+  });
+  // Counted once per person, not per row: a new volunteer with two shifts is
+  // one volunteer created, not one created and one updated (F03-025).
+  if (!first) return;
+  if (created) plan.counters.volunteersCreated += 1;
+  else plan.counters.volunteersUpdated += 1;
+}
+
 function planPeople(
   rows: readonly RosterImportRow[],
   snapshot: ImportSnapshot,
@@ -98,54 +123,65 @@ function planPeople(
   const seen = new Map<string, string>();
   for (const [index, row] of rows.entries()) {
     const existing = snapshot.existing.get(row.email);
+    const first = !seen.has(row.email);
     if (existing && !existing.active) {
-      if (!seen.has(row.email)) {
-        seen.set(row.email, DEACTIVATED);
-        plan.issues.push({
-          rowNumber: index + 1,
-          field: 'email',
-          message: `${row.email} is deactivated. Restore their access before importing them.`,
-        });
-      }
+      if (first) plan.issues.push(deactivatedPerson(row.email, index + 1));
+      seen.set(row.email, DEACTIVATED);
       continue;
     }
-    const first = !seen.has(row.email);
-    const created = !existing && first;
     seen.set(row.email, 'active');
-    plan.people.push({
-      row,
-      created,
-      roleChangedFrom: existing && existing.role !== row.role ? existing.role : null,
-    });
-    // Counted once per person, not per row: a new volunteer with two shifts is
-    // one volunteer created, not one created and one updated (F03-025).
-    if (first && created) plan.counters.volunteersCreated += 1;
-    else if (first) plan.counters.volunteersUpdated += 1;
+    planPerson(row, { existing, first, plan });
   }
   return seen;
 }
 
+function deactivatedPerson(email: string, rowNumber: number) {
+  return {
+    rowNumber,
+    field: 'email',
+    message: `${email} is deactivated. Restore their access before importing them.`,
+  };
+}
+
+function deactivatedManager(managerEmail: string, rowNumber: number) {
+  return {
+    rowNumber,
+    field: 'reportsToEmail',
+    message: `${managerEmail} is deactivated and cannot be a manager`,
+  };
+}
+
+/** A manager named by email: in the file (id not known yet), on the roster, deactivated, or nobody. */
+function findManager(
+  email: string,
+  lookup: { seen: ReadonlyMap<string, string>; snapshot: ImportSnapshot },
+): { id: string | null } | typeof DEACTIVATED | null {
+  const inFile = lookup.seen.get(email);
+  if (inFile) return inFile === DEACTIVATED ? DEACTIVATED : { id: null };
+  const onRoster = lookup.snapshot.rosterManagers.get(email);
+  if (!onRoster) return null;
+  return onRoster.active ? { id: onRoster.id } : DEACTIVATED;
+}
+
+/**
+ * The row's manager, from the file or from the roster (F03-044). A person the
+ * import skips gets no link: their row already carries the reason.
+ */
 function planLink(state: PlanState, { row, rowNumber }: RowAt) {
-  const { seen, plan } = state;
-  if (!row.reportsToEmail) return;
-  const manager = seen.get(row.reportsToEmail);
+  const { seen, plan, snapshot } = state;
+  const managerEmail = row.reportsToEmail;
+  if (!managerEmail || seen.get(row.email) !== 'active') return;
+
+  const manager = findManager(managerEmail, { seen, snapshot });
   if (manager === DEACTIVATED) {
-    plan.issues.push({
-      rowNumber,
-      field: 'reportsToEmail',
-      message: `${row.reportsToEmail} is deactivated and cannot be a manager`,
-    });
-  } else if (!manager) {
-    plan.issues.push({
-      rowNumber,
-      field: 'reportsToEmail',
-      message: `No volunteer with email ${row.reportsToEmail} in this file or on the roster`,
-    });
+    plan.issues.push(deactivatedManager(managerEmail, rowNumber));
+  } else if (manager) {
+    plan.links.push({ email: row.email, managerEmail, managerId: manager.id });
   } else {
-    plan.links.push({
-      email: row.email,
-      managerEmail: row.reportsToEmail,
-      personDeactivated: seen.get(row.email) === DEACTIVATED,
+    plan.issues.push({
+      rowNumber,
+      field: 'reportsToEmail',
+      message: `No volunteer with email ${managerEmail} in this file or on the roster`,
     });
   }
 }
