@@ -33,16 +33,15 @@ import {
 } from '../station/index.js';
 import {
   createAssignment,
-  createGiftType,
   deactivateVolunteer,
   deleteAssignment,
   getVolunteer,
   listVolunteers,
   reactivateVolunteer,
-  updateGiftType,
   updateVolunteer,
   type Actor,
 } from './service.js';
+import { createGiftTypeHandler, updateGiftTypeHandler } from '../gift/index.js';
 import {
   createEventDayHandler,
   listEventDaysHandler,
@@ -233,10 +232,7 @@ adminRouter.post(
   adminRateLimit,
   requireCapability('config.manage'),
   validate({ body: CreateGiftTypeRequest }),
-  async (req: Request, res: Response) => {
-    const body = validatedBody<CreateGiftTypeRequest>(req);
-    res.status(201).json({ giftType: await createGiftType(body, auditContextFrom(req)) });
-  },
+  createGiftTypeHandler,
 );
 
 adminRouter.patch(
@@ -244,11 +240,7 @@ adminRouter.patch(
   adminRateLimit,
   requireCapability('config.manage'),
   validate({ params: IdParams, body: UpdateGiftTypeRequest }),
-  async (req: Request, res: Response) => {
-    const { id } = validatedParams<z.infer<typeof IdParams>>(req);
-    const patch = validatedBody<UpdateGiftTypeRequest>(req);
-    res.status(200).json({ giftType: await updateGiftType(id, patch, auditContextFrom(req)) });
-  },
+  updateGiftTypeHandler,
 );
 
 // ─────────────────────────────────────────────────────────────

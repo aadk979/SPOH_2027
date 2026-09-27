@@ -3,12 +3,9 @@ import {
   ROLE_PRECEDENCE,
   type CommitteeRole,
   type CreateAssignmentRequest,
-  type CreateGiftTypeRequest,
   type DeactivateVolunteerRequest,
-  type GiftTypeRecord,
   type ListVolunteersQuery,
   type ShiftAssignmentRecord,
-  type UpdateGiftTypeRequest,
   type UpdateVolunteerRequest,
   type VolunteerAdminRecord,
   type VolunteerMutationResponse,
@@ -27,7 +24,6 @@ import { invalidateVolunteerCache } from '../../platform/identity/index.js';
 import { identityProvider } from '../identity/provider.js';
 import { revokeAllForVolunteer } from '../auth/service.js';
 import { toAssignmentRecord } from '../roster/repo.js';
-import { toGiftTypeRecord } from '../gift/index.js';
 import { pageArgs, toPage } from '../../platform/db/pagination.js';
 
 /**
@@ -522,93 +518,6 @@ export async function deleteAssignment(id: string, audit: AuditContext): Promise
       entityId: id,
       before: { ...existing },
     });
-  });
-}
-
-// ─────────────────────────────────────────────────────────────
-// GIFT TYPES
-// ─────────────────────────────────────────────────────────────
-
-export async function createGiftType(
-  request: CreateGiftTypeRequest,
-  audit: AuditContext,
-): Promise<GiftTypeRecord> {
-  const existing = await prisma.giftType.findUnique({ where: { name: request.name } });
-  if (existing) {
-    throw new ConflictError(ERROR_CODES.GIFT_TYPE_EXISTS, `${request.name} already exists`);
-  }
-
-  const gift = await prisma.$transaction(async (tx) => {
-    const row = await tx.giftType.create({
-      data: {
-        name: request.name,
-        initialStock: request.initialStock,
-        lowStockThreshold: request.lowStockThreshold,
-      },
-    });
-
-    await writeAudit(tx, {
-      ...audit,
-      action: 'giftType.create',
-      entityType: 'GiftType',
-      entityId: row.id,
-      after: { name: row.name, initialStock: row.initialStock },
-    });
-
-    return row;
-  });
-
-  return toGiftTypeRecord(gift, { redeemed: 0, adjustment: 0 });
-}
-
-export async function updateGiftType(
-  id: string,
-  patch: UpdateGiftTypeRequest,
-  audit: AuditContext,
-): Promise<GiftTypeRecord> {
-  const existing = await prisma.giftType.findUnique({ where: { id } });
-  if (!existing) throw new NotFoundError('Gift type');
-
-  const gift = await prisma.$transaction(async (tx) => {
-    const row = await tx.giftType.update({
-      where: { id },
-      data: {
-        ...(patch.name !== undefined ? { name: patch.name } : {}),
-        ...(patch.lowStockThreshold !== undefined
-          ? { lowStockThreshold: patch.lowStockThreshold }
-          : {}),
-        ...(patch.active !== undefined ? { active: patch.active } : {}),
-      },
-    });
-
-    await writeAudit(tx, {
-      ...audit,
-      action: 'giftType.update',
-      entityType: 'GiftType',
-      entityId: id,
-      before: {
-        name: existing.name,
-        lowStockThreshold: existing.lowStockThreshold,
-        active: existing.active,
-      },
-      after: { ...patch },
-    });
-
-    return row;
-  });
-
-  const totals = await prisma.giftRedemption.aggregate({
-    where: { giftTypeId: id, voided: false },
-    _count: { _all: true },
-  });
-  const adjustments = await prisma.giftStockAdjustment.aggregate({
-    where: { giftTypeId: id },
-    _sum: { delta: true },
-  });
-
-  return toGiftTypeRecord(gift, {
-    redeemed: totals._count._all,
-    adjustment: adjustments._sum.delta ?? 0,
   });
 }
 

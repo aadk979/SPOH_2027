@@ -1,10 +1,18 @@
 import type { Request, Response } from 'express';
-import type { AdjustGiftStockRequest, GiftSummaryQuery, RedeemGiftRequest } from '@spoh/shared';
+import type {
+  AdjustGiftStockRequest,
+  CreateGiftTypeRequest,
+  GiftSummaryQuery,
+  RedeemGiftRequest,
+  UpdateGiftTypeRequest,
+} from '@spoh/shared';
 import { auditContextFrom } from '../../../platform/http/auditContext.js';
 import { captureContextFrom } from '../../../platform/http/captureActor.js';
 import { validatedBody, validatedParams, validatedQuery } from '../../../platform/http/validate.js';
 import { getAuth } from '../../../platform/identity/index.js';
 import { adjustStock } from '../application/adjustStock.js';
+import { createGiftType } from '../application/createGiftType.js';
+import { updateGiftType } from '../application/updateGiftType.js';
 import { listGifts } from '../application/listGifts.js';
 import { redeemGift } from '../application/redeemGift.js';
 import { summariseGifts } from '../application/summariseGifts.js';
@@ -31,4 +39,15 @@ export async function adjustStockHandler(req: Request, res: Response): Promise<v
 
 export async function summariseGiftsHandler(req: Request, res: Response): Promise<void> {
   res.status(200).json(await summariseGifts(validatedQuery<GiftSummaryQuery>(req)));
+}
+
+export async function createGiftTypeHandler(req: Request, res: Response): Promise<void> {
+  const body = validatedBody<CreateGiftTypeRequest>(req);
+  res.status(201).json({ giftType: await createGiftType(body, auditContextFrom(req)) });
+}
+
+export async function updateGiftTypeHandler(req: Request, res: Response): Promise<void> {
+  const { id } = validatedParams<{ id: string }>(req);
+  const patch = validatedBody<UpdateGiftTypeRequest>(req);
+  res.status(200).json({ giftType: await updateGiftType(id, patch, auditContextFrom(req)) });
 }

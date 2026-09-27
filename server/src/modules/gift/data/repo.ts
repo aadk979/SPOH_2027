@@ -131,3 +131,21 @@ export async function summariseRedemptions(
 
   return rows.map((row) => ({ giftTypeId: row.giftTypeId, count: row._count._all }));
 }
+
+export async function findGiftTypeByName(name: string): Promise<GiftType | null> {
+  return prisma.giftType.findUnique({ where: { name } });
+}
+
+export async function createGiftTypeRow(
+  tx: PrismaTransactionClient,
+  data: Prisma.GiftTypeCreateInput,
+): Promise<GiftType> {
+  return tx.giftType.create({ data });
+}
+
+export async function updateGiftTypeRow(
+  tx: PrismaTransactionClient,
+  change: { id: string; data: Prisma.GiftTypeUpdateInput },
+): Promise<GiftType> {
+  return tx.giftType.update({ where: { id: change.id }, data: change.data });
+}
