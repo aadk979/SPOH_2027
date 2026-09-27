@@ -337,4 +337,31 @@ describe('list reads (F03-029)', () => {
     expect(authorLookups).toHaveBeenCalledTimes(1);
     authorLookups.mockRestore();
   });
+
+  it('names the last-seen stations of the active alerts in one query, not one per alert', async () => {
+    for (const code of ['L1', 'L2', 'L3']) {
+      const station = await createStation({ code, name: `Lab ${code}` });
+      await as(volunteer).post('/lost-person', {
+        idempotencyKey: idempotencyKey(),
+        descriptionText: `Child near ${code}`,
+        lastSeenStationId: station.id,
+      });
+    }
+
+    const stationLookups = [
+      vi.spyOn(prisma.station, 'findUnique'),
+      vi.spyOn(prisma.station, 'findMany'),
+    ];
+    const response = await as(volunteer).get('/lost-person/active');
+
+    expect(response.status).toBe(200);
+    expect(
+      response.body.alerts
+        .map((alert: { lastSeenStationName: string }) => alert.lastSeenStationName)
+        .sort(),
+    ).toEqual(['Lab L1', 'Lab L2', 'Lab L3']);
+    const calls = stationLookups.reduce((sum, spy) => sum + spy.mock.calls.length, 0);
+    expect(calls).toBe(1);
+    stationLookups.forEach((spy) => spy.mockRestore());
+  });
 });

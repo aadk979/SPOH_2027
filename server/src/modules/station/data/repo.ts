@@ -28,6 +28,23 @@ export async function findStationById(
   return db.station.findUnique({ where: { id } });
 }
 
+/**
+ * Names of the stations with these ids, in one query, for lists that show a
+ * station per row (F03-029). Inactive stations are included: a record keeps
+ * naming the station it was made at.
+ */
+export async function findStationNames(
+  ids: readonly string[],
+  db: PrismaTransactionClient = prisma,
+): Promise<Map<string, string>> {
+  if (ids.length === 0) return new Map();
+  const stations = await db.station.findMany({
+    where: { id: { in: [...new Set(ids)] } },
+    select: { id: true, name: true },
+  });
+  return new Map(stations.map((station) => [station.id, station.name]));
+}
+
 /** Stations that stamp a Mission Card — the journey the funnel measures. */
 export async function listStampingStations(
   db: PrismaTransactionClient = prisma,

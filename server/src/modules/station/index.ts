@@ -11,6 +11,7 @@ export { requireActiveStation } from './application/requireActiveStation.js';
 export { requireCountedStation } from './application/requireCountedStation.js';
 export {
   findStationById,
+  findStationNames,
   listCountedStations,
   listStampingStations,
   listStations,

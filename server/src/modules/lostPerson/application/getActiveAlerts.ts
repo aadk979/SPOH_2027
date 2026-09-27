@@ -1,5 +1,5 @@
 import type { ActiveLostPersonResponse } from '@spoh/shared';
-import { findStationById } from '../../station/index.js';
+import { findStationNames } from '../../station/index.js';
 import { toAlertRecord } from '../data/mappers.js';
 import { acknowledgedAlertIds, listActiveAlerts } from '../data/repo.js';
 
@@ -14,15 +14,16 @@ export async function getActiveAlerts(viewerId: string): Promise<ActiveLostPerso
     alerts.map((alert) => alert.id),
   );
 
-  const records = await Promise.all(
-    alerts.map(async (alert) => {
-      const station = alert.lastSeenStationId
-        ? await findStationById(alert.lastSeenStationId)
-        : null;
-      return toAlertRecord(alert, {
-        stationName: station?.name ?? null,
-        ackedByMe: acked.has(alert.id),
-      });
+  // Every device polls this; one station query for all the alerts, not one each (F03-029).
+  const stationNames = await findStationNames(
+    alerts.flatMap((alert) => (alert.lastSeenStationId ? [alert.lastSeenStationId] : [])),
+  );
+  const records = alerts.map((alert) =>
+    toAlertRecord(alert, {
+      stationName: alert.lastSeenStationId
+        ? (stationNames.get(alert.lastSeenStationId) ?? null)
+        : null,
+      ackedByMe: acked.has(alert.id),
     }),
   );
 
