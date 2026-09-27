@@ -1,6 +1,7 @@
 import type { Request } from 'express';
 import { requestIdOf } from './requestId.js';
 import type { AuditContext } from '../audit/index.js';
+import { getAuth } from '../identity/index.js';
 
 /**
  * Derives the audit context from a request.
@@ -28,3 +29,13 @@ export const SYSTEM_AUDIT_CONTEXT: AuditContext = Object.freeze({
   userAgent: null,
   requestId: null,
 });
+
+/** Who is acting and the audit trail, for a use case that is not a capture. */
+export interface ActorContext {
+  volunteerId: string;
+  audit: AuditContext;
+}
+
+export function actorContextFrom(req: Request): ActorContext {
+  return { volunteerId: getAuth(req).volunteerId, audit: auditContextFrom(req) };
+}

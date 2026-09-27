@@ -1,4 +1,4 @@
-import { Router, type Request, type Response } from 'express';
+import { Router } from 'express';
 import { z } from 'zod';
 import {
   CreateIncidentFollowUpRequest,
@@ -7,23 +7,17 @@ import {
   ListIncidentsQuery,
   UpdateIncidentStatusRequest,
 } from '@spoh/shared';
-import { getAuth, requireAuth } from '../../../platform/identity/index.js';
 import { idempotent } from '../../../platform/idempotency/index.js';
 import { defaultRateLimit } from '../../../platform/http/rateLimit.js';
 import { requireCapability } from '../../../platform/access/index.js';
+import { requireAuth } from '../../../platform/identity/index.js';
+import { validate } from '../../../platform/http/validate.js';
 import {
-  validate,
-  validatedBody,
-  validatedParams,
-  validatedQuery,
-} from '../../../platform/http/validate.js';
-import { auditContextFrom } from '../../../platform/http/auditContext.js';
-import {
-  appendFollowUp,
-  changeIncidentStatus,
-  listIncidentRecords,
-  reportIncident,
-} from '../application/incidents.js';
+  appendFollowUpHandler,
+  changeIncidentStatusHandler,
+  listIncidentsHandler,
+  reportIncidentHandler,
+} from './handlers.js';
 
 /** Incident reporting (BUILD_PLAN §7.2). */
 export const incidentRouter: Router = Router();
@@ -39,12 +33,7 @@ incidentRouter.post(
   requireCapability('incident.report'),
   validate({ body: CreateIncidentRequest }),
   idempotent('POST /incidents'),
-  async (req: Request, res: Response) => {
-    const auth = getAuth(req);
-    const body = validatedBody<CreateIncidentRequest>(req);
-    const incident = await reportIncident(body, auth.volunteerId, auditContextFrom(req));
-    res.status(201).json({ incident });
-  },
+  reportIncidentHandler,
 );
 
 incidentRouter.get(
@@ -52,14 +41,7 @@ incidentRouter.get(
   defaultRateLimit,
   requireCapability('dashboard.station.read'),
   validate({ query: ListIncidentsQuery }),
-  async (req: Request, res: Response) => {
-    const query = validatedQuery<ListIncidentsQuery>(req);
-    const page = await listIncidentRecords(query);
-    res.status(200).json({
-      data: page.data,
-      meta: { count: page.data.length, nextCursor: page.nextCursor },
-    });
-  },
+  listIncidentsHandler,
 );
 
 incidentRouter.post(
@@ -67,13 +49,7 @@ incidentRouter.post(
   defaultRateLimit,
   requireCapability('incident.resolve'),
   validate({ params: IdParams, body: CreateIncidentFollowUpRequest }),
-  async (req: Request, res: Response) => {
-    const auth = getAuth(req);
-    const { id } = validatedParams<z.infer<typeof IdParams>>(req);
-    const body = validatedBody<CreateIncidentFollowUpRequest>(req);
-    const incident = await appendFollowUp(id, body, auth.volunteerId, auditContextFrom(req));
-    res.status(201).json({ incident });
-  },
+  appendFollowUpHandler,
 );
 
 incidentRouter.post(
@@ -81,11 +57,5 @@ incidentRouter.post(
   defaultRateLimit,
   requireCapability('incident.resolve'),
   validate({ params: IdParams, body: UpdateIncidentStatusRequest }),
-  async (req: Request, res: Response) => {
-    const auth = getAuth(req);
-    const { id } = validatedParams<z.infer<typeof IdParams>>(req);
-    const body = validatedBody<UpdateIncidentStatusRequest>(req);
-    const incident = await changeIncidentStatus(id, body, auth.volunteerId, auditContextFrom(req));
-    res.status(200).json({ incident });
-  },
+  changeIncidentStatusHandler,
 );

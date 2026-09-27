@@ -1,0 +1,52 @@
+import type { CreateIncidentRequest, IncidentRecord } from '@spoh/shared';
+import { writeAudit } from '../../../platform/audit/index.js';
+import { prisma } from '../../../platform/db/client.js';
+import type { ActorContext } from '../../../platform/http/auditContext.js';
+import { findStationById } from '../../station/index.js';
+import { createIncident } from '../data/repo.js';
+import { toRecordWithAuthors } from './incidentRecord.js';
+import { notifySafetyChain } from './notifySafetyChain.js';
+
+/** Record an incident as reported, and push a severe one to the safety chain. */
+export async function reportIncident(
+  request: CreateIncidentRequest,
+  { volunteerId, audit }: ActorContext,
+): Promise<IncidentRecord> {
+  const incident = await prisma.$transaction(async (tx) => {
+    const row = await createIncident(tx, {
+      type: request.type,
+      severity: request.severity,
+      stationId: request.stationId ?? null,
+      locationNote: request.locationNote ?? null,
+      description: request.description,
+      reportedById: volunteerId,
+      occurredAt: new Date(request.occurredAt),
+      reportedAt: new Date(),
+      idempotencyKey: request.idempotencyKey,
+    });
+    await writeAudit(tx, {
+      ...audit,
+      action: 'incident.create',
+      entityType: 'Incident',
+      entityId: row.id,
+      // The description is deliberately not copied into the audit payload: it
+      // is already immutable on the incident, and duplicating free text into a
+      // second table doubles the surface for anything that should not be there.
+      after: { type: row.type, severity: row.severity, stationId: row.stationId },
+    });
+    return row;
+  });
+
+  const station = incident.stationId ? await findStationById(incident.stationId) : null;
+  notifySafetyChain(
+    {
+      id: incident.id,
+      severity: incident.severity,
+      type: incident.type,
+      stationName: station?.name ?? request.locationNote ?? null,
+    },
+    volunteerId,
+  );
+
+  return toRecordWithAuthors(incident);
+}

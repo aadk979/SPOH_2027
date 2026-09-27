@@ -11,7 +11,7 @@ import { dashboardRouter } from './modules/dashboard/router.js';
 import { fallbackRouter } from './modules/fallback/router.js';
 import { footfallRouter } from './modules/footfall/index.js';
 import { giftRouter } from './modules/gift/index.js';
-import { incidentRouter } from './modules/incident/http/routes.js';
+import { incidentRouter } from './modules/incident/index.js';
 import { lostFoundRouter } from './modules/lostFound/router.js';
 import { lostPersonRouter } from './modules/lostPerson/router.js';
 import { meRouter } from './modules/me/router.js';
