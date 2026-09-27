@@ -29,21 +29,23 @@ import { getSettings, settingsMeta, updateSettings } from '../../platform/settin
 import { listStations, toStationSummary } from '../station/index.js';
 import {
   createAssignment,
-  createEventDay,
   createGiftType,
   createStation,
   deactivateVolunteer,
   deleteAssignment,
   getVolunteer,
-  listEventDays,
   listVolunteers,
   reactivateVolunteer,
-  updateEventDay,
   updateGiftType,
   updateStation,
   updateVolunteer,
   type Actor,
 } from './service.js';
+import {
+  createEventDayHandler,
+  listEventDaysHandler,
+  updateEventDayHandler,
+} from '../eventDays/index.js';
 
 /**
  * Administration: the people, the places, the days and the dials.
@@ -218,10 +220,7 @@ adminRouter.get(
   // Wider than config.manage: the roster import and the briefing screens both
   // need to know which days exist, and a day is not a secret.
   requireCapability('user.read'),
-  async (_req: Request, res: Response) => {
-    const days = await listEventDays();
-    res.status(200).json({ data: days, meta: { count: days.length, nextCursor: null } });
-  },
+  listEventDaysHandler,
 );
 
 adminRouter.post(
@@ -229,10 +228,7 @@ adminRouter.post(
   adminRateLimit,
   requireCapability('config.manage'),
   validate({ body: CreateEventDayRequest }),
-  async (req: Request, res: Response) => {
-    const body = validatedBody<CreateEventDayRequest>(req);
-    res.status(201).json({ eventDay: await createEventDay(body, auditContextFrom(req)) });
-  },
+  createEventDayHandler,
 );
 
 adminRouter.patch(
@@ -240,11 +236,7 @@ adminRouter.patch(
   adminRateLimit,
   requireCapability('config.manage'),
   validate({ params: IdParams, body: UpdateEventDayRequest }),
-  async (req: Request, res: Response) => {
-    const { id } = validatedParams<z.infer<typeof IdParams>>(req);
-    const patch = validatedBody<UpdateEventDayRequest>(req);
-    res.status(200).json({ eventDay: await updateEventDay(id, patch, auditContextFrom(req)) });
-  },
+  updateEventDayHandler,
 );
 
 // ─────────────────────────────────────────────────────────────

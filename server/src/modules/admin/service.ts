@@ -3,16 +3,13 @@ import {
   ROLE_PRECEDENCE,
   type CommitteeRole,
   type CreateAssignmentRequest,
-  type CreateEventDayRequest,
   type CreateGiftTypeRequest,
   type CreateStationRequest,
   type DeactivateVolunteerRequest,
-  type EventDayRecord,
   type GiftTypeRecord,
   type ListVolunteersQuery,
   type ShiftAssignmentRecord,
   type StationSummary,
-  type UpdateEventDayRequest,
   type UpdateGiftTypeRequest,
   type UpdateStationRequest,
   type UpdateVolunteerRequest,
@@ -28,7 +25,6 @@ import {
 } from '../../platform/errors/index.js';
 import { logger } from '../../platform/logger/index.js';
 import { prisma } from '../../platform/db/client.js';
-import { eventDayAnchor } from '../../platform/time/index.js';
 import { writeAudit, type AuditContext } from '../../platform/audit/index.js';
 import { invalidateVolunteerCache } from '../../platform/identity/index.js';
 import { identityProvider } from '../identity/provider.js';
@@ -624,116 +620,6 @@ export async function updateStation(
   });
 
   return toStationSummary(station);
-}
-
-// ─────────────────────────────────────────────────────────────
-// EVENT DAYS
-// ─────────────────────────────────────────────────────────────
-
-export async function listEventDays(): Promise<EventDayRecord[]> {
-  const rows = await prisma.eventDay.findMany({
-    orderBy: { date: 'asc' },
-    include: { _count: { select: { shiftAssignments: true } } },
-  });
-
-  return rows.map((row) => ({
-    id: row.id,
-    date: row.date.toISOString().slice(0, 10),
-    label: row.label,
-    isPublicDay: row.isPublicDay,
-    isTourDay: row.isTourDay,
-    assignmentCount: row._count.shiftAssignments,
-    createdAt: row.createdAt.toISOString(),
-  }));
-}
-
-export async function createEventDay(
-  request: CreateEventDayRequest,
-  audit: AuditContext,
-): Promise<EventDayRecord> {
-  const date = eventDayAnchor(request.date);
-
-  const existing = await prisma.eventDay.findUnique({ where: { date } });
-  if (existing) {
-    throw new ConflictError(
-      ERROR_CODES.EVENT_DAY_EXISTS,
-      `${request.date} is already configured as "${existing.label}"`,
-    );
-  }
-
-  const row = await prisma.$transaction(async (tx) => {
-    const created = await tx.eventDay.create({
-      data: {
-        date,
-        label: request.label,
-        isPublicDay: request.isPublicDay,
-        isTourDay: request.isTourDay,
-      },
-      include: { _count: { select: { shiftAssignments: true } } },
-    });
-
-    await writeAudit(tx, {
-      ...audit,
-      action: 'eventDay.create',
-      entityType: 'EventDay',
-      entityId: created.id,
-      after: { date: request.date, label: request.label },
-    });
-
-    return created;
-  });
-
-  return {
-    id: row.id,
-    date: row.date.toISOString().slice(0, 10),
-    label: row.label,
-    isPublicDay: row.isPublicDay,
-    isTourDay: row.isTourDay,
-    assignmentCount: row._count.shiftAssignments,
-    createdAt: row.createdAt.toISOString(),
-  };
-}
-
-export async function updateEventDay(
-  id: string,
-  patch: UpdateEventDayRequest,
-  audit: AuditContext,
-): Promise<EventDayRecord> {
-  const existing = await prisma.eventDay.findUnique({ where: { id } });
-  if (!existing) throw new NotFoundError('Event day');
-
-  const row = await prisma.$transaction(async (tx) => {
-    const updated = await tx.eventDay.update({
-      where: { id },
-      data: {
-        ...(patch.label !== undefined ? { label: patch.label } : {}),
-        ...(patch.isPublicDay !== undefined ? { isPublicDay: patch.isPublicDay } : {}),
-        ...(patch.isTourDay !== undefined ? { isTourDay: patch.isTourDay } : {}),
-      },
-      include: { _count: { select: { shiftAssignments: true } } },
-    });
-
-    await writeAudit(tx, {
-      ...audit,
-      action: 'eventDay.update',
-      entityType: 'EventDay',
-      entityId: id,
-      before: { label: existing.label },
-      after: { ...patch },
-    });
-
-    return updated;
-  });
-
-  return {
-    id: row.id,
-    date: row.date.toISOString().slice(0, 10),
-    label: row.label,
-    isPublicDay: row.isPublicDay,
-    isTourDay: row.isTourDay,
-    assignmentCount: row._count.shiftAssignments,
-    createdAt: row.createdAt.toISOString(),
-  };
 }
 
 // ─────────────────────────────────────────────────────────────
