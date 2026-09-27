@@ -1,14 +1,12 @@
-import { Router, type Request, type Response } from 'express';
+import { Router } from 'express';
 import { z } from 'zod';
 import { Id, ProvisionVolunteerRequest, RosterImportRequest } from '@spoh/shared';
-import { getAuth, requireAuth } from '../../../platform/identity/index.js';
 import { defaultRateLimit, sensitiveRateLimit } from '../../../platform/http/rateLimit.js';
 import { requireCapability } from '../../../platform/access/index.js';
-import { validate, validatedBody } from '../../../platform/http/validate.js';
-import { auditContextFrom } from '../../../platform/http/auditContext.js';
-import { getMe } from '../../me/service.js';
 import { stationRosterHandler } from '../../assignments/index.js';
-import { importRoster, provisionVolunteer, type RosterActor } from '../application/roster.js';
+import { requireAuth } from '../../../platform/identity/index.js';
+import { validate } from '../../../platform/http/validate.js';
+import { importRosterHandler, myShiftsHandler, provisionVolunteerHandler } from './handlers.js';
 
 /** Roster, provisioning and shift views (BUILD_PLAN §7.2). */
 export const rosterRouter: Router = Router();
@@ -18,25 +16,8 @@ const StationRosterQuery = z.object({ eventDayId: Id.optional() }).strict();
 
 rosterRouter.use(requireAuth);
 
-function actorFrom(req: Request): RosterActor {
-  const auth = getAuth(req);
-  return { volunteerId: auth.volunteerId, role: auth.role };
-}
-
 /** My own shifts. Same payload as `/me`, reachable from the shift screen. */
-rosterRouter.get(
-  '/me',
-  defaultRateLimit,
-  requireCapability('own.read'),
-  async (req: Request, res: Response) => {
-    const auth = getAuth(req);
-    const me = await getMe(auth.volunteerId);
-    res.status(200).json({
-      data: me.upcomingAssignments,
-      meta: { count: me.upcomingAssignments.length, nextCursor: null },
-    });
-  },
-);
+rosterRouter.get('/me', defaultRateLimit, requireCapability('own.read'), myShiftsHandler);
 
 rosterRouter.get(
   '/station/:stationId',
@@ -56,11 +37,7 @@ rosterRouter.post(
   sensitiveRateLimit,
   requireCapability('user.provision'),
   validate({ body: ProvisionVolunteerRequest }),
-  async (req: Request, res: Response) => {
-    const body = validatedBody<ProvisionVolunteerRequest>(req);
-    const result = await provisionVolunteer(body, actorFrom(req), auditContextFrom(req));
-    res.status(201).json(result);
-  },
+  provisionVolunteerHandler,
 );
 
 /**
@@ -74,9 +51,5 @@ rosterRouter.post(
   sensitiveRateLimit,
   requireCapability('roster.edit'),
   validate({ body: RosterImportRequest }),
-  async (req: Request, res: Response) => {
-    const body = validatedBody<RosterImportRequest>(req);
-    const result = await importRoster(body, actorFrom(req), auditContextFrom(req));
-    res.status(200).json(result);
-  },
+  importRosterHandler,
 );

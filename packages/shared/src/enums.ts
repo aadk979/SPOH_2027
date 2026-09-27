@@ -99,6 +99,11 @@ export const ROLE_PRECEDENCE: Readonly<Record<CommitteeRole, number>> = Object.f
   VOLUNTEER: 50,
 });
 
+/** True when `actor` is strictly more privileged than `subject`: the escalation rule. */
+export function outranks(actor: CommitteeRole, subject: CommitteeRole): boolean {
+  return ROLE_PRECEDENCE[actor] < ROLE_PRECEDENCE[subject];
+}
+
 /** True when `role` is at least as privileged as `minimum`. */
 export function roleMeets(role: CommitteeRole, minimum: CommitteeRole): boolean {
   return ROLE_PRECEDENCE[role] <= ROLE_PRECEDENCE[minimum];

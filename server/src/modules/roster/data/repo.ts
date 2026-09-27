@@ -1,4 +1,3 @@
-import type { VolunteerRecord } from '@spoh/shared';
 import type { Prisma, Volunteer } from '../../../generated/prisma/client.js';
 
 export type { Volunteer };
@@ -12,20 +11,6 @@ import { prisma, type PrismaTransactionClient } from '../../../platform/db/clien
  * capture model and is archived once the post-event report is signed off
  * (PRODUCT_BRIEF §0.2).
  */
-
-export function toVolunteerRecord(volunteer: Volunteer): VolunteerRecord {
-  return {
-    id: volunteer.id,
-    displayName: volunteer.displayName,
-    email: volunteer.email,
-    phone: volunteer.phone,
-    role: volunteer.role,
-    portfolio: volunteer.portfolio,
-    reportsToId: volunteer.reportsToId,
-    active: volunteer.active,
-    createdAt: volunteer.createdAt.toISOString(),
-  };
-}
 
 export async function findVolunteerByEmail(
   email: string,
@@ -115,16 +100,34 @@ export async function upsertAssignment(
   return { created: true };
 }
 
-export async function findEventDayByDate(
-  tx: PrismaTransactionClient,
-  date: Date,
-): Promise<{ id: string } | null> {
-  return tx.eventDay.findUnique({ where: { date }, select: { id: true } });
+/** Every event day, keyed by its date (YYYY-MM-DD), for matching import rows. */
+export async function eventDayIdsByDate(): Promise<Map<string, string>> {
+  const days = await prisma.eventDay.findMany({ select: { id: true, date: true } });
+  return new Map(days.map((day) => [day.date.toISOString().slice(0, 10), day.id]));
 }
 
-export async function findStationByCodeTx(
+/** Every station, keyed by its code, for matching import rows. */
+export async function stationIdsByCode(): Promise<Map<string, string>> {
+  const stations = await prisma.station.findMany({ select: { id: true, code: true } });
+  return new Map(stations.map((station) => [station.code, station.id]));
+}
+
+/** The (day, block) slots these volunteers already hold, as volunteerId|eventDayId|block. */
+export async function existingSlots(volunteerIds: readonly string[]): Promise<Set<string>> {
+  if (volunteerIds.length === 0) return new Set();
+  const rows = await prisma.shiftAssignment.findMany({
+    where: { volunteerId: { in: [...volunteerIds] } },
+    select: { volunteerId: true, eventDayId: true, block: true },
+  });
+  return new Set(rows.map((row) => `${row.volunteerId}|${row.eventDayId}|${row.block}`));
+}
+
+export async function setManager(
   tx: PrismaTransactionClient,
-  code: string,
-): Promise<{ id: string } | null> {
-  return tx.station.findUnique({ where: { code }, select: { id: true } });
+  link: { volunteerId: string; managerId: string },
+): Promise<void> {
+  await tx.volunteer.update({
+    where: { id: link.volunteerId },
+    data: { reportsToId: link.managerId },
+  });
 }

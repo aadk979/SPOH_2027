@@ -1,4 +1,4 @@
-import { ERROR_CODES, ROLE_PRECEDENCE, type CommitteeRole } from '@spoh/shared';
+import { ERROR_CODES, outranks, type CommitteeRole } from '@spoh/shared';
 import { AppError, ConflictError } from '../../../platform/errors/index.js';
 
 /**
@@ -14,10 +14,7 @@ import { AppError, ConflictError } from '../../../platform/errors/index.js';
  * permission to manage volunteers, it is a permission to become an Admin.
  */
 
-/** True when `actor` is strictly more privileged than `subject`. */
-export function outranks(actor: CommitteeRole, subject: CommitteeRole): boolean {
-  return ROLE_PRECEDENCE[actor] < ROLE_PRECEDENCE[subject];
-}
+export { outranks };
 
 /** Whether `actor` may change `target` at all: not themselves, and only people below them. */
 export function assertMayActOn(

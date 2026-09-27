@@ -18,7 +18,7 @@ import { meRouter } from './modules/me/router.js';
 import { missionCardRouter } from './modules/missionCard/index.js';
 import { registrationRouter } from './modules/registration/index.js';
 import { reportRouter } from './modules/report/router.js';
-import { rosterRouter } from './modules/roster/http/routes.js';
+import { rosterRouter } from './modules/roster/index.js';
 import { shiftRouter } from './modules/shift/router.js';
 import { stationRouter } from './modules/station/index.js';
 import { createDevAuthRouter } from './modules/devAuth/router.js';
