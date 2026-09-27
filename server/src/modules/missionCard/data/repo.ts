@@ -49,6 +49,26 @@ export async function findCardStatus(tx: PrismaTransactionClient, shortCode: str
   return tx.missionCard.findUnique({ where: { shortCode }, select: { id: true, status: true } });
 }
 
+/**
+ * The card and every card it replaced, following reissues back to the first:
+ * one journey. One gift per journey (ADR-002 §3), so the gift desk checks all
+ * of them (F03-003).
+ */
+export async function findJourneyCardIds(
+  tx: PrismaTransactionClient,
+  cardId: string,
+): Promise<string[]> {
+  const rows = await tx.$queryRaw<Array<{ id: string }>>`
+    WITH RECURSIVE journey AS (
+      SELECT "id", "reissuedFromId" FROM "MissionCard" WHERE "id" = ${cardId}
+      UNION
+      SELECT m."id", m."reissuedFromId"
+      FROM "MissionCard" m JOIN journey j ON m."id" = j."reissuedFromId"
+    )
+    SELECT "id" FROM journey`;
+  return rows.map((row) => row.id);
+}
+
 /** The card with its full stamp rows, for carrying a journey to a replacement. */
 export async function findCardWithStamps(tx: PrismaTransactionClient, shortCode: string) {
   return tx.missionCard.findUnique({ where: { shortCode }, include: { stampEvents: true } });

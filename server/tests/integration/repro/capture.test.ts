@@ -99,7 +99,7 @@ function redeem(body: Record<string, unknown>): request.Test {
 
 describe('Mission Cards, gifts and group registration (P03 repros)', () => {
   // F03-003
-  it.skip('warns before a second gift when the redeemed card has been reissued', async () => {
+  it('warns before a second gift when the redeemed card has been reissued', async () => {
     await card('AAA111', 'COMPLETED');
     await card('BBB222', 'UNISSUED');
 

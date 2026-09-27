@@ -83,13 +83,13 @@ export async function createAdjustment(
   await tx.giftStockAdjustment.create({ data });
 }
 
-/** Has this card already been given a gift? Warns on a duplicate presentation. */
-export async function existingRedemptionForCard(
+/** Has any of these cards (one journey) already been given a gift? */
+export async function existingRedemptionForCards(
   tx: PrismaTransactionClient,
-  missionCardId: string,
+  missionCardIds: readonly string[],
 ): Promise<{ id: string } | null> {
   return tx.giftRedemption.findFirst({
-    where: { missionCardId, voided: false },
+    where: { missionCardId: { in: [...missionCardIds] }, voided: false },
     select: { id: true },
   });
 }

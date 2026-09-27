@@ -4,12 +4,12 @@ import { prisma, type PrismaTransactionClient } from '../../../platform/db/clien
 import { NotFoundError } from '../../../platform/errors/index.js';
 import type { CaptureContext } from '../../../platform/http/captureActor.js';
 import { systemClock } from '../../../platform/time/index.js';
-import { findCardForRedemption } from '../../missionCard/index.js';
+import { findCardForRedemption, findJourneyCardIds } from '../../missionCard/index.js';
 import { requireActiveStation } from '../../station/index.js';
 import { toGiftTypeRecord } from '../data/mappers.js';
 import {
   createRedemption,
-  existingRedemptionForCard,
+  existingRedemptionForCards,
   findGiftType,
   totalsForGiftType,
 } from '../data/repo.js';
@@ -25,7 +25,10 @@ async function checkCard(tx: PrismaTransactionClient, request: RedeemGiftRequest
   const usable = card && card.status !== 'VOIDED' && card.status !== 'LOST';
   return checkPresentedCard({
     card,
-    alreadyRedeemed: usable ? (await existingRedemptionForCard(tx, card.id)) !== null : false,
+    // One gift per journey: a gift against a card this one replaced counts (F03-003).
+    alreadyRedeemed: usable
+      ? (await existingRedemptionForCards(tx, await findJourneyCardIds(tx, card.id))) !== null
+      : false,
     acknowledged: request.acknowledgeWarning ?? false,
   });
 }
