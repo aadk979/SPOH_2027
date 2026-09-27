@@ -30,7 +30,7 @@ beforeEach(async () => {
 
 describe('card batches (P03 repros)', () => {
   // F03-022
-  it.skip('never prints a code that belongs to a card already in the system', async () => {
+  it('never prints a code that belongs to a card already in the system', async () => {
     const admin = await createVolunteer({ email: 'admin@batch.test', role: 'ADMIN' });
     await prisma.missionCard.create({
       data: {

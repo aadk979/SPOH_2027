@@ -99,14 +99,20 @@ export async function attachGroupRegistrations(
   });
 }
 
+/**
+ * Insert a print batch and return the rows actually inserted. A code that
+ * already belongs to a card is skipped (the unique constraint on shortCode),
+ * and the caller prints only what comes back (F03-022).
+ */
 export async function createCardBatch(
   rows: Array<{ shortCode: string; qrPayload: string; batchLabel: string }>,
-): Promise<number> {
-  // skipDuplicates because short codes are random: a collision in a 5000-card
-  // batch is vanishingly unlikely but not impossible, and losing one card off a
-  // print run is better than failing the whole batch.
-  const result = await prisma.missionCard.createMany({ data: rows, skipDuplicates: true });
-  return result.count;
+): Promise<Array<{ shortCode: string; qrPayload: string; batchLabel: string }>> {
+  const created = await prisma.missionCard.createManyAndReturn({
+    data: rows,
+    skipDuplicates: true,
+    select: { shortCode: true, qrPayload: true, batchLabel: true },
+  });
+  return created.map((row) => ({ ...row, batchLabel: row.batchLabel ?? '' }));
 }
 
 export async function updateCard(
