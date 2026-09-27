@@ -157,7 +157,7 @@ describe('cross-cutting rules (P03 repros)', () => {
   });
 
   // F03-018
-  it.skip('records where a moved shift was before the move', async () => {
+  it('records where a moved shift was before the move', async () => {
     const other = (await createStation({ code: 'BOOTH' })).id;
     const shift = await assignToStation({
       volunteerId: volunteer.id,

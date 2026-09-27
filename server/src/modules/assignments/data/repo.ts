@@ -48,6 +48,21 @@ export async function stationExists(stationId: string): Promise<boolean> {
   );
 }
 
+/** The assignment already in this person's (day, block) slot, if any. */
+export async function findAssignmentInSlot(
+  tx: PrismaTransactionClient,
+  slot: {
+    volunteerId: string;
+    eventDayId: string;
+    block: Prisma.ShiftAssignmentUncheckedCreateInput['block'];
+  },
+) {
+  return tx.shiftAssignment.findUnique({
+    where: { volunteerId_eventDayId_block: slot },
+    select: { stationId: true, roleLabel: true },
+  });
+}
+
 export async function upsertAssignmentRow(
   tx: PrismaTransactionClient,
   data: Prisma.ShiftAssignmentUncheckedCreateInput & {

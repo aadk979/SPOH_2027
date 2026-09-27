@@ -3,7 +3,7 @@ import { writeAudit, type AuditContext } from '../../../platform/audit/index.js'
 import { prisma } from '../../../platform/db/client.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { toAssignmentRecord } from '../data/mappers.js';
-import { findAssignmentTargets, upsertAssignmentRow } from '../data/repo.js';
+import { findAssignmentInSlot, findAssignmentTargets, upsertAssignmentRow } from '../data/repo.js';
 
 /**
  * Roster a volunteer into a block. Upsert rather than fail on the (volunteer,
@@ -20,6 +20,12 @@ export async function createAssignment(
   if (!eventDay) throw new NotFoundError('Event day');
 
   const row = await prisma.$transaction(async (tx) => {
+    // A move is audited as one, with where the person was before (F03-018).
+    const previous = await findAssignmentInSlot(tx, {
+      volunteerId: request.volunteerId,
+      eventDayId: request.eventDayId,
+      block: request.block,
+    });
     const assignment = await upsertAssignmentRow(tx, {
       volunteerId: request.volunteerId,
       stationId: request.stationId,
@@ -29,9 +35,10 @@ export async function createAssignment(
     });
     await writeAudit(tx, {
       ...audit,
-      action: 'assignment.create',
+      action: previous ? 'assignment.move' : 'assignment.create',
       entityType: 'ShiftAssignment',
       entityId: assignment.id,
+      ...(previous ? { before: { ...previous } } : {}),
       after: {
         volunteerId: request.volunteerId,
         stationId: request.stationId,
