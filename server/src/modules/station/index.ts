@@ -6,6 +6,11 @@
  * directly, rather than wrapped in a pass-through.
  */
 export { stationRouter } from './http/routes.js';
+export {
+  createStationHandler,
+  listAllStationsHandler,
+  updateStationHandler,
+} from './http/handlers.js';
 export { listActiveStations } from './application/listActiveStations.js';
 export { requireActiveStation } from './application/requireActiveStation.js';
 export { requireCountedStation } from './application/requireCountedStation.js';

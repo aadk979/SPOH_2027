@@ -26,18 +26,20 @@ import {
 import { auditContextFrom } from '../../platform/http/auditContext.js';
 import { prisma } from '../../platform/db/client.js';
 import { getSettings, settingsMeta, updateSettings } from '../../platform/settings/index.js';
-import { listStations, toStationSummary } from '../station/index.js';
+import {
+  createStationHandler,
+  listAllStationsHandler,
+  updateStationHandler,
+} from '../station/index.js';
 import {
   createAssignment,
   createGiftType,
-  createStation,
   deactivateVolunteer,
   deleteAssignment,
   getVolunteer,
   listVolunteers,
   reactivateVolunteer,
   updateGiftType,
-  updateStation,
   updateVolunteer,
   type Actor,
 } from './service.js';
@@ -170,21 +172,11 @@ adminRouter.delete(
 // STATIONS
 // ─────────────────────────────────────────────────────────────
 
-/**
- * Includes inactive stations, unlike `GET /stations`.
- *
- * The public list is the map legend and must not offer a closed room as a
- * capture target; this one is the configuration screen, where a closed room is
- * exactly what you came to reopen.
- */
 adminRouter.get(
   '/stations',
   defaultRateLimit,
   requireCapability('config.manage'),
-  async (_req: Request, res: Response) => {
-    const stations = (await listStations({ includeInactive: true })).map(toStationSummary);
-    res.status(200).json({ data: stations, meta: { count: stations.length, nextCursor: null } });
-  },
+  listAllStationsHandler,
 );
 
 adminRouter.post(
@@ -192,10 +184,7 @@ adminRouter.post(
   adminRateLimit,
   requireCapability('config.manage'),
   validate({ body: CreateStationRequest }),
-  async (req: Request, res: Response) => {
-    const body = validatedBody<CreateStationRequest>(req);
-    res.status(201).json({ station: await createStation(body, auditContextFrom(req)) });
-  },
+  createStationHandler,
 );
 
 adminRouter.patch(
@@ -203,11 +192,7 @@ adminRouter.patch(
   adminRateLimit,
   requireCapability('config.manage'),
   validate({ params: IdParams, body: UpdateStationRequest }),
-  async (req: Request, res: Response) => {
-    const { id } = validatedParams<z.infer<typeof IdParams>>(req);
-    const patch = validatedBody<UpdateStationRequest>(req);
-    res.status(200).json({ station: await updateStation(id, patch, auditContextFrom(req)) });
-  },
+  updateStationHandler,
 );
 
 // ─────────────────────────────────────────────────────────────

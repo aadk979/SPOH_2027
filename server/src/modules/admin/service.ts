@@ -4,14 +4,11 @@ import {
   type CommitteeRole,
   type CreateAssignmentRequest,
   type CreateGiftTypeRequest,
-  type CreateStationRequest,
   type DeactivateVolunteerRequest,
   type GiftTypeRecord,
   type ListVolunteersQuery,
   type ShiftAssignmentRecord,
-  type StationSummary,
   type UpdateGiftTypeRequest,
-  type UpdateStationRequest,
   type UpdateVolunteerRequest,
   type VolunteerAdminRecord,
   type VolunteerMutationResponse,
@@ -29,7 +26,6 @@ import { writeAudit, type AuditContext } from '../../platform/audit/index.js';
 import { invalidateVolunteerCache } from '../../platform/identity/index.js';
 import { identityProvider } from '../identity/provider.js';
 import { revokeAllForVolunteer } from '../auth/service.js';
-import { toStationSummary } from '../station/index.js';
 import { toAssignmentRecord } from '../roster/repo.js';
 import { toGiftTypeRecord } from '../gift/index.js';
 import { pageArgs, toPage } from '../../platform/db/pagination.js';
@@ -527,99 +523,6 @@ export async function deleteAssignment(id: string, audit: AuditContext): Promise
       before: { ...existing },
     });
   });
-}
-
-// ─────────────────────────────────────────────────────────────
-// STATIONS
-// ─────────────────────────────────────────────────────────────
-
-export async function createStation(
-  request: CreateStationRequest,
-  audit: AuditContext,
-): Promise<StationSummary> {
-  const existing = await prisma.station.findUnique({ where: { code: request.code } });
-  if (existing) {
-    throw new ConflictError(
-      ERROR_CODES.STATION_CODE_TAKEN,
-      `Station code ${request.code} is already in use by ${existing.name}`,
-    );
-  }
-
-  const station = await prisma.$transaction(async (tx) => {
-    const row = await tx.station.create({
-      data: {
-        code: request.code,
-        name: request.name,
-        kind: request.kind,
-        courseCode: request.courseCode ?? null,
-        floor: request.floor ?? null,
-        countsEntry: request.countsEntry,
-        issuesStamp: request.issuesStamp,
-        sortOrder: request.sortOrder,
-      },
-    });
-
-    await writeAudit(tx, {
-      ...audit,
-      action: 'station.create',
-      entityType: 'Station',
-      entityId: row.id,
-      after: { code: row.code, name: row.name, kind: row.kind },
-    });
-
-    return row;
-  });
-
-  return toStationSummary(station);
-}
-
-export async function updateStation(
-  id: string,
-  patch: UpdateStationRequest,
-  audit: AuditContext,
-): Promise<StationSummary> {
-  const existing = await prisma.station.findUnique({ where: { id } });
-  if (!existing) throw new NotFoundError('Station');
-
-  /**
-   * Turning off `issuesStamp` changes what "complete" means for every Mission
-   * Card in the system, because completion is computed against the number of
-   * stamping stations. Cards already marked complete keep their status; the
-   * change is audited so a shifting completion rate has an explanation.
-   */
-  const station = await prisma.$transaction(async (tx) => {
-    const row = await tx.station.update({
-      where: { id },
-      data: {
-        ...(patch.name !== undefined ? { name: patch.name } : {}),
-        ...(patch.kind !== undefined ? { kind: patch.kind } : {}),
-        ...(patch.courseCode !== undefined ? { courseCode: patch.courseCode ?? null } : {}),
-        ...(patch.floor !== undefined ? { floor: patch.floor ?? null } : {}),
-        ...(patch.countsEntry !== undefined ? { countsEntry: patch.countsEntry } : {}),
-        ...(patch.issuesStamp !== undefined ? { issuesStamp: patch.issuesStamp } : {}),
-        ...(patch.sortOrder !== undefined ? { sortOrder: patch.sortOrder } : {}),
-        ...(patch.active !== undefined ? { active: patch.active } : {}),
-      },
-    });
-
-    await writeAudit(tx, {
-      ...audit,
-      action: 'station.update',
-      entityType: 'Station',
-      entityId: id,
-      before: {
-        name: existing.name,
-        countsEntry: existing.countsEntry,
-        issuesStamp: existing.issuesStamp,
-        active: existing.active,
-      },
-      after: { ...patch },
-    });
-
-    return row;
-  });
-
-  return toStationSummary(station);
 }
 
 // ─────────────────────────────────────────────────────────────

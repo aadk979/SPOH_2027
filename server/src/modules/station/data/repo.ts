@@ -1,4 +1,4 @@
-import type { Station } from '../../../generated/prisma/client.js';
+import type { Prisma, Station } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 
 /**
@@ -43,6 +43,27 @@ export async function findStationNames(
     select: { id: true, name: true },
   });
   return new Map(stations.map((station) => [station.id, station.name]));
+}
+
+export async function findStationByCode(
+  code: string,
+  db: PrismaTransactionClient = prisma,
+): Promise<Station | null> {
+  return db.station.findUnique({ where: { code } });
+}
+
+export async function createStationRow(
+  tx: PrismaTransactionClient,
+  data: Prisma.StationCreateInput,
+): Promise<Station> {
+  return tx.station.create({ data });
+}
+
+export async function updateStationRow(
+  tx: PrismaTransactionClient,
+  change: { id: string; data: Prisma.StationUpdateInput },
+): Promise<Station> {
+  return tx.station.update({ where: { id: change.id }, data: change.data });
 }
 
 /** Stations that stamp a Mission Card — the journey the funnel measures. */
