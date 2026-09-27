@@ -35,6 +35,7 @@ export type AuditAction =
   | 'lostPerson.raise'
   | 'lostPerson.resolve'
   | 'lostPerson.acknowledge'
+  | 'card.batch'
   | 'lostPerson.purge'
   | 'lostFound.create'
   | 'lostFound.claim'

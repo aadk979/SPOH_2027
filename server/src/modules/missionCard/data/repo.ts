@@ -105,9 +105,10 @@ export async function attachGroupRegistrations(
  * and the caller prints only what comes back (F03-022).
  */
 export async function createCardBatch(
+  tx: PrismaTransactionClient,
   rows: Array<{ shortCode: string; qrPayload: string; batchLabel: string }>,
 ): Promise<Array<{ shortCode: string; qrPayload: string; batchLabel: string }>> {
-  const created = await prisma.missionCard.createManyAndReturn({
+  const created = await tx.missionCard.createManyAndReturn({
     data: rows,
     skipDuplicates: true,
     select: { shortCode: true, qrPayload: true, batchLabel: true },

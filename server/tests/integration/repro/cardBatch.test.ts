@@ -56,3 +56,19 @@ describe('card batches (P03 repros)', () => {
     expect(printed).toHaveLength(response.body.created as number);
   });
 });
+
+describe('card batch audit (F03-018)', () => {
+  it('audits a batch as card.batch, not as an issue', async () => {
+    const admin = await createVolunteer({ email: 'admin2@batch.test', role: 'ADMIN' });
+
+    const response = await request(app)
+      .post('/api/v1/cards/batch')
+      .set('Authorization', bearer(admin))
+      .send({ count: 3, batchLabel: 'audited' });
+    expect(response.status).toBe(201);
+
+    const entries = await prisma.auditLog.findMany({ where: { entityType: 'MissionCardBatch' } });
+    expect(entries.map((entry) => entry.action)).toEqual(['card.batch']);
+    expect(entries[0]?.after).toEqual({ requested: 3, created: 3 });
+  });
+});
