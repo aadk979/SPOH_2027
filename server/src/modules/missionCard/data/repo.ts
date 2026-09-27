@@ -36,6 +36,15 @@ export async function findCardRowById(id: string) {
   return prisma.missionCard.findUnique({ where: { id } });
 }
 
+/**
+ * Lock the card's row for the rest of the transaction. Two scans of one card
+ * then run one after the other, and the second sees the first's stamp instead
+ * of colliding with it on the (card, station) unique constraint (F03-008).
+ */
+export async function lockCard(tx: PrismaTransactionClient, shortCode: string): Promise<void> {
+  await tx.$queryRaw`SELECT "id" FROM "MissionCard" WHERE "shortCode" = ${shortCode} FOR UPDATE`;
+}
+
 /** The card with the stations it has been stamped at, for a stamp. */
 export async function findCardWithStampStations(tx: PrismaTransactionClient, shortCode: string) {
   return tx.missionCard.findUnique({

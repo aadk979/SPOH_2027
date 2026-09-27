@@ -8,6 +8,7 @@ import {
   countStampsForCard,
   createStamp,
   findCardWithStampStations,
+  lockCard,
   updateCard,
 } from '../data/repo.js';
 import {
@@ -41,6 +42,7 @@ interface StampOutcome {
  */
 async function applyStamp(tx: PrismaTransactionClient, input: StampInput): Promise<StampOutcome> {
   const { station, recordedAt, context } = input;
+  await lockCard(tx, input.shortCode);
   const existing = requireCard(await findCardWithStampStations(tx, input.shortCode));
   assertCardNotVoided(existing, 'That card has been voided.');
 

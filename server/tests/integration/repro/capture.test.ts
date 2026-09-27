@@ -171,7 +171,7 @@ describe('Mission Cards, gifts and group registration (P03 repros)', () => {
   });
 
   // F03-008
-  it.skip('answers simultaneous stamps of one card at one station without a 500', async () => {
+  it('answers simultaneous stamps of one card at one station without a 500', async () => {
     // A race: five rounds of three make it lose every run.
     const codes = ['HHH801', 'HHH802', 'HHH803', 'HHH804', 'HHH805'];
     const statuses: number[] = [];
