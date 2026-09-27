@@ -6,17 +6,17 @@ import {
   Id,
   ListLostFoundQuery,
 } from '@spoh/shared';
-import { getAuth, requireAuth } from '../../platform/identity/index.js';
-import { defaultRateLimit } from '../../platform/http/rateLimit.js';
-import { requireCapability } from '../../platform/access/index.js';
+import { getAuth, requireAuth } from '../../../platform/identity/index.js';
+import { defaultRateLimit } from '../../../platform/http/rateLimit.js';
+import { requireCapability } from '../../../platform/access/index.js';
 import {
   validate,
   validatedBody,
   validatedParams,
   validatedQuery,
-} from '../../platform/http/validate.js';
-import { auditContextFrom } from '../../platform/http/auditContext.js';
-import { claimItem, listItems, logItem, markUnclaimedAtClose } from './service.js';
+} from '../../../platform/http/validate.js';
+import { auditContextFrom } from '../../../platform/http/auditContext.js';
+import { claimItem, listItems, logItem, markUnclaimedAtClose } from '../application/items.js';
 
 /** Lost and found (BUILD_PLAN §7.2). */
 export const lostFoundRouter: Router = Router();
