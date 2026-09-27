@@ -5,9 +5,10 @@ import {
   type ListLostFoundQuery,
   type LostFoundRecord,
 } from '@spoh/shared';
-import { writeAudit, type AuditContext } from '../../platform/audit/index.js';
+import { type AuditContext, writeAudit } from '../../platform/audit/index.js';
 import { AppError, NotFoundError } from '../../platform/errors/index.js';
 import { prisma } from '../../platform/db/client.js';
+import { type Page, pageArgs, toPage } from '../../platform/db/pagination.js';
 
 /**
  * Lost and found (PRODUCT_BRIEF §7.2).
@@ -96,8 +97,8 @@ export async function logItem(
   return toRecord(item);
 }
 
-export async function listItems(query: ListLostFoundQuery): Promise<LostFoundRecord[]> {
-  const items = await prisma.lostFoundItem.findMany({
+export async function listItems(query: ListLostFoundQuery): Promise<Page<LostFoundRecord>> {
+  const rows = await prisma.lostFoundItem.findMany({
     where: {
       ...(query.status ? { status: query.status } : {}),
       // Case-insensitive substring match. The desk searches for "blue bottle",
@@ -105,12 +106,12 @@ export async function listItems(query: ListLostFoundQuery): Promise<LostFoundRec
       ...(query.q ? { itemLabel: { contains: query.q, mode: 'insensitive' } } : {}),
     },
     include: { loggedBy: { select: { displayName: true } } },
-    orderBy: { foundAt: 'desc' },
-    take: query.limit,
-    ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : {}),
+    orderBy: [{ foundAt: 'desc' }, { id: 'desc' }],
+    ...pageArgs(query),
   });
 
-  return Promise.all(items.map(toRecord));
+  const page = toPage(rows, query.limit);
+  return { data: await Promise.all(page.data.map(toRecord)), nextCursor: page.nextCursor };
 }
 
 export async function claimItem(

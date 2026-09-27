@@ -54,10 +54,10 @@ incidentRouter.get(
   validate({ query: ListIncidentsQuery }),
   async (req: Request, res: Response) => {
     const query = validatedQuery<ListIncidentsQuery>(req);
-    const incidents = await listIncidentRecords(query);
+    const page = await listIncidentRecords(query);
     res.status(200).json({
-      data: incidents,
-      meta: { count: incidents.length, nextCursor: incidents.at(-1)?.id ?? null },
+      data: page.data,
+      meta: { count: page.data.length, nextCursor: page.nextCursor },
     });
   },
 );

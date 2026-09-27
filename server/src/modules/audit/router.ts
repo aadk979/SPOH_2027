@@ -6,6 +6,7 @@ import { defaultRateLimit } from '../../platform/http/rateLimit.js';
 import { requireCapability } from '../../platform/access/index.js';
 import { validate, validatedQuery } from '../../platform/http/validate.js';
 import { prisma } from '../../platform/db/client.js';
+import { pageArgs, toPage } from '../../platform/db/pagination.js';
 
 /**
  * The audit log (BUILD_PLAN §7.2, §8.7).
@@ -36,7 +37,7 @@ auditRouter.get(
   async (req: Request, res: Response) => {
     const query = validatedQuery<z.infer<typeof AuditQuery>>(req);
 
-    const entries = await prisma.auditLog.findMany({
+    const rows = await prisma.auditLog.findMany({
       where: {
         ...(query.action ? { action: query.action } : {}),
         ...(query.entityType ? { entityType: query.entityType } : {}),
@@ -52,10 +53,10 @@ auditRouter.get(
           : {}),
       },
       include: { actor: { select: { displayName: true } } },
-      orderBy: { createdAt: 'desc' },
-      take: query.limit,
-      ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : {}),
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      ...pageArgs(query),
     });
+    const { data: entries, nextCursor } = toPage(rows, query.limit);
 
     res.status(200).json({
       data: entries.map((entry) => ({
@@ -70,7 +71,7 @@ auditRouter.get(
         requestId: entry.requestId,
         createdAt: entry.createdAt.toISOString(),
       })),
-      meta: { count: entries.length, nextCursor: entries.at(-1)?.id ?? null },
+      meta: { count: entries.length, nextCursor },
     });
   },
 );

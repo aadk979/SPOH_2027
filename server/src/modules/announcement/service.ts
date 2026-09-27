@@ -20,6 +20,7 @@ import {
   listForRecipient,
   toAnnouncementRecord,
 } from './repo.js';
+import { toPage, type Page } from '../../platform/db/pagination.js';
 
 /**
  * Broadcast and comms (PRODUCT_BRIEF §8).
@@ -84,7 +85,7 @@ export async function sendAnnouncement(
 export async function listInbox(
   query: ListAnnouncementsQuery,
   recipient: { volunteerId: string; role: CommitteeRole },
-): Promise<AnnouncementRecord[]> {
+): Promise<Page<AnnouncementRecord>> {
   const today = eventDayAnchor(singaporeDateString());
 
   // Station targeting matches every station this volunteer is rostered at
@@ -94,7 +95,7 @@ export async function listInbox(
     select: { stationId: true, eventDayId: true },
   });
 
-  const announcements = await listForRecipient({
+  const rows = await listForRecipient({
     role: recipient.role,
     stationIds: [...new Set(assignments.map((a) => a.stationId))],
     eventDayIds: [...new Set(assignments.map((a) => a.eventDayId))],
@@ -102,6 +103,7 @@ export async function listInbox(
     ...(query.cursor ? { cursor: query.cursor } : {}),
     now: new Date(),
   });
+  const { data: announcements, nextCursor } = toPage(rows, query.limit);
 
   const acked = await acknowledgedIds(
     recipient.volunteerId,
@@ -122,9 +124,12 @@ export async function listInbox(
     }),
   );
 
-  return query.unackedOnly
-    ? records.filter((record) => record.requiresAck && !record.ackedByMe)
-    : records;
+  return {
+    data: query.unackedOnly
+      ? records.filter((record) => record.requiresAck && !record.ackedByMe)
+      : records,
+    nextCursor,
+  };
 }
 
 export async function acknowledgeAnnouncement(

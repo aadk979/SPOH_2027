@@ -51,14 +51,14 @@ announcementRouter.get(
   async (req: Request, res: Response) => {
     const auth = getAuth(req);
     const query = validatedQuery<ListAnnouncementsQuery>(req);
-    const announcements = await listInbox(query, {
+    const page = await listInbox(query, {
       volunteerId: auth.volunteerId,
       role: auth.role,
     });
 
     res.status(200).json({
-      data: announcements,
-      meta: { count: announcements.length, nextCursor: announcements.at(-1)?.id ?? null },
+      data: page.data,
+      meta: { count: page.data.length, nextCursor: page.nextCursor },
     });
   },
 );

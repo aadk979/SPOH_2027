@@ -49,10 +49,10 @@ lostFoundRouter.get(
   requireCapability('own.read'),
   validate({ query: ListLostFoundQuery }),
   async (req: Request, res: Response) => {
-    const items = await listItems(validatedQuery<ListLostFoundQuery>(req));
+    const page = await listItems(validatedQuery<ListLostFoundQuery>(req));
     res.status(200).json({
-      data: items,
-      meta: { count: items.length, nextCursor: items.at(-1)?.id ?? null },
+      data: page.data,
+      meta: { count: page.data.length, nextCursor: page.nextCursor },
     });
   },
 );

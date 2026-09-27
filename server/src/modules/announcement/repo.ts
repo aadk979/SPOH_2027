@@ -1,5 +1,6 @@
 import type { AnnouncementRecord, CommitteeRole } from '@spoh/shared';
 import type { Prisma } from '../../generated/prisma/client.js';
+import { pageArgs } from '../../platform/db/pagination.js';
 import { prisma, type PrismaTransactionClient } from '../../platform/db/client.js';
 
 /** Data access for announcements (PRODUCT_BRIEF §8). */
@@ -84,9 +85,8 @@ export async function listForRecipient(input: {
       ],
     },
     include: announcementInclude,
-    orderBy: { createdAt: 'desc' },
-    take: input.limit,
-    ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
+    orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+    ...pageArgs(input),
   });
 }
 

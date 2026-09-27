@@ -19,6 +19,7 @@ import {
   toIncidentRecord,
   updateIncidentStatus,
 } from './repo.js';
+import { toPage, type Page } from '../../platform/db/pagination.js';
 
 /**
  * Incident reporting (PRODUCT_BRIEF §7.1).
@@ -87,8 +88,10 @@ export async function getIncident(id: string): Promise<IncidentRecord> {
   return toIncidentRecord(incident);
 }
 
-export async function listIncidentRecords(query: ListIncidentsQuery): Promise<IncidentRecord[]> {
-  const incidents = await listIncidents({
+export async function listIncidentRecords(
+  query: ListIncidentsQuery,
+): Promise<Page<IncidentRecord>> {
+  const rows = await listIncidents({
     ...(query.status ? { status: query.status } : {}),
     ...(query.severity ? { severity: query.severity } : {}),
     ...(query.stationId ? { stationId: query.stationId } : {}),
@@ -98,7 +101,8 @@ export async function listIncidentRecords(query: ListIncidentsQuery): Promise<In
     ...(query.cursor ? { cursor: query.cursor } : {}),
   });
 
-  return Promise.all(incidents.map(toIncidentRecord));
+  const page = toPage(rows, query.limit);
+  return { data: await Promise.all(page.data.map(toIncidentRecord)), nextCursor: page.nextCursor };
 }
 
 export async function appendFollowUp(

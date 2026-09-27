@@ -36,6 +36,7 @@ import { revokeAllForVolunteer } from '../auth/service.js';
 import { toStationSummary } from '../station/index.js';
 import { toAssignmentRecord } from '../roster/repo.js';
 import { toGiftTypeRecord } from '../gift/index.js';
+import { pageArgs, toPage } from '../../platform/db/pagination.js';
 
 /**
  * Administration.
@@ -122,10 +123,14 @@ function toAdminRecord(row: AdminRow): VolunteerAdminRecord {
  * buried under everyone who has.
  */
 const SORTS: Record<ListVolunteersQuery['sort'], Prisma.VolunteerOrderByWithRelationInput[]> = {
-  name: [{ displayName: 'asc' }],
-  role: [{ role: 'asc' }, { displayName: 'asc' }],
-  lastSeen: [{ lastSeenAt: { sort: 'asc', nulls: 'first' } }, { displayName: 'asc' }],
-  created: [{ createdAt: 'desc' }],
+  name: [{ displayName: 'asc' }, { id: 'asc' }],
+  role: [{ role: 'asc' }, { displayName: 'asc' }, { id: 'asc' }],
+  lastSeen: [
+    { lastSeenAt: { sort: 'asc', nulls: 'first' } },
+    { displayName: 'asc' },
+    { id: 'asc' },
+  ],
+  created: [{ createdAt: 'desc' }, { id: 'desc' }],
 };
 
 export async function listVolunteers(query: ListVolunteersQuery): Promise<{
@@ -157,14 +162,11 @@ export async function listVolunteers(query: ListVolunteersQuery): Promise<{
     },
     select: adminSelect,
     orderBy: SORTS[query.sort],
-    take: query.limit,
-    ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : {}),
+    ...pageArgs(query),
   });
 
-  return {
-    data: rows.map((row) => toAdminRecord(row)),
-    nextCursor: rows.length === query.limit ? (rows.at(-1)?.id ?? null) : null,
-  };
+  const page = toPage(rows, query.limit);
+  return { data: page.data.map((row) => toAdminRecord(row)), nextCursor: page.nextCursor };
 }
 
 export async function getVolunteer(id: string): Promise<VolunteerAdminRecord> {

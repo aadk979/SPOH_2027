@@ -101,7 +101,7 @@ describe('cross-cutting rules (P03 repros)', () => {
   });
 
   // F03-017
-  it.skip('returns no next cursor on the last page', async () => {
+  it('returns no next cursor on the last page', async () => {
     await request(app).post('/api/v1/incidents').set('Authorization', bearer(volunteer)).send({
       idempotencyKey: idempotencyKey(),
       type: 'NEAR_MISS',
