@@ -264,6 +264,12 @@ describe('reissue', () => {
   });
 
   it('refuses a replacement that has already been issued', async () => {
+    for (const code of [CARD_A, CARD_B]) {
+      await request(app)
+        .post(`/api/v1/cards/${code}/issue`)
+        .set('Authorization', bearer(booth))
+        .send({ idempotencyKey: idempotencyKey() });
+    }
     await request(app)
       .post(`/api/v1/cards/${CARD_B}/issue`)
       .set('Authorization', bearer(booth))

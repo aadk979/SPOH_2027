@@ -35,6 +35,27 @@ export function assertDifferentCards(originalCode: string, replacementCode: stri
   }
 }
 
+/**
+ * Only a card on a journey can be reissued: ISSUED or COMPLETED. A voided
+ * card's stamps belong to nobody, and an unissued card has none (F03-027).
+ */
+export function assertReissuable(original: { status: CardStatus }): void {
+  if (original.status === 'VOIDED' || original.status === 'LOST') {
+    throw new AppError(
+      409,
+      ERROR_CODES.CARD_VOIDED,
+      'That card has been voided and cannot be reissued.',
+    );
+  }
+  if (original.status === 'UNISSUED') {
+    throw new AppError(
+      409,
+      ERROR_CODES.CARD_NOT_ISSUED,
+      'That card was never issued, so there is no journey to carry over.',
+    );
+  }
+}
+
 /** A replacement must be a fresh card: one already issued belongs to someone. */
 export function assertReplacementUnissued(replacement: { status: CardStatus }): void {
   if (replacement.status !== 'UNISSUED') {

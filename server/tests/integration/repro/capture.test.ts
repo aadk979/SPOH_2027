@@ -131,7 +131,7 @@ describe('Mission Cards, gifts and group registration (P03 repros)', () => {
   });
 
   // F03-027
-  it.skip('refuses to reissue from a card that was voided', async () => {
+  it('refuses to reissue from a card that was voided', async () => {
     await card('DDD444', 'VOIDED');
     await card('EEE555', 'UNISSUED');
 

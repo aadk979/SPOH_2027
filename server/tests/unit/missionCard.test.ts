@@ -3,6 +3,7 @@ import { generateBatchRows, toBatchCsv } from '../../src/modules/missionCard/dom
 import {
   assertCardNotVoided,
   assertDifferentCards,
+  assertReissuable,
   assertReplacementUnissued,
   assertStationStamps,
   isJourneyComplete,
@@ -102,5 +103,17 @@ describe('buildFunnelStages', () => {
       perStation: new Map(),
     });
     expect(stages.every((stage) => stage.rateOfIssued === 0)).toBe(true);
+  });
+});
+
+describe('assertReissuable (F03-027)', () => {
+  it.each([
+    ['ISSUED', undefined],
+    ['COMPLETED', undefined],
+    ['VOIDED', 'CARD_VOIDED'],
+    ['LOST', 'CARD_VOIDED'],
+    ['UNISSUED', 'CARD_NOT_ISSUED'],
+  ] as const)('%s → %s', (status, expected) => {
+    expect(code(() => assertReissuable({ status }))).toBe(expected);
   });
 });

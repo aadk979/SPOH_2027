@@ -4,6 +4,7 @@ import { prisma, type PrismaTransactionClient } from '../../../platform/db/clien
 import { createStamp, findCardRow, findCardWithStamps, updateCard } from '../data/repo.js';
 import {
   assertDifferentCards,
+  assertReissuable,
   assertReplacementUnissued,
   replacementStatus,
   requireCard,
@@ -54,6 +55,7 @@ export async function reissueCard(
 
   const result = await prisma.$transaction(async (tx) => {
     const original = requireCard(await findCardWithStamps(tx, originalCode));
+    assertReissuable(original);
     const replacement = requireCard(
       await findCardRow(tx, replacementCode),
       'No replacement card with that code',
