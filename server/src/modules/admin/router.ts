@@ -24,8 +24,6 @@ import {
   validatedQuery,
 } from '../../platform/http/validate.js';
 import { auditContextFrom } from '../../platform/http/auditContext.js';
-import { prisma } from '../../platform/db/client.js';
-import { getSettings, settingsMeta, updateSettings } from '../../platform/settings/index.js';
 import {
   createStationHandler,
   listAllStationsHandler,
@@ -41,6 +39,7 @@ import {
   updateVolunteer,
   type Actor,
 } from './service.js';
+import { getSettingsHandler, updateSettingsHandler } from '../settings/index.js';
 import { createGiftTypeHandler, updateGiftTypeHandler } from '../gift/index.js';
 import {
   createEventDayHandler,
@@ -254,48 +253,12 @@ adminRouter.patch(
  * thresholds to behave consistently with the server, and none of it is
  * sensitive — it is the tuning of a school open house, not a secret.
  */
-adminRouter.get(
-  '/settings',
-  defaultRateLimit,
-  requireCapability('own.read'),
-  async (_req: Request, res: Response) => {
-    const meta = settingsMeta();
-
-    const updatedBy = meta.updatedById
-      ? await prisma.volunteer.findUnique({
-          where: { id: meta.updatedById },
-          select: { displayName: true },
-        })
-      : null;
-
-    res.status(200).json({
-      settings: getSettings(),
-      overriddenKeys: meta.overriddenKeys,
-      updatedAt: meta.updatedAt?.toISOString() ?? null,
-      updatedById: meta.updatedById,
-      updatedByName: updatedBy?.displayName ?? null,
-    });
-  },
-);
+adminRouter.get('/settings', defaultRateLimit, requireCapability('own.read'), getSettingsHandler);
 
 adminRouter.patch(
   '/settings',
   adminRateLimit,
   requireCapability('config.manage'),
   validate({ body: UpdateSettingsRequest }),
-  async (req: Request, res: Response) => {
-    const auth = getAuth(req);
-    const patch = validatedBody<UpdateSettingsRequest>(req);
-
-    const settings = await updateSettings(patch, auth.volunteerId, auditContextFrom(req));
-    const meta = settingsMeta();
-
-    res.status(200).json({
-      settings,
-      overriddenKeys: meta.overriddenKeys,
-      updatedAt: meta.updatedAt?.toISOString() ?? null,
-      updatedById: meta.updatedById,
-      updatedByName: auth.displayName,
-    });
-  },
+  updateSettingsHandler,
 );
