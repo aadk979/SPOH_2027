@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import type { CreateUploadRequest } from '@spoh/shared';
+import { actorContextFrom } from '../../../platform/http/auditContext.js';
 import { validatedBody, validatedQuery } from '../../../platform/http/validate.js';
 import { createUpload } from '../application/createUpload.js';
 import { readUrl } from '../application/readUrl.js';
@@ -11,7 +12,7 @@ export function mediaConfigHandler(_req: Request, res: Response): void {
 
 export async function createUploadHandler(req: Request, res: Response): Promise<void> {
   const body = validatedBody<CreateUploadRequest>(req);
-  res.status(201).json(await createUpload(body));
+  res.status(201).json(await createUpload(body, actorContextFrom(req)));
 }
 
 export async function readUrlHandler(req: Request, res: Response): Promise<void> {
