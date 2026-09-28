@@ -1,42 +1,7 @@
 'use client';
 
-import { AppShell } from '@/shared/shell/AppShell';
-import { NavTile } from '@/shared/ui/NavTile';
-import { WorkspaceIntro } from '@/shared/ui/WorkspaceIntro';
-import { Callout, CardGrid, Section, Stack } from '@/shared/ui';
-import { useRequireSession } from '@/features/session';
-import { operationLinks } from '@/shared/lib/navigation';
+import OperationsScreen from '@/features/operations/screens/OperationsScreen';
 
 export default function OperationsPage() {
-  const session = useRequireSession();
-  if (!session) return null;
-  const links = operationLinks.filter((item) => session.capabilities.includes(item.capability));
-  return (
-    <AppShell title="Operations" width="wide">
-      <Stack>
-        <WorkspaceIntro eyebrow="Event workspace" title="Keep the day running smoothly.">
-          Monitor activity, coordinate your team and manage event operations.
-        </WorkspaceIntro>
-        {links.length === 0 ? (
-          <Callout>
-            Operations tools are available to assigned event leaders. Your shift and event guide are
-            in the main navigation.
-          </Callout>
-        ) : (
-          ['Monitor', 'Manage', 'Recover & report'].map((group) => {
-            const items = links.filter((item) => item.group === group);
-            return items.length > 0 ? (
-              <Section key={group} title={group}>
-                <CardGrid columns={2}>
-                  {items.map((item) => (
-                    <NavTile key={item.href} {...item} />
-                  ))}
-                </CardGrid>
-              </Section>
-            ) : null;
-          })
-        )}
-      </Stack>
-    </AppShell>
-  );
+  return <OperationsScreen />;
 }

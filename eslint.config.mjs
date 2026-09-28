@@ -215,7 +215,7 @@ export default tseslint.config(
   {
     // Routes only compose feature screens.
     files: ['client/src/app/**/page.tsx'],
-    rules: { 'max-lines': ['warn', { max: 60, skipBlankLines: true, skipComments: true }] },
+    rules: { 'max-lines': ['error', { max: 60, skipBlankLines: true, skipComments: true }] },
   },
   {
     // Exempt by the standard: tests and static data files.
