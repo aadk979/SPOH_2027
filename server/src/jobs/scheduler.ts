@@ -2,7 +2,7 @@ import { logger } from '../platform/logger/index.js';
 import { loadSettings } from '../platform/settings/index.js';
 import { pruneIdempotencyRecords } from '../platform/idempotency/index.js';
 import { lostPersonJobs } from '../modules/lostPerson/index.js';
-import { pruneRefreshSessions } from '../modules/auth/service.js';
+import { pruneRefreshSessions } from '../modules/auth/index.js';
 
 /**
  * In-process scheduled jobs.

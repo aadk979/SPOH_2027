@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { prisma } from '../../src/platform/db/client.js';
 import { pruneIdempotencyRecords } from '../../src/platform/idempotency/index.js';
-import { pruneRefreshSessions } from '../../src/modules/auth/service.js';
+import { pruneRefreshSessions } from '../../src/modules/auth/index.js';
 import { resetDatabase } from '../helpers/db.js';
 import { createVolunteer } from '../helpers/fixtures.js';
 import { FROZEN_NOW } from '../setup.js';

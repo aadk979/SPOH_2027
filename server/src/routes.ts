@@ -3,7 +3,7 @@ import { attendanceRouter } from './modules/attendance/index.js';
 import { env } from './config/env.js';
 import { announcementRouter } from './modules/announcement/router.js';
 import { adminRouter } from './modules/admin/index.js';
-import { authRouter } from './modules/auth/router.js';
+import { authRouter } from './modules/auth/index.js';
 import { mediaRouter } from './modules/media/router.js';
 import { notificationRouter } from './modules/notification/router.js';
 import { auditRouter } from './modules/audit/router.js';

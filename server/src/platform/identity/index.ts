@@ -10,12 +10,18 @@ import { logger } from '../logger/index.js';
 import { prisma } from '../db/client.js';
 import { requestIdOf } from '../http/requestId.js';
 import type { RequestAuth } from '../../types/express.js';
-import { verifyAccessToken } from '../../modules/auth/tokens.js';
+import { verifyAccessToken } from './sessionTokens.js';
 import { createCognitoAuthProvider } from './cognitoProvider.js';
 import { createLocalAuthProvider } from './localProvider.js';
 import type { AuthProvider } from './types.js';
 
 export type { AuthProvider, VerifiedToken } from './types.js';
+export {
+  generateRefreshToken,
+  hashRefreshToken,
+  issueAccessToken,
+  newFamilyId,
+} from './sessionTokens.js';
 
 /**
  * The active identity provider, constructed once at boot from validated
