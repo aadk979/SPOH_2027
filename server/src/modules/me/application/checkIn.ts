@@ -1,12 +1,12 @@
-import type { MyAssignment } from '@spoh/shared';
+import { ERROR_CODES, type MyAssignment } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
-import { ForbiddenError, NotFoundError } from '../../../platform/errors/index.js';
+import { ConflictError, NotFoundError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { toMyAssignment } from '../data/mappers.js';
 import { findAssignmentById, hasAttendance, markCheckedIn } from '../data/repo.js';
-import { assertNotCheckedIn, isRunningNow } from '../domain/shiftRules.js';
+import { assertNotCheckedIn, assertPresentToday, assertRunningNow } from '../domain/shiftRules.js';
 import { loadOwnShift } from './ownShift.js';
 
 /**
@@ -25,13 +25,13 @@ export async function checkIn(
 
   await prisma.$transaction(async (tx) => {
     const present = await hasAttendance(tx, { volunteerId, eventDayId: assignment.eventDayId });
-    if (!present || !isRunningNow(assignment, now)) {
-      throw new ForbiddenError(
-        'Submit verified attendance for today before checking into a current shift.',
-      );
-    }
+    assertPresentToday(present);
+    assertRunningNow(assignment, now);
     if (!(await markCheckedIn(tx, { id: assignmentId, volunteerId }, now)))
-      throw new ForbiddenError('This shift has changed. Refresh your shift list.');
+      throw new ConflictError(
+        ERROR_CODES.CONFLICT,
+        'This shift has changed. Refresh your shift list.',
+      );
 
     await writeAudit(tx, {
       ...audit,

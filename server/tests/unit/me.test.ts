@@ -4,6 +4,8 @@ import {
   assertNotCheckedIn,
   assertNotCheckedOut,
   assertOwnShift,
+  assertPresentToday,
+  assertRunningNow,
   isRunningNow,
 } from '../../src/modules/me/domain/shiftRules.js';
 
@@ -40,5 +42,17 @@ describe('check-in rules', () => {
       block: 'MORNING' as const,
     };
     expect(isRunningNow(shift, new Date('2027-01-07T02:00:00.000Z'))).toBe(false);
+  });
+
+  it('reports check-in preconditions as conflicts, not permission denials (F03-026)', () => {
+    const shift = {
+      eventDay: { date: new Date('2027-01-08T00:00:00.000Z') },
+      block: 'MORNING' as const,
+    };
+    expect(codeOf(() => assertPresentToday(false))).toBe('ATTENDANCE_REQUIRED');
+    expect(codeOf(() => assertPresentToday(true))).toBeUndefined();
+    expect(codeOf(() => assertRunningNow(shift, new Date('2027-01-07T02:00:00.000Z')))).toBe(
+      'NOT_ON_SHIFT',
+    );
   });
 });

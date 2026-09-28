@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   assertChallengeUsable,
+  assertEventToday,
   assertIssuerPresent,
   assertMayVerify,
   assertVerifiedByRoot,
@@ -58,27 +59,36 @@ describe('attendance rules', () => {
     const today = { dayId: 'd', now };
     const challenge = { expiresAt: new Date(now.getTime() + 1), eventDayId: 'd', issuerId: 'e' };
     expect(codeOf(() => assertChallengeUsable(challenge, null, today))).toBeUndefined();
-    expect(codeOf(() => assertChallengeUsable(null, null, today))).toBe('FORBIDDEN');
+    expect(codeOf(() => assertChallengeUsable(null, null, today))).toBe('ATTENDANCE_CODE_INVALID');
     expect(codeOf(() => assertChallengeUsable({ ...challenge, expiresAt: now }, null, today))).toBe(
-      'FORBIDDEN',
+      'ATTENDANCE_CODE_INVALID',
     );
     const otherIssuer = { issuerId: 'x', eventDayId: 'd' };
-    expect(codeOf(() => assertChallengeUsable(challenge, otherIssuer, today))).toBe('FORBIDDEN');
+    expect(codeOf(() => assertChallengeUsable(challenge, otherIssuer, today))).toBe(
+      'ATTENDANCE_CODE_INVALID',
+    );
   });
 
-  it('refuses self-verification, an exco verified by a non-root, and QR off campus', () => {
+  it('refuses self-verification, an exco verified by a non-root, and QR off campus, as rules (F03-026)', () => {
     const base = { rootEmail: ROOT_EMAIL, method: 'PIN' as const, bothOnCampus: false };
     expect(codeOf(() => assertMayVerify({ ...base, person: exco, issuer: exco }))).toBe(
-      'FORBIDDEN',
+      'VERIFICATION_NOT_ALLOWED',
     );
     expect(
       codeOf(() => assertMayVerify({ ...base, person: exco, issuer: { ...exco, id: 'x' } })),
-    ).toBe('FORBIDDEN');
+    ).toBe('VERIFICATION_NOT_ALLOWED');
     expect(
       codeOf(() => assertMayVerify({ ...base, person: volunteer, issuer: exco })),
     ).toBeUndefined();
     expect(
       codeOf(() => assertMayVerify({ ...base, method: 'QR', person: volunteer, issuer: exco })),
-    ).toBe('FORBIDDEN');
+    ).toBe('QR_OFF_CAMPUS');
+  });
+});
+
+describe('attendance days (F03-026)', () => {
+  it('answers a day without an event as a conflict, not a permission denial', () => {
+    expect(codeOf(() => assertEventToday(null))).toBe('NO_EVENT_TODAY');
+    expect(codeOf(() => assertEventToday({ id: 'd' }))).toBeUndefined();
   });
 });

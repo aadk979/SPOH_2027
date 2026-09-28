@@ -126,7 +126,7 @@ describe('shifts and swaps (P03 repros)', () => {
   });
 
   // F03-026
-  it.skip('reports a check-in outside the running block as a conflict, not a permission denial', async () => {
+  it('reports a check-in outside the running block as a conflict, not a permission denial', async () => {
     const later = await assignToStation({
       volunteerId: owner.id,
       stationId,

@@ -1,8 +1,7 @@
 import { createHmac, randomBytes } from 'node:crypto';
 import { jwtVerify, SignJWT } from 'jose';
 import { env } from '../../../config/env.js';
-import { ForbiddenError } from '../../../platform/errors/index.js';
-import { ATTENDANCE_TTL_MS } from '../domain/attendanceRules.js';
+import { ATTENDANCE_TTL_MS, codeInvalid } from '../domain/attendanceRules.js';
 
 // Domain-separated key: an attendance QR can never authenticate an API session.
 const key = createHmac(
@@ -56,6 +55,6 @@ export async function verifyAttendanceToken(
       throw new Error();
     return { id: payload.jti, issuerId: payload.sub, eventDayId: payload.eventDayId };
   } catch {
-    throw new ForbiddenError('This attendance QR is invalid or expired. Scan a fresh code.');
+    throw codeInvalid('This attendance QR is invalid or expired. Scan a fresh code.');
   }
 }

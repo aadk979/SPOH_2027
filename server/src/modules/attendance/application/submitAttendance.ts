@@ -20,8 +20,10 @@ import {
 } from '../data/repo.js';
 import {
   assertChallengeUsable,
+  assertEventToday,
   assertMayVerify,
   attemptWindow,
+  codeInvalid,
   type Person,
 } from '../domain/attendanceRules.js';
 import { onCampus, rootEmail } from './config.js';
@@ -46,8 +48,8 @@ export async function submitAttendance(
     const now = clock.now();
     const person = await findVolunteerOrThrow(tx, volunteerId);
     const day = await findEventDayOn(tx, eventDayAnchor(singaporeDateString(now)));
-    if (!person.active || !day)
-      throw new ForbiddenError('Attendance is unavailable for this account or day.');
+    if (!person.active) throw new ForbiddenError('Attendance is unavailable for this account.');
+    assertEventToday(day);
     const existing = await findAttendance(tx, volunteerId, day.id);
     if (existing) {
       const already = { method: existing.method, verifierId: existing.verifiedById };
@@ -84,7 +86,12 @@ async function verify(
     claims ? { id: claims.id } : { pinHash: hashPin(proof.method === 'PIN' ? proof.pin : '') },
   );
   assertChallengeUsable(challenge, claims, { dayId, now });
-  const issuer = await assertIssuer(tx, challenge.issuerId, dayId);
+  const issuer = await assertIssuer(tx, challenge.issuerId, dayId).catch((error: unknown) => {
+    // The verifier was deactivated or demoted since issuing: to the person
+    // holding it, the code is no longer valid.
+    if (error instanceof ForbiddenError) throw codeInvalid(error.message);
+    throw error;
+  });
   assertMayVerify({
     person,
     issuer,

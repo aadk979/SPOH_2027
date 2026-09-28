@@ -2,7 +2,6 @@ import { randomInt, randomUUID } from 'node:crypto';
 import type { AttendanceChallenge } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
-import { ForbiddenError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import {
   eventDayAnchor,
@@ -11,7 +10,7 @@ import {
   type Clock,
 } from '../../../platform/time/index.js';
 import { findEventDayOn, lockPerson, replaceChallenge } from '../data/repo.js';
-import { ATTENDANCE_TTL_MS } from '../domain/attendanceRules.js';
+import { ATTENDANCE_TTL_MS, assertEventToday } from '../domain/attendanceRules.js';
 import { onCampus } from './config.js';
 import { assertIssuer } from './issuer.js';
 import { hashPin, signAttendanceToken } from './tokens.js';
@@ -25,7 +24,7 @@ export async function issueChallenge(
     await lockPerson(tx, volunteerId);
     const now = clock.now();
     const day = await findEventDayOn(tx, eventDayAnchor(singaporeDateString(now)));
-    if (!day) throw new ForbiddenError('Today is not a configured event day.');
+    assertEventToday(day);
     await assertIssuer(tx, volunteerId, day.id);
     const id = randomUUID();
     const pin = randomInt(0, 10_000_000_000).toString().padStart(10, '0');

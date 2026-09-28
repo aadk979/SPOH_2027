@@ -1,5 +1,5 @@
-import type { AttendanceRecord } from '@spoh/shared';
-import { ForbiddenError } from '../../../platform/errors/index.js';
+import { ERROR_CODES, type AttendanceRecord } from '@spoh/shared';
+import { ConflictError, ForbiddenError, RuleError } from '../../../platform/errors/index.js';
 
 /** How long a QR or PIN stays valid, and the window failed attempts count in. */
 export const ATTENDANCE_TTL_MS = 5 * 60_000;
@@ -50,6 +50,21 @@ export function assertVerifiedByRoot(root: Person | null, rootEmail: string | un
     throw new ForbiddenError('Excos must first verify attendance through the current root admin.');
 }
 
+/**
+ * The code cannot be used: wrong, expired, rotated, another day's, or issued by
+ * someone who can no longer verify. A rule on valid input, not a permission
+ * (F03-026).
+ */
+export function codeInvalid(message: string): RuleError {
+  return new RuleError(ERROR_CODES.ATTENDANCE_CODE_INVALID, message);
+}
+
+/** Attendance happens on a configured event day; any other day is a 409 (F03-026). */
+export function assertEventToday<D>(day: D | null): asserts day is D {
+  if (!day)
+    throw new ConflictError(ERROR_CODES.NO_EVENT_TODAY, 'Today is not a configured event day.');
+}
+
 /** Failed attempts in the current window, and whether the person must wait. */
 export function attemptWindow(
   attempts: { windowStart: Date; attempts: number } | null,
@@ -74,7 +89,7 @@ export function assertChallengeUsable<
     challenge.eventDayId !== dayId ||
     (claims && (claims.issuerId !== challenge.issuerId || claims.eventDayId !== dayId))
   ) {
-    throw new ForbiddenError('This attendance code is invalid or expired. Ask for a fresh code.');
+    throw codeInvalid('This attendance code is invalid or expired. Ask for a fresh code.');
   }
 }
 
@@ -90,11 +105,19 @@ export function assertMayVerify(input: {
   bothOnCampus: boolean;
 }): void {
   const { person, issuer, rootEmail, method, bothOnCampus } = input;
-  if (issuer.id === person.id) throw new ForbiddenError('You cannot verify your own attendance.');
+  if (issuer.id === person.id)
+    throw new RuleError(
+      ERROR_CODES.VERIFICATION_NOT_ALLOWED,
+      'You cannot verify your own attendance.',
+    );
   if (person.role !== 'VOLUNTEER' && !isRoot(issuer, rootEmail))
-    throw new ForbiddenError('Excos must scan the root admin’s QR or enter their PIN.');
+    throw new RuleError(
+      ERROR_CODES.VERIFICATION_NOT_ALLOWED,
+      'Excos must scan the root admin’s QR or enter their PIN.',
+    );
   if (method === 'QR' && !bothOnCampus) {
-    throw new ForbiddenError(
+    throw new RuleError(
+      ERROR_CODES.QR_OFF_CAMPUS,
       'Both phones must use the configured SP network for QR attendance. Ask your verifier for their secondary PIN instead.',
     );
   }

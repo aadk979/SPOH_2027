@@ -52,6 +52,29 @@ export function alreadyCheckedOut(): ConflictError {
   );
 }
 
+/** Check-in follows verified attendance: a state to reach, not a permission (F03-026). */
+export function assertPresentToday(present: boolean): void {
+  if (!present) {
+    throw new ConflictError(
+      ERROR_CODES.ATTENDANCE_REQUIRED,
+      'Submit verified attendance for today before checking into a current shift.',
+    );
+  }
+}
+
+/** Check-in is open only while the shift runs: "not yet" is a 409, not a 403 (F03-026). */
+export function assertRunningNow(
+  assignment: { eventDay: { date: Date }; block: ShiftBlock },
+  now: Date,
+): void {
+  if (!isRunningNow(assignment, now)) {
+    throw new ConflictError(
+      ERROR_CODES.NOT_ON_SHIFT,
+      'This shift is not running now. Check in during its hours.',
+    );
+  }
+}
+
 /** A shift is running when it is on today's event day, in a block open now. */
 export function isRunningNow(
   assignment: { eventDay: { date: Date }; block: ShiftBlock },

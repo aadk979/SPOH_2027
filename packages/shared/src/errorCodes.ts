@@ -34,6 +34,16 @@ export const ERROR_CODES = {
   ALREADY_CHECKED_IN: 'ALREADY_CHECKED_IN',
   NOT_CHECKED_IN: 'NOT_CHECKED_IN',
   ALREADY_CHECKED_OUT: 'ALREADY_CHECKED_OUT',
+  /// Check-in comes after verified attendance for the day.
+  ATTENDANCE_REQUIRED: 'ATTENDANCE_REQUIRED',
+  /// Today is not one of the event's configured days.
+  NO_EVENT_TODAY: 'NO_EVENT_TODAY',
+  /// The QR or PIN is wrong, expired, rotated, from another day, or its verifier can no longer verify.
+  ATTENDANCE_CODE_INVALID: 'ATTENDANCE_CODE_INVALID',
+  /// A valid code this person may not use: their own, or an exco's code for another exco.
+  VERIFICATION_NOT_ALLOWED: 'VERIFICATION_NOT_ALLOWED',
+  /// QR attendance needs both phones on the campus network; the PIN does not.
+  QR_OFF_CAMPUS: 'QR_OFF_CAMPUS',
   STATION_INACTIVE: 'STATION_INACTIVE',
   STATION_DOES_NOT_COUNT_ENTRY: 'STATION_DOES_NOT_COUNT_ENTRY',
   CARD_NOT_FOUND: 'CARD_NOT_FOUND',

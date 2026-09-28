@@ -9,7 +9,7 @@ import {
   type Clock,
 } from '../../../platform/time/index.js';
 import { findEventDayOn, findVolunteerOrThrow, lockPerson } from '../data/repo.js';
-import { isRoot } from '../domain/attendanceRules.js';
+import { assertEventToday, isRoot } from '../domain/attendanceRules.js';
 import { rootEmail } from './config.js';
 import { markPresent } from './markPresent.js';
 
@@ -25,7 +25,7 @@ export async function startAttendance(
     const day = await findEventDayOn(tx, eventDayAnchor(singaporeDateString(now)));
     if (!isRoot(person, rootEmail()))
       throw new ForbiddenError('Only the configured root admin can open attendance.');
-    if (!day) throw new ForbiddenError('Today is not a configured event day.');
+    assertEventToday(day);
     return markPresent(
       tx,
       { personId: person.id, dayId: day.id, method: 'ROOT', verifierId: null, now },

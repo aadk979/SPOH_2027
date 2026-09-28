@@ -109,13 +109,13 @@ describe('verified attendance', () => {
     const other = await createVolunteer({ email: 'another-exco@attendance.test', role: 'LEAD' });
     expect(
       (await post(other, '/attendance/submit', { method: 'QR', token: code.token })).status,
-    ).toBe(403);
+    ).toBe(422);
     expect((await post(other, '/attendance/submit', { method: 'PIN', pin: code.pin })).status).toBe(
-      403,
+      422,
     );
     expect(
       (await post(volunteer, '/attendance/submit', { method: 'QR', token: root.token })).status,
-    ).toBe(403);
+    ).toBe(422);
   });
   it('blocks QR on mobile data but accepts the secondary PIN without scanning', async () => {
     const code = await rootCode();
@@ -127,7 +127,7 @@ describe('verified attendance', () => {
           '198.51.100.20',
         )
       ).status,
-    ).toBe(403);
+    ).toBe(422);
     const result = await post(volunteer, '/attendance/submit', {
       method: 'PIN',
       pin: code.pin,
@@ -142,7 +142,7 @@ describe('verified attendance', () => {
     expect(code.body.qrEnabled).toBe(false);
     expect(
       (await post(exco, '/attendance/submit', { method: 'QR', token: code.body.token })).status,
-    ).toBe(403);
+    ).toBe(422);
     expect(
       (await post(exco, '/attendance/submit', { method: 'PIN', pin: code.body.pin })).status,
     ).toBe(200);
@@ -152,43 +152,43 @@ describe('verified attendance', () => {
     const current = await post(root, '/attendance/challenge');
     expect(
       (await post(exco, '/attendance/submit', { method: 'QR', token: old.token })).status,
-    ).toBe(403);
+    ).toBe(422);
     expect((await post(exco, '/attendance/submit', { method: 'PIN', pin: old.pin })).status).toBe(
-      403,
+      422,
     );
     vi.setSystemTime(new Date(FROZEN_NOW.getTime() + 300_000));
     expect(
       (await post(volunteer, '/attendance/submit', { method: 'QR', token: current.body.token }))
         .status,
-    ).toBe(403);
+    ).toBe(422);
     expect(
       (await post(volunteer, '/attendance/submit', { method: 'PIN', pin: current.body.pin }))
         .status,
-    ).toBe(403);
+    ).toBe(422);
   });
   it('rejects deactivated and demoted issuers even when the signature remains valid', async () => {
     const code = await excoCode();
     await prisma.volunteer.update({ where: { id: exco.id }, data: { active: false } });
     expect(
       (await post(volunteer, '/attendance/submit', { method: 'QR', token: code.token })).status,
-    ).toBe(403);
+    ).toBe(422);
     await prisma.volunteer.update({
       where: { id: exco.id },
       data: { active: true, role: 'VOLUNTEER' },
     });
     expect(
       (await post(volunteer, '/attendance/submit', { method: 'PIN', pin: code.pin })).status,
-    ).toBe(403);
+    ).toBe(422);
   });
   it('rejects codes on another event day and prevents legacy check-in bypass', async () => {
-    expect((await post(volunteer, '/me/check-in', { assignmentId })).status).toBe(403);
+    expect((await post(volunteer, '/me/check-in', { assignmentId })).status).toBe(409);
     const code = await rootCode();
     vi.setSystemTime(new Date('2027-01-08T03:30:00Z'));
     await createEventDayToday();
     volunteer = await createVolunteer({ email: volunteer.email, role: 'VOLUNTEER' });
     expect(
       (await post(volunteer, '/attendance/submit', { method: 'PIN', pin: code.pin })).status,
-    ).toBe(403);
+    ).toBe(422);
   });
   it('deduplicates simultaneous submissions and keeps one attendance audit', async () => {
     const code = await rootCode();
@@ -216,7 +216,7 @@ describe('verified attendance', () => {
             pin: '9999999999' === code.pin ? '0000000000' : '9999999999',
           })
         ).status,
-      ).toBe(403);
+      ).toBe(422);
     expect(
       (await post(volunteer, '/attendance/submit', { method: 'PIN', pin: code.pin })).status,
     ).toBe(429);

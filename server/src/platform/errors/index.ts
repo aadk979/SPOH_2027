@@ -86,6 +86,17 @@ export class ConflictError extends AppError {
   }
 }
 
+/**
+ * Valid input that a business rule refuses. 403 is for authorization only;
+ * a rule is a 422 with its own code, so the client can say what to do next
+ * instead of "not allowed for your role" (F03-026).
+ */
+export class RuleError extends AppError {
+  constructor(code: ErrorCode, message: string, details?: unknown) {
+    super(422, code, message, { details });
+  }
+}
+
 export class IdempotencyKeyReuseError extends AppError {
   constructor() {
     super(
