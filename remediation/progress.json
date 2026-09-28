@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-28T13:30:22.070Z",
+  "updatedAt": "2026-09-28T13:51:38.778Z",
   "current": {
     "phase": "P07",
-    "step": null
+    "step": "P07.3"
   },
   "gates": [
     {
@@ -1354,26 +1354,36 @@
         {
           "id": "P07.1",
           "title": "Safety net",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-28T13:31:01.521Z",
+          "completedAt": "2026-09-28T13:51:38.478Z",
+          "commits": ["91b91c4"],
+          "notes": [
+            {
+              "at": "2026-09-28T13:51:38.479Z",
+              "text": "42 client tests pass (17 new screen tests, four deferred); all 58 route screenshots repeat unchanged. Dedicated frozen-clock database and documented harness."
+            }
+          ]
         },
         {
           "id": "P07.2",
           "title": "Shared layer",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-28T13:51:38.598Z",
+          "completedAt": "2026-09-28T13:51:38.694Z",
+          "commits": ["91b91c4"],
+          "notes": [
+            {
+              "at": "2026-09-28T13:51:38.695Z",
+              "text": "Shared UI, utilities, shell and wake-lock hook moved; domain components in features. Typecheck, 42 tests and 58 visual checks pass; no lint errors; 27 existing client boundary warnings."
+            }
+          ]
         },
         {
           "id": "P07.3",
           "title": "Feature API and query layer",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-28T13:51:38.777Z",
           "completedAt": null,
           "commits": [],
           "notes": []
@@ -1451,8 +1461,8 @@
           "notes": []
         }
       ],
-      "status": "not_started",
-      "startedAt": null,
+      "status": "in_progress",
+      "startedAt": "2026-09-28T13:31:01.453Z",
       "completedAt": null
     },
     {
@@ -2408,6 +2418,14 @@
     {
       "at": "2026-09-25T17:05:37.617Z",
       "text": "P05.11: design summary published for owner review: https://claude.ai/artifact/Ahdqgo11tYz3W9LQh6TpeF (private to the owner). Awaiting G1 sign-off."
+    },
+    {
+      "at": "2026-09-28T13:48:52.686Z",
+      "text": "P07.1 implementation verified: 17 component tests added (42 pass, 4 skipped), 58 visual baselines pass unchanged on repeat. Commit/push blocked by automatic approval review pending explicit main authorization. P07.2 local shared-layer move under verification; phase steps not marked done until committed."
+    },
+    {
+      "at": "2026-09-28T13:50:07.750Z",
+      "text": "P07.2 local implementation verified: 28 files moved to shared/feature homes, generic useWakeLock extracted, public session export added for moved banner. Typecheck and 42 client tests pass (4 deferred); all 58 visual snapshots unchanged after moves; lint 0 errors/70 existing warnings; architecture 0 errors/27 existing warnings. P07.1/P07.2 await explicit authorization to commit/push main; keep steps unfinished until publication."
     }
   ]
 }
