@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   assertCheckedIn,
   assertNotCheckedIn,
+  assertNotCheckedOut,
   assertOwnShift,
   isRunningNow,
 } from '../../src/modules/me/domain/shiftRules.js';
@@ -23,12 +24,14 @@ describe('check-in rules', () => {
     expect(codeOf(() => assertOwnShift({ volunteerId: 'a' }, 'a'))).toBeUndefined();
   });
 
-  it('checks in once, and out only after checking in', () => {
+  it('checks in once, and out once, only after checking in (F03-015)', () => {
     const at = new Date('2027-01-07T01:00:00.000Z');
     expect(codeOf(() => assertNotCheckedIn({ checkedInAt: at }))).toBe('ALREADY_CHECKED_IN');
     expect(codeOf(() => assertNotCheckedIn({ checkedInAt: null }))).toBeUndefined();
     expect(codeOf(() => assertCheckedIn({ checkedInAt: null }))).toBe('NOT_CHECKED_IN');
     expect(codeOf(() => assertCheckedIn({ checkedInAt: at }))).toBeUndefined();
+    expect(codeOf(() => assertNotCheckedOut({ checkedOutAt: at }))).toBe('ALREADY_CHECKED_OUT');
+    expect(codeOf(() => assertNotCheckedOut({ checkedOutAt: null }))).toBeUndefined();
   });
 
   it('does not count a shift on another day as running', () => {

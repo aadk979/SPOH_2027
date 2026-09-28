@@ -103,7 +103,7 @@ describe('shifts and swaps (P03 repros)', () => {
   });
 
   // F03-015
-  it.skip('does not move the check-out time when check-out is tapped twice', async () => {
+  it('does not move the check-out time when check-out is tapped twice', async () => {
     const shift = await assignToStation({ volunteerId: owner.id, stationId, eventDayId: dayId });
     await presentToday(owner);
     const call = (path: string) =>

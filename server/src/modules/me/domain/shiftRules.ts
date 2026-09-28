@@ -1,5 +1,5 @@
 import { ERROR_CODES, type ShiftBlock } from '@spoh/shared';
-import { AppError, ForbiddenError } from '../../../platform/errors/index.js';
+import { AppError, ConflictError, ForbiddenError } from '../../../platform/errors/index.js';
 import {
   activeShiftBlocks,
   eventDayAnchor,
@@ -35,6 +35,21 @@ export function assertCheckedIn(assignment: { checkedInAt: Date | null }): void 
       'You cannot check out of a shift you never checked into',
     );
   }
+}
+
+/**
+ * One check-out per shift: a second tap later would stretch the hours the
+ * report counts (F03-015).
+ */
+export function assertNotCheckedOut(assignment: { checkedOutAt: Date | null }): void {
+  if (assignment.checkedOutAt) throw alreadyCheckedOut();
+}
+
+export function alreadyCheckedOut(): ConflictError {
+  return new ConflictError(
+    ERROR_CODES.ALREADY_CHECKED_OUT,
+    'You have already checked out of this shift',
+  );
 }
 
 /** A shift is running when it is on today's event day, in a block open now. */

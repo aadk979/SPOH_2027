@@ -66,16 +66,17 @@ export async function markCheckedIn(
   return changed.count > 0;
 }
 
+/** Sets the check-out only if it is still empty; false when it was not. */
 export async function markCheckedOut(
   tx: PrismaTransactionClient,
   id: string,
   at: Date,
-): Promise<void> {
-  await tx.shiftAssignment.update({
-    where: { id },
+): Promise<boolean> {
+  const changed = await tx.shiftAssignment.updateMany({
+    where: { id, checkedInAt: { not: null }, checkedOutAt: null },
     data: { checkedOutAt: at },
-    select: { id: true },
   });
+  return changed.count > 0;
 }
 
 /**

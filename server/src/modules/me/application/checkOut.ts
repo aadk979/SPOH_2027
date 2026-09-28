@@ -6,7 +6,7 @@ import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { toMyAssignment } from '../data/mappers.js';
 import { findAssignmentById, markCheckedOut } from '../data/repo.js';
-import { assertCheckedIn } from '../domain/shiftRules.js';
+import { alreadyCheckedOut, assertCheckedIn, assertNotCheckedOut } from '../domain/shiftRules.js';
 import { loadOwnShift } from './ownShift.js';
 
 export async function checkOut(
@@ -16,11 +16,13 @@ export async function checkOut(
 ): Promise<MyAssignment> {
   const assignment = await loadOwnShift(volunteerId, assignmentId);
   assertCheckedIn(assignment);
+  assertNotCheckedOut(assignment);
 
   const now = clock.now();
 
   await prisma.$transaction(async (tx) => {
-    await markCheckedOut(tx, assignmentId, now);
+    // Conditional, so two taps racing each other cannot both write (F03-015).
+    if (!(await markCheckedOut(tx, assignmentId, now))) throw alreadyCheckedOut();
 
     await writeAudit(tx, {
       ...audit,
