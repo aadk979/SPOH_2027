@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import { ERROR_CODES, type CreateSessionRequest, type SessionResponse } from '@spoh/shared';
 import { AppError, NotFoundError } from '../../../platform/errors/index.js';
 import { auditContextFrom } from '../../../platform/http/auditContext.js';
-import { getAuth } from '../../../platform/identity/index.js';
+import { getAuth } from '../../../platform/http/requireAuth.js';
 import { validatedBody, validatedParams } from '../../../platform/http/validate.js';
 import { beginLogin } from '../application/beginLogin.js';
 import { completeCallback } from '../application/completeCallback.js';

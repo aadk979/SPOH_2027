@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import type { ProvisionVolunteerRequest, RosterImportRequest } from '@spoh/shared';
 import { auditContextFrom } from '../../../platform/http/auditContext.js';
 import { validatedBody } from '../../../platform/http/validate.js';
-import { getAuth } from '../../../platform/identity/index.js';
+import { getAuth } from '../../../platform/http/requireAuth.js';
 import { getMe } from '../../me/index.js';
 import type { RosterActor } from '../application/context.js';
 import { importRoster } from '../application/importRoster.js';

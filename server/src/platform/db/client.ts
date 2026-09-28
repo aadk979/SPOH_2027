@@ -1,5 +1,5 @@
 import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient } from '../../generated/prisma/client.js';
+import { PrismaClient, type Prisma } from '../../generated/prisma/client.js';
 import { env, isTest } from '../../config/env.js';
 import { logger } from '../logger/index.js';
 
@@ -55,3 +55,6 @@ export type PrismaTransactionClient = Omit<
   PrismaClient,
   '$connect' | '$disconnect' | '$on' | '$transaction' | '$extends'
 >;
+
+/** A JSON value Prisma will store in a Json column, for callers outside data/. */
+export type JsonValue = Prisma.InputJsonValue;

@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import type { RaiseLostPersonRequest, ResolveLostPersonRequest } from '@spoh/shared';
 import { actorContextFrom, auditContextFrom } from '../../../platform/http/auditContext.js';
 import { validatedBody, validatedParams } from '../../../platform/http/validate.js';
-import { getAuth } from '../../../platform/identity/index.js';
+import { getAuth } from '../../../platform/http/requireAuth.js';
 import { acknowledge } from '../application/acknowledge.js';
 import { getAlert } from '../application/alertRecord.js';
 import { getActiveAlerts } from '../application/getActiveAlerts.js';

@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import type { UpdateSettingsRequest } from '@spoh/shared';
 import { actorContextFrom } from '../../../platform/http/auditContext.js';
 import { validatedBody } from '../../../platform/http/validate.js';
-import { getAuth } from '../../../platform/identity/index.js';
+import { getAuth } from '../../../platform/http/requireAuth.js';
 import { getSettingsView, updateSettingsView } from '../application/settingsView.js';
 
 export async function getSettingsHandler(_req: Request, res: Response): Promise<void> {

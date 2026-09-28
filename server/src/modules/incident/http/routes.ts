@@ -7,10 +7,10 @@ import {
   ListIncidentsQuery,
   UpdateIncidentStatusRequest,
 } from '@spoh/shared';
-import { idempotent } from '../../../platform/idempotency/index.js';
+import { idempotent } from '../../../platform/http/idempotency.js';
 import { defaultRateLimit } from '../../../platform/http/rateLimit.js';
-import { requireCapability } from '../../../platform/access/index.js';
-import { requireAuth } from '../../../platform/identity/index.js';
+import { requireCapability } from '../../../platform/http/access.js';
+import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { validate } from '../../../platform/http/validate.js';
 import {
   appendFollowUpHandler,

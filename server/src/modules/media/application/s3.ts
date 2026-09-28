@@ -43,14 +43,12 @@ export function mediaEnabled(): boolean {
 
 function requireClient(): S3Client {
   if (!client || !env.S3_MEDIA_BUCKET) {
-    throw new AppError(
-      503,
-      ERROR_CODES.MEDIA_NOT_CONFIGURED,
-      'Photo upload is not available on this deployment. Record the item without one.',
+    throw new AppError(503, ERROR_CODES.MEDIA_NOT_CONFIGURED, {
+      message: 'Photo upload is not available on this deployment. Record the item without one.',
       // Not a server fault — a deliberate deployment choice — so the message is
       // safe to show and tells the volunteer what to do instead.
-      { expose: true },
-    );
+      expose: true,
+    });
   }
   return client;
 }

@@ -7,7 +7,7 @@ import type {
 } from '@spoh/shared';
 import { actorContextFrom } from '../../../platform/http/auditContext.js';
 import { validatedBody, validatedParams, validatedQuery } from '../../../platform/http/validate.js';
-import { getAuth } from '../../../platform/identity/index.js';
+import { getAuth } from '../../../platform/http/requireAuth.js';
 import { getBriefingSlots, markSlotComplete } from '../application/briefingSlots.js';
 import { decideSwap } from '../application/decideSwap.js';
 import { listMySwaps, listPendingSwaps } from '../application/listSwaps.js';

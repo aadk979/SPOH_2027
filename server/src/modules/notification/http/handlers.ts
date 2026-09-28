@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import type { PushSubscriptionRequest } from '@spoh/shared';
-import { getAuth } from '../../../platform/identity/index.js';
+import { getAuth } from '../../../platform/http/requireAuth.js';
 import { validatedBody } from '../../../platform/http/validate.js';
 import { subscribeDevice, unsubscribeDevice } from '../application/subscriptions.js';
 import { pushEnabled, pushPublicKey } from '../application/webPush.js';

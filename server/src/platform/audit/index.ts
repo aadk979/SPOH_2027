@@ -1,5 +1,4 @@
-import type { Prisma } from '../../generated/prisma/client.js';
-import type { PrismaTransactionClient } from '../db/client.js';
+import type { JsonValue, PrismaTransactionClient } from '../db/client.js';
 
 /**
  * Audit logging (BUILD_PLAN §8.7).
@@ -87,9 +86,9 @@ export interface AuditEntry extends AuditContext {
   entityType: string;
   entityId: string | null;
   /** State before the change. Omit for creates. */
-  before?: Prisma.InputJsonValue;
+  before?: JsonValue;
   /** State after the change. Omit for deletes. */
-  after?: Prisma.InputJsonValue;
+  after?: JsonValue;
 }
 
 /**

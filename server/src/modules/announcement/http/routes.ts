@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { CreateAnnouncementRequest, Id, ListAnnouncementsQuery } from '@spoh/shared';
-import { requireAuth } from '../../../platform/identity/index.js';
+import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { defaultRateLimit } from '../../../platform/http/rateLimit.js';
-import { requireCapability } from '../../../platform/access/index.js';
+import { requireCapability } from '../../../platform/http/access.js';
 import { validate } from '../../../platform/http/validate.js';
 import { acknowledgeHandler, listInboxHandler, sendAnnouncementHandler } from './handlers.js';
 

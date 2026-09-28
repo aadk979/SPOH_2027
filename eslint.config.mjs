@@ -14,17 +14,17 @@ import prettier from 'eslint-config-prettier';
  */
 
 /**
- * @param {{ functionLines: number }} limits
+ * @param {{ functionLines: number, level?: 'error' | 'warn' }} limits
  * @returns {import('eslint').Linter.RulesRecord}
  */
-function sizeGuards({ functionLines }) {
+function sizeGuards({ functionLines, level = 'error' }) {
   const lines = { skipBlankLines: true, skipComments: true };
   return {
-    'max-lines-per-function': ['warn', { max: functionLines, ...lines, IIFEs: true }],
-    'max-lines': ['warn', { max: 300, ...lines }],
-    complexity: ['warn', 10],
-    'max-depth': ['warn', 3],
-    'max-params': ['warn', 3],
+    'max-lines-per-function': [level, { max: functionLines, ...lines, IIFEs: true }],
+    'max-lines': [level, { max: 300, ...lines }],
+    complexity: [level, 10],
+    'max-depth': [level, 3],
+    'max-params': [level, 3],
   };
 }
 
@@ -140,16 +140,21 @@ export default tseslint.config(
   },
 
   // Size and complexity guards: the hard limits from
-  // remediation/standards/engineering-standards.md §2. Warnings for now, so lint
-  // reports the refactor debt without failing; P06/P07 flip them to errors.
+  // remediation/standards/engineering-standards.md §2. Errors for the server and
+  // the shared package since P06.10; warnings for the client, reporting its
+  // refactor debt without failing, until P07 flips them.
   {
-    files: ['server/src/**/*.ts', 'packages/shared/src/**/*.ts', 'client/src/**/*.ts'],
+    files: ['server/src/**/*.ts', 'packages/shared/src/**/*.ts'],
     rules: sizeGuards({ functionLines: 50 }),
+  },
+  {
+    files: ['client/src/**/*.ts'],
+    rules: sizeGuards({ functionLines: 50, level: 'warn' }),
   },
   {
     // React components get 80 lines; a .tsx file is where they live.
     files: ['client/src/**/*.tsx'],
-    rules: sizeGuards({ functionLines: 80 }),
+    rules: sizeGuards({ functionLines: 80, level: 'warn' }),
   },
   {
     // Routes only compose feature screens.

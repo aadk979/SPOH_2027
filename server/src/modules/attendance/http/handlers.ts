@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import type { AttendanceProof } from '@spoh/shared';
-import { getAuth } from '../../../platform/identity/index.js';
+import { getAuth } from '../../../platform/http/requireAuth.js';
 import { actorContextFrom } from '../../../platform/http/auditContext.js';
 import { validatedBody } from '../../../platform/http/validate.js';
 import { attendanceStatus } from '../application/attendanceStatus.js';

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { AttendanceProof } from '@spoh/shared';
-import { requireAuth } from '../../../platform/identity/index.js';
+import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { defaultRateLimit, sensitiveRateLimit } from '../../../platform/http/rateLimit.js';
 import { validate } from '../../../platform/http/validate.js';
 import {

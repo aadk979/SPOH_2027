@@ -7,10 +7,10 @@ import {
   Id,
   VoidFootfallTickRequest,
 } from '@spoh/shared';
-import { requireAuth } from '../../../platform/identity/index.js';
-import { idempotent } from '../../../platform/idempotency/index.js';
+import { requireAuth } from '../../../platform/http/requireAuth.js';
+import { idempotent } from '../../../platform/http/idempotency.js';
 import { captureRateLimit, defaultRateLimit } from '../../../platform/http/rateLimit.js';
-import { requireCapability, requireStationScope } from '../../../platform/access/index.js';
+import { requireCapability, requireStationScope } from '../../../platform/http/access.js';
 import { validate } from '../../../platform/http/validate.js';
 import {
   liveFootfallHandler,

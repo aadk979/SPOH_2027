@@ -9,7 +9,7 @@ import type {
 import { auditContextFrom } from '../../../platform/http/auditContext.js';
 import { captureContextFrom } from '../../../platform/http/captureActor.js';
 import { validatedBody, validatedParams, validatedQuery } from '../../../platform/http/validate.js';
-import { getAuth } from '../../../platform/identity/index.js';
+import { getAuth } from '../../../platform/http/requireAuth.js';
 import { adjustStock } from '../application/adjustStock.js';
 import { createGiftType } from '../application/createGiftType.js';
 import { updateGiftType } from '../application/updateGiftType.js';

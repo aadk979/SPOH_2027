@@ -106,10 +106,10 @@ jobs:
         run: npm run test --workspace client
 
   architecture:
-    # Report-only until the remediation refactor (P06/P07) brings the counts to
-    # zero and flips the guards to errors. Prints the distance to the target
-    # architecture on every PR; never fails the build.
-    name: Architecture report
+    # Blocking since P06.10: a server, shared-package or cycle violation of the
+    # boundary rules fails the build. The client rules are still warnings until
+    # P07, so they print without failing; the guard counts are a report.
+    name: Architecture
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -136,7 +136,6 @@ jobs:
           { echo '```'; cat arch-report.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Boundary violations
-        continue-on-error: true
         run: npm run arch:check
 
   security:

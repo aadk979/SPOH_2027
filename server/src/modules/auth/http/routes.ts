@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { CreateSessionRequest } from '@spoh/shared';
 import { z } from 'zod';
-import { requireAuth } from '../../../platform/identity/index.js';
+import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { defaultRateLimit, signInRateLimit } from '../../../platform/http/rateLimit.js';
 import { validate } from '../../../platform/http/validate.js';
 import {

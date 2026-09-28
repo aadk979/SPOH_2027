@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { Id, RaiseLostPersonRequest, ResolveLostPersonRequest } from '@spoh/shared';
-import { idempotent } from '../../../platform/idempotency/index.js';
+import { idempotent } from '../../../platform/http/idempotency.js';
 import { captureRateLimit, defaultRateLimit } from '../../../platform/http/rateLimit.js';
-import { requireCapability } from '../../../platform/access/index.js';
-import { requireAuth } from '../../../platform/identity/index.js';
+import { requireCapability } from '../../../platform/http/access.js';
+import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { validate } from '../../../platform/http/validate.js';
 import { RAISE_ENDPOINT } from '../application/constants.js';
 import {

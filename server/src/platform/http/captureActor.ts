@@ -1,6 +1,6 @@
 import type { Request } from 'express';
 import type { AuditContext } from '../audit/index.js';
-import { getAuth } from '../identity/index.js';
+import { getAuth } from './requireAuth.js';
 import type { Clock } from '../time/clock.js';
 import { auditContextFrom } from './auditContext.js';
 

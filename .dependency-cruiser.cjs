@@ -3,9 +3,9 @@
  * remediation/standards/engineering-standards.md §3 (server) and §4 (client),
  * checked against today's code.
  *
- * Report-only: every rule is a warning, so `npm run arch:check` lists the
- * distance to the target without failing. P06/P07 flip these to errors once
- * the refactor has brought them to zero. Paths not yet in the tree (http/,
+ * The server, shared-package and cross-cutting rules are errors since P06.10:
+ * `npm run arch:check` fails on any of them. The client rules stay warnings,
+ * listing the distance to the target, until P07 brings them to zero. Paths not yet in the tree (http/,
  * application/, platform/, shared/ui/ …) match nothing until the refactor
  * creates them; where today's layout has an equivalent it is named too, so the
  * current debt is counted rather than hidden.
@@ -29,14 +29,14 @@ module.exports = {
     {
       name: 'deployable-server-to-client',
       comment: 'The server may never reach into the client deployable.',
-      severity: 'warn',
+      severity: 'error',
       from: { path: '^server/' },
       to: { path: '^client/' },
     },
     {
       name: 'deployable-client-to-server',
       comment: 'The client may never reach into the server deployable.',
-      severity: 'warn',
+      severity: 'error',
       from: { path: '^client/' },
       to: { path: '^server/' },
     },
@@ -47,7 +47,7 @@ module.exports = {
       comment:
         "Another module's internals are private: import its index.ts (public API) only. " +
         'Today every cross-module import is a violation, because no module has an index.ts yet.',
-      severity: 'warn',
+      severity: 'error',
       from: { path: '^server/src/modules/([^/]+)/' },
       to: {
         path: '^server/src/modules/[^/]+/',
@@ -60,7 +60,7 @@ module.exports = {
         'The Prisma client (@prisma/client, the generated client) is imported only by ' +
         'modules/*/data/ and platform/db. A use case opens its transaction through ' +
         'platform/db and passes tx to its repo (ADR-007 §3 prisma-in-data-only).',
-      severity: 'warn',
+      severity: 'error',
       from: {
         path: '^server/src/',
         pathNot: [`${MODULE}data/`, '^server/src/platform/db/'],
@@ -71,14 +71,15 @@ module.exports = {
       name: 'server-express-only-in-http',
       comment:
         'Express types and values belong to modules/*/http/ and platform/http only. ' +
-        'app.ts, routes.ts and index.ts are the composition root.',
-      severity: 'warn',
+        'app/, main.ts and index.ts are the composition root.',
+      severity: 'error',
       from: {
         path: '^server/src/',
         pathNot: [
           `${MODULE}http/`,
           '^server/src/platform/http/',
-          '^server/src/(app|routes|index)[.]ts$',
+          '^server/src/app/',
+          '^server/src/(main|index)[.]ts$',
         ],
       },
       to: { path: EXPRESS },
@@ -86,14 +87,14 @@ module.exports = {
     {
       name: 'server-http-not-to-data',
       comment: 'http/ calls use cases; it never reaches the data layer or Prisma directly.',
-      severity: 'warn',
+      severity: 'error',
       from: { path: `${MODULE}http/` },
       to: { path: [`${MODULE}data/`, ...PRISMA] },
     },
     {
       name: 'server-application-not-to-http',
       comment: 'Use cases do not know about HTTP.',
-      severity: 'warn',
+      severity: 'error',
       from: { path: `${MODULE}application/` },
       to: { path: [`${MODULE}http/`, ...EXPRESS] },
     },
@@ -102,7 +103,7 @@ module.exports = {
       comment:
         'domain/ is pure rules: no I/O, no Prisma, no Express, no other layer, and from ' +
         'platform only the time and errors types.',
-      severity: 'warn',
+      severity: 'error',
       from: { path: `${MODULE}domain/` },
       to: {
         path: [`${MODULE}(http|application|data)/`, '^server/src/platform/', ...PRISMA, ...EXPRESS],
@@ -112,7 +113,7 @@ module.exports = {
     {
       name: 'server-data-layer-direction',
       comment: 'data/ depends only on domain types and platform/db.',
-      severity: 'warn',
+      severity: 'error',
       from: { path: `${MODULE}data/` },
       to: {
         path: [`${MODULE}(http|application)/`, '^server/src/platform/'],
@@ -155,7 +156,7 @@ module.exports = {
     {
       name: 'shared-stays-leaf',
       comment: '@spoh/shared depends on zod only, never on a deployable.',
-      severity: 'warn',
+      severity: 'error',
       from: { path: '^packages/shared/src/' },
       to: { path: ['^server/', '^client/'] },
     },
@@ -164,14 +165,14 @@ module.exports = {
     {
       name: 'no-circular',
       comment: 'Cycles make the module graph impossible to layer.',
-      severity: 'warn',
+      severity: 'error',
       from: {},
       to: { circular: true },
     },
     {
       name: 'not-to-unresolvable',
       comment: 'An import that does not resolve is a broken build waiting to happen.',
-      severity: 'warn',
+      severity: 'error',
       from: {},
       to: { couldNotResolve: true },
     },

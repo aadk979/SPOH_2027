@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { CheckInRequest } from '@spoh/shared';
-import { requireAuth } from '../../../platform/identity/index.js';
-import { requireCapability } from '../../../platform/access/index.js';
+import { requireAuth } from '../../../platform/http/requireAuth.js';
+import { requireCapability } from '../../../platform/http/access.js';
 import { defaultRateLimit } from '../../../platform/http/rateLimit.js';
 import { validate } from '../../../platform/http/validate.js';
 import { checkInHandler, checkOutHandler, getMeHandler } from './handlers.js';

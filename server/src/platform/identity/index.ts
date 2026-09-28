@@ -1,4 +1,3 @@
-import type { NextFunction, Request, Response } from 'express';
 import { capabilitiesForRole, highestRole } from '@spoh/shared';
 import { env } from '../../config/env.js';
 import {
@@ -8,7 +7,6 @@ import {
 } from '../errors/index.js';
 import { logger } from '../logger/index.js';
 import { prisma } from '../db/client.js';
-import { requestIdOf } from '../http/requestId.js';
 import type { RequestAuth } from '../../types/express.js';
 import { verifyAccessToken } from './sessionTokens.js';
 import { createCognitoAuthProvider } from './cognitoProvider.js';
@@ -164,20 +162,8 @@ async function sessionIsLive(sessionId: string, sub: string): Promise<boolean> {
   return live && owner === sub;
 }
 
-function readBearerToken(req: Request): string {
-  const header = req.get('authorization');
-  if (!header) throw new UnauthenticatedError();
-
-  const [scheme, token] = header.split(' ');
-  if (scheme?.toLowerCase() !== 'bearer' || !token) throw new UnauthenticatedError();
-
-  return token;
-}
-
 /**
- * Default-deny gate. Every router mounts this before any handler; the only
- * unauthenticated routes in the system are `/healthz`, `/readyz` and the
- * session-opening endpoints under `/auth` (BUILD_PLAN §8.5).
+ * Who a bearer token belongs to, as the request will see it.
  *
  * Two token shapes are accepted, in order:
  *
@@ -191,69 +177,52 @@ function readBearerToken(req: Request): string {
  * Whichever arrives, only the subject is taken from it. Role, capabilities and
  * station scope are read from the roster, every time.
  */
-export async function requireAuth(req: Request, _res: Response, next: NextFunction): Promise<void> {
-  try {
-    const token = readBearerToken(req);
+export async function authenticate(token: string, requestId?: string): Promise<RequestAuth> {
+  const session = await verifyAccessToken(token);
 
-    const session = await verifyAccessToken(token);
-    let sub: string;
-    let groups: RequestAuth['groups'] = [];
-    let sessionId: string | undefined;
+  let sub: string;
+  let groups: RequestAuth['groups'] = [];
+  let sessionId: string | undefined;
 
-    if (session) {
-      if (!(await sessionIsLive(session.sid, session.sub))) {
-        // Signed out on this device, revoked by an administrator, or not this subject's.
-        throw new UnauthenticatedError();
-      }
-      sub = session.sub;
-      sessionId = session.sid;
-    } else {
-      const verified = await authProvider.verify(token);
-      sub = verified.sub;
-      groups = verified.groups;
+  if (session) {
+    if (!(await sessionIsLive(session.sid, session.sub))) {
+      // Signed out on this device, revoked by an administrator, or not this subject's.
+      throw new UnauthenticatedError();
     }
-
-    const volunteer = await resolveVolunteer(sub);
-    if (!volunteer.active) throw new AccountInactiveError();
-
-    /**
-     * The role comes from the database row, not from the token's groups. The
-     * groups are recorded for the audit trail and for detecting drift, but the
-     * roster is authoritative: a group added in the Cognito console without a
-     * matching roster change must not silently grant capabilities.
-     */
-    const role = volunteer.role;
-    const tokenRole = highestRole(groups);
-
-    if (tokenRole !== undefined && tokenRole !== role) {
-      logger.warn(
-        { requestId: requestIdOf(req), sub, tokenRole, rosterRole: role },
-        'identity provider groups disagree with the roster; roster wins',
-      );
-    }
-
-    req.auth = {
-      sub,
-      groups,
-      role,
-      volunteerId: volunteer.volunteerId,
-      displayName: volunteer.displayName,
-      capabilities: capabilitiesForRole(role),
-      ...(sessionId ? { sessionId } : {}),
-    };
-
-    next();
-  } catch (error) {
-    next(error);
+    sub = session.sub;
+    sessionId = session.sid;
+  } else {
+    const verified = await authProvider.verify(token);
+    sub = verified.sub;
+    groups = verified.groups;
   }
-}
 
-/** Narrowing helper for handlers that run after `requireAuth`. */
-export function getAuth(req: Request): RequestAuth {
-  if (!req.auth) {
-    // Reaching here means a route was mounted without `requireAuth`, which is a
-    // programming error rather than a client one.
-    throw new UnauthenticatedError();
+  const volunteer = await resolveVolunteer(sub);
+  if (!volunteer.active) throw new AccountInactiveError();
+
+  /**
+   * The role comes from the database row, not from the token's groups. The
+   * groups are recorded for the audit trail and for detecting drift, but the
+   * roster is authoritative: a group added in the Cognito console without a
+   * matching roster change must not silently grant capabilities.
+   */
+  const role = volunteer.role;
+  const tokenRole = highestRole(groups);
+
+  if (tokenRole !== undefined && tokenRole !== role) {
+    logger.warn(
+      { requestId, sub, tokenRole, rosterRole: role },
+      'identity provider groups disagree with the roster; roster wins',
+    );
   }
-  return req.auth;
+
+  return {
+    sub,
+    groups,
+    role,
+    volunteerId: volunteer.volunteerId,
+    displayName: volunteer.displayName,
+    capabilities: capabilitiesForRole(role),
+    ...(sessionId ? { sessionId } : {}),
+  };
 }

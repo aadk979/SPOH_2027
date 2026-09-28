@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireAuth } from '../../../platform/identity/index.js';
+import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { defaultRateLimit } from '../../../platform/http/rateLimit.js';
 import { listStationsHandler } from './handlers.js';
 

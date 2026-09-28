@@ -74,7 +74,8 @@ function normalise(error: unknown): AppError {
     return new AppError(400, ERROR_CODES.VALIDATION_FAILED, 'Request body is not valid JSON');
   }
 
-  return new AppError(500, ERROR_CODES.INTERNAL_ERROR, 'Something went wrong', {
+  return new AppError(500, ERROR_CODES.INTERNAL_ERROR, {
+    message: 'Something went wrong',
     cause: error,
     expose: false,
   });

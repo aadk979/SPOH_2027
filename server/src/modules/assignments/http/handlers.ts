@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import type { CreateAssignmentRequest } from '@spoh/shared';
 import { auditContextFrom } from '../../../platform/http/auditContext.js';
 import { validatedBody, validatedParams, validatedQuery } from '../../../platform/http/validate.js';
-import { getAuth } from '../../../platform/identity/index.js';
+import { getAuth } from '../../../platform/http/requireAuth.js';
 import { createAssignment } from '../application/createAssignment.js';
 import { deleteAssignment } from '../application/deleteAssignment.js';
 import { getStationRoster } from '../application/getStationRoster.js';

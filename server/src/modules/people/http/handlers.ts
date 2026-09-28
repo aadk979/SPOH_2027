@@ -6,7 +6,7 @@ import type {
 } from '@spoh/shared';
 import { auditContextFrom } from '../../../platform/http/auditContext.js';
 import { validatedBody, validatedParams, validatedQuery } from '../../../platform/http/validate.js';
-import { getAuth } from '../../../platform/identity/index.js';
+import { getAuth } from '../../../platform/http/requireAuth.js';
 import type { ManagerContext } from '../application/context.js';
 import { deactivateVolunteer } from '../application/deactivateVolunteer.js';
 import { getVolunteer, listVolunteers } from '../application/queries.js';

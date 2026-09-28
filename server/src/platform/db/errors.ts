@@ -36,9 +36,16 @@ interface UniqueMeta {
  * name is rebuilt.
  */
 function constraintName(meta: UniqueMeta | undefined): string {
-  const constraint = meta?.driverAdapterError?.cause?.constraint;
-  if (constraint?.index) return constraint.index;
-  const fields = meta?.target ?? constraint?.fields ?? [];
+  return adapterConstraint(meta)?.index ?? conventionalName(meta);
+}
+
+function adapterConstraint(meta: UniqueMeta | undefined) {
+  return meta?.driverAdapterError?.cause?.constraint;
+}
+
+/** `Model_field_field_key`, rebuilt from the fields Prisma's engine reports. */
+function conventionalName(meta: UniqueMeta | undefined): string {
+  const fields = meta?.target ?? adapterConstraint(meta)?.fields ?? [];
   const list = (Array.isArray(fields) ? fields : [fields]).map((field) => field.replace(/"/g, ''));
   return `${meta?.modelName ?? ''}_${list.join('_')}_key`;
 }

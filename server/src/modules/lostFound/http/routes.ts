@@ -7,8 +7,8 @@ import {
   ListLostFoundQuery,
 } from '@spoh/shared';
 import { defaultRateLimit } from '../../../platform/http/rateLimit.js';
-import { requireCapability } from '../../../platform/access/index.js';
-import { requireAuth } from '../../../platform/identity/index.js';
+import { requireCapability } from '../../../platform/http/access.js';
+import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { validate } from '../../../platform/http/validate.js';
 import { claimItemHandler, closeOutHandler, listItemsHandler, logItemHandler } from './handlers.js';
 

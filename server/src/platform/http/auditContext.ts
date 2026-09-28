@@ -1,7 +1,7 @@
 import type { Request } from 'express';
 import { requestIdOf } from './requestId.js';
 import type { AuditContext } from '../audit/index.js';
-import { getAuth } from '../identity/index.js';
+import { getAuth } from './requireAuth.js';
 
 /**
  * Derives the audit context from a request.

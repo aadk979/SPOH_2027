@@ -26,11 +26,11 @@ const db = vi.hoisted(() => ({
 vi.mock('../../src/platform/db/client.js', () => ({
   prisma: { idempotencyRecord: db },
 }));
-vi.mock('../../src/platform/identity/index.js', () => ({
+vi.mock('../../src/platform/http/requireAuth.js', () => ({
   getAuth: () => ({ sub: 'sub-1' }),
 }));
 
-const { idempotent } = await import('../../src/platform/idempotency/index.js');
+const { idempotent } = await import('../../src/platform/http/idempotency.js');
 
 function run(middleware: ReturnType<typeof idempotent>): Promise<unknown[]> {
   return new Promise((resolve) => {

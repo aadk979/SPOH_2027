@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import type { CreateAnnouncementRequest, ListAnnouncementsQuery } from '@spoh/shared';
 import { actorContextFrom, auditContextFrom } from '../../../platform/http/auditContext.js';
-import { getAuth } from '../../../platform/identity/index.js';
+import { getAuth } from '../../../platform/http/requireAuth.js';
 import { validatedBody, validatedParams, validatedQuery } from '../../../platform/http/validate.js';
 import { acknowledgeAnnouncement } from '../application/acknowledgeAnnouncement.js';
 import { listInbox } from '../application/listInbox.js';

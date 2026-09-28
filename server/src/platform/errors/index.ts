@@ -8,6 +8,14 @@ import { ERROR_CODES, type ErrorCode } from '@spoh/shared';
  * `res.status(500).send(err.message)` — that is how SQL text and stack traces
  * end up on a volunteer's phone.
  */
+/** A message with its context: client-safe details, the cause, and whether to show it. */
+export interface AppErrorInit {
+  message: string;
+  details?: unknown;
+  cause?: unknown;
+  expose?: boolean;
+}
+
 export class AppError extends Error {
   readonly statusCode: number;
   readonly code: ErrorCode;
@@ -16,25 +24,22 @@ export class AppError extends Error {
   /** Whether the message is safe to show a user. Internal errors are not. */
   readonly expose: boolean;
 
-  constructor(
-    statusCode: number,
-    code: ErrorCode,
-    message: string,
-    options: { details?: unknown; cause?: unknown; expose?: boolean } = {},
-  ) {
-    super(message, options.cause !== undefined ? { cause: options.cause } : undefined);
+  /** `error` is the message, or the message with its client-safe context. */
+  constructor(statusCode: number, code: ErrorCode, error: string | AppErrorInit) {
+    const init = typeof error === 'string' ? { message: error } : error;
+    super(init.message, init.cause !== undefined ? { cause: init.cause } : undefined);
     this.name = new.target.name;
     this.statusCode = statusCode;
     this.code = code;
-    this.details = options.details;
-    this.expose = options.expose ?? statusCode < 500;
+    this.details = init.details;
+    this.expose = init.expose ?? statusCode < 500;
     Error.captureStackTrace?.(this, new.target);
   }
 }
 
 export class ValidationError extends AppError {
   constructor(message = 'Request failed validation', details?: unknown) {
-    super(400, ERROR_CODES.VALIDATION_FAILED, message, { details });
+    super(400, ERROR_CODES.VALIDATION_FAILED, { message, details });
   }
 }
 
@@ -63,7 +68,7 @@ export class AccountInactiveError extends AppError {
 
 export class ForbiddenError extends AppError {
   constructor(message = 'You do not have permission to perform this action', details?: unknown) {
-    super(403, ERROR_CODES.FORBIDDEN, message, { details });
+    super(403, ERROR_CODES.FORBIDDEN, { message, details });
   }
 }
 
@@ -82,7 +87,7 @@ export class NotFoundError extends AppError {
 
 export class ConflictError extends AppError {
   constructor(code: ErrorCode, message: string, details?: unknown) {
-    super(409, code, message, { details });
+    super(409, code, { message, details });
   }
 }
 
@@ -93,7 +98,7 @@ export class ConflictError extends AppError {
  */
 export class RuleError extends AppError {
   constructor(code: ErrorCode, message: string, details?: unknown) {
-    super(422, code, message, { details });
+    super(422, code, { message, details });
   }
 }
 
@@ -115,13 +120,13 @@ export class RateLimitedError extends AppError {
 
 export class InternalError extends AppError {
   constructor(message = 'Something went wrong', cause?: unknown) {
-    super(500, ERROR_CODES.INTERNAL_ERROR, message, { cause, expose: false });
+    super(500, ERROR_CODES.INTERNAL_ERROR, { message, cause, expose: false });
   }
 }
 
 export class ServiceUnavailableError extends AppError {
   constructor(message = 'Service temporarily unavailable', cause?: unknown) {
-    super(503, ERROR_CODES.SERVICE_UNAVAILABLE, message, { cause, expose: false });
+    super(503, ERROR_CODES.SERVICE_UNAVAILABLE, { message, cause, expose: false });
   }
 }
 
