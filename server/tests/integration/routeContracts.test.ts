@@ -388,6 +388,31 @@ describe('list reads (F03-029)', () => {
   });
 });
 
+describe('inbox reads (F03-029)', () => {
+  it('names the stations of an inbox page in its query, not one lookup per announcement', async () => {
+    for (const body of ['Queue at the desk', 'Banner is down', 'Lunch at one']) {
+      expect((await as(ic).post('/announcements', { body, target: { stationId } })).status).toBe(
+        201,
+      );
+    }
+
+    const stationLookups = [
+      vi.spyOn(prisma.station, 'findUnique'),
+      vi.spyOn(prisma.station, 'findMany'),
+    ];
+    const response = await as(volunteer).get('/announcements');
+
+    expect(response.status).toBe(200);
+    expect(response.body.data).toHaveLength(3);
+    expect(
+      response.body.data.every((a: { targetStationName: string | null }) => a.targetStationName),
+    ).toBe(true);
+    const calls = stationLookups.reduce((sum, spy) => sum + spy.mock.calls.length, 0);
+    expect(calls).toBe(0);
+    stationLookups.forEach((spy) => spy.mockRestore());
+  });
+});
+
 describe('audit actions (F03-018)', () => {
   it('audits a lost-and-found close-out as lostFound.closeOut, not as a claim', async () => {
     await as(ic).post('/lost-found', { itemLabel: 'Umbrella' });

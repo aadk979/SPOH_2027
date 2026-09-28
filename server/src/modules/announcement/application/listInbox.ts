@@ -1,7 +1,6 @@
 import type { AnnouncementRecord, CommitteeRole, ListAnnouncementsQuery } from '@spoh/shared';
 import { toPage, type Page } from '../../../platform/db/pagination.js';
 import { eventDayAnchor, singaporeDateString } from '../../../platform/time/index.js';
-import { findStationById } from '../../station/index.js';
 import { toAnnouncementRecord } from '../data/mappers.js';
 import { acknowledgedIds, findTodaysPostings, listForRecipient } from '../data/repo.js';
 
@@ -31,17 +30,12 @@ export async function listInbox(
     announcements.map((a) => a.id),
   );
 
-  const records = await Promise.all(
-    announcements.map(async (announcement) => {
-      const station = announcement.targetStationId
-        ? await findStationById(announcement.targetStationId)
-        : null;
-
-      return toAnnouncementRecord(announcement, {
-        stationName: station?.name ?? null,
-        ackedByMe: acked.has(announcement.id),
-        audienceCount: null,
-      });
+  // The station's name comes with the row: one query per page, not one per
+  // announcement on a list every phone polls (F03-029).
+  const records = announcements.map((announcement) =>
+    toAnnouncementRecord(announcement, {
+      ackedByMe: acked.has(announcement.id),
+      audienceCount: null,
     }),
   );
 

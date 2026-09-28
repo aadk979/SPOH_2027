@@ -2,7 +2,8 @@ import type { AnnouncementRecord, CommitteeRole, CreateAnnouncementRequest } fro
 import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import { dispatch } from '../../notification/index.js';
-import { createAnnouncement } from '../data/repo.js';
+import { NotFoundError } from '../../../platform/errors/index.js';
+import { createAnnouncement, findAnnouncementById } from '../data/repo.js';
 import { assertMaySend, pushPreview } from '../domain/sendRules.js';
 import { decorate } from './decorate.js';
 
@@ -51,7 +52,11 @@ export async function sendAnnouncement(
 
   if (announcement.priority === 'URGENT') pushToDevices(announcement);
 
-  return decorate(announcement, sender.volunteerId, { includeAudience: true });
+  // Loaded after commit: its relations would overlap on the transaction's
+  // connection (F03-019).
+  const created = await findAnnouncementById(announcement.id);
+  if (!created) throw new NotFoundError('Announcement');
+  return decorate(created, sender.volunteerId, { includeAudience: true });
 }
 
 /**

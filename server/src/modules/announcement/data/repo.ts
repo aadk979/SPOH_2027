@@ -7,6 +7,7 @@ import { prisma, type PrismaTransactionClient } from '../../../platform/db/clien
 
 const announcementInclude = {
   author: { select: { displayName: true } },
+  targetStation: { select: { name: true } },
   _count: { select: { acks: true } },
 } satisfies Prisma.AnnouncementInclude;
 
@@ -14,11 +15,12 @@ export type AnnouncementWithContext = Prisma.AnnouncementGetPayload<{
   include: typeof announcementInclude;
 }>;
 
+/** The written row only: its relations are loaded after commit (F03-019). */
 export async function createAnnouncement(
   tx: PrismaTransactionClient,
   data: Prisma.AnnouncementUncheckedCreateInput,
-): Promise<AnnouncementWithContext> {
-  return tx.announcement.create({ data, include: announcementInclude });
+) {
+  return tx.announcement.create({ data });
 }
 
 export async function findAnnouncementById(id: string): Promise<AnnouncementWithContext | null> {

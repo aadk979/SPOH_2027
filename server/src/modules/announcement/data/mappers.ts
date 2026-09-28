@@ -3,7 +3,7 @@ import type { AnnouncementWithContext } from './repo.js';
 
 export function toAnnouncementRecord(
   announcement: AnnouncementWithContext,
-  context: { stationName: string | null; ackedByMe: boolean; audienceCount: number | null },
+  context: { ackedByMe: boolean; audienceCount: number | null },
 ): AnnouncementRecord {
   return {
     id: announcement.id,
@@ -11,7 +11,7 @@ export function toAnnouncementRecord(
     priority: announcement.priority,
     targetRole: announcement.targetRole,
     targetStationId: announcement.targetStationId,
-    targetStationName: context.stationName,
+    targetStationName: announcement.targetStation?.name ?? null,
     targetEventDayId: announcement.targetEventDayId,
     requiresAck: announcement.requiresAck,
     authorId: announcement.authorId,
