@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-28T09:44:53.752Z",
+  "updatedAt": "2026-09-28T11:10:16.595Z",
   "current": {
     "phase": "P06",
-    "step": "P06.7"
+    "step": "P06.8"
   },
   "gates": [
     {
@@ -1269,11 +1269,16 @@
         {
           "id": "P06.8",
           "title": "Operations modules",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-28T09:45:19.188Z",
+          "completedAt": "2026-09-28T11:10:16.595Z",
+          "commits": ["2e66b38"],
+          "notes": [
+            {
+              "at": "2026-09-28T11:10:16.595Z",
+              "text": "dashboard, report, fallback, announcement, notification, media, audit, health and devAuth in the layered shape; no module has a boundary or size warning (remaining warnings are platform middleware and env.ts: P06.9/P06.10)"
+            }
+          ]
         },
         {
           "id": "P06.9",
