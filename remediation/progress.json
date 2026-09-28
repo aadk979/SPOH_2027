@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-28T14:40:58.978Z",
+  "updatedAt": "2026-09-28T14:47:11.511Z",
   "current": {
     "phase": "P07",
-    "step": "P07.4"
+    "step": "P07.5"
   },
   "gates": [
     {
@@ -1404,20 +1404,30 @@
         {
           "id": "P07.4",
           "title": "Thin routes",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-28T14:40:58.978Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-28T14:47:11.419Z",
+          "commits": ["915048b"],
+          "notes": [
+            {
+              "at": "2026-09-28T14:47:11.421Z",
+              "text": "All 29 routes render feature screens within 60 lines; route size guard is blocking. Typecheck, lint (49 remaining warnings), architecture (zero violations), client 51 passed/4 deferred, server 768 passed/9 deferred, e2e 26 passed and unchanged visual snapshots 58 passed."
+            }
+          ]
         },
         {
           "id": "P07.5",
           "title": "Break up long components",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-28T14:47:11.510Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-09-28T14:47:11.511Z",
+              "text": "Splitting long feature screens and components while preserving behaviour and visual baselines."
+            }
+          ]
         },
         {
           "id": "P07.6",
