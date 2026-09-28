@@ -1,5 +1,4 @@
 import type { BriefingSlotRecord, SwapRequestRecord } from '@spoh/shared';
-import { minutesBetween } from '../../../platform/time/index.js';
 import type { SlotWithContext, SwapWithContext } from './repo.js';
 
 export function toSwapRecord(swap: SwapWithContext): SwapRequestRecord {
@@ -23,7 +22,7 @@ export function toSwapRecord(swap: SwapWithContext): SwapRequestRecord {
 
 export function toBriefingSlotRecord(
   slot: SlotWithContext,
-  context: { viewerId: string; now: Date },
+  context: { viewerId: string; minutesUntilStart: number },
 ): BriefingSlotRecord {
   return {
     id: slot.id,
@@ -36,11 +35,6 @@ export function toBriefingSlotRecord(
     completedAt: slot.completedAt?.toISOString() ?? null,
     notes: slot.notes,
     isMine: slot.briefierId === context.viewerId,
-    // Negative once the slot has started, which is what lets the client show
-    // "you're up next" and "you're on now" as different states.
-    minutesUntilStart:
-      slot.startsAt > context.now
-        ? minutesBetween(context.now, slot.startsAt)
-        : -minutesBetween(slot.startsAt, context.now),
+    minutesUntilStart: context.minutesUntilStart,
   };
 }

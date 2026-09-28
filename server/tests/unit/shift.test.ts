@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { assertMayComplete, assertSlotOpen } from '../../src/modules/shift/domain/briefingRules.js';
+import {
+  assertMayComplete,
+  assertSlotOpen,
+  minutesUntilStart,
+} from '../../src/modules/shift/domain/briefingRules.js';
 import { longShiftWarnings, staffingGaps } from '../../src/modules/shift/domain/staffing.js';
 import {
   assertNotSelf,
@@ -83,5 +87,13 @@ describe('longShiftWarnings', () => {
       ['b', 300],
       ['a', 240],
     ]);
+  });
+});
+
+describe('briefing countdown', () => {
+  it('counts minutes to a wave, and negative minutes once it has started', () => {
+    const start = new Date('2027-01-07T03:30:00.000Z');
+    expect(minutesUntilStart(start, new Date('2027-01-07T03:10:00.000Z'))).toBe(20);
+    expect(minutesUntilStart(start, new Date('2027-01-07T03:45:30.000Z'))).toBe(-15);
   });
 });

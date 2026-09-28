@@ -11,7 +11,7 @@ import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { eventDayAnchor, singaporeDateString } from '../../../platform/time/index.js';
 import { toBriefingSlotRecord } from '../data/mappers.js';
 import { completeSlot, findSlotById, listBriefingSlots } from '../data/repo.js';
-import { assertMayComplete, assertSlotOpen } from '../domain/briefingRules.js';
+import { assertMayComplete, assertSlotOpen, minutesUntilStart } from '../domain/briefingRules.js';
 
 export async function getBriefingSlots(
   query: ListBriefingSlotsQuery,
@@ -23,7 +23,12 @@ export async function getBriefingSlots(
     date: eventDayAnchor(query.date ?? singaporeDateString()),
   });
   const now = new Date();
-  return slots.map((slot) => toBriefingSlotRecord(slot, { viewerId, now }));
+  return slots.map((slot) =>
+    toBriefingSlotRecord(slot, {
+      viewerId,
+      minutesUntilStart: minutesUntilStart(slot.startsAt, now),
+    }),
+  );
 }
 
 export async function markSlotComplete(
@@ -50,5 +55,8 @@ export async function markSlotComplete(
 
   const refreshed = await findSlotById(slotId);
   if (!refreshed) throw new NotFoundError('Briefing slot');
-  return toBriefingSlotRecord(refreshed, { viewerId: actorId, now: new Date() });
+  return toBriefingSlotRecord(refreshed, {
+    viewerId: actorId,
+    minutesUntilStart: minutesUntilStart(refreshed.startsAt, new Date()),
+  });
 }

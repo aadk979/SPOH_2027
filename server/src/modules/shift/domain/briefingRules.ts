@@ -1,5 +1,6 @@
 import { ERROR_CODES, roleMeets, type CommitteeRole } from '@spoh/shared';
 import { AppError, ForbiddenError } from '../../../platform/errors/index.js';
+import { minutesBetween } from '../../../platform/time/index.js';
 
 export function assertSlotOpen(slot: { completedAt: Date | null }): void {
   if (slot.completedAt) {
@@ -23,4 +24,13 @@ export function assertMayComplete(
 ): void {
   if (slot.briefierId === actor.volunteerId || roleMeets(actor.role, 'IC')) return;
   throw new ForbiddenError('Only the assigned briefer or an IC can complete this slot');
+}
+
+/**
+ * Minutes until a briefing wave starts. Negative once the slot has started,
+ * which is what lets the client show "you're up next" and "you're on now" as
+ * different states.
+ */
+export function minutesUntilStart(startsAt: Date, now: Date): number {
+  return startsAt > now ? minutesBetween(now, startsAt) : -minutesBetween(startsAt, now);
 }
