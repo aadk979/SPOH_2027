@@ -101,7 +101,7 @@ interface CachedVolunteer {
 }
 
 const volunteerCache = new Map<string, CachedVolunteer>();
-const sessionCache = new Map<string, { live: boolean; expiresAt: number }>();
+const sessionCache = new Map<string, { live: boolean; sub: string | null; expiresAt: number }>();
 
 /** Drop a subject from the cache. Called when a volunteer is edited. */
 export function invalidateVolunteerCache(sub?: string): void {
@@ -142,20 +142,26 @@ async function resolveVolunteer(sub: string): Promise<CachedVolunteer> {
   return entry;
 }
 
-/** Is the refresh session behind this access token still live? */
-async function sessionIsLive(sessionId: string): Promise<boolean> {
+/**
+ * Is the refresh session behind this access token still live, and is it the
+ * token subject's own? The subject check binds `sid` to `sub`: without it, a
+ * token forged with a leaked signing key needs only the forger's own live
+ * session id to act as anyone (F04-011).
+ */
+async function sessionIsLive(sessionId: string, sub: string): Promise<boolean> {
   const cached = sessionCache.get(sessionId);
-  if (cached && cached.expiresAt > Date.now()) return cached.live;
+  if (cached && cached.expiresAt > Date.now()) return cached.live && cached.sub === sub;
 
   const session = await prisma.refreshSession.findUnique({
     where: { id: sessionId },
-    select: { revokedAt: true, expiresAt: true },
+    select: { revokedAt: true, expiresAt: true, volunteer: { select: { cognitoSub: true } } },
   });
 
   const live = session !== null && session.revokedAt === null && session.expiresAt > new Date();
+  const owner = session?.volunteer.cognitoSub ?? null;
 
-  sessionCache.set(sessionId, { live, expiresAt: Date.now() + SESSION_CACHE_TTL_MS });
-  return live;
+  sessionCache.set(sessionId, { live, sub: owner, expiresAt: Date.now() + SESSION_CACHE_TTL_MS });
+  return live && owner === sub;
 }
 
 function readBearerToken(req: Request): string {
@@ -195,8 +201,8 @@ export async function requireAuth(req: Request, _res: Response, next: NextFuncti
     let sessionId: string | undefined;
 
     if (session) {
-      if (!(await sessionIsLive(session.sid))) {
-        // Signed out on this device, or revoked by an administrator.
+      if (!(await sessionIsLive(session.sid, session.sub))) {
+        // Signed out on this device, revoked by an administrator, or not this subject's.
         throw new UnauthenticatedError();
       }
       sub = session.sub;

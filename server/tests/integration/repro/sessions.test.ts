@@ -2,6 +2,7 @@ import request from 'supertest';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../../src/app.js';
 import { prisma } from '../../../src/platform/db/client.js';
+import { issueAccessToken } from '../../../src/platform/identity/index.js';
 import { resetDatabase } from '../../helpers/db.js';
 import { createVolunteer } from '../../helpers/fixtures.js';
 
@@ -101,5 +102,23 @@ describe('refresh sessions (P03 repros)', () => {
       .get('/api/v1/me')
       .set('Authorization', `Bearer ${phone.accessToken}`);
     expect(after.status).toBe(401);
+  });
+
+  // F04-011 (sid bound to sub)
+  it('refuses an access token that pairs one person with a session of someone else', async () => {
+    await signIn();
+    const own = await prisma.refreshSession.findFirstOrThrow({
+      where: { volunteer: { email: 'ic@repro.test' } },
+    });
+    await createVolunteer({ email: 'chief@repro.test', role: 'CHIEF_COORDINATOR' });
+    const chief = await prisma.volunteer.findUniqueOrThrow({
+      where: { email: 'chief@repro.test' },
+    });
+
+    // What a leaked signing key allows: any subject, with the forger's own live session.
+    const { token } = await issueAccessToken({ sub: chief.cognitoSub, sid: own.id });
+    const response = await request(app).get('/api/v1/me').set('Authorization', `Bearer ${token}`);
+
+    expect(response.status).toBe(401);
   });
 });
