@@ -30,6 +30,7 @@ export async function listInboxHandler(req: Request, res: Response): Promise<voi
 
 export async function acknowledgeHandler(req: Request, res: Response): Promise<void> {
   const { id } = validatedParams<{ id: string }>(req);
-  const announcement = await acknowledgeAnnouncement(id, getAuth(req).volunteerId);
+  const { volunteerId, role } = getAuth(req);
+  const announcement = await acknowledgeAnnouncement(id, { volunteerId, role });
   res.status(200).json({ announcement });
 }

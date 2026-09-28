@@ -178,7 +178,7 @@ describe('access by id across stations (P04.3)', () => {
   });
 
   // F04-005
-  it.skip('does not reveal an announcement addressed to another station', async () => {
+  it('does not reveal an announcement addressed to another station', async () => {
     const sent = await request(app)
       .post('/api/v1/announcements')
       .set('Authorization', bearer(icB))
@@ -193,7 +193,7 @@ describe('access by id across stations (P04.3)', () => {
   });
 
   // F04-005
-  it.skip('does not reveal an announcement addressed to another role', async () => {
+  it('does not reveal an announcement addressed to another role', async () => {
     const sent = await request(app)
       .post('/api/v1/announcements')
       .set('Authorization', bearer(chief))
