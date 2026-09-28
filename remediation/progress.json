@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-28T14:19:58.588Z",
+  "updatedAt": "2026-09-28T14:40:58.978Z",
   "current": {
     "phase": "P07",
-    "step": "P07.3"
+    "step": "P07.4"
   },
   "gates": [
     {
@@ -1382,10 +1382,10 @@
         {
           "id": "P07.3",
           "title": "Feature API and query layer",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-28T13:51:38.777Z",
-          "completedAt": null,
-          "commits": ["c7a6c92", "d3223ac"],
+          "completedAt": "2026-09-28T14:40:58.912Z",
+          "commits": ["c7a6c92", "d3223ac", "858c64e"],
           "notes": [
             {
               "at": "2026-09-28T14:09:42.736Z",
@@ -1394,14 +1394,18 @@
             {
               "at": "2026-09-28T14:19:58.587Z",
               "text": "Session, attendance and shift API/query layers extracted; session consumers use public index. Attendance tests prove immediate server confirmation, refresh ordering, and lock release on failure. Client 49 pass/4 deferred; server 768 pass/9 deferred; typecheck clean; lint 0 errors/70 warnings; architecture 0 errors/16 warnings; 26 e2e and 58 unchanged visual snapshots pass. P07.3 remains in progress. Local API 4012 restored to frozen spoh2027_visual_test, client 3001."
+            },
+            {
+              "at": "2026-09-28T14:40:58.913Z",
+              "text": "All route/component api/fetch and inline query definitions extracted into domain API/query layers; endpoint constants cover queued capture paths, hosted sign-in and binary export. Query keys centralized, existing polling and success/failure semantics retained. Shared transport/session/outbox retain ADR-007 shared/lib exemption. Stateless endpoint-only domains do not add unnecessary query hooks. API and public-feature boundary rules now blocking; guard fixtures pass. Full typecheck pass; client 51 pass/4 deferred; server 768 pass/9 deferred; 26 e2e and 58 unchanged visuals pass; lint 0 errors/70 existing warnings; dependency check zero violations."
             }
           ]
         },
         {
           "id": "P07.4",
           "title": "Thin routes",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-28T14:40:58.978Z",
           "completedAt": null,
           "commits": [],
           "notes": []
