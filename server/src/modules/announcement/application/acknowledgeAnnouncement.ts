@@ -15,5 +15,5 @@ export async function acknowledgeAnnouncement(
   const refreshed = await findAnnouncementById(announcementId);
   if (!refreshed) throw new NotFoundError('Announcement');
 
-  return decorate(refreshed, volunteerId, { includeAudience: false });
+  return decorate(refreshed, volunteerId, null);
 }

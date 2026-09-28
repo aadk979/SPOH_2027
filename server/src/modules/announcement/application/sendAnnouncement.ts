@@ -1,9 +1,11 @@
 import type { AnnouncementRecord, CommitteeRole, CreateAnnouncementRequest } from '@spoh/shared';
+import { eventDayAnchor, singaporeDateString } from '../../../platform/time/index.js';
 import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import { dispatch } from '../../notification/index.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
-import { createAnnouncement, findAnnouncementById } from '../data/repo.js';
+import { createAnnouncement, findAnnouncementById, findAudienceIds } from '../data/repo.js';
+import { audienceOf } from '../domain/audience.js';
 import { assertMaySend, pushPreview } from '../domain/sendRules.js';
 import { decorate } from './decorate.js';
 
@@ -50,29 +52,29 @@ export async function sendAnnouncement(
     return row;
   });
 
-  if (announcement.priority === 'URGENT') pushToDevices(announcement);
+  // One list for the count and the push, so the sender is told how many were reached.
+  const audienceIds = await findAudienceIds(
+    audienceOf(announcement),
+    eventDayAnchor(singaporeDateString()),
+  );
+  if (announcement.priority === 'URGENT') pushToDevices(announcement, audienceIds);
 
   // Loaded after commit: its relations would overlap on the transaction's
   // connection (F03-019).
   const created = await findAnnouncementById(announcement.id);
   if (!created) throw new NotFoundError('Announcement');
-  return decorate(created, sender.volunteerId, { includeAudience: true });
+  return decorate(created, sender.volunteerId, audienceIds.length);
 }
 
 /**
  * Push an urgent announcement.
  *
- * Only URGENT reaches here — the caller checks the priority — and the audience
- * is the announcement's own targeting, so a message aimed at one station does
- * not buzz the whole event. The inbox poll delivers it either way; this is what
+ * Only URGENT reaches here — the caller checks the priority — and it goes to
+ * exactly the announcement's audience (domain/audience.ts), so a message aimed
+ * at one station does not buzz the whole event. The inbox poll delivers it either way; this is what
  * makes it arrive while the app is closed.
  */
-function pushToDevices(announcement: {
-  id: string;
-  body: string;
-  targetRole: CommitteeRole | null;
-  targetStationId: string | null;
-}): void {
+function pushToDevices(announcement: { id: string; body: string }, audienceIds: string[]): void {
   // Unlike an incident description, this text was written by a coordinator for
   // exactly this audience, so showing it directly is safe and useful.
   void dispatch({
@@ -82,11 +84,6 @@ function pushToDevices(announcement: {
     body: pushPreview(announcement.body),
     url: '/inbox',
     tag: `announcement:${announcement.id}`,
-    audience: {
-      everyone: announcement.targetRole === null && announcement.targetStationId === null,
-      ...(announcement.targetRole ? { minimumRole: announcement.targetRole } : {}),
-      ...(announcement.targetStationId ? { stationId: announcement.targetStationId } : {}),
-      volunteerIds: [],
-    },
+    audience: { everyone: false, volunteerIds: audienceIds },
   });
 }

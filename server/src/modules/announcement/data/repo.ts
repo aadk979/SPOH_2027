@@ -100,26 +100,33 @@ export async function acknowledge(announcementId: string, volunteerId: string): 
   });
 }
 
-/** How many people a message was addressed to, so reach is a fraction. */
-export async function countAudience(input: {
-  role: CommitteeRole | null;
-  stationId: string | null;
-  eventDayId: string | null;
-}): Promise<number> {
-  return prisma.volunteer.count({
+/**
+ * The ids of everyone an announcement reaches, by the rule in
+ * domain/audience.ts: the role exactly, and station or day targets matched
+ * against today's roster. The reach count is this list's length and the
+ * urgent push goes to exactly this list, so the two cannot disagree.
+ */
+export async function findAudienceIds(
+  audience: { role: CommitteeRole | null; stationId: string | null; eventDayId: string | null },
+  today: Date,
+): Promise<string[]> {
+  const rows = await prisma.volunteer.findMany({
     where: {
       active: true,
-      ...(input.role ? { role: input.role } : {}),
-      ...(input.stationId || input.eventDayId
+      ...(audience.role ? { role: audience.role } : {}),
+      ...(audience.stationId || audience.eventDayId
         ? {
             shiftAssignments: {
               some: {
-                ...(input.stationId ? { stationId: input.stationId } : {}),
-                ...(input.eventDayId ? { eventDayId: input.eventDayId } : {}),
+                eventDay: { date: today },
+                ...(audience.stationId ? { stationId: audience.stationId } : {}),
+                ...(audience.eventDayId ? { eventDayId: audience.eventDayId } : {}),
               },
             },
           }
         : {}),
     },
+    select: { id: true },
   });
+  return rows.map((row) => row.id);
 }

@@ -176,7 +176,7 @@ describe('dashboard, report and import numbers (P03 repros)', () => {
   });
 
   // F03-014
-  it.skip('pushes an urgent announcement to the same people it says it reaches', async () => {
+  it('pushes an urgent announcement to the same people it says it reaches', async () => {
     const booth = (await createStation({ code: 'BOOTH' })).id;
     const ic = await createVolunteer({ email: 'ic@numbers.test', role: 'IC' });
     await createVolunteer({ email: 'deputy@numbers.test', role: 'DEPUTY_COORDINATOR' });
