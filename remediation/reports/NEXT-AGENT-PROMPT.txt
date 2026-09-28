@@ -1,0 +1,11 @@
+Continue the SPOH 2027 remediation programme from the documented handoff. Implement and verify work, one step at a time, until the programme is complete or a genuine owner-controlled blocker is reached.
+
+Use ONLY C:\Users\aadk9\OneDrive\Desktop\SPOH_2027\V1-main. Leave sibling V1 unchanged. I authorize committing and pushing verified work directly to main under D-11. Do not ask again for that permission. Preserve required owner/live production approvals. Do not spawn subagents.
+
+Read remediation/reports/HANDOFF-2026-09-28.md first, then remediation/README.md (resume protocol), progress.json, DECISIONS.md, standards/engineering-standards.md, phases/P07-client-refactor.md, client/AGENTS.md, relevant ADRs and findings/BACKLOG.md.
+
+Verify git status and history before editing. P07.3 and P07.4 are complete and pushed. P07.5 report and attendance splits are verified and pushed. The working tree contains an UNCOMMITTED fallback/import component and parser extraction, plus five parser tests. Preserve and review it; do not restart or discard it. Client 56 passed/4 deferred, fallback lint and client typecheck passed, but the fallback slice still needs full browser/visual/server verification before committing. The handoff distinguishes prior fully verified commits from these edits.
+
+Restart disposable test services if absent. Use bundled Node24 and dedicated test databases as documented. Never reset/seed the real spoh2027 database or regenerate screenshot baselines to hide regressions. Visual and E2E use different databases and API clock/rate-limit settings on the same port, so run them serially.
+
+Finish and verify the fallback/import slice, commit with a Remediation-Step: P07.5 trailer, update progress.json accurately and push. Then continue remaining P07.5 components and P07 onward through P16. Do not stop merely after proposing a plan or finishing one slice. Do not claim project completion at the P12.8 owner go/no-go milestone. Keep a precise handoff if interrupted.
