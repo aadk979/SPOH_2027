@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-28T11:10:16.595Z",
+  "updatedAt": "2026-09-28T11:10:48.663Z",
   "current": {
     "phase": "P06",
     "step": "P06.8"
@@ -1292,11 +1292,16 @@
         {
           "id": "P06.13",
           "title": "Correctness fixes",
-          "status": "not_started",
+          "status": "done",
           "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-28T11:10:48.662Z",
+          "commits": ["7895f20"],
+          "notes": [
+            {
+              "at": "2026-09-28T11:10:48.663Z",
+              "text": "every BACKLOG row homed P06.13 fixed; the nine repros still skipped belong to P07.8, P07.11, P09.6, P10.2, P10.3, P12.5 and P15.2"
+            }
+          ]
         },
         {
           "id": "P06.10",
