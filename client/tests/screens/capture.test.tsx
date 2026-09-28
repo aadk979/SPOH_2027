@@ -26,7 +26,7 @@ vi.mock('@/shared/shell/AppShell', () => ({
   ),
 }));
 vi.mock('@/shared/shell/SyncIndicator', () => ({ SyncIndicator: () => null }));
-vi.mock('@/features/session/useSession', () => ({
+vi.mock('@/features/session', () => ({
   useRequireSession: () => (state.signedIn ? { accessToken: 'test' } : null),
   useMe: () => ({ data: { currentAssignment: state.station ? { station: state.station } : null } }),
 }));

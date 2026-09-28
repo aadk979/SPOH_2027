@@ -16,7 +16,7 @@ import {
   Stack,
 } from '@/shared/ui';
 import { ApiError, api } from '@/shared/lib/api';
-import { useMe, useRequireSession } from '@/features/session/useSession';
+import { useMe, useRequireSession } from '@/features/session';
 
 /**
  * Runtime settings (Chief and Admin).

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import type { VisitorCategory } from '@spoh/shared';
 import { AppShell } from '@/shared/shell/AppShell';
 import { Button, Callout, Card, EmptyState, Field, Input, cx } from '@/shared/ui';
-import { useMe, useRequireSession } from '@/features/session/useSession';
+import { useMe, useRequireSession } from '@/features/session';
 import { enqueue } from '@/shared/lib/outbox';
 
 /**

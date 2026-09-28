@@ -8,7 +8,7 @@ import { SyncIndicator } from '@/shared/shell/SyncIndicator';
 import { Button, ButtonLink, Callout, EmptyState } from '@/shared/ui';
 import { useCapture } from '@/features/capture/useCapture';
 import { useWakeLock } from '@/shared/hooks/useWakeLock';
-import { useMe, useRequireSession } from '@/features/session/useSession';
+import { useMe, useRequireSession } from '@/features/session';
 import { api } from '@/shared/lib/api';
 import { formatCount } from '@/shared/lib/format';
 

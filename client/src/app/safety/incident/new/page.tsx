@@ -13,7 +13,7 @@ import {
   Textarea,
   type ChoiceOption,
 } from '@/shared/ui';
-import { useMe, useRequireSession } from '@/features/session/useSession';
+import { useMe, useRequireSession } from '@/features/session';
 import { api } from '@/shared/lib/api';
 
 /**

@@ -6,7 +6,7 @@ import { SyncIndicator } from '@/shared/shell/SyncIndicator';
 import { Button, Callout, EmptyState } from '@/shared/ui';
 import { useCapture } from '@/features/capture/useCapture';
 import { useWakeLock } from '@/shared/hooks/useWakeLock';
-import { useMe, useRequireSession } from '@/features/session/useSession';
+import { useMe, useRequireSession } from '@/features/session';
 
 /**
  * The footfall counter (BUILD_PLAN §9.4, PRODUCT_BRIEF §3).

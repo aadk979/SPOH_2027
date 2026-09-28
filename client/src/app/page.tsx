@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
-import { useSessionState } from '@/features/session/useSession';
+import { useSessionState } from '@/features/session';
 
 /** Root: straight to the home screen, or to sign-in. Nothing renders here. */
 export default function IndexPage(): ReactNode {

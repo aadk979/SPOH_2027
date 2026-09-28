@@ -14,7 +14,7 @@ import {
   Stack,
   StatusText,
 } from '@/shared/ui';
-import { useMe, useRequireSession } from '@/features/session/useSession';
+import { useMe, useRequireSession } from '@/features/session';
 import { blockLabel, formatTime } from '@/shared/lib/format';
 import { flush, toClipboardText } from '@/shared/lib/outbox';
 import { useClientSettings } from '@/shared/lib/runtimeSettings';

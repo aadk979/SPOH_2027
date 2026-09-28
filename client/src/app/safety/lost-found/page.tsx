@@ -17,7 +17,7 @@ import {
   StatusText,
   type Tone,
 } from '@/shared/ui';
-import { useRequireSession } from '@/features/session/useSession';
+import { useRequireSession } from '@/features/session';
 import { api } from '@/shared/lib/api';
 import { formatDateTime } from '@/shared/lib/format';
 

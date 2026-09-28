@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { AppShell } from '@/shared/shell/AppShell';
 import { Card, CardTitle, Section, Stack } from '@/shared/ui';
 import { COURSES, ESCALATION_SCRIPT, FIVE_THINGS } from '@/content/brief';
-import { useRequireSession } from '@/features/session/useSession';
+import { useRequireSession } from '@/features/session';
 
 /**
  * "What do I say" (PRODUCT_BRIEF §1.1).

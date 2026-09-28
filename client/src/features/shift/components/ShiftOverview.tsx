@@ -1,8 +1,7 @@
 'use client';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactNode } from 'react';
-import type { AttendanceStatus, MeResponse } from '@spoh/shared';
+import type { MeResponse } from '@spoh/shared';
 
 import { NavTile } from '@/shared/ui/NavTile';
 
@@ -17,30 +16,18 @@ import {
   StatusText,
 } from '@/shared/ui';
 
-import { api } from '@/shared/lib/api';
+import { useAttendance } from '@/features/attendance';
+import { useCheckIn, useCheckOut } from '../queries';
 import { blockLabel, formatTime, readableRole } from '@/shared/lib/format';
 import { useClientSettings } from '@/shared/lib/runtimeSettings';
 
 export function ShiftCard({ me }: { me: MeResponse }): ReactNode {
-  const queryClient = useQueryClient();
   const assignment = me.currentAssignment;
   const { shiftBlocks } = useClientSettings();
   const [confirmingCheckOut, setConfirmingCheckOut] = useState(false);
-  const attendance = useQuery({
-    queryKey: ['attendance'],
-    queryFn: () => api<AttendanceStatus>('/attendance'),
-  });
-  const checkIn = useMutation({
-    mutationFn: () =>
-      api('/me/check-in', { method: 'POST', body: { assignmentId: assignment?.id } }),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['me'] }),
-  });
-
-  const checkOut = useMutation({
-    mutationFn: (assignmentId: string) =>
-      api('/me/check-out', { method: 'POST', body: { assignmentId } }),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['me'] }),
-  });
+  const attendance = useAttendance();
+  const checkIn = useCheckIn(assignment?.id);
+  const checkOut = useCheckOut();
 
   if (!assignment) {
     return (

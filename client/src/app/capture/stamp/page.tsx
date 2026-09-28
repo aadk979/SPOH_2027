@@ -8,7 +8,7 @@ import { SyncIndicator } from '@/shared/shell/SyncIndicator';
 import { Callout, Card, CardTitle, EmptyState, type Tone } from '@/shared/ui';
 import { useQrScanner } from '@/features/capture/useQrScanner';
 import { useWakeLock } from '@/shared/hooks/useWakeLock';
-import { useMe, useRequireSession } from '@/features/session/useSession';
+import { useMe, useRequireSession } from '@/features/session';
 import { ApiError, api } from '@/shared/lib/api';
 
 /**

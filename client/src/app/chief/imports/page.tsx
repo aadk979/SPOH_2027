@@ -14,7 +14,7 @@ import {
   Stack,
   Textarea,
 } from '@/shared/ui';
-import { useRequireSession } from '@/features/session/useSession';
+import { useRequireSession } from '@/features/session';
 import { ApiError, api } from '@/shared/lib/api';
 
 /**

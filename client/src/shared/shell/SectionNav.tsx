@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useCurrentSession } from '@/features/session/useSession';
+import { useCurrentSession } from '@/features/session';
 import { canOpenOperations, sectionForPath } from '@/shared/lib/navigation';
 
 const items = [

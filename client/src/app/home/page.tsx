@@ -6,7 +6,7 @@ import { SyncIndicator } from '@/shared/shell/SyncIndicator';
 import { WorkspaceIntro } from '@/shared/ui/WorkspaceIntro';
 import { NavTile } from '@/shared/ui/NavTile';
 import { Button, ButtonLink, Callout, Card, LoadingCards, Stack } from '@/shared/ui';
-import { useMe, useRequireSession } from '@/features/session/useSession';
+import { useMe, useRequireSession } from '@/features/session';
 import { canOpenOperations } from '@/shared/lib/navigation';
 
 export default function HomePage() {

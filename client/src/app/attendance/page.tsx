@@ -1,69 +1,35 @@
 'use client';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRef, useState, type ReactNode } from 'react';
-import type {
-  AttendanceChallenge,
-  AttendanceProof,
-  AttendanceRecord,
-  AttendanceStatus,
-} from '@spoh/shared';
+import type { AttendanceChallenge, AttendanceProof } from '@spoh/shared';
 import { AppShell } from '@/shared/shell/AppShell';
 import { Button, ButtonLink, Callout, Card, Field, Input, Section, Stack } from '@/shared/ui';
 import { AttendanceScanner } from '@/features/attendance/AttendanceScanner';
 import { VerifierCode } from '@/features/attendance/VerifierCode';
-import { useRequireSession } from '@/features/session/useSession';
-import { api } from '@/shared/lib/api';
+import { useRequireSession } from '@/features/session';
+import {
+  useAttendance,
+  useSubmitAttendance,
+  useStartAttendance,
+  useIssueAttendanceChallenge,
+} from '@/features/attendance';
 import { formatTime } from '@/shared/lib/format';
 
 export default function AttendancePage(): ReactNode {
   const session = useRequireSession();
-  const queryClient = useQueryClient();
   const [pin, setPin] = useState('');
   const [scanning, setScanning] = useState(true);
   const [code, setCode] = useState<AttendanceChallenge | null>(null);
   const inFlight = useRef(false);
-  const status = useQuery({
-    queryKey: ['attendance'],
-    queryFn: () => api<AttendanceStatus>('/attendance'),
-    enabled: Boolean(session),
-    refetchInterval: 30_000,
-  });
-  async function refresh(): Promise<void> {
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ['attendance'] }),
-      queryClient.invalidateQueries({ queryKey: ['me'] }),
-    ]);
-  }
-  function confirm(attendance: AttendanceRecord): void {
-    queryClient.setQueryData<AttendanceStatus>(['attendance'], (previous) =>
-      previous ? { ...previous, attendance } : previous,
-    );
-  }
-  const submit = useMutation({
-    mutationFn: (proof: AttendanceProof) =>
-      api<{ attendance: AttendanceRecord }>('/attendance/submit', { method: 'POST', body: proof }),
-    onSuccess: async (result) => {
-      confirm(result.attendance);
-      setPin('');
-      await refresh();
-    },
+  const status = useAttendance({ enabled: Boolean(session), refetchInterval: 30_000 });
+  const submit = useSubmitAttendance({
+    onConfirmed: () => setPin(''),
     onSettled: () => {
       inFlight.current = false;
     },
   });
-  const start = useMutation({
-    mutationFn: () =>
-      api<{ attendance: AttendanceRecord }>('/attendance/start', { method: 'POST' }),
-    onSuccess: async (result) => {
-      confirm(result.attendance);
-      await refresh();
-    },
-  });
-  const issue = useMutation({
-    mutationFn: () => api<AttendanceChallenge>('/attendance/challenge', { method: 'POST' }),
-    onSuccess: setCode,
-  });
+  const start = useStartAttendance();
+  const issue = useIssueAttendanceChallenge(setCode);
   function send(proof: AttendanceProof): void {
     if (inFlight.current) return;
     inFlight.current = true;

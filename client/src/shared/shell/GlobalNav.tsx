@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { clientEnv } from '@/shared/lib/env';
 import { signOut } from '@/shared/lib/session';
-import { useCurrentSession } from '@/features/session/useSession';
+import { useCurrentSession } from '@/features/session';
 import { cx } from '@/shared/ui/cx';
 
 /**

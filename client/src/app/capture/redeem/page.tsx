@@ -16,7 +16,7 @@ import {
   type Tone,
 } from '@/shared/ui';
 import { useQrScanner } from '@/features/capture/useQrScanner';
-import { useMe, useRequireSession } from '@/features/session/useSession';
+import { useMe, useRequireSession } from '@/features/session';
 import { ApiError, api } from '@/shared/lib/api';
 
 /**

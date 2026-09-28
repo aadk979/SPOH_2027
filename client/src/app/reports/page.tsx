@@ -15,7 +15,7 @@ import {
   Section,
   Stack,
 } from '@/shared/ui';
-import { useRequireSession } from '@/features/session/useSession';
+import { useRequireSession } from '@/features/session';
 import { api } from '@/shared/lib/api';
 import { clientEnv } from '@/shared/lib/env';
 import { formatTime, readableCategory } from '@/shared/lib/format';

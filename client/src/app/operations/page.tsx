@@ -4,7 +4,7 @@ import { AppShell } from '@/shared/shell/AppShell';
 import { NavTile } from '@/shared/ui/NavTile';
 import { WorkspaceIntro } from '@/shared/ui/WorkspaceIntro';
 import { Callout, CardGrid, Section, Stack } from '@/shared/ui';
-import { useRequireSession } from '@/features/session/useSession';
+import { useRequireSession } from '@/features/session';
 import { operationLinks } from '@/shared/lib/navigation';
 
 export default function OperationsPage() {

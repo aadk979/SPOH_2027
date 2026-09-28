@@ -5,7 +5,7 @@ import { useState, type FormEvent, type ReactNode } from 'react';
 import { AppShell } from '@/shared/shell/AppShell';
 import { Button, Callout, Field, Input } from '@/shared/ui';
 import { usePhotoUpload } from '@/features/media/usePhotoUpload';
-import { useMe, useRequireSession } from '@/features/session/useSession';
+import { useMe, useRequireSession } from '@/features/session';
 import { api } from '@/shared/lib/api';
 
 /**

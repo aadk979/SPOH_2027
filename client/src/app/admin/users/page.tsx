@@ -18,7 +18,7 @@ import {
   Stack,
 } from '@/shared/ui';
 import { ApiError } from '@/shared/lib/api';
-import { useMe, useRequireSession } from '@/features/session/useSession';
+import { useMe, useRequireSession } from '@/features/session';
 import {
   ROLE_LABELS,
   roleLabel,

@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { AppShell } from '@/shared/shell/AppShell';
 import { Card } from '@/shared/ui';
 import { VISITOR_JOURNEY } from '@/content/brief';
-import { useRequireSession } from '@/features/session/useSession';
+import { useRequireSession } from '@/features/session';
 
 /**
  * The visitor journey (slide 5), as a diagram rather than a paragraph.

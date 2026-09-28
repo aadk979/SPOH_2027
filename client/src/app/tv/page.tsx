@@ -2,7 +2,7 @@
 
 import { useEffect, type ReactNode } from 'react';
 import { useLiveDashboard } from '@/features/dashboard';
-import { useRequireSession } from '@/features/session/useSession';
+import { useRequireSession } from '@/features/session';
 import { cx } from '@/shared/ui';
 import { formatCount, formatTime, readableCategory } from '@/shared/lib/format';
 

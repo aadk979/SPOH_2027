@@ -5,7 +5,7 @@ import { NavTile } from '@/shared/ui/NavTile';
 import { WorkspaceIntro } from '@/shared/ui/WorkspaceIntro';
 import { FiveThings } from '@/features/shift/components/ShiftOverview';
 import { CardGrid, Stack } from '@/shared/ui';
-import { useRequireSession } from '@/features/session/useSession';
+import { useRequireSession } from '@/features/session';
 
 export default function GuidePage() {
   const session = useRequireSession();

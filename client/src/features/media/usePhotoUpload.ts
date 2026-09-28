@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { CreateUploadResponse, UploadContentType } from '@spoh/shared';
 import { api } from '@/shared/lib/api';
-import { useCurrentSession } from '../session/useSession';
+import { useCurrentSession } from '@/features/session';
 
 /**
  * Photo upload.

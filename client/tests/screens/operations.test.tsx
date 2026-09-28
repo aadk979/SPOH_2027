@@ -23,7 +23,7 @@ vi.mock('@/shared/shell/AppShell', () => ({
   ),
 }));
 vi.mock('@/shared/shell/SyncIndicator', () => ({ SyncIndicator: () => null }));
-vi.mock('@/features/session/useSession', () => ({
+vi.mock('@/features/session', () => ({
   useRequireSession: () => ({ accessToken: 'test' }),
   useCurrentSession: () => ({ accessToken: 'test' }),
   useMe: () => ({

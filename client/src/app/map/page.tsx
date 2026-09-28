@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { AppShell } from '@/shared/shell/AppShell';
 import { Card, CardTitle, StatusText } from '@/shared/ui';
 import { FLOOR_MAP } from '@/content/brief';
-import { useRequireSession } from '@/features/session/useSession';
+import { useRequireSession } from '@/features/session';
 
 /**
  * The floor map (PRODUCT_BRIEF §1.1).

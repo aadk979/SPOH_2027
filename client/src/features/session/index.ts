@@ -2,8 +2,8 @@
 export {
   useSessionState,
   useCurrentSession,
-  useMe,
   useRequireSession,
   useSessionStatus,
   useCan,
 } from './useSession';
+export { useMe, sessionKeys } from './queries';

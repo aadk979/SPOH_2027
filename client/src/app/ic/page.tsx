@@ -19,7 +19,7 @@ import {
   StatusText,
 } from '@/shared/ui';
 import { useStationDashboard } from '@/features/dashboard';
-import { useMe, useRequireSession } from '@/features/session/useSession';
+import { useMe, useRequireSession } from '@/features/session';
 import { api } from '@/shared/lib/api';
 import { blockWord, readableCategory } from '@/shared/lib/format';
 
