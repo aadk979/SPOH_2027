@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { requireAuth } from '../../../platform/identity/index.js';
+import { defaultRateLimit } from '../../../platform/http/rateLimit.js';
 import { listStationsHandler } from './handlers.js';
 
 /**
@@ -11,4 +12,4 @@ export const stationRouter: Router = Router();
 
 stationRouter.use(requireAuth);
 
-stationRouter.get('/', listStationsHandler);
+stationRouter.get('/', defaultRateLimit, listStationsHandler);

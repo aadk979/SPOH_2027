@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { CheckInRequest } from '@spoh/shared';
 import { requireAuth } from '../../../platform/identity/index.js';
 import { requireCapability } from '../../../platform/access/index.js';
+import { defaultRateLimit } from '../../../platform/http/rateLimit.js';
 import { validate } from '../../../platform/http/validate.js';
 import { checkInHandler, checkOutHandler, getMeHandler } from './handlers.js';
 
@@ -10,10 +11,11 @@ export const meRouter: Router = Router();
 
 meRouter.use(requireAuth);
 
-meRouter.get('/', requireCapability('own.read'), getMeHandler);
+meRouter.get('/', defaultRateLimit, requireCapability('own.read'), getMeHandler);
 
 meRouter.post(
   '/check-in',
+  defaultRateLimit,
   requireCapability('own.read'),
   validate({ body: CheckInRequest }),
   checkInHandler,
@@ -21,6 +23,7 @@ meRouter.post(
 
 meRouter.post(
   '/check-out',
+  defaultRateLimit,
   requireCapability('own.read'),
   validate({ body: CheckInRequest }),
   checkOutHandler,
