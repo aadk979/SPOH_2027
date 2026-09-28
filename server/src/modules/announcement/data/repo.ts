@@ -1,7 +1,7 @@
-import type { AnnouncementRecord, CommitteeRole } from '@spoh/shared';
-import type { Prisma } from '../../generated/prisma/client.js';
-import { pageArgs } from '../../platform/db/pagination.js';
-import { prisma, type PrismaTransactionClient } from '../../platform/db/client.js';
+import type { CommitteeRole } from '@spoh/shared';
+import type { Prisma } from '../../../generated/prisma/client.js';
+import { pageArgs } from '../../../platform/db/pagination.js';
+import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 
 /** Data access for announcements (PRODUCT_BRIEF §8). */
 
@@ -13,29 +13,6 @@ const announcementInclude = {
 export type AnnouncementWithContext = Prisma.AnnouncementGetPayload<{
   include: typeof announcementInclude;
 }>;
-
-export function toAnnouncementRecord(
-  announcement: AnnouncementWithContext,
-  context: { stationName: string | null; ackedByMe: boolean; audienceCount: number | null },
-): AnnouncementRecord {
-  return {
-    id: announcement.id,
-    body: announcement.body,
-    priority: announcement.priority,
-    targetRole: announcement.targetRole,
-    targetStationId: announcement.targetStationId,
-    targetStationName: context.stationName,
-    targetEventDayId: announcement.targetEventDayId,
-    requiresAck: announcement.requiresAck,
-    authorId: announcement.authorId,
-    authorName: announcement.author.displayName,
-    createdAt: announcement.createdAt.toISOString(),
-    expiresAt: announcement.expiresAt?.toISOString() ?? null,
-    ackCount: announcement._count.acks,
-    ackedByMe: context.ackedByMe,
-    audienceCount: context.audienceCount,
-  };
-}
 
 export async function createAnnouncement(
   tx: PrismaTransactionClient,
@@ -87,6 +64,14 @@ export async function listForRecipient(input: {
     include: announcementInclude,
     orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     ...pageArgs(input),
+  });
+}
+
+/** Today's rostered stations and days for a reader, which is what station targeting matches. */
+export async function findTodaysPostings(volunteerId: string, today: Date) {
+  return prisma.shiftAssignment.findMany({
+    where: { volunteerId, eventDay: { date: today } },
+    select: { stationId: true, eventDayId: true },
   });
 }
 
