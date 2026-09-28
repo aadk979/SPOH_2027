@@ -1,5 +1,6 @@
 import type { FullReport } from '@spoh/shared';
 import { listFallbackWindows } from '../../fallback/index.js';
+import { singaporeHourKey } from '../../../platform/time/index.js';
 import { listGifts } from '../../gift/index.js';
 import {
   cardTotals,
@@ -42,7 +43,12 @@ export async function registrationsReport(range: Range): Promise<Report['registr
     total: totals.total,
     byCategory: totals.byCategory,
     byDay,
-    byHour,
+    // Labelled in Singapore time: the committee reads "10:00", not "02:00".
+    byHour: byHour.map((row) => ({
+      hour: row.hour.toISOString(),
+      localHour: singaporeHourKey(row.hour).replace('T', ' ') + ':00',
+      value: row.value,
+    })),
     voided: totals.voided,
   };
 }

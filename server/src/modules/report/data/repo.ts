@@ -1,5 +1,4 @@
 import { prisma } from '../../../platform/db/client.js';
-import { singaporeHourKey } from '../../../platform/time/index.js';
 
 /**
  * Reads for the post-event report (PRODUCT_BRIEF §10).
@@ -74,13 +73,9 @@ export async function registrationsByHour(range: Range) {
 
   // Truncation stays in UTC deliberately: Singapore is UTC+8 exactly, so the
   // hour boundaries are identical either way and doing the arithmetic in the
-  // database would only move it somewhere harder to test. What was wrong was
-  // the label, which is added here.
-  return rows.map((row) => ({
-    hour: row.hour.toISOString(),
-    localHour: singaporeHourKey(row.hour).replace('T', ' ') + ':00',
-    value: Number(row.value),
-  }));
+  // database would only move it somewhere harder to test. The label is added
+  // by the report section.
+  return rows.map((row) => ({ hour: row.hour, value: Number(row.value) }));
 }
 
 export async function footfallTotals(range: Range) {
