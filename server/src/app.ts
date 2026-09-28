@@ -7,7 +7,7 @@ import { env, isProduction } from './config/env.js';
 import { logger } from './platform/logger/index.js';
 import { errorHandler, notFoundHandler } from './platform/http/errorHandler.js';
 import { requestId } from './platform/http/requestId.js';
-import { healthRouter } from './modules/health/router.js';
+import { healthRouter } from './modules/health/index.js';
 import { apiRouter } from './routes.js';
 
 /**
