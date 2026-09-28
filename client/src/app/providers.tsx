@@ -2,9 +2,9 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useEffect, useState, type ReactNode } from 'react';
-import { startOutboxFlushLoop } from '@/lib/outbox';
-import { loadClientSettings } from '@/lib/runtimeSettings';
-import { bootstrapSession } from '@/lib/session';
+import { startOutboxFlushLoop } from '@/shared/lib/outbox';
+import { loadClientSettings } from '@/shared/lib/runtimeSettings';
+import { bootstrapSession } from '@/shared/lib/session';
 
 /**
  * Client providers.

@@ -8,13 +8,13 @@ import type {
   AttendanceRecord,
   AttendanceStatus,
 } from '@spoh/shared';
-import { AppShell } from '@/components/AppShell';
-import { Button, ButtonLink, Callout, Card, Field, Input, Section, Stack } from '@/components/ui';
+import { AppShell } from '@/shared/shell/AppShell';
+import { Button, ButtonLink, Callout, Card, Field, Input, Section, Stack } from '@/shared/ui';
 import { AttendanceScanner } from '@/features/attendance/AttendanceScanner';
 import { VerifierCode } from '@/features/attendance/VerifierCode';
 import { useRequireSession } from '@/features/session/useSession';
-import { api } from '@/lib/api';
-import { formatTime } from '@/lib/format';
+import { api } from '@/shared/lib/api';
+import { formatTime } from '@/shared/lib/format';
 
 export default function AttendancePage(): ReactNode {
   const session = useRequireSession();

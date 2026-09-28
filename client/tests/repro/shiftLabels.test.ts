@@ -1,17 +1,17 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { blockLabel } from '@/lib/format';
+import { blockLabel } from '@/shared/lib/format';
 
 /**
  * F01-046: shift labels must follow the configured shift hours, which an admin
  * changes for a dry run, not the hours the client was compiled with.
  */
 
-vi.mock('@/lib/api', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/lib/api')>();
+vi.mock('@/shared/lib/api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/shared/lib/api')>();
   return { ...actual, api: vi.fn() };
 });
 
-const apiModule = await import('@/lib/api');
+const apiModule = await import('@/shared/lib/api');
 const mockedApi = vi.mocked(apiModule.api);
 
 const MOVED = {
@@ -30,7 +30,7 @@ describe('shift labels (F01-046)', () => {
   });
 
   it('loads the configured shift hours with the other runtime settings', async () => {
-    const { getClientSettings, loadClientSettings } = await import('@/lib/runtimeSettings');
+    const { getClientSettings, loadClientSettings } = await import('@/shared/lib/runtimeSettings');
     mockedApi.mockResolvedValueOnce({
       settings: {
         dashboardPollSeconds: 3,

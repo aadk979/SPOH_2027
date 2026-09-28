@@ -1,8 +1,8 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { AppShell } from '@/components/AppShell';
-import { ButtonLink, Card, CardTitle, Stack } from '@/components/ui';
+import { AppShell } from '@/shared/shell/AppShell';
+import { ButtonLink, Card, CardTitle, Stack } from '@/shared/ui';
 
 export default function NotFound(): ReactNode {
   return (

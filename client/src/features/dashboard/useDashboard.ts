@@ -2,8 +2,8 @@
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import type { LiveDashboardResponse, StationDashboardResponse } from '@spoh/shared';
-import { api } from '@/lib/api';
-import { DEFAULT_CLIENT_SETTINGS, ms } from '@/lib/runtimeSettings';
+import { api } from '@/shared/lib/api';
+import { DEFAULT_CLIENT_SETTINGS, ms } from '@/shared/lib/runtimeSettings';
 import { useCurrentSession } from '../session/useSession';
 
 /**

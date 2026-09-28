@@ -2,8 +2,8 @@
 
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 import type { ActiveLostPersonResponse } from '@spoh/shared';
-import { api } from '@/lib/api';
-import { ms } from '@/lib/runtimeSettings';
+import { api } from '@/shared/lib/api';
+import { ms } from '@/shared/lib/runtimeSettings';
 import { useCurrentSession } from '../session/useSession';
 
 /**

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ApiError } from '@/lib/api';
-import { cancel, enqueue, flush, listEntries } from '@/lib/outbox';
-import { clearSession, setSession, type Session } from '@/lib/session';
+import { ApiError } from '@/shared/lib/api';
+import { cancel, enqueue, flush, listEntries } from '@/shared/lib/outbox';
+import { clearSession, setSession, type Session } from '@/shared/lib/session';
 
 /**
  * P03 bug reproduction: the outbox gives up for good on answers that are not
@@ -9,12 +9,12 @@ import { clearSession, setSession, type Session } from '@/lib/session';
  * today. `api` is mocked at the module boundary, as in tests/outbox.test.ts.
  */
 
-vi.mock('@/lib/api', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/lib/api')>();
+vi.mock('@/shared/lib/api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/shared/lib/api')>();
   return { ...actual, api: vi.fn() };
 });
 
-const apiModule = await import('@/lib/api');
+const apiModule = await import('@/shared/lib/api');
 const mockedApi = vi.mocked(apiModule.api);
 
 beforeEach(async () => {

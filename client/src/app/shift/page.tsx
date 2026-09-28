@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
-import { AlertDelivery } from '@/components/AlertDelivery';
-import { AppShell } from '@/components/AppShell';
-import { useOutboxEntries } from '@/components/SyncIndicator';
+import { AlertDelivery } from '@/features/notification/components/AlertDelivery';
+import { AppShell } from '@/shared/shell/AppShell';
+import { useOutboxEntries } from '@/shared/shell/SyncIndicator';
 import {
   Button,
   ButtonLink,
@@ -13,11 +13,11 @@ import {
   Section,
   Stack,
   StatusText,
-} from '@/components/ui';
+} from '@/shared/ui';
 import { useMe, useRequireSession } from '@/features/session/useSession';
-import { blockLabel, formatTime } from '@/lib/format';
-import { flush, toClipboardText } from '@/lib/outbox';
-import { useClientSettings } from '@/lib/runtimeSettings';
+import { blockLabel, formatTime } from '@/shared/lib/format';
+import { flush, toClipboardText } from '@/shared/lib/outbox';
+import { useClientSettings } from '@/shared/lib/runtimeSettings';
 
 /**
  * My shift, plus the sync diagnostics panel (BUILD_PLAN §9.5).

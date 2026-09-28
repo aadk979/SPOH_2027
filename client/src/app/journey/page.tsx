@@ -1,8 +1,8 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { AppShell } from '@/components/AppShell';
-import { Card } from '@/components/ui';
+import { AppShell } from '@/shared/shell/AppShell';
+import { Card } from '@/shared/ui';
 import { VISITOR_JOURNEY } from '@/content/brief';
 import { useRequireSession } from '@/features/session/useSession';
 

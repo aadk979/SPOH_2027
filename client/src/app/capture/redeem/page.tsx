@@ -3,8 +3,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useState, type ReactNode } from 'react';
 import type { GiftTypeRecord, RedeemGiftResponse } from '@spoh/shared';
-import { AppShell } from '@/components/AppShell';
-import { CardCodeInput } from '@/components/CardCodeInput';
+import { AppShell } from '@/shared/shell/AppShell';
+import { CardCodeInput } from '@/features/capture/components/CardCodeInput';
 import {
   Button,
   Callout,
@@ -14,10 +14,10 @@ import {
   StatusText,
   cx,
   type Tone,
-} from '@/components/ui';
+} from '@/shared/ui';
 import { useQrScanner } from '@/features/capture/useQrScanner';
 import { useMe, useRequireSession } from '@/features/session/useSession';
-import { ApiError, api } from '@/lib/api';
+import { ApiError, api } from '@/shared/lib/api';
 
 /**
  * Gift redemption (PRODUCT_BRIEF §5).

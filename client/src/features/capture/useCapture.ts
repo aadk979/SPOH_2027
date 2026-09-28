@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { enqueue, cancel as cancelOutboxEntry } from '@/lib/outbox';
-import { ms } from '@/lib/runtimeSettings';
+import { enqueue, cancel as cancelOutboxEntry } from '@/shared/lib/outbox';
+import { ms } from '@/shared/lib/runtimeSettings';
 
 /**
  * The shared mechanics behind both capture screens (BUILD_PLAN §9.4).
@@ -121,41 +121,4 @@ export function useCapture(): UseCaptureResult {
   }, [undoable]);
 
   return { sessionCount, undoable, error, capture, undo };
-}
-
-/**
- * Hold a screen wake lock while a capture screen is open.
- *
- * A booth tablet that sleeps between visitors costs a tap to wake and a second
- * of the volunteer's attention every time. Best effort: not every browser
- * supports it, and it is released automatically when the tab is hidden.
- */
-export function useWakeLock(active: boolean): void {
-  useEffect(() => {
-    if (!active || !('wakeLock' in navigator)) return;
-
-    let sentinel: WakeLockSentinel | null = null;
-    let released = false;
-
-    const request = async (): Promise<void> => {
-      try {
-        sentinel = await navigator.wakeLock.request('screen');
-      } catch {
-        // Denied, unsupported, or the tab is not visible. Not worth surfacing.
-      }
-    };
-
-    const onVisible = (): void => {
-      if (document.visibilityState === 'visible' && !released) void request();
-    };
-
-    void request();
-    document.addEventListener('visibilitychange', onVisible);
-
-    return () => {
-      released = true;
-      document.removeEventListener('visibilitychange', onVisible);
-      void sentinel?.release().catch(() => undefined);
-    };
-  }, [active]);
 }

@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState, type ReactNode } from 'react';
 import type { RuntimeSettings, SettingsResponse } from '@spoh/shared';
-import { AppShell } from '@/components/AppShell';
+import { AppShell } from '@/shared/shell/AppShell';
 import {
   Button,
   Callout,
@@ -14,8 +14,8 @@ import {
   LoadingCards,
   Section,
   Stack,
-} from '@/components/ui';
-import { ApiError, api } from '@/lib/api';
+} from '@/shared/ui';
+import { ApiError, api } from '@/shared/lib/api';
 import { useMe, useRequireSession } from '@/features/session/useSession';
 
 /**

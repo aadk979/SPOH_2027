@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from 'react';
 import { ROLE_PRECEDENCE, type CommitteeRole, type VolunteerAdminRecord } from '@spoh/shared';
-import { AppShell } from '@/components/AppShell';
+import { AppShell } from '@/shared/shell/AppShell';
 import {
   Button,
   Callout,
@@ -16,8 +16,8 @@ import {
   Section,
   Select,
   Stack,
-} from '@/components/ui';
-import { ApiError } from '@/lib/api';
+} from '@/shared/ui';
+import { ApiError } from '@/shared/lib/api';
 import { useMe, useRequireSession } from '@/features/session/useSession';
 import {
   ROLE_LABELS,

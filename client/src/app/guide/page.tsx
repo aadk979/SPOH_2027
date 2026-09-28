@@ -1,10 +1,10 @@
 'use client';
 
-import { AppShell } from '@/components/AppShell';
-import { NavTile } from '@/components/NavTile';
-import { WorkspaceIntro } from '@/components/WorkspaceIntro';
-import { FiveThings } from '@/components/ShiftOverview';
-import { CardGrid, Stack } from '@/components/ui';
+import { AppShell } from '@/shared/shell/AppShell';
+import { NavTile } from '@/shared/ui/NavTile';
+import { WorkspaceIntro } from '@/shared/ui/WorkspaceIntro';
+import { FiveThings } from '@/features/shift/components/ShiftOverview';
+import { CardGrid, Stack } from '@/shared/ui';
 import { useRequireSession } from '@/features/session/useSession';
 
 export default function GuidePage() {

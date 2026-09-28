@@ -3,8 +3,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState, type ReactNode } from 'react';
 import type { StationSummary, SwapRequestRecord } from '@spoh/shared';
-import { AppShell } from '@/components/AppShell';
-import { BarList, BarRow, StatTile } from '@/components/dashboard/StatTile';
+import { AppShell } from '@/shared/shell/AppShell';
+import { BarList, BarRow, StatTile } from '@/features/dashboard/components/StatTile';
 import {
   Button,
   Callout,
@@ -17,11 +17,11 @@ import {
   Select,
   Stack,
   StatusText,
-} from '@/components/ui';
+} from '@/shared/ui';
 import { useStationDashboard } from '@/features/dashboard/useDashboard';
 import { useMe, useRequireSession } from '@/features/session/useSession';
-import { api } from '@/lib/api';
-import { blockWord, readableCategory } from '@/lib/format';
+import { api } from '@/shared/lib/api';
+import { blockWord, readableCategory } from '@/shared/lib/format';
 
 /**
  * The IC console (PRODUCT_BRIEF §2.5).

@@ -2,7 +2,7 @@
 
 import { BrowserQRCodeReader } from '@zxing/browser';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Callout } from '@/components/ui';
+import { Callout } from '@/shared/ui';
 
 export function AttendanceScanner({ onScan }: { onScan(token: string): void }): ReactNode {
   const video = useRef<HTMLVideoElement>(null);

@@ -56,7 +56,7 @@ describe('client session and settings (P03 repros)', () => {
           })
         : Promise.resolve(json(404, {})),
     );
-    const { bootstrapSession, getSessionSnapshot } = await import('@/lib/session');
+    const { bootstrapSession, getSessionSnapshot } = await import('@/shared/lib/session');
 
     // React StrictMode runs the providers' effect twice in development.
     const first = bootstrapSession();
@@ -93,8 +93,8 @@ describe('client session and settings (P03 repros)', () => {
       }
       return Promise.resolve(json(404, {}));
     });
-    const { bootstrapSession, openSession } = await import('@/lib/session');
-    const { getClientSettings, loadClientSettings } = await import('@/lib/runtimeSettings');
+    const { bootstrapSession, openSession } = await import('@/shared/lib/session');
+    const { getClientSettings, loadClientSettings } = await import('@/shared/lib/runtimeSettings');
 
     // What the providers do on a signed-out page load (the sign-in screen).
     await bootstrapSession().then(() => loadClientSettings());

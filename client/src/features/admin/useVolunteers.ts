@@ -14,7 +14,7 @@ import type {
   VolunteerAdminRecord,
   VolunteerMutationResponse,
 } from '@spoh/shared';
-import { api } from '@/lib/api';
+import { api } from '@/shared/lib/api';
 import { useCurrentSession } from '../session/useSession';
 
 /**

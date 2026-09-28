@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type { CreateUploadResponse, UploadContentType } from '@spoh/shared';
-import { api } from '@/lib/api';
+import { api } from '@/shared/lib/api';
 import { useCurrentSession } from '../session/useSession';
 
 /**

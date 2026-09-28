@@ -2,8 +2,8 @@
 
 import type { ReactNode } from 'react';
 import type { LiveDashboardResponse } from '@spoh/shared';
-import { AppShell } from '@/components/AppShell';
-import { BarList, BarRow, StatTile } from '@/components/dashboard/StatTile';
+import { AppShell } from '@/shared/shell/AppShell';
+import { BarList, BarRow, StatTile } from '@/features/dashboard/components/StatTile';
 import {
   ButtonLink,
   Callout,
@@ -13,10 +13,10 @@ import {
   LoadingCards,
   Section,
   Stack,
-} from '@/components/ui';
+} from '@/shared/ui';
 import { useLiveDashboard } from '@/features/dashboard/useDashboard';
 import { useRequireSession } from '@/features/session/useSession';
-import { formatDuration, readableCategory } from '@/lib/format';
+import { formatDuration, readableCategory } from '@/shared/lib/format';
 
 /**
  * The live operations dashboard (PRODUCT_BRIEF §9).

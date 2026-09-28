@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactNode } from 'react';
 import type { FallbackWindowRecord, StationSummary } from '@spoh/shared';
-import { AppShell } from '@/components/AppShell';
+import { AppShell } from '@/shared/shell/AppShell';
 import {
   Button,
   Callout,
@@ -15,10 +15,10 @@ import {
   Select,
   Stack,
   Textarea,
-} from '@/components/ui';
+} from '@/shared/ui';
 import { useRequireSession } from '@/features/session/useSession';
-import { ApiError, api } from '@/lib/api';
-import { formatTime } from '@/lib/format';
+import { ApiError, api } from '@/shared/lib/api';
+import { formatTime } from '@/shared/lib/format';
 
 /**
  * Declaring and closing a fallback window (PRODUCT_BRIEF §11).

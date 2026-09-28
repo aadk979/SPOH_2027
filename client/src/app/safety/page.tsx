@@ -1,9 +1,9 @@
 'use client';
 
-import { AppShell } from '@/components/AppShell';
-import { NavTile } from '@/components/NavTile';
-import { EscalationChain } from '@/components/ShiftOverview';
-import { WorkspaceIntro } from '@/components/WorkspaceIntro';
+import { AppShell } from '@/shared/shell/AppShell';
+import { NavTile } from '@/shared/ui/NavTile';
+import { EscalationChain } from '@/features/shift/components/ShiftOverview';
+import { WorkspaceIntro } from '@/shared/ui/WorkspaceIntro';
 import {
   Button,
   ButtonLink,
@@ -12,7 +12,7 @@ import {
   LoadingCards,
   Section,
   Stack,
-} from '@/components/ui';
+} from '@/shared/ui';
 import { useMe, useRequireSession } from '@/features/session/useSession';
 
 export default function SafetyPage() {

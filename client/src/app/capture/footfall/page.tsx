@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { AppShell } from '@/components/AppShell';
-import { SyncIndicator } from '@/components/SyncIndicator';
-import { Button, Callout, EmptyState } from '@/components/ui';
-import { useCapture, useWakeLock } from '@/features/capture/useCapture';
+import { AppShell } from '@/shared/shell/AppShell';
+import { SyncIndicator } from '@/shared/shell/SyncIndicator';
+import { Button, Callout, EmptyState } from '@/shared/ui';
+import { useCapture } from '@/features/capture/useCapture';
+import { useWakeLock } from '@/shared/hooks/useWakeLock';
 import { useMe, useRequireSession } from '@/features/session/useSession';
 
 /**

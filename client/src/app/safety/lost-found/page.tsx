@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState, type ReactNode } from 'react';
 import type { LostFoundRecord } from '@spoh/shared';
-import { AppShell } from '@/components/AppShell';
+import { AppShell } from '@/shared/shell/AppShell';
 import {
   Button,
   ButtonLink,
@@ -16,10 +16,10 @@ import {
   LoadingCards,
   StatusText,
   type Tone,
-} from '@/components/ui';
+} from '@/shared/ui';
 import { useRequireSession } from '@/features/session/useSession';
-import { api } from '@/lib/api';
-import { formatDateTime } from '@/lib/format';
+import { api } from '@/shared/lib/api';
+import { formatDateTime } from '@/shared/lib/format';
 
 /**
  * The lost-and-found desk (PRODUCT_BRIEF §7.2).

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ApiError, NetworkError } from '@/lib/api';
+import { ApiError, NetworkError } from '@/shared/lib/api';
 import {
   MAX_ATTEMPTS,
   UNSYNCED_WARNING_COUNT,
@@ -10,7 +10,7 @@ import {
   needsAttention,
   toClipboardText,
   type OutboxEntry,
-} from '@/lib/outbox';
+} from '@/shared/lib/outbox';
 
 /**
  * The outbox (BUILD_PLAN §9.5).
@@ -26,12 +26,12 @@ import {
  * outbox imports `api` as a live ESM binding, and reassigning a property on the
  * namespace object would not rebind it.
  */
-vi.mock('@/lib/api', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/lib/api')>();
+vi.mock('@/shared/lib/api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/shared/lib/api')>();
   return { ...actual, api: vi.fn() };
 });
 
-const apiModule = await import('@/lib/api');
+const apiModule = await import('@/shared/lib/api');
 const mockedApi = vi.mocked(apiModule.api);
 
 async function clearOutbox(): Promise<void> {

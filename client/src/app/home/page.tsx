@@ -1,13 +1,13 @@
 'use client';
 
-import { AppShell } from '@/components/AppShell';
-import { ShiftCard, RoleTiles } from '@/components/ShiftOverview';
-import { SyncIndicator } from '@/components/SyncIndicator';
-import { WorkspaceIntro } from '@/components/WorkspaceIntro';
-import { NavTile } from '@/components/NavTile';
-import { Button, ButtonLink, Callout, Card, LoadingCards, Stack } from '@/components/ui';
+import { AppShell } from '@/shared/shell/AppShell';
+import { ShiftCard, RoleTiles } from '@/features/shift/components/ShiftOverview';
+import { SyncIndicator } from '@/shared/shell/SyncIndicator';
+import { WorkspaceIntro } from '@/shared/ui/WorkspaceIntro';
+import { NavTile } from '@/shared/ui/NavTile';
+import { Button, ButtonLink, Callout, Card, LoadingCards, Stack } from '@/shared/ui';
 import { useMe, useRequireSession } from '@/features/session/useSession';
-import { canOpenOperations } from '@/lib/navigation';
+import { canOpenOperations } from '@/shared/lib/navigation';
 
 export default function HomePage() {
   const session = useRequireSession();

@@ -2,9 +2,9 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState, type FormEvent, type ReactNode } from 'react';
-import { clientEnv, isDevAuth } from '@/lib/env';
-import { openSession } from '@/lib/session';
-import { Button, ButtonLink, Card, Field, Input, Skeleton } from '@/components/ui';
+import { clientEnv, isDevAuth } from '@/shared/lib/env';
+import { openSession } from '@/shared/lib/session';
+import { Button, ButtonLink, Card, Field, Input, Skeleton } from '@/shared/ui';
 
 /**
  * Sign-in.

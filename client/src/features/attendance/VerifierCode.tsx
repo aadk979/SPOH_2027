@@ -3,7 +3,7 @@
 import { BarcodeFormat, QRCodeWriter } from '@zxing/library';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { AttendanceChallenge } from '@spoh/shared';
-import { Button, Callout, Card } from '@/components/ui';
+import { Button, Callout, Card } from '@/shared/ui';
 
 export function VerifierCode({
   challenge,

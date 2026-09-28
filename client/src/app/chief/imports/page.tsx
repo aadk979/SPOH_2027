@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from 'react';
 import type { ImportResponse } from '@spoh/shared';
-import { AppShell } from '@/components/AppShell';
+import { AppShell } from '@/shared/shell/AppShell';
 import {
   Button,
   Callout,
@@ -13,9 +13,9 @@ import {
   Input,
   Stack,
   Textarea,
-} from '@/components/ui';
+} from '@/shared/ui';
 import { useRequireSession } from '@/features/session/useSession';
-import { ApiError, api } from '@/lib/api';
+import { ApiError, api } from '@/shared/lib/api';
 
 /**
  * Reconciliation imports (PRODUCT_BRIEF §11.4).

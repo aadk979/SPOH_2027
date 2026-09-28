@@ -1,8 +1,8 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { AppShell } from '@/components/AppShell';
-import { Button, ButtonLink, Callout, Card, CardTitle, Stack } from '@/components/ui';
+import { AppShell } from '@/shared/shell/AppShell';
+import { Button, ButtonLink, Callout, Card, CardTitle, Stack } from '@/shared/ui';
 
 export default function ErrorBoundary({
   error,

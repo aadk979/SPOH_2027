@@ -17,7 +17,7 @@ const state = vi.hoisted(() => ({
   error: null as string | null,
 }));
 
-vi.mock('@/components/AppShell', () => ({
+vi.mock('@/shared/shell/AppShell', () => ({
   AppShell: ({ title, children }: { title: string; children: ReactNode }) => (
     <main>
       <h1>{title}</h1>
@@ -25,13 +25,13 @@ vi.mock('@/components/AppShell', () => ({
     </main>
   ),
 }));
-vi.mock('@/components/SyncIndicator', () => ({ SyncIndicator: () => null }));
+vi.mock('@/shared/shell/SyncIndicator', () => ({ SyncIndicator: () => null }));
 vi.mock('@/features/session/useSession', () => ({
   useRequireSession: () => (state.signedIn ? { accessToken: 'test' } : null),
   useMe: () => ({ data: { currentAssignment: state.station ? { station: state.station } : null } }),
 }));
+vi.mock('@/shared/hooks/useWakeLock', () => ({ useWakeLock: vi.fn() }));
 vi.mock('@/features/capture/useCapture', () => ({
-  useWakeLock: vi.fn(),
   useCapture: () => ({
     sessionCount: 3,
     undoable: state.undoable,

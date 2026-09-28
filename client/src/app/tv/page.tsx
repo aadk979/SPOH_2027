@@ -3,8 +3,8 @@
 import { useEffect, type ReactNode } from 'react';
 import { useLiveDashboard } from '@/features/dashboard/useDashboard';
 import { useRequireSession } from '@/features/session/useSession';
-import { cx } from '@/components/ui';
-import { formatCount, formatTime, readableCategory } from '@/lib/format';
+import { cx } from '@/shared/ui';
+import { formatCount, formatTime, readableCategory } from '@/shared/lib/format';
 
 /**
  * TV mode — the ops-room display (PRODUCT_BRIEF §9).

@@ -2,14 +2,14 @@
 
 import { useCallback, useState, type ReactNode } from 'react';
 import type { MissionCardRecord, StampCardResponse } from '@spoh/shared';
-import { AppShell } from '@/components/AppShell';
-import { CardCodeInput } from '@/components/CardCodeInput';
-import { SyncIndicator } from '@/components/SyncIndicator';
-import { Callout, Card, CardTitle, EmptyState, type Tone } from '@/components/ui';
+import { AppShell } from '@/shared/shell/AppShell';
+import { CardCodeInput } from '@/features/capture/components/CardCodeInput';
+import { SyncIndicator } from '@/shared/shell/SyncIndicator';
+import { Callout, Card, CardTitle, EmptyState, type Tone } from '@/shared/ui';
 import { useQrScanner } from '@/features/capture/useQrScanner';
-import { useWakeLock } from '@/features/capture/useCapture';
+import { useWakeLock } from '@/shared/hooks/useWakeLock';
 import { useMe, useRequireSession } from '@/features/session/useSession';
-import { ApiError, api } from '@/lib/api';
+import { ApiError, api } from '@/shared/lib/api';
 
 /**
  * Stamp scanning (BUILD_PLAN §9.4, PRODUCT_BRIEF §4.2).

@@ -2,10 +2,10 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent, type ReactNode } from 'react';
-import { AppShell } from '@/components/AppShell';
-import { Button, Callout, Field, Input, Textarea } from '@/components/ui';
+import { AppShell } from '@/shared/shell/AppShell';
+import { Button, Callout, Field, Input, Textarea } from '@/shared/ui';
 import { useMe, useRequireSession } from '@/features/session/useSession';
-import { api } from '@/lib/api';
+import { api } from '@/shared/lib/api';
 
 /**
  * Raise a lost-person alert (PRODUCT_BRIEF §7.3).

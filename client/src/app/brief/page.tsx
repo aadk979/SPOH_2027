@@ -1,8 +1,8 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { AppShell } from '@/components/AppShell';
-import { Card, CardTitle, Section, Stack } from '@/components/ui';
+import { AppShell } from '@/shared/shell/AppShell';
+import { Card, CardTitle, Section, Stack } from '@/shared/ui';
 import { COURSES, ESCALATION_SCRIPT, FIVE_THINGS } from '@/content/brief';
 import { useRequireSession } from '@/features/session/useSession';
 

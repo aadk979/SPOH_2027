@@ -1,8 +1,8 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { AppShell } from '@/components/AppShell';
-import { Card, CardTitle, StatusText } from '@/components/ui';
+import { AppShell } from '@/shared/shell/AppShell';
+import { Card, CardTitle, StatusText } from '@/shared/ui';
 import { FLOOR_MAP } from '@/content/brief';
 import { useRequireSession } from '@/features/session/useSession';
 

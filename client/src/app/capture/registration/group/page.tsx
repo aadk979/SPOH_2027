@@ -3,10 +3,10 @@
 import { useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import type { VisitorCategory } from '@spoh/shared';
-import { AppShell } from '@/components/AppShell';
-import { Button, Callout, Card, EmptyState, Field, Input, cx } from '@/components/ui';
+import { AppShell } from '@/shared/shell/AppShell';
+import { Button, Callout, Card, EmptyState, Field, Input, cx } from '@/shared/ui';
 import { useMe, useRequireSession } from '@/features/session/useSession';
-import { enqueue } from '@/lib/outbox';
+import { enqueue } from '@/shared/lib/outbox';
 
 /**
  * Group registration (PRODUCT_BRIEF §2.2).

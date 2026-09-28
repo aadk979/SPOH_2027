@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import type { IncidentSeverity, IncidentType } from '@spoh/shared';
-import { AppShell } from '@/components/AppShell';
+import { AppShell } from '@/shared/shell/AppShell';
 import {
   Button,
   Callout,
@@ -12,9 +12,9 @@ import {
   Input,
   Textarea,
   type ChoiceOption,
-} from '@/components/ui';
+} from '@/shared/ui';
 import { useMe, useRequireSession } from '@/features/session/useSession';
-import { api } from '@/lib/api';
+import { api } from '@/shared/lib/api';
 
 /**
  * Incident report (PRODUCT_BRIEF §7.1).

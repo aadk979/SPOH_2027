@@ -4,14 +4,14 @@ import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useEffect, useSyncExternalStore } from 'react';
 import type { Capability, MeResponse } from '@spoh/shared';
-import { api } from '@/lib/api';
+import { api } from '@/shared/lib/api';
 import {
   EMPTY_SNAPSHOT,
   getSessionSnapshot,
   subscribeToSession,
   type Session,
   type SessionStatus,
-} from '@/lib/session';
+} from '@/shared/lib/session';
 
 /** Re-renders whenever the in-memory session changes. */
 export function useSessionState(): { status: SessionStatus; session: Session | null } {

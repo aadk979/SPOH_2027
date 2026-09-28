@@ -3,13 +3,14 @@
 import { useQuery } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import type { RegistrationSummaryResponse, VisitorCategory } from '@spoh/shared';
-import { AppShell } from '@/components/AppShell';
-import { SyncIndicator } from '@/components/SyncIndicator';
-import { Button, ButtonLink, Callout, EmptyState } from '@/components/ui';
-import { useCapture, useWakeLock } from '@/features/capture/useCapture';
+import { AppShell } from '@/shared/shell/AppShell';
+import { SyncIndicator } from '@/shared/shell/SyncIndicator';
+import { Button, ButtonLink, Callout, EmptyState } from '@/shared/ui';
+import { useCapture } from '@/features/capture/useCapture';
+import { useWakeLock } from '@/shared/hooks/useWakeLock';
 import { useMe, useRequireSession } from '@/features/session/useSession';
-import { api } from '@/lib/api';
-import { formatCount } from '@/lib/format';
+import { api } from '@/shared/lib/api';
+import { formatCount } from '@/shared/lib/format';
 
 /**
  * The sign-up booth (BUILD_PLAN §9.4, PRODUCT_BRIEF §2).

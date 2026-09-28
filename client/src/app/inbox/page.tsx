@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactNode } from 'react';
 import type { AnnouncementRecord, StationSummary } from '@spoh/shared';
-import { AppShell } from '@/components/AppShell';
+import { AppShell } from '@/shared/shell/AppShell';
 import {
   Button,
   Callout,
@@ -18,10 +18,10 @@ import {
   Stack,
   Textarea,
   type CardTone,
-} from '@/components/ui';
+} from '@/shared/ui';
 import { useMe, useRequireSession } from '@/features/session/useSession';
-import { api } from '@/lib/api';
-import { formatTime } from '@/lib/format';
+import { api } from '@/shared/lib/api';
+import { formatTime } from '@/shared/lib/format';
 
 /**
  * The announcements inbox (PRODUCT_BRIEF §8).

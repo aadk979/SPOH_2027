@@ -3,8 +3,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState, type ReactNode } from 'react';
 import type { FullReport } from '@spoh/shared';
-import { AppShell } from '@/components/AppShell';
-import { BarList, BarRow, StatTile } from '@/components/dashboard/StatTile';
+import { AppShell } from '@/shared/shell/AppShell';
+import { BarList, BarRow, StatTile } from '@/features/dashboard/components/StatTile';
 import {
   Button,
   Callout,
@@ -14,12 +14,12 @@ import {
   LoadingCards,
   Section,
   Stack,
-} from '@/components/ui';
+} from '@/shared/ui';
 import { useRequireSession } from '@/features/session/useSession';
-import { api } from '@/lib/api';
-import { clientEnv } from '@/lib/env';
-import { formatTime, readableCategory } from '@/lib/format';
-import { getAccessToken } from '@/lib/session';
+import { api } from '@/shared/lib/api';
+import { clientEnv } from '@/shared/lib/env';
+import { formatTime, readableCategory } from '@/shared/lib/format';
+import { getAccessToken } from '@/shared/lib/session';
 
 /**
  * The post-event report (PRODUCT_BRIEF §10).
