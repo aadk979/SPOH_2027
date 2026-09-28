@@ -21,7 +21,7 @@ import { reportRouter } from './modules/report/index.js';
 import { rosterRouter } from './modules/roster/index.js';
 import { shiftRouter } from './modules/shift/index.js';
 import { stationRouter } from './modules/station/index.js';
-import { createDevAuthRouter } from './modules/devAuth/router.js';
+import { createDevAuthRouter } from './modules/devAuth/index.js';
 
 /**
  * The versioned API surface (BUILD_PLAN §7.1).
