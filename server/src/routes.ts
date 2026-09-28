@@ -14,7 +14,7 @@ import { giftRouter } from './modules/gift/index.js';
 import { incidentRouter } from './modules/incident/index.js';
 import { lostFoundRouter } from './modules/lostFound/index.js';
 import { lostPersonRouter } from './modules/lostPerson/index.js';
-import { meRouter } from './modules/me/router.js';
+import { meRouter } from './modules/me/index.js';
 import { missionCardRouter } from './modules/missionCard/index.js';
 import { registrationRouter } from './modules/registration/index.js';
 import { reportRouter } from './modules/report/router.js';

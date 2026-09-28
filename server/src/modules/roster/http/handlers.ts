@@ -3,7 +3,7 @@ import type { ProvisionVolunteerRequest, RosterImportRequest } from '@spoh/share
 import { auditContextFrom } from '../../../platform/http/auditContext.js';
 import { validatedBody } from '../../../platform/http/validate.js';
 import { getAuth } from '../../../platform/identity/index.js';
-import { getMe } from '../../me/service.js';
+import { getMe } from '../../me/index.js';
 import type { RosterActor } from '../application/context.js';
 import { importRoster } from '../application/importRoster.js';
 import { provisionVolunteer } from '../application/provisionVolunteer.js';

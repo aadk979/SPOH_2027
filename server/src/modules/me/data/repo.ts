@@ -1,5 +1,5 @@
-import type { Prisma } from '../../generated/prisma/client.js';
-import { prisma } from '../../platform/db/client.js';
+import type { Prisma } from '../../../generated/prisma/client.js';
+import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 
 /** Data access for the caller's own profile, roster and escalation chain. */
 
@@ -42,20 +42,47 @@ export async function findAssignmentById(id: string): Promise<AssignmentWithCont
   return prisma.shiftAssignment.findUnique({ where: { id }, include: assignmentInclude });
 }
 
-export async function setAssignmentCheckIn(id: string, at: Date): Promise<AssignmentWithContext> {
-  return prisma.shiftAssignment.update({
-    where: { id },
-    data: { checkedInAt: at },
-    include: assignmentInclude,
+export async function hasAttendance(
+  tx: PrismaTransactionClient,
+  where: { volunteerId: string; eventDayId: string },
+): Promise<boolean> {
+  const attendance = await tx.attendance.findUnique({
+    where: { volunteerId_eventDayId: where },
+    select: { id: true },
   });
+  return attendance !== null;
 }
 
-export async function setAssignmentCheckOut(id: string, at: Date): Promise<AssignmentWithContext> {
-  return prisma.shiftAssignment.update({
+/** Sets the check-in only if it is still empty; false when it was not. */
+export async function markCheckedIn(
+  tx: PrismaTransactionClient,
+  where: { id: string; volunteerId: string },
+  at: Date,
+): Promise<boolean> {
+  const changed = await tx.shiftAssignment.updateMany({
+    where: { ...where, checkedInAt: null },
+    data: { checkedInAt: at },
+  });
+  return changed.count > 0;
+}
+
+export async function markCheckedOut(
+  tx: PrismaTransactionClient,
+  id: string,
+  at: Date,
+): Promise<AssignmentWithContext> {
+  return tx.shiftAssignment.update({
     where: { id },
     data: { checkedOutAt: at },
     include: assignmentInclude,
   });
+}
+
+export async function findAssignmentInTx(
+  tx: PrismaTransactionClient,
+  id: string,
+): Promise<AssignmentWithContext> {
+  return tx.shiftAssignment.findUniqueOrThrow({ where: { id }, include: assignmentInclude });
 }
 
 /**
