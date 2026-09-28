@@ -27,7 +27,7 @@ import {
   useUpdateVolunteer,
   useVolunteers,
   type VolunteerFilters,
-} from '@/features/admin/useVolunteers';
+} from '@/features/volunteers';
 
 /**
  * Roster administration (Chief and Admin).

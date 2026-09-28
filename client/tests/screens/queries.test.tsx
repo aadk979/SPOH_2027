@@ -5,6 +5,13 @@ import type { ReactNode } from 'react';
 import { api } from '@/shared/lib/api';
 import { useAcknowledgeAlert, useResolveAlert, lostPersonKeys } from '@/features/lostPerson';
 import { useStationDashboard } from '@/features/dashboard';
+import {
+  useVolunteers,
+  useUpdateVolunteer,
+  useDeactivateVolunteer,
+  useReactivateVolunteer,
+  volunteerKeys,
+} from '@/features/volunteers';
 
 vi.mock('@/shared/lib/api', () => ({ api: vi.fn() }));
 vi.mock('@/features/session', () => ({ useCurrentSession: () => ({ accessToken: 'test' }) }));
@@ -69,4 +76,59 @@ it('sends the resolution outcome and invalidates alerts only after success', asy
     body: { outcome: 'RESOLVED_FOUND' },
   });
   expect(invalidate).toHaveBeenCalledWith({ queryKey: lostPersonKeys.active });
+});
+
+it('preserves roster filter encoding and separate list cache entries', async () => {
+  const { client, wrapper } = setup();
+  const filters = { q: '  Lee & Tan  ', role: 'IC', active: 'false', sort: 'lastSeen' } as const;
+  const response = { data: [], meta: { count: 0, nextCursor: null } };
+  vi.mocked(api).mockResolvedValue(response);
+  renderHook(() => useVolunteers(filters), { wrapper });
+  await waitFor(() => expect(client.getQueryData(volunteerKeys.list(filters))).toEqual(response));
+  expect(api).toHaveBeenCalledWith(
+    '/admin/volunteers?q=Lee+%26+Tan&role=IC&active=false&sort=lastSeen&limit=100',
+  );
+});
+
+it('invalidates all roster filters only after successful mutations', async () => {
+  const { client, wrapper } = setup();
+  const invalidate = vi.spyOn(client, 'invalidateQueries');
+  const { result } = renderHook(
+    () => ({
+      update: useUpdateVolunteer(),
+      deactivate: useDeactivateVolunteer(),
+      reactivate: useReactivateVolunteer(),
+    }),
+    { wrapper },
+  );
+  vi.mocked(api).mockRejectedValueOnce(new Error('offline'));
+  await act(async () => {
+    await expect(
+      result.current.update.mutateAsync({ id: 'person-42', patch: { role: 'IC' } }),
+    ).rejects.toThrow('offline');
+  });
+  expect(invalidate).not.toHaveBeenCalled();
+  await act(async () => {
+    await result.current.update.mutateAsync({ id: 'person-42', patch: { role: 'IC' } });
+    await result.current.deactivate.mutateAsync({
+      id: 'person-42',
+      body: { reason: 'Left the roster', disableIdentity: false },
+    });
+    await result.current.reactivate.mutateAsync('person-42');
+  });
+  expect(api).toHaveBeenCalledWith('/admin/volunteers/person-42', {
+    method: 'PATCH',
+    body: { role: 'IC' },
+  });
+  expect(api).toHaveBeenCalledWith('/admin/volunteers/person-42/deactivate', {
+    method: 'POST',
+    body: { reason: 'Left the roster', disableIdentity: false },
+  });
+  expect(api).toHaveBeenLastCalledWith('/admin/volunteers/person-42/reactivate', {
+    method: 'POST',
+  });
+  expect(invalidate).toHaveBeenCalledTimes(3);
+  expect(invalidate.mock.calls.every(([filter]) => filter?.queryKey === volunteerKeys.all)).toBe(
+    true,
+  );
 });
