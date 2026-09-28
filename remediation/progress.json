@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-28T11:29:11.646Z",
+  "updatedAt": "2026-09-28T11:39:27.748Z",
   "current": {
     "phase": "P06",
-    "step": "P06.9"
+    "step": "P06.10"
   },
   "gates": [
     {
@@ -1311,11 +1311,16 @@
         {
           "id": "P06.10",
           "title": "Make the guards blocking",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-28T11:29:18.654Z",
+          "completedAt": "2026-09-28T11:39:27.747Z",
+          "commits": ["1f93db1"],
+          "notes": [
+            {
+              "at": "2026-09-28T11:39:27.748Z",
+              "text": "size/complexity guards and dependency-cruiser rules are errors for server and shared; npm run lint and arch:check clean with zero server violations; CI boundary step blocking; client rules stay warnings until P07"
+            }
+          ]
         },
         {
           "id": "P06.11",
