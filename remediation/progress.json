@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-28T15:38:27.486Z",
+  "updatedAt": "2026-09-28T15:48:46.862Z",
   "current": {
     "phase": "P07",
     "step": "P07.5"
@@ -1421,7 +1421,7 @@
           "status": "in_progress",
           "startedAt": "2026-09-28T14:47:11.510Z",
           "completedAt": null,
-          "commits": ["55de33d", "5eeb3da", "dd92bb7", "62dad4e", "a674d96"],
+          "commits": ["55de33d", "5eeb3da", "dd92bb7", "62dad4e", "a674d96", "3497154"],
           "notes": [
             {
               "at": "2026-09-28T14:47:11.511Z",
@@ -1446,6 +1446,10 @@
             {
               "at": "2026-09-28T15:38:27.485Z",
               "text": "Chief, IC and TV dashboards split into focused panels; attention derivation tested, wake-lock lifecycle preserved. Client 101 passed/4 deferred, server 768 passed/9 deferred, E2E 26 passed, visual 58 passed with unchanged baselines. Workspace typecheck passed after correcting incomplete test fixture; architecture clean; lint zero errors/25 remaining warnings. P07.5 remains in progress."
+            },
+            {
+              "at": "2026-09-28T15:48:46.861Z",
+              "text": "Registration/group, footfall, stamp, redemption and card scanner split into panels, hooks and tested model functions. Queue failures, optional card payload, idle reset/cleanup, latest scanner callback and existing QR semantics covered. Client 117 passed/4 deferred; server 768 passed/9 deferred; E2E 26 passed; visual 58 passed, unchanged baselines. Workspace typecheck/architecture/format clean; lint zero errors/16 warnings. P07.5 remains in progress."
             }
           ]
         },
