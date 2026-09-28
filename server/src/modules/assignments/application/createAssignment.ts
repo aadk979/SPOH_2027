@@ -3,7 +3,12 @@ import { writeAudit, type AuditContext } from '../../../platform/audit/index.js'
 import { prisma } from '../../../platform/db/client.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { toAssignmentRecord } from '../data/mappers.js';
-import { findAssignmentInSlot, findAssignmentTargets, upsertAssignmentRow } from '../data/repo.js';
+import {
+  findAssignmentInSlot,
+  findAssignmentTargets,
+  findAssignmentWithNames,
+  upsertAssignmentRow,
+} from '../data/repo.js';
 
 /**
  * Roster a volunteer into a block. Upsert rather than fail on the (volunteer,
@@ -48,5 +53,9 @@ export async function createAssignment(
     return assignment;
   });
 
-  return toAssignmentRecord(row);
+  // Loaded after commit: its relations would overlap on the transaction's
+  // connection (F03-019).
+  const assignment = await findAssignmentWithNames(row.id);
+  if (!assignment) throw new NotFoundError('Shift assignment');
+  return toAssignmentRecord(assignment);
 }

@@ -77,7 +77,7 @@ export async function upsertAssignmentRow(
   data: Prisma.ShiftAssignmentUncheckedCreateInput & {
     block: Prisma.ShiftAssignmentUncheckedCreateInput['block'];
   },
-): Promise<AssignmentWithNames> {
+): Promise<{ id: string }> {
   return tx.shiftAssignment.upsert({
     where: {
       volunteerId_eventDayId_block: {
@@ -88,8 +88,12 @@ export async function upsertAssignmentRow(
     },
     create: data,
     update: { stationId: data.stationId, roleLabel: data.roleLabel },
-    include: assignmentInclude,
+    select: { id: true },
   });
+}
+
+export async function findAssignmentWithNames(id: string): Promise<AssignmentWithNames | null> {
+  return prisma.shiftAssignment.findUnique({ where: { id }, include: assignmentInclude });
 }
 
 export async function findAssignmentForRemoval(id: string) {

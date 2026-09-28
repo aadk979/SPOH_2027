@@ -3,7 +3,8 @@ import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { findStationById } from '../../station/index.js';
-import { createIncident } from '../data/repo.js';
+import { createIncident, findIncidentById } from '../data/repo.js';
+import { NotFoundError } from '../../../platform/errors/index.js';
 import { toRecordWithAuthors } from './incidentRecord.js';
 import { notifySafetyChain } from './notifySafetyChain.js';
 
@@ -48,5 +49,9 @@ export async function reportIncident(
     volunteerId,
   );
 
-  return toRecordWithAuthors(incident);
+  // Loaded after commit: its relations would overlap on the transaction's
+  // connection (F03-019).
+  const created = await findIncidentById(incident.id);
+  if (!created) throw new NotFoundError('Incident');
+  return toRecordWithAuthors(created);
 }

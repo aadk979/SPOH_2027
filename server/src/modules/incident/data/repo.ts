@@ -29,8 +29,16 @@ export async function findAuthorNames(authorIds: readonly string[]): Promise<Map
 export async function createIncident(
   tx: PrismaTransactionClient,
   data: Prisma.IncidentUncheckedCreateInput,
-): Promise<IncidentWithContext> {
-  return tx.incident.create({ data, include: incidentInclude });
+): Promise<{
+  id: string;
+  type: string;
+  severity: IncidentWithContext['severity'];
+  stationId: string | null;
+}> {
+  return tx.incident.create({
+    data,
+    select: { id: true, type: true, severity: true, stationId: true },
+  });
 }
 
 export async function findIncidentById(id: string): Promise<IncidentWithContext | null> {

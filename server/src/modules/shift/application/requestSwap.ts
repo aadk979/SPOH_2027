@@ -7,6 +7,7 @@ import { toSwapRecord } from '../data/mappers.js';
 import {
   createSwap,
   findAssignmentForSwap,
+  findSwapById,
   findVolunteerActive,
   hasAssignmentInBlock,
 } from '../data/repo.js';
@@ -53,5 +54,9 @@ export async function requestSwap(
     return row;
   });
 
-  return toSwapRecord(swap);
+  // Loaded after commit: the record's relations would overlap on the
+  // transaction's connection (F03-019).
+  const created = await findSwapById(swap.id);
+  if (!created) throw new NotFoundError('Swap request');
+  return toSwapRecord(created);
 }

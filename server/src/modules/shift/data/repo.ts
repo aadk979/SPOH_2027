@@ -16,9 +16,30 @@ export type SwapWithContext = Prisma.ShiftSwapRequestGetPayload<{ include: typeo
 export async function createSwap(
   tx: PrismaTransactionClient,
   data: Prisma.ShiftSwapRequestUncheckedCreateInput,
-): Promise<SwapWithContext> {
-  return tx.shiftSwapRequest.create({ data, include: swapInclude });
+): Promise<{ id: string }> {
+  return tx.shiftSwapRequest.create({ data, select: { id: true } });
 }
+
+/**
+ * A swap as a decision needs it, inside the transaction. One relation, so one
+ * follow-up query: an `include` of several relations loads them in parallel,
+ * which on a transaction's single connection overlaps queries (F03-019).
+ */
+export async function findSwapForDecision(tx: PrismaTransactionClient, id: string) {
+  return tx.shiftSwapRequest.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      status: true,
+      requesterId: true,
+      targetId: true,
+      assignmentId: true,
+      assignment: { select: { volunteerId: true, eventDayId: true, block: true } },
+    },
+  });
+}
+
+export type SwapForDecision = NonNullable<Awaited<ReturnType<typeof findSwapForDecision>>>;
 
 export async function findSwapById(
   id: string,

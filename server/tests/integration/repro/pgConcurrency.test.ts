@@ -35,7 +35,7 @@ afterEach(() => {
 
 describe('transactions (P03 repros)', () => {
   // F03-019
-  it.skip('never runs two queries at once on a transaction client', async () => {
+  it('never runs two queries at once on a transaction client', async () => {
     const day = await createEventDayToday();
     const station = await createStation({ code: 'DESK' });
     const owner = await createVolunteer({ email: 'owner@pg.test', role: 'VOLUNTEER' });

@@ -7,9 +7,10 @@ import { toSwapRecord } from '../data/mappers.js';
 import {
   claimDecision,
   findSwapById,
+  findSwapForDecision,
   hasAssignmentInBlock,
   moveAssignment,
-  type SwapWithContext,
+  type SwapForDecision,
 } from '../data/repo.js';
 import { assertStillRequesters, assertSwapPending, assertTargetFree } from '../domain/swapRules.js';
 import { ERROR_CODES } from '@spoh/shared';
@@ -20,7 +21,7 @@ import { AppError } from '../../../platform/errors/index.js';
  * person has not arrived yet, and inheriting someone else's check-in would
  * make the attendance view lie.
  */
-async function approve(tx: PrismaTransactionClient, swap: SwapWithContext) {
+async function approve(tx: PrismaTransactionClient, swap: SwapForDecision) {
   assertStillRequesters(swap);
   // Re-checked at approval: the target may have picked up another shift in the
   // time between the request and the decision.
@@ -41,7 +42,7 @@ export async function decideSwap(
   { volunteerId: deciderId, audit }: ActorContext,
 ): Promise<SwapRequestRecord> {
   await prisma.$transaction(async (tx) => {
-    const swap = await findSwapById(swapId, tx);
+    const swap = await findSwapForDecision(tx, swapId);
     if (!swap) throw new NotFoundError('Swap request');
     assertSwapPending(swap);
 
