@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { ENV_KEYS, parseEnv } from '../../src/config/schema.js';
 
@@ -44,5 +45,24 @@ describe('configuration', () => {
   it('knows every key it reads', () => {
     expect(ENV_KEYS).toHaveLength(34);
     expect(new Set(ENV_KEYS).size).toBe(ENV_KEYS.length);
+  });
+});
+
+describe('server/.env.example (F01-051)', () => {
+  // A key is documented when it appears as `KEY=` or as a commented `# KEY=`.
+  const documented = new Set(
+    [
+      ...readFileSync(new URL('../../.env.example', import.meta.url), 'utf8').matchAll(
+        /^#? ?([A-Z][A-Z0-9_]*)=/gm,
+      ),
+    ].map((match) => match[1] as string),
+  );
+
+  it('documents every key the server reads', () => {
+    expect(ENV_KEYS.filter((key) => !documented.has(key))).toEqual([]);
+  });
+
+  it('names no key the server does not read', () => {
+    expect([...documented].filter((key) => !ENV_KEYS.includes(key))).toEqual([]);
   });
 });
