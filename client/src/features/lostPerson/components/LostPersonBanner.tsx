@@ -1,11 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import {
-  useAcknowledgeAlert,
-  useActiveAlerts,
-  useResolveAlert,
-} from '@/features/lostPerson/useActiveAlerts';
+import { useAcknowledgeAlert, useActiveAlerts, useResolveAlert } from '@/features/lostPerson';
 import { useMe } from '@/features/session';
 import { Button, ButtonLink } from '@/shared/ui';
 

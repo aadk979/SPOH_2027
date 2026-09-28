@@ -2,9 +2,11 @@
 
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 import type { ActiveLostPersonResponse } from '@spoh/shared';
-import { api } from '@/shared/lib/api';
+import { getActiveAlerts, acknowledgeAlert, resolveAlert } from './api';
+
+export const lostPersonKeys = { active: ['lost-person', 'active'] as const };
 import { ms } from '@/shared/lib/runtimeSettings';
-import { useCurrentSession } from '../session/useSession';
+import { useCurrentSession } from '@/features/session';
 
 /**
  * Active lost-person alerts.
@@ -18,8 +20,8 @@ export function useActiveAlerts(): UseQueryResult<ActiveLostPersonResponse> {
   const session = useCurrentSession();
 
   return useQuery({
-    queryKey: ['lost-person', 'active'],
-    queryFn: () => api<ActiveLostPersonResponse>('/lost-person/active'),
+    queryKey: lostPersonKeys.active,
+    queryFn: getActiveAlerts,
     enabled: session !== null,
     refetchInterval: ms.alertPoll(),
     // Keep polling when the tab is backgrounded: a phone in a pocket is still
@@ -33,9 +35,9 @@ export function useAcknowledgeAlert(): ReturnType<typeof useMutation<unknown, Er
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (alertId: string) => api(`/lost-person/${alertId}/ack`, { method: 'POST' }),
+    mutationFn: acknowledgeAlert,
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['lost-person', 'active'] });
+      void queryClient.invalidateQueries({ queryKey: lostPersonKeys.active });
     },
   });
 }
@@ -57,10 +59,9 @@ export function useResolveAlert(): ReturnType<
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ alertId, outcome }) =>
-      api(`/lost-person/${alertId}/resolve`, { method: 'POST', body: { outcome } }),
+    mutationFn: resolveAlert,
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['lost-person', 'active'] });
+      void queryClient.invalidateQueries({ queryKey: lostPersonKeys.active });
     },
   });
 }

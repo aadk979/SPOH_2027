@@ -14,7 +14,7 @@ import {
   Section,
   Stack,
 } from '@/shared/ui';
-import { useLiveDashboard } from '@/features/dashboard/useDashboard';
+import { useLiveDashboard } from '@/features/dashboard';
 import { useRequireSession } from '@/features/session/useSession';
 import { formatDuration, readableCategory } from '@/shared/lib/format';
 

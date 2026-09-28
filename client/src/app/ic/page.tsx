@@ -18,7 +18,7 @@ import {
   Stack,
   StatusText,
 } from '@/shared/ui';
-import { useStationDashboard } from '@/features/dashboard/useDashboard';
+import { useStationDashboard } from '@/features/dashboard';
 import { useMe, useRequireSession } from '@/features/session/useSession';
 import { api } from '@/shared/lib/api';
 import { blockWord, readableCategory } from '@/shared/lib/format';

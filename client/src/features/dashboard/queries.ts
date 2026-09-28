@@ -2,9 +2,9 @@
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import type { LiveDashboardResponse, StationDashboardResponse } from '@spoh/shared';
-import { api } from '@/shared/lib/api';
+import { getLiveDashboard, getStationDashboard } from './api';
 import { DEFAULT_CLIENT_SETTINGS, ms } from '@/shared/lib/runtimeSettings';
-import { useCurrentSession } from '../session/useSession';
+import { useCurrentSession } from '@/features/session';
 
 /**
  * The live dashboard poll (BUILD_PLAN §7.3).
@@ -14,14 +14,19 @@ import { useCurrentSession } from '../session/useSession';
  * on event day — which is the only day it has to work.
  */
 /** Shipped default; the live cadence is a runtime setting. */
+export const dashboardKeys = {
+  live: ['dashboard', 'live'] as const,
+  station: (stationId: string | undefined) => ['dashboard', 'station', stationId] as const,
+};
+
 export const DASHBOARD_POLL_MS = DEFAULT_CLIENT_SETTINGS.dashboardPollSeconds * 1000;
 
 export function useLiveDashboard(): UseQueryResult<LiveDashboardResponse> {
   const session = useCurrentSession();
 
   return useQuery({
-    queryKey: ['dashboard', 'live'],
-    queryFn: () => api<LiveDashboardResponse>('/dashboard/live'),
+    queryKey: dashboardKeys.live,
+    queryFn: getLiveDashboard,
     enabled: session !== null,
     refetchInterval: ms.dashboardPoll(),
     // The ops-room display is never focused. Without this it would silently
@@ -37,8 +42,8 @@ export function useStationDashboard(
   const session = useCurrentSession();
 
   return useQuery({
-    queryKey: ['dashboard', 'station', stationId],
-    queryFn: () => api<StationDashboardResponse>(`/dashboard/station/${stationId ?? ''}`),
+    queryKey: dashboardKeys.station(stationId),
+    queryFn: () => getStationDashboard(stationId ?? ''),
     enabled: session !== null && Boolean(stationId),
     refetchInterval: ms.dashboardPoll(),
     staleTime: 0,
