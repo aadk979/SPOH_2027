@@ -1,9 +1,9 @@
 import { createHmac, randomBytes } from 'node:crypto';
 import { jwtVerify, SignJWT } from 'jose';
-import { env } from '../../config/env.js';
-import { ForbiddenError } from '../../platform/errors/index.js';
+import { env } from '../../../config/env.js';
+import { ForbiddenError } from '../../../platform/errors/index.js';
+import { ATTENDANCE_TTL_MS } from '../domain/attendanceRules.js';
 
-export const ATTENDANCE_TTL_MS = 5 * 60_000;
 // Domain-separated key: an attendance QR can never authenticate an API session.
 const key = createHmac(
   'sha256',
@@ -17,9 +17,7 @@ export function hashPin(pin: string): string {
 }
 
 export async function signAttendanceToken(
-  id: string,
-  issuerId: string,
-  eventDayId: string,
+  { id, issuerId, eventDayId }: { id: string; issuerId: string; eventDayId: string },
   now: Date,
 ): Promise<string> {
   return new SignJWT({ eventDayId })

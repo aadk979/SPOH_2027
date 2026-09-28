@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { attendanceRouter } from './modules/attendance/router.js';
+import { attendanceRouter } from './modules/attendance/index.js';
 import { env } from './config/env.js';
 import { announcementRouter } from './modules/announcement/router.js';
 import { adminRouter } from './modules/admin/index.js';

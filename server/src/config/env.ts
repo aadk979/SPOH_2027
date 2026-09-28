@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
-import { parseCidr } from '../modules/attendance/campusNetwork.js';
+import { parseCidr } from '../platform/http/campusNetwork.js';
 
 /**
  * Boot-time configuration.

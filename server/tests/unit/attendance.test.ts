@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { isCampusIp, parseCidr } from '../../src/modules/attendance/campusNetwork.js';
+import { isCampusIp, parseCidr } from '../../src/platform/http/campusNetwork.js';
 
 vi.mock('../../src/config/env.js', () => ({
   env: { ATTENDANCE_SIGNING_SECRET: 'attendance-test-secret-at-least-32-characters' },
@@ -8,7 +8,7 @@ import {
   hashPin,
   signAttendanceToken,
   verifyAttendanceToken,
-} from '../../src/modules/attendance/tokens.js';
+} from '../../src/modules/attendance/application/tokens.js';
 
 describe('campus network ranges', () => {
   it('matches approved IPv4 subnets, including mapped IPv6 peers, without trusting nearby addresses', () => {
@@ -35,7 +35,10 @@ describe('campus network ranges', () => {
 describe('attendance tokens', () => {
   const now = new Date('2027-01-07T03:30:00Z');
   it('binds issuer, event day and challenge, and expires at exactly five minutes', async () => {
-    const token = await signAttendanceToken('challenge', 'root', 'day', now);
+    const token = await signAttendanceToken(
+      { id: 'challenge', issuerId: 'root', eventDayId: 'day' },
+      now,
+    );
     expect(await verifyAttendanceToken(token, new Date(now.getTime() + 299_000))).toEqual({
       id: 'challenge',
       issuerId: 'root',
@@ -46,7 +49,10 @@ describe('attendance tokens', () => {
     );
   });
   it('rejects forged claims, malformed tokens and future issuance', async () => {
-    const token = await signAttendanceToken('challenge', 'root', 'day', now);
+    const token = await signAttendanceToken(
+      { id: 'challenge', issuerId: 'root', eventDayId: 'day' },
+      now,
+    );
     const [header, , signature] = token.split('.');
     const forged = `${header}.${Buffer.from(JSON.stringify({ sub: 'another-root', eventDayId: 'day' })).toString('base64url')}.${signature}`;
     await expect(verifyAttendanceToken(forged, now)).rejects.toThrow();
