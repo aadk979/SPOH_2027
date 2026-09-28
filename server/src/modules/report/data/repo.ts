@@ -1,5 +1,5 @@
-import { prisma } from '../../platform/db/client.js';
-import { singaporeHourKey } from '../../platform/time/index.js';
+import { prisma } from '../../../platform/db/client.js';
+import { singaporeHourKey } from '../../../platform/time/index.js';
 
 /**
  * Reads for the post-event report (PRODUCT_BRIEF §10).
@@ -360,4 +360,8 @@ export async function voidedCounts(range: Range) {
     { table: 'FootfallTick', value: footfall },
     { table: 'GiftRedemption', value: redemptions },
   ];
+}
+
+export async function countActiveVolunteers(): Promise<number> {
+  return prisma.volunteer.count({ where: { active: true } });
 }

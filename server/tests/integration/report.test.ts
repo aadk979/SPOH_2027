@@ -4,7 +4,7 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FullReport } from '@spoh/shared';
 import { createApp } from '../../src/app.js';
 import { prisma } from '../../src/platform/db/client.js';
-import { toCsv } from '../../src/modules/report/export.js';
+import { toCsv } from '../../src/modules/report/application/export/toCsv.js';
 import { purgeResolvedAlerts } from '../../src/modules/lostPerson/index.js';
 import { resetDatabase } from '../helpers/db.js';
 import {
