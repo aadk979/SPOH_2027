@@ -12,7 +12,7 @@ import { clearSession, getAccessToken, refreshSession } from '@/shared/lib/sessi
  * Every call goes through here so that authorization, error shape, token
  * renewal and the request-id correlation are handled in exactly one place. The
  * client talks to the Express API directly — there is no Next.js proxy in front
- * of it (BUILD_PLAN §9.1).
+ * of it (docs/adr/ADR-007-code-architecture.md).
  */
 
 export interface ApiRequest {
@@ -63,6 +63,19 @@ export async function api<T>(path: string, options: ApiRequest = {}): Promise<T>
 
   const payload: unknown = await response.json().catch(() => null);
 
+  assertResponseOk(response, payload);
+
+  return payload as T;
+}
+
+/** True for errors an outbox flush should retry rather than give up on. */
+export function isRetryable(error: unknown): boolean {
+  if (error instanceof ApiError) return error.isRetryable;
+  if (error instanceof NetworkError) return true;
+  return false;
+}
+
+function assertResponseOk(response: Response, payload: unknown): void {
   if (!response.ok) {
     const body = (payload as ErrorBody | null)?.error ?? {
       code: 'INTERNAL_ERROR',
@@ -76,13 +89,4 @@ export async function api<T>(path: string, options: ApiRequest = {}): Promise<T>
 
     throw new ApiError(response.status, body);
   }
-
-  return payload as T;
-}
-
-/** True for errors an outbox flush should retry rather than give up on. */
-export function isRetryable(error: unknown): boolean {
-  if (error instanceof ApiError) return error.isRetryable;
-  if (error instanceof NetworkError) return true;
-  return false;
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { ChoiceRadio } from './ChoiceRadio';
 import { cx } from '@/shared/ui/cx';
 
 /**
@@ -20,16 +21,11 @@ import { cx } from '@/shared/ui/cx';
  *
  * The selected state is never colour alone: the chip inverts to a filled pill
  * and the list row gains a 2px ring plus a check glyph, so it survives
- * greyscale and reads correctly at a glance in a bright hall (BUILD_PLAN §9.7).
+ * greyscale and reads correctly at a glance in a bright hall (remediation/standards/engineering-standards.md).
  */
 
-export interface ChoiceOption<T extends string> {
-  value: T;
-  label: string;
-  /** A second line, `list` layout only. Explains what picking this means. */
-  hint?: string;
-  disabled?: boolean;
-}
+import type { ChoiceOption } from './choiceTypes';
+export type { ChoiceOption } from './choiceTypes';
 
 export function ChoiceGroup<T extends string>({
   legend,
@@ -73,66 +69,14 @@ export function ChoiceGroup<T extends string>({
         )}
       >
         {options.map((option) => (
-          <label key={option.value} className={cx(layout === 'list' ? 'block' : 'inline-flex')}>
-            <input
-              type="radio"
-              name={name}
-              value={option.value}
-              checked={value === option.value}
-              disabled={option.disabled}
-              onChange={() => onChange(option.value)}
-              className="peer sr-only"
-            />
-
-            {layout === 'chips' ? (
-              <span
-                className={cx(
-                  'flex min-h-control cursor-pointer items-center rounded-pill border border-line',
-                  'bg-surface px-md py-xs text-body transition-colors',
-                  'peer-checked:border-primary peer-checked:bg-primary peer-checked:text-on-primary',
-                  'peer-checked:font-semibold',
-                  'peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2',
-                  'peer-focus-visible:outline-primary-focus',
-                  'peer-disabled:cursor-not-allowed peer-disabled:opacity-45',
-                )}
-              >
-                {option.label}
-              </span>
-            ) : (
-              <span
-                className={cx(
-                  'flex min-h-control-lg cursor-pointer items-baseline gap-sm rounded-card border',
-                  'border-line bg-surface px-md py-xs transition-colors',
-                  'peer-checked:border-primary peer-checked:bg-surface-alt',
-                  'peer-checked:shadow-[inset_0_0_0_1px_var(--color-primary)]',
-                  'peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2',
-                  'peer-focus-visible:outline-primary-focus',
-                  'peer-disabled:cursor-not-allowed peer-disabled:opacity-45',
-                )}
-              >
-                {/*
-                  The glyph is the greyscale-safe half of the selected state.
-                  Hidden from assistive tech because the radio already says
-                  "selected" — announcing it twice is noise, not clarity.
-                */}
-                <span
-                  aria-hidden="true"
-                  className={cx(
-                    'w-[1ch] shrink-0 font-semibold text-primary',
-                    value === option.value ? 'visible' : 'invisible',
-                  )}
-                >
-                  ✓
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block font-semibold">{option.label}</span>
-                  {option.hint ? (
-                    <span className="block text-caption text-text-muted">{option.hint}</span>
-                  ) : null}
-                </span>
-              </span>
-            )}
-          </label>
+          <ChoiceRadio
+            key={option.value}
+            option={option}
+            name={name}
+            value={value}
+            onChange={onChange}
+            layout={layout}
+          />
         ))}
       </div>
     </fieldset>

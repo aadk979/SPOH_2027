@@ -1,8 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { getPushConfig, registerPush, unregisterPush } from './api';
-import { useCurrentSession } from '@/features/session';
+import { useCallback, useState } from 'react';
+import { registerPush, unregisterPush } from './api';
+import { usePushConfig } from './hooks/usePushConfig';
 
 /**
  * Push registration.
@@ -24,8 +24,8 @@ import { useCurrentSession } from '@/features/session';
  * `denied` and the app carries on.
  */
 
-export type PushState =
-  'loading' | 'unsupported' | 'unconfigured' | 'denied' | 'prompt' | 'subscribed';
+export type { PushState } from './pushTypes';
+import type { PushState } from './pushTypes';
 
 /**
  * VAPID keys travel as base64url; `applicationServerKey` wants raw bytes.
@@ -45,15 +45,6 @@ function decodeKey(base64Url: string): ArrayBuffer {
   return buffer;
 }
 
-function supported(): boolean {
-  return (
-    typeof window !== 'undefined' &&
-    'serviceWorker' in navigator &&
-    'PushManager' in window &&
-    'Notification' in window
-  );
-}
-
 export interface UsePushRegistrationResult {
   state: PushState;
   /** Ask for permission and register. Call from a click, never on mount. */
@@ -63,52 +54,8 @@ export interface UsePushRegistrationResult {
 }
 
 export function usePushRegistration(): UsePushRegistrationResult {
-  const session = useCurrentSession();
-  const [state, setState] = useState<PushState>('loading');
-  const [publicKey, setPublicKey] = useState<string | null>(null);
+  const { state, setState, publicKey } = usePushConfig();
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!session) return;
-
-    if (!supported()) {
-      setState('unsupported');
-      return;
-    }
-
-    let cancelled = false;
-
-    void (async () => {
-      try {
-        const config = await getPushConfig();
-        if (cancelled) return;
-
-        if (!config.enabled || !config.publicKey) {
-          // The deployment has no VAPID keys. Not a fault — a quieter system.
-          setState('unconfigured');
-          return;
-        }
-
-        setPublicKey(config.publicKey);
-
-        if (Notification.permission === 'denied') {
-          setState('denied');
-          return;
-        }
-
-        const registration = await navigator.serviceWorker.ready;
-        const existing = await registration.pushManager.getSubscription();
-
-        setState(existing && Notification.permission === 'granted' ? 'subscribed' : 'prompt');
-      } catch {
-        if (!cancelled) setState('unsupported');
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [session]);
 
   const enable = useCallback(async (): Promise<void> => {
     setError(null);

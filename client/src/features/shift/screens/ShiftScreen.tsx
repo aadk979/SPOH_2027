@@ -1,26 +1,17 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { AlertDelivery } from '@/features/notification';
 import { AppShell } from '@/shared/shell/AppShell';
-import { useOutboxEntries } from '@/shared/shell/SyncIndicator';
-import {
-  Button,
-  ButtonLink,
-  Callout,
-  Card,
-  EmptyState,
-  Section,
-  Stack,
-  StatusText,
-} from '@/shared/ui';
+import { useSyncDiagnostics } from '../hooks/useSyncDiagnostics';
+import { SyncDiagnostics } from '../components/SyncDiagnostics';
+import { ButtonLink, Card, EmptyState, Section, Stack, StatusText } from '@/shared/ui';
 import { useMe, useRequireSession } from '@/features/session';
 import { blockLabel, formatTime } from '@/shared/lib/format';
-import { flush, toClipboardText } from '@/shared/lib/outbox';
 import { useClientSettings } from '@/shared/lib/runtimeSettings';
 
 /**
- * My shift, plus the sync diagnostics panel (BUILD_PLAN §9.5).
+ * My shift, plus the sync diagnostics panel (remediation/phases/P07-client-refactor.md).
  *
  * The diagnostics half is the important part. When taps have failed for good,
  * an IC needs to be able to get the counts out of the phone and into the
@@ -30,30 +21,9 @@ import { useClientSettings } from '@/shared/lib/runtimeSettings';
 export default function ShiftScreen(): ReactNode {
   const session = useRequireSession();
   const { data: me } = useMe();
-  const entries = useOutboxEntries();
   const { shiftBlocks } = useClientSettings();
-  const [copied, setCopied] = useState(false);
-  const [copyError, setCopyError] = useState(false);
-
+  const diagnostics = useSyncDiagnostics();
   if (!session) return null;
-
-  const failed = entries.filter((entry) => entry.status === 'failed');
-  const pending = entries.filter((entry) => entry.status !== 'failed');
-
-  async function copyFailed(): Promise<void> {
-    try {
-      await navigator.clipboard.writeText(toClipboardText(failed));
-      setCopyError(false);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 3000);
-    } catch {
-      // Clipboard access can be refused (iOS Safari, an unfocused tab). This
-      // is the moment an IC is salvaging failed captures during an outage —
-      // it must say so rather than quietly do nothing.
-      setCopied(false);
-      setCopyError(true);
-    }
-  }
 
   return (
     <AppShell title="My shift" back={{ href: '/home', label: 'Home' }}>
@@ -91,57 +61,7 @@ export default function ShiftScreen(): ReactNode {
           <AlertDelivery />
         </Section>
 
-        <Section title="Sync">
-          {entries.length === 0 ? (
-            <Callout tone="ok">Everything you have captured has reached the server.</Callout>
-          ) : (
-            <Card variant="flat">
-              <p>
-                <strong>{pending.length}</strong> waiting to send, <strong>{failed.length}</strong>{' '}
-                could not be sent.
-              </p>
-
-              <div className="mt-md flex flex-wrap gap-sm">
-                <Button onClick={() => void flush({ force: true })}>Try again now</Button>
-
-                {failed.length > 0 ? (
-                  <Button variant="quiet" onClick={() => void copyFailed()}>
-                    {copied ? 'Copied ✓' : 'Copy failed captures'}
-                  </Button>
-                ) : null}
-              </div>
-
-              {copyError ? (
-                <Callout tone="alert" role="alert" className="mt-md">
-                  Could not copy automatically. Select the list below by hand and copy it instead.
-                </Callout>
-              ) : null}
-
-              {failed.length > 0 ? (
-                <>
-                  <p className="mt-lg text-caption text-text-muted">
-                    Give these to your IC to enter on the fallback sheet. They paste straight into a
-                    spreadsheet.
-                  </p>
-
-                  {/*
-                    Scrolls inside itself. An hour of failed taps is hundreds of
-                    rows, and letting them run down the page buries the "Try
-                    again" button the volunteer came here to press.
-                  */}
-                  <ul className="mt-xs flex max-h-[40dvh] flex-col gap-xxs overflow-y-auto text-caption text-text-muted">
-                    {failed.map((entry) => (
-                      <li key={entry.id}>
-                        {formatTime(entry.clientRecordedAt)} · {entry.endpoint} · {entry.attempts}{' '}
-                        attempts · {entry.lastError ?? 'unknown error'}
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              ) : null}
-            </Card>
-          )}
-        </Section>
+        <SyncDiagnostics state={diagnostics} />
       </Stack>
     </AppShell>
   );

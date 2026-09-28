@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { AppHeader } from './AppHeader';
 import { usePathname } from 'next/navigation';
 import { sectionForPath } from '@/shared/lib/navigation';
 import type { ReactNode } from 'react';
@@ -44,7 +44,7 @@ export type ShellWidth = keyof typeof WIDTHS;
 /**
  * The frame every signed-in screen sits in.
  *
- * Order is fixed and load-bearing (BUILD_PLAN §9.3): the lost-person alert is
+ * Order is fixed and load-bearing (remediation/phases/P07-client-refactor.md): the lost-person alert is
  * always first and always visible, then the app's own chrome, then anything the
  * volunteer must be told about their own data, then the page.
  *
@@ -88,7 +88,7 @@ export function AppShell({
       {/*
         Keyboard and screen-reader users get past the chrome in one key. It
         also satisfies the "bypass blocks" criterion the axe run enforces on
-        every screen (BUILD_PLAN §9.7).
+        every screen (remediation/standards/engineering-standards.md).
       */}
       <a
         href="#main"
@@ -112,36 +112,7 @@ export function AppShell({
           unavailable the bar stays fully opaque rather than letting the page
           scroll through it illegibly.
         */}
-        <div
-          className={cx(
-            'workspace-titlebar border-b border-line bg-surface-alt',
-            'supports-[backdrop-filter:blur(1px)]:bg-surface-alt/80',
-            'supports-[backdrop-filter:blur(1px)]:backdrop-blur-[20px]',
-            'supports-[backdrop-filter:blur(1px)]:backdrop-saturate-[180%]',
-          )}
-        >
-          <div
-            className={cx(container, 'flex min-h-subnav items-center justify-between gap-sm py-xs')}
-          >
-            <div className="flex min-w-0 items-center gap-sm">
-              {parent ? (
-                <Link
-                  href={parent.href}
-                  className="inline-flex min-h-[44px] shrink-0 items-center px-xs -ml-xs text-caption font-medium text-primary no-underline transition-colors hover:text-primary-focus focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-focus"
-                  // The arrow is punctuation, not a word: without this a screen
-                  // reader announces "left arrow Home" on every single screen.
-                >
-                  <span aria-hidden="true">← </span>
-                  <span className="max-w-[14ch] truncate sm:max-w-[none]">{parent.label}</span>
-                </Link>
-              ) : null}
-
-              <h1 className="min-w-0 truncate text-tagline">{title}</h1>
-            </div>
-
-            {actions ? <div className="flex shrink-0 items-center gap-sm">{actions}</div> : null}
-          </div>
-        </div>
+        <AppHeader container={container} parent={parent} title={title} actions={actions} />
 
         <SyncWarningBanner />
       </div>

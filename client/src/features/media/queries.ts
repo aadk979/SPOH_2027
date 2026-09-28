@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type { UploadContentType } from '@spoh/shared';
-import { getMediaConfig, createUpload, uploadFile } from './api';
-import { useCurrentSession } from '@/features/session';
+import { createUpload, uploadFile } from './api';
+import { useMediaAvailability } from './hooks/useMediaAvailability';
 
 /**
  * Photo upload.
@@ -18,7 +18,7 @@ import { useCurrentSession } from '@/features/session';
  * `available: false` and the caller hides the button — which is better than
  * offering a camera that 503s at the lost-and-found desk.
  *
- * PRODUCT_BRIEF §7.2 still governs what may be photographed: an object, never a
+ * docs/adr/ADR-003-configuration-model.md §8 still governs what may be photographed: an object, never a
  * person.
  */
 
@@ -44,29 +44,11 @@ export interface UsePhotoUploadResult {
 }
 
 export function usePhotoUpload(): UsePhotoUploadResult {
-  const session = useCurrentSession();
-  const [available, setAvailable] = useState(false);
+  const available = useMediaAvailability();
   const [state, setState] = useState<UploadState>('idle');
   const [key, setKey] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!session) return;
-    let cancelled = false;
-
-    void getMediaConfig()
-      .then((config) => {
-        if (!cancelled) setAvailable(config.enabled);
-      })
-      .catch(() => {
-        if (!cancelled) setAvailable(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [session]);
 
   // An object URL that outlives its preview is a leak that grows with every
   // photo taken at a busy desk.

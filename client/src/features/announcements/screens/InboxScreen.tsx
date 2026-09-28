@@ -1,48 +1,23 @@
 'use client';
 
-import { useStations } from '@/features/stations';
+import { Composer } from '../components/Composer';
+import { PRIORITY_LABELS, PRIORITY_TONE, type Priority } from '../model/priority';
 
-import { useState, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 
 import { AppShell } from '@/shared/shell/AppShell';
-import {
-  Button,
-  Callout,
-  Card,
-  Checkbox,
-  ChoiceGroup,
-  EmptyState,
-  Field,
-  LoadingRows,
-  Section,
-  Select,
-  Stack,
-  Textarea,
-  type CardTone,
-} from '@/shared/ui';
+import { Button, Card, EmptyState, LoadingRows, Section, Stack } from '@/shared/ui';
 import { useMe, useRequireSession } from '@/features/session';
-import {
-  useAnnouncements,
-  useAcknowledgeAnnouncement,
-  useSendAnnouncement,
-} from '@/features/announcements';
+import { useAnnouncements, useAcknowledgeAnnouncement } from '@/features/announcements';
 import { formatTime } from '@/shared/lib/format';
 
 /**
- * The announcements inbox (PRODUCT_BRIEF §8).
+ * The announcements inbox (remediation/phases/P07-client-refactor.md).
  *
  * Quiet by default: everything lands here, and only URGENT is eligible for a
  * push. Volunteers who receive forty pushes stop reading pushes by 11am, and
  * then the one that matters is the one they miss.
  */
-
-type Priority = 'INFO' | 'OPERATIONAL' | 'URGENT';
-
-const PRIORITY_LABELS: Record<Priority, string> = {
-  INFO: 'Information',
-  OPERATIONAL: 'Operational',
-  URGENT: 'Urgent',
-};
 
 export default function InboxScreen(): ReactNode {
   const session = useRequireSession();
@@ -78,7 +53,7 @@ export default function InboxScreen(): ReactNode {
                   tone={PRIORITY_TONE[announcement.priority as Priority] ?? 'neutral'}
                 >
                   <p className="text-fine font-semibold tracking-[0.06em] text-text-muted uppercase">
-                    {/* Priority is a word, not a colour (BUILD_PLAN §9.7). */}
+                    {/* Priority is a word, not a colour (remediation/standards/engineering-standards.md). */}
                     {PRIORITY_LABELS[announcement.priority as Priority] ?? announcement.priority}
                     {announcement.targetStationName ? ` · ${announcement.targetStationName}` : ''}
                   </p>
@@ -107,129 +82,5 @@ export default function InboxScreen(): ReactNode {
         </Section>
       </Stack>
     </AppShell>
-  );
-}
-
-/** Urgent gets the rail; the other two do not need one to be found. */
-const PRIORITY_TONE: Record<Priority, CardTone> = {
-  URGENT: 'alert',
-  OPERATIONAL: 'neutral',
-  INFO: 'neutral',
-};
-
-/** IC and above. Station-targeted by default; event-wide needs a DC. */
-function Composer({ me }: { me: ReturnType<typeof useMe>['data'] }): ReactNode {
-  const [body, setBody] = useState('');
-  const [priority, setPriority] = useState<Priority>('OPERATIONAL');
-  const [requiresAck, setRequiresAck] = useState(false);
-  const [eventWide, setEventWide] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const stations = useStations();
-
-  const [stationId, setStationId] = useState<string>('');
-  const canSendEventWide = me?.capabilities.includes('announcement.event.send') ?? false;
-
-  const send = useSendAnnouncement(
-    () => ({
-      body: body.trim(),
-      priority,
-      requiresAck,
-      target: eventWide
-        ? {}
-        : { stationId: stationId || me?.currentAssignment?.station.id || null },
-    }),
-    {
-      onSuccess: () => {
-        setBody('');
-        setError(null);
-      },
-      onError: () => setError('Could not send. Check your connection and try again.'),
-    },
-  );
-
-  return (
-    <Card as="section" className="flex flex-col gap-md">
-      <h2 className="text-tagline">Send an announcement</h2>
-
-      <Field id="announcement-body" label="Message" error={error}>
-        {(props) => (
-          <Textarea
-            {...props}
-            value={body}
-            onChange={(event) => setBody(event.target.value)}
-            rows={3}
-            maxLength={1000}
-            placeholder="DCDF at capacity, ushers hold at Welcome Lounge."
-          />
-        )}
-      </Field>
-
-      <ChoiceGroup
-        legend="Priority"
-        name="announcement-priority"
-        value={priority}
-        onChange={setPriority}
-        options={[
-          { value: 'INFO', label: PRIORITY_LABELS.INFO },
-          { value: 'OPERATIONAL', label: PRIORITY_LABELS.OPERATIONAL },
-          { value: 'URGENT', label: PRIORITY_LABELS.URGENT },
-        ]}
-      />
-
-      {priority === 'URGENT' ? (
-        <Callout tone="warn">
-          Urgent is the only priority that pushes to phones. Use it sparingly — volunteers who get
-          forty pushes stop reading them.
-        </Callout>
-      ) : null}
-
-      <div className="flex flex-col">
-        <Checkbox
-          label="Ask for acknowledgement"
-          checked={requiresAck}
-          onChange={(event) => setRequiresAck(event.target.checked)}
-        />
-
-        {canSendEventWide ? (
-          <Checkbox
-            label="Send to the whole event"
-            checked={eventWide}
-            onChange={(event) => setEventWide(event.target.checked)}
-          />
-        ) : null}
-      </div>
-
-      {!eventWide ? (
-        <Field id="announcement-station" label="Send to">
-          {(props) => (
-            <Select
-              {...props}
-              value={stationId}
-              onChange={(event) => setStationId(event.target.value)}
-            >
-              <option value="">
-                {me?.currentAssignment
-                  ? `My station (${me.currentAssignment.station.name})`
-                  : 'Choose a station…'}
-              </option>
-              {(stations.data ?? []).map((station) => (
-                <option key={station.id} value={station.id}>
-                  {station.name}
-                </option>
-              ))}
-            </Select>
-          )}
-        </Field>
-      ) : null}
-
-      <Button
-        className="self-start"
-        disabled={body.trim().length < 3 || send.isPending}
-        onClick={() => send.mutate()}
-      >
-        {send.isPending ? 'Sending…' : 'Send'}
-      </Button>
-    </Card>
   );
 }

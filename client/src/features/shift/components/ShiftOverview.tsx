@@ -3,22 +3,15 @@
 import { useState, type ReactNode } from 'react';
 import type { MeResponse } from '@spoh/shared';
 
+import { stationTiles } from '../model/stationTiles';
+import { ShiftActions } from './ShiftActions';
 import { NavTile } from '@/shared/ui/NavTile';
 
-import {
-  Button,
-  Callout,
-  ButtonLink,
-  Card,
-  CardGrid,
-  CardTitle,
-  Section,
-  StatusText,
-} from '@/shared/ui';
+import { Callout, ButtonLink, Card, CardGrid, CardTitle, Section } from '@/shared/ui';
 
 import { useAttendance } from '@/features/attendance';
 import { useCheckIn, useCheckOut } from '../queries';
-import { blockLabel, formatTime, readableRole } from '@/shared/lib/format';
+import { blockLabel, readableRole } from '@/shared/lib/format';
 import { useClientSettings } from '@/shared/lib/runtimeSettings';
 
 export function ShiftCard({ me }: { me: MeResponse }): ReactNode {
@@ -62,58 +55,14 @@ export function ShiftCard({ me }: { me: MeResponse }): ReactNode {
       <h2 className="mt-xxs text-title">{assignment.station.name}</h2>
       <p className="text-text-muted">{assignment.roleLabel}</p>
 
-      <div className="mt-md flex flex-wrap items-center gap-sm">
-        {assignment.checkedInAt === null ? (
-          attendance.data?.attendance ? (
-            <Button onClick={() => checkIn.mutate()} disabled={checkIn.isPending}>
-              Start shift
-            </Button>
-          ) : (
-            <ButtonLink href="/attendance">Submit attendance</ButtonLink>
-          )
-        ) : assignment.checkedOutAt === null ? (
-          <>
-            <StatusText tone="ok">
-              <span aria-hidden="true">✓ </span>
-              Checked in {formatTime(assignment.checkedInAt)}
-            </StatusText>
-            {confirmingCheckOut ? (
-              <div className="flex items-center gap-xs">
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => {
-                    setConfirmingCheckOut(false);
-                    checkOut.mutate(assignment.id);
-                  }}
-                  disabled={checkOut.isPending}
-                >
-                  {checkOut.isPending ? 'Ending…' : 'Confirm end shift'}
-                </Button>
-                <Button variant="quiet" size="sm" onClick={() => setConfirmingCheckOut(false)}>
-                  Cancel
-                </Button>
-              </div>
-            ) : (
-              <Button
-                variant="quiet"
-                size="sm"
-                onClick={() => setConfirmingCheckOut(true)}
-                disabled={checkOut.isPending}
-              >
-                Check out
-              </Button>
-            )}
-          </>
-        ) : (
-          <StatusText tone="neutral">Shift ended {formatTime(assignment.checkedOutAt)}</StatusText>
-        )}
-        {assignment.checkedInAt !== null ? (
-          <ButtonLink href="/attendance" variant="quiet" size="sm">
-            Attendance & verification
-          </ButtonLink>
-        ) : null}
-      </div>
+      <ShiftActions
+        assignment={assignment}
+        attendance={attendance}
+        checkIn={checkIn}
+        checkOut={checkOut}
+        confirmingCheckOut={confirmingCheckOut}
+        setConfirmingCheckOut={setConfirmingCheckOut}
+      />
       {checkIn.isError || checkOut.isError ? (
         <Callout tone="alert" className="mt-sm">
           Your shift could not be updated. Please try again.
@@ -131,41 +80,7 @@ export function RoleTiles({ me }: { me: MeResponse }): ReactNode {
   const assignment = me.currentAssignment;
   if (!assignment) return null;
 
-  const can = (capability: string): boolean => me.capabilities.includes(capability as never);
-
-  const tiles: Array<{ href: string; label: string; hint: string }> = [];
-
-  if (can('registration.create') && assignment.station.kind === 'SIGNUP_BOOTH') {
-    tiles.push({
-      href: '/capture/registration',
-      label: 'Register a visitor',
-      hint: 'One tap per person',
-    });
-  }
-
-  if (can('footfall.create') && assignment.station.countsEntry) {
-    tiles.push({
-      href: '/capture/footfall',
-      label: 'Count entries',
-      hint: assignment.station.name,
-    });
-  }
-
-  if (can('card.stamp') && assignment.station.issuesStamp) {
-    tiles.push({
-      href: '/capture/stamp',
-      label: 'Stamp a card',
-      hint: 'Scan after stamping by hand',
-    });
-  }
-
-  if (can('gift.redeem') && assignment.station.kind === 'MISSION_COMPLETE') {
-    tiles.push({
-      href: '/capture/redeem',
-      label: 'Redeem a gift',
-      hint: 'Check the physical stamps first',
-    });
-  }
+  const tiles = stationTiles(me);
 
   if (tiles.length === 0) return null;
 

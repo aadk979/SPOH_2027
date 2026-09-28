@@ -210,15 +210,8 @@ export async function flush(options: FlushOptions = {}): Promise<void> {
         continue;
       }
 
-      await database.put(STORE, { ...entry, status: 'sending' } satisfies OutboxEntry);
-
-      try {
-        await api(entry.endpoint, { method: 'POST', body: entry.body });
-        await database.delete(STORE, entry.id);
-      } catch (error) {
-        const next = await recordFailure(entry, error);
-        if (next === 'stop') break;
-      }
+      const next = await sendEntry(entry);
+      if (next === 'stop') break;
 
       await notify();
     }
@@ -381,4 +374,18 @@ export function toClipboardText(entries: OutboxEntry[]): string {
       ].join('\t'),
     )
     .join('\n');
+}
+
+async function sendEntry(entry: OutboxEntry): Promise<'stop' | 'continue'> {
+  const database = await db();
+  await database.put(STORE, { ...entry, status: 'sending' } satisfies OutboxEntry);
+
+  try {
+    await api(entry.endpoint, { method: 'POST', body: entry.body });
+    await database.delete(STORE, entry.id);
+  } catch (error) {
+    return recordFailure(entry, error);
+  }
+
+  return 'continue';
 }
