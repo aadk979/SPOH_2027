@@ -1,8 +1,10 @@
 'use client';
 
+import { FootfallCount } from '../components/FootfallCount';
+import { useIdleNudge } from '../hooks/useIdleNudge';
 import { footfallEndpoint } from '@/features/footfall';
 
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { AppShell } from '@/shared/shell/AppShell';
 import { SyncIndicator } from '@/shared/shell/SyncIndicator';
 import { Button, Callout, EmptyState } from '@/shared/ui';
@@ -11,7 +13,7 @@ import { useWakeLock } from '@/shared/hooks/useWakeLock';
 import { useMe, useRequireSession } from '@/features/session';
 
 /**
- * The footfall counter (BUILD_PLAN §9.4, PRODUCT_BRIEF §3).
+ * The footfall counter (remediation/phases/P07-client-refactor.md).
  *
  * This replaces a physical clicker, so it has to be usable one-handed without
  * looking: one enormous `+`, the room name, the count, a small undo. Nothing
@@ -25,34 +27,16 @@ import { useMe, useRequireSession } from '@/features/session';
  * editable history is how tallies get "tidied up" into fiction.
  */
 
-/** Nudge after this long with no taps — catches the phone that went in a pocket. */
-const IDLE_NUDGE_MS = 20 * 60 * 1000;
-
 export default function FootfallCaptureScreen(): ReactNode {
   const session = useRequireSession();
   const { data: me } = useMe();
   const { sessionCount, undoable, error, capture, undo } = useCapture();
-  const [idle, setIdle] = useState(false);
-  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { idle, resetIdle } = useIdleNudge(sessionCount);
 
   useWakeLock(session !== null);
 
   const assignment = me?.currentAssignment;
   const station = assignment?.station;
-
-  const resetIdle = (): void => {
-    setIdle(false);
-    if (idleTimer.current) clearTimeout(idleTimer.current);
-    idleTimer.current = setTimeout(() => setIdle(true), IDLE_NUDGE_MS);
-  };
-
-  useEffect(() => {
-    resetIdle();
-    return () => {
-      if (idleTimer.current) clearTimeout(idleTimer.current);
-    };
-    // Restart the idle clock whenever a tap lands.
-  }, [sessionCount]);
 
   if (!session) return null;
 
@@ -93,15 +77,7 @@ export default function FootfallCaptureScreen(): ReactNode {
           to stay readable while the thumb is over the target, and a number
           under a moving thumb is a number nobody checks.
         */}
-        <p className="text-center">
-          <span
-            className="block font-display text-stat-lg font-semibold tabular-nums"
-            aria-live="polite"
-          >
-            {sessionCount}
-          </span>
-          <span className="text-caption text-text-muted">counted on this device this session</span>
-        </p>
+        <FootfallCount sessionCount={sessionCount} />
 
         <button
           type="button"

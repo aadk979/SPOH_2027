@@ -1,10 +1,11 @@
 'use client';
 
+import { useScanResult } from './useScanResult';
 import { BrowserMultiFormatReader } from '@zxing/browser';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
- * Camera QR scanning for Mission Cards (BUILD_PLAN §9.4).
+ * Camera QR scanning for Mission Cards (remediation/phases/P07-client-refactor.md).
  *
  * Auto-starts, because a facilitator with a queue should not have to press
  * "scan" before scanning. ZXing rather than the native `BarcodeDetector`:
@@ -33,12 +34,7 @@ export function useQrScanner(options: { onDecode(text: string): void }): UseQrSc
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const controlsRef = useRef<{ stop(): void } | null>(null);
   const [state, setState] = useState<ScannerState>('idle');
-  const [result, setResult] = useState<string | null>(null);
-
-  // Held in a ref so restarting the scanner does not depend on the caller
-  // memoising their handler.
-  const onDecodeRef = useRef(options.onDecode);
-  onDecodeRef.current = options.onDecode;
+  const { result, resume, receive } = useScanResult(options.onDecode);
 
   const stop = useCallback(() => {
     controlsRef.current?.stop();
@@ -74,8 +70,7 @@ export function useQrScanner(options: { onDecode(text: string): void }): UseQrSc
         (decoded) => {
           if (!decoded) return;
           const text = decoded.getText();
-          setResult(text);
-          onDecodeRef.current(text);
+          receive(text);
         },
       )
       .then((controls) => {
@@ -87,9 +82,7 @@ export function useQrScanner(options: { onDecode(text: string): void }): UseQrSc
         // mean the same thing to the volunteer: type the code instead.
         setState('denied');
       });
-  }, []);
-
-  const resume = useCallback(() => setResult(null), []);
+  }, [receive]);
 
   useEffect(() => {
     start();

@@ -2,23 +2,16 @@
 
 import { useState, type FormEvent, type ReactNode, type RefObject } from 'react';
 import type { ScannerState } from '@/features/capture/useQrScanner';
+import { CardViewfinder } from './CardViewfinder';
 import { Button, Input } from '@/shared/ui';
 
 /**
- * Scan-or-type, side by side (BUILD_PLAN §9.4).
+ * Scan-or-type, side by side (remediation/phases/P07-client-refactor.md).
  *
  * Manual entry is always visible, never behind a toggle. A damaged QR is a
  * named case in the brief, and a facilitator who has to discover the fallback
  * while a visitor waits will give up and stop scanning altogether.
  */
-
-const SCANNER_MESSAGE: Record<ScannerState, string> = {
-  scanning: 'Point the camera at the QR code on the card.',
-  starting: 'Starting the camera…',
-  denied: 'The camera is not available. Type the six-character code instead.',
-  unavailable: 'This device cannot scan. Type the six-character code instead.',
-  idle: 'Camera off.',
-};
 
 export function CardCodeInput({
   videoRef,
@@ -57,8 +50,6 @@ export function CardCodeInput({
     if (error) setError(null);
   }
 
-  const isCameraDisabled = scannerState === 'denied' || scannerState === 'unavailable';
-
   return (
     <div className="flex flex-col gap-sm">
       {/*
@@ -67,25 +58,7 @@ export function CardCodeInput({
         below the fold, which is exactly the fallback a damaged card needs.
         When camera access is denied or unavailable, the void is hidden.
       */}
-      <div
-        className={`mx-auto w-full max-w-form overflow-hidden rounded-lg bg-void [aspect-ratio:4/3] ${
-          isCameraDisabled ? 'hidden' : ''
-        }`}
-      >
-        {/* muted + playsInline are required for autoplay on iOS. */}
-        <video
-          ref={videoRef}
-          className="h-full w-full object-cover"
-          muted
-          playsInline
-          aria-label="Camera viewfinder for scanning a Mission Card"
-        />
-      </div>
-
-      <p className="text-caption text-text-muted" aria-live="polite">
-        {SCANNER_MESSAGE[scannerState]}
-      </p>
-
+      <CardViewfinder videoRef={videoRef} scannerState={scannerState} />
       <form onSubmit={submit} className="flex flex-col gap-xs">
         <div className="flex gap-xs">
           <label htmlFor="card-code" className="sr-only">

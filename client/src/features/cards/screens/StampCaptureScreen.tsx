@@ -1,19 +1,17 @@
 'use client';
 
-import { useCallback, useState, type ReactNode } from 'react';
-import type { MissionCardRecord } from '@spoh/shared';
+import { type ReactNode } from 'react';
+import { CardSummary } from '../components/CardSummary';
+import { useStampCapture } from '../hooks/useStampCapture';
 import { AppShell } from '@/shared/shell/AppShell';
 import { CardCodeInput } from '@/features/capture';
 import { SyncIndicator } from '@/shared/shell/SyncIndicator';
-import { Callout, Card, CardTitle, EmptyState, type Tone } from '@/shared/ui';
-import { useQrScanner } from '@/features/capture';
+import { Callout, EmptyState } from '@/shared/ui';
 import { useWakeLock } from '@/shared/hooks/useWakeLock';
-import { useMe, useRequireSession } from '@/features/session';
-import { ApiError } from '@/shared/lib/apiErrors';
-import { stampCard } from '@/features/cards';
+import { useRequireSession } from '@/features/session';
 
 /**
- * Stamp scanning (BUILD_PLAN §9.4, PRODUCT_BRIEF §4.2).
+ * Stamp scanning (remediation/phases/P07-client-refactor.md).
  *
  * The facilitator stamps the card physically first, then scans. The physical
  * stamp is the keepsake and stays authoritative; this records the journey so
@@ -27,77 +25,8 @@ import { stampCard } from '@/features/cards';
  */
 export default function StampCaptureScreen(): ReactNode {
   const session = useRequireSession();
-  const { data: me } = useMe();
-  const [card, setCard] = useState<MissionCardRecord | null>(null);
-  const [message, setMessage] = useState<{ tone: Tone; text: string } | null>(null);
-  const [pending, setPending] = useState(false);
-  const [scanned, setScanned] = useState(0);
-
-  const station = me?.currentAssignment?.station;
-
+  const { station, card, message, pending, scanned, stamp, scanner } = useStampCapture();
   useWakeLock(session !== null);
-
-  const stamp = useCallback(
-    async (shortCode: string): Promise<void> => {
-      if (!station || pending) return;
-      setPending(true);
-      setMessage(null);
-
-      try {
-        const result = await stampCard(shortCode, {
-          stationId: station.id,
-          idempotencyKey: crypto.randomUUID(),
-          clientRecordedAt: new Date().toISOString(),
-        });
-
-        setCard(result.card);
-        navigator.vibrate?.(result.stampAdded ? 15 : [15, 60, 15]);
-        if (result.stampAdded) setScanned((count) => count + 1);
-
-        setMessage(
-          result.justCompleted
-            ? { tone: 'ok', text: 'Journey complete — send them to Mission Complete.' }
-            : result.stampAdded
-              ? { tone: 'ok', text: 'Stamped.' }
-              : { tone: 'warn', text: result.warning ?? 'Already stamped here.' },
-        );
-      } catch (error) {
-        setCard(null);
-        setMessage({
-          tone: 'alert',
-          text:
-            error instanceof ApiError
-              ? error.message
-              : 'Could not reach the server. Stamp the card and carry on.',
-        });
-      } finally {
-        setPending(false);
-      }
-    },
-    [station, pending],
-  );
-
-  /**
-   * The QR payload is opaque (`spoh2027:<uuid>`), so a scanned code is looked
-   * up by payload while a typed code is a short code. Both resolve to the same
-   * card; the server accepts the short code, so a scan of our own QR is mapped
-   * back through the card lookup.
-   */
-  const onDecode = useCallback(
-    (text: string): void => {
-      const cleaned = text.trim();
-      // A printed card carries both. Prefer the short code when the QR encodes
-      // it directly; otherwise treat the payload as the lookup key.
-      const shortCode = /^[0-9A-HJ-NP-Z]{6}$/i.test(cleaned)
-        ? cleaned.toUpperCase()
-        : cleaned.split(':').pop()?.slice(0, 6).toUpperCase();
-
-      if (shortCode) void stamp(shortCode);
-    },
-    [stamp],
-  );
-
-  const scanner = useQrScanner({ onDecode });
 
   if (!session) return null;
 
@@ -142,35 +71,5 @@ export default function StampCaptureScreen(): ReactNode {
         {card ? <CardSummary card={card} /> : null}
       </div>
     </AppShell>
-  );
-}
-
-/** What the facilitator reads out: where they have been, where to go next. */
-function CardSummary({ card }: { card: MissionCardRecord }): ReactNode {
-  return (
-    <Card>
-      <CardTitle className="font-display tracking-[0.15em]">{card.shortCode}</CardTitle>
-      <p className="text-caption text-text-muted">
-        {card.status === 'COMPLETED' ? 'Journey complete' : `${card.stamps.length} stamps so far`}
-      </p>
-
-      <ul className="mt-sm flex flex-col gap-xxs">
-        {card.stamps.map((stampRecord) => (
-          <li key={stampRecord.id}>
-            <span aria-hidden="true" className="mr-xs text-ok">
-              ✓
-            </span>
-            {stampRecord.stationName}
-          </li>
-        ))}
-      </ul>
-
-      {card.remainingStationIds.length > 0 ? (
-        <p className="mt-sm text-caption text-text-muted">
-          {card.remainingStationIds.length} station
-          {card.remainingStationIds.length === 1 ? '' : 's'} still to visit.
-        </p>
-      ) : null}
-    </Card>
   );
 }

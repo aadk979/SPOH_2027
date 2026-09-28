@@ -1,35 +1,24 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import type { VisitorCategory } from '@spoh/shared';
+import { RegistrationButtons } from '../components/RegistrationButtons';
 import { AppShell } from '@/shared/shell/AppShell';
 import { SyncIndicator } from '@/shared/shell/SyncIndicator';
 import { Button, ButtonLink, Callout, EmptyState } from '@/shared/ui';
 import { useCapture } from '@/features/capture';
 import { useWakeLock } from '@/shared/hooks/useWakeLock';
 import { useMe, useRequireSession } from '@/features/session';
-import { useRegistrationSummary, registrationEndpoints } from '@/features/registration';
+import { useRegistrationSummary } from '@/features/registration';
 import { formatCount } from '@/shared/lib/format';
 
 /**
- * The sign-up booth (BUILD_PLAN §9.4, PRODUCT_BRIEF §2).
+ * The sign-up booth (remediation/phases/P07-client-refactor.md).
  *
  * Eight buttons matching slide 14 exactly. One tap is one registration, written
  * immediately. No submit button, no confirmation screen, no modal on success —
  * a volunteer facing a queue will stop recording before they will slow down,
  * and every extra interaction here is lost data rather than lost time.
  */
-
-const CATEGORIES: Array<{ value: VisitorCategory; label: string }> = [
-  { value: 'SEC_1', label: 'Sec 1' },
-  { value: 'SEC_2', label: 'Sec 2' },
-  { value: 'SEC_3', label: 'Sec 3' },
-  { value: 'SEC_4', label: 'Sec 4' },
-  { value: 'SEC_5', label: 'Sec 5' },
-  { value: 'GRADUATED_AWAITING_RESULTS', label: 'Graduated' },
-  { value: 'PARENT_GUARDIAN', label: 'Parent / Guardian' },
-  { value: 'OTHER', label: 'Other' },
-];
 
 export default function RegistrationCaptureScreen(): ReactNode {
   const session = useRequireSession();
@@ -91,27 +80,10 @@ export default function RegistrationCaptureScreen(): ReactNode {
 
         {/*
           2 × 4 on a phone, 4 × 2 once the row is wide enough to keep every cell
-          inside a thumb's arc. Each cell is at least 88 × 88 (BUILD_PLAN §9.4)
+          inside a thumb's arc. Each cell is at least 88 × 88 (remediation/standards/engineering-standards.md)
           and the e2e suite measures it.
         */}
-        <div className="grid grid-cols-2 gap-sm sm:grid-cols-4">
-          {CATEGORIES.map((category) => (
-            <button
-              key={category.value}
-              type="button"
-              className="capture-target"
-              onClick={() =>
-                void capture({
-                  endpoint: registrationEndpoints.single,
-                  body: { category: category.value, stationId },
-                  label: category.label,
-                })
-              }
-            >
-              {category.label}
-            </button>
-          ))}
-        </div>
+        <RegistrationButtons stationId={stationId} capture={capture} />
 
         {/* Holds its height so the grid never shifts under a thumb mid-queue. */}
         <div className="flex min-h-[56px] items-center justify-between gap-sm">
