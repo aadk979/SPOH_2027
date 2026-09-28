@@ -265,6 +265,24 @@ async function main() {
   const p95 = percentile(steady, 95);
   const failed = p95 > P95_BUDGET_MS || errors.length > 0;
 
+  // Preserve full precision for percentage comparisons between phase runs.
+  if (process.argv.includes('--json')) {
+    console.log(
+      JSON.stringify({
+        clients: CLIENTS,
+        tapsPerMinute: TAPS_PER_MINUTE,
+        durationSeconds: DURATION_SECONDS,
+        requests: all.length,
+        errors: errors.length,
+        p95Ms: p95,
+        p50Ms: percentile(steady, 50),
+        p99Ms: percentile(steady, 99),
+        budgetMs: P95_BUDGET_MS,
+        passed: !failed,
+      }),
+    );
+  }
+
   console.log('');
   console.log(failed ? 'FAIL' : 'PASS');
 

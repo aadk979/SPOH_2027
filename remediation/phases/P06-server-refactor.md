@@ -200,7 +200,7 @@ must be clean.
 ```bash
 npm run lint && npm run arch:check && npm run typecheck
 npm run test:unit --workspace server && npm run test:integration --workspace server
-node remediation/tools/route-inventory.mjs --diff remediation/reports/P06/routes-before.json
+node remediation/tools/route-inventory.mjs --diff remediation/reports/P06/routes-current.json
 node remediation/tools/code-metrics.mjs     # server/shared: 0 functions > 50, 0 files > 300
 ```
 
@@ -220,4 +220,10 @@ node remediation/tools/code-metrics.mjs     # server/shared: 0 functions > 50, 0
 
 ## Phase report
 
-_Fill in on completion._
+Completed 28 September 2026. Full results, labelled fix commits and intentional behaviour changes are in [the evidence report](../reports/P06/README.md). The regenerated route inventory and raw code-metrics snapshot are committed beside it.
+
+- Server: 768 tests passed, nine deferred repros skipped. Client: 25 passed, four deferred repros skipped. Browser: all 26 passed on a separate seeded test database. Shared has no standalone test files. Typecheck and server build pass.
+- Lint: zero errors, 70 client warnings. Architecture: zero errors, 27 client warnings. Server/shared blocking rules pass; raw-line metrics are a different measure and are explained in the report.
+- Routes: 98 before/after; only four deliberate default rate-limit additions from F04-008. The regression check uses routes-current.json; routes-before.json stays the historical snapshot.
+- Load: zero errors at 100 and 300 clients. The historical 25 ms p95 at 100 clients was not reproduced: pre-refactor c09bcb0 measures 34.1645 ms here, versus current 35.337 ms (+3.43%). At 300 clients current p95 is 36 ms versus historical 81 ms. Raw outputs preserve the initially failed historical comparison. This local recalibration is not a staging capacity claim.
+- P06.12/P06.13 server fixes are closed; explicitly assigned client, cross-instance, secrets and infrastructure follow-ups remain in later phases. No old checkout merge or live deployment was changed.

@@ -1,0 +1,386 @@
+{
+  "generatedAt": "2026-09-28T13:17:26.508Z",
+  "limits": {
+    "functionLines": 50,
+    "fileLines": 300
+  },
+  "totals": {
+    "files": 436,
+    "longFunctions": 57,
+    "longFiles": 7
+  },
+  "longFunctions": [
+    {
+      "file": "client/src/app/reports/page.tsx",
+      "line": 35,
+      "name": "ReportsPage",
+      "lines": 272
+    },
+    {
+      "file": "client/src/app/admin/settings/page.tsx",
+      "line": 151,
+      "name": "AdminSettingsPage",
+      "lines": 237
+    },
+    {
+      "file": "client/src/app/chief/imports/page.tsx",
+      "line": 52,
+      "name": "ImportsPage",
+      "lines": 237
+    },
+    {
+      "file": "client/src/app/attendance/page.tsx",
+      "line": 19,
+      "name": "AttendancePage",
+      "lines": 222
+    },
+    {
+      "file": "client/src/app/capture/registration/group/page.tsx",
+      "line": 35,
+      "name": "GroupRegistrationPage",
+      "lines": 207
+    },
+    {
+      "file": "client/src/app/ic/page.tsx",
+      "line": 35,
+      "name": "IcConsolePage",
+      "lines": 185
+    },
+    {
+      "file": "client/src/app/safety/lost-found/new/page.tsx",
+      "line": 23,
+      "name": "NewLostFoundPage",
+      "lines": 181
+    },
+    {
+      "file": "client/src/app/capture/redeem/page.tsx",
+      "line": 33,
+      "name": "RedeemPage",
+      "lines": 180
+    },
+    {
+      "file": "client/src/app/chief/fallback/page.tsx",
+      "line": 36,
+      "name": "FallbackPage",
+      "lines": 180
+    },
+    {
+      "file": "client/src/app/chief/page.tsx",
+      "line": 62,
+      "name": "DashboardBody",
+      "lines": 180
+    },
+    {
+      "file": "client/src/app/admin/users/page.tsx",
+      "line": 276,
+      "name": "VolunteerEditor",
+      "lines": 147
+    },
+    {
+      "file": "client/src/app/safety/incident/new/page.tsx",
+      "line": 49,
+      "name": "NewIncidentPage",
+      "lines": 144
+    },
+    {
+      "file": "client/src/app/safety/lost-found/page.tsx",
+      "line": 35,
+      "name": "LostFoundPage",
+      "lines": 144
+    },
+    {
+      "file": "client/src/app/safety/lost-person/new/page.tsx",
+      "line": 24,
+      "name": "RaiseLostPersonPage",
+      "lines": 141
+    },
+    {
+      "file": "client/src/app/tv/page.tsx",
+      "line": 25,
+      "name": "TvPage",
+      "lines": 141
+    },
+    {
+      "file": "client/src/app/admin/users/page.tsx",
+      "line": 47,
+      "name": "AdminUsersPage",
+      "lines": 137
+    },
+    {
+      "file": "client/src/app/inbox/page.tsx",
+      "line": 127,
+      "name": "Composer",
+      "lines": 123
+    },
+    {
+      "file": "client/src/app/capture/stamp/page.tsx",
+      "line": 27,
+      "name": "StampCapturePage",
+      "lines": 122
+    },
+    {
+      "file": "client/src/app/shift/page.tsx",
+      "line": 30,
+      "name": "ShiftPage",
+      "lines": 119
+    },
+    {
+      "file": "client/src/app/capture/registration/page.tsx",
+      "line": 34,
+      "name": "RegistrationCapturePage",
+      "lines": 118
+    },
+    {
+      "file": "client/src/features/notification/usePushRegistration.ts",
+      "line": 66,
+      "name": "usePushRegistration",
+      "lines": 116
+    },
+    {
+      "file": "client/src/app/capture/footfall/page.tsx",
+      "line": 28,
+      "name": "FootfallCapturePage",
+      "lines": 115
+    },
+    {
+      "file": "client/src/components/ShiftOverview.tsx",
+      "line": 24,
+      "name": "ShiftCard",
+      "lines": 114
+    },
+    {
+      "file": "client/src/components/LostPersonBanner.tsx",
+      "line": 35,
+      "name": "LostPersonBanner",
+      "lines": 111
+    },
+    {
+      "file": "client/src/components/ui/Choice.tsx",
+      "line": 34,
+      "name": "ChoiceGroup",
+      "lines": 107
+    },
+    {
+      "file": "client/src/components/CardCodeInput.tsx",
+      "line": 23,
+      "name": "CardCodeInput",
+      "lines": 104
+    },
+    {
+      "file": "client/src/components/AppShell.tsx",
+      "line": 56,
+      "name": "AppShell",
+      "lines": 102
+    },
+    {
+      "file": "client/src/features/attendance/VerifierCode.tsx",
+      "line": 8,
+      "name": "VerifierCode",
+      "lines": 96
+    },
+    {
+      "file": "client/src/features/media/usePhotoUpload.ts",
+      "line": 46,
+      "name": "usePhotoUpload",
+      "lines": 91
+    },
+    {
+      "file": "client/src/components/GlobalNav.tsx",
+      "line": 29,
+      "name": "GlobalNav",
+      "lines": 90
+    },
+    {
+      "file": "client/src/app/sign-in/page.tsx",
+      "line": 22,
+      "name": "SignInForm",
+      "lines": 79
+    },
+    {
+      "file": "client/src/app/home/page.tsx",
+      "line": 12,
+      "name": "HomePage",
+      "lines": 78
+    },
+    {
+      "file": "client/src/app/inbox/page.tsx",
+      "line": 43,
+      "name": "InboxPage",
+      "lines": 75
+    },
+    {
+      "file": "client/src/components/LostPersonBanner.tsx",
+      "line": 70,
+      "name": "<callback of alerts.map>",
+      "lines": 73
+    },
+    {
+      "file": "client/src/app/chief/page.tsx",
+      "line": 250,
+      "name": "AttentionPanel",
+      "lines": 69
+    },
+    {
+      "file": "client/src/features/capture/useQrScanner.ts",
+      "line": 32,
+      "name": "useQrScanner",
+      "lines": 69
+    },
+    {
+      "file": "client/src/app/ic/page.tsx",
+      "line": 222,
+      "name": "SwapQueue",
+      "lines": 67
+    },
+    {
+      "file": "client/src/features/capture/useCapture.ts",
+      "line": 59,
+      "name": "useCapture",
+      "lines": 66
+    },
+    {
+      "file": "client/src/components/AlertDelivery.tsx",
+      "line": 21,
+      "name": "AlertDelivery",
+      "lines": 65
+    },
+    {
+      "file": "server/src/platform/identity/cognitoIdentityProvider.ts",
+      "line": 25,
+      "name": "createCognitoIdentityProvider",
+      "lines": 64
+    },
+    {
+      "file": "client/src/features/attendance/AttendanceScanner.tsx",
+      "line": 7,
+      "name": "AttendanceScanner",
+      "lines": 64
+    },
+    {
+      "file": "server/src/modules/report/domain/sections.ts",
+      "line": 153,
+      "name": "volunteersSection",
+      "lines": 63
+    },
+    {
+      "file": "client/src/components/ui/Choice.tsx",
+      "line": 75,
+      "name": "<callback of options.map>",
+      "lines": 62
+    },
+    {
+      "file": "client/src/app/brief/page.tsx",
+      "line": 19,
+      "name": "BriefPage",
+      "lines": 58
+    },
+    {
+      "file": "client/src/app/admin/users/page.tsx",
+      "line": 198,
+      "name": "VolunteerRow",
+      "lines": 57
+    },
+    {
+      "file": "client/src/app/safety/page.tsx",
+      "line": 18,
+      "name": "SafetyPage",
+      "lines": 56
+    },
+    {
+      "file": "server/src/modules/dashboard/data/repo.ts",
+      "line": 74,
+      "name": "checkedInWithLastCapture",
+      "lines": 55
+    },
+    {
+      "file": "server/src/modules/fallback/application/importRegistrations.ts",
+      "line": 9,
+      "name": "importRegistrations",
+      "lines": 54
+    },
+    {
+      "file": "server/src/config/schemas/auth.ts",
+      "line": 53,
+      "name": "authProviderRule",
+      "lines": 53
+    },
+    {
+      "file": "server/src/modules/report/application/export/sheets/safety.ts",
+      "line": 5,
+      "name": "writeSafetySheet",
+      "lines": 53
+    },
+    {
+      "file": "server/src/modules/roster/application/provisionVolunteer.ts",
+      "line": 16,
+      "name": "provisionVolunteer",
+      "lines": 53
+    },
+    {
+      "file": "client/src/components/ui/Field.tsx",
+      "line": 64,
+      "name": "Field",
+      "lines": 53
+    },
+    {
+      "file": "server/src/modules/report/domain/sections.ts",
+      "line": 91,
+      "name": "safetySection",
+      "lines": 52
+    },
+    {
+      "file": "server/src/platform/identity/localProvider.ts",
+      "line": 34,
+      "name": "createLocalAuthProvider",
+      "lines": 52
+    },
+    {
+      "file": "client/src/components/ShiftOverview.tsx",
+      "line": 143,
+      "name": "RoleTiles",
+      "lines": 52
+    },
+    {
+      "file": "server/src/modules/fallback/application/importFootfall.ts",
+      "line": 9,
+      "name": "importFootfall",
+      "lines": 51
+    },
+    {
+      "file": "server/src/modules/gift/application/redeemGift.ts",
+      "line": 63,
+      "name": "redeemGift",
+      "lines": 51
+    }
+  ],
+  "longFiles": [
+    {
+      "file": "client/src/app/admin/settings/page.tsx",
+      "lines": 427
+    },
+    {
+      "file": "client/src/app/admin/users/page.tsx",
+      "lines": 423
+    },
+    {
+      "file": "client/src/lib/outbox.ts",
+      "lines": 385
+    },
+    {
+      "file": "server/src/modules/report/data/repo.ts",
+      "lines": 363
+    },
+    {
+      "file": "client/src/app/chief/imports/page.tsx",
+      "lines": 325
+    },
+    {
+      "file": "client/src/app/chief/page.tsx",
+      "lines": 319
+    },
+    {
+      "file": "client/src/app/reports/page.tsx",
+      "lines": 307
+    }
+  ]
+}

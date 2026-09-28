@@ -1,0 +1,17 @@
+load test: 100 distinct volunteers x 20 taps/min for 60s against http://localhost:4011
+provisioned 100 volunteers at SIGNUP_BOOTH
+
+requests      2003
+throughput    31.5/s
+errors        0
+
+                 all      steady state
+p50              18ms      18ms
+p95              34ms      34ms   (budget 300ms)
+p99              42ms      42ms
+max              86ms      86ms
+{"clients":100,"tapsPerMinute":20,"durationSeconds":60,"requests":2003,"errors":0,"p95Ms":34.16449999999895,"p50Ms":17.97019999999975,"p99Ms":42.28110000000015,"budgetMs":300,"passed":true}
+
+PASS
+
+clean up with: DELETE FROM "Volunteer" WHERE email LIKE '%@loadtest.spoh2027.test' (and their rows)
