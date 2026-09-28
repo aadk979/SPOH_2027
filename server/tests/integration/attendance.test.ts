@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import request from 'supertest';
 import type { CommitteeRole } from '@spoh/shared';
-import { createApp } from '../../src/app.js';
+import { createApp } from '../../src/app/createApp.js';
 import { prisma } from '../../src/platform/db/client.js';
 import { sensitiveRateLimit } from '../../src/platform/http/rateLimit.js';
 import { resetDatabase } from '../helpers/db.js';

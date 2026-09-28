@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createApp } from '../../src/app.js';
+import { createApp } from '../../src/app/createApp.js';
 import { prisma } from '../../src/platform/db/client.js';
 import { resetDatabase } from '../helpers/db.js';
 import { bearer, createVolunteer } from '../helpers/fixtures.js';

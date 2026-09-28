@@ -2,7 +2,7 @@ import type { Express } from 'express';
 import request from 'supertest';
 import { beforeAll, describe, expect, it } from 'vitest';
 import type { CommitteeRole } from '@spoh/shared';
-import { createApp } from '../../src/app.js';
+import { createApp } from '../../src/app/createApp.js';
 import { resetDatabase } from '../helpers/db.js';
 import {
   assignToStationAllBlocks,

@@ -3,30 +3,48 @@ import cors from 'cors';
 import express, { type Express } from 'express';
 import helmet from 'helmet';
 import { pinoHttp } from 'pino-http';
-import { env, isProduction } from './config/env.js';
-import { logger } from './platform/logger/index.js';
-import { errorHandler, notFoundHandler } from './platform/http/errorHandler.js';
-import { requestId } from './platform/http/requestId.js';
-import { healthRouter } from './modules/health/index.js';
-import { apiRouter } from './routes.js';
+import { env, isProduction } from '../config/env.js';
+import { logger } from '../platform/logger/index.js';
+import { errorHandler, notFoundHandler } from '../platform/http/errorHandler.js';
+import { requestId } from '../platform/http/requestId.js';
+import { healthRouter } from '../modules/health/index.js';
+import { createApiRouter } from './routes.js';
 
 /**
  * Express application factory.
  *
  * Returns the app without listening, so integration tests can drive it through
- * Supertest without binding a port (BUILD_PLAN §2 repo layout).
+ * Supertest without binding a port (BUILD_PLAN §2 repo layout). Read top-down:
+ * the steps run in the order a request meets them.
  */
 export function createApp(): Express {
   const app = express();
 
+  trustTheEdge(app);
+  app.use(requestId);
+  secureHeaders(app);
+  allowOrigins(app);
+  logRequests(app);
+  parseBodies(app);
+
+  app.use(healthRouter);
+  app.use('/api/v1', createApiRouter());
+
+  app.use(notFoundHandler);
+  app.use(errorHandler);
+
+  return app;
+}
+
+function trustTheEdge(app: Express): void {
   // Behind App Runner or an ALB the client IP arrives in X-Forwarded-For. Set
   // explicitly from config rather than `true`: trusting every hop lets a client
   // spoof its own address and defeat IP-keyed rate limiting (BUILD_PLAN §8.4).
   app.set('trust proxy', env.TRUST_PROXY_HOPS);
   app.disable('x-powered-by');
+}
 
-  app.use(requestId);
-
+function secureHeaders(app: Express): void {
   app.use(
     helmet({
       // The API serves JSON only; a restrictive CSP here costs nothing and the
@@ -37,7 +55,9 @@ export function createApp(): Express {
       crossOriginResourcePolicy: { policy: 'same-site' },
     }),
   );
+}
 
+function allowOrigins(app: Express): void {
   app.use(
     cors({
       // Exact allowlist. No wildcard, and the Origin header is never reflected
@@ -60,7 +80,9 @@ export function createApp(): Express {
       maxAge: 600,
     }),
   );
+}
 
+function logRequests(app: Express): void {
   app.use(
     pinoHttp({
       logger,
@@ -69,19 +91,13 @@ export function createApp(): Express {
       autoLogging: { ignore: (req) => req.url === '/healthz' || req.url === '/readyz' },
     }),
   );
+}
 
+function parseBodies(app: Express): void {
   // 100kb is generous for the largest capture payload (a group registration)
   // and small enough that a malformed client cannot push megabytes at the API.
   app.use(express.json({ limit: '100kb' }));
 
   // Only the refresh cookie is ever read, and only by the auth router.
   app.use(cookieParser());
-
-  app.use(healthRouter);
-  app.use('/api/v1', apiRouter);
-
-  app.use(notFoundHandler);
-  app.use(errorHandler);
-
-  return app;
 }

@@ -1,7 +1,7 @@
 import type { Express } from 'express';
 import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { createApp } from '../../../src/app.js';
+import { createApp } from '../../../src/app/createApp.js';
 import { SYSTEM_AUDIT_CONTEXT } from '../../../src/platform/http/auditContext.js';
 import { prisma } from '../../../src/platform/db/client.js';
 import { clearSettings } from '../../../src/platform/settings/index.js';

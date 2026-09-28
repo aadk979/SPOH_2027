@@ -115,7 +115,9 @@ async function inventory() {
 
   const { register } = await import('tsx/esm/api');
   register();
-  const { createApp } = await import(pathToFileURL(join(REPO, 'server', 'src', 'app.ts')).href);
+  const { createApp } = await import(
+    pathToFileURL(join(REPO, 'server', 'src', 'app', 'createApp.ts')).href
+  );
   const app = createApp();
 
   const routes = [];

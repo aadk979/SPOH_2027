@@ -1,7 +1,7 @@
 import type { Express } from 'express';
 import request from 'supertest';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createApp } from '../../../src/app.js';
+import { createApp } from '../../../src/app/createApp.js';
 import { logger } from '../../../src/platform/logger/index.js';
 import { prisma } from '../../../src/platform/db/client.js';
 import { resetDatabase } from '../../helpers/db.js';

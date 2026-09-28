@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { createApp } from '../../../src/app.js';
+import { createApp } from '../../../src/app/createApp.js';
 import { resetDatabase } from '../../helpers/db.js';
 import {
   assignToStation,

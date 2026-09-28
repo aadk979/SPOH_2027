@@ -24,7 +24,7 @@ interface Instance {
 
 async function startInstance(): Promise<Instance> {
   vi.resetModules();
-  const { createApp } = await import('../../../src/app.js');
+  const { createApp } = await import('../../../src/app/createApp.js');
   const { purgeResolvedAlerts } = await import('../../../src/modules/lostPerson/index.js');
   const { disconnectPrisma } = await import('../../../src/platform/db/client.js');
   return { app: createApp(), purgeResolvedAlerts, disconnect: disconnectPrisma };

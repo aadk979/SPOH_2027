@@ -2,7 +2,7 @@ import type { Express } from 'express';
 import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FullReport } from '@spoh/shared';
-import { createApp } from '../../src/app.js';
+import { createApp } from '../../src/app/createApp.js';
 import { prisma } from '../../src/platform/db/client.js';
 import { toCsv } from '../../src/modules/report/application/export/toCsv.js';
 import { purgeResolvedAlerts } from '../../src/modules/lostPerson/index.js';
