@@ -74,7 +74,7 @@ describe('refresh sessions (P03 repros)', () => {
   });
 
   // F03-009
-  it.skip('stops an access token as soon as its session is revoked from another device', async () => {
+  it('stops an access token as soon as its session is revoked from another device', async () => {
     const phone = await signIn();
     const laptop = await signIn();
 

@@ -1,6 +1,6 @@
 import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
-import { hashRefreshToken } from '../../../platform/identity/index.js';
+import { hashRefreshToken, invalidateSessionCache } from '../../../platform/identity/index.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { findSessionByTokenHash, revokeSession } from '../data/repo.js';
 
@@ -26,4 +26,6 @@ export async function endSession(
       after: { reason: 'signed-out' },
     });
   });
+  // The signed-out token stops at once, not when its cache entry ages out (F03-009).
+  invalidateSessionCache(existing.id);
 }

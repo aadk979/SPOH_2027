@@ -1,5 +1,6 @@
 import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
+import { invalidateSessionCache } from '../../../platform/identity/index.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { revokeLiveSessions } from '../data/repo.js';
 
@@ -9,7 +10,9 @@ export async function revokeFamily(
   reason: string,
   clock: Clock = systemClock,
 ): Promise<{ count: number }> {
-  return { count: await revokeLiveSessions({ familyId }, { at: clock.now(), reason }) };
+  const count = await revokeLiveSessions({ familyId }, { at: clock.now(), reason });
+  forgetRevoked();
+  return { count };
 }
 
 /**
@@ -24,7 +27,20 @@ export async function revokeAllForVolunteer(
   reason: string,
   clock: Clock = systemClock,
 ): Promise<number> {
-  return revokeLiveSessions({ volunteerId }, { at: clock.now(), reason });
+  const count = await revokeLiveSessions({ volunteerId }, { at: clock.now(), reason });
+  forgetRevoked();
+  return count;
+}
+
+/**
+ * Requests check a session's liveness through a short cache, so a revoke must
+ * drop what it revoked or the access token keeps working for up to a minute
+ * (F03-009). A family or a person's sessions are not listed by id here, so the
+ * whole cache goes: it holds liveness only, refilled by one query per active
+ * session. Other instances need the P10.3 cache bus.
+ */
+function forgetRevoked(sessionId?: string): void {
+  invalidateSessionCache(sessionId);
 }
 
 /**
@@ -44,6 +60,7 @@ export async function revokeOwnSession(
   );
 
   if (count === 0) return false;
+  forgetRevoked(sessionId);
 
   await prisma.$transaction(async (tx) => {
     await writeAudit(tx, {
