@@ -4,7 +4,12 @@ import { writeAudit, type AuditContext } from '../../../platform/audit/index.js'
 import { prisma } from '../../../platform/db/client.js';
 import { dispatch } from '../../notification/index.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
-import { createAnnouncement, findAnnouncementById, findAudienceIds } from '../data/repo.js';
+import {
+  createAnnouncement,
+  findAnnouncementById,
+  findAudienceIds,
+  findTodaysPostings,
+} from '../data/repo.js';
 import { audienceOf } from '../domain/audience.js';
 import { assertMaySend, pushPreview } from '../domain/sendRules.js';
 import { decorate } from './decorate.js';
@@ -22,7 +27,9 @@ export async function sendAnnouncement(
   audit: AuditContext,
 ): Promise<AnnouncementRecord> {
   const stationId = request.target.stationId ?? null;
-  assertMaySend(sender, stationId);
+  const today = eventDayAnchor(singaporeDateString());
+  const postings = await findTodaysPostings(sender.volunteerId, today);
+  assertMaySend({ ...sender, todaysStationIds: postings.map((p) => p.stationId) }, stationId);
 
   const announcement = await prisma.$transaction(async (tx) => {
     const row = await createAnnouncement(tx, {
@@ -53,10 +60,7 @@ export async function sendAnnouncement(
   });
 
   // One list for the count and the push, so the sender is told how many were reached.
-  const audienceIds = await findAudienceIds(
-    audienceOf(announcement),
-    eventDayAnchor(singaporeDateString()),
-  );
+  const audienceIds = await findAudienceIds(audienceOf(announcement), today);
   if (announcement.priority === 'URGENT') pushToDevices(announcement, audienceIds);
 
   // Loaded after commit: its relations would overlap on the transaction's

@@ -208,7 +208,7 @@ describe('access by id across stations (P04.3)', () => {
   });
 
   // F04-024
-  it.skip('lets an IC address only the station they run', async () => {
+  it('lets an IC address only the station they run', async () => {
     const response = await request(app)
       .post('/api/v1/announcements')
       .set('Authorization', bearer(icA))

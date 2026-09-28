@@ -14,9 +14,18 @@ const codeOf = (run: () => unknown): string | undefined => {
 
 describe('announcement rules', () => {
   it('lets only a Deputy Coordinator and above address the whole event', () => {
-    expect(codeOf(() => assertMaySend({ role: 'IC' }, null))).toBe('FORBIDDEN');
-    expect(codeOf(() => assertMaySend({ role: 'DEPUTY_COORDINATOR' }, null))).toBeUndefined();
-    expect(codeOf(() => assertMaySend({ role: 'IC' }, 'station'))).toBeUndefined();
+    const ic = { role: 'IC' as const, todaysStationIds: ['booth'] };
+    const deputy = { role: 'DEPUTY_COORDINATOR' as const, todaysStationIds: [] };
+    expect(codeOf(() => assertMaySend(ic, null))).toBe('FORBIDDEN');
+    expect(codeOf(() => assertMaySend(deputy, null))).toBeUndefined();
+  });
+
+  it('lets an IC address only a station they are rostered at today (F04-024)', () => {
+    const ic = { role: 'IC' as const, todaysStationIds: ['booth'] };
+    expect(codeOf(() => assertMaySend(ic, 'booth'))).toBeUndefined();
+    expect(codeOf(() => assertMaySend(ic, 'desk'))).toBe('FORBIDDEN');
+    const deputy = { role: 'DEPUTY_COORDINATOR' as const, todaysStationIds: [] };
+    expect(codeOf(() => assertMaySend(deputy, 'desk'))).toBeUndefined();
   });
 
   it('truncates a push preview to 140 characters', () => {
