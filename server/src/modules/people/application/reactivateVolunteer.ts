@@ -3,7 +3,7 @@ import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import { invalidateVolunteerCache } from '../../../platform/identity/index.js';
 import { logger } from '../../../platform/logger/index.js';
-import { identityProvider } from '../../identity/index.js';
+import { identityProvider } from '../../../platform/identity/index.js';
 import { toAdminRecord } from '../data/mappers.js';
 import { updateVolunteerRow } from '../data/repo.js';
 import { assertActive } from '../domain/escalation.js';

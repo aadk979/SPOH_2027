@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import {
   AdminAddUserToGroupCommand,
   AdminCreateUserCommand,
@@ -9,45 +8,9 @@ import {
 } from '@aws-sdk/client-cognito-identity-provider';
 import type { CommitteeRole } from '@spoh/shared';
 import { env } from '../../config/env.js';
-import { InternalError } from '../../platform/errors/index.js';
-import { logger } from '../../platform/logger/index.js';
-
-/**
- * Account provisioning (BUILD_PLAN §6.1).
- *
- * Self-signup is disabled: accounts exist because someone is on the roster, not
- * because they found the sign-in page. The Chief or an Admin provisions a
- * volunteer, which creates the identity and the `Volunteer` row together.
- *
- * The same pluggable shape as authentication — a Cognito implementation for
- * deployed environments and a deterministic local one for development, so the
- * roster import and the provisioning endpoint are exercised identically in both.
- */
-export interface IdentityProvider {
-  readonly name: 'cognito' | 'local';
-
-  /**
-   * Create (or find) the identity for an email address and put it in the right
-   * group. Returns the provider subject to store as `Volunteer.cognitoSub`.
-   */
-  ensureUser(input: { email: string; displayName: string; role: CommitteeRole }): Promise<{
-    sub: string;
-    created: boolean;
-  }>;
-
-  /** Revoke access. Used when a volunteer leaves or loses a device. */
-  disableUser(email: string): Promise<void>;
-
-  /**
-   * Restore access to a previously disabled account.
-   *
-   * Reinstating somebody is an ordinary correction — a volunteer suspended in
-   * error, or one who came back — and without this the only remedy would be
-   * deleting and re-provisioning them, which would issue a new subject and
-   * orphan every capture they had already recorded.
-   */
-  enableUser(email: string): Promise<void>;
-}
+import { InternalError } from '../errors/index.js';
+import { logger } from '../logger/index.js';
+import type { IdentityProvider } from './provisioning.js';
 
 /** Cognito group names are PascalCase; `CommitteeRole` values are not. */
 const ROLE_TO_COGNITO_GROUP: Readonly<Record<CommitteeRole, string>> = Object.freeze({
@@ -59,7 +22,7 @@ const ROLE_TO_COGNITO_GROUP: Readonly<Record<CommitteeRole, string>> = Object.fr
   VOLUNTEER: 'Volunteer',
 });
 
-function createCognitoIdentityProvider(userPoolId: string): IdentityProvider {
+export function createCognitoIdentityProvider(userPoolId: string): IdentityProvider {
   const client = new CognitoIdentityProviderClient({ region: env.COGNITO_REGION });
 
   return {
@@ -123,37 +86,3 @@ function createCognitoIdentityProvider(userPoolId: string): IdentityProvider {
     },
   };
 }
-
-/**
- * Development identity provider.
- *
- * Derives a stable subject from the email so the same person always gets the
- * same `cognitoSub` across database resets — which is what makes seeded fixtures
- * and dev tokens line up. It creates no account anywhere; the local auth
- * provider will accept any token it signs for that subject.
- */
-function createLocalIdentityProvider(): IdentityProvider {
-  return {
-    name: 'local',
-
-    ensureUser({ email }) {
-      const sub = `local:${createHash('sha256').update(email).digest('hex').slice(0, 32)}`;
-      return Promise.resolve({ sub, created: true });
-    },
-
-    disableUser(email) {
-      logger.info({ email }, 'local identity provider: disable is a no-op');
-      return Promise.resolve();
-    },
-
-    enableUser(email) {
-      logger.info({ email }, 'local identity provider: enable is a no-op');
-      return Promise.resolve();
-    },
-  };
-}
-
-export const identityProvider: IdentityProvider =
-  env.AUTH_PROVIDER === 'cognito'
-    ? createCognitoIdentityProvider(env.COGNITO_USER_POOL_ID as string)
-    : createLocalIdentityProvider();

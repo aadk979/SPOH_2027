@@ -4,7 +4,7 @@ import { prisma } from '../../../platform/db/client.js';
 import { invalidateVolunteerCache } from '../../../platform/identity/index.js';
 import { logger } from '../../../platform/logger/index.js';
 import { revokeAllForVolunteer } from '../../auth/index.js';
-import { identityProvider } from '../../identity/index.js';
+import { identityProvider } from '../../../platform/identity/index.js';
 import { toAdminRecord } from '../data/mappers.js';
 import { deletePushSubscriptions, updateVolunteerRow } from '../data/repo.js';
 import { assertActive } from '../domain/escalation.js';

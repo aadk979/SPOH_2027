@@ -5,7 +5,7 @@ import { NotFoundError } from '../../../platform/errors/index.js';
 import { invalidateVolunteerCache } from '../../../platform/identity/index.js';
 import { logger } from '../../../platform/logger/index.js';
 import { revokeAllForVolunteer } from '../../auth/index.js';
-import { identityProvider } from '../../identity/index.js';
+import { identityProvider } from '../../../platform/identity/index.js';
 import { toAdminRecord } from '../data/mappers.js';
 import { findManager, findManagerOf, updateVolunteerRow, type AdminRow } from '../data/repo.js';
 import { assertMayGrant, assertNoReportingCycle } from '../domain/escalation.js';

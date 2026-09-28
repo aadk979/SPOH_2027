@@ -1,5 +1,5 @@
 import type { RosterImportRow } from '@spoh/shared';
-import { identityProvider } from '../../identity/index.js';
+import { identityProvider } from '../../../platform/identity/index.js';
 import type { Volunteer } from '../data/repo.js';
 
 /**

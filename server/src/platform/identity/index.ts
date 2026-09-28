@@ -12,10 +12,14 @@ import { requestIdOf } from '../http/requestId.js';
 import type { RequestAuth } from '../../types/express.js';
 import { verifyAccessToken } from './sessionTokens.js';
 import { createCognitoAuthProvider } from './cognitoProvider.js';
+import { createCognitoIdentityProvider } from './cognitoIdentityProvider.js';
+import { createLocalIdentityProvider } from './localIdentityProvider.js';
+import type { IdentityProvider } from './provisioning.js';
 import { createLocalAuthProvider } from './localProvider.js';
 import type { AuthProvider } from './types.js';
 
 export type { AuthProvider, VerifiedToken } from './types.js';
+export type { IdentityProvider } from './provisioning.js';
 export {
   generateRefreshToken,
   hashRefreshToken,
@@ -55,6 +59,15 @@ export const authProvider: AuthProvider =
  * that uses Cognito, which is what makes the dev route impossible to mount there.
  */
 export const localAuthIssuer = localProvider;
+
+/**
+ * Account provisioning, the other half of identity: authentication verifies a
+ * subject, provisioning creates one. Same switch, same two implementations.
+ */
+export const identityProvider: IdentityProvider =
+  env.AUTH_PROVIDER === 'cognito'
+    ? createCognitoIdentityProvider(env.COGNITO_USER_POOL_ID as string)
+    : createLocalIdentityProvider();
 
 logger.info({ authProvider: authProvider.name }, 'authentication provider selected');
 

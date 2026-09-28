@@ -3,7 +3,7 @@ import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import { ValidationError } from '../../../platform/errors/index.js';
 import { invalidateVolunteerCache } from '../../../platform/identity/index.js';
-import { identityProvider } from '../../identity/index.js';
+import { identityProvider } from '../../../platform/identity/index.js';
 import { toVolunteerRecord } from '../data/mappers.js';
 import { findVolunteerByEmail, upsertVolunteer } from '../data/repo.js';
 import { assertMayManage } from '../domain/escalation.js';
