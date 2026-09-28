@@ -7,7 +7,7 @@ import { authRouter } from './modules/auth/index.js';
 import { mediaRouter } from './modules/media/index.js';
 import { notificationRouter } from './modules/notification/index.js';
 import { auditRouter } from './modules/audit/index.js';
-import { dashboardRouter } from './modules/dashboard/router.js';
+import { dashboardRouter } from './modules/dashboard/index.js';
 import { fallbackRouter } from './modules/fallback/index.js';
 import { footfallRouter } from './modules/footfall/index.js';
 import { giftRouter } from './modules/gift/index.js';

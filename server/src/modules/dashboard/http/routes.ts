@@ -1,11 +1,11 @@
-import { Router, type Request, type Response } from 'express';
+import { Router } from 'express';
 import { z } from 'zod';
 import { Id } from '@spoh/shared';
-import { requireAuth } from '../../platform/identity/index.js';
-import { defaultRateLimit } from '../../platform/http/rateLimit.js';
-import { requireCapability } from '../../platform/access/index.js';
-import { validate, validatedParams } from '../../platform/http/validate.js';
-import { getDataHealth, getLiveDashboard, getStationDashboard } from './service.js';
+import { requireAuth } from '../../../platform/identity/index.js';
+import { defaultRateLimit } from '../../../platform/http/rateLimit.js';
+import { requireCapability } from '../../../platform/access/index.js';
+import { validate } from '../../../platform/http/validate.js';
+import { dataHealthHandler, liveDashboardHandler, stationDashboardHandler } from './handlers.js';
 
 /** The live operations dashboard (BUILD_PLAN §7.2). */
 export const dashboardRouter: Router = Router();
@@ -23,18 +23,14 @@ dashboardRouter.get(
   '/live',
   defaultRateLimit,
   requireCapability('dashboard.event.read'),
-  async (_req: Request, res: Response) => {
-    res.status(200).json(await getLiveDashboard());
-  },
+  liveDashboardHandler,
 );
 
 dashboardRouter.get(
   '/data-health',
   defaultRateLimit,
   requireCapability('dashboard.event.read'),
-  async (_req: Request, res: Response) => {
-    res.status(200).json(await getDataHealth());
-  },
+  dataHealthHandler,
 );
 
 dashboardRouter.get(
@@ -42,8 +38,5 @@ dashboardRouter.get(
   defaultRateLimit,
   requireCapability('dashboard.station.read'),
   validate({ params: StationIdParams }),
-  async (req: Request, res: Response) => {
-    const { id } = validatedParams<z.infer<typeof StationIdParams>>(req);
-    res.status(200).json(await getStationDashboard(id));
-  },
+  stationDashboardHandler,
 );

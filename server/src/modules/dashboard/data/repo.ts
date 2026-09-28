@@ -1,4 +1,4 @@
-import { prisma } from '../../platform/db/client.js';
+import { prisma } from '../../../platform/db/client.js';
 
 /**
  * Reads for the live dashboard (PRODUCT_BRIEF §9).
@@ -202,5 +202,33 @@ export async function stampsAtStation(
 ): Promise<number> {
   return prisma.cardStampEvent.count({
     where: { stationId, recordedAt: { gte: since, lte: until } },
+  });
+}
+
+export async function findEventDayOn(date: Date) {
+  return prisma.eventDay.findUnique({ where: { date }, select: { id: true, label: true } });
+}
+
+/** Who is rostered at a station on a day, with their check-in state. */
+export async function stationRoster(stationId: string, day: Date) {
+  return prisma.shiftAssignment.findMany({
+    where: { stationId, eventDay: { date: day } },
+    select: {
+      volunteerId: true,
+      roleLabel: true,
+      checkedInAt: true,
+      checkedOutAt: true,
+      volunteer: { select: { displayName: true } },
+    },
+    orderBy: { roleLabel: 'asc' },
+  });
+}
+
+/** A station's live registrations by category over a range. */
+export async function stationRegistrationsByCategory(stationId: string, since: Date, until: Date) {
+  return prisma.registration.groupBy({
+    by: ['category'],
+    where: { stationId, voided: false, recordedAt: { gte: since, lte: until } },
+    _count: { _all: true },
   });
 }
