@@ -1,8 +1,7 @@
 'use client';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState, type ReactNode } from 'react';
-import type { RuntimeSettings, SettingsResponse } from '@spoh/shared';
+import type { RuntimeSettings } from '@spoh/shared';
 import { AppShell } from '@/shared/shell/AppShell';
 import {
   Button,
@@ -15,7 +14,8 @@ import {
   Section,
   Stack,
 } from '@/shared/ui';
-import { ApiError, api } from '@/shared/lib/api';
+import { ApiError } from '@/shared/lib/apiErrors';
+import { useSettings, useSaveSettings } from '@/features/settings';
 import { useMe, useRequireSession } from '@/features/session';
 
 /**
@@ -151,22 +151,9 @@ const NUMERIC_FIELDS: readonly FieldSpec[] = [
 export default function AdminSettingsPage(): ReactNode {
   const session = useRequireSession();
   const { data: me } = useMe();
-  const queryClient = useQueryClient();
 
-  const settings = useQuery({
-    queryKey: ['admin', 'settings'],
-    queryFn: () => api<SettingsResponse>('/admin/settings'),
-    enabled: session !== null,
-    staleTime: 30_000,
-  });
-
-  const save = useMutation({
-    mutationFn: (patch: Partial<RuntimeSettings>) =>
-      api<SettingsResponse>('/admin/settings', { method: 'PATCH', body: patch }),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['admin', 'settings'] });
-    },
-  });
+  const settings = useSettings(session !== null);
+  const save = useSaveSettings();
 
   const [eventName, setEventName] = useState('');
   const [draft, setDraft] = useState<Record<string, string>>({});

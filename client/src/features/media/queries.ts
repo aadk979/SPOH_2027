@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import type { CreateUploadResponse, UploadContentType } from '@spoh/shared';
-import { api } from '@/shared/lib/api';
+import type { UploadContentType } from '@spoh/shared';
+import { getMediaConfig, createUpload, uploadFile } from './api';
 import { useCurrentSession } from '@/features/session';
 
 /**
@@ -55,7 +55,7 @@ export function usePhotoUpload(): UsePhotoUploadResult {
     if (!session) return;
     let cancelled = false;
 
-    void api<{ enabled: boolean }>('/media/config')
+    void getMediaConfig()
       .then((config) => {
         if (!cancelled) setAvailable(config.enabled);
       })
@@ -99,24 +99,12 @@ export function usePhotoUpload(): UsePhotoUploadResult {
     setError(null);
 
     try {
-      const policy = await api<CreateUploadResponse>('/media/uploads', {
-        method: 'POST',
-        body: { purpose: 'lostFound', contentType, contentLength: file.size },
+      const policy = await createUpload({
+        purpose: 'lostFound',
+        contentType,
+        contentLength: file.size,
       });
-
-      /**
-       * Field order matters: S3 reads the form sequentially and the file part
-       * must come last, after every policy field it is validated against.
-       */
-      const form = new FormData();
-      for (const [name, value] of Object.entries(policy.fields)) form.append(name, value);
-      form.append('file', file);
-
-      // Straight to S3, so this one call deliberately does not go through
-      // `api()` — there is no bearer token to send and no JSON to parse.
-      const response = await fetch(policy.url, { method: 'POST', body: form });
-
-      if (!response.ok) throw new Error(`upload rejected with ${response.status}`);
+      await uploadFile(policy, file);
 
       setKey(policy.key);
       setPreviewUrl((current) => {

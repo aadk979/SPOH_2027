@@ -41,6 +41,62 @@ export default tseslint.config(
     ],
   },
 
+  // Feature endpoint and cache ownership (P07.3, ADR-007).
+  {
+    files: ['client/src/**/*.{ts,tsx}'],
+    ignores: ['client/src/features/*/api.ts', 'client/src/shared/lib/**'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "CallExpression[callee.name='api']",
+          message: 'Call endpoints only from features/<domain>/api.ts.',
+        },
+        {
+          selector: "CallExpression[callee.name='fetch']",
+          message: 'Keep fetch and endpoint paths in features/<domain>/api.ts.',
+        },
+        {
+          selector: "Property[key.name='endpoint'] > Literal",
+          message: 'Declare endpoint paths in features/<domain>/api.ts.',
+        },
+      ],
+    },
+  },
+  {
+    files: ['client/src/**/*.{ts,tsx}'],
+    ignores: [
+      'client/src/features/*/queries.ts',
+      'client/src/features/*/api.ts',
+      'client/src/shared/lib/**',
+    ],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'CallExpression[callee.name=/^(useQuery|useMutation)$/]',
+          message: 'Keep query and mutation hooks in feature queries.ts.',
+        },
+        {
+          selector: "Property[key.name='queryKey']",
+          message: 'Keep query keys and invalidation in feature queries.ts.',
+        },
+        {
+          selector: "Property[key.name='endpoint'] > Literal",
+          message: 'Declare endpoint paths in features/<domain>/api.ts.',
+        },
+        {
+          selector: "CallExpression[callee.name='api']",
+          message: 'Call endpoints only from features/<domain>/api.ts.',
+        },
+        {
+          selector: "CallExpression[callee.name='fetch']",
+          message: 'Keep fetch and endpoint paths in features/<domain>/api.ts.',
+        },
+      ],
+    },
+  },
+
   js.configs.recommended,
   ...tseslint.configs.recommended,
 

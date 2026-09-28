@@ -26,7 +26,7 @@ export function ShiftCard({ me }: { me: MeResponse }): ReactNode {
   const { shiftBlocks } = useClientSettings();
   const [confirmingCheckOut, setConfirmingCheckOut] = useState(false);
   const attendance = useAttendance();
-  const checkIn = useCheckIn(assignment?.id);
+  const checkIn = useCheckIn(assignment);
   const checkOut = useCheckOut();
 
   if (!assignment) {

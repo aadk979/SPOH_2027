@@ -127,7 +127,7 @@ module.exports = {
       comment:
         'Only features/*/api.ts (and shared/lib) may call the API client. ' +
         'Today that client is lib/api.ts, and pages and hooks call it directly.',
-      severity: 'warn',
+      severity: 'error',
       from: {
         path: '^client/src/',
         pathNot: ['^client/src/features/[^/]+/api[.]ts$', '^client/src/(shared/)?lib/'],
@@ -137,7 +137,7 @@ module.exports = {
     {
       name: 'client-features-via-index',
       comment: "A feature imports another feature only through that feature's index.ts.",
-      severity: 'warn',
+      severity: 'error',
       from: { path: '^client/src/features/([^/]+)/' },
       to: {
         path: '^client/src/features/[^/]+/',

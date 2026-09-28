@@ -65,3 +65,8 @@ export function useResolveAlert(): ReturnType<
     },
   });
 }
+
+import { raiseLostPerson } from './api';
+export function useRaiseLostPerson() {
+  return useMutation({ mutationFn: raiseLostPerson });
+}

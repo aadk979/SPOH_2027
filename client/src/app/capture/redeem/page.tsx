@@ -1,8 +1,7 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import { useCallback, useState, type ReactNode } from 'react';
-import type { GiftTypeRecord, RedeemGiftResponse } from '@spoh/shared';
+
 import { AppShell } from '@/shared/shell/AppShell';
 import { CardCodeInput } from '@/features/capture/components/CardCodeInput';
 import {
@@ -17,7 +16,8 @@ import {
 } from '@/shared/ui';
 import { useQrScanner } from '@/features/capture/useQrScanner';
 import { useMe, useRequireSession } from '@/features/session';
-import { ApiError, api } from '@/shared/lib/api';
+import { ApiError } from '@/shared/lib/apiErrors';
+import { useGifts, redeemGift } from '@/features/gifts';
 
 /**
  * Gift redemption (PRODUCT_BRIEF §5).
@@ -39,15 +39,7 @@ export default function RedeemPage(): ReactNode {
 
   const station = me?.currentAssignment?.station;
 
-  const gifts = useQuery({
-    queryKey: ['gifts'],
-    queryFn: async () => {
-      const result = await api<{ data: GiftTypeRecord[] }>('/gifts');
-      return result.data;
-    },
-    enabled: session !== null,
-    refetchInterval: 15_000,
-  });
+  const gifts = useGifts(session !== null);
 
   const redeem = useCallback(
     async (cardShortCode?: string): Promise<void> => {
@@ -56,15 +48,12 @@ export default function RedeemPage(): ReactNode {
       setMessage(null);
 
       try {
-        const result = await api<RedeemGiftResponse>('/gifts/redemptions', {
-          method: 'POST',
-          body: {
-            giftTypeId: selected,
-            stationId: station.id,
-            ...(cardShortCode ? { cardShortCode } : {}),
-            idempotencyKey: crypto.randomUUID(),
-            clientRecordedAt: new Date().toISOString(),
-          },
+        const result = await redeemGift({
+          giftTypeId: selected,
+          stationId: station.id,
+          ...(cardShortCode ? { cardShortCode } : {}),
+          idempotencyKey: crypto.randomUUID(),
+          clientRecordedAt: new Date().toISOString(),
         });
 
         navigator.vibrate?.(15);

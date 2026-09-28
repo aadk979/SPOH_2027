@@ -1,8 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import type { PushConfigResponse } from '@spoh/shared';
-import { api } from '@/shared/lib/api';
+import { getPushConfig, registerPush, unregisterPush } from './api';
 import { useCurrentSession } from '@/features/session';
 
 /**
@@ -81,7 +80,7 @@ export function usePushRegistration(): UsePushRegistrationResult {
 
     void (async () => {
       try {
-        const config = await api<PushConfigResponse>('/notifications/config');
+        const config = await getPushConfig();
         if (cancelled) return;
 
         if (!config.enabled || !config.publicKey) {
@@ -142,12 +141,9 @@ export function usePushRegistration(): UsePushRegistrationResult {
         throw new Error('the browser returned an incomplete subscription');
       }
 
-      await api('/notifications/subscriptions', {
-        method: 'POST',
-        body: {
-          endpoint: json.endpoint,
-          keys: { p256dh: json.keys.p256dh, auth: json.keys.auth },
-        },
+      await registerPush({
+        endpoint: json.endpoint,
+        keys: { p256dh: json.keys.p256dh, auth: json.keys.auth },
       });
 
       setState('subscribed');
@@ -165,10 +161,7 @@ export function usePushRegistration(): UsePushRegistrationResult {
 
       // Tell the server first: a subscription we forget about server-side keeps
       // consuming a delivery attempt on every urgent broadcast, forever.
-      await api('/notifications/subscriptions', {
-        method: 'DELETE',
-        body: { endpoint: subscription.endpoint },
-      });
+      await unregisterPush(subscription.endpoint);
 
       await subscription.unsubscribe();
       setState('prompt');

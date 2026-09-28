@@ -1,3 +1,4 @@
+import type { RaiseLostPersonRequest } from '@spoh/shared';
 import type { ActiveLostPersonResponse } from '@spoh/shared';
 import { api } from '@/shared/lib/api';
 
@@ -17,4 +18,8 @@ export function resolveAlert(input: {
     method: 'POST',
     body: { outcome: input.outcome },
   });
+}
+
+export function raiseLostPerson(body: RaiseLostPersonRequest): Promise<unknown> {
+  return api('/lost-person', { method: 'POST', body });
 }

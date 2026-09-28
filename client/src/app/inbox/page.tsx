@@ -1,8 +1,9 @@
 'use client';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useStations } from '@/features/stations';
+
 import { useState, type ReactNode } from 'react';
-import type { AnnouncementRecord, StationSummary } from '@spoh/shared';
+
 import { AppShell } from '@/shared/shell/AppShell';
 import {
   Button,
@@ -20,7 +21,11 @@ import {
   type CardTone,
 } from '@/shared/ui';
 import { useMe, useRequireSession } from '@/features/session';
-import { api } from '@/shared/lib/api';
+import {
+  useAnnouncements,
+  useAcknowledgeAnnouncement,
+  useSendAnnouncement,
+} from '@/features/announcements';
 import { formatTime } from '@/shared/lib/format';
 
 /**
@@ -30,7 +35,6 @@ import { formatTime } from '@/shared/lib/format';
  * push. Volunteers who receive forty pushes stop reading pushes by 11am, and
  * then the one that matters is the one they miss.
  */
-const INBOX_POLL_MS = 30_000;
 
 type Priority = 'INFO' | 'OPERATIONAL' | 'URGENT';
 
@@ -43,19 +47,9 @@ const PRIORITY_LABELS: Record<Priority, string> = {
 export default function InboxPage(): ReactNode {
   const session = useRequireSession();
   const { data: me } = useMe();
-  const queryClient = useQueryClient();
 
-  const inbox = useQuery({
-    queryKey: ['announcements'],
-    queryFn: async () => (await api<{ data: AnnouncementRecord[] }>('/announcements')).data,
-    enabled: session !== null,
-    refetchInterval: INBOX_POLL_MS,
-  });
-
-  const acknowledge = useMutation({
-    mutationFn: (id: string) => api(`/announcements/${id}/ack`, { method: 'POST' }),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['announcements'] }),
-  });
+  const inbox = useAnnouncements(session !== null);
+  const acknowledge = useAcknowledgeAnnouncement();
 
   if (!session) return null;
 
@@ -125,42 +119,34 @@ const PRIORITY_TONE: Record<Priority, CardTone> = {
 
 /** IC and above. Station-targeted by default; event-wide needs a DC. */
 function Composer({ me }: { me: ReturnType<typeof useMe>['data'] }): ReactNode {
-  const queryClient = useQueryClient();
   const [body, setBody] = useState('');
   const [priority, setPriority] = useState<Priority>('OPERATIONAL');
   const [requiresAck, setRequiresAck] = useState(false);
   const [eventWide, setEventWide] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const stations = useQuery({
-    queryKey: ['stations'],
-    queryFn: async () => (await api<{ data: StationSummary[] }>('/stations')).data,
-    staleTime: 5 * 60_000,
-  });
+  const stations = useStations();
 
   const [stationId, setStationId] = useState<string>('');
   const canSendEventWide = me?.capabilities.includes('announcement.event.send') ?? false;
 
-  const send = useMutation({
-    mutationFn: () =>
-      api('/announcements', {
-        method: 'POST',
-        body: {
-          body: body.trim(),
-          priority,
-          requiresAck,
-          target: eventWide
-            ? {}
-            : { stationId: stationId || me?.currentAssignment?.station.id || null },
-        },
-      }),
-    onSuccess: () => {
-      setBody('');
-      setError(null);
-      void queryClient.invalidateQueries({ queryKey: ['announcements'] });
+  const send = useSendAnnouncement(
+    () => ({
+      body: body.trim(),
+      priority,
+      requiresAck,
+      target: eventWide
+        ? {}
+        : { stationId: stationId || me?.currentAssignment?.station.id || null },
+    }),
+    {
+      onSuccess: () => {
+        setBody('');
+        setError(null);
+      },
+      onError: () => setError('Could not send. Check your connection and try again.'),
     },
-    onError: () => setError('Could not send. Check your connection and try again.'),
-  });
+  );
 
   return (
     <Card as="section" className="flex flex-col gap-md">

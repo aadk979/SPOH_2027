@@ -4,9 +4,9 @@ import { useRouter } from 'next/navigation';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { AppShell } from '@/shared/shell/AppShell';
 import { Button, Callout, Field, Input } from '@/shared/ui';
-import { usePhotoUpload } from '@/features/media/usePhotoUpload';
+import { usePhotoUpload } from '@/features/media';
 import { useMe, useRequireSession } from '@/features/session';
-import { api } from '@/shared/lib/api';
+import { useCreateLostFound } from '@/features/lostFound';
 
 /**
  * Log a found item (PRODUCT_BRIEF §7.2).
@@ -23,6 +23,7 @@ import { api } from '@/shared/lib/api';
 export default function NewLostFoundPage(): ReactNode {
   const session = useRequireSession();
   const router = useRouter();
+  const mutation = useCreateLostFound();
   const { data: me } = useMe();
 
   const [itemLabel, setItemLabel] = useState('');
@@ -45,16 +46,13 @@ export default function NewLostFoundPage(): ReactNode {
     setFormError(null);
 
     try {
-      await api('/lost-found', {
-        method: 'POST',
-        body: {
-          itemLabel: itemLabel.trim(),
-          ...(categoryLabel.trim() ? { categoryLabel: categoryLabel.trim() } : {}),
-          ...(holderNote.trim() ? { holderNote: holderNote.trim() } : {}),
-          ...(photo.key ? { photoKey: photo.key } : {}),
-          ...(me?.currentAssignment ? { foundStationId: me.currentAssignment.station.id } : {}),
-          foundAt: new Date().toISOString(),
-        },
+      await mutation.mutateAsync({
+        itemLabel: itemLabel.trim(),
+        ...(categoryLabel.trim() ? { categoryLabel: categoryLabel.trim() } : {}),
+        ...(holderNote.trim() ? { holderNote: holderNote.trim() } : {}),
+        ...(photo.key ? { photoKey: photo.key } : {}),
+        ...(me?.currentAssignment ? { foundStationId: me.currentAssignment.station.id } : {}),
+        foundAt: new Date().toISOString(),
       });
 
       router.replace('/safety/lost-found');

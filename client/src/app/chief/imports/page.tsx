@@ -15,7 +15,8 @@ import {
   Textarea,
 } from '@/shared/ui';
 import { useRequireSession } from '@/features/session';
-import { ApiError, api } from '@/shared/lib/api';
+import { ApiError } from '@/shared/lib/apiErrors';
+import { importFallback } from '@/features/fallback';
 
 /**
  * Reconciliation imports (PRODUCT_BRIEF §11.4).
@@ -74,15 +75,12 @@ export default function ImportsPage(): ReactNode {
         return;
       }
 
-      const response = await api<ImportResponse>(`/fallback/imports/${target}`, {
-        method: 'POST',
-        body: {
-          source,
-          rows,
-          commit,
-          ...(fileName.trim() ? { fileName: fileName.trim() } : {}),
-          ...(notes.trim() ? { notes: notes.trim() } : {}),
-        },
+      const response = await importFallback(target, {
+        source,
+        rows,
+        commit,
+        ...(fileName.trim() ? { fileName: fileName.trim() } : {}),
+        ...(notes.trim() ? { notes: notes.trim() } : {}),
       });
 
       if (commit) {

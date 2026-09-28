@@ -7,3 +7,4 @@ export {
   useCan,
 } from './useSession';
 export { useMe, sessionKeys } from './queries';
+export { hostedSignInUrl } from './api';

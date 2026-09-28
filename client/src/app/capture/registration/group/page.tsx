@@ -1,5 +1,7 @@
 'use client';
 
+import { registrationEndpoints } from '@/features/registration';
+
 import { useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import type { VisitorCategory } from '@spoh/shared';
@@ -70,7 +72,7 @@ export default function GroupRegistrationPage(): ReactNode {
     try {
       await enqueue({
         idempotencyKey,
-        endpoint: '/registrations/group',
+        endpoint: registrationEndpoints.group,
         body: {
           stationId,
           members,

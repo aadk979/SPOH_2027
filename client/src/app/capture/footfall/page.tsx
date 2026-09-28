@@ -1,5 +1,7 @@
 'use client';
 
+import { footfallEndpoint } from '@/features/footfall';
+
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { AppShell } from '@/shared/shell/AppShell';
 import { SyncIndicator } from '@/shared/shell/SyncIndicator';
@@ -108,7 +110,7 @@ export default function FootfallCapturePage(): ReactNode {
           onClick={() => {
             resetIdle();
             void capture({
-              endpoint: '/footfall/ticks',
+              endpoint: footfallEndpoint,
               body: { stationId: station.id },
               label: 'entry',
             });

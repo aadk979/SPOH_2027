@@ -1,0 +1,1 @@
+export { stampCard } from './api';

@@ -1,8 +1,7 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import { useState, type ReactNode } from 'react';
-import type { FullReport } from '@spoh/shared';
+
 import { AppShell } from '@/shared/shell/AppShell';
 import { BarList, BarRow, StatTile } from '@/features/dashboard/components/StatTile';
 import {
@@ -16,10 +15,8 @@ import {
   Stack,
 } from '@/shared/ui';
 import { useRequireSession } from '@/features/session';
-import { api } from '@/shared/lib/api';
-import { clientEnv } from '@/shared/lib/env';
+import { useReport, exportReport } from '@/features/reports';
 import { formatTime, readableCategory } from '@/shared/lib/format';
-import { getAccessToken } from '@/shared/lib/session';
 
 /**
  * The post-event report (PRODUCT_BRIEF §10).
@@ -37,14 +34,7 @@ export default function ReportsPage(): ReactNode {
   const [downloading, setDownloading] = useState<string | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
 
-  const report = useQuery({
-    queryKey: ['reports', 'summary'],
-    queryFn: () => api<FullReport>('/reports/summary'),
-    enabled: session !== null,
-    // The whole event in one query. Expensive, and it does not change while
-    // somebody is reading it.
-    staleTime: 60_000,
-  });
+  const report = useReport(session !== null);
 
   /**
    * Fetched with the bearer token and saved from a blob rather than linked.
@@ -57,14 +47,7 @@ export default function ReportsPage(): ReactNode {
     setExportError(null);
 
     try {
-      const response = await fetch(
-        `${clientEnv.apiBaseUrl}/api/v1/reports/export?format=${format}`,
-        { headers: { Authorization: `Bearer ${getAccessToken() ?? ''}` } },
-      );
-
-      if (!response.ok) throw new Error(String(response.status));
-
-      const blob = await response.blob();
+      const blob = await exportReport(format);
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
 

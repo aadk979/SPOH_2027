@@ -1,8 +1,9 @@
 'use client';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useStations } from '@/features/stations';
+
 import { useState, type ReactNode } from 'react';
-import type { FallbackWindowRecord, StationSummary } from '@spoh/shared';
+
 import { AppShell } from '@/shared/shell/AppShell';
 import {
   Button,
@@ -17,7 +18,8 @@ import {
   Textarea,
 } from '@/shared/ui';
 import { useRequireSession } from '@/features/session';
-import { ApiError, api } from '@/shared/lib/api';
+import { ApiError } from '@/shared/lib/apiErrors';
+import { useFallbackWindows, useDeclareFallback, useCloseFallback } from '@/features/fallback';
 import { formatTime } from '@/shared/lib/format';
 
 /**
@@ -35,47 +37,28 @@ import { formatTime } from '@/shared/lib/format';
  */
 export default function FallbackPage(): ReactNode {
   const session = useRequireSession();
-  const queryClient = useQueryClient();
 
   const [tier, setTier] = useState<'3' | '4'>('3');
   const [reason, setReason] = useState('');
   const [stationId, setStationId] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  const windows = useQuery({
-    queryKey: ['fallback', 'windows'],
-    queryFn: async () => (await api<{ data: FallbackWindowRecord[] }>('/fallback/windows')).data,
-    enabled: session !== null,
-    refetchInterval: 30_000,
-  });
+  const windows = useFallbackWindows(session !== null);
 
-  const stations = useQuery({
-    queryKey: ['stations'],
-    queryFn: async () => (await api<{ data: StationSummary[] }>('/stations')).data,
-    enabled: session !== null,
-    staleTime: 5 * 60_000,
-  });
+  const stations = useStations(session !== null);
 
-  const declare = useMutation({
-    mutationFn: () =>
-      api('/fallback/windows', {
-        method: 'POST',
-        // The choice control carries strings; the API takes the number.
-        body: { tier: Number(tier), reason: reason.trim(), ...(stationId ? { stationId } : {}) },
-      }),
-    onSuccess: () => {
-      setReason('');
-      setError(null);
-      void queryClient.invalidateQueries({ queryKey: ['fallback', 'windows'] });
+  const declare = useDeclareFallback(
+    { tier: Number(tier) as 3 | 4, reason: reason.trim(), ...(stationId ? { stationId } : {}) },
+    {
+      onSuccess: () => {
+        setReason('');
+        setError(null);
+      },
+      onError: (cause) =>
+        setError(cause instanceof ApiError ? cause.message : 'Could not declare the window.'),
     },
-    onError: (cause) =>
-      setError(cause instanceof ApiError ? cause.message : 'Could not declare the window.'),
-  });
-
-  const close = useMutation({
-    mutationFn: (id: string) => api(`/fallback/windows/${id}/close`, { method: 'POST', body: {} }),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['fallback', 'windows'] }),
-  });
+  );
+  const close = useCloseFallback();
 
   if (!session) return null;
 

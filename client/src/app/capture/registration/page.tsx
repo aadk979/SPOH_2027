@@ -1,15 +1,14 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
-import type { RegistrationSummaryResponse, VisitorCategory } from '@spoh/shared';
+import type { VisitorCategory } from '@spoh/shared';
 import { AppShell } from '@/shared/shell/AppShell';
 import { SyncIndicator } from '@/shared/shell/SyncIndicator';
 import { Button, ButtonLink, Callout, EmptyState } from '@/shared/ui';
 import { useCapture } from '@/features/capture/useCapture';
 import { useWakeLock } from '@/shared/hooks/useWakeLock';
 import { useMe, useRequireSession } from '@/features/session';
-import { api } from '@/shared/lib/api';
+import { useRegistrationSummary, registrationEndpoints } from '@/features/registration';
 import { formatCount } from '@/shared/lib/format';
 
 /**
@@ -46,18 +45,7 @@ export default function RegistrationCapturePage(): ReactNode {
    * their own contribution alongside the booth's, which is how a discrepancy
    * becomes visible before it becomes a reconciliation problem (§2.4).
    */
-  const boothTotal = useQuery({
-    queryKey: ['registrations', 'summary', stationId],
-    queryFn: () =>
-      api<RegistrationSummaryResponse>(
-        `/registrations/summary?groupBy=category&stationId=${stationId ?? ''}`,
-      ),
-    enabled: Boolean(stationId),
-    refetchInterval: 15_000,
-    // A volunteer cannot read this endpoint; only the IC view shows the booth
-    // total. Failing quietly is correct — the session count still works.
-    retry: false,
-  });
+  const boothTotal = useRegistrationSummary(stationId);
 
   if (!session) return null;
 
@@ -114,7 +102,7 @@ export default function RegistrationCapturePage(): ReactNode {
               className="capture-target"
               onClick={() =>
                 void capture({
-                  endpoint: '/registrations',
+                  endpoint: registrationEndpoints.single,
                   body: { category: category.value, stationId },
                   label: category.label,
                 })

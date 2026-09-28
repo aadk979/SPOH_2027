@@ -14,7 +14,7 @@ import {
   type ChoiceOption,
 } from '@/shared/ui';
 import { useMe, useRequireSession } from '@/features/session';
-import { api } from '@/shared/lib/api';
+import { useCreateIncident } from '@/features/incident';
 
 /**
  * Incident report (PRODUCT_BRIEF §7.1).
@@ -49,6 +49,7 @@ const SEVERITIES: Array<ChoiceOption<IncidentSeverity>> = [
 export default function NewIncidentPage(): ReactNode {
   const session = useRequireSession();
   const router = useRouter();
+  const mutation = useCreateIncident();
   const { data: me } = useMe();
 
   const [type, setType] = useState<IncidentType>('NEAR_MISS');
@@ -71,17 +72,14 @@ export default function NewIncidentPage(): ReactNode {
     setFormError(null);
 
     try {
-      await api('/incidents', {
-        method: 'POST',
-        body: {
-          type,
-          severity,
-          ...(me?.currentAssignment ? { stationId: me.currentAssignment.station.id } : {}),
-          ...(locationNote.trim() ? { locationNote: locationNote.trim() } : {}),
-          description: description.trim(),
-          occurredAt: new Date().toISOString(),
-          idempotencyKey: crypto.randomUUID(),
-        },
+      await mutation.mutateAsync({
+        type,
+        severity,
+        ...(me?.currentAssignment ? { stationId: me.currentAssignment.station.id } : {}),
+        ...(locationNote.trim() ? { locationNote: locationNote.trim() } : {}),
+        description: description.trim(),
+        occurredAt: new Date().toISOString(),
+        idempotencyKey: crypto.randomUUID(),
       });
 
       router.replace('/home');

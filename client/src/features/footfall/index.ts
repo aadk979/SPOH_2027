@@ -1,0 +1,1 @@
+export { footfallEndpoint } from './api';

@@ -8,9 +8,9 @@ function useInvalidateMe() {
     void client.invalidateQueries({ queryKey: sessionKeys.me });
   };
 }
-export function useCheckIn(assignmentId: string | undefined) {
+export function useCheckIn(assignment: { id: string } | null) {
   const invalidate = useInvalidateMe();
-  return useMutation({ mutationFn: () => checkIn(assignmentId), onSuccess: invalidate });
+  return useMutation({ mutationFn: () => checkIn(assignment?.id), onSuccess: invalidate });
 }
 export function useCheckOut() {
   const invalidate = useInvalidateMe();

@@ -2,7 +2,8 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState, type FormEvent, type ReactNode } from 'react';
-import { clientEnv, isDevAuth } from '@/shared/lib/env';
+import { isDevAuth } from '@/shared/lib/env';
+import { hostedSignInUrl } from '@/features/session';
 import { openSession } from '@/shared/lib/session';
 import { Button, ButtonLink, Card, Field, Input, Skeleton } from '@/shared/ui';
 
@@ -58,7 +59,7 @@ function SignInForm(): ReactNode {
           Sign in with the email address on your volunteer roster entry. Your account was created
           for you — there is no sign-up.
         </p>
-        <ButtonLink href={`${clientEnv.apiBaseUrl}/api/v1/auth/login`} size="lg" block>
+        <ButtonLink href={hostedSignInUrl} size="lg" block>
           Continue to sign in
         </ButtonLink>
       </Card>

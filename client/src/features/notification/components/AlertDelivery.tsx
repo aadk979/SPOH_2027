@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { Button, Callout, Card, CardTitle } from '@/shared/ui';
-import { usePushRegistration } from '@/features/notification/usePushRegistration';
+import { usePushRegistration } from '@/features/notification';
 
 /**
  * Turn on alerts for this device.

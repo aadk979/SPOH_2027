@@ -1,0 +1,1 @@
+export { useCreateIncident } from './queries';

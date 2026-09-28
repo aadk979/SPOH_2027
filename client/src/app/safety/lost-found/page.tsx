@@ -1,6 +1,5 @@
 'use client';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState, type ReactNode } from 'react';
 import type { LostFoundRecord } from '@spoh/shared';
 import { AppShell } from '@/shared/shell/AppShell';
@@ -18,7 +17,7 @@ import {
   type Tone,
 } from '@/shared/ui';
 import { useRequireSession } from '@/features/session';
-import { api } from '@/shared/lib/api';
+import { useLostFound, useClaimLostFound } from '@/features/lostFound';
 import { formatDateTime } from '@/shared/lib/format';
 
 /**
@@ -34,7 +33,6 @@ import { formatDateTime } from '@/shared/lib/format';
  */
 export default function LostFoundPage(): ReactNode {
   const session = useRequireSession();
-  const queryClient = useQueryClient();
   const [query, setQuery] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [heldOnly, setHeldOnly] = useState(true);
@@ -46,22 +44,8 @@ export default function LostFoundPage(): ReactNode {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  const items = useQuery({
-    queryKey: ['lost-found', query, heldOnly],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      if (query.trim()) params.set('q', query.trim());
-      if (heldOnly) params.set('status', 'HELD');
-
-      return (await api<{ data: LostFoundRecord[] }>(`/lost-found?${params.toString()}`)).data;
-    },
-    enabled: session !== null,
-  });
-
-  const claim = useMutation({
-    mutationFn: (id: string) => api(`/lost-found/${id}/claim`, { method: 'POST', body: {} }),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['lost-found'] }),
-  });
+  const items = useLostFound({ query, heldOnly }, session !== null);
+  const claim = useClaimLostFound();
 
   if (!session) return null;
 

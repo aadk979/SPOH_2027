@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useState, type ReactNode } from 'react';
-import type { MissionCardRecord, StampCardResponse } from '@spoh/shared';
+import type { MissionCardRecord } from '@spoh/shared';
 import { AppShell } from '@/shared/shell/AppShell';
 import { CardCodeInput } from '@/features/capture/components/CardCodeInput';
 import { SyncIndicator } from '@/shared/shell/SyncIndicator';
@@ -9,7 +9,8 @@ import { Callout, Card, CardTitle, EmptyState, type Tone } from '@/shared/ui';
 import { useQrScanner } from '@/features/capture/useQrScanner';
 import { useWakeLock } from '@/shared/hooks/useWakeLock';
 import { useMe, useRequireSession } from '@/features/session';
-import { ApiError, api } from '@/shared/lib/api';
+import { ApiError } from '@/shared/lib/apiErrors';
+import { stampCard } from '@/features/cards';
 
 /**
  * Stamp scanning (BUILD_PLAN §9.4, PRODUCT_BRIEF §4.2).
@@ -43,13 +44,10 @@ export default function StampCapturePage(): ReactNode {
       setMessage(null);
 
       try {
-        const result = await api<StampCardResponse>(`/cards/${shortCode}/stamps`, {
-          method: 'POST',
-          body: {
-            stationId: station.id,
-            idempotencyKey: crypto.randomUUID(),
-            clientRecordedAt: new Date().toISOString(),
-          },
+        const result = await stampCard(shortCode, {
+          stationId: station.id,
+          idempotencyKey: crypto.randomUUID(),
+          clientRecordedAt: new Date().toISOString(),
         });
 
         setCard(result.card);

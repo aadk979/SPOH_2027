@@ -1,8 +1,9 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useStations } from '@/features/stations';
+
 import { useState, type ReactNode } from 'react';
-import type { StationSummary, SwapRequestRecord } from '@spoh/shared';
+import type { SwapRequestRecord } from '@spoh/shared';
 import { AppShell } from '@/shared/shell/AppShell';
 import { BarList, BarRow, StatTile } from '@/features/dashboard/components/StatTile';
 import {
@@ -20,7 +21,7 @@ import {
 } from '@/shared/ui';
 import { useStationDashboard } from '@/features/dashboard';
 import { useMe, useRequireSession } from '@/features/session';
-import { api } from '@/shared/lib/api';
+import { usePendingSwaps, useDecideSwap } from '@/features/roster';
 import { blockWord, readableCategory } from '@/shared/lib/format';
 
 /**
@@ -37,22 +38,12 @@ export default function IcConsolePage(): ReactNode {
   const { data: me } = useMe();
   const [stationId, setStationId] = useState<string | null>(null);
 
-  const stations = useQuery({
-    queryKey: ['stations'],
-    queryFn: async () => (await api<{ data: StationSummary[] }>('/stations')).data,
-    enabled: session !== null,
-    staleTime: 5 * 60_000,
-  });
+  const stations = useStations(session !== null);
 
   const selected = stationId ?? me?.currentAssignment?.station.id;
   const dashboard = useStationDashboard(selected);
 
-  const swaps = useQuery({
-    queryKey: ['roster', 'swaps', 'pending'],
-    queryFn: async () => (await api<{ data: SwapRequestRecord[] }>('/roster/swaps/pending')).data,
-    enabled: session !== null,
-    refetchInterval: 30_000,
-  });
+  const swaps = usePendingSwaps(session !== null);
 
   if (!session) return null;
 
@@ -227,13 +218,14 @@ function SwapQueue({
   onDecided(): void;
 }): ReactNode {
   const [pending, setPending] = useState<string | null>(null);
+  const mutation = useDecideSwap();
   const [error, setError] = useState<string | null>(null);
 
   async function decide(id: string, decision: 'APPROVED' | 'REJECTED'): Promise<void> {
     setPending(id);
     setError(null);
     try {
-      await api(`/roster/swaps/${id}/decide`, { method: 'POST', body: { decision } });
+      await mutation.mutateAsync({ id, decision });
       onDecided();
     } catch {
       setError('Could not update swap request. Check your connection and try again.');

@@ -5,7 +5,7 @@ import { useState, type FormEvent, type ReactNode } from 'react';
 import { AppShell } from '@/shared/shell/AppShell';
 import { Button, Callout, Field, Input, Textarea } from '@/shared/ui';
 import { useMe, useRequireSession } from '@/features/session';
-import { api } from '@/shared/lib/api';
+import { useRaiseLostPerson } from '@/features/lostPerson';
 
 /**
  * Raise a lost-person alert (PRODUCT_BRIEF §7.3).
@@ -24,6 +24,7 @@ import { api } from '@/shared/lib/api';
 export default function RaiseLostPersonPage(): ReactNode {
   const session = useRequireSession();
   const router = useRouter();
+  const mutation = useRaiseLostPerson();
   const { data: me } = useMe();
 
   const [description, setDescription] = useState('');
@@ -47,16 +48,13 @@ export default function RaiseLostPersonPage(): ReactNode {
     setFormError(null);
 
     try {
-      await api('/lost-person', {
-        method: 'POST',
-        body: {
-          descriptionText: description.trim(),
-          ...(approxAge.trim() ? { approxAge: approxAge.trim() } : {}),
-          ...(clothing.trim() ? { clothingText: clothing.trim() } : {}),
-          ...(me?.currentAssignment ? { lastSeenStationId: me.currentAssignment.station.id } : {}),
-          lastSeenAt: new Date().toISOString(),
-          idempotencyKey: crypto.randomUUID(),
-        },
+      await mutation.mutateAsync({
+        descriptionText: description.trim(),
+        ...(approxAge.trim() ? { approxAge: approxAge.trim() } : {}),
+        ...(clothing.trim() ? { clothingText: clothing.trim() } : {}),
+        ...(me?.currentAssignment ? { lastSeenStationId: me.currentAssignment.station.id } : {}),
+        lastSeenAt: new Date().toISOString(),
+        idempotencyKey: crypto.randomUUID(),
       });
 
       router.replace('/home');

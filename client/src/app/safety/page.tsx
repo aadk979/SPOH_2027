@@ -4,15 +4,7 @@ import { AppShell } from '@/shared/shell/AppShell';
 import { NavTile } from '@/shared/ui/NavTile';
 import { EscalationChain } from '@/features/shift/components/ShiftOverview';
 import { WorkspaceIntro } from '@/shared/ui/WorkspaceIntro';
-import {
-  Button,
-  ButtonLink,
-  Callout,
-  CardGrid,
-  LoadingCards,
-  Section,
-  Stack,
-} from '@/shared/ui';
+import { Button, ButtonLink, Callout, CardGrid, LoadingCards, Section, Stack } from '@/shared/ui';
 import { useMe, useRequireSession } from '@/features/session';
 
 export default function SafetyPage() {
