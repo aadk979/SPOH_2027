@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-28T11:39:27.748Z",
+  "updatedAt": "2026-09-28T13:30:22.070Z",
   "current": {
-    "phase": "P06",
-    "step": "P06.10"
+    "phase": "P07",
+    "step": null
   },
   "gates": [
     {
@@ -1325,16 +1325,21 @@
         {
           "id": "P06.11",
           "title": "Verify and report",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-28T11:39:33.938Z",
+          "completedAt": "2026-09-28T13:30:22.013Z",
+          "commits": ["d94d4f1"],
+          "notes": [
+            {
+              "at": "2026-09-28T13:30:22.013Z",
+              "text": "768 server and 25 client tests pass; 26 e2e pass; 98 routes; zero server guards. Local pre-refactor/current p95 34.1645/35.337 ms (+3.43%); historical 25 ms not reproducible, full results retained."
+            }
+          ]
         }
       ],
-      "status": "in_progress",
+      "status": "done",
       "startedAt": "2026-09-26T15:31:36.842Z",
-      "completedAt": null
+      "completedAt": "2026-09-28T13:30:22.069Z"
     },
     {
       "id": "P07",
