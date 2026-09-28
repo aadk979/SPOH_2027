@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-28T15:48:46.862Z",
+  "updatedAt": "2026-09-28T16:01:10.164Z",
   "current": {
     "phase": "P07",
     "step": "P07.5"
@@ -1421,7 +1421,7 @@
           "status": "in_progress",
           "startedAt": "2026-09-28T14:47:11.510Z",
           "completedAt": null,
-          "commits": ["55de33d", "5eeb3da", "dd92bb7", "62dad4e", "a674d96", "3497154"],
+          "commits": ["55de33d", "5eeb3da", "dd92bb7", "62dad4e", "a674d96", "3497154", "09e5517"],
           "notes": [
             {
               "at": "2026-09-28T14:47:11.511Z",
@@ -1450,6 +1450,10 @@
             {
               "at": "2026-09-28T15:48:46.861Z",
               "text": "Registration/group, footfall, stamp, redemption and card scanner split into panels, hooks and tested model functions. Queue failures, optional card payload, idle reset/cleanup, latest scanner callback and existing QR semantics covered. Client 117 passed/4 deferred; server 768 passed/9 deferred; E2E 26 passed; visual 58 passed, unchanged baselines. Workspace typecheck/architecture/format clean; lint zero errors/16 warnings. P07.5 remains in progress."
+            },
+            {
+              "at": "2026-09-28T16:01:10.162Z",
+              "text": "Safety forms, found-item list and lost-person banner split while preserving mutation payloads, state lifetime, validation and escalation copy. Nine new form cases cover invalid submissions, trimmed optional payloads and retained input after failure. Client 126 passed/4 deferred; server 768 passed/9 deferred; E2E 26 passed; visuals 58 passed unchanged. Workspace typecheck/architecture/format pass; lint zero errors/11 warnings. P07.5 remains in progress."
             }
           ]
         },
