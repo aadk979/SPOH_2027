@@ -1,14 +1,14 @@
 'use client';
+import { useLostPersonForm } from '../hooks/useLostPersonForm';
+import { LostPersonFields } from '../components/LostPersonFields';
 
-import { useRouter } from 'next/navigation';
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { AppShell } from '@/shared/shell/AppShell';
-import { Button, Callout, Field, Input, Textarea } from '@/shared/ui';
-import { useMe, useRequireSession } from '@/features/session';
-import { useRaiseLostPerson } from '@/features/lostPerson';
+import { Button, Callout } from '@/shared/ui';
+import { useRequireSession } from '@/features/session';
 
 /**
- * Raise a lost-person alert (PRODUCT_BRIEF §7.3).
+ * Raise a lost-person alert (remediation/phases/P07-client-refactor.md).
  *
  * The highest-value single feature in the system, and the only place it holds a
  * description of a person. Two things shape this screen:
@@ -23,49 +23,8 @@ import { useRaiseLostPerson } from '@/features/lostPerson';
  */
 export default function RaiseLostPersonScreen(): ReactNode {
   const session = useRequireSession();
-  const router = useRouter();
-  const mutation = useRaiseLostPerson();
-  const { data: me } = useMe();
-
-  const [description, setDescription] = useState('');
-  const [approxAge, setApproxAge] = useState('');
-  const [clothing, setClothing] = useState('');
-  const [pending, setPending] = useState(false);
-  const [descriptionError, setDescriptionError] = useState<string | null>(null);
-  const [formError, setFormError] = useState<string | null>(null);
-
-  async function submit(event: FormEvent): Promise<void> {
-    event.preventDefault();
-    if (description.trim().length < 3) {
-      setDescriptionError(
-        'Please provide a description of who we are looking for (at least 3 characters).',
-      );
-      return;
-    }
-
-    setPending(true);
-    setDescriptionError(null);
-    setFormError(null);
-
-    try {
-      await mutation.mutateAsync({
-        descriptionText: description.trim(),
-        ...(approxAge.trim() ? { approxAge: approxAge.trim() } : {}),
-        ...(clothing.trim() ? { clothingText: clothing.trim() } : {}),
-        ...(me?.currentAssignment ? { lastSeenStationId: me.currentAssignment.station.id } : {}),
-        lastSeenAt: new Date().toISOString(),
-        idempotencyKey: crypto.randomUUID(),
-      });
-
-      router.replace('/home');
-    } catch {
-      setFormError(
-        'The alert could not be sent. Call your IC on the radio now — do not wait for this screen.',
-      );
-    } finally {
-      setPending(false);
-    }
-  }
+  const form = useLostPersonForm();
+  const { description, pending, formError, submit, me } = form;
 
   if (!session) return null;
 
@@ -77,56 +36,7 @@ export default function RaiseLostPersonScreen(): ReactNode {
       </Callout>
 
       <form onSubmit={(event) => void submit(event)} className="flex flex-col gap-md">
-        <Field
-          id="description"
-          label="What has happened, and who are we looking for?"
-          error={descriptionError}
-        >
-          {(props) => (
-            <Textarea
-              {...props}
-              required
-              minLength={3}
-              maxLength={500}
-              rows={3}
-              value={description}
-              onChange={(event) => {
-                setDescription(event.target.value);
-                if (descriptionError) setDescriptionError(null);
-              }}
-              placeholder="Child separated from their group near the Welcome Lounge"
-            />
-          )}
-        </Field>
-
-        {/*
-          Age and clothing sit side by side once there is room: they are the two
-          things a searcher scans the floor for, and on the banner they are read
-          together.
-        */}
-        <div className="grid gap-md sm:grid-cols-2">
-          <Field id="age" label="Approximate age" optional>
-            {(props) => (
-              <Input
-                {...props}
-                value={approxAge}
-                onChange={(event) => setApproxAge(event.target.value)}
-                placeholder="about 8"
-              />
-            )}
-          </Field>
-
-          <Field id="clothing" label="What are they wearing?" optional>
-            {(props) => (
-              <Input
-                {...props}
-                value={clothing}
-                onChange={(event) => setClothing(event.target.value)}
-                placeholder="red jacket, dark jeans"
-              />
-            )}
-          </Field>
-        </div>
+        <LostPersonFields form={form} />
 
         {me?.currentAssignment ? (
           <p className="text-caption text-text-muted">

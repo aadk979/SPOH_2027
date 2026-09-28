@@ -1,27 +1,14 @@
 'use client';
 
 import { useEffect, useState, type ReactNode } from 'react';
-import type { LostFoundRecord } from '@spoh/shared';
+import { FoundItemCard } from '../components/FoundItemCard';
 import { AppShell } from '@/shared/shell/AppShell';
-import {
-  Button,
-  ButtonLink,
-  Callout,
-  Card,
-  Checkbox,
-  EmptyState,
-  Field,
-  Input,
-  LoadingCards,
-  StatusText,
-  type Tone,
-} from '@/shared/ui';
+import { ButtonLink, Callout, Checkbox, EmptyState, Field, Input, LoadingCards } from '@/shared/ui';
 import { useRequireSession } from '@/features/session';
 import { useLostFound, useClaimLostFound } from '@/features/lostFound';
-import { formatDateTime } from '@/shared/lib/format';
 
 /**
- * The lost-and-found desk (PRODUCT_BRIEF §7.2).
+ * The lost-and-found desk (remediation/phases/P07-client-refactor.md).
  *
  * Search-first, because the question this screen answers is almost always "has
  * anyone handed in a blue water bottle?" rather than "show me everything".
@@ -112,68 +99,10 @@ export default function LostFoundScreen(): ReactNode {
       ) : (
         <ul className="grid gap-sm sm:grid-cols-2 sm:gap-md lg:grid-cols-3">
           {results.map((item) => (
-            <Card as="li" key={item.id} className="flex flex-col">
-              <p className="text-tagline font-semibold">{item.itemLabel}</p>
-
-              <p className="text-caption text-text-muted">
-                {item.categoryLabel ? `${item.categoryLabel} · ` : ''}
-                Found {formatDateTime(item.foundAt)}
-                {item.foundStationName ? ` at ${item.foundStationName}` : ''}
-              </p>
-
-              {item.holderNote ? (
-                <p className="mt-xs text-caption">
-                  <strong>Where it is:</strong> {item.holderNote}
-                </p>
-              ) : null}
-
-              {item.photoKey ? (
-                <p className="mt-xs text-caption text-text-muted">
-                  <span aria-hidden="true">📷 </span>
-                  Photo on file
-                </p>
-              ) : null}
-
-              {/* Status is a word, never carried by colour alone. */}
-              <StatusText tone={statusTone(item.status)} className="mt-sm block">
-                {readableStatus(item.status)}
-              </StatusText>
-
-              {item.status === 'HELD' ? (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="mt-sm self-start"
-                  disabled={claim.isPending && claim.variables === item.id}
-                  onClick={() => claim.mutate(item.id)}
-                  // Otherwise a screen-reader user hears "Mark claimed" once per
-                  // card with no way to tell which item they are about to close.
-                  aria-label={`Mark ${item.itemLabel} claimed`}
-                >
-                  {claim.isPending && claim.variables === item.id ? 'Claiming…' : 'Mark claimed'}
-                </Button>
-              ) : null}
-            </Card>
+            <FoundItemCard key={item.id} item={item} claim={claim} />
           ))}
         </ul>
       )}
     </AppShell>
   );
-}
-
-function readableStatus(status: LostFoundRecord['status']): string {
-  switch (status) {
-    case 'HELD':
-      return 'Held';
-    case 'CLAIMED':
-      return 'Claimed';
-    case 'UNCLAIMED_AT_CLOSE':
-      return 'Unclaimed at close of event';
-    case 'DISPOSED':
-      return 'Disposed';
-  }
-}
-
-function statusTone(status: LostFoundRecord['status']): Tone {
-  return status === 'HELD' ? 'warn' : status === 'CLAIMED' ? 'ok' : 'neutral';
 }

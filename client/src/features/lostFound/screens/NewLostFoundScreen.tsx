@@ -1,15 +1,15 @@
 'use client';
+import { useFoundItemForm } from '../hooks/useFoundItemForm';
+import { FoundItemPhoto } from '../components/FoundItemPhoto';
+import { FoundItemFields } from '../components/FoundItemFields';
 
-import { useRouter } from 'next/navigation';
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { AppShell } from '@/shared/shell/AppShell';
-import { Button, Callout, Field, Input } from '@/shared/ui';
-import { usePhotoUpload } from '@/features/media';
-import { useMe, useRequireSession } from '@/features/session';
-import { useCreateLostFound } from '@/features/lostFound';
+import { Button, Callout } from '@/shared/ui';
+import { useRequireSession } from '@/features/session';
 
 /**
- * Log a found item (PRODUCT_BRIEF §7.2).
+ * Log a found item (remediation/phases/P07-client-refactor.md).
  *
  * Three fields that matter: what it is, where it was found, and where it is
  * being kept. The third is the one people forget and the one that makes the
@@ -22,46 +22,8 @@ import { useCreateLostFound } from '@/features/lostFound';
  */
 export default function NewLostFoundScreen(): ReactNode {
   const session = useRequireSession();
-  const router = useRouter();
-  const mutation = useCreateLostFound();
-  const { data: me } = useMe();
-
-  const [itemLabel, setItemLabel] = useState('');
-  const [categoryLabel, setCategoryLabel] = useState('');
-  const [holderNote, setHolderNote] = useState('');
-  const [pending, setPending] = useState(false);
-  const [itemError, setItemError] = useState<string | null>(null);
-  const [formError, setFormError] = useState<string | null>(null);
-  const photo = usePhotoUpload();
-
-  async function submit(event: FormEvent): Promise<void> {
-    event.preventDefault();
-    if (itemLabel.trim().length < 2) {
-      setItemError('Please provide what the item is (at least 2 characters).');
-      return;
-    }
-
-    setPending(true);
-    setItemError(null);
-    setFormError(null);
-
-    try {
-      await mutation.mutateAsync({
-        itemLabel: itemLabel.trim(),
-        ...(categoryLabel.trim() ? { categoryLabel: categoryLabel.trim() } : {}),
-        ...(holderNote.trim() ? { holderNote: holderNote.trim() } : {}),
-        ...(photo.key ? { photoKey: photo.key } : {}),
-        ...(me?.currentAssignment ? { foundStationId: me.currentAssignment.station.id } : {}),
-        foundAt: new Date().toISOString(),
-      });
-
-      router.replace('/safety/lost-found');
-    } catch {
-      setFormError('Could not save. Check your connection and try again.');
-    } finally {
-      setPending(false);
-    }
-  }
+  const form = useFoundItemForm();
+  const { itemLabel, pending, formError, submit, me } = form;
 
   if (!session) return null;
 
@@ -71,108 +33,9 @@ export default function NewLostFoundScreen(): ReactNode {
       back={{ href: '/safety/lost-found', label: 'Lost and found' }}
     >
       <form onSubmit={(event) => void submit(event)} className="flex flex-col gap-md">
-        <Field
-          id="item"
-          label="What is it?"
-          hint="Describe it the way somebody would ask for it."
-          error={itemError}
-        >
-          {(props) => (
-            <Input
-              {...props}
-              required
-              minLength={2}
-              maxLength={120}
-              value={itemLabel}
-              onChange={(event) => {
-                setItemLabel(event.target.value);
-                if (itemError) setItemError(null);
-              }}
-              placeholder="Blue metal water bottle with stickers"
-              scale="lg"
-            />
-          )}
-        </Field>
+        <FoundItemFields form={form} />
 
-        <Field id="category" label="Kind of thing" optional>
-          {(props) => (
-            <Input
-              {...props}
-              maxLength={60}
-              value={categoryLabel}
-              onChange={(event) => setCategoryLabel(event.target.value)}
-              placeholder="Bottle, bag, phone, clothing…"
-            />
-          )}
-        </Field>
-
-        <Field
-          id="holder"
-          label="Where is it being kept?"
-          optional
-          hint="The field people forget, and the one that makes it findable again."
-        >
-          {(props) => (
-            <Input
-              {...props}
-              maxLength={200}
-              value={holderNote}
-              onChange={(event) => setHolderNote(event.target.value)}
-              placeholder="Held at the Mission Complete desk"
-            />
-          )}
-        </Field>
-
-        {photo.available ? (
-          <Field
-            id="photo"
-            label="Photo"
-            optional
-            hint="Of the item, never of a person. It makes one blue bottle findable among nine."
-            error={photo.error}
-          >
-            {(props) => (
-              <div className="flex flex-col gap-sm">
-                <input
-                  {...props}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  // Opens the rear camera on a phone rather than the gallery,
-                  // which is what somebody standing over a found item wants.
-                  capture="environment"
-                  disabled={photo.state === 'uploading'}
-                  onChange={(event) => {
-                    const file = event.target.files?.[0];
-                    if (file) void photo.upload(file);
-                  }}
-                  className="text-body file:mr-sm file:rounded-pill file:border-0 file:bg-surface-sunken file:px-md file:py-xs file:text-caption"
-                />
-
-                {photo.state === 'uploading' ? (
-                  <p className="text-caption text-text-muted">Uploading…</p>
-                ) : null}
-
-                {photo.state === 'done' && photo.previewUrl ? (
-                  <div className="flex items-center gap-sm">
-                    {/*
-                      A plain <img>, not next/image: the source is a local
-                      object URL for a file that has not left the device yet,
-                      which the image optimiser can do nothing with.
-                    */}
-                    <img
-                      src={photo.previewUrl}
-                      alt="The item you just photographed"
-                      className="size-[64px] rounded-md object-cover"
-                    />
-                    <Button variant="quiet" size="sm" type="button" onClick={photo.reset}>
-                      Remove
-                    </Button>
-                  </div>
-                ) : null}
-              </div>
-            )}
-          </Field>
-        ) : null}
+        <FoundItemPhoto form={form} />
 
         {me?.currentAssignment ? (
           <p className="text-caption text-text-muted">

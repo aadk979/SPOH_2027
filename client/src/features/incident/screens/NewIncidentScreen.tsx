@@ -1,23 +1,15 @@
 'use client';
+import { useIncidentForm } from '../hooks/useIncidentForm';
+import { IncidentDetails } from '../components/IncidentDetails';
 
-import { useRouter } from 'next/navigation';
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import type { IncidentSeverity, IncidentType } from '@spoh/shared';
 import { AppShell } from '@/shared/shell/AppShell';
-import {
-  Button,
-  Callout,
-  ChoiceGroup,
-  Field,
-  Input,
-  Textarea,
-  type ChoiceOption,
-} from '@/shared/ui';
-import { useMe, useRequireSession } from '@/features/session';
-import { useCreateIncident } from '@/features/incident';
+import { Button, Callout, ChoiceGroup, type ChoiceOption } from '@/shared/ui';
+import { useRequireSession } from '@/features/session';
 
 /**
- * Incident report (PRODUCT_BRIEF §7.1).
+ * Incident report (remediation/phases/P07-client-refactor.md).
  *
  * Structured, so the slide-43 incident log is generated rather than
  * reconstructed from memory a week later. Location is pre-filled from the
@@ -48,47 +40,8 @@ const SEVERITIES: Array<ChoiceOption<IncidentSeverity>> = [
 
 export default function NewIncidentScreen(): ReactNode {
   const session = useRequireSession();
-  const router = useRouter();
-  const mutation = useCreateIncident();
-  const { data: me } = useMe();
-
-  const [type, setType] = useState<IncidentType>('NEAR_MISS');
-  const [severity, setSeverity] = useState<IncidentSeverity>('LOW');
-  const [description, setDescription] = useState('');
-  const [locationNote, setLocationNote] = useState('');
-  const [pending, setPending] = useState(false);
-  const [descriptionError, setDescriptionError] = useState<string | null>(null);
-  const [formError, setFormError] = useState<string | null>(null);
-
-  async function submit(event: FormEvent): Promise<void> {
-    event.preventDefault();
-    if (description.trim().length < 10) {
-      setDescriptionError('Please provide at least 10 characters describing what happened.');
-      return;
-    }
-
-    setPending(true);
-    setDescriptionError(null);
-    setFormError(null);
-
-    try {
-      await mutation.mutateAsync({
-        type,
-        severity,
-        ...(me?.currentAssignment ? { stationId: me.currentAssignment.station.id } : {}),
-        ...(locationNote.trim() ? { locationNote: locationNote.trim() } : {}),
-        description: description.trim(),
-        occurredAt: new Date().toISOString(),
-        idempotencyKey: crypto.randomUUID(),
-      });
-
-      router.replace('/home');
-    } catch {
-      setFormError('The report could not be sent. Tell your IC directly, then try again.');
-    } finally {
-      setPending(false);
-    }
-  }
+  const form = useIncidentForm();
+  const { type, setType, severity, setSeverity, description, pending, formError, submit } = form;
 
   if (!session) return null;
 
@@ -115,53 +68,7 @@ export default function NewIncidentScreen(): ReactNode {
           layout="list"
         />
 
-        <Field
-          id="description"
-          label="What happened?"
-          hint="Describe the event, not the people. No names. Minimum 10 characters."
-          error={descriptionError}
-        >
-          {(props) => (
-            <Textarea
-              {...props}
-              required
-              minLength={10}
-              maxLength={2000}
-              rows={4}
-              value={description}
-              onChange={(event) => {
-                setDescription(event.target.value);
-                if (descriptionError) setDescriptionError(null);
-              }}
-              placeholder="A cable across the walkway was taped down after someone tripped on it."
-            />
-          )}
-        </Field>
-
-        <Field
-          id="location"
-          label="Where, exactly?"
-          optional
-          hint={
-            me?.currentAssignment
-              ? `Recorded against ${me.currentAssignment.station.name}. Add the detail that would help someone find the spot.`
-              : 'Add the detail that would help someone find the spot.'
-          }
-        >
-          {(props) => (
-            <Input
-              {...props}
-              value={locationNote}
-              onChange={(event) => setLocationNote(event.target.value)}
-              placeholder={
-                me?.currentAssignment
-                  ? `Near the entrance to ${me.currentAssignment.station.name}`
-                  : 'T19, level 2 walkway'
-              }
-              maxLength={200}
-            />
-          )}
-        </Field>
+        <IncidentDetails form={form} />
 
         {formError ? (
           <Callout tone="alert" role="alert">
