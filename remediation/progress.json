@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-28T15:27:17.241Z",
+  "updatedAt": "2026-09-28T15:31:12.663Z",
   "current": {
     "phase": "P07",
     "step": "P07.5"
@@ -1421,7 +1421,7 @@
           "status": "in_progress",
           "startedAt": "2026-09-28T14:47:11.510Z",
           "completedAt": null,
-          "commits": ["55de33d", "5eeb3da", "dd92bb7"],
+          "commits": ["55de33d", "5eeb3da", "dd92bb7", "62dad4e"],
           "notes": [
             {
               "at": "2026-09-28T14:47:11.511Z",
@@ -1438,6 +1438,10 @@
             {
               "at": "2026-09-28T15:18:03.837Z",
               "text": "Settings screen split into focused panels, form hook and pure validated patch builder. Added 32 validation cases preserving field order, bounds, integer exceptions and overlapping shift behavior. Client 88 passed/4 deferred, server 768 passed/9 deferred, browser 26 passed and all 58 unchanged visual comparisons passed. Workspace typecheck and architecture clean; lint zero errors/37 remaining warnings. P07.5 still in progress."
+            },
+            {
+              "at": "2026-09-28T15:31:12.662Z",
+              "text": "Volunteer roster/editor extraction preserved and reviewed. E2E rerun captured 26 passed; client rerun 98 passed/4 deferred; workspace typecheck and architecture clean; lint zero errors/31 warnings. Prior unchanged-tree verification in handoff: server 768 passed/9 deferred and all 58 visual comparisons passed with unchanged baselines. P07.5 remains in progress."
             }
           ]
         },
