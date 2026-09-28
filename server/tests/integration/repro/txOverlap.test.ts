@@ -3,6 +3,7 @@ import type { Express } from 'express';
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../../src/app.js';
+import { prisma } from '../../../src/platform/db/client.js';
 import { resetDatabase } from '../../helpers/db.js';
 import {
   assignToStation,
@@ -140,6 +141,21 @@ describe('no overlapping queries on a transaction connection (F03-019)', () => {
           .send({ idempotencyKey: idempotencyKey(), descriptionText: 'Child, red cap' }),
       ),
     ).toBe(0);
+  });
+
+  it('checking in and out of a shift', async () => {
+    const shift = await assignToStation({ volunteerId: owner.id, stationId, eventDayId: dayId });
+    await prisma.attendance.create({
+      data: { volunteerId: owner.id, eventDayId: dayId, method: 'ROOT', presentAt: new Date() },
+    });
+    const call = (path: string) => () =>
+      request(app)
+        .post(`/api/v1/me/${path}`)
+        .set('Authorization', bearer(owner))
+        .send({ assignmentId: shift.id });
+
+    expect(await overlapsDuring(call('check-in'))).toBe(0);
+    expect(await overlapsDuring(call('check-out'))).toBe(0);
   });
 
   it('editing a volunteer', async () => {

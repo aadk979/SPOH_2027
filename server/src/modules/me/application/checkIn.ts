@@ -1,11 +1,11 @@
 import type { MyAssignment } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
-import { ForbiddenError } from '../../../platform/errors/index.js';
+import { ForbiddenError, NotFoundError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { toMyAssignment } from '../data/mappers.js';
-import { findAssignmentInTx, hasAttendance, markCheckedIn } from '../data/repo.js';
+import { findAssignmentById, hasAttendance, markCheckedIn } from '../data/repo.js';
 import { assertNotCheckedIn, isRunningNow } from '../domain/shiftRules.js';
 import { loadOwnShift } from './ownShift.js';
 
@@ -23,7 +23,7 @@ export async function checkIn(
 
   const now = clock.now();
 
-  return prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx) => {
     const present = await hasAttendance(tx, { volunteerId, eventDayId: assignment.eventDayId });
     if (!present || !isRunningNow(assignment, now)) {
       throw new ForbiddenError(
@@ -32,7 +32,6 @@ export async function checkIn(
     }
     if (!(await markCheckedIn(tx, { id: assignmentId, volunteerId }, now)))
       throw new ForbiddenError('This shift has changed. Refresh your shift list.');
-    const updated = await findAssignmentInTx(tx, assignmentId);
 
     await writeAudit(tx, {
       ...audit,
@@ -41,7 +40,11 @@ export async function checkIn(
       entityId: assignmentId,
       after: { checkedInAt: now.toISOString() },
     });
-
-    return toMyAssignment(updated);
   });
+
+  // Loaded after commit: its relations would overlap on the transaction's
+  // connection (F03-019).
+  const updated = await findAssignmentById(assignmentId);
+  if (!updated) throw new NotFoundError('Shift assignment');
+  return toMyAssignment(updated);
 }

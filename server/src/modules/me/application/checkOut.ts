@@ -1,10 +1,11 @@
 import type { MyAssignment } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
+import { NotFoundError } from '../../../platform/errors/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { toMyAssignment } from '../data/mappers.js';
-import { markCheckedOut } from '../data/repo.js';
+import { findAssignmentById, markCheckedOut } from '../data/repo.js';
 import { assertCheckedIn } from '../domain/shiftRules.js';
 import { loadOwnShift } from './ownShift.js';
 
@@ -18,8 +19,8 @@ export async function checkOut(
 
   const now = clock.now();
 
-  return prisma.$transaction(async (tx) => {
-    const updated = await markCheckedOut(tx, assignmentId, now);
+  await prisma.$transaction(async (tx) => {
+    await markCheckedOut(tx, assignmentId, now);
 
     await writeAudit(tx, {
       ...audit,
@@ -28,7 +29,11 @@ export async function checkOut(
       entityId: assignmentId,
       after: { checkedOutAt: now.toISOString() },
     });
-
-    return toMyAssignment(updated);
   });
+
+  // Loaded after commit: its relations would overlap on the transaction's
+  // connection (F03-019).
+  const updated = await findAssignmentById(assignmentId);
+  if (!updated) throw new NotFoundError('Shift assignment');
+  return toMyAssignment(updated);
 }

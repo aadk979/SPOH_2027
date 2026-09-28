@@ -70,19 +70,12 @@ export async function markCheckedOut(
   tx: PrismaTransactionClient,
   id: string,
   at: Date,
-): Promise<AssignmentWithContext> {
-  return tx.shiftAssignment.update({
+): Promise<void> {
+  await tx.shiftAssignment.update({
     where: { id },
     data: { checkedOutAt: at },
-    include: assignmentInclude,
+    select: { id: true },
   });
-}
-
-export async function findAssignmentInTx(
-  tx: PrismaTransactionClient,
-  id: string,
-): Promise<AssignmentWithContext> {
-  return tx.shiftAssignment.findUniqueOrThrow({ where: { id }, include: assignmentInclude });
 }
 
 /**
