@@ -90,14 +90,13 @@ export async function listWindows(range: { from?: Date; to?: Date }): Promise<Wi
  * `declaredById` and `stationId` are plain scalars with no Prisma relation
  * (see the note at the top of schema.prisma), so names are looked up by id.
  */
-export async function findVolunteerName(id: string): Promise<string | null> {
-  const row = await prisma.volunteer.findUnique({ where: { id }, select: { displayName: true } });
-  return row?.displayName ?? null;
-}
-
-export async function findStationName(id: string): Promise<string | null> {
-  const row = await prisma.station.findUnique({ where: { id }, select: { name: true } });
-  return row?.name ?? null;
+export async function findVolunteerNames(ids: readonly string[]): Promise<Map<string, string>> {
+  if (ids.length === 0) return new Map();
+  const rows = await prisma.volunteer.findMany({
+    where: { id: { in: [...new Set(ids)] } },
+    select: { id: true, displayName: true },
+  });
+  return new Map(rows.map((row) => [row.id, row.displayName]));
 }
 
 /** Station ids by upper-cased code: how a sheet names a station. */

@@ -423,6 +423,37 @@ describe('list reads (F03-029)', () => {
   });
 });
 
+describe('fallback reads (F03-029)', () => {
+  it('names the declarers and stations of a list of windows in one query each', async () => {
+    for (const code of ['W1', 'W2', 'W3']) {
+      const station = await createStation({ code, name: `Wing ${code}` });
+      const declared = await as(chief).post('/fallback/windows', {
+        tier: 3,
+        stationId: station.id,
+        reason: `Scanner down at ${code}`,
+      });
+      expect(declared.status).toBe(201);
+    }
+
+    // Warm-up: the first request also resolves the caller's own roster row.
+    await as(ic).get('/fallback/windows');
+    const lookups = [
+      vi.spyOn(prisma.station, 'findUnique'),
+      vi.spyOn(prisma.station, 'findMany'),
+      vi.spyOn(prisma.volunteer, 'findUnique'),
+      vi.spyOn(prisma.volunteer, 'findMany'),
+    ];
+    const response = await as(ic).get('/fallback/windows');
+
+    expect(response.status).toBe(200);
+    expect(response.body.data).toHaveLength(3);
+    expect(response.body.data[0].stationName).toBe('Wing W1');
+    const calls = lookups.reduce((sum, spy) => sum + spy.mock.calls.length, 0);
+    expect(calls).toBeLessThanOrEqual(2);
+    lookups.forEach((spy) => spy.mockRestore());
+  });
+});
+
 describe('inbox reads (F03-029)', () => {
   it('names the stations of an inbox page in its query, not one lookup per announcement', async () => {
     for (const body of ['Queue at the desk', 'Banner is down', 'Lunch at one']) {
