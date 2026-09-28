@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-28T14:47:11.511Z",
+  "updatedAt": "2026-09-28T14:55:27.817Z",
   "current": {
     "phase": "P07",
     "step": "P07.5"
@@ -1421,11 +1421,15 @@
           "status": "in_progress",
           "startedAt": "2026-09-28T14:47:11.510Z",
           "completedAt": null,
-          "commits": [],
+          "commits": ["55de33d"],
           "notes": [
             {
               "at": "2026-09-28T14:47:11.511Z",
               "text": "Splitting long feature screens and components while preserving behaviour and visual baselines."
+            },
+            {
+              "at": "2026-09-28T14:55:27.816Z",
+              "text": "Reports and attendance split into focused panels and screen hooks; both domains have zero lint violations. Workspace typecheck, client 51 passed/4 deferred, server 768 passed/9 deferred, e2e 26 passed, 58 unchanged visual comparisons. Follow-up attendance screenshots passed after restarting frozen fixture API to clear accumulated sign-in rate limits. Overall lint 44 warnings/0 errors; architecture clean. Remaining long components still pending."
             }
           ]
         },
