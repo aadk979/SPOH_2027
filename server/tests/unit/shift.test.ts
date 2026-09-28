@@ -30,12 +30,17 @@ describe('swap rules', () => {
 });
 
 describe('briefing rules', () => {
-  it('completes an open slot, by its briefer or when it has none', () => {
+  it('completes an open slot: its briefer, or an IC and above (F03-016)', () => {
     expect(codeOf(() => assertSlotOpen({ completedAt: new Date() }))).toBe(
       'SLOT_ALREADY_COMPLETED',
     );
-    expect(codeOf(() => assertMayComplete({ briefierId: 'x' }, 'y'))).toBe('FORBIDDEN');
-    expect(codeOf(() => assertMayComplete({ briefierId: null }, 'y'))).toBeUndefined();
+    const volunteer = { volunteerId: 'y', role: 'VOLUNTEER' as const };
+    expect(codeOf(() => assertMayComplete({ briefierId: 'x' }, volunteer))).toBe('FORBIDDEN');
+    expect(codeOf(() => assertMayComplete({ briefierId: null }, volunteer))).toBe('FORBIDDEN');
+    expect(codeOf(() => assertMayComplete({ briefierId: 'y' }, volunteer))).toBeUndefined();
+    expect(
+      codeOf(() => assertMayComplete({ briefierId: 'x' }, { volunteerId: 'i', role: 'IC' })),
+    ).toBeUndefined();
   });
 });
 

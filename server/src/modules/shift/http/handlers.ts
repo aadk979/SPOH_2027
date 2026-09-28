@@ -45,7 +45,8 @@ export async function briefingSlotsHandler(req: Request, res: Response): Promise
 
 export async function completeSlotHandler(req: Request, res: Response): Promise<void> {
   const body = validatedBody<CompleteBriefingSlotRequest>(req);
-  res.status(200).json({ slot: await markSlotComplete(idOf(req), body, actorContextFrom(req)) });
+  const actor = { ...actorContextFrom(req), role: getAuth(req).role };
+  res.status(200).json({ slot: await markSlotComplete(idOf(req), body, actor) });
 }
 
 export async function staffingGapsHandler(_req: Request, res: Response): Promise<void> {

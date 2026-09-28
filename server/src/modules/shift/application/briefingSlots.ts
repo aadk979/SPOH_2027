@@ -1,5 +1,6 @@
 import type {
   BriefingSlotRecord,
+  CommitteeRole,
   CompleteBriefingSlotRequest,
   ListBriefingSlotsQuery,
 } from '@spoh/shared';
@@ -28,12 +29,13 @@ export async function getBriefingSlots(
 export async function markSlotComplete(
   slotId: string,
   request: CompleteBriefingSlotRequest,
-  { volunteerId: actorId, audit }: ActorContext,
+  actor: ActorContext & { role: CommitteeRole },
 ): Promise<BriefingSlotRecord> {
+  const { volunteerId: actorId, audit } = actor;
   const slot = await findSlotById(slotId);
   if (!slot) throw new NotFoundError('Briefing slot');
   assertSlotOpen(slot);
-  assertMayComplete(slot, actorId);
+  assertMayComplete(slot, actor);
 
   await prisma.$transaction(async (tx) => {
     await completeSlot(tx, slotId, request.notes ?? null);

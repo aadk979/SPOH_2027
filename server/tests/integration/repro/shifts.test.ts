@@ -144,7 +144,7 @@ describe('shifts and swaps (P03 repros)', () => {
   });
 
   // F03-016
-  it.skip('does not let a volunteer mark an unassigned briefing wave as done', async () => {
+  it('does not let a volunteer mark an unassigned briefing wave as done', async () => {
     const slot = await prisma.briefingSlot.create({
       data: { eventDayId: dayId, startsAt: new Date(FROZEN_NOW.getTime() - 60 * 60_000) },
     });
@@ -158,7 +158,7 @@ describe('shifts and swaps (P03 repros)', () => {
   });
 
   // F03-016
-  it.skip('lets an IC complete a wave assigned to someone else, as the error message promises', async () => {
+  it('lets an IC complete a wave assigned to someone else, as the error message promises', async () => {
     const slot = await prisma.briefingSlot.create({
       data: {
         eventDayId: dayId,
