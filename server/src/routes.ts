@@ -4,7 +4,7 @@ import { env } from './config/env.js';
 import { announcementRouter } from './modules/announcement/index.js';
 import { adminRouter } from './modules/admin/index.js';
 import { authRouter } from './modules/auth/index.js';
-import { mediaRouter } from './modules/media/router.js';
+import { mediaRouter } from './modules/media/index.js';
 import { notificationRouter } from './modules/notification/index.js';
 import { auditRouter } from './modules/audit/router.js';
 import { dashboardRouter } from './modules/dashboard/router.js';
