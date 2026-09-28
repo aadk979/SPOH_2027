@@ -6,7 +6,7 @@ import { adminRouter } from './modules/admin/index.js';
 import { authRouter } from './modules/auth/index.js';
 import { mediaRouter } from './modules/media/index.js';
 import { notificationRouter } from './modules/notification/index.js';
-import { auditRouter } from './modules/audit/router.js';
+import { auditRouter } from './modules/audit/index.js';
 import { dashboardRouter } from './modules/dashboard/router.js';
 import { fallbackRouter } from './modules/fallback/router.js';
 import { footfallRouter } from './modules/footfall/index.js';
