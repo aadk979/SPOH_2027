@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-28T11:10:48.663Z",
+  "updatedAt": "2026-09-28T11:29:11.646Z",
   "current": {
     "phase": "P06",
-    "step": "P06.8"
+    "step": "P06.9"
   },
   "gates": [
     {
@@ -1283,11 +1283,16 @@
         {
           "id": "P06.9",
           "title": "Composition root and config",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-28T11:10:53.225Z",
+          "completedAt": "2026-09-28T11:29:11.645Z",
+          "commits": ["f454829"],
+          "notes": [
+            {
+              "at": "2026-09-28T11:29:11.646Z",
+              "text": "main.ts + app/createApp.ts in steps, app/routes.ts registry, config split per concern, jobs via platform/scheduler, .env.example complete (F01-051); built dist/index.js boots and answers /healthz, /readyz"
+            }
+          ]
         },
         {
           "id": "P06.13",

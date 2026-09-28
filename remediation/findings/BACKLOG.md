@@ -291,7 +291,7 @@ immediate defect and the later step makes it structural.
 | F04-024 | An IC can send an urgent announcement to any station                      | P06.13 | P11.2                                        | fixed `ac569f1`                        |
 | F04-008 | Six routes unthrottled; `/readyz` queries the database for anyone         | P06.13 | P08.4 (health checks behind the ALB)         | fixed `6b3e755`                        |
 | F04-025 | A push endpoint can be any URL                                            | P06.13 | P15.3 (egress)                               | fixed `3f89b05`                        |
-| F01-051 | `server/.env.example` omits nine keys, one of them required in production | P06.9  | P08.6                                        | open                                   |
+| F01-051 | `server/.env.example` omits nine keys, one of them required in production | P06.9  | P08.6                                        | fixed `6bf0dd3`                        |
 | F02-010 | Every page load sends a settings request before the session is ready      | P07.11 | —                                            | open                                   |
 | F02-020 | Screens call endpoints their role may not use                             | P07.11 | P11.8; _see_ F02-025                         | open                                   |
 | F03-035 | A replaced push subscription is never sent to the server                  | P07.11 | —                                            | open                                   |
