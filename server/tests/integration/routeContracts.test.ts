@@ -249,7 +249,7 @@ describe('admin writes', () => {
 
 describe('push and media without their AWS configuration', () => {
   const subscription = {
-    endpoint: 'https://push.example.test/abc',
+    endpoint: 'https://fcm.googleapis.com/fcm/send/abc',
     keys: { p256dh: 'p256dh-key', auth: 'auth-key' },
   };
 
@@ -271,6 +271,41 @@ describe('push and media without their AWS configuration', () => {
     });
     expect(removed.status).toBe(204);
     expect(await prisma.pushSubscription.count({ where: { volunteerId: volunteer.id } })).toBe(0);
+  });
+
+  // F04-025
+  it('refuses a push endpoint that is not a known push service', async () => {
+    for (const endpoint of [
+      'http://fcm.googleapis.com/fcm/send/abc',
+      'https://127.0.0.1/abc',
+      'https://169.254.169.254/latest/meta-data',
+      'https://fcm.googleapis.com.evil.test/abc',
+      'https://fcm.googleapis.com:8443/abc',
+    ]) {
+      const response = await as(volunteer).post('/notifications/subscriptions', {
+        ...subscription,
+        endpoint,
+      });
+      expect(response.status, endpoint).toBe(400);
+    }
+    expect(await prisma.pushSubscription.count()).toBe(0);
+  });
+
+  // F04-025
+  it('keeps at most five devices per person, dropping the least recently seen', async () => {
+    for (let device = 0; device < 6; device += 1) {
+      vi.setSystemTime(new Date(FROZEN_NOW.getTime() + device * 60_000));
+      const created = await as(volunteer).post('/notifications/subscriptions', {
+        ...subscription,
+        endpoint: `https://web.push.apple.com/device-${device}`,
+      });
+      expect(created.status).toBe(201);
+    }
+    vi.setSystemTime(FROZEN_NOW);
+
+    const kept = await prisma.pushSubscription.findMany({ where: { volunteerId: volunteer.id } });
+    expect(kept).toHaveLength(5);
+    expect(kept.map((row) => row.endpoint)).not.toContain('https://web.push.apple.com/device-0');
   });
 
   it('GET /media/config reports uploads as disabled', async () => {

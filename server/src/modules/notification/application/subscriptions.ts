@@ -1,5 +1,6 @@
 import { systemClock, type Clock } from '../../../platform/time/index.js';
-import { deleteOwnSubscription, upsertSubscription } from '../data/repo.js';
+import { deleteOwnSubscription, pruneDevicesBeyond, upsertSubscription } from '../data/repo.js';
+import { MAX_DEVICES_PER_PERSON } from '../domain/delivery.js';
 
 /** Register a device, or refresh it and hand it to whoever now holds it. */
 export async function subscribeDevice(
@@ -12,7 +13,10 @@ export async function subscribeDevice(
   },
   clock: Clock = systemClock,
 ): Promise<{ id: string }> {
-  return upsertSubscription(input, clock.now());
+  const subscription = await upsertSubscription(input, clock.now());
+  // Capped per person: the newest devices stay, the least recently seen go (F04-025).
+  await pruneDevicesBeyond(input.volunteerId, MAX_DEVICES_PER_PERSON);
+  return subscription;
 }
 
 /** Scoped to the caller's own subscriptions: you may only unsubscribe yourself. */

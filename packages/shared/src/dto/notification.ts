@@ -17,10 +17,39 @@ import { Id } from './common.js';
  * pushes by 11am, and then the one that matters is the one they miss.
  */
 
+/**
+ * The push services browsers subscribe through: Chrome and Android (FCM),
+ * Firefox (Mozilla), Safari (Apple) and Edge (Windows). A subscription endpoint
+ * is a URL the server POSTs to, so anything else — loopback, a private
+ * address, somebody's own server — is refused (F04-025).
+ */
+export const PUSH_SERVICE_HOSTS = [
+  'fcm.googleapis.com',
+  'android.googleapis.com',
+  'push.services.mozilla.com',
+  'push.apple.com',
+  'notify.windows.com',
+] as const;
+
+/**
+ * An `https` URL on a known push service or a subdomain of one. The host is
+ * letters, digits, dots and hyphens only, followed by a path or nothing, so a
+ * port, user info, an IP literal or a query straight after the host all fail.
+ */
+export function isPushServiceEndpoint(endpoint: string): boolean {
+  const match = /^https:\/\/([a-z0-9.-]+)(?:\/|$)/i.exec(endpoint);
+  if (!match?.[1]) return false;
+  const host = match[1].toLowerCase();
+  return PUSH_SERVICE_HOSTS.some((known) => host === known || host.endsWith(`.${known}`));
+}
+
 /** What the browser's PushManager hands back, transcribed to our shape. */
 export const PushSubscriptionRequest = z
   .object({
-    endpoint: z.url().max(2048),
+    endpoint: z
+      .url()
+      .max(2048)
+      .refine(isPushServiceEndpoint, 'This is not a push service address this app sends to.'),
     keys: z
       .object({
         p256dh: z.string().min(1).max(255),

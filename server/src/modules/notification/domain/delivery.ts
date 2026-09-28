@@ -15,6 +15,16 @@ export const TTL_SECONDS: Readonly<Record<NotificationKind, number>> = Object.fr
   'gift.lowStock': 1800,
 });
 
+/**
+ * Devices one person may register. A volunteer has a phone and perhaps a
+ * tablet; the cap stops one account turning each alert into thousands of
+ * outbound requests (F04-025). A new device replaces the least recently seen.
+ */
+export const MAX_DEVICES_PER_PERSON = 5;
+
+/** How long one push service may take to accept a message before it counts as failed. */
+export const SEND_TIMEOUT_MS = 5_000;
+
 /** Every role at least as senior as `minimumRole`. */
 export function rolesAtOrAbove(minimumRole: CommitteeRole): CommitteeRole[] {
   const ceiling = ROLE_PRECEDENCE[minimumRole];

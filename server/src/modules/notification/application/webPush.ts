@@ -1,6 +1,7 @@
 import webpush, { type PushSubscription as WebPushSubscription } from 'web-push';
 import { env } from '../../../config/env.js';
 import { logger } from '../../../platform/logger/index.js';
+import { SEND_TIMEOUT_MS } from '../domain/delivery.js';
 
 /**
  * Web Push delivery (RFC 8030 / 8292).
@@ -63,5 +64,7 @@ export async function sendPush(
   await webpush.sendNotification(target, payload, {
     TTL: options.ttlSeconds,
     urgency: options.urgent ? 'high' : 'normal',
+    // A push service that hangs must not hold a lost-person alert's fan-out open (F04-025).
+    timeout: SEND_TIMEOUT_MS,
   });
 }

@@ -256,7 +256,7 @@ describe('withdrawing access', () => {
     await prisma.pushSubscription.create({
       data: {
         volunteerId: volunteer.id,
-        endpoint: 'https://push.example/abc',
+        endpoint: 'https://fcm.googleapis.com/fcm/send/abc',
         p256dh: 'key',
         auth: 'auth',
       },

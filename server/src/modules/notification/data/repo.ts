@@ -56,6 +56,7 @@ export async function upsertSubscription(
       p256dh: input.p256dh,
       auth: input.auth,
       userAgent: input.userAgent,
+      lastSeenAt: now,
     },
     update: {
       volunteerId: input.volunteerId,
@@ -67,6 +68,18 @@ export async function upsertSubscription(
     },
     select: { id: true },
   });
+}
+
+/** Deletes this person's least recently seen devices beyond `keep`; returns how many went. */
+export async function pruneDevicesBeyond(volunteerId: string, keep: number): Promise<number> {
+  const stale = await prisma.pushSubscription.findMany({
+    where: { volunteerId },
+    orderBy: [{ lastSeenAt: 'desc' }, { id: 'desc' }],
+    skip: keep,
+    select: { id: true },
+  });
+  if (stale.length === 0) return 0;
+  return deleteSubscriptions(stale.map((row) => row.id));
 }
 
 /** Scoped to the owner: you may only unsubscribe yourself. */
