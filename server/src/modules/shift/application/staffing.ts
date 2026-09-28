@@ -40,5 +40,5 @@ export async function getStaffingGaps(now = new Date()): Promise<StaffingGapsRes
 /** People on station longer than the welfare threshold, longest first. */
 export async function getLongShifts(now = new Date()): Promise<LongShiftWarning[]> {
   const cutoff = new Date(now.getTime() - getSettings().longShiftMinutes * 60_000);
-  return longShiftWarnings(await longRunningShifts(cutoff), now);
+  return longShiftWarnings(await longRunningShifts({ cutoff, since: startOfEventDay(now) }), now);
 }

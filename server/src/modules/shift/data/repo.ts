@@ -187,9 +187,14 @@ export async function staffingByStation(input: {
  * signal from slide 39. A break nobody records is a break nobody can be
  * reminded to take.
  */
-export async function longRunningShifts(cutoff: Date) {
+/**
+ * Open shifts checked in before `cutoff`, today only: a shift from an earlier
+ * day that nobody checked out of is a record to tidy, not someone still
+ * standing at a station (F03-023).
+ */
+export async function longRunningShifts(window: { cutoff: Date; since: Date }) {
   return prisma.shiftAssignment.findMany({
-    where: { checkedInAt: { lt: cutoff, not: null }, checkedOutAt: null },
+    where: { checkedInAt: { lt: window.cutoff, gte: window.since }, checkedOutAt: null },
     select: {
       volunteerId: true,
       checkedInAt: true,

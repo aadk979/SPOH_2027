@@ -176,7 +176,7 @@ describe('shifts and swaps (P03 repros)', () => {
   });
 
   // F03-023
-  it.skip('does not warn about a shift from a previous day that nobody checked out of', async () => {
+  it('does not warn about a shift from a previous day that nobody checked out of', async () => {
     const yesterday = await prisma.eventDay.create({
       data: { date: new Date('2027-01-06T00:00:00.000Z'), label: 'Day 0' },
     });
