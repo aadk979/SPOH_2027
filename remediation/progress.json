@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-28T16:01:10.164Z",
+  "updatedAt": "2026-09-28T16:12:33.145Z",
   "current": {
     "phase": "P07",
-    "step": "P07.5"
+    "step": "P07.6"
   },
   "gates": [
     {
@@ -1418,10 +1418,19 @@
         {
           "id": "P07.5",
           "title": "Break up long components",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-28T14:47:11.510Z",
-          "completedAt": null,
-          "commits": ["55de33d", "5eeb3da", "dd92bb7", "62dad4e", "a674d96", "3497154", "09e5517"],
+          "completedAt": "2026-09-28T16:12:33.081Z",
+          "commits": [
+            "55de33d",
+            "5eeb3da",
+            "dd92bb7",
+            "62dad4e",
+            "a674d96",
+            "3497154",
+            "09e5517",
+            "172d4a8"
+          ],
           "notes": [
             {
               "at": "2026-09-28T14:47:11.511Z",
@@ -1454,17 +1463,26 @@
             {
               "at": "2026-09-28T16:01:10.162Z",
               "text": "Safety forms, found-item list and lost-person banner split while preserving mutation payloads, state lifetime, validation and escalation copy. Nine new form cases cover invalid submissions, trimmed optional payloads and retained input after failure. Client 126 passed/4 deferred; server 768 passed/9 deferred; E2E 26 passed; visuals 58 passed unchanged. Workspace typecheck/architecture/format pass; lint zero errors/11 warnings. P07.5 remains in progress."
+            },
+            {
+              "at": "2026-09-28T16:12:33.082Z",
+              "text": "Completed remaining announcements, shift, media/notification and shared UI/shell/API/outbox splits. Client 136 passed/4 deferred; server 768 passed/9 deferred; E2E 26 passed after refreshing dedicated fixture date at Singapore midnight; visual 58 passed unchanged. Lint zero errors/warnings; workspace typecheck and architecture passed. Standards guard report has zero size/complexity/boundary violations; raw-line metrics retained separately."
             }
           ]
         },
         {
           "id": "P07.6",
           "title": "One form pattern",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-28T16:12:33.144Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-09-28T16:12:33.145Z",
+              "text": "Begin ADR-007 shared request-schema useZodForm pattern and migrate forms incrementally."
+            }
+          ]
         },
         {
           "id": "P07.7",
