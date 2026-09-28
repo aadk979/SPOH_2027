@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-28T13:51:38.778Z",
+  "updatedAt": "2026-09-28T13:54:37.403Z",
   "current": {
     "phase": "P07",
     "step": "P07.3"
@@ -2426,6 +2426,10 @@
     {
       "at": "2026-09-28T13:50:07.750Z",
       "text": "P07.2 local implementation verified: 28 files moved to shared/feature homes, generic useWakeLock extracted, public session export added for moved banner. Typecheck and 42 client tests pass (4 deferred); all 58 visual snapshots unchanged after moves; lint 0 errors/70 existing warnings; architecture 0 errors/27 existing warnings. P07.1/P07.2 await explicit authorization to commit/push main; keep steps unfinished until publication."
+    },
+    {
+      "at": "2026-09-28T13:54:37.403Z",
+      "text": "P07.3 first slice: dashboard and lostPerson typed api.ts, query keys/hooks in queries.ts, public index exports; query enablement and mutation success/failure invalidation tests added. 45 client tests pass, four deferred; typecheck clean; boundary warnings 27 to 23. Remaining feature APIs and inline screen queries still pending."
     }
   ]
 }
