@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import type { CreateAnnouncementRequest, ListAnnouncementsQuery } from '@spoh/shared';
-import { auditContextFrom } from '../../../platform/http/auditContext.js';
+import { actorContextFrom, auditContextFrom } from '../../../platform/http/auditContext.js';
 import { getAuth } from '../../../platform/identity/index.js';
 import { validatedBody, validatedParams, validatedQuery } from '../../../platform/http/validate.js';
 import { acknowledgeAnnouncement } from '../application/acknowledgeAnnouncement.js';
@@ -30,7 +30,7 @@ export async function listInboxHandler(req: Request, res: Response): Promise<voi
 
 export async function acknowledgeHandler(req: Request, res: Response): Promise<void> {
   const { id } = validatedParams<{ id: string }>(req);
-  const { volunteerId, role } = getAuth(req);
-  const announcement = await acknowledgeAnnouncement(id, { volunteerId, role });
+  const reader = { ...actorContextFrom(req), role: getAuth(req).role };
+  const announcement = await acknowledgeAnnouncement(id, reader);
   res.status(200).json({ announcement });
 }

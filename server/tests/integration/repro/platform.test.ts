@@ -136,6 +136,27 @@ describe('cross-cutting rules (P03 repros)', () => {
   });
 
   // F03-018
+  it('audits an announcement acknowledgement, once however often it is tapped', async () => {
+    const sent = await request(app)
+      .post('/api/v1/announcements')
+      .set('Authorization', bearer(chief))
+      .send({ body: 'Doors open in ten minutes', requiresAck: true, target: {} });
+    expect(sent.status).toBe(201);
+    const id = sent.body.announcement.id as string;
+
+    for (let tap = 0; tap < 2; tap += 1) {
+      const ack = await request(app)
+        .post(`/api/v1/announcements/${id}/ack`)
+        .set('Authorization', bearer(volunteer))
+        .send({});
+      expect(ack.status).toBe(200);
+    }
+
+    const entries = await prisma.auditLog.findMany({ where: { actorId: volunteer.id } });
+    expect(entries.map((entry) => entry.action)).toEqual(['announcement.ack']);
+  });
+
+  // F03-018
   it('audits a swap request under its own action, not as a decision', async () => {
     const shift = await assignToStation({
       volunteerId: volunteer.id,

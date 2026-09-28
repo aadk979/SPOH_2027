@@ -1,5 +1,8 @@
 import type { AnnouncementRecord, CommitteeRole } from '@spoh/shared';
+import { writeAudit } from '../../../platform/audit/index.js';
+import { prisma } from '../../../platform/db/client.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
+import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { eventDayAnchor, singaporeDateString } from '../../../platform/time/index.js';
 import { acknowledge, findAnnouncementById, findTodaysPostings } from '../data/repo.js';
 import { audienceOf, reaches } from '../domain/audience.js';
@@ -13,7 +16,7 @@ import { decorate } from './decorate.js';
  */
 export async function acknowledgeAnnouncement(
   announcementId: string,
-  reader: { volunteerId: string; role: CommitteeRole },
+  reader: ActorContext & { role: CommitteeRole },
 ): Promise<AnnouncementRecord> {
   const existing = await findAnnouncementById(announcementId);
   if (!existing) throw new NotFoundError('Announcement');
@@ -29,7 +32,18 @@ export async function acknowledgeAnnouncement(
   });
   if (!addressed) throw new NotFoundError('Announcement');
 
-  await acknowledge(announcementId, reader.volunteerId);
+  await prisma.$transaction(async (tx) => {
+    // Every mutation is audited; a second tap is a no-op and writes no second row (F03-018).
+    const ack = { announcementId, volunteerId: reader.volunteerId };
+    if (!(await acknowledge(tx, ack))) return;
+    await writeAudit(tx, {
+      ...reader.audit,
+      action: 'announcement.ack',
+      entityType: 'Announcement',
+      entityId: announcementId,
+      after: { acknowledgedBy: reader.volunteerId },
+    });
+  });
 
   const refreshed = await findAnnouncementById(announcementId);
   if (!refreshed) throw new NotFoundError('Announcement');

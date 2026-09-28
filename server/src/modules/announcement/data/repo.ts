@@ -91,13 +91,16 @@ export async function acknowledgedIds(
   return new Set(acks.map((ack) => ack.announcementId));
 }
 
-/** Idempotent by unique constraint, so a double tap cannot inflate reach. */
-export async function acknowledge(announcementId: string, volunteerId: string): Promise<void> {
-  await prisma.announcementAck.upsert({
-    where: { announcementId_volunteerId: { announcementId, volunteerId } },
-    create: { announcementId, volunteerId },
-    update: {},
-  });
+/**
+ * Idempotent by unique constraint, so a double tap cannot inflate reach.
+ * Returns false when this person had already acknowledged.
+ */
+export async function acknowledge(
+  tx: PrismaTransactionClient,
+  ack: { announcementId: string; volunteerId: string },
+): Promise<boolean> {
+  const { count } = await tx.announcementAck.createMany({ data: [ack], skipDuplicates: true });
+  return count > 0;
 }
 
 /**
