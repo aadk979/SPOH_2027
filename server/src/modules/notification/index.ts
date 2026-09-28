@@ -1,5 +1,3 @@
-/**
- * The notification module's public API: the only file another module may
- * import. P06.8 fills it in as the module is split.
- */
-export { dispatch } from './service.js';
+/** The notification module's public API: the only file another module may import. */
+export { notificationRouter } from './http/routes.js';
+export { dispatch, type NotificationInput } from './application/dispatch.js';
