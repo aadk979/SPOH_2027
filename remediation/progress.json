@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-27T05:26:48.328Z",
+  "updatedAt": "2026-09-28T09:44:53.752Z",
   "current": {
     "phase": "P06",
-    "step": "P06.4"
+    "step": "P06.7"
   },
   "gates": [
     {
@@ -1255,11 +1255,16 @@
         {
           "id": "P06.7",
           "title": "People and auth modules",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-27T05:34:10.164Z",
+          "completedAt": "2026-09-28T09:44:53.751Z",
+          "commits": ["dd82889"],
+          "notes": [
+            {
+              "at": "2026-09-28T09:44:53.752Z",
+              "text": "roster, shift, me, attendance, auth split into layers; identity adapters moved to platform/identity; P06.7 modules lint-clean and free of boundary warnings except platform/identity's Express import (P06.10, with access and idempotency)"
+            }
+          ]
         },
         {
           "id": "P06.8",
