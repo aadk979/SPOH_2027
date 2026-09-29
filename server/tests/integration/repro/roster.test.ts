@@ -3,7 +3,7 @@ import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../../src/app/createApp.js';
 import { prisma } from '../../../src/platform/db/client.js';
-import { resetDatabase } from '../../helpers/db.js';
+import { resetDatabase, rawDb } from '../../helpers/db.js';
 import {
   bearer,
   createEventDayToday,
@@ -119,7 +119,7 @@ describe('roster import and provisioning (P03 repros)', () => {
 
   // F03-025
   it('counts a new person with two shifts as one created volunteer, not one created and one updated', async () => {
-    await prisma.eventDay.create({
+    await rawDb.eventDay.create({
       data: {
         eventId: (await testEvent()).eventId,
         date: new Date('2027-01-08T00:00:00.000Z'),

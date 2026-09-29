@@ -9,6 +9,7 @@ import {
   stampsAtStation,
   stationRegistrationsByCategory,
   stationRoster,
+  type Window,
 } from '../data/repo.js';
 import { deviceRate } from '../domain/signals.js';
 import { flaggedRedemptions } from '../data/flaggedRedemptions.js';
@@ -30,12 +31,13 @@ export async function getStationDashboard(
   if (!station) throw new NotFoundError('Station');
 
   const since = startOfEventDay(now);
+  const window = { since, until: now };
   const [registrations, footfall, stamps, roster, flagged] = await Promise.all([
-    registrationsPanel(stationId, since, now),
-    footfallPanel(stationId, since, now),
-    stampsAtStation(stationId, since, now),
-    rosterPanel(stationId, since),
-    flaggedRedemptions({ since, until: now, stationId }),
+    registrationsPanel(scope, stationId, window),
+    footfallPanel(scope, stationId, window),
+    stampsAtStation(scope, stationId, window),
+    rosterPanel(scope, stationId, since),
+    flaggedRedemptions(scope, { since, until: now, stationId }),
   ]);
 
   return {
@@ -53,21 +55,19 @@ export async function getStationDashboard(
 type Panels = StationDashboardResponse;
 
 async function registrationsPanel(
+  scope: EventScope,
   stationId: string,
-  since: Date,
-  now: Date,
+  window: Window,
 ): Promise<Panels['registrations']> {
   const implausibleRate = getSettings().implausibleTapsPerMinute;
-  const [devices, categories] = await Promise.all([
-    registrationsByDevice(stationId, since, now),
-    stationRegistrationsByCategory(stationId, since, now),
+  const [devices, byCategory] = await Promise.all([
+    registrationsByDevice(scope, stationId, window),
+    stationRegistrationsByCategory(scope, stationId, window),
   ]);
   return {
     unit: 'registrations',
     todayTotal: devices.reduce((sum, device) => sum + device.value, 0),
-    byCategory: categories
-      .map((row) => ({ key: row.category, value: row._count._all }))
-      .sort((a, b) => b.value - a.value),
+    byCategory,
     byDevice: devices.map((device) => ({
       volunteerId: device.volunteerId,
       volunteerName: device.volunteerName,
@@ -78,11 +78,11 @@ async function registrationsPanel(
 }
 
 async function footfallPanel(
+  scope: EventScope,
   stationId: string,
-  since: Date,
-  now: Date,
+  window: Window,
 ): Promise<Panels['footfall']> {
-  const devices = await footfallByDevice(stationId, since, now);
+  const devices = await footfallByDevice(scope, stationId, window);
   return {
     unit: 'roomEntries',
     todayTotal: devices.reduce((sum, device) => sum + device.value, 0),
@@ -100,8 +100,12 @@ async function footfallPanel(
   };
 }
 
-async function rosterPanel(stationId: string, day: Date): Promise<Panels['roster']> {
-  const roster = await stationRoster(stationId, day);
+async function rosterPanel(
+  scope: EventScope,
+  stationId: string,
+  day: Date,
+): Promise<Panels['roster']> {
+  const roster = await stationRoster(scope, stationId, day);
   return roster.map((assignment) => ({
     assignmentId: assignment.id,
     block: assignment.block,

@@ -1,19 +1,24 @@
+import type { EventScope } from '../../../platform/db/eventScope.js';
 import { toPage, type Page } from '../../../platform/db/pagination.js';
 import { toAuditEntryRecord } from '../data/mappers.js';
 import { findAuditEntries } from '../data/repo.js';
 
 /** One page of the audit log, filtered by action, entity, actor and time. */
-export async function listAuditLog(query: {
-  limit: number;
-  cursor?: string | undefined;
-  action?: string | undefined;
-  entityType?: string | undefined;
-  entityId?: string | undefined;
-  actorId?: string | undefined;
-  from?: string | undefined;
-  to?: string | undefined;
-}): Promise<Page<ReturnType<typeof toAuditEntryRecord>>> {
+export async function listAuditLog(
+  scope: EventScope,
+  query: {
+    limit: number;
+    cursor?: string | undefined;
+    action?: string | undefined;
+    entityType?: string | undefined;
+    entityId?: string | undefined;
+    actorId?: string | undefined;
+    from?: string | undefined;
+    to?: string | undefined;
+  },
+): Promise<Page<ReturnType<typeof toAuditEntryRecord>>> {
   const rows = await findAuditEntries(
+    scope,
     {
       ...(query.action ? { action: query.action } : {}),
       ...(query.entityType ? { entityType: query.entityType } : {}),

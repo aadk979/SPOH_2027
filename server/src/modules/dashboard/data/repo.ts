@@ -1,7 +1,10 @@
+import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma } from '../../../platform/db/client.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /**
- * Reads for the live dashboard (PRODUCT_BRIEF §9).
+ * Reads for the live dashboard (PRODUCT_BRIEF §9), in the event the request
+ * works in (ADR-001 §2).
  *
  * Everything here is scoped to a single day and answers one question. They are
  * deliberately small and separate so the live payload can assemble them in
@@ -14,53 +17,85 @@ import { prisma } from '../../../platform/db/client.js';
  * hour for as long as it sits in the future.
  */
 
-export async function registrationsSince(since: Date, until: Date): Promise<number> {
+export interface Window {
+  since: Date;
+  until: Date;
+}
+
+const within = (window: Window) => ({ gte: window.since, lte: window.until });
+
+export async function registrationsSince(scope: EventScope, window: Window): Promise<number> {
   return prisma.registration.count({
-    where: { voided: false, recordedAt: { gte: since, lte: until } },
+    where: { eventId: scope.eventId, voided: false, recordedAt: within(window) },
   });
 }
 
-export async function registrationsByCategory(
-  since: Date,
-  until: Date,
-): Promise<Array<{ key: string; value: number }>> {
-  const rows = await prisma.registration.groupBy({
-    by: ['category'],
-    where: { voided: false, recordedAt: { gte: since, lte: until } },
-    _count: { _all: true },
-  });
-
+/** Counts per category, read through the event's categories (P09.5). */
+async function countByCategory(
+  scope: EventScope,
+  where: Prisma.RegistrationWhereInput,
+): Promise<Array<{ key: string; label: string; value: number }>> {
+  const [rows, categories] = await Promise.all([
+    prisma.registration.groupBy({
+      by: ['categoryId'],
+      where: { ...where, eventId: scope.eventId },
+      _count: { _all: true },
+    }),
+    prisma.captureCategory.findMany({
+      where: { eventId: scope.eventId },
+      select: { id: true, code: true, label: true },
+    }),
+  ]);
+  const byId = new Map(categories.map((category) => [category.id, category]));
   return rows
-    .map((row) => ({ key: row.category, value: row._count._all }))
+    .flatMap((row) => {
+      const category = row.categoryId ? byId.get(row.categoryId) : undefined;
+      return category
+        ? [{ key: category.code, label: category.label, value: row._count._all }]
+        : [];
+    })
     .sort((a, b) => b.value - a.value);
 }
 
-export async function footfallSince(since: Date, until: Date): Promise<number> {
-  const result = await prisma.footfallTick.aggregate({
-    where: { voided: false, recordedAt: { gte: since, lte: until } },
-    _sum: { quantity: true },
-  });
-  return result._sum.quantity ?? 0;
+export async function registrationsByCategory(scope: EventScope, window: Window) {
+  return countByCategory(scope, { voided: false, recordedAt: within(window) });
 }
 
-export async function openIncidentCounts(): Promise<{ open: number; critical: number }> {
+export async function openIncidentCounts(
+  scope: EventScope,
+): Promise<{ open: number; critical: number }> {
+  const { eventId } = scope;
   const [open, critical] = await Promise.all([
-    prisma.incident.count({ where: { status: { not: 'RESOLVED' } } }),
-    prisma.incident.count({ where: { status: { not: 'RESOLVED' }, severity: 'CRITICAL' } }),
+    prisma.incident.count({ where: { eventId, status: { not: 'RESOLVED' } } }),
+    prisma.incident.count({
+      where: { eventId, status: { not: 'RESOLVED' }, severity: 'CRITICAL' },
+    }),
   ]);
   return { open, critical };
 }
 
-export async function activeLostPersonCount(): Promise<number> {
-  return prisma.lostPersonAlert.count({ where: { status: 'ACTIVE' } });
+export async function activeLostPersonCount(scope: EventScope): Promise<number> {
+  return prisma.lostPersonAlert.count({ where: { eventId: scope.eventId, status: 'ACTIVE' } });
 }
 
-export async function openFallbackWindowExists(now: Date): Promise<boolean> {
+export async function openFallbackWindowExists(scope: EventScope, now: Date): Promise<boolean> {
   const open = await prisma.fallbackWindow.findFirst({
-    where: { startedAt: { lte: now }, endedAt: null },
+    where: { eventId: scope.eventId, startedAt: { lte: now }, endedAt: null },
     select: { id: true },
   });
   return open !== null;
+}
+
+/** Is any shift of the event running: are we within event hours? */
+export async function anyShiftRunning(
+  scope: EventScope,
+  running: Prisma.ShiftWhereInput,
+): Promise<boolean> {
+  const shift = await prisma.shift.findFirst({
+    where: { eventId: scope.eventId, ...running },
+    select: { id: true },
+  });
+  return shift !== null;
 }
 
 /**
@@ -71,12 +106,10 @@ export async function openFallbackWindowExists(now: Date): Promise<boolean> {
  * station total would hide that entirely. This is the per-person view the IC
  * needs to know who to go and find.
  */
-export async function checkedInWithLastCapture(input: {
-  eventDayId: string;
-  blocks: string[];
-  since: Date;
-  until: Date;
-}): Promise<
+export async function checkedInWithLastCapture(
+  scope: EventScope,
+  input: Window & { eventDayId: string },
+): Promise<
   Array<{
     volunteerId: string;
     volunteerName: string;
@@ -84,6 +117,7 @@ export async function checkedInWithLastCapture(input: {
     lastCaptureAt: Date | null;
   }>
 > {
+  const { eventId } = scope;
   /**
    * Scalar subqueries rather than three LEFT JOINs.
    *
@@ -108,42 +142,45 @@ export async function checkedInWithLastCapture(input: {
       s."name"        AS "stationName",
       GREATEST(
         (SELECT MAX(r."recordedAt") FROM "Registration"   r
-          WHERE r."recordedById" = v."id"
+          WHERE r."eventId" = ${eventId} AND r."recordedById" = v."id"
             AND r."recordedAt" >= ${input.since} AND r."recordedAt" <= ${input.until}),
         (SELECT MAX(f."recordedAt") FROM "FootfallTick"   f
-          WHERE f."recordedById" = v."id"
+          WHERE f."eventId" = ${eventId} AND f."recordedById" = v."id"
             AND f."recordedAt" >= ${input.since} AND f."recordedAt" <= ${input.until}),
         (SELECT MAX(c."recordedAt") FROM "CardStampEvent" c
-          WHERE c."recordedById" = v."id"
+          WHERE c."eventId" = ${eventId} AND c."recordedById" = v."id"
             AND c."recordedAt" >= ${input.since} AND c."recordedAt" <= ${input.until})
       ) AS "lastCaptureAt"
     FROM "ShiftAssignment" a
     JOIN "Volunteer" v ON v."id" = a."volunteerId"
     JOIN "Station"   s ON s."id" = a."stationId"
-    WHERE a."eventDayId" = ${input.eventDayId}
+    WHERE a."eventId" = ${eventId}
+      AND a."eventDayId" = ${input.eventDayId}
       AND a."checkedInAt" IS NOT NULL
       AND a."checkedOutAt" IS NULL`;
 
   return rows;
 }
 
-export async function checkedInCount(eventDayId: string): Promise<number> {
+export async function checkedInCount(scope: EventScope, eventDayId: string): Promise<number> {
   return prisma.shiftAssignment.count({
-    where: { eventDayId, checkedInAt: { not: null }, checkedOutAt: null },
+    where: { eventId: scope.eventId, eventDayId, checkedInAt: { not: null }, checkedOutAt: null },
   });
 }
 
-export async function onShiftCount(eventDayId: string, blocks: string[]): Promise<number> {
-  return prisma.shiftAssignment.count({
-    where: { eventDayId, block: { in: blocks as never[] } },
-  });
+/** Everyone rostered on a shift running now. */
+export async function onShiftCount(
+  scope: EventScope,
+  running: Prisma.ShiftWhereInput,
+): Promise<number> {
+  return prisma.shiftAssignment.count({ where: { eventId: scope.eventId, shift: running } });
 }
 
 /** Per-device registration contribution at one station, for the IC console. */
 export async function registrationsByDevice(
+  scope: EventScope,
   stationId: string,
-  since: Date,
-  until: Date,
+  window: Window,
 ): Promise<
   Array<{ volunteerId: string; volunteerName: string; value: number; firstAt: Date; lastAt: Date }>
 > {
@@ -164,8 +201,9 @@ export async function registrationsByDevice(
       MAX(r."recordedAt") AS "lastAt"
     FROM "Registration" r
     JOIN "Volunteer" v ON v."id" = r."recordedById"
-    WHERE r."voided" = false AND r."stationId" = ${stationId}
-      AND r."recordedAt" >= ${since} AND r."recordedAt" <= ${until}
+    WHERE r."eventId" = ${scope.eventId}
+      AND r."voided" = false AND r."stationId" = ${stationId}
+      AND r."recordedAt" >= ${window.since} AND r."recordedAt" <= ${window.until}
     GROUP BY v."id", v."displayName"
     ORDER BY value DESC`;
 
@@ -173,9 +211,9 @@ export async function registrationsByDevice(
 }
 
 export async function footfallByDevice(
+  scope: EventScope,
   stationId: string,
-  since: Date,
-  until: Date,
+  window: Window,
 ): Promise<Array<{ volunteerId: string; volunteerName: string; value: number; lastAt: Date }>> {
   const rows = await prisma.$queryRaw<
     Array<{ volunteerId: string; volunteerName: string; value: bigint; lastAt: Date }>
@@ -187,8 +225,9 @@ export async function footfallByDevice(
       MAX(f."recordedAt")       AS "lastAt"
     FROM "FootfallTick" f
     JOIN "Volunteer" v ON v."id" = f."recordedById"
-    WHERE f."voided" = false AND f."stationId" = ${stationId}
-      AND f."recordedAt" >= ${since} AND f."recordedAt" <= ${until}
+    WHERE f."eventId" = ${scope.eventId}
+      AND f."voided" = false AND f."stationId" = ${stationId}
+      AND f."recordedAt" >= ${window.since} AND f."recordedAt" <= ${window.until}
     GROUP BY v."id", v."displayName"
     ORDER BY value DESC`;
 
@@ -196,23 +235,26 @@ export async function footfallByDevice(
 }
 
 export async function stampsAtStation(
+  scope: EventScope,
   stationId: string,
-  since: Date,
-  until: Date,
+  window: Window,
 ): Promise<number> {
   return prisma.cardStampEvent.count({
-    where: { stationId, recordedAt: { gte: since, lte: until } },
+    where: { eventId: scope.eventId, stationId, recordedAt: within(window) },
   });
 }
 
-export async function findEventDayOn(date: Date) {
-  return prisma.eventDay.findUnique({ where: { date }, select: { id: true, label: true } });
+export async function findEventDayOn(scope: EventScope, date: Date) {
+  return prisma.eventDay.findFirst({
+    where: { eventId: scope.eventId, date },
+    select: { id: true, label: true },
+  });
 }
 
 /** Who is rostered at a station on a day, with their check-in state. */
-export async function stationRoster(stationId: string, day: Date) {
+export async function stationRoster(scope: EventScope, stationId: string, day: Date) {
   return prisma.shiftAssignment.findMany({
-    where: { stationId, eventDay: { date: day } },
+    where: { eventId: scope.eventId, stationId, eventDay: { date: day } },
     select: {
       id: true,
       block: true,
@@ -227,10 +269,10 @@ export async function stationRoster(stationId: string, day: Date) {
 }
 
 /** A station's live registrations by category over a range. */
-export async function stationRegistrationsByCategory(stationId: string, since: Date, until: Date) {
-  return prisma.registration.groupBy({
-    by: ['category'],
-    where: { stationId, voided: false, recordedAt: { gte: since, lte: until } },
-    _count: { _all: true },
-  });
+export async function stationRegistrationsByCategory(
+  scope: EventScope,
+  stationId: string,
+  window: Window,
+) {
+  return countByCategory(scope, { stationId, voided: false, recordedAt: within(window) });
 }

@@ -2,9 +2,8 @@ import type { Express } from 'express';
 import request from 'supertest';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../../../src/app/createApp.js';
-import { prisma } from '../../../src/platform/db/client.js';
 import { getLongShifts } from '../../../src/modules/shift/index.js';
-import { resetDatabase } from '../../helpers/db.js';
+import { resetDatabase, rawDb } from '../../helpers/db.js';
 import { FROZEN_NOW } from '../../setup.js';
 import {
   assignToStation,
@@ -64,7 +63,7 @@ function decide(swapId: string, decision: 'APPROVED' | 'REJECTED'): request.Test
 }
 
 async function presentToday(volunteer: TestVolunteer): Promise<void> {
-  await prisma.attendance.create({
+  await rawDb.attendance.create({
     data: {
       eventId: (await testEvent()).eventId,
       volunteerId: volunteer.id,
@@ -88,7 +87,7 @@ describe('shifts and swaps (P03 repros)', () => {
     // would hand `first`'s shift to `second`.
     const stale = await decide(toSecond, 'APPROVED');
     expect(stale.status).toBe(409);
-    const row = await prisma.shiftAssignment.findUniqueOrThrow({ where: { id: shift.id } });
+    const row = await rawDb.shiftAssignment.findUniqueOrThrow({ where: { id: shift.id } });
     expect(row.volunteerId).toBe(first.id);
   });
 
@@ -97,7 +96,7 @@ describe('shifts and swaps (P03 repros)', () => {
     // A race: five rounds make it lose every run.
     const statuses: number[][] = [];
     for (let round = 0; round < 5; round += 1) {
-      const day = await prisma.eventDay.create({
+      const day = await rawDb.eventDay.create({
         data: {
           eventId: (await testEvent()).eventId,
           date: new Date(Date.UTC(2027, 1, 1 + round)),
@@ -125,14 +124,14 @@ describe('shifts and swaps (P03 repros)', () => {
 
     expect((await call('check-in')).status).toBe(200);
     expect((await call('check-out')).status).toBe(200);
-    const firstOut = (await prisma.shiftAssignment.findUniqueOrThrow({ where: { id: shift.id } }))
+    const firstOut = (await rawDb.shiftAssignment.findUniqueOrThrow({ where: { id: shift.id } }))
       .checkedOutAt;
 
     vi.setSystemTime(new Date(FROZEN_NOW.getTime() + 90 * 60_000));
     const again = await call('check-out');
 
     expect(again.status).toBe(409);
-    const row = await prisma.shiftAssignment.findUniqueOrThrow({ where: { id: shift.id } });
+    const row = await rawDb.shiftAssignment.findUniqueOrThrow({ where: { id: shift.id } });
     expect(row.checkedOutAt).toEqual(firstOut);
   });
 
@@ -156,7 +155,7 @@ describe('shifts and swaps (P03 repros)', () => {
 
   // F03-016
   it('does not let a volunteer mark an unassigned briefing wave as done', async () => {
-    const slot = await prisma.briefingSlot.create({
+    const slot = await rawDb.briefingSlot.create({
       data: {
         eventId: (await testEvent()).eventId,
         eventDayId: dayId,
@@ -174,7 +173,7 @@ describe('shifts and swaps (P03 repros)', () => {
 
   // F03-016
   it('lets an IC complete a wave assigned to someone else, as the error message promises', async () => {
-    const slot = await prisma.briefingSlot.create({
+    const slot = await rawDb.briefingSlot.create({
       data: {
         eventId: (await testEvent()).eventId,
         eventDayId: dayId,
@@ -193,7 +192,7 @@ describe('shifts and swaps (P03 repros)', () => {
 
   // F03-023
   it('does not warn about a shift from a previous day that nobody checked out of', async () => {
-    const yesterday = await prisma.eventDay.create({
+    const yesterday = await rawDb.eventDay.create({
       data: {
         eventId: (await testEvent()).eventId,
         date: new Date('2027-01-06T00:00:00.000Z'),
@@ -205,12 +204,12 @@ describe('shifts and swaps (P03 repros)', () => {
       stationId,
       eventDayId: yesterday.id,
     });
-    await prisma.shiftAssignment.update({
+    await rawDb.shiftAssignment.update({
       where: { id: old.id },
       data: { checkedInAt: new Date('2027-01-06T02:00:00.000Z') },
     });
 
-    const warnings = await getLongShifts(FROZEN_NOW);
+    const warnings = await getLongShifts(await testEvent(), FROZEN_NOW);
     expect(warnings).toEqual([]);
   });
 });

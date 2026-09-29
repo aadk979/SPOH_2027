@@ -2,8 +2,7 @@ import type { Express } from 'express';
 import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app/createApp.js';
-import { prisma } from '../../src/platform/db/client.js';
-import { resetDatabase } from '../helpers/db.js';
+import { resetDatabase, rawDb } from '../helpers/db.js';
 import {
   assignToStation,
   bearer,
@@ -41,7 +40,7 @@ beforeEach(async () => {
 
 async function moveMorningShift(window: { startsAt: Date; endsAt: Date }): Promise<void> {
   const { eventId } = await testEvent();
-  await prisma.shift.updateMany({
+  await rawDb.shift.updateMany({
     where: { eventId, eventDayId, template: { code: 'MORNING' } },
     data: { ...window, overridden: true },
   });

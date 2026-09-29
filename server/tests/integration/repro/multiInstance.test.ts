@@ -1,8 +1,7 @@
 import type { Express } from 'express';
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { prisma } from '../../../src/platform/db/client.js';
-import { resetDatabase } from '../../helpers/db.js';
+import { resetDatabase, rawDb } from '../../helpers/db.js';
 import { bearer, createVolunteer, type TestVolunteer, testEvent } from '../../helpers/fixtures.js';
 
 /**
@@ -100,7 +99,7 @@ describe('two instances, one database (P03.5 repros)', () => {
   it('purges each resolved lost-person alert once when every worker runs the job', async () => {
     const resolvedAt = new Date(Date.now() - 48 * 60 * 60 * 1000);
     for (let i = 0; i < 5; i += 1) {
-      await prisma.lostPersonAlert.create({
+      await rawDb.lostPersonAlert.create({
         data: {
           eventId: (await testEvent()).eventId,
           descriptionText: `Child ${i}, blue shirt`,
@@ -114,6 +113,6 @@ describe('two instances, one database (P03.5 repros)', () => {
 
     await Promise.all([a.purgeResolvedAlerts(), b.purgeResolvedAlerts()]);
 
-    expect(await prisma.lostPersonSummary.count()).toBe(5);
+    expect(await rawDb.lostPersonSummary.count()).toBe(5);
   });
 });

@@ -2,7 +2,7 @@ import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../../../src/app/createApp.js';
 import { prisma } from '../../../src/platform/db/client.js';
-import { resetDatabase } from '../../helpers/db.js';
+import { resetDatabase, rawDb } from '../../helpers/db.js';
 import { bearer, createVolunteer, testEvent } from '../../helpers/fixtures.js';
 
 /**
@@ -32,7 +32,7 @@ describe('card batches (P03 repros)', () => {
   // F03-022
   it('never prints a code that belongs to a card already in the system', async () => {
     const admin = await createVolunteer({ email: 'admin@batch.test', role: 'ADMIN' });
-    await prisma.missionCard.create({
+    await rawDb.missionCard.create({
       data: {
         eventId: (await testEvent()).eventId,
         shortCode: 'EXIST1',

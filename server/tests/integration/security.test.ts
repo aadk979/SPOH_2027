@@ -3,7 +3,7 @@ import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app/createApp.js';
 import { prisma } from '../../src/platform/db/client.js';
-import { resetDatabase } from '../helpers/db.js';
+import { resetDatabase, rawDb } from '../helpers/db.js';
 import {
   assignToStationAllBlocks,
   bearer,
@@ -174,13 +174,13 @@ describe('authorization', () => {
       .set('Authorization', bearer(volunteer))
       .send({ category: 'SEC_4', stationId, idempotencyKey: idempotencyKey() });
 
-    const row = await prisma.registration.findFirst();
+    const row = await rawDb.registration.findFirst();
     expect(row?.recordedById).toBe(volunteer.id);
   });
 
   it('refuses to let one volunteer check another one in', async () => {
     const other = await createVolunteer({ email: 'other@sec.test', role: 'VOLUNTEER' });
-    const assignment = await prisma.shiftAssignment.findFirst({
+    const assignment = await rawDb.shiftAssignment.findFirst({
       where: { volunteerId: volunteer.id },
       select: { id: true },
     });

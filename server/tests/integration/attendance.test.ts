@@ -4,7 +4,7 @@ import type { CommitteeRole } from '@spoh/shared';
 import { createApp } from '../../src/app/createApp.js';
 import { prisma } from '../../src/platform/db/client.js';
 import { sensitiveRateLimit } from '../../src/platform/http/rateLimit.js';
-import { resetDatabase } from '../helpers/db.js';
+import { resetDatabase, rawDb } from '../helpers/db.js';
 import {
   assignToStation,
   bearer,
@@ -60,7 +60,7 @@ describe('verified attendance', () => {
     const admin = await createVolunteer({ email: 'other-admin@test.test', role: 'ADMIN' });
     expect((await post(admin, '/attendance/start')).status).toBe(403);
     await rootCode();
-    expect(await prisma.attendance.count()).toBe(1);
+    expect(await rawDb.attendance.count()).toBe(1);
   });
   it.each<CommitteeRole>(['ADMIN', 'LEAD', 'CHIEF_COORDINATOR', 'DEPUTY_COORDINATOR', 'IC'])(
     'requires root verification for %s before issuing codes',
@@ -83,11 +83,11 @@ describe('verified attendance', () => {
     expect(response.status).toBe(200);
     expect(response.body.attendance.method).toBe('QR');
     expect(
-      (await prisma.shiftAssignment.findUniqueOrThrow({ where: { id: assignmentId } })).checkedInAt,
+      (await rawDb.shiftAssignment.findUniqueOrThrow({ where: { id: assignmentId } })).checkedInAt,
     ).not.toBeNull();
     expect(
       (
-        await prisma.attendance.findUniqueOrThrow({
+        await rawDb.attendance.findUniqueOrThrow({
           where: { volunteerId_eventDayId: { volunteerId: volunteer.id, eventDayId: dayId } },
         })
       ).verifiedById,
@@ -98,7 +98,7 @@ describe('verified attendance', () => {
     expect(audit).not.toContain(code.pin);
     expect(
       (
-        await prisma.attendanceChallenge.findUniqueOrThrow({
+        await rawDb.attendanceChallenge.findUniqueOrThrow({
           where: { issuerId_eventDayId: { issuerId: exco.id, eventDayId: dayId } },
         })
       ).pinHash,
@@ -221,7 +221,7 @@ describe('verified attendance', () => {
       (await post(volunteer, '/attendance/submit', { method: 'PIN', pin: code.pin })).status,
     ).toBe(429);
     expect(
-      (await prisma.attendanceAttempt.findUniqueOrThrow({ where: { volunteerId: volunteer.id } }))
+      (await rawDb.attendanceAttempt.findUniqueOrThrow({ where: { volunteerId: volunteer.id } }))
         .attempts,
     ).toBe(5);
     vi.setSystemTime(new Date(FROZEN_NOW.getTime() + 300_001));

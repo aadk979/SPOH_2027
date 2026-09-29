@@ -4,7 +4,7 @@ import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app/createApp.js';
 import { prisma } from '../../src/platform/db/client.js';
 import { PURGE_AFTER_HOURS, purgeResolvedAlerts } from '../../src/modules/lostPerson/index.js';
-import { resetDatabase } from '../helpers/db.js';
+import { resetDatabase, rawDb } from '../helpers/db.js';
 import {
   bearer,
   createEventDayToday,
@@ -187,7 +187,7 @@ describe('the purge', () => {
 
     expect(await purgeResolvedAlerts()).toBe(0);
 
-    const alert = await prisma.lostPersonAlert.findUnique({ where: { id: alertId } });
+    const alert = await rawDb.lostPersonAlert.findUnique({ where: { id: alertId } });
     expect(alert?.descriptionText).toBe(DESCRIPTION);
   });
 
@@ -206,14 +206,14 @@ describe('the purge', () => {
     // Backdate past the retention window rather than waiting 24 hours.
     const raisedAt = new Date(Date.now() - (PURGE_AFTER_HOURS + 2) * 60 * 60 * 1000);
     const resolvedAt = new Date(raisedAt.getTime() + 7 * 60 * 1000);
-    await prisma.lostPersonAlert.update({
+    await rawDb.lostPersonAlert.update({
       where: { id: alertId },
       data: { raisedAt, resolvedAt },
     });
 
     expect(await purgeResolvedAlerts()).toBe(1);
 
-    const alert = await prisma.lostPersonAlert.findUnique({ where: { id: alertId } });
+    const alert = await rawDb.lostPersonAlert.findUnique({ where: { id: alertId } });
     expect(alert?.approxAge).toBeNull();
     expect(alert?.descriptionText).toBeNull();
     expect(alert?.clothingText).toBeNull();
@@ -221,7 +221,7 @@ describe('the purge', () => {
 
     // What survives is what goes in the post-event report: "1 case, resolved,
     // 7 minutes" — never a description of a child.
-    const summaries = await prisma.lostPersonSummary.findMany();
+    const summaries = await rawDb.lostPersonSummary.findMany();
     expect(summaries).toHaveLength(1);
     expect(summaries[0]?.resolutionMinutes).toBe(7);
     expect(summaries[0]?.outcome).toBe('RESOLVED_FOUND');
@@ -236,14 +236,14 @@ describe('the purge', () => {
       .set('Authorization', bearer(ic))
       .send({ outcome: 'RESOLVED_OTHER' });
 
-    await prisma.lostPersonAlert.update({
+    await rawDb.lostPersonAlert.update({
       where: { id: alertId },
       data: { resolvedAt: new Date(Date.now() - (PURGE_AFTER_HOURS + 1) * 60 * 60 * 1000) },
     });
 
     expect(await purgeResolvedAlerts()).toBe(1);
     expect(await purgeResolvedAlerts()).toBe(0);
-    expect(await prisma.lostPersonSummary.count()).toBe(1);
+    expect(await rawDb.lostPersonSummary.count()).toBe(1);
   });
 
   it('never touches an active alert', async () => {
@@ -251,14 +251,14 @@ describe('the purge', () => {
 
     // Even an old unresolved alert stays intact: a search still in progress is
     // exactly when the description is needed.
-    await prisma.lostPersonAlert.update({
+    await rawDb.lostPersonAlert.update({
       where: { id: alertId },
       data: { raisedAt: new Date(Date.now() - 72 * 60 * 60 * 1000) },
     });
 
     expect(await purgeResolvedAlerts()).toBe(0);
 
-    const alert = await prisma.lostPersonAlert.findUnique({ where: { id: alertId } });
+    const alert = await rawDb.lostPersonAlert.findUnique({ where: { id: alertId } });
     expect(alert?.descriptionText).toBe(DESCRIPTION);
   });
 });

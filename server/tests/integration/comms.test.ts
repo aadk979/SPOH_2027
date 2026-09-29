@@ -2,8 +2,7 @@ import type { Express } from 'express';
 import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app/createApp.js';
-import { prisma } from '../../src/platform/db/client.js';
-import { resetDatabase } from '../helpers/db.js';
+import { resetDatabase, rawDb } from '../helpers/db.js';
 import {
   assignToStationAllBlocks,
   bearer,
@@ -198,7 +197,7 @@ describe('acknowledgement', () => {
 
 describe('shift swaps', () => {
   async function myAssignment(actor: TestVolunteer): Promise<string> {
-    const assignment = await prisma.shiftAssignment.findFirst({
+    const assignment = await rawDb.shiftAssignment.findFirst({
       where: { volunteerId: actor.id },
       select: { id: true },
     });
@@ -247,7 +246,7 @@ describe('shift swaps', () => {
 
   it('moves the assignment on approval and clears the check-in', async () => {
     const assignmentId = await myAssignment(boothVolunteer);
-    await prisma.shiftAssignment.update({
+    await rawDb.shiftAssignment.update({
       where: { id: assignmentId },
       data: { checkedInAt: new Date() },
     });
@@ -265,7 +264,7 @@ describe('shift swaps', () => {
     expect(decided.status).toBe(200);
     expect(decided.body.swap.status).toBe('APPROVED');
 
-    const moved = await prisma.shiftAssignment.findUnique({ where: { id: assignmentId } });
+    const moved = await rawDb.shiftAssignment.findUnique({ where: { id: assignmentId } });
     expect(moved?.volunteerId).toBe(spare.id);
     // The new person has not arrived. Inheriting a check-in would make the
     // attendance view lie.
@@ -285,7 +284,7 @@ describe('shift swaps', () => {
       .set('Authorization', bearer(ic))
       .send({ decision: 'REJECTED' });
 
-    const unchanged = await prisma.shiftAssignment.findUnique({ where: { id: assignmentId } });
+    const unchanged = await rawDb.shiftAssignment.findUnique({ where: { id: assignmentId } });
     expect(unchanged?.volunteerId).toBe(boothVolunteer.id);
   });
 
@@ -326,7 +325,7 @@ describe('shift swaps', () => {
 
 describe('briefing waves', () => {
   it('lists the slots for a day with a countdown', async () => {
-    await prisma.briefingSlot.create({
+    await rawDb.briefingSlot.create({
       data: {
         eventId: (await testEvent()).eventId,
         eventDayId,
@@ -347,7 +346,7 @@ describe('briefing waves', () => {
   });
 
   it('lets the assigned briefer mark their slot complete', async () => {
-    const slot = await prisma.briefingSlot.create({
+    const slot = await rawDb.briefingSlot.create({
       data: {
         eventId: (await testEvent()).eventId,
         eventDayId,
@@ -367,7 +366,7 @@ describe('briefing waves', () => {
   });
 
   it('refuses to let someone else complete an assigned slot', async () => {
-    const slot = await prisma.briefingSlot.create({
+    const slot = await rawDb.briefingSlot.create({
       data: {
         eventId: (await testEvent()).eventId,
         eventDayId,

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app/createApp.js';
 import { prisma } from '../../src/platform/db/client.js';
 import { getSettings, loadSettings } from '../../src/platform/settings/index.js';
-import { resetDatabase } from '../helpers/db.js';
+import { resetDatabase, rawDb } from '../helpers/db.js';
 import {
   bearer,
   createEventDayToday,
@@ -285,7 +285,7 @@ describe('withdrawing access', () => {
     const day = await createEventDayToday();
     const station = await createStation({ code: 'BOOTH_ADMIN' });
 
-    await prisma.registration.create({
+    await rawDb.registration.create({
       data: {
         eventId: (await testEvent()).eventId,
         category: 'SEC_4',
@@ -304,7 +304,7 @@ describe('withdrawing access', () => {
 
     // Deactivation withdraws access. It is not a delete, and the counts a
     // volunteer recorded are the event's data, not theirs.
-    expect(await prisma.registration.count({ where: { recordedById: volunteer.id } })).toBe(1);
+    expect(await rawDb.registration.count({ where: { recordedById: volunteer.id } })).toBe(1);
   });
 
   it('restores access on reactivation', async () => {
@@ -378,7 +378,7 @@ describe('runtime settings', () => {
 
     expect(getSettings().shiftBlocks.MORNING.start).toBe('06:00');
     // The event's templates and today's shifts follow (P09.5), in its timezone.
-    const morning = await prisma.shift.findFirstOrThrow({
+    const morning = await rawDb.shift.findFirstOrThrow({
       where: {
         eventId: (await testEvent()).eventId,
         eventDayId: day.id,
@@ -475,7 +475,7 @@ describe('stations, days and gifts', () => {
 
     expect(created.status).toBe(201);
     // A shift per template, at its hours in the event's timezone (P09.5).
-    const shifts = await prisma.shift.findMany({
+    const shifts = await rawDb.shift.findMany({
       where: { eventId: (await testEvent()).eventId, eventDayId: created.body.eventDay.id },
       orderBy: { startsAt: 'asc' },
     });
@@ -514,7 +514,7 @@ describe('stations, days and gifts', () => {
     const day = await createEventDayToday();
     const station = await createStation({ code: 'DEL_TEST' });
 
-    const assignment = await prisma.shiftAssignment.create({
+    const assignment = await rawDb.shiftAssignment.create({
       data: {
         eventId: (await testEvent()).eventId,
         volunteerId: volunteer.id,

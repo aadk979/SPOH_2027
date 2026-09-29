@@ -5,7 +5,7 @@ import { createApp } from '../../../src/app/createApp.js';
 import { SYSTEM_AUDIT_CONTEXT } from '../../../src/platform/http/auditContext.js';
 import { prisma } from '../../../src/platform/db/client.js';
 import { clearSettings } from '../../../src/platform/settings/index.js';
-import { resetDatabase } from '../../helpers/db.js';
+import { resetDatabase, rawDb } from '../../helpers/db.js';
 import {
   assignToStation,
   assignToStationAllBlocks,
@@ -47,10 +47,10 @@ beforeEach(async () => {
 describe('cross-cutting rules (P03 repros)', () => {
   // F03-002
   it('answers a rename onto an existing gift type with 409, not 500', async () => {
-    await prisma.giftType.create({
+    await rawDb.giftType.create({
       data: { eventId: (await testEvent()).eventId, name: 'Tote Bag', initialStock: 1 },
     });
-    const badge = await prisma.giftType.create({
+    const badge = await rawDb.giftType.create({
       data: { eventId: (await testEvent()).eventId, name: 'Badge', initialStock: 1 },
     });
 
@@ -99,7 +99,7 @@ describe('cross-cutting rules (P03 repros)', () => {
     }
 
     expect(statuses.filter((status) => status >= 500)).toEqual([]);
-    expect(await prisma.registration.count()).toBe(5);
+    expect(await rawDb.registration.count()).toBe(5);
     // The losers are told the key is being processed; none of them ran the
     // handler and collided with the winner's row.
     expect(codes.every((code) => code === 'IDEMPOTENCY_IN_PROGRESS')).toBe(true);

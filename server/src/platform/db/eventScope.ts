@@ -92,21 +92,9 @@ export function assertEventScoped(model: string, operation: string, args: Args):
   if (!scoped) throw new MissingEventScopeError(model, operation);
 }
 
-/**
- * Models whose repositories take an `EventScope` so far. P09.5 moves the
- * modules over one slice at a time; when it ends this is every event-owned
- * model and the list goes away.
- */
-const ENFORCED: ReadonlySet<string> = new Set<string>([
-  // Slice 2: the event's taxonomy and shifts.
-  'CaptureCategory',
-  'StationType',
-  'StationTag',
-  'StationTagging',
-  'ShiftTemplate',
-  'Shift',
-]);
+const EVENT_OWNED: ReadonlySet<string> = new Set(EVENT_OWNED_MODELS);
 
+/** Every event-owned model's queries must name their event (P09.5 complete). */
 export function isScopeEnforced(model: string): boolean {
-  return ENFORCED.has(model) && (EVENT_OWNED_MODELS as readonly string[]).includes(model);
+  return EVENT_OWNED.has(model);
 }

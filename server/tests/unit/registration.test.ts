@@ -21,13 +21,22 @@ const { voidRegistrationById } =
 const CONTEXT = {
   stationId: 'st1',
   recordedById: 'v1',
+  recordedByMembershipId: 'm1',
   groupId: 'g1',
   missionCardId: null,
   recordedAt: new Date('2027-01-07T03:30:00.000Z'),
   clientRecordedAt: null,
 };
 
-const AUDIT = { actorId: 'ic', actorSub: 'sub', ip: null, userAgent: null, requestId: 'r1' };
+const AUDIT = {
+  actorId: 'ic',
+  actorSub: 'sub',
+  eventId: 'e1',
+  membershipId: 'm-ic',
+  ip: null,
+  userAgent: null,
+  requestId: 'r1',
+};
 
 describe('expandGroupMembers', () => {
   it('makes one row per person, each with its own idempotency key', () => {
@@ -74,7 +83,12 @@ describe('voidRegistrationById', () => {
     repo.voidRegistration.mockResolvedValueOnce({ voidedReason: 'mis-tap' } as never);
 
     const scope = { eventId: 'e1' };
-    await voidRegistrationById('r', 'mis-tap', { volunteerId: 'ic', scope, audit: AUDIT });
+    await voidRegistrationById('r', 'mis-tap', {
+      volunteerId: 'ic',
+      membershipId: 'm-ic',
+      scope,
+      audit: AUDIT,
+    });
 
     expect(repo.findRegistrationById).toHaveBeenCalledWith(scope, 'r');
     expect(repo.voidRegistration).toHaveBeenCalledWith({}, scope, { id: 'r', reason: 'mis-tap' });
@@ -92,7 +106,12 @@ describe('voidRegistrationById', () => {
     repo.findRegistrationById.mockResolvedValueOnce(null);
 
     await expect(
-      voidRegistrationById('r', 'x', { volunteerId: 'ic', scope: { eventId: 'e1' }, audit: AUDIT }),
+      voidRegistrationById('r', 'x', {
+        volunteerId: 'ic',
+        membershipId: 'm-ic',
+        scope: { eventId: 'e1' },
+        audit: AUDIT,
+      }),
     ).rejects.toMatchObject({ statusCode: 404 });
     expect(repo.voidRegistration).not.toHaveBeenCalled();
   });

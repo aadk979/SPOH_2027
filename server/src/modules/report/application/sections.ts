@@ -12,19 +12,17 @@ import {
   footfallTotals,
   giftRedemptionsByDay,
   giftRedemptionsByStation,
-  importBatches,
   incidentsInRange,
   lostFoundCounts,
   lostPersonSummaries,
-  recordsBySource,
   registrationTotals,
   registrationsByDay,
   registrationsByHour,
   unpurgedLostPersonCount,
-  voidedCounts,
   volunteerAttendance,
   type Range,
 } from '../data/repo.js';
+import { importBatches, recordsBySource, voidedCounts } from '../data/integrity.js';
 import { footfallSection, safetySection, volunteersSection } from '../domain/sections.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 
@@ -33,11 +31,14 @@ import type { EventScope } from '../../../platform/db/eventScope.js';
 type Names = ReadonlyMap<string, string>;
 type Report = FullReport;
 
-export async function registrationsReport(range: Range): Promise<Report['registrations']> {
+export async function registrationsReport(
+  scope: EventScope,
+  range: Range,
+): Promise<Report['registrations']> {
   const [totals, byDay, byHour] = await Promise.all([
-    registrationTotals(range),
-    registrationsByDay(range),
-    registrationsByHour(range),
+    registrationTotals(scope, range),
+    registrationsByDay(scope, range),
+    registrationsByHour(scope, range),
   ]);
   return {
     unit: 'registrations',
@@ -54,21 +55,29 @@ export async function registrationsReport(range: Range): Promise<Report['registr
   };
 }
 
-export async function footfallReport(range: Range, names: Names): Promise<Report['footfall']> {
+export async function footfallReport(
+  scope: EventScope,
+  range: Range,
+  names: Names,
+): Promise<Report['footfall']> {
   const [total, curve, bySource] = await Promise.all([
-    footfallTotals(range),
-    footfallCurve(range),
-    footfallBySource(range),
+    footfallTotals(scope, range),
+    footfallCurve(scope, range),
+    footfallBySource(scope, range),
   ]);
   return footfallSection({ total, curve, bySource }, names);
 }
 
-export async function cardsReport(range: Range, names: Names): Promise<Report['cards']> {
+export async function cardsReport(
+  scope: EventScope,
+  range: Range,
+  names: Names,
+): Promise<Report['cards']> {
   const [cards, issuedByDay, completedByDay, perStation] = await Promise.all([
-    cardTotals(range),
-    cardsByDay(range, 'issuedAt'),
-    cardsByDay(range, 'completedAt'),
-    cardsPerStation(range),
+    cardTotals(scope, range),
+    cardsByDay(scope, range, 'issuedAt'),
+    cardsByDay(scope, range, 'completedAt'),
+    cardsPerStation(scope, range),
   ]);
   return {
     unit: 'cards',
@@ -93,8 +102,8 @@ export async function giftsReport(
 ): Promise<Report['gifts']> {
   const [gifts, byDay, byStation] = await Promise.all([
     listGifts(scope),
-    giftRedemptionsByDay(range),
-    giftRedemptionsByStation(range),
+    giftRedemptionsByDay(scope, range),
+    giftRedemptionsByStation(scope, range),
   ]);
   return {
     unit: 'redemptions',
@@ -114,24 +123,24 @@ export async function giftsReport(
   };
 }
 
-export async function safetyReport(range: Range): Promise<Report['safety']> {
+export async function safetyReport(scope: EventScope, range: Range): Promise<Report['safety']> {
   const [incidents, summaries, unpurged, lostFound] = await Promise.all([
-    incidentsInRange(range),
-    lostPersonSummaries(range),
-    unpurgedLostPersonCount(range),
-    lostFoundCounts(range),
+    incidentsInRange(scope, range),
+    lostPersonSummaries(scope, range),
+    unpurgedLostPersonCount(scope, range),
+    lostFoundCounts(scope, range),
   ]);
   return safetySection({ incidents, summaries, unpurged, lostFound });
 }
 
 export async function volunteersReport(
+  scope: EventScope,
   range: Range,
-  names: Names,
-  now: Date,
+  { names, now }: { names: Names; now: Date },
 ): Promise<Report['volunteers']> {
   const [attendance, volunteersActive] = await Promise.all([
-    volunteerAttendance(range),
-    countActiveVolunteers(),
+    volunteerAttendance(scope, range),
+    countActiveVolunteers(scope),
   ]);
   return volunteersSection(attendance, { volunteersActive, stationName: names, now });
 }
@@ -142,9 +151,9 @@ export async function integrityReport(
 ): Promise<Report['dataIntegrity']> {
   const [windows, imports, sources, voided] = await Promise.all([
     listFallbackWindows(scope, { from: range.from, to: range.to }),
-    importBatches(range),
-    recordsBySource(range),
-    voidedCounts(range),
+    importBatches(scope, range),
+    recordsBySource(scope, range),
+    voidedCounts(scope, range),
   ]);
   return {
     containsFallbackData: windows.length > 0,

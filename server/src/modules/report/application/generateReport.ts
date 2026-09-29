@@ -33,12 +33,12 @@ export async function generateReport(scope: EventScope, query: ReportQuery): Pro
 
   const [registrations, footfall, cards, gifts, safety, volunteers, dataIntegrity] =
     await Promise.all([
-      registrationsReport(range),
-      footfallReport(range, names),
-      cardsReport(range, names),
+      registrationsReport(scope, range),
+      footfallReport(scope, range, names),
+      cardsReport(scope, range, names),
       giftsReport(scope, range, names),
-      safetyReport(range),
-      volunteersReport(range, names, now),
+      safetyReport(scope, range),
+      volunteersReport(scope, range, { names, now }),
       integrityReport(scope, range),
     ]);
 

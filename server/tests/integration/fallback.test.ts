@@ -3,7 +3,7 @@ import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app/createApp.js';
 import { prisma } from '../../src/platform/db/client.js';
-import { resetDatabase } from '../helpers/db.js';
+import { resetDatabase, rawDb } from '../helpers/db.js';
 import {
   assignToStationAllBlocks,
   bearer,
@@ -235,7 +235,7 @@ describe('registration import', () => {
 
     // A dry run applies inside a transaction that is rolled back, so the
     // preview is truthful without leaving a trace.
-    expect(await prisma.registration.count()).toBe(0);
+    expect(await rawDb.registration.count()).toBe(0);
   });
 
   it('writes source-tagged rows on commit', async () => {
@@ -244,7 +244,7 @@ describe('registration import', () => {
     expect(response.status).toBe(201);
     expect(response.body.recordsCreated).toBe(5);
 
-    const rows = await prisma.registration.findMany();
+    const rows = await rawDb.registration.findMany();
     expect(rows).toHaveLength(5);
     // Never indistinguishable from an app tap.
     expect(rows.every((row) => row.source === 'FALLBACK_SHEET')).toBe(true);
@@ -259,7 +259,7 @@ describe('registration import', () => {
     // Reconciliation happens under time pressure and has to be forgiving.
     expect(second.body.recordsCreated).toBe(0);
     expect(second.body.recordsSkipped).toBe(5);
-    expect(await prisma.registration.count()).toBe(5);
+    expect(await rawDb.registration.count()).toBe(5);
   });
 
   it('reports an unknown station rather than guessing', async () => {
@@ -281,7 +281,7 @@ describe('registration import', () => {
   it('records an ImportBatch so the report can cite it', async () => {
     const response = await importRegistrations(chief, { commit: true });
 
-    const batch = await prisma.importBatch.findUnique({
+    const batch = await rawDb.importBatch.findUnique({
       where: { id: response.body.importBatchId as string },
     });
 
@@ -307,7 +307,7 @@ describe('footfall import', () => {
   it('writes one row with a quantity, not forty-two ticks', async () => {
     await importFootfall({ commit: true });
 
-    const rows = await prisma.footfallTick.findMany();
+    const rows = await rawDb.footfallTick.findMany();
     // Splitting a block total into individual ticks would invent a precision
     // the paper tally never had.
     expect(rows).toHaveLength(1);
@@ -319,7 +319,7 @@ describe('footfall import', () => {
   it('places the total at the start of its block, not when it was typed in', async () => {
     await importFootfall({ commit: true });
 
-    const row = await prisma.footfallTick.findFirst();
+    const row = await rawDb.footfallTick.findFirst();
     // Otherwise the curve grows a spike at whatever time the IC did the data
     // entry, usually the end of the shift.
     expect(row?.recordedAt.toISOString()).toBe(FROZEN_NOW.toISOString());

@@ -18,13 +18,21 @@ import { LongShiftWarning, StaffingGap } from '../shift/index.js';
  * because there is no honest way to produce one.
  */
 
+/** Registrations in one capture category: its code, the event's label (P09.5), the count. */
+export const CategoryCount = z
+  .object({
+    key: z.string(),
+    label: z.string().optional(),
+    value: z.number().int().nonnegative(),
+  })
+  .strict();
+export type CategoryCount = z.infer<typeof CategoryCount>;
+
 export const RegistrationLiveBreakdown = z
   .object({
     unit: z.literal('registrations'),
     todayTotal: z.number().int().nonnegative(),
-    byCategory: z.array(
-      z.object({ key: z.string(), value: z.number().int().nonnegative() }).strict(),
-    ),
+    byCategory: z.array(CategoryCount),
     /**
      * Registrations in the last sixty minutes. An implausible rate usually
      * means someone is tapping to catch up rather than counting (§2.4).
@@ -142,9 +150,7 @@ export const StationDashboardResponse = z
       .object({
         unit: z.literal('registrations'),
         todayTotal: z.number().int().nonnegative(),
-        byCategory: z.array(
-          z.object({ key: z.string(), value: z.number().int().nonnegative() }).strict(),
-        ),
+        byCategory: z.array(CategoryCount),
         /** Per-device contribution, so two people on one queue see the drift. */
         byDevice: z.array(
           z

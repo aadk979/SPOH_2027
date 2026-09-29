@@ -2,8 +2,7 @@ import type { Express } from 'express';
 import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app/createApp.js';
-import { prisma } from '../../src/platform/db/client.js';
-import { resetDatabase } from '../helpers/db.js';
+import { resetDatabase, rawDb } from '../helpers/db.js';
 import {
   assignToStationAllBlocks,
   bearer,
@@ -80,7 +79,7 @@ beforeEach(async () => {
   });
 
   const { eventId } = await testEvent();
-  await prisma.missionCard.createMany({
+  await rawDb.missionCard.createMany({
     data: [CARD_A, CARD_B, CARD_C].map((shortCode) => ({
       eventId,
       shortCode,
@@ -174,7 +173,7 @@ describe('stamping', () => {
     expect(second.status).toBe(200);
     expect(second.body.stampAdded).toBe(false);
     expect(second.body.warning).toContain('already stamped');
-    expect(await prisma.cardStampEvent.count()).toBe(1);
+    expect(await rawDb.cardStampEvent.count()).toBe(1);
   });
 
   it('issues a card that reaches a station without passing the booth', async () => {
@@ -245,7 +244,7 @@ describe('issuing at the booth', () => {
     expect(response.body.card.status).toBe('ISSUED');
 
     // Three humans, one card. This is the family-of-four rule made concrete.
-    const linked = await prisma.registration.count({
+    const linked = await rawDb.registration.count({
       where: { missionCardId: response.body.card.id },
     });
     expect(linked).toBe(3);
@@ -265,7 +264,7 @@ describe('issuing at the booth', () => {
     // The common cause is a volunteer scanning twice. Failing would make them
     // think the card is broken.
     expect(second.status).toBe(200);
-    expect(await prisma.missionCard.count({ where: { status: 'ISSUED' } })).toBe(1);
+    expect(await rawDb.missionCard.count({ where: { status: 'ISSUED' } })).toBe(1);
   });
 });
 
@@ -285,7 +284,7 @@ describe('reissue', () => {
     expect(response.body.card.stamps).toHaveLength(1);
 
     // The original must be dead, or one journey could be redeemed twice.
-    const original = await prisma.missionCard.findUnique({ where: { shortCode: CARD_A } });
+    const original = await rawDb.missionCard.findUnique({ where: { shortCode: CARD_A } });
     // LOST, not VOIDED: the journey continues on the replacement (ADR-002 §3).
     expect(original?.status).toBe('LOST');
     expect(response.body.card.reissuedFromId).toBe(original?.id);
@@ -336,7 +335,7 @@ describe('batch generation', () => {
     expect(lines[0]).toBe('shortCode,qrPayload,batchLabel');
     expect(lines).toHaveLength(26);
 
-    const created = await prisma.missionCard.findMany({ where: { batchLabel: 'PRINT-RUN-1' } });
+    const created = await rawDb.missionCard.findMany({ where: { batchLabel: 'PRINT-RUN-1' } });
     expect(created).toHaveLength(25);
     expect(created.every((card) => card.status === 'UNISSUED')).toBe(true);
 
@@ -371,7 +370,7 @@ describe('the funnel', () => {
       .set('Authorization', bearer(booth))
       .send({ idempotencyKey: idempotencyKey() });
 
-    const gift = await prisma.giftType.create({
+    const gift = await rawDb.giftType.create({
       data: {
         eventId: (await testEvent()).eventId,
         name: 'Tote',

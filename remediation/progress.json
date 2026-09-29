@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-29T12:44:19.704Z",
+  "updatedAt": "2026-09-29T15:47:44.884Z",
   "current": {
     "phase": "P09",
     "step": "P09.5"
@@ -1795,11 +1795,16 @@
         {
           "id": "P09.5",
           "title": "Switch reads and writes to the new model",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-29T12:44:19.704Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-29T15:47:44.883Z",
+          "commits": ["2127488"],
+          "notes": [
+            {
+              "at": "2026-09-29T15:47:44.884Z",
+              "text": "Six slices (f3c3522, 2127488, 40ea095, f9a63b4, 5482d61 and the final one): every event-owned repository takes an EventScope and the platform/db guard (generated from @eventOwned) refuses any query without its event, in every environment; station behaviour from type flags; running-now from Shift rows in the event timezone; role/standing from EventMembership; DTOs carry type/tag and category labels. Catch-up migration 20261001000000 fills rows written between P09.4 and P09.5. Server 843, client 210, E2E 26 + totals 0 after E2E, visual 58. Server tests are now typechecked in CI."
+            }
+          ]
         },
         {
           "id": "P09.6",

@@ -2,9 +2,8 @@ import type { Express } from 'express';
 import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app/createApp.js';
-import { prisma } from '../../src/platform/db/client.js';
 import { SILENT_STATION_MINUTES } from '../../src/modules/footfall/index.js';
-import { resetDatabase } from '../helpers/db.js';
+import { resetDatabase, rawDb } from '../helpers/db.js';
 import {
   assignToStationAllBlocks,
   bearer,
@@ -159,7 +158,7 @@ describe('data health', () => {
 
   it('flags a station that has gone quiet past the threshold', async () => {
     // A tick recorded well before the silence threshold.
-    await prisma.footfallTick.create({
+    await rawDb.footfallTick.create({
       data: {
         eventId: (await testEvent()).eventId,
         stationId: roomAId,
@@ -193,7 +192,7 @@ describe('data health', () => {
   });
 
   it('flags a volunteer who is checked in but has recorded nothing', async () => {
-    await prisma.shiftAssignment.updateMany({
+    await rawDb.shiftAssignment.updateMany({
       where: { volunteerId: counter.id },
       data: { checkedInAt: new Date(FROZEN_NOW.getTime() - 60 * 60_000) },
     });
@@ -207,7 +206,7 @@ describe('data health', () => {
   });
 
   it('reports an open fallback window', async () => {
-    await prisma.fallbackWindow.create({
+    await rawDb.fallbackWindow.create({
       data: {
         eventId: (await testEvent()).eventId,
         tier: 3,
@@ -242,7 +241,7 @@ describe('staffing', () => {
   });
 
   it('drops a station from the gaps once everyone has checked in', async () => {
-    await prisma.shiftAssignment.updateMany({
+    await rawDb.shiftAssignment.updateMany({
       where: { stationId: roomAId },
       data: { checkedInAt: FROZEN_NOW },
     });
@@ -253,7 +252,7 @@ describe('staffing', () => {
   });
 
   it('warns about anyone on station three hours without a break', async () => {
-    await prisma.shiftAssignment.updateMany({
+    await rawDb.shiftAssignment.updateMany({
       where: { volunteerId: counter.id },
       data: { checkedInAt: new Date(FROZEN_NOW.getTime() - 200 * 60_000) },
     });

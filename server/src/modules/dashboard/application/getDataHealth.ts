@@ -1,12 +1,10 @@
 import type { DataHealthResponse } from '@spoh/shared';
 import { getSettings } from '../../../platform/settings/index.js';
-import {
-  activeShiftBlocks,
-  minutesBetween,
-  startOfEventDay,
-} from '../../../platform/time/index.js';
+import { runningShifts } from '../../../platform/event/runningShifts.js';
+import { minutesBetween, startOfEventDay } from '../../../platform/time/index.js';
 import { getLiveFootfall } from '../../footfall/index.js';
 import {
+  anyShiftRunning,
   checkedInWithLastCapture,
   findEventDayOn,
   openFallbackWindowExists,
@@ -28,14 +26,13 @@ export async function getDataHealth(
   now = new Date(),
 ): Promise<DataHealthResponse> {
   const since = startOfEventDay(now);
-  const blocks = activeShiftBlocks(now);
-  const withinEventHours = blocks.length > 0;
+  const withinEventHours = await anyShiftRunning(scope, await runningShifts(scope, now));
 
   const [footfall, fallbackWindowOpen, eventDay, flagged] = await Promise.all([
     getLiveFootfall(scope, now),
-    openFallbackWindowExists(now),
-    findEventDayOn(since),
-    flaggedRedemptions({ since, until: now }),
+    openFallbackWindowExists(scope, now),
+    findEventDayOn(scope, since),
+    flaggedRedemptions(scope, { since, until: now }),
   ]);
 
   const silentStations = withinEventHours
@@ -55,7 +52,7 @@ export async function getDataHealth(
     withinEventHours && eventDay
       ? staleDevicesOf(
           (
-            await checkedInWithLastCapture({ eventDayId: eventDay.id, blocks, since, until: now })
+            await checkedInWithLastCapture(scope, { eventDayId: eventDay.id, since, until: now })
           ).map((row) => ({
             volunteerId: row.volunteerId,
             volunteerName: row.volunteerName,

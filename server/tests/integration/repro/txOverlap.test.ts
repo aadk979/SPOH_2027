@@ -3,8 +3,7 @@ import type { Express } from 'express';
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../../src/app/createApp.js';
-import { prisma } from '../../../src/platform/db/client.js';
-import { resetDatabase } from '../../helpers/db.js';
+import { resetDatabase, rawDb } from '../../helpers/db.js';
 import {
   assignToStation,
   bearer,
@@ -146,7 +145,7 @@ describe('no overlapping queries on a transaction connection (F03-019)', () => {
 
   it('checking in and out of a shift', async () => {
     const shift = await assignToStation({ volunteerId: owner.id, stationId, eventDayId: dayId });
-    await prisma.attendance.create({
+    await rawDb.attendance.create({
       data: {
         eventId: (await testEvent()).eventId,
         volunteerId: owner.id,

@@ -3,10 +3,9 @@ import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FullReport } from '@spoh/shared';
 import { createApp } from '../../src/app/createApp.js';
-import { prisma } from '../../src/platform/db/client.js';
 import { toCsv } from '../../src/modules/report/application/export/toCsv.js';
 import { purgeResolvedAlerts } from '../../src/modules/lostPerson/index.js';
-import { resetDatabase } from '../helpers/db.js';
+import { resetDatabase, rawDb } from '../helpers/db.js';
 import {
   assignToStationAllBlocks,
   bearer,
@@ -66,7 +65,7 @@ beforeEach(async () => {
 
   // Exists so the report has a gift section to fill in; the report reads every
   // gift type, so the id is never needed here.
-  await prisma.giftType.create({
+  await rawDb.giftType.create({
     data: {
       eventId: (await testEvent()).eventId,
       name: 'Tote Bag',
@@ -275,7 +274,7 @@ describe('safety reporting never reads a lost-person description', () => {
       .send({ outcome: 'RESOLVED_FOUND' });
 
     // Backdate past the retention window and purge, as the scheduled job would.
-    await prisma.lostPersonAlert.update({
+    await rawDb.lostPersonAlert.update({
       where: { id: raised.body.alert.id },
       data: {
         raisedAt: new Date(FROZEN_NOW.getTime() - 26 * 60 * 60 * 1000),
@@ -322,7 +321,7 @@ describe('safety reporting never reads a lost-person description', () => {
 
 describe('volunteer hours', () => {
   it('counts a shift nobody checked out of as zero hours, not as open-ended', async () => {
-    await prisma.shiftAssignment.updateMany({
+    await rawDb.shiftAssignment.updateMany({
       where: { volunteerId: booth.id },
       data: { checkedInAt: new Date(FROZEN_NOW.getTime() - 5 * 60 * 60 * 1000) },
     });

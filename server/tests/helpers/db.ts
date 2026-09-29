@@ -1,4 +1,6 @@
+import { PrismaPg } from '@prisma/adapter-pg';
 import { env } from '../../src/config/env.js';
+import { PrismaClient } from '../../src/generated/prisma/client.js';
 import { prisma } from '../../src/platform/db/client.js';
 import { invalidateCurrentEvent } from '../../src/platform/event/currentEvent.js';
 import { invalidateVolunteerCache } from '../../src/platform/identity/index.js';
@@ -11,6 +13,16 @@ import { invalidateVolunteerCache } from '../../src/platform/identity/index.js';
  * worth of data. They refuse to run unless the connection string names a
  * database that looks like a test database.
  */
+/**
+ * The database without the event-scope guard, for tests to arrange and
+ * inspect rows directly. The application only ever gets the guarded client
+ * (`platform/db/client.ts`, ADR-001 §2); a test looking at a table is not a
+ * request working in an event.
+ */
+export const rawDb = new PrismaClient({
+  adapter: new PrismaPg({ connectionString: env.DATABASE_URL }),
+});
+
 /**
  * The database NAME must end in `_test`. Deliberately stricter than "is it
  * localhost": a developer's own dev database is on localhost too, and wiping

@@ -2,8 +2,7 @@ import type { Express } from 'express';
 import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../../src/app/createApp.js';
-import { prisma } from '../../../src/platform/db/client.js';
-import { resetDatabase } from '../../helpers/db.js';
+import { resetDatabase, rawDb } from '../../helpers/db.js';
 import {
   assignToStationAllBlocks,
   bearer,
@@ -58,7 +57,7 @@ beforeEach(async () => {
   });
 
   giftId = (
-    await prisma.giftType.create({
+    await rawDb.giftType.create({
       data: {
         eventId: (await testEvent()).eventId,
         name: 'Tote Bag',
@@ -70,7 +69,7 @@ beforeEach(async () => {
 });
 
 async function card(shortCode: string, status: 'UNISSUED' | 'ISSUED' | 'COMPLETED' | 'VOIDED') {
-  return prisma.missionCard.create({
+  return rawDb.missionCard.create({
     data: {
       eventId: (await testEvent()).eventId,
       shortCode,
@@ -133,7 +132,7 @@ describe('Mission Cards, gifts and group registration (P03 repros)', () => {
       });
     expect(response.status).toBe(201);
 
-    const row = await prisma.missionCard.findUniqueOrThrow({ where: { shortCode: 'CCC333' } });
+    const row = await rawDb.missionCard.findUniqueOrThrow({ where: { shortCode: 'CCC333' } });
     expect(row.status).toBe('COMPLETED');
   });
 
@@ -189,16 +188,16 @@ describe('Mission Cards, gifts and group registration (P03 repros)', () => {
     }
 
     expect(statuses.filter((status) => status >= 500)).toEqual([]);
-    expect(await prisma.cardStampEvent.count()).toBe(codes.length);
+    expect(await rawDb.cardStampEvent.count()).toBe(codes.length);
   });
 
   // F03-007
   it('never hands out more gifts than are in stock under simultaneous redemptions', async () => {
-    await prisma.giftType.update({ where: { id: giftId }, data: { initialStock: 1 } });
+    await rawDb.giftType.update({ where: { id: giftId }, data: { initialStock: 1 } });
 
     const responses = await Promise.all([redeem({}), redeem({}), redeem({}), redeem({})]);
     expect(responses.filter((response) => response.status === 201).length).toBe(1);
-    expect(await prisma.giftRedemption.count({ where: { giftTypeId: giftId } })).toBe(1);
+    expect(await rawDb.giftRedemption.count({ where: { giftTypeId: giftId } })).toBe(1);
   });
 
   // F03-007
@@ -210,7 +209,7 @@ describe('Mission Cards, gifts and group registration (P03 repros)', () => {
       await Promise.all([1, 2, 3, 4].map(() => redeem({ cardShortCode: code })));
     }
 
-    const perCard = await prisma.giftRedemption.groupBy({
+    const perCard = await rawDb.giftRedemption.groupBy({
       by: ['missionCardId'],
       _count: { _all: true },
     });

@@ -3,8 +3,7 @@ import request from 'supertest';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../../../src/app/createApp.js';
 import { logger } from '../../../src/platform/logger/index.js';
-import { prisma } from '../../../src/platform/db/client.js';
-import { resetDatabase } from '../../helpers/db.js';
+import { resetDatabase, rawDb } from '../../helpers/db.js';
 import {
   assignToStation,
   bearer,
@@ -44,7 +43,7 @@ afterEach(() => {
 });
 
 async function registrationAt(recordedAt: string): Promise<void> {
-  await prisma.registration.create({
+  await rawDb.registration.create({
     data: {
       eventId: (await testEvent()).eventId,
       category: 'SEC_3',
@@ -83,7 +82,7 @@ describe('dashboard, report and import numbers (P03 repros)', () => {
 
   // F02-027
   it('does not count shifts that have not happened yet as no-shows', async () => {
-    const tomorrow = await prisma.eventDay.create({
+    const tomorrow = await rawDb.eventDay.create({
       data: {
         eventId: (await testEvent()).eventId,
         date: new Date('2027-01-08T00:00:00.000Z'),
@@ -95,7 +94,7 @@ describe('dashboard, report and import numbers (P03 repros)', () => {
       stationId,
       eventDayId: dayId,
     });
-    await prisma.shiftAssignment.update({
+    await rawDb.shiftAssignment.update({
       where: { id: today.id },
       data: { checkedInAt: new Date('2027-01-07T01:30:00.000Z') },
     });
@@ -135,7 +134,7 @@ describe('dashboard, report and import numbers (P03 repros)', () => {
       });
 
     expect(response.status).toBe(201);
-    expect(await prisma.registration.count()).toBe(5);
+    expect(await rawDb.registration.count()).toBe(5);
   });
 
   // F03-012
@@ -154,7 +153,7 @@ describe('dashboard, report and import numbers (P03 repros)', () => {
     // Re-running the same file is still safe.
     expect((await post()).body.recordsCreated).toBe(0);
 
-    const total = await prisma.footfallTick.aggregate({ _sum: { quantity: true } });
+    const total = await rawDb.footfallTick.aggregate({ _sum: { quantity: true } });
     expect(total._sum.quantity).toBe(10);
   });
 

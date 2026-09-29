@@ -3,7 +3,7 @@ import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app/createApp.js';
 import { prisma } from '../../src/platform/db/client.js';
-import { resetDatabase } from '../helpers/db.js';
+import { resetDatabase, rawDb } from '../helpers/db.js';
 import {
   assignToStationAllBlocks,
   bearer,
@@ -120,7 +120,7 @@ describe('idempotency', () => {
     expect(second.body.registration.id).toBe(first.body.registration.id);
     expect(second.body.registration.recordedAt).toBe(first.body.registration.recordedAt);
 
-    expect(await prisma.registration.count()).toBe(1);
+    expect(await rawDb.registration.count()).toBe(1);
   });
 
   it('rejects the same key used for a different endpoint', async () => {
@@ -141,7 +141,7 @@ describe('station scope', () => {
 
     expect(response.status).toBe(403);
     expect(response.body.error.code).toBe('STATION_SCOPE_DENIED');
-    expect(await prisma.footfallTick.count()).toBe(0);
+    expect(await rawDb.footfallTick.count()).toBe(0);
   });
 
   it('lets an IC post outside their assignment and records the bypass', async () => {
@@ -189,7 +189,7 @@ describe('group registration', () => {
     );
     expect(groupIds.size).toBe(1);
 
-    expect(await prisma.registration.count()).toBe(3);
+    expect(await rawDb.registration.count()).toBe(3);
   });
 
   it('still records the registrations when the card link fails', async () => {
@@ -233,7 +233,7 @@ describe('voiding', () => {
       .set('Authorization', bearer(ic));
     expect(after.body.total).toBe(0);
 
-    const row = await prisma.registration.findUnique({ where: { id } });
+    const row = await rawDb.registration.findUnique({ where: { id } });
     expect(row).not.toBeNull();
     expect(row?.voided).toBe(true);
     expect(row?.voidedReason).toBe('Double tap while the queue was moving');
@@ -309,7 +309,7 @@ describe('footfall integrity', () => {
       idempotencyKey: idempotencyKey(),
     });
 
-    const rows = await prisma.footfallTick.findMany();
+    const rows = await rawDb.footfallTick.findMany();
     expect(rows).toHaveLength(1);
     expect(rows[0]?.source).toBe('FALLBACK_SHEET');
     expect(rows[0]?.timeBlockStart).not.toBeNull();
@@ -343,7 +343,7 @@ describe('fallback annotation', () => {
       .set('Authorization', bearer(ic));
     expect(clean.body.containsFallbackData).toBe(false);
 
-    await prisma.fallbackWindow.create({
+    await rawDb.fallbackWindow.create({
       data: {
         eventId: (await testEvent()).eventId,
         tier: 3,
@@ -381,7 +381,7 @@ describe('input validation', () => {
   it('attributes the capture to the token, never to the body', async () => {
     await tapRegistration(booth, 'SEC_4');
 
-    const row = await prisma.registration.findFirst();
+    const row = await rawDb.registration.findFirst();
     expect(row?.recordedById).toBe(booth.id);
   });
 

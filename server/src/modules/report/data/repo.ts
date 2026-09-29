@@ -1,7 +1,8 @@
 import { prisma } from '../../../platform/db/client.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /**
- * Reads for the post-event report (PRODUCT_BRIEF §10).
+ * Reads for the post-event report (PRODUCT_BRIEF §10), for one event (ADR-001 §2).
  *
  * Every aggregate here is bounded by an explicit time range, and every one that
  * touches a capture table filters `voided: false` — a voided row stays for the
@@ -17,17 +18,29 @@ export interface Range {
   to: Date;
 }
 
-export async function registrationTotals(range: Range) {
+export async function registrationTotals(scope: EventScope, range: Range) {
   const [total, voided, byCategory] = await Promise.all([
     prisma.registration.count({
-      where: { voided: false, recordedAt: { gte: range.from, lt: range.to } },
+      where: {
+        eventId: scope.eventId,
+        voided: false,
+        recordedAt: { gte: range.from, lt: range.to },
+      },
     }),
     prisma.registration.count({
-      where: { voided: true, recordedAt: { gte: range.from, lt: range.to } },
+      where: {
+        eventId: scope.eventId,
+        voided: true,
+        recordedAt: { gte: range.from, lt: range.to },
+      },
     }),
     prisma.registration.groupBy({
       by: ['category'],
-      where: { voided: false, recordedAt: { gte: range.from, lt: range.to } },
+      where: {
+        eventId: scope.eventId,
+        voided: false,
+        recordedAt: { gte: range.from, lt: range.to },
+      },
       _count: { _all: true },
     }),
   ]);
@@ -48,12 +61,12 @@ export async function registrationTotals(range: Range) {
  * bucket happens to line up here — but relying on that would break the moment
  * anything ran in the evening. `AT TIME ZONE` states the intent.
  */
-export async function registrationsByDay(range: Range) {
+export async function registrationsByDay(scope: EventScope, range: Range) {
   const rows = await prisma.$queryRaw<Array<{ date: Date; value: bigint }>>`
     SELECT date_trunc('day', "recordedAt" AT TIME ZONE 'Asia/Singapore') AS date,
            COUNT(*)::bigint AS value
     FROM "Registration"
-    WHERE "voided" = false AND "recordedAt" >= ${range.from} AND "recordedAt" < ${range.to}
+    WHERE "eventId" = ${scope.eventId} AND "voided" = false AND "recordedAt" >= ${range.from} AND "recordedAt" < ${range.to}
     GROUP BY date
     ORDER BY date ASC`;
 
@@ -63,11 +76,11 @@ export async function registrationsByDay(range: Range) {
   }));
 }
 
-export async function registrationsByHour(range: Range) {
+export async function registrationsByHour(scope: EventScope, range: Range) {
   const rows = await prisma.$queryRaw<Array<{ hour: Date; value: bigint }>>`
     SELECT date_trunc('hour', "recordedAt") AS hour, COUNT(*)::bigint AS value
     FROM "Registration"
-    WHERE "voided" = false AND "recordedAt" >= ${range.from} AND "recordedAt" < ${range.to}
+    WHERE "eventId" = ${scope.eventId} AND "voided" = false AND "recordedAt" >= ${range.from} AND "recordedAt" < ${range.to}
     GROUP BY hour
     ORDER BY hour ASC`;
 
@@ -78,18 +91,18 @@ export async function registrationsByHour(range: Range) {
   return rows.map((row) => ({ hour: row.hour, value: Number(row.value) }));
 }
 
-export async function footfallTotals(range: Range) {
+export async function footfallTotals(scope: EventScope, range: Range) {
   const result = await prisma.footfallTick.aggregate({
-    where: { voided: false, recordedAt: { gte: range.from, lt: range.to } },
+    where: { eventId: scope.eventId, voided: false, recordedAt: { gte: range.from, lt: range.to } },
     _sum: { quantity: true },
   });
   return result._sum.quantity ?? 0;
 }
 
-export async function footfallBySource(range: Range) {
+export async function footfallBySource(scope: EventScope, range: Range) {
   const rows = await prisma.footfallTick.groupBy({
     by: ['source'],
-    where: { voided: false, recordedAt: { gte: range.from, lt: range.to } },
+    where: { eventId: scope.eventId, voided: false, recordedAt: { gte: range.from, lt: range.to } },
     _sum: { quantity: true },
   });
 
@@ -97,7 +110,7 @@ export async function footfallBySource(range: Range) {
 }
 
 /** 30-minute curve per station — the peak-period analysis the clicker never gave. */
-export async function footfallCurve(range: Range) {
+export async function footfallCurve(scope: EventScope, range: Range) {
   const rows = await prisma.$queryRaw<
     Array<{ stationId: string; bucketStart: Date; value: bigint }>
   >`
@@ -106,7 +119,7 @@ export async function footfallCurve(range: Range) {
       to_timestamp(floor(extract(epoch FROM "recordedAt") / 1800) * 1800) AS "bucketStart",
       SUM("quantity")::bigint AS value
     FROM "FootfallTick"
-    WHERE "voided" = false AND "recordedAt" >= ${range.from} AND "recordedAt" < ${range.to}
+    WHERE "eventId" = ${scope.eventId} AND "voided" = false AND "recordedAt" >= ${range.from} AND "recordedAt" < ${range.to}
     GROUP BY "stationId", "bucketStart"
     ORDER BY "stationId", "bucketStart"`;
 
@@ -117,17 +130,29 @@ export async function footfallCurve(range: Range) {
   }));
 }
 
-export async function cardTotals(range: Range) {
+export async function cardTotals(scope: EventScope, range: Range) {
   const [issued, completed, voided] = await Promise.all([
     // A lost original's journey continues on its replacement (ADR-002 §3).
     prisma.missionCard.count({
-      where: { issuedAt: { gte: range.from, lt: range.to }, status: { not: 'LOST' } },
+      where: {
+        eventId: scope.eventId,
+        issuedAt: { gte: range.from, lt: range.to },
+        status: { not: 'LOST' },
+      },
     }),
     prisma.missionCard.count({
-      where: { status: 'COMPLETED', completedAt: { gte: range.from, lt: range.to } },
+      where: {
+        eventId: scope.eventId,
+        status: 'COMPLETED',
+        completedAt: { gte: range.from, lt: range.to },
+      },
     }),
     prisma.missionCard.count({
-      where: { status: 'VOIDED', voidedAt: { gte: range.from, lt: range.to } },
+      where: {
+        eventId: scope.eventId,
+        status: 'VOIDED',
+        voidedAt: { gte: range.from, lt: range.to },
+      },
     }),
   ]);
 
@@ -142,21 +167,25 @@ export async function cardTotals(range: Range) {
  * stamps and return (PRODUCT_BRIEF §0.5). A single per-day completion rate
  * would misread that badly, so the report shows both series.
  */
-export async function cardsByDay(range: Range, column: 'issuedAt' | 'completedAt') {
+export async function cardsByDay(
+  scope: EventScope,
+  range: Range,
+  column: 'issuedAt' | 'completedAt',
+) {
   const rows =
     column === 'issuedAt'
       ? await prisma.$queryRaw<Array<{ date: Date; value: bigint }>>`
           SELECT date_trunc('day', "issuedAt" AT TIME ZONE 'Asia/Singapore') AS date,
                  COUNT(*)::bigint AS value
           FROM "MissionCard"
-          WHERE "issuedAt" >= ${range.from} AND "issuedAt" < ${range.to}
+          WHERE "eventId" = ${scope.eventId} AND "issuedAt" >= ${range.from} AND "issuedAt" < ${range.to}
             AND "status" <> 'LOST'
           GROUP BY date ORDER BY date ASC`
       : await prisma.$queryRaw<Array<{ date: Date; value: bigint }>>`
           SELECT date_trunc('day', "completedAt" AT TIME ZONE 'Asia/Singapore') AS date,
                  COUNT(*)::bigint AS value
           FROM "MissionCard"
-          WHERE "completedAt" >= ${range.from} AND "completedAt" < ${range.to}
+          WHERE "eventId" = ${scope.eventId} AND "completedAt" >= ${range.from} AND "completedAt" < ${range.to}
           GROUP BY date ORDER BY date ASC`;
 
   return rows.map((row) => ({
@@ -165,24 +194,24 @@ export async function cardsByDay(range: Range, column: 'issuedAt' | 'completedAt
   }));
 }
 
-export async function cardsPerStation(range: Range) {
+export async function cardsPerStation(scope: EventScope, range: Range) {
   const rows = await prisma.$queryRaw<Array<{ stationId: string; cards: bigint }>>`
     SELECT s."stationId", COUNT(DISTINCT s."missionCardId")::bigint AS cards
     FROM "CardStampEvent" s
     JOIN "MissionCard" c ON c."id" = s."missionCardId"
-    WHERE s."recordedAt" >= ${range.from} AND s."recordedAt" < ${range.to}
+    WHERE s."eventId" = ${scope.eventId} AND s."recordedAt" >= ${range.from} AND s."recordedAt" < ${range.to}
       AND c."status" <> 'LOST'
     GROUP BY s."stationId"`;
 
   return rows.map((row) => ({ stationId: row.stationId, cards: Number(row.cards) }));
 }
 
-export async function giftRedemptionsByDay(range: Range) {
+export async function giftRedemptionsByDay(scope: EventScope, range: Range) {
   const rows = await prisma.$queryRaw<Array<{ date: Date; value: bigint }>>`
     SELECT date_trunc('day', "recordedAt" AT TIME ZONE 'Asia/Singapore') AS date,
            COUNT(*)::bigint AS value
     FROM "GiftRedemption"
-    WHERE "voided" = false AND "recordedAt" >= ${range.from} AND "recordedAt" < ${range.to}
+    WHERE "eventId" = ${scope.eventId} AND "voided" = false AND "recordedAt" >= ${range.from} AND "recordedAt" < ${range.to}
     GROUP BY date ORDER BY date ASC`;
 
   return rows.map((row) => ({
@@ -191,19 +220,19 @@ export async function giftRedemptionsByDay(range: Range) {
   }));
 }
 
-export async function giftRedemptionsByStation(range: Range) {
+export async function giftRedemptionsByStation(scope: EventScope, range: Range) {
   const rows = await prisma.giftRedemption.groupBy({
     by: ['stationId'],
-    where: { voided: false, recordedAt: { gte: range.from, lt: range.to } },
+    where: { eventId: scope.eventId, voided: false, recordedAt: { gte: range.from, lt: range.to } },
     _count: { _all: true },
   });
 
   return rows.map((row) => ({ stationId: row.stationId, value: row._count._all }));
 }
 
-export async function incidentsInRange(range: Range) {
+export async function incidentsInRange(scope: EventScope, range: Range) {
   return prisma.incident.findMany({
-    where: { reportedAt: { gte: range.from, lt: range.to } },
+    where: { eventId: scope.eventId, reportedAt: { gte: range.from, lt: range.to } },
     include: {
       station: { select: { name: true } },
       _count: { select: { followUps: true } },
@@ -219,9 +248,9 @@ export async function incidentsInRange(range: Range) {
  * permitted to read them even before that (BUILD_PLAN §5.9). What goes in the
  * report is "3 cases, all resolved, median 7 minutes".
  */
-export async function lostPersonSummaries(range: Range) {
+export async function lostPersonSummaries(scope: EventScope, range: Range) {
   return prisma.lostPersonSummary.findMany({
-    where: { raisedAt: { gte: range.from, lt: range.to } },
+    where: { eventId: scope.eventId, raisedAt: { gte: range.from, lt: range.to } },
     select: { resolutionMinutes: true, outcome: true },
   });
 }
@@ -233,13 +262,18 @@ export async function lostPersonSummaries(range: Range) {
  * inside the 24-hour retention window, and a report that said "0 cases" because
  * the purge had not run yet would be wrong in the most alarming possible way.
  */
-export async function unpurgedLostPersonCount(range: Range) {
+export async function unpurgedLostPersonCount(scope: EventScope, range: Range) {
   const [total, resolved] = await Promise.all([
     prisma.lostPersonAlert.count({
-      where: { raisedAt: { gte: range.from, lt: range.to }, purgedAt: null },
+      where: {
+        eventId: scope.eventId,
+        raisedAt: { gte: range.from, lt: range.to },
+        purgedAt: null,
+      },
     }),
     prisma.lostPersonAlert.count({
       where: {
+        eventId: scope.eventId,
         raisedAt: { gte: range.from, lt: range.to },
         purgedAt: null,
         status: { not: 'ACTIVE' },
@@ -250,10 +284,10 @@ export async function unpurgedLostPersonCount(range: Range) {
   return { total, resolved };
 }
 
-export async function lostFoundCounts(range: Range) {
+export async function lostFoundCounts(scope: EventScope, range: Range) {
   const rows = await prisma.lostFoundItem.groupBy({
     by: ['status'],
-    where: { foundAt: { gte: range.from, lt: range.to } },
+    where: { eventId: scope.eventId, foundAt: { gte: range.from, lt: range.to } },
     _count: { _all: true },
   });
 
@@ -266,9 +300,9 @@ export async function lostFoundCounts(range: Range) {
   };
 }
 
-export async function volunteerAttendance(range: Range) {
+export async function volunteerAttendance(scope: EventScope, range: Range) {
   return prisma.shiftAssignment.findMany({
-    where: { eventDay: { date: { gte: range.from, lt: range.to } } },
+    where: { eventId: scope.eventId, eventDay: { date: { gte: range.from, lt: range.to } } },
     select: {
       volunteerId: true,
       stationId: true,
@@ -281,82 +315,7 @@ export async function volunteerAttendance(range: Range) {
   });
 }
 
-export async function importBatches(range: Range) {
-  return prisma.importBatch.findMany({
-    where: { importedAt: { gte: range.from, lt: range.to } },
-    orderBy: { importedAt: 'asc' },
-  });
-}
-
-/** How many rows in each capture table came from each source. */
-export async function recordsBySource(range: Range) {
-  const [registrations, footfall, stamps, redemptions] = await Promise.all([
-    prisma.registration.groupBy({
-      by: ['source'],
-      where: { voided: false, recordedAt: { gte: range.from, lt: range.to } },
-      _count: { _all: true },
-    }),
-    prisma.footfallTick.groupBy({
-      by: ['source'],
-      where: { voided: false, recordedAt: { gte: range.from, lt: range.to } },
-      _sum: { quantity: true },
-    }),
-    prisma.cardStampEvent.groupBy({
-      by: ['source'],
-      where: { recordedAt: { gte: range.from, lt: range.to } },
-      _count: { _all: true },
-    }),
-    prisma.giftRedemption.groupBy({
-      by: ['source'],
-      where: { voided: false, recordedAt: { gte: range.from, lt: range.to } },
-      _count: { _all: true },
-    }),
-  ]);
-
-  return [
-    ...registrations.map((row) => ({
-      table: 'Registration',
-      source: row.source,
-      value: row._count._all,
-    })),
-    ...footfall.map((row) => ({
-      table: 'FootfallTick',
-      source: row.source,
-      value: row._sum.quantity ?? 0,
-    })),
-    ...stamps.map((row) => ({
-      table: 'CardStampEvent',
-      source: row.source,
-      value: row._count._all,
-    })),
-    ...redemptions.map((row) => ({
-      table: 'GiftRedemption',
-      source: row.source,
-      value: row._count._all,
-    })),
-  ];
-}
-
-export async function voidedCounts(range: Range) {
-  const [registrations, footfall, redemptions] = await Promise.all([
-    prisma.registration.count({
-      where: { voided: true, recordedAt: { gte: range.from, lt: range.to } },
-    }),
-    prisma.footfallTick.count({
-      where: { voided: true, recordedAt: { gte: range.from, lt: range.to } },
-    }),
-    prisma.giftRedemption.count({
-      where: { voided: true, recordedAt: { gte: range.from, lt: range.to } },
-    }),
-  ]);
-
-  return [
-    { table: 'Registration', value: registrations },
-    { table: 'FootfallTick', value: footfall },
-    { table: 'GiftRedemption', value: redemptions },
-  ];
-}
-
-export async function countActiveVolunteers(): Promise<number> {
-  return prisma.person.count({ where: { active: true } });
+/** The event's active members. */
+export async function countActiveVolunteers(scope: EventScope): Promise<number> {
+  return prisma.eventMembership.count({ where: { eventId: scope.eventId, status: 'ACTIVE' } });
 }

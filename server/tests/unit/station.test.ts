@@ -20,7 +20,11 @@ const { requireCountedStation } =
 
 type Station = NonNullable<Awaited<ReturnType<typeof repo.findStationById>>>;
 
-function station(overrides: Partial<Station> = {}): Station {
+const SCOPE = { eventId: 'e1' };
+
+/** A station row as the repo returns it: with its type, whose flags decide (P09.5). */
+function station(overrides: Partial<Station> & { countsEntry?: boolean } = {}): Station {
+  const countsEntry = overrides.countsEntry ?? true;
   return {
     id: 'st1',
     code: 'ROOM_A',
@@ -34,6 +38,8 @@ function station(overrides: Partial<Station> = {}): Station {
     sortOrder: 0,
     createdAt: new Date(0),
     updatedAt: new Date(0),
+    type: { id: 't1', code: 'OTHER', label: 'Other', countsEntry, issuesStamp: false },
+    tags: [],
     ...overrides,
   } as Station;
 }
@@ -65,22 +71,24 @@ describe('station use cases', () => {
 
   it('requireActiveStation returns an active station', async () => {
     findStationById.mockResolvedValueOnce(station());
-    await expect(requireActiveStation('st1')).resolves.toMatchObject({ id: 'st1' });
+    await expect(requireActiveStation(SCOPE, 'st1')).resolves.toMatchObject({ id: 'st1' });
   });
 
   it('requireActiveStation refuses a missing station with 404', async () => {
     findStationById.mockResolvedValueOnce(null);
-    await expect(requireActiveStation('nope')).rejects.toMatchObject({ statusCode: 404 });
+    await expect(requireActiveStation(SCOPE, 'nope')).rejects.toMatchObject({ statusCode: 404 });
   });
 
   it('requireActiveStation refuses a closed station', async () => {
     findStationById.mockResolvedValueOnce(station({ active: false }));
-    await expect(requireActiveStation('st1')).rejects.toMatchObject({ code: 'STATION_INACTIVE' });
+    await expect(requireActiveStation(SCOPE, 'st1')).rejects.toMatchObject({
+      code: 'STATION_INACTIVE',
+    });
   });
 
   it('requireCountedStation refuses a room that is not counted', async () => {
     findStationById.mockResolvedValueOnce(station({ countsEntry: false }));
-    await expect(requireCountedStation('st1')).rejects.toMatchObject({
+    await expect(requireCountedStation(SCOPE, 'st1')).rejects.toMatchObject({
       code: 'STATION_DOES_NOT_COUNT_ENTRY',
     });
   });

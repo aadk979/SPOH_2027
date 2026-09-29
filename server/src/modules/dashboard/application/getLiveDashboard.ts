@@ -1,5 +1,6 @@
 import type { LiveDashboardResponse } from '@spoh/shared';
-import { activeShiftBlocks, startOfEventDay } from '../../../platform/time/index.js';
+import { runningShifts } from '../../../platform/event/runningShifts.js';
+import { startOfEventDay } from '../../../platform/time/index.js';
 import { getLiveFootfall } from '../../footfall/index.js';
 import { listGifts } from '../../gift/index.js';
 import { getFunnel } from '../../missionCard/index.js';
@@ -12,6 +13,8 @@ import {
   openIncidentCounts,
   registrationsByCategory,
   registrationsSince,
+  anyShiftRunning,
+  type Window,
 } from '../data/repo.js';
 import { getDataHealth } from './getDataHealth.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
@@ -32,23 +35,26 @@ export async function getLiveDashboard(
   now = new Date(),
 ): Promise<LiveDashboardResponse> {
   const since = startOfEventDay(now);
-  const blocks = activeShiftBlocks(now);
-  const eventDay = await findEventDayOn(since);
+  const running = await runningShifts(scope, now);
+  const [eventDay, withinEventHours] = await Promise.all([
+    findEventDayOn(scope, since),
+    anyShiftRunning(scope, running),
+  ]);
 
   const [registrations, footfall, cards, gifts, safety, staffing, dataHealth] = await Promise.all([
-    registrationsPanel(since, now),
+    registrationsPanel(scope, { since, until: now }),
     footfallPanel(scope, now),
     cardsPanel(scope, { since, now }),
     listGifts(scope),
-    safetyPanel(),
-    staffingPanel(scope, { eventDayId: eventDay?.id ?? null, blocks }, now),
+    safetyPanel(scope),
+    staffingPanel(scope, { eventDayId: eventDay?.id ?? null, running }, now),
     getDataHealth(scope, now),
   ]);
 
   return {
     asOf: now.toISOString(),
     eventDayLabel: eventDay?.label ?? null,
-    withinEventHours: blocks.length > 0,
+    withinEventHours,
     registrations,
     footfall,
     cards,
@@ -61,11 +67,15 @@ export async function getLiveDashboard(
 
 type Panels = LiveDashboardResponse;
 
-async function registrationsPanel(since: Date, now: Date): Promise<Panels['registrations']> {
+async function registrationsPanel(
+  scope: EventScope,
+  window: Window,
+): Promise<Panels['registrations']> {
+  const lastHourStart = new Date(window.until.getTime() - 60 * 60 * 1000);
   const [todayTotal, byCategory, lastHour] = await Promise.all([
-    registrationsSince(since, now),
-    registrationsByCategory(since, now),
-    registrationsSince(new Date(now.getTime() - 60 * 60 * 1000), now),
+    registrationsSince(scope, window),
+    registrationsByCategory(scope, window),
+    registrationsSince(scope, { since: lastHourStart, until: window.until }),
   ]);
   return { unit: 'registrations', todayTotal, byCategory, lastHour };
 }
@@ -93,10 +103,10 @@ async function cardsPanel(
   };
 }
 
-async function safetyPanel(): Promise<Panels['safety']> {
+async function safetyPanel(scope: EventScope): Promise<Panels['safety']> {
   const [incidents, lostPersons] = await Promise.all([
-    openIncidentCounts(),
-    activeLostPersonCount(),
+    openIncidentCounts(scope),
+    activeLostPersonCount(scope),
   ]);
   return {
     openIncidents: incidents.open,
@@ -107,12 +117,15 @@ async function safetyPanel(): Promise<Panels['safety']> {
 
 async function staffingPanel(
   scope: EventScope,
-  { eventDayId, blocks }: { eventDayId: string | null; blocks: string[] },
+  {
+    eventDayId,
+    running,
+  }: { eventDayId: string | null; running: Awaited<ReturnType<typeof runningShifts>> },
   now: Date,
 ): Promise<Panels['staffing']> {
   const [onShift, checkedIn, gaps, longShifts] = await Promise.all([
-    eventDayId ? onShiftCount(eventDayId, blocks) : 0,
-    eventDayId ? checkedInCount(eventDayId) : 0,
+    onShiftCount(scope, running),
+    eventDayId ? checkedInCount(scope, eventDayId) : 0,
     getStaffingGaps(scope, now),
     getLongShifts(scope, now),
   ]);

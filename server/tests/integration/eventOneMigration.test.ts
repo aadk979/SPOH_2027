@@ -3,7 +3,7 @@ import pg from 'pg';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { env } from '../../src/config/env.js';
 import { prisma } from '../../src/platform/db/client.js';
-import { resetDatabase } from '../helpers/db.js';
+import { resetDatabase, rawDb } from '../helpers/db.js';
 import {
   assignToStationAllBlocks,
   createEventDayToday,
@@ -67,14 +67,14 @@ beforeAll(async () => {
   await resetDatabase();
   const day = await createEventDayToday();
   const booth = await createStation({ code: 'BOOTH', name: 'Sign-up booth' });
-  await prisma.station.update({ where: { id: booth.id }, data: { kind: 'SIGNUP_BOOTH' } });
+  await rawDb.station.update({ where: { id: booth.id }, data: { kind: 'SIGNUP_BOOTH' } });
   const room = await createStation({ code: 'DCS_ROOM', countsEntry: true, issuesStamp: true });
-  await prisma.station.update({
+  await rawDb.station.update({
     where: { id: room.id },
     data: { kind: 'COURSE_STATION', courseCode: 'DCS' },
   });
   const done = await createStation({ code: 'DONE' });
-  await prisma.station.update({ where: { id: done.id }, data: { kind: 'MISSION_COMPLETE' } });
+  await rawDb.station.update({ where: { id: done.id }, data: { kind: 'MISSION_COMPLETE' } });
 
   const chief = await createVolunteer({ email: 'chief@event1.test', role: 'CHIEF_COORDINATOR' });
   const ic = await createVolunteer({ email: 'ic@event1.test', role: 'IC' });
@@ -95,7 +95,7 @@ beforeAll(async () => {
 
   const categories = ['SEC_3', 'SEC_3', 'SEC_4', 'PARENT_GUARDIAN'] as const;
   for (const [index, category] of categories.entries()) {
-    await prisma.registration.create({
+    await rawDb.registration.create({
       data: {
         category,
         stationId: booth.id,
@@ -123,23 +123,23 @@ describe('migrating into Event #1 (P09.4)', () => {
     expect(event).toMatchObject({ slug: 'spoh2027', timezone: 'Asia/Singapore', status: 'READY' });
     expect(event.organisation.appName).toBe('SPOH Ops');
     const inEvent = { where: { eventId: event.id } };
-    expect(await prisma.captureCategory.count(inEvent)).toBe(8);
-    expect(await prisma.shiftTemplate.count(inEvent)).toBe(2);
-    expect(await prisma.shift.count(inEvent)).toBe(2);
-    const types = await prisma.stationType.findMany({ ...inEvent, orderBy: { code: 'asc' } });
+    expect(await rawDb.captureCategory.count(inEvent)).toBe(8);
+    expect(await rawDb.shiftTemplate.count(inEvent)).toBe(2);
+    expect(await rawDb.shift.count(inEvent)).toBe(2);
+    const types = await rawDb.stationType.findMany({ ...inEvent, orderBy: { code: 'asc' } });
     expect(types.map((type) => type.code)).toEqual([
       'COURSE_STATION_COUNTED_STAMPED',
       'MISSION_COMPLETE',
       'SIGNUP_BOOTH',
     ]);
-    const memberships = await prisma.eventMembership.findMany({ orderBy: { role: 'asc' } });
+    const memberships = await rawDb.eventMembership.findMany({ orderBy: { role: 'asc' } });
     expect(memberships).toHaveLength(3);
     expect(memberships.find((m) => m.role === 'CHIEF_COORDINATOR')?.status).toBe('DEACTIVATED');
   });
 
   it('places a shift at the configured local time, in the event timezone', async () => {
     const { id: eventId } = await prisma.event.findFirstOrThrow();
-    const morning = await prisma.shift.findFirstOrThrow({
+    const morning = await rawDb.shift.findFirstOrThrow({
       where: { eventId, template: { code: 'MORNING' } },
     });
     const local = new Intl.DateTimeFormat('en-GB', {
@@ -153,6 +153,6 @@ describe('migrating into Event #1 (P09.4)', () => {
   it('runs once: a second run changes nothing', async () => {
     await prisma.$executeRawUnsafe(MIGRATION);
     expect(await prisma.event.count()).toBe(1);
-    expect(await prisma.eventMembership.count()).toBe(3);
+    expect(await rawDb.eventMembership.count()).toBe(3);
   });
 });

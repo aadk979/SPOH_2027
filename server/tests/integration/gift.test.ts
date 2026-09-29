@@ -3,7 +3,7 @@ import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app/createApp.js';
 import { prisma } from '../../src/platform/db/client.js';
-import { resetDatabase } from '../helpers/db.js';
+import { resetDatabase, rawDb } from '../helpers/db.js';
 import {
   assignToStationAllBlocks,
   bearer,
@@ -53,7 +53,7 @@ beforeEach(async () => {
   await assignToStationAllBlocks({ volunteerId: ic.id, stationId, eventDayId: eventDay.id });
 
   giftId = (
-    await prisma.giftType.create({
+    await rawDb.giftType.create({
       data: {
         eventId: (await testEvent()).eventId,
         name: 'Tote Bag',
@@ -64,7 +64,7 @@ beforeEach(async () => {
   ).id;
 
   scarceGiftId = (
-    await prisma.giftType.create({
+    await rawDb.giftType.create({
       data: {
         eventId: (await testEvent()).eventId,
         name: 'Last Badge',
@@ -74,7 +74,7 @@ beforeEach(async () => {
     })
   ).id;
 
-  await prisma.missionCard.create({
+  await rawDb.missionCard.create({
     data: {
       eventId: (await testEvent()).eventId,
       shortCode: CARD,
@@ -164,7 +164,7 @@ describe('out of stock', () => {
     await redeem(volunteer, { giftTypeId: scarceGiftId });
     await redeem(volunteer, { giftTypeId: scarceGiftId });
 
-    expect(await prisma.giftRedemption.count({ where: { giftTypeId: scarceGiftId } })).toBe(1);
+    expect(await rawDb.giftRedemption.count({ where: { giftTypeId: scarceGiftId } })).toBe(1);
   });
 });
 
@@ -180,7 +180,7 @@ describe('a queued redemption is recorded and flagged, not refused', () => {
 
     expect(late.status).toBe(201);
     expect(late.body.warning).toContain('out of stock');
-    const flagged = await prisma.giftRedemption.findMany({ where: { flag: { not: null } } });
+    const flagged = await rawDb.giftRedemption.findMany({ where: { flag: { not: null } } });
     expect(flagged.map((row) => row.flag)).toEqual(['OVER_STOCK']);
   });
 
@@ -189,14 +189,14 @@ describe('a queued redemption is recorded and flagged, not refused', () => {
     const late = await redeem(volunteer, { cardShortCode: CARD, queued: true });
 
     expect(late.status).toBe(201);
-    const rows = await prisma.giftRedemption.findMany({ orderBy: { recordedAt: 'asc' } });
+    const rows = await rawDb.giftRedemption.findMany({ orderBy: { recordedAt: 'asc' } });
     expect(rows.map((row) => row.flag)).toEqual([null, 'SECOND_GIFT']);
   });
 
   it('flags nothing when a queued redemption breaks no rule', async () => {
     const late = await redeem(volunteer, { queued: true });
     expect(late.status).toBe(201);
-    expect(await prisma.giftRedemption.count({ where: { flag: { not: null } } })).toBe(0);
+    expect(await rawDb.giftRedemption.count({ where: { flag: { not: null } } })).toBe(0);
   });
 
   it('shows the IC the flagged redemption on the station dashboard', async () => {
@@ -253,7 +253,7 @@ describe('the card is a cross-check, never a gate', () => {
 
     expect(second.status).toBe(201);
     expect(second.body.warning).toContain('confirmed by the volunteer');
-    expect(await prisma.giftRedemption.count({ where: { voided: false } })).toBe(2);
+    expect(await rawDb.giftRedemption.count({ where: { voided: false } })).toBe(2);
   });
 });
 
@@ -269,7 +269,7 @@ describe('audit and attribution', () => {
   it('attributes the redemption to the token, not the body', async () => {
     await redeem(volunteer);
 
-    const row = await prisma.giftRedemption.findFirst();
+    const row = await rawDb.giftRedemption.findFirst();
     expect(row?.recordedById).toBe(volunteer.id);
   });
 
@@ -286,6 +286,6 @@ describe('audit and attribution', () => {
       .set('Authorization', bearer(volunteer))
       .send({ giftTypeId: giftId, stationId, idempotencyKey: key });
 
-    expect(await prisma.giftRedemption.count()).toBe(1);
+    expect(await rawDb.giftRedemption.count()).toBe(1);
   });
 });

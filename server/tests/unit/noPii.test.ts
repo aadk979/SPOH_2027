@@ -85,7 +85,9 @@ function parseModels(schema: string): ParsedModel[] {
       .map((line) => line.trim())
       .filter((line) => line.length > 0 && !line.startsWith('//') && !line.startsWith('@@'))
       .map((line) => line.split(/\s+/)[0])
-      .filter((field): field is string => Boolean(field) && !field.startsWith('/'));
+      .filter(
+        (field): field is string => field !== undefined && field !== '' && !field.startsWith('/'),
+      );
 
     models.push({ name, fields });
   }

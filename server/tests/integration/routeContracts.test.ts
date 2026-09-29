@@ -3,7 +3,7 @@ import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../../src/app/createApp.js';
 import { prisma } from '../../src/platform/db/client.js';
-import { resetDatabase } from '../helpers/db.js';
+import { resetDatabase, rawDb } from '../helpers/db.js';
 import {
   assignToStation,
   assignToStationAllBlocks,
@@ -65,10 +65,10 @@ function as(actor: TestVolunteer) {
 
 describe('me and attendance', () => {
   it('POST /me/check-out ends a shift the volunteer checked in to', async () => {
-    const assignment = await prisma.shiftAssignment.findFirstOrThrow({
+    const assignment = await rawDb.shiftAssignment.findFirstOrThrow({
       where: { volunteerId: volunteer.id, block: 'MORNING' },
     });
-    await prisma.shiftAssignment.update({
+    await rawDb.shiftAssignment.update({
       where: { id: assignment.id },
       data: { checkedInAt: new Date(FROZEN_NOW.getTime() - 60 * 60_000) },
     });
@@ -81,7 +81,7 @@ describe('me and attendance', () => {
   });
 
   it('POST /me/check-out refuses someone else’s shift', async () => {
-    const assignment = await prisma.shiftAssignment.findFirstOrThrow({
+    const assignment = await rawDb.shiftAssignment.findFirstOrThrow({
       where: { volunteerId: ic.id, block: 'MORNING' },
     });
 
@@ -106,7 +106,7 @@ describe('corrections and safety', () => {
       idempotencyKey: idempotencyKey(),
     });
     expect(tick.status).toBe(201);
-    const tickId = (await prisma.footfallTick.findFirstOrThrow({ where: { stationId } })).id;
+    const tickId = (await rawDb.footfallTick.findFirstOrThrow({ where: { stationId } })).id;
 
     expect(
       (await as(volunteer).post(`/footfall/ticks/${tickId}/void`, { reason: 'mis-tap' })).status,
@@ -114,7 +114,7 @@ describe('corrections and safety', () => {
     const response = await as(ic).post(`/footfall/ticks/${tickId}/void`, { reason: 'mis-tap' });
 
     expect(response.status).toBe(204);
-    const row = await prisma.footfallTick.findUniqueOrThrow({ where: { id: tickId } });
+    const row = await rawDb.footfallTick.findUniqueOrThrow({ where: { id: tickId } });
     expect(row.voided).toBe(true);
   });
 
@@ -157,7 +157,7 @@ describe('corrections and safety', () => {
     const closeOut = await as(chief).post('/lost-found/close-out');
     expect(closeOut.status).toBe(200);
     expect(closeOut.body.markedUnclaimed).toBe(1);
-    const umbrella = await prisma.lostFoundItem.findUniqueOrThrow({
+    const umbrella = await rawDb.lostFoundItem.findUniqueOrThrow({
       where: { id: held.body.item.id as string },
     });
     expect(umbrella.status).toBe('UNCLAIMED_AT_CLOSE');
@@ -228,7 +228,7 @@ describe('admin writes', () => {
 
     expect(response.status).toBe(201);
     expect(
-      await prisma.shiftAssignment.count({
+      await rawDb.shiftAssignment.count({
         where: { volunteerId: newcomer.id, block: 'AFTERNOON' },
       }),
     ).toBe(1);
@@ -242,7 +242,7 @@ describe('admin writes', () => {
     const response = await as(admin).patch(`/admin/event-days/${eventDayId}`, { label: 'Day 1' });
 
     expect(response.status).toBe(200);
-    const day = await prisma.eventDay.findUniqueOrThrow({ where: { id: eventDayId } });
+    const day = await rawDb.eventDay.findUniqueOrThrow({ where: { id: eventDayId } });
     expect(day.label).toBe('Day 1');
   });
 });
@@ -343,7 +343,7 @@ describe('push and media without their AWS configuration', () => {
 describe('an assignment helper sanity check', () => {
   it('rosters the fixture volunteers in both blocks', async () => {
     await assignToStation({ volunteerId: chief.id, stationId, eventDayId });
-    expect(await prisma.shiftAssignment.count({ where: { stationId } })).toBe(5);
+    expect(await rawDb.shiftAssignment.count({ where: { stationId } })).toBe(5);
   });
 });
 

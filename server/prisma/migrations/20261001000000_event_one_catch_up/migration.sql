@@ -3,8 +3,8 @@
 -- Idempotent, fills only what is null, and runs only while there is exactly one
 -- event: with two, a row without an event could belong to either.
 --
--- Kept here as a script (applied to local browser databases as P09.5 moves
--- module by module); it ships as a migration when the last slice lands.
+-- From this release on every writer fills the new columns itself (P09.5), and
+-- the event-scope guard refuses a query without its event.
 DO $$
 DECLARE
   ev_id text;

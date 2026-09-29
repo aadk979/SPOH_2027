@@ -4,7 +4,7 @@ import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../../src/app/createApp.js';
 import { prisma } from '../../../src/platform/db/client.js';
 import { PURGE_AFTER_HOURS, purgeResolvedAlerts } from '../../../src/modules/lostPerson/index.js';
-import { resetDatabase } from '../../helpers/db.js';
+import { resetDatabase, rawDb } from '../../helpers/db.js';
 import {
   assignToStationAllBlocks,
   bearer,
@@ -80,7 +80,7 @@ describe('data retention (P04.6)', () => {
       .set('Authorization', bearer(icA))
       .send({ outcome: 'RESOLVED_FOUND' });
     expect(resolved.status).toBe(200);
-    await prisma.lostPersonAlert.update({
+    await rawDb.lostPersonAlert.update({
       where: { id: alertId },
       data: { resolvedAt: new Date(Date.now() - (PURGE_AFTER_HOURS + 1) * 3_600_000) },
     });
@@ -108,7 +108,7 @@ describe('data retention (P04.6)', () => {
     expect(replayed.body.alert.id).toBe(first.body.alert.id);
     expect(replayed.body.alert.descriptionText).toBe(DESCRIPTION);
 
-    await prisma.lostPersonAlert.update({
+    await rawDb.lostPersonAlert.update({
       where: { id: first.body.alert.id as string },
       data: {
         status: 'RESOLVED_FOUND',
@@ -135,7 +135,7 @@ describe('data retention (P04.6)', () => {
       data: { responseBody: { alert: raised.body.alert } },
     });
 
-    await prisma.lostPersonAlert.update({
+    await rawDb.lostPersonAlert.update({
       where: { id: alert.id },
       data: {
         status: 'RESOLVED_FOUND',
@@ -218,7 +218,7 @@ describe('access by id across stations (P04.3)', () => {
   });
 
   it('refuses to check a volunteer into somebody else’s shift', async () => {
-    const theirs = await prisma.shiftAssignment.findFirstOrThrow({
+    const theirs = await rawDb.shiftAssignment.findFirstOrThrow({
       where: { volunteerId: volunteerB.id },
     });
     const response = await request(app)
@@ -230,7 +230,7 @@ describe('access by id across stations (P04.3)', () => {
   });
 
   it('refuses a swap request for somebody else’s shift', async () => {
-    const theirs = await prisma.shiftAssignment.findFirstOrThrow({
+    const theirs = await rawDb.shiftAssignment.findFirstOrThrow({
       where: { volunteerId: volunteerB.id },
     });
     const response = await request(app)
