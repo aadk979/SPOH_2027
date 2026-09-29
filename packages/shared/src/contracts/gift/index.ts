@@ -113,3 +113,32 @@ export const GiftSummaryResponse = z
   })
   .strict();
 export type GiftSummaryResponse = z.infer<typeof GiftSummaryResponse>;
+
+// Administering gift types (`config.manage`).
+
+export const CreateGiftTypeRequest = z
+  .object({
+    name: z.string().trim().min(1).max(120),
+    initialStock: z.number().int().min(0).max(1_000_000),
+    lowStockThreshold: z.number().int().min(0).max(1_000_000).default(50),
+  })
+  .strict();
+export type CreateGiftTypeRequest = z.infer<typeof CreateGiftTypeRequest>;
+
+/**
+ * `initialStock` is absent on purpose. Stock is derived — initial plus
+ * adjustments minus redemptions — so editing the opening figure after
+ * redemptions have started would rewrite history rather than correct it. A
+ * miscount is an adjustment, which is audited and carries a reason.
+ */
+export const UpdateGiftTypeRequest = z
+  .object({
+    name: z.string().trim().min(1).max(120).optional(),
+    lowStockThreshold: z.number().int().min(0).max(1_000_000).optional(),
+    active: z.boolean().optional(),
+  })
+  .strict()
+  .refine((patch) => Object.keys(patch).length > 0, {
+    message: 'supply at least one field to change',
+  });
+export type UpdateGiftTypeRequest = z.infer<typeof UpdateGiftTypeRequest>;

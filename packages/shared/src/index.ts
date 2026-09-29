@@ -5,6 +5,11 @@
  *  - zod schemas and inferred types only, no runtime logic beyond pure helpers
  *  - exactly one runtime dependency: zod
  *  - imported by both `server` and `client`; imports neither
+ *
+ * Layout (engineering-standards §5): `contracts/<domain>/` mirrors the server
+ * module of the same name; `errors/` holds the error codes; `invariants/` the
+ * enums that are product invariants; `access/` the capability matrix until P11;
+ * `generated/` what tools write. This index is the only public entry point.
  */
 export * from './invariants/enums.js';
 /** The compiled capability matrix, re-exported until P11 replaces it with Cedar actions. */
@@ -29,7 +34,9 @@ export * from './contracts/fallback/index.js';
 export * from './contracts/lostFound/index.js';
 export * from './contracts/report/index.js';
 export * from './contracts/auth/index.js';
-export * from './contracts/admin/index.js';
+export * from './contracts/people/index.js';
+export * from './contracts/assignments/index.js';
+export * from './contracts/eventDays/index.js';
 export * from './contracts/settings/index.js';
 export * from './contracts/notification/index.js';
 export * from './contracts/media/index.js';
