@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-29T07:19:49.542Z",
+  "updatedAt": "2026-09-29T08:21:37.507Z",
   "current": {
-    "phase": "P08",
-    "step": "P08.3"
+    "phase": "P09",
+    "step": "P09.3"
   },
   "gates": [
     {
@@ -1630,14 +1630,18 @@
         {
           "id": "P08.4",
           "title": "Containers and compute",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-29T03:46:57.103Z",
-          "completedAt": null,
-          "commits": ["a60fc62"],
+          "completedAt": "2026-09-29T08:21:36.989Z",
+          "commits": ["a60fc62", "895ca11"],
           "notes": [
             {
               "at": "2026-09-29T03:46:57.104Z",
               "text": "Step 1 spike passed (reports/P08/static-export-spike.md): export + one server works for /e/<slug>/; needs payload-path translation and a post-hydration usePathname slug helper. Steps 2-5 need the account bootstrapped (P08.2)."
+            },
+            {
+              "at": "2026-09-29T08:21:36.990Z",
+              "text": "Deploy staging run 36541124365 (1edf30f): ARM image on GitHub arm runner -> ECR, migrate task (roles, migrations, grants), Fargate service in Cloud Map behind HTTP API + VPC link, smoke green. https://wdgdtbz846.execute-api.ap-southeast-1.amazonaws.com serves the export same-origin with CSP/HSTS, /readyz 404, Cognito PKCE redirect. Step 5 scheduled scaling awaits owner approval of dates."
             }
           ]
         },
@@ -1722,29 +1726,44 @@
         {
           "id": "P09.1",
           "title": "Expand: Event and scoping columns",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-29T08:21:37.075Z",
+          "completedAt": "2026-09-29T08:21:37.164Z",
+          "commits": ["895ca11"],
+          "notes": [
+            {
+              "at": "2026-09-29T08:21:37.164Z",
+              "text": "Audit branch migration adopted byte for byte (1683ae4); Organisation/Event + nullable eventId everywhere (895ca11). Applied on staging by run 36541124365; smoke green, app unchanged."
+            }
+          ]
         },
         {
           "id": "P09.2",
           "title": "Expand: taxonomy tables",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-29T08:21:37.248Z",
+          "completedAt": "2026-09-29T08:21:37.322Z",
+          "commits": ["1edf30f"],
+          "notes": [
+            {
+              "at": "2026-09-29T08:21:37.323Z",
+              "text": "Taxonomy tables + nullable categoryId/typeId/shiftId; applied on staging (run 36541124365), enums still authoritative."
+            }
+          ]
         },
         {
           "id": "P09.3",
           "title": "Expand: Person and EventMembership",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-29T08:21:37.506Z",
           "completedAt": null,
-          "commits": [],
-          "notes": []
+          "commits": ["1c41b88"],
+          "notes": [
+            {
+              "at": "2026-09-29T08:21:37.507Z",
+              "text": "Person/EventMembership expand committed; awaiting staging apply."
+            }
+          ]
         },
         {
           "id": "P09.4",
@@ -1846,8 +1865,8 @@
           "notes": []
         }
       ],
-      "status": "not_started",
-      "startedAt": null,
+      "status": "in_progress",
+      "startedAt": "2026-09-29T08:21:37.076Z",
       "completedAt": null
     },
     {
