@@ -47,7 +47,7 @@ afterEach(() => {
 
 describe('client session and settings (P03 repros)', () => {
   // F02-010
-  it.skip('makes a second bootstrap wait for the first refresh instead of returning at once', async () => {
+  it('makes a second bootstrap wait for the first refresh instead of returning at once', async () => {
     let finishRefresh: (response: Response) => void = () => undefined;
     stubServer((url) =>
       url.endsWith('/auth/refresh')
@@ -74,6 +74,20 @@ describe('client session and settings (P03 repros)', () => {
 
     finishRefresh(json(200, SESSION));
     await first;
+  });
+
+  // F02-010
+  it('does not request the settings on a signed-out page load', async () => {
+    const fetchMock = stubServer((url) =>
+      Promise.resolve(url.endsWith('/auth/refresh') ? json(401, UNAUTHENTICATED) : json(404, {})),
+    );
+    const { bootstrapSession } = await import('@/shared/lib/session');
+    const { loadClientSettings } = await import('@/shared/lib/runtimeSettings');
+
+    await bootstrapSession().then(() => loadClientSettings());
+
+    const urls = fetchMock.mock.calls.map(([input]) => String(input));
+    expect(urls.some((url) => url.endsWith('/admin/settings'))).toBe(false);
   });
 
   // F03-032

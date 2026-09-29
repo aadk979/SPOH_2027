@@ -31,6 +31,17 @@ describe('shift labels (F01-046)', () => {
 
   it('loads the configured shift hours with the other runtime settings', async () => {
     const { getClientSettings, loadClientSettings } = await import('@/shared/lib/runtimeSettings');
+    const { setSession } = await import('@/shared/lib/session');
+    // Settings are read signed in (F02-010).
+    setSession({
+      accessToken: 'token',
+      volunteerId: 'v1',
+      displayName: 'Sam',
+      role: 'VOLUNTEER',
+      capabilities: [],
+      expiresAt: Date.now() + 60_000,
+      refreshAvailable: false,
+    });
     mockedApi.mockResolvedValueOnce({
       settings: {
         dashboardPollSeconds: 3,

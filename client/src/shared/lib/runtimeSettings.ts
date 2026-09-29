@@ -3,6 +3,7 @@
 import { useSyncExternalStore } from 'react';
 import type { RuntimeSettings, SettingsResponse, ShiftBlockWindows } from '@spoh/shared';
 import { api } from '@/shared/lib/api';
+import { getSession } from '@/shared/lib/session';
 
 /**
  * The client's copy of the runtime settings.
@@ -94,7 +95,9 @@ let loaded = false;
  * one that refuses to start because it could not read a poll interval.
  */
 export async function loadClientSettings(): Promise<void> {
-  if (loaded) return;
+  // Every role may read the settings, but only signed in: a signed-out request
+  // is a guaranteed 401 in the server log (F02-010).
+  if (loaded || !getSession()) return;
   loaded = true;
 
   try {

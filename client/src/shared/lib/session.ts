@@ -214,15 +214,16 @@ export function refreshSession(): Promise<Session | null> {
 }
 
 /**
- * Recover a session on page load. Safe to call more than once; only the first
- * call does any work.
+ * Recover a session on page load. Safe to call more than once: only the first
+ * call does any work, and every caller waits for that same recovery. React
+ * StrictMode runs the providers' effect twice, and a second call that returned
+ * at once let the settings request leave before the session existed (F02-010).
  */
-let bootstrapped = false;
+let bootstrapping: Promise<void> | null = null;
 
-export async function bootstrapSession(): Promise<void> {
-  if (bootstrapped) return;
-  bootstrapped = true;
-  await refreshSession();
+export function bootstrapSession(): Promise<void> {
+  bootstrapping ??= refreshSession().then(() => undefined);
+  return bootstrapping;
 }
 
 /** Sign in. Returns the session so the caller can route immediately. */
