@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-29T03:12:44.105Z",
+  "updatedAt": "2026-09-29T03:16:16.974Z",
   "current": {
     "phase": "P07",
-    "step": "P07.11"
+    "step": "P07.9"
   },
   "gates": [
     {
@@ -1541,11 +1541,16 @@
         {
           "id": "P07.9",
           "title": "Make the guards blocking",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-29T03:12:53.755Z",
+          "completedAt": "2026-09-29T03:16:16.973Z",
+          "commits": ["c8d6774"],
+          "notes": [
+            {
+              "at": "2026-09-29T03:16:16.974Z",
+              "text": "Client size/complexity guards and client-ui-no-features are errors; new lint rules for /api/v1 literals and template endpoints outside api.ts/shared/lib; shared/ui cannot import features. All guards zero (metrics/P07.9-guards.json); CI lint and arch:check blocking."
+            }
+          ]
         },
         {
           "id": "P07.10",
