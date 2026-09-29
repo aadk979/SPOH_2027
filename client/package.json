@@ -2,6 +2,9 @@
   "name": "@spoh/client",
   "version": "0.1.0",
   "private": true,
+  "sideEffects": [
+    "*.css"
+  ],
   "description": "SPOH 2027 volunteer PWA — Next.js App Router.",
   "scripts": {
     "dev": "next dev --port 3000",
@@ -20,13 +23,11 @@
     "@tanstack/react-query": "^5.102.8",
     "@zxing/browser": "^0.2.1",
     "@zxing/library": "^0.23.0",
-    "aws-amplify": "^6.20.0",
     "idb": "^8.0.3",
     "next": "^16.3.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "zod": "^4.5.4",
-    "zustand": "^5.0.15"
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",

@@ -4,6 +4,7 @@
   "private": true,
   "description": "Single definition of every DTO shared by the SPOH 2027 server and client.",
   "type": "module",
+  "sideEffects": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
