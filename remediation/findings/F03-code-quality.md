@@ -730,7 +730,7 @@ both cards as issued and both as stamped at each station, and counts the origina
 - **Fix:** one `normaliseCardCode` in shared (Crockford decoding: O→0, I/L→1), used by the DTO, the
   server and `CardCodeInput`.
 - **Phase:** P06/P07
-- **Status:** open
+- **Status:** fixed `270a4a9` (P07.11)
 
 #### F03-021 — Resetting a setting is not atomic with its audit row
 
@@ -974,7 +974,7 @@ without it. **Phase:** P12.
 - **Fix:** settings as a query keyed on the session (refetch on sign-in, on focus and on a
   settings-changed event); P10's live configuration pushes changes.
 - **Phase:** P07 (load on sign-in), P10.1 (live updates)
-- **Status:** open
+- **Status:** fixed `7c3310c` (P07.11)
 
 #### F03-033 — The outbox parks retryable captures for good
 
@@ -1008,7 +1008,7 @@ without it. **Phase:** P12.
 - **Fix:** P05 decides which captures must queue; the ones that do go through the outbox with a
   key that survives retries.
 - **Phase:** P05 (decision), P07
-- **Status:** open
+- **Status:** fixed `13a727c` (P07.11)
 
 #### F03-035 — A replaced push subscription is never sent to the server
 
@@ -1020,7 +1020,7 @@ without it. **Phase:** P12.
   with no sign on the device ("Alerts on" still shows).
 - **Fix:** post the new subscription to open clients, which re-register it with the API.
 - **Phase:** P07
-- **Status:** open
+- **Status:** fixed `528830e` (P07.11)
 
 #### F03-036 — The capture screens are not precached
 
@@ -1035,7 +1035,7 @@ without it. **Phase:** P12.
 - **Fix:** precache the capture routes and their chunks from the build manifest, versioned per
   build; cache-first for hashed `/_next/static` assets.
 - **Phase:** P07
-- **Status:** open
+- **Status:** fixed `309c5e3` (P07.11)
 
 #### F03-037 — Every route ships the shared schemas; two dependencies are unused
 
@@ -1048,7 +1048,7 @@ without it. **Phase:** P12.
 - **Fix:** import types only (or a `@spoh/shared/constants` entry without schemas) until P07's forms
   use the schemas; remove the two unused dependencies.
 - **Phase:** P07
-- **Status:** open (measurement, not a bug: no repro)
+- **Status:** fixed `f925617` (P07.11)
 
 ## Shared package review · P03.8
 
@@ -1769,4 +1769,4 @@ unchanged. Paths in "Proposed split" are relative to `server/src` or `client/src
   as before and sends a payload to the server, and asks for the typed code when that fails
   (offline or unknown). Printed cards keep working unchanged.
 - **Phase:** P07.11
-- **Status:** open
+- **Status:** fixed `56f8155` (P07.11)

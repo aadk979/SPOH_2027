@@ -234,11 +234,11 @@ immediate defect and the later step makes it structural.
 | F03-044 | The roster import cannot name a manager already on the roster (filed in P06.7)  | P06.13 | P13.5 (roster screen)                                         | fixed `38182d4`                                       |
 | PF-10   | Layering is conventional, not enforced                                          | P06.10 | P06.3–P06.9, P07.9; _umbrella_ of the F03 module map          | server and shared `1f93db1`; client P07.9             |
 | PF-18   | Coverage thresholds exist but were never enforced                               | P08.9  | P06.1, P07.1 (no drop); gate set in ADR-007                   | open                                                  |
-| F02-011 | The IC console repeats people per block and forgets the IC's station            | P07.11 | P14.1 (defaults, grouping)                                    | open                                                  |
-| F03-032 | Runtime settings load once per page load, and not after an in-app sign-in       | P07.11 | P10.8 (live updates)                                          | open                                                  |
-| F03-034 | Stamps, redemptions, incidents and lost-person alerts are online-only           | P07.11 | decided in ADR-007                                            | open                                                  |
-| F03-036 | The capture screens are not precached                                           | P07.11 | P13.4                                                         | open                                                  |
-| F03-045 | A printed card's QR resolves to no card (filed in P07.11)                       | P07.11 | —                                                             | open                                                  |
+| F02-011 | The IC console repeats people per block and forgets the IC's station            | P07.11 | P14.1 (defaults, grouping)                                    | fixed `b6e5791`                                       |
+| F03-032 | Runtime settings load once per page load, and not after an in-app sign-in       | P07.11 | P10.8 (live updates)                                          | fixed `7c3310c`                                       |
+| F03-034 | Stamps, redemptions, incidents and lost-person alerts are online-only           | P07.11 | decided in ADR-007                                            | fixed `13a727c`                                       |
+| F03-036 | The capture screens are not precached                                           | P07.11 | P13.4                                                         | fixed `309c5e3`                                       |
+| F03-045 | A printed card's QR resolves to no card (filed in P07.11)                       | P07.11 | —                                                             | fixed `56f8155`                                       |
 | PF-17   | CI does not run the e2e suite                                                   | P08.9  | —                                                             | open                                                  |
 | F04-015 | The audit log can be edited, and its retention shortened, by the app            | P08.3  | P08.8 (log group), P15.7                                      | open                                                  |
 | F04-011 | Every secret is a plaintext line on one box, with no owner or rotation          | P08.6  | P06.7 (`sid`↔`sub`), P15.6, P16.5                             | open; P06 part (`sid`↔`sub`) `6a73411`                |
@@ -274,44 +274,44 @@ immediate defect and the later step makes it structural.
 
 ### Low
 
-| ID      | Title                                                                     | Home   | Also                                         | Status                                 |
-| ------- | ------------------------------------------------------------------------- | ------ | -------------------------------------------- | -------------------------------------- |
-| F03-011 | Two retries can both take over an abandoned idempotency key               | P06.13 | P06.2                                        | fixed `184b08a`                        |
-| F03-015 | A second check-out overwrites the first                                   | P06.13 | P06.7                                        | fixed `6e525d2`                        |
-| F03-016 | Briefing-slot completion rules are inverted                               | P06.13 | P11.2                                        | fixed `bd672bd`                        |
-| F03-017 | Pagination cursors do not end, and can skip or repeat                     | P06.13 | P06.2 (one cursor helper)                    | fixed `20615c5`                        |
-| F03-020 | Card-code input disagrees with the printed alphabet                       | P06.13 | P07.11                                       | server `9d42f17`; client P07.11        |
-| F03-022 | A card batch can print a code that belongs to another card                | P06.13 | P06.5                                        | fixed `8774a0a`                        |
-| F03-023 | Long-shift warnings include shifts from earlier days                      | P06.13 | P06.7                                        | fixed `873eef5`                        |
-| F03-024 | Incident status moves freely, including back from RESOLVED                | P06.13 | P13.7                                        | fixed `8b18034`                        |
-| F03-025 | Import counters count a new person twice                                  | P06.13 | P06.7                                        | fixed `5b01e8e`                        |
-| F03-026 | Rule failures are reported as permission denials                          | P06.13 | P11.8                                        | server `a7f5c3e`; client P11.8         |
-| F03-027 | A voided or unissued card can be reissued                                 | P06.13 | P06.5                                        | fixed `b42f5f2`                        |
-| F03-029 | Record mappers query per row (N+1) on polled lists                        | P06.13 | P06.5, P06.6, P06.8                          | fixed `7895f20` (last of five modules) |
-| F04-005 | Acknowledging an announcement returns it to people outside its audience   | P06.13 | P06.8                                        | fixed `c0e3de7`                        |
-| F04-024 | An IC can send an urgent announcement to any station                      | P06.13 | P11.2                                        | fixed `ac569f1`                        |
-| F04-008 | Six routes unthrottled; `/readyz` queries the database for anyone         | P06.13 | P08.4 (health checks behind the ALB)         | fixed `6b3e755`                        |
-| F04-025 | A push endpoint can be any URL                                            | P06.13 | P15.3 (egress)                               | fixed `3f89b05`                        |
-| F01-051 | `server/.env.example` omits nine keys, one of them required in production | P06.9  | P08.6                                        | fixed `6bf0dd3`                        |
-| F02-010 | Every page load sends a settings request before the session is ready      | P07.11 | —                                            | open                                   |
-| F02-020 | Screens call endpoints their role may not use                             | P07.11 | P11.8; _see_ F02-025                         | open                                   |
-| F03-035 | A replaced push subscription is never sent to the server                  | P07.11 | —                                            | open                                   |
-| F03-037 | Every route ships the shared schemas; two dependencies are unused         | P07.11 | P07.8                                        | open                                   |
-| F03-038 | `AttendanceMethod` is missing from the shared enums                       | P07.8  | —                                            | open                                   |
-| PF-13   | Client `next.config.ts` has no `output: 'standalone'`                     | P08.4  | —                                            | open                                   |
-| F04-022 | No automated dependency updates; upgrade pins undocumented                | P08.9  | P15.9                                        | open                                   |
-| F01-047 | The `eventName` setting is never displayed                                | P09.1  | P14.6; _see_ F01-002                         | open                                   |
-| F01-050 | The server does not enforce which stations register visitors or redeem    | P09.5  | capability flags (ADR-002)                   | open                                   |
-| F03-013 | "Today" starts at 08:00 local time                                        | P09.6  | day-boundary hour (Q-P2)                     | open                                   |
-| F02-026 | The CSV export is written for machines, not for the report's readers      | P09.12 | P13.8 (export pack); remapped from P14.5     | open                                   |
-| F01-052 | `alertPollSeconds` accepts values that break the alert guarantee          | P10.1  | —                                            | open                                   |
-| F02-021 | The undo copy hardcodes ten seconds                                       | P10.1  | —                                            | open                                   |
-| F03-021 | Resetting a setting is not atomic with its audit row                      | P10.2  | —                                            | open                                   |
-| F02-005 | Saving settings marks every field as "changed from default"               | P10.8  | —                                            | open                                   |
-| F04-009 | The PIN fallback lets someone mark attendance from anywhere               | P10.4  | event setting (ADR-003); P13.3               | open                                   |
-| F03-041 | The audit log's live tail can skip rows (audit branch)                    | P13.7  | only if the branch's screen is reused        | open                                   |
-| F02-018 | My shift lists every assignment ever, in one flat list                    | P14.1  | remapped from P14.3: the person page owns it | open                                   |
-| F03-042 | Security-event dedupe is per worker (audit branch)                        | P15.2  | _see_ PF-02                                  | open                                   |
+| ID      | Title                                                                     | Home   | Also                                         | Status                                    |
+| ------- | ------------------------------------------------------------------------- | ------ | -------------------------------------------- | ----------------------------------------- |
+| F03-011 | Two retries can both take over an abandoned idempotency key               | P06.13 | P06.2                                        | fixed `184b08a`                           |
+| F03-015 | A second check-out overwrites the first                                   | P06.13 | P06.7                                        | fixed `6e525d2`                           |
+| F03-016 | Briefing-slot completion rules are inverted                               | P06.13 | P11.2                                        | fixed `bd672bd`                           |
+| F03-017 | Pagination cursors do not end, and can skip or repeat                     | P06.13 | P06.2 (one cursor helper)                    | fixed `20615c5`                           |
+| F03-020 | Card-code input disagrees with the printed alphabet                       | P06.13 | P07.11                                       | fixed: server `9d42f17`, client `270a4a9` |
+| F03-022 | A card batch can print a code that belongs to another card                | P06.13 | P06.5                                        | fixed `8774a0a`                           |
+| F03-023 | Long-shift warnings include shifts from earlier days                      | P06.13 | P06.7                                        | fixed `873eef5`                           |
+| F03-024 | Incident status moves freely, including back from RESOLVED                | P06.13 | P13.7                                        | fixed `8b18034`                           |
+| F03-025 | Import counters count a new person twice                                  | P06.13 | P06.7                                        | fixed `5b01e8e`                           |
+| F03-026 | Rule failures are reported as permission denials                          | P06.13 | P11.8                                        | server `a7f5c3e`; client P11.8            |
+| F03-027 | A voided or unissued card can be reissued                                 | P06.13 | P06.5                                        | fixed `b42f5f2`                           |
+| F03-029 | Record mappers query per row (N+1) on polled lists                        | P06.13 | P06.5, P06.6, P06.8                          | fixed `7895f20` (last of five modules)    |
+| F04-005 | Acknowledging an announcement returns it to people outside its audience   | P06.13 | P06.8                                        | fixed `c0e3de7`                           |
+| F04-024 | An IC can send an urgent announcement to any station                      | P06.13 | P11.2                                        | fixed `ac569f1`                           |
+| F04-008 | Six routes unthrottled; `/readyz` queries the database for anyone         | P06.13 | P08.4 (health checks behind the ALB)         | fixed `6b3e755`                           |
+| F04-025 | A push endpoint can be any URL                                            | P06.13 | P15.3 (egress)                               | fixed `3f89b05`                           |
+| F01-051 | `server/.env.example` omits nine keys, one of them required in production | P06.9  | P08.6                                        | fixed `6bf0dd3`                           |
+| F02-010 | Every page load sends a settings request before the session is ready      | P07.11 | —                                            | fixed `8f5c997`                           |
+| F02-020 | Screens call endpoints their role may not use                             | P07.11 | P11.8; _see_ F02-025                         | fixed `02009d2`                           |
+| F03-035 | A replaced push subscription is never sent to the server                  | P07.11 | —                                            | fixed `528830e`                           |
+| F03-037 | Every route ships the shared schemas; two dependencies are unused         | P07.11 | P07.8                                        | fixed `f925617`                           |
+| F03-038 | `AttendanceMethod` is missing from the shared enums                       | P07.8  | —                                            | open                                      |
+| PF-13   | Client `next.config.ts` has no `output: 'standalone'`                     | P08.4  | —                                            | open                                      |
+| F04-022 | No automated dependency updates; upgrade pins undocumented                | P08.9  | P15.9                                        | open                                      |
+| F01-047 | The `eventName` setting is never displayed                                | P09.1  | P14.6; _see_ F01-002                         | open                                      |
+| F01-050 | The server does not enforce which stations register visitors or redeem    | P09.5  | capability flags (ADR-002)                   | open                                      |
+| F03-013 | "Today" starts at 08:00 local time                                        | P09.6  | day-boundary hour (Q-P2)                     | open                                      |
+| F02-026 | The CSV export is written for machines, not for the report's readers      | P09.12 | P13.8 (export pack); remapped from P14.5     | open                                      |
+| F01-052 | `alertPollSeconds` accepts values that break the alert guarantee          | P10.1  | —                                            | open                                      |
+| F02-021 | The undo copy hardcodes ten seconds                                       | P10.1  | —                                            | open                                      |
+| F03-021 | Resetting a setting is not atomic with its audit row                      | P10.2  | —                                            | open                                      |
+| F02-005 | Saving settings marks every field as "changed from default"               | P10.8  | —                                            | open                                      |
+| F04-009 | The PIN fallback lets someone mark attendance from anywhere               | P10.4  | event setting (ADR-003); P13.3               | open                                      |
+| F03-041 | The audit log's live tail can skip rows (audit branch)                    | P13.7  | only if the branch's screen is reused        | open                                      |
+| F02-018 | My shift lists every assignment ever, in one flat list                    | P14.1  | remapped from P14.3: the person page owns it | open                                      |
+| F03-042 | Security-event dedupe is per worker (audit branch)                        | P15.2  | _see_ PF-02                                  | open                                      |
 
 ### Closed before P05
 

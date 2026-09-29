@@ -321,7 +321,7 @@ lets an admin separate them.
 - **Fix:** Load settings only after the session is ready; move the endpoint out of `/admin` since
   every role reads it (P03 to root-cause the ordering).
 - **Phase:** P07
-- **Status:** open
+- **Status:** fixed `8f5c997` (P07.11)
 
 ---
 
@@ -354,7 +354,7 @@ because no volunteer screen can request a swap (PF-09) and the IC needs somethin
   must pick their own station on every visit. Duplicate keys can make React drop or repeat rows.
 - **Fix:** Default to the IC's current station; group "Who is here" by block; key by assignment.
 - **Phase:** P07 (key), P14.1 (defaults and grouping)
-- **Status:** open
+- **Status:** fixed `b6e5791` (P07.11)
 
 ### F02-012 — Imported fallback rows appear as a person's device taps
 
@@ -505,7 +505,7 @@ the campus network, and the dev server restarted (F02-017).
   the code saying so. P02.9 lists the other shown-but-denied cases.
 - **Fix:** Gate the query on the capability, or give volunteers a station total they may read.
 - **Phase:** P07, P11.7
-- **Status:** open
+- **Status:** fixed `02009d2` (P07.11)
 
 ### F02-021 — The undo copy hardcodes ten seconds
 

@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-29T02:10:25.037Z",
+  "updatedAt": "2026-09-29T03:12:44.105Z",
   "current": {
     "phase": "P07",
     "step": "P07.11"
@@ -1523,14 +1523,18 @@
         {
           "id": "P07.11",
           "title": "Client correctness fixes",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-29T01:44:25.054Z",
-          "completedAt": null,
-          "commits": ["b6e5791"],
+          "completedAt": "2026-09-29T03:12:44.103Z",
+          "commits": ["b6e5791", "56f8155"],
           "notes": [
             {
               "at": "2026-09-29T02:10:25.036Z",
               "text": "Fixed so far: F02-010 8f5c997, F03-032 7c3310c, F03-035 528830e, F03-036 309c5e3, F03-020 270a4a9, F02-011 b6e5791. Remaining: F02-020, F03-034, F03-037."
+            },
+            {
+              "at": "2026-09-29T03:12:44.105Z",
+              "text": "One fix commit per finding, test first: F02-010 8f5c997, F03-032 7c3310c, F03-035 528830e, F03-036 309c5e3, F03-020 270a4a9, F02-011 b6e5791 (/ic baselines updated after review), F02-020 02009d2, F03-037 f925617 (every-route JS 289->197 KB gz), F03-034 13a727c (migration queued_redemption_flags), and new F03-045 56f8155 (printed QR resolves via payload). No client repro skipped. Server 777/8, client 209, E2E 26, visual 58."
             }
           ]
         },
