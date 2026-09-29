@@ -56,6 +56,9 @@ describe('deploy access (P08.2)', () => {
         policy as { Properties: { PolicyDocument: { Statement: Array<{ Action: string[] }> } } }
       ).Properties.PolicyDocument.Statement.flatMap((statement) => statement.Action),
     );
-    expect(actions.filter((action) => !action.startsWith('sts:'))).toEqual([]);
+    // Assume the CDK roles, push images, read stack outputs and run the migrate task: nothing else.
+    const allowed =
+      /^(sts:(AssumeRole|TagSession)|ecr:.+|ecs:(RunTask|DescribeTasks)|iam:PassRole|cloudformation:DescribeStacks)$/;
+    expect(actions.filter((action) => !allowed.test(action))).toEqual([]);
   });
 });

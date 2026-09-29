@@ -1,0 +1,115 @@
+name: Deploy staging
+
+# Every green main reaches staging with no manual step (P08.9): after CI passes,
+# build the ARM64 image, define the migrate task for it, run migrations, then
+# move the service (ADR-008 §1, P08.4). Rollback is redeploying an earlier
+# commit's image: run this workflow by hand with that commit's SHA.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: Commit whose image to deploy (defaults to the branch head)
+        required: false
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  NODE_VERSION: '24'
+  AWS_REGION: ap-southeast-1
+  DEPLOY_ROLE: arn:aws:iam::665146708212:role/spoh-github-deploy
+  REPOSITORY: 665146708212.dkr.ecr.ap-southeast-1.amazonaws.com/spoh-app
+  STACK: Spoh-staging-Platform
+
+jobs:
+  image:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    name: Build the image
+    runs-on: ubuntu-24.04-arm
+    outputs:
+      sha: ${{ steps.sha.outputs.sha }}
+    steps:
+      - id: sha
+        run: echo "sha=${{ inputs.sha || github.event.workflow_run.head_sha || github.sha }}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.sha.outputs.sha }}
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.DEPLOY_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push, unless this commit's image exists (tags are immutable)
+        env:
+          SHA: ${{ steps.sha.outputs.sha }}
+        run: |
+          if aws ecr batch-get-image --repository-name spoh-app --image-ids imageTag="$SHA" \
+               --query 'images[0].imageId.imageTag' --output text | grep -q "$SHA"; then
+            echo "image $SHA already pushed"
+          else
+            docker build --platform linux/arm64 -t "$REPOSITORY:$SHA" .
+            docker push "$REPOSITORY:$SHA"
+          fi
+
+  deploy:
+    name: Migrate and deploy
+    needs: image
+    runs-on: ubuntu-latest
+    environment: staging
+    env:
+      SHA: ${{ needs.image.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SHA }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.DEPLOY_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: The image the service runs now
+        id: current
+        run: |
+          tag=$(aws cloudformation describe-stacks --stack-name "$STACK" \
+            --query "Stacks[0].Outputs[?OutputKey=='ServiceImageTag'].OutputValue" --output text)
+          [ "$tag" = "None" ] && tag=""
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Define the migrate task for this release
+        working-directory: infra/cdk
+        run: |
+          npx cdk deploy "$STACK" --require-approval never --outputs-file ../../outputs.json \
+            -c imageTag="$SHA" ${{ steps.current.outputs.tag && format('-c serviceImageTag={0}', steps.current.outputs.tag) || '' }}
+
+      - name: Run migrations
+        run: node infra/scripts/run-migrate-task.mjs outputs.json "$STACK"
+
+      - name: Move the service to this release
+        working-directory: infra/cdk
+        run: |
+          npx cdk deploy "$STACK" --require-approval never --outputs-file ../../outputs.json \
+            -c imageTag="$SHA" -c serviceImageTag="$SHA"
+
+      - name: Smoke
+        run: node infra/scripts/smoke.mjs "$(node -e "console.log(require('./outputs.json')['$STACK'].AppUrl)")"

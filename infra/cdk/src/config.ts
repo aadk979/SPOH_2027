@@ -21,6 +21,8 @@ export interface StageConfig {
   database: { instanceClass: string; allocatedStorageGiB: number; maxStorageGiB: number };
   /** An existing Cognito pool this stage must reference and never own (P08 risk). */
   existingUserPoolId?: string;
+  /** How the app reaches that existing pool; the domain is confirmed at cutover (P12). */
+  existingCognito?: { userPoolId: string; clientId: string; domain: string };
 }
 
 const ACCOUNT = '665146708212';
@@ -63,5 +65,11 @@ export const STAGES: Record<StageName, StageConfig> = {
     database: { instanceClass: 't4g.micro', allocatedStorageGiB: 20, maxStorageGiB: 100 },
     // Every Volunteer.cognitoSub points into this pool: referenced, never replaced.
     existingUserPoolId: 'ap-southeast-1_9bwl2nGF7',
+    existingCognito: {
+      userPoolId: 'ap-southeast-1_9bwl2nGF7',
+      clientId: '23uft7mvtnrno1uunsc5lp0h2v',
+      // Placeholder until the owner confirms the production Hosted UI domain (P12.2).
+      domain: 'https://auth.spoh.example.invalid',
+    },
   },
 };
