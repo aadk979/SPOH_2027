@@ -34,7 +34,10 @@ export default function RegistrationCaptureScreen(): ReactNode {
    * their own contribution alongside the booth's, which is how a discrepancy
    * becomes visible before it becomes a reconciliation problem (§2.4).
    */
-  const boothTotal = useRegistrationSummary(stationId);
+  const boothTotal = useRegistrationSummary(
+    stationId,
+    me?.capabilities.includes('dashboard.station.read') ?? false,
+  );
 
   if (!session) return null;
 

@@ -28,7 +28,12 @@ vi.mock('@/shared/shell/AppShell', () => ({
 vi.mock('@/shared/shell/SyncIndicator', () => ({ SyncIndicator: () => null }));
 vi.mock('@/features/session', () => ({
   useRequireSession: () => (state.signedIn ? { accessToken: 'test' } : null),
-  useMe: () => ({ data: { currentAssignment: state.station ? { station: state.station } : null } }),
+  useMe: () => ({
+    data: {
+      capabilities: [],
+      currentAssignment: state.station ? { station: state.station } : null,
+    },
+  }),
 }));
 vi.mock('@/shared/hooks/useWakeLock', () => ({ useWakeLock: vi.fn() }));
 vi.mock('@/features/capture/useCapture', () => ({
