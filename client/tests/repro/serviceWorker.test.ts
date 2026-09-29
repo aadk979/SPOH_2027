@@ -18,8 +18,14 @@ function loadWorker() {
   const added: string[] = [];
   const fetchMock = vi.fn(() => Promise.resolve(new Response('{}')));
   const cache = { add: vi.fn((url: string) => (added.push(url), Promise.resolve())), put: vi.fn() };
+  const posted: unknown[] = [];
   const self = {
     addEventListener: (type: string, handler: Handler) => handlers.set(type, handler),
+    clients: {
+      matchAll: vi.fn(() =>
+        Promise.resolve([{ postMessage: (message: unknown) => posted.push(message) }]),
+      ),
+    },
     skipWaiting: () => Promise.resolve(),
     location: { origin: 'https://ops.example' },
     registration: {
@@ -47,20 +53,22 @@ function loadWorker() {
     await Promise.all(pending);
   }
 
-  return { fire, added, fetchMock };
+  return { fire, added, fetchMock, posted };
 }
 
 describe('service worker (P03 repros)', () => {
-  // F03-035
-  it.skip('tells the server about a push subscription the browser replaced', async () => {
+  // F03-035. The worker holds no access token by design, so it cannot tell the
+  // server itself: it tells the open app, which re-registers with the API
+  // (tests/screens/push-sync.test.ts covers that half, and the next load).
+  it('tells the open app about a push subscription the browser replaced', async () => {
     const worker = loadWorker();
 
     await worker.fire('pushsubscriptionchange', {
       oldSubscription: { options: { userVisibleOnly: true } },
     });
 
-    const calls = worker.fetchMock.mock.calls as unknown as Array<[string]>;
-    expect(calls.some(([url]) => String(url).includes('/notifications/subscriptions'))).toBe(true);
+    expect(worker.posted).toEqual([{ type: 'push-subscription-changed' }]);
+    expect(worker.fetchMock).not.toHaveBeenCalled();
   });
 
   // F03-036

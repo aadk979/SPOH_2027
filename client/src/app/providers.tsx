@@ -5,6 +5,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { startOutboxFlushLoop } from '@/shared/lib/outbox';
 import { loadClientSettings } from '@/shared/lib/runtimeSettings';
 import { bootstrapSession } from '@/shared/lib/session';
+import { usePushSubscriptionSync } from '@/features/notification';
 
 /**
  * Client providers.
@@ -24,6 +25,9 @@ import { bootstrapSession } from '@/shared/lib/session';
  *     the first paint on a tuning value would be a poor trade.
  *
  *  3. The outbox flush loop, which is what actually sends captures.
+ *
+ * And, once signed in, the server's copy of this phone's push subscription is
+ * kept current (F03-035).
  */
 export function Providers({ children }: { children: ReactNode }): ReactNode {
   const [queryClient] = useState(
@@ -55,6 +59,8 @@ export function Providers({ children }: { children: ReactNode }): ReactNode {
   }, []);
 
   useEffect(() => startOutboxFlushLoop(), []);
+
+  usePushSubscriptionSync();
 
   return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 }

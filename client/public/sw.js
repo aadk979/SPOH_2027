@@ -130,11 +130,11 @@ self.addEventListener('notificationclick', (event) => {
  * A push service may rotate a subscription without the page being open.
  *
  * Re-subscribing here keeps the browser side alive. The server is NOT told from
- * here on purpose: this worker holds no access token — the whole point of
- * keeping the token in memory is that nothing persistent can reach it — so any
- * request it made would be an unauthenticated 401. The page re-registers the
- * new endpoint on its next load, which is also when a volunteer could act on
- * the gap if there were one.
+ * here: this worker holds no access token — the whole point of keeping the
+ * token in memory is that nothing persistent can reach it — so any request it
+ * made would be an unauthenticated 401. Instead it tells every open window,
+ * and the app re-registers the new endpoint with the API (F03-035). With no
+ * window open, the app notices the changed endpoint on its next load.
  *
  * Until then this device is in the same position as one with push switched off:
  * it still receives every alert through the ten-second poll while the app is
@@ -144,6 +144,10 @@ self.addEventListener('pushsubscriptionchange', (event) => {
   event.waitUntil(
     self.registration.pushManager
       .subscribe(event.oldSubscription?.options ?? { userVisibleOnly: true })
+      .then(() => self.clients.matchAll({ type: 'window', includeUncontrolled: true }))
+      .then((windows) => {
+        for (const client of windows) client.postMessage({ type: 'push-subscription-changed' });
+      })
       .catch(() => undefined),
   );
 });

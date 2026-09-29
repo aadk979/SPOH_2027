@@ -2,15 +2,7 @@ import { useEffect, useState } from 'react';
 import { useCurrentSession } from '@/features/session';
 import { getPushConfig } from '../api';
 import type { PushState } from '../pushTypes';
-function supported(): boolean {
-  return (
-    typeof window !== 'undefined' &&
-    'serviceWorker' in navigator &&
-    'PushManager' in window &&
-    'Notification' in window
-  );
-}
-
+import { pushSupported } from '../pushSync';
 export function usePushConfig() {
   const session = useCurrentSession();
   const [state, setState] = useState<PushState>('loading');
@@ -18,7 +10,7 @@ export function usePushConfig() {
   useEffect(() => {
     if (!session) return;
 
-    if (!supported()) {
+    if (!pushSupported()) {
       setState('unsupported');
       return;
     }

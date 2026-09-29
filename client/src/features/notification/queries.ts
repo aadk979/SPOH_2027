@@ -1,7 +1,9 @@
 'use client';
 
 import { useCallback, useState } from 'react';
+import { getSession } from '@/shared/lib/session';
 import { registerPush, unregisterPush } from './api';
+import { rememberRegistered, toPushRequest } from './pushSync';
 import { usePushConfig } from './hooks/usePushConfig';
 
 /**
@@ -79,19 +81,8 @@ export function usePushRegistration(): UsePushRegistrationResult {
         applicationServerKey: decodeKey(publicKey),
       });
 
-      const json = subscription.toJSON() as {
-        endpoint?: string;
-        keys?: { p256dh?: string; auth?: string };
-      };
-
-      if (!json.endpoint || !json.keys?.p256dh || !json.keys.auth) {
-        throw new Error('the browser returned an incomplete subscription');
-      }
-
-      await registerPush({
-        endpoint: json.endpoint,
-        keys: { p256dh: json.keys.p256dh, auth: json.keys.auth },
-      });
+      await registerPush(toPushRequest(subscription));
+      rememberRegistered(getSession()?.volunteerId ?? null, subscription.endpoint);
 
       setState('subscribed');
     } catch {
@@ -111,6 +102,7 @@ export function usePushRegistration(): UsePushRegistrationResult {
       await unregisterPush(subscription.endpoint);
 
       await subscription.unsubscribe();
+      rememberRegistered(null, null);
       setState('prompt');
     } catch {
       setError('Could not turn alerts off. Try again, or check your browser settings.');
