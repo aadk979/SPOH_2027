@@ -122,6 +122,8 @@ This can run in parallel with P06.
      carry `eventId`, path, `personId` and `clientRecordedAt`. Remove the unused `zustand` and
      `aws-amplify` (F03-037).
   3. One `fix(...)` commit per finding, test first, after the feature it touches has moved (P07.3–P07.5).
+     F03-020 also moves `CardCodeInput` onto `useZodForm` with `CardShortCode`: adopting that schema
+     is the fix, so P07.6 left the input's length check alone.
 - **Done when:** no BACKLOG row with home P07.11 is open, and every client repro is un-skipped and green.
 
 ### P07.9 — Make the guards blocking

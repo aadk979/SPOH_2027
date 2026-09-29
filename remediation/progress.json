@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-29T01:08:14.761Z",
+  "updatedAt": "2026-09-29T01:25:59.964Z",
   "current": {
     "phase": "P07",
     "step": "P07.6"
@@ -1473,10 +1473,10 @@
         {
           "id": "P07.6",
           "title": "One form pattern",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-28T16:12:33.144Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-09-29T01:25:59.962Z",
+          "commits": ["b4c772a"],
           "notes": [
             {
               "at": "2026-09-28T16:12:33.145Z",
@@ -1485,6 +1485,10 @@
             {
               "at": "2026-09-29T01:08:14.760Z",
               "text": "Owner requested handoff. Preserve uncommitted useZodForm, Choice errors and safety/volunteer/announcement/fallback migrations. Current client 140 passed/4 deferred; client typecheck and architecture pass; lint zero errors/one useComposer size warning. Full P07.6 verification and remaining forms pending; see HANDOFF-2026-09-28.md. No owner-controlled blocker."
+            },
+            {
+              "at": "2026-09-29T01:25:59.963Z",
+              "text": "useZodForm + Field/Choice errors; incident, lost-person, lost-found, volunteer editor/withdrawal, composer, fallback, import, settings (full RuntimeSettings), group registration, attendance PIN, sign-in migrated to shared request schemas. CardCodeInput moves with F03-020 in P07.11. Client 157/4, server 768/9, E2E 26, visual 58 unchanged; lint zero warnings, arch clean."
             }
           ]
         },
