@@ -3,7 +3,7 @@ import * as shared from '@spoh/shared';
 import { describe, expect, it } from 'vitest';
 
 /**
- * P03 bug reproduction: `packages/shared/src/enums.ts` says every Prisma enum
+ * P03 bug reproduction: `packages/shared/src/invariants/enums.ts` says every Prisma enum
  * is mirrored there, and one is not (P01.3). Skipped until fixed (P07.8);
  * asserts the rule and fails today.
  */

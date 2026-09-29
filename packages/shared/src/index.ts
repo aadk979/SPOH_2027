@@ -6,30 +6,31 @@
  *  - exactly one runtime dependency: zod
  *  - imported by both `server` and `client`; imports neither
  */
-export * from './enums.js';
-export * from './capabilities.js';
-export * from './errorCodes.js';
-export * from './cardCode.js';
+export * from './invariants/enums.js';
+/** The compiled capability matrix, re-exported until P11 replaces it with Cedar actions. */
+export * from './access/capabilities.js';
+export * from './errors/errorCodes.js';
+export * from './contracts/missionCard/cardCode.js';
 
-export * from './dto/common.js';
-export * from './dto/station.js';
-export * from './dto/me.js';
-export * from './dto/registration.js';
-export * from './dto/footfall.js';
-export * from './dto/incident.js';
-export * from './dto/lostPerson.js';
-export * from './dto/roster.js';
-export * from './dto/missionCard.js';
-export * from './dto/gift.js';
-export * from './dto/announcement.js';
-export * from './dto/shift.js';
-export * from './dto/dashboard.js';
-export * from './dto/fallback.js';
-export * from './dto/lostFound.js';
-export * from './dto/report.js';
-export * from './dto/auth.js';
-export * from './dto/admin.js';
-export * from './dto/settings.js';
-export * from './dto/notification.js';
-export * from './dto/media.js';
-export * from './dto/attendance.js';
+export * from './contracts/common/index.js';
+export * from './contracts/station/index.js';
+export * from './contracts/me/index.js';
+export * from './contracts/registration/index.js';
+export * from './contracts/footfall/index.js';
+export * from './contracts/incident/index.js';
+export * from './contracts/lostPerson/index.js';
+export * from './contracts/roster/index.js';
+export * from './contracts/missionCard/index.js';
+export * from './contracts/gift/index.js';
+export * from './contracts/announcement/index.js';
+export * from './contracts/shift/index.js';
+export * from './contracts/dashboard/index.js';
+export * from './contracts/fallback/index.js';
+export * from './contracts/lostFound/index.js';
+export * from './contracts/report/index.js';
+export * from './contracts/auth/index.js';
+export * from './contracts/admin/index.js';
+export * from './contracts/settings/index.js';
+export * from './contracts/notification/index.js';
+export * from './contracts/media/index.js';
+export * from './contracts/attendance/index.js';
