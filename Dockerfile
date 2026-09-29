@@ -20,7 +20,7 @@ COPY packages/shared packages/shared
 COPY server server
 COPY client client
 RUN npm run build --workspace packages/shared \
- && DATABASE_URL=postgresql://build:build@localhost:5432/build npm run build --workspace server \
+ && DATABASE_URL=postgresql://build:build@localhost:5432/build npm run build --workspace server  && npm run build:seed --workspace server \
  && SPOH_STATIC_EXPORT=1 NEXT_PUBLIC_API_BASE_URL= npm run build --workspace client
 
 # Runtime dependencies of the server and the shared package, the Prisma CLI
@@ -42,6 +42,8 @@ COPY --from=build --chown=node:node /app/server/prisma server/prisma
 COPY --from=build --chown=node:node /app/server/scripts server/scripts
 COPY --from=build --chown=node:node /app/client/out client/out
 COPY --chown=node:node infra/docker/entrypoint.sh /app/entrypoint.sh
+# The P09 totals check, for the entrypoint's one-off `totals` task.
+COPY --chown=node:node remediation/reports/P09/totals.mjs server/scripts/event-one-totals.mjs
 # RDS certificates are not in Node's trust store, and pg reads sslmode=require
 # as full verification: trust AWS's published RDS bundle (vendored, refreshed
 # when AWS rotates it).

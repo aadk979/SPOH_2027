@@ -11,8 +11,8 @@ npm run infra:diff               # against the deployed stacks (needs credential
 npm run test --workspace infra/cdk
 ```
 
-The platform stacks are not deployed yet; P08.3 onward add their resources. Bootstrapping and the
-GitHub OIDC role are described below.
+`Spoh-staging-Platform` is deployed and released from CI; the production stack is created at the
+go decision. Bootstrapping, the GitHub OIDC role and releases are described below.
 
 - The production Cognito pool `ap-southeast-1_9bwl2nGF7` is referenced by id, never owned: every
   `Volunteer.cognitoSub` points into it.
@@ -31,3 +31,21 @@ roles, so everything CI changes goes through CloudFormation. `.github/workflows/
 The bootstrap and this stack were deployed once from a workstation with the owner's approval
 (2026-09-29, D-13). To change the role, edit `src/deployAccessStack.ts` and deploy
 `Spoh-DeployAccess` the same way, or from CI once P08.9 adds deploys.
+
+## Releases and one-off tasks (P08.4, P08.10)
+
+`.github/workflows/deploy-staging.yml` runs after CI succeeds on `main`: it pushes the image, deploys
+the stack with the new task definitions, runs the migrate task
+([`infra/scripts/run-migrate-task.mjs`](../scripts/run-migrate-task.mjs)), moves the service to the
+release and runs the smoke test.
+
+The migrate task definition also runs the container entrypoint's one-off commands against the
+stage's database, with the current release's image:
+
+```bash
+node infra/scripts/run-migrate-task.mjs - Spoh-staging-Platform seed    # idempotent seed (production shape)
+node infra/scripts/run-migrate-task.mjs - Spoh-staging-Platform totals  # P09 totals check, read-only
+```
+
+`-` reads the stack outputs from CloudFormation; the task's log is printed when it stops. Both run
+as the app role.

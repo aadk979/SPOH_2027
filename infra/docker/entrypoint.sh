@@ -25,6 +25,19 @@ case "${1:-serve}" in
     node ../node_modules/prisma/build/index.js migrate deploy --config prisma.config.ts
     node scripts/db-roles.mjs grants
     ;;
+  seed)
+    # One-off (P08.10): the idempotent seed, as the app. NODE_ENV=production
+    # keeps it to event days, stations, gift types and the admin.
+    DATABASE_URL="$(url spoh_app "$DB_APP_PASSWORD")"
+    export DATABASE_URL
+    exec node dist/seed/prisma/seed.js
+    ;;
+  totals)
+    # One-off, read-only (P09.4, P09.10): old and new columns agree.
+    DATABASE_URL="$(url spoh_app "$DB_APP_PASSWORD")"
+    export DATABASE_URL
+    exec node scripts/event-one-totals.mjs
+    ;;
   *)
     exec "$@"
     ;;

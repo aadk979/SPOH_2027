@@ -12,6 +12,7 @@
 .git
 infra/cdk/cdk.out
 remediation
+!remediation/reports/P09/totals.mjs
 docs
 client/tests
 server/tests

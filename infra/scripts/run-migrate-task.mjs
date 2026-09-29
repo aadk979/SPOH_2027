@@ -5,16 +5,54 @@
  * migration.
  *
  *   node infra/scripts/run-migrate-task.mjs outputs.json Spoh-staging-Platform
+ *
+ * The same task definition runs the entrypoint's one-off commands, `seed`
+ * (P08.10) and the read-only `totals` check (P09.4): name one after the stack,
+ * and pass `-` for the outputs file to read them from CloudFormation instead.
+ * The task's log is printed once it stops.
+ *
+ *   node infra/scripts/run-migrate-task.mjs - Spoh-staging-Platform totals
  */
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 
-const [outputsFile, stack] = process.argv.slice(2);
-const outputs = JSON.parse(readFileSync(outputsFile, 'utf8'))[stack];
+const [outputsFile, stack, ...command] = process.argv.slice(2);
 const aws = (...args) =>
   JSON.parse(execFileSync('aws', [...args, '--output', 'json'], { encoding: 'utf8' }));
 
+function stackOutputs() {
+  if (outputsFile !== '-') return JSON.parse(readFileSync(outputsFile, 'utf8'))[stack];
+  const [described] = aws('cloudformation', 'describe-stacks', '--stack-name', stack).Stacks;
+  return Object.fromEntries(described.Outputs.map((o) => [o.OutputKey, o.OutputValue]));
+}
+
+/** Best effort: the task's own log, so a one-off's result is in this output. */
+function printLog(taskDefinition, taskArn) {
+  try {
+    const [container] = aws('ecs', 'describe-task-definition', '--task-definition', taskDefinition)
+      .taskDefinition.containerDefinitions;
+    const options = container.logConfiguration.options;
+    const stream = `${options['awslogs-stream-prefix']}/${container.name}/${taskArn.split('/').pop()}`;
+    const { events } = aws(
+      'logs',
+      'get-log-events',
+      '--log-group-name',
+      options['awslogs-group'],
+      '--log-stream-name',
+      stream,
+      '--start-from-head',
+    );
+    for (const event of events) console.log(`  | ${event.message}`);
+  } catch (error) {
+    console.log(`(task log unavailable: ${error.message.split('\n')[0]})`);
+  }
+}
+
+const outputs = stackOutputs();
 const network = `awsvpcConfiguration={subnets=[${outputs.AppSubnets}],securityGroups=[${outputs.AppSecurityGroup}],assignPublicIp=ENABLED}`;
+const overrides = command.length
+  ? ['--overrides', JSON.stringify({ containerOverrides: [{ name: 'migrate', command }] })]
+  : [];
 const started = aws(
   'ecs',
   'run-task',
@@ -26,11 +64,12 @@ const started = aws(
   'FARGATE',
   '--network-configuration',
   network,
+  ...overrides,
 );
 const taskArn = started.tasks?.[0]?.taskArn;
-if (!taskArn)
-  throw new Error(`the migrate task did not start: ${JSON.stringify(started.failures)}`);
-console.log(`migrate task ${taskArn}`);
+if (!taskArn) throw new Error(`the task did not start: ${JSON.stringify(started.failures)}`);
+const label = command.length ? command.join(' ') : 'migrate';
+console.log(`${label} task ${taskArn}`);
 
 execFileSync(
   'aws',
@@ -47,6 +86,7 @@ const [task] = aws(
   '--tasks',
   taskArn,
 ).tasks;
+printLog(outputs.MigrateTaskDefinition, taskArn);
 const exitCode = task.containers?.[0]?.exitCode;
-console.log(`migrate task stopped: ${task.stoppedReason ?? ''} (exit ${exitCode})`);
+console.log(`${label} task stopped: ${task.stoppedReason ?? ''} (exit ${exitCode})`);
 if (exitCode !== 0) process.exit(1);
