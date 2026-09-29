@@ -8,7 +8,7 @@ import {
 import type { Construct } from 'constructs';
 
 export interface DeployAccessStackProps extends StackProps {
-  /** `owner/name` of the only repository allowed to deploy. */
+  /** The only repository allowed to deploy, as the OIDC `sub` claim writes it (`owner@id/name@id`). */
   repository: string;
   /** The CDK bootstrap qualifier (`cdk bootstrap` default). */
   qualifier?: string;

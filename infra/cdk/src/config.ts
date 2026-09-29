@@ -27,8 +27,12 @@ const ACCOUNT = '665146708212';
 const REGION = 'ap-southeast-1';
 const DOMAIN = 'spoh.example.invalid';
 
-/** The only repository whose workflows may deploy (P08.2). */
-export const REPOSITORY = 'aadk979/SPOH_2027';
+/**
+ * The only repository whose workflows may deploy (P08.2), as GitHub's OIDC
+ * `sub` claim names it: owner and repository with their immutable ids, so a
+ * renamed or re-created repository of the same name cannot match.
+ */
+export const REPOSITORY = 'aadk979@138833125/SPOH_2027@1379786785';
 
 export const ACCOUNT_ENV = { account: '665146708212', region: 'ap-southeast-1' };
 

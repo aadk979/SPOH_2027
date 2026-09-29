@@ -40,9 +40,9 @@ describe('deploy access (P08.2)', () => {
               StringEquals: { 'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com' },
               StringLike: {
                 'token.actions.githubusercontent.com:sub': [
-                  'repo:aadk979/SPOH_2027:ref:refs/heads/main',
-                  'repo:aadk979/SPOH_2027:environment:staging',
-                  'repo:aadk979/SPOH_2027:environment:prod',
+                  'repo:aadk979@138833125/SPOH_2027@1379786785:ref:refs/heads/main',
+                  'repo:aadk979@138833125/SPOH_2027@1379786785:environment:staging',
+                  'repo:aadk979@138833125/SPOH_2027@1379786785:environment:prod',
                 ],
               },
             },
