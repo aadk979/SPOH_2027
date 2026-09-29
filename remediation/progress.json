@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-29T07:06:33.699Z",
+  "updatedAt": "2026-09-29T07:19:49.542Z",
   "current": {
     "phase": "P08",
     "step": "P08.3"
@@ -1612,14 +1612,18 @@
         {
           "id": "P08.3",
           "title": "Network and database",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-29T07:06:33.698Z",
-          "completedAt": null,
-          "commits": ["b20bf0e"],
+          "completedAt": "2026-09-29T07:19:49.541Z",
+          "commits": ["b20bf0e", "cb24440"],
           "notes": [
             {
               "at": "2026-09-29T07:06:33.699Z",
               "text": "VPC/RDS/Backup in CDK with tests; roles SQL + runner verified locally (F04-015); staging stack deploying."
+            },
+            {
+              "at": "2026-09-29T07:19:49.542Z",
+              "text": "Spoh-staging-Platform CREATE_COMPLETE: 2-AZ VPC (no NAT, no interface endpoints, S3 gateway, reject flow logs), RDS 17.9 t4g.micro single-AZ private, force_ssl, PITR 7d, AWS Backup 35d, deletion protection; DB SG admits 5432 only from the app SG (verified with the EC2 API). Roles SQL applied by the P08.4 migrate task."
             }
           ]
         },
