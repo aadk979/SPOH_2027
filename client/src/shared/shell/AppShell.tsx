@@ -2,7 +2,7 @@
 
 import { AppHeader } from './AppHeader';
 import { usePathname } from 'next/navigation';
-import { sectionForPath } from '@/shared/lib/navigation';
+import { hubLabel, sectionForPath } from '@/navigation';
 import type { ReactNode } from 'react';
 import { GlobalNav } from '@/shared/shell/GlobalNav';
 import { SectionNav } from '@/shared/shell/SectionNav';
@@ -73,15 +73,9 @@ export function AppShell({
   const container = cx('mx-auto w-full px-md', WIDTHS[width]);
   const pathname = usePathname();
   const section = sectionForPath(pathname);
-  const parents: Record<string, string> = {
-    '/guide': 'Guide',
-    '/safety': 'Safety',
-    '/operations': 'Operations',
-  };
+  const hub = hubLabel(section);
   const parent =
-    back?.href === '/home' && parents[section] && pathname !== section
-      ? { href: section, label: parents[section] }
-      : back;
+    back?.href === '/home' && hub && pathname !== section ? { href: section, label: hub } : back;
 
   return (
     <div className="flex min-h-dvh flex-col">

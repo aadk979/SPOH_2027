@@ -7,6 +7,7 @@ import { clientEnv } from '@/shared/lib/env';
 import { signOut } from '@/shared/lib/session';
 import { useCurrentSession } from '@/features/session';
 import { cx } from '@/shared/ui/cx';
+import { globalEntries } from '@/navigation';
 
 /**
  * The persistent top bar (design.md `global-nav`).
@@ -79,21 +80,24 @@ export function GlobalNav(): ReactNode {
 
       {session ? (
         <>
-          <Link
-            href="/inbox"
-            aria-current={pathname === '/inbox' ? 'page' : undefined}
-            className={cx(
-              'flex min-h-[44px] items-center px-xs text-on-dark no-underline transition-colors shrink-0',
-              'hover:text-primary-on-dark focus-visible:outline-primary-on-dark',
-              pathname === '/inbox' && 'font-semibold text-primary-on-dark',
-            )}
-          >
-            {/* The whole bar must fit 320 px without scrolling: wider content
-                makes phones zoom the page out, which throws off every tap on the
-                fixed bottom nav. The short label is the one that fits. */}
-            <span className="max-[359px]:hidden">Announcements</span>
-            <span className="hidden max-[359px]:inline">Inbox</span>
-          </Link>
+          {globalEntries().map((entry) => (
+            <Link
+              key={entry.path}
+              href={entry.path}
+              aria-current={pathname === entry.path ? 'page' : undefined}
+              className={cx(
+                'flex min-h-[44px] items-center px-xs text-on-dark no-underline transition-colors shrink-0',
+                'hover:text-primary-on-dark focus-visible:outline-primary-on-dark',
+                pathname === entry.path && 'font-semibold text-primary-on-dark',
+              )}
+            >
+              {/* The whole bar must fit 320 px without scrolling: wider content
+                  makes phones zoom the page out, which throws off every tap on the
+                  fixed bottom nav. The short label is the one that fits. */}
+              <span className="max-[359px]:hidden">{entry.label}</span>
+              <span className="hidden max-[359px]:inline">{entry.shortLabel ?? entry.label}</span>
+            </Link>
+          ))}
           {/* The name is confirmation you are on your own account, not a link.
               Hidden on the narrowest phones, where the sign-out target matters
               more than the label. */}

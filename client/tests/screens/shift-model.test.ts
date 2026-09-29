@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { MeResponse, StationSummary } from '@spoh/shared';
-import { stationTiles } from '@/features/shift/model/stationTiles';
+import { stationLinks } from '@/navigation';
+
+/** The station tiles as RoleTiles builds them from the registry. */
+function stationTiles(me: MeResponse) {
+  return stationLinks({ capabilities: me.capabilities, station: me.currentAssignment?.station });
+}
 function fixture(
   kind: StationSummary['kind'],
   capabilities: MeResponse['capabilities'],

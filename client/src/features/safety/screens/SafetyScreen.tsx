@@ -6,6 +6,7 @@ import { EscalationChain } from '@/features/shift';
 import { WorkspaceIntro } from '@/shared/ui/WorkspaceIntro';
 import { Button, ButtonLink, Callout, CardGrid, LoadingCards, Section, Stack } from '@/shared/ui';
 import { useMe, useRequireSession } from '@/features/session';
+import { hubLinks } from '@/navigation';
 
 export default function SafetyScreen() {
   const session = useRequireSession();
@@ -22,22 +23,9 @@ export default function SafetyScreen() {
         </Callout>
         <Section title="Report & respond">
           <CardGrid>
-            <NavTile
-              href="/safety/incident/new"
-              label="Report an incident"
-              hint="Record an injury, near-miss or hazard."
-            />
-            <NavTile
-              href="/safety/lost-person/new"
-              label="Report a lost person"
-              hint="Raise an alert so the team can help."
-              emphasis="primary"
-            />
-            <NavTile
-              href="/safety/lost-found"
-              label="Lost and found"
-              hint="Search for an item or log something handed in."
-            />
+            {hubLinks('/safety').map((link) => (
+              <NavTile key={link.href} {...link} />
+            ))}
           </CardGrid>
         </Section>
         {isError ? (

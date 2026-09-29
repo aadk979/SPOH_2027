@@ -6,6 +6,7 @@ import { WorkspaceIntro } from '@/shared/ui/WorkspaceIntro';
 import { FiveThings } from '@/features/shift';
 import { CardGrid, Stack } from '@/shared/ui';
 import { useRequireSession } from '@/features/session';
+import { hubLinks } from '@/navigation';
 
 export default function GuideScreen() {
   const session = useRequireSession();
@@ -18,17 +19,9 @@ export default function GuideScreen() {
           first question.
         </WorkspaceIntro>
         <CardGrid>
-          <NavTile href="/map" label="Floor map" hint="Find stations, toilets, AEDs and exits." />
-          <NavTile
-            href="/journey"
-            label="Visitor journey"
-            hint="Follow the six steps from arrival to Mission Complete."
-          />
-          <NavTile
-            href="/brief"
-            label="What do I say"
-            hint="Your briefing, course one-liners and visitor questions."
-          />
+          {hubLinks('/guide').map((link) => (
+            <NavTile key={link.href} {...link} />
+          ))}
         </CardGrid>
         <FiveThings />
       </Stack>

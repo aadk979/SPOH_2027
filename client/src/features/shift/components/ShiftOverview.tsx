@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from 'react';
 import type { MeResponse } from '@spoh/shared';
 
-import { stationTiles } from '../model/stationTiles';
+import { stationLinks } from '@/navigation';
 import { ShiftActions } from './ShiftActions';
 import { NavTile } from '@/shared/ui/NavTile';
 
@@ -80,7 +80,7 @@ export function RoleTiles({ me }: { me: MeResponse }): ReactNode {
   const assignment = me.currentAssignment;
   if (!assignment) return null;
 
-  const tiles = stationTiles(me);
+  const tiles = stationLinks({ capabilities: me.capabilities, station: assignment.station });
 
   if (tiles.length === 0) return null;
 

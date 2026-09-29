@@ -7,7 +7,7 @@ import { WorkspaceIntro } from '@/shared/ui/WorkspaceIntro';
 import { NavTile } from '@/shared/ui/NavTile';
 import { Button, ButtonLink, Callout, Card, LoadingCards, Stack } from '@/shared/ui';
 import { useMe, useRequireSession } from '@/features/session';
-import { canOpenOperations } from '@/shared/lib/navigation';
+import { canOpenOperations } from '@/navigation';
 
 export default function HomeScreen() {
   const session = useRequireSession();
@@ -69,7 +69,7 @@ export default function HomeScreen() {
             label="Plan your shift"
             hint="View your assignments, alerts and sync status."
           />
-          {canOpenOperations(session.capabilities) ? (
+          {canOpenOperations({ capabilities: session.capabilities }) ? (
             <NavTile
               href="/operations"
               label="Open operations"
