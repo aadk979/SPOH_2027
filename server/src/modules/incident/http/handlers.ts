@@ -11,6 +11,7 @@ import { appendFollowUp } from '../application/appendFollowUp.js';
 import { changeIncidentStatus } from '../application/changeIncidentStatus.js';
 import { listIncidentRecords } from '../application/listIncidentRecords.js';
 import { reportIncident } from '../application/reportIncident.js';
+import { scopeOf } from '../../../platform/http/requireAuth.js';
 
 const idOf = (req: Request): string => validatedParams<{ id: string }>(req).id;
 
@@ -20,7 +21,7 @@ export async function reportIncidentHandler(req: Request, res: Response): Promis
 }
 
 export async function listIncidentsHandler(req: Request, res: Response): Promise<void> {
-  const page = await listIncidentRecords(validatedQuery<ListIncidentsQuery>(req));
+  const page = await listIncidentRecords(scopeOf(req), validatedQuery<ListIncidentsQuery>(req));
   res.status(200).json({
     data: page.data,
     meta: { count: page.data.length, nextCursor: page.nextCursor },

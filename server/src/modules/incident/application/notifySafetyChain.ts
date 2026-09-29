@@ -2,6 +2,7 @@ import type { IncidentSeverity } from '@spoh/shared';
 import { logger } from '../../../platform/logger/index.js';
 import { dispatch } from '../../notification/index.js';
 import { pushesToSafetyChain, safetyPushMessage } from '../domain/safetyPush.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /**
  * Notify the safety chain of a severe incident. The WhatsApp Safety
@@ -9,6 +10,7 @@ import { pushesToSafetyChain, safetyPushMessage } from '../domain/safetyPush.js'
  * replacing it (PRODUCT_BRIEF §7.4).
  */
 export function notifySafetyChain(
+  scope: EventScope,
   incident: { id: string; severity: IncidentSeverity; type: string; stationName: string | null },
   reporterId: string,
 ): void {
@@ -20,7 +22,7 @@ export function notifySafetyChain(
     return;
   }
 
-  void dispatch({
+  void dispatch(scope, {
     kind: 'incident.critical',
     priority: 'URGENT',
     ...safetyPushMessage(incident),

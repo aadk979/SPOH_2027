@@ -47,3 +47,15 @@ export async function eventTimezone(scope: EventScope): Promise<string> {
   timezones.set(scope.eventId, event.timezone);
   return event.timezone;
 }
+
+/**
+ * Every event's scope, for system jobs that have no request behind them and
+ * work event by event (a purge, a sweep).
+ */
+export async function allEventScopes(): Promise<EventScope[]> {
+  const events = await prisma.event.findMany({
+    select: { id: true },
+    orderBy: { createdAt: 'asc' },
+  });
+  return events.map((event) => ({ eventId: event.id }));
+}

@@ -1,20 +1,33 @@
 import type { CommitteeRole } from '@spoh/shared';
 import { prisma } from '../../../platform/db/client.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /** Data access for push subscriptions and the people they reach. */
 
-export async function findActiveVolunteerIds(roles?: CommitteeRole[]): Promise<string[]> {
-  const rows = await prisma.person.findMany({
-    where: { active: true, ...(roles ? { role: { in: roles } } : {}) },
-    select: { id: true },
+/** The event's active members, optionally of these roles (ADR-001 §1). */
+export async function findActiveVolunteerIds(
+  scope: EventScope,
+  roles?: CommitteeRole[],
+): Promise<string[]> {
+  const rows = await prisma.eventMembership.findMany({
+    where: { eventId: scope.eventId, status: 'ACTIVE', ...(roles ? { role: { in: roles } } : {}) },
+    select: { personId: true },
   });
-  return rows.map((row) => row.id);
+  return rows.map((row) => row.personId);
 }
 
-/** Active volunteers rostered at a station on the given day. */
-export async function findRosteredAt(stationId: string, day: Date): Promise<string[]> {
+/** Active members rostered at a station on the given day. */
+export async function findRosteredAt(
+  scope: EventScope,
+  posting: { stationId: string; day: Date },
+): Promise<string[]> {
   const rows = await prisma.shiftAssignment.findMany({
-    where: { stationId, eventDay: { date: day }, volunteer: { active: true } },
+    where: {
+      eventId: scope.eventId,
+      stationId: posting.stationId,
+      eventDay: { date: posting.day },
+      volunteer: { eventMemberships: { some: { eventId: scope.eventId, status: 'ACTIVE' } } },
+    },
     select: { volunteerId: true },
   });
   return rows.map((row) => row.volunteerId);

@@ -17,7 +17,7 @@ export async function summariseGifts(
   const [rows, gifts, containsFallbackData] = await Promise.all([
     summariseRedemptions(scope, filter),
     listGifts(scope),
-    rangeOverlapsFallbackWindow(filter),
+    rangeOverlapsFallbackWindow(scope, filter),
   ]);
   const counts = new Map(rows.map((row) => [row.giftTypeId, row.count]));
 

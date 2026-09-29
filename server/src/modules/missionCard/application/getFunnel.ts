@@ -32,7 +32,7 @@ export async function getFunnel(
       countVoided(scope, filter),
       countCardsPerStation(scope, filter),
       listStampingStations(scope),
-      rangeOverlapsFallbackWindow(filter),
+      rangeOverlapsFallbackWindow(scope, filter),
     ]);
 
   return {

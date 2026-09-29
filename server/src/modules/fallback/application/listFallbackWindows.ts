@@ -11,5 +11,5 @@ export async function listFallbackWindows(
     to?: Date;
   },
 ): Promise<FallbackWindowRecord[]> {
-  return windowRecords(scope, await listWindows(range));
+  return windowRecords(scope, await listWindows(scope, range));
 }

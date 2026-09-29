@@ -24,6 +24,7 @@ import {
   type SessionContext,
 } from './issueSession.js';
 import { revokeFamily } from './revokeSessions.js';
+import { inCurrentEvent } from './sessionAudit.js';
 
 /**
  * Rotate a refresh token: look it up, detect reuse, revoke and replace it, and
@@ -93,9 +94,10 @@ async function revokeReusedFamily(existing: PresentedSession, audit: AuditContex
     'refresh token reuse detected; revoked the entire session family',
   );
 
+  const recorded = await inCurrentEvent(audit, existing.volunteerId);
   await prisma.$transaction(async (tx) => {
     await writeAudit(tx, {
-      ...audit,
+      ...recorded,
       actorId: existing.volunteerId,
       actorSub: existing.volunteer.cognitoSub,
       action: 'session.reuseDetected',

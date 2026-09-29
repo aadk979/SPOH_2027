@@ -209,6 +209,7 @@ describe('data health', () => {
   it('reports an open fallback window', async () => {
     await prisma.fallbackWindow.create({
       data: {
+        eventId: (await testEvent()).eventId,
         tier: 3,
         startedAt: new Date(FROZEN_NOW.getTime() - 30 * 60_000),
         declaredById: chief.id,

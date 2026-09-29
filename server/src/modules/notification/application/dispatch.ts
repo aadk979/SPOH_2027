@@ -14,6 +14,7 @@ import {
 } from '../data/repo.js';
 import { rolesAtOrAbove, subscriptionGone, TTL_SECONDS } from '../domain/delivery.js';
 import { pushEnabled, sendPush } from './webPush.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 export interface NotificationInput {
   kind: NotificationKind;
@@ -39,17 +40,22 @@ export interface NotificationInput {
  * Station targeting means "rostered there today", not "has ever worked there".
  * An usher who covered DCDF yesterday should not be woken about it now.
  */
-async function resolveAudience(audience: NotificationAudience, now: Date): Promise<string[]> {
+async function resolveAudience(
+  scope: EventScope,
+  audience: NotificationAudience,
+  now: Date,
+): Promise<string[]> {
   const ids = new Set<string>(audience.volunteerIds);
 
   if (audience.everyone || audience.minimumRole) {
     const roles = audience.minimumRole ? rolesAtOrAbove(audience.minimumRole) : undefined;
-    for (const id of await findActiveVolunteerIds(roles)) ids.add(id);
+    for (const id of await findActiveVolunteerIds(scope, roles)) ids.add(id);
   }
 
   if (audience.stationId) {
     const today = eventDayAnchor(singaporeDateString(now));
-    for (const id of await findRosteredAt(audience.stationId, today)) ids.add(id);
+    const posting = { stationId: audience.stationId, day: today };
+    for (const id of await findRosteredAt(scope, posting)) ids.add(id);
   }
 
   return [...ids];
@@ -63,6 +69,7 @@ async function resolveAudience(audience: NotificationAudience, now: Date): Promi
  * ends in a log line and a count.
  */
 export async function dispatch(
+  scope: EventScope,
   input: NotificationInput,
   now: Date = new Date(),
 ): Promise<NotificationResult> {
@@ -78,7 +85,7 @@ export async function dispatch(
   };
 
   try {
-    const recipients = (await resolveAudience(input.audience, now)).filter(
+    const recipients = (await resolveAudience(scope, input.audience, now)).filter(
       (id) => id !== input.excludeVolunteerId,
     );
     base.recipients = recipients.length;

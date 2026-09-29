@@ -17,9 +17,9 @@ export async function declareFallback(
   const stationId = request.stationId ?? null;
 
   const window = await prisma.$transaction(async (tx) => {
-    assertNoOpenWindow(await findOpenWindow(tx, stationId), stationId);
+    assertNoOpenWindow(await findOpenWindow(tx, scope, stationId), stationId);
 
-    const row = await createWindow(tx, {
+    const row = await createWindow(tx, scope, {
       tier: request.tier,
       // Degraded operation usually started a few minutes before anybody
       // declared it, so the caller can backdate.

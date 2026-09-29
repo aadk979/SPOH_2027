@@ -12,6 +12,7 @@ import {
   createVolunteer,
   idempotencyKey,
   type TestVolunteer,
+  testEvent,
 } from '../helpers/fixtures.js';
 
 /**
@@ -344,6 +345,7 @@ describe('fallback annotation', () => {
 
     await prisma.fallbackWindow.create({
       data: {
+        eventId: (await testEvent()).eventId,
         tier: 3,
         startedAt: new Date(Date.now() - 60 * 60 * 1000),
         endedAt: null,

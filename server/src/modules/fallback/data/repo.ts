@@ -1,6 +1,7 @@
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
+import { membershipIdOf } from '../../../platform/db/membershipMirror.js';
 
 /**
  * Fallback-window awareness (PRODUCT_BRIEF §11.4).
@@ -12,16 +13,16 @@ import type { EventScope } from '../../../platform/db/eventScope.js';
  * is approximate", so the flag ships with the counts from the start rather than
  * being retrofitted once the importers exist.
  */
-export async function rangeOverlapsFallbackWindow(range: {
-  from?: Date;
-  to?: Date;
-  stationId?: string;
-}): Promise<boolean> {
+export async function rangeOverlapsFallbackWindow(
+  scope: EventScope,
+  range: { from?: Date; to?: Date; stationId?: string },
+): Promise<boolean> {
   const from = range.from ?? new Date(0);
   const to = range.to ?? new Date(8.64e15);
 
   const overlapping = await prisma.fallbackWindow.findFirst({
     where: {
+      eventId: scope.eventId,
       startedAt: { lt: to },
       AND: [
         // An open window (endedAt null) extends to now, so it overlaps anything
@@ -48,12 +49,20 @@ export interface WindowRow {
   reason: string;
 }
 
-export async function findOpenWindow(tx: PrismaTransactionClient, stationId: string | null) {
-  return tx.fallbackWindow.findFirst({ where: { endedAt: null, stationId }, select: { id: true } });
+export async function findOpenWindow(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  stationId: string | null,
+) {
+  return tx.fallbackWindow.findFirst({
+    where: { eventId: scope.eventId, endedAt: null, stationId },
+    select: { id: true },
+  });
 }
 
 export async function createWindow(
   tx: PrismaTransactionClient,
+  scope: EventScope,
   data: {
     tier: number;
     startedAt: Date;
@@ -62,24 +71,37 @@ export async function createWindow(
     reason: string;
   },
 ): Promise<WindowRow> {
-  return tx.fallbackWindow.create({ data });
+  return tx.fallbackWindow.create({
+    data: {
+      ...data,
+      eventId: scope.eventId,
+      declaredByMembershipId: await membershipIdOf(tx, scope, data.declaredById),
+    },
+  });
 }
 
-export async function findWindow(tx: PrismaTransactionClient, id: string) {
-  return tx.fallbackWindow.findUnique({ where: { id } });
+export async function findWindow(tx: PrismaTransactionClient, scope: EventScope, id: string) {
+  return tx.fallbackWindow.findUnique({ where: { id, eventId: scope.eventId } });
 }
 
 export async function endWindow(
   tx: PrismaTransactionClient,
-  id: string,
-  endedAt: Date,
+  scope: EventScope,
+  end: { id: string; endedAt: Date },
 ): Promise<WindowRow> {
-  return tx.fallbackWindow.update({ where: { id }, data: { endedAt } });
+  return tx.fallbackWindow.update({
+    where: { id: end.id, eventId: scope.eventId },
+    data: { endedAt: end.endedAt },
+  });
 }
 
-export async function listWindows(range: { from?: Date; to?: Date }): Promise<WindowRow[]> {
+export async function listWindows(
+  scope: EventScope,
+  range: { from?: Date; to?: Date },
+): Promise<WindowRow[]> {
   return prisma.fallbackWindow.findMany({
     where: {
+      eventId: scope.eventId,
       ...(range.to ? { startedAt: { lt: range.to } } : {}),
       ...(range.from ? { OR: [{ endedAt: null }, { endedAt: { gt: range.from } }] } : {}),
     },

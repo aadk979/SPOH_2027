@@ -14,11 +14,11 @@ export async function claimItem(
   { scope, audit }: ActorContext,
 ): Promise<LostFoundRecord> {
   const claimed = await prisma.$transaction(async (tx) => {
-    const existing = await findItemRow(tx, itemId);
+    const existing = await findItemRow(tx, scope, itemId);
     if (!existing) throw new NotFoundError('Lost and found item');
     assertNotClaimed(existing);
 
-    const row = await markClaimed(tx, { id: itemId, at: new Date(), note: request.note });
+    const row = await markClaimed(tx, scope, { id: itemId, at: new Date(), note: request.note });
     await writeAudit(tx, {
       ...audit,
       action: 'lostFound.claim',

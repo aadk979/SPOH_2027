@@ -162,6 +162,6 @@ export async function redeemGift(
 
   // Low stock alerts are an IC duty in the deck; automating it beats relying on
   // someone noticing (§5).
-  if (result.record.lowStock) notifyLowStock(result.record);
+  if (result.record.lowStock) notifyLowStock(context.scope, result.record);
   return toResponse(result);
 }

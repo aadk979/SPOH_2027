@@ -1,7 +1,9 @@
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
+import { membershipIdOf } from '../../../platform/db/membershipMirror.js';
 
-/** Data access for lost-person alerts (PRODUCT_BRIEF §7.3). */
+/** Data access for lost-person alerts (PRODUCT_BRIEF §7.3). Every query names its event (ADR-001 §2). */
 
 const alertInclude = {
   raisedBy: { select: { displayName: true, phone: true } },
@@ -12,18 +14,32 @@ export type AlertWithContext = Prisma.LostPersonAlertGetPayload<{ include: typeo
 
 export async function createAlert(
   tx: PrismaTransactionClient,
-  data: Prisma.LostPersonAlertUncheckedCreateInput,
+  scope: EventScope,
+  data: Omit<Prisma.LostPersonAlertUncheckedCreateInput, 'eventId'>,
 ): Promise<AlertWithContext> {
-  return tx.lostPersonAlert.create({ data, include: alertInclude });
+  return tx.lostPersonAlert.create({
+    data: {
+      ...data,
+      eventId: scope.eventId,
+      raisedByMembershipId: await membershipIdOf(tx, scope, data.raisedById),
+    },
+    include: alertInclude,
+  });
 }
 
-export async function findAlertById(id: string): Promise<AlertWithContext | null> {
-  return prisma.lostPersonAlert.findUnique({ where: { id }, include: alertInclude });
+export async function findAlertById(
+  scope: EventScope,
+  id: string,
+): Promise<AlertWithContext | null> {
+  return prisma.lostPersonAlert.findUnique({
+    where: { id, eventId: scope.eventId },
+    include: alertInclude,
+  });
 }
 
-export async function listActiveAlerts(): Promise<AlertWithContext[]> {
+export async function listActiveAlerts(scope: EventScope): Promise<AlertWithContext[]> {
   return prisma.lostPersonAlert.findMany({
-    where: { status: 'ACTIVE' },
+    where: { eventId: scope.eventId, status: 'ACTIVE' },
     include: alertInclude,
     orderBy: { raisedAt: 'asc' },
   });
@@ -31,13 +47,14 @@ export async function listActiveAlerts(): Promise<AlertWithContext[]> {
 
 /** Which of these alerts has this volunteer already acknowledged. */
 export async function acknowledgedAlertIds(
-  volunteerId: string,
-  alertIds: string[],
+  scope: EventScope,
+  viewer: { volunteerId: string; alertIds: string[] },
 ): Promise<Set<string>> {
+  const { volunteerId, alertIds } = viewer;
   if (alertIds.length === 0) return new Set();
 
   const acks = await prisma.lostPersonAck.findMany({
-    where: { volunteerId, alertId: { in: alertIds } },
+    where: { eventId: scope.eventId, volunteerId, alertId: { in: alertIds } },
     select: { alertId: true },
   });
 
@@ -51,26 +68,33 @@ export async function acknowledgedAlertIds(
  */
 export async function acknowledgeAlert(
   tx: PrismaTransactionClient,
+  scope: EventScope,
   ack: { alertId: string; volunteerId: string },
 ): Promise<boolean> {
-  const { count } = await tx.lostPersonAck.createMany({ data: [ack], skipDuplicates: true });
+  const membershipId = await membershipIdOf(tx, scope, ack.volunteerId);
+  const { count } = await tx.lostPersonAck.createMany({
+    data: [{ ...ack, eventId: scope.eventId, membershipId }],
+    skipDuplicates: true,
+  });
   return count === 1;
 }
 
 export async function resolveAlert(
   tx: PrismaTransactionClient,
+  scope: EventScope,
   resolution: { id: string; outcome: 'RESOLVED_FOUND' | 'RESOLVED_OTHER'; at: Date },
 ): Promise<void> {
   await tx.lostPersonAlert.update({
-    where: { id: resolution.id },
+    where: { id: resolution.id, eventId: scope.eventId },
     data: { status: resolution.outcome, resolvedAt: resolution.at },
   });
 }
 
 /** Resolved, past the retention window, and not yet purged. */
-export async function findPurgeCandidates(before: Date) {
+export async function findPurgeCandidates(scope: EventScope, before: Date) {
   return prisma.lostPersonAlert.findMany({
     where: {
+      eventId: scope.eventId,
       status: { not: 'ACTIVE' },
       resolvedAt: { lt: before },
       purgedAt: null,
@@ -81,6 +105,7 @@ export async function findPurgeCandidates(before: Date) {
 
 export async function purgeAlert(
   tx: PrismaTransactionClient,
+  scope: EventScope,
   alert: {
     id: string;
     raisedAt: Date;
@@ -95,13 +120,14 @@ export async function purgeAlert(
   // stop, so each alert gets one summary (F03-031). The summary follows in the
   // same transaction, so the fields are never nulled without one.
   const { count } = await tx.lostPersonAlert.updateMany({
-    where: { id: alert.id, purgedAt: null },
+    where: { eventId: scope.eventId, id: alert.id, purgedAt: null },
     data: { approxAge: null, descriptionText: null, clothingText: null, purgedAt: new Date() },
   });
   if (count === 0) return false;
 
   await tx.lostPersonSummary.create({
     data: {
+      eventId: scope.eventId,
       raisedAt: alert.raisedAt,
       resolvedAt: alert.resolvedAt,
       resolutionMinutes: alert.resolutionMinutes,

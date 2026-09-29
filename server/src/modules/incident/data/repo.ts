@@ -1,8 +1,10 @@
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { pageArgs } from '../../../platform/db/pagination.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
+import { membershipIdOf } from '../../../platform/db/membershipMirror.js';
 
-/** Data access for incident reports (PRODUCT_BRIEF §7.1). */
+/** Data access for incident reports (PRODUCT_BRIEF §7.1). Every query names its event (ADR-001 §2). */
 
 const incidentInclude = {
   station: { select: { name: true } },
@@ -28,7 +30,8 @@ export async function findAuthorNames(authorIds: readonly string[]): Promise<Map
 
 export async function createIncident(
   tx: PrismaTransactionClient,
-  data: Prisma.IncidentUncheckedCreateInput,
+  scope: EventScope,
+  data: Omit<Prisma.IncidentUncheckedCreateInput, 'eventId'>,
 ): Promise<{
   id: string;
   type: string;
@@ -36,13 +39,23 @@ export async function createIncident(
   stationId: string | null;
 }> {
   return tx.incident.create({
-    data,
+    data: {
+      ...data,
+      eventId: scope.eventId,
+      reportedByMembershipId: await membershipIdOf(tx, scope, data.reportedById),
+    },
     select: { id: true, type: true, severity: true, stationId: true },
   });
 }
 
-export async function findIncidentById(id: string): Promise<IncidentWithContext | null> {
-  return prisma.incident.findUnique({ where: { id }, include: incidentInclude });
+export async function findIncidentById(
+  scope: EventScope,
+  id: string,
+): Promise<IncidentWithContext | null> {
+  return prisma.incident.findUnique({
+    where: { id, eventId: scope.eventId },
+    include: incidentInclude,
+  });
 }
 
 export interface IncidentListFilter {
@@ -55,9 +68,13 @@ export interface IncidentListFilter {
   cursor?: string;
 }
 
-export async function listIncidents(filter: IncidentListFilter): Promise<IncidentWithContext[]> {
+export async function listIncidents(
+  scope: EventScope,
+  filter: IncidentListFilter,
+): Promise<IncidentWithContext[]> {
   return prisma.incident.findMany({
     where: {
+      eventId: scope.eventId,
       ...(filter.status ? { status: filter.status } : {}),
       ...(filter.severity ? { severity: filter.severity } : {}),
       ...(filter.stationId ? { stationId: filter.stationId } : {}),
@@ -78,15 +95,25 @@ export async function listIncidents(filter: IncidentListFilter): Promise<Inciden
 
 export async function addFollowUp(
   tx: PrismaTransactionClient,
+  scope: EventScope,
   data: { incidentId: string; note: string; authorId: string },
 ): Promise<void> {
-  await tx.incidentFollowUp.create({ data });
+  await tx.incidentFollowUp.create({
+    data: {
+      ...data,
+      eventId: scope.eventId,
+      authorMembershipId: await membershipIdOf(tx, scope, data.authorId),
+    },
+  });
 }
 
 export async function updateIncidentStatus(
   tx: PrismaTransactionClient,
-  id: string,
-  status: Prisma.IncidentUpdateInput['status'],
+  scope: EventScope,
+  change: { id: string; status: Prisma.IncidentUpdateInput['status'] },
 ): Promise<void> {
-  await tx.incident.update({ where: { id }, data: { status } });
+  await tx.incident.update({
+    where: { id: change.id, eventId: scope.eventId },
+    data: { status: change.status },
+  });
 }

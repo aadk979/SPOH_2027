@@ -3,6 +3,7 @@ import { prisma } from '../../../platform/db/client.js';
 import { hashRefreshToken, invalidateSessionCache } from '../../../platform/identity/index.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { findSessionByTokenHash, revokeSession } from '../data/repo.js';
+import { inCurrentEvent } from './sessionAudit.js';
 
 /** Sign out. Idempotent: signing out twice is not an error. */
 export async function endSession(
@@ -15,11 +16,14 @@ export async function endSession(
   const existing = await findSessionByTokenHash(hashRefreshToken(presentedToken));
   if (!existing || existing.revokedAt) return;
 
+  const recorded = await inCurrentEvent(audit, existing.volunteerId);
   await prisma.$transaction(async (tx) => {
     await revokeSession(tx, existing.id, { at: clock.now(), reason: 'signed-out' });
 
     await writeAudit(tx, {
-      ...audit,
+      ...recorded,
+      // Signing out presents the owner's own refresh cookie: the owner acts.
+      actorId: existing.volunteerId,
       action: 'session.revoke',
       entityType: 'RefreshSession',
       entityId: existing.id,

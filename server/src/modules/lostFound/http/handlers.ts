@@ -4,7 +4,7 @@ import type {
   CreateLostFoundRequest,
   ListLostFoundQuery,
 } from '@spoh/shared';
-import { actorContextFrom, auditContextFrom } from '../../../platform/http/auditContext.js';
+import { actorContextFrom } from '../../../platform/http/auditContext.js';
 import { validatedBody, validatedParams, validatedQuery } from '../../../platform/http/validate.js';
 import { claimItem } from '../application/claimItem.js';
 import { listItems } from '../application/listItems.js';
@@ -32,6 +32,6 @@ export async function claimItemHandler(req: Request, res: Response): Promise<voi
 }
 
 export async function closeOutHandler(req: Request, res: Response): Promise<void> {
-  const count = await markUnclaimedAtClose(auditContextFrom(req));
+  const count = await markUnclaimedAtClose(actorContextFrom(req));
   res.status(200).json({ markedUnclaimed: count });
 }

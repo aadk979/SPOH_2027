@@ -12,11 +12,11 @@ export async function getActiveAlerts(
   scope: EventScope,
   viewerId: string,
 ): Promise<ActiveLostPersonResponse> {
-  const alerts = await listActiveAlerts();
-  const acked = await acknowledgedAlertIds(
-    viewerId,
-    alerts.map((alert) => alert.id),
-  );
+  const alerts = await listActiveAlerts(scope);
+  const acked = await acknowledgedAlertIds(scope, {
+    volunteerId: viewerId,
+    alertIds: alerts.map((alert) => alert.id),
+  });
 
   // Every device polls this; one station query for all the alerts, not one each (F03-029).
   const stationNames = await findStationNames(

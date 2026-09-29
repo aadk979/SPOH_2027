@@ -14,7 +14,7 @@ export async function decorate(
   const station = alert.lastSeenStationId
     ? await findStationById(scope, alert.lastSeenStationId)
     : null;
-  const acked = await acknowledgedAlertIds(viewerId, [alert.id]);
+  const acked = await acknowledgedAlertIds(scope, { volunteerId: viewerId, alertIds: [alert.id] });
   return toAlertRecord(alert, {
     stationName: station?.name ?? null,
     ackedByMe: acked.has(alert.id),
@@ -27,7 +27,7 @@ export async function getAlert(
   alertId: string,
   viewerId: string,
 ): Promise<LostPersonAlertRecord> {
-  const alert = await findAlertById(alertId);
+  const alert = await findAlertById(scope, alertId);
   if (!alert) throw new NotFoundError('Lost person alert');
   return decorate(scope, alert, viewerId);
 }

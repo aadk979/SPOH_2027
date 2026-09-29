@@ -13,6 +13,7 @@ import {
 import { audienceOf } from '../domain/audience.js';
 import { assertMaySend, pushPreview } from '../domain/sendRules.js';
 import { decorate } from './decorate.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /**
  * Broadcast and comms (PRODUCT_BRIEF §8).
@@ -23,16 +24,17 @@ import { decorate } from './decorate.js';
  */
 export async function sendAnnouncement(
   request: CreateAnnouncementRequest,
-  sender: { volunteerId: string; role: CommitteeRole },
+  sender: { volunteerId: string; role: CommitteeRole; scope: EventScope },
   audit: AuditContext,
 ): Promise<AnnouncementRecord> {
   const stationId = request.target.stationId ?? null;
   const today = eventDayAnchor(singaporeDateString());
-  const postings = await findTodaysPostings(sender.volunteerId, today);
+  const { scope } = sender;
+  const postings = await findTodaysPostings(scope, sender.volunteerId, today);
   assertMaySend({ ...sender, todaysStationIds: postings.map((p) => p.stationId) }, stationId);
 
   const announcement = await prisma.$transaction(async (tx) => {
-    const row = await createAnnouncement(tx, {
+    const row = await createAnnouncement(tx, scope, {
       body: request.body,
       priority: request.priority,
       targetRole: request.target.role ?? null,
@@ -60,14 +62,17 @@ export async function sendAnnouncement(
   });
 
   // One list for the count and the push, so the sender is told how many were reached.
-  const audienceIds = await findAudienceIds(audienceOf(announcement), today);
-  if (announcement.priority === 'URGENT') pushToDevices(announcement, audienceIds);
+  const audienceIds = await findAudienceIds(scope, audienceOf(announcement), today);
+  if (announcement.priority === 'URGENT') pushToDevices(scope, announcement, audienceIds);
 
   // Loaded after commit: its relations would overlap on the transaction's
   // connection (F03-019).
-  const created = await findAnnouncementById(announcement.id);
+  const created = await findAnnouncementById(scope, announcement.id);
   if (!created) throw new NotFoundError('Announcement');
-  return decorate(created, sender.volunteerId, audienceIds.length);
+  return decorate(scope, created, {
+    viewerId: sender.volunteerId,
+    audienceCount: audienceIds.length,
+  });
 }
 
 /**
@@ -78,10 +83,14 @@ export async function sendAnnouncement(
  * at one station does not buzz the whole event. The inbox poll delivers it either way; this is what
  * makes it arrive while the app is closed.
  */
-function pushToDevices(announcement: { id: string; body: string }, audienceIds: string[]): void {
+function pushToDevices(
+  scope: EventScope,
+  announcement: { id: string; body: string },
+  audienceIds: string[],
+): void {
   // Unlike an incident description, this text was written by a coordinator for
   // exactly this audience, so showing it directly is safe and useful.
-  void dispatch({
+  void dispatch(scope, {
     kind: 'announcement.urgent',
     priority: 'URGENT',
     title: 'Urgent — SPOH Ops',

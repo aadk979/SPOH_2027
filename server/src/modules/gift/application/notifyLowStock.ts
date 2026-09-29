@@ -1,5 +1,6 @@
 import type { GiftTypeRecord } from '@spoh/shared';
 import { dispatch } from '../../notification/index.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /**
  * Tell the Deputy Coordinator and the Chief that stock is running out.
@@ -8,8 +9,8 @@ import { dispatch } from '../../notification/index.js';
  * someone noticing is that the first anyone hears of it is a visitor being
  * turned away at the desk.
  */
-export function notifyLowStock(gift: GiftTypeRecord): void {
-  void dispatch({
+export function notifyLowStock(scope: EventScope, gift: GiftTypeRecord): void {
+  void dispatch(scope, {
     kind: 'gift.lowStock',
     priority: 'OPERATIONAL',
     title: `${gift.name} is running low`,

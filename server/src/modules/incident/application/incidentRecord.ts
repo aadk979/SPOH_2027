@@ -2,6 +2,7 @@ import type { IncidentRecord } from '@spoh/shared';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { toIncidentRecord } from '../data/mappers.js';
 import { findAuthorNames, findIncidentById, type IncidentWithContext } from '../data/repo.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /**
  * Incidents as records, with every follow-up author's name loaded in one
@@ -24,8 +25,8 @@ export async function toRecordWithAuthors(incident: IncidentWithContext): Promis
   return record as IncidentRecord;
 }
 
-export async function getIncident(id: string): Promise<IncidentRecord> {
-  const incident = await findIncidentById(id);
+export async function getIncident(scope: EventScope, id: string): Promise<IncidentRecord> {
+  const incident = await findIncidentById(scope, id);
   if (!incident) throw new NotFoundError('Incident');
   return toRecordWithAuthors(incident);
 }

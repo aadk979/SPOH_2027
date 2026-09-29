@@ -11,7 +11,7 @@ export async function logItem(
   { volunteerId, scope, audit }: ActorContext,
 ): Promise<LostFoundRecord> {
   const item = await prisma.$transaction(async (tx) => {
-    const row = await createItem(tx, {
+    const row = await createItem(tx, scope, {
       itemLabel: request.itemLabel,
       categoryLabel: request.categoryLabel ?? null,
       foundStationId: request.foundStationId ?? null,

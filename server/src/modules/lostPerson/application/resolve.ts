@@ -15,13 +15,13 @@ export async function resolve(
   request: ResolveLostPersonRequest,
   { scope, audit }: ActorContext,
 ): Promise<LostPersonAlertRecord> {
-  const existing = await findAlertById(alertId);
+  const existing = await findAlertById(scope, alertId);
   if (!existing) throw new NotFoundError('Lost person alert');
   assertAlertActive(existing);
   const now = new Date();
 
   await prisma.$transaction(async (tx) => {
-    await resolveAlert(tx, { id: alertId, outcome: request.outcome, at: now });
+    await resolveAlert(tx, scope, { id: alertId, outcome: request.outcome, at: now });
     await writeAudit(tx, {
       ...audit,
       action: 'lostPerson.resolve',
@@ -33,6 +33,6 @@ export async function resolve(
   });
 
   const record = await getAlert(scope, alertId, audit.actorId ?? '');
-  void dispatch(resolvedPush(alertId));
+  void dispatch(scope, resolvedPush(alertId));
   return record;
 }

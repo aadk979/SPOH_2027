@@ -8,7 +8,7 @@ export async function listItems(
   scope: EventScope,
   query: ListLostFoundQuery,
 ): Promise<Page<LostFoundRecord>> {
-  const rows = await listItemRows(query);
+  const rows = await listItemRows(scope, query);
   const page = toPage(rows, query.limit);
   return {
     data: await toRecordsWithStations(scope, page.data),

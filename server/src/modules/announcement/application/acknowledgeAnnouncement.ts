@@ -18,10 +18,12 @@ export async function acknowledgeAnnouncement(
   announcementId: string,
   reader: ActorContext & { role: CommitteeRole },
 ): Promise<AnnouncementRecord> {
-  const existing = await findAnnouncementById(announcementId);
+  const { scope } = reader;
+  const existing = await findAnnouncementById(scope, announcementId);
   if (!existing) throw new NotFoundError('Announcement');
 
   const postings = await findTodaysPostings(
+    scope,
     reader.volunteerId,
     eventDayAnchor(singaporeDateString()),
   );
@@ -35,7 +37,7 @@ export async function acknowledgeAnnouncement(
   await prisma.$transaction(async (tx) => {
     // Every mutation is audited; a second tap is a no-op and writes no second row (F03-018).
     const ack = { announcementId, volunteerId: reader.volunteerId };
-    if (!(await acknowledge(tx, ack))) return;
+    if (!(await acknowledge(tx, scope, ack))) return;
     await writeAudit(tx, {
       ...reader.audit,
       action: 'announcement.ack',
@@ -45,8 +47,8 @@ export async function acknowledgeAnnouncement(
     });
   });
 
-  const refreshed = await findAnnouncementById(announcementId);
+  const refreshed = await findAnnouncementById(scope, announcementId);
   if (!refreshed) throw new NotFoundError('Announcement');
 
-  return decorate(refreshed, reader.volunteerId, null);
+  return decorate(scope, refreshed, { viewerId: reader.volunteerId, audienceCount: null });
 }

@@ -15,14 +15,14 @@ export async function closeFallback(
   { scope, audit }: ActorContext,
 ): Promise<FallbackWindowRecord> {
   const closed = await prisma.$transaction(async (tx) => {
-    const existing = await findWindow(tx, windowId);
+    const existing = await findWindow(tx, scope, windowId);
     if (!existing) throw new NotFoundError('Fallback window');
     assertWindowOpen(existing);
 
     const endedAt = request.endedAt ? new Date(request.endedAt) : systemClock.now();
     assertEndsAfterStart(existing, endedAt);
 
-    const row = await endWindow(tx, windowId, endedAt);
+    const row = await endWindow(tx, scope, { id: windowId, endedAt });
 
     await writeAudit(tx, {
       ...audit,

@@ -18,7 +18,7 @@ export async function summariseFootfall(
 
   const [total, containsFallbackData, stations, rows] = await Promise.all([
     sumMatching(scope, filter),
-    rangeOverlapsFallbackWindow(filter),
+    rangeOverlapsFallbackWindow(scope, filter),
     listCountedStations(scope),
     sumByBucket(scope, filter, BUCKET_MINUTES[query.bucket]),
   ]);

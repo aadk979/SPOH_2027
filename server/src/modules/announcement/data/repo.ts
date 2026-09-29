@@ -2,8 +2,10 @@ import type { CommitteeRole } from '@spoh/shared';
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { pageArgs } from '../../../platform/db/pagination.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
+import { membershipIdOf } from '../../../platform/db/membershipMirror.js';
 
-/** Data access for announcements (PRODUCT_BRIEF §8). */
+/** Data access for announcements (PRODUCT_BRIEF §8). Every query names its event (ADR-001 §2). */
 
 const announcementInclude = {
   author: { select: { displayName: true } },
@@ -18,13 +20,26 @@ export type AnnouncementWithContext = Prisma.AnnouncementGetPayload<{
 /** The written row only: its relations are loaded after commit (F03-019). */
 export async function createAnnouncement(
   tx: PrismaTransactionClient,
-  data: Prisma.AnnouncementUncheckedCreateInput,
+  scope: EventScope,
+  data: Omit<Prisma.AnnouncementUncheckedCreateInput, 'eventId'>,
 ) {
-  return tx.announcement.create({ data });
+  return tx.announcement.create({
+    data: {
+      ...data,
+      eventId: scope.eventId,
+      authorMembershipId: await membershipIdOf(tx, scope, data.authorId),
+    },
+  });
 }
 
-export async function findAnnouncementById(id: string): Promise<AnnouncementWithContext | null> {
-  return prisma.announcement.findUnique({ where: { id }, include: announcementInclude });
+export async function findAnnouncementById(
+  scope: EventScope,
+  id: string,
+): Promise<AnnouncementWithContext | null> {
+  return prisma.announcement.findUnique({
+    where: { id, eventId: scope.eventId },
+    include: announcementInclude,
+  });
 }
 
 /**
@@ -36,16 +51,20 @@ export async function findAnnouncementById(id: string): Promise<AnnouncementWith
  * are standing in — a message sent during the morning block should still be in
  * the inbox of the person who arrives for the afternoon.
  */
-export async function listForRecipient(input: {
-  role: Prisma.AnnouncementWhereInput['targetRole'];
-  stationIds: string[];
-  eventDayIds: string[];
-  limit: number;
-  cursor?: string;
-  now: Date;
-}): Promise<AnnouncementWithContext[]> {
+export async function listForRecipient(
+  scope: EventScope,
+  input: {
+    role: Prisma.AnnouncementWhereInput['targetRole'];
+    stationIds: string[];
+    eventDayIds: string[];
+    limit: number;
+    cursor?: string;
+    now: Date;
+  },
+): Promise<AnnouncementWithContext[]> {
   return prisma.announcement.findMany({
     where: {
+      eventId: scope.eventId,
       AND: [
         { OR: [{ expiresAt: null }, { expiresAt: { gt: input.now } }] },
         { OR: [{ targetRole: null }, { targetRole: input.role }] },
@@ -70,21 +89,22 @@ export async function listForRecipient(input: {
 }
 
 /** Today's rostered stations and days for a reader, which is what station targeting matches. */
-export async function findTodaysPostings(volunteerId: string, today: Date) {
+export async function findTodaysPostings(scope: EventScope, volunteerId: string, today: Date) {
   return prisma.shiftAssignment.findMany({
-    where: { volunteerId, eventDay: { date: today } },
+    where: { eventId: scope.eventId, volunteerId, eventDay: { date: today } },
     select: { stationId: true, eventDayId: true },
   });
 }
 
 export async function acknowledgedIds(
-  volunteerId: string,
-  announcementIds: string[],
+  scope: EventScope,
+  reader: { volunteerId: string; announcementIds: string[] },
 ): Promise<Set<string>> {
+  const { volunteerId, announcementIds } = reader;
   if (announcementIds.length === 0) return new Set();
 
   const acks = await prisma.announcementAck.findMany({
-    where: { volunteerId, announcementId: { in: announcementIds } },
+    where: { eventId: scope.eventId, volunteerId, announcementId: { in: announcementIds } },
     select: { announcementId: true },
   });
 
@@ -97,9 +117,14 @@ export async function acknowledgedIds(
  */
 export async function acknowledge(
   tx: PrismaTransactionClient,
+  scope: EventScope,
   ack: { announcementId: string; volunteerId: string },
 ): Promise<boolean> {
-  const { count } = await tx.announcementAck.createMany({ data: [ack], skipDuplicates: true });
+  const membershipId = await membershipIdOf(tx, scope, ack.volunteerId);
+  const { count } = await tx.announcementAck.createMany({
+    data: [{ ...ack, eventId: scope.eventId, membershipId }],
+    skipDuplicates: true,
+  });
   return count > 0;
 }
 
@@ -110,26 +135,32 @@ export async function acknowledge(
  * urgent push goes to exactly this list, so the two cannot disagree.
  */
 export async function findAudienceIds(
+  scope: EventScope,
   audience: { role: CommitteeRole | null; stationId: string | null; eventDayId: string | null },
   today: Date,
 ): Promise<string[]> {
-  const rows = await prisma.person.findMany({
+  const { eventId } = scope;
+  const rows = await prisma.eventMembership.findMany({
     where: {
-      active: true,
+      eventId,
+      status: 'ACTIVE',
       ...(audience.role ? { role: audience.role } : {}),
       ...(audience.stationId || audience.eventDayId
         ? {
-            shiftAssignments: {
-              some: {
-                eventDay: { date: today },
-                ...(audience.stationId ? { stationId: audience.stationId } : {}),
-                ...(audience.eventDayId ? { eventDayId: audience.eventDayId } : {}),
+            person: {
+              shiftAssignments: {
+                some: {
+                  eventId,
+                  eventDay: { date: today },
+                  ...(audience.stationId ? { stationId: audience.stationId } : {}),
+                  ...(audience.eventDayId ? { eventDayId: audience.eventDayId } : {}),
+                },
               },
             },
           }
         : {}),
     },
-    select: { id: true },
+    select: { personId: true },
   });
-  return rows.map((row) => row.id);
+  return rows.map((row) => row.personId);
 }

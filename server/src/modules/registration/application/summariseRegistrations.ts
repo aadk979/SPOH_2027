@@ -38,7 +38,7 @@ export async function summariseRegistrations(
 
   const [total, containsFallbackData] = await Promise.all([
     countMatching(scope, filter),
-    rangeOverlapsFallbackWindow(filter),
+    rangeOverlapsFallbackWindow(scope, filter),
   ]);
 
   return {

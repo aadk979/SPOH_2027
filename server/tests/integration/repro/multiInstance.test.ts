@@ -3,7 +3,7 @@ import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { prisma } from '../../../src/platform/db/client.js';
 import { resetDatabase } from '../../helpers/db.js';
-import { bearer, createVolunteer, type TestVolunteer } from '../../helpers/fixtures.js';
+import { bearer, createVolunteer, type TestVolunteer, testEvent } from '../../helpers/fixtures.js';
 
 /**
  * P03.5 — two server instances against one database.
@@ -102,6 +102,7 @@ describe('two instances, one database (P03.5 repros)', () => {
     for (let i = 0; i < 5; i += 1) {
       await prisma.lostPersonAlert.create({
         data: {
+          eventId: (await testEvent()).eventId,
           descriptionText: `Child ${i}, blue shirt`,
           raisedById: volunteer.id,
           raisedAt: new Date(resolvedAt.getTime() - 20 * 60_000),

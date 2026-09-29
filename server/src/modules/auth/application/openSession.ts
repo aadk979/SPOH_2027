@@ -15,6 +15,7 @@ import {
   type OpenedSession,
   type SessionContext,
 } from './issueSession.js';
+import { inCurrentEvent } from './sessionAudit.js';
 
 /**
  * Open a session for an already-authenticated subject.
@@ -34,6 +35,7 @@ export async function openSession(
   const now = systemClock.now();
   const expiresAt = refreshExpiry(now, getSettings().refreshSessionDays);
 
+  const recorded = await inCurrentEvent(audit, volunteer.id);
   const session = await prisma.$transaction(async (tx) => {
     const row = await createRefreshSession(tx, {
       volunteerId: volunteer.id,
@@ -47,7 +49,7 @@ export async function openSession(
     await touchVolunteer(tx, volunteer.scope, { id: volunteer.id, at: now });
 
     await writeAudit(tx, {
-      ...audit,
+      ...recorded,
       actorId: volunteer.id,
       actorSub: sub,
       action: 'session.create',

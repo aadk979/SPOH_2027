@@ -14,7 +14,7 @@ export async function reportIncident(
   { volunteerId, scope, audit }: ActorContext,
 ): Promise<IncidentRecord> {
   const incident = await prisma.$transaction(async (tx) => {
-    const row = await createIncident(tx, {
+    const row = await createIncident(tx, scope, {
       type: request.type,
       severity: request.severity,
       stationId: request.stationId ?? null,
@@ -40,6 +40,7 @@ export async function reportIncident(
 
   const station = incident.stationId ? await findStationById(scope, incident.stationId) : null;
   notifySafetyChain(
+    scope,
     {
       id: incident.id,
       severity: incident.severity,
@@ -51,7 +52,7 @@ export async function reportIncident(
 
   // Loaded after commit: its relations would overlap on the transaction's
   // connection (F03-019).
-  const created = await findIncidentById(incident.id);
+  const created = await findIncidentById(scope, incident.id);
   if (!created) throw new NotFoundError('Incident');
   return toRecordWithAuthors(created);
 }

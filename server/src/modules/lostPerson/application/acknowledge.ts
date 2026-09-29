@@ -14,12 +14,12 @@ export async function acknowledge(
   alertId: string,
   { volunteerId, scope, audit }: ActorContext,
 ): Promise<LostPersonAlertRecord> {
-  const alert = await findAlertById(alertId);
+  const alert = await findAlertById(scope, alertId);
   if (!alert) throw new NotFoundError('Lost person alert');
 
   await prisma.$transaction(async (tx) => {
     // A second tap is a no-op, and writes no second audit row (F03-018).
-    if (!(await acknowledgeAlert(tx, { alertId, volunteerId }))) return;
+    if (!(await acknowledgeAlert(tx, scope, { alertId, volunteerId }))) return;
     await writeAudit(tx, {
       ...audit,
       action: 'lostPerson.acknowledge',
