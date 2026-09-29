@@ -214,9 +214,16 @@ export class AppService extends Construct {
     const integration = new HttpServiceDiscoveryIntegration('App', service.cloudMapService!, {
       vpcLink,
     });
-    for (const path of ['/', '/{proxy+}', '/api/v1/auth/{proxy+}']) {
-      api.addRoutes({ path, methods: [HttpMethod.ANY], integration });
-    }
+    const routes = ['/', '/{proxy+}', '/api/v1/auth/{proxy+}'].flatMap((path) =>
+      api.addRoutes({ path, methods: [HttpMethod.ANY], integration }),
+    );
+    // Sign-in is throttled harder at the edge (ADR-008 §4); throttled requests
+    // never reach the app. The setting names a route, so it waits for the routes.
+    const stage = api.node.scope!.node.findChild('DefaultStage') as HttpStage;
+    (stage.node.defaultChild as CfnStage).addPropertyOverride('RouteSettings', {
+      'ANY /api/v1/auth/{proxy+}': { ThrottlingRateLimit: 5, ThrottlingBurstLimit: 10 },
+    });
+    for (const route of routes) stage.node.addDependency(route);
   }
 }
 
@@ -230,16 +237,12 @@ export function createHttpApi(scope: Construct, stage: StageConfig): HttpApi {
     retention: RetentionDays.ONE_MONTH,
     removalPolicy: stage.name === 'prod' ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
   });
-  const httpStage = new HttpStage(scope, 'DefaultStage', {
+  new HttpStage(scope, 'DefaultStage', {
     httpApi: api,
     stageName: '$default',
     autoDeploy: true,
     throttle: { rateLimit: 50, burstLimit: 100 },
     accessLogSettings: { destination: new LogGroupLogDestination(accessLogs) },
-  });
-  // Sign-in is throttled harder at the edge (ADR-008 §4); throttled requests never reach the app.
-  (httpStage.node.defaultChild as CfnStage).addPropertyOverride('RouteSettings', {
-    'ANY /api/v1/auth/{proxy+}': { ThrottlingRateLimit: 5, ThrottlingBurstLimit: 10 },
   });
   Validations.of(api).acknowledge({
     id: 'AwsSolutions-APIG4',
