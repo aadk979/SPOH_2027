@@ -160,4 +160,34 @@ node remediation/tools/code-metrics.mjs     # client: 0 components > 80, 0 files
 
 ## Phase report
 
-_Fill in on completion._
+Completed 29 September 2026 on `main`. Screens and behaviour are unchanged apart from the labelled
+P07.11 fixes below; every step's commits carry its `Remediation-Step` trailer.
+
+- **Structure (P07.1–P07.8):** thin routes over feature screens; `features/<domain>/api.ts` and
+  `queries.ts` own every call and key; components and hooks split to the size limits; one form
+  pattern (`useZodForm` with the shared request schemas, `b4c772a`); one navigation registry for
+  every nav surface (`4553f8f`); `@spoh/shared` grouped as `contracts/<domain>` mirroring the server
+  modules, with `errors/`, `invariants/`, `access/` and `generated/` (`7b07c7c`, `8d8d573`), public
+  exports unchanged.
+- **Guards (P07.9, `c8d6774`):** every size, complexity and boundary guard is an error for the
+  client too, all at zero (`reports/metrics/P07.9-guards.json`); new lint rules keep API paths in
+  `api.ts` and features out of `shared/ui`. Raw-line counts (`reports/metrics/P07.json`) include
+  comments and blank lines, which the standard's ESLint measure skips, so they run higher.
+- **Fixes (P07.11):** F02-010 `8f5c997`, F03-032 `7c3310c`, F03-035 `528830e`, F03-036 `309c5e3`,
+  F03-020 `270a4a9` (client half), F02-011 `b6e5791`, F02-020 `02009d2`, F03-037 `f925617`, F03-034
+  `13a727c` (migration `20260929000000_queued_redemption_flags`, applied to the test databases
+  only) and F03-045 `56f8155`, filed in P07.11 (a printed card's QR resolved to no card). No
+  client repro is skipped.
+- **Visual:** 58 of 58 unchanged except `/ic` (phone and laptop), updated deliberately for F02-011
+  after review: the block hours appear and the duplicate-key overlay is gone.
+- **Suites at the end:** server 777 passed, 8 deferred repros; client 209; e2e 26; visual 58;
+  typecheck, lint, architecture and formatting clean.
+- **Bundle (`reports/metrics/P07-bundle.json`, `tools/bundle-size.mjs`, P03.7's method):** 43
+  chunks, 1,840 KB raw / 538 KB gzip against 2,152 / 613 at baseline (−12% gzip). The refactor
+  alone measured +3.5% (634.7 KB gzip, before F03-037); the drop is F03-037's labelled fix: JS on
+  every route 289.5 → 197.8 KB gzip, and the QR decoder back on the three scanning screens only.
+- **Coverage (`reports/metrics/P07-coverage.json`):** server lines 78.4% → 91.3%, branches
+  60.1% → 77.3%; client lines 6.5% → 59.1%. The CI gate itself is P08.9.
+- **Carried forward:** outbox entries gain `eventId` when events exist (P09); live settings
+  updates (P10.8); IC console grouping by block (P14.1); 403 wording (P11.8); a parked capture's
+  "send again" (F02-022, P14.4).

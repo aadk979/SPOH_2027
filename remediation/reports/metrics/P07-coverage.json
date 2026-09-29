@@ -1,0 +1,19 @@
+{
+  "generatedAt": "2026-09-29T03:40:00.000Z",
+  "tool": "vitest 4.1.11 + @vitest/coverage-v8 4.1.11",
+  "baseline": "P00-coverage.json",
+  "scopes": {
+    "server (configured scope)": {
+      "command": "npm run test:coverage --workspace server",
+      "suites": "unit + integration, 777 passed, 8 deferred",
+      "totals": { "statements": 88.96, "branches": 77.26, "functions": 89.62, "lines": 91.29 },
+      "p00": { "statements": 75.41, "branches": 60.07, "functions": 74.95, "lines": 78.4 }
+    },
+    "client": {
+      "command": "npx vitest run --coverage (client)",
+      "suites": "209 passed",
+      "totals": { "statements": 57.08, "branches": 45.34, "functions": 55.13, "lines": 59.06 },
+      "p00": { "statements": 6.41, "branches": 2.78, "functions": 4.26, "lines": 6.51 }
+    }
+  }
+}

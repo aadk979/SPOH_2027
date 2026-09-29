@@ -1,0 +1,125 @@
+{
+  "chunks": 43,
+  "totalRawKb": 1839.9,
+  "totalGzipKb": 538.2,
+  "sharedByEveryRouteGzipKb": 197.8,
+  "largestFirstLoadGzipKb": 409.7,
+  "routes": [
+    {
+      "route": "/",
+      "gzipKb": 198.1
+    },
+    {
+      "route": "/admin/settings",
+      "gzipKb": 287.8
+    },
+    {
+      "route": "/admin/users",
+      "gzipKb": 288.2
+    },
+    {
+      "route": "/attendance",
+      "gzipKb": 409.1
+    },
+    {
+      "route": "/brief",
+      "gzipKb": 200.3
+    },
+    {
+      "route": "/capture/footfall",
+      "gzipKb": 200.2
+    },
+    {
+      "route": "/capture/redeem",
+      "gzipKb": 409.7
+    },
+    {
+      "route": "/capture/registration",
+      "gzipKb": 201
+    },
+    {
+      "route": "/capture/registration/group",
+      "gzipKb": 286.7
+    },
+    {
+      "route": "/capture/stamp",
+      "gzipKb": 409.4
+    },
+    {
+      "route": "/chief",
+      "gzipKb": 202.3
+    },
+    {
+      "route": "/chief/fallback",
+      "gzipKb": 287.6
+    },
+    {
+      "route": "/chief/imports",
+      "gzipKb": 287.7
+    },
+    {
+      "route": "/guide",
+      "gzipKb": 201.7
+    },
+    {
+      "route": "/home",
+      "gzipKb": 202.6
+    },
+    {
+      "route": "/ic",
+      "gzipKb": 203.6
+    },
+    {
+      "route": "/inbox",
+      "gzipKb": 287.7
+    },
+    {
+      "route": "/journey",
+      "gzipKb": 199.8
+    },
+    {
+      "route": "/map",
+      "gzipKb": 200.2
+    },
+    {
+      "route": "/operations",
+      "gzipKb": 199.4
+    },
+    {
+      "route": "/reports",
+      "gzipKb": 202.1
+    },
+    {
+      "route": "/safety",
+      "gzipKb": 202.4
+    },
+    {
+      "route": "/safety/incident/new",
+      "gzipKb": 286.5
+    },
+    {
+      "route": "/safety/lost-found",
+      "gzipKb": 201.6
+    },
+    {
+      "route": "/safety/lost-found/new",
+      "gzipKb": 286.5
+    },
+    {
+      "route": "/safety/lost-person/new",
+      "gzipKb": 285.5
+    },
+    {
+      "route": "/shift",
+      "gzipKb": 201.8
+    },
+    {
+      "route": "/sign-in",
+      "gzipKb": 289.8
+    },
+    {
+      "route": "/tv",
+      "gzipKb": 203
+    }
+  ]
+}
