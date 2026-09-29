@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-29T01:44:13.101Z",
+  "updatedAt": "2026-09-29T02:10:25.037Z",
   "current": {
     "phase": "P07",
-    "step": "P07.8"
+    "step": "P07.11"
   },
   "gates": [
     {
@@ -1523,11 +1523,16 @@
         {
           "id": "P07.11",
           "title": "Client correctness fixes",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-29T01:44:25.054Z",
           "completedAt": null,
-          "commits": [],
-          "notes": []
+          "commits": ["b6e5791"],
+          "notes": [
+            {
+              "at": "2026-09-29T02:10:25.036Z",
+              "text": "Fixed so far: F02-010 8f5c997, F03-032 7c3310c, F03-035 528830e, F03-036 309c5e3, F03-020 270a4a9, F02-011 b6e5791. Remaining: F02-020, F03-034, F03-037."
+            }
+          ]
         },
         {
           "id": "P07.9",
