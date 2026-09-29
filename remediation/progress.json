@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-29T03:46:57.104Z",
+  "updatedAt": "2026-09-29T07:06:33.699Z",
   "current": {
     "phase": "P08",
-    "step": "P08.4"
+    "step": "P08.3"
   },
   "gates": [
     {
@@ -1598,20 +1598,30 @@
         {
           "id": "P08.2",
           "title": "Bootstrap and OIDC",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-29T07:06:32.702Z",
+          "completedAt": "2026-09-29T07:06:33.098Z",
+          "commits": ["b20bf0e"],
+          "notes": [
+            {
+              "at": "2026-09-29T07:06:33.099Z",
+              "text": "Owner-approved bootstrap (CDKToolkit, ap-southeast-1) and Spoh-DeployAccess (GitHub OIDC + spoh-github-deploy, immutable-id subject, sts-only). Infra workflow run 36534524320 ran cdk diff via OIDC: success."
+            }
+          ]
         },
         {
           "id": "P08.3",
           "title": "Network and database",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-29T07:06:33.698Z",
           "completedAt": null,
-          "commits": [],
-          "notes": []
+          "commits": ["b20bf0e"],
+          "notes": [
+            {
+              "at": "2026-09-29T07:06:33.699Z",
+              "text": "VPC/RDS/Backup in CDK with tests; roles SQL + runner verified locally (F04-015); staging stack deploying."
+            }
+          ]
         },
         {
           "id": "P08.4",
