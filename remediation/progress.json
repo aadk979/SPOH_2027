@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-29T08:21:37.507Z",
+  "updatedAt": "2026-09-29T08:52:10.673Z",
   "current": {
     "phase": "P09",
-    "step": "P09.3"
+    "step": "P09.4"
   },
   "gates": [
     {
@@ -1693,8 +1693,8 @@
         {
           "id": "P08.10",
           "title": "Staging live and smoke",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-29T08:43:49.981Z",
           "completedAt": null,
           "commits": [],
           "notes": []
@@ -1754,25 +1754,34 @@
         {
           "id": "P09.3",
           "title": "Expand: Person and EventMembership",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-29T08:21:37.506Z",
-          "completedAt": null,
-          "commits": ["1c41b88"],
+          "completedAt": "2026-09-29T08:43:49.816Z",
+          "commits": ["1c41b88", "1c41b88"],
           "notes": [
             {
               "at": "2026-09-29T08:21:37.507Z",
               "text": "Person/EventMembership expand committed; awaiting staging apply."
+            },
+            {
+              "at": "2026-09-29T08:43:49.816Z",
+              "text": "Person (table Volunteer) + OrganisationMembership/EventMembership + nullable membership columns; applied on staging by run 36542413375 (3f1236a), smoke green."
             }
           ]
         },
         {
           "id": "P09.4",
           "title": "Migrate existing data into Event #1 (needs D-12)",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-29T08:43:49.892Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-09-29T08:52:10.673Z",
+              "text": "Backfill migration 20260930030000_event_one_backfill + totals.mjs (membership columns checked through the membership). Integration test (legacy rows -> zero differences, idempotent); totals 0 on local production-shape and development-fixture rehearsals and inside the image. Browser DBs show only post-backfill rows without event (app writes new columns from P09.5): P09.5 ends with a catch-up backfill and a totals re-run. Open: staging run; owner-supplied production dump (D-13)."
+            }
+          ]
         },
         {
           "id": "P09.5",

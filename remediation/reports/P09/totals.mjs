@@ -8,7 +8,8 @@
  * category and per station and day agree, every station's type grants exactly
  * what its kind and flags did, every assignment sits on the shift for its day
  * and block, and every volunteer has an Event #1 membership with the same role,
- * portfolio, reporting line and standing, referenced from the same rows.
+ * portfolio, reporting line and standing, and every membership column names
+ * the same person's membership in the row's own event.
  *
  *   DATABASE_URL=postgresql://…_test node remediation/reports/P09/totals.mjs [--json out.json]
  *
@@ -112,10 +113,12 @@ const CHECKS = {
     WHERE sh."id" IS NULL OR sh."eventDayId" <> a."eventDayId" OR t."code" <> a."block"::text`,
   'volunteers without a matching membership': `
     SELECT count(*) AS n FROM "Volunteer" v
-    LEFT JOIN "EventMembership" m ON m."id" = v."id" AND m."personId" = v."id"
+    CROSS JOIN (SELECT "id" FROM "Event" ORDER BY "createdAt" LIMIT 1) e
+    LEFT JOIN "EventMembership" m ON m."eventId" = e."id" AND m."personId" = v."id"
+    LEFT JOIN "EventMembership" boss ON boss."id" = m."reportsToId"
     WHERE m."id" IS NULL OR m."role" <> v."role"
        OR m."portfolio" IS DISTINCT FROM v."portfolio"
-       OR m."reportsToId" IS DISTINCT FROM v."reportsToId"
+       OR boss."personId" IS DISTINCT FROM v."reportsToId"
        OR (m."status" = 'ACTIVE') <> v."active"`,
 };
 
@@ -128,11 +131,20 @@ export async function checkEventOne(client) {
     results.push({ name: `${table} rows without an event`, ok: n === 0, value: n });
   }
   for (const [table, person, membership] of MEMBERSHIP_COLUMNS) {
+    // The membership must be the same person's, in the row's own event.
     const n = await scalar(
       client,
-      `SELECT count(*) AS n FROM "${table}" WHERE "${person}" IS DISTINCT FROM "${membership}"`,
+      `SELECT count(*) AS n FROM "${table}" t
+       LEFT JOIN "EventMembership" m ON m."id" = t."${membership}"
+       WHERE (t."${person}" IS NULL) <> (t."${membership}" IS NULL)
+          OR (t."${membership}" IS NOT NULL
+              AND (m."personId" IS DISTINCT FROM t."${person}" OR m."eventId" IS DISTINCT FROM t."eventId"))`,
     );
-    results.push({ name: `${table}.${membership} differs from ${person}`, ok: n === 0, value: n });
+    results.push({
+      name: `${table}.${membership} is not ${person}'s membership`,
+      ok: n === 0,
+      value: n,
+    });
   }
   for (const [name, sql] of Object.entries(CHECKS)) {
     const n = await scalar(client, sql);

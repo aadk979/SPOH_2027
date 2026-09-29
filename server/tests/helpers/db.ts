@@ -81,8 +81,20 @@ export async function resetDatabase(): Promise<void> {
   await prisma.pushSubscription.deleteMany();
   await prisma.appSetting.deleteMany();
 
+  await prisma.stationTagging.deleteMany();
   await prisma.station.deleteMany();
+  await prisma.stationType.deleteMany();
+  await prisma.stationTag.deleteMany();
+  await prisma.shift.deleteMany();
+  await prisma.shiftTemplate.deleteMany();
+  await prisma.captureCategory.deleteMany();
   await prisma.eventDay.deleteMany();
+
+  // Event #1 and its memberships (P09.3/P09.4), before the people they name.
+  await prisma.eventMembership.updateMany({ data: { reportsToId: null } });
+  await prisma.eventMembership.deleteMany();
+  await prisma.organisationMembership.deleteMany();
+  await prisma.event.deleteMany();
 
   // Volunteers last: almost everything references them.
   await prisma.person.updateMany({ data: { reportsToId: null } });
