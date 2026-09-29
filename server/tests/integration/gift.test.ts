@@ -156,6 +156,51 @@ describe('out of stock', () => {
   });
 });
 
+/**
+ * A redemption synced from a phone's offline queue happened already: the gift
+ * is in the visitor's hands. Breaking a rule then is recorded and flagged for
+ * the IC, never refused (ADR-007 §5, F03-034). Online, the rules still refuse.
+ */
+describe('a queued redemption is recorded and flagged, not refused', () => {
+  it('records one past the stock and flags it', async () => {
+    await redeem(volunteer, { giftTypeId: scarceGiftId });
+    const late = await redeem(volunteer, { giftTypeId: scarceGiftId, queued: true });
+
+    expect(late.status).toBe(201);
+    expect(late.body.warning).toContain('out of stock');
+    const flagged = await prisma.giftRedemption.findMany({ where: { flag: { not: null } } });
+    expect(flagged.map((row) => row.flag)).toEqual(['OVER_STOCK']);
+  });
+
+  it('records a second gift against one card and flags it', async () => {
+    await redeem(volunteer, { cardShortCode: CARD });
+    const late = await redeem(volunteer, { cardShortCode: CARD, queued: true });
+
+    expect(late.status).toBe(201);
+    const rows = await prisma.giftRedemption.findMany({ orderBy: { recordedAt: 'asc' } });
+    expect(rows.map((row) => row.flag)).toEqual([null, 'SECOND_GIFT']);
+  });
+
+  it('flags nothing when a queued redemption breaks no rule', async () => {
+    const late = await redeem(volunteer, { queued: true });
+    expect(late.status).toBe(201);
+    expect(await prisma.giftRedemption.count({ where: { flag: { not: null } } })).toBe(0);
+  });
+
+  it('shows the IC the flagged redemption on the station dashboard', async () => {
+    await redeem(volunteer, { giftTypeId: scarceGiftId });
+    await redeem(volunteer, { giftTypeId: scarceGiftId, queued: true });
+
+    const board = await request(app)
+      .get(`/api/v1/dashboard/station/${stationId}`)
+      .set('Authorization', bearer(ic));
+    expect(board.status).toBe(200);
+    expect(board.body.flaggedRedemptions).toEqual([
+      expect.objectContaining({ giftTypeName: 'Last Badge', flag: 'OVER_STOCK' }),
+    ]);
+  });
+});
+
 describe('the card is a cross-check, never a gate', () => {
   it('redeems without a card at all', async () => {
     const response = await redeem(volunteer);

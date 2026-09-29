@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   assertInStock,
   checkPresentedCard,
+  stockFlag,
 } from '../../src/modules/gift/domain/redemptionRules.js';
 
 /** Gift redemption rules (P06.5): the only hard stop is running out. */
@@ -13,6 +14,21 @@ describe('assertInStock', () => {
     expect(() => assertInStock({ name: 'Tote' }, 1)).not.toThrow();
     expect(() => assertInStock({ name: 'Tote' }, 0)).toThrow(
       expect.objectContaining({ code: 'GIFT_OUT_OF_STOCK', statusCode: 409 }),
+    );
+  });
+});
+
+describe('stockFlag (ADR-007 §5, F03-034)', () => {
+  it('flags a queued redemption past the stock instead of refusing it', () => {
+    expect(stockFlag({ name: 'Tote' }, 1, true)).toBeNull();
+    expect(stockFlag({ name: 'Tote' }, 0, true)).toBe('OVER_STOCK');
+    expect(stockFlag({ name: 'Tote' }, -2, true)).toBe('OVER_STOCK');
+  });
+
+  it('still refuses online', () => {
+    expect(stockFlag({ name: 'Tote' }, 1, false)).toBeNull();
+    expect(() => stockFlag({ name: 'Tote' }, 0, false)).toThrow(
+      expect.objectContaining({ code: 'GIFT_OUT_OF_STOCK' }),
     );
   });
 });
@@ -48,6 +64,7 @@ describe('checkPresentedCard', () => {
       missionCardId,
       cardComplete,
       warning,
+      secondGift: false,
     });
   });
 
@@ -60,5 +77,9 @@ describe('checkPresentedCard', () => {
       checkPresentedCard({ card: card('COMPLETED'), alreadyRedeemed: true, acknowledged: true })
         .warning,
     ).toBe('Second gift redeemed against this card, confirmed by the volunteer.');
+    expect(
+      checkPresentedCard({ card: card('COMPLETED'), alreadyRedeemed: true, acknowledged: true })
+        .secondGift,
+    ).toBe(true);
   });
 });

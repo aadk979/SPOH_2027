@@ -9,6 +9,7 @@ function fixture(): Pick<LiveDashboardResponse, 'safety' | 'dataHealth'> {
       staleDevices: [],
       fallbackWindowOpen: false,
       withinEventHours: true,
+      flaggedRedemptions: [],
       asOf: '2026-09-28T02:00:00Z',
     },
   };

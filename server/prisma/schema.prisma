@@ -79,6 +79,12 @@ enum CommitteeRole {
 }
 
 /// Provenance of a captured row. Reports must never silently blend sources.
+/// Why a redemption synced from the offline queue needs an IC's attention.
+enum RedemptionFlag {
+  OVER_STOCK
+  SECOND_GIFT
+}
+
 enum DataSource {
   APP
   FALLBACK_SHEET
@@ -481,6 +487,8 @@ model GiftRedemption {
   recordedAt     DateTime   @default(now()) @db.Timestamptz(3)
   idempotencyKey String     @unique
   voided         Boolean    @default(false)
+  /// Set when a queued redemption broke a rule on sync (ADR-007 §5, F03-034).
+  flag           RedemptionFlag?
 
   giftType    GiftType     @relation(fields: [giftTypeId], references: [id])
   missionCard MissionCard? @relation(fields: [missionCardId], references: [id])
@@ -488,6 +496,7 @@ model GiftRedemption {
   recordedBy  Volunteer    @relation(fields: [recordedById], references: [id])
 
   @@index([giftTypeId, recordedAt])
+  @@index([flag, recordedAt])
 }
 
 model GiftStockAdjustment {

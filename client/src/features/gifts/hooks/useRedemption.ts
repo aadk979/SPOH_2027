@@ -2,8 +2,14 @@ import { useCallback, useState } from 'react';
 import type { Tone } from '@/shared/ui';
 import { useMe } from '@/features/session';
 import { useCardScanner } from '@/features/capture';
-import { ApiError } from '@/shared/lib/apiErrors';
-import { useGifts, redeemGift } from '@/features/gifts';
+import { sendOrQueue } from '@/shared/lib/sendOrQueue';
+import { useGifts } from '../queries';
+import { giftEndpoints, redeemGift } from '../api';
+import {
+  QUEUED_REDEMPTION,
+  redemptionFailureMessage,
+  redemptionMessage,
+} from '../model/redemptionMessage';
 export function useRedemption(enabled: boolean) {
   const { data: me } = useMe();
   const [selected, setSelected] = useState<string | null>(null);
@@ -21,33 +27,30 @@ export function useRedemption(enabled: boolean) {
       setMessage(null);
 
       try {
-        const result = await redeemGift({
+        const body = {
           giftTypeId: selected,
           stationId: station.id,
           ...(cardShortCode ? { cardShortCode } : {}),
           idempotencyKey: crypto.randomUUID(),
           clientRecordedAt: new Date().toISOString(),
+        };
+        const outcome = await sendOrQueue({
+          endpoint: giftEndpoints.redemptions,
+          body,
+          // Synced later, the gift was already handed over (ADR-007 §5).
+          queuedBody: { ...body, queued: true },
+          send: () => redeemGift(body),
         });
+        if (outcome.status === 'queued') {
+          setMessage(QUEUED_REDEMPTION);
+          return;
+        }
 
         navigator.vibrate?.(15);
         await gifts.refetch();
-
-        setMessage(
-          result.warning
-            ? { tone: 'warn', text: result.warning }
-            : {
-                tone: 'ok',
-                text: `${result.giftType.name} redeemed. ${result.giftType.remaining} left.`,
-              },
-        );
+        setMessage(redemptionMessage(outcome.response));
       } catch (error) {
-        setMessage({
-          tone: 'alert',
-          text:
-            error instanceof ApiError
-              ? error.message
-              : 'Could not reach the server. Hand over the gift and tell your IC.',
-        });
+        setMessage(redemptionFailureMessage(error));
       } finally {
         setPending(false);
       }

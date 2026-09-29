@@ -14,10 +14,16 @@ import {
   lockGiftType,
   totalsForGiftType,
 } from '../data/repo.js';
-import { assertInStock, checkPresentedCard, type CardCheck } from '../domain/redemptionRules.js';
+import { checkPresentedCard, stockFlag, type CardCheck } from '../domain/redemptionRules.js';
+import type { RedemptionFlag } from '@spoh/shared';
 import { notifyLowStock } from './notifyLowStock.js';
 
-const NO_CARD: CardCheck = { missionCardId: null, cardComplete: null, warning: null };
+const NO_CARD: CardCheck = {
+  missionCardId: null,
+  cardComplete: null,
+  warning: null,
+  secondGift: false,
+};
 
 /** Check the card the visitor presented, if they gave a code at all. */
 async function checkCard(tx: PrismaTransactionClient, request: RedeemGiftRequest) {
@@ -30,7 +36,8 @@ async function checkCard(tx: PrismaTransactionClient, request: RedeemGiftRequest
     alreadyRedeemed: usable
       ? (await existingRedemptionForCards(tx, await findJourneyCardIds(tx, card.id))) !== null
       : false,
-    acknowledged: request.acknowledgeWarning ?? false,
+    // A queued redemption was handed over already; a second gift is flagged, not refused.
+    acknowledged: (request.acknowledgeWarning ?? false) || request.queued,
   });
 }
 
@@ -59,52 +66,88 @@ function toResponse(result: {
   };
 }
 
+/** Why a queued redemption needs the IC, and what the desk is told about it. */
+function flagFor(
+  request: RedeemGiftRequest,
+  gift: { name: string; overStock: boolean },
+  check: CardCheck,
+): { flag: RedemptionFlag | null; warning: string | null } {
+  if (gift.overStock) {
+    return {
+      flag: 'OVER_STOCK',
+      warning: `${gift.name} was out of stock; this gift is recorded and flagged for your IC.`,
+    };
+  }
+  return {
+    flag: request.queued && check.secondGift ? 'SECOND_GIFT' : null,
+    warning: check.warning,
+  };
+}
+
+interface RecordInput {
+  request: RedeemGiftRequest;
+  stationId: string;
+  context: CaptureContext;
+  recordedAt: Date;
+}
+
+/** Lock the gift type, check stock and card, write the redemption and its audit row. */
+async function recordRedemption(tx: PrismaTransactionClient, input: RecordInput) {
+  const { request, stationId, context, recordedAt } = input;
+  // Gift type first, then the card (in checkCard): one order, so no deadlock.
+  await lockGiftType(tx, request.giftTypeId);
+  const giftType = await findGiftType(request.giftTypeId, tx);
+  if (!giftType) throw new NotFoundError('Gift type');
+  const before = await totalsForGiftType(tx, giftType.id);
+  const remaining = giftType.initialStock + before.adjustment - before.redeemed;
+  // Stock before the card, as before: online, running out is the answer the desk gets first.
+  const overStock = stockFlag(giftType, remaining, request.queued) !== null;
+  const card = await checkCard(tx, request);
+  const { flag, warning } = flagFor(request, { name: giftType.name, overStock }, card);
+  const check = { ...card, warning };
+
+  const redemption = await createRedemption(tx, {
+    giftTypeId: giftType.id,
+    missionCardId: check.missionCardId,
+    stationId,
+    recordedById: context.actor.volunteerId,
+    recordedAt,
+    idempotencyKey: request.idempotencyKey,
+    source: 'APP',
+    flag,
+  });
+
+  await auditStationScopeBypass(tx, context.actor.stationScopeBypass, context.audit);
+  await writeAudit(tx, {
+    ...context.audit,
+    action: 'gift.redeem',
+    entityType: 'GiftRedemption',
+    entityId: redemption.id,
+    after: {
+      giftTypeId: giftType.id,
+      missionCardId: check.missionCardId,
+      stationId,
+      remainingAfter: remaining - 1,
+      warning,
+      flag,
+    },
+  });
+
+  const record = toGiftTypeRecord(giftType, await totalsForGiftType(tx, giftType.id));
+  return { redemption, record, check };
+}
+
 /** Hand over a gift at the Mission Complete desk and record it. */
 export async function redeemGift(
   request: RedeemGiftRequest,
-  { actor, audit, clock = systemClock }: CaptureContext,
+  context: CaptureContext,
 ): Promise<RedeemGiftResponse> {
   const station = await requireActiveStation(request.stationId);
-  const recordedAt = clock.now();
+  const recordedAt = (context.clock ?? systemClock).now();
 
-  const result = await prisma.$transaction(async (tx) => {
-    // Gift type first, then the card (in checkCard): one order, so no deadlock.
-    await lockGiftType(tx, request.giftTypeId);
-    const giftType = await findGiftType(request.giftTypeId, tx);
-    if (!giftType) throw new NotFoundError('Gift type');
-    const before = await totalsForGiftType(tx, giftType.id);
-    const remaining = giftType.initialStock + before.adjustment - before.redeemed;
-    assertInStock(giftType, remaining);
-
-    const check = await checkCard(tx, request);
-    const redemption = await createRedemption(tx, {
-      giftTypeId: giftType.id,
-      missionCardId: check.missionCardId,
-      stationId: station.id,
-      recordedById: actor.volunteerId,
-      recordedAt,
-      idempotencyKey: request.idempotencyKey,
-      source: 'APP',
-    });
-
-    await auditStationScopeBypass(tx, actor.stationScopeBypass, audit);
-    await writeAudit(tx, {
-      ...audit,
-      action: 'gift.redeem',
-      entityType: 'GiftRedemption',
-      entityId: redemption.id,
-      after: {
-        giftTypeId: giftType.id,
-        missionCardId: check.missionCardId,
-        stationId: station.id,
-        remainingAfter: remaining - 1,
-        warning: check.warning,
-      },
-    });
-
-    const record = toGiftTypeRecord(giftType, await totalsForGiftType(tx, giftType.id));
-    return { redemption, record, check };
-  });
+  const result = await prisma.$transaction((tx) =>
+    recordRedemption(tx, { request, stationId: station.id, context, recordedAt }),
+  );
 
   // Low stock alerts are an IC duty in the deck; automating it beats relying on
   // someone noticing (§5).

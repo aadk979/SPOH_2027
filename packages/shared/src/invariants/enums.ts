@@ -51,6 +51,10 @@ export type CommitteeRole = z.infer<typeof CommitteeRole>;
 export const DataSource = z.enum(['APP', 'FALLBACK_SHEET', 'PAPER', 'MANUAL_ADJUSTMENT']);
 export type DataSource = z.infer<typeof DataSource>;
 
+/** Why a redemption synced from the offline queue needs an IC's attention (F03-034). */
+export const RedemptionFlag = z.enum(['OVER_STOCK', 'SECOND_GIFT']);
+export type RedemptionFlag = z.infer<typeof RedemptionFlag>;
+
 export const ShiftBlock = z.enum(['MORNING', 'AFTERNOON']);
 export type ShiftBlock = z.infer<typeof ShiftBlock>;
 

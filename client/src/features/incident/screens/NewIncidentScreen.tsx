@@ -78,6 +78,12 @@ export default function NewIncidentScreen(): ReactNode {
           </Callout>
         ) : null}
 
+        {form.queued ? (
+          <Callout tone="warn" role="alert">
+            Queued. If anyone is hurt or in danger, tell your IC now.
+          </Callout>
+        ) : null}
+
         <div>
           <Button
             type="submit"

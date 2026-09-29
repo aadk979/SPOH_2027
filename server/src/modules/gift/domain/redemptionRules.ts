@@ -1,4 +1,4 @@
-import { ERROR_CODES } from '@spoh/shared';
+import { ERROR_CODES, type RedemptionFlag } from '@spoh/shared';
 import { AppError } from '../../../platform/errors/index.js';
 
 /**
@@ -23,10 +23,27 @@ export function assertInStock(gift: { name: string }, remaining: number): void {
   }
 }
 
+/**
+ * Stock for a redemption. Online, running out is the hard stop above. From
+ * the offline queue the gift is already in the visitor's hands, so the record
+ * is kept and flagged for the IC instead (ADR-007 §5, F03-034).
+ */
+export function stockFlag(
+  gift: { name: string },
+  remaining: number,
+  queued: boolean,
+): RedemptionFlag | null {
+  if (remaining > 0) return null;
+  if (!queued) assertInStock(gift, remaining);
+  return 'OVER_STOCK';
+}
+
 export interface CardCheck {
   missionCardId: string | null;
   cardComplete: boolean | null;
   warning: string | null;
+  /** The journey already had a gift. */
+  secondGift: boolean;
 }
 
 /**
@@ -47,6 +64,7 @@ export function checkPresentedCard(presented: {
       missionCardId: null,
       cardComplete: null,
       warning: 'That card code was not found. The gift was still recorded.',
+      secondGift: false,
     };
   }
   if (card.status === 'VOIDED' || card.status === 'LOST') {
@@ -54,6 +72,7 @@ export function checkPresentedCard(presented: {
       missionCardId: card.id,
       cardComplete: null,
       warning: 'That card has been voided. Check with your IC before handing over a gift.',
+      secondGift: false,
     };
   }
   if (presented.alreadyRedeemed && !presented.acknowledged) {
@@ -69,5 +88,5 @@ export function checkPresentedCard(presented: {
     : cardComplete
       ? null
       : 'This card is not yet complete. Verify the stamps.';
-  return { missionCardId: card.id, cardComplete, warning };
+  return { missionCardId: card.id, cardComplete, warning, secondGift: presented.alreadyRedeemed };
 }

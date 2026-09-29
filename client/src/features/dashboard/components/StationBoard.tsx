@@ -6,6 +6,7 @@ import { StationRoster } from './StationRoster';
 import { StationCounters } from './StationCounters';
 import { DeviceRegistrations } from './DeviceRegistrations';
 import { StationTotals } from './StationTotals';
+import { FlaggedRedemptions } from './FlaggedRedemptions';
 
 /** One station's numbers, roster and per-device totals, or what to do before there are any. */
 export function StationBoard({
@@ -27,6 +28,8 @@ export function StationBoard({
   return (
     <>
       <StationTotals board={board} />
+
+      <FlaggedRedemptions flagged={board.flaggedRedemptions} />
 
       <div className="grid gap-lg lg:grid-cols-2">
         {board.registrations.byDevice.length > 0 ? <DeviceRegistrations board={board} /> : null}

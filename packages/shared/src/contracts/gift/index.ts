@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DataSource } from '../../invariants/enums.js';
+import { DataSource, RedemptionFlag } from '../../invariants/enums.js';
 import { CaptureEnvelope, Id, IsoDateTime, ReasonText, TimeRangeQuery } from '../common/index.js';
 import { CardShortCode } from '../missionCard/index.js';
 
@@ -48,6 +48,12 @@ export const RedeemGiftRequest = CaptureEnvelope.extend({
   cardShortCode: CardShortCode.optional(),
   /** Acknowledges a duplicate-redemption or incomplete-card warning. */
   acknowledgeWarning: z.boolean().default(false),
+  /**
+   * Sent from the phone's offline queue: the gift was already handed over, so
+   * a broken stock or one-per-journey rule is recorded and flagged for the IC
+   * rather than refused (ADR-007 §5, F03-034).
+   */
+  queued: z.boolean().default(false),
 }).strict();
 export type RedeemGiftRequest = z.infer<typeof RedeemGiftRequest>;
 
@@ -142,3 +148,17 @@ export const UpdateGiftTypeRequest = z
     message: 'supply at least one field to change',
   });
 export type UpdateGiftTypeRequest = z.infer<typeof UpdateGiftTypeRequest>;
+
+/** A queued redemption that broke a rule on sync, for the IC to follow up. */
+export const FlaggedRedemption = z
+  .object({
+    redemptionId: Id,
+    giftTypeName: z.string(),
+    stationId: Id,
+    stationName: z.string(),
+    recordedByName: z.string(),
+    flag: RedemptionFlag,
+    recordedAt: IsoDateTime,
+  })
+  .strict();
+export type FlaggedRedemption = z.infer<typeof FlaggedRedemption>;

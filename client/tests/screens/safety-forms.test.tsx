@@ -121,7 +121,7 @@ describe.each(forms)('$name form', (form) => {
     expect((screen.getByLabelText(form.label) as HTMLInputElement).value).toBe(form.value);
     expect(
       screen
-        .getByRole('button', { name: /Submit report|Log this item|Alert every volunteer now/ })
+        .getByRole('button', { name: /Submit report|Log this item|Send the alert now/ })
         .hasAttribute('disabled'),
     ).toBe(false);
   });

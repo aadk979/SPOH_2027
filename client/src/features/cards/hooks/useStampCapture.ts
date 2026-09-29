@@ -3,9 +3,9 @@ import type { MissionCardRecord } from '@spoh/shared';
 import type { Tone } from '@/shared/ui';
 import { useMe } from '@/features/session';
 import { useCardScanner } from '@/features/capture';
-import { ApiError } from '@/shared/lib/apiErrors';
-import { stampCard } from '@/features/cards';
-import { stampMessage } from '../model/stampMessage';
+import { sendOrQueue } from '@/shared/lib/sendOrQueue';
+import { cardEndpoints, stampCard } from '../api';
+import { QUEUED_STAMP, stampFailureMessage, stampMessage } from '../model/stampMessage';
 export function useStampCapture() {
   const { data: me } = useMe();
   const [card, setCard] = useState<MissionCardRecord | null>(null);
@@ -22,11 +22,22 @@ export function useStampCapture() {
       setMessage(null);
 
       try {
-        const result = await stampCard(shortCode, {
+        const body = {
           stationId: station.id,
           idempotencyKey: crypto.randomUUID(),
           clientRecordedAt: new Date().toISOString(),
+        };
+        const outcome = await sendOrQueue({
+          endpoint: cardEndpoints.stamps(shortCode),
+          body,
+          send: () => stampCard(shortCode, body),
         });
+        if (outcome.status === 'queued') {
+          setCard(null);
+          setMessage(QUEUED_STAMP);
+          return;
+        }
+        const result = outcome.response;
 
         setCard(result.card);
         navigator.vibrate?.(result.stampAdded ? 15 : [15, 60, 15]);
@@ -35,13 +46,7 @@ export function useStampCapture() {
         setMessage(stampMessage(result));
       } catch (error) {
         setCard(null);
-        setMessage({
-          tone: 'alert',
-          text:
-            error instanceof ApiError
-              ? error.message
-              : 'Could not reach the server. Stamp the card and carry on.',
-        });
+        setMessage(stampFailureMessage(error));
       } finally {
         setPending(false);
       }

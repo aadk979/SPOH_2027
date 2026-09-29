@@ -13,6 +13,7 @@ export function useLostPersonForm() {
 
   const [pending, setPending] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
 
   async function submit(event: FormEvent): Promise<void> {
     event.preventDefault();
@@ -33,9 +34,12 @@ export function useLostPersonForm() {
 
       router.replace('/home');
     } catch {
+      // Never queued (ADR-007 §5): a late alert teaches people to ignore alerts.
+      // The description stays for an explicit "send now".
       setFormError(
         'The alert could not be sent. Call your IC on the radio now — do not wait for this screen.',
       );
+      setFailed(true);
     } finally {
       setPending(false);
     }
@@ -44,6 +48,7 @@ export function useLostPersonForm() {
   return {
     ...fields,
     pending,
+    failed,
     formError:
       formError ??
       fields.errors.lastSeenStationId ??

@@ -12,6 +12,7 @@ import {
   openFallbackWindowExists,
 } from '../data/repo.js';
 import { staleDevices as staleDevicesOf } from '../domain/signals.js';
+import { flaggedRedemptions } from '../data/flaggedRedemptions.js';
 
 /**
  * Data health (PRODUCT_BRIEF §9) — the early warning that a station has quietly
@@ -26,10 +27,11 @@ export async function getDataHealth(now = new Date()): Promise<DataHealthRespons
   const blocks = activeShiftBlocks(now);
   const withinEventHours = blocks.length > 0;
 
-  const [footfall, fallbackWindowOpen, eventDay] = await Promise.all([
+  const [footfall, fallbackWindowOpen, eventDay, flagged] = await Promise.all([
     getLiveFootfall(now),
     openFallbackWindowExists(now),
     findEventDayOn(since),
+    flaggedRedemptions({ since, until: now }),
   ]);
 
   const silentStations = withinEventHours
@@ -69,5 +71,6 @@ export async function getDataHealth(now = new Date()): Promise<DataHealthRespons
     staleDevices,
     fallbackWindowOpen,
     withinEventHours,
+    flaggedRedemptions: flagged,
   };
 }

@@ -1,13 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { clientEnv } from '@/shared/lib/env';
-import { signOut } from '@/shared/lib/session';
 import { useCurrentSession } from '@/features/session';
 import { cx } from '@/shared/ui/cx';
 import { globalEntries } from '@/navigation';
+import { SignOutButton } from './SignOutButton';
 
 /**
  * The persistent top bar (design.md `global-nav`).
@@ -28,27 +28,8 @@ import { globalEntries } from '@/navigation';
  * e2e suite asserts it.
  */
 export function GlobalNav(): ReactNode {
-  const router = useRouter();
   const pathname = usePathname();
   const session = useCurrentSession();
-
-  /**
-   * Sign out on the server as well as locally.
-   *
-   * Dropping the in-memory token alone would leave the refresh cookie in place,
-   * and the next page load would silently restore the session — on a phone that
-   * has just been handed to somebody else, which is the exact moment this
-   * button gets pressed.
-   *
-   * The local token is dropped synchronously inside `signOut()`, so the UI is
-   * already signed out while the request is in flight. The redirect waits for
-   * that request: the cookie is httpOnly and only the server can clear it, and
-   * leaving before it does would let the next page load sign them straight back
-   * in — on a phone that has just been handed to somebody else.
-   */
-  function onSignOut(): void {
-    void signOut().finally(() => router.replace('/sign-in'));
-  }
 
   return (
     <nav
@@ -104,17 +85,9 @@ export function GlobalNav(): ReactNode {
           <span className="hidden max-w-[24ch] truncate text-on-dark-muted sm:inline">
             {session.displayName}
           </span>
-          <button
-            type="button"
-            onClick={onSignOut}
-            className={cx(
-              'min-h-[44px] whitespace-nowrap rounded-sm bg-tile-dark px-sm text-fine text-on-dark shrink-0',
-              'transition-[transform,background-color] duration-75 hover:bg-tile-dark-2 active:scale-[0.95]',
-              'focus-visible:outline-primary-on-dark',
-            )}
-          >
-            Sign out
-          </button>
+          {/* Sign out on the server as well as locally, and not past captures
+              still on the phone (useSignOutGuard). */}
+          <SignOutButton />
         </>
       ) : null}
     </nav>

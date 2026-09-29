@@ -58,7 +58,11 @@ export default function RaiseLostPersonScreen(): ReactNode {
             block
             disabled={pending || description.trim().length < 3}
           >
-            {pending ? 'Alerting everyone…' : 'Alert every volunteer now'}
+            {pending
+              ? 'Alerting everyone…'
+              : form.failed
+                ? 'Send the alert now'
+                : 'Alert every volunteer now'}
           </Button>
 
           <p className="mt-sm text-caption text-text-muted">

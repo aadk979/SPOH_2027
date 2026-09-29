@@ -11,6 +11,7 @@ import {
   stationRoster,
 } from '../data/repo.js';
 import { deviceRate } from '../domain/signals.js';
+import { flaggedRedemptions } from '../data/flaggedRedemptions.js';
 
 /**
  * The same picture scoped to one station, for an IC.
@@ -27,11 +28,12 @@ export async function getStationDashboard(
   if (!station) throw new NotFoundError('Station');
 
   const since = startOfEventDay(now);
-  const [registrations, footfall, stamps, roster] = await Promise.all([
+  const [registrations, footfall, stamps, roster, flagged] = await Promise.all([
     registrationsPanel(stationId, since, now),
     footfallPanel(stationId, since, now),
     stampsAtStation(stationId, since, now),
     rosterPanel(stationId, since),
+    flaggedRedemptions({ since, until: now, stationId }),
   ]);
 
   return {
@@ -41,6 +43,7 @@ export async function getStationDashboard(
     registrations,
     footfall,
     stamps,
+    flaggedRedemptions: flagged,
     roster,
   };
 }

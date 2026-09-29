@@ -3,7 +3,7 @@ import { ShiftBlock } from '../../invariants/enums.js';
 import { Id, IsoDateTime } from '../common/index.js';
 import { FootfallLiveStation } from '../footfall/index.js';
 import { FunnelStage } from '../missionCard/index.js';
-import { GiftTypeRecord } from '../gift/index.js';
+import { FlaggedRedemption, GiftTypeRecord } from '../gift/index.js';
 import { LongShiftWarning, StaffingGap } from '../shift/index.js';
 
 /**
@@ -100,6 +100,8 @@ export const DataHealthResponse = z
     fallbackWindowOpen: z.boolean(),
     /** Whether event hours are running; outside them, silence is expected. */
     withinEventHours: z.boolean(),
+    /** Today's queued redemptions that broke a rule on sync (F03-034). */
+    flaggedRedemptions: z.array(FlaggedRedemption),
   })
   .strict();
 export type DataHealthResponse = z.infer<typeof DataHealthResponse>;
@@ -176,6 +178,8 @@ export const StationDashboardResponse = z
       })
       .strict(),
     stamps: z.number().int().nonnegative(),
+    /** Today's queued redemptions here that broke a rule on sync (F03-034). */
+    flaggedRedemptions: z.array(FlaggedRedemption),
     roster: z.array(
       z
         .object({
