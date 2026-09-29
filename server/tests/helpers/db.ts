@@ -1,5 +1,7 @@
 import { env } from '../../src/config/env.js';
 import { prisma } from '../../src/platform/db/client.js';
+import { invalidateCurrentEvent } from '../../src/platform/event/currentEvent.js';
+import { invalidateVolunteerCache } from '../../src/platform/identity/index.js';
 
 /**
  * Test database helpers.
@@ -99,4 +101,7 @@ export async function resetDatabase(): Promise<void> {
   // Volunteers last: almost everything references them.
   await prisma.person.updateMany({ data: { reportsToId: null } });
   await prisma.person.deleteMany();
+
+  invalidateCurrentEvent();
+  invalidateVolunteerCache();
 }

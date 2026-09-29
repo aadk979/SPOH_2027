@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app/createApp.js';
 import { prisma } from '../../src/platform/db/client.js';
 import { resetDatabase } from '../helpers/db.js';
-import { createVolunteer } from '../helpers/fixtures.js';
+import { createVolunteer, deactivate } from '../helpers/fixtures.js';
 
 /**
  * Sessions, refresh and rotation.
@@ -87,10 +87,7 @@ describe('opening a session', () => {
   });
 
   it('refuses a deactivated account', async () => {
-    await prisma.person.updateMany({
-      where: { email: 'ic@spoh.test' },
-      data: { active: false },
-    });
+    await deactivate({ email: 'ic@spoh.test' });
 
     const response = await openSession('ic@spoh.test');
     expect(response.status).toBe(403);

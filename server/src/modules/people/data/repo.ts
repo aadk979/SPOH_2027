@@ -2,6 +2,8 @@ import type { ListVolunteersQuery } from '@spoh/shared';
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import { pageArgs } from '../../../platform/db/pagination.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
+import { mirrorMembership } from '../../../platform/db/membershipMirror.js';
 
 /** Data access for the people on the roster, as the admin screens see them. */
 
@@ -89,9 +91,16 @@ export async function findManagerOf(id: string): Promise<string | null> {
 
 export async function updateVolunteerRow(
   tx: PrismaTransactionClient,
+  scope: EventScope,
   change: { id: string; data: Prisma.PersonUncheckedUpdateInput },
 ): Promise<AdminRow> {
-  return tx.person.update({ where: { id: change.id }, data: change.data, select: adminSelect });
+  const row = await tx.person.update({
+    where: { id: change.id },
+    data: change.data,
+    select: adminSelect,
+  });
+  await mirrorMembership(tx, scope, change.id);
+  return row;
 }
 
 /**

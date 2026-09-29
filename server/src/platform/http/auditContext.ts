@@ -1,6 +1,7 @@
 import type { Request } from 'express';
 import { requestIdOf } from './requestId.js';
 import type { AuditContext } from '../audit/index.js';
+import type { EventScope } from '../db/eventScope.js';
 import { getAuth } from './requireAuth.js';
 
 /**
@@ -10,10 +11,23 @@ import { getAuth } from './requireAuth.js';
  * the request body — attribution that a client could set is not attribution
  * (BUILD_PLAN §8.5).
  */
+/** The caller's half of the context; nulls before sign-in. */
+function actorOf(
+  req: Request,
+): Pick<AuditContext, 'actorId' | 'actorSub' | 'eventId' | 'membershipId'> {
+  const auth = req.auth;
+  if (!auth) return { actorId: null, actorSub: null, eventId: null, membershipId: null };
+  return {
+    actorId: auth.volunteerId,
+    actorSub: auth.sub,
+    eventId: auth.eventId,
+    membershipId: auth.membershipId,
+  };
+}
+
 export function auditContextFrom(req: Request): AuditContext {
   return {
-    actorId: req.auth?.volunteerId ?? null,
-    actorSub: req.auth?.sub ?? null,
+    ...actorOf(req),
     ip: req.ip ?? null,
     // Truncated: a user-agent string is attacker-controlled and unbounded.
     userAgent: req.get('user-agent')?.slice(0, 512) ?? null,
@@ -25,6 +39,8 @@ export function auditContextFrom(req: Request): AuditContext {
 export const SYSTEM_AUDIT_CONTEXT: AuditContext = Object.freeze({
   actorId: null,
   actorSub: 'system',
+  eventId: null,
+  membershipId: null,
   ip: null,
   userAgent: null,
   requestId: null,
@@ -33,9 +49,16 @@ export const SYSTEM_AUDIT_CONTEXT: AuditContext = Object.freeze({
 /** Who is acting and the audit trail, for a use case that is not a capture. */
 export interface ActorContext {
   volunteerId: string;
+  /** The event the request works in (ADR-001 §2). */
+  scope: EventScope;
   audit: AuditContext;
 }
 
 export function actorContextFrom(req: Request): ActorContext {
-  return { volunteerId: getAuth(req).volunteerId, audit: auditContextFrom(req) };
+  const auth = getAuth(req);
+  return {
+    volunteerId: auth.volunteerId,
+    scope: { eventId: auth.eventId },
+    audit: auditContextFrom(req),
+  };
 }

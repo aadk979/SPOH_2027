@@ -5,7 +5,7 @@ import { createApp } from '../../src/app/createApp.js';
 import { env } from '../../src/config/env.js';
 import { prisma } from '../../src/platform/db/client.js';
 import { resetDatabase } from '../helpers/db.js';
-import { createVolunteer, type TestVolunteer } from '../helpers/fixtures.js';
+import { createVolunteer, removeFromRoster, type TestVolunteer } from '../helpers/fixtures.js';
 
 /**
  * Hosted sign-in: `GET /auth/login` and `GET /auth/callback` (P06.1).
@@ -185,7 +185,7 @@ describe('GET /auth/callback', () => {
 
   it('reports a person who is not on the roster', async () => {
     const { state, cookie } = await beginLogin();
-    await prisma.person.delete({ where: { id: volunteer.id } });
+    await removeFromRoster(volunteer.id);
     tokenEndpoint.mockResolvedValueOnce(tokenResponse(200, { access_token: volunteer.token }));
 
     const response = await callback(`code=abc&state=${state}`, cookie);

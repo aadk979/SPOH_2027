@@ -13,6 +13,7 @@ function actorFrom(req: Request): RosterActor {
   return {
     volunteerId: auth.volunteerId,
     role: auth.role,
+    scope: { eventId: auth.eventId },
     audit: auditContextFrom(req),
     mayProvision: auth.capabilities.includes('user.provision'),
   };

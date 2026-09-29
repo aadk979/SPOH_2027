@@ -41,7 +41,7 @@ export async function provisionVolunteer(
       });
 
   const volunteer = await prisma.$transaction(async (tx) => {
-    const { volunteer: row } = await upsertVolunteer(tx, {
+    const { volunteer: row } = await upsertVolunteer(tx, actor.scope, {
       cognitoSub: identity.sub,
       displayName: request.displayName,
       email: request.email,

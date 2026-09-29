@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma/client.js';
@@ -443,6 +444,28 @@ async function seedDevMissionCards(): Promise<void> {
   console.log(`      try card ${rows[0]?.shortCode}`);
 }
 
+/**
+ * Event #1 and memberships (P09.4, P09.5). On a fresh database the migration
+ * that turns today's data into Event #1 found nothing to migrate, so the seed
+ * runs the same SQL over what it just wrote. Then every person gets a
+ * membership of the event mirroring their roster row, so a re-run that adds
+ * someone, or makes the configured root an admin, is reflected there too.
+ */
+async function seedEventOne(): Promise<void> {
+  const backfill = new URL(
+    './migrations/20260930030000_event_one_backfill/migration.sql',
+    import.meta.url,
+  );
+  await prisma.$executeRawUnsafe(readFileSync(fileURLToPath(backfill), 'utf8'));
+  await prisma.$executeRawUnsafe(`
+    INSERT INTO "EventMembership" ("id", "eventId", "personId", "role", "portfolio", "status", "updatedAt")
+    SELECT gen_random_uuid()::text, e."id", v."id", v."role", v."portfolio",
+           CASE WHEN v."active" THEN 'ACTIVE' ELSE 'DEACTIVATED' END::"MembershipStatus", now()
+    FROM "Volunteer" v CROSS JOIN (SELECT "id" FROM "Event" ORDER BY "createdAt" LIMIT 1) e
+    ON CONFLICT ("eventId", "personId") DO UPDATE
+      SET "role" = EXCLUDED."role", "status" = EXCLUDED."status", "portfolio" = EXCLUDED."portfolio"`);
+}
+
 async function main(): Promise<void> {
   await seedEventDays();
   await seedStations();
@@ -462,6 +485,7 @@ async function main(): Promise<void> {
 
   // Apply last so a configured root matching a development fixture stays ADMIN.
   await seedAdmin();
+  await seedEventOne();
   console.log('seed: done');
 }
 

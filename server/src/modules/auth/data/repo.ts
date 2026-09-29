@@ -1,11 +1,20 @@
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /** Data access for refresh sessions and the volunteer rows they belong to. */
 
 export async function findVolunteerBySub(sub: string) {
   return prisma.person.findUnique({
     where: { cognitoSub: sub },
-    select: { id: true, displayName: true, role: true, active: true },
+    select: { id: true, displayName: true },
+  });
+}
+
+/** A person's membership of the event: where role and standing live (ADR-001 §1). */
+export async function findMembership(scope: EventScope, personId: string) {
+  return prisma.eventMembership.findUnique({
+    where: { eventId_personId: { eventId: scope.eventId, personId } },
+    select: { id: true, role: true, status: true },
   });
 }
 
@@ -33,10 +42,15 @@ export async function createRefreshSession(
 
 export async function touchVolunteer(
   tx: PrismaTransactionClient,
-  id: string,
-  at: Date,
+  scope: EventScope,
+  visit: { id: string; at: Date },
 ): Promise<void> {
+  const { id, at } = visit;
   await tx.person.update({ where: { id }, data: { lastSeenAt: at } });
+  await tx.eventMembership.updateMany({
+    where: { eventId: scope.eventId, personId: id },
+    data: { lastSeenAt: at },
+  });
 }
 
 export async function findSessionByTokenHash(tokenHash: string) {

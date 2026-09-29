@@ -7,6 +7,7 @@ import {
 } from '../errors/index.js';
 import { logger } from '../logger/index.js';
 import { prisma } from '../db/client.js';
+import { currentEvent } from '../event/currentEvent.js';
 import type { RequestAuth } from '../../types/express.js';
 import { verifyAccessToken } from './sessionTokens.js';
 import { createCognitoAuthProvider } from './cognitoProvider.js';
@@ -93,6 +94,9 @@ const SESSION_CACHE_TTL_MS = 60_000;
 interface CachedVolunteer {
   volunteerId: string;
   displayName: string;
+  /** The event this entry was resolved in; a different current event misses. */
+  eventId: string;
+  membershipId: string;
   role: RequestAuth['role'];
   active: boolean;
   expiresAt: number;
@@ -117,22 +121,35 @@ export function invalidateSessionCache(sessionId?: string): void {
   else sessionCache.delete(sessionId);
 }
 
+/**
+ * The person behind a subject and their membership of the current event: the
+ * role and standing come from the membership (ADR-001 §1). A person with no
+ * membership in this event is not provisioned for it.
+ */
 async function resolveVolunteer(sub: string): Promise<CachedVolunteer> {
+  const { eventId } = await currentEvent();
   const cached = volunteerCache.get(sub);
-  if (cached && cached.expiresAt > Date.now()) return cached;
+  if (cached && cached.expiresAt > Date.now() && cached.eventId === eventId) return cached;
 
   const volunteer = await prisma.person.findUnique({
     where: { cognitoSub: sub },
-    select: { id: true, displayName: true, role: true, active: true },
+    select: { id: true, displayName: true },
   });
-
   if (!volunteer) throw new NotProvisionedError();
+
+  const membership = await prisma.eventMembership.findUnique({
+    where: { eventId_personId: { eventId, personId: volunteer.id } },
+    select: { id: true, role: true, status: true },
+  });
+  if (!membership) throw new NotProvisionedError();
 
   const entry: CachedVolunteer = {
     volunteerId: volunteer.id,
     displayName: volunteer.displayName,
-    role: volunteer.role,
-    active: volunteer.active,
+    eventId,
+    membershipId: membership.id,
+    role: membership.role,
+    active: membership.status === 'ACTIVE',
     expiresAt: Date.now() + VOLUNTEER_CACHE_TTL_MS,
   };
 
@@ -221,6 +238,8 @@ export async function authenticate(token: string, requestId?: string): Promise<R
     groups,
     role,
     volunteerId: volunteer.volunteerId,
+    eventId: volunteer.eventId,
+    membershipId: volunteer.membershipId,
     displayName: volunteer.displayName,
     capabilities: capabilitiesForRole(role),
     ...(sessionId ? { sessionId } : {}),

@@ -36,6 +36,24 @@ async function totals(): Promise<Array<{ name: string; ok: boolean; value: numbe
   }
 }
 
+/**
+ * Fixtures create their rows in a test event (P09.5). Strip what P09 added, so
+ * the rows look as production's did before this migration.
+ */
+async function asLegacyRows(): Promise<void> {
+  for (const table of ['EventDay', 'Station', 'ShiftAssignment', 'Registration']) {
+    await prisma.$executeRawUnsafe(`UPDATE "${table}" SET "eventId" = NULL`);
+  }
+  await prisma.$executeRawUnsafe('UPDATE "Station" SET "typeId" = NULL');
+  await prisma.eventMembership.updateMany({ data: { reportsToId: null } });
+  await prisma.eventMembership.deleteMany();
+  await prisma.shift.deleteMany();
+  await prisma.shiftTemplate.deleteMany();
+  await prisma.stationType.deleteMany();
+  await prisma.captureCategory.deleteMany();
+  await prisma.event.deleteMany();
+}
+
 beforeAll(async () => {
   await resetDatabase();
   const day = await createEventDayToday();
@@ -81,6 +99,7 @@ beforeAll(async () => {
     data: { action: 'test.action', entityType: 'Test', actorId: ic.id },
   });
 
+  await asLegacyRows();
   await prisma.$executeRawUnsafe(MIGRATION);
 });
 

@@ -1,8 +1,9 @@
 import type { SessionResponse } from '@spoh/shared';
 import { AccountInactiveError, NotProvisionedError } from '../../../platform/errors/index.js';
+import { currentEvent } from '../../../platform/event/currentEvent.js';
 import { issueAccessToken } from '../../../platform/identity/index.js';
 import { toSessionResponse } from '../data/mappers.js';
-import { findVolunteerBySub } from '../data/repo.js';
+import { findMembership, findVolunteerBySub } from '../data/repo.js';
 
 export interface SessionContext {
   userAgent: string | null;
@@ -17,16 +18,20 @@ export interface OpenedSession {
 }
 
 /**
- * The roster row behind a subject. Being able to authenticate and being
- * allowed in are different questions (BUILD_PLAN §6.2).
+ * The person behind a subject, with their role in the current event. Being
+ * able to authenticate and being allowed in are different questions
+ * (BUILD_PLAN §6.2): the membership of the event answers the second.
  */
 export async function loadVolunteer(sub: string) {
   const volunteer = await findVolunteerBySub(sub);
-
   if (!volunteer) throw new NotProvisionedError();
-  if (!volunteer.active) throw new AccountInactiveError();
 
-  return volunteer;
+  const scope = await currentEvent();
+  const membership = await findMembership(scope, volunteer.id);
+  if (!membership) throw new NotProvisionedError();
+  if (membership.status !== 'ACTIVE') throw new AccountInactiveError();
+
+  return { ...volunteer, role: membership.role, scope: { eventId: scope.eventId } };
 }
 
 /** Mint the access token for a stored session and describe it to the client. */

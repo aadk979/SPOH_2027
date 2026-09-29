@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-29T08:52:10.673Z",
+  "updatedAt": "2026-09-29T12:44:19.704Z",
   "current": {
     "phase": "P09",
-    "step": "P09.4"
+    "step": "P09.5"
   },
   "gates": [
     {
@@ -1697,7 +1697,12 @@
           "startedAt": "2026-09-29T08:43:49.981Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-09-29T12:44:19.588Z",
+              "text": "Staging seeded with the production-shape fixture through the one-off seed task (56a0c3e). Cost report due after 3 days of running."
+            }
+          ]
         },
         {
           "id": "P08.11",
@@ -1780,14 +1785,18 @@
             {
               "at": "2026-09-29T08:52:10.673Z",
               "text": "Backfill migration 20260930030000_event_one_backfill + totals.mjs (membership columns checked through the membership). Integration test (legacy rows -> zero differences, idempotent); totals 0 on local production-shape and development-fixture rehearsals and inside the image. Browser DBs show only post-backfill rows without event (app writes new columns from P09.5): P09.5 ends with a catch-up backfill and a totals re-run. Open: staging run; owner-supplied production dump (D-13)."
+            },
+            {
+              "at": "2026-09-29T12:44:19.496Z",
+              "text": "Staging: seeded (production shape) then released; totals 58/58 ok, zero differences (reports/P09/staging-totals.md). Remaining: the owner-supplied production dump (D-13)."
             }
           ]
         },
         {
           "id": "P09.5",
           "title": "Switch reads and writes to the new model",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-29T12:44:19.704Z",
           "completedAt": null,
           "commits": [],
           "notes": []

@@ -4,6 +4,8 @@ import type { Prisma, Person } from '../../../generated/prisma/client.js';
 type Volunteer = Person;
 export type { Volunteer };
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
+import { mirrorMembership } from '../../../platform/db/membershipMirror.js';
 
 /**
  * Data access for the committee roster.
@@ -23,6 +25,7 @@ export async function findVolunteerByEmail(
 
 export async function upsertVolunteer(
   tx: PrismaTransactionClient,
+  scope: EventScope,
   data: {
     cognitoSub: string;
     displayName: string;
@@ -46,6 +49,7 @@ export async function upsertVolunteer(
         reportsToId: data.reportsToId ?? existing.reportsToId,
       },
     });
+    await mirrorMembership(tx, scope, volunteer.id);
     return { volunteer, created: false };
   }
 
@@ -60,6 +64,7 @@ export async function upsertVolunteer(
       reportsToId: data.reportsToId ?? null,
     },
   });
+  await mirrorMembership(tx, scope, volunteer.id);
 
   return { volunteer, created: true };
 }
@@ -135,10 +140,12 @@ export async function existingSlots(volunteerIds: readonly string[]): Promise<Se
 
 export async function setManager(
   tx: PrismaTransactionClient,
+  scope: EventScope,
   link: { volunteerId: string; managerId: string },
 ): Promise<void> {
   await tx.person.update({
     where: { id: link.volunteerId },
     data: { reportsToId: link.managerId },
   });
+  await mirrorMembership(tx, scope, link.volunteerId);
 }

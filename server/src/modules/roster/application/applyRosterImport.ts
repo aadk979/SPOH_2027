@@ -1,18 +1,25 @@
 import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 import { setManager, upsertAssignment, upsertVolunteer } from '../data/repo.js';
 import type { RosterImportPlan } from '../domain/planRosterImport.js';
+
+interface RosterImportContext {
+  identities: ReadonlyMap<string, string>;
+  scope: EventScope;
+  audit: AuditContext;
+}
 
 /** Create or update each person, and audit a role change per person. */
 async function applyPeople(
   tx: PrismaTransactionClient,
   plan: RosterImportPlan,
-  context: { identities: ReadonlyMap<string, string>; audit: AuditContext },
+  context: RosterImportContext,
 ): Promise<Map<string, string>> {
   const ids = new Map<string, string>();
   for (const step of plan.people) {
     const { row } = step;
-    const { volunteer } = await upsertVolunteer(tx, {
+    const { volunteer } = await upsertVolunteer(tx, context.scope, {
       cognitoSub: context.identities.get(row.email) ?? `pending:${row.email}`,
       displayName: row.displayName,
       email: row.email,
@@ -40,11 +47,11 @@ async function applyPeople(
 export async function applyRosterImport(
   tx: PrismaTransactionClient,
   plan: RosterImportPlan,
-  context: { identities: ReadonlyMap<string, string>; audit: AuditContext },
+  context: RosterImportContext,
 ): Promise<void> {
   const ids = await applyPeople(tx, plan, context);
   for (const link of plan.links) {
-    await setManager(tx, {
+    await setManager(tx, context.scope, {
       volunteerId: ids.get(link.email) as string,
       managerId: link.managerId ?? (ids.get(link.managerEmail) as string),
     });

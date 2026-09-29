@@ -25,7 +25,7 @@ export async function importRoster(
 
   const identities = await mintIdentities(request.rows, snapshot.accounts);
   await prisma.$transaction(async (tx) => {
-    await applyRosterImport(tx, plan, { identities, audit: actor.audit });
+    await applyRosterImport(tx, plan, { identities, scope: actor.scope, audit: actor.audit });
     await writeAudit(tx, {
       ...actor.audit,
       action: 'roster.import',

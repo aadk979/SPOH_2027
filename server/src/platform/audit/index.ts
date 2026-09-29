@@ -76,6 +76,10 @@ export interface AuditContext {
   actorId: string | null;
   /** Identity-provider subject, kept even if the volunteer row is later removed. */
   actorSub: string | null;
+  /** The event the action happened in; null for organisation-level and system actions. */
+  eventId: string | null;
+  /** The actor's EventMembership in that event. */
+  membershipId: string | null;
   ip: string | null;
   userAgent: string | null;
   requestId: string | null;
@@ -100,6 +104,8 @@ export async function writeAudit(tx: PrismaTransactionClient, entry: AuditEntry)
     data: {
       actorId: entry.actorId,
       actorSub: entry.actorSub,
+      eventId: entry.eventId,
+      membershipId: entry.membershipId,
       action: entry.action,
       entityType: entry.entityType,
       entityId: entry.entityId,

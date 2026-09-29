@@ -64,7 +64,7 @@ export async function updateVolunteer(
   const roleChanged = patch.role !== undefined && patch.role !== target.role;
 
   const updated = await prisma.$transaction(async (tx) => {
-    const row = await updateVolunteerRow(tx, { id, data: toUpdate(patch) });
+    const row = await updateVolunteerRow(tx, actor.scope, { id, data: toUpdate(patch) });
     await writeAudit(tx, {
       ...actor.audit,
       action: 'user.update',

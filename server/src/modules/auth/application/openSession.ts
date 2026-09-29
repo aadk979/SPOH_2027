@@ -44,7 +44,7 @@ export async function openSession(
       expiresAt,
     });
 
-    await touchVolunteer(tx, volunteer.id, now);
+    await touchVolunteer(tx, volunteer.scope, { id: volunteer.id, at: now });
 
     await writeAudit(tx, {
       ...audit,

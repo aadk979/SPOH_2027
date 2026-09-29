@@ -16,6 +16,10 @@ export interface RequestAuth {
   role: CommitteeRole;
   /** `Volunteer.id`, resolved from `sub`. */
   volunteerId: string;
+  /** The event this request works in (ADR-001; the current event until P09.7). */
+  eventId: string;
+  /** The caller's EventMembership in that event, where role and standing live. */
+  membershipId: string;
   displayName: string;
   /** Capabilities granted by `role`, computed from the shared matrix. */
   capabilities: Capability[];

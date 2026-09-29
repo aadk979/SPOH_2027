@@ -15,7 +15,12 @@ import { updateVolunteer } from '../application/updateVolunteer.js';
 
 function managerFrom(req: Request): ManagerContext {
   const auth = getAuth(req);
-  return { volunteerId: auth.volunteerId, role: auth.role, audit: auditContextFrom(req) };
+  return {
+    volunteerId: auth.volunteerId,
+    role: auth.role,
+    scope: { eventId: auth.eventId },
+    audit: auditContextFrom(req),
+  };
 }
 
 const idOf = (req: Request): string => validatedParams<{ id: string }>(req).id;

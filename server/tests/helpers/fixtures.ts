@@ -2,6 +2,9 @@ import { createHash, randomUUID } from 'node:crypto';
 import type { CommitteeRole, ShiftBlock } from '@spoh/shared';
 import { env } from '../../src/config/env.js';
 import { prisma } from '../../src/platform/db/client.js';
+import type { EventScope } from '../../src/platform/db/eventScope.js';
+import { mirrorMembership } from '../../src/platform/db/membershipMirror.js';
+import { createEvent } from '../../src/modules/event/index.js';
 import { createLocalAuthProvider } from '../../src/platform/identity/localProvider.js';
 import { invalidateVolunteerCache } from '../../src/platform/identity/index.js';
 import { eventDayAnchor, singaporeDateString } from '../../src/platform/time/index.js';
@@ -28,15 +31,69 @@ export interface TestVolunteer {
   token: string;
 }
 
+const TEST_EVENT_SLUG = 'test-event';
+
+/**
+ * The event every fixture belongs to, created on first use through the same
+ * factory production uses (P09.5), with today's taxonomy.
+ */
+export async function testEvent(): Promise<EventScope> {
+  const existing = await prisma.event.findFirst({
+    where: { slug: TEST_EVENT_SLUG },
+    select: { id: true },
+  });
+  if (existing) return { eventId: existing.id };
+
+  const organisation = await prisma.organisation.upsert({
+    where: { slug: 'test-organisation' },
+    create: {
+      slug: 'test-organisation',
+      name: 'Test Organisation',
+      appName: 'Test Ops',
+      defaultTimezone: 'Asia/Singapore',
+    },
+    update: {},
+    select: { id: true },
+  });
+  const event = await createEvent({
+    organisationId: organisation.id,
+    slug: TEST_EVENT_SLUG,
+    name: 'Test Event',
+    timezone: 'Asia/Singapore',
+    status: 'LIVE',
+    categories: [
+      { code: 'SEC_1', label: 'Sec 1' },
+      { code: 'SEC_2', label: 'Sec 2' },
+      { code: 'SEC_3', label: 'Sec 3' },
+      { code: 'SEC_4', label: 'Sec 4' },
+      { code: 'SEC_5', label: 'Sec 5' },
+      { code: 'GRADUATED_AWAITING_RESULTS', label: 'Graduated, awaiting results' },
+      { code: 'PARENT_GUARDIAN', label: 'Parent / Guardian' },
+      { code: 'OTHER', label: 'Other' },
+    ],
+    stationTypes: [
+      { code: 'SIGNUP_BOOTH', label: 'Sign-up booth', registersVisitors: true },
+      { code: 'MISSION_COMPLETE', label: 'Mission complete', redeemsGifts: true },
+      { code: 'OTHER', label: 'Other' },
+    ],
+    shiftTemplates: [
+      { code: 'MORNING', label: 'Morning', startLocal: '09:30', endLocal: '14:00' },
+      { code: 'AFTERNOON', label: 'Afternoon', startLocal: '13:30', endLocal: '18:00' },
+    ],
+  });
+  return { eventId: event.id };
+}
+
 function subFor(email: string): string {
   return `local:${createHash('sha256').update(email).digest('hex').slice(0, 32)}`;
 }
 
 export async function createEventDayToday(): Promise<{ id: string }> {
+  const { eventId } = await testEvent();
   const date = eventDayAnchor(singaporeDateString());
   return prisma.eventDay.upsert({
     where: { date },
-    create: { date, label: 'Test Day', isPublicDay: true, isTourDay: false },
+    create: { eventId, date, label: 'Test Day', isPublicDay: true, isTourDay: false },
     update: {},
     select: { id: true },
   });
@@ -49,9 +106,11 @@ export async function createStation(overrides: {
   issuesStamp?: boolean;
   active?: boolean;
 }): Promise<{ id: string; code: string }> {
+  const { eventId } = await testEvent();
   return prisma.station.upsert({
     where: { code: overrides.code },
     create: {
+      eventId,
       code: overrides.code,
       name: overrides.name ?? overrides.code,
       kind: 'OTHER',
@@ -82,6 +141,7 @@ export async function createVolunteer(input: {
     update: { role: input.role, active: true },
     select: { id: true },
   });
+  await mirrorMembership(prisma, await testEvent(), volunteer.id);
 
   // The auth middleware caches sub -> volunteer for 60 seconds; a fixture
   // rebuilt between tests must not be served from a previous test's cache.
@@ -143,4 +203,24 @@ export function idempotencyKey(): string {
 
 export function bearer(volunteer: TestVolunteer): string {
   return `Bearer ${volunteer.token}`;
+}
+
+/** Take someone off the roster entirely: their memberships, then the person. */
+export async function removeFromRoster(personId: string): Promise<void> {
+  await prisma.eventMembership.deleteMany({
+    where: { eventId: (await testEvent()).eventId, personId },
+  });
+  await prisma.person.delete({ where: { id: personId } });
+  invalidateVolunteerCache();
+}
+
+/** Deactivate someone as the roster does: the person, mirrored onto the membership. */
+export async function deactivate(where: { id: string } | { email: string }): Promise<void> {
+  const person = await prisma.person.update({
+    where,
+    data: { active: false },
+    select: { id: true },
+  });
+  await mirrorMembership(prisma, await testEvent(), person.id);
+  invalidateVolunteerCache();
 }

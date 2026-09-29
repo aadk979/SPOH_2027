@@ -41,3 +41,6 @@ export * from './contracts/settings/index.js';
 export * from './contracts/notification/index.js';
 export * from './contracts/media/index.js';
 export * from './contracts/attendance/index.js';
+
+// Wall-clock time in an event's timezone (ADR-007 §7).
+export * from './time/index.js';

@@ -24,6 +24,8 @@
     "test:unit": "vitest run --passWithNoTests"
   },
   "dependencies": {
+    "@date-fns/tz": "^1.5.0",
+    "date-fns": "^4.4.0",
     "zod": "^4.5.4"
   },
   "devDependencies": {
