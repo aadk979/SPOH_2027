@@ -364,6 +364,7 @@ describe('runtime settings', () => {
    * change has to actually take effect.
    */
   it('applies a changed shift boundary to the running server', async () => {
+    const day = await createEventDayToday();
     await request(app)
       .patch('/api/v1/admin/settings')
       .set('Authorization', bearer(chief))
@@ -376,6 +377,16 @@ describe('runtime settings', () => {
       .expect(200);
 
     expect(getSettings().shiftBlocks.MORNING.start).toBe('06:00');
+    // The event's templates and today's shifts follow (P09.5), in its timezone.
+    const morning = await prisma.shift.findFirstOrThrow({
+      where: {
+        eventId: (await testEvent()).eventId,
+        eventDayId: day.id,
+        template: { code: 'MORNING' },
+      },
+    });
+    expect(morning.startsAt.toISOString()).toBe('2027-01-06T22:00:00.000Z');
+    expect(morning.endsAt.toISOString()).toBe('2027-01-06T23:00:00.000Z');
   });
 
   it('rejects a shift block that ends before it starts', async () => {
@@ -505,6 +516,7 @@ describe('stations, days and gifts', () => {
 
     const assignment = await prisma.shiftAssignment.create({
       data: {
+        eventId: (await testEvent()).eventId,
         volunteerId: volunteer.id,
         stationId: station.id,
         eventDayId: day.id,

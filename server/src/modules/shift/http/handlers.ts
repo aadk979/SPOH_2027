@@ -7,7 +7,7 @@ import type {
 } from '@spoh/shared';
 import { actorContextFrom } from '../../../platform/http/auditContext.js';
 import { validatedBody, validatedParams, validatedQuery } from '../../../platform/http/validate.js';
-import { getAuth } from '../../../platform/http/requireAuth.js';
+import { getAuth, scopeOf } from '../../../platform/http/requireAuth.js';
 import { getBriefingSlots, markSlotComplete } from '../application/briefingSlots.js';
 import { decideSwap } from '../application/decideSwap.js';
 import { listMySwaps, listPendingSwaps } from '../application/listSwaps.js';
@@ -26,11 +26,11 @@ export async function requestSwapHandler(req: Request, res: Response): Promise<v
 }
 
 export async function mySwapsHandler(req: Request, res: Response): Promise<void> {
-  asList(res, await listMySwaps(getAuth(req).volunteerId));
+  asList(res, await listMySwaps(scopeOf(req), getAuth(req).volunteerId));
 }
 
-export async function pendingSwapsHandler(_req: Request, res: Response): Promise<void> {
-  asList(res, await listPendingSwaps());
+export async function pendingSwapsHandler(req: Request, res: Response): Promise<void> {
+  asList(res, await listPendingSwaps(scopeOf(req)));
 }
 
 export async function decideSwapHandler(req: Request, res: Response): Promise<void> {
@@ -40,7 +40,7 @@ export async function decideSwapHandler(req: Request, res: Response): Promise<vo
 
 export async function briefingSlotsHandler(req: Request, res: Response): Promise<void> {
   const query = validatedQuery<ListBriefingSlotsQuery>(req);
-  asList(res, await getBriefingSlots(query, getAuth(req).volunteerId));
+  asList(res, await getBriefingSlots(scopeOf(req), query, getAuth(req).volunteerId));
 }
 
 export async function completeSlotHandler(req: Request, res: Response): Promise<void> {
@@ -49,6 +49,6 @@ export async function completeSlotHandler(req: Request, res: Response): Promise<
   res.status(200).json({ slot: await markSlotComplete(idOf(req), body, actor) });
 }
 
-export async function staffingGapsHandler(_req: Request, res: Response): Promise<void> {
-  res.status(200).json(await getStaffingGaps());
+export async function staffingGapsHandler(req: Request, res: Response): Promise<void> {
+  res.status(200).json(await getStaffingGaps(scopeOf(req)));
 }

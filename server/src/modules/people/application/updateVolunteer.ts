@@ -1,22 +1,31 @@
-import type { UpdateVolunteerRequest, VolunteerMutationResponse } from '@spoh/shared';
+import type {
+  UpdateVolunteerRequest,
+  VolunteerAdminRecord,
+  VolunteerMutationResponse,
+} from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { invalidateVolunteerCache } from '../../../platform/identity/index.js';
 import { logger } from '../../../platform/logger/index.js';
 import { revokeAllForVolunteer } from '../../auth/index.js';
 import { identityProvider } from '../../../platform/identity/index.js';
 import { toAdminRecord } from '../data/mappers.js';
-import { findManager, findManagerOf, updateVolunteerRow, type AdminRow } from '../data/repo.js';
+import { findManager, findManagerOf, updateVolunteerRow } from '../data/repo.js';
 import { assertMayGrant, assertNoReportingCycle } from '../domain/escalation.js';
 import type { ManagerContext } from './context.js';
 import { loadTarget } from './queries.js';
 
-async function assertValidManager(volunteerId: string, managerId: string | undefined | null) {
+async function assertValidManager(
+  scope: EventScope,
+  link: { volunteerId: string; managerId: string | undefined | null },
+) {
+  const { volunteerId, managerId } = link;
   if (!managerId) return;
-  const manager = await findManager(managerId);
+  const manager = await findManager(scope, managerId);
   if (!manager?.active) throw new NotFoundError('Manager');
-  await assertNoReportingCycle({ volunteerId, managerId }, findManagerOf);
+  await assertNoReportingCycle({ volunteerId, managerId }, (id) => findManagerOf(scope, id));
 }
 
 function toUpdate(patch: UpdateVolunteerRequest) {
@@ -36,7 +45,7 @@ function toUpdate(patch: UpdateVolunteerRequest) {
  * is authoritative, so a failure there is a reconciliation problem, not a
  * failed edit.
  */
-async function afterRoleChange(updated: AdminRow): Promise<number> {
+async function afterRoleChange(updated: VolunteerAdminRecord): Promise<number> {
   const sessionsRevoked = await revokeAllForVolunteer(updated.id, 'role-changed');
   try {
     await identityProvider.ensureUser({
@@ -60,7 +69,7 @@ export async function updateVolunteer(
 ): Promise<VolunteerMutationResponse> {
   const target = await loadTarget(id, actor, 'edit');
   assertMayGrant(actor.role, patch.role);
-  await assertValidManager(id, patch.reportsToId);
+  await assertValidManager(actor.scope, { volunteerId: id, managerId: patch.reportsToId });
   const roleChanged = patch.role !== undefined && patch.role !== target.role;
 
   const updated = await prisma.$transaction(async (tx) => {
@@ -81,7 +90,8 @@ export async function updateVolunteer(
     return row;
   });
 
-  const sessionsRevoked = roleChanged ? await afterRoleChange(updated) : 0;
+  const volunteer = toAdminRecord(updated);
+  const sessionsRevoked = roleChanged ? await afterRoleChange(volunteer) : 0;
   invalidateVolunteerCache();
-  return { volunteer: toAdminRecord(updated), sessionsRevoked, identityChanged: roleChanged };
+  return { volunteer, sessionsRevoked, identityChanged: roleChanged };
 }

@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import type { ProvisionVolunteerRequest, RosterImportRequest } from '@spoh/shared';
 import { auditContextFrom } from '../../../platform/http/auditContext.js';
 import { validatedBody } from '../../../platform/http/validate.js';
-import { getAuth } from '../../../platform/http/requireAuth.js';
+import { getAuth, scopeOf } from '../../../platform/http/requireAuth.js';
 import { getMe } from '../../me/index.js';
 import type { RosterActor } from '../application/context.js';
 import { importRoster } from '../application/importRoster.js';
@@ -21,7 +21,7 @@ function actorFrom(req: Request): RosterActor {
 
 /** My own shifts. Same payload as `/me`, reachable from the shift screen. */
 export async function myShiftsHandler(req: Request, res: Response): Promise<void> {
-  const me = await getMe(getAuth(req).volunteerId);
+  const me = await getMe(scopeOf(req), getAuth(req).volunteerId);
   res.status(200).json({
     data: me.upcomingAssignments,
     meta: { count: me.upcomingAssignments.length, nextCursor: null },

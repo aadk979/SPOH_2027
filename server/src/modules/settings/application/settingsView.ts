@@ -2,6 +2,7 @@ import type { SettingsResponse, UpdateSettingsRequest } from '@spoh/shared';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { getSettings, settingsMeta, updateSettings } from '../../../platform/settings/index.js';
 import { findVolunteerName } from '../data/repo.js';
+import { applyShiftHours } from '../../eventDays/index.js';
 
 function withMeta(
   settings: SettingsResponse['settings'],
@@ -30,5 +31,6 @@ export async function updateSettingsView(
   actor: ActorContext & { displayName: string },
 ): Promise<SettingsResponse> {
   const settings = await updateSettings(patch, actor.volunteerId, actor.audit);
+  if (patch.shiftBlocks) await applyShiftHours(actor.scope, patch.shiftBlocks);
   return withMeta(settings, actor.displayName);
 }

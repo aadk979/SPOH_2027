@@ -13,6 +13,7 @@ import {
   createVolunteer,
   idempotencyKey,
   type TestVolunteer,
+  testEvent,
 } from '../../helpers/fixtures.js';
 
 /**
@@ -146,7 +147,13 @@ describe('no overlapping queries on a transaction connection (F03-019)', () => {
   it('checking in and out of a shift', async () => {
     const shift = await assignToStation({ volunteerId: owner.id, stationId, eventDayId: dayId });
     await prisma.attendance.create({
-      data: { volunteerId: owner.id, eventDayId: dayId, method: 'ROOT', presentAt: new Date() },
+      data: {
+        eventId: (await testEvent()).eventId,
+        volunteerId: owner.id,
+        eventDayId: dayId,
+        method: 'ROOT',
+        presentAt: new Date(),
+      },
     });
     const call = (path: string) => () =>
       request(app)

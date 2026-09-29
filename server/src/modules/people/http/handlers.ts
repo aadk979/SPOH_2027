@@ -6,7 +6,7 @@ import type {
 } from '@spoh/shared';
 import { auditContextFrom } from '../../../platform/http/auditContext.js';
 import { validatedBody, validatedParams, validatedQuery } from '../../../platform/http/validate.js';
-import { getAuth } from '../../../platform/http/requireAuth.js';
+import { getAuth, scopeOf } from '../../../platform/http/requireAuth.js';
 import type { ManagerContext } from '../application/context.js';
 import { deactivateVolunteer } from '../application/deactivateVolunteer.js';
 import { getVolunteer, listVolunteers } from '../application/queries.js';
@@ -26,12 +26,15 @@ function managerFrom(req: Request): ManagerContext {
 const idOf = (req: Request): string => validatedParams<{ id: string }>(req).id;
 
 export async function listVolunteersHandler(req: Request, res: Response): Promise<void> {
-  const { data, nextCursor } = await listVolunteers(validatedQuery<ListVolunteersQuery>(req));
+  const { data, nextCursor } = await listVolunteers(
+    scopeOf(req),
+    validatedQuery<ListVolunteersQuery>(req),
+  );
   res.status(200).json({ data, meta: { count: data.length, nextCursor } });
 }
 
 export async function getVolunteerHandler(req: Request, res: Response): Promise<void> {
-  res.status(200).json({ volunteer: await getVolunteer(idOf(req)) });
+  res.status(200).json({ volunteer: await getVolunteer(scopeOf(req), idOf(req)) });
 }
 
 export async function updateVolunteerHandler(req: Request, res: Response): Promise<void> {

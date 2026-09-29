@@ -1,7 +1,14 @@
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
+import { membershipIdOf } from '../../../platform/db/membershipMirror.js';
 
-/** Data access for swaps, briefing waves and staffing (PRODUCT_BRIEF §6). */
+/**
+ * Data access for swaps, briefing waves and staffing (PRODUCT_BRIEF §6). Every
+ * query names its event (ADR-001 §2).
+ */
+
+type Block = NonNullable<Prisma.ShiftAssignmentWhereInput['block']>;
 
 const swapInclude = {
   assignment: {
@@ -15,9 +22,16 @@ export type SwapWithContext = Prisma.ShiftSwapRequestGetPayload<{ include: typeo
 
 export async function createSwap(
   tx: PrismaTransactionClient,
-  data: Prisma.ShiftSwapRequestUncheckedCreateInput,
+  scope: EventScope,
+  data: { assignmentId: string; requesterId: string; targetId: string; reason: string | null },
 ): Promise<{ id: string }> {
-  return tx.shiftSwapRequest.create({ data, select: { id: true } });
+  // Sequential: parallel queries overlap on a transaction's connection (F03-019).
+  const requesterMembershipId = await membershipIdOf(tx, scope, data.requesterId);
+  const targetMembershipId = await membershipIdOf(tx, scope, data.targetId);
+  return tx.shiftSwapRequest.create({
+    data: { ...data, eventId: scope.eventId, requesterMembershipId, targetMembershipId },
+    select: { id: true },
+  });
 }
 
 /**
@@ -25,9 +39,13 @@ export async function createSwap(
  * follow-up query: an `include` of several relations loads them in parallel,
  * which on a transaction's single connection overlaps queries (F03-019).
  */
-export async function findSwapForDecision(tx: PrismaTransactionClient, id: string) {
+export async function findSwapForDecision(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  id: string,
+) {
   return tx.shiftSwapRequest.findUnique({
-    where: { id },
+    where: { id, eventId: scope.eventId },
     select: {
       id: true,
       status: true,
@@ -42,18 +60,23 @@ export async function findSwapForDecision(tx: PrismaTransactionClient, id: strin
 export type SwapForDecision = NonNullable<Awaited<ReturnType<typeof findSwapForDecision>>>;
 
 export async function findSwapById(
+  scope: EventScope,
   id: string,
   tx: PrismaTransactionClient = prisma,
 ): Promise<SwapWithContext | null> {
-  return tx.shiftSwapRequest.findUnique({ where: { id }, include: swapInclude });
+  return tx.shiftSwapRequest.findUnique({
+    where: { id, eventId: scope.eventId },
+    include: swapInclude,
+  });
 }
 
-export async function listSwaps(filter: {
-  status?: Prisma.ShiftSwapRequestWhereInput['status'];
-  volunteerId?: string;
-}): Promise<SwapWithContext[]> {
+export async function listSwaps(
+  scope: EventScope,
+  filter: { status?: Prisma.ShiftSwapRequestWhereInput['status']; volunteerId?: string },
+): Promise<SwapWithContext[]> {
   return prisma.shiftSwapRequest.findMany({
     where: {
+      eventId: scope.eventId,
       ...(filter.status ? { status: filter.status } : {}),
       ...(filter.volunteerId
         ? { OR: [{ requesterId: filter.volunteerId }, { targetId: filter.volunteerId }] }
@@ -71,41 +94,50 @@ export async function listSwaps(filter: {
  */
 export async function claimDecision(
   tx: PrismaTransactionClient,
+  scope: EventScope,
   decision: { swapId: string; status: 'APPROVED' | 'REJECTED'; decidedById: string },
 ): Promise<boolean> {
   const { count } = await tx.shiftSwapRequest.updateMany({
-    where: { id: decision.swapId, status: 'REQUESTED' },
-    data: { status: decision.status, decidedById: decision.decidedById, decidedAt: new Date() },
+    where: { eventId: scope.eventId, id: decision.swapId, status: 'REQUESTED' },
+    data: {
+      status: decision.status,
+      decidedById: decision.decidedById,
+      decidedByMembershipId: await membershipIdOf(tx, scope, decision.decidedById),
+      decidedAt: new Date(),
+    },
   });
   return count === 1;
 }
 
 /**
- * Move the assignment to the target volunteer. The unique key (volunteer, day,
- * block) means a target already working that block would collide — the use
- * case checks for that before it gets here.
+ * Move the assignment to the target volunteer, with the target's membership.
+ * The unique key (volunteer, day, block) means a target already working that
+ * block would collide — the use case checks for that before it gets here.
  */
 export async function moveAssignment(
   tx: PrismaTransactionClient,
+  scope: EventScope,
   move: { assignmentId: string; targetId: string },
 ): Promise<void> {
   await tx.shiftAssignment.update({
-    where: { id: move.assignmentId },
-    data: { volunteerId: move.targetId, checkedInAt: null, checkedOutAt: null },
+    where: { id: move.assignmentId, eventId: scope.eventId },
+    data: {
+      volunteerId: move.targetId,
+      membershipId: await membershipIdOf(tx, scope, move.targetId),
+      checkedInAt: null,
+      checkedOutAt: null,
+    },
   });
 }
 
 /** Is this volunteer already working that day and block? */
 export async function hasAssignmentInBlock(
   tx: PrismaTransactionClient,
-  input: {
-    volunteerId: string;
-    eventDayId: string;
-    block: Prisma.ShiftAssignmentWhereInput['block'];
-  },
+  scope: EventScope,
+  input: { volunteerId: string; eventDayId: string; block: Block },
 ): Promise<boolean> {
   const existing = await tx.shiftAssignment.findFirst({
-    where: input as Prisma.ShiftAssignmentWhereInput,
+    where: { eventId: scope.eventId, ...input },
     select: { id: true },
   });
   return existing !== null;
@@ -118,12 +150,13 @@ const slotInclude = {
 
 export type SlotWithContext = Prisma.BriefingSlotGetPayload<{ include: typeof slotInclude }>;
 
-export async function listBriefingSlots(filter: {
-  eventDayId?: string;
-  date?: Date;
-}): Promise<SlotWithContext[]> {
+export async function listBriefingSlots(
+  scope: EventScope,
+  filter: { eventDayId?: string; date?: Date },
+): Promise<SlotWithContext[]> {
   return prisma.briefingSlot.findMany({
     where: {
+      eventId: scope.eventId,
       ...(filter.eventDayId ? { eventDayId: filter.eventDayId } : {}),
       ...(filter.date ? { eventDay: { date: filter.date } } : {}),
     },
@@ -132,43 +165,55 @@ export async function listBriefingSlots(filter: {
   });
 }
 
-export async function findSlotById(id: string): Promise<SlotWithContext | null> {
-  return prisma.briefingSlot.findUnique({ where: { id }, include: slotInclude });
+export async function findSlotById(scope: EventScope, id: string): Promise<SlotWithContext | null> {
+  return prisma.briefingSlot.findFirst({
+    where: { eventId: scope.eventId, id },
+    include: slotInclude,
+  });
 }
 
 export async function completeSlot(
   tx: PrismaTransactionClient,
-  id: string,
-  notes: string | null,
+  scope: EventScope,
+  change: { id: string; notes: string | null },
 ): Promise<void> {
   await tx.briefingSlot.update({
-    where: { id },
-    data: { completedAt: new Date(), ...(notes ? { notes } : {}) },
+    where: { id: change.id, eventId: scope.eventId },
+    data: { completedAt: new Date(), ...(change.notes ? { notes: change.notes } : {}) },
   });
 }
 
+/** The template codes of the event's shifts running now: the blocks on duty. */
+export async function runningShiftCodes(
+  scope: EventScope,
+  running: Prisma.ShiftWhereInput,
+): Promise<string[]> {
+  const shifts = await prisma.shift.findMany({
+    where: { eventId: scope.eventId, ...running },
+    select: { template: { select: { code: true } } },
+  });
+  return [...new Set(shifts.map((shift) => shift.template.code))];
+}
+
 /**
- * Staffing per station for the blocks running now: how many are rostered, and
+ * Staffing per station for the shifts running now: how many are rostered, and
  * how many have actually checked in. The gap between those two numbers is the
  * no-show list.
  */
-export async function staffingByStation(input: {
-  eventDayId: string;
-  blocks: Array<Prisma.ShiftAssignmentWhereInput['block']>;
-}): Promise<
+export async function staffingByStation(
+  scope: EventScope,
+  running: Prisma.ShiftWhereInput,
+): Promise<
   Array<{
     stationId: string;
     stationName: string;
-    block: NonNullable<Prisma.ShiftAssignmentWhereInput['block']>;
+    block: Block;
     assigned: number;
     checkedIn: number;
   }>
 > {
   const assignments = await prisma.shiftAssignment.findMany({
-    where: {
-      eventDayId: input.eventDayId,
-      block: { in: input.blocks as never[] },
-    },
+    where: { eventId: scope.eventId, shift: running },
     select: {
       stationId: true,
       block: true,
@@ -180,7 +225,7 @@ export async function staffingByStation(input: {
 
   const byKey = new Map<
     string,
-    { stationId: string; stationName: string; block: never; assigned: number; checkedIn: number }
+    { stationId: string; stationName: string; block: Block; assigned: number; checkedIn: number }
   >();
 
   for (const assignment of assignments) {
@@ -188,7 +233,7 @@ export async function staffingByStation(input: {
     const entry = byKey.get(key) ?? {
       stationId: assignment.stationId,
       stationName: assignment.station.name,
-      block: assignment.block as never,
+      block: assignment.block,
       assigned: 0,
       checkedIn: 0,
     };
@@ -207,15 +252,18 @@ export async function staffingByStation(input: {
  * Anyone checked in for three hours or more without checking out — the welfare
  * signal from slide 39. A break nobody records is a break nobody can be
  * reminded to take.
- */
-/**
+ *
  * Open shifts checked in before `cutoff`, today only: a shift from an earlier
  * day that nobody checked out of is a record to tidy, not someone still
  * standing at a station (F03-023).
  */
-export async function longRunningShifts(window: { cutoff: Date; since: Date }) {
+export async function longRunningShifts(scope: EventScope, window: { cutoff: Date; since: Date }) {
   return prisma.shiftAssignment.findMany({
-    where: { checkedInAt: { lt: window.cutoff, gte: window.since }, checkedOutAt: null },
+    where: {
+      eventId: scope.eventId,
+      checkedInAt: { lt: window.cutoff, gte: window.since },
+      checkedOutAt: null,
+    },
     select: {
       volunteerId: true,
       checkedInAt: true,
@@ -226,26 +274,34 @@ export async function longRunningShifts(window: { cutoff: Date; since: Date }) {
 }
 
 /** The assignment a swap would give away. */
-export async function findAssignmentForSwap(tx: PrismaTransactionClient, id: string) {
+export async function findAssignmentForSwap(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  id: string,
+) {
   return tx.shiftAssignment.findUnique({
-    where: { id },
+    where: { id, eventId: scope.eventId },
     select: { id: true, volunteerId: true, eventDayId: true, block: true },
   });
 }
 
-export async function findVolunteerActive(tx: PrismaTransactionClient, id: string) {
-  return tx.person.findUnique({ where: { id }, select: { id: true, active: true } });
-}
-
-export async function findEventDayId(date: Date): Promise<string | null> {
-  const day = await prisma.eventDay.findUnique({ where: { date }, select: { id: true } });
-  return day?.id ?? null;
+/** A person as a swap target: active in this event. */
+export async function findVolunteerActive(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  id: string,
+) {
+  const membership = await tx.eventMembership.findUnique({
+    where: { eventId_personId: { eventId: scope.eventId, personId: id } },
+    select: { status: true },
+  });
+  return membership ? { id, active: membership.status === 'ACTIVE' } : null;
 }
 
 /** Active stations in their display order, for the staffing grid. */
-export async function listStaffedStations() {
+export async function listStaffedStations(scope: EventScope) {
   return prisma.station.findMany({
-    where: { active: true },
+    where: { eventId: scope.eventId, active: true },
     select: { id: true, name: true },
     orderBy: { sortOrder: 'asc' },
   });

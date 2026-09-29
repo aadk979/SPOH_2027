@@ -43,9 +43,12 @@ export async function loadImportSnapshot(
     row.reportsToEmail && !inFile.has(row.reportsToEmail) ? [row.reportsToEmail] : [],
   );
   const [stationIdByCode, eventDayIdByDate, heldSlots, rosterManagers] = await Promise.all([
-    stationIdsByCode(),
-    eventDayIdsByDate(),
-    existingSlots([...accounts.values()].map((account) => account.id)),
+    stationIdsByCode(actor.scope),
+    eventDayIdsByDate(actor.scope),
+    existingSlots(
+      actor.scope,
+      [...accounts.values()].map((account) => account.id),
+    ),
     findVolunteersByEmails([...new Set(managerEmails)]),
   ]);
   return {

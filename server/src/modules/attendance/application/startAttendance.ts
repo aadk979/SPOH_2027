@@ -15,20 +15,20 @@ import { markPresent } from './markPresent.js';
 
 /** The root admin marks themself present, which opens the day's verification chain. */
 export async function startAttendance(
-  { volunteerId, audit }: ActorContext,
+  { volunteerId, scope, audit }: ActorContext,
   clock: Clock = systemClock,
 ): Promise<AttendanceRecord> {
   return prisma.$transaction(async (tx) => {
     await lockPerson(tx, volunteerId);
     const now = clock.now();
     const person = await findVolunteerOrThrow(tx, volunteerId);
-    const day = await findEventDayOn(tx, eventDayAnchor(singaporeDateString(now)));
+    const day = await findEventDayOn(tx, scope, eventDayAnchor(singaporeDateString(now)));
     if (!isRoot(person, rootEmail()))
       throw new ForbiddenError('Only the configured root admin can open attendance.');
     assertEventToday(day);
     return markPresent(
       tx,
-      { personId: person.id, dayId: day.id, method: 'ROOT', verifierId: null, now },
+      { scope, personId: person.id, dayId: day.id, method: 'ROOT', verifierId: null, now },
       audit,
     );
   });

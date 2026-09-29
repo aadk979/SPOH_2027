@@ -1,7 +1,7 @@
 import type { AttendanceRecord } from '@spoh/shared';
 import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
-import { activeShiftBlocks } from '../../../platform/time/index.js';
+import { runningShifts } from '../../../platform/event/runningShifts.js';
 import { toAttendanceRecord } from '../data/mappers.js';
 import {
   createAttendance,
@@ -9,6 +9,7 @@ import {
   findUncheckedShifts,
   markShiftCheckedIn,
 } from '../data/repo.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /**
  * Records the person present once per day, and checks them into any shift
@@ -17,6 +18,7 @@ import {
 export async function markPresent(
   tx: PrismaTransactionClient,
   presence: {
+    scope: EventScope;
     personId: string;
     dayId: string;
     method: AttendanceRecord['method'];
@@ -25,11 +27,11 @@ export async function markPresent(
   },
   audit: AuditContext,
 ): Promise<AttendanceRecord> {
-  const { personId, dayId, method, verifierId, now } = presence;
-  const existing = await findAttendance(tx, personId, dayId);
+  const { scope, personId, dayId, method, verifierId, now } = presence;
+  const existing = await findAttendance(tx, scope, { volunteerId: personId, eventDayId: dayId });
   const row =
     existing ??
-    (await createAttendance(tx, {
+    (await createAttendance(tx, scope, {
       volunteerId: personId,
       eventDayId: dayId,
       method,
@@ -44,13 +46,12 @@ export async function markPresent(
       entityId: row.id,
       after: { eventDayId: dayId, method, verifiedById: verifierId, presentAt: now.toISOString() },
     });
-  const shifts = await findUncheckedShifts(tx, {
+  const shifts = await findUncheckedShifts(tx, scope, {
     volunteerId: personId,
-    eventDayId: dayId,
-    blocks: { in: activeShiftBlocks(now) },
+    running: await runningShifts(scope, now),
   });
   for (const shift of shifts) {
-    if (await markShiftCheckedIn(tx, { id: shift.id, volunteerId: personId }, now))
+    if (await markShiftCheckedIn(tx, scope, { id: shift.id, volunteerId: personId, at: now }))
       await writeAudit(tx, {
         ...audit,
         action: 'shift.checkIn',

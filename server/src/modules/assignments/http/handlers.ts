@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import type { CreateAssignmentRequest } from '@spoh/shared';
-import { auditContextFrom } from '../../../platform/http/auditContext.js';
+import { actorContextFrom } from '../../../platform/http/auditContext.js';
 import { validatedBody, validatedParams, validatedQuery } from '../../../platform/http/validate.js';
 import { getAuth } from '../../../platform/http/requireAuth.js';
 import { createAssignment } from '../application/createAssignment.js';
@@ -9,12 +9,12 @@ import { getStationRoster } from '../application/getStationRoster.js';
 
 export async function createAssignmentHandler(req: Request, res: Response): Promise<void> {
   const body = validatedBody<CreateAssignmentRequest>(req);
-  res.status(201).json({ assignment: await createAssignment(body, auditContextFrom(req)) });
+  res.status(201).json({ assignment: await createAssignment(body, actorContextFrom(req)) });
 }
 
 export async function deleteAssignmentHandler(req: Request, res: Response): Promise<void> {
   const { id } = validatedParams<{ id: string }>(req);
-  await deleteAssignment(id, auditContextFrom(req));
+  await deleteAssignment(id, actorContextFrom(req));
   res.status(204).end();
 }
 
@@ -24,7 +24,7 @@ export async function stationRosterHandler(req: Request, res: Response): Promise
   const auth = getAuth(req);
   const roster = await getStationRoster(
     { stationId, eventDayId },
-    { volunteerId: auth.volunteerId, role: auth.role },
+    { scope: { eventId: auth.eventId }, membershipId: auth.membershipId, role: auth.role },
   );
   res.status(200).json({ data: roster, meta: { count: roster.length, nextCursor: null } });
 }

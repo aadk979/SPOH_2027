@@ -76,3 +76,44 @@ export async function insertShifts(
     skipDuplicates: true,
   });
 }
+
+/** Set a template's wall-clock hours; null when the event has no template of that code. */
+export async function updateTemplateHours(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  hours: { code: string; startLocal: string; endLocal: string },
+) {
+  const template = await tx.shiftTemplate.findUnique({
+    where: { eventId_code: { eventId: scope.eventId, code: hours.code } },
+    select: { id: true },
+  });
+  if (!template) return null;
+  return tx.shiftTemplate.update({
+    where: { id: template.id, eventId: scope.eventId },
+    data: { startLocal: hours.startLocal, endLocal: hours.endLocal },
+    select: { id: true, startLocal: true, endLocal: true, endsNextDay: true },
+  });
+}
+
+/** A template's shifts that still follow it: not overridden in the exceptions grid. */
+export async function listFollowingShifts(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  templateId: string,
+) {
+  return tx.shift.findMany({
+    where: { eventId: scope.eventId, templateId, overridden: false },
+    select: { id: true, eventDay: { select: { date: true } } },
+  });
+}
+
+export async function setShiftWindow(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  shift: { id: string; startsAt: Date; endsAt: Date },
+): Promise<void> {
+  await tx.shift.update({
+    where: { id: shift.id, eventId: scope.eventId },
+    data: { startsAt: shift.startsAt, endsAt: shift.endsAt },
+  });
+}

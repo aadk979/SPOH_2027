@@ -45,6 +45,9 @@ async function asLegacyRows(): Promise<void> {
     await prisma.$executeRawUnsafe(`UPDATE "${table}" SET "eventId" = NULL`);
   }
   await prisma.$executeRawUnsafe('UPDATE "Station" SET "typeId" = NULL');
+  await prisma.$executeRawUnsafe(
+    'UPDATE "ShiftAssignment" SET "membershipId" = NULL, "shiftId" = NULL',
+  );
   await prisma.$executeRawUnsafe('UPDATE "EventMembership" SET "reportsToId" = NULL');
   for (const table of [
     'StationTagging',

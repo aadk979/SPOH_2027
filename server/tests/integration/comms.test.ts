@@ -11,6 +11,7 @@ import {
   createStation,
   createVolunteer,
   type TestVolunteer,
+  testEvent,
 } from '../helpers/fixtures.js';
 
 /**
@@ -327,6 +328,7 @@ describe('briefing waves', () => {
   it('lists the slots for a day with a countdown', async () => {
     await prisma.briefingSlot.create({
       data: {
+        eventId: (await testEvent()).eventId,
         eventDayId,
         startsAt: new Date(Date.now() + 20 * 60_000),
         briefierId: chief.id,
@@ -346,7 +348,13 @@ describe('briefing waves', () => {
 
   it('lets the assigned briefer mark their slot complete', async () => {
     const slot = await prisma.briefingSlot.create({
-      data: { eventDayId, startsAt: new Date(), briefierId: chief.id, waveSize: 20 },
+      data: {
+        eventId: (await testEvent()).eventId,
+        eventDayId,
+        startsAt: new Date(),
+        briefierId: chief.id,
+        waveSize: 20,
+      },
     });
 
     const response = await request(app)
@@ -360,7 +368,13 @@ describe('briefing waves', () => {
 
   it('refuses to let someone else complete an assigned slot', async () => {
     const slot = await prisma.briefingSlot.create({
-      data: { eventDayId, startsAt: new Date(), briefierId: chief.id, waveSize: 20 },
+      data: {
+        eventId: (await testEvent()).eventId,
+        eventDayId,
+        startsAt: new Date(),
+        briefierId: chief.id,
+        waveSize: 20,
+      },
     });
 
     const response = await request(app)

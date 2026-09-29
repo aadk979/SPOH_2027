@@ -5,9 +5,15 @@ import { ConflictError, NotFoundError } from '../../../platform/errors/index.js'
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { toMyAssignment } from '../data/mappers.js';
-import { findAssignmentById, hasAttendance, markCheckedIn } from '../data/repo.js';
+import {
+  findAssignmentById,
+  findRunningAssignmentIds,
+  hasAttendance,
+  markCheckedIn,
+} from '../data/repo.js';
 import { assertNotCheckedIn, assertPresentToday, assertRunningNow } from '../domain/shiftRules.js';
 import { loadOwnShift } from './ownShift.js';
+import { runningShifts } from '../../../platform/event/runningShifts.js';
 
 /**
  * Shift check-in. Gives Lead Facilitators live attendance instead of counting
@@ -15,19 +21,26 @@ import { loadOwnShift } from './ownShift.js';
  */
 export async function checkIn(
   assignmentId: string,
-  { volunteerId, audit }: ActorContext,
+  { volunteerId, scope, audit }: ActorContext,
   clock: Clock = systemClock,
 ): Promise<MyAssignment> {
-  const assignment = await loadOwnShift(volunteerId, assignmentId);
+  const assignment = await loadOwnShift(scope, { volunteerId, assignmentId });
   assertNotCheckedIn(assignment);
 
   const now = clock.now();
+  const running = await findRunningAssignmentIds(scope, {
+    volunteerId,
+    running: await runningShifts(scope, now),
+  });
 
   await prisma.$transaction(async (tx) => {
-    const present = await hasAttendance(tx, { volunteerId, eventDayId: assignment.eventDayId });
+    const present = await hasAttendance(tx, scope, {
+      volunteerId,
+      eventDayId: assignment.eventDayId,
+    });
     assertPresentToday(present);
-    assertRunningNow(assignment, now);
-    if (!(await markCheckedIn(tx, { id: assignmentId, volunteerId }, now)))
+    assertRunningNow(running.has(assignmentId));
+    if (!(await markCheckedIn(tx, scope, { id: assignmentId, volunteerId, at: now })))
       throw new ConflictError(
         ERROR_CODES.CONFLICT,
         'This shift has changed. Refresh your shift list.',
@@ -44,7 +57,7 @@ export async function checkIn(
 
   // Loaded after commit: its relations would overlap on the transaction's
   // connection (F03-019).
-  const updated = await findAssignmentById(assignmentId);
+  const updated = await findAssignmentById(scope, assignmentId);
   if (!updated) throw new NotFoundError('Shift assignment');
   return toMyAssignment(updated);
 }

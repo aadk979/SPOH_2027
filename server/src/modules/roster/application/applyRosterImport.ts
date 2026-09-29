@@ -57,7 +57,7 @@ export async function applyRosterImport(
     });
   }
   for (const step of plan.assignments) {
-    await upsertAssignment(tx, {
+    await upsertAssignment(tx, context.scope, {
       volunteerId: ids.get(step.email) as string,
       stationId: step.stationId,
       eventDayId: step.eventDayId,

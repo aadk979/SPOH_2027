@@ -49,11 +49,9 @@ export async function createRegistrationsForGroup(
   rows: NewRegistration[],
 ): Promise<Registration[]> {
   const codes = [...new Set(rows.map((row) => row.category))];
-  const ids = new Map(
-    await Promise.all(
-      codes.map(async (code) => [code, await categoryIdFor(tx, scope, code)] as const),
-    ),
-  );
+  // Sequential: parallel queries overlap on a transaction's connection (F03-019).
+  const ids = new Map<string, string | null>();
+  for (const code of codes) ids.set(code, await categoryIdFor(tx, scope, code));
   // createManyAndReturn keeps this one round trip while still yielding the rows
   // the response needs; a family of four is four inserts either way.
   return tx.registration.createManyAndReturn({

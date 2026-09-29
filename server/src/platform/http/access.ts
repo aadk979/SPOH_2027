@@ -1,6 +1,6 @@
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import { type Capability, roleHasCapability, roleMeets, type CommitteeRole } from '@spoh/shared';
-import { isRosteredAt } from '../access/index.js';
+import { isOnShiftAt } from '../access/index.js';
 import { ForbiddenError, StationScopeError, ValidationError } from '../errors/index.js';
 import { named } from './named.js';
 import { getAuth } from './requireAuth.js';
@@ -67,7 +67,7 @@ export const stationIdFromParams =
 
 /**
  * Layer 2. Asserts the caller is rostered on the target station for a shift
- * block that is running now, in Singapore time.
+ * that is running now, in the event's timezone.
  *
  * Deliberately strict about time: outside event hours no block is active and
  * nobody is on shift, so a counter left open overnight cannot keep writing.
@@ -89,14 +89,16 @@ export function requireStationScope(
         // IC and above may write anywhere — they are the people who correct a
         // station that has gone wrong. The bypass is recorded so it is visible
         // in reconciliation rather than indistinguishable from a normal write.
+        const scope = { eventId: auth.eventId };
+        const who = { membershipId: auth.membershipId, stationId };
         if (roleMeets(auth.role, 'IC')) {
-          const onShift = await isRosteredAt(auth.volunteerId, stationId);
+          const onShift = await isOnShiftAt(scope, who);
           if (!onShift) auth.stationScopeBypass = { stationId };
           next();
           return;
         }
 
-        if (!(await isRosteredAt(auth.volunteerId, stationId))) {
+        if (!(await isOnShiftAt(scope, who))) {
           next(new StationScopeError());
           return;
         }

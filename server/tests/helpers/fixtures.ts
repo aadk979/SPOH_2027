@@ -7,6 +7,7 @@ import { mirrorMembership } from '../../src/platform/db/membershipMirror.js';
 import { createEvent } from '../../src/modules/event/index.js';
 import { addShiftsForDay } from '../../src/modules/eventDays/index.js';
 import { typeIdFor } from '../../src/modules/station/data/repo.js';
+import { assignmentLinks } from '../../src/modules/assignments/index.js';
 import { createLocalAuthProvider } from '../../src/platform/identity/localProvider.js';
 import { invalidateVolunteerCache } from '../../src/platform/identity/index.js';
 import { eventDayAnchor, singaporeDateString } from '../../src/platform/time/index.js';
@@ -175,6 +176,7 @@ export async function assignToStation(input: {
   roleLabel?: string;
 }): Promise<{ id: string }> {
   const block = input.block ?? 'MORNING';
+  const links = await assignmentLinks(prisma, await testEvent(), { ...input, block });
 
   return prisma.shiftAssignment.upsert({
     where: {
@@ -190,8 +192,9 @@ export async function assignToStation(input: {
       eventDayId: input.eventDayId,
       block,
       roleLabel: input.roleLabel ?? 'Volunteer',
+      ...links,
     },
-    update: { stationId: input.stationId },
+    update: { stationId: input.stationId, ...links },
     select: { id: true },
   });
 }

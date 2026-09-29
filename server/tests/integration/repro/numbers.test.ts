@@ -84,7 +84,11 @@ describe('dashboard, report and import numbers (P03 repros)', () => {
   // F02-027
   it('does not count shifts that have not happened yet as no-shows', async () => {
     const tomorrow = await prisma.eventDay.create({
-      data: { date: new Date('2027-01-08T00:00:00.000Z'), label: 'Day 2' },
+      data: {
+        eventId: (await testEvent()).eventId,
+        date: new Date('2027-01-08T00:00:00.000Z'),
+        label: 'Day 2',
+      },
     });
     const today = await assignToStation({
       volunteerId: volunteer.id,

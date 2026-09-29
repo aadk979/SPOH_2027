@@ -30,6 +30,7 @@ import { onCampus, rootEmail } from './config.js';
 import { assertIssuer } from './issuer.js';
 import { markPresent } from './markPresent.js';
 import { hashPin, verifyAttendanceToken } from './tokens.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 type Outcome = { attendance: AttendanceRecord; error?: undefined } | { error: AppError };
 
@@ -40,32 +41,34 @@ type Outcome = { attendance: AttendanceRecord; error?: undefined } | { error: Ap
  */
 export async function submitAttendance(
   proof: AttendanceProof,
-  { volunteerId, audit }: ActorContext,
+  { volunteerId, scope, audit }: ActorContext,
   clock: Clock = systemClock,
 ): Promise<AttendanceRecord> {
   const result = await prisma.$transaction(async (tx): Promise<Outcome> => {
     await lockPerson(tx, volunteerId);
     const now = clock.now();
     const person = await findVolunteerOrThrow(tx, volunteerId);
-    const day = await findEventDayOn(tx, eventDayAnchor(singaporeDateString(now)));
+    const day = await findEventDayOn(tx, scope, eventDayAnchor(singaporeDateString(now)));
     if (!person.active) throw new ForbiddenError('Attendance is unavailable for this account.');
     assertEventToday(day);
-    const existing = await findAttendance(tx, volunteerId, day.id);
+    const existing = await findAttendance(tx, scope, { volunteerId, eventDayId: day.id });
     if (existing) {
       const already = { method: existing.method, verifierId: existing.verifiedById };
-      const presence = { personId: person.id, dayId: day.id, ...already, now };
+      const presence = { scope, personId: person.id, dayId: day.id, ...already, now };
       return { attendance: await markPresent(tx, presence, audit) };
     }
-    const window = attemptWindow(await findAttempts(tx, volunteerId), now);
+    const window = attemptWindow(await findAttempts(tx, scope, volunteerId), now);
     if (window.exhausted)
       return {
         error: new RateLimitedError(
           'Too many attendance attempts. Wait five minutes before trying again.',
         ),
       };
-    await recordAttempt(tx, volunteerId, { now, sameWindow: window.sameWindow });
+    await recordAttempt(tx, scope, { volunteerId, now, sameWindow: window.sameWindow });
     try {
-      return { attendance: await verify(tx, { person, dayId: day.id, proof, audit, now }) };
+      return {
+        attendance: await verify(tx, { scope, person, dayId: day.id, proof, audit, now }),
+      };
     } catch (error) {
       if (error instanceof AppError) return { error };
       throw error;
@@ -77,21 +80,31 @@ export async function submitAttendance(
 
 async function verify(
   tx: PrismaTransactionClient,
-  input: { person: Person; dayId: string; proof: AttendanceProof; audit: AuditContext; now: Date },
+  input: {
+    scope: EventScope;
+    person: Person;
+    dayId: string;
+    proof: AttendanceProof;
+    audit: AuditContext;
+    now: Date;
+  },
 ): Promise<AttendanceRecord> {
-  const { person, dayId, proof, audit, now } = input;
+  const { scope, person, dayId, proof, audit, now } = input;
   const claims = proof.method === 'QR' ? await verifyAttendanceToken(proof.token, now) : null;
   const challenge = await findChallenge(
     tx,
+    scope,
     claims ? { id: claims.id } : { pinHash: hashPin(proof.method === 'PIN' ? proof.pin : '') },
   );
   assertChallengeUsable(challenge, claims, { dayId, now });
-  const issuer = await assertIssuer(tx, challenge.issuerId, dayId).catch((error: unknown) => {
-    // The verifier was deactivated or demoted since issuing: to the person
-    // holding it, the code is no longer valid.
-    if (error instanceof ForbiddenError) throw codeInvalid(error.message);
-    throw error;
-  });
+  const issuer = await assertIssuer(tx, scope, { issuerId: challenge.issuerId, dayId }).catch(
+    (error: unknown) => {
+      // The verifier was deactivated or demoted since issuing: to the person
+      // holding it, the code is no longer valid.
+      if (error instanceof ForbiddenError) throw codeInvalid(error.message);
+      throw error;
+    },
+  );
   assertMayVerify({
     person,
     issuer,
@@ -99,6 +112,13 @@ async function verify(
     method: proof.method,
     bothOnCampus: challenge.campusNetwork && onCampus(audit.ip),
   });
-  const presence = { personId: person.id, dayId, method: proof.method, verifierId: issuer.id, now };
+  const presence = {
+    scope,
+    personId: person.id,
+    dayId,
+    method: proof.method,
+    verifierId: issuer.id,
+    now,
+  };
   return markPresent(tx, presence, audit);
 }

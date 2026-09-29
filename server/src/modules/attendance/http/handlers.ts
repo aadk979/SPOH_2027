@@ -9,7 +9,14 @@ import { startAttendance } from '../application/startAttendance.js';
 import { submitAttendance } from '../application/submitAttendance.js';
 
 export async function attendanceStatusHandler(req: Request, res: Response): Promise<void> {
-  res.json(await attendanceStatus(getAuth(req).volunteerId, req.ip));
+  const auth = getAuth(req);
+  res.json(
+    await attendanceStatus({
+      scope: { eventId: auth.eventId },
+      volunteerId: auth.volunteerId,
+      ip: req.ip,
+    }),
+  );
 }
 
 export async function startAttendanceHandler(req: Request, res: Response): Promise<void> {

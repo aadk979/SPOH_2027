@@ -17,19 +17,19 @@ import { hashPin, signAttendanceToken } from './tokens.js';
 
 /** A fresh QR token and PIN for a verifier; the previous pair stops working. */
 export async function issueChallenge(
-  { volunteerId, audit }: ActorContext,
+  { volunteerId, scope, audit }: ActorContext,
   clock: Clock = systemClock,
 ): Promise<AttendanceChallenge> {
   return prisma.$transaction(async (tx) => {
     await lockPerson(tx, volunteerId);
     const now = clock.now();
-    const day = await findEventDayOn(tx, eventDayAnchor(singaporeDateString(now)));
+    const day = await findEventDayOn(tx, scope, eventDayAnchor(singaporeDateString(now)));
     assertEventToday(day);
-    await assertIssuer(tx, volunteerId, day.id);
+    await assertIssuer(tx, scope, { issuerId: volunteerId, dayId: day.id });
     const id = randomUUID();
     const pin = randomInt(0, 10_000_000_000).toString().padStart(10, '0');
     const expiresAt = new Date(now.getTime() + ATTENDANCE_TTL_MS);
-    await replaceChallenge(tx, {
+    await replaceChallenge(tx, scope, {
       id,
       issuerId: volunteerId,
       eventDayId: day.id,

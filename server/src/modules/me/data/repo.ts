@@ -1,8 +1,13 @@
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 import { STATION_WITH_TYPE } from '../../station/index.js';
 
-/** Data access for the caller's own profile, roster and escalation chain. */
+/**
+ * Data access for the caller's own profile, roster and escalation chain, in
+ * the event the request works in (ADR-001 §2). Role, portfolio, standing and
+ * reporting line are the membership's (ADR-001 §1).
+ */
 
 const assignmentInclude = {
   station: { include: STATION_WITH_TYPE },
@@ -13,42 +18,69 @@ export type AssignmentWithContext = Prisma.ShiftAssignmentGetPayload<{
   include: typeof assignmentInclude;
 }>;
 
-export async function findVolunteerById(id: string) {
-  return prisma.person.findUnique({
-    where: { id },
+/** The caller as the event knows them: the person, with their membership. */
+export async function findVolunteerById(scope: EventScope, id: string) {
+  const membership = await prisma.eventMembership.findUnique({
+    where: { eventId_personId: { eventId: scope.eventId, personId: id } },
     select: {
-      id: true,
-      displayName: true,
       role: true,
       portfolio: true,
-      phone: true,
-      active: true,
+      status: true,
       reportsToId: true,
+      person: { select: { id: true, displayName: true, phone: true } },
     },
   });
+  if (!membership) return null;
+  return {
+    ...membership.person,
+    role: membership.role,
+    portfolio: membership.portfolio,
+    active: membership.status === 'ACTIVE',
+    reportsToMembershipId: membership.reportsToId,
+  };
 }
 
 /** All of this volunteer's assignments across the event, earliest first. */
 export async function listAssignmentsForVolunteer(
+  scope: EventScope,
   volunteerId: string,
 ): Promise<AssignmentWithContext[]> {
   return prisma.shiftAssignment.findMany({
-    where: { volunteerId },
+    where: { eventId: scope.eventId, volunteerId },
     include: assignmentInclude,
     orderBy: [{ eventDay: { date: 'asc' } }, { block: 'asc' }],
   });
 }
 
-export async function findAssignmentById(id: string): Promise<AssignmentWithContext | null> {
-  return prisma.shiftAssignment.findUnique({ where: { id }, include: assignmentInclude });
+/** Which of this volunteer's assignments are on a shift running now. */
+export async function findRunningAssignmentIds(
+  scope: EventScope,
+  who: { volunteerId: string; running: Prisma.ShiftWhereInput },
+): Promise<Set<string>> {
+  const rows = await prisma.shiftAssignment.findMany({
+    where: { eventId: scope.eventId, volunteerId: who.volunteerId, shift: who.running },
+    select: { id: true },
+  });
+  return new Set(rows.map((row) => row.id));
+}
+
+export async function findAssignmentById(
+  scope: EventScope,
+  id: string,
+): Promise<AssignmentWithContext | null> {
+  return prisma.shiftAssignment.findFirst({
+    where: { eventId: scope.eventId, id },
+    include: assignmentInclude,
+  });
 }
 
 export async function hasAttendance(
   tx: PrismaTransactionClient,
+  scope: EventScope,
   where: { volunteerId: string; eventDayId: string },
 ): Promise<boolean> {
   const attendance = await tx.attendance.findUnique({
-    where: { volunteerId_eventDayId: where },
+    where: { volunteerId_eventDayId: where, eventId: scope.eventId },
     select: { id: true },
   });
   return attendance !== null;
@@ -57,12 +89,17 @@ export async function hasAttendance(
 /** Sets the check-in only if it is still empty; false when it was not. */
 export async function markCheckedIn(
   tx: PrismaTransactionClient,
-  where: { id: string; volunteerId: string },
-  at: Date,
+  scope: EventScope,
+  check: { id: string; volunteerId: string; at: Date },
 ): Promise<boolean> {
   const changed = await tx.shiftAssignment.updateMany({
-    where: { ...where, checkedInAt: null },
-    data: { checkedInAt: at },
+    where: {
+      eventId: scope.eventId,
+      id: check.id,
+      volunteerId: check.volunteerId,
+      checkedInAt: null,
+    },
+    data: { checkedInAt: check.at },
   });
   return changed.count > 0;
 }
@@ -70,61 +107,63 @@ export async function markCheckedIn(
 /** Sets the check-out only if it is still empty; false when it was not. */
 export async function markCheckedOut(
   tx: PrismaTransactionClient,
-  id: string,
-  at: Date,
+  scope: EventScope,
+  check: { id: string; at: Date },
 ): Promise<boolean> {
   const changed = await tx.shiftAssignment.updateMany({
-    where: { id, checkedInAt: { not: null }, checkedOutAt: null },
-    data: { checkedOutAt: at },
+    where: { eventId: scope.eventId, id: check.id, checkedInAt: { not: null }, checkedOutAt: null },
+    data: { checkedOutAt: check.at },
   });
   return changed.count > 0;
 }
 
 /**
- * Walk `reportsTo` upwards to build the escalation chain: my IC, my Deputy
- * Coordinator, the Chief. Bounded rather than recursive — a cycle in the
- * hierarchy is a data error, not a reason to hang a request.
+ * Walk the memberships' `reportsTo` upwards to build the escalation chain: my
+ * IC, my Deputy Coordinator, the Chief. Bounded rather than recursive — a
+ * cycle in the hierarchy is a data error, not a reason to hang a request.
  */
-export async function buildEscalationChain(startId: string | null, maxDepth = 5) {
+export async function buildEscalationChain(
+  scope: EventScope,
+  startMembershipId: string | null,
+  maxDepth = 5,
+) {
   const chain: Array<{
     id: string;
     displayName: string;
-    role: Prisma.PersonGetPayload<object>['role'];
+    role: Prisma.EventMembershipGetPayload<object>['role'];
     phone: string | null;
     portfolio: string | null;
   }> = [];
 
   const seen = new Set<string>();
-  let currentId = startId;
+  let currentId = startMembershipId;
 
   for (let depth = 0; depth < maxDepth && currentId && !seen.has(currentId); depth += 1) {
     seen.add(currentId);
 
-    const person = await prisma.person.findUnique({
-      where: { id: currentId },
+    const membership = await prisma.eventMembership.findFirst({
+      where: { eventId: scope.eventId, id: currentId },
       select: {
-        id: true,
-        displayName: true,
         role: true,
-        phone: true,
         portfolio: true,
+        status: true,
         reportsToId: true,
-        active: true,
+        person: { select: { id: true, displayName: true, phone: true } },
       },
     });
 
-    if (!person) break;
-    if (person.active) {
+    if (!membership) break;
+    if (membership.status === 'ACTIVE') {
       chain.push({
-        id: person.id,
-        displayName: person.displayName,
-        role: person.role,
-        phone: person.phone,
-        portfolio: person.portfolio,
+        id: membership.person.id,
+        displayName: membership.person.displayName,
+        role: membership.role,
+        phone: membership.person.phone,
+        portfolio: membership.portfolio,
       });
     }
 
-    currentId = person.reportsToId;
+    currentId = membership.reportsToId;
   }
 
   return chain;

@@ -8,3 +8,4 @@ export {
   stationRosterHandler,
 } from './http/handlers.js';
 export { toAssignmentRecord } from './data/mappers.js';
+export { assignmentLinks } from './data/repo.js';

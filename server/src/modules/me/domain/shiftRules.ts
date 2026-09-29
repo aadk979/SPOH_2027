@@ -1,10 +1,5 @@
-import { ERROR_CODES, type ShiftBlock } from '@spoh/shared';
+import { ERROR_CODES } from '@spoh/shared';
 import { AppError, ConflictError, ForbiddenError } from '../../../platform/errors/index.js';
-import {
-  activeShiftBlocks,
-  eventDayAnchor,
-  singaporeDateString,
-} from '../../../platform/time/index.js';
 
 /**
  * You may only check yourself in or out. Verified against the row rather than
@@ -62,26 +57,16 @@ export function assertPresentToday(present: boolean): void {
   }
 }
 
-/** Check-in is open only while the shift runs: "not yet" is a 409, not a 403 (F03-026). */
-export function assertRunningNow(
-  assignment: { eventDay: { date: Date }; block: ShiftBlock },
-  now: Date,
-): void {
-  if (!isRunningNow(assignment, now)) {
+/**
+ * Check-in is open only while the shift runs: "not yet" is a 409, not a 403
+ * (F03-026). Whether it runs is the shift's own hours (P09.5), asked of the
+ * database.
+ */
+export function assertRunningNow(running: boolean): void {
+  if (!running) {
     throw new ConflictError(
       ERROR_CODES.NOT_ON_SHIFT,
       'This shift is not running now. Check in during its hours.',
     );
   }
-}
-
-/** A shift is running when it is on today's event day, in a block open now. */
-export function isRunningNow(
-  assignment: { eventDay: { date: Date }; block: ShiftBlock },
-  now: Date,
-): boolean {
-  return (
-    assignment.eventDay.date.getTime() === eventDayAnchor(singaporeDateString(now)).getTime() &&
-    activeShiftBlocks(now).includes(assignment.block)
-  );
 }

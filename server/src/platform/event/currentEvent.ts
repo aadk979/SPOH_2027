@@ -33,3 +33,17 @@ export async function currentEvent(): Promise<CurrentEvent> {
 export function invalidateCurrentEvent(): void {
   cached = null;
 }
+
+const timezones = new Map<string, string>();
+
+/** An event's IANA timezone. Fixed once the event exists, so cached for the process. */
+export async function eventTimezone(scope: EventScope): Promise<string> {
+  const known = timezones.get(scope.eventId);
+  if (known) return known;
+  const event = await prisma.event.findUniqueOrThrow({
+    where: { id: scope.eventId },
+    select: { timezone: true },
+  });
+  timezones.set(scope.eventId, event.timezone);
+  return event.timezone;
+}

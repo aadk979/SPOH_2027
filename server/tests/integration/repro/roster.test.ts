@@ -10,6 +10,7 @@ import {
   createStation,
   createVolunteer,
   type TestVolunteer,
+  testEvent,
 } from '../../helpers/fixtures.js';
 
 /**
@@ -119,7 +120,11 @@ describe('roster import and provisioning (P03 repros)', () => {
   // F03-025
   it('counts a new person with two shifts as one created volunteer, not one created and one updated', async () => {
     await prisma.eventDay.create({
-      data: { date: new Date('2027-01-08T00:00:00.000Z'), label: 'Day 2' },
+      data: {
+        eventId: (await testEvent()).eventId,
+        date: new Date('2027-01-08T00:00:00.000Z'),
+        label: 'Day 2',
+      },
     });
 
     const response = await importRoster(

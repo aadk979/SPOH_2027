@@ -1,13 +1,15 @@
-import type { LongShiftWarning, StaffingGapsResponse } from '@spoh/shared';
+import { ShiftBlock, type LongShiftWarning, type StaffingGapsResponse } from '@spoh/shared';
 import { DEFAULT_SETTINGS, getSettings } from '../../../platform/settings/index.js';
-import { activeShiftBlocks, startOfEventDay } from '../../../platform/time/index.js';
+import { runningShifts } from '../../../platform/event/runningShifts.js';
+import { startOfEventDay } from '../../../platform/time/index.js';
 import {
-  findEventDayId,
   listStaffedStations,
   longRunningShifts,
+  runningShiftCodes,
   staffingByStation,
 } from '../data/repo.js';
 import { longShiftWarnings, staffingGaps } from '../domain/staffing.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /**
  * Time on station without a break before the welfare list picks somebody up.
@@ -18,17 +20,29 @@ import { longShiftWarnings, staffingGaps } from '../domain/staffing.js';
 export const LONG_SHIFT_MINUTES = DEFAULT_SETTINGS.longShiftMinutes;
 
 /** Which stations are understaffed right now. */
-export async function getStaffingGaps(now = new Date()): Promise<StaffingGapsResponse> {
-  const blocks = activeShiftBlocks(now);
-  const eventDayId = await findEventDayId(startOfEventDay(now));
-  if (!eventDayId || blocks.length === 0) {
+/** The shifts on duty now, by the template codes the grid is keyed on. */
+async function blocksOnDuty(scope: EventScope, running: Awaited<ReturnType<typeof runningShifts>>) {
+  const codes = await runningShiftCodes(scope, running);
+  return codes.flatMap((code) => {
+    const block = ShiftBlock.safeParse(code);
+    return block.success ? [block.data] : [];
+  });
+}
+
+export async function getStaffingGaps(
+  scope: EventScope,
+  now = new Date(),
+): Promise<StaffingGapsResponse> {
+  const running = await runningShifts(scope, now);
+  const blocks = await blocksOnDuty(scope, running);
+  if (blocks.length === 0) {
     // Outside event hours nothing is understaffed, because nothing is staffed.
     return { asOf: now.toISOString(), activeBlocks: blocks, gaps: [] };
   }
 
   const [staffing, stations] = await Promise.all([
-    staffingByStation({ eventDayId, blocks }),
-    listStaffedStations(),
+    staffingByStation(scope, running),
+    listStaffedStations(scope),
   ]);
   return {
     asOf: now.toISOString(),
@@ -38,7 +52,13 @@ export async function getStaffingGaps(now = new Date()): Promise<StaffingGapsRes
 }
 
 /** People on station longer than the welfare threshold, longest first. */
-export async function getLongShifts(now = new Date()): Promise<LongShiftWarning[]> {
+export async function getLongShifts(
+  scope: EventScope,
+  now = new Date(),
+): Promise<LongShiftWarning[]> {
   const cutoff = new Date(now.getTime() - getSettings().longShiftMinutes * 60_000);
-  return longShiftWarnings(await longRunningShifts({ cutoff, since: startOfEventDay(now) }), now);
+  return longShiftWarnings(
+    await longRunningShifts(scope, { cutoff, since: startOfEventDay(now) }),
+    now,
+  );
 }

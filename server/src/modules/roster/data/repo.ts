@@ -6,6 +6,7 @@ export type { Volunteer };
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { mirrorMembership } from '../../../platform/db/membershipMirror.js';
+import { assignmentLinks } from '../../assignments/index.js';
 
 /**
  * Data access for the committee roster.
@@ -76,6 +77,7 @@ export async function upsertVolunteer(
  */
 export async function upsertAssignment(
   tx: PrismaTransactionClient,
+  scope: EventScope,
   data: {
     volunteerId: string;
     stationId: string;
@@ -91,19 +93,21 @@ export async function upsertAssignment(
         eventDayId: data.eventDayId,
         block: data.block,
       },
+      eventId: scope.eventId,
     },
     select: { id: true },
   });
+  const links = await assignmentLinks(tx, scope, data);
 
   if (existing) {
     await tx.shiftAssignment.update({
-      where: { id: existing.id },
-      data: { stationId: data.stationId, roleLabel: data.roleLabel },
+      where: { id: existing.id, eventId: scope.eventId },
+      data: { stationId: data.stationId, roleLabel: data.roleLabel, ...links },
     });
     return { created: false };
   }
 
-  await tx.shiftAssignment.create({ data });
+  await tx.shiftAssignment.create({ data: { ...data, ...links } });
   return { created: true };
 }
 
@@ -117,22 +121,31 @@ export async function findVolunteersByEmails(
 }
 
 /** Every event day, keyed by its date (YYYY-MM-DD), for matching import rows. */
-export async function eventDayIdsByDate(): Promise<Map<string, string>> {
-  const days = await prisma.eventDay.findMany({ select: { id: true, date: true } });
+export async function eventDayIdsByDate(scope: EventScope): Promise<Map<string, string>> {
+  const days = await prisma.eventDay.findMany({
+    where: { eventId: scope.eventId },
+    select: { id: true, date: true },
+  });
   return new Map(days.map((day) => [day.date.toISOString().slice(0, 10), day.id]));
 }
 
 /** Every station, keyed by its code, for matching import rows. */
-export async function stationIdsByCode(): Promise<Map<string, string>> {
-  const stations = await prisma.station.findMany({ select: { id: true, code: true } });
+export async function stationIdsByCode(scope: EventScope): Promise<Map<string, string>> {
+  const stations = await prisma.station.findMany({
+    where: { eventId: scope.eventId },
+    select: { id: true, code: true },
+  });
   return new Map(stations.map((station) => [station.code, station.id]));
 }
 
 /** The (day, block) slots these volunteers already hold, as volunteerId|eventDayId|block. */
-export async function existingSlots(volunteerIds: readonly string[]): Promise<Set<string>> {
+export async function existingSlots(
+  scope: EventScope,
+  volunteerIds: readonly string[],
+): Promise<Set<string>> {
   if (volunteerIds.length === 0) return new Set();
   const rows = await prisma.shiftAssignment.findMany({
-    where: { volunteerId: { in: [...volunteerIds] } },
+    where: { eventId: scope.eventId, volunteerId: { in: [...volunteerIds] } },
     select: { volunteerId: true, eventDayId: true, block: true },
   });
   return new Set(rows.map((row) => `${row.volunteerId}|${row.eventDayId}|${row.block}`));

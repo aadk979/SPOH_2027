@@ -12,12 +12,14 @@ import { eventDayAnchor, singaporeDateString } from '../../../platform/time/inde
 import { toBriefingSlotRecord } from '../data/mappers.js';
 import { completeSlot, findSlotById, listBriefingSlots } from '../data/repo.js';
 import { assertMayComplete, assertSlotOpen, minutesUntilStart } from '../domain/briefingRules.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 export async function getBriefingSlots(
+  scope: EventScope,
   query: ListBriefingSlotsQuery,
   viewerId: string,
 ): Promise<BriefingSlotRecord[]> {
-  const slots = await listBriefingSlots({
+  const slots = await listBriefingSlots(scope, {
     ...(query.eventDayId ? { eventDayId: query.eventDayId } : {}),
     // Defaults to today, because the briefing roster is a today-shaped thing.
     date: eventDayAnchor(query.date ?? singaporeDateString()),
@@ -36,14 +38,14 @@ export async function markSlotComplete(
   request: CompleteBriefingSlotRequest,
   actor: ActorContext & { role: CommitteeRole },
 ): Promise<BriefingSlotRecord> {
-  const { volunteerId: actorId, audit } = actor;
-  const slot = await findSlotById(slotId);
+  const { volunteerId: actorId, scope, audit } = actor;
+  const slot = await findSlotById(scope, slotId);
   if (!slot) throw new NotFoundError('Briefing slot');
   assertSlotOpen(slot);
   assertMayComplete(slot, actor);
 
   await prisma.$transaction(async (tx) => {
-    await completeSlot(tx, slotId, request.notes ?? null);
+    await completeSlot(tx, scope, { id: slotId, notes: request.notes ?? null });
     await writeAudit(tx, {
       ...audit,
       action: 'roster.edit',
@@ -53,7 +55,7 @@ export async function markSlotComplete(
     });
   });
 
-  const refreshed = await findSlotById(slotId);
+  const refreshed = await findSlotById(scope, slotId);
   if (!refreshed) throw new NotFoundError('Briefing slot');
   return toBriefingSlotRecord(refreshed, {
     viewerId: actorId,

@@ -48,3 +48,20 @@ export async function mirrorMembership(
     select: { id: true },
   });
 }
+
+/**
+ * A person's membership id in the event, for a membership column written
+ * beside a person column (expand phase, P09.5). Null when they have none.
+ */
+export async function membershipIdOf(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  personId: string | null,
+): Promise<string | null> {
+  if (!personId) return null;
+  const membership = await tx.eventMembership.findUnique({
+    where: { eventId_personId: { eventId: scope.eventId, personId } },
+    select: { id: true },
+  });
+  return membership?.id ?? null;
+}

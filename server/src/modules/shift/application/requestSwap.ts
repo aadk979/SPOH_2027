@@ -16,20 +16,20 @@ import { assertNotSelf, assertOwnShift, assertTargetFree } from '../domain/swapR
 /** Ask to give a shift to someone else; an IC decides. */
 export async function requestSwap(
   request: CreateSwapRequest,
-  { volunteerId: requesterId, audit }: ActorContext,
+  { volunteerId: requesterId, scope, audit }: ActorContext,
 ): Promise<SwapRequestRecord> {
   const swap = await prisma.$transaction(async (tx) => {
-    const assignment = await findAssignmentForSwap(tx, request.assignmentId);
+    const assignment = await findAssignmentForSwap(tx, scope, request.assignmentId);
     if (!assignment) throw new NotFoundError('Shift assignment');
     assertOwnShift(assignment, requesterId);
     assertNotSelf(request.targetVolunteerId, requesterId);
 
-    const target = await findVolunteerActive(tx, request.targetVolunteerId);
+    const target = await findVolunteerActive(tx, scope, request.targetVolunteerId);
     if (!target?.active) throw new NotFoundError('Volunteer');
     // Caught here rather than at approval so the requester finds out now,
     // while there is still time to ask somebody else.
     assertTargetFree(
-      await hasAssignmentInBlock(tx, {
+      await hasAssignmentInBlock(tx, scope, {
         volunteerId: target.id,
         eventDayId: assignment.eventDayId,
         block: assignment.block,
@@ -37,7 +37,7 @@ export async function requestSwap(
       'That volunteer is already working this block. Ask someone else.',
     );
 
-    const row = await createSwap(tx, {
+    const row = await createSwap(tx, scope, {
       assignmentId: assignment.id,
       requesterId,
       targetId: target.id,
@@ -56,7 +56,7 @@ export async function requestSwap(
 
   // Loaded after commit: the record's relations would overlap on the
   // transaction's connection (F03-019).
-  const created = await findSwapById(swap.id);
+  const created = await findSwapById(scope, swap.id);
   if (!created) throw new NotFoundError('Swap request');
   return toSwapRecord(created);
 }

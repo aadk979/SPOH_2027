@@ -41,7 +41,7 @@ export async function getLiveDashboard(
     cardsPanel(scope, { since, now }),
     listGifts(scope),
     safetyPanel(),
-    staffingPanel(eventDay?.id ?? null, blocks, now),
+    staffingPanel(scope, { eventDayId: eventDay?.id ?? null, blocks }, now),
     getDataHealth(scope, now),
   ]);
 
@@ -106,15 +106,15 @@ async function safetyPanel(): Promise<Panels['safety']> {
 }
 
 async function staffingPanel(
-  eventDayId: string | null,
-  blocks: string[],
+  scope: EventScope,
+  { eventDayId, blocks }: { eventDayId: string | null; blocks: string[] },
   now: Date,
 ): Promise<Panels['staffing']> {
   const [onShift, checkedIn, gaps, longShifts] = await Promise.all([
     eventDayId ? onShiftCount(eventDayId, blocks) : 0,
     eventDayId ? checkedInCount(eventDayId) : 0,
-    getStaffingGaps(now),
-    getLongShifts(now),
+    getStaffingGaps(scope, now),
+    getLongShifts(scope, now),
   ]);
   return { onShift, checkedIn, gaps: gaps.gaps, longShifts };
 }

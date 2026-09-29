@@ -1,5 +1,6 @@
 import { prisma } from '../db/client.js';
-import { activeShiftBlocks, eventDayAnchor, singaporeDateString } from '../time/index.js';
+import type { EventScope } from '../db/eventScope.js';
+import { runningShifts } from '../event/runningShifts.js';
 
 /**
  * Authorization, in two layers (BUILD_PLAN §6.3).
@@ -10,28 +11,23 @@ import { activeShiftBlocks, eventDayAnchor, singaporeDateString } from '../time/
  * precedence comparison would grant exactly the wrong thing.
  *
  * Layer 2 — station scope. For capture writes, whether the caller is actually
- * rostered on the target station for a currently-running shift block. IC and
- * above bypass this, and the bypass is audited.
+ * rostered on the target station for a shift that is running now. IC and above
+ * bypass this, and the bypass is audited.
  */
 
 /**
- * Is this volunteer rostered at this station, today, in a block that is
- * currently running? Checked against the database rather than the token because
- * station assignment changes hourly and group membership does not.
+ * Is this membership rostered at this station on a shift running now
+ * (`runningShifts`)? Checked against the database rather than the token
+ * because assignments change hourly.
  */
-export async function isRosteredAt(volunteerId: string, stationId: string): Promise<boolean> {
-  const blocks = activeShiftBlocks();
-  if (blocks.length === 0) return false;
-
+export async function isOnShiftAt(
+  scope: EventScope,
+  who: { membershipId: string; stationId: string },
+  now: Date = new Date(),
+): Promise<boolean> {
   const assignment = await prisma.shiftAssignment.findFirst({
-    where: {
-      volunteerId,
-      stationId,
-      block: { in: blocks },
-      eventDay: { date: eventDayAnchor(singaporeDateString()) },
-    },
+    where: { eventId: scope.eventId, ...who, shift: await runningShifts(scope, now) },
     select: { id: true },
   });
-
   return assignment !== null;
 }

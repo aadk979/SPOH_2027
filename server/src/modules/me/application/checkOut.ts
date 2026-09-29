@@ -11,10 +11,10 @@ import { loadOwnShift } from './ownShift.js';
 
 export async function checkOut(
   assignmentId: string,
-  { volunteerId, audit }: ActorContext,
+  { volunteerId, scope, audit }: ActorContext,
   clock: Clock = systemClock,
 ): Promise<MyAssignment> {
-  const assignment = await loadOwnShift(volunteerId, assignmentId);
+  const assignment = await loadOwnShift(scope, { volunteerId, assignmentId });
   assertCheckedIn(assignment);
   assertNotCheckedOut(assignment);
 
@@ -22,7 +22,8 @@ export async function checkOut(
 
   await prisma.$transaction(async (tx) => {
     // Conditional, so two taps racing each other cannot both write (F03-015).
-    if (!(await markCheckedOut(tx, assignmentId, now))) throw alreadyCheckedOut();
+    if (!(await markCheckedOut(tx, scope, { id: assignmentId, at: now })))
+      throw alreadyCheckedOut();
 
     await writeAudit(tx, {
       ...audit,
@@ -35,7 +36,7 @@ export async function checkOut(
 
   // Loaded after commit: its relations would overlap on the transaction's
   // connection (F03-019).
-  const updated = await findAssignmentById(assignmentId);
+  const updated = await findAssignmentById(scope, assignmentId);
   if (!updated) throw new NotFoundError('Shift assignment');
   return toMyAssignment(updated);
 }

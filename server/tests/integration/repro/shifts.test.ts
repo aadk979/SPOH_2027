@@ -13,6 +13,7 @@ import {
   createStation,
   createVolunteer,
   type TestVolunteer,
+  testEvent,
 } from '../../helpers/fixtures.js';
 
 /**
@@ -64,7 +65,13 @@ function decide(swapId: string, decision: 'APPROVED' | 'REJECTED'): request.Test
 
 async function presentToday(volunteer: TestVolunteer): Promise<void> {
   await prisma.attendance.create({
-    data: { volunteerId: volunteer.id, eventDayId: dayId, method: 'ROOT', presentAt: new Date() },
+    data: {
+      eventId: (await testEvent()).eventId,
+      volunteerId: volunteer.id,
+      eventDayId: dayId,
+      method: 'ROOT',
+      presentAt: new Date(),
+    },
   });
 }
 
@@ -91,7 +98,11 @@ describe('shifts and swaps (P03 repros)', () => {
     const statuses: number[][] = [];
     for (let round = 0; round < 5; round += 1) {
       const day = await prisma.eventDay.create({
-        data: { date: new Date(Date.UTC(2027, 1, 1 + round)), label: `Round ${round}` },
+        data: {
+          eventId: (await testEvent()).eventId,
+          date: new Date(Date.UTC(2027, 1, 1 + round)),
+          label: `Round ${round}`,
+        },
       });
       const shift = await assignToStation({ volunteerId: owner.id, stationId, eventDayId: day.id });
       const swapId = (await askSwap(shift.id, first)).body.swap.id as string;
@@ -146,7 +157,11 @@ describe('shifts and swaps (P03 repros)', () => {
   // F03-016
   it('does not let a volunteer mark an unassigned briefing wave as done', async () => {
     const slot = await prisma.briefingSlot.create({
-      data: { eventDayId: dayId, startsAt: new Date(FROZEN_NOW.getTime() - 60 * 60_000) },
+      data: {
+        eventId: (await testEvent()).eventId,
+        eventDayId: dayId,
+        startsAt: new Date(FROZEN_NOW.getTime() - 60 * 60_000),
+      },
     });
 
     const response = await request(app)
@@ -161,6 +176,7 @@ describe('shifts and swaps (P03 repros)', () => {
   it('lets an IC complete a wave assigned to someone else, as the error message promises', async () => {
     const slot = await prisma.briefingSlot.create({
       data: {
+        eventId: (await testEvent()).eventId,
         eventDayId: dayId,
         startsAt: new Date(FROZEN_NOW.getTime() - 60 * 60_000),
         briefierId: first.id,
@@ -178,7 +194,11 @@ describe('shifts and swaps (P03 repros)', () => {
   // F03-023
   it('does not warn about a shift from a previous day that nobody checked out of', async () => {
     const yesterday = await prisma.eventDay.create({
-      data: { date: new Date('2027-01-06T00:00:00.000Z'), label: 'Day 0' },
+      data: {
+        eventId: (await testEvent()).eventId,
+        date: new Date('2027-01-06T00:00:00.000Z'),
+        label: 'Day 0',
+      },
     });
     const old = await assignToStation({
       volunteerId: owner.id,
