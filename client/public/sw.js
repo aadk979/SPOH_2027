@@ -1,10 +1,11 @@
 /**
  * Service worker (BUILD_PLAN §9.6).
  *
- * Precaches the app shell and the briefing content so the map, the visitor
- * journey and the five things work with no network — those are the screens a
- * volunteer needs in a stairwell or a dead spot, and they never change during a
- * shift.
+ * Precaches the app shell, the briefing content, My shift and the capture
+ * screens, with the scripts and styles each of them loads, so a volunteer who
+ * first opens a capture screen while the venue Wi-Fi is down still gets it
+ * (F03-036). The map, the visitor journey and the five things are what a
+ * volunteer needs in a stairwell or a dead spot.
  *
  * It deliberately does NOT cache API responses. A stale count is worse than an
  * absent count: a volunteer shown yesterday's booth total will trust it, and a
@@ -13,17 +14,54 @@
  * fails honestly when the network is not there.
  */
 
-const CACHE = 'spoh2027-shell-v1';
+/**
+ * One cache per build. The page registers `/sw.js?v=<build id>`, so a new
+ * build installs a new worker, and activate drops the last build's chunks
+ * instead of letting every past build accumulate.
+ */
+const VERSION = new URLSearchParams(self.location.search || '').get('v') || 'dev';
+const CACHE = `spoh2027-shell-${VERSION}`;
 
-const SHELL = ['/', '/home', '/map', '/journey', '/brief', '/manifest.json'];
+const SHELL = [
+  '/',
+  '/home',
+  '/map',
+  '/journey',
+  '/brief',
+  '/shift',
+  '/capture/registration',
+  '/capture/registration/group',
+  '/capture/footfall',
+  '/capture/stamp',
+  '/capture/redeem',
+  '/manifest.json',
+];
+
+/** Hashed build assets: immutable, so a cached copy is always the right one. */
+const STATIC_ASSET = /\/_next\/static\/[^"'\s)]+/g;
+
+/** The scripts and styles a cached page names, so the page runs offline too. */
+function assetsOf(cache, url) {
+  return cache
+    .match(url)
+    .then((response) => (response ? response.text() : ''))
+    .then((html) => [...new Set(html.match(STATIC_ASSET) || [])]);
+}
+
+function precache(cache) {
+  // Individual failures must not abort the whole install: a missing icon
+  // should not leave the volunteer with no offline shell at all.
+  return Promise.allSettled(SHELL.map((url) => cache.add(url)))
+    .then(() => Promise.all(SHELL.map((url) => assetsOf(cache, url).catch(() => []))))
+    .then((lists) => [...new Set(lists.flat())])
+    .then((assets) => Promise.allSettled(assets.map((url) => cache.add(url))));
+}
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
       .open(CACHE)
-      // Individual failures must not abort the whole install: a missing icon
-      // should not leave the volunteer with no offline shell at all.
-      .then((cache) => Promise.allSettled(SHELL.map((url) => cache.add(url))))
+      .then(precache)
       .then(() => self.skipWaiting()),
   );
 });
@@ -48,6 +86,11 @@ self.addEventListener('fetch', (event) => {
   // Never cache the API. See the note above — this is the load-bearing rule.
   if (url.pathname.startsWith('/api/') || url.origin !== self.location.origin) return;
 
+  if (url.pathname.startsWith('/_next/static/')) {
+    event.respondWith(fromCacheFirst(request));
+    return;
+  }
+
   // Network first, falling back to the cached shell. A volunteer on a working
   // connection always sees the current build; one in a stairwell still gets the
   // map.
@@ -63,6 +106,20 @@ self.addEventListener('fetch', (event) => {
       .catch(() => caches.match(request).then((cached) => cached ?? caches.match('/home'))),
   );
 });
+
+function fromCacheFirst(request) {
+  return caches.match(request).then(
+    (cached) =>
+      cached ??
+      fetch(request).then((response) => {
+        if (response.ok) {
+          const copy = response.clone();
+          void caches.open(CACHE).then((cache) => cache.put(request, copy));
+        }
+        return response;
+      }),
+  );
+}
 
 /**
  * Push (RFC 8030).

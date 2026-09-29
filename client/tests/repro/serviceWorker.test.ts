@@ -13,11 +13,22 @@ type Handler = (
   event: { waitUntil(promise: Promise<unknown>): void } & Record<string, unknown>,
 ) => void;
 
-function loadWorker() {
+const PAGE =
+  '<script src="/_next/static/chunks/app-1a2b.js"></script><link href="/_next/static/css/ui-9f.css">';
+
+function loadWorker(search = '') {
   const handlers = new Map<string, Handler>();
   const added: string[] = [];
+  const opened: string[] = [];
   const fetchMock = vi.fn(() => Promise.resolve(new Response('{}')));
-  const cache = { add: vi.fn((url: string) => (added.push(url), Promise.resolve())), put: vi.fn() };
+  const cache = {
+    add: vi.fn((url: string) => (added.push(url), Promise.resolve())),
+    put: vi.fn(),
+    // A precached route answers with a page that names its build's assets.
+    match: vi.fn((url: string) =>
+      Promise.resolve(url.startsWith('/_next/') ? undefined : new Response(PAGE)),
+    ),
+  };
   const posted: unknown[] = [];
   const self = {
     addEventListener: (type: string, handler: Handler) => handlers.set(type, handler),
@@ -27,7 +38,7 @@ function loadWorker() {
       ),
     },
     skipWaiting: () => Promise.resolve(),
-    location: { origin: 'https://ops.example' },
+    location: { origin: 'https://ops.example', search },
     registration: {
       pushManager: {
         subscribe: vi.fn(() =>
@@ -41,9 +52,13 @@ function loadWorker() {
   };
   runInNewContext(readFileSync('public/sw.js', 'utf8'), {
     self,
-    caches: { open: () => Promise.resolve(cache), keys: () => Promise.resolve([]) },
+    caches: {
+      open: (name: string) => (opened.push(name), Promise.resolve(cache)),
+      keys: () => Promise.resolve([]),
+    },
     fetch: fetchMock,
     URL,
+    URLSearchParams,
     Promise,
   });
 
@@ -53,7 +68,7 @@ function loadWorker() {
     await Promise.all(pending);
   }
 
-  return { fire, added, fetchMock, posted };
+  return { fire, added, opened, fetchMock, posted };
 }
 
 describe('service worker (P03 repros)', () => {
@@ -72,8 +87,8 @@ describe('service worker (P03 repros)', () => {
   });
 
   // F03-036
-  it.skip('precaches the capture screens so they open offline the first time', async () => {
-    const worker = loadWorker();
+  it('precaches the capture screens so they open offline the first time', async () => {
+    const worker = loadWorker('?v=build-42');
 
     await worker.fire('install');
 
@@ -86,5 +101,11 @@ describe('service worker (P03 repros)', () => {
         '/shift',
       ]),
     );
+    // Their scripts and styles too, or the cached page would not run offline.
+    expect(worker.added).toEqual(
+      expect.arrayContaining(['/_next/static/chunks/app-1a2b.js', '/_next/static/css/ui-9f.css']),
+    );
+    // One cache per build, so activate can drop the last build's chunks.
+    expect(worker.opened.every((name) => name.endsWith('build-42'))).toBe(true);
   });
 });

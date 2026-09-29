@@ -11,6 +11,12 @@ import type { NextConfig } from 'next';
 const apiOrigin = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4010';
 const isDev = process.env.NODE_ENV !== 'production';
 
+/**
+ * Names the service worker's cache (F03-036). A deploy may pin it with
+ * SPOH_BUILD_ID (the commit); otherwise every `next build` gets a fresh one.
+ */
+const swVersion = process.env.SPOH_BUILD_ID ?? Date.now().toString(36);
+
 const contentSecurityPolicy = [
   "default-src 'self'",
   // 'unsafe-inline' is required in both dev and prod: Next's App Router
@@ -35,6 +41,7 @@ const nextConfig: NextConfig = {
   // The floating development badge overlaps the mobile Home tab.
   devIndicators: false,
   reactStrictMode: true,
+  env: { NEXT_PUBLIC_SW_VERSION: swVersion },
   poweredByHeader: false,
 
   async headers() {

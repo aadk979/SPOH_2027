@@ -15,7 +15,10 @@ export function ServiceWorkerRegistration(): null {
     if (process.env.NODE_ENV !== 'production') return;
 
     const register = (): void => {
-      void navigator.serviceWorker.register('/sw.js').catch(() => undefined);
+      // The build id names the worker's cache, so each build replaces the last
+      // build's offline copy rather than piling on top of it (F03-036).
+      const version = encodeURIComponent(process.env.NEXT_PUBLIC_SW_VERSION ?? 'dev');
+      void navigator.serviceWorker.register(`/sw.js?v=${version}`).catch(() => undefined);
     };
 
     // Registering after load keeps the worker off the critical path for the
