@@ -3,12 +3,9 @@
  * remediation/standards/engineering-standards.md §3 (server) and §4 (client),
  * checked against today's code.
  *
- * The server, shared-package and cross-cutting rules are errors since P06.10:
- * `npm run arch:check` fails on any of them. The client rules stay warnings,
- * listing the distance to the target, until P07 brings them to zero. Paths not yet in the tree (http/,
- * application/, platform/, shared/ui/ …) match nothing until the refactor
- * creates them; where today's layout has an equivalent it is named too, so the
- * current debt is counted rather than hidden.
+ * Every rule is an error: the server, shared-package and cross-cutting ones
+ * since P06.10, the client ones since P07.9. `npm run arch:check` fails on any.
+ * A rule whose paths match nothing in today's tree waits for the code it guards.
  *
  *   npm run arch:check      every violation
  *   npm run arch:report     counts per rule (with the ESLint size guards)
@@ -146,8 +143,8 @@ module.exports = {
     },
     {
       name: 'client-design-system-no-features',
-      comment: 'The design system (shared/ui; today components/ui) never imports a feature.',
-      severity: 'warn',
+      comment: 'The design system (shared/ui) never imports a feature. Blocking since P07.9.',
+      severity: 'error',
       from: { path: '^client/src/(shared/ui|components/ui)/' },
       to: { path: '^client/src/features/' },
     },

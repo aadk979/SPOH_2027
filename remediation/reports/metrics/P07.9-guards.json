@@ -1,0 +1,27 @@
+{
+  "generatedAt": "2026-09-29T03:16:04.533Z",
+  "size": {
+    "max-lines-per-function": 0,
+    "max-lines": 0,
+    "complexity": 0,
+    "max-depth": 0,
+    "max-params": 0
+  },
+  "boundaries": {
+    "deployable-server-to-client": 0,
+    "deployable-client-to-server": 0,
+    "server-module-internals-private": 0,
+    "server-prisma-only-in-data": 0,
+    "server-express-only-in-http": 0,
+    "server-http-not-to-data": 0,
+    "server-application-not-to-http": 0,
+    "server-domain-is-pure": 0,
+    "server-data-layer-direction": 0,
+    "client-api-only-in-feature-api": 0,
+    "client-features-via-index": 0,
+    "client-design-system-no-features": 0,
+    "shared-stays-leaf": 0,
+    "no-circular": 0,
+    "not-to-unresolvable": 0
+  }
+}

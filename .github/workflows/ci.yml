@@ -106,9 +106,9 @@ jobs:
         run: npm run test --workspace client
 
   architecture:
-    # Blocking since P06.10: a server, shared-package or cycle violation of the
-    # boundary rules fails the build. The client rules are still warnings until
-    # P07, so they print without failing; the guard counts are a report.
+    # Blocking: any boundary violation fails the build (server, shared and cycles
+    # since P06.10, the client since P07.9). The size guards are lint errors in the
+    # quality job; the guard counts here are a report.
     name: Architecture
     runs-on: ubuntu-latest
     steps:

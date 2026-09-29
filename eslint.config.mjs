@@ -60,6 +60,18 @@ export default tseslint.config(
           selector: "Property[key.name='endpoint'] > Literal",
           message: 'Declare endpoint paths in features/<domain>/api.ts.',
         },
+        {
+          selector: "Property[key.name='endpoint'] > TemplateLiteral",
+          message: 'Declare endpoint paths in features/<domain>/api.ts.',
+        },
+        {
+          selector: 'Literal[value=/api.v1/]',
+          message: 'API paths live in features/<domain>/api.ts and shared/lib (P07.9).',
+        },
+        {
+          selector: 'TemplateElement[value.raw=/api.v1/]',
+          message: 'API paths live in features/<domain>/api.ts and shared/lib (P07.9).',
+        },
       ],
     },
   },
@@ -84,6 +96,18 @@ export default tseslint.config(
         {
           selector: "Property[key.name='endpoint'] > Literal",
           message: 'Declare endpoint paths in features/<domain>/api.ts.',
+        },
+        {
+          selector: "Property[key.name='endpoint'] > TemplateLiteral",
+          message: 'Declare endpoint paths in features/<domain>/api.ts.',
+        },
+        {
+          selector: 'Literal[value=/api.v1/]',
+          message: 'API paths live in features/<domain>/api.ts and shared/lib (P07.9).',
+        },
+        {
+          selector: 'TemplateElement[value.raw=/api.v1/]',
+          message: 'API paths live in features/<domain>/api.ts and shared/lib (P07.9).',
         },
         {
           selector: "CallExpression[callee.name='api']",
@@ -167,6 +191,30 @@ export default tseslint.config(
     },
   },
 
+  // The design system never imports a feature (ADR-007 §3, `client-ui-no-features`),
+  // on top of the deployable boundary above, which this block must repeat.
+  {
+    files: ['client/src/shared/ui/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/server/**', '@spoh/server', '@prisma/client', 'express', 'prisma'],
+              message:
+                'client must not import from the server deployable (BUILD_PLAN §2.1). Share types via @spoh/shared.',
+            },
+            {
+              group: ['@/features', '@/features/*', '**/features/**'],
+              message: 'shared/ui is the design system: it never imports a feature (P07.9).',
+            },
+          ],
+        },
+      ],
+    },
+  },
+
   // `packages/shared` has exactly one runtime dependency: zod (BUILD_PLAN §2.3).
   {
     files: ['packages/shared/**/*.ts'],
@@ -197,20 +245,19 @@ export default tseslint.config(
 
   // Size and complexity guards: the hard limits from
   // remediation/standards/engineering-standards.md §2. Errors for the server and
-  // the shared package since P06.10; warnings for the client, reporting its
-  // refactor debt without failing, until P07 flips them.
+  // the shared package since P06.10, and for the client since P07.9.
   {
     files: ['server/src/**/*.ts', 'packages/shared/src/**/*.ts'],
     rules: sizeGuards({ functionLines: 50 }),
   },
   {
     files: ['client/src/**/*.ts'],
-    rules: sizeGuards({ functionLines: 50, level: 'warn' }),
+    rules: sizeGuards({ functionLines: 50 }),
   },
   {
     // React components get 80 lines; a .tsx file is where they live.
     files: ['client/src/**/*.tsx'],
-    rules: sizeGuards({ functionLines: 80, level: 'warn' }),
+    rules: sizeGuards({ functionLines: 80 }),
   },
   {
     // Routes only compose feature screens.

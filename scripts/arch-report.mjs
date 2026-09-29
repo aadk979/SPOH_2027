@@ -9,7 +9,8 @@
  *   npm run arch:report            table
  *   npm run arch:report -- --json  machine-readable, for reports/metrics
  *
- * Exits 0 whatever it finds; the guards are report-only until P06/P07.
+ * Exits 0 whatever it finds: it is the report. `npm run lint` and `npm run arch:check`
+ * are the blocking gates (every guard is an error since P07.9).
  */
 import { execFileSync } from 'node:child_process';
 import { ESLint } from 'eslint';
@@ -69,6 +70,6 @@ const report = { size: await lintGuardCounts(), boundaries: boundaryCounts() };
 if (process.argv.includes('--json')) {
   console.log(JSON.stringify({ generatedAt: new Date().toISOString(), ...report }, null, 2));
 } else {
-  printSection('Size and complexity guards (ESLint, warn)', report.size);
-  printSection('Module boundaries (dependency-cruiser, warn)', report.boundaries);
+  printSection('Size and complexity guards (ESLint)', report.size);
+  printSection('Module boundaries (dependency-cruiser)', report.boundaries);
 }
