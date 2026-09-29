@@ -39,6 +39,9 @@ const COMMITTEE_MODELS = new Set([
  * a gift type's name, an event day's label.
  */
 const REFERENCE_MODELS = new Set([
+  // An organisation's and an event's name, app name and branding (ADR-001).
+  'Organisation',
+  'Event',
   'EventDay',
   'Station',
   'GiftType',
