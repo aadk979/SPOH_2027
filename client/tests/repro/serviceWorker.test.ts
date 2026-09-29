@@ -13,8 +13,10 @@ type Handler = (
   event: { waitUntil(promise: Promise<unknown>): void } & Record<string, unknown>,
 ) => void;
 
+// A prerendered page also names its chunks inside inline RSC JSON, with escaped quotes.
 const PAGE =
-  '<script src="/_next/static/chunks/app-1a2b.js"></script><link href="/_next/static/css/ui-9f.css">';
+  '<script src="/_next/static/chunks/app-1a2b.js"></script><link href="/_next/static/css/ui-9f.css">' +
+  '<script>self.__next_f.push([1,"[\\"/_next/static/chunks/rsc-3c4d.js\\"]"])</script>';
 
 function loadWorker(search = '') {
   const handlers = new Map<string, Handler>();
@@ -103,8 +105,14 @@ describe('service worker (P03 repros)', () => {
     );
     // Their scripts and styles too, or the cached page would not run offline.
     expect(worker.added).toEqual(
-      expect.arrayContaining(['/_next/static/chunks/app-1a2b.js', '/_next/static/css/ui-9f.css']),
+      expect.arrayContaining([
+        '/_next/static/chunks/app-1a2b.js',
+        '/_next/static/css/ui-9f.css',
+        '/_next/static/chunks/rsc-3c4d.js',
+      ]),
     );
+    // No URL picks up the escaping backslash (which a browser reads as "/").
+    expect(worker.added.filter((url) => url.includes('\\'))).toEqual([]);
     // One cache per build, so activate can drop the last build's chunks.
     expect(worker.opened.every((name) => name.endsWith('build-42'))).toBe(true);
   });

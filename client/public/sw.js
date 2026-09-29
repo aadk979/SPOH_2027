@@ -37,8 +37,12 @@ const SHELL = [
   '/manifest.json',
 ];
 
-/** Hashed build assets: immutable, so a cached copy is always the right one. */
-const STATIC_ASSET = /\/_next\/static\/[^"'\s)]+/g;
+/**
+ * Hashed build assets: immutable, so a cached copy is always the right one.
+ * The backslash is excluded because pages also name chunks inside inline RSC
+ * JSON, where the closing quote is escaped.
+ */
+const STATIC_ASSET = /\/_next\/static\/[^"'\s)\\]+/g;
 
 /** The scripts and styles a cached page names, so the page runs offline too. */
 function assetsOf(cache, url) {
