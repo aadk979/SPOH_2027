@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-29T01:25:59.964Z",
+  "updatedAt": "2026-09-29T01:33:40.648Z",
   "current": {
     "phase": "P07",
-    "step": "P07.6"
+    "step": "P07.7"
   },
   "gates": [
     {
@@ -1495,11 +1495,16 @@
         {
           "id": "P07.7",
           "title": "Navigation registry",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-29T01:26:08.339Z",
+          "completedAt": "2026-09-29T01:33:40.647Z",
+          "commits": ["4553f8f"],
+          "notes": [
+            {
+              "at": "2026-09-29T01:33:40.648Z",
+              "text": "navigation/registry.ts drives SectionNav, GlobalNav inbox, operations tiles, RoleTiles, guide/safety hubs, AppShell hub parent and sectionForPath; route-coverage test; parity with old helpers verified. Client 174/4, E2E 26, visual 58 unchanged."
+            }
+          ]
         },
         {
           "id": "P07.8",
