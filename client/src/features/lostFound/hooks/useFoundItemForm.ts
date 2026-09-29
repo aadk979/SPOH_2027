@@ -1,3 +1,5 @@
+import { CreateLostFoundRequest } from '@spoh/shared';
+import { useZodForm } from '@/shared/hooks/useZodForm';
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { useMe } from '@/features/session';
@@ -5,7 +7,7 @@ import { useCreateLostFound } from '@/features/lostFound';
 import { usePhotoUpload } from '@/features/media';
 export function useFoundItemForm() {
   const fields = useFoundItemFields();
-  const { itemLabel, categoryLabel, holderNote, setItemError } = fields;
+  const { itemLabel, categoryLabel, holderNote } = fields;
   const router = useRouter();
   const mutation = useCreateLostFound();
   const { data: me } = useMe();
@@ -16,17 +18,11 @@ export function useFoundItemForm() {
 
   async function submit(event: FormEvent): Promise<void> {
     event.preventDefault();
-    if (itemLabel.trim().length < 2) {
-      setItemError('Please provide what the item is (at least 2 characters).');
-      return;
-    }
-
     setPending(true);
-    setItemError(null);
     setFormError(null);
 
     try {
-      await mutation.mutateAsync({
+      const request = fields.validate({
         itemLabel: itemLabel.trim(),
         ...(categoryLabel.trim() ? { categoryLabel: categoryLabel.trim() } : {}),
         ...(holderNote.trim() ? { holderNote: holderNote.trim() } : {}),
@@ -34,6 +30,8 @@ export function useFoundItemForm() {
         ...(me?.currentAssignment ? { foundStationId: me.currentAssignment.station.id } : {}),
         foundAt: new Date().toISOString(),
       });
+      if (!request) return;
+      await mutation.mutateAsync(request);
 
       router.replace('/safety/lost-found');
     } catch {
@@ -43,23 +41,36 @@ export function useFoundItemForm() {
     }
   }
 
-  return { ...fields, pending, formError, photo, submit, me };
+  return {
+    ...fields,
+    pending,
+    formError:
+      formError ??
+      fields.errors.foundStationId ??
+      fields.errors.foundAt ??
+      fields.errors.photoKey ??
+      fields.errors._form,
+    photo,
+    submit,
+    me,
+  };
 }
 export type FoundItemFormState = ReturnType<typeof useFoundItemForm>;
 
 function useFoundItemFields() {
-  const [itemLabel, setItemLabel] = useState('');
-  const [categoryLabel, setCategoryLabel] = useState('');
-  const [holderNote, setHolderNote] = useState('');
-  const [itemError, setItemError] = useState<string | null>(null);
+  const form = useZodForm(CreateLostFoundRequest, {
+    itemLabel: '',
+    categoryLabel: '',
+    holderNote: '',
+  });
   return {
-    itemLabel,
-    setItemLabel,
-    categoryLabel,
-    setCategoryLabel,
-    holderNote,
-    setHolderNote,
-    itemError,
-    setItemError,
+    ...form.values,
+    setItemLabel: (value: typeof form.values.itemLabel) => form.setField('itemLabel', value),
+    setCategoryLabel: (value: typeof form.values.categoryLabel) =>
+      form.setField('categoryLabel', value),
+    setHolderNote: (value: typeof form.values.holderNote) => form.setField('holderNote', value),
+    errors: form.errors,
+    itemError: form.errors.itemLabel,
+    validate: form.validate,
   };
 }

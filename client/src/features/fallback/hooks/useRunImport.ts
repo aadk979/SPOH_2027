@@ -1,66 +1,41 @@
 import type { Dispatch, SetStateAction } from 'react';
 import type { ImportResponse } from '@spoh/shared';
-import type { Target, Source } from '../model/importTemplates';
 import { ApiError } from '@/shared/lib/apiErrors';
 import { importFallback } from '../api';
 import { parseCsv } from '../model/parseImportCsv';
+import { toImportRequest, type ImportFormRequest, type ImportValues } from '../model/importRequest';
+import type { z } from 'zod';
 interface ImportAction {
-  csv: string;
-  target: Target;
-  source: Source;
-  fileName: string;
-  notes: string;
+  values: ImportValues;
+  validate(input: unknown): z.output<typeof ImportFormRequest> | null;
   setPending: Dispatch<SetStateAction<boolean>>;
   setError: Dispatch<SetStateAction<string | null>>;
-  setResult: Dispatch<SetStateAction<ImportResponse | null>>;
-  setPreview: Dispatch<SetStateAction<ImportResponse | null>>;
+  setOutcome(commit: boolean, response: ImportResponse): void;
 }
-export function useRunImport({
-  csv,
-  target,
-  source,
-  fileName,
-  notes,
-  setPending,
-  setError,
-  setResult,
-  setPreview,
-}: ImportAction) {
+
+function failureMessage(cause: unknown): string {
+  if (cause instanceof ApiError) return `${cause.message} (${cause.code})`;
+  return cause instanceof Error ? cause.message : 'The import failed.';
+}
+
+export function useRunImport({ values, validate, setPending, setError, setOutcome }: ImportAction) {
   async function run(commit: boolean): Promise<void> {
     setPending(true);
     setError(null);
 
     try {
-      const rows = parseCsv(csv, target);
+      const rows = parseCsv(values.csv, values.target);
 
       if (rows.length === 0) {
         setError('No rows parsed. Check the header line matches the template.');
         return;
       }
 
-      const response = await importFallback(target, {
-        source,
-        rows,
-        commit,
-        ...(fileName.trim() ? { fileName: fileName.trim() } : {}),
-        ...(notes.trim() ? { notes: notes.trim() } : {}),
-      });
-
-      if (commit) {
-        setResult(response);
-        setPreview(null);
-      } else {
-        setPreview(response);
-        setResult(null);
-      }
+      const request = validate(toImportRequest(values, rows, commit));
+      if (!request) return;
+      setOutcome(commit, await importFallback(request.target, request.body));
     } catch (cause) {
-      setError(
-        cause instanceof ApiError
-          ? `${cause.message} (${cause.code})`
-          : cause instanceof Error
-            ? cause.message
-            : 'The import failed.',
-      );
+      setError(failureMessage(cause));
     } finally {
       setPending(false);
     }

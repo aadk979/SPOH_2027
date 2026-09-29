@@ -1,52 +1,39 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { RuntimeSettings } from '@spoh/shared';
+import { useZodForm } from '@/shared/hooks/useZodForm';
 import { useSettings, useSaveSettings } from '../queries';
-import { NUMERIC_FIELDS } from '../model/numericFields';
-import { buildSettingsPatch } from '../model/buildSettingsPatch';
+import {
+  EMPTY_SETTINGS,
+  SETTINGS_ERROR_FIELDS,
+  toSettingsRequest,
+  toSettingsValues,
+} from '../model/settingsValues';
 export function useSettingsForm(enabled: boolean) {
   const settings = useSettings(enabled);
   const save = useSaveSettings();
-
-  const [eventName, setEventName] = useState('');
-  const [draft, setDraft] = useState<Record<string, string>>({});
-  const [morning, setMorning] = useState({ start: '', end: '' });
-  const [afternoon, setAfternoon] = useState({ start: '', end: '' });
-  const [validationError, setValidationError] = useState<string | null>(null);
+  const form = useZodForm(RuntimeSettings, EMPTY_SETTINGS, SETTINGS_ERROR_FIELDS);
+  const { reset } = form;
 
   // Seed the form once the current values arrive; a controlled input cannot
-  // start empty and later adopt a value without this.
+  // start empty and later adopt a value without this. `reset` is deliberately
+  // not a dependency: it is recreated every render, and only new server values
+  // should replace what the admin is typing.
   useEffect(() => {
     const current = settings.data?.settings;
-    if (!current) return;
-
-    setEventName(current.eventName ?? '');
-    setDraft(
-      Object.fromEntries(NUMERIC_FIELDS.map((field) => [field.key, String(current[field.key])])),
-    );
-    setMorning(current.shiftBlocks.MORNING);
-    setAfternoon(current.shiftBlocks.AFTERNOON);
+    if (current) reset(toSettingsValues(current));
   }, [settings.data]);
 
   function onSave(): void {
-    setValidationError(null);
-    const result = buildSettingsPatch({ eventName, draft, morning, afternoon });
-    if ('error' in result) {
-      setValidationError(result.error);
-      return;
-    }
-    save.mutate(result.patch);
+    const patch = form.validate(toSettingsRequest(form.values));
+    if (patch) save.mutate(patch);
   }
   return {
     settings,
     save,
-    eventName,
-    setEventName,
-    draft,
-    setDraft,
-    morning,
-    setMorning,
-    afternoon,
-    setAfternoon,
-    validationError,
+    values: form.values,
+    errors: form.errors,
+    setField: form.setField,
+    hasErrors: Object.values(form.errors).some(Boolean),
     onSave,
   };
 }

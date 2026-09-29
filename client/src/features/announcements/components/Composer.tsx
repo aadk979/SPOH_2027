@@ -11,7 +11,7 @@ export function Composer({ me }: { me: ReturnType<typeof useMe>['data'] }): Reac
     <Card as="section" className="flex flex-col gap-md">
       <h2 className="text-tagline">Send an announcement</h2>
 
-      <Field id="announcement-body" label="Message" error={error}>
+      <Field id="announcement-body" label="Message" error={form.errors.body ?? error}>
         {(props) => (
           <Textarea
             {...props}
@@ -27,6 +27,7 @@ export function Composer({ me }: { me: ReturnType<typeof useMe>['data'] }): Reac
       <ChoiceGroup
         legend="Priority"
         name="announcement-priority"
+        error={form.errors.priority}
         value={priority}
         onChange={setPriority}
         options={[
@@ -47,7 +48,7 @@ export function Composer({ me }: { me: ReturnType<typeof useMe>['data'] }): Reac
       <Button
         className="self-start"
         disabled={body.trim().length < 3 || send.isPending}
-        onClick={() => send.mutate()}
+        onClick={form.submit}
       >
         {send.isPending ? 'Sending…' : 'Send'}
       </Button>

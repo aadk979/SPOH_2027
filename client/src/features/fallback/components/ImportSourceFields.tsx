@@ -22,6 +22,7 @@ export function ImportSourceFields({ form }: { form: ImportForm }): ReactNode {
       <ChoiceGroup
         legend="Where did it come from?"
         name="import-source"
+        error={form.errors.source}
         value={source}
         onChange={(value) => {
           setSource(value);

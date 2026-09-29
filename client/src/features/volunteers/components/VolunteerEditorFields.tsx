@@ -17,7 +17,7 @@ export function VolunteerEditorFields({
   return (
     <>
       <div className="grid gap-sm sm:grid-cols-3">
-        <Field id={`role-${volunteer.id}`} label="Committee role">
+        <Field id={`role-${volunteer.id}`} label="Committee role" error={form.errors.role}>
           {(props) => (
             <Select
               {...props}
@@ -33,7 +33,7 @@ export function VolunteerEditorFields({
           )}
         </Field>
 
-        <Field id={`phone-${volunteer.id}`} label="Phone" optional>
+        <Field id={`phone-${volunteer.id}`} label="Phone" error={form.errors.phone} optional>
           {(props) => (
             <Input
               {...props}
@@ -44,7 +44,12 @@ export function VolunteerEditorFields({
           )}
         </Field>
 
-        <Field id={`portfolio-${volunteer.id}`} label="Portfolio" optional>
+        <Field
+          id={`portfolio-${volunteer.id}`}
+          label="Portfolio"
+          error={form.errors.portfolio}
+          optional
+        >
           {(props) => (
             <Input
               {...props}

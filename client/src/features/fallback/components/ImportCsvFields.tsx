@@ -10,7 +10,7 @@ export function ImportCsvFields({ form }: { form: ImportForm }): ReactNode {
         id="csv"
         label="Rows (CSV)"
         hint="Times are ISO-8601 UTC. A 30-minute block start is enough — a tally sheet never had more precision than that, and pretending otherwise would invent it."
-        error={error}
+        error={form.errors.csv ?? error}
       >
         {(props) => (
           <Textarea

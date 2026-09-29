@@ -1,6 +1,5 @@
 'use client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { CreateAnnouncementRequest } from '@spoh/shared';
 import { listAnnouncements, acknowledgeAnnouncement, sendAnnouncement } from './api';
 export const announcementKeys = { all: ['announcements'] as const };
 export function useAnnouncements(enabled: boolean) {
@@ -21,13 +20,10 @@ export function useAcknowledgeAnnouncement() {
   const invalidate = useInvalidateAnnouncements();
   return useMutation({ mutationFn: acknowledgeAnnouncement, onSuccess: invalidate });
 }
-export function useSendAnnouncement(
-  input: () => CreateAnnouncementRequest,
-  callbacks: { onSuccess: () => void; onError: () => void },
-) {
+export function useSendAnnouncement(callbacks: { onSuccess: () => void; onError: () => void }) {
   const invalidate = useInvalidateAnnouncements();
   return useMutation({
-    mutationFn: () => sendAnnouncement(input()),
+    mutationFn: sendAnnouncement,
     onSuccess: () => {
       callbacks.onSuccess();
       invalidate();

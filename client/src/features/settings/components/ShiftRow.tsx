@@ -3,11 +3,14 @@ import { Field, Input } from '@/shared/ui';
 export function ShiftRow({
   label,
   value,
+  error,
   disabled,
   onChange,
 }: {
   label: string;
   value: { start: string; end: string };
+  /** Schema errors for the block; shown under its end time, which the ordering rule names. */
+  error?: string;
   disabled: boolean;
   onChange(next: { start: string; end: string }): void;
 }): ReactNode {
@@ -24,7 +27,7 @@ export function ShiftRow({
           />
         )}
       </Field>
-      <Field id={`${label}-end`} label={`${label} ends`}>
+      <Field id={`${label}-end`} label={`${label} ends`} error={error}>
         {(props) => (
           <Input
             {...props}

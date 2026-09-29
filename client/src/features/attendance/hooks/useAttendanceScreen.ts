@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
-import type { AttendanceChallenge, AttendanceProof } from '@spoh/shared';
+import { AttendanceProof, type AttendanceChallenge } from '@spoh/shared';
+import { useZodForm } from '@/shared/hooks/useZodForm';
 import {
   useAttendance,
   useSubmitAttendance,
@@ -7,7 +8,8 @@ import {
   useIssueAttendanceChallenge,
 } from '../queries';
 export function useAttendanceScreen(enabled: boolean) {
-  const [pin, setPin] = useState('');
+  const pinForm = useZodForm(AttendanceProof, { method: 'PIN' as const, pin: '' });
+  const setPin = pinForm.setter('pin');
   const [scanning, setScanning] = useState(true);
   const [code, setCode] = useState<AttendanceChallenge | null>(null);
   const inFlight = useRef(false);
@@ -26,8 +28,27 @@ export function useAttendanceScreen(enabled: boolean) {
     setScanning(false);
     submit.mutate(proof);
   }
+  /** The typed PIN, checked against the proof schema the server applies. */
+  function sendPin(): void {
+    const proof = pinForm.validate();
+    if (proof) send(proof);
+  }
 
-  return { pin, setPin, scanning, setScanning, code, setCode, status, submit, start, issue, send };
+  return {
+    pin: pinForm.values.pin,
+    pinError: pinForm.errors.pin ?? pinForm.errors._form,
+    setPin,
+    sendPin,
+    scanning,
+    setScanning,
+    code,
+    setCode,
+    status,
+    submit,
+    start,
+    issue,
+    send,
+  };
 }
 export type AttendanceController = ReturnType<typeof useAttendanceScreen>;
 export type AttendanceData = NonNullable<AttendanceController['status']['data']>;

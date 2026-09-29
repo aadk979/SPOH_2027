@@ -11,7 +11,7 @@ export function WithdrawVolunteerAccess({
   volunteer: VolunteerAdminRecord;
   form: VolunteerEditorState;
 }): ReactNode {
-  const { pending, reason, setReason, deactivate } = form;
+  const { pending, reason, setReason, deactivate, withdraw } = form;
   return (
     <>
       {volunteer.active ? (
@@ -25,6 +25,7 @@ export function WithdrawVolunteerAccess({
           <Field
             id={`reason-${volunteer.id}`}
             label="Reason"
+            error={form.errors.reason}
             hint="Shown on the roster, so the next person to look knows why."
           >
             {(props) => (
@@ -41,12 +42,7 @@ export function WithdrawVolunteerAccess({
             variant="danger"
             size="sm"
             disabled={pending || reason.trim().length < 3}
-            onClick={() =>
-              deactivate.mutate({
-                id: volunteer.id,
-                body: { reason: reason.trim(), disableIdentity: true },
-              })
-            }
+            onClick={withdraw}
           >
             {deactivate.isPending ? 'Withdrawing…' : `Deactivate ${volunteer.displayName}`}
           </Button>

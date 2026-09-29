@@ -9,7 +9,7 @@ export function SettingsFeedback({
   form: SettingsForm;
   canEdit: boolean;
 }): ReactNode {
-  const { validationError, save } = form;
+  const { hasErrors, save } = form;
   return (
     <>
       {!canEdit ? (
@@ -18,9 +18,9 @@ export function SettingsFeedback({
           only.
         </Callout>
       ) : null}
-      {validationError ? (
+      {hasErrors ? (
         <Callout tone="alert" role="alert" title="Invalid input">
-          {validationError}
+          Nothing was saved. Correct the highlighted values and save again.
         </Callout>
       ) : null}
       {save.isError ? (

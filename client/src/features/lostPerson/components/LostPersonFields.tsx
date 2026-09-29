@@ -10,7 +10,6 @@ export function LostPersonFields({ form }: { form: LostPersonFormState }): React
     clothing,
     setClothing,
     descriptionError,
-    setDescriptionError,
   } = form;
   return (
     <>
@@ -29,7 +28,6 @@ export function LostPersonFields({ form }: { form: LostPersonFormState }): React
             value={description}
             onChange={(event) => {
               setDescription(event.target.value);
-              if (descriptionError) setDescriptionError(null);
             }}
             placeholder="Child separated from their group near the Welcome Lounge"
           />
@@ -42,7 +40,7 @@ export function LostPersonFields({ form }: { form: LostPersonFormState }): React
           together.
         */}
       <div className="grid gap-md sm:grid-cols-2">
-        <Field id="age" label="Approximate age" optional>
+        <Field id="age" error={form.errors.approxAge} label="Approximate age" optional>
           {(props) => (
             <Input
               {...props}
@@ -53,7 +51,12 @@ export function LostPersonFields({ form }: { form: LostPersonFormState }): React
           )}
         </Field>
 
-        <Field id="clothing" label="What are they wearing?" optional>
+        <Field
+          id="clothing"
+          error={form.errors.clothingText}
+          label="What are they wearing?"
+          optional
+        >
           {(props) => (
             <Input
               {...props}

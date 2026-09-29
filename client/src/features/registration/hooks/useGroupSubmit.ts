@@ -1,44 +1,35 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import type { CreateGroupRegistrationRequest } from '@spoh/shared';
 import { registrationEndpoints } from '@/features/registration';
 import { enqueue } from '@/shared/lib/outbox';
-import { groupMembers, type GroupCounts } from '../model/groupMembers';
+import { toGroupRequest, type GroupValues } from '../model/groupRequest';
 export function useGroupSubmit({
   stationId,
   total,
-  counts,
-  shortCode,
+  values,
+  form,
 }: {
   stationId: string | undefined;
   total: number;
-  counts: GroupCounts;
-  shortCode: string;
+  values: GroupValues;
+  form: { validate(input: unknown): CreateGroupRegistrationRequest | null };
 }) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   async function submit(): Promise<void> {
     if (!stationId || total === 0) return;
+    const body = form.validate(toGroupRequest(values, stationId, crypto.randomUUID()));
+    if (!body) return;
     setSaving(true);
     setError(null);
 
-    const members = groupMembers(counts);
-
-    const idempotencyKey = crypto.randomUUID();
-
     try {
       await enqueue({
-        idempotencyKey,
+        idempotencyKey: body.idempotencyKey,
         endpoint: registrationEndpoints.group,
-        body: {
-          stationId,
-          members,
-          // Optional. If the card cannot be linked the registrations still
-          // stand and only that card's journey goes untracked (remediation/phases/P07-client-refactor.md).
-          ...(shortCode.trim() ? { missionCardShortCode: shortCode.trim().toUpperCase() } : {}),
-          idempotencyKey,
-          clientRecordedAt: new Date().toISOString(),
-        },
+        body,
       });
     } catch {
       // The local write itself failed. Without this the button stayed

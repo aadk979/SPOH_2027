@@ -9,7 +9,7 @@ export function EventNameField({
   form: SettingsForm;
   canEdit: boolean;
 }): ReactNode {
-  const { eventName, setEventName } = form;
+  const { values, errors, setField } = form;
   return (
     <>
       <Section
@@ -17,13 +17,13 @@ export function EventNameField({
         description="Display name for the event, used in reports, exports and the ops-room display."
       >
         <Card variant="flat">
-          <Field id="event-name" label="Event name">
+          <Field id="event-name" label="Event name" error={errors.eventName}>
             {(props) => (
               <Input
                 {...props}
                 disabled={!canEdit}
-                value={eventName}
-                onChange={(event) => setEventName(event.target.value)}
+                value={values.eventName}
+                onChange={(event) => setField('eventName', event.target.value)}
                 maxLength={80}
                 placeholder="SPOH 2027"
               />

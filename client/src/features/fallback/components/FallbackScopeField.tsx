@@ -4,7 +4,7 @@ import { Field, Select } from '@/shared/ui';
 export function FallbackScopeField({ controller }: { controller: FallbackController }): ReactNode {
   const { stationId, setStationId, stations } = controller;
   return (
-    <Field id="scope" label="Scope">
+    <Field id="scope" label="Scope" error={controller.errors.stationId}>
       {(props) => (
         <Select {...props} value={stationId} onChange={(event) => setStationId(event.target.value)}>
           <option value="">Event-wide</option>

@@ -9,7 +9,7 @@ export function ThresholdsForm({
   form: SettingsForm;
   canEdit: boolean;
 }): ReactNode {
-  const { draft, setDraft, settings } = form;
+  const { values, errors, setField, settings } = form;
   const overridden = new Set(settings.data?.overriddenKeys ?? []);
   return (
     <>
@@ -26,7 +26,12 @@ export function ThresholdsForm({
                 variant="flat"
                 className={isChanged ? 'border-primary/40' : undefined}
               >
-                <Field id={field.key} label={field.label} hint={field.hint}>
+                <Field
+                  id={field.key}
+                  label={field.label}
+                  hint={field.hint}
+                  error={errors[field.key]}
+                >
                   {(props) => (
                     <div className="flex items-center gap-sm">
                       <Input
@@ -36,10 +41,8 @@ export function ThresholdsForm({
                         min={field.min}
                         max={field.max}
                         disabled={!canEdit}
-                        value={draft[field.key] ?? ''}
-                        onChange={(event) =>
-                          setDraft({ ...draft, [field.key]: event.target.value })
-                        }
+                        value={(values[field.key] as string | undefined) ?? ''}
+                        onChange={(event) => setField(field.key, event.target.value)}
                         className={`max-w-[140px] ${isChanged ? 'font-bold text-primary' : ''}`}
                       />
                       <span

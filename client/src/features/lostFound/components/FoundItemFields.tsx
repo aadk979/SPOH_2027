@@ -10,7 +10,6 @@ export function FoundItemFields({ form }: { form: FoundItemFormState }): ReactNo
     holderNote,
     setHolderNote,
     itemError,
-    setItemError,
   } = form;
   return (
     <>
@@ -29,7 +28,6 @@ export function FoundItemFields({ form }: { form: FoundItemFormState }): ReactNo
             value={itemLabel}
             onChange={(event) => {
               setItemLabel(event.target.value);
-              if (itemError) setItemError(null);
             }}
             placeholder="Blue metal water bottle with stickers"
             scale="lg"
@@ -37,7 +35,7 @@ export function FoundItemFields({ form }: { form: FoundItemFormState }): ReactNo
         )}
       </Field>
 
-      <Field id="category" label="Kind of thing" optional>
+      <Field id="category" error={form.errors.categoryLabel} label="Kind of thing" optional>
         {(props) => (
           <Input
             {...props}
@@ -51,6 +49,7 @@ export function FoundItemFields({ form }: { form: FoundItemFormState }): ReactNo
 
       <Field
         id="holder"
+        error={form.errors.holderNote}
         label="Where is it being kept?"
         optional
         hint="The field people forget, and the one that makes it findable again."

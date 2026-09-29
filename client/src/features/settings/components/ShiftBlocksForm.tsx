@@ -9,7 +9,7 @@ export function ShiftBlocksForm({
   form: SettingsForm;
   canEdit: boolean;
 }): ReactNode {
-  const { morning, setMorning, afternoon, setAfternoon } = form;
+  const { values, errors, setField } = form;
   return (
     <>
       <Section
@@ -17,12 +17,19 @@ export function ShiftBlocksForm({
         description="Singapore time. A capture screen only works while the volunteer is rostered on a block that is running, so these two rows decide when the system accepts data at all. They are allowed to overlap — the handover is deliberate."
       >
         <Card className="flex flex-col gap-md">
-          <ShiftRow label="Morning" value={morning} disabled={!canEdit} onChange={setMorning} />
+          <ShiftRow
+            label="Morning"
+            value={values.morning}
+            error={errors.morning}
+            disabled={!canEdit}
+            onChange={(next) => setField('morning', next)}
+          />
           <ShiftRow
             label="Afternoon"
-            value={afternoon}
+            value={values.afternoon}
+            error={errors.afternoon}
             disabled={!canEdit}
-            onChange={setAfternoon}
+            onChange={(next) => setField('afternoon', next)}
           />
         </Card>
       </Section>

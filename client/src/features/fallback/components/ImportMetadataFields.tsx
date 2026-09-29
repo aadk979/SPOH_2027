@@ -5,7 +5,7 @@ export function ImportMetadataFields({ form }: { form: ImportForm }): ReactNode 
   const { fileName, setFileName, notes, setNotes } = form;
   return (
     <div className="grid gap-md sm:grid-cols-2">
-      <Field id="file-name" label="File name" optional>
+      <Field id="file-name" label="File name" error={form.errors.fileName} optional>
         {(props) => (
           <Input
             {...props}
@@ -16,7 +16,7 @@ export function ImportMetadataFields({ form }: { form: ImportForm }): ReactNode 
         )}
       </Field>
 
-      <Field id="notes" label="Notes" optional>
+      <Field id="notes" label="Notes" error={form.errors.notes} optional>
         {(props) => (
           <Input
             {...props}

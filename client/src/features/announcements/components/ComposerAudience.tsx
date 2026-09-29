@@ -38,7 +38,7 @@ export function ComposerAudience({
         ) : null}
       </div>
       {!eventWide ? (
-        <Field id="announcement-station" label="Send to">
+        <Field id="announcement-station" label="Send to" error={form.errors.stationId}>
           {(props) => (
             <Select
               {...props}

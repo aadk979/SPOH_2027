@@ -2,15 +2,7 @@ import type { ReactNode } from 'react';
 import type { IncidentFormState } from '../hooks/useIncidentForm';
 import { Field, Textarea, Input } from '@/shared/ui';
 export function IncidentDetails({ form }: { form: IncidentFormState }): ReactNode {
-  const {
-    description,
-    setDescription,
-    descriptionError,
-    setDescriptionError,
-    locationNote,
-    setLocationNote,
-    me,
-  } = form;
+  const { description, setDescription, descriptionError, locationNote, setLocationNote, me } = form;
   return (
     <>
       <Field
@@ -29,7 +21,6 @@ export function IncidentDetails({ form }: { form: IncidentFormState }): ReactNod
             value={description}
             onChange={(event) => {
               setDescription(event.target.value);
-              if (descriptionError) setDescriptionError(null);
             }}
             placeholder="A cable across the walkway was taped down after someone tripped on it."
           />
@@ -38,6 +29,7 @@ export function IncidentDetails({ form }: { form: IncidentFormState }): ReactNod
 
       <Field
         id="location"
+        error={form.errors.locationNote}
         label="Where, exactly?"
         optional
         hint={

@@ -1,37 +1,38 @@
 import { useState } from 'react';
+import { DeclareFallbackRequest } from '@spoh/shared';
+import { useZodForm } from '@/shared/hooks/useZodForm';
 import { useStations } from '@/features/stations';
 import { ApiError } from '@/shared/lib/apiErrors';
 import { useFallbackWindows, useDeclareFallback, useCloseFallback } from '../queries';
+import { EMPTY_DECLARATION, toDeclareFallbackRequest } from '../model/declareRequest';
 export function useFallbackScreen(enabled: boolean) {
-  const [tier, setTier] = useState<'3' | '4'>('3');
-  const [reason, setReason] = useState('');
-  const [stationId, setStationId] = useState('');
+  const form = useZodForm(DeclareFallbackRequest, EMPTY_DECLARATION);
+  const setReason = form.setter('reason');
   const [error, setError] = useState<string | null>(null);
-
   const windows = useFallbackWindows(enabled);
-
   const stations = useStations(enabled);
 
-  const declare = useDeclareFallback(
-    { tier: Number(tier) as 3 | 4, reason: reason.trim(), ...(stationId ? { stationId } : {}) },
-    {
-      onSuccess: () => {
-        setReason('');
-        setError(null);
-      },
-      onError: (cause) =>
-        setError(cause instanceof ApiError ? cause.message : 'Could not declare the window.'),
+  const declare = useDeclareFallback({
+    onSuccess: () => {
+      setReason('');
+      setError(null);
     },
-  );
+    onError: (cause) =>
+      setError(cause instanceof ApiError ? cause.message : 'Could not declare the window.'),
+  });
   const close = useCloseFallback();
 
+  function submit(): void {
+    const parsed = form.validate(toDeclareFallbackRequest(form.values));
+    if (parsed) declare.mutate(parsed);
+  }
   return {
-    tier,
-    setTier,
-    reason,
+    ...form.values,
+    submit,
+    errors: form.errors,
+    setTier: form.setter('tier'),
     setReason,
-    stationId,
-    setStationId,
+    setStationId: form.setter('stationId'),
     error,
     windows,
     stations,

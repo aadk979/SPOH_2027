@@ -1,95 +1,84 @@
 import { describe, expect, it } from 'vitest';
-import {
-  buildSettingsPatch,
-  type SettingsDraft,
-} from '@/features/settings/model/buildSettingsPatch';
+import { RuntimeSettings, UpdateSettingsRequest } from '@spoh/shared';
 import { NUMERIC_FIELDS } from '@/features/settings/model/numericFields';
+import {
+  toSettingsRequest,
+  toSettingsValues,
+  type SettingsValues,
+} from '@/features/settings/model/settingsValues';
 
-function validDraft(): SettingsDraft {
+function validValues(): SettingsValues {
   return {
+    ...Object.fromEntries(NUMERIC_FIELDS.map((field) => [field.key, '2'])),
     eventName: ' Test event ',
-    draft: Object.fromEntries(NUMERIC_FIELDS.map((field) => [field.key, '2'])),
     morning: { start: '09:00', end: '13:00' },
     afternoon: { start: '12:00', end: '18:00' },
   };
 }
-describe('settings patch validation', () => {
-  it('trims names and numbers, preserves overlapping blocks and includes every numeric field', () => {
-    const input = validDraft();
-    input.draft.implausibleTapsPerMinute = ' 2.5 ';
-    expect(buildSettingsPatch(input)).toEqual({
-      patch: {
-        eventName: 'Test event',
-        ...Object.fromEntries(
-          NUMERIC_FIELDS.map((field) => [
-            field.key,
-            field.key === 'implausibleTapsPerMinute' ? 2.5 : 2,
-          ]),
-        ),
-        shiftBlocks: { MORNING: input.morning, AFTERNOON: input.afternoon },
-      },
+
+function issuesFor(values: SettingsValues) {
+  const result = RuntimeSettings.safeParse(toSettingsRequest(values));
+  // Distinct paths: the form shows the first message per field.
+  return result.success ? [] : [...new Set(result.error.issues.map((i) => i.path.join('.')))];
+}
+
+describe('settings request', () => {
+  it('trims names and numbers, keeps overlapping blocks and includes every setting', () => {
+    const values = validValues();
+    values.implausibleTapsPerMinute = ' 2.5 ';
+    const parsed = RuntimeSettings.parse(toSettingsRequest(values));
+    expect(parsed).toEqual({
+      eventName: 'Test event',
+      ...Object.fromEntries(
+        NUMERIC_FIELDS.map((field) => [
+          field.key,
+          field.key === 'implausibleTapsPerMinute' ? 2.5 : 2,
+        ]),
+      ),
+      shiftBlocks: { MORNING: values.morning, AFTERNOON: values.afternoon },
     });
+    // The full object is also a valid patch: the server accepts what the screen sends.
+    expect(UpdateSettingsRequest.safeParse(parsed).success).toBe(true);
   });
-  it.each([
-    ['', 'Event name cannot be empty.'],
-    [' '.repeat(3), 'Event name cannot be empty.'],
-    ['a'.repeat(81), 'Event name must be 80 characters or fewer.'],
-  ])('validates event name before missing numeric fields: %j', (eventName, error) => {
-    expect(buildSettingsPatch({ ...validDraft(), eventName, draft: {} })).toEqual({ error });
+
+  it('round-trips the server values through the editable form', () => {
+    const settings = RuntimeSettings.parse(toSettingsRequest(validValues()));
+    expect(RuntimeSettings.parse(toSettingsRequest(toSettingsValues(settings)))).toEqual(settings);
   });
-  it.each(NUMERIC_FIELDS)('preserves bounds and required validation for $key', (field) => {
-    for (const raw of ['', ' ', undefined]) {
-      const input = validDraft();
-      if (raw === undefined) delete input.draft[field.key];
-      else input.draft[field.key] = raw;
-      expect(buildSettingsPatch(input)).toEqual({ error: `${field.label} cannot be empty.` });
-    }
-    for (const raw of ['NaN', 'Infinity', String(field.min - 1), String(field.max + 1)]) {
-      const input = validDraft();
-      input.draft[field.key] = raw;
-      expect(buildSettingsPatch(input)).toEqual({
-        error: `${field.label} must be a number between ${field.min} and ${field.max} ${field.unit}.`,
-      });
+
+  it.each(['', '   ', 'a'.repeat(81)])('rejects event name %j', (eventName) => {
+    expect(issuesFor({ ...validValues(), eventName })).toEqual(['eventName']);
+  });
+
+  it.each(NUMERIC_FIELDS)('keeps bounds and required validation for $key', (field) => {
+    for (const raw of ['', ' ', 'NaN', 'Infinity', String(field.min - 1), String(field.max + 1)]) {
+      expect(issuesFor({ ...validValues(), [field.key]: raw })).toEqual([field.key]);
     }
     for (const bound of [field.min, field.max]) {
-      const input = validDraft();
-      input.draft[field.key] = String(bound);
-      expect(buildSettingsPatch(input)).toHaveProperty('patch');
+      expect(issuesFor({ ...validValues(), [field.key]: String(bound) })).toEqual([]);
     }
   });
+
   it.each(NUMERIC_FIELDS.filter((field) => field.key !== 'implausibleTapsPerMinute'))(
-    'requires integer $key',
+    'requires a whole number for $key',
     (field) => {
-      const input = validDraft();
-      input.draft[field.key] = '1.5';
-      expect(buildSettingsPatch(input)).toEqual({
-        error: `${field.label} must be a whole number.`,
-      });
+      expect(issuesFor({ ...validValues(), [field.key]: '1.5' })).toEqual([field.key]);
     },
   );
-  it('validates numeric fields in their displayed order before shift blocks', () => {
-    const input = validDraft();
-    input.draft.silentStationMinutes = '';
-    input.draft.staleDeviceMinutes = '';
-    input.morning.start = '';
-    expect(buildSettingsPatch(input)).toEqual({ error: 'Station silence cannot be empty.' });
-  });
+
   it.each(['morning', 'afternoon'] as const)(
-    'requires both %s endpoints and rejects reversed or equal times',
+    'requires both %s times and rejects reversed or equal blocks',
     (block) => {
+      const key = block === 'morning' ? 'MORNING' : 'AFTERNOON';
       for (const endpoint of ['start', 'end'] as const) {
-        const input = validDraft();
-        input[block][endpoint] = '';
-        expect(buildSettingsPatch(input)).toEqual({
-          error: 'All shift block start and end times must be specified.',
-        });
+        const values = validValues();
+        values[block] = { ...values[block], [endpoint]: '' };
+        expect(issuesFor(values)).toEqual([`shiftBlocks.${key}.${endpoint}`]);
       }
       for (const end of ['09:00', '08:00']) {
-        const input = validDraft();
-        input[block] = { start: '09:00', end };
-        expect(buildSettingsPatch(input)).toEqual({
-          error: `${block === 'morning' ? 'Morning' : 'Afternoon'} shift block must end after it starts.`,
-        });
+        const values = validValues();
+        values[block] = { start: '09:00', end };
+        expect(issuesFor(values)).toEqual([`shiftBlocks.${key}.end`]);
       }
     },
   );

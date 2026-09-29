@@ -1,3 +1,5 @@
+import { CreateIncidentRequest } from '@spoh/shared';
+import { useZodForm } from '@/shared/hooks/useZodForm';
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { useMe } from '@/features/session';
@@ -5,7 +7,7 @@ import type { IncidentSeverity, IncidentType } from '@spoh/shared';
 import { useCreateIncident } from '@/features/incident';
 export function useIncidentForm() {
   const fields = useIncidentFields();
-  const { type, severity, description, locationNote, setDescriptionError } = fields;
+  const { type, severity, description, locationNote } = fields;
   const router = useRouter();
   const mutation = useCreateIncident();
   const { data: me } = useMe();
@@ -15,17 +17,11 @@ export function useIncidentForm() {
 
   async function submit(event: FormEvent): Promise<void> {
     event.preventDefault();
-    if (description.trim().length < 10) {
-      setDescriptionError('Please provide at least 10 characters describing what happened.');
-      return;
-    }
-
     setPending(true);
-    setDescriptionError(null);
     setFormError(null);
 
     try {
-      await mutation.mutateAsync({
+      const request = fields.validate({
         type,
         severity,
         ...(me?.currentAssignment ? { stationId: me.currentAssignment.station.id } : {}),
@@ -34,6 +30,8 @@ export function useIncidentForm() {
         occurredAt: new Date().toISOString(),
         idempotencyKey: crypto.randomUUID(),
       });
+      if (!request) return;
+      await mutation.mutateAsync(request);
 
       router.replace('/home');
     } catch {
@@ -43,26 +41,37 @@ export function useIncidentForm() {
     }
   }
 
-  return { ...fields, pending, formError, submit, me };
+  return {
+    ...fields,
+    pending,
+    formError:
+      formError ??
+      fields.errors.stationId ??
+      fields.errors.occurredAt ??
+      fields.errors.idempotencyKey ??
+      fields.errors._form,
+    submit,
+    me,
+  };
 }
 export type IncidentFormState = ReturnType<typeof useIncidentForm>;
 
 function useIncidentFields() {
-  const [type, setType] = useState<IncidentType>('NEAR_MISS');
-  const [severity, setSeverity] = useState<IncidentSeverity>('LOW');
-  const [description, setDescription] = useState('');
-  const [locationNote, setLocationNote] = useState('');
-  const [descriptionError, setDescriptionError] = useState<string | null>(null);
+  const form = useZodForm(CreateIncidentRequest, {
+    type: 'NEAR_MISS' as IncidentType,
+    severity: 'LOW' as IncidentSeverity,
+    description: '',
+    locationNote: '',
+  });
   return {
-    type,
-    setType,
-    severity,
-    setSeverity,
-    description,
-    setDescription,
-    locationNote,
-    setLocationNote,
-    descriptionError,
-    setDescriptionError,
+    ...form.values,
+    setType: (value: typeof form.values.type) => form.setField('type', value),
+    setSeverity: (value: typeof form.values.severity) => form.setField('severity', value),
+    setDescription: (value: typeof form.values.description) => form.setField('description', value),
+    setLocationNote: (value: typeof form.values.locationNote) =>
+      form.setField('locationNote', value),
+    errors: form.errors,
+    descriptionError: form.errors.description,
+    validate: form.validate,
   };
 }

@@ -1,8 +1,11 @@
 import type { ReactNode } from 'react';
 import type { GroupRegistrationForm } from '../hooks/useGroupRegistration';
 import { Button, Callout, Card, Field, Input } from '@/shared/ui';
+import { shortCodeError } from '../model/groupRequest';
 export function GroupSubmitForm({ form }: { form: GroupRegistrationForm }): ReactNode {
-  const { submit, shortCode, setShortCode, error, total, saving } = form;
+  const { submit, shortCode, setShortCode, total, saving, errors } = form;
+  const typingError = shortCodeError(shortCode);
+  const error = form.error ?? errors.counts ?? errors.stationId ?? errors._form;
   return (
     <Card
       as="form"
@@ -18,11 +21,7 @@ export function GroupSubmitForm({ form }: { form: GroupRegistrationForm }): Reac
         label="Mission Card code"
         optional
         hint="Six characters, printed under the QR code."
-        error={
-          shortCode.trim().length > 0 && shortCode.trim().length !== 6
-            ? 'Card code must be exactly 6 characters.'
-            : null
-        }
+        error={errors.shortCode ?? typingError}
       >
         {(props) => (
           <Input
@@ -61,9 +60,7 @@ export function GroupSubmitForm({ form }: { form: GroupRegistrationForm }): Reac
         type="submit"
         size="lg"
         block
-        disabled={
-          total === 0 || saving || (shortCode.trim().length > 0 && shortCode.trim().length !== 6)
-        }
+        disabled={total === 0 || saving || typingError !== null}
       >
         {total === 0
           ? 'Add at least one person'

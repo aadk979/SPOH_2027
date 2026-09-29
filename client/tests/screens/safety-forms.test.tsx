@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import NewIncidentScreen from '@/features/incident/screens/NewIncidentScreen';
 import NewLostFoundScreen from '@/features/lostFound/screens/NewLostFoundScreen';
 import RaiseLostPersonScreen from '@/features/lostPerson/screens/RaiseLostPersonScreen';
+import { z } from 'zod';
 import { api } from '@/shared/lib/api';
 const state = vi.hoisted(() => ({ replace: vi.fn() }));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ replace: state.replace }) }));
@@ -14,7 +15,11 @@ vi.mock('@/shared/shell/AppShell', () => ({
 vi.mock('@/features/session', () => ({
   useRequireSession: () => ({ accessToken: 'fixture' }),
   useMe: () => ({
-    data: { currentAssignment: { station: { id: 'station-1', name: 'Test room' } } },
+    data: {
+      currentAssignment: {
+        station: { id: '11111111-1111-4111-8111-111111111111', name: 'Test room' },
+      },
+    },
   }),
 }));
 vi.mock('@/features/media', () => ({ usePhotoUpload: () => ({ available: false, key: null }) }));
@@ -34,13 +39,14 @@ const forms = [
     body: {
       type: 'NEAR_MISS',
       severity: 'LOW',
-      stationId: 'station-1',
+      stationId: '11111111-1111-4111-8111-111111111111',
       description: 'Cable across walkway',
       occurredAt: expect.any(String),
       idempotencyKey: expect.any(String),
     },
     destination: '/home',
     failure: 'The report could not be sent. Tell your IC directly, then try again.',
+    optional: { label: /Where, exactly/, max: 200 },
   },
   {
     name: 'found item',
@@ -48,9 +54,14 @@ const forms = [
     label: 'What is it?',
     value: '  Blue bottle  ',
     endpoint: '/lost-found',
-    body: { itemLabel: 'Blue bottle', foundStationId: 'station-1', foundAt: expect.any(String) },
+    body: {
+      itemLabel: 'Blue bottle',
+      foundStationId: '11111111-1111-4111-8111-111111111111',
+      foundAt: expect.any(String),
+    },
     destination: '/safety/lost-found',
     failure: 'Could not save. Check your connection and try again.',
+    optional: { label: /Kind of thing/, max: 60 },
   },
   {
     name: 'lost person',
@@ -60,13 +71,14 @@ const forms = [
     endpoint: '/lost-person',
     body: {
       descriptionText: 'Child separated from group',
-      lastSeenStationId: 'station-1',
+      lastSeenStationId: '11111111-1111-4111-8111-111111111111',
       lastSeenAt: expect.any(String),
       idempotencyKey: expect.any(String),
     },
     destination: '/home',
     failure:
       'The alert could not be sent. Call your IC on the radio now — do not wait for this screen.',
+    optional: { label: /Approximate age/, max: 40 },
   },
 ];
 function show(node: ReactNode) {
@@ -112,5 +124,36 @@ describe.each(forms)('$name form', (form) => {
         .getByRole('button', { name: /Submit report|Log this item|Alert every volunteer now/ })
         .hasAttribute('disabled'),
     ).toBe(false);
+  });
+});
+
+describe.each(forms)('$name form validation', (form) => {
+  it('shows the schema message on the described field and sends nothing', () => {
+    show(form.node);
+    fireEvent.submit(screen.getByLabelText(form.label).closest('form')!);
+    const field = screen.getByLabelText(form.label);
+    expect(field.getAttribute('aria-invalid')).toBe('true');
+    expect(document.getElementById(`${field.id}-error`)?.textContent).toBeTruthy();
+    expect(mockedApi).not.toHaveBeenCalled();
+  });
+
+  it('rejects an over-long optional field, then submits once it is corrected', async () => {
+    mockedApi.mockResolvedValue({});
+    show(form.node);
+    const tooLong = 'x'.repeat(form.optional.max + 1);
+    const expected = z.string().max(form.optional.max).safeParse(tooLong).error?.issues[0]?.message;
+    fireEvent.change(screen.getByLabelText(form.label), { target: { value: form.value } });
+    const optional = screen.getByLabelText(form.optional.label);
+    fireEvent.change(optional, { target: { value: tooLong } });
+    fireEvent.submit(optional.closest('form')!);
+    expect(document.getElementById(`${optional.id}-error`)?.textContent).toBe(expected);
+    expect(mockedApi).not.toHaveBeenCalled();
+
+    fireEvent.change(optional, { target: { value: '   ' } });
+    expect(optional.getAttribute('aria-invalid')).toBeNull();
+    fireEvent.submit(optional.closest('form')!);
+    await waitFor(() => expect(state.replace).toHaveBeenCalledWith(form.destination));
+    // A blank optional field is omitted, exactly as before the migration.
+    expect(mockedApi).toHaveBeenCalledWith(form.endpoint, { method: 'POST', body: form.body });
   });
 });

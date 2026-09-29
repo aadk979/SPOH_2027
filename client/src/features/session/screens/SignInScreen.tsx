@@ -1,10 +1,10 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useState, type FormEvent, type ReactNode } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Suspense, type FormEvent, type ReactNode } from 'react';
 import { isDevAuth } from '@/shared/lib/env';
 import { hostedSignInUrl } from '@/features/session';
-import { openSession } from '@/shared/lib/session';
+import { useSignInForm } from '../hooks/useSignInForm';
 import { Button, ButtonLink, Card, Field, Input, Skeleton } from '@/shared/ui';
 
 /**
@@ -21,36 +21,10 @@ import { Button, ButtonLink, Card, Field, Input, Skeleton } from '@/shared/ui';
  * putting a long-lived credential where script can reach it.
  */
 function SignInForm(): ReactNode {
-  const router = useRouter();
   const params = useSearchParams();
-  const [email, setEmail] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
-
-  const returnTo = params.get('returnTo') ?? '/home';
-
-  async function onSubmit(event: FormEvent): Promise<void> {
-    event.preventDefault();
-    setPending(true);
-    setError(null);
-
-    try {
-      await openSession({ email: email.trim().toLowerCase() });
-      router.replace(returnTo);
-    } catch (cause) {
-      const status = (cause as { status?: number }).status;
-
-      setError(
-        status === 404
-          ? 'That email is not on the volunteer roster. Check with your IC.'
-          : status === 403
-            ? 'That account has been deactivated. Speak to your Chief Coordinator.'
-            : 'Could not sign in. Check your connection and try again.',
-      );
-    } finally {
-      setPending(false);
-    }
-  }
+  const { email, setEmail, error, pending, onSubmit } = useSignInForm(
+    params.get('returnTo') ?? '/home',
+  );
 
   if (!isDevAuth) {
     return (

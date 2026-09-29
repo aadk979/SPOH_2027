@@ -1,6 +1,5 @@
 'use client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { DeclareFallbackRequest } from '@spoh/shared';
 import { listFallbackWindows, declareFallback, closeFallback } from './api';
 export const fallbackKeys = { windows: ['fallback', 'windows'] as const };
 export function useFallbackWindows(enabled: boolean) {
@@ -17,13 +16,13 @@ function useInvalidateWindows() {
     void client.invalidateQueries({ queryKey: fallbackKeys.windows });
   };
 }
-export function useDeclareFallback(
-  input: DeclareFallbackRequest,
-  callbacks: { onSuccess: () => void; onError: (cause: Error) => void },
-) {
+export function useDeclareFallback(callbacks: {
+  onSuccess: () => void;
+  onError: (cause: Error) => void;
+}) {
   const invalidate = useInvalidateWindows();
   return useMutation({
-    mutationFn: () => declareFallback(input),
+    mutationFn: declareFallback,
     onSuccess: () => {
       callbacks.onSuccess();
       invalidate();

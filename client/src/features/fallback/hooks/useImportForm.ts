@@ -1,13 +1,10 @@
 import { useState } from 'react';
 import type { ImportResponse } from '@spoh/shared';
-import type { Target, Source } from '../model/importTemplates';
+import { useZodForm } from '@/shared/hooks/useZodForm';
+import { EMPTY_IMPORT, IMPORT_ERROR_FIELDS, ImportFormRequest } from '../model/importRequest';
 import { useRunImport } from './useRunImport';
 export function useImportForm() {
-  const [target, setTarget] = useState<Target>('registrations');
-  const [source, setSource] = useState<Source>('FALLBACK_SHEET');
-  const [csv, setCsv] = useState('');
-  const [fileName, setFileName] = useState('');
-  const [notes, setNotes] = useState('');
+  const form = useZodForm(ImportFormRequest, EMPTY_IMPORT, IMPORT_ERROR_FIELDS);
   const [preview, setPreview] = useState<ImportResponse | null>(null);
   const [result, setResult] = useState<ImportResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -19,28 +16,26 @@ export function useImportForm() {
     setResult(null);
   }
 
+  function setOutcome(commit: boolean, response: ImportResponse): void {
+    setResult(commit ? response : null);
+    setPreview(commit ? null : response);
+  }
+
   const run = useRunImport({
-    csv,
-    target,
-    source,
-    fileName,
-    notes,
+    values: form.values,
+    validate: form.validate,
     setPending,
     setError,
-    setResult,
-    setPreview,
+    setOutcome,
   });
   return {
-    target,
-    setTarget,
-    source,
-    setSource,
-    csv,
-    setCsv,
-    fileName,
-    setFileName,
-    notes,
-    setNotes,
+    ...form.values,
+    errors: form.errors,
+    setTarget: form.setter('target'),
+    setSource: form.setter('source'),
+    setCsv: form.setter('csv'),
+    setFileName: form.setter('fileName'),
+    setNotes: form.setter('notes'),
     preview,
     result,
     error,

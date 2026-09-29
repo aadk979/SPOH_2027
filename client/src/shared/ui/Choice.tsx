@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 import { ChoiceRadio } from './ChoiceRadio';
 import { cx } from '@/shared/ui/cx';
 
@@ -30,6 +30,7 @@ export type { ChoiceOption } from './choiceTypes';
 export function ChoiceGroup<T extends string>({
   legend,
   hint,
+  error,
   name,
   value,
   options,
@@ -39,6 +40,7 @@ export function ChoiceGroup<T extends string>({
 }: {
   legend: string;
   hint?: string;
+  error?: string | null;
   /** Must be unique on the page — it is what groups the radios. */
   name: string;
   value: T;
@@ -57,8 +59,13 @@ export function ChoiceGroup<T extends string>({
   layout?: 'chips' | 'list';
   className?: string;
 }): ReactNode {
+  const errorId = useId();
   return (
-    <fieldset className={cx('min-w-0', className)}>
+    <fieldset
+      className={cx('min-w-0', className)}
+      aria-invalid={error ? true : undefined}
+      aria-describedby={error ? errorId : undefined}
+    >
       <legend className="text-body font-semibold">{legend}</legend>
       {hint ? <p className="mt-xxs text-caption text-text-muted">{hint}</p> : null}
 
@@ -79,6 +86,11 @@ export function ChoiceGroup<T extends string>({
           />
         ))}
       </div>
+      {error ? (
+        <p id={errorId} role="alert" className="text-caption font-semibold text-alert">
+          {error}
+        </p>
+      ) : null}
     </fieldset>
   );
 }

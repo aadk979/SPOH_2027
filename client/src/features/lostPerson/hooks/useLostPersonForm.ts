@@ -1,10 +1,12 @@
+import { RaiseLostPersonRequest } from '@spoh/shared';
+import { useZodForm } from '@/shared/hooks/useZodForm';
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { useMe } from '@/features/session';
 import { useRaiseLostPerson } from '@/features/lostPerson';
 export function useLostPersonForm() {
   const fields = useLostPersonFields();
-  const { description, approxAge, clothing, setDescriptionError } = fields;
+  const { description, approxAge, clothing } = fields;
   const router = useRouter();
   const mutation = useRaiseLostPerson();
   const { data: me } = useMe();
@@ -14,19 +16,11 @@ export function useLostPersonForm() {
 
   async function submit(event: FormEvent): Promise<void> {
     event.preventDefault();
-    if (description.trim().length < 3) {
-      setDescriptionError(
-        'Please provide a description of who we are looking for (at least 3 characters).',
-      );
-      return;
-    }
-
     setPending(true);
-    setDescriptionError(null);
     setFormError(null);
 
     try {
-      await mutation.mutateAsync({
+      const request = fields.validate({
         descriptionText: description.trim(),
         ...(approxAge.trim() ? { approxAge: approxAge.trim() } : {}),
         ...(clothing.trim() ? { clothingText: clothing.trim() } : {}),
@@ -34,6 +28,8 @@ export function useLostPersonForm() {
         lastSeenAt: new Date().toISOString(),
         idempotencyKey: crypto.randomUUID(),
       });
+      if (!request) return;
+      await mutation.mutateAsync(request);
 
       router.replace('/home');
     } catch {
@@ -45,23 +41,37 @@ export function useLostPersonForm() {
     }
   }
 
-  return { ...fields, pending, formError, submit, me };
+  return {
+    ...fields,
+    pending,
+    formError:
+      formError ??
+      fields.errors.lastSeenStationId ??
+      fields.errors.lastSeenAt ??
+      fields.errors.idempotencyKey ??
+      fields.errors._form,
+    submit,
+    me,
+  };
 }
 export type LostPersonFormState = ReturnType<typeof useLostPersonForm>;
 
 function useLostPersonFields() {
-  const [description, setDescription] = useState('');
-  const [approxAge, setApproxAge] = useState('');
-  const [clothing, setClothing] = useState('');
-  const [descriptionError, setDescriptionError] = useState<string | null>(null);
+  const form = useZodForm(RaiseLostPersonRequest, {
+    descriptionText: '',
+    approxAge: '',
+    clothingText: '',
+  });
   return {
-    description,
-    setDescription,
-    approxAge,
-    setApproxAge,
-    clothing,
-    setClothing,
-    descriptionError,
-    setDescriptionError,
+    ...form.values,
+    description: form.values.descriptionText,
+    clothing: form.values.clothingText,
+    setDescription: (value: typeof form.values.descriptionText) =>
+      form.setField('descriptionText', value),
+    setApproxAge: (value: typeof form.values.approxAge) => form.setField('approxAge', value),
+    setClothing: (value: typeof form.values.clothingText) => form.setField('clothingText', value),
+    errors: form.errors,
+    descriptionError: form.errors.descriptionText,
+    validate: form.validate,
   };
 }

@@ -11,24 +11,11 @@ export function VolunteerEditorActions({
   volunteer: VolunteerAdminRecord;
   form: VolunteerEditorState;
 }): ReactNode {
-  const { pending, update, reactivate, role, phone, portfolio } = form;
+  const { pending, update, reactivate, save } = form;
   return (
     <>
       <div className="flex flex-wrap gap-sm">
-        <Button
-          size="sm"
-          disabled={pending}
-          onClick={() =>
-            update.mutate({
-              id: volunteer.id,
-              patch: {
-                role,
-                phone: phone.trim() || null,
-                portfolio: portfolio.trim() || null,
-              },
-            })
-          }
-        >
+        <Button size="sm" disabled={pending} onClick={save}>
           {update.isPending ? 'Saving…' : 'Save changes'}
         </Button>
 

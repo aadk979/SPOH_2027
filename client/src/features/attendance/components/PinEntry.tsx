@@ -3,22 +3,24 @@ import type { AttendanceController } from '../hooks/useAttendanceScreen';
 import { Card, Button, Field, Input } from '@/shared/ui';
 export function PinEntry({
   pin,
+  pinError,
   setPin,
-  send,
+  sendPin,
   submit,
-}: Pick<AttendanceController, 'pin' | 'setPin' | 'send' | 'submit'>): ReactNode {
+}: Pick<AttendanceController, 'pin' | 'pinError' | 'setPin' | 'sendPin' | 'submit'>): ReactNode {
   return (
     <Card>
       <form
         onSubmit={(event) => {
           event.preventDefault();
-          send({ method: 'PIN', pin });
+          sendPin();
         }}
         className="flex flex-col gap-sm"
       >
         <Field
           id="attendance-pin"
           label="Secondary verification PIN"
+          error={pinError}
           hint="On mobile data or unable to scan? Ask your verifier for their current 10-digit PIN. An internet connection is still required."
         >
           {(props) => (

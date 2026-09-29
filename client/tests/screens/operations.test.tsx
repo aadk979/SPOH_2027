@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
+import { RuntimeSettings } from '@spoh/shared';
 import { api } from '@/shared/lib/api';
 import ImportsPage from '@/app/chief/imports/page';
 import ReportsPage from '@/app/reports/page';
@@ -117,12 +118,18 @@ describe('operations screen safety net', () => {
     expect(screen.queryByRole('button', { name: 'Save settings' })).toBeNull();
   });
 
-  it('rejects an empty event name before submitting settings', async () => {
+  it('rejects an empty event name with the server schema message before submitting', async () => {
     state.capabilities = ['config.manage'];
     show(<SettingsPage />);
     fireEvent.click(await screen.findByRole('button', { name: 'Save settings' }));
-    expect(screen.getByRole('alert').textContent).toContain('Event name cannot be empty');
+    const name = screen.getByLabelText('Event name');
+    const expected = RuntimeSettings.shape.eventName.safeParse('').error?.issues[0]?.message;
+    expect(name.getAttribute('aria-invalid')).toBe('true');
+    expect(document.getElementById('event-name-error')?.textContent).toBe(expected);
+    expect(screen.getByText(/Nothing was saved/)).toBeTruthy();
     expect(mockedApi.mock.calls.every(([, options]) => !options?.method)).toBe(true);
+    fireEvent.change(name, { target: { value: 'Rehearsal' } });
+    expect(name.getAttribute('aria-invalid')).toBeNull();
   });
 
   it('requires a full PIN and sends it as attendance proof', async () => {

@@ -51,6 +51,7 @@ export default function NewIncidentScreen(): ReactNode {
         <ChoiceGroup
           legend="What kind of incident?"
           name="incident-type"
+          error={form.errors.type}
           value={type}
           onChange={setType}
           options={TYPES}
@@ -59,6 +60,7 @@ export default function NewIncidentScreen(): ReactNode {
         <ChoiceGroup
           legend="How serious is it?"
           name="incident-severity"
+          error={form.errors.severity}
           value={severity}
           onChange={setSeverity}
           options={SEVERITIES}

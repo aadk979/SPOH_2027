@@ -18,6 +18,7 @@ export function DeclareFallbackForm({ controller }: { controller: FallbackContro
       <ChoiceGroup
         legend="Which tier?"
         name="fallback-tier"
+        error={controller.errors.tier}
         value={tier}
         onChange={setTier}
         layout="list"
@@ -33,7 +34,7 @@ export function DeclareFallbackForm({ controller }: { controller: FallbackContro
 
       <FallbackScopeField controller={controller} />
 
-      <Field id="reason" label="What has happened?" error={error}>
+      <Field id="reason" label="What has happened?" error={controller.errors.reason ?? error}>
         {(props) => (
           <Textarea
             {...props}
@@ -56,7 +57,7 @@ export function DeclareFallbackForm({ controller }: { controller: FallbackContro
         size="lg"
         block
         disabled={reason.trim().length < 3 || declare.isPending}
-        onClick={() => declare.mutate()}
+        onClick={controller.submit}
       >
         {declare.isPending ? 'Declaring…' : `Declare Tier ${tier}`}
       </Button>

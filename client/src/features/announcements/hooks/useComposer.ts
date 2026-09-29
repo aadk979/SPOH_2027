@@ -1,51 +1,44 @@
 import { useState } from 'react';
+import { CreateAnnouncementRequest, type MeResponse } from '@spoh/shared';
+import { useZodForm } from '@/shared/hooks/useZodForm';
 import { useStations } from '@/features/stations';
-import type { MeResponse } from '@spoh/shared';
 import { useSendAnnouncement } from '@/features/announcements';
-import type { Priority } from '../model/priority';
+import {
+  COMPOSER_ERROR_FIELDS,
+  EMPTY_COMPOSER,
+  toAnnouncementRequest,
+} from '../model/composerRequest';
 export function useComposer(me: MeResponse | undefined) {
-  const [body, setBody] = useState('');
-  const [priority, setPriority] = useState<Priority>('OPERATIONAL');
-  const [requiresAck, setRequiresAck] = useState(false);
-  const [eventWide, setEventWide] = useState(false);
+  const form = useZodForm(CreateAnnouncementRequest, EMPTY_COMPOSER, COMPOSER_ERROR_FIELDS);
+  const setBody = form.setter('body');
   const [error, setError] = useState<string | null>(null);
-
   const stations = useStations();
-
-  const [stationId, setStationId] = useState<string>('');
   const canSendEventWide = me?.capabilities.includes('announcement.event.send') ?? false;
 
-  const send = useSendAnnouncement(
-    () => ({
-      body: body.trim(),
-      priority,
-      requiresAck,
-      target: eventWide
-        ? {}
-        : { stationId: stationId || me?.currentAssignment?.station.id || null },
-    }),
-    {
-      onSuccess: () => {
-        setBody('');
-        setError(null);
-      },
-      onError: () => setError('Could not send. Check your connection and try again.'),
+  const send = useSendAnnouncement({
+    onSuccess: () => {
+      setBody('');
+      setError(null);
     },
-  );
+    onError: () => setError('Could not send. Check your connection and try again.'),
+  });
 
+  function submit(): void {
+    const ownStationId = me?.currentAssignment?.station.id ?? null;
+    const parsed = form.validate(toAnnouncementRequest(form.values, ownStationId));
+    if (parsed) send.mutate(parsed);
+  }
   return {
-    body,
+    ...form.values,
+    submit,
+    errors: form.errors,
     setBody,
-    priority,
-    setPriority,
-    requiresAck,
-    setRequiresAck,
-    eventWide,
-    setEventWide,
+    setPriority: form.setter('priority'),
+    setRequiresAck: form.setter('requiresAck'),
+    setEventWide: form.setter('eventWide'),
+    setStationId: form.setter('stationId'),
     error,
     stations,
-    stationId,
-    setStationId,
     canSendEventWide,
     send,
   };
