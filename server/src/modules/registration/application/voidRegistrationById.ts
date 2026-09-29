@@ -1,8 +1,9 @@
-import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
+import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { findRegistrationById, voidRegistration } from '../data/repo.js';
 import { assertNotVoided } from '../domain/voiding.js';
+import type { ActorContext } from '../../../platform/http/auditContext.js';
 
 /**
  * Voiding keeps the row and excludes it from every count. Deleting it would
@@ -12,14 +13,14 @@ import { assertNotVoided } from '../domain/voiding.js';
 export async function voidRegistrationById(
   id: string,
   reason: string,
-  audit: AuditContext,
+  { scope, audit }: ActorContext,
 ): Promise<void> {
-  const existing = await findRegistrationById(id);
+  const existing = await findRegistrationById(scope, id);
   if (!existing) throw new NotFoundError('Registration');
   assertNotVoided(existing);
 
   await prisma.$transaction(async (tx) => {
-    const updated = await voidRegistration(tx, id, reason);
+    const updated = await voidRegistration(tx, scope, { id, reason });
     await writeAudit(tx, {
       ...audit,
       action: 'registration.void',

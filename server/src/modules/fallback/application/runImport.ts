@@ -4,6 +4,7 @@ import { prisma, type PrismaTransactionClient } from '../../../platform/db/clien
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { createImportBatch } from '../data/repo.js';
 import type { ImportPlan } from '../domain/importPlan.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 interface ImportInput<T> {
   source: 'FALLBACK_SHEET' | 'PAPER';
@@ -13,7 +14,7 @@ interface ImportInput<T> {
   fileName: string | null;
   notes: string | null;
   plan: ImportPlan<T>;
-  insert(tx: PrismaTransactionClient, records: T[]): Promise<number>;
+  insert(tx: PrismaTransactionClient, scope: EventScope, records: T[]): Promise<number>;
 }
 
 interface Outcome {
@@ -53,22 +54,24 @@ export async function runImport<T>(
  */
 async function applyPlan<T>(
   input: ImportInput<T>,
-  { volunteerId, audit }: ActorContext,
+  { volunteerId, membershipId, scope, audit }: ActorContext,
 ): Promise<Outcome> {
   const { plan } = input;
   return prisma.$transaction(async (tx) => {
     const created = await input.insert(
       tx,
+      scope,
       plan.creates.map((keyed) => keyed.record),
     );
     const skipped = plan.skipped + (plan.creates.length - created);
 
-    const batch = await createImportBatch(tx, {
+    const batch = await createImportBatch(tx, scope, {
       source: input.source,
       targetTable: input.targetTable,
       rowCount: created,
       fileName: input.fileName,
       importedById: volunteerId,
+      importedByMembershipId: membershipId,
       notes: input.notes,
     });
 

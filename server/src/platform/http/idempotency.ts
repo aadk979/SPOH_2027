@@ -104,7 +104,11 @@ function idempotencyMiddleware(endpointName: string, options: IdempotentOptions)
           return;
         }
 
-        const existing = await reserve(key, endpointName, auth.sub);
+        const existing = await reserve(key, {
+          endpoint: endpointName,
+          actorSub: auth.sub,
+          eventId: auth.eventId,
+        });
         const ctx: KeyContext = { req, res, key, endpointName, options };
         const outcome = existing ? await resolveExisting(ctx, existing, auth.sub) : null;
         if (outcome === 'replayed') return;

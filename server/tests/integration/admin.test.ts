@@ -287,6 +287,7 @@ describe('withdrawing access', () => {
 
     await prisma.registration.create({
       data: {
+        eventId: (await testEvent()).eventId,
         category: 'SEC_4',
         stationId: station.id,
         recordedById: volunteer.id,

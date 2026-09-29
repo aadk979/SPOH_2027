@@ -12,6 +12,7 @@ import {
   createVolunteer,
   idempotencyKey,
   type TestVolunteer,
+  testEvent,
 } from '../helpers/fixtures.js';
 
 /**
@@ -78,8 +79,10 @@ beforeEach(async () => {
     eventDayId: eventDay.id,
   });
 
+  const { eventId } = await testEvent();
   await prisma.missionCard.createMany({
     data: [CARD_A, CARD_B, CARD_C].map((shortCode) => ({
+      eventId,
       shortCode,
       qrPayload: `spoh2027:test-${shortCode}`,
       batchLabel: 'TEST',
@@ -369,7 +372,12 @@ describe('the funnel', () => {
       .send({ idempotencyKey: idempotencyKey() });
 
     const gift = await prisma.giftType.create({
-      data: { name: 'Tote', initialStock: 100, lowStockThreshold: 10 },
+      data: {
+        eventId: (await testEvent()).eventId,
+        name: 'Tote',
+        initialStock: 100,
+        lowStockThreshold: 10,
+      },
     });
 
     await request(app).post('/api/v1/gifts/redemptions').set('Authorization', bearer(admin)).send({

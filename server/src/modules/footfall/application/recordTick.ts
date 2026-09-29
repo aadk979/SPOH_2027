@@ -18,9 +18,10 @@ export async function recordTick(
   const recordedAt = clock.now();
 
   const tick = await prisma.$transaction(async (tx) => {
-    const row = await createTick(tx, {
+    const row = await createTick(tx, scope, {
       stationId: station.id,
       recordedById: actor.volunteerId,
+      recordedByMembershipId: actor.membershipId,
       quantity: 1,
       source: 'APP',
       recordedAt,
@@ -40,8 +41,8 @@ export async function recordTick(
 
   const since = startOfEventDay(clock.now());
   const [sessionTotal, stationTotal] = await Promise.all([
-    sumForRecorderSince(actor.volunteerId, station.id, since),
-    sumForStationSince(station.id, since),
+    sumForRecorderSince(scope, { recordedById: actor.volunteerId, stationId: station.id }, since),
+    sumForStationSince(scope, station.id, since),
   ]);
 
   return { tick: toFootfallTickRecord(tick), sessionTotal, stationTotal };

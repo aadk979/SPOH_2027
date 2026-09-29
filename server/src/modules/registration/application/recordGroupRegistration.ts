@@ -24,18 +24,22 @@ export async function recordGroupRegistration(
 
   const { registrations, cardId, linkError } = await prisma.$transaction(async (tx) => {
     const link = request.missionCardShortCode
-      ? await linkGroupToCard(tx, { shortCode: request.missionCardShortCode, issuedAt: recordedAt })
+      ? await linkGroupToCard(tx, scope, {
+          shortCode: request.missionCardShortCode,
+          issuedAt: recordedAt,
+        })
       : { cardId: null, linkError: null };
 
     const rows = expandGroupMembers(request, {
       stationId: station.id,
       recordedById: actor.volunteerId,
+      recordedByMembershipId: actor.membershipId,
       groupId,
       missionCardId: link.cardId,
       recordedAt,
       clientRecordedAt: request.clientRecordedAt ? new Date(request.clientRecordedAt) : null,
     });
-    const created = await createRegistrationsForGroup(tx, rows);
+    const created = await createRegistrationsForGroup(tx, scope, rows);
 
     await auditStationScopeBypass(tx, actor.stationScopeBypass, audit);
     await writeAudit(tx, {
@@ -59,6 +63,6 @@ export async function recordGroupRegistration(
     registrations: registrations.map(toRegistrationRecord),
     linkedCardId: cardId,
     cardLinkError: linkError,
-    boothTotal: await countForStationSince(station.id, startOfEventDay(clock.now())),
+    boothTotal: await countForStationSince(scope, station.id, startOfEventDay(clock.now())),
   };
 }

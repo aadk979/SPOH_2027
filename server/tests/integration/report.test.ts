@@ -15,6 +15,7 @@ import {
   createVolunteer,
   idempotencyKey,
   type TestVolunteer,
+  testEvent,
 } from '../helpers/fixtures.js';
 import { FROZEN_NOW } from '../setup.js';
 
@@ -66,7 +67,12 @@ beforeEach(async () => {
   // Exists so the report has a gift section to fill in; the report reads every
   // gift type, so the id is never needed here.
   await prisma.giftType.create({
-    data: { name: 'Tote Bag', initialStock: 100, lowStockThreshold: 10 },
+    data: {
+      eventId: (await testEvent()).eventId,
+      name: 'Tote Bag',
+      initialStock: 100,
+      lowStockThreshold: 10,
+    },
   });
 });
 

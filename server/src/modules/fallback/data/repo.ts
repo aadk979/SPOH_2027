@@ -1,5 +1,6 @@
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /**
  * Fallback-window awareness (PRODUCT_BRIEF §11.4).
@@ -100,22 +101,31 @@ export async function findVolunteerNames(ids: readonly string[]): Promise<Map<st
 }
 
 /** Station ids by upper-cased code: how a sheet names a station. */
-export async function stationIdsByCode(): Promise<Map<string, string>> {
-  const stations = await prisma.station.findMany({ select: { id: true, code: true } });
+export async function stationIdsByCode(scope: EventScope): Promise<Map<string, string>> {
+  const stations = await prisma.station.findMany({
+    where: { eventId: scope.eventId },
+    select: { id: true, code: true },
+  });
   return new Map(stations.map((station) => [station.code.toUpperCase(), station.id]));
 }
 
-export async function existingRegistrationKeys(keys: string[]): Promise<Set<string>> {
+export async function existingRegistrationKeys(
+  scope: EventScope,
+  keys: string[],
+): Promise<Set<string>> {
   const rows = await prisma.registration.findMany({
-    where: { idempotencyKey: { in: keys } },
+    where: { eventId: scope.eventId, idempotencyKey: { in: keys } },
     select: { idempotencyKey: true },
   });
   return new Set(rows.map((row) => row.idempotencyKey as string));
 }
 
-export async function existingFootfallKeys(keys: string[]): Promise<Set<string>> {
+export async function existingFootfallKeys(
+  scope: EventScope,
+  keys: string[],
+): Promise<Set<string>> {
   const rows = await prisma.footfallTick.findMany({
-    where: { idempotencyKey: { in: keys } },
+    where: { eventId: scope.eventId, idempotencyKey: { in: keys } },
     select: { idempotencyKey: true },
   });
   return new Set(rows.map((row) => row.idempotencyKey as string));
@@ -124,32 +134,55 @@ export async function existingFootfallKeys(keys: string[]): Promise<Set<string>>
 /** Inserts what is not already there; returns how many rows were written. */
 export async function insertRegistrations(
   tx: PrismaTransactionClient,
-  rows: Prisma.RegistrationCreateManyInput[],
+  scope: EventScope,
+  rows: Array<Omit<Prisma.RegistrationCreateManyInput, 'eventId' | 'categoryId'>>,
 ): Promise<number> {
   if (rows.length === 0) return 0;
-  const { count } = await tx.registration.createMany({ data: rows, skipDuplicates: true });
+  // Both columns while the enum is authoritative (P09.5): the category by its code.
+  const categories = await tx.captureCategory.findMany({
+    where: { eventId: scope.eventId },
+    select: { id: true, code: true },
+  });
+  const idOf = new Map(categories.map((category) => [category.code, category.id]));
+  const { count } = await tx.registration.createMany({
+    data: rows.map((row) => ({
+      ...row,
+      eventId: scope.eventId,
+      categoryId: idOf.get(row.category) ?? null,
+    })),
+    skipDuplicates: true,
+  });
   return count;
 }
 
 export async function insertFootfall(
   tx: PrismaTransactionClient,
-  rows: Prisma.FootfallTickCreateManyInput[],
+  scope: EventScope,
+  rows: Array<Omit<Prisma.FootfallTickCreateManyInput, 'eventId'>>,
 ): Promise<number> {
   if (rows.length === 0) return 0;
-  const { count } = await tx.footfallTick.createMany({ data: rows, skipDuplicates: true });
+  const { count } = await tx.footfallTick.createMany({
+    data: rows.map((row) => ({ ...row, eventId: scope.eventId })),
+    skipDuplicates: true,
+  });
   return count;
 }
 
 export async function createImportBatch(
   tx: PrismaTransactionClient,
+  scope: EventScope,
   data: {
     source: 'FALLBACK_SHEET' | 'PAPER';
     targetTable: string;
     rowCount: number;
     fileName: string | null;
     importedById: string;
+    importedByMembershipId: string;
     notes: string | null;
   },
 ): Promise<{ id: string }> {
-  return tx.importBatch.create({ data, select: { id: true } });
+  return tx.importBatch.create({
+    data: { ...data, eventId: scope.eventId },
+    select: { id: true },
+  });
 }

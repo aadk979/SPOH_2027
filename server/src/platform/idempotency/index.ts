@@ -66,12 +66,11 @@ export interface Reservation {
  */
 export async function reserve(
   key: string,
-  endpoint: string,
-  actorSub: string,
+  owner: { endpoint: string; actorSub: string; eventId: string },
 ): Promise<Reservation | null> {
   try {
     await prisma.idempotencyRecord.create({
-      data: { key, endpoint, actorSub, statusCode: IN_PROGRESS, responseBody: {} },
+      data: { key, ...owner, statusCode: IN_PROGRESS, responseBody: {} },
     });
     return null;
   } catch {

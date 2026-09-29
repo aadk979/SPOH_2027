@@ -42,8 +42,9 @@ interface StampOutcome {
  */
 async function applyStamp(tx: PrismaTransactionClient, input: StampInput): Promise<StampOutcome> {
   const { station, recordedAt, context } = input;
-  await lockCard(tx, input.shortCode);
-  const existing = requireCard(await findCardWithStampStations(tx, input.shortCode));
+  const { scope } = context;
+  await lockCard(tx, scope, input.shortCode);
+  const existing = requireCard(await findCardWithStampStations(tx, scope, input.shortCode));
   assertCardNotVoided(existing, 'That card has been voided.');
 
   if (existing.stampEvents.some((stamp) => stamp.stationId === station.id)) {
@@ -55,13 +56,17 @@ async function applyStamp(tx: PrismaTransactionClient, input: StampInput): Promi
   // without being linked. Record the stamp anyway and mark it issued: losing
   // the journey would be worse than a slightly late issue timestamp.
   if (existing.status === 'UNISSUED') {
-    await updateCard(tx, existing.id, { status: 'ISSUED', issuedAt: recordedAt });
+    await updateCard(tx, scope, {
+      id: existing.id,
+      data: { status: 'ISSUED', issuedAt: recordedAt },
+    });
   }
 
-  await createStamp(tx, {
+  await createStamp(tx, scope, {
     missionCardId: existing.id,
     stationId: station.id,
     recordedById: context.actor.volunteerId,
+    recordedByMembershipId: context.actor.membershipId,
     recordedAt,
     clientRecordedAt: input.request.clientRecordedAt
       ? new Date(input.request.clientRecordedAt)
@@ -70,10 +75,13 @@ async function applyStamp(tx: PrismaTransactionClient, input: StampInput): Promi
     source: 'APP',
   });
 
-  const stampCount = await countStampsForCard(tx, existing.id);
+  const stampCount = await countStampsForCard(tx, scope, existing.id);
   const justCompleted = isJourneyComplete(stampCount, input.stationCount);
   if (justCompleted && existing.status !== 'COMPLETED') {
-    await updateCard(tx, existing.id, { status: 'COMPLETED', completedAt: recordedAt });
+    await updateCard(tx, scope, {
+      id: existing.id,
+      data: { status: 'COMPLETED', completedAt: recordedAt },
+    });
   }
 
   await auditStationScopeBypass(tx, context.actor.stationScopeBypass, context.audit);

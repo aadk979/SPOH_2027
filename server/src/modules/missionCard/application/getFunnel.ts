@@ -26,11 +26,11 @@ export async function getFunnel(
 
   const [issued, completed, redeemed, voided, perStation, stations, containsFallbackData] =
     await Promise.all([
-      countIssued(filter),
-      countByStatus('COMPLETED', filter),
-      countRedeemedCards(filter),
-      countVoided(filter),
-      countCardsPerStation(filter),
+      countIssued(scope, filter),
+      countByStatus(scope, 'COMPLETED', filter),
+      countRedeemedCards(scope, filter),
+      countVoided(scope, filter),
+      countCardsPerStation(scope, filter),
       listStampingStations(scope),
       rangeOverlapsFallbackWindow(filter),
     ]);

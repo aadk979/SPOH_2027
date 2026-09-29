@@ -25,10 +25,11 @@ export async function recordRegistration(
   const recordedAt = clock.now();
 
   const registration = await prisma.$transaction(async (tx) => {
-    const row = await createRegistration(tx, {
+    const row = await createRegistration(tx, scope, {
       category: request.category,
       stationId: station.id,
       recordedById: actor.volunteerId,
+      recordedByMembershipId: actor.membershipId,
       recordedAt,
       clientRecordedAt: request.clientRecordedAt ? new Date(request.clientRecordedAt) : null,
       idempotencyKey: request.idempotencyKey,
@@ -49,8 +50,8 @@ export async function recordRegistration(
   // Independent queries, so they go together. Serialising them put an extra
   // round trip on the critical path of every booth tap.
   const [sessionTotal, boothTotal] = await Promise.all([
-    countForRecorderSince(actor.volunteerId, station.id, since),
-    countForStationSince(station.id, since),
+    countForRecorderSince(scope, { recordedById: actor.volunteerId, stationId: station.id }, since),
+    countForStationSince(scope, station.id, since),
   ]);
 
   return { registration: toRegistrationRecord(registration), sessionTotal, boothTotal };

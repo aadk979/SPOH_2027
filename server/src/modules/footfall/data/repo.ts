@@ -1,8 +1,9 @@
 import type { FootfallTick, Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /**
- * Data access for COUNT 2 — footfall.
+ * Data access for COUNT 2 — footfall. Every query names its event (ADR-001 §2).
  *
  * Every aggregate sums `quantity` rather than counting rows: an app tap is
  * quantity 1, but a clicker total keyed in by an IC at end of shift is one row
@@ -11,34 +12,53 @@ import { prisma, type PrismaTransactionClient } from '../../../platform/db/clien
 
 export async function createTick(
   tx: PrismaTransactionClient,
-  data: Prisma.FootfallTickUncheckedCreateInput,
+  scope: EventScope,
+  data: Omit<Prisma.FootfallTickUncheckedCreateInput, 'eventId'>,
 ): Promise<FootfallTick> {
-  return tx.footfallTick.create({ data });
+  return tx.footfallTick.create({ data: { ...data, eventId: scope.eventId } });
 }
 
-export async function findTickById(id: string): Promise<FootfallTick | null> {
-  return prisma.footfallTick.findUnique({ where: { id } });
+export async function findTickById(scope: EventScope, id: string): Promise<FootfallTick | null> {
+  return prisma.footfallTick.findFirst({ where: { eventId: scope.eventId, id } });
 }
 
-export async function voidTick(tx: PrismaTransactionClient, id: string): Promise<FootfallTick> {
-  return tx.footfallTick.update({ where: { id }, data: { voided: true } });
+export async function voidTick(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  id: string,
+): Promise<FootfallTick> {
+  return tx.footfallTick.update({ where: { id, eventId: scope.eventId }, data: { voided: true } });
 }
 
-async function sumQuantity(where: Prisma.FootfallTickWhereInput): Promise<number> {
+async function sumQuantity(where: Prisma.FootfallTickWhereInput & EventScope): Promise<number> {
   const result = await prisma.footfallTick.aggregate({ where, _sum: { quantity: true } });
   return result._sum.quantity ?? 0;
 }
 
-export async function sumForStationSince(stationId: string, since: Date): Promise<number> {
-  return sumQuantity({ stationId, voided: false, recordedAt: { gte: since } });
-}
-
-export async function sumForRecorderSince(
-  recordedById: string,
+export async function sumForStationSince(
+  scope: EventScope,
   stationId: string,
   since: Date,
 ): Promise<number> {
-  return sumQuantity({ recordedById, stationId, voided: false, recordedAt: { gte: since } });
+  return sumQuantity({
+    eventId: scope.eventId,
+    stationId,
+    voided: false,
+    recordedAt: { gte: since },
+  });
+}
+
+export async function sumForRecorderSince(
+  scope: EventScope,
+  recorder: { recordedById: string; stationId: string },
+  since: Date,
+): Promise<number> {
+  return sumQuantity({
+    eventId: scope.eventId,
+    ...recorder,
+    voided: false,
+    recordedAt: { gte: since },
+  });
 }
 
 export interface FootfallFilter {
@@ -47,8 +67,12 @@ export interface FootfallFilter {
   to?: Date;
 }
 
-function whereFrom(filter: FootfallFilter): Prisma.FootfallTickWhereInput {
+function whereFrom(
+  scope: EventScope,
+  filter: FootfallFilter,
+): Prisma.FootfallTickWhereInput & EventScope {
   return {
+    eventId: scope.eventId,
     voided: false,
     ...(filter.stationId ? { stationId: filter.stationId } : {}),
     ...(filter.from || filter.to
@@ -62,8 +86,8 @@ function whereFrom(filter: FootfallFilter): Prisma.FootfallTickWhereInput {
   };
 }
 
-export async function sumMatching(filter: FootfallFilter): Promise<number> {
-  return sumQuantity(whereFrom(filter));
+export async function sumMatching(scope: EventScope, filter: FootfallFilter): Promise<number> {
+  return sumQuantity(whereFrom(scope, filter));
 }
 
 /**
@@ -75,6 +99,7 @@ export async function sumMatching(filter: FootfallFilter): Promise<number> {
  * validated upstream against a fixed set (15, 30, 60), never free text.
  */
 export async function sumByBucket(
+  scope: EventScope,
   filter: FootfallFilter,
   bucketMinutes: number,
 ): Promise<Array<{ stationId: string; bucket: Date; total: number }>> {
@@ -89,7 +114,8 @@ export async function sumByBucket(
       to_timestamp(floor(extract(epoch FROM "recordedAt") / ${intervalSeconds}) * ${intervalSeconds}) AS bucket,
       SUM("quantity")::bigint AS total
     FROM "FootfallTick"
-    WHERE "voided" = false
+    WHERE "eventId" = ${scope.eventId}
+      AND "voided" = false
       AND "recordedAt" >= ${from}
       AND "recordedAt" < ${to}
       AND (${stationId}::text IS NULL OR "stationId" = ${stationId})
@@ -109,8 +135,8 @@ export async function sumByBucket(
  * stopped counting is invisible in a total and obvious here.
  */
 export async function liveStationStats(
-  since: Date,
-  until: Date,
+  scope: EventScope,
+  window: { since: Date; until: Date },
 ): Promise<
   Array<{ stationId: string; total: number; lastActivityAt: Date | null; counters: number }>
 > {
@@ -123,7 +149,8 @@ export async function liveStationStats(
       MAX("recordedAt")                              AS "lastActivityAt",
       COUNT(DISTINCT "recordedById")::bigint         AS counters
     FROM "FootfallTick"
-    WHERE "voided" = false AND "recordedAt" >= ${since} AND "recordedAt" <= ${until}
+    WHERE "eventId" = ${scope.eventId}
+      AND "voided" = false AND "recordedAt" >= ${window.since} AND "recordedAt" <= ${window.until}
     GROUP BY "stationId"`;
 
   return rows.map((row) => ({

@@ -15,6 +15,7 @@ import {
   createVolunteer,
   idempotencyKey,
   type TestVolunteer,
+  testEvent,
 } from '../../helpers/fixtures.js';
 
 /**
@@ -46,8 +47,12 @@ beforeEach(async () => {
 describe('cross-cutting rules (P03 repros)', () => {
   // F03-002
   it('answers a rename onto an existing gift type with 409, not 500', async () => {
-    await prisma.giftType.create({ data: { name: 'Tote Bag', initialStock: 1 } });
-    const badge = await prisma.giftType.create({ data: { name: 'Badge', initialStock: 1 } });
+    await prisma.giftType.create({
+      data: { eventId: (await testEvent()).eventId, name: 'Tote Bag', initialStock: 1 },
+    });
+    const badge = await prisma.giftType.create({
+      data: { eventId: (await testEvent()).eventId, name: 'Badge', initialStock: 1 },
+    });
 
     const response = await request(app)
       .patch(`/api/v1/admin/gift-types/${badge.id}`)

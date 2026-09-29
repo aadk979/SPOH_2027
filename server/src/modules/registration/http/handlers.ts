@@ -7,7 +7,8 @@ import type {
   RegistrationSummaryQuery,
   VoidRegistrationRequest,
 } from '@spoh/shared';
-import { auditContextFrom } from '../../../platform/http/auditContext.js';
+import { actorContextFrom } from '../../../platform/http/auditContext.js';
+import { scopeOf } from '../../../platform/http/requireAuth.js';
 import { captureContextFrom } from '../../../platform/http/captureActor.js';
 import { validatedBody, validatedParams, validatedQuery } from '../../../platform/http/validate.js';
 import { recordGroupRegistration } from '../application/recordGroupRegistration.js';
@@ -28,11 +29,11 @@ export async function recordGroupRegistrationHandler(req: Request, res: Response
 export async function voidRegistrationHandler(req: Request, res: Response): Promise<void> {
   const { id } = validatedParams<{ id: z.infer<typeof Id> }>(req);
   const { reason } = validatedBody<VoidRegistrationRequest>(req);
-  await voidRegistrationById(id, reason, auditContextFrom(req));
+  await voidRegistrationById(id, reason, actorContextFrom(req));
   res.status(204).send();
 }
 
 export async function summariseRegistrationsHandler(req: Request, res: Response): Promise<void> {
   const query = validatedQuery<RegistrationSummaryQuery>(req);
-  res.status(200).json(await summariseRegistrations(query));
+  res.status(200).json(await summariseRegistrations(scopeOf(req), query));
 }

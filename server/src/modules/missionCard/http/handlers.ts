@@ -9,7 +9,7 @@ import type {
   TimeRangeQuery,
   VoidCardRequest,
 } from '@spoh/shared';
-import { actorContextFrom, auditContextFrom } from '../../../platform/http/auditContext.js';
+import { actorContextFrom } from '../../../platform/http/auditContext.js';
 import { captureContextFrom } from '../../../platform/http/captureActor.js';
 import { scopeOf } from '../../../platform/http/requireAuth.js';
 import { validatedBody, validatedParams, validatedQuery } from '../../../platform/http/validate.js';
@@ -25,7 +25,7 @@ const shortCodeOf = (req: Request): string => validatedParams<CardLookupParams>(
 
 export async function generateBatchHandler(req: Request, res: Response): Promise<void> {
   const body = validatedBody<GenerateCardBatchRequest>(req);
-  res.status(201).json(await generateBatch(body, auditContextFrom(req)));
+  res.status(201).json(await generateBatch(body, actorContextFrom(req)));
 }
 
 export async function funnelHandler(req: Request, res: Response): Promise<void> {

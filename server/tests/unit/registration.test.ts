@@ -73,9 +73,11 @@ describe('voidRegistrationById', () => {
     } as never);
     repo.voidRegistration.mockResolvedValueOnce({ voidedReason: 'mis-tap' } as never);
 
-    await voidRegistrationById('r', 'mis-tap', AUDIT);
+    const scope = { eventId: 'e1' };
+    await voidRegistrationById('r', 'mis-tap', { volunteerId: 'ic', scope, audit: AUDIT });
 
-    expect(repo.voidRegistration).toHaveBeenCalledWith({}, 'r', 'mis-tap');
+    expect(repo.findRegistrationById).toHaveBeenCalledWith(scope, 'r');
+    expect(repo.voidRegistration).toHaveBeenCalledWith({}, scope, { id: 'r', reason: 'mis-tap' });
     expect(writeAudit).toHaveBeenCalledWith(
       {},
       expect.objectContaining({
@@ -89,7 +91,9 @@ describe('voidRegistrationById', () => {
   it('refuses a missing registration with 404 and writes nothing', async () => {
     repo.findRegistrationById.mockResolvedValueOnce(null);
 
-    await expect(voidRegistrationById('r', 'x', AUDIT)).rejects.toMatchObject({ statusCode: 404 });
+    await expect(
+      voidRegistrationById('r', 'x', { volunteerId: 'ic', scope: { eventId: 'e1' }, audit: AUDIT }),
+    ).rejects.toMatchObject({ statusCode: 404 });
     expect(repo.voidRegistration).not.toHaveBeenCalled();
   });
 });

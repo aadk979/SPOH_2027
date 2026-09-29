@@ -2,6 +2,7 @@ import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import { findCardRow, updateCard } from '../data/repo.js';
 import { isOutOfUse } from '../domain/cardRules.js';
 import { normaliseShortCode } from '../domain/shortCode.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /**
  * Link a group registration to the Mission Card the booth handed over, inside
@@ -14,9 +15,10 @@ import { normaliseShortCode } from '../domain/shortCode.js';
  */
 export async function linkGroupToCard(
   tx: PrismaTransactionClient,
+  scope: EventScope,
   link: { shortCode: string; issuedAt: Date },
 ): Promise<{ cardId: string | null; linkError: string | null }> {
-  const card = await findCardRow(tx, normaliseShortCode(link.shortCode));
+  const card = await findCardRow(tx, scope, normaliseShortCode(link.shortCode));
 
   if (!card) {
     return { cardId: null, linkError: 'Card not found. The registrations were still recorded.' };
@@ -32,7 +34,10 @@ export async function linkGroupToCard(
   // its journey keeps its status: linking a completed card reset it to ISSUED
   // and its visitor lost their completion (F03-004).
   if (card.status === 'UNISSUED') {
-    await updateCard(tx, card.id, { status: 'ISSUED', issuedAt: link.issuedAt });
+    await updateCard(tx, scope, {
+      id: card.id,
+      data: { status: 'ISSUED', issuedAt: link.issuedAt },
+    });
   }
   return { cardId: card.id, linkError: null };
 }

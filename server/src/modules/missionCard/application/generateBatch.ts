@@ -1,8 +1,10 @@
 import type { GenerateCardBatchRequest, GenerateCardBatchResponse } from '@spoh/shared';
-import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
+import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import { createCardBatch } from '../data/repo.js';
 import { generateBatchRows, toBatchCsv, type BatchRow } from '../domain/cardBatch.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
+import type { ActorContext } from '../../../platform/http/auditContext.js';
 
 /** Collisions with existing codes are rare (32^6 codes); a few rounds always suffice. */
 const MAX_ROUNDS = 5;
@@ -15,12 +17,13 @@ const MAX_ROUNDS = 5;
  */
 async function insertFreshCards(
   tx: PrismaTransactionClient,
+  scope: EventScope,
   batch: { count: number; batchLabel: string },
 ): Promise<BatchRow[]> {
   const inserted: BatchRow[] = [];
   for (let round = 0; round < MAX_ROUNDS && inserted.length < batch.count; round += 1) {
     const rows = generateBatchRows(batch.count - inserted.length, batch.batchLabel);
-    inserted.push(...(await createCardBatch(tx, rows)));
+    inserted.push(...(await createCardBatch(tx, scope, rows)));
   }
   return inserted;
 }
@@ -35,12 +38,12 @@ const BATCH_TRANSACTION = { timeout: 60_000 };
  */
 export async function generateBatch(
   request: GenerateCardBatchRequest,
-  audit: AuditContext,
+  { scope, audit }: ActorContext,
 ): Promise<GenerateCardBatchResponse> {
   // The cards and their audit row commit together, and the batch is its own
   // action: it was audited as card.issue, after the insert (F03-018).
   const rows = await prisma.$transaction(async (tx) => {
-    const inserted = await insertFreshCards(tx, request);
+    const inserted = await insertFreshCards(tx, scope, request);
     await writeAudit(tx, {
       ...audit,
       action: 'card.batch',

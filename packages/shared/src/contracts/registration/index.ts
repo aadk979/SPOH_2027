@@ -94,8 +94,10 @@ export type RegistrationSummaryQuery = z.infer<typeof RegistrationSummaryQuery>;
 
 export const RegistrationSummaryBucket = z
   .object({
-    /** Category name, ISO hour, or ISO date depending on `groupBy`. */
+    /** Category code, ISO hour, or ISO date depending on `groupBy`. */
     key: z.string(),
+    /** The event's label for a category bucket (P09.5); absent for time buckets. */
+    label: z.string().optional(),
     value: z.number().int().nonnegative(),
   })
   .strict();

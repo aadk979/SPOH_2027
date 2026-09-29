@@ -1,20 +1,21 @@
 import { ERROR_CODES, type CreateGiftTypeRequest, type GiftTypeRecord } from '@spoh/shared';
-import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
+import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import { ConflictError } from '../../../platform/errors/index.js';
 import { toGiftTypeRecord } from '../data/mappers.js';
 import { createGiftTypeRow, findGiftTypeByName } from '../data/repo.js';
+import type { ActorContext } from '../../../platform/http/auditContext.js';
 
 export async function createGiftType(
   request: CreateGiftTypeRequest,
-  audit: AuditContext,
+  { scope, audit }: ActorContext,
 ): Promise<GiftTypeRecord> {
-  if (await findGiftTypeByName(request.name)) {
+  if (await findGiftTypeByName(scope, request.name)) {
     throw new ConflictError(ERROR_CODES.GIFT_TYPE_EXISTS, `${request.name} already exists`);
   }
 
   const gift = await prisma.$transaction(async (tx) => {
-    const row = await createGiftTypeRow(tx, {
+    const row = await createGiftTypeRow(tx, scope, {
       name: request.name,
       initialStock: request.initialStock,
       lowStockThreshold: request.lowStockThreshold,

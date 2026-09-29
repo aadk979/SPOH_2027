@@ -2,8 +2,12 @@ import type { GiftSummaryQuery, GiftSummaryResponse } from '@spoh/shared';
 import { rangeOverlapsFallbackWindow } from '../../fallback/index.js';
 import { summariseRedemptions } from '../data/repo.js';
 import { listGifts } from './listGifts.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
-export async function summariseGifts(query: GiftSummaryQuery): Promise<GiftSummaryResponse> {
+export async function summariseGifts(
+  scope: EventScope,
+  query: GiftSummaryQuery,
+): Promise<GiftSummaryResponse> {
   const filter = {
     ...(query.stationId ? { stationId: query.stationId } : {}),
     ...(query.from ? { from: new Date(query.from) } : {}),
@@ -11,8 +15,8 @@ export async function summariseGifts(query: GiftSummaryQuery): Promise<GiftSumma
   };
 
   const [rows, gifts, containsFallbackData] = await Promise.all([
-    summariseRedemptions(filter),
-    listGifts(),
+    summariseRedemptions(scope, filter),
+    listGifts(scope),
     rangeOverlapsFallbackWindow(filter),
   ]);
   const counts = new Map(rows.map((row) => [row.giftTypeId, row.count]));

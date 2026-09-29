@@ -14,6 +14,8 @@ import { auditContextFrom } from './auditContext.js';
  */
 export interface CaptureActor {
   volunteerId: string;
+  /** Their EventMembership in the request's event: who the capture is recorded by. */
+  membershipId: string;
   /**
    * Present when an IC-or-above wrote to a station they are not rostered on.
    * The capture services pass this to `auditStationScopeBypass` so the write is
@@ -44,6 +46,7 @@ export function captureActorFrom(req: Request): CaptureActor {
   const auth = getAuth(req);
   return {
     volunteerId: auth.volunteerId,
+    membershipId: auth.membershipId,
     ...(auth.stationScopeBypass ? { stationScopeBypass: auth.stationScopeBypass } : {}),
   };
 }

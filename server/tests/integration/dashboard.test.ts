@@ -13,6 +13,7 @@ import {
   createVolunteer,
   idempotencyKey,
   type TestVolunteer,
+  testEvent,
 } from '../helpers/fixtures.js';
 import { FROZEN_NOW } from '../setup.js';
 
@@ -160,6 +161,7 @@ describe('data health', () => {
     // A tick recorded well before the silence threshold.
     await prisma.footfallTick.create({
       data: {
+        eventId: (await testEvent()).eventId,
         stationId: roomAId,
         recordedById: counter.id,
         quantity: 1,

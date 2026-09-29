@@ -10,6 +10,7 @@ export async function importRegistrations(
   request: ImportRegistrationsRequest,
   actor: ActorContext,
 ): Promise<ImportResponse> {
+  const recorder = { recordedById: actor.volunteerId, recordedByMembershipId: actor.membershipId };
   const expand = (
     row: ImportRegistrationsRequest['rows'][number],
     { rowNumber, stationId }: { rowNumber: number; stationId: string },
@@ -31,7 +32,7 @@ export async function importRegistrations(
         record: {
           category: row.category,
           stationId,
-          recordedById: actor.volunteerId,
+          ...recorder,
           // Source-tagged, so no report can mistake this for an app tap.
           source: request.source,
           recordedAt,
@@ -41,9 +42,9 @@ export async function importRegistrations(
     });
   };
 
-  const stationIds = await stationIdsByCode();
+  const stationIds = await stationIdsByCode(actor.scope);
   const candidates = planImport(request.rows, { stationIds, existingKeys: new Set() }, expand);
-  const existingKeys = await existingRegistrationKeys(candidates.creates.map(keyOf));
+  const existingKeys = await existingRegistrationKeys(actor.scope, candidates.creates.map(keyOf));
   const plan = planImport(request.rows, { stationIds, existingKeys }, expand);
 
   return runImport(

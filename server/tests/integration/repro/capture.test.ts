@@ -12,6 +12,7 @@ import {
   createVolunteer,
   idempotencyKey,
   type TestVolunteer,
+  testEvent,
 } from '../../helpers/fixtures.js';
 
 /**
@@ -58,7 +59,12 @@ beforeEach(async () => {
 
   giftId = (
     await prisma.giftType.create({
-      data: { name: 'Tote Bag', initialStock: 100, lowStockThreshold: 1 },
+      data: {
+        eventId: (await testEvent()).eventId,
+        name: 'Tote Bag',
+        initialStock: 100,
+        lowStockThreshold: 1,
+      },
     })
   ).id;
 });
@@ -66,6 +72,7 @@ beforeEach(async () => {
 async function card(shortCode: string, status: 'UNISSUED' | 'ISSUED' | 'COMPLETED' | 'VOIDED') {
   return prisma.missionCard.create({
     data: {
+      eventId: (await testEvent()).eventId,
       shortCode,
       qrPayload: `spoh2027:repro-${shortCode}`,
       status,

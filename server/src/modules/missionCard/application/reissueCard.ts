@@ -12,6 +12,7 @@ import {
 import { normaliseShortCode } from '../domain/shortCode.js';
 import { getCard } from './getCard.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 type CardWithStamps = NonNullable<Awaited<ReturnType<typeof findCardWithStamps>>>;
 
@@ -21,14 +22,16 @@ type CardWithStamps = NonNullable<Awaited<ReturnType<typeof findCardWithStamps>>
  */
 async function copyStamps(
   tx: PrismaTransactionClient,
-  original: CardWithStamps,
-  replacementId: string,
+  scope: EventScope,
+  journey: { original: CardWithStamps; replacementId: string },
 ): Promise<void> {
+  const { original, replacementId } = journey;
   for (const stamp of original.stampEvents) {
-    await createStamp(tx, {
+    await createStamp(tx, scope, {
       missionCardId: replacementId,
       stationId: stamp.stationId,
       recordedById: stamp.recordedById,
+      recordedByMembershipId: stamp.recordedByMembershipId,
       recordedAt: stamp.recordedAt,
       source: stamp.source,
       idempotencyKey: `reissue:${replacementId}:${stamp.stationId}`,
@@ -55,24 +58,27 @@ export async function reissueCard(
   const now = new Date();
 
   const result = await prisma.$transaction(async (tx) => {
-    const original = requireCard(await findCardWithStamps(tx, originalCode));
+    const original = requireCard(await findCardWithStamps(tx, scope, originalCode));
     assertReissuable(original);
     const replacement = requireCard(
-      await findCardRow(tx, replacementCode),
+      await findCardRow(tx, scope, replacementCode),
       'No replacement card with that code',
     );
     assertReplacementUnissued(replacement);
 
-    await updateCard(tx, replacement.id, {
-      status: replacementStatus(original.status),
-      issuedAt: original.issuedAt ?? now,
-      completedAt: original.completedAt,
-      reissuedFromId: original.id,
+    await updateCard(tx, scope, {
+      id: replacement.id,
+      data: {
+        status: replacementStatus(original.status),
+        issuedAt: original.issuedAt ?? now,
+        completedAt: original.completedAt,
+        reissuedFromId: original.id,
+      },
     });
-    await copyStamps(tx, original, replacement.id);
+    await copyStamps(tx, scope, { original, replacementId: replacement.id });
     // LOST, not VOIDED (ADR-002 §3): the journey goes on with the replacement,
     // so the original is neither a spoiled card nor a second journey.
-    await updateCard(tx, original.id, { status: 'LOST' });
+    await updateCard(tx, scope, { id: original.id, data: { status: 'LOST' } });
 
     await writeAudit(tx, {
       ...audit,

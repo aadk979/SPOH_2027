@@ -26,7 +26,7 @@ export async function getLiveFootfall(
   const silentAfterMinutes = getSettings().silentStationMinutes;
   const [stations, stats] = await Promise.all([
     listCountedStations(scope),
-    liveStationStats(startOfEventDay(now), now),
+    liveStationStats(scope, { since: startOfEventDay(now), until: now }),
   ]);
   const statsByStation = new Map(stats.map((row) => [row.stationId, row]));
 

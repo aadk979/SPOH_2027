@@ -49,6 +49,8 @@ export const SYSTEM_AUDIT_CONTEXT: AuditContext = Object.freeze({
 /** Who is acting and the audit trail, for a use case that is not a capture. */
 export interface ActorContext {
   volunteerId: string;
+  /** Their EventMembership in the request's event. */
+  membershipId: string;
   /** The event the request works in (ADR-001 §2). */
   scope: EventScope;
   audit: AuditContext;
@@ -58,6 +60,7 @@ export function actorContextFrom(req: Request): ActorContext {
   const auth = getAuth(req);
   return {
     volunteerId: auth.volunteerId,
+    membershipId: auth.membershipId,
     scope: { eventId: auth.eventId },
     audit: auditContextFrom(req),
   };

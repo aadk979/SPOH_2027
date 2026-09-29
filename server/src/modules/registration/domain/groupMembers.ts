@@ -10,6 +10,7 @@ export interface GroupMembers {
 export interface GroupRowContext {
   stationId: string;
   recordedById: string;
+  recordedByMembershipId: string;
   groupId: string;
   missionCardId: string | null;
   recordedAt: Date;

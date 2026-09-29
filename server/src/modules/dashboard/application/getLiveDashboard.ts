@@ -39,7 +39,7 @@ export async function getLiveDashboard(
     registrationsPanel(since, now),
     footfallPanel(scope, now),
     cardsPanel(scope, { since, now }),
-    listGifts(),
+    listGifts(scope),
     safetyPanel(),
     staffingPanel(eventDay?.id ?? null, blocks, now),
     getDataHealth(scope, now),

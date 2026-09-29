@@ -1,26 +1,29 @@
 import type { AdjustGiftStockRequest, GiftTypeRecord } from '@spoh/shared';
-import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
+import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { toGiftTypeRecord } from '../data/mappers.js';
 import { createAdjustment, findGiftType, totalsForGiftType } from '../data/repo.js';
+import type { ActorContext } from '../../../platform/http/auditContext.js';
 
 /** A stock correction: a delivery, a breakage, a recount. Audited with the before state. */
 export async function adjustStock(
   giftTypeId: string,
   request: AdjustGiftStockRequest,
-  actor: { volunteerId: string; audit: AuditContext },
+  actor: ActorContext & { membershipId: string },
 ): Promise<GiftTypeRecord> {
   return prisma.$transaction(async (tx) => {
-    const giftType = await findGiftType(giftTypeId, tx);
+    const { scope } = actor;
+    const giftType = await findGiftType(scope, giftTypeId, tx);
     if (!giftType) throw new NotFoundError('Gift type');
-    const before = await totalsForGiftType(tx, giftTypeId);
+    const before = await totalsForGiftType(tx, scope, giftTypeId);
 
-    await createAdjustment(tx, {
+    await createAdjustment(tx, scope, {
       giftTypeId,
       delta: request.delta,
       reason: request.reason,
       createdById: actor.volunteerId,
+      createdByMembershipId: actor.membershipId,
     });
     await writeAudit(tx, {
       ...actor.audit,
@@ -31,6 +34,6 @@ export async function adjustStock(
       after: { delta: request.delta, reason: request.reason },
     });
 
-    return toGiftTypeRecord(giftType, await totalsForGiftType(tx, giftTypeId));
+    return toGiftTypeRecord(giftType, await totalsForGiftType(tx, scope, giftTypeId));
   });
 }

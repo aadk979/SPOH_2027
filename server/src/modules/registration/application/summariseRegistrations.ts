@@ -6,21 +6,28 @@ import {
   groupByTimeBucket,
   type RegistrationSummaryFilter,
 } from '../data/repo.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 async function bucketsFor(
+  scope: EventScope,
   groupBy: RegistrationSummaryQuery['groupBy'],
   filter: RegistrationSummaryFilter,
 ): Promise<RegistrationSummaryResponse['buckets']> {
   if (groupBy === 'category') {
-    return (await groupByCategory(filter)).map((row) => ({ key: row.category, value: row.count }));
+    return (await groupByCategory(scope, filter)).map((row) => ({
+      key: row.category,
+      label: row.label,
+      value: row.count,
+    }));
   }
-  return (await groupByTimeBucket(filter, groupBy)).map((row) => ({
+  return (await groupByTimeBucket(scope, filter, groupBy)).map((row) => ({
     key: row.bucket.toISOString(),
     value: row.count,
   }));
 }
 
 export async function summariseRegistrations(
+  scope: EventScope,
   query: RegistrationSummaryQuery,
 ): Promise<RegistrationSummaryResponse> {
   const filter = {
@@ -30,7 +37,7 @@ export async function summariseRegistrations(
   };
 
   const [total, containsFallbackData] = await Promise.all([
-    countMatching(filter),
+    countMatching(scope, filter),
     rangeOverlapsFallbackWindow(filter),
   ]);
 
@@ -40,7 +47,7 @@ export async function summariseRegistrations(
     unit: 'registrations',
     groupBy: query.groupBy,
     total,
-    buckets: await bucketsFor(query.groupBy, filter),
+    buckets: await bucketsFor(scope, query.groupBy, filter),
     containsFallbackData,
   };
 }

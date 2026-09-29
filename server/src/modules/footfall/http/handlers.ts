@@ -5,7 +5,7 @@ import type {
   FootfallSummaryQuery,
   VoidFootfallTickRequest,
 } from '@spoh/shared';
-import { auditContextFrom } from '../../../platform/http/auditContext.js';
+import { actorContextFrom } from '../../../platform/http/auditContext.js';
 import { captureContextFrom } from '../../../platform/http/captureActor.js';
 import { validatedBody, validatedParams, validatedQuery } from '../../../platform/http/validate.js';
 import { getLiveFootfall } from '../application/getLiveFootfall.js';
@@ -28,7 +28,7 @@ export async function recordBulkHandler(req: Request, res: Response): Promise<vo
 export async function voidTickHandler(req: Request, res: Response): Promise<void> {
   const { id } = validatedParams<{ id: string }>(req);
   const { reason } = validatedBody<VoidFootfallTickRequest>(req);
-  await voidTickById(id, reason, auditContextFrom(req));
+  await voidTickById(id, reason, actorContextFrom(req));
   res.status(204).send();
 }
 

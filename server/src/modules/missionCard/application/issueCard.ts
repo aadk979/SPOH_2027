@@ -29,11 +29,14 @@ export async function issueCard(
   const shortCode = normaliseShortCode(shortCodeInput);
 
   const cardId = await prisma.$transaction(async (tx) => {
-    const existing = requireCard(await findCardRow(tx, shortCode));
+    const existing = requireCard(await findCardRow(tx, scope, shortCode));
     assertCardNotVoided(existing, 'That card has been voided. Issue a fresh one.');
 
     if (existing.status === 'UNISSUED') {
-      await updateCard(tx, existing.id, { status: 'ISSUED', issuedAt: clock.now() });
+      await updateCard(tx, scope, {
+        id: existing.id,
+        data: { status: 'ISSUED', issuedAt: clock.now() },
+      });
       await writeAudit(tx, {
         ...audit,
         action: 'card.issue',
@@ -46,14 +49,14 @@ export async function issueCard(
     // Attach the card to the group registered a moment earlier. The link is
     // optional by design: a failed link must never block the count (§2.3).
     if (request.groupId) {
-      await attachGroupRegistrations(tx, { groupId: request.groupId, cardId: existing.id });
+      await attachGroupRegistrations(tx, scope, { groupId: request.groupId, cardId: existing.id });
     }
 
     await auditStationScopeBypass(tx, actor.stationScopeBypass, audit);
     return existing.id;
   });
 
-  const refreshed = await findCardRowById(cardId);
+  const refreshed = await findCardRowById(scope, cardId);
   if (!refreshed) throw new NotFoundError('Mission card');
   return getCard(scope, refreshed.shortCode);
 }

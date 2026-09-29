@@ -15,10 +15,13 @@ export async function voidCard(
   const shortCode = normaliseShortCode(shortCodeInput);
 
   await prisma.$transaction(async (tx) => {
-    const existing = requireCard(await findCardRow(tx, shortCode));
+    const existing = requireCard(await findCardRow(tx, scope, shortCode));
     assertCardNotVoided(existing, 'That card is already voided.');
 
-    await updateCard(tx, existing.id, { status: 'VOIDED', voidedAt: new Date() });
+    await updateCard(tx, scope, {
+      id: existing.id,
+      data: { status: 'VOIDED', voidedAt: new Date() },
+    });
     await writeAudit(tx, {
       ...audit,
       action: 'card.void',

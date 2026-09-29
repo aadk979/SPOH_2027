@@ -1,7 +1,8 @@
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
-/** Data access for COUNT 3 — Mission Cards. */
+/** Data access for COUNT 3 — Mission Cards. Every query names its event (ADR-001 §2). */
 
 const cardInclude = {
   stampEvents: {
@@ -14,33 +15,46 @@ const cardInclude = {
 export type CardWithContext = Prisma.MissionCardGetPayload<{ include: typeof cardInclude }>;
 
 export async function findCardByShortCode(
+  scope: EventScope,
   shortCode: string,
   tx: PrismaTransactionClient = prisma,
 ): Promise<CardWithContext | null> {
-  return tx.missionCard.findUnique({ where: { shortCode }, include: cardInclude });
+  return tx.missionCard.findUnique({
+    where: { shortCode, eventId: scope.eventId },
+    include: cardInclude,
+  });
 }
 
 export async function findCardByQrPayload(
+  scope: EventScope,
   qrPayload: string,
   tx: PrismaTransactionClient = prisma,
 ): Promise<CardWithContext | null> {
-  return tx.missionCard.findUnique({ where: { qrPayload }, include: cardInclude });
+  return tx.missionCard.findUnique({
+    where: { qrPayload, eventId: scope.eventId },
+    include: cardInclude,
+  });
 }
 
 export async function findCardById(
+  scope: EventScope,
   id: string,
   tx: PrismaTransactionClient = prisma,
 ): Promise<CardWithContext | null> {
-  return tx.missionCard.findUnique({ where: { id }, include: cardInclude });
+  return tx.missionCard.findUnique({ where: { id, eventId: scope.eventId }, include: cardInclude });
 }
 
 /** The bare card row, for a write that only needs its status. */
-export async function findCardRow(tx: PrismaTransactionClient, shortCode: string) {
-  return tx.missionCard.findUnique({ where: { shortCode } });
+export async function findCardRow(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  shortCode: string,
+) {
+  return tx.missionCard.findUnique({ where: { shortCode, eventId: scope.eventId } });
 }
 
-export async function findCardRowById(id: string) {
-  return prisma.missionCard.findUnique({ where: { id } });
+export async function findCardRowById(scope: EventScope, id: string) {
+  return prisma.missionCard.findUnique({ where: { id, eventId: scope.eventId } });
 }
 
 /**
@@ -48,21 +62,39 @@ export async function findCardRowById(id: string) {
  * then run one after the other, and the second sees the first's stamp instead
  * of colliding with it on the (card, station) unique constraint (F03-008).
  */
-export async function lockCard(tx: PrismaTransactionClient, shortCode: string): Promise<void> {
-  await tx.$queryRaw`SELECT "id" FROM "MissionCard" WHERE "shortCode" = ${shortCode} FOR UPDATE`;
+export async function lockCard(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  shortCode: string,
+): Promise<void> {
+  await tx.$queryRaw`
+    SELECT "id" FROM "MissionCard"
+    WHERE "eventId" = ${scope.eventId} AND "shortCode" = ${shortCode}
+    FOR UPDATE`;
 }
 
 /** The card with the stations it has been stamped at, for a stamp. */
-export async function findCardWithStampStations(tx: PrismaTransactionClient, shortCode: string) {
+export async function findCardWithStampStations(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  shortCode: string,
+) {
   return tx.missionCard.findUnique({
-    where: { shortCode },
+    where: { shortCode, eventId: scope.eventId },
     include: { stampEvents: { select: { stationId: true } } },
   });
 }
 
 /** A card's id and status, for the redemption cross-check. */
-export async function findCardStatus(tx: PrismaTransactionClient, shortCode: string) {
-  return tx.missionCard.findUnique({ where: { shortCode }, select: { id: true, status: true } });
+export async function findCardStatus(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  shortCode: string,
+) {
+  return tx.missionCard.findUnique({
+    where: { shortCode, eventId: scope.eventId },
+    select: { id: true, status: true },
+  });
 }
 
 /**
@@ -72,22 +104,32 @@ export async function findCardStatus(tx: PrismaTransactionClient, shortCode: str
  */
 export async function findJourneyCardIds(
   tx: PrismaTransactionClient,
+  scope: EventScope,
   cardId: string,
 ): Promise<string[]> {
   const rows = await tx.$queryRaw<Array<{ id: string }>>`
     WITH RECURSIVE journey AS (
-      SELECT "id", "reissuedFromId" FROM "MissionCard" WHERE "id" = ${cardId}
+      SELECT "id", "reissuedFromId" FROM "MissionCard"
+      WHERE "eventId" = ${scope.eventId} AND "id" = ${cardId}
       UNION
       SELECT m."id", m."reissuedFromId"
       FROM "MissionCard" m JOIN journey j ON m."id" = j."reissuedFromId"
+      WHERE m."eventId" = ${scope.eventId}
     )
     SELECT "id" FROM journey`;
   return rows.map((row) => row.id);
 }
 
 /** The card with its full stamp rows, for carrying a journey to a replacement. */
-export async function findCardWithStamps(tx: PrismaTransactionClient, shortCode: string) {
-  return tx.missionCard.findUnique({ where: { shortCode }, include: { stampEvents: true } });
+export async function findCardWithStamps(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  shortCode: string,
+) {
+  return tx.missionCard.findUnique({
+    where: { shortCode, eventId: scope.eventId },
+    include: { stampEvents: true },
+  });
 }
 
 /**
@@ -98,10 +140,11 @@ export async function findCardWithStamps(tx: PrismaTransactionClient, shortCode:
  */
 export async function attachGroupRegistrations(
   tx: PrismaTransactionClient,
+  scope: EventScope,
   link: { groupId: string; cardId: string },
 ): Promise<void> {
   await tx.registration.updateMany({
-    where: { groupId: link.groupId, missionCardId: null },
+    where: { eventId: scope.eventId, groupId: link.groupId, missionCardId: null },
     data: { missionCardId: link.cardId },
   });
 }
@@ -113,10 +156,11 @@ export async function attachGroupRegistrations(
  */
 export async function createCardBatch(
   tx: PrismaTransactionClient,
+  scope: EventScope,
   rows: Array<{ shortCode: string; qrPayload: string; batchLabel: string }>,
 ): Promise<Array<{ shortCode: string; qrPayload: string; batchLabel: string }>> {
   const created = await tx.missionCard.createManyAndReturn({
-    data: rows,
+    data: rows.map((row) => ({ ...row, eventId: scope.eventId })),
     skipDuplicates: true,
     select: { shortCode: true, qrPayload: true, batchLabel: true },
   });
@@ -125,24 +169,29 @@ export async function createCardBatch(
 
 export async function updateCard(
   tx: PrismaTransactionClient,
-  id: string,
-  data: Prisma.MissionCardUncheckedUpdateInput,
+  scope: EventScope,
+  change: { id: string; data: Prisma.MissionCardUncheckedUpdateInput },
 ): Promise<void> {
-  await tx.missionCard.update({ where: { id }, data });
+  await tx.missionCard.update({
+    where: { id: change.id, eventId: scope.eventId },
+    data: change.data,
+  });
 }
 
 export async function createStamp(
   tx: PrismaTransactionClient,
-  data: Prisma.CardStampEventUncheckedCreateInput,
+  scope: EventScope,
+  data: Omit<Prisma.CardStampEventUncheckedCreateInput, 'eventId'>,
 ): Promise<void> {
-  await tx.cardStampEvent.create({ data });
+  await tx.cardStampEvent.create({ data: { ...data, eventId: scope.eventId } });
 }
 
 export async function countStampsForCard(
   tx: PrismaTransactionClient,
+  scope: EventScope,
   missionCardId: string,
 ): Promise<number> {
-  return tx.cardStampEvent.count({ where: { missionCardId } });
+  return tx.cardStampEvent.count({ where: { eventId: scope.eventId, missionCardId } });
 }
 
 export interface CardFunnelFilter {
@@ -155,8 +204,12 @@ export interface CardFunnelFilter {
  * and reissued. The replacement carries the original's issue time and stamps,
  * so each chain of reissues counts once (ADR-002 §3, F03-028).
  */
-function issuedWhere(filter: CardFunnelFilter): Prisma.MissionCardWhereInput {
+function issuedWhere(
+  scope: EventScope,
+  filter: CardFunnelFilter,
+): Prisma.MissionCardWhereInput & EventScope {
   return {
+    eventId: scope.eventId,
     status: { notIn: ['UNISSUED', 'LOST'] },
     ...(filter.from || filter.to
       ? {
@@ -169,19 +222,20 @@ function issuedWhere(filter: CardFunnelFilter): Prisma.MissionCardWhereInput {
   };
 }
 
-export async function countIssued(filter: CardFunnelFilter): Promise<number> {
-  return prisma.missionCard.count({ where: issuedWhere(filter) });
+export async function countIssued(scope: EventScope, filter: CardFunnelFilter): Promise<number> {
+  return prisma.missionCard.count({ where: issuedWhere(scope, filter) });
 }
 
 export async function countByStatus(
+  scope: EventScope,
   status: Prisma.MissionCardWhereInput['status'],
   filter: CardFunnelFilter,
 ): Promise<number> {
-  return prisma.missionCard.count({ where: { ...issuedWhere(filter), status } });
+  return prisma.missionCard.count({ where: { ...issuedWhere(scope, filter), status } });
 }
 
-export async function countVoided(filter: CardFunnelFilter): Promise<number> {
-  return prisma.missionCard.count({ where: { ...issuedWhere(filter), status: 'VOIDED' } });
+export async function countVoided(scope: EventScope, filter: CardFunnelFilter): Promise<number> {
+  return prisma.missionCard.count({ where: { ...issuedWhere(scope, filter), status: 'VOIDED' } });
 }
 
 /**
@@ -192,7 +246,10 @@ export async function countVoided(filter: CardFunnelFilter): Promise<number> {
  * makes those the same number — this keeps them the same number if that
  * constraint ever changes.
  */
-export async function countCardsPerStation(filter: CardFunnelFilter): Promise<Map<string, number>> {
+export async function countCardsPerStation(
+  scope: EventScope,
+  filter: CardFunnelFilter,
+): Promise<Map<string, number>> {
   const from = filter.from ?? new Date(0);
   const to = filter.to ?? new Date(8.64e15);
 
@@ -200,21 +257,26 @@ export async function countCardsPerStation(filter: CardFunnelFilter): Promise<Ma
     SELECT s."stationId", COUNT(DISTINCT s."missionCardId")::bigint AS cards
     FROM "CardStampEvent" s
     JOIN "MissionCard" c ON c."id" = s."missionCardId"
-    WHERE s."recordedAt" >= ${from} AND s."recordedAt" < ${to}
+    WHERE s."eventId" = ${scope.eventId}
+      AND s."recordedAt" >= ${from} AND s."recordedAt" < ${to}
       AND c."status" <> 'LOST'
     GROUP BY s."stationId"`;
 
   return new Map(rows.map((row) => [row.stationId, Number(row.cards)]));
 }
 
-export async function countRedeemedCards(filter: CardFunnelFilter): Promise<number> {
+export async function countRedeemedCards(
+  scope: EventScope,
+  filter: CardFunnelFilter,
+): Promise<number> {
   const from = filter.from ?? new Date(0);
   const to = filter.to ?? new Date(8.64e15);
 
   const rows = await prisma.$queryRaw<Array<{ cards: bigint }>>`
     SELECT COUNT(DISTINCT "missionCardId")::bigint AS cards
     FROM "GiftRedemption"
-    WHERE "voided" = false
+    WHERE "eventId" = ${scope.eventId}
+      AND "voided" = false
       AND "missionCardId" IS NOT NULL
       AND "recordedAt" >= ${from} AND "recordedAt" < ${to}`;
 

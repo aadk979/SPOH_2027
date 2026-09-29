@@ -17,10 +17,10 @@ export async function summariseFootfall(
   };
 
   const [total, containsFallbackData, stations, rows] = await Promise.all([
-    sumMatching(filter),
+    sumMatching(scope, filter),
     rangeOverlapsFallbackWindow(filter),
     listCountedStations(scope),
-    sumByBucket(filter, BUCKET_MINUTES[query.bucket]),
+    sumByBucket(scope, filter, BUCKET_MINUTES[query.bucket]),
   ]);
 
   const byStation = bucketsByStation(rows);

@@ -36,7 +36,7 @@ export async function generateReport(scope: EventScope, query: ReportQuery): Pro
       registrationsReport(range),
       footfallReport(range, names),
       cardsReport(range, names),
-      giftsReport(range, names),
+      giftsReport(scope, range, names),
       safetyReport(range),
       volunteersReport(range, names, now),
       integrityReport(scope, range),

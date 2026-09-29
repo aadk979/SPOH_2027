@@ -1,8 +1,10 @@
 import type { GiftType, Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /**
- * Data access for gifts (PRODUCT_BRIEF §5).
+ * Data access for gifts (PRODUCT_BRIEF §5). Every query names its event
+ * (ADR-001 §2).
  *
  * Stock is DERIVED on every read: initialStock + adjustments − unvoided
  * redemptions. There is deliberately no `remaining` column. A stored counter
@@ -16,9 +18,12 @@ export interface GiftTotals {
   adjustment: number;
 }
 
-export async function listGiftTypes(includeInactive = false): Promise<GiftType[]> {
+export async function listGiftTypes(
+  scope: EventScope,
+  includeInactive = false,
+): Promise<GiftType[]> {
   return prisma.giftType.findMany({
-    where: includeInactive ? {} : { active: true },
+    where: { eventId: scope.eventId, ...(includeInactive ? {} : { active: true }) },
     orderBy: { name: 'asc' },
   });
 }
@@ -28,28 +33,39 @@ export async function listGiftTypes(includeInactive = false): Promise<GiftType[]
  * redemptions of one gift read the stock one after the other and the last
  * one cannot be handed out twice (F03-007).
  */
-export async function lockGiftType(tx: PrismaTransactionClient, id: string): Promise<void> {
-  await tx.$queryRaw`SELECT "id" FROM "GiftType" WHERE "id" = ${id} FOR UPDATE`;
+export async function lockGiftType(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  id: string,
+): Promise<void> {
+  await tx.$queryRaw`
+    SELECT "id" FROM "GiftType" WHERE "eventId" = ${scope.eventId} AND "id" = ${id} FOR UPDATE`;
 }
 
 export async function findGiftType(
+  scope: EventScope,
   id: string,
   tx: PrismaTransactionClient = prisma,
 ): Promise<GiftType | null> {
-  return tx.giftType.findUnique({ where: { id } });
+  return tx.giftType.findUnique({ where: { id, eventId: scope.eventId } });
 }
 
 /** Redemption and adjustment totals for every gift type, in two queries. */
 export async function giftTotals(
+  scope: EventScope,
   tx: PrismaTransactionClient = prisma,
 ): Promise<Map<string, GiftTotals>> {
   const [redemptions, adjustments] = await Promise.all([
     tx.giftRedemption.groupBy({
       by: ['giftTypeId'],
-      where: { voided: false },
+      where: { eventId: scope.eventId, voided: false },
       _count: { _all: true },
     }),
-    tx.giftStockAdjustment.groupBy({ by: ['giftTypeId'], _sum: { delta: true } }),
+    tx.giftStockAdjustment.groupBy({
+      by: ['giftTypeId'],
+      where: { eventId: scope.eventId },
+      _sum: { delta: true },
+    }),
   ]);
 
   const totals = new Map<string, GiftTotals>();
@@ -68,11 +84,13 @@ export async function giftTotals(
 
 export async function totalsForGiftType(
   tx: PrismaTransactionClient,
+  scope: EventScope,
   giftTypeId: string,
 ): Promise<GiftTotals> {
+  const { eventId } = scope;
   const [redeemed, adjustment] = await Promise.all([
-    tx.giftRedemption.count({ where: { giftTypeId, voided: false } }),
-    tx.giftStockAdjustment.aggregate({ where: { giftTypeId }, _sum: { delta: true } }),
+    tx.giftRedemption.count({ where: { eventId, giftTypeId, voided: false } }),
+    tx.giftStockAdjustment.aggregate({ where: { eventId, giftTypeId }, _sum: { delta: true } }),
   ]);
 
   return { redeemed, adjustment: adjustment._sum.delta ?? 0 };
@@ -80,25 +98,28 @@ export async function totalsForGiftType(
 
 export async function createRedemption(
   tx: PrismaTransactionClient,
-  data: Prisma.GiftRedemptionUncheckedCreateInput,
+  scope: EventScope,
+  data: Omit<Prisma.GiftRedemptionUncheckedCreateInput, 'eventId'>,
 ) {
-  return tx.giftRedemption.create({ data });
+  return tx.giftRedemption.create({ data: { ...data, eventId: scope.eventId } });
 }
 
 export async function createAdjustment(
   tx: PrismaTransactionClient,
-  data: Prisma.GiftStockAdjustmentUncheckedCreateInput,
+  scope: EventScope,
+  data: Omit<Prisma.GiftStockAdjustmentUncheckedCreateInput, 'eventId'>,
 ): Promise<void> {
-  await tx.giftStockAdjustment.create({ data });
+  await tx.giftStockAdjustment.create({ data: { ...data, eventId: scope.eventId } });
 }
 
 /** Has any of these cards (one journey) already been given a gift? */
 export async function existingRedemptionForCards(
   tx: PrismaTransactionClient,
+  scope: EventScope,
   missionCardIds: readonly string[],
 ): Promise<{ id: string } | null> {
   return tx.giftRedemption.findFirst({
-    where: { missionCardId: { in: [...missionCardIds] }, voided: false },
+    where: { eventId: scope.eventId, missionCardId: { in: [...missionCardIds] }, voided: false },
     select: { id: true },
   });
 }
@@ -110,11 +131,13 @@ export interface GiftSummaryFilter {
 }
 
 export async function summariseRedemptions(
+  scope: EventScope,
   filter: GiftSummaryFilter,
 ): Promise<Array<{ giftTypeId: string; count: number }>> {
   const rows = await prisma.giftRedemption.groupBy({
     by: ['giftTypeId'],
     where: {
+      eventId: scope.eventId,
       voided: false,
       ...(filter.stationId ? { stationId: filter.stationId } : {}),
       ...(filter.from || filter.to
@@ -132,20 +155,28 @@ export async function summariseRedemptions(
   return rows.map((row) => ({ giftTypeId: row.giftTypeId, count: row._count._all }));
 }
 
-export async function findGiftTypeByName(name: string): Promise<GiftType | null> {
-  return prisma.giftType.findUnique({ where: { name } });
+export async function findGiftTypeByName(
+  scope: EventScope,
+  name: string,
+): Promise<GiftType | null> {
+  return prisma.giftType.findUnique({ where: { name, eventId: scope.eventId } });
 }
 
 export async function createGiftTypeRow(
   tx: PrismaTransactionClient,
-  data: Prisma.GiftTypeCreateInput,
+  scope: EventScope,
+  data: Omit<Prisma.GiftTypeUncheckedCreateInput, 'eventId'>,
 ): Promise<GiftType> {
-  return tx.giftType.create({ data });
+  return tx.giftType.create({ data: { ...data, eventId: scope.eventId } });
 }
 
 export async function updateGiftTypeRow(
   tx: PrismaTransactionClient,
-  change: { id: string; data: Prisma.GiftTypeUpdateInput },
+  scope: EventScope,
+  change: { id: string; data: Prisma.GiftTypeUncheckedUpdateInput },
 ): Promise<GiftType> {
-  return tx.giftType.update({ where: { id: change.id }, data: change.data });
+  return tx.giftType.update({
+    where: { id: change.id, eventId: scope.eventId },
+    data: change.data,
+  });
 }

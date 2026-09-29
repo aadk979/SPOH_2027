@@ -86,9 +86,13 @@ export async function cardsReport(range: Range, names: Names): Promise<Report['c
   };
 }
 
-export async function giftsReport(range: Range, names: Names): Promise<Report['gifts']> {
+export async function giftsReport(
+  scope: EventScope,
+  range: Range,
+  names: Names,
+): Promise<Report['gifts']> {
   const [gifts, byDay, byStation] = await Promise.all([
-    listGifts(),
+    listGifts(scope),
     giftRedemptionsByDay(range),
     giftRedemptionsByStation(range),
   ]);

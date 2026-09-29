@@ -17,6 +17,7 @@ import {
 import { checkPresentedCard, stockFlag, type CardCheck } from '../domain/redemptionRules.js';
 import type { RedemptionFlag } from '@spoh/shared';
 import { notifyLowStock } from './notifyLowStock.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 const NO_CARD: CardCheck = {
   missionCardId: null,
@@ -26,15 +27,23 @@ const NO_CARD: CardCheck = {
 };
 
 /** Check the card the visitor presented, if they gave a code at all. */
-async function checkCard(tx: PrismaTransactionClient, request: RedeemGiftRequest) {
+async function checkCard(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  request: RedeemGiftRequest,
+) {
   if (!request.cardShortCode) return NO_CARD;
-  const card = await findCardForRedemption(tx, request.cardShortCode);
+  const card = await findCardForRedemption(tx, scope, request.cardShortCode);
   const usable = card && card.status !== 'VOIDED' && card.status !== 'LOST';
   return checkPresentedCard({
     card,
     // One gift per journey: a gift against a card this one replaced counts (F03-003).
     alreadyRedeemed: usable
-      ? (await existingRedemptionForCards(tx, await findJourneyCardIds(tx, card.id))) !== null
+      ? (await existingRedemptionForCards(
+          tx,
+          scope,
+          await findJourneyCardIds(tx, scope, card.id),
+        )) !== null
       : false,
     // A queued redemption was handed over already; a second gift is flagged, not refused.
     acknowledged: (request.acknowledgeWarning ?? false) || request.queued,
@@ -94,23 +103,25 @@ interface RecordInput {
 /** Lock the gift type, check stock and card, write the redemption and its audit row. */
 async function recordRedemption(tx: PrismaTransactionClient, input: RecordInput) {
   const { request, stationId, context, recordedAt } = input;
+  const { scope } = context;
   // Gift type first, then the card (in checkCard): one order, so no deadlock.
-  await lockGiftType(tx, request.giftTypeId);
-  const giftType = await findGiftType(request.giftTypeId, tx);
+  await lockGiftType(tx, scope, request.giftTypeId);
+  const giftType = await findGiftType(scope, request.giftTypeId, tx);
   if (!giftType) throw new NotFoundError('Gift type');
-  const before = await totalsForGiftType(tx, giftType.id);
+  const before = await totalsForGiftType(tx, scope, giftType.id);
   const remaining = giftType.initialStock + before.adjustment - before.redeemed;
   // Stock before the card, as before: online, running out is the answer the desk gets first.
   const overStock = stockFlag(giftType, remaining, request.queued) !== null;
-  const card = await checkCard(tx, request);
+  const card = await checkCard(tx, scope, request);
   const { flag, warning } = flagFor(request, { name: giftType.name, overStock }, card);
   const check = { ...card, warning };
 
-  const redemption = await createRedemption(tx, {
+  const redemption = await createRedemption(tx, scope, {
     giftTypeId: giftType.id,
     missionCardId: check.missionCardId,
     stationId,
     recordedById: context.actor.volunteerId,
+    recordedByMembershipId: context.actor.membershipId,
     recordedAt,
     idempotencyKey: request.idempotencyKey,
     source: 'APP',
@@ -133,7 +144,7 @@ async function recordRedemption(tx: PrismaTransactionClient, input: RecordInput)
     },
   });
 
-  const record = toGiftTypeRecord(giftType, await totalsForGiftType(tx, giftType.id));
+  const record = toGiftTypeRecord(giftType, await totalsForGiftType(tx, scope, giftType.id));
   return { redemption, record, check };
 }
 

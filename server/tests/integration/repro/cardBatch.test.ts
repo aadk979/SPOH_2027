@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../../../src/app/createApp.js';
 import { prisma } from '../../../src/platform/db/client.js';
 import { resetDatabase } from '../../helpers/db.js';
-import { bearer, createVolunteer } from '../../helpers/fixtures.js';
+import { bearer, createVolunteer, testEvent } from '../../helpers/fixtures.js';
 
 /**
  * P03 bug reproduction: a printed card batch that includes a code the
@@ -34,6 +34,7 @@ describe('card batches (P03 repros)', () => {
     const admin = await createVolunteer({ email: 'admin@batch.test', role: 'ADMIN' });
     await prisma.missionCard.create({
       data: {
+        eventId: (await testEvent()).eventId,
         shortCode: 'EXIST1',
         qrPayload: 'spoh2027:existing',
         status: 'ISSUED',

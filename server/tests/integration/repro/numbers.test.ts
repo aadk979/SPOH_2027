@@ -12,6 +12,7 @@ import {
   createStation,
   createVolunteer,
   type TestVolunteer,
+  testEvent,
 } from '../../helpers/fixtures.js';
 
 /**
@@ -45,6 +46,7 @@ afterEach(() => {
 async function registrationAt(recordedAt: string): Promise<void> {
   await prisma.registration.create({
     data: {
+      eventId: (await testEvent()).eventId,
       category: 'SEC_3',
       stationId,
       recordedById: volunteer.id,
