@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-29T03:27:10.526Z",
+  "updatedAt": "2026-09-29T03:34:34.008Z",
   "current": {
     "phase": "P08",
-    "step": null
+    "step": "P08.1"
   },
   "gates": [
     {
@@ -1584,11 +1584,16 @@
         {
           "id": "P08.1",
           "title": "CDK app skeleton",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-29T03:34:33.878Z",
+          "completedAt": "2026-09-29T03:34:34.006Z",
+          "commits": ["b9b763b"],
+          "notes": [
+            {
+              "at": "2026-09-29T03:34:34.008Z",
+              "text": "infra/cdk workspace: typed stage config, tags, cdk-nag AwsSolutions as synth validation, recommended flags; infra:synth/diff; synth green, 3 tests. Nothing deployed."
+            }
+          ]
         },
         {
           "id": "P08.2",
@@ -1681,8 +1686,8 @@
           "notes": []
         }
       ],
-      "status": "not_started",
-      "startedAt": null,
+      "status": "in_progress",
+      "startedAt": "2026-09-29T03:34:33.880Z",
       "completedAt": null
     },
     {
