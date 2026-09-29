@@ -3,7 +3,7 @@
 import { useSyncExternalStore } from 'react';
 import type { RuntimeSettings, SettingsResponse, ShiftBlockWindows } from '@spoh/shared';
 import { api } from '@/shared/lib/api';
-import { getSession } from '@/shared/lib/session';
+import { getSession, subscribeToSession } from '@/shared/lib/session';
 
 /**
  * The client's copy of the runtime settings.
@@ -86,9 +86,24 @@ export const ms = {
 };
 
 let loaded = false;
+let stopWaiting: (() => void) | null = null;
 
 /**
- * Fetch once per page load.
+ * A signed-out page load has nothing to read with. The sign-in that follows is
+ * client-side navigation, so nothing reloads: the settings load when the
+ * session appears instead (F03-032).
+ */
+function loadOnceSignedIn(): void {
+  stopWaiting ??= subscribeToSession(() => {
+    if (!getSession()) return;
+    stopWaiting?.();
+    stopWaiting = null;
+    void loadClientSettings();
+  });
+}
+
+/**
+ * Fetch once per page load, as soon as there is a session to fetch with.
  *
  * Deliberately total: any failure leaves the defaults in place. A volunteer
  * whose settings request failed should get an app that behaves normally, not
@@ -97,7 +112,11 @@ let loaded = false;
 export async function loadClientSettings(): Promise<void> {
   // Every role may read the settings, but only signed in: a signed-out request
   // is a guaranteed 401 in the server log (F02-010).
-  if (loaded || !getSession()) return;
+  if (loaded) return;
+  if (!getSession()) {
+    loadOnceSignedIn();
+    return;
+  }
   loaded = true;
 
   try {

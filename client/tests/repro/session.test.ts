@@ -91,7 +91,7 @@ describe('client session and settings (P03 repros)', () => {
   });
 
   // F03-032
-  it.skip('loads the runtime settings after an in-app sign-in', async () => {
+  it('loads the runtime settings after an in-app sign-in', async () => {
     const fetchMock = stubServer((url) => {
       if (url.endsWith('/auth/refresh')) return Promise.resolve(json(401, UNAUTHENTICATED));
       if (url.endsWith('/auth/session')) return Promise.resolve(json(201, SESSION));
