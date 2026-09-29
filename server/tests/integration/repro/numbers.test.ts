@@ -153,7 +153,7 @@ describe('dashboard, report and import numbers (P03 repros)', () => {
   });
 
   // F02-011
-  it.skip('lists a person rostered in both blocks so the two rows can be told apart', async () => {
+  it('lists a person rostered in both blocks so the two rows can be told apart', async () => {
     const ic = await createVolunteer({ email: 'ic@numbers.test', role: 'IC' });
     await assignToStation({ volunteerId: volunteer.id, stationId, eventDayId: dayId });
     await assignToStation({

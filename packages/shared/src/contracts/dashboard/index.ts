@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ShiftBlock } from '../../invariants/enums.js';
 import { Id, IsoDateTime } from '../common/index.js';
 import { FootfallLiveStation } from '../footfall/index.js';
 import { FunnelStage } from '../missionCard/index.js';
@@ -178,6 +179,9 @@ export const StationDashboardResponse = z
     roster: z.array(
       z
         .object({
+          /** One row per assignment: a person rostered in both blocks is two rows (F02-011). */
+          assignmentId: Id,
+          block: ShiftBlock,
           volunteerId: Id,
           volunteerName: z.string(),
           roleLabel: z.string(),

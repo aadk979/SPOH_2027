@@ -214,13 +214,15 @@ export async function stationRoster(stationId: string, day: Date) {
   return prisma.shiftAssignment.findMany({
     where: { stationId, eventDay: { date: day } },
     select: {
+      id: true,
+      block: true,
       volunteerId: true,
       roleLabel: true,
       checkedInAt: true,
       checkedOutAt: true,
       volunteer: { select: { displayName: true } },
     },
-    orderBy: { roleLabel: 'asc' },
+    orderBy: [{ roleLabel: 'asc' }, { block: 'asc' }],
   });
 }
 

@@ -14,6 +14,7 @@ import { EmptyState, Field, LoadingCards, Select, Stack } from '@/shared/ui';
 import { useStationDashboard } from '@/features/dashboard';
 import { useMe, useRequireSession } from '@/features/session';
 import { usePendingSwaps } from '@/features/roster';
+import { defaultStationId } from '../model/defaultStation';
 
 /**
  * The IC console (remediation/phases/P07-client-refactor.md).
@@ -31,7 +32,7 @@ export default function IcConsoleScreen(): ReactNode {
 
   const stations = useStations(session !== null);
 
-  const selected = stationId ?? me?.currentAssignment?.station.id;
+  const selected = stationId ?? defaultStationId(me);
   const dashboard = useStationDashboard(selected);
 
   const swaps = usePendingSwaps(session !== null);

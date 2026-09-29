@@ -98,6 +98,8 @@ async function footfallPanel(
 async function rosterPanel(stationId: string, day: Date): Promise<Panels['roster']> {
   const roster = await stationRoster(stationId, day);
   return roster.map((assignment) => ({
+    assignmentId: assignment.id,
+    block: assignment.block,
     volunteerId: assignment.volunteerId,
     volunteerName: assignment.volunteer.displayName,
     roleLabel: assignment.roleLabel,
