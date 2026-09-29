@@ -358,5 +358,5 @@ export async function voidedCounts(range: Range) {
 }
 
 export async function countActiveVolunteers(): Promise<number> {
-  return prisma.volunteer.count({ where: { active: true } });
+  return prisma.person.count({ where: { active: true } });
 }

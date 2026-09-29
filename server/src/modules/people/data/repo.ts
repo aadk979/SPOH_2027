@@ -23,16 +23,16 @@ export const adminSelect = {
   // work this person is actually holding, and whether any device could be
   // reached if it mattered.
   _count: { select: { shiftAssignments: true, pushSubscriptions: true } },
-} satisfies Prisma.VolunteerSelect;
+} satisfies Prisma.PersonSelect;
 
-export type AdminRow = Prisma.VolunteerGetPayload<{ select: typeof adminSelect }>;
+export type AdminRow = Prisma.PersonGetPayload<{ select: typeof adminSelect }>;
 
 /**
  * Nulls first on "last seen": the people who have never signed in are exactly
  * who you open this screen to find, so they belong at the top rather than
  * buried under everyone who has.
  */
-const SORTS: Record<ListVolunteersQuery['sort'], Prisma.VolunteerOrderByWithRelationInput[]> = {
+const SORTS: Record<ListVolunteersQuery['sort'], Prisma.PersonOrderByWithRelationInput[]> = {
   name: [{ displayName: 'asc' }, { id: 'asc' }],
   role: [{ role: 'asc' }, { displayName: 'asc' }, { id: 'asc' }],
   lastSeen: [
@@ -44,7 +44,7 @@ const SORTS: Record<ListVolunteersQuery['sort'], Prisma.VolunteerOrderByWithRela
 };
 
 export async function listVolunteerRows(query: ListVolunteersQuery): Promise<AdminRow[]> {
-  return prisma.volunteer.findMany({
+  return prisma.person.findMany({
     where: {
       ...(query.active !== undefined ? { active: query.active } : {}),
       ...(query.role ? { role: query.role } : {}),
@@ -74,24 +74,24 @@ export async function listVolunteerRows(query: ListVolunteersQuery): Promise<Adm
 }
 
 export async function findVolunteerRow(id: string): Promise<AdminRow | null> {
-  return prisma.volunteer.findUnique({ where: { id }, select: adminSelect });
+  return prisma.person.findUnique({ where: { id }, select: adminSelect });
 }
 
 export async function findManager(id: string): Promise<{ id: string; active: boolean } | null> {
-  return prisma.volunteer.findUnique({ where: { id }, select: { id: true, active: true } });
+  return prisma.person.findUnique({ where: { id }, select: { id: true, active: true } });
 }
 
 /** The person this volunteer reports to, for walking a reporting chain. */
 export async function findManagerOf(id: string): Promise<string | null> {
-  const row = await prisma.volunteer.findUnique({ where: { id }, select: { reportsToId: true } });
+  const row = await prisma.person.findUnique({ where: { id }, select: { reportsToId: true } });
   return row?.reportsToId ?? null;
 }
 
 export async function updateVolunteerRow(
   tx: PrismaTransactionClient,
-  change: { id: string; data: Prisma.VolunteerUncheckedUpdateInput },
+  change: { id: string; data: Prisma.PersonUncheckedUpdateInput },
 ): Promise<AdminRow> {
-  return tx.volunteer.update({ where: { id: change.id }, data: change.data, select: adminSelect });
+  return tx.person.update({ where: { id: change.id }, data: change.data, select: adminSelect });
 }
 
 /**

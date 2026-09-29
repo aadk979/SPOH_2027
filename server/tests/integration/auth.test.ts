@@ -87,7 +87,7 @@ describe('opening a session', () => {
   });
 
   it('refuses a deactivated account', async () => {
-    await prisma.volunteer.updateMany({
+    await prisma.person.updateMany({
       where: { email: 'ic@spoh.test' },
       data: { active: false },
     });

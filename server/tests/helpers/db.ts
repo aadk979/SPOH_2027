@@ -85,6 +85,6 @@ export async function resetDatabase(): Promise<void> {
   await prisma.eventDay.deleteMany();
 
   // Volunteers last: almost everything references them.
-  await prisma.volunteer.updateMany({ data: { reportsToId: null } });
-  await prisma.volunteer.deleteMany();
+  await prisma.person.updateMany({ data: { reportsToId: null } });
+  await prisma.person.deleteMany();
 }

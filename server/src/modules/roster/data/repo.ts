@@ -1,5 +1,7 @@
-import type { Prisma, Volunteer } from '../../../generated/prisma/client.js';
+import type { Prisma, Person } from '../../../generated/prisma/client.js';
 
+// The roster still speaks of volunteers; the row is a Person since P09.3.
+type Volunteer = Person;
 export type { Volunteer };
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 
@@ -16,7 +18,7 @@ export async function findVolunteerByEmail(
   email: string,
   tx: PrismaTransactionClient = prisma,
 ): Promise<Volunteer | null> {
-  return tx.volunteer.findUnique({ where: { email } });
+  return tx.person.findUnique({ where: { email } });
 }
 
 export async function upsertVolunteer(
@@ -26,15 +28,15 @@ export async function upsertVolunteer(
     displayName: string;
     email: string;
     phone?: string | null;
-    role: Prisma.VolunteerUncheckedCreateInput['role'];
+    role: Prisma.PersonUncheckedCreateInput['role'];
     portfolio?: string | null;
     reportsToId?: string | null;
   },
 ): Promise<{ volunteer: Volunteer; created: boolean }> {
-  const existing = await tx.volunteer.findUnique({ where: { email: data.email } });
+  const existing = await tx.person.findUnique({ where: { email: data.email } });
 
   if (existing) {
-    const volunteer = await tx.volunteer.update({
+    const volunteer = await tx.person.update({
       where: { id: existing.id },
       data: {
         displayName: data.displayName,
@@ -47,7 +49,7 @@ export async function upsertVolunteer(
     return { volunteer, created: false };
   }
 
-  const volunteer = await tx.volunteer.create({
+  const volunteer = await tx.person.create({
     data: {
       cognitoSub: data.cognitoSub,
       displayName: data.displayName,
@@ -105,7 +107,7 @@ export async function findVolunteersByEmails(
   emails: readonly string[],
 ): Promise<Map<string, Volunteer>> {
   if (emails.length === 0) return new Map();
-  const rows = await prisma.volunteer.findMany({ where: { email: { in: [...emails] } } });
+  const rows = await prisma.person.findMany({ where: { email: { in: [...emails] } } });
   return new Map(rows.map((row) => [row.email, row]));
 }
 
@@ -135,7 +137,7 @@ export async function setManager(
   tx: PrismaTransactionClient,
   link: { volunteerId: string; managerId: string },
 ): Promise<void> {
-  await tx.volunteer.update({
+  await tx.person.update({
     where: { id: link.volunteerId },
     data: { reportsToId: link.managerId },
   });

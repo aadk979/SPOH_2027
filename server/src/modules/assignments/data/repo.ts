@@ -35,7 +35,7 @@ export async function findAssignmentTargets(ids: {
   eventDayId: string;
 }) {
   const [volunteer, station, eventDay] = await Promise.all([
-    prisma.volunteer.findUnique({ where: { id: ids.volunteerId }, select: { active: true } }),
+    prisma.person.findUnique({ where: { id: ids.volunteerId }, select: { active: true } }),
     prisma.station.findUnique({ where: { id: ids.stationId }, select: { active: true } }),
     prisma.eventDay.findUnique({ where: { id: ids.eventDayId }, select: { id: true } }),
   ]);

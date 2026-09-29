@@ -69,7 +69,7 @@ describe('roster import and provisioning (P03 repros)', () => {
     );
 
     expect(response.status).toBe(403);
-    const row = await prisma.volunteer.findUniqueOrThrow({ where: { id: deputy.id } });
+    const row = await prisma.person.findUniqueOrThrow({ where: { id: deputy.id } });
     expect(row.role).toBe('DEPUTY_COORDINATOR');
   });
 
@@ -81,20 +81,20 @@ describe('roster import and provisioning (P03 repros)', () => {
       .send({ displayName: 'Minted', email: 'minted@roster.test', role: 'ADMIN' });
 
     expect(response.status).toBe(403);
-    expect(await prisma.volunteer.count({ where: { email: 'minted@roster.test' } })).toBe(0);
+    expect(await prisma.person.count({ where: { email: 'minted@roster.test' } })).toBe(0);
   });
 
   // F03-001
   it('does not reactivate a deactivated account because its email is in the file', async () => {
     const leaver = await createVolunteer({ email: 'leaver@roster.test', role: 'VOLUNTEER' });
-    await prisma.volunteer.update({
+    await prisma.person.update({
       where: { id: leaver.id },
       data: { active: false, deactivatedAt: new Date(), deactivatedReason: 'left' },
     });
 
     await importRoster(deputy, [{ displayName: 'Leaver', email: leaver.email }], true);
 
-    const row = await prisma.volunteer.findUniqueOrThrow({ where: { id: leaver.id } });
+    const row = await prisma.person.findUniqueOrThrow({ where: { id: leaver.id } });
     expect(row.active).toBe(false);
   });
 
@@ -161,7 +161,7 @@ describe('roster import and provisioning (P03 repros)', () => {
 
     expect(response.status).toBe(200);
     expect(response.body.issues).toEqual([]);
-    const newbie = await prisma.volunteer.findUniqueOrThrow({
+    const newbie = await prisma.person.findUniqueOrThrow({
       where: { email: 'newbie@roster.test' },
     });
     expect(newbie.reportsToId).toBe(ic.id);
@@ -170,7 +170,7 @@ describe('roster import and provisioning (P03 repros)', () => {
   // F03-044
   it('skips a deactivated person whose row names a manager, instead of failing the import', async () => {
     const leaver = await createVolunteer({ email: 'gone@roster.test', role: 'VOLUNTEER' });
-    await prisma.volunteer.update({ where: { id: leaver.id }, data: { active: false } });
+    await prisma.person.update({ where: { id: leaver.id }, data: { active: false } });
 
     const response = await importRoster(
       chief,
@@ -214,6 +214,6 @@ describe('roster import and provisioning (P03 repros)', () => {
     expect(response.status).toBe(200);
     expect(response.body.volunteersCreated).toBe(0);
     expect(response.body.issues[0]?.field).toBe('email');
-    expect(await prisma.volunteer.count({ where: { email: 'stranger@roster.test' } })).toBe(0);
+    expect(await prisma.person.count({ where: { email: 'stranger@roster.test' } })).toBe(0);
   });
 });

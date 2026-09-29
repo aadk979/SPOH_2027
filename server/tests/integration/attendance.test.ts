@@ -168,11 +168,11 @@ describe('verified attendance', () => {
   });
   it('rejects deactivated and demoted issuers even when the signature remains valid', async () => {
     const code = await excoCode();
-    await prisma.volunteer.update({ where: { id: exco.id }, data: { active: false } });
+    await prisma.person.update({ where: { id: exco.id }, data: { active: false } });
     expect(
       (await post(volunteer, '/attendance/submit', { method: 'QR', token: code.token })).status,
     ).toBe(422);
-    await prisma.volunteer.update({
+    await prisma.person.update({
       where: { id: exco.id },
       data: { active: true, role: 'VOLUNTEER' },
     });

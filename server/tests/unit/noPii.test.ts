@@ -27,7 +27,9 @@ const PII_FIELD_PATTERN = /name|email|phone|nric|ic_num|address|school|dob|birth
 
 /** Models that legitimately describe committee members, not visitors. */
 const COMMITTEE_MODELS = new Set([
-  'Volunteer',
+  // A committee member's identity (the Volunteer table, the Person model since P09.3).
+  'Person',
+  'EventMembership',
   'ShiftAssignment',
   'ShiftSwapRequest',
   'BriefingSlot',

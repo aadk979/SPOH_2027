@@ -185,7 +185,7 @@ describe('GET /auth/callback', () => {
 
   it('reports a person who is not on the roster', async () => {
     const { state, cookie } = await beginLogin();
-    await prisma.volunteer.delete({ where: { id: volunteer.id } });
+    await prisma.person.delete({ where: { id: volunteer.id } });
     tokenEndpoint.mockResolvedValueOnce(tokenResponse(200, { access_token: volunteer.token }));
 
     const response = await callback(`code=abc&state=${state}`, cookie);

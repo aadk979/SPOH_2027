@@ -56,7 +56,7 @@ beforeEach(async () => {
   ] as const) {
     await assignToStationAllBlocks({ volunteerId: who.id, stationId, eventDayId });
   }
-  await prisma.volunteer.update({ where: { id: volunteerB.id }, data: { phone: '+65 9000 0000' } });
+  await prisma.person.update({ where: { id: volunteerB.id }, data: { phone: '+65 9000 0000' } });
 });
 
 describe('data retention (P04.6)', () => {

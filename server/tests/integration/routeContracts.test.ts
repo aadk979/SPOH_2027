@@ -363,7 +363,7 @@ describe('list reads (F03-029)', () => {
       });
     }
 
-    const authorLookups = vi.spyOn(prisma.volunteer, 'findMany');
+    const authorLookups = vi.spyOn(prisma.person, 'findMany');
     const response = await as(ic).get('/incidents');
 
     expect(response.status).toBe(200);
@@ -440,8 +440,8 @@ describe('fallback reads (F03-029)', () => {
     const lookups = [
       vi.spyOn(prisma.station, 'findUnique'),
       vi.spyOn(prisma.station, 'findMany'),
-      vi.spyOn(prisma.volunteer, 'findUnique'),
-      vi.spyOn(prisma.volunteer, 'findMany'),
+      vi.spyOn(prisma.person, 'findUnique'),
+      vi.spyOn(prisma.person, 'findMany'),
     ];
     const response = await as(ic).get('/fallback/windows');
 

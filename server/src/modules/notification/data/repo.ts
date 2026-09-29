@@ -4,7 +4,7 @@ import { prisma } from '../../../platform/db/client.js';
 /** Data access for push subscriptions and the people they reach. */
 
 export async function findActiveVolunteerIds(roles?: CommitteeRole[]): Promise<string[]> {
-  const rows = await prisma.volunteer.findMany({
+  const rows = await prisma.person.findMany({
     where: { active: true, ...(roles ? { role: { in: roles } } : {}) },
     select: { id: true },
   });

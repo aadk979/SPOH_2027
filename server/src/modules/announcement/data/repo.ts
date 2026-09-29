@@ -113,7 +113,7 @@ export async function findAudienceIds(
   audience: { role: CommitteeRole | null; stationId: string | null; eventDayId: string | null },
   today: Date,
 ): Promise<string[]> {
-  const rows = await prisma.volunteer.findMany({
+  const rows = await prisma.person.findMany({
     where: {
       active: true,
       ...(audience.role ? { role: audience.role } : {}),

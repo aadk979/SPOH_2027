@@ -128,3 +128,11 @@ export type AuditSeverity = z.infer<typeof AuditSeverity>;
 /** Whether the audited action happened, was refused, or failed. */
 export const AuditOutcome = z.enum(['SUCCESS', 'DENIED', 'FAILURE']);
 export type AuditOutcome = z.infer<typeof AuditOutcome>;
+
+/** Organisation-level access; platform admins own events and guardrails (ADR-001 §1). */
+export const OrganisationRole = z.enum(['MEMBER', 'PLATFORM_ADMIN']);
+export type OrganisationRole = z.infer<typeof OrganisationRole>;
+
+/** A person's standing in one event (ADR-001 §1). */
+export const MembershipStatus = z.enum(['INVITED', 'ACTIVE', 'DEACTIVATED', 'ENDED']);
+export type MembershipStatus = z.infer<typeof MembershipStatus>;

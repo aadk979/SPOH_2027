@@ -77,7 +77,7 @@ describe('raising an alert', () => {
   });
 
   it('carries the reporter phone number, because calling beats tapping', async () => {
-    await prisma.volunteer.update({
+    await prisma.person.update({
       where: { id: finder.id },
       data: { phone: '+65 9123 4567' },
     });

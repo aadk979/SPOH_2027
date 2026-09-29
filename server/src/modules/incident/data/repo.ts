@@ -19,7 +19,7 @@ export type IncidentWithContext = Prisma.IncidentGetPayload<{ include: typeof in
  */
 export async function findAuthorNames(authorIds: readonly string[]): Promise<Map<string, string>> {
   if (authorIds.length === 0) return new Map();
-  const authors = await prisma.volunteer.findMany({
+  const authors = await prisma.person.findMany({
     where: { id: { in: [...authorIds] } },
     select: { id: true, displayName: true },
   });

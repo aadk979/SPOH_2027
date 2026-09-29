@@ -281,7 +281,7 @@ async function seedAdmin(): Promise<void> {
   ).toLowerCase();
   const displayName = process.env.SEED_ADMIN_NAME ?? 'SPOH 2027 Administrator';
 
-  await prisma.volunteer.upsert({
+  await prisma.person.upsert({
     where: { email },
     create: {
       email,
@@ -295,7 +295,7 @@ async function seedAdmin(): Promise<void> {
 
 async function seedDevelopmentFixtures(): Promise<void> {
   for (const volunteer of DEV_VOLUNTEERS) {
-    await prisma.volunteer.upsert({
+    await prisma.person.upsert({
       where: { email: volunteer.email },
       create: {
         email: volunteer.email,
@@ -312,7 +312,7 @@ async function seedDevelopmentFixtures(): Promise<void> {
   // Reporting lines, so `GET /me` returns a usable escalation chain.
   const byEmail = new Map(
     (
-      await prisma.volunteer.findMany({
+      await prisma.person.findMany({
         where: { email: { in: DEV_VOLUNTEERS.map((v) => v.email) } },
         select: { id: true, email: true },
       })
@@ -330,7 +330,7 @@ async function seedDevelopmentFixtures(): Promise<void> {
     const subordinateId = byEmail.get(subordinate);
     const managerId = byEmail.get(manager);
     if (subordinateId && managerId) {
-      await prisma.volunteer.update({
+      await prisma.person.update({
         where: { id: subordinateId },
         data: { reportsToId: managerId },
       });

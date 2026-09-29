@@ -234,7 +234,7 @@ export async function findAssignmentForSwap(tx: PrismaTransactionClient, id: str
 }
 
 export async function findVolunteerActive(tx: PrismaTransactionClient, id: string) {
-  return tx.volunteer.findUnique({ where: { id }, select: { id: true, active: true } });
+  return tx.person.findUnique({ where: { id }, select: { id: true, active: true } });
 }
 
 export async function findEventDayId(date: Date): Promise<string | null> {

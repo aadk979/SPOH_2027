@@ -158,6 +158,65 @@ enum AnnouncementPriority {
 // REFERENCE / CONFIG
 // ─────────────────────────────────────────────
 
+/// Organisation-level access (ADR-001 §1): platform admins create, clone and
+/// archive events and alone edit guardrails (ADR-005).
+enum OrganisationRole {
+  MEMBER
+  PLATFORM_ADMIN
+}
+
+/// A person's standing in one event (ADR-001 §1).
+enum MembershipStatus {
+  INVITED
+  ACTIVE
+  DEACTIVATED
+  ENDED
+}
+
+model OrganisationMembership {
+  id             String           @id @default(cuid())
+  organisationId String
+  personId       String
+  role           OrganisationRole @default(MEMBER)
+  createdAt      DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime         @updatedAt @db.Timestamptz(3)
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Restrict)
+  person       Person       @relation(fields: [personId], references: [id], onDelete: Restrict)
+
+  @@unique([organisationId, personId])
+}
+
+/// A person working in one event: the role half of what Volunteer was
+/// (ADR-001 §1). Unique per (event, person).
+/// @eventOwned
+model EventMembership {
+  id                String           @id @default(cuid())
+  eventId           String
+  personId          String
+  role              CommitteeRole    @default(VOLUNTEER)
+  portfolio         String?
+  /// Another membership of the same event.
+  reportsToId       String?
+  status            MembershipStatus @default(ACTIVE)
+  invitedAt         DateTime?        @db.Timestamptz(3)
+  acceptedAt        DateTime?        @db.Timestamptz(3)
+  deactivatedAt     DateTime?        @db.Timestamptz(3)
+  deactivatedReason String?
+  lastSeenAt        DateTime?        @db.Timestamptz(3)
+  createdAt         DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime         @updatedAt @db.Timestamptz(3)
+
+  event         Event             @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  person        Person            @relation(fields: [personId], references: [id], onDelete: Restrict)
+  reportsTo     EventMembership?  @relation("MembershipHierarchy", fields: [reportsToId], references: [id], onDelete: Restrict)
+  directReports EventMembership[] @relation("MembershipHierarchy")
+
+  @@unique([eventId, personId])
+  @@unique([eventId, id])
+  @@index([eventId, role, status])
+}
+
 /// The eventual multi-event owner (D-02 A): one row today, so multi-organisation
 /// (D-02 B) stays a data change (ADR-001 §1).
 model Organisation {
@@ -171,7 +230,8 @@ model Organisation {
   createdAt       DateTime @default(now()) @db.Timestamptz(3)
   updatedAt       DateTime @updatedAt @db.Timestamptz(3)
 
-  events Event[]
+  events      Event[]
+  memberships OrganisationMembership[]
 }
 
 /// The event lifecycle (ADR-004 §1).
@@ -207,6 +267,7 @@ model Event {
   organisation         Organisation          @relation(fields: [organisationId], references: [id], onDelete: Restrict)
   clonedFrom           Event?                @relation("EventClone", fields: [clonedFromEventId], references: [id], onDelete: Restrict)
   clones               Event[]               @relation("EventClone")
+  memberships          EventMembership[]
   captureCategories    CaptureCategory[]
   stationTypes         StationType[]
   stationTags          StationTag[]
@@ -440,7 +501,7 @@ model Station {
 // PEOPLE (committee only — never visitors)
 // ─────────────────────────────────────────────
 
-model Volunteer {
+model Person {
   id                String        @id @default(cuid())
   cognitoSub        String        @unique
   displayName       String
@@ -462,8 +523,8 @@ model Volunteer {
   createdAt         DateTime      @default(now()) @db.Timestamptz(3)
   updatedAt         DateTime      @updatedAt @db.Timestamptz(3)
 
-  reportsTo            Volunteer?            @relation("Hierarchy", fields: [reportsToId], references: [id])
-  directReports        Volunteer[]           @relation("Hierarchy")
+  reportsTo            Person?               @relation("Hierarchy", fields: [reportsToId], references: [id])
+  directReports        Person[]              @relation("Hierarchy")
   attendance           Attendance[]          @relation("Attendee")
   verifiedAttendance   Attendance[]          @relation("AttendanceVerifier")
   attendanceChallenges AttendanceChallenge[]
@@ -495,9 +556,13 @@ model Volunteer {
   pushSubscriptions PushSubscription[]
   refreshSessions   RefreshSession[]
 
+  eventMemberships        EventMembership[]
+  organisationMemberships OrganisationMembership[]
+
   @@index([role, active])
   // The roster screen lists by name within an active/inactive split.
   @@index([active, displayName])
+  @@map("Volunteer")
 }
 
 /// @eventOwned
@@ -508,6 +573,8 @@ model ShiftAssignment {
   /// The materialised shift (ADR-002); eventDayId + block stay authoritative until P09.5.
   shiftId      String?
   volunteerId  String
+  /// The EventMembership behind volunteerId (ADR-001); backfilled in P09.4, read from P09.5.
+  membershipId String?
   stationId    String
   eventDayId   String
   block        ShiftBlock
@@ -517,7 +584,7 @@ model ShiftAssignment {
   checkedOutAt DateTime?  @db.Timestamptz(3)
   createdAt    DateTime   @default(now()) @db.Timestamptz(3)
 
-  volunteer    Volunteer          @relation(fields: [volunteerId], references: [id])
+  volunteer    Person             @relation(fields: [volunteerId], references: [id])
   station      Station            @relation(fields: [stationId], references: [id])
   eventDay     EventDay           @relation(fields: [eventDayId], references: [id])
   swapRequests ShiftSwapRequest[]
@@ -529,6 +596,7 @@ model ShiftAssignment {
   @@index([stationId, eventDayId, block])
   @@index([eventId, stationId])
   @@index([shiftId])
+  @@index([membershipId])
 }
 
 enum AttendanceMethod {
@@ -539,104 +607,128 @@ enum AttendanceMethod {
 
 /// @eventOwned
 model Attendance {
-  id           String           @id @default(cuid())
+  id                     String           @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2). Nullable until P09.10 backfills and contracts.
-  eventId      String?
-  volunteerId  String
-  eventDayId   String
-  verifiedById String?
-  method       AttendanceMethod
-  presentAt    DateTime         @default(now()) @db.Timestamptz(3)
-  volunteer    Volunteer        @relation("Attendee", fields: [volunteerId], references: [id], onDelete: Restrict)
-  verifiedBy   Volunteer?       @relation("AttendanceVerifier", fields: [verifiedById], references: [id], onDelete: Restrict)
-  eventDay     EventDay         @relation(fields: [eventDayId], references: [id], onDelete: Restrict)
+  eventId                String?
+  volunteerId            String
+  /// The EventMembership behind volunteerId (ADR-001); backfilled in P09.4, read from P09.5.
+  membershipId           String?
+  eventDayId             String
+  verifiedById           String?
+  /// The EventMembership behind verifiedById (ADR-001); backfilled in P09.4, read from P09.5.
+  verifiedByMembershipId String?
+  method                 AttendanceMethod
+  presentAt              DateTime         @default(now()) @db.Timestamptz(3)
+  volunteer              Person           @relation("Attendee", fields: [volunteerId], references: [id], onDelete: Restrict)
+  verifiedBy             Person?          @relation("AttendanceVerifier", fields: [verifiedById], references: [id], onDelete: Restrict)
+  eventDay               EventDay         @relation(fields: [eventDayId], references: [id], onDelete: Restrict)
 
   event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
 
   @@unique([volunteerId, eventDayId])
   @@index([eventDayId, presentAt])
   @@index([eventId, eventDayId])
+  @@index([membershipId])
+  @@index([verifiedByMembershipId])
 }
 
 /// @eventOwned
 model AttendanceChallenge {
-  id            String    @id
+  id                 String   @id
   /// The event this row belongs to (ADR-001 §2). Nullable until P09.10 backfills and contracts.
-  eventId       String?
-  issuerId      String
-  eventDayId    String
-  pinHash       String    @unique
-  campusNetwork Boolean
-  expiresAt     DateTime  @db.Timestamptz(3)
-  issuer        Volunteer @relation(fields: [issuerId], references: [id], onDelete: Cascade)
-  eventDay      EventDay  @relation(fields: [eventDayId], references: [id], onDelete: Cascade)
+  eventId            String?
+  issuerId           String
+  /// The EventMembership behind issuerId (ADR-001); backfilled in P09.4, read from P09.5.
+  issuerMembershipId String?
+  eventDayId         String
+  pinHash            String   @unique
+  campusNetwork      Boolean
+  expiresAt          DateTime @db.Timestamptz(3)
+  issuer             Person   @relation(fields: [issuerId], references: [id], onDelete: Cascade)
+  eventDay           EventDay @relation(fields: [eventDayId], references: [id], onDelete: Cascade)
 
   event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
 
   @@unique([issuerId, eventDayId])
   @@index([expiresAt])
   @@index([eventId])
+  @@index([issuerMembershipId])
 }
 
 // Persisted across processes and restarts so PIN guessing cannot evade limits.
 /// @eventOwned
 model AttendanceAttempt {
-  volunteerId String    @id
+  volunteerId  String   @id
+  /// The EventMembership behind volunteerId (ADR-001); backfilled in P09.4, read from P09.5.
+  membershipId String?
   /// The event this row belongs to (ADR-001 §2). Nullable until P09.10 backfills and contracts.
-  eventId     String?
-  windowStart DateTime  @db.Timestamptz(3)
-  attempts    Int
-  volunteer   Volunteer @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+  eventId      String?
+  windowStart  DateTime @db.Timestamptz(3)
+  attempts     Int
+  volunteer    Person   @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
 
   event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
 
   @@index([eventId])
+  @@index([membershipId])
 }
 
 /// @eventOwned
 model ShiftSwapRequest {
-  id           String     @id @default(cuid())
+  id                    String     @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2). Nullable until P09.10 backfills and contracts.
-  eventId      String?
-  assignmentId String
-  requesterId  String
-  targetId     String
-  status       SwapStatus @default(REQUESTED)
-  reason       String?
-  decidedById  String?
-  decidedAt    DateTime?  @db.Timestamptz(3)
-  createdAt    DateTime   @default(now()) @db.Timestamptz(3)
+  eventId               String?
+  assignmentId          String
+  requesterId           String
+  /// The EventMembership behind requesterId (ADR-001); backfilled in P09.4, read from P09.5.
+  requesterMembershipId String?
+  targetId              String
+  /// The EventMembership behind targetId (ADR-001); backfilled in P09.4, read from P09.5.
+  targetMembershipId    String?
+  status                SwapStatus @default(REQUESTED)
+  reason                String?
+  decidedById           String?
+  /// The EventMembership behind decidedById (ADR-001); backfilled in P09.4, read from P09.5.
+  decidedByMembershipId String?
+  decidedAt             DateTime?  @db.Timestamptz(3)
+  createdAt             DateTime   @default(now()) @db.Timestamptz(3)
 
   assignment ShiftAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
-  requester  Volunteer       @relation("SwapRequester", fields: [requesterId], references: [id], onDelete: Restrict)
-  target     Volunteer       @relation("SwapTarget", fields: [targetId], references: [id], onDelete: Restrict)
-  decidedBy  Volunteer?      @relation("SwapDecider", fields: [decidedById], references: [id], onDelete: SetNull)
+  requester  Person          @relation("SwapRequester", fields: [requesterId], references: [id], onDelete: Restrict)
+  target     Person          @relation("SwapTarget", fields: [targetId], references: [id], onDelete: Restrict)
+  decidedBy  Person?         @relation("SwapDecider", fields: [decidedById], references: [id], onDelete: SetNull)
 
   event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
 
   @@index([status])
   @@index([eventId, status])
+  @@index([requesterMembershipId])
+  @@index([targetMembershipId])
+  @@index([decidedByMembershipId])
 }
 
 /// @eventOwned
 model BriefingSlot {
-  id          String    @id @default(cuid())
+  id                   String    @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2). Nullable until P09.10 backfills and contracts.
-  eventId     String?
-  eventDayId  String
-  startsAt    DateTime  @db.Timestamptz(3)
-  briefierId  String?
-  waveSize    Int       @default(20)
-  completedAt DateTime? @db.Timestamptz(3)
-  notes       String?
+  eventId              String?
+  eventDayId           String
+  startsAt             DateTime  @db.Timestamptz(3)
+  briefierId           String?
+  /// The EventMembership behind briefierId (ADR-001); backfilled in P09.4, read from P09.5.
+  briefierMembershipId String?
+  waveSize             Int       @default(20)
+  completedAt          DateTime? @db.Timestamptz(3)
+  notes                String?
 
-  eventDay EventDay   @relation(fields: [eventDayId], references: [id])
-  briefier Volunteer? @relation(fields: [briefierId], references: [id])
+  eventDay EventDay @relation(fields: [eventDayId], references: [id])
+  briefier Person?  @relation(fields: [briefierId], references: [id])
 
   event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
 
   @@index([eventDayId, startsAt])
   @@index([eventId, eventDayId])
+  @@index([briefierMembershipId])
 }
 
 // ─────────────────────────────────────────────
@@ -645,27 +737,29 @@ model BriefingSlot {
 
 /// @eventOwned
 model Registration {
-  id               String          @id @default(cuid())
+  id                     String          @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2). Nullable until P09.10 backfills and contracts.
-  eventId          String?
+  eventId                String?
   /// The category as data (ADR-002); the enum stays authoritative until P09.5.
-  categoryId       String?
-  category         VisitorCategory
-  stationId        String
-  recordedById     String
+  categoryId             String?
+  category               VisitorCategory
+  stationId              String
+  recordedById           String
+  /// The EventMembership behind recordedById (ADR-001); backfilled in P09.4, read from P09.5.
+  recordedByMembershipId String?
   /// Links members of one family/group. One group may share one Mission Card.
-  groupId          String?
+  groupId                String?
   /// Optional by design: a failed card link must never block the count.
-  missionCardId    String?
-  source           DataSource      @default(APP)
-  recordedAt       DateTime        @default(now()) @db.Timestamptz(3)
-  clientRecordedAt DateTime?       @db.Timestamptz(3)
-  idempotencyKey   String          @unique
-  voided           Boolean         @default(false)
-  voidedReason     String?
+  missionCardId          String?
+  source                 DataSource      @default(APP)
+  recordedAt             DateTime        @default(now()) @db.Timestamptz(3)
+  clientRecordedAt       DateTime?       @db.Timestamptz(3)
+  idempotencyKey         String          @unique
+  voided                 Boolean         @default(false)
+  voidedReason           String?
 
   station     Station      @relation(fields: [stationId], references: [id])
-  recordedBy  Volunteer    @relation(fields: [recordedById], references: [id])
+  recordedBy  Person       @relation(fields: [recordedById], references: [id])
   missionCard MissionCard? @relation(fields: [missionCardId], references: [id])
 
   event           Event?           @relation(fields: [eventId], references: [id], onDelete: Restrict)
@@ -676,6 +770,7 @@ model Registration {
   @@index([groupId])
   @@index([eventId, recordedAt])
   @@index([eventId, categoryId, recordedAt])
+  @@index([recordedByMembershipId])
 }
 
 // ─────────────────────────────────────────────
@@ -684,29 +779,32 @@ model Registration {
 
 /// @eventOwned
 model FootfallTick {
-  id               String     @id @default(cuid())
+  id                     String     @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2). Nullable until P09.10 backfills and contracts.
-  eventId          String?
-  stationId        String
-  recordedById     String
+  eventId                String?
+  stationId              String
+  recordedById           String
+  /// The EventMembership behind recordedById (ADR-001); backfilled in P09.4, read from P09.5.
+  recordedByMembershipId String?
   /// >1 only for manual clicker totals and fallback block entries.
-  quantity         Int        @default(1)
-  source           DataSource @default(APP)
-  recordedAt       DateTime   @default(now()) @db.Timestamptz(3)
-  clientRecordedAt DateTime?  @db.Timestamptz(3)
+  quantity               Int        @default(1)
+  source                 DataSource @default(APP)
+  recordedAt             DateTime   @default(now()) @db.Timestamptz(3)
+  clientRecordedAt       DateTime?  @db.Timestamptz(3)
   /// Set for fallback/paper block entries where only a 30-minute block is known.
-  timeBlockStart   DateTime?  @db.Timestamptz(3)
-  idempotencyKey   String     @unique
-  voided           Boolean    @default(false)
+  timeBlockStart         DateTime?  @db.Timestamptz(3)
+  idempotencyKey         String     @unique
+  voided                 Boolean    @default(false)
 
-  station    Station   @relation(fields: [stationId], references: [id])
-  recordedBy Volunteer @relation(fields: [recordedById], references: [id])
+  station    Station @relation(fields: [stationId], references: [id])
+  recordedBy Person  @relation(fields: [recordedById], references: [id])
 
   event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
 
   @@index([stationId, recordedAt])
   @@index([recordedAt])
   @@index([eventId, recordedAt])
+  @@index([recordedByMembershipId])
 }
 
 // ─────────────────────────────────────────────
@@ -744,26 +842,29 @@ model MissionCard {
 
 /// @eventOwned
 model CardStampEvent {
-  id               String     @id @default(cuid())
+  id                     String     @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2). Nullable until P09.10 backfills and contracts.
-  eventId          String?
-  missionCardId    String
-  stationId        String
-  recordedById     String
-  source           DataSource @default(APP)
-  recordedAt       DateTime   @default(now()) @db.Timestamptz(3)
-  clientRecordedAt DateTime?  @db.Timestamptz(3)
-  idempotencyKey   String     @unique
+  eventId                String?
+  missionCardId          String
+  stationId              String
+  recordedById           String
+  /// The EventMembership behind recordedById (ADR-001); backfilled in P09.4, read from P09.5.
+  recordedByMembershipId String?
+  source                 DataSource @default(APP)
+  recordedAt             DateTime   @default(now()) @db.Timestamptz(3)
+  clientRecordedAt       DateTime?  @db.Timestamptz(3)
+  idempotencyKey         String     @unique
 
   missionCard MissionCard @relation(fields: [missionCardId], references: [id])
   station     Station     @relation(fields: [stationId], references: [id])
-  recordedBy  Volunteer   @relation(fields: [recordedById], references: [id])
+  recordedBy  Person      @relation(fields: [recordedById], references: [id])
 
   event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
 
   @@unique([missionCardId, stationId])
   @@index([recordedAt])
   @@index([eventId, recordedAt])
+  @@index([recordedByMembershipId])
 }
 
 // ─────────────────────────────────────────────
@@ -790,50 +891,56 @@ model GiftType {
 
 /// @eventOwned
 model GiftRedemption {
-  id             String          @id @default(cuid())
+  id                     String          @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2). Nullable until P09.10 backfills and contracts.
-  eventId        String?
-  giftTypeId     String
-  missionCardId  String?
-  stationId      String
-  recordedById   String
-  source         DataSource      @default(APP)
-  recordedAt     DateTime        @default(now()) @db.Timestamptz(3)
-  idempotencyKey String          @unique
-  voided         Boolean         @default(false)
+  eventId                String?
+  giftTypeId             String
+  missionCardId          String?
+  stationId              String
+  recordedById           String
+  /// The EventMembership behind recordedById (ADR-001); backfilled in P09.4, read from P09.5.
+  recordedByMembershipId String?
+  source                 DataSource      @default(APP)
+  recordedAt             DateTime        @default(now()) @db.Timestamptz(3)
+  idempotencyKey         String          @unique
+  voided                 Boolean         @default(false)
   /// Set when a queued redemption broke a rule on sync (ADR-007 §5, F03-034).
-  flag           RedemptionFlag?
+  flag                   RedemptionFlag?
 
   giftType    GiftType     @relation(fields: [giftTypeId], references: [id])
   missionCard MissionCard? @relation(fields: [missionCardId], references: [id])
   station     Station      @relation(fields: [stationId], references: [id])
-  recordedBy  Volunteer    @relation(fields: [recordedById], references: [id])
+  recordedBy  Person       @relation(fields: [recordedById], references: [id])
 
   event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
 
   @@index([giftTypeId, recordedAt])
   @@index([flag, recordedAt])
   @@index([eventId, recordedAt])
+  @@index([recordedByMembershipId])
 }
 
 /// @eventOwned
 model GiftStockAdjustment {
-  id          String   @id @default(cuid())
+  id                    String   @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2). Nullable until P09.10 backfills and contracts.
-  eventId     String?
-  giftTypeId  String
-  delta       Int
-  reason      String
-  createdById String
-  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  eventId               String?
+  giftTypeId            String
+  delta                 Int
+  reason                String
+  createdById           String
+  /// The EventMembership behind createdById (ADR-001); backfilled in P09.4, read from P09.5.
+  createdByMembershipId String?
+  createdAt             DateTime @default(now()) @db.Timestamptz(3)
 
-  giftType  GiftType  @relation(fields: [giftTypeId], references: [id], onDelete: Restrict)
-  createdBy Volunteer @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  giftType  GiftType @relation(fields: [giftTypeId], references: [id], onDelete: Restrict)
+  createdBy Person   @relation(fields: [createdById], references: [id], onDelete: Restrict)
 
   event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
 
   @@index([giftTypeId, createdAt])
   @@index([eventId])
+  @@index([createdByMembershipId])
 }
 
 // ─────────────────────────────────────────────
@@ -842,23 +949,25 @@ model GiftStockAdjustment {
 
 /// @eventOwned
 model Incident {
-  id             String           @id @default(cuid())
+  id                     String           @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2). Nullable until P09.10 backfills and contracts.
-  eventId        String?
-  type           IncidentType
-  severity       IncidentSeverity
-  status         IncidentStatus   @default(OPEN)
-  stationId      String?
-  locationNote   String?
+  eventId                String?
+  type                   IncidentType
+  severity               IncidentSeverity
+  status                 IncidentStatus   @default(OPEN)
+  stationId              String?
+  locationNote           String?
   /// Describes the EVENT, not the person.
-  description    String
-  reportedById   String
-  occurredAt     DateTime         @db.Timestamptz(3)
-  reportedAt     DateTime         @default(now()) @db.Timestamptz(3)
-  idempotencyKey String           @unique
+  description            String
+  reportedById           String
+  /// The EventMembership behind reportedById (ADR-001); backfilled in P09.4, read from P09.5.
+  reportedByMembershipId String?
+  occurredAt             DateTime         @db.Timestamptz(3)
+  reportedAt             DateTime         @default(now()) @db.Timestamptz(3)
+  idempotencyKey         String           @unique
 
   station    Station?           @relation(fields: [stationId], references: [id])
-  reportedBy Volunteer          @relation("IncidentReporter", fields: [reportedById], references: [id])
+  reportedBy Person             @relation("IncidentReporter", fields: [reportedById], references: [id])
   followUps  IncidentFollowUp[]
 
   event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
@@ -866,69 +975,79 @@ model Incident {
   @@index([status, severity])
   @@index([reportedAt])
   @@index([eventId, status])
+  @@index([reportedByMembershipId])
 }
 
 /// @eventOwned
 model IncidentFollowUp {
-  id         String   @id @default(cuid())
+  id                 String   @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2). Nullable until P09.10 backfills and contracts.
-  eventId    String?
-  incidentId String
-  note       String
-  authorId   String
-  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  eventId            String?
+  incidentId         String
+  note               String
+  authorId           String
+  /// The EventMembership behind authorId (ADR-001); backfilled in P09.4, read from P09.5.
+  authorMembershipId String?
+  createdAt          DateTime @default(now()) @db.Timestamptz(3)
 
-  incident Incident  @relation(fields: [incidentId], references: [id], onDelete: Cascade)
-  author   Volunteer @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  incident Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  author   Person   @relation(fields: [authorId], references: [id], onDelete: Restrict)
 
   event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
 
   @@index([incidentId, createdAt])
   @@index([eventId])
+  @@index([authorMembershipId])
 }
 
 /// TRANSIENT by design. See BUILD_PLAN §5.9 — purged to LostPersonSummary on resolve.
 /// @eventOwned
 model LostPersonAlert {
-  id                String           @id @default(cuid())
+  id                   String           @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2). Nullable until P09.10 backfills and contracts.
-  eventId           String?
-  status            LostPersonStatus @default(ACTIVE)
-  approxAge         String?
-  descriptionText   String?
-  clothingText      String?
-  lastSeenStationId String?
-  lastSeenAt        DateTime?        @db.Timestamptz(3)
-  raisedById        String
-  raisedAt          DateTime         @default(now()) @db.Timestamptz(3)
-  resolvedAt        DateTime?        @db.Timestamptz(3)
-  purgedAt          DateTime?        @db.Timestamptz(3)
+  eventId              String?
+  status               LostPersonStatus @default(ACTIVE)
+  approxAge            String?
+  descriptionText      String?
+  clothingText         String?
+  lastSeenStationId    String?
+  lastSeenAt           DateTime?        @db.Timestamptz(3)
+  raisedById           String
+  /// The EventMembership behind raisedById (ADR-001); backfilled in P09.4, read from P09.5.
+  raisedByMembershipId String?
+  raisedAt             DateTime         @default(now()) @db.Timestamptz(3)
+  resolvedAt           DateTime?        @db.Timestamptz(3)
+  purgedAt             DateTime?        @db.Timestamptz(3)
 
-  raisedBy         Volunteer       @relation(fields: [raisedById], references: [id])
+  raisedBy         Person          @relation(fields: [raisedById], references: [id])
   acknowledgements LostPersonAck[]
 
   event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
 
   @@index([status])
   @@index([eventId, status])
+  @@index([raisedByMembershipId])
 }
 
 /// @eventOwned
 model LostPersonAck {
-  id          String   @id @default(cuid())
+  id           String   @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2). Nullable until P09.10 backfills and contracts.
-  eventId     String?
-  alertId     String
-  volunteerId String
-  ackedAt     DateTime @default(now()) @db.Timestamptz(3)
+  eventId      String?
+  alertId      String
+  volunteerId  String
+  /// The EventMembership behind volunteerId (ADR-001); backfilled in P09.4, read from P09.5.
+  membershipId String?
+  ackedAt      DateTime @default(now()) @db.Timestamptz(3)
 
   alert     LostPersonAlert @relation(fields: [alertId], references: [id], onDelete: Cascade)
-  volunteer Volunteer       @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+  volunteer Person          @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
 
   event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
 
   @@unique([alertId, volunteerId])
   @@index([eventId])
+  @@index([membershipId])
 }
 
 /// What survives after purge — analytics only. Every report reads this, never the alert.
@@ -951,30 +1070,33 @@ model LostPersonSummary {
 
 /// @eventOwned
 model LostFoundItem {
-  id             String          @id @default(cuid())
+  id                   String          @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2). Nullable until P09.10 backfills and contracts.
-  eventId        String?
-  itemLabel      String
-  categoryLabel  String?
-  foundStationId String?
-  foundAt        DateTime        @db.Timestamptz(3)
+  eventId              String?
+  itemLabel            String
+  categoryLabel        String?
+  foundStationId       String?
+  foundAt              DateTime        @db.Timestamptz(3)
   /// "held at Mission Complete desk"
-  holderNote     String?
+  holderNote           String?
   /// S3 key
-  photoKey       String?
-  status         LostFoundStatus @default(HELD)
-  loggedById     String
-  claimedAt      DateTime?       @db.Timestamptz(3)
-  createdAt      DateTime        @default(now()) @db.Timestamptz(3)
+  photoKey             String?
+  status               LostFoundStatus @default(HELD)
+  loggedById           String
+  /// The EventMembership behind loggedById (ADR-001); backfilled in P09.4, read from P09.5.
+  loggedByMembershipId String?
+  claimedAt            DateTime?       @db.Timestamptz(3)
+  createdAt            DateTime        @default(now()) @db.Timestamptz(3)
 
-  loggedBy     Volunteer @relation(fields: [loggedById], references: [id], onDelete: Restrict)
-  foundStation Station?  @relation(fields: [foundStationId], references: [id], onDelete: SetNull)
+  loggedBy     Person   @relation(fields: [loggedById], references: [id], onDelete: Restrict)
+  foundStation Station? @relation(fields: [foundStationId], references: [id], onDelete: SetNull)
 
   event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
 
   @@index([status])
   @@index([foundAt])
   @@index([eventId, status])
+  @@index([loggedByMembershipId])
 }
 
 // ─────────────────────────────────────────────
@@ -983,20 +1105,22 @@ model LostFoundItem {
 
 /// @eventOwned
 model Announcement {
-  id               String               @id @default(cuid())
+  id                 String               @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2). Nullable until P09.10 backfills and contracts.
-  eventId          String?
-  body             String
-  priority         AnnouncementPriority @default(INFO)
-  targetRole       CommitteeRole?
-  targetStationId  String?
-  targetEventDayId String?
-  requiresAck      Boolean              @default(false)
-  authorId         String
-  createdAt        DateTime             @default(now()) @db.Timestamptz(3)
-  expiresAt        DateTime?            @db.Timestamptz(3)
+  eventId            String?
+  body               String
+  priority           AnnouncementPriority @default(INFO)
+  targetRole         CommitteeRole?
+  targetStationId    String?
+  targetEventDayId   String?
+  requiresAck        Boolean              @default(false)
+  authorId           String
+  /// The EventMembership behind authorId (ADR-001); backfilled in P09.4, read from P09.5.
+  authorMembershipId String?
+  createdAt          DateTime             @default(now()) @db.Timestamptz(3)
+  expiresAt          DateTime?            @db.Timestamptz(3)
 
-  author        Volunteer         @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  author        Person            @relation(fields: [authorId], references: [id], onDelete: Restrict)
   targetStation Station?          @relation(fields: [targetStationId], references: [id], onDelete: Cascade)
   targetDay     EventDay?         @relation(fields: [targetEventDayId], references: [id], onDelete: Cascade)
   acks          AnnouncementAck[]
@@ -1005,6 +1129,7 @@ model Announcement {
 
   @@index([createdAt])
   @@index([eventId, createdAt])
+  @@index([authorMembershipId])
 }
 
 /// @eventOwned
@@ -1014,15 +1139,18 @@ model AnnouncementAck {
   eventId        String?
   announcementId String
   volunteerId    String
+  /// The EventMembership behind volunteerId (ADR-001); backfilled in P09.4, read from P09.5.
+  membershipId   String?
   ackedAt        DateTime @default(now()) @db.Timestamptz(3)
 
   announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
-  volunteer    Volunteer    @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+  volunteer    Person       @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
 
   event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
 
   @@unique([announcementId, volunteerId])
   @@index([eventId])
+  @@index([membershipId])
 }
 
 // ─────────────────────────────────────────────
@@ -1033,21 +1161,23 @@ model AnnouncementAck {
 /// range must say so plainly rather than silently blending sources (§11.4).
 /// @eventOwned
 model FallbackWindow {
-  id           String    @id @default(cuid())
+  id                     String    @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2). Nullable until P09.10 backfills and contracts.
-  eventId      String?
+  eventId                String?
   /// 3 = google sheets, 4 = paper
-  tier         Int
-  startedAt    DateTime  @db.Timestamptz(3)
-  endedAt      DateTime? @db.Timestamptz(3)
+  tier                   Int
+  startedAt              DateTime  @db.Timestamptz(3)
+  endedAt                DateTime? @db.Timestamptz(3)
   /// null = event-wide
-  stationId    String?
-  declaredById String
-  reason       String
-  createdAt    DateTime  @default(now()) @db.Timestamptz(3)
+  stationId              String?
+  declaredById           String
+  /// The EventMembership behind declaredById (ADR-001); backfilled in P09.4, read from P09.5.
+  declaredByMembershipId String?
+  reason                 String
+  createdAt              DateTime  @default(now()) @db.Timestamptz(3)
 
-  declaredBy Volunteer @relation(fields: [declaredById], references: [id], onDelete: Restrict)
-  station    Station?  @relation(fields: [stationId], references: [id], onDelete: Restrict)
+  declaredBy Person   @relation(fields: [declaredById], references: [id], onDelete: Restrict)
+  station    Station? @relation(fields: [stationId], references: [id], onDelete: Restrict)
 
   event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
 
@@ -1055,27 +1185,31 @@ model FallbackWindow {
   // "Is a window open right now" is asked on every dashboard poll.
   @@index([endedAt])
   @@index([eventId, startedAt])
+  @@index([declaredByMembershipId])
 }
 
 /// @eventOwned
 model ImportBatch {
-  id           String     @id @default(cuid())
+  id                     String     @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2). Nullable until P09.10 backfills and contracts.
-  eventId      String?
-  source       DataSource
-  targetTable  String
-  rowCount     Int
-  fileName     String?
-  importedById String
-  importedAt   DateTime   @default(now()) @db.Timestamptz(3)
-  notes        String?
+  eventId                String?
+  source                 DataSource
+  targetTable            String
+  rowCount               Int
+  fileName               String?
+  importedById           String
+  /// The EventMembership behind importedById (ADR-001); backfilled in P09.4, read from P09.5.
+  importedByMembershipId String?
+  importedAt             DateTime   @default(now()) @db.Timestamptz(3)
+  notes                  String?
 
-  importedBy Volunteer @relation(fields: [importedById], references: [id], onDelete: Restrict)
+  importedBy Person @relation(fields: [importedById], references: [id], onDelete: Restrict)
 
   event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
 
   @@index([importedAt])
   @@index([eventId])
+  @@index([importedByMembershipId])
 }
 
 enum AuditSeverity {
@@ -1092,30 +1226,32 @@ enum AuditOutcome {
 }
 
 model AuditLog {
-  id         String        @id @default(cuid())
+  id           String        @id @default(cuid())
   /// The event, when the row was written inside one; null for platform actions (ADR-001 §3).
-  eventId    String?
-  actorId    String?
-  actorSub   String?
+  eventId      String?
+  actorId      String?
+  /// The EventMembership behind actorId (ADR-001); backfilled in P09.4, read from P09.5.
+  membershipId String?
+  actorSub     String?
   /// "registration.void", "card.reissue", "auth.signInFailed"
-  action     String
-  severity   AuditSeverity @default(INFO)
-  outcome    AuditOutcome  @default(SUCCESS)
-  entityType String
-  entityId   String?
-  before     Json?
-  after      Json?
+  action       String
+  severity     AuditSeverity @default(INFO)
+  outcome      AuditOutcome  @default(SUCCESS)
+  entityType   String
+  entityId     String?
+  before       Json?
+  after        Json?
   /// Transport detail. Set on security events, null on change events, which
   /// describe themselves through before/after instead.
-  method     String?
-  path       String?
-  statusCode Int?
-  ip         String?
-  userAgent  String?
-  requestId  String?
-  createdAt  DateTime      @default(now()) @db.Timestamptz(3)
+  method       String?
+  path         String?
+  statusCode   Int?
+  ip           String?
+  userAgent    String?
+  requestId    String?
+  createdAt    DateTime      @default(now()) @db.Timestamptz(3)
 
-  actor Volunteer? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  actor Person? @relation(fields: [actorId], references: [id], onDelete: SetNull)
 
   event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
 
@@ -1130,6 +1266,7 @@ model AuditLog {
   // Tailing. The live view asks for "rows after this id" every few seconds.
   @@index([id, createdAt])
   @@index([eventId, createdAt])
+  @@index([membershipId])
 }
 
 /// Makes the client's retry-on-failure loop safe, which is what makes the local
@@ -1164,7 +1301,7 @@ model AppSetting {
   updatedById String?
   updatedAt   DateTime @updatedAt @db.Timestamptz(3)
 
-  updatedBy Volunteer? @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedBy Person? @relation(fields: [updatedById], references: [id], onDelete: SetNull)
 }
 
 /// A browser push endpoint (RFC 8030 / Web Push).
@@ -1185,7 +1322,7 @@ model PushSubscription {
   createdAt    DateTime @default(now()) @db.Timestamptz(3)
   lastSeenAt   DateTime @default(now()) @db.Timestamptz(3)
 
-  volunteer Volunteer @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+  volunteer Person @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
 
   @@index([volunteerId])
 }
@@ -1215,7 +1352,7 @@ model RefreshSession {
   /// Why it was revoked: "rotated", "signed-out", "reuse-detected", "deactivated".
   revokedReason String?
 
-  volunteer Volunteer @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+  volunteer Person @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
 
   @@index([volunteerId, revokedAt])
   @@index([familyId])

@@ -193,7 +193,7 @@ describe('authorization', () => {
 
   it('rejects a token for an account that is not on the roster', async () => {
     const ghost = await createVolunteer({ email: 'ghost@sec.test', role: 'VOLUNTEER' });
-    await prisma.volunteer.delete({ where: { id: ghost.id } });
+    await prisma.person.delete({ where: { id: ghost.id } });
 
     const response = await request(app).get('/api/v1/me').set('Authorization', bearer(ghost));
 
@@ -202,7 +202,7 @@ describe('authorization', () => {
   });
 
   it('rejects a token for a deactivated account', async () => {
-    await prisma.volunteer.update({ where: { id: volunteer.id }, data: { active: false } });
+    await prisma.person.update({ where: { id: volunteer.id }, data: { active: false } });
 
     // The auth cache is invalidated by the fixture helper, so this reflects the
     // database rather than a stale entry.

@@ -71,7 +71,7 @@ export async function createVolunteer(input: {
 }): Promise<TestVolunteer> {
   const sub = subFor(input.email);
 
-  const volunteer = await prisma.volunteer.upsert({
+  const volunteer = await prisma.person.upsert({
     where: { email: input.email },
     create: {
       email: input.email,

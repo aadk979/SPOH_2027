@@ -121,7 +121,7 @@ async function resolveVolunteer(sub: string): Promise<CachedVolunteer> {
   const cached = volunteerCache.get(sub);
   if (cached && cached.expiresAt > Date.now()) return cached;
 
-  const volunteer = await prisma.volunteer.findUnique({
+  const volunteer = await prisma.person.findUnique({
     where: { cognitoSub: sub },
     select: { id: true, displayName: true, role: true, active: true },
   });

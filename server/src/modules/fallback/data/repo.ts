@@ -92,7 +92,7 @@ export async function listWindows(range: { from?: Date; to?: Date }): Promise<Wi
  */
 export async function findVolunteerNames(ids: readonly string[]): Promise<Map<string, string>> {
   if (ids.length === 0) return new Map();
-  const rows = await prisma.volunteer.findMany({
+  const rows = await prisma.person.findMany({
     where: { id: { in: [...new Set(ids)] } },
     select: { id: true, displayName: true },
   });

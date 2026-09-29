@@ -16,11 +16,11 @@ export async function lockPerson(tx: PrismaTransactionClient, id: string): Promi
 }
 
 export async function findVolunteer(db: PrismaTransactionClient, id: string) {
-  return db.volunteer.findUnique({ where: { id } });
+  return db.person.findUnique({ where: { id } });
 }
 
 export async function findVolunteerOrThrow(db: PrismaTransactionClient, id: string) {
-  return db.volunteer.findUniqueOrThrow({ where: { id } });
+  return db.person.findUniqueOrThrow({ where: { id } });
 }
 
 export async function findEventDayOn(db: PrismaTransactionClient, date: Date) {

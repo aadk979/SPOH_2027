@@ -13,7 +13,7 @@ export type AssignmentWithContext = Prisma.ShiftAssignmentGetPayload<{
 }>;
 
 export async function findVolunteerById(id: string) {
-  return prisma.volunteer.findUnique({
+  return prisma.person.findUnique({
     where: { id },
     select: {
       id: true,
@@ -88,7 +88,7 @@ export async function buildEscalationChain(startId: string | null, maxDepth = 5)
   const chain: Array<{
     id: string;
     displayName: string;
-    role: Prisma.VolunteerGetPayload<object>['role'];
+    role: Prisma.PersonGetPayload<object>['role'];
     phone: string | null;
     portfolio: string | null;
   }> = [];
@@ -99,7 +99,7 @@ export async function buildEscalationChain(startId: string | null, maxDepth = 5)
   for (let depth = 0; depth < maxDepth && currentId && !seen.has(currentId); depth += 1) {
     seen.add(currentId);
 
-    const person = await prisma.volunteer.findUnique({
+    const person = await prisma.person.findUnique({
       where: { id: currentId },
       select: {
         id: true,

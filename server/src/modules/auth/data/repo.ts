@@ -3,7 +3,7 @@ import { prisma, type PrismaTransactionClient } from '../../../platform/db/clien
 /** Data access for refresh sessions and the volunteer rows they belong to. */
 
 export async function findVolunteerBySub(sub: string) {
-  return prisma.volunteer.findUnique({
+  return prisma.person.findUnique({
     where: { cognitoSub: sub },
     select: { id: true, displayName: true, role: true, active: true },
   });
@@ -11,7 +11,7 @@ export async function findVolunteerBySub(sub: string) {
 
 /** The development sign-in's lookup: an email is enough, outside Cognito. */
 export async function findVolunteerByEmail(email: string) {
-  return prisma.volunteer.findUnique({
+  return prisma.person.findUnique({
     where: { email },
     select: { cognitoSub: true, role: true },
   });
@@ -36,7 +36,7 @@ export async function touchVolunteer(
   id: string,
   at: Date,
 ): Promise<void> {
-  await tx.volunteer.update({ where: { id }, data: { lastSeenAt: at } });
+  await tx.person.update({ where: { id }, data: { lastSeenAt: at } });
 }
 
 export async function findSessionByTokenHash(tokenHash: string) {

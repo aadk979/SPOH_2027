@@ -111,7 +111,7 @@ describe('refresh sessions (P03 repros)', () => {
       where: { volunteer: { email: 'ic@repro.test' } },
     });
     await createVolunteer({ email: 'chief@repro.test', role: 'CHIEF_COORDINATOR' });
-    const chief = await prisma.volunteer.findUniqueOrThrow({
+    const chief = await prisma.person.findUniqueOrThrow({
       where: { email: 'chief@repro.test' },
     });
 
