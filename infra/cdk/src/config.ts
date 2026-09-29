@@ -27,6 +27,11 @@ const ACCOUNT = '665146708212';
 const REGION = 'ap-southeast-1';
 const DOMAIN = 'spoh.example.invalid';
 
+/** The only repository whose workflows may deploy (P08.2). */
+export const REPOSITORY = 'aadk979/SPOH_2027';
+
+export const ACCOUNT_ENV = { account: '665146708212', region: 'ap-southeast-1' };
+
 const tags = (env: StageName): StageConfig['tags'] => ({
   app: 'spoh-platform',
   env,

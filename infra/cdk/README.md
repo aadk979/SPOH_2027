@@ -11,9 +11,22 @@ npm run infra:diff               # against the deployed stacks (needs credential
 npm run test --workspace infra/cdk
 ```
 
-Nothing is deployed from here yet. Bootstrapping the account and the GitHub OIDC role (P08.2) is a
-one-time step that needs the owner's approval, and the P08 report records when it happens.
+The platform stacks are not deployed yet; P08.3 onward add their resources. Bootstrapping and the
+GitHub OIDC role are described below.
 
 - The production Cognito pool `ap-southeast-1_9bwl2nGF7` is referenced by id, never owned: every
   `Volunteer.cognitoSub` points into it.
 - The production domain is a placeholder (`spoh.example.invalid`) until the owner names it (D-08).
+
+## Access from CI (P08.2)
+
+The account is bootstrapped (`cdk bootstrap aws://665146708212/ap-southeast-1`, default qualifier,
+tagged). The `Spoh-DeployAccess` stack holds GitHub's OIDC provider and the role
+`spoh-github-deploy`, which a workflow may assume only from `aadk979/SPOH_2027` on `main` or in the
+`staging` or `prod` deployment environment. Its only permission is to assume the four CDK bootstrap
+roles, so everything CI changes goes through CloudFormation. `.github/workflows/infra.yml` runs
+`cdk diff` with it; no workflow holds static keys.
+
+The bootstrap and this stack were deployed once from a workstation with the owner's approval
+(2026-09-29, D-13). To change the role, edit `src/deployAccessStack.ts` and deploy
+`Spoh-DeployAccess` the same way, or from CI once P08.9 adds deploys.
