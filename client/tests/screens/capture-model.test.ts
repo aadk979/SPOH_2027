@@ -5,7 +5,7 @@ import {
   groupTotal,
   type GroupCounts,
 } from '@/features/registration/model/groupMembers';
-import { decodedCardCode } from '@/features/capture/model/decodedCardCode';
+import { readScan } from '@/features/capture/model/readScan';
 import { stampMessage } from '@/features/cards/model/stampMessage';
 describe('group composition', () => {
   it('clamps removals at zero and removes empty categories without mutating its input', () => {
@@ -26,19 +26,27 @@ describe('group composition', () => {
     expect(groupMembers({})).toEqual([]);
   });
 });
-describe('scan decoding', () => {
+describe('scan reading', () => {
   it.each([
     [' abc234 ', 'ABC234'],
     // A bare code is read with the printed alphabet's rule (F03-020).
     [' abcl2o ', 'ABC120'],
-    ['spoh2027:abc234more', 'ABC234'],
-    ['prefix:other:xyz987', 'XYZ987'],
-    ['abcdefghi', 'ABCDEF'],
-    ['', ''],
-    ['prefix:', ''],
-    ['abc', 'ABC'],
     ['i0o123', '100123'],
-  ])('reads %s as %s', (text, code) => expect(decodedCardCode(text)).toBe(code));
+  ])('reads the bare code %s as %s', (text, code) =>
+    expect(readScan(text)).toEqual({ kind: 'code', code }),
+  );
+
+  it.each([
+    'spoh2027:0f8f6a52-3c2b-4d7e-9a61-5b7c2d9e1f00',
+    'spoh2027:abc234more',
+    'prefix:other:xyz987',
+  ])('hands the printed payload %s to the server to resolve (F03-045)', (text) =>
+    expect(readScan(text)).toEqual({ kind: 'payload', payload: text }),
+  );
+
+  it.each(['', '   ', 'abc', 'abcdefghi'])('reads nothing it can use from %j', (text) =>
+    expect(readScan(text)).toBeNull(),
+  );
 });
 describe('stamp feedback', () => {
   it('prioritizes completed journeys over the stamp result', () => {

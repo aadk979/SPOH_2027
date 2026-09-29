@@ -20,6 +20,13 @@ export async function findCardByShortCode(
   return tx.missionCard.findUnique({ where: { shortCode }, include: cardInclude });
 }
 
+export async function findCardByQrPayload(
+  qrPayload: string,
+  tx: PrismaTransactionClient = prisma,
+): Promise<CardWithContext | null> {
+  return tx.missionCard.findUnique({ where: { qrPayload }, include: cardInclude });
+}
+
 export async function findCardById(
   id: string,
   tx: PrismaTransactionClient = prisma,

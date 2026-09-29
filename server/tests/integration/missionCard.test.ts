@@ -126,6 +126,30 @@ describe('card identity', () => {
   });
 });
 
+/**
+ * The printed QR holds the card's opaque payload, not its short code, so a
+ * scan must resolve through the payload (F03-045).
+ */
+describe('scanning a printed card', () => {
+  it('resolves the card its QR payload was printed for', async () => {
+    const response = await request(app)
+      .get(`/api/v1/cards/qr/${encodeURIComponent(`spoh2027:test-${CARD_B}`)}`)
+      .set('Authorization', bearer(booth));
+
+    expect(response.status).toBe(200);
+    expect(response.body.card.shortCode).toBe(CARD_B);
+  });
+
+  it('404s a payload that belongs to no card', async () => {
+    const response = await request(app)
+      .get(`/api/v1/cards/qr/${encodeURIComponent('spoh2027:not-a-card')}`)
+      .set('Authorization', bearer(booth));
+
+    expect(response.status).toBe(404);
+    expect(response.body.error.code).toBe('CARD_NOT_FOUND');
+  });
+});
+
 /** BUILD_PLAN §10 case 9. */
 describe('stamping', () => {
   it('records a stamp and reports what is left of the journey', async () => {

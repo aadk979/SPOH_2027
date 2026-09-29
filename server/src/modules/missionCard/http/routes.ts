@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   CardLookupParams,
+  CardQrParams,
   GenerateCardBatchRequest,
   IssueCardRequest,
   ReissueCardRequest,
@@ -20,6 +21,7 @@ import { validate } from '../../../platform/http/validate.js';
 import {
   funnelHandler,
   generateBatchHandler,
+  getCardByQrHandler,
   getCardHandler,
   issueCardHandler,
   reissueCardHandler,
@@ -51,6 +53,15 @@ missionCardRouter.get(
   requireCapability('dashboard.station.read'),
   validate({ query: TimeRangeQuery }),
   funnelHandler,
+);
+
+/** A scanned QR resolves to its card; the same people who may look a card up (F03-045). */
+missionCardRouter.get(
+  '/qr/:payload',
+  captureRateLimit,
+  requireCapability('card.stamp'),
+  validate({ params: CardQrParams }),
+  getCardByQrHandler,
 );
 
 /** Any capture role may look a card up — this is the "where do I go next" view. */

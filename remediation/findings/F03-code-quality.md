@@ -108,6 +108,7 @@ is not on `main`.
 | F03-042 | Low    | Security-event dedupe is per worker                                       | P15.2                                                                               | —                     |
 | F03-043 | Medium | A Deputy's roster import creates accounts (found in P06.12)               | P06.13                                                                              | —                     |
 | F03-044 | Medium | The roster import cannot name a manager who is already on the roster      | P06.13                                                                              | —                     |
+| F03-045 | Medium | A printed card's QR resolves to no card (found in P07.11)                 | P07.11                                                                              | —                     |
 
 ### For P05 (no new owner decision)
 
@@ -1752,3 +1753,20 @@ unchanged. Paths in "Proposed split" are relative to `server/src` or `client/src
 |    51 | `server:modules/missionCard/service.ts:65`               | `issueCard`                              | card lookup; issue + audit; link group registrations; bypass audit; reload                                                             | server:modules/missionCards/application/{issueCard.ts, linkGroupToCard.ts}                                                                                                                                                                                                                            |  M   | 93.75% lines                           |
 
 <!-- backlog:end -->
+
+#### F03-045 — A printed card's QR resolves to no card
+
+- **Severity:** Medium (manual entry still works; every scan of a printed card fails)
+- **Area:** `client/src/features/capture/model/decodedCardCode.ts` (was `app/capture/stamp/page.tsx`),
+  `server/src/modules/missionCard/domain/shortCode.ts` `generateQrPayload`
+- **Evidence:** found in P07.11 while fixing F03-020. A card batch prints the QR from `qrPayload`,
+  which is `spoh2027:<uuid>` and deliberately unrelated to the short code. The scanner took the six
+  characters after the last `:`, the start of the UUID, and asked for `/cards/<those>/stamps`;
+  nothing on the server resolves a payload. The e2e journeys type the code, so none caught it.
+- **Impact:** at the stamp and redemption desks the camera never finds a real card, and
+  volunteers fall back to typing every code, which the scan exists to avoid.
+- **Fix:** `GET /cards/qr/:payload` resolves a payload to its card; the scanner reads a bare code
+  as before and sends a payload to the server, and asks for the typed code when that fails
+  (offline or unknown). Printed cards keep working unchanged.
+- **Phase:** P07.11
+- **Status:** open

@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import type { MissionCardRecord } from '@spoh/shared';
 import type { Tone } from '@/shared/ui';
 import { useMe } from '@/features/session';
-import { useCardScanner } from '@/features/capture';
+import { UNRESOLVED_SCAN, useCardScanner } from '@/features/capture';
 import { sendOrQueue } from '@/shared/lib/sendOrQueue';
 import { cardEndpoints, stampCard } from '../api';
 import { QUEUED_STAMP, stampFailureMessage, stampMessage } from '../model/stampMessage';
@@ -54,6 +54,7 @@ export function useStampCapture() {
     [station, pending],
   );
 
-  const scanner = useCardScanner(stamp);
+  const onUnresolvedScan = useCallback(() => setMessage(UNRESOLVED_SCAN), []);
+  const scanner = useCardScanner(stamp, onUnresolvedScan);
   return { station, card, message, pending, scanned, stamp, scanner };
 }

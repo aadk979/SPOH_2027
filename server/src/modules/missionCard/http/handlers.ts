@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import type {
   CardLookupParams,
+  CardQrParams,
   GenerateCardBatchRequest,
   IssueCardRequest,
   ReissueCardRequest,
@@ -12,7 +13,7 @@ import { auditContextFrom } from '../../../platform/http/auditContext.js';
 import { captureContextFrom } from '../../../platform/http/captureActor.js';
 import { validatedBody, validatedParams, validatedQuery } from '../../../platform/http/validate.js';
 import { generateBatch } from '../application/generateBatch.js';
-import { getCard } from '../application/getCard.js';
+import { getCard, getCardByQr } from '../application/getCard.js';
 import { getFunnel } from '../application/getFunnel.js';
 import { issueCard } from '../application/issueCard.js';
 import { reissueCard } from '../application/reissueCard.js';
@@ -32,6 +33,10 @@ export async function funnelHandler(req: Request, res: Response): Promise<void> 
 
 export async function getCardHandler(req: Request, res: Response): Promise<void> {
   res.status(200).json({ card: await getCard(shortCodeOf(req)) });
+}
+
+export async function getCardByQrHandler(req: Request, res: Response): Promise<void> {
+  res.status(200).json({ card: await getCardByQr(validatedParams<CardQrParams>(req).payload) });
 }
 
 export async function issueCardHandler(req: Request, res: Response): Promise<void> {

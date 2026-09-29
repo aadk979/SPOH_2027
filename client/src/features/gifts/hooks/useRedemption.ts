@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import type { Tone } from '@/shared/ui';
 import { useMe } from '@/features/session';
-import { useCardScanner } from '@/features/capture';
+import { UNRESOLVED_SCAN, useCardScanner } from '@/features/capture';
 import { sendOrQueue } from '@/shared/lib/sendOrQueue';
 import { useGifts } from '../queries';
 import { giftEndpoints, redeemGift } from '../api';
@@ -58,7 +58,8 @@ export function useRedemption(enabled: boolean) {
     [station, selected, pending, gifts],
   );
 
-  const scanner = useCardScanner(redeem);
+  const onUnresolvedScan = useCallback(() => setMessage(UNRESOLVED_SCAN), []);
+  const scanner = useCardScanner(redeem, onUnresolvedScan);
   return { station, selected, setSelected, message, pending, gifts, redeem, scanner };
 }
 export type Redemption = ReturnType<typeof useRedemption>;

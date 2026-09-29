@@ -42,7 +42,7 @@ F01-047, F02-020, F03-042). They keep their own row so that every ID has a home,
 _umbrella_ or _see_ in **Also**. The other **108** are the unique open findings.
 
 **Filed after P05.1:** F03-043 (Medium, P06.13), found in P06.12; F03-044 (Medium, P06.13), found
-in P06.7. The counts above are as of P05.1.
+in P06.7; F03-045 (Medium, P07.11), found in P07.11. The counts above are as of P05.1.
 
 | Severity | Rows | Unique | Earliest home           |
 | -------- | ---: | -----: | ----------------------- |
@@ -238,6 +238,7 @@ immediate defect and the later step makes it structural.
 | F03-032 | Runtime settings load once per page load, and not after an in-app sign-in       | P07.11 | P10.8 (live updates)                                          | open                                                  |
 | F03-034 | Stamps, redemptions, incidents and lost-person alerts are online-only           | P07.11 | decided in ADR-007                                            | open                                                  |
 | F03-036 | The capture screens are not precached                                           | P07.11 | P13.4                                                         | open                                                  |
+| F03-045 | A printed card's QR resolves to no card (filed in P07.11)                       | P07.11 | —                                                             | open                                                  |
 | PF-17   | CI does not run the e2e suite                                                   | P08.9  | —                                                             | open                                                  |
 | F04-015 | The audit log can be edited, and its retention shortened, by the app            | P08.3  | P08.8 (log group), P15.7                                      | open                                                  |
 | F04-011 | Every secret is a plaintext line on one box, with no owner or rotation          | P08.6  | P06.7 (`sid`↔`sub`), P15.6, P16.5                             | open; P06 part (`sid`↔`sub`) `6a73411`                |

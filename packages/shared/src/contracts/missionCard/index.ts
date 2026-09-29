@@ -183,4 +183,12 @@ export const CardFunnelResponse = z
 export type CardFunnelResponse = z.infer<typeof CardFunnelResponse>;
 
 export const CardLookupParams = z.object({ shortCode: CardShortCode }).strict();
+
+/**
+ * What a printed card's QR holds: an opaque payload unrelated to the short
+ * code (so a visitor scanning their own card reaches nothing). A scan resolves
+ * the card through it (F03-045).
+ */
+export const CardQrParams = z.object({ payload: z.string().trim().min(1).max(200) }).strict();
+export type CardQrParams = z.infer<typeof CardQrParams>;
 export type CardLookupParams = z.infer<typeof CardLookupParams>;
