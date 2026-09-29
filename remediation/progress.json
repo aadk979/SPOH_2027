@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-29T03:34:34.008Z",
+  "updatedAt": "2026-09-29T03:46:57.104Z",
   "current": {
     "phase": "P08",
-    "step": "P08.1"
+    "step": "P08.4"
   },
   "gates": [
     {
@@ -1616,11 +1616,16 @@
         {
           "id": "P08.4",
           "title": "Containers and compute",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-09-29T03:46:57.103Z",
           "completedAt": null,
-          "commits": [],
-          "notes": []
+          "commits": ["a60fc62"],
+          "notes": [
+            {
+              "at": "2026-09-29T03:46:57.104Z",
+              "text": "Step 1 spike passed (reports/P08/static-export-spike.md): export + one server works for /e/<slug>/; needs payload-path translation and a post-hydration usePathname slug helper. Steps 2-5 need the account bootstrapped (P08.2)."
+            }
+          ]
         },
         {
           "id": "P08.5",
