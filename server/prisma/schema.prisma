@@ -207,6 +207,12 @@ model Event {
   organisation         Organisation          @relation(fields: [organisationId], references: [id], onDelete: Restrict)
   clonedFrom           Event?                @relation("EventClone", fields: [clonedFromEventId], references: [id], onDelete: Restrict)
   clones               Event[]               @relation("EventClone")
+  captureCategories    CaptureCategory[]
+  stationTypes         StationType[]
+  stationTags          StationTag[]
+  stationTaggings      StationTagging[]
+  shiftTemplates       ShiftTemplate[]
+  shifts               Shift[]
   days                 EventDay[]
   stations             Station[]
   shiftAssignments     ShiftAssignment[]
@@ -239,6 +245,134 @@ model Event {
   @@index([status])
 }
 
+// --- Taxonomy (ADR-002 §1): what an event counts, where and when, as data ---
+
+/// A category a registration counts in; replaces VisitorCategory.
+/// @eventOwned
+model CaptureCategory {
+  id        String   @id @default(cuid())
+  eventId   String
+  /// Stable: CSV imports and content refer to it. The label is free.
+  code      String
+  label     String
+  sortOrder Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  event         Event          @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  registrations Registration[]
+
+  @@unique([eventId, code])
+  @@unique([eventId, id])
+  @@index([eventId, active, sortOrder])
+}
+
+/// What kind of station, and so what it may do; replaces StationKind and the
+/// per-station countsEntry/issuesStamp flags. Capabilities live here only.
+/// @eventOwned
+model StationType {
+  id                String   @id @default(cuid())
+  eventId           String
+  code              String
+  label             String
+  registersVisitors Boolean  @default(false)
+  countsEntry       Boolean  @default(false)
+  issuesStamp       Boolean  @default(false)
+  redeemsGifts      Boolean  @default(false)
+  sortOrder         Int      @default(0)
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime @updatedAt @db.Timestamptz(3)
+
+  event    Event     @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  stations Station[]
+
+  @@unique([eventId, code])
+  @@unique([eventId, id])
+}
+
+/// A label a station can carry (a course is one kind); replaces CourseCode.
+/// @eventOwned
+model StationTag {
+  id          String   @id @default(cuid())
+  eventId     String
+  code        String
+  label       String
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+
+  event    Event            @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  stations StationTagging[]
+
+  @@unique([eventId, code])
+  @@unique([eventId, id])
+}
+
+/// @eventOwned
+model StationTagging {
+  eventId   String
+  stationId String
+  tagId     String
+
+  event   Event      @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  station Station    @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  tag     StationTag @relation(fields: [tagId], references: [id], onDelete: Restrict)
+
+  @@id([stationId, tagId])
+  @@index([eventId, tagId])
+}
+
+/// A shift pattern in the event's local time; replaces ShiftBlock and the
+/// shiftBlocks setting. endsNextDay lets a shift cross midnight.
+/// @eventOwned
+model ShiftTemplate {
+  id          String   @id @default(cuid())
+  eventId     String
+  code        String
+  label       String
+  /// HH:MM on the event's wall clock.
+  startLocal  String
+  endLocal    String
+  endsNextDay Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+
+  event  Event   @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  shifts Shift[]
+
+  @@unique([eventId, code])
+  @@unique([eventId, id])
+}
+
+/// A template on a day, as real instants: running now means startsAt <= now < endsAt.
+/// @eventOwned
+model Shift {
+  id         String   @id @default(cuid())
+  eventId    String
+  eventDayId String
+  templateId String
+  startsAt   DateTime @db.Timestamptz(3)
+  endsAt     DateTime @db.Timestamptz(3)
+  /// Set by the exceptions grid; a template edit leaves an overridden shift alone.
+  overridden Boolean  @default(false)
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime @updatedAt @db.Timestamptz(3)
+
+  event       Event             @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  eventDay    EventDay          @relation(fields: [eventDayId], references: [id], onDelete: Restrict)
+  template    ShiftTemplate     @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  assignments ShiftAssignment[]
+
+  @@unique([eventDayId, templateId])
+  @@unique([eventId, id])
+  @@index([eventId, startsAt, endsAt])
+}
+
 /// @eventOwned
 model EventDay {
   id          String   @id @default(cuid())
@@ -257,7 +391,8 @@ model EventDay {
   attendance           Attendance[]
   attendanceChallenges AttendanceChallenge[]
 
-  event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  event  Event?  @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  shifts Shift[]
 
   @@unique([date])
   @@index([eventId, date])
@@ -268,6 +403,8 @@ model Station {
   id          String      @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2). Nullable until P09.10 backfills and contracts.
   eventId     String?
+  /// The type as data (ADR-002); kind and the flags stay authoritative until P09.5.
+  typeId      String?
   /// "DAAA_STATION", "SIGNUP_BOOTH"
   code        String      @unique
   name        String
@@ -290,10 +427,13 @@ model Station {
   announcements    Announcement[]
   fallbackWindows  FallbackWindow[]
 
-  event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  event Event?           @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  type  StationType?     @relation(fields: [typeId], references: [id], onDelete: Restrict)
+  tags  StationTagging[]
 
   @@index([kind, active])
   @@index([eventId, code])
+  @@index([eventId, typeId, active])
 }
 
 // ─────────────────────────────────────────────
@@ -365,6 +505,8 @@ model ShiftAssignment {
   id           String     @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2). Nullable until P09.10 backfills and contracts.
   eventId      String?
+  /// The materialised shift (ADR-002); eventDayId + block stay authoritative until P09.5.
+  shiftId      String?
   volunteerId  String
   stationId    String
   eventDayId   String
@@ -381,10 +523,12 @@ model ShiftAssignment {
   swapRequests ShiftSwapRequest[]
 
   event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  shift Shift? @relation(fields: [shiftId], references: [id], onDelete: Restrict)
 
   @@unique([volunteerId, eventDayId, block])
   @@index([stationId, eventDayId, block])
   @@index([eventId, stationId])
+  @@index([shiftId])
 }
 
 enum AttendanceMethod {
@@ -504,6 +648,8 @@ model Registration {
   id               String          @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2). Nullable until P09.10 backfills and contracts.
   eventId          String?
+  /// The category as data (ADR-002); the enum stays authoritative until P09.5.
+  categoryId       String?
   category         VisitorCategory
   stationId        String
   recordedById     String
@@ -522,12 +668,14 @@ model Registration {
   recordedBy  Volunteer    @relation(fields: [recordedById], references: [id])
   missionCard MissionCard? @relation(fields: [missionCardId], references: [id])
 
-  event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  event           Event?           @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  captureCategory CaptureCategory? @relation(fields: [categoryId], references: [id], onDelete: Restrict)
 
   @@index([recordedAt])
   @@index([category, recordedAt])
   @@index([groupId])
   @@index([eventId, recordedAt])
+  @@index([eventId, categoryId, recordedAt])
 }
 
 // ─────────────────────────────────────────────
