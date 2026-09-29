@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-29T01:33:40.648Z",
+  "updatedAt": "2026-09-29T01:44:13.101Z",
   "current": {
     "phase": "P07",
-    "step": "P07.7"
+    "step": "P07.8"
   },
   "gates": [
     {
@@ -1509,11 +1509,16 @@
         {
           "id": "P07.8",
           "title": "Shared package reorganisation",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-29T01:34:21.974Z",
+          "completedAt": "2026-09-29T01:44:13.101Z",
+          "commits": ["8d8d573"],
+          "notes": [
+            {
+              "at": "2026-09-29T01:44:13.101Z",
+              "text": "contracts/<domain> mirroring server modules (admin split into people, assignments, eventDays, station, gift); errors/, invariants/, access/ (capability matrix re-exported until P11), generated/. Public exports unchanged (202 names). Server 768/9, client 174/4, E2E 26, visual 58."
+            }
+          ]
         },
         {
           "id": "P07.11",
