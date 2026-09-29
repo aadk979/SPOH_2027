@@ -1,13 +1,9 @@
 Continue the SPOH 2027 remediation programme from the documented handoff. Implement and verify one step at a time until the programme is complete or a genuine owner-controlled blocker is reached.
 
-Use ONLY C:\Users\aadk9\OneDrive\Desktop\SPOH_2027\V1-main. Leave sibling V1 unchanged. I authorize verified commits and pushes directly to main under D-11; do not ask again. Preserve required owner/live production approvals. Do not spawn subagents.
+Use ONLY C:\Users\aadk9\OneDrive\Desktop\SPOH_2027\V1-main. Leave sibling V1 unchanged. Verified commits and pushes directly to main are authorized under D-11; do not ask again. Preserve required owner/live-production approvals. Do not spawn subagents.
 
-Read remediation/reports/HANDOFF-2026-09-28.md FIRST, then remediation/README.md resume protocol, progress.json, DECISIONS.md, standards/engineering-standards.md, phases/P07-client-refactor.md, client/AGENTS.md, relevant ADRs and findings/BACKLOG.md. Verify git status/history before editing.
+Read remediation/reports/HANDOFF-2026-09-29.md FIRST, then remediation/README.md resume protocol, progress.json, DECISIONS.md, standards/engineering-standards.md, the current phase file, client/AGENTS.md, relevant ADRs and findings/BACKLOG.md. Verify git status/history before editing.
 
-P07.3/P07.4 are complete. P07.5 reports, attendance, fallback/import (5eeb3da) and settings (dd92bb7) are verified and pushed. P07.5 remains in progress. The working tree contains an UNCOMMITTED volunteer administration split and two new test files. Preserve and review it; do not restart or discard it.
+P00-P07 are done (G2 passed). P08.1 is done and the P08.4 static-export spike passed; P08.2-P08.11 wait on the owner's approval to bootstrap the AWS account. Continue P09 onward in dependency order, and P08 once the bootstrap is approved.
 
-Volunteer slice checks: client 98 passed/4 deferred, server 768 passed/9 deferred, full visual 58 passed with unchanged baselines, workspace typecheck and architecture passed, lint zero errors/31 remaining warnings. E2E was interrupted before its final console summary was collected; .last-run.json says passed, but rerun all 26 journeys before committing for unambiguous evidence. Details and files are in the handoff.
-
-Restart disposable services if absent. Use bundled Node24 and dedicated test databases. Never reset/seed real spoh2027 or regenerate screenshot baselines to hide regressions. Visual and E2E use different databases and clock/rate-limit settings on port4012: run them serially.
-
-Finish volunteer verification, commit with Remediation-Step: P07.5, update progress.json accurately and push. Continue the remaining P07.5 components and then P07 onward through P16. Do not stop after a plan or one slice. P12.8 owner go/no-go is not project completion. Keep an accurate handoff if interrupted.
+Use bundled Node 24 and the dedicated test databases. Never reset/seed the real spoh2027 or regenerate screenshot baselines to hide regressions. Visual and E2E share port 4012 with different databases and clock/rate-limit settings: run them serially, restarting the visual API before each full visual run.
