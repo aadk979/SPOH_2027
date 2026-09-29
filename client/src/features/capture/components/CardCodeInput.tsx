@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, type FormEvent, type ReactNode, type RefObject } from 'react';
+import type { FormEvent, ReactNode, RefObject } from 'react';
+import { useZodForm } from '@/shared/hooks/useZodForm';
+import { CardCodeEntry } from '../model/cardCodeEntry';
 import type { ScannerState } from '@/features/capture/useQrScanner';
 import { CardViewfinder } from './CardViewfinder';
 import { Button, Input } from '@/shared/ui';
@@ -24,19 +26,17 @@ export function CardCodeInput({
   onSubmitCode(code: string): void;
   pending: boolean;
 }): ReactNode {
-  const [code, setCode] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const form = useZodForm(CardCodeEntry, { code: '' });
+  const { code } = form.values;
+  const error = form.errors.code;
 
+  /** The printed alphabet's reading rule, from the schema the server applies (F03-020). */
   function submit(event: FormEvent): void {
     event.preventDefault();
-    const trimmed = code.trim().toUpperCase();
-    if (trimmed.length !== 6) {
-      setError('Card code must be exactly 6 characters.');
-      return;
-    }
-    setError(null);
-    onSubmitCode(trimmed);
-    setCode('');
+    const entry = form.validate();
+    if (!entry) return;
+    onSubmitCode(entry.code);
+    form.reset();
   }
 
   function handlePaste(event: React.ClipboardEvent<HTMLInputElement>): void {
@@ -46,8 +46,7 @@ export function CardCodeInput({
       .replace(/[^a-zA-Z0-9]/g, '')
       .toUpperCase()
       .slice(0, 6);
-    setCode(cleaned);
-    if (error) setError(null);
+    form.setField('code', cleaned);
   }
 
   return (
@@ -67,10 +66,9 @@ export function CardCodeInput({
           <Input
             id="card-code"
             value={code}
-            onChange={(event) => {
-              setCode(event.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase());
-              if (error) setError(null);
-            }}
+            onChange={(event) =>
+              form.setField('code', event.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase())
+            }
             onPaste={handlePaste}
             maxLength={6}
             autoCapitalize="characters"

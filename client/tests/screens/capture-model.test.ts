@@ -26,17 +26,19 @@ describe('group composition', () => {
     expect(groupMembers({})).toEqual([]);
   });
 });
-describe('existing scan decoding', () => {
+describe('scan decoding', () => {
   it.each([
     [' abc234 ', 'ABC234'],
+    // A bare code is read with the printed alphabet's rule (F03-020).
+    [' abcl2o ', 'ABC120'],
     ['spoh2027:abc234more', 'ABC234'],
     ['prefix:other:xyz987', 'XYZ987'],
     ['abcdefghi', 'ABCDEF'],
     ['', ''],
     ['prefix:', ''],
     ['abc', 'ABC'],
-    ['i0o123', 'I0O123'],
-  ])('preserves %s as %s', (text, code) => expect(decodedCardCode(text)).toBe(code));
+    ['i0o123', '100123'],
+  ])('reads %s as %s', (text, code) => expect(decodedCardCode(text)).toBe(code));
 });
 describe('stamp feedback', () => {
   it('prioritizes completed journeys over the stamp result', () => {
