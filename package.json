@@ -10,7 +10,8 @@
   "workspaces": [
     "packages/*",
     "server",
-    "client"
+    "client",
+    "infra/cdk"
   ],
   "scripts": {
     "dev": "npm run build:shared && run-p dev:shared dev:server dev:client",
@@ -35,7 +36,9 @@
     "db:reset": "npm run db:reset --workspace server",
     "audit:ci": "npm audit --audit-level=high",
     "build:shared": "npm run build --workspace packages/shared",
-    "dev:shared": "npm run dev --workspace packages/shared"
+    "dev:shared": "npm run dev --workspace packages/shared",
+    "infra:synth": "npm run synth --workspace infra/cdk",
+    "infra:diff": "npm run diff --workspace infra/cdk"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

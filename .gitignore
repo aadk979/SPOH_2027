@@ -50,3 +50,6 @@ client/test-results/
 client/playwright-report/
 client/blob-report/
 remediation/tools/journeys/.state/
+
+# CDK synth output
+infra/cdk/cdk.out/
