@@ -224,6 +224,10 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   **Amended** (owner, G1, 2026-09-26): the agent may use the AWS CLI and this environment's AWS
   credentials. Creating billable resources stays within ADR-008's cost plan. Nothing on the live
   Lightsail site is changed without the owner.
+  **Approved** (owner, 2026-09-29): bootstrap account 665146708212 in ap-southeast-1 (CDK
+  bootstrap and the GitHub OIDC deploy role) and build staging per ADR-008. Production is still
+  created only at the 28 Oct go decision. For P09.4's production-copy check the owner will supply a
+  `pg_dump` file; it is restored only into a dedicated `*_test` database and dropped afterwards.
 
 ### D-14 — Shared state for rate limits and caches
 
