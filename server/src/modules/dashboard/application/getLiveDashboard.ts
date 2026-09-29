@@ -14,6 +14,7 @@ import {
   registrationsSince,
 } from '../data/repo.js';
 import { getDataHealth } from './getDataHealth.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /**
  * The live operations dashboard (PRODUCT_BRIEF §9).
@@ -26,19 +27,22 @@ import { getDataHealth } from './getDataHealth.js';
  * screen, because there is no honest way to produce one. Each panel is built
  * by its own function, from its own queries, and composed here.
  */
-export async function getLiveDashboard(now = new Date()): Promise<LiveDashboardResponse> {
+export async function getLiveDashboard(
+  scope: EventScope,
+  now = new Date(),
+): Promise<LiveDashboardResponse> {
   const since = startOfEventDay(now);
   const blocks = activeShiftBlocks(now);
   const eventDay = await findEventDayOn(since);
 
   const [registrations, footfall, cards, gifts, safety, staffing, dataHealth] = await Promise.all([
     registrationsPanel(since, now),
-    footfallPanel(now),
-    cardsPanel(since, now),
+    footfallPanel(scope, now),
+    cardsPanel(scope, { since, now }),
     listGifts(),
     safetyPanel(),
     staffingPanel(eventDay?.id ?? null, blocks, now),
-    getDataHealth(now),
+    getDataHealth(scope, now),
   ]);
 
   return {
@@ -66,8 +70,8 @@ async function registrationsPanel(since: Date, now: Date): Promise<Panels['regis
   return { unit: 'registrations', todayTotal, byCategory, lastHour };
 }
 
-async function footfallPanel(now: Date): Promise<Panels['footfall']> {
-  const footfall = await getLiveFootfall(now);
+async function footfallPanel(scope: EventScope, now: Date): Promise<Panels['footfall']> {
+  const footfall = await getLiveFootfall(scope, now);
   return {
     unit: 'roomEntries',
     todayTotal: footfall.stations.reduce((sum, station) => sum + station.todayTotal, 0),
@@ -75,8 +79,11 @@ async function footfallPanel(now: Date): Promise<Panels['footfall']> {
   };
 }
 
-async function cardsPanel(since: Date, now: Date): Promise<Panels['cards']> {
-  const funnel = await getFunnel({ from: since.toISOString(), to: now.toISOString() });
+async function cardsPanel(
+  scope: EventScope,
+  { since, now }: { since: Date; now: Date },
+): Promise<Panels['cards']> {
+  const funnel = await getFunnel(scope, { from: since.toISOString(), to: now.toISOString() });
   return {
     unit: 'cards',
     issued: funnel.issued,

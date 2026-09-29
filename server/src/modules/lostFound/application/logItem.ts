@@ -8,7 +8,7 @@ import { toRecordWithStation } from './itemRecord.js';
 /** Log a found item: what it is, where it was found, where it is kept. */
 export async function logItem(
   request: CreateLostFoundRequest,
-  { volunteerId, audit }: ActorContext,
+  { volunteerId, scope, audit }: ActorContext,
 ): Promise<LostFoundRecord> {
   const item = await prisma.$transaction(async (tx) => {
     const row = await createItem(tx, {
@@ -30,5 +30,5 @@ export async function logItem(
     return row;
   });
 
-  return toRecordWithStation(item);
+  return toRecordWithStation(scope, item);
 }

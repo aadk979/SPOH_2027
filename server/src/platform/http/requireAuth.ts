@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from 'express';
 import { UnauthenticatedError } from '../errors/index.js';
 import { authenticate } from '../identity/index.js';
 import type { RequestAuth } from '../../types/express.js';
+import type { EventScope } from '../db/eventScope.js';
 import { requestIdOf } from './requestId.js';
 
 function readBearerToken(req: Request): string {
@@ -37,4 +38,9 @@ export function getAuth(req: Request): RequestAuth {
     throw new UnauthenticatedError();
   }
   return req.auth;
+}
+
+/** The event a request works in, for use cases that take an `EventScope`. */
+export function scopeOf(req: Request): EventScope {
+  return { eventId: getAuth(req).eventId };
 }

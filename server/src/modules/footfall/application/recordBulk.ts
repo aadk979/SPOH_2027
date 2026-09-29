@@ -15,9 +15,9 @@ import { createTick, sumForRecorderSince, sumForStationSince } from '../data/rep
  */
 export async function recordBulk(
   request: CreateFootfallBulkRequest,
-  { actor, audit, clock = systemClock }: CaptureContext,
+  { actor, scope, audit, clock = systemClock }: CaptureContext,
 ): Promise<CreateFootfallTickResponse> {
-  const station = await requireCountedStation(request.stationId);
+  const station = await requireCountedStation(scope, request.stationId);
   const timeBlockStart = new Date(request.timeBlockStart);
 
   const tick = await prisma.$transaction(async (tx) => {

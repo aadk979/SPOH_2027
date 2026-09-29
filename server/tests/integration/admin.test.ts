@@ -9,6 +9,7 @@ import {
   createEventDayToday,
   createStation,
   createVolunteer,
+  testEvent,
 } from '../helpers/fixtures.js';
 import type { TestVolunteer } from '../helpers/fixtures.js';
 
@@ -421,6 +422,14 @@ describe('stations, days and gifts', () => {
 
     expect(created.status).toBe(201);
     expect(created.body.station.code).toBe('NEW_LAB');
+    // What happens there is the type's, derived from kind and flags (P09.5).
+    expect(created.body.station.type).toMatchObject({
+      code: 'COURSE_STATION_COUNTED',
+      registersVisitors: false,
+      countsEntry: true,
+      issuesStamp: false,
+      redeemsGifts: false,
+    });
 
     const duplicate = await request(app)
       .post('/api/v1/admin/stations')
@@ -453,6 +462,15 @@ describe('stations, days and gifts', () => {
       .send({ date: '2027-01-10', label: 'Extra Day' });
 
     expect(created.status).toBe(201);
+    // A shift per template, at its hours in the event's timezone (P09.5).
+    const shifts = await prisma.shift.findMany({
+      where: { eventId: (await testEvent()).eventId, eventDayId: created.body.eventDay.id },
+      orderBy: { startsAt: 'asc' },
+    });
+    expect(shifts.map((shift) => shift.startsAt.toISOString())).toEqual([
+      '2027-01-10T01:30:00.000Z',
+      '2027-01-10T05:30:00.000Z',
+    ]);
 
     const duplicate = await request(app)
       .post('/api/v1/admin/event-days')

@@ -21,7 +21,12 @@ import { enqueue } from '@/shared/lib/outbox';
 /** ADR-007 §5 (F03-034): stamps, redemptions and incidents queue offline; alerts never do. */
 
 const state = vi.hoisted(() => ({ replace: vi.fn() }));
-const STATION = { id: 'station-1', name: 'Room A', kind: 'MISSION_COMPLETE' };
+const STATION = {
+  id: 'station-1',
+  name: 'Room A',
+  kind: 'MISSION_COMPLETE',
+  type: { registersVisitors: false, countsEntry: false, issuesStamp: false, redeemsGifts: true },
+};
 vi.mock('next/navigation', () => ({ useRouter: () => ({ replace: state.replace }) }));
 vi.mock('@/shared/shell/AppShell', () => ({
   AppShell: ({ children }: { children: ReactNode }) => <main>{children}</main>,

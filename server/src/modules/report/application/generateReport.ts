@@ -11,6 +11,7 @@ import {
   safetyReport,
   volunteersReport,
 } from './sections.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /** Absent bounds mean the whole event. */
 function resolveRange(query: ReportQuery): Range {
@@ -24,9 +25,9 @@ function resolveRange(query: ReportQuery): Range {
  * The post-event report: each section built by its own loader from its own
  * queries, composed here. Stations are named once for every section.
  */
-export async function generateReport(query: ReportQuery): Promise<FullReport> {
+export async function generateReport(scope: EventScope, query: ReportQuery): Promise<FullReport> {
   const range = resolveRange(query);
-  const stations = await listStations({ includeInactive: true });
+  const stations = await listStations(scope, { includeInactive: true });
   const names = new Map(stations.map((station) => [station.id, station.name]));
   const now = new Date();
 
@@ -38,7 +39,7 @@ export async function generateReport(query: ReportQuery): Promise<FullReport> {
       giftsReport(range, names),
       safetyReport(range),
       volunteersReport(range, names, now),
-      integrityReport(range),
+      integrityReport(scope, range),
     ]);
 
   return {

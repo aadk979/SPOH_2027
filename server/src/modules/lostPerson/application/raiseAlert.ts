@@ -14,7 +14,7 @@ import { decorate } from './alertRecord.js';
  */
 export async function raiseAlert(
   request: RaiseLostPersonRequest,
-  { volunteerId, audit }: ActorContext,
+  { volunteerId, scope, audit }: ActorContext,
 ): Promise<LostPersonAlertRecord> {
   const alert = await prisma.$transaction(async (tx) => {
     const row = await createAlert(tx, {
@@ -40,5 +40,5 @@ export async function raiseAlert(
   });
 
   void dispatch(raisedPush(alert.id));
-  return decorate(alert, volunteerId);
+  return decorate(scope, alert, volunteerId);
 }

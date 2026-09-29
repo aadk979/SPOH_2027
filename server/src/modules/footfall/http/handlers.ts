@@ -13,6 +13,7 @@ import { recordBulk } from '../application/recordBulk.js';
 import { recordTick } from '../application/recordTick.js';
 import { summariseFootfall } from '../application/summariseFootfall.js';
 import { voidTickById } from '../application/voidTickById.js';
+import { scopeOf } from '../../../platform/http/requireAuth.js';
 
 export async function recordTickHandler(req: Request, res: Response): Promise<void> {
   const body = validatedBody<CreateFootfallTickRequest>(req);
@@ -33,9 +34,9 @@ export async function voidTickHandler(req: Request, res: Response): Promise<void
 
 export async function summariseFootfallHandler(req: Request, res: Response): Promise<void> {
   const query = validatedQuery<FootfallSummaryQuery>(req);
-  res.status(200).json(await summariseFootfall(query));
+  res.status(200).json(await summariseFootfall(scopeOf(req), query));
 }
 
-export async function liveFootfallHandler(_req: Request, res: Response): Promise<void> {
-  res.status(200).json(await getLiveFootfall());
+export async function liveFootfallHandler(req: Request, res: Response): Promise<void> {
+  res.status(200).json(await getLiveFootfall(scopeOf(req)));
 }

@@ -12,7 +12,7 @@ import { getAlert } from './alertRecord.js';
  */
 export async function acknowledge(
   alertId: string,
-  { volunteerId, audit }: ActorContext,
+  { volunteerId, scope, audit }: ActorContext,
 ): Promise<LostPersonAlertRecord> {
   const alert = await findAlertById(alertId);
   if (!alert) throw new NotFoundError('Lost person alert');
@@ -29,5 +29,5 @@ export async function acknowledge(
     });
   });
 
-  return getAlert(alertId, volunteerId);
+  return getAlert(scope, alertId, volunteerId);
 }

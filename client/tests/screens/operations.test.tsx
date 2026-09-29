@@ -31,7 +31,9 @@ vi.mock('@/features/session', () => ({
     data: {
       volunteer: { id: 'viewer', role: 'CHIEF_COORDINATOR' },
       capabilities: state.capabilities,
-      currentAssignment: { station: { id: 'station-1', name: 'Room', issuesStamp: true } },
+      currentAssignment: {
+        station: { id: 'station-1', name: 'Room', issuesStamp: true, type: { issuesStamp: true } },
+      },
     },
   }),
 }));

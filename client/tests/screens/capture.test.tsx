@@ -6,10 +6,10 @@ import FootfallPage from '@/app/capture/footfall/page';
 
 const state = vi.hoisted(() => ({
   signedIn: true,
-  station: { id: 'station-1', name: 'Test Room', countsEntry: true } as {
+  station: { id: 'station-1', name: 'Test Room', type: { countsEntry: true } } as {
     id: string;
     name: string;
-    countsEntry: boolean;
+    type: { countsEntry: boolean };
   } | null,
   capture: vi.fn(),
   undo: vi.fn(),
@@ -49,7 +49,7 @@ vi.mock('@tanstack/react-query', () => ({ useQuery: () => ({ data: undefined }) 
 
 beforeEach(() => {
   state.signedIn = true;
-  state.station = { id: 'station-1', name: 'Test Room', countsEntry: true };
+  state.station = { id: 'station-1', name: 'Test Room', type: { countsEntry: true } };
   state.undoable = null;
   state.error = null;
   state.capture.mockReset();
@@ -107,7 +107,7 @@ describe('footfall screen safety net', () => {
   });
 
   it('does not count at a station that is not a counted room', () => {
-    state.station = { id: 'station-1', name: 'Test Room', countsEntry: false };
+    state.station = { id: 'station-1', name: 'Test Room', type: { countsEntry: false } };
     render(<FootfallPage />);
     expect(screen.getByText('This counter is closed')).toBeTruthy();
     expect(screen.queryByRole('button', { name: /Count one entry/ })).toBeNull();

@@ -40,7 +40,7 @@ export default function FootfallCaptureScreen(): ReactNode {
 
   if (!session) return null;
 
-  if (!station || !station.countsEntry) {
+  if (!station || !station.type.countsEntry) {
     return (
       <AppShell title="Counter" back={{ href: '/home', label: 'Home' }}>
         <EmptyState title="This counter is closed">

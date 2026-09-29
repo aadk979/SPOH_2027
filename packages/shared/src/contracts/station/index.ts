@@ -2,11 +2,37 @@ import { z } from 'zod';
 import { CourseCode, StationKind } from '../../invariants/enums.js';
 import { Id } from '../common/index.js';
 
+/**
+ * What a station is, as the event defines it (ADR-002): its capabilities are
+ * flags on the type, so behaviour never depends on a kind's name.
+ */
+export const StationTypeSummary = z
+  .object({
+    id: Id,
+    code: z.string(),
+    label: z.string(),
+    /** Visitors are registered here: the sign-up booth. */
+    registersVisitors: z.boolean(),
+    countsEntry: z.boolean(),
+    issuesStamp: z.boolean(),
+    /** Gifts are handed out here: mission complete. */
+    redeemsGifts: z.boolean(),
+  })
+  .strict();
+export type StationTypeSummary = z.infer<typeof StationTypeSummary>;
+
+/** A label the event puts on stations, such as the course a room presents. */
+export const StationTagSummary = z.object({ id: Id, code: z.string(), label: z.string() }).strict();
+export type StationTagSummary = z.infer<typeof StationTagSummary>;
+
 export const StationSummary = z
   .object({
     id: Id,
     code: z.string(),
     name: z.string(),
+    type: StationTypeSummary,
+    tags: z.array(StationTagSummary),
+    /** Superseded by `type` (P09.5); removed with the enums at P09.10. */
     kind: StationKind,
     courseCode: CourseCode.nullable(),
     floor: z.string().nullable(),

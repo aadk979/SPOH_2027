@@ -11,7 +11,7 @@ import { windowRecord } from './windowRecord.js';
 /** Declare degraded operation, event-wide or for one station. */
 export async function declareFallback(
   request: DeclareFallbackRequest,
-  { volunteerId: declaredById, audit }: ActorContext,
+  { volunteerId: declaredById, scope, audit }: ActorContext,
   clock: Clock = systemClock,
 ): Promise<FallbackWindowRecord> {
   const stationId = request.stationId ?? null;
@@ -45,5 +45,5 @@ export async function declareFallback(
     'FALLBACK DECLARED — announce it in the Safety Communications Chat',
   );
 
-  return windowRecord(window);
+  return windowRecord(scope, window);
 }

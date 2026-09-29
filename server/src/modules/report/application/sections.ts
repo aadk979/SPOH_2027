@@ -26,6 +26,7 @@ import {
   type Range,
 } from '../data/repo.js';
 import { footfallSection, safetySection, volunteersSection } from '../domain/sections.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /** One loader per report section: its own queries, then its builder. */
 
@@ -131,9 +132,12 @@ export async function volunteersReport(
   return volunteersSection(attendance, { volunteersActive, stationName: names, now });
 }
 
-export async function integrityReport(range: Range): Promise<Report['dataIntegrity']> {
+export async function integrityReport(
+  scope: EventScope,
+  range: Range,
+): Promise<Report['dataIntegrity']> {
   const [windows, imports, sources, voided] = await Promise.all([
-    listFallbackWindows({ from: range.from, to: range.to }),
+    listFallbackWindows(scope, { from: range.from, to: range.to }),
     importBatches(range),
     recordsBySource(range),
     voidedCounts(range),

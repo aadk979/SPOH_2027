@@ -27,7 +27,14 @@ vi.mock('@/features/session', () => ({
   useMe: () => ({
     data: {
       capabilities: state.capabilities,
-      currentAssignment: { station: { id: 'booth', name: 'Booth', kind: 'SIGNUP_BOOTH' } },
+      currentAssignment: {
+        station: {
+          id: 'booth',
+          name: 'Booth',
+          kind: 'SIGNUP_BOOTH',
+          type: { registersVisitors: true },
+        },
+      },
       upcomingAssignments: [],
     },
   }),

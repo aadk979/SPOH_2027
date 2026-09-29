@@ -1,5 +1,5 @@
 import type { ReissueCardRequest, ReissueCardResponse } from '@spoh/shared';
-import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
+import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import { createStamp, findCardRow, findCardWithStamps, updateCard } from '../data/repo.js';
 import {
@@ -11,6 +11,7 @@ import {
 } from '../domain/cardRules.js';
 import { normaliseShortCode } from '../domain/shortCode.js';
 import { getCard } from './getCard.js';
+import type { ActorContext } from '../../../platform/http/auditContext.js';
 
 type CardWithStamps = NonNullable<Awaited<ReturnType<typeof findCardWithStamps>>>;
 
@@ -46,7 +47,7 @@ async function copyStamps(
 export async function reissueCard(
   shortCodeInput: string,
   request: ReissueCardRequest,
-  audit: AuditContext,
+  { scope, audit }: ActorContext,
 ): Promise<ReissueCardResponse> {
   const originalCode = normaliseShortCode(shortCodeInput);
   const replacementCode = normaliseShortCode(request.replacementShortCode);
@@ -88,5 +89,5 @@ export async function reissueCard(
     return { voidedCardId: original.id, stampsCarriedOver: original.stampEvents.length };
   });
 
-  return { card: await getCard(replacementCode), ...result };
+  return { card: await getCard(scope, replacementCode), ...result };
 }

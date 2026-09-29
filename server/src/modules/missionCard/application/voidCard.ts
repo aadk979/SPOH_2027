@@ -1,15 +1,16 @@
 import type { MissionCardRecord } from '@spoh/shared';
-import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
+import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import { findCardRow, updateCard } from '../data/repo.js';
 import { assertCardNotVoided, requireCard } from '../domain/cardRules.js';
 import { normaliseShortCode } from '../domain/shortCode.js';
 import { getCard } from './getCard.js';
+import type { ActorContext } from '../../../platform/http/auditContext.js';
 
 export async function voidCard(
   shortCodeInput: string,
   reason: string,
-  audit: AuditContext,
+  { scope, audit }: ActorContext,
 ): Promise<MissionCardRecord> {
   const shortCode = normaliseShortCode(shortCodeInput);
 
@@ -28,5 +29,5 @@ export async function voidCard(
     });
   });
 
-  return getCard(shortCode);
+  return getCard(scope, shortCode);
 }

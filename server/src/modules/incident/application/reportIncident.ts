@@ -11,7 +11,7 @@ import { notifySafetyChain } from './notifySafetyChain.js';
 /** Record an incident as reported, and push a severe one to the safety chain. */
 export async function reportIncident(
   request: CreateIncidentRequest,
-  { volunteerId, audit }: ActorContext,
+  { volunteerId, scope, audit }: ActorContext,
 ): Promise<IncidentRecord> {
   const incident = await prisma.$transaction(async (tx) => {
     const row = await createIncident(tx, {
@@ -38,7 +38,7 @@ export async function reportIncident(
     return row;
   });
 
-  const station = incident.stationId ? await findStationById(incident.stationId) : null;
+  const station = incident.stationId ? await findStationById(scope, incident.stationId) : null;
   notifySafetyChain(
     {
       id: incident.id,

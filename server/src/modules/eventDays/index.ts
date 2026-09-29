@@ -7,3 +7,4 @@ export {
   listEventDaysHandler,
   updateEventDayHandler,
 } from './http/handlers.js';
+export { addShiftsForDay } from './application/addShiftsForDay.js';

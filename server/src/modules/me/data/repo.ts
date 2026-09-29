@@ -1,10 +1,11 @@
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
+import { STATION_WITH_TYPE } from '../../station/index.js';
 
 /** Data access for the caller's own profile, roster and escalation chain. */
 
 const assignmentInclude = {
-  station: true,
+  station: { include: STATION_WITH_TYPE },
   eventDay: true,
 } satisfies Prisma.ShiftAssignmentInclude;
 

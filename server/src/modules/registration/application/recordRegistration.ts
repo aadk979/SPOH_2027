@@ -16,9 +16,9 @@ import { countForRecorderSince, countForStationSince, createRegistration } from 
  */
 export async function recordRegistration(
   request: CreateRegistrationRequest,
-  { actor, audit, clock = systemClock }: CaptureContext,
+  { actor, scope, audit, clock = systemClock }: CaptureContext,
 ): Promise<CreateRegistrationResponse> {
-  const station = await requireActiveStation(request.stationId);
+  const station = await requireActiveStation(scope, request.stationId);
   // Stamped by the server, on receipt. The client's own timestamp is stored
   // alongside it — a phone that slept for ten minutes would otherwise skew the
   // curve — but the server's clock is the one every report buckets against.

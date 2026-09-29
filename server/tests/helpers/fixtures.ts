@@ -5,6 +5,8 @@ import { prisma } from '../../src/platform/db/client.js';
 import type { EventScope } from '../../src/platform/db/eventScope.js';
 import { mirrorMembership } from '../../src/platform/db/membershipMirror.js';
 import { createEvent } from '../../src/modules/event/index.js';
+import { addShiftsForDay } from '../../src/modules/eventDays/index.js';
+import { typeIdFor } from '../../src/modules/station/data/repo.js';
 import { createLocalAuthProvider } from '../../src/platform/identity/localProvider.js';
 import { invalidateVolunteerCache } from '../../src/platform/identity/index.js';
 import { eventDayAnchor, singaporeDateString } from '../../src/platform/time/index.js';
@@ -89,14 +91,23 @@ function subFor(email: string): string {
 }
 
 export async function createEventDayToday(): Promise<{ id: string }> {
-  const { eventId } = await testEvent();
-  const date = eventDayAnchor(singaporeDateString());
-  return prisma.eventDay.upsert({
+  const scope = await testEvent();
+  const today = singaporeDateString();
+  const date = eventDayAnchor(today);
+  const day = await prisma.eventDay.upsert({
     where: { date },
-    create: { eventId, date, label: 'Test Day', isPublicDay: true, isTourDay: false },
+    create: {
+      eventId: scope.eventId,
+      date,
+      label: 'Test Day',
+      isPublicDay: true,
+      isTourDay: false,
+    },
     update: {},
     select: { id: true },
   });
+  await addShiftsForDay(prisma, scope, { id: day.id, date: today });
+  return day;
 }
 
 export async function createStation(overrides: {
@@ -106,16 +117,20 @@ export async function createStation(overrides: {
   issuesStamp?: boolean;
   active?: boolean;
 }): Promise<{ id: string; code: string }> {
-  const { eventId } = await testEvent();
+  const scope = await testEvent();
+  const shape = {
+    kind: 'OTHER' as const,
+    countsEntry: overrides.countsEntry ?? false,
+    issuesStamp: overrides.issuesStamp ?? false,
+  };
   return prisma.station.upsert({
     where: { code: overrides.code },
     create: {
-      eventId,
+      eventId: scope.eventId,
+      typeId: await typeIdFor(prisma, scope, shape),
       code: overrides.code,
       name: overrides.name ?? overrides.code,
-      kind: 'OTHER',
-      countsEntry: overrides.countsEntry ?? false,
-      issuesStamp: overrides.issuesStamp ?? false,
+      ...shape,
       active: overrides.active ?? true,
     },
     update: {},

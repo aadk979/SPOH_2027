@@ -9,12 +9,16 @@ import {
   countVoided,
 } from '../data/repo.js';
 import { buildFunnelStages } from '../domain/funnel.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /** The card funnel for a time range. Every stage is a count of cards. */
-export async function getFunnel(range: {
-  from?: string;
-  to?: string;
-}): Promise<CardFunnelResponse> {
+export async function getFunnel(
+  scope: EventScope,
+  range: {
+    from?: string;
+    to?: string;
+  },
+): Promise<CardFunnelResponse> {
   const filter = {
     ...(range.from ? { from: new Date(range.from) } : {}),
     ...(range.to ? { to: new Date(range.to) } : {}),
@@ -27,7 +31,7 @@ export async function getFunnel(range: {
       countRedeemedCards(filter),
       countVoided(filter),
       countCardsPerStation(filter),
-      listStampingStations(),
+      listStampingStations(scope),
       rangeOverlapsFallbackWindow(filter),
     ]);
 

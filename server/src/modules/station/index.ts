@@ -20,6 +20,7 @@ export {
   listCountedStations,
   listStampingStations,
   listStations,
+  WITH_TYPE as STATION_WITH_TYPE,
   type Station,
 } from './data/repo.js';
 export { toStationSummary } from './data/mappers.js';

@@ -1,17 +1,20 @@
 import { ERROR_CODES, type CreateEventDayRequest, type EventDayRecord } from '@spoh/shared';
-import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
+import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import { ConflictError } from '../../../platform/errors/index.js';
+import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { eventDayAnchor } from '../../../platform/time/index.js';
 import { toEventDayRecord } from '../data/mappers.js';
 import { createEventDayRow, findEventDayByDate } from '../data/repo.js';
+import { addShiftsForDay } from './addShiftsForDay.js';
 
+/** A new day of the event, with a shift per template (P09.5). */
 export async function createEventDay(
   request: CreateEventDayRequest,
-  audit: AuditContext,
+  { scope, audit }: ActorContext,
 ): Promise<EventDayRecord> {
   const date = eventDayAnchor(request.date);
-  const existing = await findEventDayByDate(date);
+  const existing = await findEventDayByDate(scope, date);
   if (existing) {
     throw new ConflictError(
       ERROR_CODES.EVENT_DAY_EXISTS,
@@ -20,12 +23,13 @@ export async function createEventDay(
   }
 
   const row = await prisma.$transaction(async (tx) => {
-    const created = await createEventDayRow(tx, {
+    const created = await createEventDayRow(tx, scope, {
       date,
       label: request.label,
       isPublicDay: request.isPublicDay,
       isTourDay: request.isTourDay,
     });
+    await addShiftsForDay(tx, scope, { id: created.id, date: request.date });
     await writeAudit(tx, {
       ...audit,
       action: 'eventDay.create',

@@ -24,7 +24,7 @@ import { getCard } from './getCard.js';
 export async function issueCard(
   shortCodeInput: string,
   request: IssueCardRequest,
-  { actor, audit, clock = systemClock }: CaptureContext,
+  { actor, scope, audit, clock = systemClock }: CaptureContext,
 ): Promise<MissionCardRecord> {
   const shortCode = normaliseShortCode(shortCodeInput);
 
@@ -55,5 +55,5 @@ export async function issueCard(
 
   const refreshed = await findCardRowById(cardId);
   if (!refreshed) throw new NotFoundError('Mission card');
-  return getCard(refreshed.shortCode);
+  return getCard(scope, refreshed.shortCode);
 }

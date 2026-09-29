@@ -4,6 +4,7 @@ import { startOfEventDay } from '../../../platform/time/index.js';
 import { listCountedStations } from '../../station/index.js';
 import { liveStationStats } from '../data/repo.js';
 import { liveStationRow } from '../domain/footfallRules.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /**
  * A station silent for longer than this during event hours is flagged. The
@@ -18,10 +19,13 @@ export const SILENT_STATION_MINUTES = DEFAULT_SETTINGS.silentStationMinutes;
  * one with no ticks at all — a station missing from the list would be a station
  * nobody notices has stopped (PRODUCT_BRIEF §9).
  */
-export async function getLiveFootfall(now = new Date()): Promise<FootfallLiveResponse> {
+export async function getLiveFootfall(
+  scope: EventScope,
+  now = new Date(),
+): Promise<FootfallLiveResponse> {
   const silentAfterMinutes = getSettings().silentStationMinutes;
   const [stations, stats] = await Promise.all([
-    listCountedStations(),
+    listCountedStations(scope),
     liveStationStats(startOfEventDay(now), now),
   ]);
   const statsByStation = new Map(stats.map((row) => [row.stationId, row]));

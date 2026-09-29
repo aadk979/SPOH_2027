@@ -142,7 +142,7 @@ export async function redeemGift(
   request: RedeemGiftRequest,
   context: CaptureContext,
 ): Promise<RedeemGiftResponse> {
-  const station = await requireActiveStation(request.stationId);
+  const station = await requireActiveStation(context.scope, request.stationId);
   const recordedAt = (context.clock ?? systemClock).now();
 
   const result = await prisma.$transaction((tx) =>

@@ -12,6 +12,7 @@ import {
 } from '../data/repo.js';
 import { deviceRate } from '../domain/signals.js';
 import { flaggedRedemptions } from '../data/flaggedRedemptions.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /**
  * The same picture scoped to one station, for an IC.
@@ -21,10 +22,11 @@ import { flaggedRedemptions } from '../data/flaggedRedemptions.js';
  * becomes visible before it becomes a reconciliation problem (§2.4).
  */
 export async function getStationDashboard(
+  scope: EventScope,
   stationId: string,
   now = new Date(),
 ): Promise<StationDashboardResponse> {
-  const station = await findStationById(stationId);
+  const station = await findStationById(scope, stationId);
   if (!station) throw new NotFoundError('Station');
 
   const since = startOfEventDay(now);

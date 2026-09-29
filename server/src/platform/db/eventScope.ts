@@ -97,7 +97,15 @@ export function assertEventScoped(model: string, operation: string, args: Args):
  * modules over one slice at a time; when it ends this is every event-owned
  * model and the list goes away.
  */
-const ENFORCED: ReadonlySet<string> = new Set<string>([]);
+const ENFORCED: ReadonlySet<string> = new Set<string>([
+  // Slice 2: the event's taxonomy and shifts.
+  'CaptureCategory',
+  'StationType',
+  'StationTag',
+  'StationTagging',
+  'ShiftTemplate',
+  'Shift',
+]);
 
 export function isScopeEnforced(model: string): boolean {
   return ENFORCED.has(model) && (EVENT_OWNED_MODELS as readonly string[]).includes(model);

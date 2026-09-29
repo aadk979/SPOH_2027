@@ -30,7 +30,7 @@ export default function StampCaptureScreen(): ReactNode {
 
   if (!session) return null;
 
-  if (!station?.issuesStamp) {
+  if (!station?.type.issuesStamp) {
     return (
       <AppShell title="Stamp a card" back={{ href: '/home', label: 'Home' }}>
         <EmptyState title="Scanning is closed here">

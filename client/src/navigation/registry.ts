@@ -216,7 +216,7 @@ export const NAV_REGISTRY: readonly NavEntry[] = [
     section: '/capture',
     surfaces: ['station'],
     requires: 'registration.create',
-    visible: ({ station }) => station?.kind === 'SIGNUP_BOOTH',
+    visible: ({ station }) => station?.type.registersVisitors === true,
   },
   { path: '/capture/registration/group', label: 'Register a group', section: '/capture' },
   {
@@ -225,7 +225,7 @@ export const NAV_REGISTRY: readonly NavEntry[] = [
     section: '/capture',
     surfaces: ['station'],
     requires: 'footfall.create',
-    visible: ({ station }) => station?.countsEntry === true,
+    visible: ({ station }) => station?.type.countsEntry === true,
     stationHint: (station) => station.name,
   },
   {
@@ -235,7 +235,7 @@ export const NAV_REGISTRY: readonly NavEntry[] = [
     section: '/capture',
     surfaces: ['station'],
     requires: 'card.stamp',
-    visible: ({ station }) => station?.issuesStamp === true,
+    visible: ({ station }) => station?.type.issuesStamp === true,
   },
   {
     path: '/capture/redeem',
@@ -244,7 +244,7 @@ export const NAV_REGISTRY: readonly NavEntry[] = [
     section: '/capture',
     surfaces: ['station'],
     requires: 'gift.redeem',
-    visible: ({ station }) => station?.kind === 'MISSION_COMPLETE',
+    visible: ({ station }) => station?.type.redeemsGifts === true,
   },
 ];
 

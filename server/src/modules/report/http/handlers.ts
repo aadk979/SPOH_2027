@@ -4,14 +4,15 @@ import { validatedQuery } from '../../../platform/http/validate.js';
 import { toCsv } from '../application/export/toCsv.js';
 import { toXlsx } from '../application/export/toXlsx.js';
 import { generateReport } from '../application/generateReport.js';
+import { scopeOf } from '../../../platform/http/requireAuth.js';
 
 export async function reportSummaryHandler(req: Request, res: Response): Promise<void> {
-  res.status(200).json(await generateReport(validatedQuery<ReportQuery>(req)));
+  res.status(200).json(await generateReport(scopeOf(req), validatedQuery<ReportQuery>(req)));
 }
 
 export async function exportReportHandler(req: Request, res: Response): Promise<void> {
   const query = validatedQuery<ReportExportQuery>(req);
-  const report = await generateReport(query);
+  const report = await generateReport(scopeOf(req), query);
   const stamp = report.generatedAt.slice(0, 10);
 
   if (query.format === 'csv') {

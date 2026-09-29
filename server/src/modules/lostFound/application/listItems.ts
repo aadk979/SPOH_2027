@@ -2,12 +2,16 @@ import type { ListLostFoundQuery, LostFoundRecord } from '@spoh/shared';
 import { toPage, type Page } from '../../../platform/db/pagination.js';
 import { listItemRows } from '../data/repo.js';
 import { toRecordsWithStations } from './itemRecord.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
-export async function listItems(query: ListLostFoundQuery): Promise<Page<LostFoundRecord>> {
+export async function listItems(
+  scope: EventScope,
+  query: ListLostFoundQuery,
+): Promise<Page<LostFoundRecord>> {
   const rows = await listItemRows(query);
   const page = toPage(rows, query.limit);
   return {
-    data: await toRecordsWithStations(page.data),
+    data: await toRecordsWithStations(scope, page.data),
     nextCursor: page.nextCursor,
   };
 }

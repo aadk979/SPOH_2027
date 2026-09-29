@@ -10,9 +10,9 @@ import { createTick, sumForRecorderSince, sumForStationSince } from '../data/rep
 /** One room entry from a counter's tap. */
 export async function recordTick(
   request: CreateFootfallTickRequest,
-  { actor, audit, clock = systemClock }: CaptureContext,
+  { actor, scope, audit, clock = systemClock }: CaptureContext,
 ): Promise<CreateFootfallTickResponse> {
-  const station = await requireCountedStation(request.stationId);
+  const station = await requireCountedStation(scope, request.stationId);
   // Server-stamped on receipt (BUILD_PLAN §3.3); the client's own timestamp is
   // kept alongside so a sleeping phone is visible rather than silently absent.
   const recordedAt = clock.now();

@@ -102,15 +102,15 @@ export async function stampCard(
   context: CaptureContext,
 ): Promise<StampCardResponse> {
   const shortCode = normaliseShortCode(shortCodeInput);
-  const station = await requireActiveStation(request.stationId);
-  assertStationStamps(station);
+  const station = await requireActiveStation(context.scope, request.stationId);
+  assertStationStamps({ name: station.name, issuesStamp: station.type?.issuesStamp ?? false });
 
-  const stationCount = (await stampingStationIds()).length;
+  const stationCount = (await stampingStationIds(context.scope)).length;
   const recordedAt = (context.clock ?? systemClock).now();
 
   const outcome = await prisma.$transaction((tx) =>
     applyStamp(tx, { shortCode, station, stationCount, request, context, recordedAt }),
   );
 
-  return { card: await getCard(shortCode), ...outcome };
+  return { card: await getCard(context.scope, shortCode), ...outcome };
 }

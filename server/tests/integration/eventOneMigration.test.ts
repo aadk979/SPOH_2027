@@ -45,13 +45,19 @@ async function asLegacyRows(): Promise<void> {
     await prisma.$executeRawUnsafe(`UPDATE "${table}" SET "eventId" = NULL`);
   }
   await prisma.$executeRawUnsafe('UPDATE "Station" SET "typeId" = NULL');
-  await prisma.eventMembership.updateMany({ data: { reportsToId: null } });
-  await prisma.eventMembership.deleteMany();
-  await prisma.shift.deleteMany();
-  await prisma.shiftTemplate.deleteMany();
-  await prisma.stationType.deleteMany();
-  await prisma.captureCategory.deleteMany();
-  await prisma.event.deleteMany();
+  await prisma.$executeRawUnsafe('UPDATE "EventMembership" SET "reportsToId" = NULL');
+  for (const table of [
+    'StationTagging',
+    'EventMembership',
+    'Shift',
+    'ShiftTemplate',
+    'StationType',
+    'StationTag',
+    'CaptureCategory',
+    'Event',
+  ]) {
+    await prisma.$executeRawUnsafe(`DELETE FROM "${table}"`);
+  }
 }
 
 beforeAll(async () => {
@@ -113,10 +119,11 @@ describe('migrating into Event #1 (P09.4)', () => {
     const event = await prisma.event.findFirstOrThrow({ include: { organisation: true } });
     expect(event).toMatchObject({ slug: 'spoh2027', timezone: 'Asia/Singapore', status: 'READY' });
     expect(event.organisation.appName).toBe('SPOH Ops');
-    expect(await prisma.captureCategory.count()).toBe(8);
-    expect(await prisma.shiftTemplate.count()).toBe(2);
-    expect(await prisma.shift.count()).toBe(2);
-    const types = await prisma.stationType.findMany({ orderBy: { code: 'asc' } });
+    const inEvent = { where: { eventId: event.id } };
+    expect(await prisma.captureCategory.count(inEvent)).toBe(8);
+    expect(await prisma.shiftTemplate.count(inEvent)).toBe(2);
+    expect(await prisma.shift.count(inEvent)).toBe(2);
+    const types = await prisma.stationType.findMany({ ...inEvent, orderBy: { code: 'asc' } });
     expect(types.map((type) => type.code)).toEqual([
       'COURSE_STATION_COUNTED_STAMPED',
       'MISSION_COMPLETE',
@@ -128,8 +135,9 @@ describe('migrating into Event #1 (P09.4)', () => {
   });
 
   it('places a shift at the configured local time, in the event timezone', async () => {
+    const { id: eventId } = await prisma.event.findFirstOrThrow();
     const morning = await prisma.shift.findFirstOrThrow({
-      where: { template: { code: 'MORNING' } },
+      where: { eventId, template: { code: 'MORNING' } },
     });
     const local = new Intl.DateTimeFormat('en-GB', {
       timeZone: 'Asia/Singapore',

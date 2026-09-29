@@ -3,6 +3,7 @@ import { minutesBetween } from '../../../platform/time/index.js';
 import { findStationNames } from '../../station/index.js';
 import { toWindowRecord } from '../data/mappers.js';
 import { findVolunteerNames, type WindowRow } from '../data/repo.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /**
  * Windows as the API shows them: who declared each, where, and for how long.
@@ -10,11 +11,15 @@ import { findVolunteerNames, type WindowRow } from '../data/repo.js';
  * (F03-029).
  */
 export async function windowRecords(
+  scope: EventScope,
   windows: readonly WindowRow[],
 ): Promise<FallbackWindowRecord[]> {
   const [declarers, stations] = await Promise.all([
     findVolunteerNames(windows.map((window) => window.declaredById)),
-    findStationNames(windows.flatMap((window) => (window.stationId ? [window.stationId] : []))),
+    findStationNames(
+      scope,
+      windows.flatMap((window) => (window.stationId ? [window.stationId] : [])),
+    ),
   ]);
   return windows.map((window) =>
     toWindowRecord(
@@ -28,7 +33,10 @@ export async function windowRecords(
   );
 }
 
-export async function windowRecord(window: WindowRow): Promise<FallbackWindowRecord> {
-  const [record] = await windowRecords([window]);
+export async function windowRecord(
+  scope: EventScope,
+  window: WindowRow,
+): Promise<FallbackWindowRecord> {
+  const [record] = await windowRecords(scope, [window]);
   return record as FallbackWindowRecord;
 }

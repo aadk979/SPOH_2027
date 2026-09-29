@@ -1,16 +1,17 @@
 import type { ClaimLostFoundRequest, LostFoundRecord } from '@spoh/shared';
-import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
+import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { findItemRow, markClaimed } from '../data/repo.js';
 import { assertNotClaimed } from '../domain/itemRules.js';
 import { toRecordWithStation } from './itemRecord.js';
+import type { ActorContext } from '../../../platform/http/auditContext.js';
 
 /** Hand an item back. A claim is a status change; the claimant is never recorded. */
 export async function claimItem(
   itemId: string,
   request: ClaimLostFoundRequest,
-  audit: AuditContext,
+  { scope, audit }: ActorContext,
 ): Promise<LostFoundRecord> {
   const claimed = await prisma.$transaction(async (tx) => {
     const existing = await findItemRow(tx, itemId);
@@ -29,5 +30,5 @@ export async function claimItem(
     return row;
   });
 
-  return toRecordWithStation(claimed);
+  return toRecordWithStation(scope, claimed);
 }

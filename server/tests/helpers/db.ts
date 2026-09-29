@@ -33,74 +33,81 @@ function assertTestDatabase(): void {
   }
 }
 
+/** Delete every row of one table. The name is a constant from the list below. */
+async function wipe(table: string): Promise<void> {
+  await prisma.$executeRawUnsafe(`DELETE FROM "${table}"`);
+}
+
 /**
  * Delete every row, in dependency order.
  *
  * Explicit deletes rather than `TRUNCATE ... CASCADE` so that a model added
  * without being listed here shows up as a foreign-key error in the test suite
- * rather than being silently wiped.
+ * rather than being silently wiped. Raw SQL on purpose: this is the one place
+ * that deletes across every event, which the event-scope guard forbids the
+ * application (ADR-001 §2).
  */
 export async function resetDatabase(): Promise<void> {
   assertTestDatabase();
 
-  await prisma.auditLog.deleteMany();
-  await prisma.idempotencyRecord.deleteMany();
+  await wipe('AuditLog');
+  await wipe('IdempotencyRecord');
 
-  await prisma.announcementAck.deleteMany();
-  await prisma.announcement.deleteMany();
+  await wipe('AnnouncementAck');
+  await wipe('Announcement');
 
-  await prisma.lostPersonAck.deleteMany();
-  await prisma.lostPersonSummary.deleteMany();
-  await prisma.lostPersonAlert.deleteMany();
-  await prisma.lostFoundItem.deleteMany();
+  await wipe('LostPersonAck');
+  await wipe('LostPersonSummary');
+  await wipe('LostPersonAlert');
+  await wipe('LostFoundItem');
 
-  await prisma.incidentFollowUp.deleteMany();
-  await prisma.incident.deleteMany();
+  await wipe('IncidentFollowUp');
+  await wipe('Incident');
 
-  await prisma.giftStockAdjustment.deleteMany();
-  await prisma.giftRedemption.deleteMany();
-  await prisma.giftType.deleteMany();
+  await wipe('GiftStockAdjustment');
+  await wipe('GiftRedemption');
+  await wipe('GiftType');
 
-  await prisma.cardStampEvent.deleteMany();
-  await prisma.registration.deleteMany();
-  await prisma.footfallTick.deleteMany();
-  await prisma.missionCard.deleteMany();
+  await wipe('CardStampEvent');
+  await wipe('Registration');
+  await wipe('FootfallTick');
+  await wipe('MissionCard');
 
-  await prisma.shiftSwapRequest.deleteMany();
-  await prisma.attendanceAttempt.deleteMany();
-  await prisma.attendanceChallenge.deleteMany();
-  await prisma.attendance.deleteMany();
-  await prisma.shiftAssignment.deleteMany();
-  await prisma.briefingSlot.deleteMany();
+  await wipe('ShiftSwapRequest');
+  await wipe('AttendanceAttempt');
+  await wipe('AttendanceChallenge');
+  await wipe('Attendance');
+  await wipe('ShiftAssignment');
+  await wipe('BriefingSlot');
 
-  await prisma.fallbackWindow.deleteMany();
-  await prisma.importBatch.deleteMany();
+  await wipe('FallbackWindow');
+  await wipe('ImportBatch');
 
   // Session and device state. RefreshSession and PushSubscription cascade from
   // Volunteer, but AppSetting does not — and a settings override left behind by
   // one test would silently retune every test that ran after it.
-  await prisma.refreshSession.deleteMany();
-  await prisma.pushSubscription.deleteMany();
-  await prisma.appSetting.deleteMany();
+  await wipe('RefreshSession');
+  await wipe('PushSubscription');
+  await wipe('AppSetting');
 
-  await prisma.stationTagging.deleteMany();
-  await prisma.station.deleteMany();
-  await prisma.stationType.deleteMany();
-  await prisma.stationTag.deleteMany();
-  await prisma.shift.deleteMany();
-  await prisma.shiftTemplate.deleteMany();
-  await prisma.captureCategory.deleteMany();
-  await prisma.eventDay.deleteMany();
+  await wipe('StationTagging');
+  await wipe('Station');
+  await wipe('StationType');
+  await wipe('StationTag');
+  await wipe('Shift');
+  await wipe('ShiftTemplate');
+  await wipe('CaptureCategory');
+  await wipe('EventDay');
 
   // Event #1 and its memberships (P09.3/P09.4), before the people they name.
-  await prisma.eventMembership.updateMany({ data: { reportsToId: null } });
-  await prisma.eventMembership.deleteMany();
-  await prisma.organisationMembership.deleteMany();
-  await prisma.event.deleteMany();
+  await prisma.$executeRawUnsafe('UPDATE "EventMembership" SET "reportsToId" = NULL');
+  await wipe('EventMembership');
+  await wipe('OrganisationMembership');
+  await wipe('Event');
 
   // Volunteers last: almost everything references them.
-  await prisma.person.updateMany({ data: { reportsToId: null } });
-  await prisma.person.deleteMany();
+  await prisma.$executeRawUnsafe('UPDATE "Volunteer" SET "reportsToId" = NULL');
+  await wipe('Volunteer');
 
   invalidateCurrentEvent();
   invalidateVolunteerCache();

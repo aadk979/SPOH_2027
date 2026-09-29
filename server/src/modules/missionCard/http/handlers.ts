@@ -9,8 +9,9 @@ import type {
   TimeRangeQuery,
   VoidCardRequest,
 } from '@spoh/shared';
-import { auditContextFrom } from '../../../platform/http/auditContext.js';
+import { actorContextFrom, auditContextFrom } from '../../../platform/http/auditContext.js';
 import { captureContextFrom } from '../../../platform/http/captureActor.js';
+import { scopeOf } from '../../../platform/http/requireAuth.js';
 import { validatedBody, validatedParams, validatedQuery } from '../../../platform/http/validate.js';
 import { generateBatch } from '../application/generateBatch.js';
 import { getCard, getCardByQr } from '../application/getCard.js';
@@ -28,15 +29,17 @@ export async function generateBatchHandler(req: Request, res: Response): Promise
 }
 
 export async function funnelHandler(req: Request, res: Response): Promise<void> {
-  res.status(200).json(await getFunnel(validatedQuery<TimeRangeQuery>(req)));
+  res.status(200).json(await getFunnel(scopeOf(req), validatedQuery<TimeRangeQuery>(req)));
 }
 
 export async function getCardHandler(req: Request, res: Response): Promise<void> {
-  res.status(200).json({ card: await getCard(shortCodeOf(req)) });
+  res.status(200).json({ card: await getCard(scopeOf(req), shortCodeOf(req)) });
 }
 
 export async function getCardByQrHandler(req: Request, res: Response): Promise<void> {
-  res.status(200).json({ card: await getCardByQr(validatedParams<CardQrParams>(req).payload) });
+  res
+    .status(200)
+    .json({ card: await getCardByQr(scopeOf(req), validatedParams<CardQrParams>(req).payload) });
 }
 
 export async function issueCardHandler(req: Request, res: Response): Promise<void> {
@@ -55,10 +58,10 @@ export async function stampCardHandler(req: Request, res: Response): Promise<voi
 
 export async function voidCardHandler(req: Request, res: Response): Promise<void> {
   const { reason } = validatedBody<VoidCardRequest>(req);
-  res.status(200).json({ card: await voidCard(shortCodeOf(req), reason, auditContextFrom(req)) });
+  res.status(200).json({ card: await voidCard(shortCodeOf(req), reason, actorContextFrom(req)) });
 }
 
 export async function reissueCardHandler(req: Request, res: Response): Promise<void> {
   const body = validatedBody<ReissueCardRequest>(req);
-  res.status(201).json(await reissueCard(shortCodeOf(req), body, auditContextFrom(req)));
+  res.status(201).json(await reissueCard(shortCodeOf(req), body, actorContextFrom(req)));
 }

@@ -1,17 +1,18 @@
 import type { CloseFallbackRequest, FallbackWindowRecord } from '@spoh/shared';
-import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
+import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { minutesBetween, systemClock } from '../../../platform/time/index.js';
 import { endWindow, findWindow } from '../data/repo.js';
 import { assertEndsAfterStart, assertWindowOpen } from '../domain/windowRules.js';
 import { windowRecord } from './windowRecord.js';
+import type { ActorContext } from '../../../platform/http/auditContext.js';
 
 /** Close a window, now or at a backdated time no earlier than its start. */
 export async function closeFallback(
   windowId: string,
   request: CloseFallbackRequest,
-  audit: AuditContext,
+  { scope, audit }: ActorContext,
 ): Promise<FallbackWindowRecord> {
   const closed = await prisma.$transaction(async (tx) => {
     const existing = await findWindow(tx, windowId);
@@ -39,5 +40,5 @@ export async function closeFallback(
     return row;
   });
 
-  return windowRecord(closed);
+  return windowRecord(scope, closed);
 }

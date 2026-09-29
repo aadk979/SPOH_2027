@@ -16,9 +16,9 @@ import { expandGroupMembers } from '../domain/groupMembers.js';
  */
 export async function recordGroupRegistration(
   request: CreateGroupRegistrationRequest,
-  { actor, audit, clock = systemClock }: CaptureContext,
+  { actor, scope, audit, clock = systemClock }: CaptureContext,
 ): Promise<CreateGroupRegistrationResponse> {
-  const station = await requireActiveStation(request.stationId);
+  const station = await requireActiveStation(scope, request.stationId);
   const recordedAt = clock.now();
   const groupId = randomUUID();
 

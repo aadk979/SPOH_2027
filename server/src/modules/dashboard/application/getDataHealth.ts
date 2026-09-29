@@ -13,6 +13,7 @@ import {
 } from '../data/repo.js';
 import { staleDevices as staleDevicesOf } from '../domain/signals.js';
 import { flaggedRedemptions } from '../data/flaggedRedemptions.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /**
  * Data health (PRODUCT_BRIEF §9) — the early warning that a station has quietly
@@ -22,13 +23,16 @@ import { flaggedRedemptions } from '../data/flaggedRedemptions.js';
  * while a room counts nothing for an hour, and a total alone would never reveal
  * it. Outside event hours silence is expected, so nothing is flagged.
  */
-export async function getDataHealth(now = new Date()): Promise<DataHealthResponse> {
+export async function getDataHealth(
+  scope: EventScope,
+  now = new Date(),
+): Promise<DataHealthResponse> {
   const since = startOfEventDay(now);
   const blocks = activeShiftBlocks(now);
   const withinEventHours = blocks.length > 0;
 
   const [footfall, fallbackWindowOpen, eventDay, flagged] = await Promise.all([
-    getLiveFootfall(now),
+    getLiveFootfall(scope, now),
     openFallbackWindowExists(now),
     findEventDayOn(since),
     flaggedRedemptions({ since, until: now }),
