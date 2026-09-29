@@ -1,4 +1,3 @@
-/* eslint-disable no-console -- a CLI; stdout is its interface */
 /**
  * Database roles and grants (P08.3, F04-015), for the one-off migrate task.
  *
