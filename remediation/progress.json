@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-28T16:12:33.145Z",
+  "updatedAt": "2026-09-29T01:08:14.761Z",
   "current": {
     "phase": "P07",
     "step": "P07.6"
@@ -1481,6 +1481,10 @@
             {
               "at": "2026-09-28T16:12:33.145Z",
               "text": "Begin ADR-007 shared request-schema useZodForm pattern and migrate forms incrementally."
+            },
+            {
+              "at": "2026-09-29T01:08:14.760Z",
+              "text": "Owner requested handoff. Preserve uncommitted useZodForm, Choice errors and safety/volunteer/announcement/fallback migrations. Current client 140 passed/4 deferred; client typecheck and architecture pass; lint zero errors/one useComposer size warning. Full P07.6 verification and remaining forms pending; see HANDOFF-2026-09-28.md. No owner-controlled blocker."
             }
           ]
         },
