@@ -7,6 +7,7 @@ import { env, isProduction } from '../config/env.js';
 import { logger } from '../platform/logger/index.js';
 import { errorHandler, notFoundHandler } from '../platform/http/errorHandler.js';
 import { requestId } from '../platform/http/requestId.js';
+import { staticClient } from '../platform/http/staticClient.js';
 import { healthRouter } from '../modules/health/index.js';
 import { createApiRouter } from './routes.js';
 
@@ -29,6 +30,7 @@ export function createApp(): Express {
 
   app.use(healthRouter);
   app.use('/api/v1', createApiRouter());
+  if (env.CLIENT_DIR) app.use(staticClient(env.CLIENT_DIR));
 
   app.use(notFoundHandler);
   app.use(errorHandler);

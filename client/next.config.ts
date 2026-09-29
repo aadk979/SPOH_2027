@@ -37,43 +37,53 @@ const contentSecurityPolicy = [
   "form-action 'self'",
 ].join('; ');
 
+/**
+ * The container build exports the client as static files for the API to serve
+ * on its own origin (ADR-008 §2, P08.4). An export has no server of its own, so
+ * the headers below are the API's job there (`platform/http/staticClient.ts`).
+ */
+const staticExport = process.env.SPOH_STATIC_EXPORT === '1';
+
 const nextConfig: NextConfig = {
+  ...(staticExport ? { output: 'export' as const } : {}),
   // The floating development badge overlaps the mobile Home tab.
   devIndicators: false,
   reactStrictMode: true,
   env: { NEXT_PUBLIC_SW_VERSION: swVersion },
   poweredByHeader: false,
 
-  async headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: [
-          { key: 'Content-Security-Policy', value: contentSecurityPolicy },
-          { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-          {
-            key: 'Permissions-Policy',
-            value: 'geolocation=(), microphone=(), camera=(self), payment=()',
-          },
-          ...(isDev
-            ? []
-            : [
-                {
-                  key: 'Strict-Transport-Security',
-                  value: 'max-age=31536000; includeSubDomains',
-                },
-              ]),
-        ],
-      },
-      {
-        // The service worker must never be served from a stale cache, or a
-        // fixed bug stays fixed only for people who clear their browser.
-        source: '/sw.js',
-        headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }],
-      },
-    ];
-  },
+  ...(staticExport ? {} : { headers }),
 };
+
+async function headers() {
+  return [
+    {
+      source: '/:path*',
+      headers: [
+        { key: 'Content-Security-Policy', value: contentSecurityPolicy },
+        { key: 'X-Content-Type-Options', value: 'nosniff' },
+        { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+        {
+          key: 'Permissions-Policy',
+          value: 'geolocation=(), microphone=(), camera=(self), payment=()',
+        },
+        ...(isDev
+          ? []
+          : [
+              {
+                key: 'Strict-Transport-Security',
+                value: 'max-age=31536000; includeSubDomains',
+              },
+            ]),
+      ],
+    },
+    {
+      // The service worker must never be served from a stale cache, or a
+      // fixed bug stays fixed only for people who clear their browser.
+      source: '/sw.js',
+      headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }],
+    },
+  ];
+}
 
 export default nextConfig;

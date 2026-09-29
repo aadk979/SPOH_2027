@@ -43,7 +43,7 @@ describe('configuration', () => {
   });
 
   it('knows every key it reads', () => {
-    expect(ENV_KEYS).toHaveLength(34);
+    expect(ENV_KEYS).toHaveLength(35);
     expect(new Set(ENV_KEYS).size).toBe(ENV_KEYS.length);
   });
 });

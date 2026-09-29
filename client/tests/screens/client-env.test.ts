@@ -22,7 +22,7 @@ describe('client configuration (F03-037: no zod on every route)', () => {
 
   it('refuses to start against an API address that is not a URL', () => {
     expect(() => readClientEnv({ apiBaseUrl: 'localhost:4012/api' })).toThrow(/API base URL/);
-    expect(() => readClientEnv({ apiBaseUrl: '' })).toThrow(/API base URL/);
+    expect(() => readClientEnv({ apiBaseUrl: 'ftp://api.example' })).toThrow(/API base URL/);
   });
 
   it('treats an empty optional value as unset', () => {
@@ -30,5 +30,9 @@ describe('client configuration (F03-037: no zod on every route)', () => {
       apiBaseUrl: 'https://api.example',
       envLabel: 'development',
     });
+  });
+
+  it("reads an empty API base as the page's own origin (the static export)", () => {
+    expect(readClientEnv({ apiBaseUrl: '' }).apiBaseUrl).toBe('');
   });
 });

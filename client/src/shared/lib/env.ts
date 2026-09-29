@@ -28,9 +28,12 @@ function isHttpUrl(value: string): boolean {
 
 /** A misconfigured build fails at load, not at the first request. */
 export function readClientEnv(raw: RawClientEnv): ClientEnv {
+  // Empty means the API is on this page's own origin, as it is when the API
+  // container serves the exported client (ADR-008 §2).
   const apiBaseUrl = raw.apiBaseUrl ?? '';
-  if (!isHttpUrl(apiBaseUrl))
+  if (apiBaseUrl !== '' && !isHttpUrl(apiBaseUrl)) {
     throw new Error(`API base URL is not an http(s) URL: "${apiBaseUrl}"`);
+  }
   const env: ClientEnv = { apiBaseUrl, envLabel: raw.envLabel || 'development' };
   for (const key of ['cognitoRegion', 'cognitoUserPoolId', 'cognitoClientId'] as const) {
     if (raw[key]) env[key] = raw[key];

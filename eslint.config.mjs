@@ -34,6 +34,8 @@ export default tseslint.config(
       '**/node_modules/**',
       '**/dist/**',
       '**/.next/**',
+      'client/out/**',
+      'infra/cdk/cdk.out/**',
       '**/coverage/**',
       '**/playwright-report/**',
       'server/prisma/migrations/**',

@@ -18,6 +18,11 @@ export const serverFields = {
 
   TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(0),
   /**
+   * The client's static export, served by this process on the same origin as
+   * the API (ADR-008 §2). Unset in development, where Next serves the client.
+   */
+  CLIENT_DIR: z.string().min(1).optional(),
+  /**
    * Treat every hour as event hours. DEVELOPMENT ONLY.
    *
    * Station scoping requires a shift block to be running, which outside
