@@ -1,6 +1,6 @@
 import { CfnOutput, Duration, RemovalPolicy, Stack, Validations } from 'aws-cdk-lib';
 import {
-  CfnStage,
+  type CfnStage,
   HttpApi,
   HttpMethod,
   HttpStage,

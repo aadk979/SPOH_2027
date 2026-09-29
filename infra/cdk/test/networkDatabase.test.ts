@@ -29,7 +29,7 @@ describe('database (P08.3)', () => {
   it('is a private, encrypted, single-AZ Postgres 17 micro with PITR and deletion protection', () => {
     template.hasResourceProperties('AWS::RDS::DBInstance', {
       Engine: 'postgres',
-      EngineVersion: Match.stringLikeRegexp('^17\.'),
+      EngineVersion: Match.stringLikeRegexp('^17\\.'),
       DBInstanceClass: 'db.t4g.micro',
       MultiAZ: false,
       PubliclyAccessible: false,
