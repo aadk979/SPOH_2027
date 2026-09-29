@@ -120,3 +120,11 @@ export function highestRole(roles: readonly CommitteeRole[]): CommitteeRole | un
     undefined,
   );
 }
+
+/** How much an audit row matters (ADR-009 §4: the audit branch's migration, adopted in P09.1). */
+export const AuditSeverity = z.enum(['INFO', 'NOTICE', 'WARNING', 'CRITICAL']);
+export type AuditSeverity = z.infer<typeof AuditSeverity>;
+
+/** Whether the audited action happened, was refused, or failed. */
+export const AuditOutcome = z.enum(['SUCCESS', 'DENIED', 'FAILURE']);
+export type AuditOutcome = z.infer<typeof AuditOutcome>;
