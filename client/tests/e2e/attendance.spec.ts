@@ -90,6 +90,7 @@ async function attendanceSession(page: Page, root = false) {
         : path.endsWith('/me')
           ? {
               volunteer,
+              event: { id: 'event', name: 'Event', timezone: 'Asia/Singapore', locale: 'en-SG' },
               capabilities: ['own.read'],
               currentAssignment: null,
               upcomingAssignments: [],

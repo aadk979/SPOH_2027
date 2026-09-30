@@ -3,12 +3,8 @@ import type { AuditContext } from '../../../platform/audit/index.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import { AppError, ForbiddenError, RateLimitedError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
-import {
-  eventDayAnchor,
-  singaporeDateString,
-  systemClock,
-  type Clock,
-} from '../../../platform/time/index.js';
+import { eventToday } from '../../../platform/event/today.js';
+import { systemClock, type Clock } from '../../../platform/time/index.js';
 import {
   findAttendance,
   findAttempts,
@@ -48,7 +44,7 @@ export async function submitAttendance(
     await lockPerson(tx, volunteerId);
     const now = clock.now();
     const person = await findVolunteerOrThrow(tx, volunteerId);
-    const day = await findEventDayOn(tx, scope, eventDayAnchor(singaporeDateString(now)));
+    const day = await findEventDayOn(tx, scope, await eventToday(scope, now));
     if (!person.active) throw new ForbiddenError('Attendance is unavailable for this account.');
     assertEventToday(day);
     const existing = await findAttendance(tx, scope, { volunteerId, eventDayId: day.id });

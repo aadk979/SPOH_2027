@@ -22,7 +22,7 @@ export type IdempotencyKey = z.infer<typeof IdempotencyKey>;
 export const IsoDateTime = z.iso.datetime({ offset: true });
 export type IsoDateTime = z.infer<typeof IsoDateTime>;
 
-/** Calendar date, `YYYY-MM-DD`, interpreted in Asia/Singapore for display. */
+/** Calendar date, `YYYY-MM-DD`, in the event's timezone. */
 export const IsoDate = z.iso.date();
 export type IsoDate = z.infer<typeof IsoDate>;
 

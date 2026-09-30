@@ -1,15 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { RuntimeSettings, UpdateSettingsRequest } from '@spoh/shared';
-import {
-  DEFAULT_SETTINGS,
-  getSettings,
-  overrideSettingsForTest,
-} from '../../src/platform/settings/index.js';
-import {
-  activeShiftBlocks,
-  shiftBlockRanges,
-  singaporeHourKey,
-} from '../../src/platform/time/index.js';
+import { DEFAULT_SETTINGS, getSettings } from '../../src/platform/settings/index.js';
 
 /**
  * Runtime settings.
@@ -29,52 +20,6 @@ describe('compiled defaults', () => {
 
   it('are what an unconfigured server reports', () => {
     expect(getSettings()).toEqual(DEFAULT_SETTINGS);
-  });
-
-  it('reproduce the shipped shift boundaries', () => {
-    // 09:30-14:00 and 13:30-18:00 (BUILD_PLAN §1.1), overlapping deliberately.
-    expect(shiftBlockRanges().MORNING).toEqual({ startMinute: 570, endMinute: 840 });
-    expect(shiftBlockRanges().AFTERNOON).toEqual({ startMinute: 810, endMinute: 1080 });
-  });
-});
-
-describe('a changed shift boundary changes who is on shift', () => {
-  /**
-   * The reason these are configurable at all. Station scoping asks whether a
-   * block is running, so moving a boundary decides whether the capture screens
-   * accept anything — and a rehearsal moved to an evening should not need a
-   * deploy.
-   */
-  it('reports no block when the configured window has passed', () => {
-    const restore = overrideSettingsForTest({
-      shiftBlocks: {
-        MORNING: { start: '06:00', end: '07:00' },
-        AFTERNOON: { start: '19:00', end: '20:00' },
-      },
-    });
-
-    try {
-      // 11:30 Singapore: inside the shipped morning block, outside this one.
-      expect(activeShiftBlocks(new Date('2027-01-07T03:30:00Z'), false)).toEqual([]);
-    } finally {
-      restore();
-    }
-  });
-
-  it('reports a block when the configured window covers the instant', () => {
-    const restore = overrideSettingsForTest({
-      shiftBlocks: {
-        MORNING: { start: '06:00', end: '07:00' },
-        AFTERNOON: { start: '19:00', end: '20:00' },
-      },
-    });
-
-    try {
-      // 06:30 Singapore.
-      expect(activeShiftBlocks(new Date('2027-01-06T22:30:00Z'), false)).toEqual(['MORNING']);
-    } finally {
-      restore();
-    }
   });
 });
 
@@ -114,20 +59,5 @@ describe('the update schema', () => {
   it('rejects a threshold outside its range', () => {
     expect(UpdateSettingsRequest.safeParse({ silentStationMinutes: 0 }).success).toBe(false);
     expect(UpdateSettingsRequest.safeParse({ dashboardPollSeconds: 99_999 }).success).toBe(false);
-  });
-});
-
-describe('report hour labels', () => {
-  /**
-   * The bucket boundaries were always right — Singapore is UTC+8 exactly — but
-   * the label was in UTC, so a reader looking for the 11am rush had to shift
-   * every row by eight hours in their head.
-   */
-  it('labels a bucket with the local hour the event experienced', () => {
-    expect(singaporeHourKey(new Date('2027-01-07T03:00:00Z'))).toBe('2027-01-07T11');
-  });
-
-  it('rolls the local date over correctly across midnight UTC', () => {
-    expect(singaporeHourKey(new Date('2027-01-06T17:00:00Z'))).toBe('2027-01-07T01');
   });
 });

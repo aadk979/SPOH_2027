@@ -10,15 +10,17 @@ import { typeIdFor } from '../../src/modules/station/data/repo.js';
 import { assignmentLinks } from '../../src/modules/assignments/index.js';
 import { createLocalAuthProvider } from '../../src/platform/identity/localProvider.js';
 import { invalidateVolunteerCache } from '../../src/platform/identity/index.js';
-import { eventDayAnchor, singaporeDateString } from '../../src/platform/time/index.js';
+import { zonedDate } from '@spoh/shared';
+import { eventDayAnchor } from '../../src/platform/time/index.js';
 
 /**
  * Fixtures for the integration suite.
  *
- * Everything is created against "today" in Singapore, which the frozen clock in
- * tests/setup.ts pins to a real event day inside the MORNING block. Station
- * scoping asks "is this volunteer rostered here, in a block running now", so
- * fixtures and the code under test must agree on what now is.
+ * Everything is created against "today" in the test event's timezone, which
+ * the frozen clock in tests/setup.ts pins to a real event day inside the
+ * MORNING shift. Station scoping asks "is this volunteer rostered here, on a
+ * shift running now", so fixtures and the code under test must agree on what
+ * now is.
  */
 
 const issuer = createLocalAuthProvider({
@@ -35,6 +37,8 @@ export interface TestVolunteer {
 }
 
 const TEST_EVENT_SLUG = 'test-event';
+/** The test event's timezone: a fixture, where a zone name belongs. */
+export const TEST_EVENT_TIMEZONE = 'Asia/Singapore';
 
 /**
  * The event every fixture belongs to, created on first use through the same
@@ -53,7 +57,7 @@ export async function testEvent(): Promise<EventScope> {
       slug: 'test-organisation',
       name: 'Test Organisation',
       appName: 'Test Ops',
-      defaultTimezone: 'Asia/Singapore',
+      defaultTimezone: TEST_EVENT_TIMEZONE,
     },
     update: {},
     select: { id: true },
@@ -62,7 +66,7 @@ export async function testEvent(): Promise<EventScope> {
     organisationId: organisation.id,
     slug: TEST_EVENT_SLUG,
     name: 'Test Event',
-    timezone: 'Asia/Singapore',
+    timezone: TEST_EVENT_TIMEZONE,
     status: 'LIVE',
     categories: [
       { code: 'SEC_1', label: 'Sec 1' },
@@ -93,7 +97,7 @@ function subFor(email: string): string {
 
 export async function createEventDayToday(): Promise<{ id: string }> {
   const scope = await testEvent();
-  const today = singaporeDateString();
+  const today = zonedDate(new Date(), TEST_EVENT_TIMEZONE);
   const date = eventDayAnchor(today);
   const day = await prisma.eventDay.upsert({
     where: { date, eventId: scope.eventId },

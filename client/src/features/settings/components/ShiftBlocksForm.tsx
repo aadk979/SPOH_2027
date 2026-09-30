@@ -14,7 +14,7 @@ export function ShiftBlocksForm({
     <>
       <Section
         title="Shift blocks"
-        description="Singapore time. A capture screen only works while the volunteer is rostered on a block that is running, so these two rows decide when the system accepts data at all. They are allowed to overlap — the handover is deliberate."
+        description="The event's local time. A capture screen only works while the volunteer is rostered on a block that is running, so these two rows decide when the system accepts data at all. They are allowed to overlap — the handover is deliberate."
       >
         <Card className="flex flex-col gap-md">
           <ShiftRow

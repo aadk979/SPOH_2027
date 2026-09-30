@@ -19,6 +19,11 @@ const adapter = new PrismaPg({
   // A capture that waits five seconds for a connection has already failed the
   // volunteer; better to error and let the outbox retry than to hold the tap.
   connectionTimeoutMillis: 5_000,
+  // The driver adapter writes and reads instants as UTC wall times, so a
+  // session in any other zone would shift every timestamp it touches. Pinned
+  // here rather than trusted to the server's default (F01 time audit, case 12);
+  // wall-clock questions go through the event's zone explicitly (zonedSql.ts).
+  options: '-c TimeZone=UTC',
 });
 
 const base = new PrismaClient({

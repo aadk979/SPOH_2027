@@ -2,6 +2,7 @@ import type { Prisma, Registration } from '../../../generated/prisma/client.js';
 import { prisma } from '../../../platform/db/client.js';
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
+import { eventDaySql, localBucketStartSql, type EventZone } from '../../../platform/db/zonedSql.js';
 
 /**
  * Data access for COUNT 1 — registrations.
@@ -154,43 +155,35 @@ export async function groupByCategory(
 }
 
 /**
- * Time-bucketed counts. Raw SQL because `date_trunc` has no Prisma equivalent
- * and pulling every row into Node to bucket it would be worse at 30k rows.
+ * Counts by local hour (the instant each hour starts) or by event day (its
+ * local date), on the event's wall clock. Raw SQL because Postgres can bucket
+ * and Prisma cannot; pulling every row into Node would be worse at 30k rows.
  * Parameterised via a tagged template — never string interpolation
  * (BUILD_PLAN §8.3).
  */
 export async function groupByTimeBucket(
   scope: EventScope,
   filter: RegistrationSummaryFilter,
-  granularity: 'hour' | 'day',
+  by: { granularity: 'hour' | 'day'; zone: EventZone },
 ): Promise<Array<{ bucket: Date; count: number }>> {
   const from = filter.from ?? new Date(0);
   const to = filter.to ?? new Date(8.64e15);
   const stationId = filter.stationId ?? null;
-  const { eventId } = scope;
+  const bucket =
+    by.granularity === 'hour'
+      ? localBucketStartSql('recordedAt', by.zone.timezone, 60)
+      : eventDaySql('recordedAt', by.zone);
 
-  const rows =
-    granularity === 'hour'
-      ? await prisma.$queryRaw<Array<{ bucket: Date; count: bigint }>>`
-          SELECT date_trunc('hour', "recordedAt") AS bucket, COUNT(*)::bigint AS count
-          FROM "Registration"
-          WHERE "eventId" = ${eventId}
-            AND "voided" = false
-            AND "recordedAt" >= ${from}
-            AND "recordedAt" < ${to}
-            AND (${stationId}::text IS NULL OR "stationId" = ${stationId})
-          GROUP BY bucket
-          ORDER BY bucket ASC`
-      : await prisma.$queryRaw<Array<{ bucket: Date; count: bigint }>>`
-          SELECT date_trunc('day', "recordedAt") AS bucket, COUNT(*)::bigint AS count
-          FROM "Registration"
-          WHERE "eventId" = ${eventId}
-            AND "voided" = false
-            AND "recordedAt" >= ${from}
-            AND "recordedAt" < ${to}
-            AND (${stationId}::text IS NULL OR "stationId" = ${stationId})
-          GROUP BY bucket
-          ORDER BY bucket ASC`;
+  const rows = await prisma.$queryRaw<Array<{ bucket: Date; count: bigint }>>`
+    SELECT ${bucket} AS bucket, COUNT(*)::bigint AS count
+    FROM "Registration"
+    WHERE "eventId" = ${scope.eventId}
+      AND "voided" = false
+      AND "recordedAt" >= ${from}
+      AND "recordedAt" < ${to}
+      AND (${stationId}::text IS NULL OR "stationId" = ${stationId})
+    GROUP BY bucket
+    ORDER BY bucket ASC`;
 
   return rows.map((row) => ({ bucket: row.bucket, count: Number(row.count) }));
 }

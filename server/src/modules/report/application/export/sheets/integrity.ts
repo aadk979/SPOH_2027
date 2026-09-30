@@ -1,6 +1,6 @@
 import type { FullReport } from '@spoh/shared';
 import type { ExcelJS } from '../format.js';
-import { SHEETS, rows, sgt } from '../format.js';
+import { SHEETS, rows, eventTime } from '../format.js';
 
 export function writeIntegritySheet(workbook: ExcelJS.Workbook, report: FullReport): void {
   const sheet = workbook.addWorksheet(SHEETS.integrity);
@@ -9,7 +9,7 @@ export function writeIntegritySheet(workbook: ExcelJS.Workbook, report: FullRepo
   sheet.addRow(['Fallback windows — periods when data was captured off-app']).font = {
     bold: true,
   };
-  sheet.addRow(['Tier', 'Started (SGT)', 'Ended (SGT)', 'Minutes', 'Scope and reason']).font = {
+  sheet.addRow(['Tier', 'Started (local)', 'Ended (local)', 'Minutes', 'Scope and reason']).font = {
     bold: true,
   };
 
@@ -22,7 +22,7 @@ export function writeIntegritySheet(workbook: ExcelJS.Workbook, report: FullRepo
 
   sheet.addRow([]);
   sheet.addRow(['Imports run']).font = { bold: true };
-  sheet.addRow(['Imported (SGT)', 'Source', 'Target', 'Rows', 'File / notes']).font = {
+  sheet.addRow(['Imported (local)', 'Source', 'Target', 'Rows', 'File / notes']).font = {
     bold: true,
   };
   for (const row of importRows(report)) sheet.addRow(row);
@@ -40,8 +40,8 @@ function windowRows(report: FullReport): Array<Array<string | number>> {
   if (windows.length === 0) return [['—', '—', '—', 0, 'No fallback windows were declared.']];
   return windows.map((window) => [
     window.tier === 4 ? '4 (paper)' : '3 (Google pack)',
-    sgt(window.startedAt),
-    window.endedAt ? sgt(window.endedAt) : 'still open',
+    eventTime(window.startedAt, report.timezone),
+    window.endedAt ? eventTime(window.endedAt, report.timezone) : 'still open',
     window.durationMinutes ?? 0,
     `${window.stationName ?? 'Event-wide'} — ${window.reason}`,
   ]);
@@ -49,7 +49,7 @@ function windowRows(report: FullReport): Array<Array<string | number>> {
 
 function importRows(report: FullReport): Array<Array<string | number>> {
   return report.dataIntegrity.imports.map((batch) => [
-    sgt(batch.importedAt),
+    eventTime(batch.importedAt, report.timezone),
     batch.source,
     batch.targetTable,
     batch.rowCount,

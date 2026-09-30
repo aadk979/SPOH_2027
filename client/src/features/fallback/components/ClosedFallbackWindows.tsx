@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react';
 import type { FallbackWindowRecord } from '@spoh/shared';
 import { Section, Card } from '@/shared/ui';
-import { formatTime } from '@/shared/lib/format';
+import { useEventTime } from '@/features/session';
 export function ClosedFallbackWindows({ closed }: { closed: FallbackWindowRecord[] }): ReactNode {
+  const format = useEventTime();
   return (
     <Section title="Closed windows">
       <ul className="flex flex-col gap-xs">
@@ -13,8 +14,8 @@ export function ClosedFallbackWindows({ closed }: { closed: FallbackWindowRecord
               <strong>{window.durationMinutes} minutes</strong>
             </p>
             <p className="text-caption text-text-muted">
-              {formatTime(window.startedAt)} – {window.endedAt ? formatTime(window.endedAt) : '—'} ·{' '}
-              {window.reason}
+              {format.time(window.startedAt)} – {window.endedAt ? format.time(window.endedAt) : '—'}{' '}
+              · {window.reason}
             </p>
           </Card>
         ))}

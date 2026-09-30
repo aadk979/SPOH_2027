@@ -3,7 +3,8 @@ import type { CreateGroupRegistrationRequest, CreateGroupRegistrationResponse } 
 import { auditStationScopeBypass, writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import type { CaptureContext } from '../../../platform/http/captureActor.js';
-import { startOfEventDay, systemClock } from '../../../platform/time/index.js';
+import { eventTodayStart } from '../../../platform/event/today.js';
+import { systemClock } from '../../../platform/time/index.js';
 import { linkGroupToCard } from '../../missionCard/index.js';
 import { requireActiveStation } from '../../station/index.js';
 import { toRegistrationRecord } from '../data/mappers.js';
@@ -58,11 +59,12 @@ export async function recordGroupRegistration(
     return { registrations: created, ...link };
   });
 
+  const since = await eventTodayStart(scope, clock.now());
   return {
     groupId,
     registrations: registrations.map(toRegistrationRecord),
     linkedCardId: cardId,
     cardLinkError: linkError,
-    boothTotal: await countForStationSince(scope, station.id, startOfEventDay(clock.now())),
+    boothTotal: await countForStationSince(scope, station.id, since),
   };
 }

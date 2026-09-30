@@ -1,6 +1,6 @@
 import type { FullReport } from '@spoh/shared';
 import type { ExcelJS } from '../format.js';
-import { SHEETS, header, sgt } from '../format.js';
+import { SHEETS, header, eventTime } from '../format.js';
 
 export function writeSafetySheet(workbook: ExcelJS.Workbook, report: FullReport): void {
   const sheet = workbook.addWorksheet(SHEETS.safety);
@@ -19,7 +19,7 @@ export function writeSafetySheet(workbook: ExcelJS.Workbook, report: FullReport)
     'Severity',
     'Status',
     'Station',
-    'Occurred (SGT)',
+    'Occurred (local)',
     'What happened',
     'Follow-ups',
   ]);
@@ -30,7 +30,7 @@ export function writeSafetySheet(workbook: ExcelJS.Workbook, report: FullReport)
       incident.severity,
       incident.status,
       incident.stationName ?? '—',
-      sgt(incident.occurredAt),
+      eventTime(incident.occurredAt, report.timezone),
       incident.description,
       incident.followUpCount,
     ]);

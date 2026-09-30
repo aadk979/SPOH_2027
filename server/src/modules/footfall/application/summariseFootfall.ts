@@ -5,6 +5,7 @@ import { listCountedStations } from '../../station/index.js';
 import { sumByBucket, sumMatching, type FootfallFilter } from '../data/repo.js';
 import { bucketsByStation } from '../domain/footfallRules.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
+import { eventTimezone } from '../../../platform/event/currentEvent.js';
 
 export async function summariseFootfall(
   scope: EventScope,
@@ -16,11 +17,12 @@ export async function summariseFootfall(
     ...(query.to ? { to: new Date(query.to) } : {}),
   };
 
+  const bucket = { minutes: BUCKET_MINUTES[query.bucket], timezone: await eventTimezone(scope) };
   const [total, containsFallbackData, stations, rows] = await Promise.all([
     sumMatching(scope, filter),
     rangeOverlapsFallbackWindow(scope, filter),
     listCountedStations(scope),
-    sumByBucket(scope, filter, BUCKET_MINUTES[query.bucket]),
+    sumByBucket(scope, filter, bucket),
   ]);
 
   const byStation = bucketsByStation(rows);

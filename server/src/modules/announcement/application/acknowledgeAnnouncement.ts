@@ -3,7 +3,7 @@ import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
-import { eventDayAnchor, singaporeDateString } from '../../../platform/time/index.js';
+import { eventToday } from '../../../platform/event/today.js';
 import { acknowledge, findAnnouncementById, findTodaysPostings } from '../data/repo.js';
 import { audienceOf, reaches } from '../domain/audience.js';
 import { decorate } from './decorate.js';
@@ -22,11 +22,8 @@ export async function acknowledgeAnnouncement(
   const existing = await findAnnouncementById(scope, announcementId);
   if (!existing) throw new NotFoundError('Announcement');
 
-  const postings = await findTodaysPostings(
-    scope,
-    reader.volunteerId,
-    eventDayAnchor(singaporeDateString()),
-  );
+  const today = await eventToday(scope, new Date());
+  const postings = await findTodaysPostings(scope, reader.volunteerId, today);
   const addressed = reaches(audienceOf(existing), {
     role: reader.role,
     todaysStationIds: postings.map((posting) => posting.stationId),

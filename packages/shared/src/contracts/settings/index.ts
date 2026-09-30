@@ -21,7 +21,7 @@ import { Id, IsoDateTime } from '../common/index.js';
  * update only touches what it names.
  */
 
-/** Local wall-clock time in Asia/Singapore, `HH:MM` on a 24-hour clock. */
+/** Wall-clock time in the event's timezone, `HH:MM` on a 24-hour clock. */
 export const WallClockTime = z
   .string()
   .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'must be HH:MM on a 24-hour clock');

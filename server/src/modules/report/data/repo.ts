@@ -1,5 +1,6 @@
 import { prisma } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
+import { eventDaySql, localBucketStartSql, type EventZone } from '../../../platform/db/zonedSql.js';
 
 /**
  * Reads for the post-event report (PRODUCT_BRIEF §10), for one event (ADR-001 §2).
@@ -55,15 +56,13 @@ export async function registrationTotals(scope: EventScope, range: Range) {
 }
 
 /**
- * Bucketed by Singapore day, not UTC day.
- *
- * The event runs 09:30 to 18:00 local, which is 01:30 to 10:00 UTC, so a UTC
- * bucket happens to line up here — but relying on that would break the moment
- * anything ran in the evening. `AT TIME ZONE` states the intent.
+ * Bucketed by event day in the event's timezone, from its day boundary
+ * (ADR-004 §3), never by UTC day: an evening session would otherwise land on
+ * the wrong date.
  */
-export async function registrationsByDay(scope: EventScope, range: Range) {
+export async function registrationsByDay(scope: EventScope, range: Range, zone: EventZone) {
   const rows = await prisma.$queryRaw<Array<{ date: Date; value: bigint }>>`
-    SELECT date_trunc('day', "recordedAt" AT TIME ZONE 'Asia/Singapore') AS date,
+    SELECT ${eventDaySql('recordedAt', zone)} AS date,
            COUNT(*)::bigint AS value
     FROM "Registration"
     WHERE "eventId" = ${scope.eventId} AND "voided" = false AND "recordedAt" >= ${range.from} AND "recordedAt" < ${range.to}
@@ -76,18 +75,18 @@ export async function registrationsByDay(scope: EventScope, range: Range) {
   }));
 }
 
-export async function registrationsByHour(scope: EventScope, range: Range) {
+/**
+ * By local hour: the bucket starts on the event's wall-clock hour, which is
+ * not a UTC hour at +05:30. The label is added by the report section.
+ */
+export async function registrationsByHour(scope: EventScope, range: Range, timezone: string) {
   const rows = await prisma.$queryRaw<Array<{ hour: Date; value: bigint }>>`
-    SELECT date_trunc('hour', "recordedAt") AS hour, COUNT(*)::bigint AS value
+    SELECT ${localBucketStartSql('recordedAt', timezone, 60)} AS hour, COUNT(*)::bigint AS value
     FROM "Registration"
     WHERE "eventId" = ${scope.eventId} AND "voided" = false AND "recordedAt" >= ${range.from} AND "recordedAt" < ${range.to}
     GROUP BY hour
     ORDER BY hour ASC`;
 
-  // Truncation stays in UTC deliberately: Singapore is UTC+8 exactly, so the
-  // hour boundaries are identical either way and doing the arithmetic in the
-  // database would only move it somewhere harder to test. The label is added
-  // by the report section.
   return rows.map((row) => ({ hour: row.hour, value: Number(row.value) }));
 }
 
@@ -109,14 +108,17 @@ export async function footfallBySource(scope: EventScope, range: Range) {
   return rows.map((row) => ({ source: row.source, value: row._sum.quantity ?? 0 }));
 }
 
-/** 30-minute curve per station — the peak-period analysis the clicker never gave. */
-export async function footfallCurve(scope: EventScope, range: Range) {
+/**
+ * 30-minute curve per station — the peak-period analysis the clicker never
+ * gave — on the event's local half hours.
+ */
+export async function footfallCurve(scope: EventScope, range: Range, timezone: string) {
   const rows = await prisma.$queryRaw<
     Array<{ stationId: string; bucketStart: Date; value: bigint }>
   >`
     SELECT
       "stationId",
-      to_timestamp(floor(extract(epoch FROM "recordedAt") / 1800) * 1800) AS "bucketStart",
+      ${localBucketStartSql('recordedAt', timezone, 30)} AS "bucketStart",
       SUM("quantity")::bigint AS value
     FROM "FootfallTick"
     WHERE "eventId" = ${scope.eventId} AND "voided" = false AND "recordedAt" >= ${range.from} AND "recordedAt" < ${range.to}
@@ -170,19 +172,20 @@ export async function cardTotals(scope: EventScope, range: Range) {
 export async function cardsByDay(
   scope: EventScope,
   range: Range,
-  column: 'issuedAt' | 'completedAt',
+  by: { column: 'issuedAt' | 'completedAt'; zone: EventZone },
 ) {
+  const day = eventDaySql(by.column, by.zone);
   const rows =
-    column === 'issuedAt'
+    by.column === 'issuedAt'
       ? await prisma.$queryRaw<Array<{ date: Date; value: bigint }>>`
-          SELECT date_trunc('day', "issuedAt" AT TIME ZONE 'Asia/Singapore') AS date,
+          SELECT ${day} AS date,
                  COUNT(*)::bigint AS value
           FROM "MissionCard"
           WHERE "eventId" = ${scope.eventId} AND "issuedAt" >= ${range.from} AND "issuedAt" < ${range.to}
             AND "status" <> 'LOST'
           GROUP BY date ORDER BY date ASC`
       : await prisma.$queryRaw<Array<{ date: Date; value: bigint }>>`
-          SELECT date_trunc('day', "completedAt" AT TIME ZONE 'Asia/Singapore') AS date,
+          SELECT ${day} AS date,
                  COUNT(*)::bigint AS value
           FROM "MissionCard"
           WHERE "eventId" = ${scope.eventId} AND "completedAt" >= ${range.from} AND "completedAt" < ${range.to}
@@ -206,9 +209,9 @@ export async function cardsPerStation(scope: EventScope, range: Range) {
   return rows.map((row) => ({ stationId: row.stationId, cards: Number(row.cards) }));
 }
 
-export async function giftRedemptionsByDay(scope: EventScope, range: Range) {
+export async function giftRedemptionsByDay(scope: EventScope, range: Range, zone: EventZone) {
   const rows = await prisma.$queryRaw<Array<{ date: Date; value: bigint }>>`
-    SELECT date_trunc('day', "recordedAt" AT TIME ZONE 'Asia/Singapore') AS date,
+    SELECT ${eventDaySql('recordedAt', zone)} AS date,
            COUNT(*)::bigint AS value
     FROM "GiftRedemption"
     WHERE "eventId" = ${scope.eventId} AND "voided" = false AND "recordedAt" >= ${range.from} AND "recordedAt" < ${range.to}
@@ -306,11 +309,10 @@ export async function volunteerAttendance(scope: EventScope, range: Range) {
     select: {
       volunteerId: true,
       stationId: true,
-      block: true,
       checkedInAt: true,
       checkedOutAt: true,
       station: { select: { name: true } },
-      eventDay: { select: { date: true } },
+      shift: { select: { endsAt: true } },
     },
   });
 }

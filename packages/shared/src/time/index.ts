@@ -55,13 +55,38 @@ export function zonedDate(instant: Date, tz: string): string {
   return shifted.toISOString().slice(0, 10);
 }
 
-/** The next calendar date after "YYYY-MM-DD". */
-export function nextDate(date: string): string {
+/**
+ * The wall-clock reading of an instant in `tz`, as "YYYY-MM-DDTHH:MM". Both
+ * occurrences of a repeated hour read the same; `zonedOffset` tells them apart.
+ */
+export function zonedWallTime(instant: Date, tz: string): string {
+  const shifted = new Date(instant.getTime() + offsetAt(tz, instant.getTime()) * MINUTE);
+  return shifted.toISOString().slice(0, 16);
+}
+
+/** The UTC offset of `tz` at an instant, as "+08:00", "-04:00" or "+05:45". */
+export function zonedOffset(instant: Date, tz: string): string {
+  const offset = offsetAt(tz, instant.getTime());
+  const sign = offset < 0 ? '-' : '+';
+  return `${sign}${minutesToTime(Math.abs(offset))}`;
+}
+
+function shiftDate(date: string, days: number): string {
   const d = DATE.exec(date);
   if (!d) throw new RangeError(`not a date: ${date}`);
-  return new Date(Date.UTC(Number(d[1]), Number(d[2]) - 1, Number(d[3]) + 1))
+  return new Date(Date.UTC(Number(d[1]), Number(d[2]) - 1, Number(d[3]) + days))
     .toISOString()
     .slice(0, 10);
+}
+
+/** The next calendar date after "YYYY-MM-DD". */
+export function nextDate(date: string): string {
+  return shiftDate(date, 1);
+}
+
+/** The calendar date before "YYYY-MM-DD". */
+export function previousDate(date: string): string {
+  return shiftDate(date, -1);
 }
 
 function minutesToTime(minutes: number): string {

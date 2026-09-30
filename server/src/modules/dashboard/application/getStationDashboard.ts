@@ -1,7 +1,8 @@
 import type { StationDashboardResponse } from '@spoh/shared';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { getSettings } from '../../../platform/settings/index.js';
-import { minutesBetween, startOfEventDay } from '../../../platform/time/index.js';
+import { eventToday, eventTodayStart } from '../../../platform/event/today.js';
+import { minutesBetween } from '../../../platform/time/index.js';
 import { findStationById } from '../../station/index.js';
 import {
   footfallByDevice,
@@ -30,13 +31,14 @@ export async function getStationDashboard(
   const station = await findStationById(scope, stationId);
   if (!station) throw new NotFoundError('Station');
 
-  const since = startOfEventDay(now);
+  const since = await eventTodayStart(scope, now);
+  const today = await eventToday(scope, now);
   const window = { since, until: now };
   const [registrations, footfall, stamps, roster, flagged] = await Promise.all([
     registrationsPanel(scope, stationId, window),
     footfallPanel(scope, stationId, window),
     stampsAtStation(scope, stationId, window),
-    rosterPanel(scope, stationId, since),
+    rosterPanel(scope, stationId, today),
     flaggedRedemptions(scope, { since, until: now, stationId }),
   ]);
 

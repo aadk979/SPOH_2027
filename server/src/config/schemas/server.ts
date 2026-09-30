@@ -25,8 +25,8 @@ export const serverFields = {
   /**
    * Treat every hour as event hours. DEVELOPMENT ONLY.
    *
-   * Station scoping requires a shift block to be running, which outside
-   * 09:30-18:00 Singapore means no capture screen works at all. Correct for
+   * Station scoping requires a shift to be running, which outside the
+   * event's shift hours means no capture screen works at all. Correct for
    * the event — a counter left open overnight must not keep writing — and
    * unworkable for a student team testing at 10pm.
    *

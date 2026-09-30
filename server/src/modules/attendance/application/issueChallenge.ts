@@ -3,12 +3,8 @@ import type { AttendanceChallenge } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
-import {
-  eventDayAnchor,
-  singaporeDateString,
-  systemClock,
-  type Clock,
-} from '../../../platform/time/index.js';
+import { eventToday } from '../../../platform/event/today.js';
+import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { findEventDayOn, lockPerson, replaceChallenge } from '../data/repo.js';
 import { ATTENDANCE_TTL_MS, assertEventToday } from '../domain/attendanceRules.js';
 import { onCampus } from './config.js';
@@ -23,7 +19,7 @@ export async function issueChallenge(
   return prisma.$transaction(async (tx) => {
     await lockPerson(tx, volunteerId);
     const now = clock.now();
-    const day = await findEventDayOn(tx, scope, eventDayAnchor(singaporeDateString(now)));
+    const day = await findEventDayOn(tx, scope, await eventToday(scope, now));
     assertEventToday(day);
     await assertIssuer(tx, scope, { issuerId: volunteerId, dayId: day.id });
     const id = randomUUID();

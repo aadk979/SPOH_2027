@@ -1,6 +1,6 @@
 import type { FootfallLiveResponse } from '@spoh/shared';
 import { DEFAULT_SETTINGS, getSettings } from '../../../platform/settings/index.js';
-import { startOfEventDay } from '../../../platform/time/index.js';
+import { eventTodayStart } from '../../../platform/event/today.js';
 import { listCountedStations } from '../../station/index.js';
 import { liveStationStats } from '../data/repo.js';
 import { liveStationRow } from '../domain/footfallRules.js';
@@ -24,9 +24,10 @@ export async function getLiveFootfall(
   now = new Date(),
 ): Promise<FootfallLiveResponse> {
   const silentAfterMinutes = getSettings().silentStationMinutes;
+  const since = await eventTodayStart(scope, now);
   const [stations, stats] = await Promise.all([
     listCountedStations(scope),
-    liveStationStats(scope, { since: startOfEventDay(now), until: now }),
+    liveStationStats(scope, { since, until: now }),
   ]);
   const statsByStation = new Map(stats.map((row) => [row.stationId, row]));
 

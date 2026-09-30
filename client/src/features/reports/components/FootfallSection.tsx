@@ -2,8 +2,9 @@ import type { ReactNode } from 'react';
 import type { FullReport } from '@spoh/shared';
 import { Section } from '@/shared/ui';
 import { BarList, BarRow } from '@/features/dashboard';
-import { formatTime } from '@/shared/lib/format';
+import { useEventTime } from '@/features/session';
 export function FootfallSection({ data }: { data: FullReport }): ReactNode {
+  const format = useEventTime();
   return (
     <Section title="Room entries and peak periods">
       <BarList>
@@ -21,7 +22,7 @@ export function FootfallSection({ data }: { data: FullReport }): ReactNode {
                 // Under its own bar, not at a fixed 160px indent that
                 // landed under the neighbouring station on a phone.
                 <p className="mt-xxs text-caption text-text-muted">
-                  Busiest 30 minutes: {formatTime(row.peakBlockStart)} · {row.peakBlockValue}{' '}
+                  Busiest 30 minutes: {format.time(row.peakBlockStart)} · {row.peakBlockValue}{' '}
                   entries
                 </p>
               ) : null}

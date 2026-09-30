@@ -2,8 +2,9 @@ import type { ReactNode } from 'react';
 import type { SyncDiagnosticsState } from '../hooks/useSyncDiagnostics';
 import { Button, Callout, Card, Section } from '@/shared/ui';
 import { flush } from '@/shared/lib/outbox';
-import { formatTime } from '@/shared/lib/format';
+import { useEventTime } from '@/features/session';
 export function SyncDiagnostics({ state }: { state: SyncDiagnosticsState }): ReactNode {
+  const format = useEventTime();
   const { entries, failed, pending, copied, copyError, copyFailed } = state;
   return (
     <Section title="Sync">
@@ -47,7 +48,7 @@ export function SyncDiagnostics({ state }: { state: SyncDiagnosticsState }): Rea
               <ul className="mt-xs flex max-h-[40dvh] flex-col gap-xxs overflow-y-auto text-caption text-text-muted">
                 {failed.map((entry) => (
                   <li key={entry.id}>
-                    {formatTime(entry.clientRecordedAt)} · {entry.endpoint} · {entry.attempts}{' '}
+                    {format.time(entry.clientRecordedAt)} · {entry.endpoint} · {entry.attempts}{' '}
                     attempts · {entry.lastError ?? 'unknown error'}
                   </li>
                 ))}

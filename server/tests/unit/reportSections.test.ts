@@ -40,30 +40,27 @@ describe('report sections', () => {
     ]);
   });
 
-  it('counts a missed shift as a no-show only once its block has ended', () => {
-    const day = { date: new Date('2027-01-07T00:00:00.000Z') };
+  it('counts a missed shift as a no-show only once the shift has ended', () => {
     const attendance = [
       {
         stationId: 'hall',
         checkedInAt: null,
         checkedOutAt: null,
-        eventDay: day,
-        block: 'MORNING' as const,
+        shift: { endsAt: new Date('2027-01-07T06:00:00.000Z') },
       },
       {
         stationId: 'hall',
         checkedInAt: null,
         checkedOutAt: null,
-        eventDay: day,
-        block: 'AFTERNOON' as const,
+        shift: { endsAt: new Date('2027-01-07T10:00:00.000Z') },
       },
     ];
     const section = volunteersSection(attendance, {
       volunteersActive: 2,
       stationName: names,
-      now: new Date('2027-01-07T05:00:00.000Z'),
+      now: new Date('2027-01-07T06:00:00.000Z'),
     });
-    expect(section.noShows + section.notYetDue).toBe(2);
-    expect(section.notYetDue).toBeGreaterThanOrEqual(1);
+    expect(section.noShows).toBe(1);
+    expect(section.notYetDue).toBe(1);
   });
 });

@@ -12,6 +12,9 @@ export function writeReadMeSheet(workbook: ExcelJS.Workbook, report: FullReport)
   sheet.addRow([
     `Range: ${report.range.from ?? 'start of event'} to ${report.range.to ?? 'end of event'}`,
   ]);
+  sheet.addRow([
+    `Times marked "local" are on the event's clock (${report.timezone}), each with its UTC offset.`,
+  ]);
   sheet.addRow([]);
 
   sheet.addRow(['How to read the numbers']).font = { bold: true };

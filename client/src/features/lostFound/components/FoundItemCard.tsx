@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import type { LostFoundRecord } from '@spoh/shared';
 import { Button, Card, StatusText, type Tone } from '@/shared/ui';
 import type { useClaimLostFound } from '@/features/lostFound';
-import { formatDateTime } from '@/shared/lib/format';
+import { useEventTime } from '@/features/session';
 export function FoundItemCard({
   item,
   claim,
@@ -10,13 +10,14 @@ export function FoundItemCard({
   item: LostFoundRecord;
   claim: ReturnType<typeof useClaimLostFound>;
 }): ReactNode {
+  const format = useEventTime();
   return (
     <Card as="li" className="flex flex-col">
       <p className="text-tagline font-semibold">{item.itemLabel}</p>
 
       <p className="text-caption text-text-muted">
         {item.categoryLabel ? `${item.categoryLabel} · ` : ''}
-        Found {formatDateTime(item.foundAt)}
+        Found {format.dateTime(item.foundAt)}
         {item.foundStationName ? ` at ${item.foundStationName}` : ''}
       </p>
 

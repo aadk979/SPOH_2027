@@ -1,5 +1,5 @@
 import type { FullReport } from '@spoh/shared';
-import { rows, sgt } from './format.js';
+import { rows, eventTime } from './format.js';
 
 type Cell = string | number | null;
 
@@ -42,7 +42,7 @@ function sections(report: FullReport): CsvSection[] {
     {
       title: 'Room entries (unit: roomEntries — not unique visitors)',
       rows: [
-        ['Station', 'Room entries', 'Peak block (SGT)', 'Peak value'],
+        ['Station', 'Room entries', 'Peak block (local)', 'Peak value'],
         ...rows.footfallStations(report),
         ['TOTAL', report.footfall.total],
       ],
@@ -70,13 +70,13 @@ function cardRows(report: FullReport): Cell[][] {
 
 function safetyRows(report: FullReport): Cell[][] {
   return [
-    ['Type', 'Severity', 'Status', 'Station', 'Occurred (SGT)', 'What happened'],
+    ['Type', 'Severity', 'Status', 'Station', 'Occurred (local)', 'What happened'],
     ...report.safety.incidents.map((incident) => [
       incident.type,
       incident.severity,
       incident.status,
       incident.stationName,
-      sgt(incident.occurredAt),
+      eventTime(incident.occurredAt, report.timezone),
       incident.description,
     ]),
     ['Lost-person cases', report.safety.lostPerson.cases],
@@ -97,11 +97,11 @@ function volunteerRows(report: FullReport): Cell[][] {
 
 function integrityRows(report: FullReport): Array<readonly Cell[]> {
   return [
-    ['Tier', 'Started (SGT)', 'Ended (SGT)', 'Minutes', 'Scope and reason'],
+    ['Tier', 'Started (local)', 'Ended (local)', 'Minutes', 'Scope and reason'],
     ...report.dataIntegrity.fallbackWindows.map((window) => [
       window.tier,
-      sgt(window.startedAt),
-      window.endedAt ? sgt(window.endedAt) : 'still open',
+      eventTime(window.startedAt, report.timezone),
+      window.endedAt ? eventTime(window.endedAt, report.timezone) : 'still open',
       window.durationMinutes,
       `${window.stationName ?? 'Event-wide'} - ${window.reason}`,
     ]),

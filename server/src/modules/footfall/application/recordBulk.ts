@@ -2,7 +2,8 @@ import type { CreateFootfallBulkRequest, CreateFootfallTickResponse } from '@spo
 import { auditStationScopeBypass, writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import type { CaptureContext } from '../../../platform/http/captureActor.js';
-import { startOfEventDay, systemClock } from '../../../platform/time/index.js';
+import { eventTodayStart } from '../../../platform/event/today.js';
+import { systemClock } from '../../../platform/time/index.js';
 import { requireCountedStation } from '../../station/index.js';
 import { toFootfallTickRecord } from '../data/mappers.js';
 import { createTick, sumForRecorderSince, sumForStationSince } from '../data/repo.js';
@@ -50,7 +51,7 @@ export async function recordBulk(
     return row;
   });
 
-  const since = startOfEventDay(clock.now());
+  const since = await eventTodayStart(scope, clock.now());
   return {
     tick: toFootfallTickRecord(tick),
     sessionTotal: await sumForRecorderSince(

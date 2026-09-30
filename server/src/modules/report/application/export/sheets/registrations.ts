@@ -21,6 +21,6 @@ export function writeRegistrationsSheet(workbook: ExcelJS.Workbook, report: Full
 
   sheet.addRow([]);
   sheet.addRow(['By hour']).font = { bold: true };
-  sheet.addRow(['Hour (Singapore)', 'Registrations']).font = { bold: true };
+  sheet.addRow(['Hour (local)', 'Registrations']).font = { bold: true };
   for (const row of report.registrations.byHour) sheet.addRow([row.localHour, row.value]);
 }

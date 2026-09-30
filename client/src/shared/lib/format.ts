@@ -9,35 +9,51 @@ import type { ShiftBlock, ShiftBlockWindows } from '@spoh/shared';
  * its whole query tree into three unrelated route bundles. Same strings, no
  * import cycle, no passenger code.
  *
- * Every time is rendered in Asia/Singapore explicitly. A volunteer's phone may
- * be on any timezone it likes; the shift board is not.
+ * Every time is rendered on the event's wall clock and in its locale, passed
+ * in explicitly (ADR-003 §6). A volunteer's phone may be on any timezone it
+ * likes; the shift board is not. Screens get both from `useEventTime()`.
  */
 
-const TZ = 'Asia/Singapore';
+/** The event's IANA timezone and locale: what every time on screen is read in. */
+export interface EventClockFormat {
+  timeZone: string;
+  locale: string;
+}
 
-/** 14:05 */
-export function formatTime(iso: string | null | undefined): string {
-  if (!iso) return '—';
+function parsed(iso: string | null | undefined): Date | null {
+  if (!iso) return null;
   const date = new Date(iso);
-  if (isNaN(date.getTime())) return '—';
-  return date.toLocaleTimeString('en-SG', {
+  return isNaN(date.getTime()) ? null : date;
+}
+
+/**
+ * "14:05", or "02:05 pm", by the locale. Without the event's clock (before
+ * `/me` has loaded) it shows a dash: a time in the device's zone would be a
+ * wrong time that looks right.
+ */
+export function formatTime(iso: string | null | undefined, clock: EventClockFormat | null): string {
+  const date = parsed(iso);
+  if (!date || !clock) return '—';
+  return date.toLocaleTimeString(clock.locale, {
     hour: '2-digit',
     minute: '2-digit',
-    timeZone: TZ,
+    timeZone: clock.timeZone,
   });
 }
 
-/** 7 Jan, 14:05 */
-export function formatDateTime(iso: string | null | undefined): string {
-  if (!iso) return '—';
-  const date = new Date(iso);
-  if (isNaN(date.getTime())) return '—';
-  return date.toLocaleString('en-SG', {
+/** "7 Jan, 14:05", by the locale. */
+export function formatDateTime(
+  iso: string | null | undefined,
+  clock: EventClockFormat | null,
+): string {
+  const date = parsed(iso);
+  if (!date || !clock) return '—';
+  return date.toLocaleString(clock.locale, {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',
     minute: '2-digit',
-    timeZone: TZ,
+    timeZone: clock.timeZone,
   });
 }
 

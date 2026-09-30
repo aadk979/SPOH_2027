@@ -1,6 +1,7 @@
 import { prisma } from '../db/client.js';
 import type { EventScope } from '../db/eventScope.js';
 import { ServiceUnavailableError } from '../errors/index.js';
+import type { EventZone } from '../time/index.js';
 
 /**
  * The event a request works in, until P09.7 puts it in the URL: the newest
@@ -29,23 +30,33 @@ export async function currentEvent(): Promise<CurrentEvent> {
   return event;
 }
 
-/** Forget the cached event: after one is created or closed, and between tests. */
+/** Forget the cached event and zones: after one is created, edited or closed, and between tests. */
 export function invalidateCurrentEvent(): void {
   cached = null;
+  zones.clear();
 }
 
-const timezones = new Map<string, string>();
+const zones = new Map<string, EventZone>();
 
-/** An event's IANA timezone. Fixed once the event exists, so cached for the process. */
-export async function eventTimezone(scope: EventScope): Promise<string> {
-  const known = timezones.get(scope.eventId);
+/**
+ * An event's wall clock: its IANA timezone and day boundary. Neither changes
+ * once the event runs, so it is cached for the process; `invalidateCurrentEvent`
+ * forgets it for set-up edits and tests.
+ */
+export async function eventZone(scope: EventScope): Promise<EventZone> {
+  const known = zones.get(scope.eventId);
   if (known) return known;
-  const event = await prisma.event.findUniqueOrThrow({
+  const zone = await prisma.event.findUniqueOrThrow({
     where: { id: scope.eventId },
-    select: { timezone: true },
+    select: { timezone: true, dayBoundaryMinutes: true },
   });
-  timezones.set(scope.eventId, event.timezone);
-  return event.timezone;
+  zones.set(scope.eventId, zone);
+  return zone;
+}
+
+/** An event's IANA timezone. */
+export async function eventTimezone(scope: EventScope): Promise<string> {
+  return (await eventZone(scope)).timezone;
 }
 
 /**

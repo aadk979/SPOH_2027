@@ -1,7 +1,7 @@
 import { ShiftBlock, type LongShiftWarning, type StaffingGapsResponse } from '@spoh/shared';
 import { DEFAULT_SETTINGS, getSettings } from '../../../platform/settings/index.js';
 import { runningShifts } from '../../../platform/event/runningShifts.js';
-import { startOfEventDay } from '../../../platform/time/index.js';
+import { eventTodayStart } from '../../../platform/event/today.js';
 import {
   listStaffedStations,
   longRunningShifts,
@@ -57,8 +57,6 @@ export async function getLongShifts(
   now = new Date(),
 ): Promise<LongShiftWarning[]> {
   const cutoff = new Date(now.getTime() - getSettings().longShiftMinutes * 60_000);
-  return longShiftWarnings(
-    await longRunningShifts(scope, { cutoff, since: startOfEventDay(now) }),
-    now,
-  );
+  const since = await eventTodayStart(scope, now);
+  return longShiftWarnings(await longRunningShifts(scope, { cutoff, since }), now);
 }

@@ -1,6 +1,6 @@
 import type { LiveDashboardResponse } from '@spoh/shared';
 import { runningShifts } from '../../../platform/event/runningShifts.js';
-import { startOfEventDay } from '../../../platform/time/index.js';
+import { eventToday, eventTodayStart } from '../../../platform/event/today.js';
 import { getLiveFootfall } from '../../footfall/index.js';
 import { listGifts } from '../../gift/index.js';
 import { getFunnel } from '../../missionCard/index.js';
@@ -34,10 +34,11 @@ export async function getLiveDashboard(
   scope: EventScope,
   now = new Date(),
 ): Promise<LiveDashboardResponse> {
-  const since = startOfEventDay(now);
+  const since = await eventTodayStart(scope, now);
+  const today = await eventToday(scope, now);
   const running = await runningShifts(scope, now);
   const [eventDay, withinEventHours] = await Promise.all([
-    findEventDayOn(scope, since),
+    findEventDayOn(scope, today),
     anyShiftRunning(scope, running),
   ]);
 

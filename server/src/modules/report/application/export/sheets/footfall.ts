@@ -1,6 +1,6 @@
 import type { FullReport } from '@spoh/shared';
 import type { ExcelJS } from '../format.js';
-import { SHEETS, header, rows, sgt } from '../format.js';
+import { SHEETS, eventTime, header, rows } from '../format.js';
 
 export function writeFootfallSheet(workbook: ExcelJS.Workbook, report: FullReport): void {
   const sheet = workbook.addWorksheet(SHEETS.footfall);
@@ -12,7 +12,7 @@ export function writeFootfallSheet(workbook: ExcelJS.Workbook, report: FullRepor
   sheet.addRow([`Total: ${report.footfall.total}`]);
   sheet.addRow([]);
 
-  header(sheet, ['Station', 'Room entries', 'Peak 30-min block (SGT)', 'Peak entries']);
+  header(sheet, ['Station', 'Room entries', 'Peak 30-min block (local)', 'Peak entries']);
   for (const row of rows.footfallStations(report)) sheet.addRow([...row]);
 
   sheet.addRow([]);
@@ -22,11 +22,11 @@ export function writeFootfallSheet(workbook: ExcelJS.Workbook, report: FullRepor
 
   sheet.addRow([]);
   sheet.addRow(['30-minute curve']).font = { bold: true };
-  sheet.addRow(['Block start (SGT)', 'Station', 'Room entries']).font = { bold: true };
+  sheet.addRow(['Block start (local)', 'Station', 'Room entries']).font = { bold: true };
   const names = new Map(report.footfall.byStation.map((row) => [row.stationId, row.stationName]));
   for (const point of report.footfall.curve) {
     sheet.addRow([
-      sgt(point.bucketStart),
+      eventTime(point.bucketStart, report.timezone),
       names.get(point.stationId) ?? point.stationId,
       point.value,
     ]);

@@ -1,6 +1,5 @@
 import type { FullReport } from '@spoh/shared';
 import { listFallbackWindows } from '../../fallback/index.js';
-import { singaporeHourKey } from '../../../platform/time/index.js';
 import { listGifts } from '../../gift/index.js';
 import {
   cardTotals,
@@ -23,7 +22,9 @@ import {
   type Range,
 } from '../data/repo.js';
 import { importBatches, recordsBySource, voidedCounts } from '../data/integrity.js';
+import { hourlyRows } from '../domain/hours.js';
 import { footfallSection, safetySection, volunteersSection } from '../domain/sections.js';
+import type { EventZone } from '../../../platform/time/index.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /** One loader per report section: its own queries, then its builder. */
@@ -31,38 +32,39 @@ import type { EventScope } from '../../../platform/db/eventScope.js';
 type Names = ReadonlyMap<string, string>;
 type Report = FullReport;
 
+/** The report's time range, read on the event's wall clock. */
+export interface ReportSpan extends Range {
+  zone: EventZone;
+}
+
 export async function registrationsReport(
   scope: EventScope,
-  range: Range,
+  range: ReportSpan,
 ): Promise<Report['registrations']> {
   const [totals, byDay, byHour] = await Promise.all([
     registrationTotals(scope, range),
-    registrationsByDay(scope, range),
-    registrationsByHour(scope, range),
+    registrationsByDay(scope, range, range.zone),
+    registrationsByHour(scope, range, range.zone.timezone),
   ]);
   return {
     unit: 'registrations',
     total: totals.total,
     byCategory: totals.byCategory,
     byDay,
-    // Labelled in Singapore time: the committee reads "10:00", not "02:00".
-    byHour: byHour.map((row) => ({
-      hour: row.hour.toISOString(),
-      localHour: singaporeHourKey(row.hour).replace('T', ' ') + ':00',
-      value: row.value,
-    })),
+    // Labelled on the event's clock: the committee reads "10:00", not "02:00".
+    byHour: hourlyRows(byHour, range.zone.timezone),
     voided: totals.voided,
   };
 }
 
 export async function footfallReport(
   scope: EventScope,
-  range: Range,
+  range: ReportSpan,
   names: Names,
 ): Promise<Report['footfall']> {
   const [total, curve, bySource] = await Promise.all([
     footfallTotals(scope, range),
-    footfallCurve(scope, range),
+    footfallCurve(scope, range, range.zone.timezone),
     footfallBySource(scope, range),
   ]);
   return footfallSection({ total, curve, bySource }, names);
@@ -70,13 +72,13 @@ export async function footfallReport(
 
 export async function cardsReport(
   scope: EventScope,
-  range: Range,
+  range: ReportSpan,
   names: Names,
 ): Promise<Report['cards']> {
   const [cards, issuedByDay, completedByDay, perStation] = await Promise.all([
     cardTotals(scope, range),
-    cardsByDay(scope, range, 'issuedAt'),
-    cardsByDay(scope, range, 'completedAt'),
+    cardsByDay(scope, range, { column: 'issuedAt', zone: range.zone }),
+    cardsByDay(scope, range, { column: 'completedAt', zone: range.zone }),
     cardsPerStation(scope, range),
   ]);
   return {
@@ -97,12 +99,12 @@ export async function cardsReport(
 
 export async function giftsReport(
   scope: EventScope,
-  range: Range,
+  range: ReportSpan,
   names: Names,
 ): Promise<Report['gifts']> {
   const [gifts, byDay, byStation] = await Promise.all([
     listGifts(scope),
-    giftRedemptionsByDay(scope, range),
+    giftRedemptionsByDay(scope, range, range.zone),
     giftRedemptionsByStation(scope, range),
   ]);
   return {

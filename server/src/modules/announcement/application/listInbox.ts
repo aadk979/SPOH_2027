@@ -1,6 +1,6 @@
 import type { AnnouncementRecord, CommitteeRole, ListAnnouncementsQuery } from '@spoh/shared';
 import { toPage, type Page } from '../../../platform/db/pagination.js';
-import { eventDayAnchor, singaporeDateString } from '../../../platform/time/index.js';
+import { eventToday } from '../../../platform/event/today.js';
 import { toAnnouncementRecord } from '../data/mappers.js';
 import { acknowledgedIds, findTodaysPostings, listForRecipient } from '../data/repo.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
@@ -10,11 +10,10 @@ export async function listInbox(
   query: ListAnnouncementsQuery,
   recipient: { volunteerId: string; role: CommitteeRole; scope: EventScope },
 ): Promise<Page<AnnouncementRecord>> {
-  const today = eventDayAnchor(singaporeDateString());
-
   // Station targeting matches every station this volunteer is rostered at
   // today, not just the one they happen to be standing in right now.
   const { scope } = recipient;
+  const today = await eventToday(scope, new Date());
   const assignments = await findTodaysPostings(scope, recipient.volunteerId, today);
 
   const rows = await listForRecipient(scope, {

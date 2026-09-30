@@ -21,6 +21,7 @@ async function mockSession(page: Page, leader = false, failMe = false) {
       : path.endsWith('/me')
         ? {
             volunteer,
+            event: { id: 'event', name: 'Event', timezone: 'Asia/Singapore', locale: 'en-SG' },
             capabilities,
             currentAssignment: null,
             upcomingAssignments: [],

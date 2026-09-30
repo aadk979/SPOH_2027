@@ -2,7 +2,8 @@ import type { CreateRegistrationRequest, CreateRegistrationResponse } from '@spo
 import { auditStationScopeBypass, writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import type { CaptureContext } from '../../../platform/http/captureActor.js';
-import { startOfEventDay, systemClock } from '../../../platform/time/index.js';
+import { eventTodayStart } from '../../../platform/event/today.js';
+import { systemClock } from '../../../platform/time/index.js';
 import { requireActiveStation } from '../../station/index.js';
 import { toRegistrationRecord } from '../data/mappers.js';
 import { countForRecorderSince, countForStationSince, createRegistration } from '../data/repo.js';
@@ -46,7 +47,7 @@ export async function recordRegistration(
     return row;
   });
 
-  const since = startOfEventDay(clock.now());
+  const since = await eventTodayStart(scope, clock.now());
   // Independent queries, so they go together. Serialising them put an extra
   // round trip on the critical path of every booth tap.
   const [sessionTotal, boothTotal] = await Promise.all([

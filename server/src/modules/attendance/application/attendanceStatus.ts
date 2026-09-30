@@ -1,12 +1,8 @@
 import type { AttendanceStatus } from '@spoh/shared';
 import { prisma } from '../../../platform/db/client.js';
 import { ForbiddenError } from '../../../platform/errors/index.js';
-import {
-  eventDayAnchor,
-  singaporeDateString,
-  systemClock,
-  type Clock,
-} from '../../../platform/time/index.js';
+import { eventToday } from '../../../platform/event/today.js';
+import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { toAttendanceRecord } from '../data/mappers.js';
 import { findAttendance, findEventDayOn, findVolunteerOrThrow } from '../data/repo.js';
 import { assertActiveAccount, isRoot } from '../domain/attendanceRules.js';
@@ -21,9 +17,10 @@ export async function attendanceStatus(
 ): Promise<AttendanceStatus> {
   const { scope, volunteerId, ip } = viewer;
   const now = clock.now();
+  const today = await eventToday(scope, now);
   const [person, day] = await Promise.all([
     findVolunteerOrThrow(prisma, volunteerId),
-    findEventDayOn(prisma, scope, eventDayAnchor(singaporeDateString(now))),
+    findEventDayOn(prisma, scope, today),
   ]);
   assertActiveAccount(person);
   const attendance = day

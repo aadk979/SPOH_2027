@@ -7,6 +7,8 @@ import {
   type RegistrationSummaryFilter,
 } from '../data/repo.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
+import { eventZone } from '../../../platform/event/currentEvent.js';
+import { zonedDayWindow } from '@spoh/shared';
 
 async function bucketsFor(
   scope: EventScope,
@@ -20,10 +22,16 @@ async function bucketsFor(
       value: row.count,
     }));
   }
-  return (await groupByTimeBucket(scope, filter, groupBy)).map((row) => ({
-    key: row.bucket.toISOString(),
-    value: row.count,
-  }));
+  // A day bucket is keyed by the instant the event day starts (its local
+  // date read at the day boundary), an hour bucket by the instant it starts.
+  const zone = await eventZone(scope);
+  const rows = await groupByTimeBucket(scope, filter, { granularity: groupBy, zone });
+  const startOf = (bucket: Date): Date =>
+    groupBy === 'day'
+      ? zonedDayWindow(bucket.toISOString().slice(0, 10), zone.timezone, zone.dayBoundaryMinutes)
+          .start
+      : bucket;
+  return rows.map((row) => ({ key: startOf(row.bucket).toISOString(), value: row.count }));
 }
 
 export async function summariseRegistrations(

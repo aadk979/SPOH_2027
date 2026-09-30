@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { nextDate, wallTimeToInstant, zonedDate, zonedDayWindow } from './index.js';
+import {
+  nextDate,
+  previousDate,
+  wallTimeToInstant,
+  zonedDate,
+  zonedDayWindow,
+  zonedOffset,
+  zonedWallTime,
+} from './index.js';
 
 const iso = (date: Date) => date.toISOString();
 
@@ -73,5 +81,34 @@ describe('zonedDayWindow', () => {
   it('crosses month and year ends', () => {
     expect(nextDate('2026-12-31')).toBe('2027-01-01');
     expect(nextDate('2028-02-28')).toBe('2028-02-29');
+  });
+});
+
+describe('previousDate', () => {
+  it('crosses month and year starts', () => {
+    expect(previousDate('2027-01-01')).toBe('2026-12-31');
+    expect(previousDate('2028-03-01')).toBe('2028-02-29');
+  });
+});
+
+describe('zonedWallTime and zonedOffset', () => {
+  it.each([
+    ['2027-01-07T03:30:00Z', 'Asia/Singapore', '2027-01-07T11:30', '+08:00'],
+    ['2027-01-07T04:10:00Z', 'Asia/Kolkata', '2027-01-07T09:40', '+05:30'],
+    ['2027-01-07T04:20:00Z', 'Asia/Kathmandu', '2027-01-07T10:05', '+05:45'],
+    ['2027-01-06T13:30:00Z', 'Australia/Sydney', '2027-01-07T00:30', '+11:00'],
+    ['2027-03-15T03:59:00Z', 'America/New_York', '2027-03-14T23:59', '-04:00'],
+  ])('reads %s in %s', (instant, tz, wall, offset) => {
+    expect(zonedWallTime(new Date(instant), tz)).toBe(wall);
+    expect(zonedOffset(new Date(instant), tz)).toBe(offset);
+  });
+
+  it('tells the two occurrences of a repeated hour apart by offset (F01 case 9)', () => {
+    const first = new Date('2027-10-31T00:15:00Z');
+    const second = new Date('2027-10-31T01:15:00Z');
+    expect(zonedWallTime(first, 'Europe/London')).toBe('2027-10-31T01:15');
+    expect(zonedWallTime(second, 'Europe/London')).toBe('2027-10-31T01:15');
+    expect(zonedOffset(first, 'Europe/London')).toBe('+01:00');
+    expect(zonedOffset(second, 'Europe/London')).toBe('+00:00');
   });
 });

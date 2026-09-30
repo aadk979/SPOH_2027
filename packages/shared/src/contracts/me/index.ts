@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { Capability } from '../../access/capabilities.js';
 import { CommitteeRole, ShiftBlock } from '../../invariants/enums.js';
 import { Id, IsoDate, IsoDateTime } from '../common/index.js';
+import { EventSummary } from '../event/index.js';
 import { StationSummary } from '../station/index.js';
 
 /** A volunteer the caller may need to contact — their IC, their Deputy, the Chief. */
@@ -47,6 +48,8 @@ export const MeResponse = z
         active: z.boolean(),
       })
       .strict(),
+    /** The event this answer is about; its timezone and locale format every time shown. */
+    event: EventSummary,
     /** Server-computed from the capability matrix. The client never derives it. */
     capabilities: z.array(Capability),
     /** Today's assignment, if the caller is on shift. */

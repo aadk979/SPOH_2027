@@ -20,9 +20,8 @@ import { writeAudit, type AuditContext } from '../audit/index.js';
  *
  * ── Why a synchronous cache ─────────────────────────────────────────────────
  *
- * `activeShiftBlocks()` is called from `requireStationScope`, which runs on
- * every capture write, and from a dozen pure functions that have no business
- * being async. So settings are loaded into memory at boot and refreshed on a
+ * Thresholds are read on every capture write and from a dozen pure functions
+ * that have no business being async. So settings are loaded into memory at boot and refreshed on a
  * timer; readers get a synchronous snapshot. The cache starts populated with
  * the compiled defaults, which means:
  *

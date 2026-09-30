@@ -6,8 +6,8 @@ import { AppShell } from '@/shared/shell/AppShell';
 import { useSyncDiagnostics } from '../hooks/useSyncDiagnostics';
 import { SyncDiagnostics } from '../components/SyncDiagnostics';
 import { ButtonLink, Card, EmptyState, Section, Stack, StatusText } from '@/shared/ui';
-import { useMe, useRequireSession } from '@/features/session';
-import { blockLabel, formatTime } from '@/shared/lib/format';
+import { useMe, useRequireSession, useEventTime } from '@/features/session';
+import { blockLabel } from '@/shared/lib/format';
 import { useClientSettings } from '@/shared/lib/runtimeSettings';
 
 /**
@@ -19,6 +19,7 @@ import { useClientSettings } from '@/shared/lib/runtimeSettings';
  * Copying them as tab-separated text pastes straight into a Google Sheet.
  */
 export default function ShiftScreen(): ReactNode {
+  const format = useEventTime();
   const session = useRequireSession();
   const { data: me } = useMe();
   const { shiftBlocks } = useClientSettings();
@@ -44,7 +45,7 @@ export default function ShiftScreen(): ReactNode {
                   {assignment.checkedInAt ? (
                     <StatusText tone="ok" className="mt-xxs block">
                       <span aria-hidden="true">✓ </span>
-                      Checked in {formatTime(assignment.checkedInAt)}
+                      Checked in {format.time(assignment.checkedInAt)}
                     </StatusText>
                   ) : null}
                 </Card>

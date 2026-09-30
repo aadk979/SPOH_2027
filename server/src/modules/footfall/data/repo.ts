@@ -1,6 +1,7 @@
 import type { FootfallTick, Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
+import { localBucketStartSql } from '../../../platform/db/zonedSql.js';
 
 /**
  * Data access for COUNT 2 — footfall. Every query names its event (ADR-001 §2).
@@ -95,23 +96,24 @@ export async function sumMatching(scope: EventScope, filter: FootfallFilter): Pr
  * message could never give you.
  *
  * Raw SQL because Postgres can bucket by an arbitrary interval and Prisma
- * cannot. Parameterised through a tagged template; `bucketMinutes` is a number
- * validated upstream against a fixed set (15, 30, 60), never free text.
+ * cannot. Buckets align to the event's wall clock (a 30-minute bucket at
+ * +05:45 starts on the local half hour). Parameterised through a tagged
+ * template; the minutes are validated upstream against a fixed set (15, 30,
+ * 60), never free text.
  */
 export async function sumByBucket(
   scope: EventScope,
   filter: FootfallFilter,
-  bucketMinutes: number,
+  bucket: { minutes: number; timezone: string },
 ): Promise<Array<{ stationId: string; bucket: Date; total: number }>> {
   const from = filter.from ?? new Date(0);
   const to = filter.to ?? new Date(8.64e15);
   const stationId = filter.stationId ?? null;
-  const intervalSeconds = bucketMinutes * 60;
 
   const rows = await prisma.$queryRaw<Array<{ stationId: string; bucket: Date; total: bigint }>>`
     SELECT
       "stationId",
-      to_timestamp(floor(extract(epoch FROM "recordedAt") / ${intervalSeconds}) * ${intervalSeconds}) AS bucket,
+      ${localBucketStartSql('recordedAt', bucket.timezone, bucket.minutes)} AS bucket,
       SUM("quantity")::bigint AS total
     FROM "FootfallTick"
     WHERE "eventId" = ${scope.eventId}

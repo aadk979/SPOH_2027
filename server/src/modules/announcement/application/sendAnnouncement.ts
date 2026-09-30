@@ -1,5 +1,5 @@
 import type { AnnouncementRecord, CommitteeRole, CreateAnnouncementRequest } from '@spoh/shared';
-import { eventDayAnchor, singaporeDateString } from '../../../platform/time/index.js';
+import { eventToday } from '../../../platform/event/today.js';
 import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import { dispatch } from '../../notification/index.js';
@@ -28,8 +28,8 @@ export async function sendAnnouncement(
   audit: AuditContext,
 ): Promise<AnnouncementRecord> {
   const stationId = request.target.stationId ?? null;
-  const today = eventDayAnchor(singaporeDateString());
   const { scope } = sender;
+  const today = await eventToday(scope, new Date());
   const postings = await findTodaysPostings(scope, sender.volunteerId, today);
   assertMaySend({ ...sender, todaysStationIds: postings.map((p) => p.stationId) }, stationId);
 

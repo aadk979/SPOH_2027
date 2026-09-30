@@ -2,12 +2,8 @@ import type { AttendanceRecord } from '@spoh/shared';
 import { prisma } from '../../../platform/db/client.js';
 import { ForbiddenError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
-import {
-  eventDayAnchor,
-  singaporeDateString,
-  systemClock,
-  type Clock,
-} from '../../../platform/time/index.js';
+import { eventToday } from '../../../platform/event/today.js';
+import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { findEventDayOn, findVolunteerOrThrow, lockPerson } from '../data/repo.js';
 import { assertEventToday, isRoot } from '../domain/attendanceRules.js';
 import { rootEmail } from './config.js';
@@ -22,7 +18,7 @@ export async function startAttendance(
     await lockPerson(tx, volunteerId);
     const now = clock.now();
     const person = await findVolunteerOrThrow(tx, volunteerId);
-    const day = await findEventDayOn(tx, scope, eventDayAnchor(singaporeDateString(now)));
+    const day = await findEventDayOn(tx, scope, await eventToday(scope, now));
     if (!isRoot(person, rootEmail()))
       throw new ForbiddenError('Only the configured root admin can open attendance.');
     assertEventToday(day);

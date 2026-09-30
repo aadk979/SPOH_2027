@@ -7,9 +7,8 @@ import { type ReactNode } from 'react';
 
 import { AppShell } from '@/shared/shell/AppShell';
 import { Button, Card, EmptyState, LoadingRows, Section, Stack } from '@/shared/ui';
-import { useMe, useRequireSession } from '@/features/session';
+import { useMe, useRequireSession, useEventTime } from '@/features/session';
 import { useAnnouncements, useAcknowledgeAnnouncement } from '@/features/announcements';
-import { formatTime } from '@/shared/lib/format';
 
 /**
  * The announcements inbox (remediation/phases/P07-client-refactor.md).
@@ -20,6 +19,7 @@ import { formatTime } from '@/shared/lib/format';
  */
 
 export default function InboxScreen(): ReactNode {
+  const format = useEventTime();
   const session = useRequireSession();
   const { data: me } = useMe();
 
@@ -61,7 +61,7 @@ export default function InboxScreen(): ReactNode {
                   <p className="mt-xs text-reading">{announcement.body}</p>
 
                   <p className="mt-xs text-caption text-text-muted">
-                    {announcement.authorName} · {formatTime(announcement.createdAt)}
+                    {announcement.authorName} · {format.time(announcement.createdAt)}
                     {announcement.requiresAck ? ` · ${announcement.ackCount} acknowledged` : ''}
                   </p>
 

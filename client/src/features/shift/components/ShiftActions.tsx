@@ -3,7 +3,7 @@ import type { MeResponse } from '@spoh/shared';
 import type { useAttendance } from '@/features/attendance';
 import type { useCheckIn, useCheckOut } from '../queries';
 import { Button, ButtonLink, StatusText } from '@/shared/ui';
-import { formatTime } from '@/shared/lib/format';
+import { useEventTime } from '@/features/session';
 export function ShiftActions({
   assignment,
   attendance,
@@ -19,6 +19,7 @@ export function ShiftActions({
   confirmingCheckOut: boolean;
   setConfirmingCheckOut(value: boolean): void;
 }): ReactNode {
+  const format = useEventTime();
   return (
     <div className="mt-md flex flex-wrap items-center gap-sm">
       {assignment.checkedInAt === null ? (
@@ -33,7 +34,7 @@ export function ShiftActions({
         <>
           <StatusText tone="ok">
             <span aria-hidden="true">✓ </span>
-            Checked in {formatTime(assignment.checkedInAt)}
+            Checked in {format.time(assignment.checkedInAt)}
           </StatusText>
           {confirmingCheckOut ? (
             <div className="flex items-center gap-xs">
@@ -64,7 +65,7 @@ export function ShiftActions({
           )}
         </>
       ) : (
-        <StatusText tone="neutral">Shift ended {formatTime(assignment.checkedOutAt)}</StatusText>
+        <StatusText tone="neutral">Shift ended {format.time(assignment.checkedOutAt)}</StatusText>
       )}
       {assignment.checkedInAt !== null ? (
         <ButtonLink href="/attendance" variant="quiet" size="sm">

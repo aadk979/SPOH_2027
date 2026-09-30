@@ -41,12 +41,11 @@ export const RegistrationReport = z
           /** The true UTC instant the bucket starts at. Unambiguous, for machines. */
           hour: IsoDateTime,
           /**
-           * The same moment in Singapore time, `YYYY-MM-DD HH:00`.
-           *
-           * The bucket boundaries were always right — Singapore is a whole
-           * number of hours from UTC — but the label was not, and a reader
-           * looking for the 11am rush had to shift every row by eight in their
-           * head. Both are returned so neither audience has to convert.
+           * The same hour on the event's wall clock, `YYYY-MM-DD HH:00`, so a
+           * reader looking for the 11am rush need not convert. Buckets start
+           * on local hours (not UTC ones, which differ at +05:30). The two
+           * occurrences of a repeated hour, when clocks go back, carry their
+           * offset: `YYYY-MM-DD HH:00 +01:00`.
            */
           localHour: z.string(),
           value: z.number().int().nonnegative(),
@@ -264,6 +263,8 @@ export const FullReport = z
   .object({
     generatedAt: IsoDateTime,
     range: z.object({ from: IsoDateTime.nullable(), to: IsoDateTime.nullable() }).strict(),
+    /** The event's IANA timezone: every local date, hour and label below is read in it. */
+    timezone: z.string(),
     /**
      * Stated at the top of every report, in prose, because the single most
      * likely misreading of this document is that these are the same people

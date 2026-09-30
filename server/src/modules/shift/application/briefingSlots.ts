@@ -8,7 +8,8 @@ import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
-import { eventDayAnchor, singaporeDateString } from '../../../platform/time/index.js';
+import { eventToday } from '../../../platform/event/today.js';
+import { eventDayAnchor } from '../../../platform/time/index.js';
 import { toBriefingSlotRecord } from '../data/mappers.js';
 import { completeSlot, findSlotById, listBriefingSlots } from '../data/repo.js';
 import { assertMayComplete, assertSlotOpen, minutesUntilStart } from '../domain/briefingRules.js';
@@ -19,12 +20,12 @@ export async function getBriefingSlots(
   query: ListBriefingSlotsQuery,
   viewerId: string,
 ): Promise<BriefingSlotRecord[]> {
+  const now = new Date();
   const slots = await listBriefingSlots(scope, {
     ...(query.eventDayId ? { eventDayId: query.eventDayId } : {}),
     // Defaults to today, because the briefing roster is a today-shaped thing.
-    date: eventDayAnchor(query.date ?? singaporeDateString()),
+    date: query.date ? eventDayAnchor(query.date) : await eventToday(scope, now),
   });
-  const now = new Date();
   return slots.map((slot) =>
     toBriefingSlotRecord(slot, {
       viewerId,

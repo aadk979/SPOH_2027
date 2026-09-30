@@ -7,8 +7,7 @@ import { TvAlerts } from '../components/TvAlerts';
 
 import { type ReactNode } from 'react';
 import { useLiveDashboard } from '@/features/dashboard';
-import { useRequireSession } from '@/features/session';
-import { formatTime } from '@/shared/lib/format';
+import { useRequireSession, useEventTime } from '@/features/session';
 
 /**
  * TV mode — the ops-room display (remediation/phases/P07-client-refactor.md).
@@ -27,6 +26,7 @@ import { formatTime } from '@/shared/lib/format';
  * wall, not the same size in pixels.
  */
 export default function TvScreen(): ReactNode {
+  const format = useEventTime();
   const session = useRequireSession();
   const { data } = useLiveDashboard();
 
@@ -65,7 +65,7 @@ export default function TvScreen(): ReactNode {
             Exit TV mode
           </a>
         </div>
-        <p className="text-tv-row tabular-nums text-on-dark-muted">{formatTime(data.asOf)}</p>
+        <p className="text-tv-row tabular-nums text-on-dark-muted">{format.time(data.asOf)}</p>
       </header>
 
       <div className="grid gap-[1.5vw] sm:grid-cols-3">

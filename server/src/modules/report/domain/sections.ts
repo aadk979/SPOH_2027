@@ -1,5 +1,5 @@
-import type { FullReport, ShiftBlock } from '@spoh/shared';
-import { minutesBetween, shiftBlockEndsAt } from '../../../platform/time/index.js';
+import type { FullReport } from '@spoh/shared';
+import { minutesBetween } from '../../../platform/time/index.js';
 
 /**
  * The report's computed sections: totals, peaks, medians and rates from the
@@ -23,8 +23,8 @@ export interface AttendanceRow {
   stationId: string;
   checkedInAt: Date | null;
   checkedOutAt: Date | null;
-  eventDay: { date: Date };
-  block: ShiftBlock;
+  /** The materialised shift (ADR-002): its real end, in the event's timezone. */
+  shift: { endsAt: Date } | null;
 }
 
 /** The middle value, or the mean of the middle two; null for no values. */
@@ -142,12 +142,13 @@ export function safetySection(input: {
 }
 
 /**
- * A shift nobody checked in to is a no-show only once its block is over
- * (F02-027). Until then it is not yet due: run after a dry run, the report
- * would otherwise count every January shift as missed.
+ * A shift nobody checked in to is a no-show only once it is over (F02-027).
+ * Until then it is not yet due: run after a dry run, the report would
+ * otherwise count every January shift as missed. The shift's own end decides,
+ * so an overnight shift or a DST day needs no arithmetic here.
  */
-function hasEnded(assignment: { eventDay: { date: Date }; block: ShiftBlock }, now: Date): boolean {
-  return shiftBlockEndsAt(assignment.eventDay.date, assignment.block) <= now;
+function hasEnded(assignment: Pick<AttendanceRow, 'shift'>, now: Date): boolean {
+  return assignment.shift !== null && assignment.shift.endsAt <= now;
 }
 
 export function volunteersSection(

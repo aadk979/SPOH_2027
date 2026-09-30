@@ -1,8 +1,7 @@
-import { zonedDate } from '@spoh/shared';
 import { env } from '../../config/env.js';
 import type { EventScope } from '../db/eventScope.js';
-import { eventDayAnchor } from '../time/index.js';
-import { eventTimezone } from './currentEvent.js';
+import { eventDayAnchorOf } from '../time/index.js';
+import { eventZone } from './currentEvent.js';
 
 /**
  * Which shifts are running at an instant, as a filter on `Shift` (P09.5): the
@@ -16,7 +15,7 @@ export async function runningShifts(
   now: Date = new Date(),
 ): Promise<{ startsAt: { lte: Date }; endsAt: { gt: Date } } | { eventDay: { date: Date } }> {
   if (env.SHIFT_HOURS_ALWAYS_OPEN) {
-    return { eventDay: { date: eventDayAnchor(zonedDate(now, await eventTimezone(scope))) } };
+    return { eventDay: { date: eventDayAnchorOf(now, await eventZone(scope)) } };
   }
   return { startsAt: { lte: now }, endsAt: { gt: now } };
 }

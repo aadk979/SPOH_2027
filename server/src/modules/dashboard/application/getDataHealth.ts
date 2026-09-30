@@ -1,7 +1,8 @@
 import type { DataHealthResponse } from '@spoh/shared';
 import { getSettings } from '../../../platform/settings/index.js';
 import { runningShifts } from '../../../platform/event/runningShifts.js';
-import { minutesBetween, startOfEventDay } from '../../../platform/time/index.js';
+import { eventToday, eventTodayStart } from '../../../platform/event/today.js';
+import { minutesBetween } from '../../../platform/time/index.js';
 import { getLiveFootfall } from '../../footfall/index.js';
 import {
   anyShiftRunning,
@@ -25,13 +26,14 @@ export async function getDataHealth(
   scope: EventScope,
   now = new Date(),
 ): Promise<DataHealthResponse> {
-  const since = startOfEventDay(now);
+  const since = await eventTodayStart(scope, now);
+  const today = await eventToday(scope, now);
   const withinEventHours = await anyShiftRunning(scope, await runningShifts(scope, now));
 
   const [footfall, fallbackWindowOpen, eventDay, flagged] = await Promise.all([
     getLiveFootfall(scope, now),
     openFallbackWindowExists(scope, now),
-    findEventDayOn(scope, since),
+    findEventDayOn(scope, today),
     flaggedRedemptions(scope, { since, until: now }),
   ]);
 

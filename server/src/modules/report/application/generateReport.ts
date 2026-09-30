@@ -1,6 +1,5 @@
 import type { FullReport, ReportQuery } from '@spoh/shared';
 import { listStations } from '../../station/index.js';
-import type { Range } from '../data/repo.js';
 import { COUNTING_NOTE } from '../domain/countingNote.js';
 import {
   cardsReport,
@@ -10,14 +9,18 @@ import {
   registrationsReport,
   safetyReport,
   volunteersReport,
+  type ReportSpan,
 } from './sections.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
+import { eventZone } from '../../../platform/event/currentEvent.js';
+import type { EventZone } from '../../../platform/time/index.js';
 
 /** Absent bounds mean the whole event. */
-function resolveRange(query: ReportQuery): Range {
+function resolveRange(query: ReportQuery, zone: EventZone): ReportSpan {
   return {
     from: query.from ? new Date(query.from) : new Date(0),
     to: query.to ? new Date(query.to) : new Date(8.64e15),
+    zone,
   };
 }
 
@@ -26,7 +29,8 @@ function resolveRange(query: ReportQuery): Range {
  * queries, composed here. Stations are named once for every section.
  */
 export async function generateReport(scope: EventScope, query: ReportQuery): Promise<FullReport> {
-  const range = resolveRange(query);
+  const zone = await eventZone(scope);
+  const range = resolveRange(query, zone);
   const stations = await listStations(scope, { includeInactive: true });
   const names = new Map(stations.map((station) => [station.id, station.name]));
   const now = new Date();
@@ -45,6 +49,7 @@ export async function generateReport(scope: EventScope, query: ReportQuery): Pro
   return {
     generatedAt: now.toISOString(),
     range: { from: query.from ?? null, to: query.to ?? null },
+    timezone: zone.timezone,
     countingNote: COUNTING_NOTE,
     registrations,
     footfall,

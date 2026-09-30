@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import type { FallbackWindowRecord } from '@spoh/shared';
 import type { FallbackController } from '../hooks/useFallbackScreen';
 import { Card, CardTitle, Button } from '@/shared/ui';
-import { formatTime } from '@/shared/lib/format';
+import { useEventTime } from '@/features/session';
 export function OpenFallbackWindows({
   open,
   close,
@@ -10,6 +10,7 @@ export function OpenFallbackWindows({
   open: FallbackWindowRecord[];
   close: FallbackController['close'];
 }): ReactNode {
+  const format = useEventTime();
   return (
     <Card tone="warn" as="section" aria-label="Open fallback windows">
       <CardTitle>
@@ -25,7 +26,7 @@ export function OpenFallbackWindows({
               {window.stationName ?? 'Event-wide'}
             </p>
             <p className="text-caption text-text-muted">
-              Since {formatTime(window.startedAt)} · declared by {window.declaredByName} ·{' '}
+              Since {format.time(window.startedAt)} · declared by {window.declaredByName} ·{' '}
               {window.reason}
             </p>
             <Button

@@ -5,7 +5,7 @@ import type {
   NotificationResult,
 } from '@spoh/shared';
 import { logger } from '../../../platform/logger/index.js';
-import { eventDayAnchor, singaporeDateString } from '../../../platform/time/index.js';
+import { eventToday } from '../../../platform/event/today.js';
 import {
   deleteSubscriptions,
   findActiveVolunteerIds,
@@ -53,7 +53,7 @@ async function resolveAudience(
   }
 
   if (audience.stationId) {
-    const today = eventDayAnchor(singaporeDateString(now));
+    const today = await eventToday(scope, now);
     const posting = { stationId: audience.stationId, day: today };
     for (const id of await findRosteredAt(scope, posting)) ids.add(id);
   }

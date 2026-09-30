@@ -10,6 +10,7 @@ import {
 } from '../data/repo.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { runningShifts } from '../../../platform/event/runningShifts.js';
+import { getEventSummary } from '../../event/index.js';
 
 /**
  * `GET /me` is the client's boot call. It returns everything the role-scoped
@@ -27,7 +28,8 @@ export async function getMe(
   if (!volunteer) throw new NotFoundError('Volunteer');
 
   const now = clock.now();
-  const [assignments, escalationChain, running] = await Promise.all([
+  const [event, assignments, escalationChain, running] = await Promise.all([
+    getEventSummary(scope),
     listAssignmentsForVolunteer(scope, volunteerId),
     buildEscalationChain(scope, volunteer.reportsToMembershipId),
     findRunningAssignmentIds(scope, { volunteerId, running: await runningShifts(scope, now) }),
@@ -42,6 +44,7 @@ export async function getMe(
       portfolio: volunteer.portfolio,
       active: volunteer.active,
     },
+    event,
     capabilities: capabilitiesForRole(volunteer.role),
     currentAssignment: currentAssignment ? toMyAssignment(currentAssignment) : null,
     upcomingAssignments: assignments.map(toMyAssignment),
