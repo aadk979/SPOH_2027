@@ -12,9 +12,16 @@ const checks = [
   [
     'the sign-in page',
     '/sign-in',
-    async (r) => r.status === 200 && (await r.text()).includes('SPOH'),
+    async (r) => r.status === 200 && (await r.text()).includes('<html'),
   ],
-  ['a page under the client export', '/map', (r) => r.status === 200],
+  // Event screens are one exported placeholder served for every slug (ADR-008 §2).
+  ['an event screen, for any event', '/e/smoke-check/map', (r) => r.status === 200],
+  // An old screen address is the export's 404 page, which sends the browser on.
+  [
+    'an old screen address',
+    '/map',
+    async (r) => r.status === 404 && (await r.text()).includes('<html'),
+  ],
   ['the API refuses the signed out', '/api/v1/me', (r) => r.status === 401],
   ['readiness is private', '/readyz', (r) => r.status === 404],
 ];
