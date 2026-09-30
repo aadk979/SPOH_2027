@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-30T16:48:08.770Z",
+  "updatedAt": "2026-09-30T17:10:57.700Z",
   "current": {
     "phase": "P09",
     "step": "P09.6"
@@ -1855,11 +1855,16 @@
         {
           "id": "P09.9",
           "title": "Event cloning",
-          "status": "not_started",
+          "status": "done",
           "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-30T17:10:57.699Z",
+          "commits": ["7b203f7"],
+          "notes": [
+            {
+              "at": "2026-09-30T17:10:57.700Z",
+              "text": "Station code, gift type name and event day date unique per event (migration 20261001010000). planClone/applyClone in the event module: DRAFT event with the source's structure, days moved, shifts at the same wall times, gift stock reset, optional INVITED memberships with remapped reporting lines, event.clone audit. Integration test clones SPOH 2027 into SPOH 2028 (+365 days) and uses it through the API. Settings/content/role permissions join the clone in P10/P11; HTTP in P13.2."
+            }
+          ]
         },
         {
           "id": "P09.10",
