@@ -162,6 +162,20 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   The owner has not named the domain yet. The CDK config carries a placeholder, which the P08 report
   flags. P08.5 and P12.2 build against the placeholder, and the owner supplies the name before
   cutover.
+  **Changed** (owner, 2026-09-30): no Route 53 domain. The client is hosted on **Firebase Hosting**
+  (a `*.web.app` address) and the API on a **DuckDNS** name with HTTPS. Alarms and the budget go to
+  the owner's personal address, supplied at deploy time and kept out of this public repository (CDK
+  context or a secret, never committed). No SES: invites use Cognito's default sender (free, about
+  50 emails a day); P12 revisits only if bulk invites need more. No paid mailing service.
+  Consequences the P08.5 design must resolve, with costs shown to the owner before building:
+  - DuckDNS holds only A/AAAA/TXT records, and ACM cannot validate it, so API Gateway or ALB custom
+    domains cannot use it. HTTPS needs a static IP holding a Let's Encrypt certificate (DNS-01
+    through DuckDNS TXT): a small EC2/Lightsail reverse proxy (Caddy) or an NLB with an Elastic IP.
+    Either adds a monthly cost beyond ADR-008's plan.
+  - Client (`*.web.app`) and API (`*.duckdns.org`) are different sites. The refresh cookie becomes a
+    third-party cookie, which Safari's ITP and strict browser settings block, so the session design
+    (ADR-006, P12) must not depend on it. CORS must allow the Firebase origin. The static export is
+    deployed to Firebase instead of being served by the API (ADR-008 §1 amended).
 
 ### D-09 — Scheduler engine
 
@@ -210,6 +224,10 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   everyone is avoidable friction.
 - **Answer:** **Migrate** (owner, G1, 2026-09-26). The current data becomes "SPOH 2027", Event #1
   (ADR-001, ADR-009).
+  **Clarified** (owner, 2026-09-30): there is no production data to carry over. The earlier data was
+  fake and has been deleted. The migration stays (it is what a database with data needs), but it is
+  verified on seeded test data only. Production starts empty, and its event is created through the
+  event factory (P09.11 seed generator, P10 set-up).
 
 ### D-13 — Access for testing
 
@@ -226,8 +244,9 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   Lightsail site is changed without the owner.
   **Approved** (owner, 2026-09-29): bootstrap account 665146708212 in ap-southeast-1 (CDK
   bootstrap and the GitHub OIDC deploy role) and build staging per ADR-008. Production is still
-  created only at the 28 Oct go decision. For P09.4's production-copy check the owner will supply a
-  `pg_dump` file; it is restored only into a dedicated `*_test` database and dropped afterwards.
+  created only at the 28 Oct go decision. ~~For P09.4's production-copy check the owner will supply a
+  `pg_dump` file.~~ Withdrawn (owner, 2026-09-30): no production copy exists (D-12); seed test data
+  instead.
 
 ### D-14 — Shared state for rate limits and caches
 

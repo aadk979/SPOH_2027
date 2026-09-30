@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-30T11:18:05.058Z",
+  "updatedAt": "2026-09-30T11:23:00.680Z",
   "current": {
     "phase": "P09",
     "step": "P09.5"
@@ -1777,10 +1777,10 @@
         {
           "id": "P09.4",
           "title": "Migrate existing data into Event #1 (needs D-12)",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-29T08:43:49.892Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-09-30T11:23:00.680Z",
+          "commits": ["c5a7838"],
           "notes": [
             {
               "at": "2026-09-29T08:52:10.673Z",
@@ -1789,6 +1789,10 @@
             {
               "at": "2026-09-29T12:44:19.496Z",
               "text": "Staging: seeded (production shape) then released; totals 58/58 ok, zero differences (reports/P09/staging-totals.md). Remaining: the owner-supplied production dump (D-13)."
+            },
+            {
+              "at": "2026-09-30T11:23:00.680Z",
+              "text": "Done on seeded data per D-12/D-13 (owner, 2026-09-30: no production data exists). Evidence: integration test (legacy rows -> zero differences, idempotent), production-shape and development seed rehearsals (totals 0), browser DBs, staging 58/58 before and after P09.5 (reports/P09/staging-totals.md)."
             }
           ]
         },

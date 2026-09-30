@@ -79,6 +79,8 @@ After this phase a second event can exist beside the first without code, seed or
      (a script under `reports/P09/`).
 - **Done when:** the verification script shows zero differences on a copy of production data
   (restored from backup) and on staging.
+  _Amended 2026-09-30 (D-12, D-13): no production data exists, so the check runs on seeded test
+  data (the production-shape and development seeds, the integration test) and on staging._
 
 ### P09.5 — Switch reads and writes to the new model
 

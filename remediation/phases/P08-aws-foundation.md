@@ -81,15 +81,26 @@ code in P15.
 
 ### P08.5 — DNS, TLS and edge (needs D-08)
 
+_Revised 2026-09-30 for D-08's change: Firebase Hosting for the client, DuckDNS for the API, no
+Route 53, ACM or SES._
+
 - **Do:**
-  1. A Route 53 hosted zone (or delegated subdomain) and an ACM certificate for the HTTP API's
-     custom domain.
-  2. No CloudFront or WAF in the baseline (ADR-008 §4). If the owner approves Q-P9, add WAF (with
-     CloudFront Pro) for production event weeks.
-  3. Security headers on responses, set by the app (it serves the static client).
-  4. Staging's own Cognito pool (ADR-006 §1) with its callback and logout URLs. The production
-     pool is referenced by id only and is not modified here.
-- **Done when:** `https://staging.<domain>` works end to end, including Cognito sign-in.
+  1. Design the API's HTTPS entry for a DuckDNS name (A/AAAA/TXT only, no ACM validation): a static
+     IP holding a Let's Encrypt certificate obtained by DNS-01 through DuckDNS TXT, with renewal
+     automated. Candidates: a small EC2/Lightsail reverse proxy (Caddy) in front of the service, or
+     an NLB with an Elastic IP and the imported certificate. Show the owner the monthly cost of the
+     chosen option before building it (it is outside ADR-008's plan).
+  2. Deploy the client's static export to Firebase Hosting (`*.web.app`) from CI, with the API base
+     URL built in; the API stops serving the client in production. CORS allows the Firebase origin
+     only.
+  3. Sessions across two sites: the refresh cookie would be third-party and is blocked by Safari
+     ITP, so the session design (ADR-006) moves off it before production (with P12).
+  4. No CloudFront or WAF in the baseline (ADR-008 §4). Security headers are set by Firebase Hosting
+     for the client and by the app for the API.
+  5. Staging's own Cognito pool (ADR-006 §1) with the Firebase callback and logout URLs. The
+     production pool is referenced by id only and is not modified here.
+- **Done when:** the Firebase-hosted client signs in against the API's DuckDNS HTTPS address end to
+  end on staging, including on iOS Safari.
 
 ### P08.6 — Secrets and configuration
 
