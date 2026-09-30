@@ -68,3 +68,35 @@ export async function findEventSummary(id: string) {
     select: { id: true, name: true, timezone: true, locale: true },
   });
 }
+
+/**
+ * A person's memberships with their events, archived events left out, oldest
+ * event first. A platform read about the person, so it goes through the
+ * person rather than naming one event (ADR-001 §4).
+ */
+export async function findMembershipsWithEvents(personId: string) {
+  const person = await prisma.person.findUnique({
+    where: { id: personId },
+    select: {
+      eventMemberships: {
+        where: { event: { status: { not: 'ARCHIVED' } } },
+        orderBy: { event: { createdAt: 'asc' } },
+        select: {
+          role: true,
+          status: true,
+          event: {
+            select: {
+              id: true,
+              slug: true,
+              name: true,
+              timezone: true,
+              locale: true,
+              status: true,
+            },
+          },
+        },
+      },
+    },
+  });
+  return person?.eventMemberships ?? [];
+}

@@ -587,4 +587,32 @@ describe('two events, one person', () => {
     const alias = await request(app).get('/api/v1/me').set('Authorization', auth);
     expect(alias.status).toBe(403);
   });
+
+  it('lists each person their own events, marking the one the old paths serve', async () => {
+    await rawDb.eventMembership.create({
+      data: { eventId: b.scope.eventId, personId: admin.id, role: 'VOLUNTEER' },
+    });
+    const mine = await send('GET', '/api/v1/events');
+    expect(mine.status).toBe(200);
+    expect(
+      mine.body.data.map((event: { slug: string; role: string; servesLegacyPaths: boolean }) => [
+        event.slug,
+        event.role,
+        event.servesLegacyPaths,
+      ]),
+    ).toEqual([
+      ['test-event', 'ADMIN', true],
+      ['event-b', 'VOLUNTEER', false],
+    ]);
+
+    const opened = await request(app)
+      .post('/api/v1/auth/session')
+      .send({ email: 'b-one@isolation.test' });
+    const onlyB = await request(app)
+      .get('/api/v1/events')
+      .set('Authorization', `Bearer ${opened.body.accessToken as string}`);
+    expect(onlyB.body.data.map((event: { slug: string }) => event.slug)).toEqual(['event-b']);
+
+    expect((await request(app).get('/api/v1/events')).status).toBe(401);
+  });
 });

@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import { UnauthenticatedError } from '../errors/index.js';
-import { authenticate } from '../identity/index.js';
+import { authenticate, authenticatePerson } from '../identity/index.js';
 import { aliasEvent } from '../event/events.js';
 import type { RequestAuth } from '../../types/express.js';
 import type { EventScope } from '../db/eventScope.js';
@@ -33,6 +33,29 @@ export async function requireAuth(req: Request, _res: Response, next: NextFuncti
   } catch (error) {
     next(error);
   }
+}
+
+/**
+ * The gate for platform routes about the person, not one event (`GET
+ * /events`): a valid token of a provisioned person, no membership needed.
+ */
+export async function requirePerson(
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    req.person = await authenticatePerson(readBearerToken(req));
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
+/** The person behind a `requirePerson` request. */
+export function getPerson(req: Request): { sub: string; personId: string } {
+  if (!req.person) throw new UnauthenticatedError();
+  return req.person;
 }
 
 /** Narrowing helper for handlers that run after `requireAuth`. */

@@ -23,7 +23,7 @@ import { named } from './named.js';
  * limiter exists to stop abuse, not to second-guess the queue.
  */
 function keyGenerator(req: Request): string {
-  const sub = req.auth?.sub;
+  const sub = req.auth?.sub ?? req.person?.sub;
   if (sub) return `sub:${sub}`;
   // ipKeyGenerator normalises IPv6 to a /56 block so a single client cannot
   // trivially rotate addresses within its own prefix.

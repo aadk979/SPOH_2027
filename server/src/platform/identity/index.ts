@@ -195,10 +195,15 @@ async function sessionIsLive(sessionId: string, sub: string): Promise<boolean> {
   return live && owner === sub;
 }
 
+/** The subject a bearer token proves, and how it proved it. */
+interface Subject {
+  sub: string;
+  groups: RequestAuth['groups'];
+  sessionId?: string;
+}
+
 /**
- * Who a bearer token belongs to, as the request will see it.
- *
- * Two token shapes are accepted, in order:
+ * The subject behind a bearer token. Two token shapes are accepted, in order:
  *
  *  1. An access token this API issued, which is the normal path — short-lived,
  *     renewed from the refresh cookie, and revocable through its session row.
@@ -206,35 +211,47 @@ async function sessionIsLive(sessionId: string, sub: string): Promise<boolean> {
  *  2. An identity-provider token, verified directly. This is what the
  *     integration suite uses and what a service-to-service caller would present;
  *     it skips the session layer, so it cannot be revoked before it expires.
- *
- * Whichever arrives, only the subject is taken from it. Role, capabilities and
- * station scope are read from the roster, every time.
  */
-export async function authenticate(
-  token: string,
-  request: { event: RequestedEvent; requestId?: string },
-): Promise<RequestAuth> {
-  const { event, requestId } = request;
+async function subjectOf(token: string): Promise<Subject> {
   const session = await verifyAccessToken(token);
-
-  let sub: string;
-  let groups: RequestAuth['groups'] = [];
-  let sessionId: string | undefined;
-
   if (session) {
     if (!(await sessionIsLive(session.sid, session.sub))) {
       // Signed out on this device, revoked by an administrator, or not this subject's.
       throw new UnauthenticatedError();
     }
-    sub = session.sub;
-    sessionId = session.sid;
-  } else {
-    const verified = await authProvider.verify(token);
-    sub = verified.sub;
-    groups = verified.groups;
+    return { sub: session.sub, groups: [], sessionId: session.sid };
   }
+  const verified = await authProvider.verify(token);
+  return { sub: verified.sub, groups: verified.groups };
+}
 
-  const volunteer = await resolveVolunteer(sub, event);
+/**
+ * The person behind a bearer token, for platform routes that are about the
+ * person rather than one event (`GET /events`, ADR-001 §4).
+ */
+export async function authenticatePerson(
+  token: string,
+): Promise<{ sub: string; personId: string }> {
+  const { sub } = await subjectOf(token);
+  const person = await prisma.person.findUnique({
+    where: { cognitoSub: sub },
+    select: { id: true },
+  });
+  if (!person) throw new NotProvisionedError();
+  return { sub, personId: person.id };
+}
+
+/**
+ * Who a bearer token belongs to, as a request in one event will see it. Only
+ * the subject is taken from the token. Role, capabilities and station scope
+ * are read from the membership, every time.
+ */
+export async function authenticate(
+  token: string,
+  request: { event: RequestedEvent; requestId?: string },
+): Promise<RequestAuth> {
+  const { sub, groups, sessionId } = await subjectOf(token);
+  const volunteer = await resolveVolunteer(sub, request.event);
   if (!volunteer.active) throw new AccountInactiveError();
 
   /**
@@ -245,10 +262,9 @@ export async function authenticate(
    */
   const role = volunteer.role;
   const tokenRole = highestRole(groups);
-
   if (tokenRole !== undefined && tokenRole !== role) {
     logger.warn(
-      { requestId, sub, tokenRole, rosterRole: role },
+      { requestId: request.requestId, sub, tokenRole, rosterRole: role },
       'identity provider groups disagree with the roster; roster wins',
     );
   }
