@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-30T11:23:00.680Z",
+  "updatedAt": "2026-09-30T12:11:54.458Z",
   "current": {
     "phase": "P09",
-    "step": "P09.5"
+    "step": "P09.6"
   },
   "gates": [
     {
@@ -1813,11 +1813,16 @@
         {
           "id": "P09.6",
           "title": "Event timezone everywhere",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-09-30T11:27:50.650Z",
+          "completedAt": "2026-09-30T12:11:54.458Z",
+          "commits": ["1fa4485"],
+          "notes": [
+            {
+              "at": "2026-09-30T12:11:54.458Z",
+              "text": "Event timezone and day boundary everywhere: eventClock/eventZone/eventToday, zone-parameterised report and summary SQL (local hour/half-hour/day buckets, DST repeated hour as two offset-labelled rows), export local times with offsets, no-shows from Shift.endsAt, Postgres sessions pinned to UTC, /me carries the event, client formats via useEventTime. DST suite (London 2027 transitions, Kolkata/Kathmandu, non-UTC session). F01 case 3 confirmed as ADR-007's earlier-occurrence rule for shift ends. Server 424+428, client 214, shared 23, e2e 26, visual 58 (admin-settings baseline updated for the reworded shift-hours label)."
+            }
+          ]
         },
         {
           "id": "P09.7",
