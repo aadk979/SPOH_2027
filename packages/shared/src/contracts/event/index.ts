@@ -39,3 +39,24 @@ export type MyEvent = z.infer<typeof MyEvent>;
 /** `GET /events`: the caller's events, oldest first. Archived events are not listed. */
 export const MyEventsResponse = z.object({ data: z.array(MyEvent) }).strict();
 export type MyEventsResponse = z.infer<typeof MyEventsResponse>;
+
+/** An event's slug: lower case, digits and hyphens, for `/e/<slug>/…`. */
+export const EventSlug = z
+  .string()
+  .trim()
+  .regex(/^[a-z0-9][a-z0-9-]{1,47}$/, 'Use lower-case letters, digits and hyphens');
+export type EventSlug = z.infer<typeof EventSlug>;
+
+/**
+ * Clone an event's structure into a new event in DRAFT (ADR-001 §6): its days
+ * moved by `dayOffsetDays`, and its people invited again only when asked.
+ */
+export const CloneEventRequest = z
+  .object({
+    slug: EventSlug,
+    name: z.string().trim().min(2).max(120),
+    dayOffsetDays: z.number().int().min(-3660).max(3660),
+    inviteSamePeople: z.boolean().default(false),
+  })
+  .strict();
+export type CloneEventRequest = z.infer<typeof CloneEventRequest>;
