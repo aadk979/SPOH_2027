@@ -7,7 +7,7 @@ import {
   type RegistrationSummaryFilter,
 } from '../data/repo.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
-import { eventZone } from '../../../platform/event/currentEvent.js';
+import { eventZone } from '../../../platform/event/events.js';
 import { zonedDayWindow } from '@spoh/shared';
 
 async function bucketsFor(

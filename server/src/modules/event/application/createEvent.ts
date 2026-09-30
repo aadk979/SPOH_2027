@@ -1,5 +1,5 @@
 import { prisma } from '../../../platform/db/client.js';
-import { invalidateEventCache } from '../../../platform/event/currentEvent.js';
+import { invalidateEventCache } from '../../../platform/event/events.js';
 import {
   insertEvent,
   insertTaxonomy,

@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
-import { aliasEvent } from '../event/currentEvent.js';
+import { aliasEvent } from '../event/events.js';
 import { NotFoundError } from '../errors/index.js';
 
 /**

@@ -1,7 +1,7 @@
 import { env } from '../../config/env.js';
 import type { EventScope } from '../db/eventScope.js';
 import { eventDayAnchorOf } from '../time/index.js';
-import { eventZone } from './currentEvent.js';
+import { eventZone } from './events.js';
 
 /**
  * Which shifts are running at an instant, as a filter on `Shift` (P09.5): the

@@ -1,5 +1,5 @@
 import type { AuditContext } from '../../../platform/audit/index.js';
-import { aliasEvent } from '../../../platform/event/currentEvent.js';
+import { aliasEvent } from '../../../platform/event/events.js';
 import { homeMembership } from './homeMembership.js';
 
 /**

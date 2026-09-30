@@ -5,7 +5,7 @@ import { listCountedStations } from '../../station/index.js';
 import { sumByBucket, sumMatching, type FootfallFilter } from '../data/repo.js';
 import { bucketsByStation } from '../domain/footfallRules.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
-import { eventTimezone } from '../../../platform/event/currentEvent.js';
+import { eventTimezone } from '../../../platform/event/events.js';
 
 export async function summariseFootfall(
   scope: EventScope,

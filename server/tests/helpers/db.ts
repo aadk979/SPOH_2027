@@ -2,7 +2,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { env } from '../../src/config/env.js';
 import { PrismaClient } from '../../src/generated/prisma/client.js';
 import { prisma } from '../../src/platform/db/client.js';
-import { invalidateEventCache } from '../../src/platform/event/currentEvent.js';
+import { invalidateEventCache } from '../../src/platform/event/events.js';
 import { invalidateVolunteerCache } from '../../src/platform/identity/index.js';
 
 /**

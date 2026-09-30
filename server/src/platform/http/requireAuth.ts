@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import { UnauthenticatedError } from '../errors/index.js';
 import { authenticate } from '../identity/index.js';
-import { aliasEvent } from '../event/currentEvent.js';
+import { aliasEvent } from '../event/events.js';
 import type { RequestAuth } from '../../types/express.js';
 import type { EventScope } from '../db/eventScope.js';
 import { requestIdOf } from './requestId.js';

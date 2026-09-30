@@ -1,7 +1,7 @@
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import { SYSTEM_AUDIT_CONTEXT } from '../../../platform/http/auditContext.js';
-import { allEventScopes } from '../../../platform/event/currentEvent.js';
+import { allEventScopes } from '../../../platform/event/events.js';
 import { logger } from '../../../platform/logger/index.js';
 import { getSettings } from '../../../platform/settings/index.js';
 import { minutesBetween } from '../../../platform/time/index.js';

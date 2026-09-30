@@ -1,6 +1,6 @@
 import type { EventScope } from '../db/eventScope.js';
 import { eventDayAnchorOf, eventDayStart } from '../time/index.js';
-import { eventZone } from './currentEvent.js';
+import { eventZone } from './events.js';
 
 /**
  * "Today" for an event (ADR-004 §3): the event day containing `now` in the

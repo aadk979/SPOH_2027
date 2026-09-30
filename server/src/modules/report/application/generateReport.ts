@@ -12,7 +12,7 @@ import {
   type ReportSpan,
 } from './sections.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
-import { eventZone } from '../../../platform/event/currentEvent.js';
+import { eventZone } from '../../../platform/event/events.js';
 import type { EventZone } from '../../../platform/time/index.js';
 
 /** Absent bounds mean the whole event. */

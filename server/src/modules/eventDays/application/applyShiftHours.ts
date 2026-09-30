@@ -1,6 +1,6 @@
 import { prisma } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
-import { eventTimezone } from '../../../platform/event/currentEvent.js';
+import { eventTimezone } from '../../../platform/event/events.js';
 import { listFollowingShifts, setShiftWindow, updateTemplateHours } from '../data/repo.js';
 import { shiftWindow } from '../domain/shiftWindow.js';
 
