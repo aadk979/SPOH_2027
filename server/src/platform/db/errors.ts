@@ -14,11 +14,11 @@ import { AppError } from '../errors/index.js';
  * (Prisma names them <Model>_<fields>_key). Anything else is CONFLICT.
  */
 const UNIQUE_CODES: Record<string, { code: ErrorCode; message: string }> = {
-  GiftType_name_key: {
+  GiftType_eventId_name_key: {
     code: ERROR_CODES.GIFT_TYPE_EXISTS,
     message: 'A gift type with that name already exists.',
   },
-  EventDay_date_key: {
+  EventDay_eventId_date_key: {
     code: ERROR_CODES.EVENT_DAY_EXISTS,
     message: 'That date is already an event day.',
   },

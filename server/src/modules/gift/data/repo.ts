@@ -159,7 +159,9 @@ export async function findGiftTypeByName(
   scope: EventScope,
   name: string,
 ): Promise<GiftType | null> {
-  return prisma.giftType.findUnique({ where: { name, eventId: scope.eventId } });
+  return prisma.giftType.findUnique({
+    where: { eventId_name: { eventId: scope.eventId, name } },
+  });
 }
 
 export async function createGiftTypeRow(

@@ -100,7 +100,7 @@ export async function createEventDayToday(): Promise<{ id: string }> {
   const today = zonedDate(new Date(), TEST_EVENT_TIMEZONE);
   const date = eventDayAnchor(today);
   const day = await prisma.eventDay.upsert({
-    where: { date, eventId: scope.eventId },
+    where: { eventId_date: { eventId: scope.eventId, date } },
     create: {
       eventId: scope.eventId,
       date,
@@ -129,7 +129,7 @@ export async function createStation(overrides: {
     issuesStamp: overrides.issuesStamp ?? false,
   };
   return prisma.station.upsert({
-    where: { code: overrides.code, eventId: scope.eventId },
+    where: { eventId_code: { eventId: scope.eventId, code: overrides.code } },
     create: {
       eventId: scope.eventId,
       typeId: await typeIdFor(prisma, scope, shape),

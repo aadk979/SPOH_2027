@@ -13,17 +13,21 @@ const adapterUnique = (index: string, modelName: string) =>
 
 describe('fromDatabaseError', () => {
   it('names the clash when the constraint has its own code', () => {
-    expect(fromDatabaseError(adapterUnique('GiftType_name_key', 'GiftType'))).toMatchObject({
-      statusCode: 409,
-      code: 'GIFT_TYPE_EXISTS',
-    });
+    expect(fromDatabaseError(adapterUnique('GiftType_eventId_name_key', 'GiftType'))).toMatchObject(
+      {
+        statusCode: 409,
+        code: 'GIFT_TYPE_EXISTS',
+      },
+    );
     expect(
-      fromDatabaseError(prismaError('P2002', { modelName: 'EventDay', target: ['date'] })),
+      fromDatabaseError(
+        prismaError('P2002', { modelName: 'EventDay', target: ['eventId', 'date'] }),
+      ),
     ).toMatchObject({ statusCode: 409, code: 'EVENT_DAY_EXISTS' });
   });
 
   it('answers any other unique violation with CONFLICT', () => {
-    expect(fromDatabaseError(adapterUnique('Station_code_key', 'Station'))).toMatchObject({
+    expect(fromDatabaseError(adapterUnique('Station_eventId_code_key', 'Station'))).toMatchObject({
       statusCode: 409,
       code: 'CONFLICT',
     });

@@ -224,21 +224,17 @@ function sandboxDay(): { date: string; label: string; isPublicDay: boolean; isTo
 async function seedEventDays(): Promise<void> {
   const days = [...EVENT_DAYS, ...DRY_RUN_DAYS, ...(isProduction ? [] : [sandboxDay()])];
 
+  // Found by date rather than upserted: on a fresh database Event #1 does not
+  // exist yet (seedEventOne adopts these rows), so there is no event to key by.
   for (const eventDay of days) {
-    await prisma.eventDay.upsert({
-      where: { date: day(eventDay.date) },
-      create: {
-        date: day(eventDay.date),
-        label: eventDay.label,
-        isPublicDay: eventDay.isPublicDay,
-        isTourDay: eventDay.isTourDay,
-      },
-      update: {
-        label: eventDay.label,
-        isPublicDay: eventDay.isPublicDay,
-        isTourDay: eventDay.isTourDay,
-      },
-    });
+    const data = {
+      label: eventDay.label,
+      isPublicDay: eventDay.isPublicDay,
+      isTourDay: eventDay.isTourDay,
+    };
+    const existing = await prisma.eventDay.findFirst({ where: { date: day(eventDay.date) } });
+    if (existing) await prisma.eventDay.update({ where: { id: existing.id }, data });
+    else await prisma.eventDay.create({ data: { date: day(eventDay.date), ...data } });
   }
 }
 
@@ -255,23 +251,18 @@ async function seedStations(): Promise<void> {
       active: true,
     };
 
-    await prisma.station.upsert({
-      where: { code: station.code },
-      create: { code: station.code, ...data },
-      update: data,
-    });
+    const existing = await prisma.station.findFirst({ where: { code: station.code } });
+    if (existing) await prisma.station.update({ where: { id: existing.id }, data });
+    else await prisma.station.create({ data: { code: station.code, ...data } });
   }
 }
 
 async function seedGiftTypes(): Promise<void> {
   for (const gift of GIFT_TYPES) {
-    await prisma.giftType.upsert({
-      where: { name: gift.name },
-      create: { ...gift },
-      // Stock levels are operational data. Re-running the seed must not reset a
-      // threshold the gift team has already tuned during the event.
-      update: {},
-    });
+    // Stock levels are operational data. Re-running the seed must not reset a
+    // threshold the gift team has already tuned during the event.
+    const existing = await prisma.giftType.findFirst({ where: { name: gift.name } });
+    if (!existing) await prisma.giftType.create({ data: { ...gift } });
   }
 }
 
@@ -512,7 +503,7 @@ async function seedSecondEvent(): Promise<void> {
     });
   }
   const station = await prisma.station.upsert({
-    where: { code: SECOND_EVENT.stationCode },
+    where: { eventId_code: { eventId: event.id, code: SECOND_EVENT.stationCode } },
     create: {
       ...scope,
       typeId: type.id,
@@ -523,7 +514,7 @@ async function seedSecondEvent(): Promise<void> {
     update: {},
   });
   const eventDay = await prisma.eventDay.upsert({
-    where: { date: day(SECOND_EVENT.day) },
+    where: { eventId_date: { eventId: event.id, date: day(SECOND_EVENT.day) } },
     create: { ...scope, date: day(SECOND_EVENT.day), label: 'Dry-run day' },
     update: {},
   });
@@ -611,7 +602,9 @@ async function seedMultiInFirstEvent(eventId: string, personId: string): Promise
     create: { eventId, personId, role: 'VOLUNTEER' },
     update: { role: 'VOLUNTEER', status: 'ACTIVE' },
   });
-  const booth = await prisma.station.findUnique({ where: { code: 'SIGNUP_BOOTH' } });
+  const booth = await prisma.station.findUnique({
+    where: { eventId_code: { eventId, code: 'SIGNUP_BOOTH' } },
+  });
   if (!booth) return;
   const shifts = await prisma.shift.findMany({
     where: { eventId, template: { code: 'MORNING' } },

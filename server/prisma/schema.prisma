@@ -455,7 +455,8 @@ model EventDay {
   event  Event?  @relation(fields: [eventId], references: [id], onDelete: Restrict)
   shifts Shift[]
 
-  @@unique([date])
+  /// One day per date in each event; two events may share a date (P09.9).
+  @@unique([eventId, date])
   @@index([eventId, date])
 }
 
@@ -467,7 +468,7 @@ model Station {
   /// The type as data (ADR-002); kind and the flags stay authoritative until P09.5.
   typeId      String?
   /// "DAAA_STATION", "SIGNUP_BOOTH"
-  code        String      @unique
+  code        String
   name        String
   kind        StationKind
   courseCode  CourseCode?
@@ -493,7 +494,8 @@ model Station {
   tags  StationTagging[]
 
   @@index([kind, active])
-  @@index([eventId, code])
+  /// Codes are unique within an event, so a clone keeps them (P09.9).
+  @@unique([eventId, code])
   @@index([eventId, typeId, active])
 }
 
@@ -876,7 +878,7 @@ model GiftType {
   id                String  @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2). Nullable until P09.10 backfills and contracts.
   eventId           String?
-  name              String  @unique
+  name              String
   initialStock      Int
   lowStockThreshold Int     @default(50)
   active            Boolean @default(true)
@@ -886,6 +888,7 @@ model GiftType {
 
   event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
 
+  @@unique([eventId, name])
   @@index([eventId])
 }
 
