@@ -19,7 +19,7 @@ function fixture(
       portfolio: null,
       active: true,
     },
-    event: { id: 'e', name: 'Event', timezone: 'Asia/Singapore', locale: 'en-SG' },
+    event: { id: 'e', name: 'Event', timezone: 'Asia/Singapore', locale: 'en-SG', status: 'LIVE' },
     capabilities,
     currentAssignment: {
       id: 'a',

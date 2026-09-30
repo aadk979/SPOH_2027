@@ -52,7 +52,7 @@ export async function generateReport(scope: EventScope, query: ReportQuery): Pro
     generatedAt: now.toISOString(),
     range: { from: query.from ?? null, to: query.to ?? null },
     timezone: zone.timezone,
-    event: { name: summary.name, slug },
+    event: { name: summary.name, slug, status: summary.status },
     countingNote: COUNTING_NOTE,
     registrations,
     footfall,

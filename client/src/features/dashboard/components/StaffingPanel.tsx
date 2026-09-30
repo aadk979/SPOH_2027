@@ -27,7 +27,7 @@ export function StaffingPanel({ data }: { data: LiveDashboardResponse }): ReactN
         // screenful of scrolling to read what fits in a third of the height.
         <Card as="ul" className="mt-sm grid gap-x-lg gap-y-xxs sm:grid-cols-2 xl:grid-cols-3">
           {data.staffing.gaps.map((gap) => (
-            <li key={`${gap.stationId}:${gap.block}`}>
+            <li key={`${gap.stationId}:${gap.shift.code}`}>
               <strong>{gap.stationName}</strong>{' '}
               <span className="text-text-muted">
                 {gap.severity === 'UNSTAFFED'

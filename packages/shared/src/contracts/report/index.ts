@@ -6,6 +6,7 @@ import {
   LostPersonStatus,
 } from '../../invariants/enums.js';
 import { Id, IsoDate, IsoDateTime, TimeRangeQuery } from '../common/index.js';
+import { EventStatus } from '../event/index.js';
 import { FallbackWindowRecord } from '../fallback/index.js';
 
 /**
@@ -31,8 +32,11 @@ export const RegistrationReport = z
   .object({
     unit: z.literal('registrations'),
     total: z.number().int().nonnegative(),
+    /** Per capture category of the event: its code, its label, the count (P09.12). */
     byCategory: z.array(
-      z.object({ key: z.string(), value: z.number().int().nonnegative() }).strict(),
+      z
+        .object({ key: z.string(), label: z.string(), value: z.number().int().nonnegative() })
+        .strict(),
     ),
     byDay: z.array(z.object({ date: IsoDate, value: z.number().int().nonnegative() }).strict()),
     byHour: z.array(
@@ -266,7 +270,14 @@ export const FullReport = z
     /** The event's IANA timezone: every local date, hour and label below is read in it. */
     timezone: z.string(),
     /** The event reported on: its name titles the export, its slug names the file. */
-    event: z.object({ name: z.string(), slug: z.string() }).strict(),
+    event: z
+      .object({
+        name: z.string(),
+        slug: z.string(),
+        /** A REHEARSAL event's figures are practice data, and the report says so. */
+        status: EventStatus,
+      })
+      .strict(),
     /**
      * Stated at the top of every report, in prose, because the single most
      * likely misreading of this document is that these are the same people

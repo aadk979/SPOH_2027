@@ -49,6 +49,12 @@ export default function ReportsScreen(): ReactNode {
         <Stack>
           <ReportHeader data={data} />
 
+          {data.event.status === 'REHEARSAL' ? (
+            <Callout tone="warn" title="Rehearsal data">
+              This event is in rehearsal: every figure below is practice, not the event.
+            </Callout>
+          ) : null}
+
           <IntegritySection data={data} />
 
           <div className="flex flex-wrap gap-sm">

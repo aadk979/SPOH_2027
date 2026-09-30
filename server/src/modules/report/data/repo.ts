@@ -20,7 +20,7 @@ export interface Range {
 }
 
 export async function registrationTotals(scope: EventScope, range: Range) {
-  const [total, voided, byCategory] = await Promise.all([
+  const [total, voided, byCategory, categories] = await Promise.all([
     prisma.registration.count({
       where: {
         eventId: scope.eventId,
@@ -36,7 +36,7 @@ export async function registrationTotals(scope: EventScope, range: Range) {
       },
     }),
     prisma.registration.groupBy({
-      by: ['category'],
+      by: ['categoryId'],
       where: {
         eventId: scope.eventId,
         voided: false,
@@ -44,13 +44,24 @@ export async function registrationTotals(scope: EventScope, range: Range) {
       },
       _count: { _all: true },
     }),
+    prisma.captureCategory.findMany({
+      where: { eventId: scope.eventId },
+      select: { id: true, code: true, label: true },
+    }),
   ]);
 
+  // Grouped by the event's own categories, named as the event names them (P09.12).
+  const byId = new Map(categories.map((category) => [category.id, category]));
   return {
     total,
     voided,
     byCategory: byCategory
-      .map((row) => ({ key: row.category, value: row._count._all }))
+      .flatMap((row) => {
+        const category = row.categoryId ? byId.get(row.categoryId) : undefined;
+        return category
+          ? [{ key: category.code, label: category.label, value: row._count._all }]
+          : [];
+      })
       .sort((a, b) => b.value - a.value),
   };
 }

@@ -50,8 +50,14 @@ describe('briefing rules', () => {
 
 describe('staffingGaps', () => {
   it('names each kind of gap and skips a fully checked-in station', () => {
+    const morning = {
+      code: 'MORNING',
+      label: 'Morning',
+      startsAt: '2027-01-07T01:30:00.000Z',
+      endsAt: '2027-01-07T06:00:00.000Z',
+    };
     const gaps = staffingGaps({
-      blocks: ['MORNING'],
+      shifts: [morning],
       stations: [
         { id: 'a', name: 'A' },
         { id: 'b', name: 'B' },
@@ -69,6 +75,8 @@ describe('staffingGaps', () => {
       ['b', 'NOBODY_CHECKED_IN', 2],
       ['c', 'PARTIAL', 1],
     ]);
+    // Each gap names its shift as the event does (P09.12).
+    expect(gaps.every((gap) => gap.shift.label === 'Morning')).toBe(true);
   });
 });
 

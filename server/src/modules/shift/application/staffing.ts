@@ -1,11 +1,16 @@
-import { ShiftBlock, type LongShiftWarning, type StaffingGapsResponse } from '@spoh/shared';
+import {
+  ShiftBlock,
+  type LongShiftWarning,
+  type ShiftRef,
+  type StaffingGapsResponse,
+} from '@spoh/shared';
 import { DEFAULT_SETTINGS, getSettings } from '../../../platform/settings/index.js';
 import { runningShifts } from '../../../platform/event/runningShifts.js';
 import { eventTodayStart } from '../../../platform/event/today.js';
 import {
   listStaffedStations,
   longRunningShifts,
-  runningShiftCodes,
+  runningShiftRefs,
   staffingByStation,
 } from '../data/repo.js';
 import { longShiftWarnings, staffingGaps } from '../domain/staffing.js';
@@ -19,25 +24,31 @@ import type { EventScope } from '../../../platform/db/eventScope.js';
  */
 export const LONG_SHIFT_MINUTES = DEFAULT_SETTINGS.longShiftMinutes;
 
-/** Which stations are understaffed right now. */
-/** The shifts on duty now, by the template codes the grid is keyed on. */
-async function blocksOnDuty(scope: EventScope, running: Awaited<ReturnType<typeof runningShifts>>) {
-  const codes = await runningShiftCodes(scope, running);
-  return codes.flatMap((code) => {
-    const block = ShiftBlock.safeParse(code);
+/** The shifts on duty now, named, with the legacy blocks their templates still map to. */
+async function shiftsOnDuty(scope: EventScope, running: Awaited<ReturnType<typeof runningShifts>>) {
+  const refs = await runningShiftRefs(scope, running);
+  const shifts: ShiftRef[] = refs.map((ref) => ({
+    ...ref,
+    startsAt: ref.startsAt.toISOString(),
+    endsAt: ref.endsAt.toISOString(),
+  }));
+  const blocks = refs.flatMap((ref) => {
+    const block = ShiftBlock.safeParse(ref.code);
     return block.success ? [block.data] : [];
   });
+  return { shifts, blocks };
 }
 
+/** Which stations are understaffed right now. */
 export async function getStaffingGaps(
   scope: EventScope,
   now = new Date(),
 ): Promise<StaffingGapsResponse> {
   const running = await runningShifts(scope, now);
-  const blocks = await blocksOnDuty(scope, running);
-  if (blocks.length === 0) {
+  const { shifts, blocks } = await shiftsOnDuty(scope, running);
+  if (shifts.length === 0) {
     // Outside event hours nothing is understaffed, because nothing is staffed.
-    return { asOf: now.toISOString(), activeBlocks: blocks, gaps: [] };
+    return { asOf: now.toISOString(), activeBlocks: blocks, activeShifts: shifts, gaps: [] };
   }
 
   const [staffing, stations] = await Promise.all([
@@ -47,7 +58,8 @@ export async function getStaffingGaps(
   return {
     asOf: now.toISOString(),
     activeBlocks: blocks,
-    gaps: staffingGaps({ blocks, stations, staffing }),
+    activeShifts: shifts,
+    gaps: staffingGaps({ shifts, stations, staffing }),
   };
 }
 

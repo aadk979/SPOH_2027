@@ -7,6 +7,20 @@ import { Id, IsoDate, IsoDateTime, ReasonText } from '../common/index.js';
  */
 
 /**
+ * A shift as a screen names it (P09.12): its template's code and label, from
+ * the event's own data, and its real times, shown on the event's clock.
+ */
+export const ShiftRef = z
+  .object({
+    code: z.string(),
+    label: z.string(),
+    startsAt: IsoDateTime,
+    endsAt: IsoDateTime,
+  })
+  .strict();
+export type ShiftRef = z.infer<typeof ShiftRef>;
+
+/**
  * A swap request. The volunteer proposes, an IC approves, and the whole thing
  * is an audit trail — slide 54 asks briefers to arrange their own swaps, and
  * this makes that two taps instead of a WhatsApp thread nobody can reconstruct
@@ -110,6 +124,7 @@ export const StaffingGap = z
     stationId: Id,
     stationName: z.string(),
     block: ShiftBlock,
+    shift: ShiftRef,
     assigned: z.number().int().nonnegative(),
     checkedIn: z.number().int().nonnegative(),
     /** Assigned but never checked in — the likely no-shows. */
@@ -123,6 +138,8 @@ export const StaffingGapsResponse = z
   .object({
     asOf: IsoDateTime,
     activeBlocks: z.array(ShiftBlock),
+    /** The shifts on duty now, by their templates. */
+    activeShifts: z.array(ShiftRef),
     gaps: z.array(StaffingGap),
   })
   .strict();

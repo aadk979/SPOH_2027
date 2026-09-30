@@ -4,7 +4,7 @@ import { Id, IsoDateTime } from '../common/index.js';
 import { FootfallLiveStation } from '../footfall/index.js';
 import { FunnelStage } from '../missionCard/index.js';
 import { FlaggedRedemption, GiftTypeRecord } from '../gift/index.js';
-import { LongShiftWarning, StaffingGap } from '../shift/index.js';
+import { LongShiftWarning, ShiftRef, StaffingGap } from '../shift/index.js';
 
 /**
  * The live operations dashboard (PRODUCT_BRIEF §9).
@@ -22,7 +22,7 @@ import { LongShiftWarning, StaffingGap } from '../shift/index.js';
 export const CategoryCount = z
   .object({
     key: z.string(),
-    label: z.string().optional(),
+    label: z.string(),
     value: z.number().int().nonnegative(),
   })
   .strict();
@@ -192,6 +192,7 @@ export const StationDashboardResponse = z
           /** One row per assignment: a person rostered in both blocks is two rows (F02-011). */
           assignmentId: Id,
           block: ShiftBlock,
+          shift: ShiftRef.nullable(),
           volunteerId: Id,
           volunteerName: z.string(),
           roleLabel: z.string(),

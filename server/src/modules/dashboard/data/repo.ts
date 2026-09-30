@@ -263,6 +263,9 @@ export async function stationRoster(scope: EventScope, stationId: string, day: D
       checkedInAt: true,
       checkedOutAt: true,
       volunteer: { select: { displayName: true } },
+      shift: {
+        select: { startsAt: true, endsAt: true, template: { select: { code: true, label: true } } },
+      },
     },
     orderBy: [{ roleLabel: 'asc' }, { block: 'asc' }],
   });

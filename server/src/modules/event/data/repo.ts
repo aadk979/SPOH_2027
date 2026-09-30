@@ -65,7 +65,7 @@ export async function findEvent(id: string, db: PrismaTransactionClient = prisma
 export async function findEventSummary(id: string) {
   return prisma.event.findUniqueOrThrow({
     where: { id },
-    select: { id: true, name: true, timezone: true, locale: true },
+    select: { id: true, name: true, timezone: true, locale: true, status: true },
   });
 }
 

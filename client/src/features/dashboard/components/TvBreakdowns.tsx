@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import type { LiveDashboardResponse } from '@spoh/shared';
 import { TvPanel, TvRow } from './TvPrimitives';
-import { readableCategory } from '@/shared/lib/format';
 export function TvBreakdowns({ data }: { data: LiveDashboardResponse }): ReactNode {
   return (
     <>
@@ -28,9 +27,7 @@ export function TvBreakdowns({ data }: { data: LiveDashboardResponse }): ReactNo
           ) : (
             data.registrations.byCategory
               .slice(0, 6)
-              .map((row) => (
-                <TvRow key={row.key} label={readableCategory(row.key)} value={row.value} />
-              ))
+              .map((row) => <TvRow key={row.key} label={row.label} value={row.value} />)
           )}
         </TvPanel>
       </div>

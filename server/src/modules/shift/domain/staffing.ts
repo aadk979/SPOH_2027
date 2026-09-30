@@ -1,4 +1,4 @@
-import type { LongShiftWarning, StaffingGap } from '@spoh/shared';
+import type { LongShiftWarning, ShiftRef, StaffingGap } from '@spoh/shared';
 import { minutesBetween } from '../../../platform/time/index.js';
 
 /**
@@ -13,10 +13,10 @@ interface StaffingRow {
   checkedIn: number;
 }
 
-/** The gap at one station in one block, or null when everyone rostered is there. */
+/** The gap at one station on one shift, or null when everyone rostered is there. */
 function gapAt(
   station: { id: string; name: string },
-  block: string,
+  shift: ShiftRef,
   row: StaffingRow | undefined,
 ): StaffingGap | null {
   const assigned = row?.assigned ?? 0;
@@ -25,7 +25,8 @@ function gapAt(
   return {
     stationId: station.id,
     stationName: station.name,
-    block: block as StaffingGap['block'],
+    block: shift.code as StaffingGap['block'],
+    shift,
     assigned,
     checkedIn,
     missing: Math.max(0, assigned - checkedIn),
@@ -34,14 +35,14 @@ function gapAt(
 }
 
 export function staffingGaps(input: {
-  blocks: readonly string[];
+  shifts: readonly ShiftRef[];
   stations: ReadonlyArray<{ id: string; name: string }>;
   staffing: readonly StaffingRow[];
 }): StaffingGap[] {
-  return input.blocks.flatMap((block) =>
+  return input.shifts.flatMap((shift) =>
     input.stations.flatMap((station) => {
-      const row = input.staffing.find((s) => s.stationId === station.id && s.block === block);
-      const gap = gapAt(station, block, row);
+      const row = input.staffing.find((s) => s.stationId === station.id && s.block === shift.code);
+      const gap = gapAt(station, shift, row);
       return gap ? [gap] : [];
     }),
   );

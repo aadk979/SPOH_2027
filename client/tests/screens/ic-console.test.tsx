@@ -6,9 +6,26 @@ import { defaultStationId } from '@/features/dashboard/model/defaultStation';
 
 afterEach(cleanup);
 
+/** The fixture's two shifts, as the server sends them: real instants (09:30–14:00 and 13:30–18:00 Singapore). */
+const SHIFTS = {
+  MORNING: {
+    code: 'MORNING',
+    label: 'Morning',
+    startsAt: '2027-01-07T01:30:00Z',
+    endsAt: '2027-01-07T06:00:00Z',
+  },
+  AFTERNOON: {
+    code: 'AFTERNOON',
+    label: 'Afternoon',
+    startsAt: '2027-01-07T05:30:00Z',
+    endsAt: '2027-01-07T10:00:00Z',
+  },
+};
+
 const row = (block: 'MORNING' | 'AFTERNOON', assignmentId: string) => ({
   assignmentId,
   block,
+  shift: SHIFTS[block],
   volunteerId: 'v1',
   volunteerName: 'Bea Booth',
   roleLabel: 'Helper',

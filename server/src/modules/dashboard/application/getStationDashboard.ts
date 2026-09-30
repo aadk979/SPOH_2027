@@ -111,6 +111,14 @@ async function rosterPanel(
   return roster.map((assignment) => ({
     assignmentId: assignment.id,
     block: assignment.block,
+    shift: assignment.shift
+      ? {
+          code: assignment.shift.template.code,
+          label: assignment.shift.template.label,
+          startsAt: assignment.shift.startsAt.toISOString(),
+          endsAt: assignment.shift.endsAt.toISOString(),
+        }
+      : null,
     volunteerId: assignment.volunteerId,
     volunteerName: assignment.volunteer.displayName,
     roleLabel: assignment.roleLabel,

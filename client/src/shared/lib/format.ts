@@ -94,28 +94,6 @@ export function blockWord(block: string): string {
   return block === 'MORNING' ? 'morning' : 'afternoon';
 }
 
-/**
- * Visitor categories, exactly as slide 14 words them.
- *
- * Unknown keys fall through to the raw value rather than throwing: a category
- * added on the server should show up as an ugly string on a dashboard, not
- * take the dashboard down.
- */
-const CATEGORY_LABELS: Record<string, string> = {
-  SEC_1: 'Sec 1',
-  SEC_2: 'Sec 2',
-  SEC_3: 'Sec 3',
-  SEC_4: 'Sec 4',
-  SEC_5: 'Sec 5',
-  GRADUATED_AWAITING_RESULTS: 'Graduated',
-  PARENT_GUARDIAN: 'Parent / Guardian',
-  OTHER: 'Other',
-};
-
-export function readableCategory(key: string): string {
-  return CATEGORY_LABELS[key] ?? key;
-}
-
 /** SAFETY_IC → Safety Ic. Good enough for a fallback beside a real job title. */
 export function readableRole(role: string): string {
   return String(role)

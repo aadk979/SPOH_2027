@@ -42,7 +42,7 @@ export function header(sheet: ExcelJS.Worksheet, columns: string[]): void {
  */
 export const rows = {
   categories: (report: FullReport) =>
-    report.registrations.byCategory.map((row) => [row.key, row.value] as const),
+    report.registrations.byCategory.map((row) => [row.label, row.value] as const),
   footfallStations: (report: FullReport) =>
     report.footfall.byStation.map(
       (row) =>

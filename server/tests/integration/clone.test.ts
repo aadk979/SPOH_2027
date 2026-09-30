@@ -208,4 +208,61 @@ describe('cloning an event (P09.9)', () => {
     expect(inbox.status).toBe(200);
     expect(inbox.body.data).toEqual([]);
   });
+
+  it('reports and dashboards a cloned event with its own labels and only its numbers (P09.12)', async () => {
+    const event = await applyClone(await planClone(source, request2028(true)), { audit: SYSTEM });
+    await rawDb.eventMembership.update({
+      where: { eventId_personId: { eventId: event.id, personId: ic.id } },
+      data: { status: 'ACTIVE', role: 'ADMIN' },
+    });
+    // The new event renames a category: labels are its own data, not a code's.
+    const renamed = await rawDb.captureCategory.update({
+      where: { eventId_code: { eventId: event.id, code: 'SEC_1' } },
+      data: { label: 'Year 1' },
+    });
+    const desk = await rawDb.station.findUniqueOrThrow({
+      where: { eventId_code: { eventId: event.id, code: 'DESK' } },
+    });
+    for (let index = 0; index < 2; index += 1) {
+      await rawDb.registration.create({
+        data: {
+          eventId: event.id,
+          category: 'SEC_1',
+          categoryId: renamed.id,
+          stationId: desk.id,
+          recordedById: ic.id,
+          idempotencyKey: idempotencyKey(),
+        },
+      });
+    }
+
+    const report = await request(app)
+      .get(`/api/v1/events/${event.id}/reports/summary`)
+      .set('Authorization', bearer(ic));
+    expect(report.status).toBe(200);
+    expect(report.body.event).toMatchObject({ name: 'SPOH 2028', status: 'DRAFT' });
+    expect(report.body.registrations.total).toBe(2);
+    expect(report.body.registrations.byCategory).toEqual([
+      { key: 'SEC_1', label: 'Year 1', value: 2 },
+    ]);
+
+    const live = await request(app)
+      .get(`/api/v1/events/${event.id}/dashboard/live`)
+      .set('Authorization', bearer(ic));
+    expect(live.status).toBe(200);
+    expect(live.body.registrations.byCategory).toEqual([
+      { key: 'SEC_1', label: 'Year 1', value: 2 },
+    ]);
+
+    // The source still reports its own one registration, under its own label.
+    const sourceReport = await request(app)
+      .get(`/api/v1/events/${source.eventId}/reports/summary`)
+      .set(
+        'Authorization',
+        bearer(await createVolunteer({ email: 'admin@clone.test', role: 'ADMIN' })),
+      );
+    expect(sourceReport.body.registrations.byCategory).toEqual([
+      { key: 'SEC_1', label: 'Sec 1', value: 1 },
+    ]);
+  });
 });

@@ -184,15 +184,21 @@ export async function completeSlot(
 }
 
 /** The template codes of the event's shifts running now: the blocks on duty. */
-export async function runningShiftCodes(
+/** The shifts running now, one per template, with the template's code and label. */
+export async function runningShiftRefs(
   scope: EventScope,
   running: Prisma.ShiftWhereInput,
-): Promise<string[]> {
+): Promise<Array<{ code: string; label: string; startsAt: Date; endsAt: Date }>> {
   const shifts = await prisma.shift.findMany({
     where: { eventId: scope.eventId, ...running },
-    select: { template: { select: { code: true } } },
+    select: { startsAt: true, endsAt: true, template: { select: { code: true, label: true } } },
+    orderBy: { startsAt: 'asc' },
   });
-  return [...new Set(shifts.map((shift) => shift.template.code))];
+  const byCode = new Map<string, { code: string; label: string; startsAt: Date; endsAt: Date }>();
+  for (const { startsAt, endsAt, template } of shifts) {
+    if (!byCode.has(template.code)) byCode.set(template.code, { ...template, startsAt, endsAt });
+  }
+  return [...byCode.values()];
 }
 
 /**

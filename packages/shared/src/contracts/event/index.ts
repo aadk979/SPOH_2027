@@ -7,19 +7,21 @@ import { Id } from '../common/index.js';
  * name, and the wall clock (IANA timezone) and locale every date and time is
  * shown in (ADR-003 §6), never the device's.
  */
+/** An event's lifecycle state (ADR-004). */
+export const EventStatus = z.enum(['DRAFT', 'READY', 'REHEARSAL', 'LIVE', 'CLOSED', 'ARCHIVED']);
+export type EventStatus = z.infer<typeof EventStatus>;
+
 export const EventSummary = z
   .object({
     id: Id,
     name: z.string(),
     timezone: z.string(),
     locale: z.string(),
+    /** REHEARSAL marks everything recorded as practice data (ADR-004). */
+    status: EventStatus,
   })
   .strict();
 export type EventSummary = z.infer<typeof EventSummary>;
-
-/** An event's lifecycle state (ADR-004). */
-export const EventStatus = z.enum(['DRAFT', 'READY', 'REHEARSAL', 'LIVE', 'CLOSED', 'ARCHIVED']);
-export type EventStatus = z.infer<typeof EventStatus>;
 
 /** One of the caller's events, with their membership of it. */
 export const MyEvent = EventSummary.extend({
