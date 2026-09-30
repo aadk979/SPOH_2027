@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-30T17:32:14.985Z",
+  "updatedAt": "2026-09-30T17:46:02.501Z",
   "current": {
     "phase": "P09",
     "step": "P09.6"
@@ -1892,11 +1892,16 @@
         {
           "id": "P09.12",
           "title": "Reports and dashboards on taxonomy",
-          "status": "not_started",
+          "status": "done",
           "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-30T17:46:02.500Z",
+          "commits": ["2f2722d"],
+          "notes": [
+            {
+              "at": "2026-09-30T17:46:02.501Z",
+              "text": "Report categories by the event's CaptureCategory with labels; CategoryCount.label required; client category map removed. ShiftRef on staffing gaps/active shifts and station roster (roster prints the shift's own hours). FullReport.event.status + rehearsal notice in report and export. Clone reports/dashboards use its own labels and numbers (tested). Server 427+445, client 218, e2e 29, visual 58 unchanged."
+            }
+          ]
         },
         {
           "id": "P09.14",
