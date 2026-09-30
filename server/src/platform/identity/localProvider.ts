@@ -21,7 +21,9 @@ import type { AuthProvider, VerifiedToken } from './types.js';
  * after a hurried config change in January.
  */
 
+// hardcoding-allowed: the product's own identifier, not an event; renaming it invalidates tokens.
 const ISSUER = 'spoh2027-local-dev';
+// hardcoding-allowed: the product's own identifier, not an event; renaming it invalidates tokens.
 const AUDIENCE = 'spoh2027-api';
 
 export interface LocalTokenClaims {

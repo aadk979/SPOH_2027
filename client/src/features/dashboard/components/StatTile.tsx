@@ -74,7 +74,7 @@ export function StatTile({
  * for the bar and the number together — every bar looked full. It is now a
  * grid that gives the label a third of the row on a phone and a fixed measure
  * once there is room, and the label wraps to two lines instead of truncating a
- * station name down to "DCDF Stat…".
+ * station name down to "Welcome Lou…".
  */
 export function BarRow({
   label,

@@ -27,7 +27,7 @@ async function main(): Promise<void> {
   const jobs = startJobs(JOBS);
 
   const server = app.listen(env.PORT, () => {
-    logger.info({ port: env.PORT, env: env.NODE_ENV }, 'spoh-server listening');
+    logger.info({ port: env.PORT, env: env.NODE_ENV }, 'server listening');
   });
 
   // Give in-flight capture writes a chance to finish before the process exits.

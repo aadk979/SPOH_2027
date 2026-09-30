@@ -35,6 +35,7 @@ export const logger: Logger = pino({
     paths: [...REDACTED_PATHS],
     censor: '[redacted]',
   },
+  // hardcoding-allowed: the service name log queries and alarms filter on.
   base: { service: 'spoh-server' },
   // Pretty output is a developer convenience only; deployed environments emit
   // newline-delimited JSON for CloudWatch.

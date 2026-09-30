@@ -23,6 +23,7 @@
     "lint:fix": "eslint . --fix",
     "arch:check": "depcruise server/src client/src packages/shared/src --config .dependency-cruiser.cjs --output-type err",
     "arch:report": "node scripts/arch-report.mjs",
+    "check:hardcoding": "node scripts/check-hardcoding.mjs && node --test scripts/check-hardcoding.test.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "npm run test --workspaces --if-present",

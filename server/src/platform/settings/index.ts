@@ -40,7 +40,8 @@ import { writeAudit, type AuditContext } from '../audit/index.js';
  * configurable. Anything absent or invalid in the database falls back to these.
  */
 export const DEFAULT_SETTINGS: RuntimeSettings = Object.freeze({
-  eventName: 'SPOH 2027',
+  // Superseded by the event's own name (Event.name); retired with the global settings in P10.
+  eventName: 'Event',
 
   // BUILD_PLAN §1.1. The blocks overlap between 13:30 and 14:00; that handover
   // is intentional and means a moment can belong to both.

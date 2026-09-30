@@ -31,6 +31,7 @@ export const StationKind = z.enum([
 ]);
 export type StationKind = z.infer<typeof StationKind>;
 
+// hardcoding-allowed: legacy taxonomy enum, dropped with the others at the P09.10 contract.
 export const CourseCode = z.enum(['DAAA', 'DCDF', 'DCS', 'DCITP']);
 export type CourseCode = z.infer<typeof CourseCode>;
 

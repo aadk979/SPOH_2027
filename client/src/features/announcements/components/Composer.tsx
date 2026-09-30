@@ -19,7 +19,7 @@ export function Composer({ me }: { me: ReturnType<typeof useMe>['data'] }): Reac
             onChange={(event) => setBody(event.target.value)}
             rows={3}
             maxLength={1000}
-            placeholder="DCDF at capacity, ushers hold at Welcome Lounge."
+            placeholder="Room at capacity, ushers hold visitors at the entrance."
           />
         )}
       </Field>

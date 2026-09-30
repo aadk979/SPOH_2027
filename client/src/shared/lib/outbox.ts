@@ -20,6 +20,7 @@ import { currentVolunteerId, getSession, subscribeToSession } from '@/shared/lib
  * a count. Without it this buffer would be a duplicate-count machine.
  */
 
+// hardcoding-allowed: the product's own identifier, not an event; renaming it would strand queued captures.
 const DB_NAME = 'spoh2027';
 const DB_VERSION = 1;
 const STORE = 'outbox';

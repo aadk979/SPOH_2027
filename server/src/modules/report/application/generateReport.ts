@@ -12,7 +12,8 @@ import {
   type ReportSpan,
 } from './sections.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
-import { eventZone } from '../../../platform/event/events.js';
+import { eventSlug, eventZone } from '../../../platform/event/events.js';
+import { getEventSummary } from '../../event/index.js';
 import type { EventZone } from '../../../platform/time/index.js';
 
 /** Absent bounds mean the whole event. */
@@ -30,6 +31,7 @@ function resolveRange(query: ReportQuery, zone: EventZone): ReportSpan {
  */
 export async function generateReport(scope: EventScope, query: ReportQuery): Promise<FullReport> {
   const zone = await eventZone(scope);
+  const [summary, slug] = [await getEventSummary(scope), await eventSlug(scope)];
   const range = resolveRange(query, zone);
   const stations = await listStations(scope, { includeInactive: true });
   const names = new Map(stations.map((station) => [station.id, station.name]));
@@ -50,6 +52,7 @@ export async function generateReport(scope: EventScope, query: ReportQuery): Pro
     generatedAt: now.toISOString(),
     range: { from: query.from ?? null, to: query.to ?? null },
     timezone: zone.timezone,
+    event: { name: summary.name, slug },
     countingNote: COUNTING_NOTE,
     registrations,
     footfall,

@@ -4,7 +4,7 @@ import { localHourLabel } from '../../../platform/time/index.js';
 /**
  * Hourly rows labelled on the event's wall clock. On the day clocks go back
  * the repeated hour is two real hours, so it stays two rows, and those two
- * labels carry their UTC offset ("2027-10-31 01:00 +01:00", "… +00:00") to be
+ * labels carry their UTC offset ("… 01:00 +01:00", "… 01:00 +00:00") to be
  * told apart (F01 time audit, case 4). Every other label is the plain hour.
  */
 export function hourlyRows(

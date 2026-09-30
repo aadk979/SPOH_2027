@@ -1,4 +1,6 @@
 'use client';
+// hardcoding-allowed-file: event content (F01 `event-content`) until it moves to the
+// event's ContentDocument in P13; nothing here is read as configuration.
 
 import type { ReactNode } from 'react';
 import { AppShell } from '@/shared/shell/AppShell';

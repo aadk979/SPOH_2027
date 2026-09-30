@@ -92,7 +92,7 @@ export async function sumMatching(scope: EventScope, filter: FootfallFilter): Pr
 }
 
 /**
- * Bucketed curves per station — the thing last year's "DCS: 120" WhatsApp
+ * Bucketed curves per station — the thing last year's "Room 3: 120" WhatsApp
  * message could never give you.
  *
  * Raw SQL because Postgres can bucket by an arbitrary interval and Prisma

@@ -2,12 +2,14 @@
 
 import { AppLink as Link } from '@/shared/lib/AppLink';
 import { useAppPathname } from '@/shared/lib/appPath';
+import { useOptionalEvent } from '@/shared/lib/eventContext';
 import { useCurrentSession } from '@/features/session';
 import { sectionEntries, sectionForPath } from '@/navigation';
 
 export function SectionNav() {
   const session = useCurrentSession();
   const active = sectionForPath(useAppPathname());
+  const event = useOptionalEvent();
   return (
     <nav aria-label="Main sections" className="section-nav">
       <p className="section-nav-caption">Your workspace</p>
@@ -37,8 +39,8 @@ export function SectionNav() {
         ))}
       </div>
       <div className="section-nav-note">
-        <p className="font-semibold">School of Computing</p>
-        <p>Open House 2027</p>
+        <p className="font-semibold">{event?.name}</p>
+        <p>Volunteer operations</p>
         <Link href="/safety/incident/new">
           Report an incident <span aria-hidden="true">↗</span>
         </Link>

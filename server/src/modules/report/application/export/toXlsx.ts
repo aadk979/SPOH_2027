@@ -22,7 +22,7 @@ import { writeVolunteersSheet } from './sheets/volunteers.js';
  */
 export async function toXlsx(report: FullReport): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = 'SPOH 2027 Operations';
+  workbook.creator = report.event.name;
   workbook.created = new Date(report.generatedAt);
 
   writeReadMeSheet(workbook, report);

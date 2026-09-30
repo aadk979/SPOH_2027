@@ -25,6 +25,6 @@ export function safetyPushMessage(incident: {
   const what = incident.type.replace(/_/g, ' ').toLowerCase();
   return {
     title: `${incident.severity} incident reported`,
-    body: `${what} at ${incident.stationName ?? 'an unlisted location'}. Open SPOH Ops.`,
+    body: `${what} at ${incident.stationName ?? 'an unlisted location'}. Open the ops app.`,
   };
 }

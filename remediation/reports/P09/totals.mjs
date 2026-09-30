@@ -125,7 +125,8 @@ const CHECKS = {
 export async function checkEventOne(client) {
   const results = [];
   const events = await scalar(client, 'SELECT count(*) AS n FROM "Event"');
-  results.push({ name: 'Event #1 exists', ok: events === 1, value: events });
+  // Development fixtures hold a second event (P09.8); Event #1 is the first created.
+  results.push({ name: 'Event #1 exists', ok: events >= 1, value: events });
   for (const table of EVENT_OWNED) {
     const n = await scalar(client, `SELECT count(*) AS n FROM "${table}" WHERE "eventId" IS NULL`);
     results.push({ name: `${table} rows without an event`, ok: n === 0, value: n });

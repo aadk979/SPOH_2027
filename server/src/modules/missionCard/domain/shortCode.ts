@@ -49,6 +49,7 @@ export function generateShortCode(): string {
  * system that has no visitor-facing surface at all.
  */
 export function generateQrPayload(): string {
+  // hardcoding-allowed: the QR namespace already printed on issued cards.
   return `spoh2027:${randomUUID()}`;
 }
 

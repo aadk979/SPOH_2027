@@ -5,10 +5,10 @@ import { ServiceWorkerRegistration } from '@/shared/shell/ServiceWorkerRegistrat
 import { Providers } from './providers';
 
 export const metadata: Metadata = {
-  title: 'SPOH 2027 Ops',
-  description: 'Volunteer operations for the SP School of Computing Open House, 6–9 January 2027.',
+  title: 'Volunteer operations',
+  description: 'Shifts, capture, safety and reports for the volunteers who run an event.',
   manifest: '/manifest.json',
-  appleWebApp: { capable: true, statusBarStyle: 'default', title: 'SPOH Ops' },
+  appleWebApp: { capable: true, statusBarStyle: 'default', title: 'Ops' },
 };
 
 export const viewport: Viewport = {

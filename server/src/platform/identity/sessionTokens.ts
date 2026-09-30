@@ -25,7 +25,9 @@ import { logger } from '../logger/index.js';
  * as long as somebody's token does.
  */
 
+// hardcoding-allowed: the product's own identifier, not an event; renaming it invalidates tokens.
 const ISSUER = 'spoh2027-api';
+// hardcoding-allowed: the product's own identifier, not an event; renaming it invalidates tokens.
 const AUDIENCE = 'spoh2027-api';
 
 /**

@@ -20,7 +20,7 @@ import { useMe, useRequireSession } from '@/features/session';
  * else on the screen.
  *
  * Pre-assigned, not chosen. The usher opens the app and it already knows they
- * are on DCDF Station this block — a station picker here would be one more
+ * are on one station this block — a station picker here would be one more
  * thing to get wrong at 1:30pm.
  *
  * Increment-only. There is no way to edit history from this screen, because

@@ -1,22 +1,34 @@
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { wallTimeToInstant, zonedDate } from '@spoh/shared';
 import { PrismaClient } from '../src/generated/prisma/client.js';
-import type { CommitteeRole, ShiftBlock, StationKind } from '../src/generated/prisma/enums.js';
-import { wallTimeToInstant } from '@spoh/shared';
+import type { CommitteeRole, ShiftBlock } from '../src/generated/prisma/enums.js';
+import {
+  ASSIGNMENTS,
+  CATEGORIES,
+  COURSE_TAGS,
+  DAYS,
+  FIXTURE_EVENT,
+  GIFT_TYPES,
+  PEOPLE,
+  REPORTING,
+  SECOND_EVENT,
+  SHIFT_TEMPLATES,
+  STATIONS,
+  type FixturePerson,
+} from './fixtures/devEvent.js';
 
 /**
- * Idempotent seed (BUILD_PLAN §5.10).
+ * The seed (P09.11): a development fixture generator, and in production the
+ * administrator only.
  *
- * Every write is an upsert, never a create, so this can be re-run against a
- * database that already has data — including production, where it establishes
- * the event days, the station list and the Admin account and touches nothing
- * else.
- *
- * The fake volunteers and shift assignments are created only outside
- * production. A seeded account with a predictable identity is a back door, and
- * this is the guard that keeps one out of the real system.
+ * Production starts empty (D-12): its events come from the event factory
+ * (P10 set-up), never from a script, so production gets the administrator
+ * account and nothing else. Development and test databases get the fixture in
+ * `fixtures/devEvent.ts`, generated relative to today on the event's clock,
+ * so it is always live. Idempotent: every write finds or upserts, so a re-run
+ * on another day adds that day's rows and changes nothing else.
  */
 
 if (!process.env.DATABASE_URL) {
@@ -31,7 +43,6 @@ const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) throw new Error('DATABASE_URL is required to seed');
 
 const isProduction = process.env.NODE_ENV === 'production';
-
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: databaseUrl }) });
 
 /** Matches the local identity provider, so seeded accounts work with dev tokens. */
@@ -39,385 +50,303 @@ function localSub(email: string): string {
   return `local:${createHash('sha256').update(email).digest('hex').slice(0, 32)}`;
 }
 
+/** "YYYY-MM-DD" `days` after `date`. */
+function addDays(date: string, days: number): string {
+  const [year, month, day] = date.split('-').map(Number) as [number, number, number];
+  return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10);
+}
+
 /** Midnight UTC, the anchor Prisma uses for a `@db.Date` column. */
-function day(date: string): Date {
+function anchor(date: string): Date {
   return new Date(`${date}T00:00:00.000Z`);
 }
 
-/**
- * The event window (PRODUCT_BRIEF header): Sec 4 tours 6–8 Jan, SP Open House
- * 7–9 Jan, Discovery Evening on 8 Jan.
- */
-const EVENT_DAYS = [
-  { date: '2027-01-06', label: 'Sec 4 Tour Day 1', isPublicDay: false, isTourDay: true },
-  {
-    date: '2027-01-07',
-    label: 'Sec 4 Tour Day 2 / Open House Day 1',
-    isPublicDay: true,
-    isTourDay: true,
-  },
-  {
-    date: '2027-01-08',
-    label: 'Sec 4 Tour Day 3 / Open House Day 2 / Discovery Evening',
-    isPublicDay: true,
-    isTourDay: true,
-  },
-  { date: '2027-01-09', label: 'Open House Day 3', isPublicDay: true, isTourDay: false },
-] as const;
+type Scope = { eventId: string };
 
-/**
- * Station list. `countsEntry` marks the five rooms whose entries are counted
- * (PRODUCT_BRIEF §3); `issuesStamp` marks where a Mission Card is stamped.
- *
- * OPEN QUESTION for the Chief Coordinator (BUILD_PLAN §15.6): confirm the exact
- * station list and which rooms require entry counting. The set below follows
- * slide 28 and is the working assumption until that is confirmed.
- */
-const STATIONS = [
-  {
-    code: 'SIGNUP_BOOTH',
-    name: 'Sign-Up Booth',
-    kind: 'SIGNUP_BOOTH',
-    floor: 'L1',
-    countsEntry: false,
-    issuesStamp: false,
-    sortOrder: 10,
-  },
-  {
-    code: 'WELCOME_LOUNGE',
-    name: 'Welcome Lounge',
-    kind: 'WELCOME_LOUNGE',
-    floor: 'L1',
-    countsEntry: true,
-    issuesStamp: true,
-    sortOrder: 20,
-  },
-  {
-    code: 'DAAA_STATION',
-    name: 'DAAA Station',
-    kind: 'COURSE_STATION',
-    courseCode: 'DAAA',
-    floor: 'L2',
-    countsEntry: true,
-    issuesStamp: true,
-    sortOrder: 30,
-  },
-  {
-    code: 'DCDF_STATION',
-    name: 'DCDF Station',
-    kind: 'COURSE_STATION',
-    courseCode: 'DCDF',
-    floor: 'L2',
-    countsEntry: true,
-    issuesStamp: true,
-    sortOrder: 40,
-  },
-  {
-    code: 'DCS_STATION',
-    name: 'DCS Station',
-    kind: 'COURSE_STATION',
-    courseCode: 'DCS',
-    floor: 'L3',
-    countsEntry: true,
-    issuesStamp: true,
-    sortOrder: 50,
-  },
-  {
-    code: 'MISSION_COMPLETE',
-    name: 'Mission Complete Area',
-    kind: 'MISSION_COMPLETE',
-    floor: 'L1',
-    countsEntry: true,
-    issuesStamp: true,
-    sortOrder: 60,
-  },
-  {
-    code: 'WELCOME_PARTY',
-    name: 'Welcome Party',
-    kind: 'WELCOME_PARTY',
-    floor: 'L1',
-    countsEntry: false,
-    issuesStamp: false,
-    sortOrder: 70,
-  },
-  {
-    code: 'T19_FOYER',
-    name: 'T19 Foyer',
-    kind: 'OTHER',
-    floor: 'L1',
-    countsEntry: false,
-    issuesStamp: false,
-    sortOrder: 80,
-  },
-] as const;
+// ── People ──────────────────────────────────────────────────────────────────
 
-const GIFT_TYPES = [
-  { name: 'SoC Tote Bag', initialStock: 800, lowStockThreshold: 100 },
-  { name: 'SoC Water Bottle', initialStock: 500, lowStockThreshold: 75 },
-  { name: 'Mission Complete Badge', initialStock: 1200, lowStockThreshold: 150 },
-] as const;
-
-/**
- * Development fixtures: one volunteer per role, so the capability matrix can be
- * exercised by hand through `POST /api/v1/dev-auth/sign-in`.
- */
-const DEV_VOLUNTEERS = [
-  { email: 'admin@spoh2027.test', displayName: 'Ada Admin', role: 'ADMIN', portfolio: null },
-  {
-    email: 'lead@spoh2027.test',
-    displayName: 'Lee Lead',
-    role: 'LEAD',
-    portfolio: 'Comms & Outreach',
-  },
-  {
-    email: 'chief@spoh2027.test',
-    displayName: 'Chen Chief',
-    role: 'CHIEF_COORDINATOR',
-    portfolio: null,
-  },
-  {
-    email: 'dc@spoh2027.test',
-    displayName: 'Dana Deputy',
-    role: 'DEPUTY_COORDINATOR',
-    portfolio: 'Operations & Crowd Management',
-  },
-  { email: 'ic@spoh2027.test', displayName: 'Ivan IC', role: 'IC', portfolio: null },
-  { email: 'booth@spoh2027.test', displayName: 'Bea Booth', role: 'VOLUNTEER', portfolio: null },
-  {
-    email: 'counter@spoh2027.test',
-    displayName: 'Cal Counter',
-    role: 'VOLUNTEER',
-    portfolio: null,
-  },
-] as const;
-
-/** Which station each dev volunteer works, so station scoping is testable. */
-const DEV_ASSIGNMENTS: Array<{ email: string; stationCode: string; roleLabel: string }> = [
-  { email: 'booth@spoh2027.test', stationCode: 'SIGNUP_BOOTH', roleLabel: 'Registration' },
-  { email: 'counter@spoh2027.test', stationCode: 'DCDF_STATION', roleLabel: 'Counter' },
-  { email: 'ic@spoh2027.test', stationCode: 'SIGNUP_BOOTH', roleLabel: 'Booth IC' },
-];
-
-/**
- * The two dry runs (BUILD_PLAN §12). They are real operating days with real
- * rosters, so they need `EventDay` rows — they just run against staging so the
- * data never mixes with the event itself.
- */
-const DRY_RUN_DAYS = [
-  { date: '2026-11-18', label: 'Dry Run #1', isPublicDay: false, isTourDay: false },
-  { date: '2027-01-04', label: 'Dry Run #2', isPublicDay: false, isTourDay: false },
-] as const;
-
-/**
- * Today, as a sandbox event day. Development only.
- *
- * Station scoping requires an assignment on today's event day in a running
- * shift block, so without this nothing captures on a developer machine in
- * September and every capture screen looks broken for the wrong reason.
- */
-function sandboxDay(): { date: string; label: string; isPublicDay: boolean; isTourDay: boolean } {
-  // Singapore is UTC+8 year round, so shifting by 8h gives the local date.
-  const today = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 10);
-  return { date: today, label: 'Local Dev Sandbox', isPublicDay: false, isTourDay: false };
+async function upsertPerson(person: FixturePerson & { sub?: string }): Promise<string> {
+  const row = await prisma.person.upsert({
+    where: { email: person.email },
+    create: {
+      email: person.email,
+      displayName: person.displayName,
+      cognitoSub: person.sub ?? localSub(person.email),
+      role: person.role,
+      portfolio: person.portfolio,
+      phone: '+65 8000 0000',
+    },
+    update: { role: person.role, active: true },
+  });
+  return row.id;
 }
 
-async function seedEventDays(): Promise<void> {
-  const days = [...EVENT_DAYS, ...DRY_RUN_DAYS, ...(isProduction ? [] : [sandboxDay()])];
-
-  // Found by date rather than upserted: on a fresh database Event #1 does not
-  // exist yet (seedEventOne adopts these rows), so there is no event to key by.
-  for (const eventDay of days) {
-    const data = {
-      label: eventDay.label,
-      isPublicDay: eventDay.isPublicDay,
-      isTourDay: eventDay.isTourDay,
-    };
-    const existing = await prisma.eventDay.findFirst({ where: { date: day(eventDay.date) } });
-    if (existing) await prisma.eventDay.update({ where: { id: existing.id }, data });
-    else await prisma.eventDay.create({ data: { date: day(eventDay.date), ...data } });
-  }
+async function upsertMembership(
+  scope: Scope,
+  personId: string,
+  as: { role: CommitteeRole; portfolio?: string | null },
+) {
+  const fields = { role: as.role, portfolio: as.portfolio ?? null };
+  return prisma.eventMembership.upsert({
+    where: { eventId_personId: { eventId: scope.eventId, personId } },
+    create: { eventId: scope.eventId, personId, ...fields },
+    update: { ...fields, status: 'ACTIVE' },
+  });
 }
 
-async function seedStations(): Promise<void> {
-  for (const station of STATIONS) {
-    const data = {
-      name: station.name,
-      kind: station.kind as StationKind,
-      courseCode: 'courseCode' in station ? station.courseCode : null,
-      floor: station.floor,
-      countsEntry: station.countsEntry,
-      issuesStamp: station.issuesStamp,
-      sortOrder: station.sortOrder,
-      active: true,
-    };
-
-    const existing = await prisma.station.findFirst({ where: { code: station.code } });
-    if (existing) await prisma.station.update({ where: { id: existing.id }, data });
-    else await prisma.station.create({ data: { code: station.code, ...data } });
-  }
-}
-
-async function seedGiftTypes(): Promise<void> {
-  for (const gift of GIFT_TYPES) {
-    // Stock levels are operational data. Re-running the seed must not reset a
-    // threshold the gift team has already tuned during the event.
-    const existing = await prisma.giftType.findFirst({ where: { name: gift.name } });
-    if (!existing) await prisma.giftType.create({ data: { ...gift } });
-  }
-}
-
-async function seedAdmin(): Promise<void> {
+/**
+ * The administrator: from the environment in a deployment, the fixture's own
+ * otherwise. The only thing production gets.
+ */
+async function seedAdmin(): Promise<string> {
   const email = (
     process.env.ATTENDANCE_ROOT_EMAIL ??
     process.env.SEED_ADMIN_EMAIL ??
     'admin@spoh2027.test'
   ).toLowerCase();
-  const displayName = process.env.SEED_ADMIN_NAME ?? 'SPOH 2027 Administrator';
-
-  await prisma.person.upsert({
-    where: { email },
-    create: {
-      email,
-      displayName,
-      cognitoSub: process.env.SEED_ADMIN_SUB ?? localSub(email),
-      role: 'ADMIN' as CommitteeRole,
-    },
-    update: { role: 'ADMIN' as CommitteeRole, active: true },
+  return upsertPerson({
+    email,
+    displayName: process.env.SEED_ADMIN_NAME ?? 'Administrator',
+    role: 'ADMIN',
+    portfolio: null,
+    ...(process.env.SEED_ADMIN_SUB ? { sub: process.env.SEED_ADMIN_SUB } : {}),
   });
 }
 
-async function seedDevelopmentFixtures(): Promise<void> {
-  for (const volunteer of DEV_VOLUNTEERS) {
-    await prisma.person.upsert({
-      where: { email: volunteer.email },
-      create: {
-        email: volunteer.email,
-        displayName: volunteer.displayName,
-        cognitoSub: localSub(volunteer.email),
-        role: volunteer.role as CommitteeRole,
-        portfolio: volunteer.portfolio,
-        phone: '+65 8000 0000',
-      },
-      update: { role: volunteer.role as CommitteeRole, active: true },
+// ── The event and its structure ────────────────────────────────────────────
+
+async function seedEvent(): Promise<Scope & { today: string }> {
+  const organisation = await prisma.organisation.findFirstOrThrow({
+    orderBy: { createdAt: 'asc' },
+  });
+  await prisma.event.upsert({
+    where: { id: FIXTURE_EVENT.id },
+    create: { ...FIXTURE_EVENT, organisationId: organisation.id, status: 'LIVE' },
+    update: {},
+  });
+  const scope = { eventId: FIXTURE_EVENT.id };
+  for (const [index, category] of CATEGORIES.entries()) {
+    await prisma.captureCategory.upsert({
+      where: { eventId_code: { eventId: scope.eventId, code: category.code } },
+      create: { ...scope, ...category, sortOrder: index + 1 },
+      update: {},
     });
   }
+  return { ...scope, today: zonedDate(new Date(), FIXTURE_EVENT.timezone) };
+}
 
-  // Reporting lines, so `GET /me` returns a usable escalation chain.
-  const byEmail = new Map(
-    (
-      await prisma.person.findMany({
-        where: { email: { in: DEV_VOLUNTEERS.map((v) => v.email) } },
-        select: { id: true, email: true },
-      })
-    ).map((v) => [v.email, v.id]),
-  );
+/** One station type per (kind, counts, stamps) combination, as the P09.4 migration made them. */
+async function typeIdFor(scope: Scope, station: (typeof STATIONS)[number]): Promise<string> {
+  const code = `${station.kind}${station.countsEntry ? '_COUNTED' : ''}${station.issuesStamp ? '_STAMPED' : ''}`;
+  const type = await prisma.stationType.upsert({
+    where: { eventId_code: { eventId: scope.eventId, code } },
+    create: {
+      ...scope,
+      code,
+      label: station.kind.charAt(0) + station.kind.slice(1).toLowerCase().replaceAll('_', ' '),
+      registersVisitors: station.kind === 'SIGNUP_BOOTH',
+      redeemsGifts: station.kind === 'MISSION_COMPLETE',
+      countsEntry: station.countsEntry,
+      issuesStamp: station.issuesStamp,
+    },
+    update: {},
+  });
+  return type.id;
+}
 
-  const chain: Array<[string, string]> = [
-    ['booth@spoh2027.test', 'ic@spoh2027.test'],
-    ['counter@spoh2027.test', 'ic@spoh2027.test'],
-    ['ic@spoh2027.test', 'dc@spoh2027.test'],
-    ['dc@spoh2027.test', 'chief@spoh2027.test'],
-  ];
-
-  for (const [subordinate, manager] of chain) {
-    const subordinateId = byEmail.get(subordinate);
-    const managerId = byEmail.get(manager);
-    if (subordinateId && managerId) {
-      await prisma.person.update({
-        where: { id: subordinateId },
-        data: { reportsToId: managerId },
-      });
-    }
+async function seedStations(scope: Scope): Promise<Map<string, string>> {
+  const ids = new Map<string, string>();
+  for (const station of STATIONS) {
+    const typeId = await typeIdFor(scope, station);
+    const row = await prisma.station.upsert({
+      where: { eventId_code: { eventId: scope.eventId, code: station.code } },
+      create: { ...scope, ...station, typeId },
+      update: { name: station.name, typeId, active: true },
+    });
+    ids.set(station.code, row.id);
+    if (station.courseCode) await tagStation(scope, row.id, station.courseCode);
   }
+  return ids;
+}
 
-  // Assign every dev volunteer to both blocks on every event day, so station
-  // scoping can be exercised whatever day the developer happens to run this.
-  const eventDays = await prisma.eventDay.findMany({ select: { id: true } });
-  const stations = new Map(
-    (await prisma.station.findMany({ select: { id: true, code: true } })).map((s) => [
-      s.code,
-      s.id,
-    ]),
-  );
+async function tagStation(scope: Scope, stationId: string, course: string): Promise<void> {
+  const label = COURSE_TAGS.find((tag) => tag.code === course)?.label ?? course;
+  const tag = await prisma.stationTag.upsert({
+    where: { eventId_code: { eventId: scope.eventId, code: course } },
+    create: { ...scope, code: course, label },
+    update: {},
+  });
+  await prisma.stationTagging.upsert({
+    where: { stationId_tagId: { stationId, tagId: tag.id } },
+    create: { ...scope, stationId, tagId: tag.id },
+    update: {},
+  });
+}
 
-  for (const assignment of DEV_ASSIGNMENTS) {
-    const volunteerId = byEmail.get(assignment.email);
-    const stationId = stations.get(assignment.stationCode);
-    if (!volunteerId || !stationId) continue;
+async function seedGiftTypes(scope: Scope): Promise<void> {
+  for (const gift of GIFT_TYPES) {
+    // Stock is operational: a re-run never resets a threshold tuned during the event.
+    await prisma.giftType.upsert({
+      where: { eventId_name: { eventId: scope.eventId, name: gift.name } },
+      create: { ...scope, ...gift },
+      update: {},
+    });
+  }
+}
 
-    for (const eventDay of eventDays) {
+// ── Days and shifts ────────────────────────────────────────────────────────
+
+type Day = { id: string; date: string; isTourDay: boolean; shifts: Map<ShiftBlock, string> };
+
+async function seedTemplates(scope: Scope, timezone: string) {
+  const templates = [];
+  for (const [index, template] of SHIFT_TEMPLATES.entries()) {
+    templates.push(
+      await prisma.shiftTemplate.upsert({
+        where: { eventId_code: { eventId: scope.eventId, code: template.code } },
+        create: { ...scope, ...template, sortOrder: index + 1 },
+        update: {},
+      }),
+    );
+  }
+  return { templates, timezone };
+}
+
+async function seedDay(
+  scope: Scope,
+  day: { date: string; label: string; isPublicDay: boolean; isTourDay: boolean },
+  plan: Awaited<ReturnType<typeof seedTemplates>>,
+): Promise<Day> {
+  const { date, ...fields } = day;
+  const row = await prisma.eventDay.upsert({
+    where: { eventId_date: { eventId: scope.eventId, date: anchor(date) } },
+    create: { ...scope, date: anchor(date), ...fields },
+    update: fields,
+  });
+  const shifts = new Map<ShiftBlock, string>();
+  for (const template of plan.templates) {
+    const shift = await prisma.shift.upsert({
+      where: { eventDayId_templateId: { eventDayId: row.id, templateId: template.id } },
+      create: {
+        ...scope,
+        eventDayId: row.id,
+        templateId: template.id,
+        startsAt: wallTimeToInstant(date, template.startLocal, plan.timezone),
+        endsAt: wallTimeToInstant(date, template.endLocal, plan.timezone),
+      },
+      update: {},
+    });
+    shifts.set(template.code as ShiftBlock, shift.id);
+  }
+  return { id: row.id, date, isTourDay: day.isTourDay, shifts };
+}
+
+async function seedDays(scope: Scope, today: string): Promise<Day[]> {
+  const plan = await seedTemplates(scope, FIXTURE_EVENT.timezone);
+  const days: Day[] = [];
+  for (const { offset, ...day } of DAYS) {
+    days.push(await seedDay(scope, { ...day, date: addDays(today, offset) }, plan));
+  }
+  return days;
+}
+
+// ── The roster ─────────────────────────────────────────────────────────────
+
+async function seedPeople(
+  scope: Scope,
+): Promise<Map<string, { personId: string; membershipId: string }>> {
+  const people = new Map<string, { personId: string; membershipId: string }>();
+  for (const person of PEOPLE) {
+    const personId = await upsertPerson(person);
+    const membership = await upsertMembership(scope, personId, person);
+    people.set(person.email, { personId, membershipId: membership.id });
+  }
+  for (const [subordinate, manager] of REPORTING) {
+    const [from, to] = [people.get(subordinate), people.get(manager)];
+    if (!from || !to) continue;
+    await prisma.person.update({
+      where: { id: from.personId },
+      data: { reportsToId: to.personId },
+    });
+    await prisma.eventMembership.update({
+      where: { eventId_id: { eventId: scope.eventId, id: from.membershipId } },
+      data: { reportsToId: to.membershipId },
+    });
+  }
+  return people;
+}
+
+async function assign(
+  scope: Scope,
+  who: { personId: string; membershipId: string; stationId: string; roleLabel: string },
+  shift: { day: Day; block: ShiftBlock },
+): Promise<void> {
+  const { day, block } = shift;
+  await prisma.shiftAssignment.upsert({
+    where: {
+      volunteerId_eventDayId_block: { volunteerId: who.personId, eventDayId: day.id, block },
+    },
+    create: {
+      ...scope,
+      volunteerId: who.personId,
+      membershipId: who.membershipId,
+      stationId: who.stationId,
+      eventDayId: day.id,
+      shiftId: day.shifts.get(block) ?? null,
+      block,
+      roleLabel: who.roleLabel,
+    },
+    update: { stationId: who.stationId, roleLabel: who.roleLabel },
+  });
+}
+
+async function seedAssignments(
+  scope: Scope,
+  input: {
+    days: Day[];
+    stations: Map<string, string>;
+    people: Awaited<ReturnType<typeof seedPeople>>;
+  },
+): Promise<void> {
+  for (const assignment of ASSIGNMENTS) {
+    const person = input.people.get(assignment.email);
+    const stationId = input.stations.get(assignment.stationCode);
+    if (!person || !stationId) continue;
+    for (const day of input.days) {
       for (const block of ['MORNING', 'AFTERNOON'] as ShiftBlock[]) {
-        await prisma.shiftAssignment.upsert({
-          where: {
-            volunteerId_eventDayId_block: { volunteerId, eventDayId: eventDay.id, block },
-          },
-          create: {
-            volunteerId,
-            stationId,
-            eventDayId: eventDay.id,
-            block,
-            roleLabel: assignment.roleLabel,
-          },
-          update: { stationId, roleLabel: assignment.roleLabel },
-        });
+        await assign(
+          scope,
+          { ...person, stationId, roleLabel: assignment.roleLabel },
+          { day, block },
+        );
       }
     }
   }
 }
 
-/**
- * Briefing waves (PRODUCT_BRIEF §6.2).
- *
- * Waves of 20 Sec 4 students every 30 minutes across the tour days, one briefer
- * per wave rotating through the Chief and the Deputy Coordinators. Seeded
- * unassigned in production — who briefs which wave is the Chief's call, not a
- * seed script's.
- */
-async function seedBriefingSlots(): Promise<void> {
-  const tourDays = await prisma.eventDay.findMany({
-    where: { isTourDay: true },
-    select: { id: true, date: true },
-  });
-
-  // 09:30 to 12:30 Singapore time, every 30 minutes. Stored UTC (SGT is UTC+8).
-  const startHourUtc = 1;
-  const slotsPerDay = 7;
-
-  for (const day of tourDays) {
-    for (let index = 0; index < slotsPerDay; index += 1) {
-      const startsAt = new Date(day.date);
-      startsAt.setUTCHours(startHourUtc, 30 + index * 30, 0, 0);
-
+/** Briefing waves every 30 minutes, 09:30–12:30 on the event's clock, on tour days. */
+async function seedBriefingSlots(scope: Scope, days: Day[]): Promise<void> {
+  for (const day of days.filter((candidate) => candidate.isTourDay)) {
+    for (let index = 0; index < 7; index += 1) {
+      const minutes = 9 * 60 + 30 + index * 30;
+      const time = `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+      const startsAt = wallTimeToInstant(day.date, time, FIXTURE_EVENT.timezone);
       const existing = await prisma.briefingSlot.findFirst({
-        where: { eventDayId: day.id, startsAt },
-        select: { id: true },
+        where: { ...scope, eventDayId: day.id, startsAt },
       });
-
       if (!existing) {
         await prisma.briefingSlot.create({
-          data: { eventDayId: day.id, startsAt, waveSize: 20 },
+          data: { ...scope, eventDayId: day.id, startsAt, waveSize: 20 },
         });
       }
     }
   }
 }
 
-/**
- * A small batch of Mission Cards for development.
- *
- * Real cards are generated through `POST /api/v1/cards/batch` and printed; this
- * exists only so the stamp and redemption screens have something to scan on a
- * developer machine. Never in production, where a card that was never printed
- * would be a card nobody can present.
- */
-async function seedDevMissionCards(): Promise<void> {
-  const existing = await prisma.missionCard.count();
-  if (existing > 0) return;
-
+/** Fifty cards to scan on a developer machine, with codes that stay the same run to run. */
+async function seedMissionCards(scope: Scope): Promise<void> {
   const alphabet = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
   const rows = Array.from({ length: 50 }, (_unused, index) => {
-    // Deterministic, so the same codes come back after a database reset and a
-    // developer can keep a card code in a scratch file.
     let code = '';
     let n = index + 1;
     for (let i = 0; i < 6; i += 1) {
@@ -425,66 +354,31 @@ async function seedDevMissionCards(): Promise<void> {
       n = Math.floor(n / alphabet.length) + 7 * (i + 1);
     }
     return {
+      ...scope,
       shortCode: code,
       qrPayload: `spoh2027:dev-${String(index + 1).padStart(4, '0')}`,
       batchLabel: 'DEV',
     };
   });
-
   await prisma.missionCard.createMany({ data: rows, skipDuplicates: true });
-  console.log(`seed: ${rows.length} development mission cards (batch DEV)`);
-  console.log(`      try card ${rows[0]?.shortCode}`);
+  console.log(`seed: try card ${rows[0]?.shortCode}`);
 }
 
-/**
- * Event #1 and memberships (P09.4, P09.5). On a fresh database the migration
- * that turns today's data into Event #1 found nothing to migrate, so the seed
- * runs the same SQL over what it just wrote. Then every person gets a
- * membership of the event mirroring their roster row, so a re-run that adds
- * someone, or makes the configured root an admin, is reflected there too.
- */
-async function seedEventOne(): Promise<void> {
-  const backfill = new URL(
-    './migrations/20260930030000_event_one_backfill/migration.sql',
-    import.meta.url,
-  );
-  await prisma.$executeRawUnsafe(readFileSync(fileURLToPath(backfill), 'utf8'));
-  await prisma.$executeRawUnsafe(`
-    INSERT INTO "EventMembership" ("id", "eventId", "personId", "role", "portfolio", "status", "updatedAt")
-    SELECT gen_random_uuid()::text, e."id", v."id", v."role", v."portfolio",
-           CASE WHEN v."active" THEN 'ACTIVE' ELSE 'DEACTIVATED' END::"MembershipStatus", now()
-    FROM "Volunteer" v CROSS JOIN (SELECT "id" FROM "Event" ORDER BY "createdAt" LIMIT 1) e
-    ON CONFLICT ("eventId", "personId") DO UPDATE
-      SET "role" = EXCLUDED."role", "status" = EXCLUDED."status", "portfolio" = EXCLUDED."portfolio"`);
-}
+// ── The second event ───────────────────────────────────────────────────────
 
-/**
- * A second event beside Event #1, for development and the two-event e2e
- * (P09.8, ADR-001 §5): "Dry Run" with one booth, one day and its shifts, and
- * a person on both rosters — a volunteer in Event #1 and an IC in the dry run —
- * so each event's shifts, stations and permissions can be seen apart. Its own
- * persona, so no existing fixture changes. Development only.
- */
-const SECOND_EVENT = {
-  id: 'evt_seed_dry_run',
-  slug: 'dry-run',
-  name: 'Dry Run',
-  day: '2027-02-01',
-  stationCode: 'DRY_RUN_BOOTH',
-  email: 'multi@spoh2027.test',
-} as const;
-
-async function seedSecondEvent(): Promise<void> {
-  const first = await prisma.event.findFirst({ orderBy: { createdAt: 'asc' } });
-  if (!first || first.id === SECOND_EVENT.id) return;
-  const event = await prisma.event.upsert({
-    where: { id: SECOND_EVENT.id },
+async function seedSecondEvent(first: Scope, today: string): Promise<void> {
+  const organisation = await prisma.organisation.findFirstOrThrow({
+    orderBy: { createdAt: 'asc' },
+  });
+  const { station, person, ...event } = SECOND_EVENT;
+  await prisma.event.upsert({
+    where: { id: event.id },
     create: {
-      id: SECOND_EVENT.id,
-      organisationId: first.organisationId,
-      slug: SECOND_EVENT.slug,
-      name: SECOND_EVENT.name,
-      timezone: first.timezone,
+      id: event.id,
+      organisationId: organisation.id,
+      slug: event.slug,
+      name: event.name,
+      timezone: FIXTURE_EVENT.timezone,
       status: 'LIVE',
     },
     update: {},
@@ -495,166 +389,96 @@ async function seedSecondEvent(): Promise<void> {
     create: { ...scope, code: 'SIGNUP_BOOTH', label: 'Sign-up booth', registersVisitors: true },
     update: {},
   });
-  for (const [index, code] of ['SEC_4', 'OTHER'].entries()) {
+  for (const [index, code] of (['SEC_4', 'OTHER'] as const).entries()) {
     await prisma.captureCategory.upsert({
       where: { eventId_code: { eventId: event.id, code } },
       create: { ...scope, code, label: code === 'OTHER' ? 'Other' : 'Sec 4', sortOrder: index + 1 },
       update: {},
     });
   }
-  const station = await prisma.station.upsert({
-    where: { eventId_code: { eventId: event.id, code: SECOND_EVENT.stationCode } },
+  const booth = await prisma.station.upsert({
+    where: { eventId_code: { eventId: event.id, code: station.code } },
     create: {
       ...scope,
       typeId: type.id,
-      code: SECOND_EVENT.stationCode,
-      name: 'Dry-run booth',
+      code: station.code,
+      name: station.name,
       kind: 'SIGNUP_BOOTH',
     },
     update: {},
   });
-  const eventDay = await prisma.eventDay.upsert({
-    where: { eventId_date: { eventId: event.id, date: day(SECOND_EVENT.day) } },
-    create: { ...scope, date: day(SECOND_EVENT.day), label: 'Dry-run day' },
-    update: {},
-  });
-  const person = await prisma.person.upsert({
-    where: { email: SECOND_EVENT.email },
-    create: {
-      email: SECOND_EVENT.email,
-      displayName: 'Mo Multi',
-      cognitoSub: localSub(SECOND_EVENT.email),
-      role: 'VOLUNTEER',
+  const plan = await seedTemplates(scope, FIXTURE_EVENT.timezone);
+  const day = await seedDay(
+    scope,
+    {
+      date: addDays(today, event.dayOffset),
+      label: event.dayLabel,
+      isPublicDay: true,
+      isTourDay: false,
     },
-    update: { active: true },
-  });
-  await seedSecondEventShifts({
-    eventId: event.id,
-    dayId: eventDay.id,
-    stationId: station.id,
-    personId: person.id,
-    timezone: event.timezone,
-  });
-  await seedMultiInFirstEvent(first.id, person.id);
+    plan,
+  );
+  const personId = await upsertPerson({ ...person, role: 'VOLUNTEER', portfolio: null });
+  const membership = await upsertMembership(scope, personId, { role: 'IC' });
+  await assign(
+    scope,
+    { personId, membershipId: membership.id, stationId: booth.id, roleLabel: 'Booth IC' },
+    { day, block: 'MORNING' },
+  );
+  await seedMultiInFirstEvent(first, personId);
 }
 
-/** The dry run's two shifts on its day, and the multi-event person on the morning one, as IC. */
-async function seedSecondEventShifts(input: {
-  eventId: string;
-  dayId: string;
-  stationId: string;
-  personId: string;
-  timezone: string;
-}): Promise<void> {
-  const { eventId, dayId, stationId, personId, timezone } = input;
-  const membership = await prisma.eventMembership.upsert({
-    where: { eventId_personId: { eventId, personId } },
-    create: { eventId, personId, role: 'IC' },
-    update: { role: 'IC', status: 'ACTIVE' },
+/** The same person as a volunteer of the first event, at its booth, mornings. */
+async function seedMultiInFirstEvent(first: Scope, personId: string): Promise<void> {
+  const membership = await upsertMembership(first, personId, { role: 'VOLUNTEER' });
+  const booth = await prisma.station.findUniqueOrThrow({
+    where: { eventId_code: { eventId: first.eventId, code: 'SIGNUP_BOOTH' } },
   });
-  for (const [index, block] of (['MORNING', 'AFTERNOON'] as ShiftBlock[]).entries()) {
-    const hours = block === 'MORNING' ? ['09:30', '14:00'] : ['13:30', '18:00'];
-    const template = await prisma.shiftTemplate.upsert({
-      where: { eventId_code: { eventId, code: block } },
-      create: {
-        eventId,
-        code: block,
-        label: block === 'MORNING' ? 'Morning' : 'Afternoon',
-        startLocal: hours[0]!,
-        endLocal: hours[1]!,
-        sortOrder: index + 1,
-      },
-      update: {},
-    });
-    const shift = await prisma.shift.upsert({
-      where: { eventDayId_templateId: { eventDayId: dayId, templateId: template.id } },
-      create: {
-        eventId,
-        eventDayId: dayId,
-        templateId: template.id,
-        startsAt: wallTimeToInstant(SECOND_EVENT.day, template.startLocal, timezone),
-        endsAt: wallTimeToInstant(SECOND_EVENT.day, template.endLocal, timezone),
-      },
-      update: {},
-    });
-    if (block !== 'MORNING') continue;
-    await prisma.shiftAssignment.upsert({
-      where: { volunteerId_eventDayId_block: { volunteerId: personId, eventDayId: dayId, block } },
-      create: {
-        eventId,
-        shiftId: shift.id,
-        membershipId: membership.id,
-        volunteerId: personId,
-        stationId,
-        eventDayId: dayId,
-        block,
-        roleLabel: 'Booth IC',
-      },
-      update: {},
-    });
-  }
-}
-
-/** The same person as a volunteer of Event #1, at its booth on every day of it. */
-async function seedMultiInFirstEvent(eventId: string, personId: string): Promise<void> {
-  const membership = await prisma.eventMembership.upsert({
-    where: { eventId_personId: { eventId, personId } },
-    create: { eventId, personId, role: 'VOLUNTEER' },
-    update: { role: 'VOLUNTEER', status: 'ACTIVE' },
-  });
-  const booth = await prisma.station.findUnique({
-    where: { eventId_code: { eventId, code: 'SIGNUP_BOOTH' } },
-  });
-  if (!booth) return;
   const shifts = await prisma.shift.findMany({
-    where: { eventId, template: { code: 'MORNING' } },
+    where: { eventId: first.eventId, template: { code: 'MORNING' } },
     select: { id: true, eventDayId: true },
   });
   for (const shift of shifts) {
-    await prisma.shiftAssignment.upsert({
-      where: {
-        volunteerId_eventDayId_block: {
-          volunteerId: personId,
-          eventDayId: shift.eventDayId,
-          block: 'MORNING',
-        },
-      },
-      create: {
-        eventId,
-        shiftId: shift.id,
-        membershipId: membership.id,
-        volunteerId: personId,
-        stationId: booth.id,
-        eventDayId: shift.eventDayId,
-        block: 'MORNING',
-        roleLabel: 'Registration',
-      },
-      update: {},
-    });
+    const day: Day = {
+      id: shift.eventDayId,
+      date: '',
+      isTourDay: false,
+      shifts: new Map([['MORNING', shift.id]]),
+    };
+    await assign(
+      first,
+      { personId, membershipId: membership.id, stationId: booth.id, roleLabel: 'Registration' },
+      { day, block: 'MORNING' },
+    );
   }
 }
 
+// ── Run ────────────────────────────────────────────────────────────────────
+
+async function seedFixture(): Promise<void> {
+  const { today, ...event } = await seedEvent();
+  const stations = await seedStations(event);
+  await seedGiftTypes(event);
+  const days = await seedDays(event, today);
+  const people = await seedPeople(event);
+  await seedAssignments(event, { days, stations, people });
+  await seedBriefingSlots(event, days);
+  await seedMissionCards(event);
+  await upsertMembership(event, await seedAdmin(), { role: 'ADMIN' });
+  await seedSecondEvent(event, today);
+  console.log(`seed: ${FIXTURE_EVENT.name} and ${SECOND_EVENT.name}, days from ${today}`);
+  console.log(
+    '      sign in with POST /api/v1/dev-auth/sign-in { "email": "booth@spoh2027.test" }',
+  );
+}
+
 async function main(): Promise<void> {
-  await seedEventDays();
-  await seedStations();
-  await seedGiftTypes();
-  await seedBriefingSlots();
-
   if (isProduction) {
-    console.log('seed: production — event days, stations, gift types and admin only');
+    await seedAdmin();
+    console.log('seed: production — the administrator only; events come from set-up (D-12)');
   } else {
-    await seedDevelopmentFixtures();
-    await seedDevMissionCards();
-    console.log('seed: development fixtures created');
-    console.log(
-      '      sign in with POST /api/v1/dev-auth/sign-in { "email": "booth@spoh2027.test" }',
-    );
+    await seedFixture();
   }
-
-  // Apply last so a configured root matching a development fixture stays ADMIN.
-  await seedAdmin();
-  await seedEventOne();
-  if (!isProduction) await seedSecondEvent();
   console.log('seed: done');
 }
 

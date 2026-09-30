@@ -96,7 +96,7 @@ function pushToDevices(
   void dispatch(scope, {
     kind: 'announcement.urgent',
     priority: 'URGENT',
-    title: 'Urgent — SPOH Ops',
+    title: 'Urgent announcement',
     body: pushPreview(announcement.body),
     url: '/inbox',
     tag: `announcement:${announcement.id}`,

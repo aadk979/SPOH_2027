@@ -18,7 +18,7 @@ interface CsvSection {
  */
 export function toCsv(report: FullReport): string {
   const lines = [
-    '# SPOH 2027 post-event report',
+    `# ${report.event.name} post-event report`,
     `# Generated,${report.generatedAt}`,
     `# ${report.countingNote.replace(/,/g, ';')}`,
   ];

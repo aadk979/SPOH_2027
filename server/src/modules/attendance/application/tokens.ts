@@ -1,3 +1,5 @@
+// hardcoding-allowed-file: the attendance token's issuer and audience name the product,
+// not an event; renaming them invalidates tokens in flight.
 import { createHmac, randomBytes } from 'node:crypto';
 import { jwtVerify, SignJWT } from 'jose';
 import { env } from '../../../config/env.js';

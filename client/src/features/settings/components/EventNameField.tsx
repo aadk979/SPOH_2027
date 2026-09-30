@@ -25,7 +25,7 @@ export function EventNameField({
                 value={values.eventName}
                 onChange={(event) => setField('eventName', event.target.value)}
                 maxLength={80}
-                placeholder="SPOH 2027"
+                placeholder="Event name"
               />
             )}
           </Field>

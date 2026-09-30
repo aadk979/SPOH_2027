@@ -40,6 +40,8 @@ node node_modules/next/dist/bin/next dev client --port 3001
 
 Then run `npm run test:visual --workspace client`. Use `-- --update-snapshots` only to deliberately establish a reviewed new baseline, and inspect the diff. `VISUAL_BASE_URL` can override the client URL. Do not use the browser fixture database for load tests: accumulated captures change dashboards and reports.
 
+Since P09.11 the seed generates its fixture relative to "today" (here the frozen date): event days are offsets from it, not the January 2027 dates of the earlier fixture. The committed baselines were captured on a database seeded before that change; rebuilding the visual database from the current seed changes day labels and dates on some screens, so establish and review a new baseline in the same change rather than chasing the differences.
+
 The screenshots cover seeded initial page states. Behavioural actions are covered separately by the e2e and component suites. Snapshot coverage does not imply every interactive state has a visual baseline.
 
 The frozen API clock also freezes rate-window expiry. These two high limits belong only to this disposable visual process; rate-limit correctness remains covered by server tests under their normal configuration. Browser tests reject 429/5xx responses instead of capturing an error/loading state as a golden image. All seeded accounts are signed in before capture so roster last-seen fields are independent of test order.

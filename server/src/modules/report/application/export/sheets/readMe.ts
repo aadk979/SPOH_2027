@@ -6,7 +6,7 @@ export function writeReadMeSheet(workbook: ExcelJS.Workbook, report: FullReport)
   const sheet = workbook.addWorksheet(SHEETS.readMe);
   sheet.columns = [{ width: 110 }];
 
-  sheet.addRow(['SPOH 2027 — post-event report']).font = { bold: true, size: 14 };
+  sheet.addRow([`${report.event.name} — post-event report`]).font = { bold: true, size: 14 };
   sheet.addRow([]);
   sheet.addRow([`Generated ${new Date(report.generatedAt).toISOString()}`]);
   sheet.addRow([

@@ -23,7 +23,7 @@ function loopbackOnly(req: Request, _res: Response, next: NextFunction): void {
  * The only two unauthenticated routes in the system, and only liveness is
  * public. Neither leaks detail: a
  * failing readiness probe says "not ready", not "connection to
- * spoh-prod.abc123.ap-southeast-1.rds.amazonaws.com refused".
+ * <database host> refused".
  */
 export const healthRouter: Router = Router();
 

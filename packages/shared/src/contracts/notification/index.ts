@@ -94,7 +94,7 @@ export type NotificationKind = z.infer<typeof NotificationKind>;
 
 /**
  * Who a notification goes to. Resolved server-side against today's roster —
- * "everyone at DCDF Station" means everyone rostered there today, not everyone
+ * "everyone at a station" means everyone rostered there today, not everyone
  * who has ever worked there.
  */
 export const NotificationAudience = z

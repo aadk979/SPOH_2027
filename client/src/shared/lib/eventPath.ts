@@ -18,12 +18,12 @@ export function eventSlugOf(pathname: string): string | null {
   return slug && slug !== '_' ? decodeURIComponent(slug) : null;
 }
 
-/** The path inside the event: `/e/spoh-2027/capture/footfall` → `/capture/footfall`. */
+/** The path inside the event: `/e/<slug>/capture/footfall` → `/capture/footfall`. */
 export function pathInEvent(pathname: string): string {
   return EVENT_SEGMENT.exec(pathname)?.[2] ?? '/';
 }
 
-/** An event screen's address: `eventHref('spoh-2027', '/home')` → `/e/spoh-2027/home`. */
+/** An event screen's address: `eventHref(slug, '/home')` → `/e/<slug>/home`. */
 export function eventHref(slug: string, path: string): string {
   return `/e/${encodeURIComponent(slug)}${path === '/' ? '' : path}`;
 }

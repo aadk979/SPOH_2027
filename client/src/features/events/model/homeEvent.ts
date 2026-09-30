@@ -11,6 +11,7 @@ export function homeEventSlug(events: readonly MyEvent[], lastUsed: string | nul
   return active.find((event) => event.slug === lastUsed)?.slug ?? null;
 }
 
+// hardcoding-allowed: the product's own identifier, not an event; renaming it only forgets it.
 const LAST_USED = 'spoh.lastEvent';
 
 /** The last event opened on this device; per device, so best effort. */

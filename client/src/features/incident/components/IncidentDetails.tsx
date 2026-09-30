@@ -46,7 +46,7 @@ export function IncidentDetails({ form }: { form: IncidentFormState }): ReactNod
             placeholder={
               me?.currentAssignment
                 ? `Near the entrance to ${me.currentAssignment.station.name}`
-                : 'T19, level 2 walkway'
+                : 'Level 2 walkway, by the lifts'
             }
             maxLength={200}
           />

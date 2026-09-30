@@ -82,10 +82,8 @@ export default function SignInScreen(): ReactNode {
      * movement apart for no reason.
      */
     <main className="mx-auto flex min-h-dvh max-w-form flex-col justify-center px-md py-xl">
-      <h1 className="text-display">SPOH 2027</h1>
-      <p className="mt-xxs mb-lg text-lead text-text-muted">
-        School of Computing Open House · volunteer operations
-      </p>
+      <h1 className="text-display">Sign in</h1>
+      <p className="mt-xxs mb-lg text-lead text-text-muted">Volunteer operations</p>
 
       {/*
         `useSearchParams` suspends, so the fallback has to hold the form's

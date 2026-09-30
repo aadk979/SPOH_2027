@@ -38,7 +38,7 @@ export function raisedPush(alertId: string) {
     kind: 'lostPerson.raised' as const,
     priority: 'URGENT' as const,
     title: 'Lost person — check your app now',
-    body: 'A lost person alert is active. Open SPOH Ops for the description.',
+    body: 'A lost person alert is active. Open the ops app for the description.',
     url: '/home',
     tag: `lost-person:${alertId}`,
     audience: { everyone: true, volunteerIds: [] as string[] },

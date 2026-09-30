@@ -41,5 +41,6 @@ export function localBucketStartSql(
 ): Prisma.Sql {
   const column = columnOf(name);
   const local = Prisma.sql`(${column} AT TIME ZONE ${timezone}::text)`;
+  // hardcoding-allowed: the bin origin, a fixed midnight, not an event date.
   return Prisma.sql`${column} - (${local} - date_bin(make_interval(mins => ${minutes}::int), ${local}, TIMESTAMP '2000-01-01'))`;
 }

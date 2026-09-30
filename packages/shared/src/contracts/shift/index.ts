@@ -93,6 +93,7 @@ export type CompleteBriefingSlotRequest = z.infer<typeof CompleteBriefingSlotReq
  * ⚠ PLACEHOLDER wording, pending the Chief Coordinator's sign-off.
  */
 export const MANDATORY_BRIEF_POINTS: readonly string[] = Object.freeze([
+  // hardcoding-allowed: briefing content until the event's ContentDocument (P13).
   'Welcome, and what the School of Computing is.',
   'The Mission Card: what it is, and that the stamps are the point.',
   'The route: Welcome Lounge, the three course stations, Mission Complete.',

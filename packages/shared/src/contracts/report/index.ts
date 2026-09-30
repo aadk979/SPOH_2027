@@ -265,6 +265,8 @@ export const FullReport = z
     range: z.object({ from: IsoDateTime.nullable(), to: IsoDateTime.nullable() }).strict(),
     /** The event's IANA timezone: every local date, hour and label below is read in it. */
     timezone: z.string(),
+    /** The event reported on: its name titles the export, its slug names the file. */
+    event: z.object({ name: z.string(), slug: z.string() }).strict(),
     /**
      * Stated at the top of every report, in prose, because the single most
      * likely misreading of this document is that these are the same people

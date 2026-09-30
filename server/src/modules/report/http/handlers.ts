@@ -17,7 +17,10 @@ export async function exportReportHandler(req: Request, res: Response): Promise<
 
   if (query.format === 'csv') {
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="spoh2027-report-${stamp}.csv"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${report.event.slug}-report-${stamp}.csv"`,
+    );
     res.status(200).send(toCsv(report));
     return;
   }
@@ -27,6 +30,9 @@ export async function exportReportHandler(req: Request, res: Response): Promise<
     'Content-Type',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   );
-  res.setHeader('Content-Disposition', `attachment; filename="spoh2027-report-${stamp}.xlsx"`);
+  res.setHeader(
+    'Content-Disposition',
+    `attachment; filename="${report.event.slug}-report-${stamp}.xlsx"`,
+  );
   res.status(200).send(workbook);
 }

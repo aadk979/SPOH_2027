@@ -209,7 +209,7 @@ adminRouter.patch(
  *
  * The client needs the poll intervals, the undo window and the outbox warning
  * thresholds to behave consistently with the server, and none of it is
- * sensitive — it is the tuning of a school open house, not a secret.
+ * sensitive — it is the tuning of an event, not a secret.
  */
 adminRouter.get('/settings', defaultRateLimit, requireCapability('own.read'), getSettingsHandler);
 

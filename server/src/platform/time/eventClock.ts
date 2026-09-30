@@ -36,7 +36,7 @@ export function eventDayAnchorOf(instant: Date, zone: EventZone): Date {
 }
 
 /**
- * "2027-01-07 10:00": the local hour an hourly bucket starting at `instant`
+ * "YYYY-MM-DD HH:00": the local hour an hourly bucket starting at `instant`
  * covers, as the committee reads it. Both occurrences of a repeated hour read
  * the same; the report tells them apart (`labelHours`).
  */
@@ -45,7 +45,7 @@ export function localHourLabel(instant: Date, timezone: string): string {
 }
 
 /**
- * "2027-01-07 10:05 +08:00": an instant for a person reading an export. The
+ * "YYYY-MM-DD HH:MM +08:00": an instant for a person reading an export. The
  * offset is printed on every value, so the rows either side of a DST change
  * cannot be misread (F01 time audit, case 9).
  */

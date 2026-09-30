@@ -20,10 +20,10 @@ describe('safety chain push', () => {
   it('says what and where, never the description', () => {
     expect(
       safetyPushMessage({ severity: 'HIGH', type: 'NEAR_MISS', stationName: 'Room A' }),
-    ).toEqual({ title: 'HIGH incident reported', body: 'near miss at Room A. Open SPOH Ops.' });
+    ).toEqual({ title: 'HIGH incident reported', body: 'near miss at Room A. Open the ops app.' });
     expect(
       safetyPushMessage({ severity: 'CRITICAL', type: 'INJURY', stationName: null }).body,
-    ).toBe('injury at an unlisted location. Open SPOH Ops.');
+    ).toBe('injury at an unlisted location. Open the ops app.');
   });
 });
 

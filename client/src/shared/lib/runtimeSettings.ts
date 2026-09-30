@@ -47,7 +47,7 @@ export const DEFAULT_CLIENT_SETTINGS: Readonly<ClientSettings> = Object.freeze({
   outboxWarningAgeMinutes: 5,
   silentStationMinutes: 15,
   staleDeviceMinutes: 15,
-  eventName: 'SPOH 2027',
+  eventName: 'Event',
   shiftBlocks: {
     MORNING: { start: '09:30', end: '14:00' },
     AFTERNOON: { start: '13:30', end: '18:00' },

@@ -4,7 +4,7 @@ import { localTimestamp } from '../../../../platform/time/index.js';
 
 /**
  * Render an instant on the event's wall clock, for a human, with its UTC
- * offset: "2027-01-07 10:05 +08:00".
+ * offset: "YYYY-MM-DD HH:MM +08:00".
  *
  * The workbook is read by the committee about an event that happened in one
  * place. Labelling the peak period in UTC is technically honest and practically

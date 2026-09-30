@@ -12,6 +12,7 @@ import { registerPush } from './api';
  * The server upserts by endpoint and takes the new owner.
  */
 
+// hardcoding-allowed: the product's own identifier, not an event; renaming it only forgets it.
 const REGISTERED_KEY = 'spoh.push.registered';
 
 export function pushSupported(): boolean {

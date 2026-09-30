@@ -138,6 +138,10 @@ jobs:
       - name: Boundary violations
         run: npm run arch:check
 
+      # No event-specific literal in source: events, days and zones are data (P09.11).
+      - name: No hardcoded event values
+        run: npm run check:hardcoding
+
   security:
     name: Security checks
     runs-on: ubuntu-latest

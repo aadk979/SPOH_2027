@@ -39,7 +39,7 @@ export interface NotificationInput {
  * Resolve an audience to volunteer ids.
  *
  * Station targeting means "rostered there today", not "has ever worked there".
- * An usher who covered DCDF yesterday should not be woken about it now.
+ * An usher who covered another station yesterday should not be woken about it now.
  */
 async function resolveAudience(
   scope: EventScope,
