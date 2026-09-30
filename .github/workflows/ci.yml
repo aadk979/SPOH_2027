@@ -154,9 +154,10 @@ jobs:
 
       - run: npm ci
 
-      # Fails the build on a high or critical advisory (BUILD_PLAN §8.6).
+      # Fails the build on a high or critical advisory (BUILD_PLAN §8.6), save
+      # the narrow, expiring exceptions in scripts/audit-exceptions.json.
       - name: Dependency audit
-        run: npm audit --audit-level=high
+        run: node scripts/audit.mjs
 
       - name: Secret scan
         uses: gitleaks/gitleaks-action@v2

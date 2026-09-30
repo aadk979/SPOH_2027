@@ -1,0 +1,12 @@
+{
+  "$comment": "Advisories the dependency audit tolerates, each on named install paths only, with a reason and an expiry after which the audit fails again. Read by scripts/audit.mjs; add an entry only when no fixed version exists and the code path cannot see untrusted input.",
+  "exceptions": [
+    {
+      "package": "brace-expansion",
+      "paths": ["node_modules/aws-cdk-lib/node_modules/brace-expansion"],
+      "advisories": ["GHSA-q2hr-2g5m-vwhr", "GHSA-qhr7-859c-m2p7", "GHSA-6j4f-fj2g-mc7p"],
+      "reason": "Bundled inside aws-cdk-lib 2.271.0 (the latest release, 2026-09-30), so no override or upgrade can replace it. CDK runs it at synth time over the repository's own asset globs; it never sees untrusted input and never ships in the application image.",
+      "expires": "2026-10-31"
+    }
+  ]
+}
