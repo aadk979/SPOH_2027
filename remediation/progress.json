@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-30T12:11:54.458Z",
+  "updatedAt": "2026-09-30T12:36:06.817Z",
   "current": {
     "phase": "P09",
     "step": "P09.6"
@@ -1827,11 +1827,16 @@
         {
           "id": "P09.7",
           "title": "Event-scoped API",
-          "status": "not_started",
+          "status": "done",
           "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-30T12:36:06.816Z",
+          "commits": ["37b5d05"],
+          "notes": [
+            {
+              "at": "2026-09-30T12:36:06.817Z",
+              "text": "Event routes under /api/v1/events/:eventId (path-only event context; 404 for unknown event or no membership), old paths are in-place aliases of Event #1 (first-created event) until P16.7, sign-in via home membership in any running event. Isolation suite generated from the route inventory (90 routes, each a case or a stated no-id reason); it found and closed 5 cross-event station/day leaks (incidents, lost-person, announcements, lost-found, fallback windows). Server 424+437, e2e 26, visual 58."
+            }
+          ]
         },
         {
           "id": "P09.8",
