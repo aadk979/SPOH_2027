@@ -48,13 +48,17 @@ describe('expandGroupMembers', () => {
           { category: 'SEC_4', count: 1 },
         ],
       },
+      new Map([
+        ['SEC_3', 'cat-3'],
+        ['SEC_4', 'cat-4'],
+      ]),
       CONTEXT,
     );
 
-    expect(rows.map((row) => [row.category, row.idempotencyKey])).toEqual([
-      ['SEC_3', 'k:SEC_3:0'],
-      ['SEC_3', 'k:SEC_3:1'],
-      ['SEC_4', 'k:SEC_4:0'],
+    expect(rows.map((row) => [row.categoryId, row.idempotencyKey])).toEqual([
+      ['cat-3', 'k:SEC_3:0'],
+      ['cat-3', 'k:SEC_3:1'],
+      ['cat-4', 'k:SEC_4:0'],
     ]);
     expect(rows.every((row) => row.groupId === 'g1' && row.source === 'APP')).toBe(true);
   });
@@ -78,7 +82,7 @@ describe('voidRegistrationById', () => {
     repo.findRegistrationById.mockResolvedValueOnce({
       id: 'r',
       voided: false,
-      category: 'SEC_3',
+      captureCategory: { code: 'SEC_3', label: 'Sec 3' },
     } as never);
     repo.voidRegistration.mockResolvedValueOnce({ voidedReason: 'mis-tap' } as never);
 

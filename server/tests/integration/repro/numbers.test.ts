@@ -5,12 +5,13 @@ import { createApp } from '../../../src/app/createApp.js';
 import { logger } from '../../../src/platform/logger/index.js';
 import { resetDatabase, rawDb } from '../../helpers/db.js';
 import {
+  type TestVolunteer,
   assignToStation,
   bearer,
+  categoryId,
   createEventDayToday,
   createStation,
   createVolunteer,
-  type TestVolunteer,
   testEvent,
 } from '../../helpers/fixtures.js';
 
@@ -46,7 +47,7 @@ async function registrationAt(recordedAt: string): Promise<void> {
   await rawDb.registration.create({
     data: {
       eventId: (await testEvent()).eventId,
-      category: 'SEC_3',
+      categoryId: await categoryId('SEC_3'),
       stationId,
       recordedById: volunteer.id,
       recordedAt: new Date(recordedAt),

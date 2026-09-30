@@ -124,7 +124,7 @@ describe('no visitor personal data (BUILD_PLAN §3.2)', () => {
     expect(registration).toBeDefined();
     // No free-text field of any kind other than the void reason, which is an
     // IC-only correction note about the record, not about a person.
-    expect(registration?.fields).toContain('category');
+    expect(registration?.fields).toContain('categoryId');
     expect(registration?.fields).not.toContain('notes');
     expect(registration?.fields).not.toContain('description');
   });

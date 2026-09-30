@@ -133,7 +133,6 @@ describe('the report on a DST day (P09.6)', () => {
     await rawDb.registration.createMany({
       data: instants.map((instant) => ({
         eventId: london.eventId,
-        category: 'SEC_1' as const,
         categoryId: category.id,
         stationId: station.id,
         recordedById: person.id,

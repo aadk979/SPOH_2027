@@ -82,15 +82,6 @@ const scalar = async (client, sql) => Number((await client.query(sql)).rows[0].n
 
 /** Rows that disagree between the old and new readings; zero means identical. */
 const CHECKS = {
-  'registrations per category': `
-    SELECT count(*) AS n FROM (
-      (SELECT "category"::text AS k, count(*) FROM "Registration" GROUP BY 1
-       EXCEPT SELECT c."code", count(*) FROM "Registration" r
-              JOIN "CaptureCategory" c ON c."id" = r."categoryId" GROUP BY 1)
-      UNION ALL
-      (SELECT c."code", count(*) FROM "Registration" r
-              JOIN "CaptureCategory" c ON c."id" = r."categoryId" GROUP BY 1
-       EXCEPT SELECT "category"::text, count(*) FROM "Registration" GROUP BY 1)) d`,
   'registrations in another event than their station': `
     SELECT count(*) AS n FROM "Registration" r
     LEFT JOIN "Station" s ON s."id" = r."stationId"

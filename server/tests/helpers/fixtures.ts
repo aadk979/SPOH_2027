@@ -220,6 +220,16 @@ export async function assignToStationAllBlocks(input: {
   }
 }
 
+/** The test event's category for a code, for rows a test writes directly. */
+export async function categoryId(code: string, scope?: EventScope): Promise<string> {
+  const { eventId } = scope ?? (await testEvent());
+  const category = await prisma.captureCategory.findUniqueOrThrow({
+    where: { eventId_code: { eventId, code } },
+    select: { id: true },
+  });
+  return category.id;
+}
+
 export function idempotencyKey(): string {
   return randomUUID();
 }

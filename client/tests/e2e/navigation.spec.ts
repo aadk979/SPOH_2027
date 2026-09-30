@@ -19,26 +19,28 @@ async function mockSession(page: Page, leader = false, failMe = false) {
     }
     const json = path.endsWith('/api/v1/events')
       ? { data: [MOCK_EVENT] }
-      : path.includes('/auth/')
-        ? {
-            accessToken: 'preview',
-            expiresIn: 3600,
-            volunteer,
-            capabilities,
-            refreshAvailable: true,
-          }
-        : path.endsWith('/me')
+      : path.endsWith('/registrations/categories')
+        ? { data: [] }
+        : path.includes('/auth/')
           ? {
+              accessToken: 'preview',
+              expiresIn: 3600,
               volunteer,
-              event: MOCK_EVENT,
               capabilities,
-              currentAssignment: null,
-              upcomingAssignments: [],
-              escalationChain: [],
+              refreshAvailable: true,
             }
-          : path.endsWith('/lost-person/active')
-            ? { alerts: [] }
-            : {};
+          : path.endsWith('/me')
+            ? {
+                volunteer,
+                event: MOCK_EVENT,
+                capabilities,
+                currentAssignment: null,
+                upcomingAssignments: [],
+                escalationChain: [],
+              }
+            : path.endsWith('/lost-person/active')
+              ? { alerts: [] }
+              : {};
     await route.fulfill({ json });
   });
 }

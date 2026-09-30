@@ -7,6 +7,7 @@ import { systemClock } from '../../../platform/time/index.js';
 import { requireActiveStation } from '../../station/index.js';
 import { toRegistrationRecord } from '../data/mappers.js';
 import { countForRecorderSince, countForStationSince, createRegistration } from '../data/repo.js';
+import { requireCategory } from './requireCategory.js';
 
 /**
  * COUNT 1 — one tap, one registration (PRODUCT_BRIEF §0.1, §2).
@@ -26,8 +27,9 @@ export async function recordRegistration(
   const recordedAt = clock.now();
 
   const registration = await prisma.$transaction(async (tx) => {
+    const category = await requireCategory(tx, scope, request.category);
     const row = await createRegistration(tx, scope, {
-      category: request.category,
+      categoryId: category.id,
       stationId: station.id,
       recordedById: actor.volunteerId,
       recordedByMembershipId: actor.membershipId,
@@ -42,7 +44,7 @@ export async function recordRegistration(
       action: 'registration.create',
       entityType: 'Registration',
       entityId: row.id,
-      after: { category: row.category, stationId: row.stationId },
+      after: { category: row.captureCategory.code, stationId: row.stationId },
     });
     return row;
   });

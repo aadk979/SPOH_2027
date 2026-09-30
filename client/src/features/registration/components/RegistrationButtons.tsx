@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { type useCapture } from '@/features/capture';
 import { registrationEndpoints } from '@/features/registration';
-import { CATEGORIES } from '../model/categories';
+import { useCaptureCategories } from '../queries';
 export function RegistrationButtons({
   stationId,
   capture,
@@ -9,17 +9,18 @@ export function RegistrationButtons({
   stationId: string;
   capture: ReturnType<typeof useCapture>['capture'];
 }): ReactNode {
+  const { data: categories = [] } = useCaptureCategories();
   return (
     <div className="grid grid-cols-2 gap-sm sm:grid-cols-4">
-      {CATEGORIES.map((category) => (
+      {categories.map((category) => (
         <button
-          key={category.value}
+          key={category.code}
           type="button"
           className="capture-target"
           onClick={() =>
             void capture({
               endpoint: registrationEndpoints.single,
-              body: { category: category.value, stationId },
+              body: { category: category.code, stationId },
               label: category.label,
             })
           }

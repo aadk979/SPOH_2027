@@ -69,7 +69,6 @@ beforeEach(async () => {
   await rawDb.registration.create({
     data: {
       eventId: source.eventId,
-      category: 'SEC_1',
       categoryId: category.id,
       stationId,
       recordedById: volunteer.id,
@@ -227,7 +226,6 @@ describe('cloning an event (P09.9)', () => {
       await rawDb.registration.create({
         data: {
           eventId: event.id,
-          category: 'SEC_1',
           categoryId: renamed.id,
           stationId: desk.id,
           recordedById: ic.id,

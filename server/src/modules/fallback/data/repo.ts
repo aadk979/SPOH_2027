@@ -131,6 +131,15 @@ export async function stationIdsByCode(scope: EventScope): Promise<Map<string, s
   return new Map(stations.map((station) => [station.code.toUpperCase(), station.id]));
 }
 
+/** The event's categories by code, for placing imported rows. */
+export async function categoryIdsByCode(scope: EventScope): Promise<Map<string, string>> {
+  const categories = await prisma.captureCategory.findMany({
+    where: { eventId: scope.eventId },
+    select: { id: true, code: true },
+  });
+  return new Map(categories.map((category) => [category.code, category.id]));
+}
+
 export async function existingRegistrationKeys(
   scope: EventScope,
   keys: string[],
@@ -157,21 +166,11 @@ export async function existingFootfallKeys(
 export async function insertRegistrations(
   tx: PrismaTransactionClient,
   scope: EventScope,
-  rows: Array<Omit<Prisma.RegistrationCreateManyInput, 'eventId' | 'categoryId'>>,
+  rows: Array<Omit<Prisma.RegistrationCreateManyInput, 'eventId'>>,
 ): Promise<number> {
   if (rows.length === 0) return 0;
-  // Both columns while the enum is authoritative (P09.5): the category by its code.
-  const categories = await tx.captureCategory.findMany({
-    where: { eventId: scope.eventId },
-    select: { id: true, code: true },
-  });
-  const idOf = new Map(categories.map((category) => [category.code, category.id]));
   const { count } = await tx.registration.createMany({
-    data: rows.map((row) => ({
-      ...row,
-      eventId: scope.eventId,
-      categoryId: idOf.get(row.category) ?? null,
-    })),
+    data: rows.map((row) => ({ ...row, eventId: scope.eventId })),
     skipDuplicates: true,
   });
   return count;

@@ -108,9 +108,10 @@ test.describe('accessibility', () => {
     // 88px, not the 44px WCAG floor. A booth volunteer taps these hundreds of
     // times an hour without looking, and a missed tap is a visitor who never
     // gets counted (BUILD_PLAN §9.4).
+    // The buttons are the event's eight categories, loaded from the event.
     const buttons = page.locator('.capture-target');
+    await expect(buttons).toHaveCount(8);
     const count = await buttons.count();
-    expect(count).toBe(8);
 
     for (let index = 0; index < count; index += 1) {
       const box = await buttons.nth(index).boundingBox();

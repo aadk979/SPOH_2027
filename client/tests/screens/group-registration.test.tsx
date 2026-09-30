@@ -3,7 +3,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import GroupRegistrationScreen from '@/features/registration/screens/GroupRegistrationScreen';
 import { enqueue } from '@/shared/lib/outbox';
-import { TEST_EVENT } from '../helpers/event';
+import { TEST_EVENT, TEST_CATEGORIES } from '../helpers/event';
+vi.mock('@/features/registration/queries', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/features/registration/queries')>()),
+  useCaptureCategories: () => ({ data: TEST_CATEGORIES }),
+}));
 
 /** The test event's API paths and screen addresses (tests/setup.ts). */
 const APP = `/e/${TEST_EVENT.slug}`;

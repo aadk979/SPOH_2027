@@ -80,28 +80,30 @@ async function attendanceSession(page: Page, root = false) {
     }
     const json = path.endsWith('/api/v1/events')
       ? { data: [MOCK_EVENT] }
-      : path.includes('/auth/')
-        ? {
-            accessToken: 'preview',
-            expiresIn: 3600,
-            volunteer,
-            capabilities: ['own.read'],
-            refreshAvailable: true,
-          }
-        : path.endsWith('/attendance')
-          ? state
-          : path.endsWith('/me')
-            ? {
-                volunteer,
-                event: MOCK_EVENT,
-                capabilities: ['own.read'],
-                currentAssignment: null,
-                upcomingAssignments: [],
-                escalationChain: [],
-              }
-            : path.endsWith('/lost-person/active')
-              ? { alerts: [] }
-              : {};
+      : path.endsWith('/registrations/categories')
+        ? { data: [] }
+        : path.includes('/auth/')
+          ? {
+              accessToken: 'preview',
+              expiresIn: 3600,
+              volunteer,
+              capabilities: ['own.read'],
+              refreshAvailable: true,
+            }
+          : path.endsWith('/attendance')
+            ? state
+            : path.endsWith('/me')
+              ? {
+                  volunteer,
+                  event: MOCK_EVENT,
+                  capabilities: ['own.read'],
+                  currentAssignment: null,
+                  upcomingAssignments: [],
+                  escalationChain: [],
+                }
+              : path.endsWith('/lost-person/active')
+                ? { alerts: [] }
+                : {};
     await route.fulfill({ json });
   });
   return { submissions };

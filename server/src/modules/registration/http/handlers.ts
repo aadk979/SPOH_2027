@@ -11,6 +11,7 @@ import { actorContextFrom } from '../../../platform/http/auditContext.js';
 import { scopeOf } from '../../../platform/http/requireAuth.js';
 import { captureContextFrom } from '../../../platform/http/captureActor.js';
 import { validatedBody, validatedParams, validatedQuery } from '../../../platform/http/validate.js';
+import { listCaptureCategories } from '../application/listCaptureCategories.js';
 import { recordGroupRegistration } from '../application/recordGroupRegistration.js';
 import { recordRegistration } from '../application/recordRegistration.js';
 import { summariseRegistrations } from '../application/summariseRegistrations.js';
@@ -36,4 +37,8 @@ export async function voidRegistrationHandler(req: Request, res: Response): Prom
 export async function summariseRegistrationsHandler(req: Request, res: Response): Promise<void> {
   const query = validatedQuery<RegistrationSummaryQuery>(req);
   res.status(200).json(await summariseRegistrations(scopeOf(req), query));
+}
+
+export async function listCategoriesHandler(req: Request, res: Response): Promise<void> {
+  res.status(200).json(await listCaptureCategories(scopeOf(req)));
 }

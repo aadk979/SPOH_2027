@@ -13,6 +13,7 @@ import { validate } from '../../../platform/http/validate.js';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { idempotent } from '../../../platform/http/idempotency.js';
 import {
+  listCategoriesHandler,
   recordGroupRegistrationHandler,
   recordRegistrationHandler,
   summariseRegistrationsHandler,
@@ -52,6 +53,9 @@ registrationRouter.post(
   idempotent('POST /registrations/group'),
   recordGroupRegistrationHandler,
 );
+
+/** The booth's buttons: the event's categories. Any member may read them, like the stations. */
+registrationRouter.get('/categories', defaultRateLimit, listCategoriesHandler);
 
 registrationRouter.post(
   '/:id/void',

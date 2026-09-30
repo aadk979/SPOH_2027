@@ -15,7 +15,7 @@
  * reviewers treat each one as a question.
  */
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 
 const SCOPE = ['server/src', 'client/src', 'packages/shared/src'];
 const EXCLUDED = [
@@ -48,9 +48,13 @@ const ALLOW_FILE = /hardcoding-allowed-file:\s*\S/;
 
 function trackedFiles() {
   const listed = execFileSync('git', ['ls-files', '-z', '--', ...SCOPE], { encoding: 'utf8' });
-  return listed
-    .split('\0')
-    .filter((file) => SOURCE.test(file) && !EXCLUDED.some((rule) => rule.test(file)));
+  return (
+    listed
+      .split('\0')
+      .filter((file) => SOURCE.test(file) && !EXCLUDED.some((rule) => rule.test(file)))
+      // Deleted in the working tree but not yet staged.
+      .filter((file) => existsSync(file))
+  );
 }
 
 /** Every offending line of one file, with the pattern it matched. */

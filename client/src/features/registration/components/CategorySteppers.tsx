@@ -1,17 +1,18 @@
 import type { ReactNode } from 'react';
 import type { GroupRegistrationForm } from '../hooks/useGroupRegistration';
 import { cx } from '@/shared/ui';
-import { CATEGORIES } from '../model/categories';
+import { useCaptureCategories } from '../queries';
 import { Stepper } from './Stepper';
 export function CategorySteppers({ form }: { form: GroupRegistrationForm }): ReactNode {
   const { counts, adjust } = form;
+  const { data: categories = [] } = useCaptureCategories();
   return (
     <ul className="flex flex-col gap-xxs">
-      {CATEGORIES.map((category) => {
-        const count = counts[category.value] ?? 0;
+      {categories.map((category) => {
+        const count = counts[category.code] ?? 0;
         return (
           <li
-            key={category.value}
+            key={category.code}
             className={cx(
               'flex items-center justify-between gap-sm rounded-lg px-md py-xs transition-colors',
               // The filled row is how a volunteer checks the composition at
@@ -26,7 +27,7 @@ export function CategorySteppers({ form }: { form: GroupRegistrationForm }): Rea
                 label={`Remove one ${category.label}`}
                 glyph="−"
                 variant="quiet"
-                onClick={() => adjust(category.value, -1)}
+                onClick={() => adjust(category.code, -1)}
                 disabled={count === 0}
               />
 
@@ -45,7 +46,7 @@ export function CategorySteppers({ form }: { form: GroupRegistrationForm }): Rea
                 label={`Add one ${category.label}`}
                 glyph="+"
                 variant="primary"
-                onClick={() => adjust(category.value, 1)}
+                onClick={() => adjust(category.code, 1)}
               />
             </span>
           </li>

@@ -1,10 +1,11 @@
 import type { RegistrationRecord } from '@spoh/shared';
-import type { Registration } from '../../../generated/prisma/client.js';
+import type { RegistrationRow } from './repo.js';
 
-export function toRegistrationRecord(row: Registration): RegistrationRecord {
+export function toRegistrationRecord(row: RegistrationRow): RegistrationRecord {
   return {
     id: row.id,
-    category: row.category,
+    category: row.captureCategory.code,
+    categoryLabel: row.captureCategory.label,
     stationId: row.stationId,
     groupId: row.groupId,
     missionCardId: row.missionCardId,

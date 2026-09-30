@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { DataSource, VisitorCategory } from '../../invariants/enums.js';
+import { DataSource } from '../../invariants/enums.js';
+import { CategoryCode } from '../registration/index.js';
 import { Id, IsoDateTime, ReasonText } from '../common/index.js';
 
 /**
@@ -71,7 +72,7 @@ export type ImportSource = z.infer<typeof ImportSource>;
 
 export const RegistrationImportRow = z
   .object({
-    category: VisitorCategory,
+    category: CategoryCode,
     stationCode: z.string().trim().min(1).max(64),
     /** Exact instant if the sheet captured one. */
     recordedAt: IsoDateTime.optional(),

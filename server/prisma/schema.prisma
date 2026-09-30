@@ -41,18 +41,6 @@ datasource db {
 // ENUMS
 // ─────────────────────────────────────────────
 
-/// The eight sign-up booth buttons, matching the booth screen one for one.
-enum VisitorCategory {
-  SEC_1
-  SEC_2
-  SEC_3
-  SEC_4
-  SEC_5
-  GRADUATED_AWAITING_RESULTS
-  PARENT_GUARDIAN
-  OTHER
-}
-
 enum StationKind {
   SIGNUP_BOOTH
   WELCOME_LOUNGE
@@ -742,9 +730,8 @@ model Registration {
   id                     String          @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2). Nullable until P09.10 backfills and contracts.
   eventId                String?
-  /// The category as data (ADR-002); the enum stays authoritative until P09.5.
-  categoryId             String?
-  category               VisitorCategory
+  /// The event's capture category (ADR-002): the only record of what was counted (P09.10).
+  categoryId             String
   stationId              String
   recordedById           String
   /// The EventMembership behind recordedById (ADR-001); backfilled in P09.4, read from P09.5.
@@ -765,10 +752,9 @@ model Registration {
   missionCard MissionCard? @relation(fields: [missionCardId], references: [id])
 
   event           Event?           @relation(fields: [eventId], references: [id], onDelete: Restrict)
-  captureCategory CaptureCategory? @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  captureCategory CaptureCategory  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
 
   @@index([recordedAt])
-  @@index([category, recordedAt])
   @@index([groupId])
   @@index([eventId, recordedAt])
   @@index([eventId, categoryId, recordedAt])

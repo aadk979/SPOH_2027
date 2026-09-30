@@ -1,2 +1,2 @@
-export { useRegistrationSummary, registrationKeys } from './queries';
+export { useRegistrationSummary, useCaptureCategories, registrationKeys } from './queries';
 export { registrationEndpoints } from './api';

@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, type ReactNode } from 'react';
+import { useCaptureCategories } from '@/features/registration';
 import { useRequireSession } from '@/features/session';
 import { upgradeLegacyEntries } from '@/shared/lib/outbox';
 import { ButtonLink, Card, CardTitle, LoadingRows, Stack } from '@/shared/ui';
@@ -17,9 +18,20 @@ export function EventLayout({ children }: { children: ReactNode }): ReactNode {
   if (!session) return null;
   return (
     <EventProvider fallback={(state) => <EventUnavailable state={state} />}>
+      <OfflineWarmup />
       {children}
     </EventProvider>
   );
+}
+
+/**
+ * Loads, on entering an event, what its capture screens need offline: the
+ * booth's categories are the event's data (ADR-002), and a booth first opened
+ * in a dead spot must still have its buttons. They are kept on the device.
+ */
+function OfflineWarmup(): null {
+  useCaptureCategories();
+  return null;
 }
 
 function useLegacyOutboxUpgrade(): void {

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DataSource, VisitorCategory } from '../../invariants/enums.js';
+import { DataSource } from '../../invariants/enums.js';
 import { CaptureEnvelope, Id, IsoDateTime, ReasonText, TimeRangeQuery } from '../common/index.js';
 
 /**
@@ -11,9 +11,30 @@ import { CaptureEnvelope, Id, IsoDateTime, ReasonText, TimeRangeQuery } from '..
  * policy memo (BUILD_PLAN §3.2).
  */
 
+/**
+ * A capture category's code, as the event defines it (ADR-002): the booth's
+ * buttons are the event's categories, not a list compiled into the app. The
+ * server checks it against the event's own categories.
+ */
+export const CategoryCode = z
+  .string()
+  .trim()
+  .regex(/^[A-Z0-9_]{1,40}$/, 'Not a category code');
+export type CategoryCode = z.infer<typeof CategoryCode>;
+
+/** One of the event's capture categories, in the booth's order. */
+export const CaptureCategoryRecord = z.object({ code: CategoryCode, label: z.string() }).strict();
+export type CaptureCategoryRecord = z.infer<typeof CaptureCategoryRecord>;
+
+/** `GET /registrations/categories`: the event's active categories, in order. */
+export const CaptureCategoriesResponse = z
+  .object({ data: z.array(CaptureCategoryRecord) })
+  .strict();
+export type CaptureCategoriesResponse = z.infer<typeof CaptureCategoriesResponse>;
+
 /** One tap at the booth. */
 export const CreateRegistrationRequest = CaptureEnvelope.extend({
-  category: VisitorCategory,
+  category: CategoryCode,
   stationId: Id,
 }).strict();
 export type CreateRegistrationRequest = z.infer<typeof CreateRegistrationRequest>;
@@ -26,7 +47,7 @@ export type CreateRegistrationRequest = z.infer<typeof CreateRegistrationRequest
  */
 export const GroupMember = z
   .object({
-    category: VisitorCategory,
+    category: CategoryCode,
     count: z.number().int().min(1).max(20),
   })
   .strict();
@@ -48,7 +69,9 @@ export type CreateGroupRegistrationRequest = z.infer<typeof CreateGroupRegistrat
 export const RegistrationRecord = z
   .object({
     id: Id,
-    category: VisitorCategory,
+    category: CategoryCode,
+    /** The event's label for the category (P09.10). */
+    categoryLabel: z.string(),
     stationId: Id,
     groupId: Id.nullable(),
     missionCardId: Id.nullable(),

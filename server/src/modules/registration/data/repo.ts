@@ -14,61 +14,66 @@ import { eventDaySql, localBucketStartSql, type EventZone } from '../../../platf
  */
 
 /** A registration as the capture writes it; the event is the scope's. */
-export type NewRegistration = Omit<
-  Prisma.RegistrationUncheckedCreateInput,
-  'eventId' | 'categoryId'
->;
+export type NewRegistration = Omit<Prisma.RegistrationUncheckedCreateInput, 'eventId'>;
 
-/**
- * The event's category for a capture's code. Expand phase: the capture still
- * names the category by its code, and both columns are written (P09.5).
- */
-export async function categoryIdFor(
-  tx: PrismaTransactionClient,
+/** A registration with its category's code and label, as every record carries them. */
+export type RegistrationRow = Registration & { captureCategory: { code: string; label: string } };
+
+const WITH_CATEGORY = { captureCategory: { select: { code: true, label: true } } } as const;
+
+/** The event's category for a code, or null when the event has none by that code. */
+export async function findCategory(
+  db: PrismaTransactionClient,
   scope: EventScope,
   code: string,
-): Promise<string | null> {
-  const category = await tx.captureCategory.findUnique({
+): Promise<{ id: string; code: string; label: string } | null> {
+  return db.captureCategory.findUnique({
     where: { eventId_code: { eventId: scope.eventId, code } },
-    select: { id: true },
+    select: { id: true, code: true, label: true },
   });
-  return category?.id ?? null;
+}
+
+/** The event's active categories, in the booth's order. */
+export async function listActiveCategories(scope: EventScope) {
+  return prisma.captureCategory.findMany({
+    where: { eventId: scope.eventId, active: true },
+    orderBy: [{ sortOrder: 'asc' }, { code: 'asc' }],
+    select: { code: true, label: true },
+  });
 }
 
 export async function createRegistration(
   tx: PrismaTransactionClient,
   scope: EventScope,
   data: NewRegistration,
-): Promise<Registration> {
-  const categoryId = await categoryIdFor(tx, scope, data.category);
-  return tx.registration.create({ data: { ...data, eventId: scope.eventId, categoryId } });
+): Promise<RegistrationRow> {
+  return tx.registration.create({
+    data: { ...data, eventId: scope.eventId },
+    include: WITH_CATEGORY,
+  });
 }
 
 export async function createRegistrationsForGroup(
   tx: PrismaTransactionClient,
   scope: EventScope,
   rows: NewRegistration[],
-): Promise<Registration[]> {
-  const codes = [...new Set(rows.map((row) => row.category))];
-  // Sequential: parallel queries overlap on a transaction's connection (F03-019).
-  const ids = new Map<string, string | null>();
-  for (const code of codes) ids.set(code, await categoryIdFor(tx, scope, code));
+): Promise<RegistrationRow[]> {
   // createManyAndReturn keeps this one round trip while still yielding the rows
   // the response needs; a family of four is four inserts either way.
   return tx.registration.createManyAndReturn({
-    data: rows.map((row) => ({
-      ...row,
-      eventId: scope.eventId,
-      categoryId: ids.get(row.category) ?? null,
-    })),
+    data: rows.map((row) => ({ ...row, eventId: scope.eventId })),
+    include: WITH_CATEGORY,
   });
 }
 
 export async function findRegistrationById(
   scope: EventScope,
   id: string,
-): Promise<Registration | null> {
-  return prisma.registration.findFirst({ where: { eventId: scope.eventId, id } });
+): Promise<RegistrationRow | null> {
+  return prisma.registration.findFirst({
+    where: { eventId: scope.eventId, id },
+    include: WITH_CATEGORY,
+  });
 }
 
 export async function voidRegistration(

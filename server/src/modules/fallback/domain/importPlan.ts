@@ -26,13 +26,23 @@ export interface ImportPlan<T> {
  */
 export function planImport<Row extends { stationCode: string }, T>(
   rows: readonly Row[],
-  snapshot: { stationIds: ReadonlyMap<string, string>; existingKeys: ReadonlySet<string> },
+  snapshot: {
+    stationIds: ReadonlyMap<string, string>;
+    existingKeys: ReadonlySet<string>;
+    /** Anything else a row names that the event lacks, such as a category. */
+    rowIssue?: (row: Row) => Omit<ImportIssue, 'rowNumber'> | null;
+  },
   expand: (row: Row, context: { rowNumber: number; stationId: string }) => KeyedRecord<T>[],
 ): ImportPlan<T> {
   const plan: ImportPlan<T> = { creates: [], skipped: 0, issues: [] };
 
   rows.forEach((row, index) => {
     const rowNumber = index + 1;
+    const issue = snapshot.rowIssue?.(row);
+    if (issue) {
+      plan.issues.push({ rowNumber, ...issue });
+      return;
+    }
     const stationId = snapshot.stationIds.get(row.stationCode.toUpperCase());
     if (!stationId) {
       plan.issues.push({

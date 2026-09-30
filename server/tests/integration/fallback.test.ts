@@ -244,11 +244,11 @@ describe('registration import', () => {
     expect(response.status).toBe(201);
     expect(response.body.recordsCreated).toBe(5);
 
-    const rows = await rawDb.registration.findMany();
+    const rows = await rawDb.registration.findMany({ include: { captureCategory: true } });
     expect(rows).toHaveLength(5);
     // Never indistinguishable from an app tap.
     expect(rows.every((row) => row.source === 'FALLBACK_SHEET')).toBe(true);
-    expect(rows.filter((row) => row.category === 'SEC_4')).toHaveLength(3);
+    expect(rows.filter((row) => row.captureCategory.code === 'SEC_4')).toHaveLength(3);
   });
 
   it('is safe to re-run after a partial failure', async () => {

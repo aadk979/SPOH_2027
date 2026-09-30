@@ -44,8 +44,17 @@ test.describe('booth registration', () => {
 
     await tapThrough(page, /Register a visitor/, '/capture/registration');
 
-    // Eight buttons, matching slide 14 exactly.
-    for (const label of ['Sec 1', 'Sec 2', 'Sec 3', 'Sec 4', 'Sec 5', 'Graduated', 'Other']) {
+    // The event's eight categories, named as the event names them.
+    const labels = [
+      'Sec 1',
+      'Sec 2',
+      'Sec 3',
+      'Sec 4',
+      'Sec 5',
+      'Graduated, awaiting results',
+      'Other',
+    ];
+    for (const label of labels) {
       await expect(page.getByRole('button', { name: label, exact: true })).toBeVisible();
     }
 
@@ -88,6 +97,8 @@ test.describe('booth registration', () => {
   }) => {
     await signIn(page, BOOTH);
     await tapThrough(page, /Register a visitor/, '/capture/registration');
+    // The booth is open (its categories are on the phone) when the network drops.
+    await expect(page.getByRole('button', { name: 'Sec 4', exact: true })).toBeVisible();
 
     await context.setOffline(true);
 

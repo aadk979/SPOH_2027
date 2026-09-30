@@ -130,8 +130,9 @@ async function seedEventB(): Promise<EventB> {
     },
   });
   const common = { eventId, stationId: station.id, recordedById: person };
+  const category = await rawDb.captureCategory.findFirstOrThrow({ where: { eventId } });
   const registration = await rawDb.registration.create({
-    data: { ...common, category: 'SEC_1', idempotencyKey: idempotencyKey() },
+    data: { ...common, categoryId: category.id, idempotencyKey: idempotencyKey() },
   });
   const tick = await rawDb.footfallTick.create({
     data: { ...common, idempotencyKey: idempotencyKey() },
@@ -244,6 +245,7 @@ const CASES: Record<string, Case> = {
     body: () => ({ reason: 'isolation check' }),
   },
   'GET /registrations/summary': { query: (b) => ({ stationId: b.station }) },
+  'GET /registrations/categories': LIST,
 
   'POST /footfall/ticks': { body: (b) => ({ ...capture(), stationId: b.station }) },
   'POST /footfall/bulk': {

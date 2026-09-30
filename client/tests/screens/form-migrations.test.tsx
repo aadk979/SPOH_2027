@@ -10,7 +10,11 @@ import SignInScreen from '@/features/session/screens/SignInScreen';
 import { api } from '@/shared/lib/api';
 import { enqueue } from '@/shared/lib/outbox';
 import { openSession } from '@/shared/lib/session';
-import { TEST_EVENT } from '../helpers/event';
+import { TEST_EVENT, TEST_CATEGORIES } from '../helpers/event';
+vi.mock('@/features/registration/queries', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/features/registration/queries')>()),
+  useCaptureCategories: () => ({ data: TEST_CATEGORIES }),
+}));
 
 /** The test event's API paths and screen addresses (tests/setup.ts). */
 const API = `/events/${TEST_EVENT.id}`;

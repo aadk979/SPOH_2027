@@ -1,9 +1,4 @@
-import type {
-  CommitteeRole,
-  CourseCode,
-  StationKind,
-  VisitorCategory,
-} from '../../src/generated/prisma/enums.js';
+import type { CommitteeRole, CourseCode, StationKind } from '../../src/generated/prisma/enums.js';
 
 /**
  * The development fixture (P09.11): one event shaped like SPOH 2027 and a
@@ -41,7 +36,7 @@ export const SHIFT_TEMPLATES = [
   { code: 'AFTERNOON', label: 'Afternoon', startLocal: '13:30', endLocal: '18:00' },
 ] as const;
 
-export const CATEGORIES: ReadonlyArray<{ code: VisitorCategory; label: string }> = [
+export const CATEGORIES: ReadonlyArray<{ code: string; label: string }> = [
   { code: 'SEC_1', label: 'Sec 1' },
   { code: 'SEC_2', label: 'Sec 2' },
   { code: 'SEC_3', label: 'Sec 3' },

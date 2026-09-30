@@ -1,4 +1,4 @@
-import { CreateGroupRegistrationRequest, type VisitorCategory } from '@spoh/shared';
+import { CreateGroupRegistrationRequest } from '@spoh/shared';
 import { useZodForm } from '@/shared/hooks/useZodForm';
 import { useMe } from '@/features/session';
 import { adjustGroup, groupTotal } from '../model/groupMembers';
@@ -10,7 +10,7 @@ export function useGroupRegistration() {
   const { counts, shortCode } = form.values;
   const stationId = me?.currentAssignment?.station.id;
   const total = groupTotal(counts);
-  function adjust(category: VisitorCategory, delta: number): void {
+  function adjust(category: string, delta: number): void {
     form.updateField('counts', (current) => adjustGroup(current, category, delta));
   }
   const submission = useGroupSubmit({ stationId, total, values: form.values, form });

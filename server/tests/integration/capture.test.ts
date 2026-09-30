@@ -385,12 +385,12 @@ describe('input validation', () => {
     expect(row?.recordedById).toBe(booth.id);
   });
 
-  it('rejects an unknown visitor category', async () => {
+  it('refuses a category the event does not have (P09.10)', async () => {
     const response = await request(app)
       .post('/api/v1/registrations')
       .set('Authorization', bearer(booth))
       .send({ category: 'TEACHER', stationId: boothStationId, idempotencyKey: idempotencyKey() });
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(404);
   });
 });

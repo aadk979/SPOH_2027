@@ -8,19 +8,6 @@ import { z } from 'zod';
  * If you change a member here you MUST change the Prisma enum and add a migration.
  */
 
-/** The eight sign-up booth buttons, matching the booth screen one for one. */
-export const VisitorCategory = z.enum([
-  'SEC_1',
-  'SEC_2',
-  'SEC_3',
-  'SEC_4',
-  'SEC_5',
-  'GRADUATED_AWAITING_RESULTS',
-  'PARENT_GUARDIAN',
-  'OTHER',
-]);
-export type VisitorCategory = z.infer<typeof VisitorCategory>;
-
 export const StationKind = z.enum([
   'SIGNUP_BOOTH',
   'WELCOME_LOUNGE',

@@ -6,6 +6,7 @@ import { getSettings, loadSettings } from '../../src/platform/settings/index.js'
 import { resetDatabase, rawDb } from '../helpers/db.js';
 import {
   bearer,
+  categoryId,
   createEventDayToday,
   createStation,
   createVolunteer,
@@ -288,7 +289,7 @@ describe('withdrawing access', () => {
     await rawDb.registration.create({
       data: {
         eventId: (await testEvent()).eventId,
-        category: 'SEC_4',
+        categoryId: await categoryId('SEC_4'),
         stationId: station.id,
         recordedById: volunteer.id,
         idempotencyKey: 'admin-test-keeps-records',

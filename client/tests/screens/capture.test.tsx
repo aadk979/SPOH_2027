@@ -3,6 +3,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import RegistrationPage from '@/app/e/[event]/capture/registration/page';
 import FootfallPage from '@/app/e/[event]/capture/footfall/page';
+import { TEST_CATEGORIES } from '../helpers/event';
+vi.mock('@/features/registration/queries', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/features/registration/queries')>()),
+  useCaptureCategories: () => ({ data: TEST_CATEGORIES }),
+}));
 
 const state = vi.hoisted(() => ({
   signedIn: true,

@@ -10,6 +10,7 @@ import { requireActiveStation } from '../../station/index.js';
 import { toRegistrationRecord } from '../data/mappers.js';
 import { countForStationSince, createRegistrationsForGroup } from '../data/repo.js';
 import { expandGroupMembers } from '../domain/groupMembers.js';
+import { requireCategories } from './requireCategory.js';
 
 /**
  * Group registration (PRODUCT_BRIEF §2.2): a family of four is four
@@ -31,7 +32,8 @@ export async function recordGroupRegistration(
         })
       : { cardId: null, linkError: null };
 
-    const rows = expandGroupMembers(request, {
+    const codes = request.members.map((member) => member.category);
+    const rows = expandGroupMembers(request, await requireCategories(tx, scope, codes), {
       stationId: station.id,
       recordedById: actor.volunteerId,
       recordedByMembershipId: actor.membershipId,

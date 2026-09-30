@@ -26,7 +26,7 @@ export async function voidRegistrationById(
       action: 'registration.void',
       entityType: 'Registration',
       entityId: id,
-      before: { voided: false, category: existing.category },
+      before: { voided: false, category: existing.captureCategory.code },
       after: { voided: true, voidedReason: updated.voidedReason },
     });
   });
