@@ -2,8 +2,8 @@ Continue the SPOH 2027 remediation programme from the documented handoff. Implem
 
 Use ONLY C:\Users\aadk9\OneDrive\Desktop\SPOH_2027\V1-main. Leave sibling V1 unchanged. Verified commits and pushes directly to main are authorized under D-11; do not ask again. Preserve required owner/live-production approvals. Do not spawn subagents.
 
-Read remediation/reports/HANDOFF-2026-09-29.md FIRST, then remediation/README.md resume protocol, progress.json, DECISIONS.md, standards/engineering-standards.md, the current phase file, client/AGENTS.md, relevant ADRs and findings/BACKLOG.md. Verify git status/history before editing.
+Read remediation/reports/HANDOFF-2026-09-29.md FIRST (the evening version), then remediation/README.md resume protocol, progress.json, DECISIONS.md, standards/engineering-standards.md, the current phase file, client/AGENTS.md, relevant ADRs and findings/BACKLOG.md. Verify git status/history before editing.
 
-P00-P07 are done (G2 passed). P08.1 is done and the P08.4 static-export spike passed; P08.2-P08.11 wait on the owner's approval to bootstrap the AWS account. Continue P09 onward in dependency order, and P08 once the bootstrap is approved.
+P00-P07 are done. P08.1-P08.4 are done and staging deploys from main; P08.5-P08.11 continue (P08.5 needs the owner's domain). P09.1-P09.3 and P09.5 are done; P09.4 waits only on the owner's production pg_dump for its totals check. Continue with P09.6 onward in dependency order.
 
-Use bundled Node 24 and the dedicated test databases. Never reset/seed the real spoh2027 or regenerate screenshot baselines to hide regressions. Visual and E2E share port 4012 with different databases and clock/rate-limit settings: run them serially, restarting the visual API before each full visual run.
+Use bundled Node 24 and the dedicated test databases. Never reset/seed the real spoh2027 or regenerate screenshot baselines to hide regressions. Visual and E2E share port 4012 with different databases and clock/rate-limit settings: run them serially, restarting the visual API before each full visual run. Judge tsc/eslint/tests by exit code.
