@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import type { AttendanceStatus } from '@spoh/shared';
+import { MOCK_EVENT } from './mockEvent';
 
 async function attendanceSession(page: Page, root = false) {
   const now = new Date().toISOString();
@@ -77,28 +78,30 @@ async function attendanceSession(page: Page, root = false) {
       });
       return;
     }
-    const json = path.includes('/auth/')
-      ? {
-          accessToken: 'preview',
-          expiresIn: 3600,
-          volunteer,
-          capabilities: ['own.read'],
-          refreshAvailable: true,
-        }
-      : path.endsWith('/attendance')
-        ? state
-        : path.endsWith('/me')
-          ? {
-              volunteer,
-              event: { id: 'event', name: 'Event', timezone: 'Asia/Singapore', locale: 'en-SG' },
-              capabilities: ['own.read'],
-              currentAssignment: null,
-              upcomingAssignments: [],
-              escalationChain: [],
-            }
-          : path.endsWith('/lost-person/active')
-            ? { alerts: [] }
-            : {};
+    const json = path.endsWith('/api/v1/events')
+      ? { data: [MOCK_EVENT] }
+      : path.includes('/auth/')
+        ? {
+            accessToken: 'preview',
+            expiresIn: 3600,
+            volunteer,
+            capabilities: ['own.read'],
+            refreshAvailable: true,
+          }
+        : path.endsWith('/attendance')
+          ? state
+          : path.endsWith('/me')
+            ? {
+                volunteer,
+                event: MOCK_EVENT,
+                capabilities: ['own.read'],
+                currentAssignment: null,
+                upcomingAssignments: [],
+                escalationChain: [],
+              }
+            : path.endsWith('/lost-person/active')
+              ? { alerts: [] }
+              : {};
     await route.fulfill({ json });
   });
   return { submissions };

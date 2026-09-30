@@ -4,10 +4,12 @@ import type { Tone } from '@/shared/ui';
 import { useMe } from '@/features/session';
 import { UNRESOLVED_SCAN, useCardScanner } from '@/features/capture';
 import { sendOrQueue } from '@/shared/lib/sendOrQueue';
+import { useEventId } from '@/shared/lib/eventContext';
 import { cardEndpoints, stampCard } from '../api';
 import { QUEUED_STAMP, stampFailureMessage, stampMessage } from '../model/stampMessage';
 export function useStampCapture() {
   const { data: me } = useMe();
+  const eventId = useEventId();
   const [card, setCard] = useState<MissionCardRecord | null>(null);
   const [message, setMessage] = useState<{ tone: Tone; text: string } | null>(null);
   const [pending, setPending] = useState(false);
@@ -28,9 +30,10 @@ export function useStampCapture() {
           clientRecordedAt: new Date().toISOString(),
         };
         const outcome = await sendOrQueue({
-          endpoint: cardEndpoints.stamps(shortCode),
+          eventId,
+          path: cardEndpoints.stamps(shortCode),
           body,
-          send: () => stampCard(shortCode, body),
+          send: () => stampCard(eventId, shortCode, body),
         });
         if (outcome.status === 'queued') {
           setCard(null);
@@ -51,7 +54,7 @@ export function useStampCapture() {
         setPending(false);
       }
     },
-    [station, pending],
+    [eventId, station, pending],
   );
 
   const onUnresolvedScan = useCallback(() => setMessage(UNRESOLVED_SCAN), []);

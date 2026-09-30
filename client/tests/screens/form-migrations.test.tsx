@@ -10,6 +10,10 @@ import SignInScreen from '@/features/session/screens/SignInScreen';
 import { api } from '@/shared/lib/api';
 import { enqueue } from '@/shared/lib/outbox';
 import { openSession } from '@/shared/lib/session';
+import { TEST_EVENT } from '../helpers/event';
+
+/** The test event's API paths and screen addresses (tests/setup.ts). */
+const API = `/events/${TEST_EVENT.id}`;
 
 const state = vi.hoisted(() => ({ replace: vi.fn() }));
 vi.mock('next/navigation', () => ({
@@ -60,7 +64,7 @@ beforeEach(() => {
   mockedApi.mockReset();
   mockedApi.mockImplementation(async (path: string, options?: { method?: string }) => {
     if (options?.method) return { rowsRead: 1, recordsCreated: 1, recordsSkipped: 0, issues: [] };
-    return path === '/stations' ? { data: STATIONS } : { data: [] };
+    return path === `${API}/stations` ? { data: STATIONS } : { data: [] };
   });
   mockedEnqueue.mockReset();
   mockedOpenSession.mockReset();
@@ -81,8 +85,8 @@ describe('announcement composer', () => {
     show(<Composer me={me} />);
     fireEvent.change(screen.getByLabelText('Message'), { target: { value: '  Hold at lounge  ' } });
     fireEvent.click(screen.getByRole('button', { name: 'Send' }));
-    await waitFor(() => expect(posts('/announcements')).toHaveLength(1));
-    expect(posts('/announcements')[0]![1]).toEqual({
+    await waitFor(() => expect(posts(`${API}/announcements`)).toHaveLength(1));
+    expect(posts(`${API}/announcements`)[0]![1]).toEqual({
       method: 'POST',
       body: {
         body: 'Hold at lounge',
@@ -98,8 +102,8 @@ describe('announcement composer', () => {
     fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'Doors close at 5' } });
     fireEvent.click(screen.getByLabelText('Send to the whole event'));
     fireEvent.click(screen.getByRole('button', { name: 'Send' }));
-    await waitFor(() => expect(posts('/announcements')).toHaveLength(1));
-    expect(posts('/announcements')[0]![1]?.body).toMatchObject({ target: {} });
+    await waitFor(() => expect(posts(`${API}/announcements`)).toHaveLength(1));
+    expect(posts(`${API}/announcements`)[0]![1]?.body).toMatchObject({ target: {} });
   });
 });
 
@@ -110,8 +114,11 @@ describe('fallback declaration', () => {
       target: { value: ' Backend down ' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Declare Tier 3' }));
-    await waitFor(() => expect(posts('/fallback/windows')).toHaveLength(1));
-    expect(posts('/fallback/windows')[0]![1]?.body).toEqual({ tier: 3, reason: 'Backend down' });
+    await waitFor(() => expect(posts(`${API}/fallback/windows`)).toHaveLength(1));
+    expect(posts(`${API}/fallback/windows`)[0]![1]?.body).toEqual({
+      tier: 3,
+      reason: 'Backend down',
+    });
   });
 
   it('scopes the window to the chosen station', async () => {
@@ -123,8 +130,8 @@ describe('fallback declaration', () => {
       target: { value: 'Paper only' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Declare Tier 4' }));
-    await waitFor(() => expect(posts('/fallback/windows')).toHaveLength(1));
-    expect(posts('/fallback/windows')[0]![1]?.body).toEqual({
+    await waitFor(() => expect(posts(`${API}/fallback/windows`)).toHaveLength(1));
+    expect(posts(`${API}/fallback/windows`)[0]![1]?.body).toEqual({
       tier: 4,
       reason: 'Paper only',
       stationId: 'room-a',
@@ -143,7 +150,7 @@ describe('reconciliation import', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Preview — writes nothing' }));
     return waitFor(() => {
       expect(box.getAttribute('aria-invalid')).toBe('true');
-      expect(posts('/fallback/imports/registrations')).toHaveLength(0);
+      expect(posts(`${API}/fallback/imports/registrations`)).toHaveLength(0);
     });
   });
 
@@ -157,8 +164,8 @@ describe('reconciliation import', () => {
     expect(box.getAttribute('aria-invalid')).toBeNull();
     fireEvent.change(screen.getByLabelText(/File name/), { target: { value: '   ' } });
     fireEvent.click(screen.getByRole('button', { name: 'Preview — writes nothing' }));
-    await waitFor(() => expect(posts('/fallback/imports/registrations')).toHaveLength(1));
-    expect(posts('/fallback/imports/registrations')[0]![1]?.body).toEqual({
+    await waitFor(() => expect(posts(`${API}/fallback/imports/registrations`)).toHaveLength(1));
+    expect(posts(`${API}/fallback/imports/registrations`)[0]![1]?.body).toEqual({
       source: 'FALLBACK_SHEET',
       commit: false,
       rows: [
@@ -195,7 +202,7 @@ describe('development sign-in', () => {
     expect(mockedOpenSession).not.toHaveBeenCalled();
     fireEvent.change(email, { target: { value: ' Admin@SPOH2027.test ' } });
     fireEvent.submit(email.closest('form')!);
-    await waitFor(() => expect(state.replace).toHaveBeenCalledWith('/home'));
+    await waitFor(() => expect(state.replace).toHaveBeenCalledWith('/'));
     expect(mockedOpenSession).toHaveBeenCalledWith({ email: 'admin@spoh2027.test' });
   });
 });

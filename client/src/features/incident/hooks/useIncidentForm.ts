@@ -1,18 +1,20 @@
 import { CreateIncidentRequest } from '@spoh/shared';
 import { useZodForm } from '@/shared/hooks/useZodForm';
-import { useRouter } from 'next/navigation';
+import { useAppRouter } from '@/shared/lib/appPath';
 import { useState, type FormEvent } from 'react';
 import { useMe } from '@/features/session';
 import type { IncidentSeverity, IncidentType } from '@spoh/shared';
 import { useCreateIncident } from '../queries';
 import { incidentEndpoints } from '../api';
 import { sendOrQueue } from '@/shared/lib/sendOrQueue';
+import { useEventId } from '@/shared/lib/eventContext';
 import { toIncidentRequest } from '../model/incidentRequest';
 export function useIncidentForm() {
   const fields = useIncidentFields();
-  const router = useRouter();
+  const router = useAppRouter();
   const mutation = useCreateIncident();
   const { data: me } = useMe();
+  const eventId = useEventId();
 
   const [pending, setPending] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -28,7 +30,8 @@ export function useIncidentForm() {
       const request = fields.validate(toIncidentRequest(fields, me?.currentAssignment?.station.id));
       if (!request) return;
       const outcome = await sendOrQueue({
-        endpoint: incidentEndpoints.create,
+        eventId,
+        path: incidentEndpoints.create,
         body: request,
         send: () => mutation.mutateAsync(request),
       });

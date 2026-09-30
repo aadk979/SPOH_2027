@@ -1,13 +1,13 @@
 import type { FallbackWindowRecord, DeclareFallbackRequest, ImportResponse } from '@spoh/shared';
-import { api } from '@/shared/lib/api';
-export async function listFallbackWindows(): Promise<FallbackWindowRecord[]> {
-  return (await api<{ data: FallbackWindowRecord[] }>('/fallback/windows')).data;
+import { eventApi } from '@/shared/lib/eventApi';
+export async function listFallbackWindows(eventId: string): Promise<FallbackWindowRecord[]> {
+  return (await eventApi<{ data: FallbackWindowRecord[] }>(eventId, '/fallback/windows')).data;
 }
-export function declareFallback(body: DeclareFallbackRequest): Promise<unknown> {
-  return api('/fallback/windows', { method: 'POST', body });
+export function declareFallback(eventId: string, body: DeclareFallbackRequest): Promise<unknown> {
+  return eventApi(eventId, '/fallback/windows', { method: 'POST', body });
 }
-export function closeFallback(id: string): Promise<unknown> {
-  return api(`/fallback/windows/${id}/close`, { method: 'POST', body: {} });
+export function closeFallback(eventId: string, id: string): Promise<unknown> {
+  return eventApi(eventId, `/fallback/windows/${id}/close`, { method: 'POST', body: {} });
 }
 export interface FallbackImport {
   source: 'FALLBACK_SHEET' | 'PAPER';
@@ -17,8 +17,9 @@ export interface FallbackImport {
   notes?: string;
 }
 export function importFallback(
+  eventId: string,
   target: 'registrations' | 'footfall',
   body: FallbackImport,
 ): Promise<ImportResponse> {
-  return api<ImportResponse>(`/fallback/imports/${target}`, { method: 'POST', body });
+  return eventApi<ImportResponse>(eventId, `/fallback/imports/${target}`, { method: 'POST', body });
 }

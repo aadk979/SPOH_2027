@@ -35,7 +35,7 @@ export function invalidateEventCache(): void {
   zones.clear();
 }
 
-const zones = new Map<string, EventZone>();
+const zones = new Map<string, EventZone & { slug: string }>();
 
 /**
  * An event's wall clock: its IANA timezone and day boundary. Neither changes
@@ -43,14 +43,24 @@ const zones = new Map<string, EventZone>();
  * forgets it for set-up edits and tests.
  */
 export async function eventZone(scope: EventScope): Promise<EventZone> {
+  const { timezone, dayBoundaryMinutes } = await eventRow(scope);
+  return { timezone, dayBoundaryMinutes };
+}
+
+/** An event's slug: the client's addresses are `/e/<slug>/…` (ADR-001 §5). */
+export async function eventSlug(scope: EventScope): Promise<string> {
+  return (await eventRow(scope)).slug;
+}
+
+async function eventRow(scope: EventScope): Promise<EventZone & { slug: string }> {
   const known = zones.get(scope.eventId);
   if (known) return known;
-  const zone = await prisma.event.findUniqueOrThrow({
+  const row = await prisma.event.findUniqueOrThrow({
     where: { id: scope.eventId },
-    select: { timezone: true, dayBoundaryMinutes: true },
+    select: { timezone: true, dayBoundaryMinutes: true, slug: true },
   });
-  zones.set(scope.eventId, zone);
-  return zone;
+  zones.set(scope.eventId, row);
+  return row;
 }
 
 /** An event's IANA timezone. */

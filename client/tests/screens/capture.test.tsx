@@ -1,8 +1,8 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
-import RegistrationPage from '@/app/capture/registration/page';
-import FootfallPage from '@/app/capture/footfall/page';
+import RegistrationPage from '@/app/e/[event]/capture/registration/page';
+import FootfallPage from '@/app/e/[event]/capture/footfall/page';
 
 const state = vi.hoisted(() => ({
   signedIn: true,

@@ -6,6 +6,10 @@ import type { AttendanceStatus } from '@spoh/shared';
 import { api } from '@/shared/lib/api';
 import { attendanceKeys, useSubmitAttendance } from '@/features/attendance';
 import { sessionKeys } from '@/features/session';
+import { TEST_EVENT } from '../helpers/event';
+
+/** The test event's API paths and screen addresses (tests/setup.ts). */
+const API = `/events/${TEST_EVENT.id}`;
 
 vi.mock('@/shared/lib/api', () => ({ api: vi.fn() }));
 afterEach(() => {
@@ -29,7 +33,7 @@ it('confirms attendance before refreshing and holds the submission lock until re
     canIssue: false,
     serverTime: '2026-09-28T02:00:00Z',
   };
-  client.setQueryData(attendanceKeys.status, initial);
+  client.setQueryData(attendanceKeys.status(TEST_EVENT.id), initial);
   const attendance = {
     id: 'attendance-1',
     presentAt: initial.serverTime,
@@ -42,9 +46,9 @@ it('confirms attendance before refreshing and holds the submission lock until re
   });
   const invalidate = vi.spyOn(client, 'invalidateQueries').mockReturnValue(refresh);
   const confirmed = vi.fn(() =>
-    expect(client.getQueryData<AttendanceStatus>(attendanceKeys.status)?.attendance).toEqual(
-      attendance,
-    ),
+    expect(
+      client.getQueryData<AttendanceStatus>(attendanceKeys.status(TEST_EVENT.id))?.attendance,
+    ).toEqual(attendance),
   );
   const settled = vi.fn();
   const { result } = renderHook(
@@ -57,15 +61,15 @@ it('confirms attendance before refreshing and holds the submission lock until re
     pending = result.current.mutateAsync({ method: 'PIN', pin: '1234567890' });
   });
   expect(confirmed).toHaveBeenCalledOnce();
-  expect(invalidate).toHaveBeenCalledWith({ queryKey: attendanceKeys.status });
-  expect(invalidate).toHaveBeenCalledWith({ queryKey: sessionKeys.me });
+  expect(invalidate).toHaveBeenCalledWith({ queryKey: attendanceKeys.status(TEST_EVENT.id) });
+  expect(invalidate).toHaveBeenCalledWith({ queryKey: sessionKeys.me(TEST_EVENT.id) });
   expect(settled).not.toHaveBeenCalled();
   await act(async () => {
     release();
     await pending;
   });
   expect(settled).toHaveBeenCalledOnce();
-  expect(api).toHaveBeenCalledWith('/attendance/submit', {
+  expect(api).toHaveBeenCalledWith(`${API}/attendance/submit`, {
     method: 'POST',
     body: { method: 'PIN', pin: '1234567890' },
   });
@@ -93,6 +97,6 @@ it('releases the submission lock after rejection without changing cached attenda
   expect(confirmed).not.toHaveBeenCalled();
   expect(invalidate).not.toHaveBeenCalled();
   expect(settled).toHaveBeenCalledOnce();
-  expect(client.getQueryData(attendanceKeys.status)).toBeUndefined();
+  expect(client.getQueryData(attendanceKeys.status(TEST_EVENT.id))).toBeUndefined();
   client.clear();
 });

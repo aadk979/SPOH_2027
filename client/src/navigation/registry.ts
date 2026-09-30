@@ -54,6 +54,7 @@ const RECOVER: OperationsGroup = 'Recover & report';
 export const NAV_REGISTRY: readonly NavEntry[] = [
   { path: '/', label: 'Start', section: '/home' },
   { path: '/sign-in', label: 'Sign in', section: '/home' },
+  { path: '/events', label: 'Your events', section: '/home' },
   {
     path: '/home',
     label: 'Home',

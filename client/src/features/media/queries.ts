@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { UploadContentType } from '@spoh/shared';
 import { createUpload, uploadFile } from './api';
 import { useMediaAvailability } from './hooks/useMediaAvailability';
+import { useEventId } from '@/shared/lib/eventContext';
 
 /**
  * Photo upload.
@@ -43,8 +44,24 @@ export interface UsePhotoUploadResult {
   reset(): void;
 }
 
+/** Ask for a presigned upload in the event, then send the file straight to S3. */
+async function uploadPhoto(
+  eventId: string,
+  file: File,
+  contentType: UploadContentType,
+): Promise<string> {
+  const policy = await createUpload(eventId, {
+    purpose: 'lostFound',
+    contentType,
+    contentLength: file.size,
+  });
+  await uploadFile(policy, file);
+  return policy.key;
+}
+
 export function usePhotoUpload(): UsePhotoUploadResult {
   const available = useMediaAvailability();
+  const eventId = useEventId();
   const [state, setState] = useState<UploadState>('idle');
   const [key, setKey] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -68,39 +85,35 @@ export function usePhotoUpload(): UsePhotoUploadResult {
     });
   }, []);
 
-  const upload = useCallback(async (file: File): Promise<void> => {
-    const contentType = ACCEPTED[file.type];
+  const upload = useCallback(
+    async (file: File): Promise<void> => {
+      const contentType = ACCEPTED[file.type];
 
-    if (!contentType) {
-      setError('That file is not a photo. Use the camera, or pick a JPEG or PNG.');
-      setState('error');
-      return;
-    }
+      if (!contentType) {
+        setError('That file is not a photo. Use the camera, or pick a JPEG or PNG.');
+        setState('error');
+        return;
+      }
 
-    setState('uploading');
-    setError(null);
+      setState('uploading');
+      setError(null);
 
-    try {
-      const policy = await createUpload({
-        purpose: 'lostFound',
-        contentType,
-        contentLength: file.size,
-      });
-      await uploadFile(policy, file);
-
-      setKey(policy.key);
-      setPreviewUrl((current) => {
-        if (current) URL.revokeObjectURL(current);
-        return URL.createObjectURL(file);
-      });
-      setState('done');
-    } catch {
-      // Never fatal: the item record is what matters and the photo is a
-      // convenience. The caller keeps the form submittable.
-      setError('The photo did not upload. You can still save the item without it.');
-      setState('error');
-    }
-  }, []);
+      try {
+        setKey(await uploadPhoto(eventId, file, contentType));
+        setPreviewUrl((current) => {
+          if (current) URL.revokeObjectURL(current);
+          return URL.createObjectURL(file);
+        });
+        setState('done');
+      } catch {
+        // Never fatal: the item record is what matters and the photo is a
+        // convenience. The caller keeps the form submittable.
+        setError('The photo did not upload. You can still save the item without it.');
+        setState('error');
+      }
+    },
+    [eventId],
+  );
 
   return { available, state, key, previewUrl, error, upload, reset };
 }

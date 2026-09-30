@@ -1,7 +1,7 @@
 'use client';
 
-import IndexScreen from '@/features/session/screens/IndexScreen';
+import StartScreen from '@/features/events/screens/StartScreen';
 
 export default function IndexPage() {
-  return <IndexScreen />;
+  return <StartScreen />;
 }

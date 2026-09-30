@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useQrScanner } from './useQrScanner';
 import { readScan } from './model/readScan';
 import { resolveScannedCard } from './api';
+import { useEventId } from '@/shared/lib/eventContext';
 
 /**
  * The camera, reading Mission Cards. A bare code acts at once; a printed QR's
@@ -9,6 +10,7 @@ import { resolveScannedCard } from './api';
  * unknown, `onUnresolved` asks for the code printed under the QR instead.
  */
 export function useCardScanner(onCode: (code: string) => Promise<void>, onUnresolved: () => void) {
+  const eventId = useEventId();
   const onDecode = useCallback(
     (text: string): void => {
       const scan = readScan(text);
@@ -17,12 +19,12 @@ export function useCardScanner(onCode: (code: string) => Promise<void>, onUnreso
         void onCode(scan.code);
         return;
       }
-      resolveScannedCard(scan.payload).then(
+      resolveScannedCard(eventId, scan.payload).then(
         (card) => void onCode(card.shortCode),
         () => onUnresolved(),
       );
     },
-    [onCode, onUnresolved],
+    [eventId, onCode, onUnresolved],
   );
   return useQrScanner({ onDecode });
 }

@@ -1,10 +1,13 @@
 import type { LiveDashboardResponse, StationDashboardResponse } from '@spoh/shared';
-import { api } from '@/shared/lib/api';
+import { eventApi } from '@/shared/lib/eventApi';
 
-export function getLiveDashboard(): Promise<LiveDashboardResponse> {
-  return api<LiveDashboardResponse>('/dashboard/live');
+export function getLiveDashboard(eventId: string): Promise<LiveDashboardResponse> {
+  return eventApi<LiveDashboardResponse>(eventId, '/dashboard/live');
 }
 
-export function getStationDashboard(stationId: string): Promise<StationDashboardResponse> {
-  return api<StationDashboardResponse>(`/dashboard/station/${stationId}`);
+export function getStationDashboard(
+  eventId: string,
+  stationId: string,
+): Promise<StationDashboardResponse> {
+  return eventApi<StationDashboardResponse>(eventId, `/dashboard/station/${stationId}`);
 }

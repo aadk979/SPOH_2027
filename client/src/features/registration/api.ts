@@ -1,13 +1,15 @@
 import type { RegistrationSummaryResponse } from '@spoh/shared';
-import { api } from '@/shared/lib/api';
+import { eventApi } from '@/shared/lib/eventApi';
 export const registrationEndpoints = {
   single: '/registrations',
   group: '/registrations/group',
 } as const;
 export function getRegistrationSummary(
+  eventId: string,
   stationId: string | undefined,
 ): Promise<RegistrationSummaryResponse> {
-  return api<RegistrationSummaryResponse>(
+  return eventApi<RegistrationSummaryResponse>(
+    eventId,
     `/registrations/summary?groupBy=category&stationId=${stationId ?? ''}`,
   );
 }

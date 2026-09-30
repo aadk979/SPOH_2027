@@ -7,6 +7,11 @@ import NewLostFoundScreen from '@/features/lostFound/screens/NewLostFoundScreen'
 import RaiseLostPersonScreen from '@/features/lostPerson/screens/RaiseLostPersonScreen';
 import { z } from 'zod';
 import { api } from '@/shared/lib/api';
+import { TEST_EVENT } from '../helpers/event';
+
+/** The test event's API paths and screen addresses (tests/setup.ts). */
+const API = `/events/${TEST_EVENT.id}`;
+const APP = `/e/${TEST_EVENT.slug}`;
 const state = vi.hoisted(() => ({ replace: vi.fn() }));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ replace: state.replace }) }));
 vi.mock('@/shared/shell/AppShell', () => ({
@@ -35,7 +40,7 @@ const forms = [
     node: <NewIncidentScreen />,
     label: 'What happened?',
     value: '  Cable across walkway  ',
-    endpoint: '/incidents',
+    endpoint: `${API}/incidents`,
     body: {
       type: 'NEAR_MISS',
       severity: 'LOW',
@@ -44,7 +49,7 @@ const forms = [
       occurredAt: expect.any(String),
       idempotencyKey: expect.any(String),
     },
-    destination: '/home',
+    destination: `${APP}/home`,
     failure: 'The report could not be sent. Tell your IC directly, then try again.',
     optional: { label: /Where, exactly/, max: 200 },
   },
@@ -53,13 +58,13 @@ const forms = [
     node: <NewLostFoundScreen />,
     label: 'What is it?',
     value: '  Blue bottle  ',
-    endpoint: '/lost-found',
+    endpoint: `${API}/lost-found`,
     body: {
       itemLabel: 'Blue bottle',
       foundStationId: '11111111-1111-4111-8111-111111111111',
       foundAt: expect.any(String),
     },
-    destination: '/safety/lost-found',
+    destination: `${APP}/safety/lost-found`,
     failure: 'Could not save. Check your connection and try again.',
     optional: { label: /Kind of thing/, max: 60 },
   },
@@ -68,14 +73,14 @@ const forms = [
     node: <RaiseLostPersonScreen />,
     label: 'What has happened, and who are we looking for?',
     value: '  Child separated from group  ',
-    endpoint: '/lost-person',
+    endpoint: `${API}/lost-person`,
     body: {
       descriptionText: 'Child separated from group',
       lastSeenStationId: '11111111-1111-4111-8111-111111111111',
       lastSeenAt: expect.any(String),
       idempotencyKey: expect.any(String),
     },
-    destination: '/home',
+    destination: `${APP}/home`,
     failure:
       'The alert could not be sent. Call your IC on the radio now — do not wait for this screen.',
     optional: { label: /Approximate age/, max: 40 },

@@ -4,15 +4,19 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import { RuntimeSettings } from '@spoh/shared';
 import { api } from '@/shared/lib/api';
-import ImportsPage from '@/app/chief/imports/page';
-import ReportsPage from '@/app/reports/page';
-import ChiefPage from '@/app/chief/page';
-import IcPage from '@/app/ic/page';
-import UsersPage from '@/app/admin/users/page';
-import SettingsPage from '@/app/admin/settings/page';
-import AttendancePage from '@/app/attendance/page';
-import StampPage from '@/app/capture/stamp/page';
-import RedeemPage from '@/app/capture/redeem/page';
+import ImportsPage from '@/app/e/[event]/chief/imports/page';
+import ReportsPage from '@/app/e/[event]/reports/page';
+import ChiefPage from '@/app/e/[event]/chief/page';
+import IcPage from '@/app/e/[event]/ic/page';
+import UsersPage from '@/app/e/[event]/admin/users/page';
+import SettingsPage from '@/app/e/[event]/admin/settings/page';
+import AttendancePage from '@/app/e/[event]/attendance/page';
+import StampPage from '@/app/e/[event]/capture/stamp/page';
+import RedeemPage from '@/app/e/[event]/capture/redeem/page';
+import { TEST_EVENT } from '../helpers/event';
+
+/** The test event's API paths and screen addresses (tests/setup.ts). */
+const API = `/events/${TEST_EVENT.id}`;
 
 const state = vi.hoisted(() => ({ capabilities: [] as string[] }));
 vi.mock('@/shared/shell/AppShell', () => ({
@@ -76,7 +80,7 @@ describe('operations screen safety net', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Preview — writes nothing' }));
     await screen.findByRole('button', { name: 'Import 17 records as fallback sheet' });
     expect(mockedApi).toHaveBeenCalledWith(
-      '/fallback/imports/registrations',
+      `${API}/fallback/imports/registrations`,
       expect.objectContaining({
         body: expect.objectContaining({ commit: false, source: 'FALLBACK_SHEET' }),
       }),
@@ -101,7 +105,9 @@ describe('operations screen safety net', () => {
 
   it('requests the IC dashboard for the assigned station', async () => {
     show(<IcPage />);
-    await waitFor(() => expect(mockedApi).toHaveBeenCalledWith('/dashboard/station/station-1'));
+    await waitFor(() =>
+      expect(mockedApi).toHaveBeenCalledWith(`${API}/dashboard/station/station-1`),
+    );
   });
 
   it('filters the roster by the selected role', async () => {
@@ -152,7 +158,7 @@ describe('operations screen safety net', () => {
     fireEvent.change(pin, { target: { value: '1234567890' } });
     fireEvent.click(screen.getByRole('button', { name: 'Submit attendance with PIN' }));
     await waitFor(() =>
-      expect(mockedApi).toHaveBeenCalledWith('/attendance/submit', {
+      expect(mockedApi).toHaveBeenCalledWith(`${API}/attendance/submit`, {
         method: 'POST',
         body: { method: 'PIN', pin: '1234567890' },
       }),
@@ -168,7 +174,7 @@ describe('operations screen safety net', () => {
     fireEvent.submit(screen.getByLabelText('Six-character card code').closest('form')!);
     await waitFor(() =>
       expect(mockedApi).toHaveBeenCalledWith(
-        '/cards/ABC123/stamps',
+        `${API}/cards/ABC123/stamps`,
         expect.objectContaining({
           method: 'POST',
           body: expect.objectContaining({ stationId: 'station-1' }),

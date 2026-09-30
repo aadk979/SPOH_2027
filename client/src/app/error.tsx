@@ -1,10 +1,10 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { AppShell } from '@/shared/shell/AppShell';
-import { Button, ButtonLink, Callout, Card, CardTitle, Stack } from '@/shared/ui';
+import { Button, ButtonLink, Callout, Stack } from '@/shared/ui';
 
-export default function ErrorBoundary({
+/** Errors outside an event's screens (sign-in, the picker); event screens have their own. */
+export default function PlatformError({
   error,
   reset,
 }: {
@@ -12,32 +12,16 @@ export default function ErrorBoundary({
   reset(): void;
 }): ReactNode {
   return (
-    <AppShell title="Something went wrong" back={{ href: '/home', label: 'Home' }} width="reading">
+    <main className="mx-auto w-full max-w-reading px-md py-lg">
       <Stack>
         <Callout tone="alert" role="alert" title="An unexpected error occurred">
           {error.message || 'The application encountered an unexpected issue.'}
         </Callout>
-
-        <Card className="flex flex-col gap-md">
-          <CardTitle as="h2">What you can do</CardTitle>
-          <p className="text-body text-text-muted">
-            Try refreshing the screen. If you are in the middle of a critical operation, tell your
-            IC or reach out via the radio. Offline counts and sync queues are preserved.
-          </p>
-
-          <div className="flex flex-wrap gap-sm">
-            <Button variant="primary" onClick={() => reset()}>
-              Try again
-            </Button>
-            <ButtonLink href="/home" variant="secondary">
-              Back to Home
-            </ButtonLink>
-            <ButtonLink href="/safety" variant="quiet">
-              Safety & Help
-            </ButtonLink>
-          </div>
-        </Card>
+        <Button onClick={reset}>Try again</Button>
+        <ButtonLink href="/" variant="secondary">
+          Start again
+        </ButtonLink>
       </Stack>
-    </AppShell>
+    </main>
   );
 }

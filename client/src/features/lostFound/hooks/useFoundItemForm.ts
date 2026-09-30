@@ -1,6 +1,6 @@
 import { CreateLostFoundRequest } from '@spoh/shared';
 import { useZodForm } from '@/shared/hooks/useZodForm';
-import { useRouter } from 'next/navigation';
+import { useAppRouter } from '@/shared/lib/appPath';
 import { useState, type FormEvent } from 'react';
 import { useMe } from '@/features/session';
 import { useCreateLostFound } from '@/features/lostFound';
@@ -8,7 +8,7 @@ import { usePhotoUpload } from '@/features/media';
 export function useFoundItemForm() {
   const fields = useFoundItemFields();
   const { itemLabel, categoryLabel, holderNote } = fields;
-  const router = useRouter();
+  const router = useAppRouter();
   const mutation = useCreateLostFound();
   const { data: me } = useMe();
 

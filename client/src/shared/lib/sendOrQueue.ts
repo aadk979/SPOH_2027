@@ -15,7 +15,9 @@ export type SendOrQueueResult<T> = { status: 'sent'; response: T } | { status: '
  * queued: it would fail the same way forever.
  */
 export async function sendOrQueue<T>(request: {
-  endpoint: string;
+  eventId: string;
+  /** The path inside the event the queue sends to: `/gifts/redemptions`. */
+  path: string;
   body: { idempotencyKey: string };
   /** What the queue sends later, when it differs from the online body. */
   queuedBody?: unknown;
@@ -27,7 +29,8 @@ export async function sendOrQueue<T>(request: {
     if (!isRetryable(error)) throw error;
     await enqueue({
       idempotencyKey: request.body.idempotencyKey,
-      endpoint: request.endpoint,
+      eventId: request.eventId,
+      path: request.path,
       body: request.queuedBody ?? request.body,
     });
     return { status: 'queued' };

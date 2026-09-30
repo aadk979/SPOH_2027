@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { enqueue, cancel as cancelOutboxEntry } from '@/shared/lib/outbox';
+import { useEventId } from '@/shared/lib/eventContext';
 import { ms } from '@/shared/lib/runtimeSettings';
 
 /**
@@ -61,6 +62,7 @@ export function useCapture(): UseCaptureResult {
   const [undoable, setUndoable] = useState<CaptureTap | null>(null);
   const [error, setError] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const eventId = useEventId();
 
   useEffect(
     () => () => {
@@ -76,7 +78,8 @@ export function useCapture(): UseCaptureResult {
       try {
         await enqueue({
           idempotencyKey,
-          endpoint: input.endpoint,
+          eventId,
+          path: input.endpoint,
           body: {
             ...input.body,
             idempotencyKey,
@@ -105,7 +108,7 @@ export function useCapture(): UseCaptureResult {
       if (timer.current) clearTimeout(timer.current);
       timer.current = setTimeout(() => setUndoable(null), ms.undoWindow());
     },
-    [],
+    [eventId],
   );
 
   const undo = useCallback(async (): Promise<void> => {

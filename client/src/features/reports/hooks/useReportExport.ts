@@ -1,6 +1,9 @@
 import { useState } from 'react';
+import { zonedDate } from '@spoh/shared';
+import { useEvent } from '@/shared/lib/eventContext';
 import { exportReport } from '../api';
 export function useReportExport() {
+  const event = useEvent();
   const [downloading, setDownloading] = useState<string | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
 
@@ -15,12 +18,14 @@ export function useReportExport() {
     setExportError(null);
 
     try {
-      const blob = await exportReport(format);
+      const blob = await exportReport(event.id, format);
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
 
       anchor.href = url;
-      anchor.download = `spoh2027-report-${new Date().toISOString().slice(0, 10)}.${format}`;
+      // Named for the event and dated on its clock, not in UTC (F01 T-16).
+      const today = zonedDate(new Date(), event.timezone);
+      anchor.download = `${event.slug}-report-${today}.${format}`;
       anchor.click();
 
       URL.revokeObjectURL(url);

@@ -1,10 +1,13 @@
 import type { CreateUploadRequest, CreateUploadResponse } from '@spoh/shared';
-import { api } from '@/shared/lib/api';
-export function getMediaConfig(): Promise<{ enabled: boolean }> {
-  return api<{ enabled: boolean }>('/media/config');
+import { eventApi } from '@/shared/lib/eventApi';
+export function getMediaConfig(eventId: string): Promise<{ enabled: boolean }> {
+  return eventApi<{ enabled: boolean }>(eventId, '/media/config');
 }
-export function createUpload(body: CreateUploadRequest): Promise<CreateUploadResponse> {
-  return api<CreateUploadResponse>('/media/uploads', { method: 'POST', body });
+export function createUpload(
+  eventId: string,
+  body: CreateUploadRequest,
+): Promise<CreateUploadResponse> {
+  return eventApi<CreateUploadResponse>(eventId, '/media/uploads', { method: 'POST', body });
 }
 export async function uploadFile(policy: CreateUploadResponse, file: File): Promise<void> {
   // S3 reads fields in order: the file must follow the signed policy fields.

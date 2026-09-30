@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
+import { MOCK_EVENT } from './mockEvent';
 
 const axe = readFileSync('../node_modules/axe-core/axe.min.js', 'utf8');
 
@@ -16,20 +17,28 @@ async function mockSession(page: Page, leader = false, failMe = false) {
       await route.fulfill({ status: 503, json: { error: { message: 'Unavailable' } } });
       return;
     }
-    const json = path.includes('/auth/')
-      ? { accessToken: 'preview', expiresIn: 3600, volunteer, capabilities, refreshAvailable: true }
-      : path.endsWith('/me')
+    const json = path.endsWith('/api/v1/events')
+      ? { data: [MOCK_EVENT] }
+      : path.includes('/auth/')
         ? {
+            accessToken: 'preview',
+            expiresIn: 3600,
             volunteer,
-            event: { id: 'event', name: 'Event', timezone: 'Asia/Singapore', locale: 'en-SG' },
             capabilities,
-            currentAssignment: null,
-            upcomingAssignments: [],
-            escalationChain: [],
+            refreshAvailable: true,
           }
-        : path.endsWith('/lost-person/active')
-          ? { alerts: [] }
-          : {};
+        : path.endsWith('/me')
+          ? {
+              volunteer,
+              event: MOCK_EVENT,
+              capabilities,
+              currentAssignment: null,
+              upcomingAssignments: [],
+              escalationChain: [],
+            }
+          : path.endsWith('/lost-person/active')
+            ? { alerts: [] }
+            : {};
     await route.fulfill({ json });
   });
 }

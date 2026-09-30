@@ -5,6 +5,7 @@ import type {
   NotificationResult,
 } from '@spoh/shared';
 import { logger } from '../../../platform/logger/index.js';
+import { eventSlug } from '../../../platform/event/events.js';
 import { eventToday } from '../../../platform/event/today.js';
 import {
   deleteSubscriptions,
@@ -21,7 +22,7 @@ export interface NotificationInput {
   priority: AnnouncementPriority;
   title: string;
   body: string;
-  /** Where tapping the notification should land. */
+  /** The screen tapping the notification opens, inside the event: `/inbox`. */
   url: string;
   /**
    * Collapse key. A second alert about the same incident replaces the first on
@@ -101,7 +102,9 @@ export async function dispatch(
     base.devices = subscriptions.length;
     if (subscriptions.length === 0) return base;
 
-    await sendToDevices(input, subscriptions, base);
+    // The tap opens the screen in this notification's own event (ADR-001 §5).
+    const url = `/e/${encodeURIComponent(await eventSlug(scope))}${input.url}`;
+    await sendToDevices({ ...input, url }, subscriptions, base);
     return base;
   } catch (error) {
     logger.error({ err: error, kind: input.kind }, 'notification dispatch failed');

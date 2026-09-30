@@ -1,10 +1,13 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
-import type { ActiveLostPersonResponse } from '@spoh/shared';
+import type { ActiveLostPersonResponse, RaiseLostPersonRequest } from '@spoh/shared';
+import { useEventId } from '@/shared/lib/eventContext';
 import { getActiveAlerts, acknowledgeAlert, resolveAlert } from './api';
 
-export const lostPersonKeys = { active: ['lost-person', 'active'] as const };
+export const lostPersonKeys = {
+  active: (eventId: string) => [eventId, 'lost-person', 'active'] as const,
+};
 import { ms } from '@/shared/lib/runtimeSettings';
 import { useCurrentSession } from '@/features/session';
 
@@ -18,10 +21,11 @@ import { useCurrentSession } from '@/features/session';
  */
 export function useActiveAlerts(): UseQueryResult<ActiveLostPersonResponse> {
   const session = useCurrentSession();
+  const eventId = useEventId();
 
   return useQuery({
-    queryKey: lostPersonKeys.active,
-    queryFn: getActiveAlerts,
+    queryKey: lostPersonKeys.active(eventId),
+    queryFn: () => getActiveAlerts(eventId),
     enabled: session !== null,
     refetchInterval: ms.alertPoll(),
     // Keep polling when the tab is backgrounded: a phone in a pocket is still
@@ -33,11 +37,12 @@ export function useActiveAlerts(): UseQueryResult<ActiveLostPersonResponse> {
 
 export function useAcknowledgeAlert(): ReturnType<typeof useMutation<unknown, Error, string>> {
   const queryClient = useQueryClient();
+  const eventId = useEventId();
 
   return useMutation({
-    mutationFn: acknowledgeAlert,
+    mutationFn: (alertId: string) => acknowledgeAlert(eventId, alertId),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: lostPersonKeys.active });
+      void queryClient.invalidateQueries({ queryKey: lostPersonKeys.active(eventId) });
     },
   });
 }
@@ -57,16 +62,21 @@ export function useResolveAlert(): ReturnType<
   >
 > {
   const queryClient = useQueryClient();
+  const eventId = useEventId();
 
   return useMutation({
-    mutationFn: resolveAlert,
+    mutationFn: (input: { alertId: string; outcome: 'RESOLVED_FOUND' | 'RESOLVED_OTHER' }) =>
+      resolveAlert(eventId, input),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: lostPersonKeys.active });
+      void queryClient.invalidateQueries({ queryKey: lostPersonKeys.active(eventId) });
     },
   });
 }
 
 import { raiseLostPerson } from './api';
 export function useRaiseLostPerson() {
-  return useMutation({ mutationFn: raiseLostPerson });
+  const eventId = useEventId();
+  return useMutation({
+    mutationFn: (body: RaiseLostPersonRequest) => raiseLostPerson(eventId, body),
+  });
 }

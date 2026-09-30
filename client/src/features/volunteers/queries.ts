@@ -21,6 +21,7 @@ import {
   type VolunteerListResponse,
 } from './api';
 import { useCurrentSession } from '@/features/session';
+import { useEventId } from '@/shared/lib/eventContext';
 
 /**
  * Roster administration.
@@ -32,15 +33,17 @@ import { useCurrentSession } from '@/features/session';
  */
 
 export const volunteerKeys = {
-  all: ['admin', 'volunteers'] as const,
-  list: (filters: VolunteerFilters) => ['admin', 'volunteers', filters] as const,
+  all: (eventId: string) => [eventId, 'admin', 'volunteers'] as const,
+  list: (eventId: string, filters: VolunteerFilters) =>
+    [eventId, 'admin', 'volunteers', filters] as const,
 };
 export function useVolunteers(filters: VolunteerFilters): UseQueryResult<VolunteerListResponse> {
   const session = useCurrentSession();
+  const eventId = useEventId();
 
   return useQuery({
-    queryKey: volunteerKeys.list(filters),
-    queryFn: () => listVolunteers(filters),
+    queryKey: volunteerKeys.list(eventId, filters),
+    queryFn: () => listVolunteers(eventId, filters),
     enabled: session !== null,
     // The roster is not live data. Refetching it every two seconds would be
     // noise on a screen somebody is reading rather than glancing at.
@@ -50,8 +53,9 @@ export function useVolunteers(filters: VolunteerFilters): UseQueryResult<Volunte
 
 function useInvalidate(): () => void {
   const queryClient = useQueryClient();
+  const eventId = useEventId();
   return () => {
-    void queryClient.invalidateQueries({ queryKey: volunteerKeys.all });
+    void queryClient.invalidateQueries({ queryKey: volunteerKeys.all(eventId) });
   };
 }
 
@@ -61,9 +65,11 @@ export function useUpdateVolunteer(): UseMutationResult<
   { id: string; patch: UpdateVolunteerRequest }
 > {
   const invalidate = useInvalidate();
+  const eventId = useEventId();
 
   return useMutation({
-    mutationFn: updateVolunteer,
+    mutationFn: (input: { id: string; patch: UpdateVolunteerRequest }) =>
+      updateVolunteer(eventId, input),
     onSuccess: invalidate,
   });
 }
@@ -74,9 +80,11 @@ export function useDeactivateVolunteer(): UseMutationResult<
   { id: string; body: DeactivateVolunteerRequest }
 > {
   const invalidate = useInvalidate();
+  const eventId = useEventId();
 
   return useMutation({
-    mutationFn: deactivateVolunteer,
+    mutationFn: (input: { id: string; body: DeactivateVolunteerRequest }) =>
+      deactivateVolunteer(eventId, input),
     onSuccess: invalidate,
   });
 }
@@ -87,9 +95,10 @@ export function useReactivateVolunteer(): UseMutationResult<
   string
 > {
   const invalidate = useInvalidate();
+  const eventId = useEventId();
 
   return useMutation({
-    mutationFn: reactivateVolunteer,
+    mutationFn: (id: string) => reactivateVolunteer(eventId, id),
     onSuccess: invalidate,
   });
 }

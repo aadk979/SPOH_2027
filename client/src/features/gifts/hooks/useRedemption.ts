@@ -3,6 +3,7 @@ import type { Tone } from '@/shared/ui';
 import { useMe } from '@/features/session';
 import { UNRESOLVED_SCAN, useCardScanner } from '@/features/capture';
 import { sendOrQueue } from '@/shared/lib/sendOrQueue';
+import { useEventId } from '@/shared/lib/eventContext';
 import { useGifts } from '../queries';
 import { giftEndpoints, redeemGift } from '../api';
 import {
@@ -12,6 +13,7 @@ import {
 } from '../model/redemptionMessage';
 export function useRedemption(enabled: boolean) {
   const { data: me } = useMe();
+  const eventId = useEventId();
   const [selected, setSelected] = useState<string | null>(null);
   const [message, setMessage] = useState<{ tone: Tone; text: string } | null>(null);
   const [pending, setPending] = useState(false);
@@ -35,11 +37,12 @@ export function useRedemption(enabled: boolean) {
           clientRecordedAt: new Date().toISOString(),
         };
         const outcome = await sendOrQueue({
-          endpoint: giftEndpoints.redemptions,
+          eventId,
+          path: giftEndpoints.redemptions,
           body,
           // Synced later, the gift was already handed over (ADR-007 §5).
           queuedBody: { ...body, queued: true },
-          send: () => redeemGift(body),
+          send: () => redeemGift(eventId, body),
         });
         if (outcome.status === 'queued') {
           setMessage(QUEUED_REDEMPTION);
@@ -55,7 +58,7 @@ export function useRedemption(enabled: boolean) {
         setPending(false);
       }
     },
-    [station, selected, pending, gifts],
+    [eventId, station, selected, pending, gifts],
   );
 
   const onUnresolvedScan = useCallback(() => setMessage(UNRESOLVED_SCAN), []);

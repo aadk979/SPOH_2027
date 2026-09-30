@@ -2,6 +2,10 @@ import { cleanup, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { useCardScanner } from '@/features/capture/useCardScanner';
 import { api } from '@/shared/lib/api';
+import { TEST_EVENT } from '../helpers/event';
+
+/** The test event's API paths and screen addresses (tests/setup.ts). */
+const API = `/events/${TEST_EVENT.id}`;
 
 const scanner = vi.hoisted(() => ({ onDecode: (_text: string) => {} }));
 vi.mock('@/features/capture/useQrScanner', () => ({
@@ -28,7 +32,7 @@ describe('scanning a printed card (F03-045)', () => {
 
     await waitFor(() => expect(onCode).toHaveBeenCalledWith('BBB222'));
     expect(mockedApi).toHaveBeenCalledWith(
-      `/cards/qr/${encodeURIComponent('spoh2027:0f8f6a52-3c2b-4d7e-9a61-5b7c2d9e1f00')}`,
+      `${API}/cards/qr/${encodeURIComponent('spoh2027:0f8f6a52-3c2b-4d7e-9a61-5b7c2d9e1f00')}`,
     );
   });
 

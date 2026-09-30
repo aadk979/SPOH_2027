@@ -1,7 +1,14 @@
 'use client';
 import { useQuery } from '@tanstack/react-query';
+import { useEventId } from '@/shared/lib/eventContext';
 import { listGifts } from './api';
-export const giftKeys = { all: ['gifts'] as const };
+export const giftKeys = { all: (eventId: string) => [eventId, 'gifts'] as const };
 export function useGifts(enabled: boolean) {
-  return useQuery({ queryKey: giftKeys.all, queryFn: listGifts, enabled, refetchInterval: 15_000 });
+  const eventId = useEventId();
+  return useQuery({
+    queryKey: giftKeys.all(eventId),
+    queryFn: () => listGifts(eventId),
+    enabled,
+    refetchInterval: 15_000,
+  });
 }

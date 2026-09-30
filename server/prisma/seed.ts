@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma/client.js';
 import type { CommitteeRole, ShiftBlock, StationKind } from '../src/generated/prisma/enums.js';
+import { wallTimeToInstant } from '@spoh/shared';
 
 /**
  * Idempotent seed (BUILD_PLAN §5.10).
@@ -466,6 +467,180 @@ async function seedEventOne(): Promise<void> {
       SET "role" = EXCLUDED."role", "status" = EXCLUDED."status", "portfolio" = EXCLUDED."portfolio"`);
 }
 
+/**
+ * A second event beside Event #1, for development and the two-event e2e
+ * (P09.8, ADR-001 §5): "Dry Run" with one booth, one day and its shifts, and
+ * a person on both rosters — a volunteer in Event #1 and an IC in the dry run —
+ * so each event's shifts, stations and permissions can be seen apart. Its own
+ * persona, so no existing fixture changes. Development only.
+ */
+const SECOND_EVENT = {
+  id: 'evt_seed_dry_run',
+  slug: 'dry-run',
+  name: 'Dry Run',
+  day: '2027-02-01',
+  stationCode: 'DRY_RUN_BOOTH',
+  email: 'multi@spoh2027.test',
+} as const;
+
+async function seedSecondEvent(): Promise<void> {
+  const first = await prisma.event.findFirst({ orderBy: { createdAt: 'asc' } });
+  if (!first || first.id === SECOND_EVENT.id) return;
+  const event = await prisma.event.upsert({
+    where: { id: SECOND_EVENT.id },
+    create: {
+      id: SECOND_EVENT.id,
+      organisationId: first.organisationId,
+      slug: SECOND_EVENT.slug,
+      name: SECOND_EVENT.name,
+      timezone: first.timezone,
+      status: 'LIVE',
+    },
+    update: {},
+  });
+  const scope = { eventId: event.id };
+  const type = await prisma.stationType.upsert({
+    where: { eventId_code: { eventId: event.id, code: 'SIGNUP_BOOTH' } },
+    create: { ...scope, code: 'SIGNUP_BOOTH', label: 'Sign-up booth', registersVisitors: true },
+    update: {},
+  });
+  for (const [index, code] of ['SEC_4', 'OTHER'].entries()) {
+    await prisma.captureCategory.upsert({
+      where: { eventId_code: { eventId: event.id, code } },
+      create: { ...scope, code, label: code === 'OTHER' ? 'Other' : 'Sec 4', sortOrder: index + 1 },
+      update: {},
+    });
+  }
+  const station = await prisma.station.upsert({
+    where: { code: SECOND_EVENT.stationCode },
+    create: {
+      ...scope,
+      typeId: type.id,
+      code: SECOND_EVENT.stationCode,
+      name: 'Dry-run booth',
+      kind: 'SIGNUP_BOOTH',
+    },
+    update: {},
+  });
+  const eventDay = await prisma.eventDay.upsert({
+    where: { date: day(SECOND_EVENT.day) },
+    create: { ...scope, date: day(SECOND_EVENT.day), label: 'Dry-run day' },
+    update: {},
+  });
+  const person = await prisma.person.upsert({
+    where: { email: SECOND_EVENT.email },
+    create: {
+      email: SECOND_EVENT.email,
+      displayName: 'Mo Multi',
+      cognitoSub: localSub(SECOND_EVENT.email),
+      role: 'VOLUNTEER',
+    },
+    update: { active: true },
+  });
+  await seedSecondEventShifts({
+    eventId: event.id,
+    dayId: eventDay.id,
+    stationId: station.id,
+    personId: person.id,
+    timezone: event.timezone,
+  });
+  await seedMultiInFirstEvent(first.id, person.id);
+}
+
+/** The dry run's two shifts on its day, and the multi-event person on the morning one, as IC. */
+async function seedSecondEventShifts(input: {
+  eventId: string;
+  dayId: string;
+  stationId: string;
+  personId: string;
+  timezone: string;
+}): Promise<void> {
+  const { eventId, dayId, stationId, personId, timezone } = input;
+  const membership = await prisma.eventMembership.upsert({
+    where: { eventId_personId: { eventId, personId } },
+    create: { eventId, personId, role: 'IC' },
+    update: { role: 'IC', status: 'ACTIVE' },
+  });
+  for (const [index, block] of (['MORNING', 'AFTERNOON'] as ShiftBlock[]).entries()) {
+    const hours = block === 'MORNING' ? ['09:30', '14:00'] : ['13:30', '18:00'];
+    const template = await prisma.shiftTemplate.upsert({
+      where: { eventId_code: { eventId, code: block } },
+      create: {
+        eventId,
+        code: block,
+        label: block === 'MORNING' ? 'Morning' : 'Afternoon',
+        startLocal: hours[0]!,
+        endLocal: hours[1]!,
+        sortOrder: index + 1,
+      },
+      update: {},
+    });
+    const shift = await prisma.shift.upsert({
+      where: { eventDayId_templateId: { eventDayId: dayId, templateId: template.id } },
+      create: {
+        eventId,
+        eventDayId: dayId,
+        templateId: template.id,
+        startsAt: wallTimeToInstant(SECOND_EVENT.day, template.startLocal, timezone),
+        endsAt: wallTimeToInstant(SECOND_EVENT.day, template.endLocal, timezone),
+      },
+      update: {},
+    });
+    if (block !== 'MORNING') continue;
+    await prisma.shiftAssignment.upsert({
+      where: { volunteerId_eventDayId_block: { volunteerId: personId, eventDayId: dayId, block } },
+      create: {
+        eventId,
+        shiftId: shift.id,
+        membershipId: membership.id,
+        volunteerId: personId,
+        stationId,
+        eventDayId: dayId,
+        block,
+        roleLabel: 'Booth IC',
+      },
+      update: {},
+    });
+  }
+}
+
+/** The same person as a volunteer of Event #1, at its booth on every day of it. */
+async function seedMultiInFirstEvent(eventId: string, personId: string): Promise<void> {
+  const membership = await prisma.eventMembership.upsert({
+    where: { eventId_personId: { eventId, personId } },
+    create: { eventId, personId, role: 'VOLUNTEER' },
+    update: { role: 'VOLUNTEER', status: 'ACTIVE' },
+  });
+  const booth = await prisma.station.findUnique({ where: { code: 'SIGNUP_BOOTH' } });
+  if (!booth) return;
+  const shifts = await prisma.shift.findMany({
+    where: { eventId, template: { code: 'MORNING' } },
+    select: { id: true, eventDayId: true },
+  });
+  for (const shift of shifts) {
+    await prisma.shiftAssignment.upsert({
+      where: {
+        volunteerId_eventDayId_block: {
+          volunteerId: personId,
+          eventDayId: shift.eventDayId,
+          block: 'MORNING',
+        },
+      },
+      create: {
+        eventId,
+        shiftId: shift.id,
+        membershipId: membership.id,
+        volunteerId: personId,
+        stationId: booth.id,
+        eventDayId: shift.eventDayId,
+        block: 'MORNING',
+        roleLabel: 'Registration',
+      },
+      update: {},
+    });
+  }
+}
+
 async function main(): Promise<void> {
   await seedEventDays();
   await seedStations();
@@ -486,6 +661,7 @@ async function main(): Promise<void> {
   // Apply last so a configured root matching a development fixture stays ADMIN.
   await seedAdmin();
   await seedEventOne();
+  if (!isProduction) await seedSecondEvent();
   console.log('seed: done');
 }
 

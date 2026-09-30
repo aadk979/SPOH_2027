@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useAppRouter } from '@/shared/lib/appPath';
+import { useEventId } from '@/shared/lib/eventContext';
 import type { CreateGroupRegistrationRequest } from '@spoh/shared';
 import { registrationEndpoints } from '@/features/registration';
 import { enqueue } from '@/shared/lib/outbox';
@@ -15,7 +16,8 @@ export function useGroupSubmit({
   values: GroupValues;
   form: { validate(input: unknown): CreateGroupRegistrationRequest | null };
 }) {
-  const router = useRouter();
+  const router = useAppRouter();
+  const eventId = useEventId();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   async function submit(): Promise<void> {
@@ -28,7 +30,8 @@ export function useGroupSubmit({
     try {
       await enqueue({
         idempotencyKey: body.idempotencyKey,
-        endpoint: registrationEndpoints.group,
+        eventId,
+        path: registrationEndpoints.group,
         body,
       });
     } catch {

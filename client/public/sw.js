@@ -22,18 +22,32 @@
 const VERSION = new URLSearchParams(self.location.search || '').get('v') || 'dev';
 const CACHE = `spoh2027-shell-${VERSION}`;
 
+/**
+ * Event screens live at `/e/<slug>/…`, and every slug is served from the one
+ * exported placeholder `/e/_/…` (ADR-008 §2). So the worker precaches the
+ * placeholder and files any event's page under it: a volunteer offline in any
+ * event gets the same shell, which reads its event from the address.
+ */
+const EVENT_SEGMENT = /^\/e\/[^/]+/;
+const PLACEHOLDER = '/e/_';
+
+function cacheKeyOf(url) {
+  return url.pathname.replace(EVENT_SEGMENT, PLACEHOLDER) + url.search;
+}
+
 const SHELL = [
   '/',
-  '/home',
-  '/map',
-  '/journey',
-  '/brief',
-  '/shift',
-  '/capture/registration',
-  '/capture/registration/group',
-  '/capture/footfall',
-  '/capture/stamp',
-  '/capture/redeem',
+  '/events',
+  `${PLACEHOLDER}/home`,
+  `${PLACEHOLDER}/map`,
+  `${PLACEHOLDER}/journey`,
+  `${PLACEHOLDER}/brief`,
+  `${PLACEHOLDER}/shift`,
+  `${PLACEHOLDER}/capture/registration`,
+  `${PLACEHOLDER}/capture/registration/group`,
+  `${PLACEHOLDER}/capture/footfall`,
+  `${PLACEHOLDER}/capture/stamp`,
+  `${PLACEHOLDER}/capture/redeem`,
   '/manifest.json',
 ];
 
@@ -98,16 +112,19 @@ self.addEventListener('fetch', (event) => {
   // Network first, falling back to the cached shell. A volunteer on a working
   // connection always sees the current build; one in a stairwell still gets the
   // map.
+  const key = cacheKeyOf(url);
   event.respondWith(
     fetch(request)
       .then((response) => {
         if (response.ok) {
           const copy = response.clone();
-          void caches.open(CACHE).then((cache) => cache.put(request, copy));
+          void caches.open(CACHE).then((cache) => cache.put(key, copy));
         }
         return response;
       })
-      .catch(() => caches.match(request).then((cached) => cached ?? caches.match('/home'))),
+      .catch(() =>
+        caches.match(key).then((cached) => cached ?? caches.match(`${PLACEHOLDER}/home`)),
+      ),
   );
 });
 
@@ -160,7 +177,7 @@ self.addEventListener('push', (event) => {
       requireInteraction: payload.priority === 'URGENT',
       icon: '/icons/icon-192.png',
       badge: '/icons/icon-192.png',
-      data: { url: payload.url || '/home', kind: payload.kind },
+      data: { url: payload.url || '/', kind: payload.kind },
     }),
   );
 });
@@ -174,7 +191,7 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  const target = new URL(event.notification.data?.url || '/home', self.location.origin);
+  const target = new URL(event.notification.data?.url || '/', self.location.origin);
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {

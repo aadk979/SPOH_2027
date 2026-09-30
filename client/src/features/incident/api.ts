@@ -1,7 +1,7 @@
 import type { CreateIncidentRequest } from '@spoh/shared';
-import { api } from '@/shared/lib/api';
+import { eventApi } from '@/shared/lib/eventApi';
 
 export const incidentEndpoints = { create: '/incidents' } as const;
-export function createIncident(body: CreateIncidentRequest): Promise<unknown> {
-  return api(incidentEndpoints.create, { method: 'POST', body });
+export function createIncident(eventId: string, body: CreateIncidentRequest): Promise<unknown> {
+  return eventApi(eventId, incidentEndpoints.create, { method: 'POST', body });
 }

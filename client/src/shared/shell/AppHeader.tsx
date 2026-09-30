@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import Link from 'next/link';
+import { AppLink as Link } from '@/shared/lib/AppLink';
 import { cx } from '@/shared/ui/cx';
 export function AppHeader({
   container,

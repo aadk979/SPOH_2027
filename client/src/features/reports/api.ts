@@ -1,12 +1,13 @@
 import type { FullReport } from '@spoh/shared';
-import { api } from '@/shared/lib/api';
+import { eventApi, eventApiPath } from '@/shared/lib/eventApi';
 import { clientEnv } from '@/shared/lib/env';
 import { getAccessToken } from '@/shared/lib/session';
-export function getReport(): Promise<FullReport> {
-  return api<FullReport>('/reports/summary');
+export function getReport(eventId: string): Promise<FullReport> {
+  return eventApi<FullReport>(eventId, '/reports/summary');
 }
-export async function exportReport(format: 'xlsx' | 'csv'): Promise<Blob> {
-  const response = await fetch(`${clientEnv.apiBaseUrl}/api/v1/reports/export?format=${format}`, {
+export async function exportReport(eventId: string, format: 'xlsx' | 'csv'): Promise<Blob> {
+  const path = eventApiPath(eventId, `/reports/export?format=${format}`);
+  const response = await fetch(`${clientEnv.apiBaseUrl}/api/v1${path}`, {
     headers: { Authorization: `Bearer ${getAccessToken() ?? ''}` },
   });
   if (!response.ok) throw new Error(String(response.status));

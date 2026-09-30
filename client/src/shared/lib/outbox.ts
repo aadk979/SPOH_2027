@@ -2,6 +2,7 @@
 
 import { openDB, type IDBPDatabase } from 'idb';
 import { ApiError, api, isRetryable } from '@/shared/lib/api';
+import { eventApiPath } from '@/shared/lib/eventApi';
 import { getClientSettings, ms } from '@/shared/lib/runtimeSettings';
 import { currentVolunteerId, getSession, subscribeToSession } from '@/shared/lib/session';
 
@@ -28,7 +29,14 @@ export type OutboxStatus = 'pending' | 'sending' | 'failed';
 export interface OutboxEntry {
   /** Equals the idempotencyKey in the body. One key, one row, forever. */
   id: string;
+  /** The full API path, event included: `/events/<id>/registrations` (ADR-001 §5). */
   endpoint: string;
+  /**
+   * The event the capture belongs to. Absent on entries the pre-P09.8 build
+   * queued, whose endpoint is an old path (`/registrations`): those belong to
+   * Event #1 and are upgraded to its paths (`upgradeLegacyEntries`).
+   */
+  eventId?: string | null;
   method: 'POST';
   body: unknown;
   clientRecordedAt: string;
@@ -127,12 +135,15 @@ export async function pendingCount(): Promise<number> {
  */
 export async function enqueue(input: {
   idempotencyKey: string;
-  endpoint: string;
+  eventId: string;
+  /** The path inside the event: `/registrations`. */
+  path: string;
   body: unknown;
 }): Promise<OutboxEntry> {
   const entry: OutboxEntry = {
     id: input.idempotencyKey,
-    endpoint: input.endpoint,
+    endpoint: eventApiPath(input.eventId, input.path),
+    eventId: input.eventId,
     method: 'POST',
     body: input.body,
     clientRecordedAt: new Date().toISOString(),
@@ -151,6 +162,31 @@ export async function enqueue(input: {
   scheduleFlush(sendGraceMs());
 
   return entry;
+}
+
+/**
+ * Entries the pre-P09.8 build queued carry an old path (`/registrations`) and
+ * no event. They belong to Event #1, the event the old paths serve, and are
+ * moved onto its paths, keeping their idempotency keys, the first time the
+ * new build knows that event's id (ADR-009 §6). A pending entry being sent
+ * right now is left alone: the old path still reaches the same event.
+ * Returns how many entries moved.
+ */
+export async function upgradeLegacyEntries(legacyEventId: string): Promise<number> {
+  const database = await db();
+  const legacy = ((await database.getAll(STORE)) as OutboxEntry[]).filter(
+    (entry) =>
+      !entry.eventId && !entry.endpoint.startsWith('/events/') && entry.status !== 'sending',
+  );
+  for (const entry of legacy) {
+    await database.put(STORE, {
+      ...entry,
+      eventId: legacyEventId,
+      endpoint: eventApiPath(legacyEventId, entry.endpoint),
+    });
+  }
+  if (legacy.length > 0) await notify();
+  return legacy.length;
 }
 
 /**

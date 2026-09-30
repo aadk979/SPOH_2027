@@ -1,13 +1,13 @@
 import { RaiseLostPersonRequest } from '@spoh/shared';
 import { useZodForm } from '@/shared/hooks/useZodForm';
-import { useRouter } from 'next/navigation';
+import { useAppRouter } from '@/shared/lib/appPath';
 import { useState, type FormEvent } from 'react';
 import { useMe } from '@/features/session';
 import { useRaiseLostPerson } from '@/features/lostPerson';
 export function useLostPersonForm() {
   const fields = useLostPersonFields();
   const { description, approxAge, clothing } = fields;
-  const router = useRouter();
+  const router = useAppRouter();
   const mutation = useRaiseLostPerson();
   const { data: me } = useMe();
 

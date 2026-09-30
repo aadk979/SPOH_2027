@@ -5,6 +5,7 @@ import { importFallback } from '../api';
 import { parseCsv } from '../model/parseImportCsv';
 import { toImportRequest, type ImportFormRequest, type ImportValues } from '../model/importRequest';
 import type { z } from 'zod';
+import { useEventId } from '@/shared/lib/eventContext';
 interface ImportAction {
   values: ImportValues;
   validate(input: unknown): z.output<typeof ImportFormRequest> | null;
@@ -19,6 +20,7 @@ function failureMessage(cause: unknown): string {
 }
 
 export function useRunImport({ values, validate, setPending, setError, setOutcome }: ImportAction) {
+  const eventId = useEventId();
   async function run(commit: boolean): Promise<void> {
     setPending(true);
     setError(null);
@@ -33,7 +35,7 @@ export function useRunImport({ values, validate, setPending, setError, setOutcom
 
       const request = validate(toImportRequest(values, rows, commit));
       if (!request) return;
-      setOutcome(commit, await importFallback(request.target, request.body));
+      setOutcome(commit, await importFallback(eventId, request.target, request.body));
     } catch (cause) {
       setError(failureMessage(cause));
     } finally {

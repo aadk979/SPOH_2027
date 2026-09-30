@@ -48,7 +48,7 @@ export async function completeCallback(
 
   try {
     const session = await openSession(sub, context, audit);
-    return { redirectTo: `${config.appBaseUrl}/home`, session };
+    return { redirectTo: `${config.appBaseUrl}/`, session };
   } catch (cause) {
     return failed(cause instanceof AppError ? cause.code : ERROR_CODES.INTERNAL_ERROR);
   }

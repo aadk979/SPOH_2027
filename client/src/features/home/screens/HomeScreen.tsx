@@ -8,17 +8,19 @@ import { NavTile } from '@/shared/ui/NavTile';
 import { Button, ButtonLink, Callout, Card, LoadingCards, Stack } from '@/shared/ui';
 import { useMe, useRequireSession } from '@/features/session';
 import { canOpenOperations } from '@/navigation';
+import { useEvent } from '@/shared/lib/eventContext';
 
 export default function HomeScreen() {
   const session = useRequireSession();
   const { data: me, isPending, isError, refetch } = useMe();
+  const event = useEvent();
   if (!session) return null;
 
   return (
     <AppShell width="wide" title="Home" actions={<SyncIndicator />}>
       <Stack>
         <WorkspaceIntro
-          eyebrow="SPOH 2027 · Volunteer workspace"
+          eyebrow={`${event.name} · Volunteer workspace`}
           title={`Hello, ${me?.volunteer.displayName ?? session.displayName}`}
         >
           Your shift, your next action, and the information you need along the way.

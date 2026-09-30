@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import { api } from '@/shared/lib/api';
+import { TEST_EVENT } from '../helpers/event';
 import { useAcknowledgeAlert, useResolveAlert, lostPersonKeys } from '@/features/lostPerson';
 import { useStationDashboard } from '@/features/dashboard';
 import {
@@ -43,7 +44,9 @@ it('does not query a station dashboard until a station is selected', async () =>
   });
   expect(api).not.toHaveBeenCalled();
   rerender({ id: 'station-42' });
-  await waitFor(() => expect(api).toHaveBeenCalledWith('/dashboard/station/station-42'));
+  await waitFor(() =>
+    expect(api).toHaveBeenCalledWith(`/events/${TEST_EVENT.id}/dashboard/station/station-42`),
+  );
 });
 
 it('acknowledges an alert and invalidates the active-alert cache', async () => {
@@ -53,8 +56,10 @@ it('acknowledges an alert and invalidates the active-alert cache', async () => {
   await act(async () => {
     await result.current.mutateAsync('alert-42');
   });
-  expect(api).toHaveBeenCalledWith('/lost-person/alert-42/ack', { method: 'POST' });
-  expect(invalidate).toHaveBeenCalledWith({ queryKey: lostPersonKeys.active });
+  expect(api).toHaveBeenCalledWith(`/events/${TEST_EVENT.id}/lost-person/alert-42/ack`, {
+    method: 'POST',
+  });
+  expect(invalidate).toHaveBeenCalledWith({ queryKey: lostPersonKeys.active(TEST_EVENT.id) });
 });
 
 it('sends the resolution outcome and invalidates alerts only after success', async () => {
@@ -71,11 +76,11 @@ it('sends the resolution outcome and invalidates alerts only after success', asy
   await act(async () => {
     await result.current.mutateAsync({ alertId: 'alert-42', outcome: 'RESOLVED_FOUND' });
   });
-  expect(api).toHaveBeenLastCalledWith('/lost-person/alert-42/resolve', {
+  expect(api).toHaveBeenLastCalledWith(`/events/${TEST_EVENT.id}/lost-person/alert-42/resolve`, {
     method: 'POST',
     body: { outcome: 'RESOLVED_FOUND' },
   });
-  expect(invalidate).toHaveBeenCalledWith({ queryKey: lostPersonKeys.active });
+  expect(invalidate).toHaveBeenCalledWith({ queryKey: lostPersonKeys.active(TEST_EVENT.id) });
 });
 
 it('preserves roster filter encoding and separate list cache entries', async () => {
@@ -84,9 +89,11 @@ it('preserves roster filter encoding and separate list cache entries', async () 
   const response = { data: [], meta: { count: 0, nextCursor: null } };
   vi.mocked(api).mockResolvedValue(response);
   renderHook(() => useVolunteers(filters), { wrapper });
-  await waitFor(() => expect(client.getQueryData(volunteerKeys.list(filters))).toEqual(response));
+  await waitFor(() =>
+    expect(client.getQueryData(volunteerKeys.list(TEST_EVENT.id, filters))).toEqual(response),
+  );
   expect(api).toHaveBeenCalledWith(
-    '/admin/volunteers?q=Lee+%26+Tan&role=IC&active=false&sort=lastSeen&limit=100',
+    `/events/${TEST_EVENT.id}/admin/volunteers?q=Lee+%26+Tan&role=IC&active=false&sort=lastSeen&limit=100`,
   );
 });
 
@@ -116,19 +123,28 @@ it('invalidates all roster filters only after successful mutations', async () =>
     });
     await result.current.reactivate.mutateAsync('person-42');
   });
-  expect(api).toHaveBeenCalledWith('/admin/volunteers/person-42', {
+  expect(api).toHaveBeenCalledWith(`/events/${TEST_EVENT.id}/admin/volunteers/person-42`, {
     method: 'PATCH',
     body: { role: 'IC' },
   });
-  expect(api).toHaveBeenCalledWith('/admin/volunteers/person-42/deactivate', {
-    method: 'POST',
-    body: { reason: 'Left the roster', disableIdentity: false },
-  });
-  expect(api).toHaveBeenLastCalledWith('/admin/volunteers/person-42/reactivate', {
-    method: 'POST',
-  });
-  expect(invalidate).toHaveBeenCalledTimes(3);
-  expect(invalidate.mock.calls.every(([filter]) => filter?.queryKey === volunteerKeys.all)).toBe(
-    true,
+  expect(api).toHaveBeenCalledWith(
+    `/events/${TEST_EVENT.id}/admin/volunteers/person-42/deactivate`,
+    {
+      method: 'POST',
+      body: { reason: 'Left the roster', disableIdentity: false },
+    },
   );
+  expect(api).toHaveBeenLastCalledWith(
+    `/events/${TEST_EVENT.id}/admin/volunteers/person-42/reactivate`,
+    {
+      method: 'POST',
+    },
+  );
+  expect(invalidate).toHaveBeenCalledTimes(3);
+  expect(
+    invalidate.mock.calls.every(
+      ([filter]) =>
+        JSON.stringify(filter?.queryKey) === JSON.stringify(volunteerKeys.all(TEST_EVENT.id)),
+    ),
+  ).toBe(true);
 });

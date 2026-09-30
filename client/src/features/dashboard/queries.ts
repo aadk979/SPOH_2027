@@ -5,6 +5,7 @@ import type { LiveDashboardResponse, StationDashboardResponse } from '@spoh/shar
 import { getLiveDashboard, getStationDashboard } from './api';
 import { DEFAULT_CLIENT_SETTINGS, ms } from '@/shared/lib/runtimeSettings';
 import { useCurrentSession } from '@/features/session';
+import { useEventId } from '@/shared/lib/eventContext';
 
 /**
  * The live dashboard poll (BUILD_PLAN §7.3).
@@ -15,18 +16,20 @@ import { useCurrentSession } from '@/features/session';
  */
 /** Shipped default; the live cadence is a runtime setting. */
 export const dashboardKeys = {
-  live: ['dashboard', 'live'] as const,
-  station: (stationId: string | undefined) => ['dashboard', 'station', stationId] as const,
+  live: (eventId: string) => [eventId, 'dashboard', 'live'] as const,
+  station: (eventId: string, stationId: string | undefined) =>
+    [eventId, 'dashboard', 'station', stationId] as const,
 };
 
 export const DASHBOARD_POLL_MS = DEFAULT_CLIENT_SETTINGS.dashboardPollSeconds * 1000;
 
 export function useLiveDashboard(): UseQueryResult<LiveDashboardResponse> {
   const session = useCurrentSession();
+  const eventId = useEventId();
 
   return useQuery({
-    queryKey: dashboardKeys.live,
-    queryFn: getLiveDashboard,
+    queryKey: dashboardKeys.live(eventId),
+    queryFn: () => getLiveDashboard(eventId),
     enabled: session !== null,
     refetchInterval: ms.dashboardPoll(),
     // The ops-room display is never focused. Without this it would silently
@@ -40,10 +43,11 @@ export function useStationDashboard(
   stationId: string | undefined,
 ): UseQueryResult<StationDashboardResponse> {
   const session = useCurrentSession();
+  const eventId = useEventId();
 
   return useQuery({
-    queryKey: dashboardKeys.station(stationId),
-    queryFn: () => getStationDashboard(stationId ?? ''),
+    queryKey: dashboardKeys.station(eventId, stationId),
+    queryFn: () => getStationDashboard(eventId, stationId ?? ''),
     enabled: session !== null && Boolean(stationId),
     refetchInterval: ms.dashboardPoll(),
     staleTime: 0,

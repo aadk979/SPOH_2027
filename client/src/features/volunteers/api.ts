@@ -5,7 +5,7 @@ import type {
   VolunteerAdminRecord,
   VolunteerMutationResponse,
 } from '@spoh/shared';
-import { api } from '@/shared/lib/api';
+import { eventApi } from '@/shared/lib/eventApi';
 export interface VolunteerFilters {
   q: string;
   role: CommitteeRole | '';
@@ -28,30 +28,44 @@ function toQueryString(filters: VolunteerFilters): string {
   return params.toString();
 }
 
-export function listVolunteers(filters: VolunteerFilters): Promise<VolunteerListResponse> {
-  return api<VolunteerListResponse>(`/admin/volunteers?${toQueryString(filters)}`);
+export function listVolunteers(
+  eventId: string,
+  filters: VolunteerFilters,
+): Promise<VolunteerListResponse> {
+  return eventApi<VolunteerListResponse>(eventId, `/admin/volunteers?${toQueryString(filters)}`);
 }
 
-export function updateVolunteer(input: {
-  id: string;
-  patch: UpdateVolunteerRequest;
-}): Promise<VolunteerMutationResponse> {
-  return api<VolunteerMutationResponse>(`/admin/volunteers/${input.id}`, {
+export function updateVolunteer(
+  eventId: string,
+  input: {
+    id: string;
+    patch: UpdateVolunteerRequest;
+  },
+): Promise<VolunteerMutationResponse> {
+  return eventApi<VolunteerMutationResponse>(eventId, `/admin/volunteers/${input.id}`, {
     method: 'PATCH',
     body: input.patch,
   });
 }
 
-export function deactivateVolunteer(input: {
-  id: string;
-  body: DeactivateVolunteerRequest;
-}): Promise<VolunteerMutationResponse> {
-  return api<VolunteerMutationResponse>(`/admin/volunteers/${input.id}/deactivate`, {
+export function deactivateVolunteer(
+  eventId: string,
+  input: {
+    id: string;
+    body: DeactivateVolunteerRequest;
+  },
+): Promise<VolunteerMutationResponse> {
+  return eventApi<VolunteerMutationResponse>(eventId, `/admin/volunteers/${input.id}/deactivate`, {
     method: 'POST',
     body: input.body,
   });
 }
 
-export function reactivateVolunteer(id: string): Promise<VolunteerMutationResponse> {
-  return api<VolunteerMutationResponse>(`/admin/volunteers/${id}/reactivate`, { method: 'POST' });
+export function reactivateVolunteer(
+  eventId: string,
+  id: string,
+): Promise<VolunteerMutationResponse> {
+  return eventApi<VolunteerMutationResponse>(eventId, `/admin/volunteers/${id}/reactivate`, {
+    method: 'POST',
+  });
 }

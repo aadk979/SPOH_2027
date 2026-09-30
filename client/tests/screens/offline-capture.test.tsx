@@ -17,6 +17,10 @@ import { useRedemption } from '@/features/gifts/hooks/useRedemption';
 import { api } from '@/shared/lib/api';
 import { ApiError, NetworkError } from '@/shared/lib/apiErrors';
 import { enqueue } from '@/shared/lib/outbox';
+import { TEST_EVENT } from '../helpers/event';
+
+/** The test event's API paths and screen addresses (tests/setup.ts). */
+const API = `/events/${TEST_EVENT.id}`;
 
 /** ADR-007 §5 (F03-034): stamps, redemptions and incidents queue offline; alerts never do. */
 
@@ -76,7 +80,8 @@ describe('stamps', () => {
     const sent = mockedApi.mock.calls[0]![1] as { body: { idempotencyKey: string } };
     expect(mockedEnqueue).toHaveBeenCalledWith({
       idempotencyKey: sent.body.idempotencyKey,
-      endpoint: '/cards/ABC123/stamps',
+      eventId: TEST_EVENT.id,
+      path: '/cards/ABC123/stamps',
       body: sent.body,
     });
     expect(result.current.message?.tone).toBe('warn');
@@ -98,7 +103,7 @@ describe('redemptions', () => {
   it('queue marked as handed over, so a broken rule is flagged on sync', async () => {
     mockedApi.mockImplementation(async (path: string, options?: { method?: string }) => {
       if (options?.method) throw offline();
-      return path === '/gifts' ? { data: [] } : {};
+      return path === `${API}/gifts` ? { data: [] } : {};
     });
     const { result } = renderHook(() => useRedemption(true), { wrapper });
     act(() => result.current.setSelected('gift-1'));
@@ -108,7 +113,8 @@ describe('redemptions', () => {
     const sent = call![1] as { body: { idempotencyKey: string } };
     expect(mockedEnqueue).toHaveBeenCalledWith({
       idempotencyKey: sent.body.idempotencyKey,
-      endpoint: '/gifts/redemptions',
+      eventId: TEST_EVENT.id,
+      path: '/gifts/redemptions',
       body: { ...sent.body, queued: true },
     });
     expect(result.current.message?.text).toMatch(/Hand over the gift/);
@@ -127,7 +133,8 @@ describe('incident reports', () => {
     const sent = mockedApi.mock.calls[0]![1] as { body: { idempotencyKey: string } };
     expect(mockedEnqueue).toHaveBeenCalledWith({
       idempotencyKey: sent.body.idempotencyKey,
-      endpoint: '/incidents',
+      eventId: TEST_EVENT.id,
+      path: '/incidents',
       body: sent.body,
     });
     expect(state.replace).not.toHaveBeenCalled();

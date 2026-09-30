@@ -1,13 +1,13 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { AppLink as Link } from '@/shared/lib/AppLink';
+import { useAppPathname } from '@/shared/lib/appPath';
 import { useCurrentSession } from '@/features/session';
 import { sectionEntries, sectionForPath } from '@/navigation';
 
 export function SectionNav() {
   const session = useCurrentSession();
-  const active = sectionForPath(usePathname());
+  const active = sectionForPath(useAppPathname());
   return (
     <nav aria-label="Main sections" className="section-nav">
       <p className="section-nav-caption">Your workspace</p>

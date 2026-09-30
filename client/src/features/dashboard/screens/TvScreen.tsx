@@ -8,6 +8,8 @@ import { TvAlerts } from '../components/TvAlerts';
 import { type ReactNode } from 'react';
 import { useLiveDashboard } from '@/features/dashboard';
 import { useRequireSession, useEventTime } from '@/features/session';
+import { AppLink } from '@/shared/lib/AppLink';
+import { useEvent } from '@/shared/lib/eventContext';
 
 /**
  * TV mode — the ops-room display (remediation/phases/P07-client-refactor.md).
@@ -27,6 +29,7 @@ import { useRequireSession, useEventTime } from '@/features/session';
  */
 export default function TvScreen(): ReactNode {
   const format = useEventTime();
+  const event = useEvent();
   const session = useRequireSession();
   const { data } = useLiveDashboard();
 
@@ -57,13 +60,15 @@ export default function TvScreen(): ReactNode {
 
       <header className="flex flex-wrap items-baseline justify-between gap-sm">
         <div className="flex items-baseline gap-sm">
-          <h1 className="text-tv-row font-semibold">SPOH 2027 · {data.eventDayLabel ?? 'Ops'}</h1>
-          <a
+          <h1 className="text-tv-row font-semibold">
+            {`${event.name} · ${data.eventDayLabel ?? 'Ops'}`}
+          </h1>
+          <AppLink
             href="/chief"
             className="rounded-sm bg-tile-dark px-sm py-xxs text-caption text-on-dark-muted no-underline hover:text-on-dark focus-visible:outline-primary-on-dark"
           >
             Exit TV mode
-          </a>
+          </AppLink>
         </div>
         <p className="text-tv-row tabular-nums text-on-dark-muted">{format.time(data.asOf)}</p>
       </header>

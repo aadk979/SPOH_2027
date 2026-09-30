@@ -1,7 +1,16 @@
 'use client';
 import { useQuery } from '@tanstack/react-query';
+import { useEventId } from '@/shared/lib/eventContext';
 import { getReport } from './api';
-export const reportKeys = { summary: ['reports', 'summary'] as const };
+export const reportKeys = {
+  summary: (eventId: string) => [eventId, 'reports', 'summary'] as const,
+};
 export function useReport(enabled: boolean) {
-  return useQuery({ queryKey: reportKeys.summary, queryFn: getReport, enabled, staleTime: 60_000 });
+  const eventId = useEventId();
+  return useQuery({
+    queryKey: reportKeys.summary(eventId),
+    queryFn: () => getReport(eventId),
+    enabled,
+    staleTime: 60_000,
+  });
 }

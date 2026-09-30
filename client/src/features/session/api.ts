@@ -1,7 +1,7 @@
 import type { MeResponse } from '@spoh/shared';
-import { api } from '@/shared/lib/api';
-export function getMe(): Promise<MeResponse> {
-  return api<MeResponse>('/me');
+import { eventApi } from '@/shared/lib/eventApi';
+export function getMe(eventId: string): Promise<MeResponse> {
+  return eventApi<MeResponse>(eventId, '/me');
 }
 
 import { clientEnv } from '@/shared/lib/env';

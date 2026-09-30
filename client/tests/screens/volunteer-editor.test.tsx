@@ -4,6 +4,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { VolunteerAdminRecord } from '@spoh/shared';
 import { api } from '@/shared/lib/api';
 import { VolunteerEditor } from '@/features/volunteers/components/VolunteerEditor';
+import { TEST_EVENT } from '../helpers/event';
+
+/** The test event's API paths and screen addresses (tests/setup.ts). */
+const API = `/events/${TEST_EVENT.id}`;
 vi.mock('@/shared/lib/api', async (original) => ({
   ...(await original<typeof import('@/shared/lib/api')>()),
   api: vi.fn(),
@@ -44,7 +48,7 @@ describe('volunteer editor actions', () => {
     fireEvent.change(screen.getByLabelText(/^Portfolio/), { target: { value: '   ' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
     await waitFor(() =>
-      expect(mockedApi).toHaveBeenCalledWith('/admin/volunteers/person-1', {
+      expect(mockedApi).toHaveBeenCalledWith(`${API}/admin/volunteers/person-1`, {
         method: 'PATCH',
         body: { role: 'VOLUNTEER', phone: '12345678', portfolio: null },
       }),
@@ -61,7 +65,7 @@ describe('volunteer editor actions', () => {
     fireEvent.change(screen.getByLabelText('Reason'), { target: { value: '  Left committee  ' } });
     fireEvent.click(button);
     await waitFor(() =>
-      expect(mockedApi).toHaveBeenCalledWith('/admin/volunteers/person-1/deactivate', {
+      expect(mockedApi).toHaveBeenCalledWith(`${API}/admin/volunteers/person-1/deactivate`, {
         method: 'POST',
         body: { reason: 'Left committee', disableIdentity: true },
       }),
@@ -73,7 +77,7 @@ describe('volunteer editor actions', () => {
     expect(screen.queryByRole('button', { name: 'Deactivate Test Volunteer' })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Restore access' }));
     await screen.findByText('Try again in a moment.');
-    expect(mockedApi).toHaveBeenCalledWith('/admin/volunteers/person-1/reactivate', {
+    expect(mockedApi).toHaveBeenCalledWith(`${API}/admin/volunteers/person-1/reactivate`, {
       method: 'POST',
     });
   });

@@ -127,7 +127,7 @@ describe('GET /auth/callback', () => {
     const response = await callback(`code=abc&state=${state}`, cookie);
 
     expect(response.status).toBe(302);
-    expect(response.headers.location).toBe(`${HOSTED.APP_BASE_URL}/home`);
+    expect(response.headers.location).toBe(`${HOSTED.APP_BASE_URL}/`);
     expect(cookieValue(response, 'spoh_refresh')).toBeTruthy();
     expect(await prisma.refreshSession.count({ where: { volunteerId: volunteer.id } })).toBe(1);
 

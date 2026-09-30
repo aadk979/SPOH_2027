@@ -1,10 +1,12 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { AppLink as Link } from '@/shared/lib/AppLink';
+import { useAppPathname } from '@/shared/lib/appPath';
 import type { ReactNode } from 'react';
 import { clientEnv } from '@/shared/lib/env';
 import { useCurrentSession } from '@/features/session';
+import { EventSwitcher } from '@/features/events';
+import { useOptionalEvent } from '@/shared/lib/eventContext';
 import { cx } from '@/shared/ui/cx';
 import { globalEntries } from '@/navigation';
 import { SignOutButton } from './SignOutButton';
@@ -28,8 +30,9 @@ import { SignOutButton } from './SignOutButton';
  * e2e suite asserts it.
  */
 export function GlobalNav(): ReactNode {
-  const pathname = usePathname();
+  const pathname = useAppPathname();
   const session = useCurrentSession();
+  const event = useOptionalEvent();
 
   return (
     <nav
@@ -40,7 +43,7 @@ export function GlobalNav(): ReactNode {
         href="/home"
         className="flex min-h-[44px] items-center whitespace-nowrap font-semibold tracking-[-0.01em] text-on-dark no-underline transition-colors hover:text-primary-on-dark focus-visible:outline-primary-on-dark"
       >
-        SPOH 2027
+        {event?.name ?? 'Home'}
       </Link>
 
       {/*
@@ -58,6 +61,8 @@ export function GlobalNav(): ReactNode {
       ) : null}
 
       <span className="flex-1 min-w-0" />
+
+      {session ? <EventSwitcher /> : null}
 
       {session ? (
         <>

@@ -1,7 +1,7 @@
 'use client';
 
 import { AppHeader } from './AppHeader';
-import { usePathname } from 'next/navigation';
+import { useAppPathname } from '@/shared/lib/appPath';
 import { hubLabel, sectionForPath } from '@/navigation';
 import type { ReactNode } from 'react';
 import { GlobalNav } from '@/shared/shell/GlobalNav';
@@ -71,7 +71,7 @@ export function AppShell({
   // The sub-nav tracks the content width so the title and the page it labels
   // stay on the same left edge.
   const container = cx('mx-auto w-full px-md', WIDTHS[width]);
-  const pathname = usePathname();
+  const pathname = useAppPathname();
   const section = sectionForPath(pathname);
   const hub = hubLabel(section);
   const parent =

@@ -2,7 +2,7 @@
   "name": "SPOH 2027 Operations",
   "short_name": "SPOH Ops",
   "description": "Volunteer operations for the SP School of Computing Open House, 6-9 January 2027.",
-  "start_url": "/home",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",

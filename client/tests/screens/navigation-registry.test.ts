@@ -15,14 +15,18 @@ import {
 
 const APP = join(__dirname, '..', '..', 'src', 'app');
 
-/** Every route the app serves, from its page.tsx files. */
+/**
+ * Every route the app serves, from its page.tsx files, as the registry names
+ * it: an event screen by its path inside the event (`/e/[event]/home` is
+ * `/home`, ADR-001 §5).
+ */
 function appRoutes(dir = APP): string[] {
   return readdirSync(dir).flatMap((name) => {
     const path = join(dir, name);
     if (statSync(path).isDirectory()) return appRoutes(path);
     if (name !== 'page.tsx') return [];
-    const route = relative(APP, dir).split(sep).join('/');
-    return [`/${route}`];
+    const route = `/${relative(APP, dir).split(sep).join('/')}`.replace(/^\/e\/\[event\]/, '');
+    return [route || '/'];
   });
 }
 

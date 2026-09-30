@@ -32,6 +32,7 @@ function loadWorker(search = '') {
     ),
   };
   const posted: unknown[] = [];
+  const matched: string[] = [];
   const self = {
     addEventListener: (type: string, handler: Handler) => handlers.set(type, handler),
     clients: {
@@ -57,6 +58,7 @@ function loadWorker(search = '') {
     caches: {
       open: (name: string) => (opened.push(name), Promise.resolve(cache)),
       keys: () => Promise.resolve([]),
+      match: (key: string) => (matched.push(key), Promise.resolve(new Response(`cached ${key}`))),
     },
     fetch: fetchMock,
     URL,
@@ -70,7 +72,7 @@ function loadWorker(search = '') {
     await Promise.all(pending);
   }
 
-  return { fire, added, opened, fetchMock, posted };
+  return { fire, added, opened, fetchMock, posted, matched };
 }
 
 describe('service worker (P03 repros)', () => {
@@ -96,11 +98,11 @@ describe('service worker (P03 repros)', () => {
 
     expect(worker.added).toEqual(
       expect.arrayContaining([
-        '/capture/registration',
-        '/capture/footfall',
-        '/capture/stamp',
-        '/capture/redeem',
-        '/shift',
+        '/e/_/capture/registration',
+        '/e/_/capture/footfall',
+        '/e/_/capture/stamp',
+        '/e/_/capture/redeem',
+        '/e/_/shift',
       ]),
     );
     // Their scripts and styles too, or the cached page would not run offline.
@@ -115,5 +117,20 @@ describe('service worker (P03 repros)', () => {
     expect(worker.added.filter((url) => url.includes('\\'))).toEqual([]);
     // One cache per build, so activate can drop the last build's chunks.
     expect(worker.opened.every((name) => name.endsWith('build-42'))).toBe(true);
+  });
+
+  // P09.8: every event's pages are one exported placeholder (ADR-008 §2).
+  it("answers any event's screen offline from the placeholder's cached copy", async () => {
+    const worker = loadWorker('?v=build-42');
+    worker.fetchMock.mockImplementation(() => Promise.reject(new TypeError('offline')));
+    let answer: Promise<Response> | undefined;
+
+    await worker.fire('fetch', {
+      request: { method: 'GET', url: 'https://ops.example/e/spoh-2028/capture/footfall' },
+      respondWith: (response: Promise<Response>) => (answer = response),
+    });
+
+    expect(await (await answer!).text()).toBe('cached /e/_/capture/footfall');
+    expect(worker.matched).toEqual(['/e/_/capture/footfall']);
   });
 });

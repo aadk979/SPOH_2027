@@ -23,7 +23,7 @@ import { Button, ButtonLink, Card, Field, Input, Skeleton } from '@/shared/ui';
 function SignInForm(): ReactNode {
   const params = useSearchParams();
   const { email, setEmail, error, pending, onSubmit } = useSignInForm(
-    params.get('returnTo') ?? '/home',
+    params.get('returnTo') ?? '/',
   );
 
   if (!isDevAuth) {

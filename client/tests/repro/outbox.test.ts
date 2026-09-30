@@ -28,7 +28,8 @@ afterEach(() => {
 function capture(key: string): Promise<unknown> {
   return enqueue({
     idempotencyKey: key,
-    endpoint: '/registrations',
+    eventId: 'evt_1',
+    path: '/registrations',
     body: { stationId: 's1', category: 'SEC_3', idempotencyKey: key },
   });
 }

@@ -9,8 +9,10 @@ import {
   listEntries,
   needsAttention,
   toClipboardText,
+  upgradeLegacyEntries,
   type OutboxEntry,
 } from '@/shared/lib/outbox';
+import { openDB } from 'idb';
 
 /**
  * The outbox (BUILD_PLAN §9.5).
@@ -67,11 +69,12 @@ async function flushNow(): Promise<void> {
  * Mirrors what `useCapture` enqueues: the key is both the entry id and a field
  * in the body, because the server reads it from the body.
  */
-function tap(overrides: Partial<{ endpoint: string; body: object }> = {}): Promise<OutboxEntry> {
+function tap(overrides: Partial<{ path: string; body: object }> = {}): Promise<OutboxEntry> {
   const idempotencyKey = crypto.randomUUID();
   return enqueue({
     idempotencyKey,
-    endpoint: overrides.endpoint ?? '/registrations',
+    eventId: 'evt_1',
+    path: overrides.path ?? '/registrations',
     body: {
       category: 'SEC_4',
       stationId: 'station-1',
@@ -93,8 +96,8 @@ describe('enqueue', () => {
 
   it('uses the idempotency key as the entry id, so a retry cannot duplicate', async () => {
     const key = crypto.randomUUID();
-    await enqueue({ idempotencyKey: key, endpoint: '/registrations', body: {} });
-    await enqueue({ idempotencyKey: key, endpoint: '/registrations', body: {} });
+    await enqueue({ idempotencyKey: key, eventId: 'evt_1', path: '/registrations', body: {} });
+    await enqueue({ idempotencyKey: key, eventId: 'evt_1', path: '/registrations', body: {} });
 
     // The same key is the same row. Two enqueues of one logical tap is one
     // entry, and the server would collapse them anyway.
@@ -188,7 +191,7 @@ describe('cancel', () => {
 describe('needsAttention', () => {
   const base: OutboxEntry = {
     id: 'x',
-    endpoint: '/registrations',
+    endpoint: '/events/evt_1/registrations',
     method: 'POST',
     body: {},
     clientRecordedAt: new Date().toISOString(),
@@ -229,7 +232,7 @@ describe('toClipboardText', () => {
     const text = toClipboardText([
       {
         id: 'a',
-        endpoint: '/footfall/ticks',
+        endpoint: '/events/evt_1/footfall/ticks',
         method: 'POST',
         body: { stationId: 's1' },
         clientRecordedAt: '2027-01-07T03:30:00.000Z',
@@ -243,10 +246,77 @@ describe('toClipboardText', () => {
     const [row] = text.split('\n');
     expect(row?.split('\t')).toEqual([
       '2027-01-07T03:30:00.000Z',
-      '/footfall/ticks',
+      '/events/evt_1/footfall/ticks',
       '{"stationId":"s1"}',
       'attempts=10',
       'Could not reach the server',
     ]);
+  });
+});
+
+describe('the event (P09.8)', () => {
+  it("stores the event's full path and the event with every entry", async () => {
+    const entry = await tap();
+    expect(entry.endpoint).toBe('/events/evt_1/registrations');
+    expect(entry.eventId).toBe('evt_1');
+
+    mockedApi.mockResolvedValue({});
+    await flushNow();
+    expect(mockedApi).toHaveBeenCalledWith('/events/evt_1/registrations', {
+      method: 'POST',
+      body: entry.body,
+    });
+  });
+});
+
+describe('entries queued by the previous build (ADR-009 §6)', () => {
+  /** What the pre-P09.8 build stored: an old path, no event. */
+  async function queueAsOldBuild(key: string): Promise<void> {
+    const database = await openDB('spoh2027', 1);
+    await database.put('outbox', {
+      id: key,
+      endpoint: '/registrations',
+      method: 'POST',
+      body: { stationId: 's1', category: 'SEC_3', idempotencyKey: key },
+      clientRecordedAt: '2026-11-18T02:00:00.000Z',
+      attempts: 2,
+      lastAttemptAt: null,
+      status: 'pending',
+      lastError: 'Could not reach the server',
+    });
+    database.close();
+  }
+
+  it("moves onto Event #1's paths with the same key, and sends there", async () => {
+    const key = crypto.randomUUID();
+    await queueAsOldBuild(key);
+
+    expect(await upgradeLegacyEntries('evt_1')).toBe(1);
+    const [upgraded] = await listEntries();
+    expect(upgraded).toMatchObject({
+      id: key,
+      eventId: 'evt_1',
+      endpoint: '/events/evt_1/registrations',
+      attempts: 2,
+    });
+
+    mockedApi.mockResolvedValue({});
+    await flushNow();
+    expect(mockedApi).toHaveBeenCalledWith('/events/evt_1/registrations', {
+      method: 'POST',
+      body: { stationId: 's1', category: 'SEC_3', idempotencyKey: key },
+    });
+    expect(await listEntries()).toHaveLength(0);
+  });
+
+  it('leaves entries of the new build alone, and upgrades only once', async () => {
+    await tap();
+    const key = crypto.randomUUID();
+    await queueAsOldBuild(key);
+
+    expect(await upgradeLegacyEntries('evt_1')).toBe(1);
+    expect(await upgradeLegacyEntries('evt_1')).toBe(0);
+    const endpoints = (await listEntries()).map((entry) => entry.endpoint);
+    expect(endpoints).toEqual(['/events/evt_1/registrations', '/events/evt_1/registrations']);
   });
 });
