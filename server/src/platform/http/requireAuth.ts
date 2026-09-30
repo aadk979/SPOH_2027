@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import { UnauthenticatedError } from '../errors/index.js';
 import { authenticate } from '../identity/index.js';
+import { aliasEvent } from '../event/currentEvent.js';
 import type { RequestAuth } from '../../types/express.js';
 import type { EventScope } from '../db/eventScope.js';
 import { requestIdOf } from './requestId.js';
@@ -23,7 +24,11 @@ function readBearerToken(req: Request): string {
  */
 export async function requireAuth(req: Request, _res: Response, next: NextFunction): Promise<void> {
   try {
-    req.auth = await authenticate(readBearerToken(req), requestIdOf(req));
+    const token = readBearerToken(req);
+    // Platform routes (`/auth/sessions`) name no event; they work in Event #1
+    // like an alias path until P12 gives the person a scope of their own.
+    const event = req.requestedEvent ?? { eventId: (await aliasEvent()).eventId, fromPath: false };
+    req.auth = await authenticate(token, { event, requestId: requestIdOf(req) });
     next();
   } catch (error) {
     next(error);

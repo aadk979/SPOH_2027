@@ -14,6 +14,7 @@ export {
 export { listActiveStations } from './application/listActiveStations.js';
 export { requireActiveStation } from './application/requireActiveStation.js';
 export { requireCountedStation } from './application/requireCountedStation.js';
+export { requireEventStation } from './application/requireEventStation.js';
 export {
   findStationById,
   findStationNames,

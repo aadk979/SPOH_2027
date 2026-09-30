@@ -1,9 +1,9 @@
 import type { SessionResponse } from '@spoh/shared';
 import { AccountInactiveError, NotProvisionedError } from '../../../platform/errors/index.js';
-import { currentEvent } from '../../../platform/event/currentEvent.js';
 import { issueAccessToken } from '../../../platform/identity/index.js';
 import { toSessionResponse } from '../data/mappers.js';
-import { findMembership, findVolunteerBySub } from '../data/repo.js';
+import { findVolunteerBySub } from '../data/repo.js';
+import { homeMembership } from './homeMembership.js';
 
 export interface SessionContext {
   userAgent: string | null;
@@ -18,20 +18,19 @@ export interface OpenedSession {
 }
 
 /**
- * The person behind a subject, with their role in the current event. Being
+ * The person behind a subject, with their role in their home event. Being
  * able to authenticate and being allowed in are different questions
- * (BUILD_PLAN §6.2): the membership of the event answers the second.
+ * (BUILD_PLAN §6.2): a membership of a running event answers the second.
  */
 export async function loadVolunteer(sub: string) {
   const volunteer = await findVolunteerBySub(sub);
   if (!volunteer) throw new NotProvisionedError();
 
-  const scope = await currentEvent();
-  const membership = await findMembership(scope, volunteer.id);
+  const membership = await homeMembership(volunteer.id);
   if (!membership) throw new NotProvisionedError();
   if (membership.status !== 'ACTIVE') throw new AccountInactiveError();
 
-  return { ...volunteer, role: membership.role, scope: { eventId: scope.eventId } };
+  return { ...volunteer, role: membership.role, scope: { eventId: membership.eventId } };
 }
 
 /** Mint the access token for a stored session and describe it to the client. */

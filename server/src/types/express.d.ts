@@ -48,6 +48,12 @@ declare global {
        * `platform/http/requestId.ts` rather than assuming a string.
        */
       auth?: RequestAuth;
+      /**
+       * The event the request works in, set before authentication by the
+       * event-context middleware (`platform/http/eventContext.ts`): the path's
+       * `:eventId`, or Event #1 on an alias path.
+       */
+      requestedEvent?: { eventId: string; fromPath: boolean };
     }
   }
 }

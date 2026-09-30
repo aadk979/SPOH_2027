@@ -22,6 +22,7 @@ import { rosterRouter } from '../modules/roster/index.js';
 import { shiftRouter } from '../modules/shift/index.js';
 import { stationRouter } from '../modules/station/index.js';
 import { createDevAuthRouter } from '../modules/devAuth/index.js';
+import { eventFromAlias, eventFromPath } from '../platform/http/eventContext.js';
 
 /** A module's routes and where they are mounted under /api/v1. */
 export interface ModuleRoutes {
@@ -30,20 +31,28 @@ export interface ModuleRoutes {
 }
 
 /**
- * The versioned API surface (BUILD_PLAN §7.1): every module and its path, in
- * mount order.
+ * Platform routes (ADR-001 §4): about the person and their session, outside
+ * any event. The only routes inside `/api/v1` reachable without a bearer
+ * token are here — opening a session is how you get one — and they carry
+ * their own origin check and the sensitive rate limit instead.
+ */
+export const PLATFORM_ROUTES: readonly ModuleRoutes[] = [
+  { path: '/auth', router: authRouter },
+  // Development sign-in. The factory returns an empty router outside
+  // AUTH_PROVIDER=local, so the path simply 404s in every deployed environment.
+  ...(env.AUTH_PROVIDER === 'local' ? [{ path: '/dev-auth', router: createDevAuthRouter() }] : []),
+];
+
+/**
+ * The event's API surface (BUILD_PLAN §7.1): every module and its path, in
+ * mount order, served under `/api/v1/events/:eventId` (ADR-001 §4).
  *
  * Every router mounts `requireAuth` itself — default deny, with `/healthz` and
  * `/readyz` mounted outside this surface as the only unauthenticated routes in
- * the system.
+ * the system — and authentication resolves the caller's membership of the
+ * path's event.
  */
-export const MODULE_ROUTES: readonly ModuleRoutes[] = [
-  /**
-   * Session lifecycle. The only routes inside `/api/v1` that are reachable
-   * without a bearer token — opening a session is how you get one. They carry
-   * their own origin check and the sensitive rate limit instead.
-   */
-  { path: '/auth', router: authRouter },
+export const EVENT_ROUTES: readonly ModuleRoutes[] = [
   { path: '/me', router: meRouter },
   { path: '/attendance', router: attendanceRouter },
   { path: '/stations', router: stationRouter },
@@ -72,14 +81,21 @@ export const MODULE_ROUTES: readonly ModuleRoutes[] = [
   // Fallback declarations and the reconciliation imports live together: the import only makes
   // sense in the context of the window it is recovering from.
   { path: '/fallback', router: fallbackRouter },
-  // Development sign-in. The factory returns an empty router outside
-  // AUTH_PROVIDER=local, so the path simply 404s in every deployed environment.
-  ...(env.AUTH_PROVIDER === 'local' ? [{ path: '/dev-auth', router: createDevAuthRouter() }] : []),
 ];
 
-/** The /api/v1 router: each module mounted at its path. */
+/**
+ * The /api/v1 router: platform routes, then the event surface under
+ * `/events/:eventId`, then the same surface at its pre-P09.7 paths as aliases
+ * of Event #1's (ADR-009 §6) until P16.7 removes them.
+ */
 export function createApiRouter(): Router {
   const api = Router();
-  for (const { path, router } of MODULE_ROUTES) api.use(path, router);
+  for (const { path, router } of PLATFORM_ROUTES) api.use(path, router);
+
+  const event = Router({ mergeParams: true });
+  for (const { path, router } of EVENT_ROUTES) event.use(path, router);
+  api.use('/events/:eventId', eventFromPath, event);
+
+  for (const { path, router } of EVENT_ROUTES) api.use(path, eventFromAlias, router);
   return api;
 }

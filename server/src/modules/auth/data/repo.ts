@@ -18,6 +18,25 @@ export async function findMembership(scope: EventScope, personId: string) {
   });
 }
 
+/**
+ * A person's memberships of events that are still running (not closed or
+ * archived), oldest event first. A platform read about the person, so it goes
+ * through the person rather than naming one event (ADR-001 §4).
+ */
+export async function findLiveMemberships(personId: string) {
+  const person = await prisma.person.findUnique({
+    where: { id: personId },
+    select: {
+      eventMemberships: {
+        where: { event: { status: { notIn: ['CLOSED', 'ARCHIVED'] } } },
+        select: { id: true, eventId: true, role: true, status: true },
+        orderBy: { event: { createdAt: 'asc' } },
+      },
+    },
+  });
+  return person?.eventMemberships ?? [];
+}
+
 /** The development sign-in's lookup: an email is enough, outside Cognito. */
 export async function findVolunteerByEmail(email: string) {
   return prisma.person.findUnique({

@@ -3,7 +3,7 @@ import { prisma } from '../../../platform/db/client.js';
 import { invalidateSessionCache } from '../../../platform/identity/index.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { revokeLiveSessions } from '../data/repo.js';
-import { inCurrentEvent } from './sessionAudit.js';
+import { inHomeEvent } from './sessionAudit.js';
 
 /** Revoke every live session in a family. Returns how many were live. */
 export async function revokeFamily(
@@ -63,7 +63,7 @@ export async function revokeOwnSession(
   if (count === 0) return false;
   forgetRevoked(sessionId);
 
-  const recorded = await inCurrentEvent(audit, volunteerId);
+  const recorded = await inHomeEvent(audit, volunteerId);
   await prisma.$transaction(async (tx) => {
     await writeAudit(tx, {
       ...recorded,

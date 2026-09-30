@@ -4,6 +4,7 @@ import { prisma } from '../../../platform/db/client.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { logger } from '../../../platform/logger/index.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
+import { requireEventStation } from '../../station/index.js';
 import { createWindow, findOpenWindow } from '../data/repo.js';
 import { assertNoOpenWindow } from '../domain/windowRules.js';
 import { windowRecord } from './windowRecord.js';
@@ -14,7 +15,7 @@ export async function declareFallback(
   { volunteerId: declaredById, scope, audit }: ActorContext,
   clock: Clock = systemClock,
 ): Promise<FallbackWindowRecord> {
-  const stationId = request.stationId ?? null;
+  const stationId = await requireEventStation(scope, request.stationId);
 
   const window = await prisma.$transaction(async (tx) => {
     assertNoOpenWindow(await findOpenWindow(tx, scope, stationId), stationId);

@@ -2,7 +2,7 @@ import type { CreateIncidentRequest, IncidentRecord } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
-import { findStationById } from '../../station/index.js';
+import { findStationById, requireEventStation } from '../../station/index.js';
 import { createIncident, findIncidentById } from '../data/repo.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { toRecordWithAuthors } from './incidentRecord.js';
@@ -13,11 +13,12 @@ export async function reportIncident(
   request: CreateIncidentRequest,
   { volunteerId, scope, audit }: ActorContext,
 ): Promise<IncidentRecord> {
+  const stationId = await requireEventStation(scope, request.stationId);
   const incident = await prisma.$transaction(async (tx) => {
     const row = await createIncident(tx, scope, {
       type: request.type,
       severity: request.severity,
-      stationId: request.stationId ?? null,
+      stationId,
       locationNote: request.locationNote ?? null,
       description: request.description,
       reportedById: volunteerId,

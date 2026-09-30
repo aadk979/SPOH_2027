@@ -2,12 +2,12 @@ import { capabilitiesForRole, highestRole } from '@spoh/shared';
 import { env } from '../../config/env.js';
 import {
   AccountInactiveError,
+  NotFoundError,
   NotProvisionedError,
   UnauthenticatedError,
 } from '../errors/index.js';
 import { logger } from '../logger/index.js';
 import { prisma } from '../db/client.js';
-import { currentEvent } from '../event/currentEvent.js';
 import type { RequestAuth } from '../../types/express.js';
 import { verifyAccessToken } from './sessionTokens.js';
 import { createCognitoAuthProvider } from './cognitoProvider.js';
@@ -94,7 +94,7 @@ const SESSION_CACHE_TTL_MS = 60_000;
 interface CachedVolunteer {
   volunteerId: string;
   displayName: string;
-  /** The event this entry was resolved in; a different current event misses. */
+  /** The event this entry was resolved in. */
   eventId: string;
   membershipId: string;
   role: RequestAuth['role'];
@@ -102,7 +102,9 @@ interface CachedVolunteer {
   expiresAt: number;
 }
 
+/** Keyed by subject and event: one person, one entry per event they work in. */
 const volunteerCache = new Map<string, CachedVolunteer>();
+const cacheKey = (sub: string, eventId: string) => `${sub}|${eventId}`;
 const sessionCache = new Map<string, { live: boolean; sub: string | null; expiresAt: number }>();
 
 /** Drop a subject from the cache. Called when a volunteer is edited. */
@@ -111,7 +113,9 @@ export function invalidateVolunteerCache(sub?: string): void {
     volunteerCache.clear();
     sessionCache.clear();
   } else {
-    volunteerCache.delete(sub);
+    for (const key of volunteerCache.keys()) {
+      if (key.startsWith(`${sub}|`)) volunteerCache.delete(key);
+    }
   }
 }
 
@@ -122,14 +126,26 @@ export function invalidateSessionCache(sessionId?: string): void {
 }
 
 /**
- * The person behind a subject and their membership of the current event: the
- * role and standing come from the membership (ADR-001 §1). A person with no
- * membership in this event is not provisioned for it.
+ * The event a request works in, and whether its path named it (ADR-001 §4).
+ * An alias path (the pre-P09.7 surface) works in Event #1 without naming it.
  */
-async function resolveVolunteer(sub: string): Promise<CachedVolunteer> {
-  const { eventId } = await currentEvent();
-  const cached = volunteerCache.get(sub);
-  if (cached && cached.expiresAt > Date.now() && cached.eventId === eventId) return cached;
+export interface RequestedEvent {
+  eventId: string;
+  fromPath: boolean;
+}
+
+/**
+ * The person behind a subject and their membership of the requested event:
+ * the role and standing come from the membership (ADR-001 §1). A path that
+ * names an event the caller has no membership of answers 404, exactly as an
+ * event that does not exist, so a response never tells an outsider an event
+ * exists. On an alias path the same absence means "not provisioned", as it
+ * always has.
+ */
+async function resolveVolunteer(sub: string, event: RequestedEvent): Promise<CachedVolunteer> {
+  const { eventId } = event;
+  const cached = volunteerCache.get(cacheKey(sub, eventId));
+  if (cached && cached.expiresAt > Date.now()) return cached;
 
   const volunteer = await prisma.person.findUnique({
     where: { cognitoSub: sub },
@@ -141,7 +157,7 @@ async function resolveVolunteer(sub: string): Promise<CachedVolunteer> {
     where: { eventId_personId: { eventId, personId: volunteer.id } },
     select: { id: true, role: true, status: true },
   });
-  if (!membership) throw new NotProvisionedError();
+  if (!membership) throw event.fromPath ? new NotFoundError('Event') : new NotProvisionedError();
 
   const entry: CachedVolunteer = {
     volunteerId: volunteer.id,
@@ -153,7 +169,7 @@ async function resolveVolunteer(sub: string): Promise<CachedVolunteer> {
     expiresAt: Date.now() + VOLUNTEER_CACHE_TTL_MS,
   };
 
-  volunteerCache.set(sub, entry);
+  volunteerCache.set(cacheKey(sub, eventId), entry);
   return entry;
 }
 
@@ -194,7 +210,11 @@ async function sessionIsLive(sessionId: string, sub: string): Promise<boolean> {
  * Whichever arrives, only the subject is taken from it. Role, capabilities and
  * station scope are read from the roster, every time.
  */
-export async function authenticate(token: string, requestId?: string): Promise<RequestAuth> {
+export async function authenticate(
+  token: string,
+  request: { event: RequestedEvent; requestId?: string },
+): Promise<RequestAuth> {
+  const { event, requestId } = request;
   const session = await verifyAccessToken(token);
 
   let sub: string;
@@ -214,7 +234,7 @@ export async function authenticate(token: string, requestId?: string): Promise<R
     groups = verified.groups;
   }
 
-  const volunteer = await resolveVolunteer(sub);
+  const volunteer = await resolveVolunteer(sub, event);
   if (!volunteer.active) throw new AccountInactiveError();
 
   /**

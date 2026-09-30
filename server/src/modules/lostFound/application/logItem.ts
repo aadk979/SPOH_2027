@@ -2,6 +2,7 @@ import type { CreateLostFoundRequest, LostFoundRecord } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
+import { requireEventStation } from '../../station/index.js';
 import { createItem } from '../data/repo.js';
 import { toRecordWithStation } from './itemRecord.js';
 
@@ -10,11 +11,12 @@ export async function logItem(
   request: CreateLostFoundRequest,
   { volunteerId, scope, audit }: ActorContext,
 ): Promise<LostFoundRecord> {
+  const foundStationId = await requireEventStation(scope, request.foundStationId);
   const item = await prisma.$transaction(async (tx) => {
     const row = await createItem(tx, scope, {
       itemLabel: request.itemLabel,
       categoryLabel: request.categoryLabel ?? null,
-      foundStationId: request.foundStationId ?? null,
+      foundStationId,
       foundAt: request.foundAt ? new Date(request.foundAt) : new Date(),
       holderNote: request.holderNote ?? null,
       photoKey: request.photoKey ?? null,

@@ -4,34 +4,33 @@ import { ServiceUnavailableError } from '../errors/index.js';
 import type { EventZone } from '../time/index.js';
 
 /**
- * The event a request works in, until P09.7 puts it in the URL: the newest
- * event that is neither closed nor archived. With one event, that is Event #1.
+ * The event the pre-P09.7 paths (`/api/v1/registrations` …) still work in:
+ * Event #1, the first event created that is not archived. Those paths are
+ * aliases of its event-scoped paths (ADR-001 §4, ADR-009 §6), kept for queued
+ * outbox entries and old clients until P16.7 removes them. It stays Event #1
+ * after it closes, because the outbox drains after the event.
  *
- * Read on every authenticated request, changed only when an event is created
- * or closed, so it is cached for a minute like the roster lookup beside it.
+ * Read on every alias request and changed only when an event is created or
+ * archived, so it is cached for a minute like the roster lookup beside it.
  */
-export interface CurrentEvent extends EventScope {
-  timezone: string;
-}
-
 const TTL_MS = 60_000;
-let cached: { event: CurrentEvent; expiresAt: number } | null = null;
+let cached: { event: EventScope; expiresAt: number } | null = null;
 
-export async function currentEvent(): Promise<CurrentEvent> {
+export async function aliasEvent(): Promise<EventScope> {
   if (cached && cached.expiresAt > Date.now()) return cached.event;
   const row = await prisma.event.findFirst({
-    where: { status: { notIn: ['CLOSED', 'ARCHIVED'] } },
-    orderBy: { createdAt: 'desc' },
-    select: { id: true, timezone: true },
+    where: { status: { not: 'ARCHIVED' } },
+    orderBy: { createdAt: 'asc' },
+    select: { id: true },
   });
   if (!row) throw new ServiceUnavailableError('No event is set up yet');
-  const event = { eventId: row.id, timezone: row.timezone };
+  const event = { eventId: row.id };
   cached = { event, expiresAt: Date.now() + TTL_MS };
   return event;
 }
 
-/** Forget the cached event and zones: after one is created, edited or closed, and between tests. */
-export function invalidateCurrentEvent(): void {
+/** Forget cached events and zones: after one is created, edited or archived, and between tests. */
+export function invalidateEventCache(): void {
   cached = null;
   zones.clear();
 }
@@ -40,7 +39,7 @@ const zones = new Map<string, EventZone>();
 
 /**
  * An event's wall clock: its IANA timezone and day boundary. Neither changes
- * once the event runs, so it is cached for the process; `invalidateCurrentEvent`
+ * once the event runs, so it is cached for the process; `invalidateEventCache`
  * forgets it for set-up edits and tests.
  */
 export async function eventZone(scope: EventScope): Promise<EventZone> {

@@ -4,6 +4,8 @@ import { writeAudit, type AuditContext } from '../../../platform/audit/index.js'
 import { prisma } from '../../../platform/db/client.js';
 import { dispatch } from '../../notification/index.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
+import { requireEventDay } from '../../eventDays/index.js';
+import { requireEventStation } from '../../station/index.js';
 import {
   createAnnouncement,
   findAnnouncementById,
@@ -27,8 +29,9 @@ export async function sendAnnouncement(
   sender: { volunteerId: string; role: CommitteeRole; scope: EventScope },
   audit: AuditContext,
 ): Promise<AnnouncementRecord> {
-  const stationId = request.target.stationId ?? null;
   const { scope } = sender;
+  const stationId = await requireEventStation(scope, request.target.stationId);
+  const eventDayId = await requireEventDay(scope, request.target.eventDayId);
   const today = await eventToday(scope, new Date());
   const postings = await findTodaysPostings(scope, sender.volunteerId, today);
   assertMaySend({ ...sender, todaysStationIds: postings.map((p) => p.stationId) }, stationId);
@@ -39,7 +42,7 @@ export async function sendAnnouncement(
       priority: request.priority,
       targetRole: request.target.role ?? null,
       targetStationId: stationId,
-      targetEventDayId: request.target.eventDayId ?? null,
+      targetEventDayId: eventDayId,
       requiresAck: request.requiresAck,
       authorId: sender.volunteerId,
       expiresAt: request.expiresAt ? new Date(request.expiresAt) : null,

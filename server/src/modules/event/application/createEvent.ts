@@ -1,5 +1,5 @@
 import { prisma } from '../../../platform/db/client.js';
-import { invalidateCurrentEvent } from '../../../platform/event/currentEvent.js';
+import { invalidateEventCache } from '../../../platform/event/currentEvent.js';
 import {
   insertEvent,
   insertTaxonomy,
@@ -32,6 +32,6 @@ export async function createEvent(input: NewEvent): Promise<Event> {
     await insertTaxonomy(tx, { eventId: row.id }, { categories, stationTypes, shiftTemplates });
     return row;
   });
-  invalidateCurrentEvent();
+  invalidateEventCache();
   return created;
 }

@@ -3,6 +3,7 @@ import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { dispatch } from '../../notification/index.js';
+import { requireEventStation } from '../../station/index.js';
 import { createAlert } from '../data/repo.js';
 import { raisedPush } from '../domain/alertRules.js';
 import { decorate } from './alertRecord.js';
@@ -16,12 +17,13 @@ export async function raiseAlert(
   request: RaiseLostPersonRequest,
   { volunteerId, scope, audit }: ActorContext,
 ): Promise<LostPersonAlertRecord> {
+  const lastSeenStationId = await requireEventStation(scope, request.lastSeenStationId);
   const alert = await prisma.$transaction(async (tx) => {
     const row = await createAlert(tx, scope, {
       approxAge: request.approxAge ?? null,
       descriptionText: request.descriptionText,
       clothingText: request.clothingText ?? null,
-      lastSeenStationId: request.lastSeenStationId ?? null,
+      lastSeenStationId,
       lastSeenAt: request.lastSeenAt ? new Date(request.lastSeenAt) : null,
       raisedById: volunteerId,
       raisedAt: new Date(),
