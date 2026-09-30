@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-30T17:10:57.700Z",
+  "updatedAt": "2026-09-30T17:32:14.985Z",
   "current": {
     "phase": "P09",
     "step": "P09.6"
@@ -1878,11 +1878,16 @@
         {
           "id": "P09.11",
           "title": "Seed and no-hardcoding guard",
-          "status": "not_started",
+          "status": "done",
           "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-30T17:32:14.984Z",
+          "commits": ["2b91bb5"],
+          "notes": [
+            {
+              "at": "2026-09-30T17:32:14.985Z",
+              "text": "Seed = dev fixture generator relative to today (event first, rows with event/shift/membership; production seeds the admin only). check:hardcoding in CI (F01 patterns in src, reasons required for exceptions; event content marked until P13). Report/export/sign-in/nav/push copy de-hardcoded; 33 visual baselines updated where labels changed (diff regions reviewed). Server 427+444, client 218, e2e 29, visual 58."
+            }
+          ]
         },
         {
           "id": "P09.12",
