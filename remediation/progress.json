@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-30T12:36:06.817Z",
+  "updatedAt": "2026-09-30T16:48:08.770Z",
   "current": {
     "phase": "P09",
     "step": "P09.6"
@@ -1841,11 +1841,16 @@
         {
           "id": "P09.8",
           "title": "Client event context",
-          "status": "not_started",
+          "status": "done",
           "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-09-30T16:48:08.769Z",
+          "commits": ["e458c14"],
+          "notes": [
+            {
+              "at": "2026-09-30T16:48:08.770Z",
+              "text": "GET /events (person-level auth); client event segment /e/[event] on the static-export placeholder, EventLayout/EventProvider, event-scoped API paths and query keys, outbox eventId + legacy upgrade (unit-tested), picker/switcher, old-address redirects, SW placeholder caching, event-scoped push URLs. Dev seed adds 'Dry Run' + a two-roster persona; e2e 29 incl. two events at once, visual 58 unchanged, client 218, server 424+438. Known: settings loader and push-subscription sync still use alias paths (Event #1) until P10/P12."
+            }
+          ]
         },
         {
           "id": "P09.9",
