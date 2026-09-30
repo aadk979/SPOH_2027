@@ -6,7 +6,6 @@ import type { EventScope } from '../../src/platform/db/eventScope.js';
 import { mirrorMembership } from '../../src/platform/db/membershipMirror.js';
 import { createEvent } from '../../src/modules/event/index.js';
 import { addShiftsForDay } from '../../src/modules/eventDays/index.js';
-import { typeIdFor } from '../../src/modules/station/data/repo.js';
 import { assignmentLinks } from '../../src/modules/assignments/index.js';
 import { createLocalAuthProvider } from '../../src/platform/identity/localProvider.js';
 import { invalidateVolunteerCache } from '../../src/platform/identity/index.js';
@@ -115,6 +114,21 @@ export async function createEventDayToday(): Promise<{ id: string }> {
   return day;
 }
 
+/** A station type of the test event with these capabilities, made on first use. */
+async function stationTypeFor(
+  scope: EventScope,
+  shape: { countsEntry: boolean; issuesStamp: boolean },
+): Promise<string> {
+  const code = `OTHER${shape.countsEntry ? '_COUNTED' : ''}${shape.issuesStamp ? '_STAMPED' : ''}`;
+  const type = await prisma.stationType.upsert({
+    where: { eventId_code: { eventId: scope.eventId, code } },
+    create: { eventId: scope.eventId, code, label: code, ...shape },
+    update: {},
+    select: { id: true },
+  });
+  return type.id;
+}
+
 export async function createStation(overrides: {
   code: string;
   name?: string;
@@ -124,7 +138,6 @@ export async function createStation(overrides: {
 }): Promise<{ id: string; code: string }> {
   const scope = await testEvent();
   const shape = {
-    kind: 'OTHER' as const,
     countsEntry: overrides.countsEntry ?? false,
     issuesStamp: overrides.issuesStamp ?? false,
   };
@@ -132,10 +145,9 @@ export async function createStation(overrides: {
     where: { eventId_code: { eventId: scope.eventId, code: overrides.code } },
     create: {
       eventId: scope.eventId,
-      typeId: await typeIdFor(prisma, scope, shape),
+      typeId: await stationTypeFor(scope, shape),
       code: overrides.code,
       name: overrides.name ?? overrides.code,
-      ...shape,
       active: overrides.active ?? true,
     },
     update: {},

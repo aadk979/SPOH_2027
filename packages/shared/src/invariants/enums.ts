@@ -8,20 +8,6 @@ import { z } from 'zod';
  * If you change a member here you MUST change the Prisma enum and add a migration.
  */
 
-export const StationKind = z.enum([
-  'SIGNUP_BOOTH',
-  'WELCOME_LOUNGE',
-  'COURSE_STATION',
-  'MISSION_COMPLETE',
-  'WELCOME_PARTY',
-  'OTHER',
-]);
-export type StationKind = z.infer<typeof StationKind>;
-
-// hardcoding-allowed: legacy taxonomy enum, dropped with the others at the P09.10 contract.
-export const CourseCode = z.enum(['DAAA', 'DCDF', 'DCS', 'DCITP']);
-export type CourseCode = z.infer<typeof CourseCode>;
-
 export const CommitteeRole = z.enum([
   'VOLUNTEER',
   'IC',

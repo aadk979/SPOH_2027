@@ -28,7 +28,6 @@ const state = vi.hoisted(() => ({ replace: vi.fn() }));
 const STATION = {
   id: 'station-1',
   name: 'Room A',
-  kind: 'MISSION_COMPLETE',
   type: { registersVisitors: false, countsEntry: false, issuesStamp: false, redeemsGifts: true },
 };
 vi.mock('next/navigation', () => ({ useRouter: () => ({ replace: state.replace }) }));

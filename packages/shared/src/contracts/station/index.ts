@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { CourseCode, StationKind } from '../../invariants/enums.js';
 import { Id } from '../common/index.js';
 
 /**
@@ -32,14 +31,7 @@ export const StationSummary = z
     name: z.string(),
     type: StationTypeSummary,
     tags: z.array(StationTagSummary),
-    /** Superseded by `type` (P09.5); removed with the enums at P09.10. */
-    kind: StationKind,
-    courseCode: CourseCode.nullable(),
     floor: z.string().nullable(),
-    /** Is this one of the rooms whose entries are counted (PRODUCT_BRIEF §3). */
-    countsEntry: z.boolean(),
-    /** Does a Mission Card get stamped here. */
-    issuesStamp: z.boolean(),
     active: z.boolean(),
     sortOrder: z.number().int(),
   })
@@ -66,11 +58,11 @@ export const CreateStationRequest = z
   .object({
     code: StationCode,
     name: z.string().trim().min(1).max(120),
-    kind: StationKind,
-    courseCode: CourseCode.nullish(),
+    /** One of the event's station types, by code: what happens there (ADR-002). */
+    typeCode: z.string().trim().min(1).max(64),
+    /** The event's tags for it, by code (a course a room presents). */
+    tagCodes: z.array(z.string().trim().min(1).max(64)).max(20).default([]),
     floor: z.string().trim().max(40).nullish(),
-    countsEntry: z.boolean().default(false),
-    issuesStamp: z.boolean().default(false),
     sortOrder: z.number().int().min(0).max(9999).default(0),
   })
   .strict();

@@ -4,7 +4,8 @@ import { prisma } from '../../../platform/db/client.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { toStationSummary, toStationUpdate } from '../data/mappers.js';
-import { findStationById, setCourseTag, typeIdFor, updateStationRow } from '../data/repo.js';
+import { findStationById, setTags, updateStationRow } from '../data/repo.js';
+import { requireStationTags, requireStationType } from './requireStationStructure.js';
 
 /**
  * Turning off `issuesStamp` changes what "complete" means for every Mission
@@ -12,7 +13,7 @@ import { findStationById, setCourseTag, typeIdFor, updateStationRow } from '../d
  * stations. Cards already complete keep their status; the change is audited
  * so a shifting completion rate has an explanation.
  *
- * The type follows the kind and flags, and the tag the course (expand phase).
+ * Changing the type changes what happens at the station (ADR-002).
  */
 export async function updateStation(
   id: string,
@@ -24,16 +25,14 @@ export async function updateStation(
   if (!existing) throw new NotFoundError('Station');
 
   const station = await prisma.$transaction(async (tx) => {
-    const typeId = await typeIdFor(tx, scope, {
-      kind: patch.kind ?? existing.kind,
-      countsEntry: patch.countsEntry ?? existing.countsEntry,
-      issuesStamp: patch.issuesStamp ?? existing.issuesStamp,
-    });
+    const typeId = patch.typeCode ? await requireStationType(tx, scope, patch.typeCode) : undefined;
     const row = await updateStationRow(tx, scope, {
       id,
-      data: { ...toStationUpdate(patch), typeId },
+      data: { ...toStationUpdate(patch), ...(typeId ? { typeId } : {}) },
     });
-    if (patch.courseCode !== undefined) await setCourseTag(tx, scope, row);
+    if (patch.tagCodes) {
+      await setTags(tx, scope, { id, tagIds: await requireStationTags(tx, scope, patch.tagCodes) });
+    }
     await writeAudit(tx, {
       ...actor.audit,
       action: 'station.update',
@@ -41,8 +40,8 @@ export async function updateStation(
       entityId: id,
       before: {
         name: existing.name,
-        countsEntry: existing.countsEntry,
-        issuesStamp: existing.issuesStamp,
+        typeCode: existing.type.code,
+        tagCodes: existing.tags.map(({ tag }) => tag.code),
         active: existing.active,
       },
       after: { ...patch },

@@ -5,8 +5,8 @@
  *
  * Reads the old columns and the new ones side by side and fails on any
  * difference: every event-owned row belongs to an event, registrations per
- * category and per station and day agree, every station's type grants exactly
- * what its kind and flags did, every assignment sits on the shift for its day
+ * category and per station and day agree, every station's type is its own
+ * event's (it granted exactly what its kind and flags did until P09.10), every assignment sits on the shift for its day
  * and block, and every volunteer has an Event #1 membership with the same role,
  * portfolio, reporting line and standing, and every membership column names
  * the same person's membership in the row's own event.
@@ -86,17 +86,11 @@ const CHECKS = {
     SELECT count(*) AS n FROM "Registration" r
     LEFT JOIN "Station" s ON s."id" = r."stationId"
     WHERE r."eventId" IS DISTINCT FROM s."eventId"`,
-  'stations whose type grants something else': `
-    SELECT count(*) AS n FROM "Station" s LEFT JOIN "StationType" t ON t."id" = s."typeId"
-    WHERE t."id" IS NULL
-       OR t."registersVisitors" <> (s."kind" = 'SIGNUP_BOOTH')
-       OR t."redeemsGifts" <> (s."kind" = 'MISSION_COMPLETE')
-       OR t."countsEntry" <> s."countsEntry" OR t."issuesStamp" <> s."issuesStamp"`,
-  'stations whose course tag differs': `
-    SELECT count(*) AS n FROM "Station" s
-    LEFT JOIN "StationTagging" st ON st."stationId" = s."id"
-    LEFT JOIN "StationTag" tag ON tag."id" = st."tagId"
-    WHERE s."courseCode"::text IS DISTINCT FROM tag."code"`,
+  // The kind, course and flag columns are gone (P09.10); what remains to check
+  // is that a station's type is its own event's.
+  'stations typed from another event': `
+    SELECT count(*) AS n FROM "Station" s JOIN "StationType" t ON t."id" = s."typeId"
+    WHERE t."eventId" <> s."eventId"`,
   'assignments off their day and block': `
     SELECT count(*) AS n FROM "ShiftAssignment" a
     LEFT JOIN "Shift" sh ON sh."id" = a."shiftId"

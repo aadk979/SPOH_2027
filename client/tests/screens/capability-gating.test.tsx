@@ -31,7 +31,6 @@ vi.mock('@/features/session', () => ({
         station: {
           id: 'booth',
           name: 'Booth',
-          kind: 'SIGNUP_BOOTH',
           type: { registersVisitors: true },
         },
       },

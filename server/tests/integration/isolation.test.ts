@@ -113,7 +113,7 @@ async function seedEventB(): Promise<EventB> {
   const other = await personIn(scope, 'b-two@isolation.test');
   const type = await rawDb.stationType.findFirstOrThrow({ where: { eventId } });
   const station = await rawDb.station.create({
-    data: { eventId, typeId: type.id, code: 'B-DESK', name: 'B desk', kind: 'SIGNUP_BOOTH' },
+    data: { eventId, typeId: type.id, code: 'B-DESK', name: 'B desk' },
   });
   // Days are unique by date until P09.10: B's is the day after A's.
   const day = await rawDb.eventDay.create({

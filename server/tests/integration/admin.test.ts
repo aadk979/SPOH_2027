@@ -427,37 +427,61 @@ describe('runtime settings', () => {
 });
 
 describe('stations, days and gifts', () => {
-  it('creates a station and refuses a duplicate code', async () => {
+  // The event's own station structure (ADR-002): a type and a tag.
+  beforeEach(async () => {
+    const { eventId } = await testEvent();
+    await rawDb.stationType.create({
+      data: { eventId, code: 'COURSE_ROOM', label: 'Course room', countsEntry: true },
+    });
+    await rawDb.stationTag.create({ data: { eventId, code: 'DCS', label: 'DCS' } });
+  });
+
+  it("creates a station of the event's type and tags, and refuses a duplicate code", async () => {
     const created = await request(app)
       .post('/api/v1/admin/stations')
       .set('Authorization', bearer(chief))
-      .send({ code: 'NEW_LAB', name: 'New Lab', kind: 'COURSE_STATION', countsEntry: true });
+      .send({ code: 'NEW_LAB', name: 'New Lab', typeCode: 'COURSE_ROOM', tagCodes: ['DCS'] });
 
     expect(created.status).toBe(201);
     expect(created.body.station.code).toBe('NEW_LAB');
-    // What happens there is the type's, derived from kind and flags (P09.5).
+    // What happens there is the type's (ADR-002), the course a tag.
     expect(created.body.station.type).toMatchObject({
-      code: 'COURSE_STATION_COUNTED',
+      code: 'COURSE_ROOM',
       registersVisitors: false,
       countsEntry: true,
       issuesStamp: false,
       redeemsGifts: false,
     });
+    expect(created.body.station.tags).toEqual([expect.objectContaining({ code: 'DCS' })]);
 
     const duplicate = await request(app)
       .post('/api/v1/admin/stations')
       .set('Authorization', bearer(chief))
-      .send({ code: 'NEW_LAB', name: 'Another', kind: 'OTHER' });
+      .send({ code: 'NEW_LAB', name: 'Another', typeCode: 'COURSE_ROOM' });
 
     expect(duplicate.status).toBe(409);
     expect(duplicate.body.error.code).toBe('STATION_CODE_TAKEN');
+  });
+
+  it('refuses a type or tag the event does not have', async () => {
+    const send = (body: object) =>
+      request(app).post('/api/v1/admin/stations').set('Authorization', bearer(chief)).send(body);
+    expect((await send({ code: 'NO_TYPE', name: 'X', typeCode: 'NOPE' })).status).toBe(404);
+    const noTag = await send({
+      code: 'NO_TAG',
+      name: 'X',
+      typeCode: 'COURSE_ROOM',
+      tagCodes: ['NOPE'],
+    });
+    expect(noTag.status).toBe(404);
+    expect(await rawDb.station.count({ where: { code: { in: ['NO_TYPE', 'NO_TAG'] } } })).toBe(0);
   });
 
   it('will not let a station code be renamed, because imports join on it', async () => {
     const created = await request(app)
       .post('/api/v1/admin/stations')
       .set('Authorization', bearer(chief))
-      .send({ code: 'RENAME_ME', name: 'Station', kind: 'OTHER' })
+      .send({ code: 'RENAME_ME', name: 'Station', typeCode: 'COURSE_ROOM' })
       .expect(201);
 
     const response = await request(app)

@@ -1,4 +1,14 @@
-import type { CommitteeRole, CourseCode, StationKind } from '../../src/generated/prisma/enums.js';
+import type { CommitteeRole } from '../../src/generated/prisma/enums.js';
+
+/** The fixture's station kinds and courses: they decide its types and tags. */
+type StationKind =
+  | 'SIGNUP_BOOTH'
+  | 'WELCOME_LOUNGE'
+  | 'COURSE_STATION'
+  | 'MISSION_COMPLETE'
+  | 'WELCOME_PARTY'
+  | 'OTHER';
+type CourseCode = 'DAAA' | 'DCDF' | 'DCS' | 'DCITP';
 
 /**
  * The development fixture (P09.11): one event shaped like SPOH 2027 and a

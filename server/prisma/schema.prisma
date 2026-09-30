@@ -41,22 +41,6 @@ datasource db {
 // ENUMS
 // ─────────────────────────────────────────────
 
-enum StationKind {
-  SIGNUP_BOOTH
-  WELCOME_LOUNGE
-  COURSE_STATION
-  MISSION_COMPLETE
-  WELCOME_PARTY
-  OTHER
-}
-
-enum CourseCode {
-  DAAA
-  DCDF
-  DCS
-  DCITP
-}
-
 enum CommitteeRole {
   VOLUNTEER
   IC
@@ -453,17 +437,12 @@ model Station {
   id          String      @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2). Nullable until P09.10 backfills and contracts.
   eventId     String?
-  /// The type as data (ADR-002); kind and the flags stay authoritative until P09.5.
-  typeId      String?
+  /// What happens at the station: its type's capability flags (ADR-002).
+  typeId      String
   /// "DAAA_STATION", "SIGNUP_BOOTH"
   code        String
   name        String
-  kind        StationKind
-  courseCode  CourseCode?
   floor       String?
-  /// Is this a footfall-counted room (PRODUCT_BRIEF §3).
-  countsEntry Boolean     @default(false)
-  issuesStamp Boolean     @default(false)
   active      Boolean     @default(true)
   sortOrder   Int         @default(0)
 
@@ -478,10 +457,9 @@ model Station {
   fallbackWindows  FallbackWindow[]
 
   event Event?           @relation(fields: [eventId], references: [id], onDelete: Restrict)
-  type  StationType?     @relation(fields: [typeId], references: [id], onDelete: Restrict)
+  type  StationType      @relation(fields: [typeId], references: [id], onDelete: Restrict)
   tags  StationTagging[]
 
-  @@index([kind, active])
   /// Codes are unique within an event, so a clone keeps them (P09.9).
   @@unique([eventId, code])
   @@index([eventId, typeId, active])

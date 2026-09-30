@@ -110,56 +110,35 @@ export async function listCountedStations(
   });
 }
 
-/** The capabilities a station of the old shape had (F01 § P01.3). */
-export interface LegacyStationShape {
-  kind: string;
-  countsEntry: boolean;
-  issuesStamp: boolean;
-}
-
-/**
- * Expand phase (P09.5 to P09.10): stations are still created and edited by
- * kind and flags, so the type is found, or made, from them, exactly as the
- * Event #1 migration derived it.
- */
-export async function typeIdFor(
-  tx: PrismaTransactionClient,
-  scope: EventScope,
-  shape: LegacyStationShape,
-): Promise<string> {
-  const code = `${shape.kind}${shape.countsEntry ? '_COUNTED' : ''}${shape.issuesStamp ? '_STAMPED' : ''}`;
-  const label = shape.kind.toLowerCase().replace(/_/g, ' ');
-  const type = await tx.stationType.upsert({
+/** One of the event's station types by code, or null. */
+export async function findTypeByCode(tx: PrismaTransactionClient, scope: EventScope, code: string) {
+  return tx.stationType.findUnique({
     where: { eventId_code: { eventId: scope.eventId, code } },
-    create: {
-      eventId: scope.eventId,
-      code,
-      label: label.charAt(0).toUpperCase() + label.slice(1),
-      registersVisitors: shape.kind === 'SIGNUP_BOOTH',
-      redeemsGifts: shape.kind === 'MISSION_COMPLETE',
-      countsEntry: shape.countsEntry,
-      issuesStamp: shape.issuesStamp,
-    },
-    update: {},
-    select: { id: true },
+    select: { id: true, code: true },
   });
-  return type.id;
 }
 
-/** Expand phase: a station's course becomes its only tag. */
-export async function setCourseTag(
+/** The event's tags among these codes. */
+export async function findTagsByCodes(
   tx: PrismaTransactionClient,
   scope: EventScope,
-  station: { id: string; courseCode: string | null },
+  codes: readonly string[],
+) {
+  return tx.stationTag.findMany({
+    where: { eventId: scope.eventId, code: { in: [...codes] } },
+    select: { id: true, code: true },
+  });
+}
+
+/** A station's tags, replaced. */
+export async function setTags(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  station: { id: string; tagIds: readonly string[] },
 ): Promise<void> {
   const { eventId } = scope;
   await tx.stationTagging.deleteMany({ where: { eventId, stationId: station.id } });
-  if (!station.courseCode) return;
-  const tag = await tx.stationTag.upsert({
-    where: { eventId_code: { eventId, code: station.courseCode } },
-    create: { eventId, code: station.courseCode, label: station.courseCode },
-    update: {},
-    select: { id: true },
+  await tx.stationTagging.createMany({
+    data: station.tagIds.map((tagId) => ({ eventId, stationId: station.id, tagId })),
   });
-  await tx.stationTagging.create({ data: { eventId, stationId: station.id, tagId: tag.id } });
 }

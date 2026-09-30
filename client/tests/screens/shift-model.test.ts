@@ -6,8 +6,10 @@ import { stationLinks } from '@/navigation';
 function stationTiles(me: MeResponse) {
   return stationLinks({ capabilities: me.capabilities, station: me.currentAssignment?.station });
 }
+/** A station type's code, as the fixture event names them. */
+type Kind = 'SIGNUP_BOOTH' | 'WELCOME_LOUNGE' | 'COURSE_STATION' | 'MISSION_COMPLETE' | 'OTHER';
 function fixture(
-  kind: StationSummary['kind'],
+  kind: Kind,
   capabilities: MeResponse['capabilities'],
   flags = { countsEntry: false, issuesStamp: false },
 ): MeResponse {
@@ -34,7 +36,6 @@ function fixture(
         id: 's',
         code: 'S',
         name: 'Test room',
-        kind,
         type: {
           id: 't',
           code: kind,
@@ -44,12 +45,10 @@ function fixture(
           ...flags,
         },
         tags: [],
-        courseCode: null,
         floor: null,
         active: true,
         sortOrder: 0,
-        ...flags,
-      },
+      } satisfies StationSummary,
     },
     upcomingAssignments: [],
     escalationChain: [],

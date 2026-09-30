@@ -88,7 +88,7 @@ export async function copyStations(
   await tx.station.createMany({
     data: from.stations.map((row) => ({
       ...copyOf(row, ids, eventId),
-      typeId: mapped(ids, row.typeId),
+      typeId: mapped(ids, row.typeId) as string,
     })),
   });
   await tx.stationTagging.createMany({

@@ -5,8 +5,6 @@ import type { Station } from './repo.js';
 /** A station's type as the API returns it: what happens there (ADR-002). */
 function toTypeSummary(station: Station): StationSummary['type'] {
   const { type } = station;
-  // Every station has a type from P09.4 on; one without is a migration gap.
-  if (!type) throw new Error(`station ${station.id} has no type`);
   return {
     id: type.id,
     code: type.code,
@@ -26,29 +24,18 @@ export function toStationSummary(station: Station): StationSummary {
     name: station.name,
     type: toTypeSummary(station),
     tags: station.tags.map(({ tag }) => ({ id: tag.id, code: tag.code, label: tag.label })),
-    kind: station.kind,
-    courseCode: station.courseCode,
     floor: station.floor,
-    countsEntry: station.countsEntry,
-    issuesStamp: station.issuesStamp,
     active: station.active,
     sortOrder: station.sortOrder,
   };
 }
 
-const PATCHABLE = [
-  'name',
-  'kind',
-  'courseCode',
-  'floor',
-  'countsEntry',
-  'issuesStamp',
-  'sortOrder',
-  'active',
-] as const satisfies ReadonlyArray<keyof UpdateStationRequest>;
+const PATCHABLE = ['name', 'floor', 'sortOrder', 'active'] as const satisfies ReadonlyArray<
+  keyof UpdateStationRequest
+>;
 
 /** Fields a patch may clear by sending null. */
-const CLEARABLE: ReadonlySet<string> = new Set(['courseCode', 'floor']);
+const CLEARABLE: ReadonlySet<string> = new Set(['floor']);
 
 /** The patch as a row update: only the fields the request names. */
 export function toStationUpdate(patch: UpdateStationRequest): Prisma.StationUncheckedUpdateInput {

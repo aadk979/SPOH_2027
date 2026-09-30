@@ -160,7 +160,14 @@ async function seedStations(scope: Scope): Promise<Map<string, string>> {
     const typeId = await typeIdFor(scope, station);
     const row = await prisma.station.upsert({
       where: { eventId_code: { eventId: scope.eventId, code: station.code } },
-      create: { ...scope, ...station, typeId },
+      create: {
+        ...scope,
+        code: station.code,
+        name: station.name,
+        floor: station.floor,
+        sortOrder: station.sortOrder,
+        typeId,
+      },
       update: { name: station.name, typeId, active: true },
     });
     ids.set(station.code, row.id);
@@ -403,7 +410,6 @@ async function seedSecondEvent(first: Scope, today: string): Promise<void> {
       typeId: type.id,
       code: station.code,
       name: station.name,
-      kind: 'SIGNUP_BOOTH',
     },
     update: {},
   });

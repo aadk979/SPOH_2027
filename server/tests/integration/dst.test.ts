@@ -124,8 +124,11 @@ describe('shifts across a DST transition (P09.6)', () => {
 describe('the report on a DST day (P09.6)', () => {
   async function register(instants: string[]): Promise<void> {
     const person = await createVolunteer({ email: 'counter@dst.test', role: 'VOLUNTEER' });
+    const type = await rawDb.stationType.create({
+      data: { eventId: london.eventId, code: 'BOOTH', label: 'Booth', registersVisitors: true },
+    });
     const station = await rawDb.station.create({
-      data: { eventId: london.eventId, code: 'LDN-BOOTH', name: 'Booth', kind: 'SIGNUP_BOOTH' },
+      data: { eventId: london.eventId, typeId: type.id, code: 'LDN-BOOTH', name: 'Booth' },
     });
     const category = await rawDb.captureCategory.findFirstOrThrow({
       where: { eventId: london.eventId, code: 'SEC_1' },

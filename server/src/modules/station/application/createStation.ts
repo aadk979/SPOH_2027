@@ -4,13 +4,8 @@ import { prisma } from '../../../platform/db/client.js';
 import { ConflictError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { toStationSummary } from '../data/mappers.js';
-import {
-  createStationRow,
-  findStationById,
-  findStationByCode,
-  setCourseTag,
-  typeIdFor,
-} from '../data/repo.js';
+import { createStationRow, findStationById, findStationByCode, setTags } from '../data/repo.js';
+import { requireStationTags, requireStationType } from './requireStationStructure.js';
 
 export async function createStation(
   request: CreateStationRequest,
@@ -29,21 +24,23 @@ export async function createStation(
     const row = await createStationRow(tx, scope, {
       code: request.code,
       name: request.name,
-      kind: request.kind,
-      typeId: await typeIdFor(tx, scope, request),
-      courseCode: request.courseCode ?? null,
+      typeId: await requireStationType(tx, scope, request.typeCode),
       floor: request.floor ?? null,
-      countsEntry: request.countsEntry,
-      issuesStamp: request.issuesStamp,
       sortOrder: request.sortOrder,
     });
-    await setCourseTag(tx, scope, row);
+    const tagIds = await requireStationTags(tx, scope, request.tagCodes);
+    await setTags(tx, scope, { id: row.id, tagIds });
     await writeAudit(tx, {
       ...actor.audit,
       action: 'station.create',
       entityType: 'Station',
       entityId: row.id,
-      after: { code: row.code, name: row.name, kind: row.kind },
+      after: {
+        code: row.code,
+        name: row.name,
+        typeCode: request.typeCode,
+        tagCodes: request.tagCodes,
+      },
     });
     return (await findStationById(scope, row.id, tx)) ?? row;
   });
