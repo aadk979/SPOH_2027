@@ -90,7 +90,12 @@ export function requireStationScope(
         // station that has gone wrong. The bypass is recorded so it is visible
         // in reconciliation rather than indistinguishable from a normal write.
         const scope = { eventId: auth.eventId };
-        const who = { membershipId: auth.membershipId, stationId };
+        const recorded: unknown = req.body?.clientRecordedAt;
+        const who = {
+          membershipId: auth.membershipId,
+          stationId,
+          ...(typeof recorded === 'string' ? { clientRecordedAt: recorded } : {}),
+        };
         if (roleMeets(auth.role, 'IC')) {
           const onShift = await isOnShiftAt(scope, who);
           if (!onShift) auth.stationScopeBypass = { stationId };

@@ -1,4 +1,4 @@
-import { captureProvenance } from '../../../platform/db/captureProvenance.js';
+import { admitCapture } from '../../../platform/db/captureAdmission.js';
 import type { CreateLostFoundRequest, LostFoundRecord } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
@@ -15,7 +15,7 @@ export async function logItem(
 ): Promise<LostFoundRecord> {
   const foundStationId = await requireEventStation(scope, request.foundStationId);
   const item = await prisma.$transaction(async (tx) => {
-    await captureProvenance(tx, scope, request);
+    await admitCapture(tx, scope, { request, clock });
     const row = await createItem(tx, scope, {
       itemLabel: request.itemLabel,
       categoryLabel: request.categoryLabel ?? null,

@@ -7,7 +7,7 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { onlineManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import NewIncidentScreen from '@/features/incident/screens/NewIncidentScreen';
@@ -68,6 +68,7 @@ beforeEach(() => {
   state.replace.mockReset();
 });
 afterEach(() => {
+  onlineManager.setOnline(true);
   cleanup();
   clients.splice(0).forEach((client) => client.clear());
 });
@@ -79,7 +80,10 @@ describe('stamps', () => {
     await act(() => result.current.stamp('ABC123'));
 
     const sent = mockedApi.mock.calls[0]![1] as {
-      body: { idempotencyKey: string; rehearsal: boolean };
+      body: {
+        idempotencyKey: string;
+        rehearsal: boolean;
+      };
     };
     expect(sent.body.rehearsal).toBe(true);
     expect(mockedEnqueue).toHaveBeenCalledWith({
@@ -127,26 +131,37 @@ describe('redemptions', () => {
 });
 
 describe('incident reports', () => {
-  it('queue offline and tell the reporter to find their IC now', async () => {
-    mockedApi.mockRejectedValue(offline());
-    render(<NewIncidentScreen />, { wrapper });
-    const description = screen.getByLabelText('What happened?');
-    fireEvent.change(description, { target: { value: 'Cable across the walkway' } });
-    fireEvent.submit(description.closest('form')!);
+  it.each([true, false])(
+    'queues and tells the reporter to find their IC (query manager online %s)',
+    async (online) => {
+      onlineManager.setOnline(online);
+      mockedApi.mockRejectedValue(offline());
+      render(<NewIncidentScreen />, { wrapper });
+      const description = screen.getByLabelText('What happened?');
+      fireEvent.change(description, { target: { value: 'Cable across the walkway' } });
+      fireEvent.submit(description.closest('form')!);
 
-    await screen.findByText('Queued. If anyone is hurt or in danger, tell your IC now.');
-    const sent = mockedApi.mock.calls[0]![1] as {
-      body: { idempotencyKey: string; rehearsal: boolean };
-    };
-    expect(sent.body.rehearsal).toBe(true);
-    expect(mockedEnqueue).toHaveBeenCalledWith({
-      idempotencyKey: sent.body.idempotencyKey,
-      eventId: TEST_EVENT.id,
-      path: '/incidents',
-      body: sent.body,
-    });
-    expect(state.replace).not.toHaveBeenCalled();
-  });
+      await screen.findByText('Queued. If anyone is hurt or in danger, tell your IC now.');
+      const sent = mockedApi.mock.calls[0]![1] as {
+        body: {
+          idempotencyKey: string;
+          rehearsal: boolean;
+          clientRecordedAt: string;
+          occurredAt: string;
+        };
+      };
+      expect(sent.body.rehearsal).toBe(true);
+      expect(Number.isFinite(new Date(sent.body.clientRecordedAt).getTime())).toBe(true);
+      expect(sent.body.clientRecordedAt).toBe(sent.body.occurredAt);
+      expect(mockedEnqueue).toHaveBeenCalledWith({
+        idempotencyKey: sent.body.idempotencyKey,
+        eventId: TEST_EVENT.id,
+        path: '/incidents',
+        body: sent.body,
+      });
+      expect(state.replace).not.toHaveBeenCalled();
+    },
+  );
 });
 
 describe('lost-person alerts', () => {

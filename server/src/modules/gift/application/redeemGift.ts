@@ -105,7 +105,7 @@ interface RecordInput {
 async function recordRedemption(tx: PrismaTransactionClient, input: RecordInput) {
   const { request, stationId, context, recordedAt } = input;
   const { scope } = context;
-  const { stationScopeBypass } = await captureStation(tx, context, request);
+  const { stationScopeBypass, lateSync } = await captureStation(tx, context, request);
   // Gift type first, then the card (in checkCard): one order, so no deadlock.
   await lockGiftType(tx, scope, request.giftTypeId);
   const giftType = await findGiftType(scope, request.giftTypeId, tx);
@@ -145,6 +145,7 @@ async function recordRedemption(tx: PrismaTransactionClient, input: RecordInput)
       warning,
       flag,
       rehearsal: redemption.rehearsal,
+      ...(lateSync ? { lateSync } : {}),
     },
   });
 

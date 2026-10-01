@@ -47,6 +47,7 @@ const forms = [
       stationId: '11111111-1111-4111-8111-111111111111',
       description: 'Cable across walkway',
       occurredAt: expect.any(String),
+      clientRecordedAt: expect.any(String),
       idempotencyKey: expect.any(String),
     },
     destination: `${APP}/home`,

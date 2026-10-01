@@ -1,6 +1,10 @@
 import { captureStation } from '../../../platform/access/captureStation.js';
 import type { CreateRegistrationRequest, CreateRegistrationResponse } from '@spoh/shared';
-import { auditStationScopeBypass, writeAudit } from '../../../platform/audit/index.js';
+import {
+  auditStationScopeBypass,
+  captureAuditFields,
+  writeAudit,
+} from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import type { CaptureContext } from '../../../platform/http/captureActor.js';
 import { eventTodayStart } from '../../../platform/event/today.js';
@@ -30,7 +34,7 @@ export async function recordRegistration(
   const recordedAt = clock.now();
 
   const registration = await prisma.$transaction(async (tx) => {
-    const { stationScopeBypass } = await captureStation(tx, { scope, actor, clock }, request);
+    const mode = await captureStation(tx, { scope, actor, clock }, request);
     const category = await requireCategory(tx, scope, request.category);
     const row = await createRegistration(tx, scope, {
       categoryId: category.id,
@@ -45,13 +49,17 @@ export async function recordRegistration(
     if (request.visitor) {
       await recordVisitorValues(tx, scope, { registrationId: row.id, values: request.visitor });
     }
-    await auditStationScopeBypass(tx, stationScopeBypass, audit);
+    await auditStationScopeBypass(tx, mode.stationScopeBypass, audit);
     await writeAudit(tx, {
       ...audit,
       action: 'registration.create',
       entityType: 'Registration',
       entityId: row.id,
-      after: { category: row.captureCategory.code, stationId: row.stationId },
+      after: {
+        category: row.captureCategory.code,
+        stationId: row.stationId,
+        ...captureAuditFields(mode),
+      },
     });
     return row;
   });

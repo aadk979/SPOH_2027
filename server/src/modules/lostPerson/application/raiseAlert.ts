@@ -1,4 +1,4 @@
-import { captureProvenance } from '../../../platform/db/captureProvenance.js';
+import { admitCapture } from '../../../platform/db/captureAdmission.js';
 import type { LostPersonAlertRecord, RaiseLostPersonRequest } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
@@ -21,7 +21,7 @@ export async function raiseAlert(
 ): Promise<LostPersonAlertRecord> {
   const lastSeenStationId = await requireEventStation(scope, request.lastSeenStationId);
   const alert = await prisma.$transaction(async (tx) => {
-    await captureProvenance(tx, scope, request);
+    await admitCapture(tx, scope, { request, clock });
     const row = await createAlert(tx, scope, {
       approxAge: request.approxAge ?? null,
       descriptionText: request.descriptionText,

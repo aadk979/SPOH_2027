@@ -7,6 +7,7 @@ import {
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { ConflictError, NotFoundError, ValidationError } from '../../../platform/errors/index.js';
 import { findWindow } from '../data/repo.js';
+import { admitCapture } from '../../../platform/db/captureAdmission.js';
 
 export interface ImportProvenance extends CaptureProvenance {
   fallbackWindowId?: string;
@@ -35,8 +36,8 @@ export async function assertImportProvenance(
   scope: EventScope,
   provenance: ImportProvenance,
 ): Promise<void> {
+  const current = await admitCapture(tx, scope);
   if (provenance.fallbackWindowId) return;
-  const current = await captureProvenance(tx, scope);
   if (current.rehearsal !== provenance.rehearsal) {
     throw new ConflictError(
       ERROR_CODES.CONFLICT,

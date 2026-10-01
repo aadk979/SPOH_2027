@@ -1,5 +1,5 @@
 import { assertCardProvenance } from '../domain/cardRules.js';
-import { captureProvenance } from '../../../platform/db/captureProvenance.js';
+import { admitCapture } from '../../../platform/db/captureAdmission.js';
 import type { IssueCardRequest, MissionCardRecord } from '@spoh/shared';
 import { auditStationScopeBypass, writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
@@ -31,7 +31,7 @@ export async function issueCard(
   const shortCode = normaliseShortCode(shortCodeInput);
 
   const cardId = await prisma.$transaction(async (tx) => {
-    const provenance = await captureProvenance(tx, scope, request);
+    const provenance = await admitCapture(tx, scope, { request, clock });
     const existing = requireCard(await findCardRow(tx, scope, shortCode));
     assertCardProvenance(existing, provenance);
     assertCardNotVoided(existing, 'That card has been voided. Issue a fresh one.');
@@ -46,7 +46,12 @@ export async function issueCard(
         action: 'card.issue',
         entityType: 'MissionCard',
         entityId: existing.id,
-        after: { shortCode, groupId: request.groupId ?? null },
+        after: {
+          shortCode,
+          groupId: request.groupId ?? null,
+          rehearsal: provenance.rehearsal,
+          ...(provenance.lateSync ? { lateSync: provenance.lateSync } : {}),
+        },
       });
     }
 

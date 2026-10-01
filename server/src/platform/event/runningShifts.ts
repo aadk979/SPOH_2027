@@ -18,10 +18,19 @@ export function shiftFilter(scope: EventScope, mode: { rehearsal: boolean; now: 
  * and a DST day all hold. REHEARSAL permits assigned shifts outside their hours
  * and dates. The phase is read on every check so go-live closes that permission.
  */
-export async function runningShifts(scope: EventScope, now: Date = systemClock.now()) {
+export async function runningShifts(
+  scope: EventScope,
+  now: Date = systemClock.now(),
+  clientRecordedAt?: string,
+) {
   const event = await prisma.event.findUniqueOrThrow({
     where: { id: scope.eventId },
     select: { status: true },
   });
-  return shiftFilter(scope, { rehearsal: event.status === 'REHEARSAL', now });
+  const recorded = clientRecordedAt ? new Date(clientRecordedAt) : null;
+  const shiftAt =
+    event.status === 'CLOSED' && recorded && Number.isFinite(recorded.getTime()) ? recorded : now;
+  // This permits the middleware's historical roster check. The capture transaction
+  // independently validates close time, grace period, mode and active membership.
+  return shiftFilter(scope, { rehearsal: event.status === 'REHEARSAL', now: shiftAt });
 }

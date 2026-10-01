@@ -1,6 +1,10 @@
 import { captureStation } from '../../../platform/access/captureStation.js';
 import type { CreateFootfallTickRequest, CreateFootfallTickResponse } from '@spoh/shared';
-import { auditStationScopeBypass, writeAudit } from '../../../platform/audit/index.js';
+import {
+  auditStationScopeBypass,
+  captureAuditFields,
+  writeAudit,
+} from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import type { CaptureContext } from '../../../platform/http/captureActor.js';
 import { eventTodayStart } from '../../../platform/event/today.js';
@@ -20,7 +24,7 @@ export async function recordTick(
   const recordedAt = clock.now();
 
   const tick = await prisma.$transaction(async (tx) => {
-    const { stationScopeBypass } = await captureStation(tx, { scope, actor, clock }, request);
+    const mode = await captureStation(tx, { scope, actor, clock }, request);
     const row = await createTick(tx, scope, {
       stationId: station.id,
       recordedById: actor.volunteerId,
@@ -31,13 +35,13 @@ export async function recordTick(
       clientRecordedAt: request.clientRecordedAt ? new Date(request.clientRecordedAt) : null,
       idempotencyKey: request.idempotencyKey,
     });
-    await auditStationScopeBypass(tx, stationScopeBypass, audit);
+    await auditStationScopeBypass(tx, mode.stationScopeBypass, audit);
     await writeAudit(tx, {
       ...audit,
       action: 'footfall.tick',
       entityType: 'FootfallTick',
       entityId: row.id,
-      after: { stationId: row.stationId, quantity: row.quantity },
+      after: { stationId: row.stationId, quantity: row.quantity, ...captureAuditFields(mode) },
     });
     return row;
   });

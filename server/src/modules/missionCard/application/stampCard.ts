@@ -1,7 +1,11 @@
 import { assertCardProvenance } from '../domain/cardRules.js';
 import { captureStation } from '../../../platform/access/captureStation.js';
-import type { StampCardRequest, StampCardResponse } from '@spoh/shared';
-import { auditStationScopeBypass, writeAudit } from '../../../platform/audit/index.js';
+import type { CardStatus, StampCardRequest, StampCardResponse } from '@spoh/shared';
+import {
+  auditStationScopeBypass,
+  captureAuditFields,
+  writeAudit,
+} from '../../../platform/audit/index.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { CaptureContext } from '../../../platform/http/captureActor.js';
 import { systemClock } from '../../../platform/time/index.js';
@@ -22,6 +26,7 @@ import {
 import { normaliseShortCode } from '../domain/shortCode.js';
 import { getCard } from './getCard.js';
 import { stampingStationIds } from './stampingStations.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 
 interface StampInput {
   shortCode: string;
@@ -36,6 +41,22 @@ interface StampOutcome {
   stampAdded: boolean;
   justCompleted: boolean;
   warning: string | null;
+}
+
+async function completeStampedJourney(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  input: { card: { id: string; status: CardStatus }; stationCount: number; recordedAt: Date },
+) {
+  const stampCount = await countStampsForCard(tx, scope, input.card.id);
+  const justCompleted = isJourneyComplete(stampCount, input.stationCount);
+  if (justCompleted && input.card.status !== 'COMPLETED') {
+    await updateCard(tx, scope, {
+      id: input.card.id,
+      data: { status: 'COMPLETED', completedAt: input.recordedAt },
+    });
+  }
+  return { stampCount, justCompleted };
 }
 
 /**
@@ -79,14 +100,11 @@ async function applyStamp(tx: PrismaTransactionClient, input: StampInput): Promi
     source: 'APP',
   });
 
-  const stampCount = await countStampsForCard(tx, scope, existing.id);
-  const justCompleted = isJourneyComplete(stampCount, input.stationCount);
-  if (justCompleted && existing.status !== 'COMPLETED') {
-    await updateCard(tx, scope, {
-      id: existing.id,
-      data: { status: 'COMPLETED', completedAt: recordedAt },
-    });
-  }
+  const { stampCount, justCompleted } = await completeStampedJourney(tx, scope, {
+    card: existing,
+    stationCount: input.stationCount,
+    recordedAt,
+  });
 
   await auditStationScopeBypass(tx, stationScopeBypass, context.audit);
   await writeAudit(tx, {
@@ -94,7 +112,12 @@ async function applyStamp(tx: PrismaTransactionClient, input: StampInput): Promi
     action: 'card.stamp',
     entityType: 'MissionCard',
     entityId: existing.id,
-    after: { stationId: station.id, stampCount, completed: justCompleted },
+    after: {
+      stationId: station.id,
+      stampCount,
+      completed: justCompleted,
+      ...captureAuditFields(provenance),
+    },
   });
 
   return { stampAdded: true, justCompleted, warning: null };

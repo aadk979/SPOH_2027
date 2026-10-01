@@ -10,22 +10,41 @@ export interface CaptureProvenance {
 /** Capture-screen counts use the written row's mode, even if the event changes afterwards. */
 export type CaptureModeScope = EventScope & CaptureProvenance;
 
-/** Keep the event phase stable until the capture transaction commits. */
-export async function captureProvenance(
+export interface CaptureEvent {
+  status: EventStatus;
+  closedAt: Date | null;
+  organisationId: string;
+}
+
+/** Keep phase and close time stable until the caller's transaction commits. */
+export async function holdCaptureEvent(
   tx: PrismaTransactionClient,
   scope: EventScope,
-  expected?: { rehearsal?: boolean },
-): Promise<CaptureProvenance> {
-  const rows = await tx.$queryRaw<Array<{ status: EventStatus }>>`
-    SELECT status FROM "Event" WHERE id = ${scope.eventId} FOR SHARE`;
+): Promise<CaptureEvent> {
+  const rows = await tx.$queryRaw<CaptureEvent[]>`
+    SELECT status, "closedAt", "organisationId" FROM "Event" WHERE id = ${scope.eventId} FOR SHARE`;
   const event = rows[0];
   if (!event) throw new NotFoundError('Event');
-  const rehearsal = event.status === 'REHEARSAL';
+  return event;
+}
+
+export function assertCaptureMode(rehearsal: boolean, expected?: { rehearsal?: boolean }): void {
   if (expected?.rehearsal !== undefined && expected.rehearsal !== rehearsal) {
     throw new ConflictError(
       ERROR_CODES.CONFLICT,
       'The event changed rehearsal/live mode. This capture was not recorded.',
     );
   }
+}
+
+/** Preparation and reads need provenance without admitting a new capture. */
+export async function captureProvenance(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  expected?: { rehearsal?: boolean },
+): Promise<CaptureProvenance> {
+  const event = await holdCaptureEvent(tx, scope);
+  const rehearsal = event.status === 'REHEARSAL';
+  assertCaptureMode(rehearsal, expected);
   return { rehearsal };
 }

@@ -102,6 +102,14 @@ export interface AuditEntry extends AuditContext {
   after?: JsonValue;
 }
 
+/** Stored practice mode and the bounded close exception belong in the mutation's audit. */
+export function captureAuditFields(provenance: { rehearsal: boolean; lateSync?: JsonValue }) {
+  return {
+    rehearsal: provenance.rehearsal,
+    ...(provenance.lateSync ? { lateSync: provenance.lateSync } : {}),
+  };
+}
+
 const MEMBERSHIP_CHANGES = new Set<AuditAction>([
   'roster.edit',
   'roster.import',

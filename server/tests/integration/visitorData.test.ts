@@ -67,6 +67,11 @@ const tap = (visitor?: Record<string, string>) =>
       ...(visitor ? { visitor } : {}),
     });
 
+async function openLiveCapture() {
+  const { eventId } = await testEvent();
+  await rawDb.event.update({ where: { id: eventId }, data: { status: 'LIVE' } });
+}
+
 describe('per-event visitor allowlist (ADR-002 §4)', () => {
   it.each([false, true])(
     'copies the registration mode into visitor values (practice %s)',
@@ -101,6 +106,7 @@ describe('per-event visitor allowlist (ADR-002 §4)', () => {
     const { eventId } = await testEvent();
     expect((await changeMode('allowlist', 0)).status).toBe(200);
     expect((await field('contact', 2, ['CHIEF_COORDINATOR'])).status).toBe(201);
+    await openLiveCapture();
     let pending: Promise<request.Response> | undefined;
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
@@ -125,6 +131,7 @@ describe('per-event visitor allowlist (ADR-002 §4)', () => {
   });
 
   it('defaults to no personal data and rejects undeclared values without a count', async () => {
+    await openLiveCapture();
     const refused = await tap({ contact: 'visitor@example.test' });
     expect(refused.status).toBe(422);
     expect(await rawDb.registration.count()).toBe(0);
@@ -144,6 +151,7 @@ describe('per-event visitor allowlist (ADR-002 §4)', () => {
     expect((await changeMode('allowlist', 0)).status).toBe(200);
     expect((await field('contact', 2, ['CHIEF_COORDINATOR'])).status).toBe(201);
     expect((await field('interest', 5, ['IC', 'LEAD', 'CHIEF_COORDINATOR'])).status).toBe(201);
+    await openLiveCapture();
 
     const rejected = await tap({ unknown: 'secret' });
     expect(rejected.status).toBe(422);
@@ -205,6 +213,7 @@ describe('per-event visitor allowlist (ADR-002 §4)', () => {
     expect((await changeMode('allowlist', 0)).status).toBe(200);
     await field('early', 1, ['CHIEF_COORDINATOR']);
     await field('late', 3, ['CHIEF_COORDINATOR']);
+    await openLiveCapture();
     expect((await tap({ early: 'one', late: 'three' })).status).toBe(201);
 
     const { eventId } = await testEvent();

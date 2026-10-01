@@ -1,7 +1,11 @@
 import { captureStation } from '../../../platform/access/captureStation.js';
 import { randomUUID } from 'node:crypto';
 import type { CreateGroupRegistrationRequest, CreateGroupRegistrationResponse } from '@spoh/shared';
-import { auditStationScopeBypass, writeAudit } from '../../../platform/audit/index.js';
+import {
+  auditStationScopeBypass,
+  captureAuditFields,
+  writeAudit,
+} from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import type { CaptureContext } from '../../../platform/http/captureActor.js';
 import { eventTodayStart } from '../../../platform/event/today.js';
@@ -56,6 +60,7 @@ export async function recordGroupRegistration(
         memberCount: created.length,
         linkedCardId: link.cardId,
         cardLinkError: link.linkError,
+        ...captureAuditFields(mode),
       },
     });
     return { registrations: created, ...link, rehearsal: mode.rehearsal };

@@ -1,6 +1,10 @@
 import { captureStation } from '../../../platform/access/captureStation.js';
 import type { CreateFootfallBulkRequest, CreateFootfallTickResponse } from '@spoh/shared';
-import { auditStationScopeBypass, writeAudit } from '../../../platform/audit/index.js';
+import {
+  auditStationScopeBypass,
+  captureAuditFields,
+  writeAudit,
+} from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import type { CaptureContext } from '../../../platform/http/captureActor.js';
 import { eventTodayStart } from '../../../platform/event/today.js';
@@ -23,7 +27,7 @@ export async function recordBulk(
   const timeBlockStart = new Date(request.timeBlockStart);
 
   const tick = await prisma.$transaction(async (tx) => {
-    const { stationScopeBypass } = await captureStation(tx, { scope, actor, clock }, request);
+    const mode = await captureStation(tx, { scope, actor, clock }, request);
     const row = await createTick(tx, scope, {
       stationId: station.id,
       recordedById: actor.volunteerId,
@@ -36,7 +40,7 @@ export async function recordBulk(
       recordedAt: timeBlockStart,
       idempotencyKey: request.idempotencyKey,
     });
-    await auditStationScopeBypass(tx, stationScopeBypass, audit);
+    await auditStationScopeBypass(tx, mode.stationScopeBypass, audit);
     await writeAudit(tx, {
       ...audit,
       action: 'footfall.bulk',
@@ -48,6 +52,7 @@ export async function recordBulk(
         source: row.source,
         timeBlockStart: timeBlockStart.toISOString(),
         reason: request.reason,
+        ...captureAuditFields(mode),
       },
     });
     return row;

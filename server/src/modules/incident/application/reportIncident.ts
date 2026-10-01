@@ -1,4 +1,4 @@
-import { captureProvenance } from '../../../platform/db/captureProvenance.js';
+import { admitCapture } from '../../../platform/db/captureAdmission.js';
 import type { CreateIncidentRequest, IncidentRecord } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
@@ -17,7 +17,7 @@ export async function reportIncident(
 ): Promise<IncidentRecord> {
   const stationId = await requireEventStation(scope, request.stationId);
   const incident = await prisma.$transaction(async (tx) => {
-    await captureProvenance(tx, scope, request);
+    const provenance = await admitCapture(tx, scope, { request, clock });
     const row = await createIncident(tx, scope, {
       type: request.type,
       severity: request.severity,
@@ -42,6 +42,7 @@ export async function reportIncident(
         severity: row.severity,
         stationId: row.stationId,
         rehearsal: row.rehearsal,
+        ...(provenance.lateSync ? { lateSync: provenance.lateSync } : {}),
       },
     });
     return row;

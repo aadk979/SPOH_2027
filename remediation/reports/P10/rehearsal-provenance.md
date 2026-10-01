@@ -247,5 +247,39 @@ passed by exit code. The integration, visual and E2E dedicated `_test` databases
 migration; a read-only Prisma schema comparison found no drift. No client layout changed in
 this slice.
 
-Remaining: audited lifecycle admission, transitions and close/archive side effects.
+## Capture admission and bounded late sync
+
+New registration/group, footfall/bulk, card issue/stamp, gift redemption, incident, lost-person
+and found-item captures are refused in DRAFT, READY and ARCHIVED. Import commits use the same
+event lock and admission check, including imports bound to a historical source window; previews
+remain read-only. Preparation and operational reads retain their separate provenance helper.
+
+CLOSED accepts a capture only with a strictly pre-close `clientRecordedAt`, received within
+`capture.lateSyncHours` (default 24, resolved from the event's stored setting). Station captures
+recheck active membership and the assignment at that historical instant in the transaction;
+the existing IC bypass remains audited. Practice captures cannot become live late-sync rows.
+Mutation audits include the original device timestamp, close time, receipt time and grace used.
+Online-only new lost-person alerts and found-item entries, and new import commits, are refused
+after close.
+
+Incident requests now carry the device timestamp into their existing offline queue. A real
+browser regression exposed React Query pausing the incident mutation before the queue wrapper
+could save it. The incident mutation now uses `networkMode: 'always'` so the failed offline
+attempt reaches that wrapper, consistent with the library's
+[network-mode semantics](https://tanstack.com/query/latest/docs/framework/react/guides/network-mode).
+The browser journey failed before that fix and passed afterward: a report is saved offline,
+the event closes, and reconnecting writes one live incident with an audited pre-close timestamp.
+
+Verification on 2026-10-02: full integration **582 passed / 4 existing skips**, server unit
+**491**, client unit **257**, and targeted browser E2E **13** passed. Twelve new database cases
+cover all capture surfaces, close boundaries, configured grace, historical assignments,
+practice refusal, retries and a concurrent archive waiting for the capture lock. Fifteen pure
+cases cover phase and time boundaries. Visitor fixtures now enter LIVE after configuring the
+allowlist; the first full run correctly refused their former READY captures, and the corrected
+fixtures passed in the final full run. All workspace typechecks, root lint, architecture,
+hardcoding, formatting and server build passed by exit code. No client layout or visual baseline
+changed in this slice.
+
+Remaining: audited lifecycle transitions and close/archive side effects, including the general
+archived-write forbid and its Cedar context in P11.
 P10.4/P10.5 remain in progress.

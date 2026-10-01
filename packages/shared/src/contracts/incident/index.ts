@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { IncidentSeverity, IncidentStatus, IncidentType } from '../../invariants/enums.js';
-import { Id, IdempotencyKey, IsoDateTime, PaginationQuery } from '../common/index.js';
+import { CaptureEnvelope, Id, IsoDateTime, PaginationQuery } from '../common/index.js';
 
 /**
  * Incident reporting (PRODUCT_BRIEF §7.1).
@@ -12,19 +12,15 @@ import { Id, IdempotencyKey, IsoDateTime, PaginationQuery } from '../common/inde
 
 export const IncidentDescription = z.string().trim().min(10).max(2000);
 
-export const CreateIncidentRequest = z
-  .object({
-    rehearsal: z.boolean().optional(),
-    idempotencyKey: IdempotencyKey,
-    type: IncidentType,
-    severity: IncidentSeverity,
-    /** Pre-filled from the reporter's current station; may be null if roaming. */
-    stationId: Id.nullish(),
-    locationNote: z.string().trim().max(200).optional(),
-    description: IncidentDescription,
-    occurredAt: IsoDateTime,
-  })
-  .strict();
+export const CreateIncidentRequest = CaptureEnvelope.extend({
+  type: IncidentType,
+  severity: IncidentSeverity,
+  /** Pre-filled from the reporter's current station; may be null if roaming. */
+  stationId: Id.nullish(),
+  locationNote: z.string().trim().max(200).optional(),
+  description: IncidentDescription,
+  occurredAt: IsoDateTime,
+}).strict();
 export type CreateIncidentRequest = z.infer<typeof CreateIncidentRequest>;
 
 export const IncidentFollowUpRecord = z

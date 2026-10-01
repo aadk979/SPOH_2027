@@ -22,11 +22,16 @@ import { runningShifts } from '../event/runningShifts.js';
  */
 export async function isOnShiftAt(
   scope: EventScope,
-  who: { membershipId: string; stationId: string },
+  who: { membershipId: string; stationId: string; clientRecordedAt?: string },
   now: Date = new Date(),
 ): Promise<boolean> {
+  const { clientRecordedAt, ...assignmentKey } = who;
   const assignment = await prisma.shiftAssignment.findFirst({
-    where: { eventId: scope.eventId, ...who, shift: await runningShifts(scope, now) },
+    where: {
+      eventId: scope.eventId,
+      ...assignmentKey,
+      shift: await runningShifts(scope, now, clientRecordedAt),
+    },
     select: { id: true },
   });
   return assignment !== null;
