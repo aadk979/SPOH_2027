@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-01T19:16:11.416Z",
+  "updatedAt": "2026-10-01T19:32:05.063Z",
   "current": {
     "phase": "P10",
     "step": "P10.5"
@@ -2008,7 +2008,7 @@
           "status": "in_progress",
           "startedAt": "2026-10-01T13:40:50.186Z",
           "completedAt": null,
-          "commits": ["6ac79bf", "efff58c", "e3cb374", "17ddfab"],
+          "commits": ["6ac79bf", "efff58c", "e3cb374", "17ddfab", "30a7010"],
           "notes": [
             {
               "at": "2026-10-01T17:53:43.239Z",
@@ -2025,6 +2025,10 @@
             {
               "at": "2026-10-01T19:16:11.360Z",
               "text": "Audited preparation transitions verified: server-owned structure guards, sticky observed live history/version, locked current permissions, atomic practice-window close, audit/replay and post-commit cache state. Go-live and close/archive effects remain."
+            },
+            {
+              "at": "2026-10-01T19:32:04.995Z",
+              "text": "Transaction-aware report foundation verified: all sections and supporting names/settings/stock share the supplied transaction; ordinary reports use repeatable read. Concurrent mixed-report regression fails without isolation and passes with it. Persistent snapshot and close/archive effects remain."
             }
           ]
         },
@@ -2775,6 +2779,10 @@
     {
       "at": "2026-10-01T19:16:11.416Z",
       "text": "Verified preparation lifecycle slice 17ddfab: 607 integration passes/4 existing skips, 491 server and 257 client units, 7 browser journeys, schema drift and all static gates green. P10.4/P10.5 remain in progress; next close-out storage and scheduler crossover."
+    },
+    {
+      "at": "2026-10-01T19:32:05.062Z",
+      "text": "Report transaction slice 30a7010 verified: 609 integration passes/4 existing skips, 491 units and 12 browser journeys; server typechecks, lint, architecture, hardcoding, format and build green. P10.4/P10.5 remain in progress. GitHub CLI unavailable for read-only CI inspection; no CI or deploy success claimed."
     }
   ]
 }
