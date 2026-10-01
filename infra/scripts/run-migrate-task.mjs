@@ -12,11 +12,17 @@
  * The task's log is printed once it stops.
  *
  *   node infra/scripts/run-migrate-task.mjs - Spoh-staging-Platform totals
+ *   node infra/scripts/run-migrate-task.mjs - Spoh-staging-Platform seed-fixture
  */
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 
-const [outputsFile, stack, ...command] = process.argv.slice(2);
+const [outputsFile, stack, ...requestedCommand] = process.argv.slice(2);
+const fixture = requestedCommand.length === 1 && requestedCommand[0] === 'seed-fixture';
+if (fixture && stack !== 'Spoh-staging-Platform') {
+  throw new Error('seed-fixture is only permitted for Spoh-staging-Platform');
+}
+const command = fixture ? ['seed'] : requestedCommand;
 const aws = (...args) =>
   JSON.parse(execFileSync('aws', [...args, '--output', 'json'], { encoding: 'utf8' }));
 
@@ -49,9 +55,29 @@ function printLog(taskDefinition, taskArn) {
 }
 
 const outputs = stackOutputs();
+if (
+  fixture &&
+  (!outputs.ClusterName?.startsWith('Spoh-staging-') ||
+    !outputs.MigrateTaskDefinition?.includes('task-definition/spoh-staging-migrate:'))
+) {
+  throw new Error('seed-fixture requires the staging cluster and staging task definition');
+}
 const network = `awsvpcConfiguration={subnets=[${outputs.AppSubnets}],securityGroups=[${outputs.AppSecurityGroup}],assignPublicIp=ENABLED}`;
 const overrides = command.length
-  ? ['--overrides', JSON.stringify({ containerOverrides: [{ name: 'migrate', command }] })]
+  ? [
+      '--overrides',
+      JSON.stringify({
+        containerOverrides: [
+          {
+            name: 'migrate',
+            command,
+            // Staging alone gets the two synthetic event fixtures; production
+            // seed remains administrator-only (D-12, P08.10).
+            ...(fixture ? { environment: [{ name: 'NODE_ENV', value: 'development' }] } : {}),
+          },
+        ],
+      }),
+    ]
   : [];
 const started = aws(
   'ecs',
@@ -68,7 +94,7 @@ const started = aws(
 );
 const taskArn = started.tasks?.[0]?.taskArn;
 if (!taskArn) throw new Error(`the task did not start: ${JSON.stringify(started.failures)}`);
-const label = command.length ? command.join(' ') : 'migrate';
+const label = fixture ? 'seed-fixture' : command.length ? command.join(' ') : 'migrate';
 console.log(`${label} task ${taskArn}`);
 
 execFileSync(

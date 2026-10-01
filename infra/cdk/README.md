@@ -44,8 +44,10 @@ stage's database, with the current release's image:
 
 ```bash
 node infra/scripts/run-migrate-task.mjs - Spoh-staging-Platform seed    # idempotent seed (production shape)
+node infra/scripts/run-migrate-task.mjs - Spoh-staging-Platform seed-fixture # two synthetic event fixtures, staging only
 node infra/scripts/run-migrate-task.mjs - Spoh-staging-Platform totals  # P09 totals check, read-only
 ```
 
-`-` reads the stack outputs from CloudFormation; the task's log is printed when it stops. Both run
-as the app role.
+`-` reads the stack outputs from CloudFormation; the task's log is printed when it stops. All run
+as the app role. `seed-fixture` overrides `NODE_ENV` for that one-off staging task only. The API
+service stays in production mode, and a production stack name is refused before any AWS call.
