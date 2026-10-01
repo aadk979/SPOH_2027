@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-01T18:47:28.535Z",
+  "updatedAt": "2026-10-01T19:16:11.416Z",
   "current": {
     "phase": "P10",
     "step": "P10.5"
@@ -2008,7 +2008,7 @@
           "status": "in_progress",
           "startedAt": "2026-10-01T13:40:50.186Z",
           "completedAt": null,
-          "commits": ["6ac79bf", "efff58c", "e3cb374"],
+          "commits": ["6ac79bf", "efff58c", "e3cb374", "17ddfab"],
           "notes": [
             {
               "at": "2026-10-01T17:53:43.239Z",
@@ -2021,6 +2021,10 @@
             {
               "at": "2026-10-01T18:47:28.456Z",
               "text": "Capture admission refuses DRAFT/READY/ARCHIVED, validates CLOSED pre-close timestamps and event grace under the phase lock, checks historical station assignments and audits late sync. Incident timestamp/actual offline pause fixed. Full integration 582/4 skips, unit 491/257, browser 13 and static gates passed. Audited transitions and close/archive effects remain."
+            },
+            {
+              "at": "2026-10-01T19:16:11.360Z",
+              "text": "Audited preparation transitions verified: server-owned structure guards, sticky observed live history/version, locked current permissions, atomic practice-window close, audit/replay and post-commit cache state. Go-live and close/archive effects remain."
             }
           ]
         },
@@ -2767,6 +2771,10 @@
     {
       "at": "2026-10-01T18:47:28.534Z",
       "text": "Verified P10.4/P10.5 capture admission slice e3cb374 pushed with 582 database passes, 491/257 units and 13 browser passes. Visitor fixtures enter LIVE after configuration; real offline incident regression fixed. Both steps remain in progress."
+    },
+    {
+      "at": "2026-10-01T19:16:11.416Z",
+      "text": "Verified preparation lifecycle slice 17ddfab: 607 integration passes/4 existing skips, 491 server and 257 client units, 7 browser journeys, schema drift and all static gates green. P10.4/P10.5 remain in progress; next close-out storage and scheduler crossover."
     }
   ]
 }
