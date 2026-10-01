@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-01T13:10:22.204Z",
+  "updatedAt": "2026-10-01T13:36:53.853Z",
   "current": {
     "phase": "P10",
     "step": "P10.4"
@@ -2698,6 +2698,10 @@
     {
       "at": "2026-10-01T13:10:22.202Z",
       "text": "P10.4 rate-limit slice verified in 59d2d9d: platform-scoped live policies, failure-only sign-in, 497 integration/4 skipped, 460 unit, 30 E2E and 58 visual; P10.4 remains in progress."
+    },
+    {
+      "at": "2026-10-01T13:36:53.852Z",
+      "text": "P10.4 attendance administration slice at 6e25071: Event settings now selects an active admin root, edits versioned trusted CIDRs, and tests unsaved ranges against the request IP. Integration 500 passed / 4 skipped, server unit 460, client unit 229, admin E2E 8, visual 56 unchanged plus 2 reviewed/updated and re-asserted; typechecks, builds, lint, architecture, hardcoding, generated settings and format passed. P10.4 remains in progress for rehearsal/env exit work."
     }
   ]
 }
