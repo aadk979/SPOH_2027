@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-01T12:24:59.715Z",
+  "updatedAt": "2026-10-01T13:10:22.204Z",
   "current": {
     "phase": "P10",
     "step": "P10.4"
@@ -2694,6 +2694,10 @@
     {
       "at": "2026-10-01T12:24:59.714Z",
       "text": "P10.4 access-token lifetime moved from env to bounded organisation platform setting; sign-in and refresh read changes live. Commit 6d05271. Server unit 460, integration 494 passed/4 skipped, typecheck, lint, format, arch, hardcoding, settings checks pass."
+    },
+    {
+      "at": "2026-10-01T13:10:22.202Z",
+      "text": "P10.4 rate-limit slice verified in 59d2d9d: platform-scoped live policies, failure-only sign-in, 497 integration/4 skipped, 460 unit, 30 E2E and 58 visual; P10.4 remains in progress."
     }
   ]
 }
