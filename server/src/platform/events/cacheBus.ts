@@ -64,6 +64,7 @@ async function connect(): Promise<void> {
   const candidate = new Client({
     connectionString: env.DATABASE_URL,
     options: '-c TimeZone=UTC',
+    // hardcoding-allowed: stable process identifier for diagnosing listener connections.
     application_name: 'spoh-cache-bus',
   });
   try {
