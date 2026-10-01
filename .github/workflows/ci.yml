@@ -31,6 +31,7 @@ jobs:
       # The client and server both import @spoh/shared from its built output,
       # so it has to exist before anything else compiles.
       - run: npm run build:shared
+      - run: npm run settings:check
 
       # prisma.config.ts refuses to load without DATABASE_URL, even though
       # generate never connects. A placeholder satisfies it.

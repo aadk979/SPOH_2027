@@ -271,6 +271,11 @@ export default tseslint.config(
     files: ['**/*.test.{ts,tsx}', '**/tests/**', 'client/src/content/**'],
     rules: Object.fromEntries(Object.keys(sizeGuards({ functionLines: 0 })).map((r) => [r, 'off'])),
   },
+  {
+    // The authored settings catalogue is static data; shared settings are generated from it.
+    files: ['server/src/platform/settings/registry.ts', 'packages/shared/src/generated/**'],
+    rules: { 'max-lines': 'off' },
+  },
 
   // Config, scripts, seeds and tests legitimately write to stdout.
   {

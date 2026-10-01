@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { GENERATED_SETTING_SCHEMAS as settings } from '../../generated/settings/index.js';
 import { Id, IsoDateTime } from '../common/index.js';
 
 /**
@@ -15,7 +16,7 @@ import { Id, IsoDateTime } from '../common/index.js';
  * morning of a rehearsal, so they are stored, versioned by the audit log, and
  * served to both the server and the client from one place.
  *
- * Defaults live in `server/src/platform/settings/index.ts` and every field is optional on
+ * Defaults come from the server registry's generated contracts and every field is optional on
  * the way in, so an empty settings table is a working system and a partial
  * update only touches what it names.
  */
@@ -26,43 +27,22 @@ export const WallClockTime = z
   .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'must be HH:MM on a 24-hour clock');
 export type WallClockTime = z.infer<typeof WallClockTime>;
 
-const Minutes = z.number().int().min(1).max(1440);
-const Seconds = z.number().int().min(1).max(3600);
-
 export const RuntimeSettings = z
   .object({
-    /** Display name for the event, used in exports and the ops-room display. */
-    eventName: z.string().trim().min(1).max(80),
-
-    /** A counted room silent for this long during event hours is flagged. */
-    silentStationMinutes: Minutes,
-    /** A checked-in device that has captured nothing for this long is flagged. */
-    staleDeviceMinutes: Minutes,
-    /** Registrations per minute above which the IC console flags an anomaly. */
-    implausibleTapsPerMinute: z.number().min(1).max(600),
-    /** Time on station without a break before the welfare list picks someone up. */
-    longShiftMinutes: Minutes,
-
-    /** How long a resolved lost-person alert keeps its descriptive fields. */
-    lostPersonPurgeHours: z.number().int().min(1).max(720),
-    /** How long a settled idempotency record is kept for replay. */
-    idempotencyRetentionDays: z.number().int().min(1).max(90),
-    /** How long a refresh session lives before the volunteer signs in again. */
-    refreshSessionDays: z.number().int().min(1).max(90),
-
-    /** Client poll cadence for the live dashboard and the ops-room display. */
-    dashboardPollSeconds: Seconds,
-    /** Client poll cadence for active lost-person alerts. */
-    alertPollSeconds: Seconds,
-
-    /** How long undo stays available after a capture tap. */
-    captureUndoWindowSeconds: Seconds,
-    /** How long a tap waits before its first send, so undo can still cancel it. */
-    captureSendGraceSeconds: Seconds,
-    /** Unsent captures above which the volunteer is told to find their IC. */
-    outboxWarningCount: z.number().int().min(1).max(1000),
-    /** Age of the oldest unsent capture that triggers the same warning. */
-    outboxWarningAgeMinutes: Minutes,
+    eventName: settings.eventName,
+    silentStationMinutes: settings.silentStationMinutes,
+    staleDeviceMinutes: settings.staleDeviceMinutes,
+    implausibleTapsPerMinute: settings.implausibleTapsPerMinute,
+    longShiftMinutes: settings.longShiftMinutes,
+    lostPersonPurgeHours: settings.lostPersonPurgeHours,
+    idempotencyRetentionDays: settings.idempotencyRetentionDays,
+    refreshSessionDays: settings.refreshSessionDays,
+    dashboardPollSeconds: settings.dashboardPollSeconds,
+    alertPollSeconds: settings.alertPollSeconds,
+    captureUndoWindowSeconds: settings.captureUndoWindowSeconds,
+    captureSendGraceSeconds: settings.captureSendGraceSeconds,
+    outboxWarningCount: settings.outboxWarningCount,
+    outboxWarningAgeMinutes: settings.outboxWarningAgeMinutes,
   })
   .strict();
 export type RuntimeSettings = z.infer<typeof RuntimeSettings>;

@@ -1,5 +1,7 @@
 import { z } from 'zod';
-import { Id } from '../common/index.js';
+import { GENERATED_SETTING_SCHEMAS as settings } from '../../generated/settings/index.js';
+import { CountsMode, HeadlineSource, VisitorDataMode } from './modes.js';
+export { CountsMode, HeadlineSource, VisitorDataMode } from './modes.js';
 
 /**
  * Event settings (ADR-003): per event, versioned, changed one key at a time
@@ -7,34 +9,10 @@ import { Id } from '../common/index.js';
  * the registry grows into every setting at P10.
  */
 
-/**
- * The one count a headline is taken from. Never a sum: a registration, a
- * footfall tick and a Mission Card count different things (F01-048).
- */
-export const HeadlineSource = z.discriminatedUnion('count', [
-  z.object({ count: z.literal('registrations') }).strict(),
-  /** Entries counted at one station, such as the front door. */
-  z.object({ count: z.literal('footfall'), stationId: Id }).strict(),
-  /** Mission Card journeys issued. */
-  z.object({ count: z.literal('journeys') }).strict(),
-]);
-export type HeadlineSource = z.infer<typeof HeadlineSource>;
-
-/** `separate`: the three counts side by side. `headline`: one of them on top as well. */
-export const CountsMode = z.discriminatedUnion('mode', [
-  z.object({ mode: z.literal('separate') }).strict(),
-  z.object({ mode: z.literal('headline'), source: HeadlineSource }).strict(),
-]);
-export type CountsMode = z.infer<typeof CountsMode>;
-
-/** `none`: no visitor personal data. `allowlist`: only the event's declared fields. */
-export const VisitorDataMode = z.enum(['none', 'allowlist']);
-export type VisitorDataMode = z.infer<typeof VisitorDataMode>;
-
 export const EventSettings = z
   .object({
-    'product.countsMode': CountsMode,
-    'product.visitorDataMode': VisitorDataMode,
+    'product.countsMode': settings['product.countsMode'],
+    'product.visitorDataMode': settings['product.visitorDataMode'],
   })
   .strict();
 export type EventSettings = z.infer<typeof EventSettings>;

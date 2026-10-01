@@ -41,6 +41,7 @@ export * from './contracts/eventDays/index.js';
 export * from './contracts/settings/index.js';
 export * from './contracts/eventSettings/index.js';
 export * from './contracts/visitor/index.js';
+export * from './generated/settings/index.js';
 export * from './contracts/notification/index.js';
 export * from './contracts/media/index.js';
 export * from './contracts/attendance/index.js';

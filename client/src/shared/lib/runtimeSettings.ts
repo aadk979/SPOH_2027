@@ -1,7 +1,12 @@
 'use client';
 
 import { useSyncExternalStore } from 'react';
-import type { RuntimeSettings, SettingsResponse } from '@spoh/shared';
+import {
+  GENERATED_SETTING_DEFAULTS,
+  type GeneratedSettingValues,
+  type RuntimeSettings,
+  type SettingsResponse,
+} from '@spoh/shared';
 import { api } from '@/shared/lib/api';
 import { getSession, subscribeToSession } from '@/shared/lib/session';
 
@@ -21,32 +26,26 @@ import { getSession, subscribeToSession } from '@/shared/lib/session';
 
 /**
  * Compiled defaults. These are the values the client shipped with, and they
- * mirror `DEFAULT_SETTINGS` on the server — the two are checked against each
- * other by `client/tests/settings.test.ts`.
+ * come from the server registry's generated contracts.
  */
-export interface ClientSettings {
-  dashboardPollSeconds: number;
-  alertPollSeconds: number;
-  captureUndoWindowSeconds: number;
-  captureSendGraceSeconds: number;
-  outboxWarningCount: number;
-  outboxWarningAgeMinutes: number;
-  silentStationMinutes: number;
-  staleDeviceMinutes: number;
-  eventName: string;
-}
+const CLIENT_KEYS = [
+  'dashboardPollSeconds',
+  'alertPollSeconds',
+  'captureUndoWindowSeconds',
+  'captureSendGraceSeconds',
+  'outboxWarningCount',
+  'outboxWarningAgeMinutes',
+  'silentStationMinutes',
+  'staleDeviceMinutes',
+  'eventName',
+] as const satisfies readonly (keyof GeneratedSettingValues)[];
+export type ClientSettings = Pick<GeneratedSettingValues, (typeof CLIENT_KEYS)[number]>;
 
-export const DEFAULT_CLIENT_SETTINGS: Readonly<ClientSettings> = Object.freeze({
-  dashboardPollSeconds: 3,
-  alertPollSeconds: 10,
-  captureUndoWindowSeconds: 10,
-  captureSendGraceSeconds: 2,
-  outboxWarningCount: 20,
-  outboxWarningAgeMinutes: 5,
-  silentStationMinutes: 15,
-  staleDeviceMinutes: 15,
-  eventName: 'Event',
-});
+export const DEFAULT_CLIENT_SETTINGS: Readonly<ClientSettings> = Object.freeze(
+  Object.fromEntries(
+    CLIENT_KEYS.map((key) => [key, GENERATED_SETTING_DEFAULTS[key]]),
+  ) as ClientSettings,
+);
 
 let cache: Readonly<ClientSettings> = DEFAULT_CLIENT_SETTINGS;
 

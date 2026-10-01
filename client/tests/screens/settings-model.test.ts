@@ -9,7 +9,9 @@ import {
 
 function validValues(): SettingsValues {
   return {
-    ...Object.fromEntries(NUMERIC_FIELDS.map((field) => [field.key, '2'])),
+    ...Object.fromEntries(
+      NUMERIC_FIELDS.map((field) => [field.key, String(Math.max(2, field.min))]),
+    ),
     eventName: ' Test event ',
   };
 }
@@ -30,7 +32,7 @@ describe('settings request', () => {
       ...Object.fromEntries(
         NUMERIC_FIELDS.map((field) => [
           field.key,
-          field.key === 'implausibleTapsPerMinute' ? 2.5 : 2,
+          field.key === 'implausibleTapsPerMinute' ? 2.5 : Math.max(2, field.min),
         ]),
       ),
     });

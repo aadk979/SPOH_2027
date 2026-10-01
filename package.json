@@ -37,6 +37,8 @@
     "db:reset": "npm run db:reset --workspace server",
     "audit:ci": "npm audit --audit-level=high",
     "build:shared": "npm run build --workspace packages/shared",
+    "settings:generate": "node --import tsx scripts/generate-settings.mjs",
+    "settings:check": "node --import tsx scripts/generate-settings.mjs --check",
     "dev:shared": "npm run dev --workspace packages/shared",
     "infra:synth": "npm run synth --workspace infra/cdk",
     "infra:diff": "npm run diff --workspace infra/cdk"

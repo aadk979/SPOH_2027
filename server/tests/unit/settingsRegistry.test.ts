@@ -1,0 +1,72 @@
+import { describe, expect, it } from 'vitest';
+import { z } from 'zod';
+import {
+  GENERATED_SETTING_DEFAULTS,
+  GENERATED_SETTING_METADATA,
+  GENERATED_SETTING_SCHEMAS,
+  RuntimeSettings,
+} from '@spoh/shared';
+import { DEFAULT_SETTINGS } from '../../src/platform/settings/index.js';
+import { SETTINGS } from '../../src/platform/settings/registry.js';
+
+type JsonSchema = Record<string, unknown>;
+
+function hasBounds(schema: JsonSchema): boolean {
+  if ('const' in schema || Array.isArray(schema.enum)) return true;
+  if (Array.isArray(schema.oneOf)) return schema.oneOf.every((part) => hasBounds(part));
+  if (Array.isArray(schema.anyOf)) return schema.anyOf.every((part) => hasBounds(part));
+  if (schema.type === 'boolean' || schema.type === 'null') return true;
+  if (schema.type === 'number' || schema.type === 'integer') {
+    return typeof schema.minimum === 'number' && typeof schema.maximum === 'number';
+  }
+  if (schema.type === 'string') {
+    return typeof schema.maxLength === 'number';
+  }
+  if (schema.type === 'array') {
+    return typeof schema.maxItems === 'number' && hasBounds(schema.items as JsonSchema);
+  }
+  if (schema.type === 'object') {
+    return (
+      schema.additionalProperties === false &&
+      Object.values(schema.properties as Record<string, JsonSchema>).every(hasBounds)
+    );
+  }
+  return false;
+}
+
+describe('settings registry and generated contracts (P10.1)', () => {
+  it('gives every key copy, scope, action, a valid default and finite validation', () => {
+    for (const [key, definition] of Object.entries(SETTINGS)) {
+      expect(definition.key).toBe(key);
+      expect(definition.label.length).toBeGreaterThan(0);
+      expect(definition.description.length).toBeGreaterThan(20);
+      expect(definition.group.length).toBeGreaterThan(0);
+      expect(definition.scopes.length).toBeGreaterThan(0);
+      expect(definition.requiredAction.length).toBeGreaterThan(0);
+      expect(definition.schema.safeParse(definition.default).success, key).toBe(true);
+      expect(hasBounds(z.toJSONSchema(definition.schema) as JsonSchema), key).toBe(true);
+    }
+  });
+
+  it('generates the same keys, defaults and bounded schemas for both packages', () => {
+    const keys = Object.keys(SETTINGS).sort();
+    expect(Object.keys(GENERATED_SETTING_METADATA).sort()).toEqual(keys);
+    expect(Object.keys(GENERATED_SETTING_SCHEMAS).sort()).toEqual(keys);
+    expect(Object.keys(GENERATED_SETTING_DEFAULTS).sort()).toEqual(keys);
+    for (const key of keys) {
+      const definition = SETTINGS[key as keyof typeof SETTINGS];
+      expect(GENERATED_SETTING_DEFAULTS[key as keyof typeof GENERATED_SETTING_DEFAULTS]).toEqual(
+        definition.default,
+      );
+      expect(
+        GENERATED_SETTING_SCHEMAS[key as keyof typeof GENERATED_SETTING_SCHEMAS].safeParse(
+          definition.default,
+        ).success,
+        key,
+      ).toBe(true);
+    }
+    expect(DEFAULT_SETTINGS).toEqual(RuntimeSettings.parse(DEFAULT_SETTINGS));
+    expect(DEFAULT_SETTINGS.alertPollSeconds).toBe(GENERATED_SETTING_DEFAULTS.alertPollSeconds);
+    expect(RuntimeSettings.shape.alertPollSeconds.safeParse(31).success).toBe(false);
+  });
+});

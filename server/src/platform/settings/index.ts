@@ -1,4 +1,8 @@
-import { RuntimeSettings, type UpdateSettingsRequest } from '@spoh/shared';
+import {
+  GENERATED_SETTING_DEFAULTS,
+  RuntimeSettings,
+  type UpdateSettingsRequest,
+} from '@spoh/shared';
 import { prisma, type PrismaTransactionClient } from '../db/client.js';
 import { logger } from '../logger/index.js';
 import { writeAudit, type AuditContext } from '../audit/index.js';
@@ -39,27 +43,14 @@ import { writeAudit, type AuditContext } from '../audit/index.js';
  * The compiled defaults — the values the system had before any of this was
  * configurable. Anything absent or invalid in the database falls back to these.
  */
-export const DEFAULT_SETTINGS: RuntimeSettings = Object.freeze({
-  // Superseded by the event's own name (Event.name); retired with the global settings in P10.
-  eventName: 'Event',
-
-  silentStationMinutes: 15,
-  staleDeviceMinutes: 15,
-  implausibleTapsPerMinute: 20,
-  longShiftMinutes: 180,
-
-  lostPersonPurgeHours: 24,
-  idempotencyRetentionDays: 7,
-  refreshSessionDays: 30,
-
-  dashboardPollSeconds: 3,
-  alertPollSeconds: 10,
-
-  captureUndoWindowSeconds: 10,
-  captureSendGraceSeconds: 2,
-  outboxWarningCount: 20,
-  outboxWarningAgeMinutes: 5,
-});
+export const DEFAULT_SETTINGS: RuntimeSettings = Object.freeze(
+  Object.fromEntries(
+    Object.keys(RuntimeSettings.shape).map((key) => [
+      key,
+      GENERATED_SETTING_DEFAULTS[key as keyof RuntimeSettings],
+    ]),
+  ) as RuntimeSettings,
+);
 
 export type SettingKey = keyof RuntimeSettings;
 
