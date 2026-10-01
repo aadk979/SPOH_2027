@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-01T10:48:25.840Z",
+  "updatedAt": "2026-10-01T11:13:22.460Z",
   "current": {
     "phase": "P10",
-    "step": "P10.1"
+    "step": "P10.2"
   },
   "gates": [
     {
@@ -1968,11 +1968,16 @@
         {
           "id": "P10.2",
           "title": "Storage, resolution and history",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-10-01T10:50:05.173Z",
+          "completedAt": "2026-10-01T11:13:22.459Z",
+          "commits": ["f7da06a"],
+          "notes": [
+            {
+              "at": "2026-10-01T11:13:22.460Z",
+              "text": "Scoped resolution uses station, event, platform and default with malformed-row fallback. Versioned writes, revert including reset history, reset, and audit share one transaction. Test DB migration applied; server unit 460, integration 481 passed/7 skipped plus focused rollback and revert tests, client unit 229, root quality gates green. Legacy AppSetting UI path remains until P10.8."
+            }
+          ]
         },
         {
           "id": "P10.3",
