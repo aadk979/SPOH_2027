@@ -180,6 +180,13 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   with 2 TB transfer included and US$0.12/GB excess outbound transfer. The priced design is in
     `reports/P08/duckdns-https-pricing.md`. This does not authorise production stack creation before
     the 28 October go decision.
+    **Staging identifiers** (owner, 2026-10-01 continuation): staging uses
+    `secure-channel.duckdns.org` for the client and `api.secure-channel.duckdns.org` for the API.
+    Firebase Hosting is for production only; its project/site ID is still needed before that
+    deployment. Both staging names terminate HTTPS at the approved new Caddy proxy, with separate
+    host routing to the existing staging service. This does not authorise changes to the live
+    Lightsail site or creation of the production stack before the go decision. Same-site staging
+    does not waive the production requirement to work without a third-party refresh cookie.
 
 ### D-09 — Scheduler engine
 

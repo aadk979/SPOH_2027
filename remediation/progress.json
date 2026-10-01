@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-01T14:10:00.030Z",
+  "updatedAt": "2026-10-01T14:12:27.651Z",
   "current": {
     "phase": "P10",
     "step": "P10.5"
@@ -3034,6 +3034,10 @@
     {
       "at": "2026-10-01T14:10:00.030Z",
       "text": "P10.5 provenance storage slice verified at 3aafb29: additive transactional migration on 14 tables, separate practice stock baseline and attendance/challenge uniqueness; seeded migration replay preserved live data. Server integration 504 passed/4 existing skips, unit 467, server typecheck, lint, architecture, hardcoding, formatting and schema drift checks exit 0. P10.4/P10.5 stay in progress; behavior wiring remains."
+    },
+    {
+      "at": "2026-10-01T14:12:27.650Z",
+      "text": "Owner staging clarification 2026-10-01: secure-channel.duckdns.org serves staging client; api.secure-channel.duckdns.org serves staging API. Firebase is production only; its ID remains needed for production. Approved new USD7/month proxy and production/live-site gates preserved. DECISIONS, P08.5 and ADR-006/008 amended."
     }
   ]
 }

@@ -82,7 +82,9 @@ code in P15.
 ### P08.5 — DNS, TLS and edge (needs D-08)
 
 _Revised 2026-09-30 for D-08's change: Firebase Hosting for the client, DuckDNS for the API, no
-Route 53, ACM or SES._
+Route 53, ACM or SES. Owner amendment on 2026-10-01: Firebase is production only;
+staging client is `secure-channel.duckdns.org` and staging API is
+`api.secure-channel.duckdns.org`, through the approved US$7/month new Lightsail Caddy proxy._
 
 - **Do:**
   1. Design the API's HTTPS entry for a DuckDNS name (A/AAAA/TXT only, no ACM validation): a static
@@ -90,17 +92,20 @@ Route 53, ACM or SES._
      automated. Candidates: a small EC2/Lightsail reverse proxy (Caddy) in front of the service, or
      an NLB with an Elastic IP and the imported certificate. Show the owner the monthly cost of the
      chosen option before building it (it is outside ADR-008's plan).
-  2. Deploy the client's static export to Firebase Hosting (`*.web.app`) from CI, with the API base
+  2. Serve the staging static export through the client DuckDNS host and proxy API requests through
+     the separate API DuckDNS host. Verify nested-name DNS, HTTPS renewal, host routing and CORS.
+     Deploy the production client's static export to Firebase Hosting (`*.web.app`) from CI, with the API base
      URL built in; the API stops serving the client in production. CORS allows the Firebase origin
-     only.
+     only in production, and the exact staging client origin in staging.
   3. Sessions across two sites: the refresh cookie would be third-party and is blocked by Safari
      ITP, so the session design (ADR-006) moves off it before production (with P12).
   4. No CloudFront or WAF in the baseline (ADR-008 §4). Security headers are set by Firebase Hosting
      for the client and by the app for the API.
-  5. Staging's own Cognito pool (ADR-006 §1) with the Firebase callback and logout URLs. The
+  5. Staging's own Cognito pool (ADR-006 §1) with the staging DuckDNS client callback and logout URLs. The
      production pool is referenced by id only and is not modified here.
-- **Done when:** the Firebase-hosted client signs in against the API's DuckDNS HTTPS address end to
-  end on staging, including on iOS Safari.
+- **Done when:** the staging DuckDNS client signs in against the API's DuckDNS HTTPS address end to
+  end, including on iOS Safari; production Firebase configuration is reviewable and its cross-site
+  session dependency is addressed in P12 before production deployment.
 
 ### P08.6 — Secrets and configuration
 

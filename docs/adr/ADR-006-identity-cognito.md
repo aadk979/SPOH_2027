@@ -30,6 +30,14 @@
 
 ## Decision
 
+**Owner hosting amendment (D-08, 2026-09-30; staging clarified 2026-10-01).** Production uses
+a Firebase client and a DuckDNS API, so its session flow must work with third-party cookies
+blocked. P12 must replace the cross-site refresh-cookie dependency before production deployment.
+Staging uses `secure-channel.duckdns.org` and `api.secure-channel.duckdns.org`; its Cognito
+callback and logout URLs use the client host. Same-site staging success does not prove the
+production session flow. Invites use Cognito's default sender; no SES. Production identity
+resources and the live Lightsail site retain their owner approval boundaries.
+
 ### 1. Pools per environment
 
 | Environment | Pool                                                                                                    | Tier                                                                                                                                                                                                   | Why                                                                                          |

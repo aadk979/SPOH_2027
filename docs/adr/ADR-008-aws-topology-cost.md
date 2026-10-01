@@ -47,6 +47,17 @@ Prices used below (ap-southeast-1, USD; the source file for each is in `prices.j
 
 ### 1. Topology (per environment)
 
+**Owner amendments (2026-09-30 and 2026-10-01, D-08/D-13).** These supersede the historical
+Route 53/ACM/SES topology below. Production client hosting is Firebase; API HTTPS is DuckDNS
+through a new Singapore Lightsail Micro Caddy proxy (approved addition US$7/month, 2 TB
+included, US$0.12/GB excess). Staging serves its static client at
+`secure-channel.duckdns.org` and its API at `api.secure-channel.duckdns.org` through that proxy
+and the existing staging service. No new Next service is needed. Use SNS email and AWS Budgets
+with the owner's address supplied privately at deploy time, and Cognito's default invite sender.
+No Route 53, ACM or SES resources. Production stack creation waits for the 28 October go
+decision; the live Lightsail site is untouched without owner approval. Production starts empty,
+with an event from the factory. See `remediation/reports/P08/duckdns-https-pricing.md` for pricing.
+
 ```
 Route 53 (zone for <domain>)  ─ ACM certificate
         │
