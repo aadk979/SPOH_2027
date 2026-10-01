@@ -55,6 +55,7 @@ export async function reportIncident(
       severity: incident.severity,
       type: incident.type,
       stationName: station?.name ?? request.locationNote ?? null,
+      rehearsal: incident.rehearsal,
     },
     volunteerId,
   );

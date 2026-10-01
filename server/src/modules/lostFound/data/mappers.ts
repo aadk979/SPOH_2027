@@ -9,6 +9,7 @@ import type { ItemWithContext } from './repo.js';
 export function toItemRecord(item: ItemWithContext, stationName: string | null): LostFoundRecord {
   return {
     id: item.id,
+    rehearsal: item.rehearsal,
     itemLabel: item.itemLabel,
     categoryLabel: item.categoryLabel,
     foundStationId: item.foundStationId,

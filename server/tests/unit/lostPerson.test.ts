@@ -22,8 +22,8 @@ describe('lost-person rules', () => {
   });
 
   it('pushes carry no description, and the stand-down replaces the alert', () => {
-    const raised = raisedPush('a1');
-    const resolved = resolvedPush('a1');
+    const raised = raisedPush({ id: 'a1', rehearsal: false });
+    const resolved = resolvedPush({ id: 'a1', rehearsal: false });
     for (const push of [raised, resolved]) {
       expect(Object.keys(push)).not.toEqual(
         expect.arrayContaining(['descriptionText', 'clothingText', 'approxAge']),
@@ -31,5 +31,19 @@ describe('lost-person rules', () => {
     }
     expect(resolved.tag).toBe(raised.tag);
     expect(raised.audience.everyone).toBe(true);
+  });
+
+  it('labels practice raise and stand-down notifications using the alert provenance', () => {
+    const alert = { id: 'practice', rehearsal: true };
+    for (const push of [raisedPush(alert), resolvedPush(alert)]) {
+      expect(push.title).toMatch(/^REHEARSAL · /);
+      expect(push.body).toMatch(/practice/i);
+      expect(push.tag).toBe('lost-person:practice');
+      expect(JSON.stringify(push)).not.toMatch(/descriptionText|clothingText|approxAge/);
+    }
+    expect(raisedPush({ ...alert, rehearsal: false }).title).toBe(
+      'Lost person — check your app now',
+    );
+    expect(resolvedPush({ ...alert, rehearsal: false }).title).toBe('Lost person resolved');
   });
 });

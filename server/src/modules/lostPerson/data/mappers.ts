@@ -7,6 +7,7 @@ export function toAlertRecord(
 ): LostPersonAlertRecord {
   return {
     id: alert.id,
+    rehearsal: alert.rehearsal,
     status: alert.status,
     approxAge: alert.approxAge,
     descriptionText: alert.descriptionText,

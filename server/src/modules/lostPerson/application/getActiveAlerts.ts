@@ -3,6 +3,7 @@ import { findStationNames } from '../../station/index.js';
 import { toAlertRecord } from '../data/mappers.js';
 import { acknowledgedAlertIds, listActiveAlerts } from '../data/repo.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
+import { systemClock, type Clock } from '../../../platform/time/index.js';
 
 /**
  * The client polls this every 10 seconds. Push is best effort; the poll is the
@@ -11,6 +12,7 @@ import type { EventScope } from '../../../platform/db/eventScope.js';
 export async function getActiveAlerts(
   scope: EventScope,
   viewerId: string,
+  clock: Clock = systemClock,
 ): Promise<ActiveLostPersonResponse> {
   const alerts = await listActiveAlerts(scope);
   const acked = await acknowledgedAlertIds(scope, {
@@ -32,5 +34,5 @@ export async function getActiveAlerts(
     }),
   );
 
-  return { asOf: new Date().toISOString(), alerts: records };
+  return { asOf: clock.now().toISOString(), alerts: records };
 }

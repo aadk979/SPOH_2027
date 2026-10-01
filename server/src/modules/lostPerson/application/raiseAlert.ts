@@ -44,6 +44,6 @@ export async function raiseAlert(
     return row;
   });
 
-  void dispatch(scope, raisedPush(alert.id));
+  void dispatch(scope, raisedPush(alert));
   return decorate(scope, alert, volunteerId);
 }

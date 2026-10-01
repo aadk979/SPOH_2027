@@ -28,6 +28,8 @@ for (const [name, width, height] of [
       'SELECT id, "startsAt", "endsAt" FROM "Shift" WHERE "eventId" = $1',
       [EVENT_ID],
     );
+    let alertId: string | undefined;
+    const description = `Practice phase-change search ${name}`;
     try {
       await db.query(
         'UPDATE "Shift" SET "startsAt" = now() + interval \'1 day\', "endsAt" = now() + interval \'2 days\' WHERE "eventId" = $1',
@@ -38,6 +40,19 @@ for (const [name, width, height] of [
       await page.getByLabel('Roster email').fill('booth@spoh2027.test');
       await page.getByRole('button', { name: 'Sign in', exact: true }).click();
       await page.waitForURL('**/home');
+      await page.goto('/e/spoh2027/safety/lost-person/new');
+      await page.getByLabel(/What has happened/).fill(description);
+      const raised = page.waitForResponse(
+        (result) => result.url().endsWith('/lost-person') && result.request().method() === 'POST',
+      );
+      await page.getByRole('button', { name: /Alert every volunteer/ }).click();
+      const alert = await raised;
+      expect(alert.status()).toBe(201);
+      const record = (await alert.json()).alert;
+      alertId = record.id;
+      expect(record.rehearsal).toBe(true);
+      await page.waitForURL('**/home');
+      await expect(page.getByText('REHEARSAL · Lost person practice alert')).toBeVisible();
       await page.goto('/e/spoh2027/capture/registration');
       const banner = page.getByRole('note', { name: 'Rehearsal mode' });
       await expect(banner).toBeVisible();
@@ -56,11 +71,17 @@ for (const [name, width, height] of [
       expect(stored.rows[0]?.rehearsal).toBe(true);
       await db.query('UPDATE "Event" SET status = $1 WHERE id = $2', ['LIVE', EVENT_ID]);
       await expect(banner).toHaveCount(0, { timeout: 30_000 });
+      await expect(page.getByText(description)).toHaveCount(0, { timeout: 20_000 });
       await expect(
         page.getByText('You are not on shift at the sign-up booth right now', { exact: false }),
       ).toBeVisible({ timeout: 15_000 });
       await expect(page.getByRole('button', { name: 'Sec 4', exact: true })).toHaveCount(0);
     } finally {
+      if (alertId)
+        await db.query('DELETE FROM "LostPersonAlert" WHERE "eventId" = $1 AND id = $2', [
+          EVENT_ID,
+          alertId,
+        ]);
       for (const shift of shifts.rows)
         await db.query(
           'UPDATE "Shift" SET "startsAt" = $1, "endsAt" = $2 WHERE "eventId" = $3 AND id = $4',

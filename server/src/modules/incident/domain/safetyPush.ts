@@ -21,10 +21,11 @@ export function safetyPushMessage(incident: {
   severity: IncidentSeverity;
   type: string;
   stationName: string | null;
+  rehearsal: boolean;
 }): { title: string; body: string } {
   const what = incident.type.replace(/_/g, ' ').toLowerCase();
   return {
-    title: `${incident.severity} incident reported`,
-    body: `${what} at ${incident.stationName ?? 'an unlisted location'}. Open the ops app.`,
+    title: `${incident.rehearsal ? 'REHEARSAL · ' : ''}${incident.severity} incident reported`,
+    body: `${incident.rehearsal ? 'Practice exercise: ' : ''}${what} at ${incident.stationName ?? 'an unlisted location'}. Open the ops app.`,
   };
 }

@@ -184,7 +184,7 @@ test.describe('lost person', () => {
     const banner = searcherPage.getByRole('alert', { name: /Lost person alert/ });
     const mine = banner.locator('div').filter({ hasText: description }).last();
 
-    await expect(mine.getByText('Lost person — search now')).toBeVisible();
+    await expect(mine.getByText('REHEARSAL · Lost person practice alert')).toBeVisible();
     await mine.getByRole('button', { name: 'Acknowledge' }).click();
     await expect(mine.getByRole('button', { name: /Acknowledged/ })).toBeVisible();
 

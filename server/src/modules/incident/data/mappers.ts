@@ -8,6 +8,7 @@ export function toIncidentRecord(
 ): IncidentRecord {
   return {
     id: incident.id,
+    rehearsal: incident.rehearsal,
     type: incident.type,
     severity: incident.severity,
     status: incident.status,

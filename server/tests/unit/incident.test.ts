@@ -19,11 +19,35 @@ describe('safety chain push', () => {
 
   it('says what and where, never the description', () => {
     expect(
-      safetyPushMessage({ severity: 'HIGH', type: 'NEAR_MISS', stationName: 'Room A' }),
+      safetyPushMessage({
+        severity: 'HIGH',
+        type: 'NEAR_MISS',
+        stationName: 'Room A',
+        rehearsal: false,
+      }),
     ).toEqual({ title: 'HIGH incident reported', body: 'near miss at Room A. Open the ops app.' });
     expect(
-      safetyPushMessage({ severity: 'CRITICAL', type: 'INJURY', stationName: null }).body,
+      safetyPushMessage({
+        severity: 'CRITICAL',
+        type: 'INJURY',
+        stationName: null,
+        rehearsal: false,
+      }).body,
     ).toBe('injury at an unlisted location. Open the ops app.');
+  });
+
+  it('identifies a severe practice incident on the lock screen', () => {
+    expect(
+      safetyPushMessage({
+        severity: 'HIGH',
+        type: 'NEAR_MISS',
+        stationName: 'Room A',
+        rehearsal: true,
+      }),
+    ).toEqual({
+      title: 'REHEARSAL · HIGH incident reported',
+      body: 'Practice exercise: near miss at Room A. Open the ops app.',
+    });
   });
 });
 

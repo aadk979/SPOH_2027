@@ -31,7 +31,9 @@ export function LostPersonAlert({
         <div className="flex items-start justify-between gap-sm">
           <p className="text-caption font-semibold tracking-[0.06em] uppercase">
             {/* Text, not colour, carries the meaning (remediation/standards/engineering-standards.md). */}
-            Lost person — search now
+            {alert.rehearsal
+              ? 'REHEARSAL · Lost person practice alert'
+              : 'Lost person — search now'}
           </p>
           <p className="shrink-0 text-caption text-white/90">{alert.ackCount} acknowledged</p>
         </div>

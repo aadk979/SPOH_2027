@@ -42,6 +42,7 @@ export type IncidentFollowUpRecord = z.infer<typeof IncidentFollowUpRecord>;
 export const IncidentRecord = z
   .object({
     id: Id,
+    rehearsal: z.boolean(),
     type: IncidentType,
     severity: IncidentSeverity,
     status: IncidentStatus,

@@ -33,6 +33,7 @@ export type CreateLostFoundRequest = z.infer<typeof CreateLostFoundRequest>;
 export const LostFoundRecord = z
   .object({
     id: Id,
+    rehearsal: z.boolean(),
     itemLabel: z.string(),
     categoryLabel: z.string().nullable(),
     foundStationId: Id.nullable(),

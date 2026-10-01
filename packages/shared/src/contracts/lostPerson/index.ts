@@ -30,6 +30,7 @@ export type RaiseLostPersonRequest = z.infer<typeof RaiseLostPersonRequest>;
 export const LostPersonAlertRecord = z
   .object({
     id: Id,
+    rehearsal: z.boolean(),
     status: LostPersonStatus,
     approxAge: z.string().nullable(),
     descriptionText: z.string().nullable(),
@@ -69,6 +70,7 @@ export type ResolveLostPersonRequest = z.infer<typeof ResolveLostPersonRequest>;
 export const LostPersonSummaryRecord = z
   .object({
     id: Id,
+    rehearsal: z.boolean(),
     raisedAt: IsoDateTime,
     resolvedAt: IsoDateTime,
     resolutionMinutes: z.number().int().nonnegative(),

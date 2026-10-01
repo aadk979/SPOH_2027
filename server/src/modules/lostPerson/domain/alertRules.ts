@@ -33,14 +33,18 @@ export function purgeCutoff(now: Date, purgeHours: number): Date {
  * do afterwards can reach it. The notification says a child is missing; the
  * app says who.
  */
-export function raisedPush(alertId: string) {
+export function raisedPush(alert: { id: string; rehearsal: boolean }) {
   return {
     kind: 'lostPerson.raised' as const,
     priority: 'URGENT' as const,
-    title: 'Lost person — check your app now',
-    body: 'A lost person alert is active. Open the ops app for the description.',
+    title: alert.rehearsal
+      ? 'REHEARSAL · Lost person practice alert'
+      : 'Lost person — check your app now',
+    body: alert.rehearsal
+      ? 'Practice exercise. Open the ops app to rehearse the response.'
+      : 'A lost person alert is active. Open the ops app for the description.',
     url: '/home',
-    tag: `lost-person:${alertId}`,
+    tag: `lost-person:${alert.id}`,
     audience: { everyone: true, volunteerIds: [] as string[] },
   };
 }
@@ -51,14 +55,16 @@ export function raisedPush(alertId: string) {
  * lands on people who learned the last one never ended. Same tag as the raise,
  * so it replaces that notification rather than stacking under it.
  */
-export function resolvedPush(alertId: string) {
+export function resolvedPush(alert: { id: string; rehearsal: boolean }) {
   return {
     kind: 'lostPerson.resolved' as const,
     priority: 'OPERATIONAL' as const,
-    title: 'Lost person resolved',
-    body: 'The alert has been closed. Thank you — stand down.',
+    title: alert.rehearsal ? 'REHEARSAL · Practice alert resolved' : 'Lost person resolved',
+    body: alert.rehearsal
+      ? 'The practice alert has been closed. The exercise is complete.'
+      : 'The alert has been closed. Thank you — stand down.',
     url: '/home',
-    tag: `lost-person:${alertId}`,
+    tag: `lost-person:${alert.id}`,
     audience: { everyone: true, volunteerIds: [] as string[] },
   };
 }

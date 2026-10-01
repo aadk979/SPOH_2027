@@ -144,6 +144,27 @@ staffing and separate live stock. The frozen sign-in bucket was exhausted during
 comparison's repeated worker restarts; proposed images were reviewed against saved originals,
 then the API restarted for assertion runs. Final full visual assertion: **58 passed**.
 
-Remaining: explicit card batch selection, import window selection in the UI, operational reads
-after a phase change, then audited lifecycle
-admission, transitions and close/archive side effects. P10.4/P10.5 remain in progress.
+## Safety records and practice interruptions
+
+Safety response contracts expose the stored rehearsal provenance. Practice lost-person alerts
+interrupt the active feed only during REHEARSAL; real searches remain visible in every phase.
+The phase predicate is part of the database query, so cached event state cannot keep a practice
+search active after go-live. Historical incident/item reads and close-out responses retain
+their labels. The client labels practice alerts and found items from the record itself.
+
+Lost-person raise/stand-down and severe-incident pushes identify practice on the lock screen,
+using the saved row's provenance. They continue to carry no personal description. Resolving a
+practice alert after go-live still sends a labelled practice stand-down. Resolution checks,
+the update and its provenance audit now share a row lock and transaction: two responders produce
+one successful resolution and one audit. Poll and resolution times use an injected Clock.
+
+Verification on 2026-10-02: targeted integration runs **27** and **28** passed, including five new
+cases for phase changes, real-search visibility, labelled historical records and concurrent
+resolution; server unit **469**, client unit **247**. Four browser journeys passed, including
+phone/laptop practice-alert removal on go-live and the two-device acknowledgement/resolution
+flow. All workspace typechecks, root lint, architecture, hardcoding and server build passed.
+Full visual assertion **58 passed** against the existing baselines; no images changed.
+
+Remaining: explicit card batch selection, import window selection in the UI, derived safety
+acknowledgement/follow-up provenance, then audited lifecycle admission, transitions and
+close/archive side effects. P10.4/P10.5 remain in progress.

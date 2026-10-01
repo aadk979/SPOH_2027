@@ -41,9 +41,32 @@ export async function findAlertById(
 
 export async function listActiveAlerts(scope: EventScope): Promise<AlertWithContext[]> {
   return prisma.lostPersonAlert.findMany({
-    where: { eventId: scope.eventId, status: 'ACTIVE' },
+    where: {
+      eventId: scope.eventId,
+      status: 'ACTIVE',
+      // Real searches remain visible in every phase; practice interrupts only a rehearsal.
+      // The relation predicate reads the phase in this query, avoiding a stale event cache.
+      OR: [
+        { rehearsal: false },
+        { rehearsal: true, event: { id: scope.eventId, status: 'REHEARSAL' } },
+      ],
+    },
     include: alertInclude,
     orderBy: { raisedAt: 'asc' },
+  });
+}
+
+/** A resolution's state check and write must not race another responder. */
+export async function findAlertForUpdate(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  id: string,
+): Promise<AlertWithContext | null> {
+  await tx.$queryRaw`SELECT id FROM "LostPersonAlert"
+    WHERE "eventId" = ${scope.eventId} AND id = ${id} FOR UPDATE`;
+  return tx.lostPersonAlert.findUnique({
+    where: { eventId: scope.eventId, id },
+    include: alertInclude,
   });
 }
 

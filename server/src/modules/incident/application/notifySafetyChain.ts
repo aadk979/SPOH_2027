@@ -11,7 +11,13 @@ import type { EventScope } from '../../../platform/db/eventScope.js';
  */
 export function notifySafetyChain(
   scope: EventScope,
-  incident: { id: string; severity: IncidentSeverity; type: string; stationName: string | null },
+  incident: {
+    id: string;
+    severity: IncidentSeverity;
+    type: string;
+    stationName: string | null;
+    rehearsal: boolean;
+  },
   reporterId: string,
 ): void {
   if (!pushesToSafetyChain(incident.severity)) {

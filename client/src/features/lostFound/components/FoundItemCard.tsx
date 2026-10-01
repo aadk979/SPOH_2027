@@ -14,6 +14,9 @@ export function FoundItemCard({
   return (
     <Card as="li" className="flex flex-col">
       <p className="text-tagline font-semibold">{item.itemLabel}</p>
+      {item.rehearsal ? (
+        <p className="text-caption font-semibold">REHEARSAL · Practice item</p>
+      ) : null}
 
       <p className="text-caption text-text-muted">
         {item.categoryLabel ? `${item.categoryLabel} · ` : ''}
