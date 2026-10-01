@@ -1,5 +1,5 @@
 import { prisma } from '../../../platform/db/client.js';
-import type { EventScope } from '../../../platform/db/eventScope.js';
+import { rehearsalFilter, type ReportingScope } from '../../../platform/db/rehearsalFilter.js';
 import type { Range } from './repo.js';
 
 /**
@@ -9,23 +9,28 @@ import type { Range } from './repo.js';
  */
 
 /** Rows of the event recorded in the range, voided or not. */
-function recorded(scope: EventScope, range: Range, voided: boolean | null = false) {
+function recorded(scope: ReportingScope, range: Range, voided: boolean | null = false) {
   return {
     eventId: scope.eventId,
+    ...rehearsalFilter(scope),
     ...(voided === null ? {} : { voided }),
     recordedAt: { gte: range.from, lt: range.to },
   };
 }
 
-export async function importBatches(scope: EventScope, range: Range) {
+export async function importBatches(scope: ReportingScope, range: Range) {
   return prisma.importBatch.findMany({
-    where: { eventId: scope.eventId, importedAt: { gte: range.from, lt: range.to } },
+    where: {
+      eventId: scope.eventId,
+      ...rehearsalFilter(scope),
+      importedAt: { gte: range.from, lt: range.to },
+    },
     orderBy: { importedAt: 'asc' },
   });
 }
 
 /** How many rows in each capture table came from each source. */
-export async function recordsBySource(scope: EventScope, range: Range) {
+export async function recordsBySource(scope: ReportingScope, range: Range) {
   const count = { _count: { _all: true } } as const;
   const [registrations, footfall, stamps, redemptions] = await Promise.all([
     prisma.registration.groupBy({ by: ['source'], where: recorded(scope, range), ...count }),
@@ -66,7 +71,7 @@ export async function recordsBySource(scope: EventScope, range: Range) {
   ];
 }
 
-export async function voidedCounts(scope: EventScope, range: Range) {
+export async function voidedCounts(scope: ReportingScope, range: Range) {
   const [registrations, footfall, redemptions] = await Promise.all([
     prisma.registration.count({ where: recorded(scope, range, true) }),
     prisma.footfallTick.count({ where: recorded(scope, range, true) }),

@@ -11,8 +11,8 @@ export function GiftSection({ data }: { data: FullReport }): ReactNode {
         ) : (
           data.gifts.byGiftType.map((row) => (
             <BarRow
-              key={row.giftTypeId}
-              label={row.giftTypeName}
+              key={`${row.giftTypeId}:${row.rehearsal ?? false}`}
+              label={`${row.giftTypeName}${row.rehearsal ? ' (rehearsal)' : data.rehearsalIncluded ? ' (live)' : ''}`}
               value={row.redeemed}
               max={Math.max(1, ...data.gifts.byGiftType.map((entry) => entry.redeemed))}
             />

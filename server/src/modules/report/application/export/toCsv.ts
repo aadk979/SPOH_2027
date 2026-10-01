@@ -21,6 +21,9 @@ export function toCsv(report: FullReport, visitors: VisitorRecordsResponse | nul
     `# ${report.event.name} post-event report`,
     `# Generated,${report.generatedAt}`,
     `# ${report.countingNote.replace(/,/g, ';')}`,
+    report.rehearsalIncluded
+      ? '# Includes rehearsal data: totals combine live and practice captures. Gift stock pools stay separate.'
+      : '# Rehearsal data is excluded.',
     ...(report.headline ? [`# ${headlineLine(report.headline).replace(/,/g, ';')}`] : []),
   ];
   const all = [...sections(report), ...(visitors ? [visitorSection(visitors)] : [])];
@@ -52,7 +55,7 @@ function sections(report: FullReport): CsvSection[] {
     { title: 'Mission Cards (unit: cards — journeys, not people)', rows: cardRows(report) },
     {
       title: 'Gifts (unit: redemptions)',
-      rows: [['Gift', 'Redeemed', 'Remaining'], ...rows.giftTypes(report)],
+      rows: [['Gift', 'Redeemed', 'Remaining', 'Stock pool'], ...rows.giftTypes(report)],
     },
     { title: 'Safety', rows: safetyRows(report) },
     { title: 'Volunteers', rows: volunteerRows(report) },

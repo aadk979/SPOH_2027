@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 
 import { AppShell } from '@/shared/shell/AppShell';
 import { Button, Callout, LoadingCards, Stack } from '@/shared/ui';
@@ -16,6 +16,7 @@ import { CardSection } from '../components/CardSection';
 import { GiftSection } from '../components/GiftSection';
 import { SafetySection } from '../components/SafetySection';
 import { VolunteerSection } from '../components/VolunteerSection';
+import { RehearsalReportControl } from '../components/RehearsalReportControl';
 
 /**
  * The post-event report (PRODUCT_BRIEF §10).
@@ -30,8 +31,9 @@ import { VolunteerSection } from '../components/VolunteerSection';
  */
 export default function ReportsScreen(): ReactNode {
   const session = useRequireSession();
-  const report = useReport(session !== null);
-  const { downloading, exportError, download } = useReportExport();
+  const [includeRehearsal, setIncludeRehearsal] = useState(false);
+  const report = useReport(session !== null, includeRehearsal);
+  const { downloading, exportError, download } = useReportExport(includeRehearsal);
 
   if (!session) return null;
 
@@ -39,6 +41,7 @@ export default function ReportsScreen(): ReactNode {
 
   return (
     <AppShell width="wide" title="Post-event report" back={{ href: '/home', label: 'Home' }}>
+      <RehearsalReportControl included={includeRehearsal} onChange={setIncludeRehearsal} />
       {report.isLoading ? (
         <LoadingCards count={3} label="Generating the report" />
       ) : !data ? (
@@ -48,12 +51,6 @@ export default function ReportsScreen(): ReactNode {
       ) : (
         <Stack>
           <ReportHeader data={data} />
-
-          {data.event.status === 'REHEARSAL' ? (
-            <Callout tone="warn" title="Rehearsal data">
-              This event is in rehearsal: every figure below is practice, not the event.
-            </Callout>
-          ) : null}
 
           <IntegritySection data={data} />
 

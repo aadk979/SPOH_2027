@@ -9,6 +9,7 @@ export async function listFallbackWindows(
   range: {
     from?: Date;
     to?: Date;
+    rehearsal?: boolean;
   },
 ): Promise<FallbackWindowRecord[]> {
   return windowRecords(scope, await listWindows(scope, range));

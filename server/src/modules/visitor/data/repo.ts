@@ -2,6 +2,7 @@ import type { CommitteeRole, CreateVisitorFieldRequest } from '@spoh/shared';
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
+import { rehearsalFilter, type ReportingScope } from '../../../platform/db/rehearsalFilter.js';
 
 /**
  * Data access for visitor fields and records (ADR-002 §4). The values live
@@ -85,11 +86,15 @@ export async function createVisitorRecord(
 }
 
 /** Records in a window, oldest first, with when their registration was made. */
-export async function listRecordRows(scope: EventScope, window: { from: Date; to: Date }) {
+export async function listRecordRows(scope: ReportingScope, window: { from: Date; to: Date }) {
   return prisma.visitorRecord.findMany({
     where: {
       eventId: scope.eventId,
-      registration: { recordedAt: { gte: window.from, lt: window.to } },
+      registration: {
+        eventId: scope.eventId,
+        ...rehearsalFilter(scope),
+        recordedAt: { gte: window.from, lt: window.to },
+      },
     },
     orderBy: { createdAt: 'asc' },
     select: { registrationId: true, data: true, registration: { select: { recordedAt: true } } },

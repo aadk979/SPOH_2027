@@ -12,12 +12,11 @@ export function writeReadMeSheet(workbook: ExcelJS.Workbook, report: FullReport)
   sheet.addRow([
     `Range: ${report.range.from ?? 'start of event'} to ${report.range.to ?? 'end of event'}`,
   ]);
-  if (report.event.status === 'REHEARSAL') {
-    sheet.addRow(['REHEARSAL: every figure in this report is practice data, not the event.']).font =
-      {
-        bold: true,
-      };
-  }
+  sheet.addRow([
+    report.rehearsalIncluded
+      ? 'Includes rehearsal data: totals combine live and practice captures. Gift stock pools stay separate.'
+      : 'Rehearsal data is excluded.',
+  ]).font = { bold: true };
   sheet.addRow([
     `Times marked "local" are on the event's clock (${report.timezone}), each with its UTC offset.`,
   ]);

@@ -52,6 +52,30 @@ concurrent phase update blocked by the event lock. Client tests use real Indexed
 queued mode retention and refusal handling. No visible layout changed, so visual baselines were
 not modified. A Prisma reset was refused; verification used a fresh test database instead.
 
-Remaining: complete default report/dashboard/export filters and labelled inclusion, explicit
-card batch selection, import window selection in the UI, rehearsal shift logic and fixture/banner
-updates, then audited lifecycle admission, transitions and close/archive side effects.
+## Report filtering and inclusion
+
+Report summaries and CSV/XLSX exports now exclude practice captures by default, independently
+of the event's current phase. Filters cover registrations and voids, footfall quantities and
+curves, cards and stamps, gift redemptions, safety records and summaries, fallback windows,
+imports, source totals and visitor details. Existing reader permissions still govern visitor
+exports. Practice attendance never changed the live roster, so practice check-ins cannot inflate
+the volunteer report.
+
+The report screen offers an explicit "Show rehearsal data" control. Inclusion combines capture
+totals, labels the screen and exports, and adds `-with-rehearsal` to download names. Live and
+practice gift stock remain separate rows. Redemption counts respect the requested report range;
+remaining stock reflects each pool's current inventory. Query keys include the selection so
+cached practice totals cannot appear in the default view.
+
+Verification: full integration **518 passed / 4 existing skips**, server unit **467**, client
+unit **233**. Two browser journeys cover phone/laptop inclusion, return to the default view and
+labelled CSV downloads. Visual verification passed on **56 unchanged screens**; the two report
+baselines were inspected, deliberately updated and re-asserted. All workspace typechecks,
+lint, architecture, hardcoding, changed-file formatting and server build passed by exit code.
+Database tests cover both LIVE and REHEARSAL phases and the explicit inclusion query, including
+visitor exports and XLSX labels. The visual database received only the additive migration;
+its original fixture dates were preserved.
+
+Remaining: dashboard filters and labelled inclusion, explicit card batch selection, import
+window selection in the UI, rehearsal shift logic and fixture/banner updates, then audited
+lifecycle admission, transitions and close/archive side effects. P10.4/P10.5 remain in progress.

@@ -48,6 +48,7 @@ export interface WindowRow {
   stationId: string | null;
   declaredById: string;
   reason: string;
+  rehearsal: boolean;
 }
 
 export async function findOpenWindow(
@@ -104,11 +105,12 @@ export async function endWindow(
 
 export async function listWindows(
   scope: EventScope,
-  range: { from?: Date; to?: Date },
+  range: { from?: Date; to?: Date; rehearsal?: boolean },
 ): Promise<WindowRow[]> {
   return prisma.fallbackWindow.findMany({
     where: {
       eventId: scope.eventId,
+      ...(range.rehearsal === undefined ? {} : { rehearsal: range.rehearsal }),
       ...(range.to ? { startedAt: { lt: range.to } } : {}),
       ...(range.from ? { OR: [{ endedAt: null }, { endedAt: { gt: range.from } }] } : {}),
     },

@@ -26,6 +26,10 @@ import { FallbackWindowRecord } from '../fallback/index.js';
 
 export const ReportQuery = TimeRangeQuery.extend({
   eventDayId: Id.optional(),
+  includeRehearsal: z
+    .enum(['true', 'false'])
+    .transform((value) => value === 'true')
+    .optional(),
 }).strict();
 export type ReportQuery = z.infer<typeof ReportQuery>;
 
@@ -134,6 +138,7 @@ export const GiftReport = z
           giftTypeName: z.string(),
           redeemed: z.number().int().nonnegative(),
           remaining: z.number().int(),
+          rehearsal: z.boolean().optional(),
         })
         .strict(),
     ),
@@ -266,6 +271,7 @@ export type DataIntegrityReport = z.infer<typeof DataIntegrityReport>;
 
 export const FullReport = z
   .object({
+    rehearsalIncluded: z.boolean().optional(),
     generatedAt: IsoDateTime,
     range: z.object({ from: IsoDateTime.nullable(), to: IsoDateTime.nullable() }).strict(),
     /** The event's IANA timezone: every local date, hour and label below is read in it. */
@@ -275,7 +281,7 @@ export const FullReport = z
       .object({
         name: z.string(),
         slug: z.string(),
-        /** A REHEARSAL event's figures are practice data, and the report says so. */
+        /** The current lifecycle state; inclusion depends on row provenance. */
         status: EventStatus,
       })
       .strict(),

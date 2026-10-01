@@ -54,7 +54,15 @@ export const rows = {
         ] as const,
     ),
   giftTypes: (report: FullReport) =>
-    report.gifts.byGiftType.map((row) => [row.giftTypeName, row.redeemed, row.remaining] as const),
+    report.gifts.byGiftType.map(
+      (row) =>
+        [
+          row.giftTypeName,
+          row.redeemed,
+          row.remaining,
+          row.rehearsal ? 'REHEARSAL' : 'LIVE',
+        ] as const,
+    ),
   recordsBySource: (report: FullReport) =>
     report.dataIntegrity.recordsBySource.map((row) => [row.table, row.source, row.value] as const),
 };

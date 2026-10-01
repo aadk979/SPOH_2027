@@ -1,5 +1,5 @@
 import type { CommitteeRole, VisitorRecordsResponse } from '@spoh/shared';
-import type { EventScope } from '../../../platform/db/eventScope.js';
+import type { ReportingScope } from '../../../platform/db/rehearsalFilter.js';
 import { ForbiddenError } from '../../../platform/errors/index.js';
 import { toFieldRecord } from '../data/mappers.js';
 import { listFieldRows, listRecordRows } from '../data/repo.js';
@@ -7,7 +7,7 @@ import { readableBy } from '../domain/visitorRules.js';
 
 /** The values a role may read in a window, or null when it reads no field. */
 export async function visitorRecordsFor(
-  scope: EventScope,
+  scope: ReportingScope,
   reader: { role: CommitteeRole; from: Date; to: Date },
 ): Promise<VisitorRecordsResponse | null> {
   const fields = readableBy((await listFieldRows(scope)).map(toFieldRecord), reader.role);
@@ -31,7 +31,7 @@ export async function visitorRecordsFor(
 
 /** As above, for the screen: a role that reads no field is refused (ADR-002 §4). */
 export async function readVisitorRecords(
-  scope: EventScope,
+  scope: ReportingScope,
   reader: { role: CommitteeRole; from: Date; to: Date },
 ): Promise<VisitorRecordsResponse> {
   const records = await visitorRecordsFor(scope, reader);

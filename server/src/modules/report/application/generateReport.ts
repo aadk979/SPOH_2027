@@ -16,6 +16,7 @@ import { eventSlug, eventZone } from '../../../platform/event/events.js';
 import { getEventSummary } from '../../event/index.js';
 import { eventSetting } from '../../../platform/settings/eventSettings.js';
 import type { EventZone } from '../../../platform/time/index.js';
+import { systemClock, type Clock } from '../../../platform/time/index.js';
 
 /** Absent bounds mean the whole event. */
 function resolveRange(query: ReportQuery, zone: EventZone): ReportSpan {
@@ -30,13 +31,18 @@ function resolveRange(query: ReportQuery, zone: EventZone): ReportSpan {
  * The post-event report: each section built by its own loader from its own
  * queries, composed here. Stations are named once for every section.
  */
-export async function generateReport(scope: EventScope, query: ReportQuery): Promise<FullReport> {
+export async function generateReport(
+  eventScope: EventScope,
+  query: ReportQuery,
+  clock: Clock = systemClock,
+): Promise<FullReport> {
+  const scope = { ...eventScope, includeRehearsal: query.includeRehearsal ?? false };
   const zone = await eventZone(scope);
   const [summary, slug] = [await getEventSummary(scope), await eventSlug(scope)];
   const range = resolveRange(query, zone);
   const stations = await listStations(scope, { includeInactive: true });
   const names = new Map(stations.map((station) => [station.id, station.name]));
-  const now = new Date();
+  const now = clock.now();
 
   const [registrations, footfall, cards, gifts, safety, volunteers, dataIntegrity] =
     await Promise.all([
@@ -60,6 +66,7 @@ export async function generateReport(scope: EventScope, query: ReportQuery): Pro
   });
 
   return {
+    rehearsalIncluded: scope.includeRehearsal,
     generatedAt: now.toISOString(),
     range: { from: query.from ?? null, to: query.to ?? null },
     timezone: zone.timezone,

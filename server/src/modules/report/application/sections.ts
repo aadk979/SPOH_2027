@@ -11,6 +11,7 @@ import {
   footfallTotals,
   giftRedemptionsByDay,
   giftRedemptionsByStation,
+  giftRedemptionsByType,
   incidentsInRange,
   lostFoundCounts,
   lostPersonSummaries,
@@ -25,7 +26,7 @@ import { importBatches, recordsBySource, voidedCounts } from '../data/integrity.
 import { hourlyRows } from '../domain/hours.js';
 import { footfallSection, safetySection, volunteersSection } from '../domain/sections.js';
 import type { EventZone } from '../../../platform/time/index.js';
-import type { EventScope } from '../../../platform/db/eventScope.js';
+import { rehearsalFilter, type ReportingScope } from '../../../platform/db/rehearsalFilter.js';
 
 /** One loader per report section: its own queries, then its builder. */
 
@@ -38,7 +39,7 @@ export interface ReportSpan extends Range {
 }
 
 export async function registrationsReport(
-  scope: EventScope,
+  scope: ReportingScope,
   range: ReportSpan,
 ): Promise<Report['registrations']> {
   const [totals, byDay, byHour] = await Promise.all([
@@ -58,7 +59,7 @@ export async function registrationsReport(
 }
 
 export async function footfallReport(
-  scope: EventScope,
+  scope: ReportingScope,
   range: ReportSpan,
   names: Names,
 ): Promise<Report['footfall']> {
@@ -71,7 +72,7 @@ export async function footfallReport(
 }
 
 export async function cardsReport(
-  scope: EventScope,
+  scope: ReportingScope,
   range: ReportSpan,
   names: Names,
 ): Promise<Report['cards']> {
@@ -98,23 +99,29 @@ export async function cardsReport(
 }
 
 export async function giftsReport(
-  scope: EventScope,
+  scope: ReportingScope,
   range: ReportSpan,
   names: Names,
 ): Promise<Report['gifts']> {
-  const [gifts, byDay, byStation] = await Promise.all([
+  const [live, practice, counts, byDay, byStation] = await Promise.all([
     listGifts({ ...scope, rehearsal: false }),
+    scope.includeRehearsal ? listGifts({ ...scope, rehearsal: true }) : [],
+    giftRedemptionsByType(scope, range),
     giftRedemptionsByDay(scope, range, range.zone),
     giftRedemptionsByStation(scope, range),
   ]);
+  const gifts = [...live, ...practice];
   return {
     unit: 'redemptions',
-    total: gifts.reduce((sum, gift) => sum + gift.redeemed, 0),
+    total: counts.reduce((sum, row) => sum + row._count._all, 0),
     byGiftType: gifts.map((gift) => ({
       giftTypeId: gift.id,
       giftTypeName: gift.name,
-      redeemed: gift.redeemed,
+      redeemed:
+        counts.find((row) => row.giftTypeId === gift.id && row.rehearsal === gift.rehearsal)?._count
+          ._all ?? 0,
       remaining: gift.remaining,
+      rehearsal: gift.rehearsal ?? false,
     })),
     byDay,
     byStation: byStation.map((row) => ({
@@ -125,7 +132,7 @@ export async function giftsReport(
   };
 }
 
-export async function safetyReport(scope: EventScope, range: Range): Promise<Report['safety']> {
+export async function safetyReport(scope: ReportingScope, range: Range): Promise<Report['safety']> {
   const [incidents, summaries, unpurged, lostFound] = await Promise.all([
     incidentsInRange(scope, range),
     lostPersonSummaries(scope, range),
@@ -136,7 +143,7 @@ export async function safetyReport(scope: EventScope, range: Range): Promise<Rep
 }
 
 export async function volunteersReport(
-  scope: EventScope,
+  scope: ReportingScope,
   range: Range,
   { names, now }: { names: Names; now: Date },
 ): Promise<Report['volunteers']> {
@@ -148,11 +155,11 @@ export async function volunteersReport(
 }
 
 export async function integrityReport(
-  scope: EventScope,
+  scope: ReportingScope,
   range: Range,
 ): Promise<Report['dataIntegrity']> {
   const [windows, imports, sources, voided] = await Promise.all([
-    listFallbackWindows(scope, { from: range.from, to: range.to }),
+    listFallbackWindows(scope, { from: range.from, to: range.to, ...rehearsalFilter(scope) }),
     importBatches(scope, range),
     recordsBySource(scope, range),
     voidedCounts(scope, range),
