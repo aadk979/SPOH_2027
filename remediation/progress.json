@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-01T11:53:25.897Z",
+  "updatedAt": "2026-10-01T12:17:51.103Z",
   "current": {
     "phase": "P10",
     "step": "P10.4"
@@ -2686,6 +2686,10 @@
     {
       "at": "2026-10-01T11:53:25.896Z",
       "text": "P10.4 first slice 56275e4: attendance root and trusted CIDRs now resolve per event; membership validation and live-change tests. Full integration 492 passed/4 skipped; server unit 460, workspace typecheck/lint/format/architecture, settings generation and hardcoding gates passed. P10.4 remains in progress for UI, remaining env settings and rehearsal lifecycle."
+    },
+    {
+      "at": "2026-10-01T12:17:51.102Z",
+      "text": "P10.4 second slice 067902b: removed attendance root/network and S3 media TTL/size env keys; media limits now resolve by event organisation, synthetic fixture seeds root, migration note and reviewed visual fixture baselines. Server unit 460, integration 493 passed/4 skipped, visual 58, browser E2E 30, dedicated seed DB, typecheck/lint/format/architecture/hardcoding/settings gates passed. P10.4 remains in progress for token/rate limits, rehearsal and admin controls."
     }
   ]
 }
