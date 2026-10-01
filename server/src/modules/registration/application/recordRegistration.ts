@@ -57,11 +57,16 @@ export async function recordRegistration(
   });
 
   const since = await eventTodayStart(scope, clock.now());
+  const countsScope = { ...scope, rehearsal: registration.rehearsal };
   // Independent queries, so they go together. Serialising them put an extra
   // round trip on the critical path of every booth tap.
   const [sessionTotal, boothTotal] = await Promise.all([
-    countForRecorderSince(scope, { recordedById: actor.volunteerId, stationId: station.id }, since),
-    countForStationSince(scope, station.id, since),
+    countForRecorderSince(
+      countsScope,
+      { recordedById: actor.volunteerId, stationId: station.id },
+      since,
+    ),
+    countForStationSince(countsScope, station.id, since),
   ]);
 
   return { registration: toRegistrationRecord(registration), sessionTotal, boothTotal };

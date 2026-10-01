@@ -96,6 +96,18 @@ visual sign-in reached the frozen clock's rate bucket; restarting the fixture AP
 before the successful baseline runs. Typecheck, lint, architecture, hardcoding, formatting and
 server build passed by exit code.
 
+## Capture totals and registration summaries
+
+Registration and footfall capture responses total only the mode of the row just written. The
+response cannot switch pools if the event changes phase after commit. Registration summaries
+exclude practice across category, hour and day buckets by default, with explicit labelled API
+inclusion and matching fallback-window indicators.
+
+Verification on 2026-10-02: full integration **527 passed / 4 existing skips**, server unit
+**467**. Five new database cases cover single/group registrations, footfall taps/bulk counts,
+phase changes and every summary bucket. All workspace typechecks, root lint, architecture,
+hardcoding, formatting and server build passed by exit code. No visible layout changed.
+
 Remaining: explicit card batch selection, import window selection in the UI, rehearsal shift
 logic and fixture/banner updates, operational reads after a phase change, then audited lifecycle
 admission, transitions and close/archive side effects. P10.4/P10.5 remain in progress.

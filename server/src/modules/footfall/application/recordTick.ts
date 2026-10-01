@@ -43,9 +43,14 @@ export async function recordTick(
   });
 
   const since = await eventTodayStart(scope, clock.now());
+  const countsScope = { ...scope, rehearsal: tick.rehearsal };
   const [sessionTotal, stationTotal] = await Promise.all([
-    sumForRecorderSince(scope, { recordedById: actor.volunteerId, stationId: station.id }, since),
-    sumForStationSince(scope, station.id, since),
+    sumForRecorderSince(
+      countsScope,
+      { recordedById: actor.volunteerId, stationId: station.id },
+      since,
+    ),
+    sumForStationSince(countsScope, station.id, since),
   ]);
 
   return { tick: toFootfallTickRecord(tick), sessionTotal, stationTotal };

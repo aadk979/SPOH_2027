@@ -54,13 +54,14 @@ export async function recordBulk(
   });
 
   const since = await eventTodayStart(scope, clock.now());
+  const countsScope = { ...scope, rehearsal: tick.rehearsal };
   return {
     tick: toFootfallTickRecord(tick),
     sessionTotal: await sumForRecorderSince(
-      scope,
+      countsScope,
       { recordedById: actor.volunteerId, stationId: station.id },
       since,
     ),
-    stationTotal: await sumForStationSince(scope, station.id, since),
+    stationTotal: await sumForStationSince(countsScope, station.id, since),
   };
 }

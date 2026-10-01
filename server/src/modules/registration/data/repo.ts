@@ -1,8 +1,12 @@
-import { captureProvenance } from '../../../platform/db/captureProvenance.js';
+import {
+  captureProvenance,
+  type CaptureModeScope,
+} from '../../../platform/db/captureProvenance.js';
 import type { Prisma, Registration } from '../../../generated/prisma/client.js';
 import { prisma } from '../../../platform/db/client.js';
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
+import { rehearsalFilter, type ReportingScope } from '../../../platform/db/rehearsalFilter.js';
 import { eventDaySql, localBucketStartSql, type EventZone } from '../../../platform/db/zonedSql.js';
 
 /**
@@ -89,25 +93,37 @@ export async function voidRegistration(
   });
 }
 
-/** Live count for one station today — the "booth total" on the capture screen. */
+/** Count in the written capture's mode — the "booth total" on the capture screen. */
 export async function countForStationSince(
-  scope: EventScope,
+  scope: CaptureModeScope,
   stationId: string,
   since: Date,
 ): Promise<number> {
   return prisma.registration.count({
-    where: { eventId: scope.eventId, stationId, voided: false, recordedAt: { gte: since } },
+    where: {
+      eventId: scope.eventId,
+      rehearsal: scope.rehearsal,
+      stationId,
+      voided: false,
+      recordedAt: { gte: since },
+    },
   });
 }
 
 /** This device's contribution, so two volunteers on one queue can see a drift. */
 export async function countForRecorderSince(
-  scope: EventScope,
+  scope: CaptureModeScope,
   recorder: { recordedById: string; stationId: string },
   since: Date,
 ): Promise<number> {
   return prisma.registration.count({
-    where: { eventId: scope.eventId, ...recorder, voided: false, recordedAt: { gte: since } },
+    where: {
+      eventId: scope.eventId,
+      rehearsal: scope.rehearsal,
+      ...recorder,
+      voided: false,
+      recordedAt: { gte: since },
+    },
   });
 }
 
@@ -118,11 +134,12 @@ export interface RegistrationSummaryFilter {
 }
 
 function whereFrom(
-  scope: EventScope,
+  scope: ReportingScope,
   filter: RegistrationSummaryFilter,
 ): Prisma.RegistrationWhereInput {
   return {
     eventId: scope.eventId,
+    ...rehearsalFilter(scope),
     voided: false,
     ...(filter.stationId ? { stationId: filter.stationId } : {}),
     ...(filter.from || filter.to
@@ -138,7 +155,7 @@ function whereFrom(
 
 /** Counts per category, read through the event's categories (P09.5). */
 export async function groupByCategory(
-  scope: EventScope,
+  scope: ReportingScope,
   filter: RegistrationSummaryFilter,
 ): Promise<Array<{ category: string; label: string; count: number }>> {
   const [rows, categories] = await Promise.all([
@@ -169,7 +186,7 @@ export async function groupByCategory(
  * (BUILD_PLAN §8.3).
  */
 export async function groupByTimeBucket(
-  scope: EventScope,
+  scope: ReportingScope,
   filter: RegistrationSummaryFilter,
   by: { granularity: 'hour' | 'day'; zone: EventZone },
 ): Promise<Array<{ bucket: Date; count: number }>> {
@@ -185,6 +202,7 @@ export async function groupByTimeBucket(
     SELECT ${bucket} AS bucket, COUNT(*)::bigint AS count
     FROM "Registration"
     WHERE "eventId" = ${scope.eventId}
+      AND (${scope.includeRehearsal ?? false} OR "rehearsal" = false)
       AND "voided" = false
       AND "recordedAt" >= ${from}
       AND "recordedAt" < ${to}
@@ -196,7 +214,7 @@ export async function groupByTimeBucket(
 }
 
 export async function countMatching(
-  scope: EventScope,
+  scope: ReportingScope,
   filter: RegistrationSummaryFilter,
 ): Promise<number> {
   return prisma.registration.count({ where: whereFrom(scope, filter) });

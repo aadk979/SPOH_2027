@@ -7,6 +7,9 @@ export interface CaptureProvenance {
   rehearsal: boolean;
 }
 
+/** Capture-screen counts use the written row's mode, even if the event changes afterwards. */
+export type CaptureModeScope = EventScope & CaptureProvenance;
+
 /** Keep the event phase stable until the capture transaction commits. */
 export async function captureProvenance(
   tx: PrismaTransactionClient,

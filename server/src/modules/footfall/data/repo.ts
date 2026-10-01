@@ -1,4 +1,7 @@
-import { captureProvenance } from '../../../platform/db/captureProvenance.js';
+import {
+  captureProvenance,
+  type CaptureModeScope,
+} from '../../../platform/db/captureProvenance.js';
 import type { FootfallTick, Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
@@ -41,12 +44,13 @@ async function sumQuantity(where: Prisma.FootfallTickWhereInput & EventScope): P
 }
 
 export async function sumForStationSince(
-  scope: EventScope,
+  scope: CaptureModeScope,
   stationId: string,
   since: Date,
 ): Promise<number> {
   return sumQuantity({
     eventId: scope.eventId,
+    rehearsal: scope.rehearsal,
     stationId,
     voided: false,
     recordedAt: { gte: since },
@@ -54,12 +58,13 @@ export async function sumForStationSince(
 }
 
 export async function sumForRecorderSince(
-  scope: EventScope,
+  scope: CaptureModeScope,
   recorder: { recordedById: string; stationId: string },
   since: Date,
 ): Promise<number> {
   return sumQuantity({
     eventId: scope.eventId,
+    rehearsal: scope.rehearsal,
     ...recorder,
     voided: false,
     recordedAt: { gte: since },

@@ -1,7 +1,14 @@
 import { z } from 'zod';
 import { VisitorValues } from '../visitor/index.js';
 import { DataSource } from '../../invariants/enums.js';
-import { CaptureEnvelope, Id, IsoDateTime, ReasonText, TimeRangeQuery } from '../common/index.js';
+import {
+  CaptureEnvelope,
+  Id,
+  IsoDateTime,
+  ReasonText,
+  TimeRangeQuery,
+  RehearsalInclusionQuery,
+} from '../common/index.js';
 
 /**
  * COUNT 1 of the three counts (PRODUCT_BRIEF §0.1).
@@ -115,6 +122,7 @@ export const VoidRegistrationRequest = z.object({ reason: ReasonText }).strict()
 export type VoidRegistrationRequest = z.infer<typeof VoidRegistrationRequest>;
 
 export const RegistrationSummaryQuery = TimeRangeQuery.extend({
+  ...RehearsalInclusionQuery.shape,
   eventDayId: Id.optional(),
   stationId: Id.optional(),
   groupBy: z.enum(['category', 'hour', 'day']).default('category'),
@@ -134,6 +142,7 @@ export type RegistrationSummaryBucket = z.infer<typeof RegistrationSummaryBucket
 
 export const RegistrationSummaryResponse = z
   .object({
+    rehearsalIncluded: z.boolean().optional(),
     unit: z.literal('registrations'),
     groupBy: z.enum(['category', 'hour', 'day']),
     total: z.number().int().nonnegative(),

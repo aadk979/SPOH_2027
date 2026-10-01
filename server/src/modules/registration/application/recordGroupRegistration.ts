@@ -25,8 +25,8 @@ export async function recordGroupRegistration(
   const recordedAt = clock.now();
   const groupId = randomUUID();
 
-  const { registrations, cardId, linkError } = await prisma.$transaction(async (tx) => {
-    await captureProvenance(tx, scope, request);
+  const { registrations, cardId, linkError, rehearsal } = await prisma.$transaction(async (tx) => {
+    const provenance = await captureProvenance(tx, scope, request);
     const link = await linkGroupToCard(tx, scope, {
       shortCode: request.missionCardShortCode,
       issuedAt: recordedAt,
@@ -58,7 +58,7 @@ export async function recordGroupRegistration(
         cardLinkError: link.linkError,
       },
     });
-    return { registrations: created, ...link };
+    return { registrations: created, ...link, ...provenance };
   });
 
   const since = await eventTodayStart(scope, clock.now());
@@ -67,6 +67,6 @@ export async function recordGroupRegistration(
     registrations: registrations.map(toRegistrationRecord),
     linkedCardId: cardId,
     cardLinkError: linkError,
-    boothTotal: await countForStationSince(scope, station.id, since),
+    boothTotal: await countForStationSince({ ...scope, rehearsal }, station.id, since),
   };
 }

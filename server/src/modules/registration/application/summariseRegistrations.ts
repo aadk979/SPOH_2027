@@ -7,11 +7,12 @@ import {
   type RegistrationSummaryFilter,
 } from '../data/repo.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
+import type { ReportingScope } from '../../../platform/db/rehearsalFilter.js';
 import { eventZone } from '../../../platform/event/events.js';
 import { zonedDayWindow } from '@spoh/shared';
 
 async function bucketsFor(
-  scope: EventScope,
+  scope: ReportingScope,
   groupBy: RegistrationSummaryQuery['groupBy'],
   filter: RegistrationSummaryFilter,
 ): Promise<RegistrationSummaryResponse['buckets']> {
@@ -35,9 +36,10 @@ async function bucketsFor(
 }
 
 export async function summariseRegistrations(
-  scope: EventScope,
+  eventScope: EventScope,
   query: RegistrationSummaryQuery,
 ): Promise<RegistrationSummaryResponse> {
+  const scope = { ...eventScope, includeRehearsal: query.includeRehearsal ?? false };
   const filter = {
     ...(query.stationId ? { stationId: query.stationId } : {}),
     ...(query.from ? { from: new Date(query.from) } : {}),
@@ -50,6 +52,7 @@ export async function summariseRegistrations(
   ]);
 
   return {
+    rehearsalIncluded: scope.includeRehearsal,
     // The unit is stated explicitly on every count so nobody can add this to a
     // footfall figure by accident (PRODUCT_BRIEF §0.1).
     unit: 'registrations',
