@@ -63,12 +63,13 @@ export interface SessionClaims {
 }
 
 /** Mint an access token. Lifetime comes from configuration, not from here. */
-export async function issueAccessToken(claims: SessionClaims): Promise<{
+export async function issueAccessToken(
+  claims: SessionClaims,
+  expiresIn: number,
+): Promise<{
   token: string;
   expiresIn: number;
 }> {
-  const expiresIn = env.ACCESS_TOKEN_TTL_SECONDS;
-
   const token = await new SignJWT({ sid: claims.sid })
     .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
     .setSubject(claims.sub)

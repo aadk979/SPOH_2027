@@ -116,7 +116,7 @@ describe('refresh sessions (P03 repros)', () => {
     });
 
     // What a leaked signing key allows: any subject, with the forger's own live session.
-    const { token } = await issueAccessToken({ sub: chief.cognitoSub, sid: own.id });
+    const { token } = await issueAccessToken({ sub: chief.cognitoSub, sid: own.id }, 900);
     const response = await request(app).get('/api/v1/me').set('Authorization', `Bearer ${token}`);
 
     expect(response.status).toBe(401);

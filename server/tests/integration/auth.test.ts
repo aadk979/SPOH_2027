@@ -1,9 +1,10 @@
 import request from 'supertest';
+import { decodeJwt } from 'jose';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app/createApp.js';
 import { prisma } from '../../src/platform/db/client.js';
-import { resetDatabase } from '../helpers/db.js';
-import { createVolunteer, deactivate } from '../helpers/fixtures.js';
+import { rawDb, resetDatabase } from '../helpers/db.js';
+import { createVolunteer, deactivate, testEvent } from '../helpers/fixtures.js';
 
 /**
  * Sessions, refresh and rotation.
@@ -54,6 +55,45 @@ describe('opening a session', () => {
     expect(response.body.volunteer.displayName).toBe('Sam IC');
     expect(response.body.capabilities).toContain('record.void');
     expect(cookieValue(response, COOKIE)).toEqual(expect.any(String));
+  });
+
+  it('uses the live organisation token lifetime on sign-in and refresh', async () => {
+    const { eventId } = await testEvent();
+    const event = await rawDb.event.findUniqueOrThrow({
+      where: { id: eventId },
+      select: { organisationId: true },
+    });
+    await rawDb.setting.create({
+      data: {
+        scope: 'PLATFORM',
+        scopeId: event.organisationId,
+        key: 'auth.accessTokenTtlSeconds',
+        value: 120,
+        version: 1,
+      },
+    });
+    const first = await openSession('ic@spoh.test');
+    expect(first.status).toBe(201);
+    expect(first.body.expiresIn).toBe(120);
+    const firstClaims = decodeJwt(first.body.accessToken as string);
+    expect((firstClaims.exp ?? 0) - (firstClaims.iat ?? 0)).toBe(120);
+
+    await rawDb.setting.updateMany({
+      where: {
+        scope: 'PLATFORM',
+        scopeId: event.organisationId,
+        key: 'auth.accessTokenTtlSeconds',
+      },
+      data: { value: 240, version: 2 },
+    });
+    const refreshed = await request(app)
+      .post('/api/v1/auth/refresh')
+      .set('Cookie', `${COOKIE}=${cookieValue(first, COOKIE) as string}`);
+    expect(refreshed.status).toBe(200);
+    expect(refreshed.body.expiresIn).toBe(240);
+    const nextClaims = decodeJwt(refreshed.body.accessToken as string);
+    expect((nextClaims.exp ?? 0) - (nextClaims.iat ?? 0)).toBe(240);
+    expect((firstClaims.exp ?? 0) - (firstClaims.iat ?? 0)).toBe(120);
   });
 
   it('makes the refresh cookie unreadable by page script and scopes it to the auth path', async () => {

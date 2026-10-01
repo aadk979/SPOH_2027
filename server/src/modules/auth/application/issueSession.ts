@@ -1,6 +1,8 @@
 import type { SessionResponse } from '@spoh/shared';
 import { AccountInactiveError, NotProvisionedError } from '../../../platform/errors/index.js';
 import { issueAccessToken } from '../../../platform/identity/index.js';
+import { prisma } from '../../../platform/db/client.js';
+import { loadResolvedSetting } from '../../../platform/settings/scopedStore.js';
 import { toSessionResponse } from '../data/mappers.js';
 import { findVolunteerBySub } from '../data/repo.js';
 import { homeMembership } from './homeMembership.js';
@@ -38,7 +40,17 @@ export async function issueSession(
   volunteer: Awaited<ReturnType<typeof loadVolunteer>>,
   session: { sub: string; sessionId: string; refreshToken: string; expiresAt: Date },
 ): Promise<OpenedSession> {
-  const access = await issueAccessToken({ sub: session.sub, sid: session.sessionId });
+  const event = await prisma.event.findUniqueOrThrow({
+    where: { id: volunteer.scope.eventId },
+    select: { organisationId: true },
+  });
+  const lifetime = await loadResolvedSetting('auth.accessTokenTtlSeconds', {
+    organisationId: event.organisationId,
+  });
+  const access = await issueAccessToken(
+    { sub: session.sub, sid: session.sessionId },
+    lifetime.value as number,
+  );
   return {
     refreshToken: session.refreshToken,
     expiresAt: session.expiresAt,

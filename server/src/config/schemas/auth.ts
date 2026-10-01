@@ -23,8 +23,6 @@ export const authFields = {
    * and every restart simply invalidates its own sessions.
    */
   SESSION_SIGNING_SECRET: z.string().min(32).optional(),
-  /** Access-token lifetime. Short, because a refresh cookie renews it. */
-  ACCESS_TOKEN_TTL_SECONDS: z.coerce.number().int().min(60).max(86_400).default(900),
   /**
    * Domain for the refresh cookie. Leave unset for a host-only cookie, which
    * is correct when the API and client share an origin or a parent domain is
