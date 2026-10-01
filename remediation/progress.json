@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-01T14:12:27.651Z",
+  "updatedAt": "2026-10-01T14:56:47.536Z",
   "current": {
     "phase": "P10",
     "step": "P10.5"
@@ -3038,6 +3038,10 @@
     {
       "at": "2026-10-01T14:12:27.650Z",
       "text": "Owner staging clarification 2026-10-01: secure-channel.duckdns.org serves staging client; api.secure-channel.duckdns.org serves staging API. Firebase is production only; its ID remains needed for production. Approved new USD7/month proxy and production/live-site gates preserved. DECISIONS, P08.5 and ADR-006/008 amended."
+    },
+    {
+      "at": "2026-10-01T14:56:47.534Z",
+      "text": "P10.4/P10.5 capture provenance verified at cdac039: phase-locked capture/import tagging, queued mode snapshots/refusal, isolated card journeys, gift stock and attendance; 514 integration passed/4 existing skips, 467 server unit, 233 client unit, 31 browser E2E plus static gates. Both steps remain in progress; report/dashboard filters and lifecycle wiring remain. Staging owner hostnames both resolve; AWS STS account matches 665146708212; read-only inspection only."
     }
   ]
 }
