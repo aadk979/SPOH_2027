@@ -21,12 +21,20 @@ const FIELD = {
   active: true,
 } satisfies Prisma.VisitorFieldSelect;
 
-/** Serialize captures with turning visitor collection off. */
+/** Turning collection off owns an exclusive lock before purging values. */
 export async function lockVisitorEvent(
   tx: PrismaTransactionClient,
   scope: EventScope,
 ): Promise<void> {
   await tx.$queryRaw`SELECT "id" FROM "Event" WHERE "id" = ${scope.eventId} FOR UPDATE`;
+}
+
+/** Captures may run together while holding collection mode stable against switch-off. */
+export async function holdVisitorMode(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+): Promise<void> {
+  await tx.$queryRaw`SELECT "id" FROM "Event" WHERE "id" = ${scope.eventId} FOR SHARE`;
 }
 
 export type FieldRow = Prisma.VisitorFieldGetPayload<{ select: typeof FIELD }>;
@@ -82,7 +90,11 @@ export async function createVisitorRecord(
   scope: EventScope,
   record: { registrationId: string; data: Record<string, string> },
 ): Promise<void> {
-  await tx.visitorRecord.create({ data: { ...record, eventId: scope.eventId } });
+  const parent = await tx.registration.findUniqueOrThrow({
+    where: { eventId: scope.eventId, id: record.registrationId },
+    select: { rehearsal: true },
+  });
+  await tx.visitorRecord.create({ data: { ...record, ...parent, eventId: scope.eventId } });
 }
 
 /** Records in a window, oldest first, with when their registration was made. */
@@ -90,6 +102,7 @@ export async function listRecordRows(scope: ReportingScope, window: { from: Date
   return prisma.visitorRecord.findMany({
     where: {
       eventId: scope.eventId,
+      ...rehearsalFilter(scope),
       registration: {
         eventId: scope.eventId,
         ...rehearsalFilter(scope),
@@ -97,7 +110,12 @@ export async function listRecordRows(scope: ReportingScope, window: { from: Date
       },
     },
     orderBy: { createdAt: 'asc' },
-    select: { registrationId: true, data: true, registration: { select: { recordedAt: true } } },
+    select: {
+      registrationId: true,
+      rehearsal: true,
+      data: true,
+      registration: { select: { recordedAt: true } },
+    },
   });
 }
 

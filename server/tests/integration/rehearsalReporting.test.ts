@@ -73,7 +73,12 @@ beforeEach(async () => {
       },
     });
     await rawDb.visitorRecord.create({
-      data: { eventId, registrationId: registration.id, data: { contact: `${mode}@visitor.test` } },
+      data: {
+        eventId,
+        registrationId: registration.id,
+        rehearsal,
+        data: { contact: `${mode}@visitor.test` },
+      },
     });
     await rawDb.footfallTick.create({
       data: {
@@ -247,6 +252,8 @@ describe('reports read capture provenance', () => {
     expect(all.status).toBe(200);
     expect(all.text).toContain('Includes rehearsal data');
     expect(all.text).toContain('practice@visitor.test');
+    expect(all.text).toContain('practice@visitor.test,REHEARSAL');
+    expect(all.text).toContain('live@visitor.test,LIVE');
     expect(all.text).toContain('Badge,1,9,LIVE');
     expect(all.text).toContain('Badge,1,2,REHEARSAL');
     expect(all.text).not.toContain('sensitive alert');

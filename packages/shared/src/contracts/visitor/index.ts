@@ -76,6 +76,7 @@ export type VisitorValues = z.infer<typeof VisitorValues>;
 export const VisitorRecordRow = z
   .object({
     registrationId: Id,
+    rehearsal: z.boolean(),
     recordedAt: IsoDateTime,
     values: z.record(z.string(), z.string()),
   })

@@ -11,10 +11,18 @@ export function writeVisitorsSheet(
 ): void {
   const sheet = workbook.addWorksheet('Visitor details');
   sheet.addRow(['Personal data: keep only as long as the event allows.']).font = { bold: true };
-  sheet.addRow(['Registered at (UTC)', ...visitors.fields.map((field) => field.label)]).font = {
+  sheet.addRow([
+    'Registered at (UTC)',
+    ...visitors.fields.map((field) => field.label),
+    'Mode',
+  ]).font = {
     bold: true,
   };
   for (const row of visitors.data) {
-    sheet.addRow([row.recordedAt, ...visitors.fields.map((field) => row.values[field.code] ?? '')]);
+    sheet.addRow([
+      row.recordedAt,
+      ...visitors.fields.map((field) => row.values[field.code] ?? ''),
+      row.rehearsal ? 'REHEARSAL' : 'LIVE',
+    ]);
   }
 }

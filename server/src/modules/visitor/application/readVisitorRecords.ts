@@ -21,6 +21,7 @@ export async function visitorRecordsFor(
     return [
       {
         registrationId: row.registrationId,
+        rehearsal: row.rehearsal,
         recordedAt: row.registration.recordedAt.toISOString(),
         values,
       },

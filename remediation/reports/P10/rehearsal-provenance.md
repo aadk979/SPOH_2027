@@ -217,6 +217,35 @@ All workspace typechecks, root lint, architecture, hardcoding, formatting and se
 passed by exit code. The two changed phone/laptop import baselines were inspected and
 re-asserted; the other 56 images remain unchanged.
 
-Remaining: derived safety and visitor
-acknowledgement/follow-up provenance, then audited lifecycle admission, transitions and
-close/archive side effects. P10.4/P10.5 remain in progress.
+## Derived records and compatible capture locks
+
+Incident follow-ups, lost-person acknowledgements and visitor values now store their parent's
+rehearsal flag. The migration backfills existing children from the same event's parent, makes
+the flag required without a false default, and enforces matching event, parent and mode through
+foreign keys. Insert triggers derive an omitted flag for older API writers during a rolling
+deployment; explicitly incorrect flags are refused. This uses PostgreSQL's
+[transactional BEFORE INSERT semantics](https://www.postgresql.org/docs/17/trigger-definition.html).
+
+Follow-up and acknowledgement responses retain their stored mode. Visitor CSV and workbook
+exports label every included row LIVE or REHEARSAL; default visitor reads still exclude practice.
+Incident status decisions and derived writes lock their parent inside the audit transaction.
+Concurrent resolution produces one successful update and one note/audit, and repeated alert
+acknowledgements produce one row/audit even across phase changes.
+
+Verification exposed visitor captures upgrading an already-held event share lock to an exclusive
+lock, which blocked compatible captures and could deadlock. Captures now keep a share lock while
+collection changes retain their exclusive lock. A deterministic database regression failed
+before the fix and passed afterward; this follows PostgreSQL's
+[row lock compatibility rules](https://www.postgresql.org/docs/17/explicit-locking.html).
+
+Verification on 2026-10-02: full integration **570 passed / 4 existing skips**, server unit
+**476**, client unit **256**, and targeted browser E2E **10** passed. New database cases cover
+historical derived modes, concurrent safety writes, compatible visitor capture locks, exports,
+and a scratch migration from old rows with legacy writers and invalid ownership/mode updates.
+All workspace typechecks, root lint, architecture, hardcoding, formatting and server build
+passed by exit code. The integration, visual and E2E dedicated `_test` databases received the
+migration; a read-only Prisma schema comparison found no drift. No client layout changed in
+this slice.
+
+Remaining: audited lifecycle admission, transitions and close/archive side effects.
+P10.4/P10.5 remain in progress.

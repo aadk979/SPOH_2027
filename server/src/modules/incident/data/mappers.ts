@@ -22,6 +22,7 @@ export function toIncidentRecord(
     reportedAt: incident.reportedAt.toISOString(),
     followUps: incident.followUps.map((followUp) => ({
       id: followUp.id,
+      rehearsal: followUp.rehearsal,
       note: followUp.note,
       authorId: followUp.authorId,
       authorName: authorNames.get(followUp.authorId) ?? 'Unknown',

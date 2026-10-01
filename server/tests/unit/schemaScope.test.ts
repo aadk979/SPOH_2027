@@ -5,8 +5,8 @@ import { describe, expect, it } from 'vitest';
  * The schema lint of ADR-001 "How it is tested" (2), finished at P09.10: a
  * model with an `eventId` is marked `@eventOwned` (or is one of the named
  * platform-level tables), its `eventId` is required, and every reference it
- * holds to an event-owned row is the composite `(eventId, parentId)`, never
- * one a delete could null.
+ * holds to an event-owned row starts with `(eventId, parentId)`, never one a
+ * delete could null. Provenance may extend that composite with matching fields.
  */
 
 const schema = readFileSync(new URL('../../prisma/schema.prisma', import.meta.url), 'utf8');
@@ -65,10 +65,17 @@ describe('the event-scoped schema (ADR-001 §2, P09.10)', () => {
     const loose = owned.flatMap((model) =>
       relations(model)
         .filter(({ target, fields }) => ownedNames.has(target) && fields !== '')
-        .filter(
-          ({ fields, references }) =>
-            !fields.startsWith('eventId,') || references !== 'eventId, id',
-        )
+        .filter(({ fields, references }) => {
+          const child = fields.split(',').map((field) => field.trim());
+          const parent = references.split(',').map((field) => field.trim());
+          return (
+            child[0] !== 'eventId' ||
+            parent[0] !== 'eventId' ||
+            parent[1] !== 'id' ||
+            child.length !== parent.length ||
+            child.slice(2).join(',') !== parent.slice(2).join(',')
+          );
+        })
         .map(({ field }) => `${model.name}.${field}`),
     );
     expect(loose).toEqual([]);
@@ -101,7 +108,7 @@ describe('the event-scoped schema (ADR-001 §2, P09.10)', () => {
     const targets = new Set(
       owned.flatMap((model) =>
         relations(model)
-          .filter(({ references }) => references === 'eventId, id')
+          .filter(({ references }) => references.startsWith('eventId, id'))
           .map(({ target }) => target),
       ),
     );
@@ -109,6 +116,23 @@ describe('the event-scoped schema (ADR-001 §2, P09.10)', () => {
       .filter((model) => targets.has(model.name))
       .filter((model) => !model.body.includes('@@unique([eventId, id])'))
       .map((model) => model.name);
+    expect(unkeyed).toEqual([]);
+  });
+
+  it('enforces the entire parent key when provenance extends a scoped reference', () => {
+    const parents = new Map(models.map((model) => [model.name, model]));
+    const unkeyed = owned.flatMap((model) =>
+      relations(model)
+        .filter(
+          ({ target, references }) =>
+            ownedNames.has(target) && references.startsWith('eventId, id,'),
+        )
+        .filter(
+          ({ target, references }) =>
+            !parents.get(target)?.body.includes(`@@unique([${references}])`),
+        )
+        .map(({ field }) => `${model.name}.${field}`),
+    );
     expect(unkeyed).toEqual([]);
   });
 });

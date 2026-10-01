@@ -61,6 +61,19 @@ export async function findIncidentById(
   });
 }
 
+/** Serialize status decisions and derived writes with their incident. */
+export async function findIncidentForUpdate(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  id: string,
+): Promise<IncidentWithContext | null> {
+  await tx.$queryRaw`SELECT id FROM "Incident" WHERE "eventId" = ${scope.eventId} AND id = ${id} FOR UPDATE`;
+  return tx.incident.findUnique({
+    where: { eventId: scope.eventId, id },
+    include: incidentInclude,
+  });
+}
+
 export interface IncidentListFilter {
   status?: Prisma.IncidentWhereInput['status'];
   severity?: Prisma.IncidentWhereInput['severity'];
@@ -99,7 +112,7 @@ export async function listIncidents(
 export async function addFollowUp(
   tx: PrismaTransactionClient,
   scope: EventScope,
-  data: { incidentId: string; note: string; authorId: string },
+  data: { incidentId: string; note: string; authorId: string; rehearsal: boolean },
 ): Promise<void> {
   await tx.incidentFollowUp.create({
     data: {

@@ -94,7 +94,7 @@ export async function acknowledgedAlertIds(
 export async function acknowledgeAlert(
   tx: PrismaTransactionClient,
   scope: EventScope,
-  ack: { alertId: string; volunteerId: string },
+  ack: { alertId: string; volunteerId: string; rehearsal: boolean },
 ): Promise<boolean> {
   const membershipId = await membershipIdOf(tx, scope, ack.volunteerId);
   const { count } = await tx.lostPersonAck.createMany({

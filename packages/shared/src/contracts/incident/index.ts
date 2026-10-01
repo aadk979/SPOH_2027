@@ -30,6 +30,7 @@ export type CreateIncidentRequest = z.infer<typeof CreateIncidentRequest>;
 export const IncidentFollowUpRecord = z
   .object({
     id: Id,
+    rehearsal: z.boolean(),
     note: z.string(),
     authorId: Id,
     authorName: z.string(),

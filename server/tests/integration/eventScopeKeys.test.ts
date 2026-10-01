@@ -246,11 +246,17 @@ const CROSSINGS: Record<string, () => Promise<unknown>> = {
     }),
   Incident: () =>
     rawDb.incidentFollowUp.create({
-      data: { eventId: a.eventId, incidentId: b.incident, note: 'x', authorId: a.person },
+      data: {
+        eventId: a.eventId,
+        incidentId: b.incident,
+        note: 'x',
+        authorId: a.person,
+        rehearsal: false,
+      },
     }),
   LostPersonAlert: () =>
     rawDb.lostPersonAck.create({
-      data: { eventId: a.eventId, alertId: b.alert, volunteerId: a.person },
+      data: { eventId: a.eventId, alertId: b.alert, volunteerId: a.person, rehearsal: false },
     }),
   Announcement: () =>
     rawDb.announcementAck.create({

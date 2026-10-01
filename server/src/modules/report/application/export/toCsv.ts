@@ -127,10 +127,11 @@ function visitorSection(visitors: VisitorRecordsResponse): CsvSection {
   return {
     title: 'Visitor details (personal data: keep only as long as the event allows)',
     rows: [
-      ['Registered at (UTC)', ...visitors.fields.map((field) => field.label)],
+      ['Registered at (UTC)', ...visitors.fields.map((field) => field.label), 'Mode'],
       ...visitors.data.map((row) => [
         row.recordedAt,
         ...visitors.fields.map((field) => row.values[field.code] ?? null),
+        row.rehearsal ? 'REHEARSAL' : 'LIVE',
       ]),
     ],
   };

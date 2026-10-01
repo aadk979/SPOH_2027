@@ -825,6 +825,7 @@ model Registration {
   visitorRecord VisitorRecord?
 
   @@unique([eventId, id])
+  @@unique([eventId, id, rehearsal])
   @@index([recordedAt])
   @@index([groupId])
   @@index([eventId, recordedAt])
@@ -1077,6 +1078,7 @@ model Incident {
   reportedByMembership EventMembership? @relation("IncidentReportedByMembership", fields: [eventId, reportedByMembershipId], references: [eventId, id], onDelete: Restrict)
 
   @@unique([eventId, id])
+  @@unique([eventId, id, rehearsal])
   @@index([status, severity])
   @@index([reportedAt])
   @@index([eventId, status])
@@ -1089,6 +1091,8 @@ model IncidentFollowUp {
   id                 String   @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2).
   eventId            String
+  /// Copied from its incident, including when older writers omit the field.
+  rehearsal          Boolean
   incidentId         String
   /// @class staff-personal
   note               String
@@ -1097,7 +1101,7 @@ model IncidentFollowUp {
   authorMembershipId String?
   createdAt          DateTime @default(now()) @db.Timestamptz(3)
 
-  incident Incident @relation(fields: [eventId, incidentId], references: [eventId, id], onDelete: Cascade)
+  incident Incident @relation(fields: [eventId, incidentId, rehearsal], references: [eventId, id, rehearsal], onDelete: Cascade, onUpdate: Restrict)
   author   Person   @relation(fields: [authorId], references: [id], onDelete: Restrict)
 
   event Event @relation(fields: [eventId], references: [id], onDelete: Restrict)
@@ -1108,6 +1112,7 @@ model IncidentFollowUp {
   @@index([incidentId, createdAt])
   @@index([eventId])
   @@index([authorMembershipId])
+  @@index([eventId, rehearsal])
 }
 
 /// TRANSIENT by design. See BUILD_PLAN §5.9 — purged to LostPersonSummary on resolve.
@@ -1144,6 +1149,7 @@ model LostPersonAlert {
   raisedByMembership EventMembership? @relation("LostPersonAlertRaisedByMembership", fields: [eventId, raisedByMembershipId], references: [eventId, id], onDelete: Restrict)
 
   @@unique([eventId, id])
+  @@unique([eventId, id, rehearsal])
   @@index([status])
   @@index([eventId, status])
   @@index([raisedByMembershipId])
@@ -1155,13 +1161,15 @@ model LostPersonAck {
   id           String   @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2).
   eventId      String
+  /// Copied from its alert, including when older writers omit the field.
+  rehearsal    Boolean
   alertId      String
   volunteerId  String
   /// The EventMembership behind volunteerId (ADR-001); backfilled in P09.4, read from P09.5.
   membershipId String?
   ackedAt      DateTime @default(now()) @db.Timestamptz(3)
 
-  alert     LostPersonAlert @relation(fields: [eventId, alertId], references: [eventId, id], onDelete: Cascade)
+  alert     LostPersonAlert @relation(fields: [eventId, alertId, rehearsal], references: [eventId, id, rehearsal], onDelete: Cascade, onUpdate: Restrict)
   volunteer Person          @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
 
   event Event @relation(fields: [eventId], references: [id], onDelete: Restrict)
@@ -1172,6 +1180,7 @@ model LostPersonAck {
   @@unique([alertId, volunteerId])
   @@index([eventId])
   @@index([membershipId])
+  @@index([eventId, rehearsal])
 }
 
 /// What survives after purge — analytics only. Every report reads this, never the alert.
@@ -1495,23 +1504,27 @@ model VisitorField {
 /// a purge deletes these and leaves the counts untouched (ADR-002 §4).
 /// @eventOwned
 model VisitorRecord {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2).
   eventId        String
-  registrationId String   @unique
+  /// Copied from its registration, including when older writers omit the field.
+  rehearsal      Boolean
+  registrationId String    @unique
   /// Values by field code, each checked against the event's fields.
   /// @class visitor-personal
   data           Json
   /// Deadline for the last remaining value, set when the event closes.
   purgeAfter     DateTime? @db.Timestamptz(3)
-  createdAt      DateTime @default(now()) @db.Timestamptz(3)
+  createdAt      DateTime  @default(now()) @db.Timestamptz(3)
 
   event        Event        @relation(fields: [eventId], references: [id], onDelete: Restrict)
-  registration Registration @relation(fields: [eventId, registrationId], references: [eventId, id], onDelete: Restrict)
+  registration Registration @relation(fields: [eventId, registrationId, rehearsal], references: [eventId, id, rehearsal], onDelete: Restrict, onUpdate: Restrict)
 
   @@unique([eventId, registrationId])
+  @@unique([eventId, registrationId, rehearsal])
   @@index([eventId, createdAt])
   @@index([eventId, purgeAfter])
+  @@index([eventId, rehearsal])
 }
 
 enum SettingScope {

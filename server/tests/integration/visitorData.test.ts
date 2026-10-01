@@ -68,6 +68,62 @@ const tap = (visitor?: Record<string, string>) =>
     });
 
 describe('per-event visitor allowlist (ADR-002 §4)', () => {
+  it.each([false, true])(
+    'copies the registration mode into visitor values (practice %s)',
+    async (rehearsal) => {
+      const { eventId } = await testEvent();
+      expect((await changeMode('allowlist', 0)).status).toBe(200);
+      expect((await field('contact', 2, ['CHIEF_COORDINATOR'])).status).toBe(201);
+      await rawDb.event.update({
+        where: { id: eventId },
+        data: { status: rehearsal ? 'REHEARSAL' : 'LIVE' },
+      });
+      const captured = await tap({ contact: 'derived@visitor.test' });
+      expect(captured.status).toBe(201);
+      expect(
+        await rawDb.visitorRecord.findFirstOrThrow({
+          where: { eventId, registrationId: captured.body.registration.id },
+        }),
+      ).toMatchObject({ rehearsal });
+      await rawDb.event.update({
+        where: { id: eventId },
+        data: { status: rehearsal ? 'LIVE' : 'REHEARSAL' },
+      });
+      const read = await request(app).get('/api/v1/visitors').set('Authorization', bearer(chief));
+      expect(read.status).toBe(200);
+      expect(read.body.data).toEqual(
+        rehearsal ? [] : [expect.objectContaining({ rehearsal: false })],
+      );
+    },
+  );
+
+  it('allows visitor captures beside another capture’s phase lock', async () => {
+    const { eventId } = await testEvent();
+    expect((await changeMode('allowlist', 0)).status).toBe(200);
+    expect((await field('contact', 2, ['CHIEF_COORDINATOR'])).status).toBe(201);
+    let pending: Promise<request.Response> | undefined;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      await rawDb.$transaction(async (tx) => {
+        await tx.$queryRaw`SELECT id FROM "Event" WHERE id = ${eventId} FOR SHARE`;
+        pending = tap({ contact: 'parallel@visitor.test' }).then((response) => response);
+        const result = await Promise.race([
+          pending,
+          new Promise<never>((_resolve, reject) => {
+            timer = setTimeout(
+              () => reject(new Error('Visitor capture blocked by compatible phase lock')),
+              1500,
+            );
+          }),
+        ]);
+        expect(result.status).toBe(201);
+      });
+    } finally {
+      clearTimeout(timer);
+      await pending;
+    }
+  });
+
   it('defaults to no personal data and rejects undeclared values without a count', async () => {
     const refused = await tap({ contact: 'visitor@example.test' });
     expect(refused.status).toBe(422);
