@@ -4,6 +4,7 @@ import { PrismaClient } from '../../src/generated/prisma/client.js';
 import { prisma } from '../../src/platform/db/client.js';
 import { invalidateEventCache } from '../../src/platform/event/events.js';
 import { invalidateVolunteerCache } from '../../src/platform/identity/index.js';
+import { invalidateRateLimitPolicy } from '../../src/platform/http/rateLimitPolicy.js';
 
 /**
  * Test database helpers.
@@ -128,4 +129,5 @@ export async function resetDatabase(): Promise<void> {
 
   invalidateEventCache();
   invalidateVolunteerCache();
+  invalidateRateLimitPolicy();
 }

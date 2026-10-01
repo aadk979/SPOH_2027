@@ -10,12 +10,6 @@ export const serverFields = {
   // Exact origins only. A wildcard here would defeat the whole CORS policy.
   CORS_ALLOWED_ORIGINS: CsvList.default(['http://localhost:3000']),
 
-  RATE_LIMIT_WINDOW_MS: z.coerce.number().int().min(1000).default(60_000),
-  RATE_LIMIT_MAX_DEFAULT: z.coerce.number().int().min(1).default(300),
-  RATE_LIMIT_MAX_CAPTURE: z.coerce.number().int().min(1).default(1200),
-  RATE_LIMIT_MAX_SENSITIVE: z.coerce.number().int().min(1).default(20),
-  RATE_LIMIT_MAX_ADMIN: z.coerce.number().int().min(1).default(60),
-
   TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(0),
   /**
    * The client's static export, served by this process on the same origin as

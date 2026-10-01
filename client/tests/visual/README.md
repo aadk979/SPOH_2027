@@ -12,6 +12,7 @@ $env:DATABASE_URL=$env:TEST_DATABASE_URL
 $env:NODE_ENV='development'
 node server/scripts/setup-test-db.mjs
 node --import ./client/tests/visual/freeze-clock.mjs --import tsx server/prisma/seed.ts
+node --import tsx server/scripts/prepare-visual-rate-limits.mjs
 npm run build --workspace server
 ```
 
@@ -25,8 +26,6 @@ $env:PORT='4012'
 $env:LOG_LEVEL='silent'
 $env:SHIFT_HOURS_ALWAYS_OPEN='true'
 $env:CORS_ALLOWED_ORIGINS='http://localhost:3001'
-$env:RATE_LIMIT_MAX_DEFAULT='100000'
-$env:RATE_LIMIT_MAX_ADMIN='100000'
 node --import ./client/tests/visual/freeze-clock.mjs server/dist/index.js
 ```
 
@@ -43,4 +42,4 @@ Since P09.11 the seed generates its fixture relative to "today" (here the frozen
 
 The screenshots cover seeded initial page states. Behavioural actions are covered separately by the e2e and component suites. Snapshot coverage does not imply every interactive state has a visual baseline.
 
-The frozen API clock also freezes rate-window expiry. These two high limits belong only to this disposable visual process; rate-limit correctness remains covered by server tests under their normal configuration. Browser tests reject 429/5xx responses instead of capturing an error/loading state as a golden image. All seeded accounts are signed in before capture so roster last-seen fields are independent of test order.
+The frozen API clock also freezes rate-window expiry. The guarded fixture script sets bounded, high platform limits in this disposable test database; rate-limit correctness remains covered by server tests under their normal configuration. Browser tests reject 429/5xx responses instead of capturing an error/loading state as a golden image. All seeded accounts are signed in before capture so roster last-seen fields are independent of test order.

@@ -8,6 +8,8 @@ import {
   type PrismaTransactionClient,
 } from '../db/client.js';
 import { ConflictError, NotFoundError, ValidationError } from '../errors/index.js';
+import { publishCacheEvent } from '../events/cacheBus.js';
+import { invalidateRateLimitPolicy } from '../http/rateLimitPolicy.js';
 import { SETTINGS, type SettingKey } from './registry.js';
 import { assertSettingTarget, scopeOf, storedSetting, type SettingTarget } from './scopedStore.js';
 
@@ -167,7 +169,7 @@ export async function changeSetting(input: ChangeSettingInput): Promise<number> 
   }
   const parsed = definition.schema.safeParse(input.value);
   if (!parsed.success) throw new ValidationError('Invalid setting value', parsed.error.issues);
-  return prisma.$transaction(async (tx) => {
+  const version = await prisma.$transaction(async (tx) => {
     await assertSettingTarget(tx, input.target);
     await assertUnlocked(tx, input.target, input.key);
     await assertAttendanceRoot(tx, input, parsed.data);
@@ -185,8 +187,16 @@ export async function changeSetting(input: ChangeSettingInput): Promise<number> 
       before: current?.value ?? definition.default,
       version,
     });
+    await publishCacheEvent(tx, 'settings', {
+      scope: input.target.scope,
+      scopeId: scopeOf(input.target).scopeId,
+      key: input.key,
+      version,
+    });
     return version;
   });
+  invalidateRateLimitPolicy();
+  return version;
 }
 
 /** Revert copies a historical value into a new version; history remains append-only. */
@@ -210,7 +220,7 @@ export async function resetSetting(
   if (!SETTINGS[input.key].scopes.includes(input.target.scope)) {
     throw new ValidationError(`${input.key} cannot be reset at ${input.target.scope} scope`);
   }
-  return prisma.$transaction(async (tx) => {
+  const version = await prisma.$transaction(async (tx) => {
     await assertSettingTarget(tx, input.target);
     await assertUnlocked(tx, input.target, input.key);
     const current = await storedSetting(input.target, input.key, tx);
@@ -247,6 +257,9 @@ export async function resetSetting(
       entityId: input.key,
       after: { scope, scopeId, reset: true, version },
     });
+    await publishCacheEvent(tx, 'settings', { scope, scopeId, key: input.key, version });
     return version;
   });
+  invalidateRateLimitPolicy();
+  return version;
 }

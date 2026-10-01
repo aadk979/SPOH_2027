@@ -9,7 +9,14 @@ The server loads infrastructure addresses and secrets from its environment. Oper
 | `S3_UPLOAD_TTL_SECONDS`    | `media.uploadTtlSeconds`      | Platform | 300 seconds. The new value applies to newly signed upload and read URLs.                                                                                    |
 | `S3_MAX_UPLOAD_BYTES`      | `media.maxUploadBytes`        | Platform | 10 MiB. The new value is embedded in each new S3 upload policy.                                                                                             |
 | `ACCESS_TOKEN_TTL_SECONDS` | `auth.accessTokenTtlSeconds`  | Platform | 900 seconds, bounded to 60–3600. Each newly issued access token uses the live organisation value; existing tokens retain their signed expiry.               |
+| `RATE_LIMIT_WINDOW_MS`     | `rateLimit.windowSeconds`     | Platform | 60 seconds, bounded to 10–600. A changed window starts a new counter bucket.                                                                                |
+| `RATE_LIMIT_MAX_DEFAULT`   | `rateLimit.max.default`       | Platform | 300 requests per window. Ordinary authenticated routes use the event's organisation.                                                                        |
+| `RATE_LIMIT_MAX_CAPTURE`   | `rateLimit.max.capture`       | Platform | 1200 requests per window. Capture routes retain their separate, higher ceiling.                                                                             |
+| `RATE_LIMIT_MAX_SENSITIVE` | `rateLimit.max.sensitive`     | Platform | 20 requests per window. Sign-in still counts failures only and uses Event #1's organisation regardless of caller-supplied identity.                         |
+| `RATE_LIMIT_MAX_ADMIN`     | `rateLimit.max.admin`         | Platform | 60 requests per window for administrative writes.                                                                                                           |
 
 The media values are resolved for the organisation that owns the event named in the API path. A malformed stored value falls through to its bounded registry default. Existing URLs keep the lifetime and size they were signed with.
+
+Rate-limit settings are read from a short-lived per-process policy cache, invalidated by the settings bus. Counter buckets remain in-process until P15.2 replaces the store with a shared Postgres counter and proves a multi-instance limit. A live setting change does not require a restart; the bounded value applies to the next request after invalidation or the one-second cache expiry.
 
 `ATTENDANCE_SIGNING_SECRET` remains a secret. `SEED_ADMIN_EMAIL` and `SEED_ADMIN_SUB` are seed-time inputs only; they do not choose the attendance root. The remaining operational env keys and rehearsal mode are tracked in P10.4.

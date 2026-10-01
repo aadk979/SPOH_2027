@@ -1,40 +1,38 @@
-import {
-  ipKeyGenerator,
-  rateLimit,
-  type Options,
-  type RateLimitRequestHandler,
-} from 'express-rate-limit';
-import type { Request } from 'express';
+import { ipKeyGenerator, rateLimit, type Options } from 'express-rate-limit';
+import type { Request, RequestHandler } from 'express';
 import { ERROR_CODES } from '@spoh/shared';
-import { env } from '../../config/env.js';
 import { requestIdOf } from './requestId.js';
 import { named } from './named.js';
+import { DynamicRateLimitStore } from './dynamicRateLimitStore.js';
+import { rateLimitPolicy, type RateLimitPolicy, type RateLimitTier } from './rateLimitPolicy.js';
 
-/**
- * Rate limiting (BUILD_PLAN §8.4).
- *
- * Keyed on the authenticated subject where there is one, falling back to IP.
- * Keying on IP alone would be wrong at this event: a whole station of
- * volunteers can share one Wi-Fi egress, and one busy booth would throttle the
- * rest of the room.
- *
- * The capture ceiling is deliberately high. A booth volunteer at peak genuinely
- * taps fast, and a throttled tap is a visitor who never gets counted — the
- * limiter exists to stop abuse, not to second-guess the queue.
- */
-function keyGenerator(req: Request): string {
+/** A person gets their own bucket; anonymous routes use a normalised IP. */
+function subjectKey(req: Request): string {
   const sub = req.auth?.sub ?? req.person?.sub;
   if (sub) return `sub:${sub}`;
-  // ipKeyGenerator normalises IPv6 to a /56 block so a single client cannot
-  // trivially rotate addresses within its own prefix.
   return `ip:${ipKeyGenerator(req.ip ?? 'unknown')}`;
 }
 
-function build(max: number, extra: Partial<Options> = {}): RateLimitRequestHandler {
-  return rateLimit({
-    windowMs: env.RATE_LIMIT_WINDOW_MS,
-    limit: max,
-    keyGenerator,
+type ScopedLimiter = RequestHandler & { resetKey: (subject: string) => void };
+
+function build(tier: RateLimitTier, extra: Partial<Options> = {}): ScopedLimiter {
+  const policies = new WeakMap<Request, RateLimitPolicy>();
+  const store = new DynamicRateLimitStore();
+  const policyOf = (req: Request): RateLimitPolicy => {
+    const policy = policies.get(req);
+    if (!policy) throw new Error('Rate limit policy was not loaded');
+    return policy;
+  };
+  const limiter = rateLimit({
+    // The store returns the actual reset time from the live window setting.
+    windowMs: 60_000,
+    limit: (req) => policyOf(req).max,
+    keyGenerator: (req) => {
+      const policy = policyOf(req);
+      return `w=${policy.windowSeconds}|o=${policy.organisationId ?? 'unconfigured'}|${subjectKey(req)}`;
+    },
+    identifier: (req) => `${tier}-${policyOf(req).windowSeconds}s`,
+    store,
     standardHeaders: 'draft-8',
     legacyHeaders: false,
     handler: (req, res) => {
@@ -48,45 +46,31 @@ function build(max: number, extra: Partial<Options> = {}): RateLimitRequestHandl
     },
     ...extra,
   });
+  const handler: RequestHandler = async (req, res, next) => {
+    try {
+      policies.set(req, await rateLimitPolicy(req, tier));
+      await limiter(req, res, next);
+    } catch (error) {
+      next(error);
+    }
+  };
+  return Object.assign(handler, { resetKey: (subject: string) => store.resetSubject(subject) });
 }
 
-/** Everything that is not a capture write or an auth-adjacent action. */
-export const defaultRateLimit = named('defaultRateLimit', build(env.RATE_LIMIT_MAX_DEFAULT));
+/** Ordinary reads and writes. */
+export const defaultRateLimit = named('defaultRateLimit', build('default'));
 
-/** Registration taps and footfall ticks. */
-export const captureRateLimit = named('captureRateLimit', build(env.RATE_LIMIT_MAX_CAPTURE));
+/** Capture requests have a high ceiling so taps are not lost at a busy booth. */
+export const captureRateLimit = named('captureRateLimit', build('capture'));
 
-/**
- * Anything that mints a credential, sends an email, or reads the whole event.
- *
- * Provisioning, roster and fallback imports, report generation. Kept
- * deliberately tight: these are slow, and none of them is something a human
- * does twenty times a minute.
- */
-export const sensitiveRateLimit = named('sensitiveRateLimit', build(env.RATE_LIMIT_MAX_SENSITIVE));
+/** Credential minting, imports and whole-event reports. */
+export const sensitiveRateLimit = named('sensitiveRateLimit', build('sensitive'));
 
-/**
- * Sign-in: `POST /auth/session`, `GET /auth/login` and `GET /auth/callback`.
- *
- * Counts failures only (F04-006). Before sign-in there is no subject, so the
- * key is the IP, and a room of volunteers told to sign in at a briefing shares
- * one campus egress: on the sensitive ceiling, counting every request, the
- * 21st person in a minute was refused and retries kept the bucket full. A
- * successful sign-in costs nothing here; twenty failures a minute from one
- * address still stop a password-guessing loop.
- */
+/** A shared IP is charged only for failed sign-ins (F04-006). */
 export const signInRateLimit = named(
   'signInRateLimit',
-  build(env.RATE_LIMIT_MAX_SENSITIVE, { skipSuccessfulRequests: true }),
+  build('sensitive', { skipSuccessfulRequests: true }),
 );
 
-/**
- * Administration writes.
- *
- * Between the two. Editing a volunteer or a station is privileged but cheap,
- * and it comes in bursts — configuring eight stations and four event days
- * before a dry run is one sitting, not an attack. The sensitive ceiling would
- * stop an admin halfway through and look like a broken screen; the default
- * ceiling is looser than a privileged write deserves.
- */
-export const adminRateLimit = named('adminRateLimit', build(env.RATE_LIMIT_MAX_ADMIN));
+/** Privileged writes, below the ordinary ceiling. */
+export const adminRateLimit = named('adminRateLimit', build('admin'));
