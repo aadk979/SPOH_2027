@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-01T07:16:22.399Z",
+  "updatedAt": "2026-10-01T07:24:41.450Z",
   "current": {
-    "phase": "P09",
-    "step": "P09.13"
+    "phase": "P08",
+    "step": null
   },
   "gates": [
     {
@@ -1925,16 +1925,21 @@
         {
           "id": "P09.13",
           "title": "Verify and report",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-01T07:08:34.243Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-10-01T07:24:33.237Z",
+          "commits": ["c07ecd0"],
+          "notes": [
+            {
+              "at": "2026-10-01T07:24:33.237Z",
+              "text": "Full P09 verification: server unit 455, integration 474 passed/7 skipped, isolation and DST 19, client unit 229, browser E2E 30, visual 58, root quality gates and audit exception gate; staging c62ea61 CI/deploy and six smoke probes passed; staging seed has two synthetic events and totals oracle zero mismatches. No production data/pg_dump exists."
+            }
+          ]
         }
       ],
-      "status": "in_progress",
+      "status": "done",
       "startedAt": "2026-09-29T08:21:37.076Z",
-      "completedAt": null
+      "completedAt": "2026-10-01T07:24:41.449Z"
     },
     {
       "id": "P10",
