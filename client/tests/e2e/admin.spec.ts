@@ -143,5 +143,36 @@ test.describe('roster administration', () => {
     // The two times that decide whether the capture screens work at all.
     await expect(page.getByLabel('Morning starts')).toHaveValue('09:30');
     await expect(page.getByLabel('Afternoon ends')).toHaveValue('18:00');
+    await expect(page.getByRole('heading', { name: 'Attendance setup' })).toBeVisible();
+    await expect(page.getByLabel('Attendance root')).toContainText('admin@spoh2027.test');
+  });
+
+  test('a Chief tests draft trusted networks and saves the list', async ({ page }) => {
+    await signIn(page, CHIEF);
+    await page.goto('/e/spoh2027/admin/settings');
+    const networks = page.getByLabel('Trusted networks');
+    await expect(networks).toBeVisible();
+    const initial = await networks.inputValue();
+    const draft = '127.0.0.1/32\n::1/128\n192.0.2.0/24';
+    try {
+      await networks.fill(draft);
+      await page.getByRole('button', { name: 'Test from my current IP' }).click();
+      await expect(page.getByText('Your current IP is trusted.')).toBeVisible();
+      await page.getByRole('button', { name: 'Save trusted networks' }).click();
+      await expect(page.getByRole('button', { name: 'Save trusted networks' })).toHaveCount(0);
+      await page.reload();
+      await expect(page.getByLabel('Trusted networks')).toHaveValue(draft);
+    } finally {
+      const current = page.getByLabel('Trusted networks');
+      if (await current.isVisible()) {
+        await current.fill(initial);
+        const restore = page.getByRole('button', { name: 'Save trusted networks' });
+        if (await restore.isVisible()) {
+          await restore.click();
+          await expect(restore).toHaveCount(0);
+          await expect(current).toHaveValue(initial);
+        }
+      }
+    }
   });
 });

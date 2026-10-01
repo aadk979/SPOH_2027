@@ -1,23 +1,29 @@
 'use client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type {
+  ChangeAttendanceConfigRequest,
   ChangeEventSettingRequest,
   RuntimeSettings,
+  TestAttendanceNetworkRequest,
   UpdateShiftTemplateRequest,
 } from '@spoh/shared';
 import { useEventId } from '@/shared/lib/eventContext';
 import {
+  changeAttendanceConfig,
   changeEventSetting,
+  getAttendanceConfig,
   getEventSettings,
   getSettings,
   listShiftTemplates,
   saveSettings,
   saveShiftTemplate,
+  testAttendanceNetwork,
 } from './api';
 export const settingsKeys = {
   current: (eventId: string) => [eventId, 'admin', 'settings'] as const,
   shiftTemplates: (eventId: string) => [eventId, 'admin', 'shift-templates'] as const,
   event: (eventId: string) => [eventId, 'event-settings'] as const,
+  attendance: (eventId: string) => [eventId, 'admin', 'attendance-settings'] as const,
 };
 export function useSettings(enabled: boolean) {
   const eventId = useEventId();
@@ -83,5 +89,34 @@ export function useChangeEventSetting() {
       // Reports and dashboards show counts by these rules.
       void client.invalidateQueries({ queryKey: [eventId] });
     },
+  });
+}
+
+export function useAttendanceConfig(enabled: boolean) {
+  const eventId = useEventId();
+  return useQuery({
+    queryKey: settingsKeys.attendance(eventId),
+    queryFn: () => getAttendanceConfig(eventId),
+    enabled,
+    staleTime: 30_000,
+  });
+}
+
+export function useChangeAttendanceConfig() {
+  const client = useQueryClient();
+  const eventId = useEventId();
+  return useMutation({
+    mutationFn: (body: ChangeAttendanceConfigRequest) => changeAttendanceConfig(eventId, body),
+    onSuccess: (response) => {
+      client.setQueryData(settingsKeys.attendance(eventId), response);
+      void client.invalidateQueries({ queryKey: [eventId] });
+    },
+  });
+}
+
+export function useTestAttendanceNetwork() {
+  const eventId = useEventId();
+  return useMutation({
+    mutationFn: (body: TestAttendanceNetworkRequest) => testAttendanceNetwork(eventId, body),
   });
 }

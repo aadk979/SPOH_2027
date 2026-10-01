@@ -1,9 +1,13 @@
 import type {
+  AttendanceConfig,
+  ChangeAttendanceConfigRequest,
   ChangeEventSettingRequest,
   EventSettingsResponse,
   RuntimeSettings,
   SettingsResponse,
   ShiftTemplateRecord,
+  TestAttendanceNetworkRequest,
+  TestAttendanceNetworkResponse,
   UpdateShiftTemplateRequest,
 } from '@spoh/shared';
 import { eventApi } from '@/shared/lib/eventApi';
@@ -48,4 +52,33 @@ export function changeEventSetting(
     method: 'PATCH',
     body,
   });
+}
+
+/** Event attendance root and trusted networks, with independent versions. */
+export function getAttendanceConfig(eventId: string): Promise<AttendanceConfig> {
+  return eventApi<AttendanceConfig>(eventId, '/admin/attendance-settings');
+}
+
+export function changeAttendanceConfig(
+  eventId: string,
+  body: ChangeAttendanceConfigRequest,
+): Promise<AttendanceConfig> {
+  return eventApi<AttendanceConfig>(eventId, '/admin/attendance-settings', {
+    method: 'PATCH',
+    body,
+  });
+}
+
+export function testAttendanceNetwork(
+  eventId: string,
+  body: TestAttendanceNetworkRequest,
+): Promise<TestAttendanceNetworkResponse> {
+  return eventApi<TestAttendanceNetworkResponse>(
+    eventId,
+    '/admin/attendance-settings/test-network',
+    {
+      method: 'POST',
+      body,
+    },
+  );
 }

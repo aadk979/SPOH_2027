@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import {
   ChangeEventSettingRequest,
+  ChangeAttendanceConfigRequest,
   CreateAssignmentRequest,
   CreateEventDayRequest,
   CreateGiftTypeRequest,
@@ -10,6 +11,7 @@ import {
   DeactivateVolunteerRequest,
   Id,
   ListVolunteersQuery,
+  TestAttendanceNetworkRequest,
   UpdateEventDayRequest,
   UpdateGiftTypeRequest,
   UpdateShiftTemplateRequest,
@@ -41,6 +43,11 @@ import {
   getSettingsHandler,
   updateSettingsHandler,
 } from '../../settings/index.js';
+import {
+  changeAttendanceConfigHandler,
+  getAttendanceConfigHandler,
+  testAttendanceNetworkHandler,
+} from '../../attendance/index.js';
 import {
   createVisitorFieldHandler,
   listVisitorFieldsHandler,
@@ -274,6 +281,28 @@ adminRouter.patch(
   requireCapability('config.manage'),
   validate({ body: ChangeEventSettingRequest }),
   changeEventSettingHandler,
+);
+
+// The attendance root and trusted networks are event-scoped security settings.
+adminRouter.get(
+  '/attendance-settings',
+  defaultRateLimit,
+  requireCapability('config.manage'),
+  getAttendanceConfigHandler,
+);
+adminRouter.patch(
+  '/attendance-settings',
+  adminRateLimit,
+  requireCapability('config.manage'),
+  validate({ body: ChangeAttendanceConfigRequest }),
+  changeAttendanceConfigHandler,
+);
+adminRouter.post(
+  '/attendance-settings/test-network',
+  adminRateLimit,
+  requireCapability('config.manage'),
+  validate({ body: TestAttendanceNetworkRequest }),
+  testAttendanceNetworkHandler,
 );
 
 // ─────────────────────────────────────────────────────────────

@@ -440,6 +440,13 @@ const CASES: Record<string, Case> = {
   'PATCH /admin/settings': noId('runtime settings are platform-wide until P10'),
   'GET /admin/event-settings': noId("reads the path event's settings"),
   'PATCH /admin/event-settings': noId("changes the path event's settings"),
+  'GET /admin/attendance-settings': noId("reads the path event's attendance setup"),
+  'PATCH /admin/attendance-settings': noId(
+    'changes path event settings; root membership scope is checked by settingStore tests',
+  ),
+  'POST /admin/attendance-settings/test-network': noId(
+    'tests the request IP against supplied ranges without reading another event',
+  ),
   'GET /admin/visitor-fields': LIST,
   'POST /admin/visitor-fields': noId('creates a field in the path event'),
   'PATCH /admin/visitor-fields/:id': {

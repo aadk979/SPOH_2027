@@ -10,6 +10,7 @@ import { ProductRulesForm } from '../components/ProductRulesForm';
 import { ShiftHoursForm } from '../components/ShiftHoursForm';
 import { ThresholdsForm } from '../components/ThresholdsForm';
 import { SettingsApply } from '../components/SettingsApply';
+import { AttendanceSettingsForm } from '../components/AttendanceSettingsForm';
 export default function AdminSettingsScreen(): ReactNode {
   const session = useRequireSession();
   const { data: me } = useMe();
@@ -27,6 +28,7 @@ export default function AdminSettingsScreen(): ReactNode {
             <EventNameField form={form} canEdit={canEdit} />
             <ShiftHoursForm enabled={session !== null} canEdit={canEdit} />
             <ProductRulesForm enabled={session !== null} canEdit={canEdit} />
+            <AttendanceSettingsForm enabled={canEdit} />
             <ThresholdsForm form={form} canEdit={canEdit} />
             <SettingsApply form={form} canEdit={canEdit} />
           </>

@@ -17,6 +17,8 @@ The server loads infrastructure addresses and secrets from its environment. Oper
 
 The media values are resolved for the organisation that owns the event named in the API path. A malformed stored value falls through to its bounded registry default. Existing URLs keep the lifetime and size they were signed with.
 
+An event configuration manager can choose the attendance root from active admins of that event and edit trusted networks on the Event settings screen. The “Test from my current IP” action checks the unsaved CIDR list against the address seen by the API; it does not change the stored setting. Both saves use the version the manager read and leave an audited setting history.
+
 Rate-limit settings are read from a short-lived per-process policy cache, invalidated by the settings bus. Counter buckets remain in-process until P15.2 replaces the store with a shared Postgres counter and proves a multi-instance limit. A live setting change does not require a restart; the bounded value applies to the next request after invalidation or the one-second cache expiry.
 
 `ATTENDANCE_SIGNING_SECRET` remains a secret. `SEED_ADMIN_EMAIL` and `SEED_ADMIN_SUB` are seed-time inputs only; they do not choose the attendance root. The remaining operational env keys and rehearsal mode are tracked in P10.4.
