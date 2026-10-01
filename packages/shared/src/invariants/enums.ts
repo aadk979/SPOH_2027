@@ -29,6 +29,10 @@ export type DataSource = z.infer<typeof DataSource>;
 export const RedemptionFlag = z.enum(['OVER_STOCK', 'SECOND_GIFT']);
 export type RedemptionFlag = z.infer<typeof RedemptionFlag>;
 
+/** How a volunteer's presence was confirmed: by a root admin, a scanned QR, or a PIN. */
+export const AttendanceMethod = z.enum(['ROOT', 'QR', 'PIN']);
+export type AttendanceMethod = z.infer<typeof AttendanceMethod>;
+
 export const SwapStatus = z.enum(['REQUESTED', 'APPROVED', 'REJECTED', 'CANCELLED']);
 export type SwapStatus = z.infer<typeof SwapStatus>;
 

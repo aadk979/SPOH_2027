@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { AttendanceMethod } from '../../invariants/enums.js';
 import { Id, IsoDateTime } from '../common/index.js';
 
 export const AttendanceProof = z.discriminatedUnion('method', [
@@ -10,7 +11,7 @@ export type AttendanceProof = z.infer<typeof AttendanceProof>;
 export const AttendanceRecord = z.object({
   id: Id,
   presentAt: IsoDateTime,
-  method: z.enum(['ROOT', 'QR', 'PIN']),
+  method: AttendanceMethod,
   verifiedByName: z.string().nullable(),
 });
 export type AttendanceRecord = z.infer<typeof AttendanceRecord>;
