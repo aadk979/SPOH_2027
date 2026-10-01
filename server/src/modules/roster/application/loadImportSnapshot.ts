@@ -21,7 +21,7 @@ async function loadExisting(request: RosterImportRequest, actor: RosterActor) {
   const existing = new Map<string, Volunteer>();
   for (const [index, row] of request.rows.entries()) {
     if (!existing.has(row.email)) {
-      const found = await findVolunteerByEmail(row.email);
+      const found = await findVolunteerByEmail(actor.scope, row.email);
       if (found) existing.set(row.email, found);
     }
     assertMayManage(
@@ -52,7 +52,7 @@ export async function loadImportSnapshot(
         actor.scope,
         [...accounts.values()].map((account) => account.id),
       ),
-      findVolunteersByEmails([...new Set(managerEmails)]),
+      findVolunteersByEmails(actor.scope, [...new Set(managerEmails)]),
     ]);
   return {
     existing: accounts,

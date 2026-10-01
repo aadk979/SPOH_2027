@@ -3,7 +3,6 @@ import type { CommitteeRole } from '@spoh/shared';
 import { env } from '../../src/config/env.js';
 import { prisma } from '../../src/platform/db/client.js';
 import type { EventScope } from '../../src/platform/db/eventScope.js';
-import { mirrorMembership } from '../../src/platform/db/membershipMirror.js';
 import { createEvent } from '../../src/modules/event/index.js';
 import { addShiftsForDay } from '../../src/modules/eventDays/index.js';
 import { assignmentLinks } from '../../src/modules/assignments/index.js';
@@ -172,12 +171,23 @@ export async function createVolunteer(input: {
       email: input.email,
       displayName: input.displayName ?? input.email,
       cognitoSub: sub,
-      role: input.role,
     },
-    update: { role: input.role, active: true },
+    update: {},
     select: { id: true },
   });
-  await mirrorMembership(prisma, await testEvent(), volunteer.id);
+  // What they are in the event is their membership (ADR-001 §1).
+  const { eventId } = await testEvent();
+  const standing = {
+    role: input.role,
+    status: 'ACTIVE' as const,
+    deactivatedAt: null,
+    deactivatedReason: null,
+  };
+  await prisma.eventMembership.upsert({
+    where: { eventId_personId: { eventId, personId: volunteer.id } },
+    create: { eventId, personId: volunteer.id, ...standing },
+    update: standing,
+  });
 
   // The auth middleware caches sub -> volunteer for 60 seconds; a fixture
   // rebuilt between tests must not be served from a previous test's cache.
@@ -269,13 +279,36 @@ export async function removeFromRoster(personId: string): Promise<void> {
   invalidateVolunteerCache();
 }
 
-/** Deactivate someone as the roster does: the person, mirrored onto the membership. */
+/** Deactivate someone as the roster does: their membership of the test event. */
 export async function deactivate(where: { id: string } | { email: string }): Promise<void> {
-  const person = await prisma.person.update({
-    where,
-    data: { active: false },
-    select: { id: true },
-  });
-  await mirrorMembership(prisma, await testEvent(), person.id);
+  const person = await prisma.person.findUniqueOrThrow({ where, select: { id: true } });
+  await setMembership(person.id, { status: 'DEACTIVATED', deactivatedAt: new Date() });
   invalidateVolunteerCache();
+}
+
+/** Change someone's membership of the test event directly, as a test needs to. */
+export async function setMembership(
+  personId: string,
+  data: {
+    role?: CommitteeRole;
+    status?: 'ACTIVE' | 'DEACTIVATED';
+    deactivatedAt?: Date | null;
+    deactivatedReason?: string | null;
+  },
+): Promise<void> {
+  const { eventId } = await testEvent();
+  await prisma.eventMembership.update({
+    where: { eventId_personId: { eventId, personId } },
+    data,
+  });
+  invalidateVolunteerCache();
+}
+
+/** Someone's membership of the test event. */
+export async function membershipOf(personId: string) {
+  const { eventId } = await testEvent();
+  return prisma.eventMembership.findUniqueOrThrow({
+    where: { eventId_personId: { eventId, personId } },
+    include: { reportsTo: { select: { personId: true } } },
+  });
 }

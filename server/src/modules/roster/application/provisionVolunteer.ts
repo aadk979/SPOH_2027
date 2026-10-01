@@ -18,7 +18,7 @@ export async function provisionVolunteer(
   actor: RosterActor,
 ): Promise<ProvisionVolunteerResponse> {
   const reportsTo = request.reportsToEmail
-    ? await findVolunteerByEmail(request.reportsToEmail)
+    ? await findVolunteerByEmail(actor.scope, request.reportsToEmail)
     : null;
   if (request.reportsToEmail && !reportsTo) {
     throw new ValidationError('The manager named in reportsToEmail is not on the roster', {
@@ -26,7 +26,7 @@ export async function provisionVolunteer(
     });
   }
 
-  const existing = await findVolunteerByEmail(request.email);
+  const existing = await findVolunteerByEmail(actor.scope, request.email);
   assertMayManage(actor, { role: request.role, existing });
 
   // Only mint an identity for someone who does not have one. Re-provisioning is

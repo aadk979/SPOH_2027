@@ -117,9 +117,8 @@ export async function resetDatabase(): Promise<void> {
   await wipe('OrganisationMembership');
   await wipe('Event');
 
-  // Volunteers last: almost everything references them.
-  await prisma.$executeRawUnsafe('UPDATE "Volunteer" SET "reportsToId" = NULL');
-  await wipe('Volunteer');
+  // People last: almost everything references them.
+  await wipe('Person');
 
   invalidateEventCache();
   invalidateVolunteerCache();

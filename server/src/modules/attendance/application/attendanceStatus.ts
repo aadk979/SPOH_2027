@@ -4,7 +4,8 @@ import { ForbiddenError } from '../../../platform/errors/index.js';
 import { eventToday } from '../../../platform/event/today.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { toAttendanceRecord } from '../data/mappers.js';
-import { findAttendance, findEventDayOn, findVolunteerOrThrow } from '../data/repo.js';
+import { findAttendance, findEventDayOn } from '../data/repo.js';
+import { requireVolunteer } from './requireVolunteer.js';
 import { assertActiveAccount, isRoot } from '../domain/attendanceRules.js';
 import { networkConfigured, onCampus, rootEmail } from './config.js';
 import { assertIssuer } from './issuer.js';
@@ -19,7 +20,7 @@ export async function attendanceStatus(
   const now = clock.now();
   const today = await eventToday(scope, now);
   const [person, day] = await Promise.all([
-    findVolunteerOrThrow(prisma, volunteerId),
+    requireVolunteer(prisma, scope, volunteerId),
     findEventDayOn(prisma, scope, today),
   ]);
   assertActiveAccount(person);

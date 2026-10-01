@@ -37,12 +37,26 @@ export async function findLiveMemberships(personId: string) {
   return person?.eventMemberships ?? [];
 }
 
-/** The development sign-in's lookup: an email is enough, outside Cognito. */
+/**
+ * The development sign-in's lookup: an email is enough, outside Cognito. The
+ * role is the person's in their home event (the first running one), for the
+ * token's groups; authorization reads the membership on every request anyway.
+ */
 export async function findVolunteerByEmail(email: string) {
-  return prisma.person.findUnique({
+  const person = await prisma.person.findUnique({
     where: { email },
-    select: { cognitoSub: true, role: true },
+    select: {
+      cognitoSub: true,
+      eventMemberships: {
+        where: { status: 'ACTIVE', event: { status: { notIn: ['CLOSED', 'ARCHIVED'] } } },
+        orderBy: { event: { createdAt: 'asc' } },
+        take: 1,
+        select: { role: true },
+      },
+    },
   });
+  if (!person) return null;
+  return { cognitoSub: person.cognitoSub, role: person.eventMemberships[0]?.role ?? 'VOLUNTEER' };
 }
 
 export async function createRefreshSession(
@@ -82,7 +96,7 @@ export async function findSessionByTokenHash(tokenHash: string) {
       expiresAt: true,
       revokedAt: true,
       revokedReason: true,
-      volunteer: { select: { cognitoSub: true, active: true } },
+      volunteer: { select: { cognitoSub: true } },
     },
   });
 }

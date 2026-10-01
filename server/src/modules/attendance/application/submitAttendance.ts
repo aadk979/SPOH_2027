@@ -10,10 +10,10 @@ import {
   findAttempts,
   findChallenge,
   findEventDayOn,
-  findVolunteerOrThrow,
   lockPerson,
   recordAttempt,
 } from '../data/repo.js';
+import { requireVolunteer } from './requireVolunteer.js';
 import {
   assertChallengeUsable,
   assertEventToday,
@@ -43,7 +43,7 @@ export async function submitAttendance(
   const result = await prisma.$transaction(async (tx): Promise<Outcome> => {
     await lockPerson(tx, volunteerId);
     const now = clock.now();
-    const person = await findVolunteerOrThrow(tx, volunteerId);
+    const person = await requireVolunteer(tx, scope, volunteerId);
     const day = await findEventDayOn(tx, scope, await eventToday(scope, now));
     if (!person.active) throw new ForbiddenError('Attendance is unavailable for this account.');
     assertEventToday(day);

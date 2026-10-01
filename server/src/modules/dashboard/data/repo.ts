@@ -153,7 +153,7 @@ export async function checkedInWithLastCapture(
             AND c."recordedAt" >= ${input.since} AND c."recordedAt" <= ${input.until})
       ) AS "lastCaptureAt"
     FROM "ShiftAssignment" a
-    JOIN "Volunteer" v ON v."id" = a."volunteerId"
+    JOIN "Person" v ON v."id" = a."volunteerId"
     JOIN "Station"   s ON s."id" = a."stationId"
     WHERE a."eventId" = ${eventId}
       AND a."eventDayId" = ${input.eventDayId}
@@ -201,7 +201,7 @@ export async function registrationsByDevice(
       MIN(r."recordedAt") AS "firstAt",
       MAX(r."recordedAt") AS "lastAt"
     FROM "Registration" r
-    JOIN "Volunteer" v ON v."id" = r."recordedById"
+    JOIN "Person" v ON v."id" = r."recordedById"
     WHERE r."eventId" = ${scope.eventId}
       AND r."voided" = false AND r."stationId" = ${stationId}
       AND r."recordedAt" >= ${window.since} AND r."recordedAt" <= ${window.until}
@@ -225,7 +225,7 @@ export async function footfallByDevice(
       SUM(f."quantity")::bigint AS value,
       MAX(f."recordedAt")       AS "lastAt"
     FROM "FootfallTick" f
-    JOIN "Volunteer" v ON v."id" = f."recordedById"
+    JOIN "Person" v ON v."id" = f."recordedById"
     WHERE f."eventId" = ${scope.eventId}
       AND f."voided" = false AND f."stationId" = ${stationId}
       AND f."recordedAt" >= ${window.since} AND f."recordedAt" <= ${window.until}

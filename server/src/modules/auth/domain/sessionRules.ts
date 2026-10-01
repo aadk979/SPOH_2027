@@ -1,5 +1,5 @@
 import { ERROR_CODES } from '@spoh/shared';
-import { AccountInactiveError, AppError } from '../../../platform/errors/index.js';
+import { AppError } from '../../../platform/errors/index.js';
 
 /**
  * Session lifecycle rules.
@@ -47,11 +47,12 @@ export function reuseDetected(): AppError {
  * client cannot probe which check failed.
  */
 export function rotationCheck(
-  session: { revokedAt: Date | null; expiresAt: Date; volunteer: { active: boolean } },
+  session: { revokedAt: Date | null; expiresAt: Date },
   now: Date,
 ): 'reused' | 'ok' {
   if (session.revokedAt) return 'reused';
   if (session.expiresAt <= now) throw sessionEnded();
-  if (!session.volunteer.active) throw new AccountInactiveError();
+  // Standing is the membership's: loading the person for the new token
+  // refuses one whose home membership is not active (AccountInactiveError).
   return 'ok';
 }

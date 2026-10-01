@@ -470,24 +470,12 @@ model Person {
   displayName       String
   email             String        @unique
   phone             String?
-  role              CommitteeRole @default(VOLUNTEER)
-  /// for DCs: "Operations & Crowd Management"
-  portfolio         String?
-  reportsToId       String?
-  active            Boolean       @default(true)
-  /// When and why access was withdrawn. Kept on the row as well as in the audit
-  /// log so the roster screen can explain a greyed-out name without a second
-  /// query, and so reinstating someone is a visible act rather than a silent one.
-  deactivatedAt     DateTime?     @db.Timestamptz(3)
-  deactivatedReason String?
   /// Last authenticated request. Lets an admin see who has actually signed in
   /// before the event, rather than discovering it at 09:25 on the day.
   lastSeenAt        DateTime?     @db.Timestamptz(3)
   createdAt         DateTime      @default(now()) @db.Timestamptz(3)
   updatedAt         DateTime      @updatedAt @db.Timestamptz(3)
 
-  reportsTo            Person?               @relation("Hierarchy", fields: [reportsToId], references: [id])
-  directReports        Person[]              @relation("Hierarchy")
   attendance           Attendance[]          @relation("Attendee")
   verifiedAttendance   Attendance[]          @relation("AttendanceVerifier")
   attendanceChallenges AttendanceChallenge[]
@@ -522,10 +510,8 @@ model Person {
   eventMemberships        EventMembership[]
   organisationMemberships OrganisationMembership[]
 
-  @@index([role, active])
-  // The roster screen lists by name within an active/inactive split.
-  @@index([active, displayName])
-  @@map("Volunteer")
+  // The roster screen lists by name.
+  @@index([displayName])
 }
 
 /// @eventOwned

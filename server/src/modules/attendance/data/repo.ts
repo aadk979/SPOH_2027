@@ -26,12 +26,23 @@ export async function lockPerson(tx: PrismaTransactionClient, id: string): Promi
   await tx.$queryRaw`SELECT 1 FROM pg_advisory_xact_lock(hashtextextended(${`attendance:${id}`}, 0))`;
 }
 
-export async function findVolunteer(db: PrismaTransactionClient, id: string) {
-  return db.person.findUnique({ where: { id } });
-}
-
-export async function findVolunteerOrThrow(db: PrismaTransactionClient, id: string) {
-  return db.person.findUniqueOrThrow({ where: { id } });
+/**
+ * A person as attendance judges them: who they are, and their role and
+ * standing in this event, which are their membership's (ADR-001 §1). Null when
+ * they are not a member of the event.
+ */
+export async function findVolunteer(
+  db: PrismaTransactionClient,
+  scope: EventScope,
+  id: string,
+): Promise<{ id: string; email: string; role: string; active: boolean } | null> {
+  const membership = await db.eventMembership.findUnique({
+    where: { eventId_personId: { eventId: scope.eventId, personId: id } },
+    select: { role: true, status: true, person: { select: { id: true, email: true } } },
+  });
+  if (!membership) return null;
+  const { person } = membership;
+  return { ...person, role: membership.role, active: membership.status === 'ACTIVE' };
 }
 
 export async function findEventDayOn(db: PrismaTransactionClient, scope: EventScope, date: Date) {

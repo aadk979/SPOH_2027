@@ -28,13 +28,19 @@ async function assertValidManager(
   await assertNoReportingCycle({ volunteerId, managerId }, (id) => findManagerOf(scope, id));
 }
 
-function toUpdate(patch: UpdateVolunteerRequest) {
+/** The patch as a change: name and phone are the person's, the rest the membership's. */
+function toChange(id: string, patch: UpdateVolunteerRequest) {
   return {
-    ...(patch.displayName !== undefined ? { displayName: patch.displayName } : {}),
-    ...(patch.phone !== undefined ? { phone: patch.phone ?? null } : {}),
-    ...(patch.role !== undefined ? { role: patch.role } : {}),
-    ...(patch.portfolio !== undefined ? { portfolio: patch.portfolio ?? null } : {}),
-    ...(patch.reportsToId !== undefined ? { reportsToId: patch.reportsToId ?? null } : {}),
+    id,
+    person: {
+      ...(patch.displayName !== undefined ? { displayName: patch.displayName } : {}),
+      ...(patch.phone !== undefined ? { phone: patch.phone ?? null } : {}),
+    },
+    membership: {
+      ...(patch.role !== undefined ? { role: patch.role } : {}),
+      ...(patch.portfolio !== undefined ? { portfolio: patch.portfolio ?? null } : {}),
+      ...(patch.reportsToId !== undefined ? { reportsToPersonId: patch.reportsToId ?? null } : {}),
+    },
   };
 }
 
@@ -73,7 +79,7 @@ export async function updateVolunteer(
   const roleChanged = patch.role !== undefined && patch.role !== target.role;
 
   const updated = await prisma.$transaction(async (tx) => {
-    const row = await updateVolunteerRow(tx, actor.scope, { id, data: toUpdate(patch) });
+    const row = await updateVolunteerRow(tx, actor.scope, toChange(id, patch));
     await writeAudit(tx, {
       ...actor.audit,
       action: 'user.update',

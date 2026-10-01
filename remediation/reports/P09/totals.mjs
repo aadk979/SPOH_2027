@@ -96,15 +96,12 @@ const CHECKS = {
     SELECT count(*) AS n FROM "ShiftAssignment" a
     JOIN "Shift" sh ON sh."id" = a."shiftId"
     WHERE sh."eventDayId" <> a."eventDayId" OR sh."eventId" <> a."eventId"`,
-  'volunteers without a matching membership': `
-    SELECT count(*) AS n FROM "Volunteer" v
-    CROSS JOIN (SELECT "id" FROM "Event" ORDER BY "createdAt" LIMIT 1) e
-    LEFT JOIN "EventMembership" m ON m."eventId" = e."id" AND m."personId" = v."id"
-    LEFT JOIN "EventMembership" boss ON boss."id" = m."reportsToId"
-    WHERE m."id" IS NULL OR m."role" <> v."role"
-       OR m."portfolio" IS DISTINCT FROM v."portfolio"
-       OR boss."personId" IS DISTINCT FROM v."reportsToId"
-       OR (m."status" = 'ACTIVE') <> v."active"`,
+  // The person's role, portfolio, manager and standing columns are gone
+  // (P09.10); a membership's manager must be a member of the same event.
+  'memberships managed from another event': `
+    SELECT count(*) AS n FROM "EventMembership" m
+    JOIN "EventMembership" boss ON boss."id" = m."reportsToId"
+    WHERE boss."eventId" <> m."eventId"`,
 };
 
 export async function checkEventOne(client) {

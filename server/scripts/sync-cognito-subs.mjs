@@ -73,7 +73,7 @@ const cognitoUsers = await listAllUsers();
 console.log(`cognito pool ${poolId}: ${cognitoUsers.length} users`);
 
 const { rows: volunteers } = await client.query(
-  'SELECT id, email, "cognitoSub", "displayName" FROM "Volunteer"',
+  'SELECT id, email, "cognitoSub", "displayName" FROM "Person"',
 );
 console.log(`database: ${volunteers.length} volunteers\n`);
 
@@ -99,10 +99,7 @@ for (const volunteer of volunteers) {
   console.log(`${volunteer.email}\n  ${volunteer.cognitoSub}\n  -> ${sub}`);
 
   if (COMMIT) {
-    await client.query('UPDATE "Volunteer" SET "cognitoSub" = $1 WHERE id = $2', [
-      sub,
-      volunteer.id,
-    ]);
+    await client.query('UPDATE "Person" SET "cognitoSub" = $1 WHERE id = $2', [sub, volunteer.id]);
   }
 
   updated += 1;

@@ -1,11 +1,8 @@
-import type { Prisma, Person } from '../../../generated/prisma/client.js';
-
-// The roster still speaks of volunteers; the row is a Person since P09.3.
-type Volunteer = Person;
-export type { Volunteer };
+import type { CommitteeRole } from '@spoh/shared';
+import type { Person } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
-import { mirrorMembership } from '../../../platform/db/membershipMirror.js';
+import { membershipIdOf } from '../../../platform/db/membershipMirror.js';
 import { assignmentLinks } from '../../assignments/index.js';
 
 /**
@@ -17,11 +14,89 @@ import { assignmentLinks } from '../../assignments/index.js';
  * (PRODUCT_BRIEF §0.2).
  */
 
+/**
+ * A person as this event's roster sees them: the identity, with the role,
+ * portfolio, manager and standing of their membership (ADR-001 §1). Someone
+ * not yet in the event is a volunteer in good standing, about to be added.
+ */
+export type Volunteer = Person & {
+  role: CommitteeRole;
+  portfolio: string | null;
+  reportsToId: string | null;
+  active: boolean;
+};
+
+function withMembership(scope: EventScope) {
+  return {
+    eventMemberships: {
+      where: { eventId: scope.eventId },
+      select: {
+        role: true,
+        portfolio: true,
+        status: true,
+        reportsTo: { select: { personId: true } },
+      },
+    },
+  } as const;
+}
+
+type PersonWithMembership = Person & {
+  eventMemberships: Array<{
+    role: CommitteeRole;
+    portfolio: string | null;
+    status: string;
+    reportsTo: { personId: string } | null;
+  }>;
+};
+
+function asVolunteer(row: PersonWithMembership): Volunteer {
+  const { eventMemberships, ...person } = row;
+  const [membership] = eventMemberships;
+  return {
+    ...person,
+    role: membership?.role ?? 'VOLUNTEER',
+    portfolio: membership?.portfolio ?? null,
+    reportsToId: membership?.reportsTo?.personId ?? null,
+    active: membership ? membership.status === 'ACTIVE' : true,
+  };
+}
+
 export async function findVolunteerByEmail(
+  scope: EventScope,
   email: string,
   tx: PrismaTransactionClient = prisma,
 ): Promise<Volunteer | null> {
-  return tx.person.findUnique({ where: { email } });
+  const row = await tx.person.findUnique({ where: { email }, include: withMembership(scope) });
+  return row ? asVolunteer(row) : null;
+}
+
+/** The person's membership of the event, created when missing; role and line set. */
+async function upsertMembership(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  member: {
+    personId: string;
+    role: CommitteeRole;
+    portfolio?: string | null;
+    reportsToId?: string | null;
+  },
+): Promise<void> {
+  const { eventId } = scope;
+  const reportsToId = member.reportsToId
+    ? await membershipIdOf(tx, scope, member.reportsToId)
+    : undefined;
+  // Unchanged unless the row names them, as before: a re-run of an import
+  // without a portfolio column keeps the portfolios already there.
+  const named = {
+    role: member.role,
+    ...(member.portfolio ? { portfolio: member.portfolio } : {}),
+    ...(reportsToId ? { reportsToId } : {}),
+  };
+  await tx.eventMembership.upsert({
+    where: { eventId_personId: { eventId, personId: member.personId } },
+    create: { eventId, personId: member.personId, ...named },
+    update: named,
+  });
 }
 
 export async function upsertVolunteer(
@@ -32,42 +107,28 @@ export async function upsertVolunteer(
     displayName: string;
     email: string;
     phone?: string | null;
-    role: Prisma.PersonUncheckedCreateInput['role'];
+    role: CommitteeRole;
     portfolio?: string | null;
     reportsToId?: string | null;
   },
 ): Promise<{ volunteer: Volunteer; created: boolean }> {
   const existing = await tx.person.findUnique({ where: { email: data.email } });
-
-  if (existing) {
-    const volunteer = await tx.person.update({
-      where: { id: existing.id },
-      data: {
-        displayName: data.displayName,
-        phone: data.phone ?? existing.phone,
-        role: data.role,
-        portfolio: data.portfolio ?? existing.portfolio,
-        reportsToId: data.reportsToId ?? existing.reportsToId,
-      },
-    });
-    await mirrorMembership(tx, scope, volunteer.id);
-    return { volunteer, created: false };
-  }
-
-  const volunteer = await tx.person.create({
-    data: {
-      cognitoSub: data.cognitoSub,
-      displayName: data.displayName,
-      email: data.email,
-      phone: data.phone ?? null,
-      role: data.role,
-      portfolio: data.portfolio ?? null,
-      reportsToId: data.reportsToId ?? null,
-    },
-  });
-  await mirrorMembership(tx, scope, volunteer.id);
-
-  return { volunteer, created: true };
+  const person = existing
+    ? await tx.person.update({
+        where: { id: existing.id },
+        data: { displayName: data.displayName, phone: data.phone ?? existing.phone },
+      })
+    : await tx.person.create({
+        data: {
+          cognitoSub: data.cognitoSub,
+          displayName: data.displayName,
+          email: data.email,
+          phone: data.phone ?? null,
+        },
+      });
+  await upsertMembership(tx, scope, { personId: person.id, ...data });
+  const volunteer = (await findVolunteerByEmail(scope, data.email, tx)) as Volunteer;
+  return { volunteer, created: !existing };
 }
 
 /**
@@ -107,13 +168,17 @@ export async function upsertAssignment(
   return { created: true };
 }
 
-/** The accounts with these emails, by email. */
+/** The accounts with these emails, by email, as this event's roster sees them. */
 export async function findVolunteersByEmails(
+  scope: EventScope,
   emails: readonly string[],
 ): Promise<Map<string, Volunteer>> {
   if (emails.length === 0) return new Map();
-  const rows = await prisma.person.findMany({ where: { email: { in: [...emails] } } });
-  return new Map(rows.map((row) => [row.email, row]));
+  const rows = await prisma.person.findMany({
+    where: { email: { in: [...emails] } },
+    include: withMembership(scope),
+  });
+  return new Map(rows.map((row) => [row.email, asVolunteer(row)]));
 }
 
 /** Every event day, keyed by its date (YYYY-MM-DD), for matching import rows. */
@@ -161,9 +226,8 @@ export async function setManager(
   scope: EventScope,
   link: { volunteerId: string; managerId: string },
 ): Promise<void> {
-  await tx.person.update({
-    where: { id: link.volunteerId },
-    data: { reportsToId: link.managerId },
+  await tx.eventMembership.update({
+    where: { eventId_personId: { eventId: scope.eventId, personId: link.volunteerId } },
+    data: { reportsToId: await membershipIdOf(tx, scope, link.managerId) },
   });
-  await mirrorMembership(tx, scope, link.volunteerId);
 }

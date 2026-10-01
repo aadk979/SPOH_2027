@@ -1,9 +1,8 @@
 import type { ListVolunteersQuery } from '@spoh/shared';
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
-import { pageArgs } from '../../../platform/db/pagination.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
-import { mirrorMembership } from '../../../platform/db/membershipMirror.js';
+import { membershipIdOf } from '../../../platform/db/membershipMirror.js';
 
 /**
  * Data access for the people on the roster, as the admin screens see them:
@@ -46,58 +45,73 @@ export function adminSelect(scope: EventScope) {
 export type AdminRow = Prisma.PersonGetPayload<{ select: ReturnType<typeof adminSelect> }>;
 
 /**
- * Nulls first on "last seen": the people who have never signed in are exactly
- * who you open this screen to find, so they belong at the top rather than
- * buried under everyone who has.
+ * The roster is the event's memberships, ordered by what the screen shows:
+ * the membership's role and last visit, the person's name. Nulls first on
+ * "last seen": the people who have never signed in are exactly who you open
+ * this screen to find, so they belong at the top rather than buried under
+ * everyone who has. `personId` breaks ties, and is the cursor.
  */
-const SORTS: Record<ListVolunteersQuery['sort'], Prisma.PersonOrderByWithRelationInput[]> = {
-  name: [{ displayName: 'asc' }, { id: 'asc' }],
-  role: [{ role: 'asc' }, { displayName: 'asc' }, { id: 'asc' }],
-  lastSeen: [
-    { lastSeenAt: { sort: 'asc', nulls: 'first' } },
-    { displayName: 'asc' },
-    { id: 'asc' },
-  ],
-  created: [{ createdAt: 'desc' }, { id: 'desc' }],
-};
+const SORTS: Record<ListVolunteersQuery['sort'], Prisma.EventMembershipOrderByWithRelationInput[]> =
+  {
+    name: [{ person: { displayName: 'asc' } }, { personId: 'asc' }],
+    role: [{ role: 'asc' }, { person: { displayName: 'asc' } }, { personId: 'asc' }],
+    lastSeen: [
+      { lastSeenAt: { sort: 'asc', nulls: 'first' } },
+      { person: { displayName: 'asc' } },
+      { personId: 'asc' },
+    ],
+    created: [{ person: { createdAt: 'desc' } }, { personId: 'desc' }],
+  };
+
+/** Who matches the search, the station or the day, as a filter on the person. */
+function personFilter(scope: EventScope, query: ListVolunteersQuery): Prisma.PersonWhereInput {
+  return {
+    ...(query.q
+      ? {
+          OR: [
+            { displayName: { contains: query.q, mode: 'insensitive' as const } },
+            { email: { contains: query.q, mode: 'insensitive' as const } },
+          ],
+        }
+      : {}),
+    ...(query.stationId || query.eventDayId
+      ? {
+          shiftAssignments: {
+            some: {
+              eventId: scope.eventId,
+              ...(query.stationId ? { stationId: query.stationId } : {}),
+              ...(query.eventDayId ? { eventDayId: query.eventDayId } : {}),
+            },
+          },
+        }
+      : {}),
+  };
+}
 
 export async function listVolunteerRows(
   scope: EventScope,
   query: ListVolunteersQuery,
 ): Promise<AdminRow[]> {
+  const { eventId } = scope;
   const standing =
     query.active === undefined
       ? {}
       : { status: query.active ? ('ACTIVE' as const) : { not: 'ACTIVE' as const } };
-  return prisma.person.findMany({
+  const rows = await prisma.eventMembership.findMany({
     where: {
-      eventMemberships: {
-        some: { eventId: scope.eventId, ...standing, ...(query.role ? { role: query.role } : {}) },
-      },
-      ...(query.q
-        ? {
-            OR: [
-              { displayName: { contains: query.q, mode: 'insensitive' as const } },
-              { email: { contains: query.q, mode: 'insensitive' as const } },
-            ],
-          }
-        : {}),
-      ...(query.stationId || query.eventDayId
-        ? {
-            shiftAssignments: {
-              some: {
-                eventId: scope.eventId,
-                ...(query.stationId ? { stationId: query.stationId } : {}),
-                ...(query.eventDayId ? { eventDayId: query.eventDayId } : {}),
-              },
-            },
-          }
-        : {}),
+      eventId,
+      ...standing,
+      ...(query.role ? { role: query.role } : {}),
+      person: personFilter(scope, query),
     },
-    select: adminSelect(scope),
+    select: { person: { select: adminSelect(scope) } },
     orderBy: SORTS[query.sort],
-    ...pageArgs(query),
+    take: query.limit + 1,
+    ...(query.cursor
+      ? { cursor: { eventId_personId: { eventId, personId: query.cursor } }, skip: 1 }
+      : {}),
   });
+  return rows.map((row) => row.person);
 }
 
 export async function findVolunteerRow(scope: EventScope, id: string): Promise<AdminRow | null> {
@@ -128,13 +142,41 @@ export async function findManagerOf(scope: EventScope, id: string): Promise<stri
   return membership?.reportsTo?.personId ?? null;
 }
 
+/** A change to someone on the roster: their contact details, and what they are in the event. */
+export interface VolunteerChange {
+  id: string;
+  person?: { displayName?: string; phone?: string | null };
+  membership?: {
+    role?: Prisma.EventMembershipUncheckedUpdateInput['role'];
+    portfolio?: string | null;
+    /** The manager as a person; stored as their membership of the event. */
+    reportsToPersonId?: string | null;
+    status?: 'ACTIVE' | 'DEACTIVATED';
+    deactivatedAt?: Date | null;
+    deactivatedReason?: string | null;
+  };
+}
+
 export async function updateVolunteerRow(
   tx: PrismaTransactionClient,
   scope: EventScope,
-  change: { id: string; data: Prisma.PersonUncheckedUpdateInput },
+  change: VolunteerChange,
 ): Promise<AdminRow> {
-  await tx.person.update({ where: { id: change.id }, data: change.data });
-  await mirrorMembership(tx, scope, change.id);
+  const { eventId } = scope;
+  if (change.person && Object.keys(change.person).length > 0) {
+    await tx.person.update({ where: { id: change.id }, data: change.person });
+  }
+  if (change.membership) {
+    const { reportsToPersonId, ...fields } = change.membership;
+    const reportsToId =
+      reportsToPersonId === undefined
+        ? undefined
+        : await membershipIdOf(tx, scope, reportsToPersonId);
+    await tx.eventMembership.update({
+      where: { eventId_personId: { eventId, personId: change.id } },
+      data: { ...fields, ...(reportsToId !== undefined ? { reportsToId } : {}) },
+    });
+  }
   return tx.person.findUniqueOrThrow({ where: { id: change.id }, select: adminSelect(scope) });
 }
 

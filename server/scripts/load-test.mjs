@@ -297,7 +297,7 @@ async function main() {
 
   console.log('');
   console.log(
-    `clean up with: DELETE FROM "Volunteer" WHERE email LIKE '%@${LOAD_EMAIL_DOMAIN}' (and their rows)`,
+    `clean up with: DELETE FROM "Person" WHERE email LIKE '%@${LOAD_EMAIL_DOMAIN}' (and their rows)`,
   );
 
   process.exitCode = failed ? 1 : 0;

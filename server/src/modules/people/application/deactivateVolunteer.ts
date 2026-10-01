@@ -45,7 +45,7 @@ export async function deactivateVolunteer(
   const updated = await prisma.$transaction(async (tx) => {
     const row = await updateVolunteerRow(tx, actor.scope, {
       id,
-      data: { active: false, deactivatedAt: now, deactivatedReason: request.reason },
+      membership: { status: 'DEACTIVATED', deactivatedAt: now, deactivatedReason: request.reason },
     });
     await deletePushSubscriptions(tx, id);
     await writeAudit(tx, {

@@ -65,18 +65,19 @@ type Scope = { eventId: string };
 
 // ── People ──────────────────────────────────────────────────────────────────
 
-async function upsertPerson(person: FixturePerson & { sub?: string }): Promise<string> {
+/** The person: an identity. What they are in an event is their membership of it. */
+async function upsertPerson(
+  person: Pick<FixturePerson, 'email' | 'displayName'> & { sub?: string },
+): Promise<string> {
   const row = await prisma.person.upsert({
     where: { email: person.email },
     create: {
       email: person.email,
       displayName: person.displayName,
       cognitoSub: person.sub ?? localSub(person.email),
-      role: person.role,
-      portfolio: person.portfolio,
       phone: '+65 8000 0000',
     },
-    update: { role: person.role, active: true },
+    update: {},
   });
   return row.id;
 }
@@ -96,7 +97,8 @@ async function upsertMembership(
 
 /**
  * The administrator: from the environment in a deployment, the fixture's own
- * otherwise. The only thing production gets.
+ * otherwise. The only thing production gets: a platform administrator of the
+ * organisation, who sets the first event up (D-12).
  */
 async function seedAdmin(): Promise<string> {
   const email = (
@@ -104,13 +106,20 @@ async function seedAdmin(): Promise<string> {
     process.env.SEED_ADMIN_EMAIL ??
     'admin@spoh2027.test'
   ).toLowerCase();
-  return upsertPerson({
+  const personId = await upsertPerson({
     email,
     displayName: process.env.SEED_ADMIN_NAME ?? 'Administrator',
-    role: 'ADMIN',
-    portfolio: null,
     ...(process.env.SEED_ADMIN_SUB ? { sub: process.env.SEED_ADMIN_SUB } : {}),
   });
+  const organisation = await prisma.organisation.findFirstOrThrow({
+    orderBy: { createdAt: 'asc' },
+  });
+  await prisma.organisationMembership.upsert({
+    where: { organisationId_personId: { organisationId: organisation.id, personId } },
+    create: { organisationId: organisation.id, personId, role: 'PLATFORM_ADMIN' },
+    update: { role: 'PLATFORM_ADMIN' },
+  });
+  return personId;
 }
 
 // ── The event and its structure ────────────────────────────────────────────
@@ -272,10 +281,6 @@ async function seedPeople(
   for (const [subordinate, manager] of REPORTING) {
     const [from, to] = [people.get(subordinate), people.get(manager)];
     if (!from || !to) continue;
-    await prisma.person.update({
-      where: { id: from.personId },
-      data: { reportsToId: to.personId },
-    });
     await prisma.eventMembership.update({
       where: { eventId_id: { eventId: scope.eventId, id: from.membershipId } },
       data: { reportsToId: to.membershipId },
@@ -424,7 +429,7 @@ async function seedSecondEvent(first: Scope, today: string): Promise<void> {
     },
     plan,
   );
-  const personId = await upsertPerson({ ...person, role: 'VOLUNTEER', portfolio: null });
+  const personId = await upsertPerson(person);
   const membership = await upsertMembership(scope, personId, { role: 'IC' });
   await assign(
     scope,

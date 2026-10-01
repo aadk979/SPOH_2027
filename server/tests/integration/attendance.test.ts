@@ -11,6 +11,7 @@ import {
   createEventDayToday,
   createStation,
   createVolunteer,
+  setMembership,
   type TestVolunteer,
 } from '../helpers/fixtures.js';
 import { FROZEN_NOW } from '../setup.js';
@@ -168,14 +169,11 @@ describe('verified attendance', () => {
   });
   it('rejects deactivated and demoted issuers even when the signature remains valid', async () => {
     const code = await excoCode();
-    await prisma.person.update({ where: { id: exco.id }, data: { active: false } });
+    await setMembership(exco.id, { status: 'DEACTIVATED' });
     expect(
       (await post(volunteer, '/attendance/submit', { method: 'QR', token: code.token })).status,
     ).toBe(422);
-    await prisma.person.update({
-      where: { id: exco.id },
-      data: { active: true, role: 'VOLUNTEER' },
-    });
+    await setMembership(exco.id, { status: 'ACTIVE', role: 'VOLUNTEER' });
     expect(
       (await post(volunteer, '/attendance/submit', { method: 'PIN', pin: code.pin })).status,
     ).toBe(422);

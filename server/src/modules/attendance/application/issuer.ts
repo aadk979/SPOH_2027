@@ -16,11 +16,13 @@ export async function assertIssuer(
   issuance: { issuerId: string; dayId: string },
 ): Promise<Person> {
   const { issuerId, dayId } = issuance;
-  const issuer = await findVolunteer(db, issuerId);
+  const issuer = await findVolunteer(db, scope, issuerId);
   const present = await findPresence(db, scope, { volunteerId: issuerId, eventDayId: dayId });
   assertIssuerPresent(issuer, present, rootEmail());
   if (!isRoot(issuer, rootEmail())) {
-    const root = present?.verifiedById ? await findVolunteer(db, present.verifiedById) : null;
+    const root = present?.verifiedById
+      ? await findVolunteer(db, scope, present.verifiedById)
+      : null;
     assertVerifiedByRoot(root, rootEmail());
   }
   return issuer;

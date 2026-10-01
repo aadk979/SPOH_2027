@@ -100,7 +100,7 @@ async function createEventB(): Promise<EventScope> {
 
 async function personIn(scope: EventScope, email: string): Promise<string> {
   const person = await rawDb.person.create({
-    data: { email, displayName: email, cognitoSub: `local:${email}`, role: 'VOLUNTEER' },
+    data: { email, displayName: email, cognitoSub: `local:${email}` },
   });
   await rawDb.eventMembership.create({
     data: { eventId: scope.eventId, personId: person.id, role: 'VOLUNTEER' },

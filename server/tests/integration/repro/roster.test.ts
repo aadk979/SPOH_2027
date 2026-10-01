@@ -10,6 +10,8 @@ import {
   createEventDayToday,
   createStation,
   createVolunteer,
+  membershipOf,
+  setMembership,
   type TestVolunteer,
 } from '../../helpers/fixtures.js';
 
@@ -70,8 +72,7 @@ describe('roster import and provisioning (P03 repros)', () => {
     );
 
     expect(response.status).toBe(403);
-    const row = await prisma.person.findUniqueOrThrow({ where: { id: deputy.id } });
-    expect(row.role).toBe('DEPUTY_COORDINATOR');
+    expect((await membershipOf(deputy.id)).role).toBe('DEPUTY_COORDINATOR');
   });
 
   // F03-001
@@ -88,15 +89,15 @@ describe('roster import and provisioning (P03 repros)', () => {
   // F03-001
   it('does not reactivate a deactivated account because its email is in the file', async () => {
     const leaver = await createVolunteer({ email: 'leaver@roster.test', role: 'VOLUNTEER' });
-    await prisma.person.update({
-      where: { id: leaver.id },
-      data: { active: false, deactivatedAt: new Date(), deactivatedReason: 'left' },
+    await setMembership(leaver.id, {
+      status: 'DEACTIVATED',
+      deactivatedAt: new Date(),
+      deactivatedReason: 'left',
     });
 
     await importRoster(deputy, [{ displayName: 'Leaver', email: leaver.email }], true);
 
-    const row = await prisma.person.findUniqueOrThrow({ where: { id: leaver.id } });
-    expect(row.active).toBe(false);
+    expect((await membershipOf(leaver.id)).status).toBe('DEACTIVATED');
   });
 
   // F03-001
@@ -163,13 +164,13 @@ describe('roster import and provisioning (P03 repros)', () => {
     const newbie = await prisma.person.findUniqueOrThrow({
       where: { email: 'newbie@roster.test' },
     });
-    expect(newbie.reportsToId).toBe(ic.id);
+    expect((await membershipOf(newbie.id)).reportsTo?.personId).toBe(ic.id);
   });
 
   // F03-044
   it('skips a deactivated person whose row names a manager, instead of failing the import', async () => {
     const leaver = await createVolunteer({ email: 'gone@roster.test', role: 'VOLUNTEER' });
-    await prisma.person.update({ where: { id: leaver.id }, data: { active: false } });
+    await setMembership(leaver.id, { status: 'DEACTIVATED' });
 
     const response = await importRoster(
       chief,
