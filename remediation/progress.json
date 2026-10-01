@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-09-30T17:46:02.501Z",
+  "updatedAt": "2026-10-01T01:53:58.752Z",
   "current": {
     "phase": "P09",
     "step": "P09.6"
@@ -1869,11 +1869,16 @@
         {
           "id": "P09.10",
           "title": "Contract: remove the enums and legacy columns",
-          "status": "not_started",
+          "status": "done",
           "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-10-01T01:53:58.751Z",
+          "commits": ["37ce043"],
+          "notes": [
+            {
+              "at": "2026-10-01T01:53:58.752Z",
+              "text": "Contract: VisitorCategory, StationKind, CourseCode and ShiftBlock dropped (categories, types/tags, shift templates are event data; no-taxonomy and mirror tests guard it); Person is an identity, role/portfolio/manager/standing are the membership's; eventId NOT NULL with composite (eventId, parentId) FKs on every event-owned reference, schema lint and per-parent DB tests. Aliases stay to P16.7."
+            }
+          ]
         },
         {
           "id": "P09.11",
