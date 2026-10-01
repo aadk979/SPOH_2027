@@ -7,6 +7,9 @@ export function ImportResult({ form }: { form: ImportForm }): ReactNode {
   return (
     <Card tone="ok" as="section" aria-live="polite">
       <CardTitle>Imported</CardTitle>
+      <p className="mt-xs font-semibold">
+        {result.rehearsal ? 'REHEARSAL · Practice import' : 'LIVE · Live import'}
+      </p>
       <p className="mt-xs">
         {result.recordsCreated} record{result.recordsCreated === 1 ? '' : 's'} created,{' '}
         {result.recordsSkipped} already present.

@@ -20,6 +20,9 @@ export function OpenFallbackWindows({
       <ul className="mt-sm flex flex-col gap-md">
         {open.map((window) => (
           <li key={window.id}>
+            {window.rehearsal ? (
+              <p className="text-caption font-semibold">REHEARSAL · Practice window</p>
+            ) : null}
             <p>
               <strong>Tier {window.tier}</strong>{' '}
               {window.tier === 4 ? '(paper pack)' : '(Google fallback pack)'} ·{' '}

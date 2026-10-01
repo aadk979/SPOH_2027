@@ -28,7 +28,8 @@ vi.mock('@/shared/shell/AppShell', () => ({
   ),
 }));
 vi.mock('@/shared/shell/SyncIndicator', () => ({ SyncIndicator: () => null }));
-vi.mock('@/features/session', () => ({
+vi.mock('@/features/session', async (original) => ({
+  ...(await original<typeof import('@/features/session')>()),
   useRequireSession: () => ({ accessToken: 'test' }),
   useCurrentSession: () => ({ accessToken: 'test' }),
   useMe: () => ({
@@ -73,7 +74,11 @@ afterEach(() => {
 
 describe('operations screen safety net', () => {
   it('requires an import preview and invalidates it when CSV changes', async () => {
-    mockedApi.mockResolvedValue({ rowsRead: 2, recordsCreated: 17, recordsSkipped: 0, issues: [] });
+    mockedApi.mockImplementation(async (_path, options) =>
+      options?.method
+        ? { rowsRead: 2, recordsCreated: 17, recordsSkipped: 0, issues: [], rehearsal: false }
+        : { data: [] },
+    );
     show(<ImportsPage />);
     expect(screen.queryByRole('button', { name: /^Import \d/ })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Insert the template' }));
@@ -87,7 +92,7 @@ describe('operations screen safety net', () => {
     );
     fireEvent.change(screen.getByLabelText('Rows (CSV)'), { target: { value: 'changed' } });
     expect(screen.queryByRole('button', { name: /^Import \d/ })).toBeNull();
-    expect(mockedApi).toHaveBeenCalledTimes(1);
+    expect(mockedApi.mock.calls.filter(([, options]) => options?.method)).toHaveLength(1);
   });
 
   it('reports a failed report query without offering a misleading export', async () => {

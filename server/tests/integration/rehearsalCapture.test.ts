@@ -122,7 +122,13 @@ describe('rehearsal capture provenance', () => {
   it('retains a practice window provenance when its registration sheet is imported live', async () => {
     const declared = await post('/fallback/windows', { tier: 4, reason: 'Practice paper tally' });
     expect(declared.status).toBe(201);
+    expect(declared.body.window.rehearsal).toBe(true);
+    const closed = await post(`/fallback/windows/${declared.body.window.id}/close`);
+    expect(closed.body.window.rehearsal).toBe(true);
     await phase('LIVE');
+    expect((await get('/fallback/windows')).body.data).toEqual([
+      expect.objectContaining({ id: declared.body.window.id, rehearsal: true, open: false }),
+    ]);
     const body = {
       source: 'PAPER',
       commit: true,

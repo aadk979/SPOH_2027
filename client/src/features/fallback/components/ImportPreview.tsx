@@ -7,6 +7,14 @@ export function ImportPreview({ form }: { form: ImportForm }): ReactNode {
   return (
     <Card tone="info" as="section" aria-live="polite">
       <CardTitle>This is what would happen</CardTitle>
+      <p className="mt-xs font-semibold">
+        {preview.rehearsal ? 'REHEARSAL · Practice import' : 'LIVE · Live import'}
+      </p>
+      {preview.rehearsal ? (
+        <p className="mt-xs text-caption">
+          Reports and dashboards exclude these records by default.
+        </p>
+      ) : null}
 
       <dl className="mt-sm grid grid-cols-[1fr_auto] gap-x-md gap-y-xxs">
         <dt>Rows read</dt>

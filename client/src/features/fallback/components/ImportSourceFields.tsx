@@ -2,17 +2,14 @@ import type { ReactNode } from 'react';
 import type { ImportForm } from '../hooks/useImportForm';
 import { ChoiceGroup } from '@/shared/ui';
 export function ImportSourceFields({ form }: { form: ImportForm }): ReactNode {
-  const { target, setTarget, source, setSource, invalidatePreview } = form;
+  const { target, setTarget, source, setSource } = form;
   return (
     <>
       <ChoiceGroup
         legend="What are you importing?"
         name="import-target"
         value={target}
-        onChange={(value) => {
-          setTarget(value);
-          invalidatePreview();
-        }}
+        onChange={setTarget}
         options={[
           { value: 'registrations', label: 'Registrations' },
           { value: 'footfall', label: 'Room entries' },
@@ -24,10 +21,7 @@ export function ImportSourceFields({ form }: { form: ImportForm }): ReactNode {
         name="import-source"
         error={form.errors.source}
         value={source}
-        onChange={(value) => {
-          setSource(value);
-          invalidatePreview();
-        }}
+        onChange={setSource}
         options={[
           { value: 'FALLBACK_SHEET', label: 'Google fallback sheet' },
           { value: 'PAPER', label: 'Paper tally' },

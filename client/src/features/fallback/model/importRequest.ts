@@ -8,6 +8,7 @@ export interface ImportValues {
   csv: string;
   fileName: string;
   notes: string;
+  fallbackWindowId: string;
 }
 
 export const EMPTY_IMPORT: ImportValues = {
@@ -16,6 +17,7 @@ export const EMPTY_IMPORT: ImportValues = {
   csv: '',
   fileName: '',
   notes: '',
+  fallbackWindowId: '',
 };
 
 /** The endpoint's own request schema, chosen by what is being imported. */
@@ -30,6 +32,7 @@ export const IMPORT_ERROR_FIELDS = {
   'body.source': 'source',
   'body.fileName': 'fileName',
   'body.notes': 'notes',
+  'body.fallbackWindowId': 'fallbackWindowId',
 } as const;
 
 /** The request before schema validation; blank optional fields are omitted. */
@@ -44,6 +47,7 @@ export function toImportRequest(
       source: values.source,
       rows,
       commit,
+      ...(values.fallbackWindowId ? { fallbackWindowId: values.fallbackWindowId } : {}),
       ...(values.fileName.trim() ? { fileName: values.fileName.trim() } : {}),
       ...(values.notes.trim() ? { notes: values.notes.trim() } : {}),
     },

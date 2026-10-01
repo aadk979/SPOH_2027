@@ -45,6 +45,7 @@ export type CloseFallbackRequest = z.infer<typeof CloseFallbackRequest>;
 export const FallbackWindowRecord = z
   .object({
     id: Id,
+    rehearsal: z.boolean(),
     tier: z.number().int(),
     startedAt: IsoDateTime,
     endedAt: IsoDateTime.nullable(),
@@ -143,7 +144,7 @@ export const ImportResponse = z
     recordsSkipped: z.number().int().nonnegative(),
     issues: z.array(ImportIssue),
     importBatchId: Id.nullable(),
-    rehearsal: z.boolean().optional(),
+    rehearsal: z.boolean(),
   })
   .strict();
 export type ImportResponse = z.infer<typeof ImportResponse>;

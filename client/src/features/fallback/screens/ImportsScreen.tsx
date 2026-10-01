@@ -30,7 +30,7 @@ import { ImportResult } from '../components/ImportResult';
 export default function ImportsScreen(): ReactNode {
   const session = useRequireSession();
 
-  const form = useImportForm();
+  const form = useImportForm(session !== null);
   const { preview, result } = form;
 
   if (!session) return null;

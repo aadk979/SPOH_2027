@@ -9,6 +9,9 @@ export function ClosedFallbackWindows({ closed }: { closed: FallbackWindowRecord
       <ul className="flex flex-col gap-xs">
         {closed.map((window) => (
           <Card as="li" variant="flat" key={window.id}>
+            {window.rehearsal ? (
+              <p className="text-caption font-semibold">REHEARSAL · Practice window</p>
+            ) : null}
             <p>
               Tier {window.tier} · {window.stationName ?? 'Event-wide'} ·{' '}
               <strong>{window.durationMinutes} minutes</strong>

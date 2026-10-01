@@ -28,7 +28,8 @@ vi.mock('next/navigation', () => ({
 vi.mock('@/shared/shell/AppShell', () => ({
   AppShell: ({ children }: { children: ReactNode }) => <main>{children}</main>,
 }));
-vi.mock('@/features/session', () => ({
+vi.mock('@/features/session', async (original) => ({
+  ...(await original<typeof import('@/features/session')>()),
   useRequireSession: () => ({ accessToken: 'fixture' }),
   useMe: () => ({ data: { currentAssignment: { station: { id: 'own-station' } } } }),
   hostedSignInUrl: '/hosted',
@@ -72,7 +73,8 @@ function posts(path: string) {
 beforeEach(() => {
   mockedApi.mockReset();
   mockedApi.mockImplementation(async (path: string, options?: { method?: string }) => {
-    if (options?.method) return { rowsRead: 1, recordsCreated: 1, recordsSkipped: 0, issues: [] };
+    if (options?.method)
+      return { rowsRead: 1, recordsCreated: 1, recordsSkipped: 0, issues: [], rehearsal: false };
     return path === `${API}/stations` ? { data: STATIONS } : { data: [] };
   });
   mockedEnqueue.mockReset();
@@ -152,13 +154,11 @@ describe('reconciliation import', () => {
   it('commits with the preview mode after the event changes phase', async () => {
     const event = vi.spyOn(eventContext, 'useEvent');
     event.mockReturnValue({ ...TEST_EVENT, status: 'REHEARSAL' });
-    mockedApi.mockResolvedValue({
-      rowsRead: 1,
-      recordsCreated: 2,
-      recordsSkipped: 0,
-      issues: [],
-      rehearsal: true,
-    });
+    mockedApi.mockImplementation(async (_path, options) =>
+      options?.method
+        ? { rowsRead: 1, recordsCreated: 2, recordsSkipped: 0, issues: [], rehearsal: true }
+        : { data: [] },
+    );
     const view = show(<ImportsScreen />);
     fireEvent.change(screen.getByLabelText('Rows (CSV)'), { target: { value: csv('2') } });
     fireEvent.click(screen.getByRole('button', { name: 'Preview — writes nothing' }));

@@ -191,6 +191,32 @@ formatting and server build passed by exit code. The initial full run exposed an
 fixture missing event ownership; the corrected fixture passed in the final full run.
 Batch printing UI is built with the card administration screen in P13.3.
 
-Remaining: import window selection in the UI, derived safety
+## Import source windows and reviewed previews
+
+Importers can select an open or closed fallback window from their event. The selector shows
+its stored LIVE or REHEARSAL label, scope and event-local start time, and offers only the tier
+matching the sheet/paper source. Preview and commit keep the window's provenance even after
+go-live. Without a window, a mode change between preview and commit is refused rather than
+reclassifying the sheet. Window and import response contracts now require the stored flag.
+
+Preview and completion label practice imports explicitly. Every editable value, including
+filename and notes, invalidates the preview; switching source clears the incompatible window.
+Fields stay disabled while a request is pending, so a returned preview cannot describe changed
+inputs. Historical practice windows remain labelled after closing.
+
+Verification on 2026-10-02: targeted server integration **33** and isolation **10** passed,
+server unit **475**, client unit **256**, full browser E2E **43**, and full visual assertions
+**58** passed. Seven new component cases cover historical mode selection, phase changes,
+source/metadata invalidation and pending inputs. Phone/laptop journeys declare and close a
+practice window, import its sheet after go-live, verify stored batch/row flags and default
+report exclusion, then prove an unbound preview is refused after a mode change. A final targeted
+browser run **2** passed, including selected-window overflow checks, after restarting the test
+API to clear counters exhausted by successive runs. Initial browser failures were corrected
+test locators for custom radio labels and Next's route-announcer alert, and a stopped test API.
+All workspace typechecks, root lint, architecture, hardcoding, formatting and server build
+passed by exit code. The two changed phone/laptop import baselines were inspected and
+re-asserted; the other 56 images remain unchanged.
+
+Remaining: derived safety and visitor
 acknowledgement/follow-up provenance, then audited lifecycle admission, transitions and
 close/archive side effects. P10.4/P10.5 remain in progress.

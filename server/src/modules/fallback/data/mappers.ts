@@ -8,6 +8,7 @@ export function toWindowRecord(
 ): FallbackWindowRecord {
   return {
     id: window.id,
+    rehearsal: window.rehearsal,
     tier: window.tier,
     startedAt: window.startedAt.toISOString(),
     endedAt: window.endedAt?.toISOString() ?? null,

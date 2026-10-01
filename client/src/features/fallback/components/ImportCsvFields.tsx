@@ -3,7 +3,7 @@ import type { ImportForm } from '../hooks/useImportForm';
 import { Field, Textarea, Button } from '@/shared/ui';
 import { TEMPLATES } from '../model/importTemplates';
 export function ImportCsvFields({ form }: { form: ImportForm }): ReactNode {
-  const { csv, setCsv, error, target, invalidatePreview } = form;
+  const { csv, setCsv, error, target } = form;
   return (
     <>
       <Field
@@ -16,10 +16,7 @@ export function ImportCsvFields({ form }: { form: ImportForm }): ReactNode {
           <Textarea
             {...props}
             value={csv}
-            onChange={(event) => {
-              setCsv(event.target.value);
-              invalidatePreview();
-            }}
+            onChange={(event) => setCsv(event.target.value)}
             rows={8}
             spellCheck={false}
             placeholder={TEMPLATES[target]}
@@ -35,10 +32,7 @@ export function ImportCsvFields({ form }: { form: ImportForm }): ReactNode {
         variant="quiet"
         size="sm"
         className="self-start"
-        onClick={() => {
-          setCsv(TEMPLATES[target]);
-          invalidatePreview();
-        }}
+        onClick={() => setCsv(TEMPLATES[target])}
       >
         Insert the template
       </Button>
