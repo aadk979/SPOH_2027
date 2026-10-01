@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-01T17:53:43.350Z",
+  "updatedAt": "2026-10-01T18:20:34.780Z",
   "current": {
     "phase": "P10",
     "step": "P10.5"
@@ -2008,11 +2008,15 @@
           "status": "in_progress",
           "startedAt": "2026-10-01T13:40:50.186Z",
           "completedAt": null,
-          "commits": ["6ac79bf"],
+          "commits": ["6ac79bf", "efff58c"],
           "notes": [
             {
               "at": "2026-10-01T17:53:43.239Z",
               "text": "Verified source-window import UI: historical open/closed windows retain stored mode; every input invalidates preview and fields hold during requests. Integration 33 and isolation 10, server unit 475, client unit 256, E2E 43, visual 58; two inspected import baselines updated. P10.4/P10.5 remain in progress for derived provenance and audited lifecycle enforcement."
+            },
+            {
+              "at": "2026-10-01T18:20:34.670Z",
+              "text": "Required parent-derived modes on safety follow-ups, acknowledgements and visitor values; safe backfill, FK invariants and rolling-writer triggers; compatible visitor capture locks; integration 570/4 skips, units 476/256, browser 10 and static gates passed. Lifecycle admission/transitions/effects remain."
             }
           ]
         },
@@ -2751,6 +2755,10 @@
     {
       "at": "2026-10-01T17:53:43.349Z",
       "text": "P10.5 verified import UI slice 6ac79bf: closed practice window imported after go-live stays practice; unbound phase changes refuse commit. Integration 33 and isolation 10, server unit 475, client unit 256, E2E 43 plus final targeted 2, visual 58, static gates and build passed. Two import PNGs inspected/re-asserted. Next derived safety/visitor provenance and audited lifecycle; both P10.4/P10.5 remain in progress."
+    },
+    {
+      "at": "2026-10-01T18:20:34.779Z",
+      "text": "P10.4/P10.5 derived rehearsal slice efff58c verified: dedicated test databases only; no schema drift, no client layout changes. Both steps remain in progress."
     }
   ]
 }
