@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-01T15:23:34.721Z",
+  "updatedAt": "2026-10-01T15:46:13.863Z",
   "current": {
     "phase": "P10",
     "step": "P10.5"
@@ -3046,6 +3046,10 @@
     {
       "at": "2026-10-01T15:23:34.720Z",
       "text": "P10.5 report provenance slice verified at 21c40b9: default live-only summaries, safety/integrity/visitor exports and labelled opt-in with separate stock pools. Full integration 518 passed/4 existing skips; server unit 467, client unit 233; 2 phone/laptop browser journeys; 56 unchanged visual screens plus 2 reviewed updated baselines re-asserted; static gates and server build passed. P10.4/P10.5 remain in progress for dashboards, shift/env fixtures, selection UI and audited lifecycle."
+    },
+    {
+      "at": "2026-10-01T15:46:13.861Z",
+      "text": "P10.5 dashboard provenance verified at 6262246: default live-only Chief/IC/TV, footfall and card summaries, activity/safety/fallback filters, labelled inclusion and separate stock pools. Integration 522 passed/4 existing skips; unit 467 server and 234 client; full browser 39; visual 52 unchanged plus 6 inspected/updated/re-asserted; static gates and server build passed. P10.4/P10.5 remain in progress; next is rehearsal shift/env fixtures/banner, selection UI and lifecycle wiring."
     }
   ]
 }
