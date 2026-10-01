@@ -2,7 +2,7 @@
 
 `npm run test:visual --workspace client` compares all 29 current app routes at 390×844 and 1440×900. Baselines were generated with the installed Playwright Chromium on Windows. Use the same browser/platform to avoid font-rendering differences. Screenshots are assertions, not automatically updated during refactors.
 
-The fixture stack uses a dedicated `spoh2027_visual_test` database, API port 4012 and client port 3001. The seed, API and browser dates are fixed at 2026-09-28T02:00:00Z; timers still run normally. `freeze-clock.mjs` refuses production and any database whose name does not end in `_test`. The API runs local auth, silent logging and always-open development shifts. No live credentials are needed.
+The fixture stack uses a dedicated `spoh2027_visual_test` database, API port 4012 and client port 3001. The seed, API and browser dates are fixed at 2026-09-28T02:00:00Z; timers still run normally. `freeze-clock.mjs` refuses production and any database whose name does not end in `_test`. The API runs local auth, silent logging and REHEARSAL fixtures. Assigned stations remain available outside shift hours in that phase. No live credentials are needed.
 
 From the repository root, with Node 24 on PATH, prepare the disposable fixture:
 
@@ -24,7 +24,6 @@ $env:AUTH_PROVIDER='local'
 $env:LOCAL_AUTH_SECRET='visual-fixture-only-secret-at-least-thirty-two-chars'
 $env:PORT='4012'
 $env:LOG_LEVEL='silent'
-$env:SHIFT_HOURS_ALWAYS_OPEN='true'
 $env:CORS_ALLOWED_ORIGINS='http://localhost:3001'
 node --import ./client/tests/visual/freeze-clock.mjs server/dist/index.js
 ```
@@ -39,6 +38,13 @@ node node_modules/next/dist/bin/next dev client --port 3001
 Then run `npm run test:visual --workspace client`. Use `-- --update-snapshots` only to deliberately establish a reviewed new baseline, and inspect the diff. `VISUAL_BASE_URL` can override the client URL. Do not use the browser fixture database for load tests: accumulated captures change dashboards and reports.
 
 Since P09.11 the seed generates its fixture relative to "today" (here the frozen date): event days are offsets from it, not the January 2027 dates of the earlier fixture. The committed baselines were captured on a database seeded before that change; rebuilding the visual database from the current seed changes day labels and dates on some screens, so establish and review a new baseline in the same change rather than chasing the differences.
+
+P10.5 fixtures start in REHEARSAL with practice cards and stock. For the existing legacy visual
+database, `node --import tsx server/scripts/prepare-visual-rehearsal.mjs` preserves its dates and
+roster. It permits only the exact local visual test database, refuses any capture, issued card or
+closed/archived event, and converts the unused fixtures in one transaction. Normal
+seed reruns never reclassify existing events, cards or stock. Restart the visual API before every
+full run; visual and E2E APIs share port 4012 and must run serially.
 
 The screenshots cover seeded initial page states. Behavioural actions are covered separately by the e2e and component suites. Snapshot coverage does not imply every interactive state has a visual baseline.
 

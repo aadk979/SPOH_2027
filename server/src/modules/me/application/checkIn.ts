@@ -13,7 +13,7 @@ import {
 } from '../data/repo.js';
 import { assertNotCheckedIn, assertPresentToday, assertRunningNow } from '../domain/shiftRules.js';
 import { loadOwnShift } from './ownShift.js';
-import { runningShifts } from '../../../platform/event/runningShifts.js';
+import { scheduledShifts } from '../../../platform/event/runningShifts.js';
 
 /**
  * Shift check-in. Gives Lead Facilitators live attendance instead of counting
@@ -30,7 +30,7 @@ export async function checkIn(
   const now = clock.now();
   const running = await findRunningAssignmentIds(scope, {
     volunteerId,
-    running: await runningShifts(scope, now),
+    running: scheduledShifts(scope, now),
   });
 
   await prisma.$transaction(async (tx) => {

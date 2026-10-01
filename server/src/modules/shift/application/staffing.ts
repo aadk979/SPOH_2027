@@ -1,6 +1,6 @@
 import type { LongShiftWarning, StaffingGapsResponse } from '@spoh/shared';
 import { DEFAULT_SETTINGS, getSettings } from '../../../platform/settings/index.js';
-import { runningShifts } from '../../../platform/event/runningShifts.js';
+import { scheduledShifts } from '../../../platform/event/runningShifts.js';
 import { eventTodayStart } from '../../../platform/event/today.js';
 import {
   listStaffedStations,
@@ -24,7 +24,7 @@ export async function getStaffingGaps(
   scope: EventScope,
   now = new Date(),
 ): Promise<StaffingGapsResponse> {
-  const running = await runningShifts(scope, now);
+  const running = scheduledShifts(scope, now);
   const shifts = await runningShiftRefs(scope, running);
   if (shifts.length === 0) {
     // Outside event hours nothing is understaffed, because nothing is staffed.

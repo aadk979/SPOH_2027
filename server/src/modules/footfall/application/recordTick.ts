@@ -1,4 +1,4 @@
-import { captureProvenance } from '../../../platform/db/captureProvenance.js';
+import { captureStation } from '../../../platform/access/captureStation.js';
 import type { CreateFootfallTickRequest, CreateFootfallTickResponse } from '@spoh/shared';
 import { auditStationScopeBypass, writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
@@ -20,7 +20,7 @@ export async function recordTick(
   const recordedAt = clock.now();
 
   const tick = await prisma.$transaction(async (tx) => {
-    await captureProvenance(tx, scope, request);
+    const { stationScopeBypass } = await captureStation(tx, { scope, actor, clock }, request);
     const row = await createTick(tx, scope, {
       stationId: station.id,
       recordedById: actor.volunteerId,
@@ -31,7 +31,7 @@ export async function recordTick(
       clientRecordedAt: request.clientRecordedAt ? new Date(request.clientRecordedAt) : null,
       idempotencyKey: request.idempotencyKey,
     });
-    await auditStationScopeBypass(tx, actor.stationScopeBypass, audit);
+    await auditStationScopeBypass(tx, stationScopeBypass, audit);
     await writeAudit(tx, {
       ...audit,
       action: 'footfall.tick',

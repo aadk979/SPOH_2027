@@ -11,6 +11,7 @@ import { useLiveDashboard } from '@/features/dashboard';
 import { useRequireSession, useEventTime } from '@/features/session';
 import { AppLink } from '@/shared/lib/AppLink';
 import { useEvent } from '@/shared/lib/eventContext';
+import { RehearsalBanner } from '@/features/events';
 
 /**
  * TV mode — the ops-room display (remediation/phases/P07-client-refactor.md).
@@ -59,6 +60,7 @@ export default function TvScreen(): ReactNode {
       className="flex min-h-dvh flex-col gap-[2vw] bg-void p-[2vw] text-on-dark"
     >
       <TvAlerts data={data} />
+      <RehearsalBanner display />
       <RehearsalDashboardControl included={includeRehearsal} onChange={setIncludeRehearsal} />
       {data.rehearsalIncluded ? (
         <p className="text-tv-row font-semibold">

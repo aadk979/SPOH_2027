@@ -3,7 +3,7 @@ import { useEffect, type ReactNode } from 'react';
 import { EventContext } from '@/shared/lib/eventContext';
 import { useEventSlug } from '@/shared/lib/eventPath';
 import { rememberLastUsedEvent } from './model/homeEvent';
-import { useMyEvents } from './queries';
+import { useMyEvents, useEventPhase } from './queries';
 
 /**
  * Resolves the slug of an `/e/<slug>/…` page to one of the caller's events.
@@ -21,6 +21,7 @@ export function EventProvider({
   const slug = useEventSlug();
   const { data: events, isError } = useMyEvents();
   const event = events?.find((candidate) => candidate.slug === slug) ?? null;
+  useEventPhase(event);
 
   useEffect(() => {
     if (event) rememberLastUsedEvent(event.slug);

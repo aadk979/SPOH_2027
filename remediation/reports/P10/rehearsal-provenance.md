@@ -108,6 +108,42 @@ Verification on 2026-10-02: full integration **527 passed / 4 existing skips**, 
 phase changes and every summary bucket. All workspace typechecks, root lint, architecture,
 hardcoding, formatting and server build passed by exit code. No visible layout changed.
 
-Remaining: explicit card batch selection, import window selection in the UI, rehearsal shift
-logic and fixture/banner updates, operational reads after a phase change, then audited lifecycle
+## Rehearsal shift access, fixtures and banner
+
+REHEARSAL permits capture at the volunteer's assigned station on any shift/day of the event.
+LIVE keeps actual shift hours. The development-only shift flag and its environment rule are
+removed. Station capture writes recheck active membership and station permission under the
+event phase lock, closing the gap between middleware and a concurrent go-live. An IC correction
+still succeeds and its bypass is audited using the permission at write time.
+
+Scheduled staffing, activity warnings and live roster attendance continue to use actual hours;
+the wider practice capture permission cannot inflate those measures. New development fixtures
+start in REHEARSAL with practice cards and practice initial stock; live initial stock is zero.
+Seed reruns preserve existing phase, cards and stock. The guarded visual conversion preserves
+historical fixture dates and refuses non-visual databases, production, existing captures,
+issued cards and closed/archived events. It was run twice successfully on the unused visual
+fixture, and its wrong-database/production guards refused before connecting.
+
+Every event screen in the app shell shows a persistent practice banner below urgent lost-person
+alerts. TV uses a larger banner. Event polling updates it and invalidates that event's cached
+postings and operational reads when phase changes; another event's cache stays intact.
+
+Verification on 2026-10-02: full integration **533 passed / 4 existing skips**, server unit
+**467**, client unit **243**, full browser E2E **41**. Six new database cases cover outside-hours
+practice, LIVE refusal, a posting on another event day, missing assignments, concurrent go-live
+and the audited IC bypass; the dashboard regression keeps staffing and warnings on actual hours.
+Two browser journeys cover phone/laptop practice captures, stored provenance and automatic
+banner/posting updates on go-live. Nine component/cache cases cover every phase, platform pages,
+TV labelling and invalidation isolation. All workspace typechecks, root lint, architecture,
+hardcoding, formatting and server build passed by exit code.
+
+Visual review covered the 56 changed phone/laptop event baselines; both sign-in images remain
+unchanged. It caught staffing being widened to every event shift, which was corrected before
+commit and covered by the new database regression. Chief/TV images reflect actual scheduled
+staffing and separate live stock. The frozen sign-in bucket was exhausted during the initial
+comparison's repeated worker restarts; proposed images were reviewed against saved originals,
+then the API restarted for assertion runs. Final full visual assertion: **58 passed**.
+
+Remaining: explicit card batch selection, import window selection in the UI, operational reads
+after a phase change, then audited lifecycle
 admission, transitions and close/archive side effects. P10.4/P10.5 remain in progress.

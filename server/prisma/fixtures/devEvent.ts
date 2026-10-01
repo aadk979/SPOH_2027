@@ -13,8 +13,8 @@ type CourseCode = 'DAAA' | 'DCDF' | 'DCS' | 'DCITP';
 /**
  * The development fixture (P09.11): one event shaped like SPOH 2027 and a
  * second, small one, with no literal dates — every day is an offset from
- * "today" on the event's clock, so the fixture is always live whenever it is
- * generated. Development and test databases only.
+ * "today" on the event's clock. New fixtures rehearse outside shift hours with
+ * practice captures, cards and stock. Development and test databases only.
  */
 
 export const FIXTURE_EVENT = {

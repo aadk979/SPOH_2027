@@ -69,8 +69,8 @@ export const stationIdFromParams =
  * Layer 2. Asserts the caller is rostered on the target station for a shift
  * that is running now, in the event's timezone.
  *
- * Deliberately strict about time: outside event hours no block is active and
- * nobody is on shift, so a counter left open overnight cannot keep writing.
+ * LIVE uses actual shift hours. REHEARSAL permits assigned stations on any
+ * event day. Capture writes recheck under the phase lock before mutation.
  */
 export function requireStationScope(
   extract: StationIdExtractor = stationIdFromBody,

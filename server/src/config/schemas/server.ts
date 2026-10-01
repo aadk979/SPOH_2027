@@ -16,35 +16,9 @@ export const serverFields = {
    * the API (ADR-008 §2). Unset in development, where Next serves the client.
    */
   CLIENT_DIR: z.string().min(1).optional(),
-  /**
-   * Treat every hour as event hours. DEVELOPMENT ONLY.
-   *
-   * Station scoping requires a shift to be running, which outside the
-   * event's shift hours means no capture screen works at all. Correct for
-   * the event — a counter left open overnight must not keep writing — and
-   * unworkable for a student team testing at 10pm.
-   *
-   * Refused in production, where a counter that never closes would let a
-   * volunteer capture against a station they left hours ago.
-   */
-  SHIFT_HOURS_ALWAYS_OPEN: z
-    .enum(['true', 'false'])
-    .default('false')
-    .transform((value) => value === 'true'),
 };
 
 type ServerEnv = z.infer<z.ZodObject<typeof serverFields>>;
-
-export const shiftHoursRule: EnvRule<ServerEnv> = (env, ctx) => {
-  if (env.NODE_ENV === 'production' && env.SHIFT_HOURS_ALWAYS_OPEN) {
-    ctx.addIssue({
-      code: 'custom',
-      path: ['SHIFT_HOURS_ALWAYS_OPEN'],
-      message:
-        'SHIFT_HOURS_ALWAYS_OPEN is a development convenience and is forbidden when NODE_ENV=production',
-    });
-  }
-};
 
 export const corsWildcardRule: EnvRule<ServerEnv> = (env, ctx) => {
   if (env.NODE_ENV === 'production' && env.CORS_ALLOWED_ORIGINS.some((o) => o.includes('*'))) {

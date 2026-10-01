@@ -1,7 +1,7 @@
 import type { AttendanceRecord } from '@spoh/shared';
 import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
-import { runningShifts } from '../../../platform/event/runningShifts.js';
+import { scheduledShifts } from '../../../platform/event/runningShifts.js';
 import { toAttendanceRecord } from '../data/mappers.js';
 import {
   createAttendance,
@@ -49,7 +49,7 @@ export async function markPresent(
   if (row.rehearsal) return toAttendanceRecord(row);
   const shifts = await findUncheckedShifts(tx, scope, {
     volunteerId: personId,
-    running: await runningShifts(scope, now),
+    running: scheduledShifts(scope, now),
   });
   for (const shift of shifts) {
     if (await markShiftCheckedIn(tx, scope, { id: shift.id, volunteerId: personId, at: now }))

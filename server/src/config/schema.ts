@@ -3,7 +3,7 @@ import { attendanceFields } from './schemas/attendance.js';
 import { authFields, authProviderRule, sessionRule } from './schemas/auth.js';
 import { databaseFields, databaseSslRule } from './schemas/database.js';
 import { pushFields, vapidRule } from './schemas/push.js';
-import { corsWildcardRule, serverFields, shiftHoursRule } from './schemas/server.js';
+import { corsWildcardRule, serverFields } from './schemas/server.js';
 import { storageFields } from './schemas/storage.js';
 
 /**
@@ -25,7 +25,6 @@ const EnvSchema = z
   .superRefine((env, ctx) => {
     for (const rule of [
       authProviderRule,
-      shiftHoursRule,
       databaseSslRule,
       sessionRule,
       vapidRule,

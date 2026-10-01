@@ -1,4 +1,4 @@
-import { captureProvenance } from '../../../platform/db/captureProvenance.js';
+import { captureStation } from '../../../platform/access/captureStation.js';
 import { randomUUID } from 'node:crypto';
 import type { CreateGroupRegistrationRequest, CreateGroupRegistrationResponse } from '@spoh/shared';
 import { auditStationScopeBypass, writeAudit } from '../../../platform/audit/index.js';
@@ -26,7 +26,7 @@ export async function recordGroupRegistration(
   const groupId = randomUUID();
 
   const { registrations, cardId, linkError, rehearsal } = await prisma.$transaction(async (tx) => {
-    const provenance = await captureProvenance(tx, scope, request);
+    const mode = await captureStation(tx, { scope, actor, clock }, request);
     const link = await linkGroupToCard(tx, scope, {
       shortCode: request.missionCardShortCode,
       issuedAt: recordedAt,
@@ -44,7 +44,7 @@ export async function recordGroupRegistration(
     });
     const created = await createRegistrationsForGroup(tx, scope, rows);
 
-    await auditStationScopeBypass(tx, actor.stationScopeBypass, audit);
+    await auditStationScopeBypass(tx, mode.stationScopeBypass, audit);
     await writeAudit(tx, {
       ...audit,
       action: 'registration.createGroup',
@@ -58,7 +58,7 @@ export async function recordGroupRegistration(
         cardLinkError: link.linkError,
       },
     });
-    return { registrations: created, ...link, ...provenance };
+    return { registrations: created, ...link, rehearsal: mode.rehearsal };
   });
 
   const since = await eventTodayStart(scope, clock.now());

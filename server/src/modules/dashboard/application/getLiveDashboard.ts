@@ -1,7 +1,7 @@
 import { systemClock } from '../../../platform/time/index.js';
 import { headlineOf, type LiveDashboardResponse } from '@spoh/shared';
 import { eventSetting } from '../../../platform/settings/eventSettings.js';
-import { runningShifts } from '../../../platform/event/runningShifts.js';
+import { scheduledShifts } from '../../../platform/event/runningShifts.js';
 import { eventToday, eventTodayStart } from '../../../platform/event/today.js';
 import { getLiveFootfall } from '../../footfall/index.js';
 import { listGifts } from '../../gift/index.js';
@@ -38,7 +38,7 @@ export async function getLiveDashboard(
 ): Promise<LiveDashboardResponse> {
   const since = await eventTodayStart(scope, now);
   const today = await eventToday(scope, now);
-  const running = await runningShifts(scope, now);
+  const running = scheduledShifts(scope, now);
   const [eventDay, withinEventHours] = await Promise.all([
     findEventDayOn(scope, today),
     anyShiftRunning(scope, running),
@@ -143,7 +143,7 @@ async function staffingPanel(
   {
     eventDayId,
     running,
-  }: { eventDayId: string | null; running: Awaited<ReturnType<typeof runningShifts>> },
+  }: { eventDayId: string | null; running: ReturnType<typeof scheduledShifts> },
   now: Date,
 ): Promise<Panels['staffing']> {
   const [onShift, checkedIn, gaps, longShifts] = await Promise.all([

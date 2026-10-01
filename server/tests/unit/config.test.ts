@@ -24,7 +24,7 @@ describe('configuration', () => {
     const env = parseEnv(DEV);
     expect(env.PORT).toBe(4000);
     expect(env.CORS_ALLOWED_ORIGINS).toEqual(['http://localhost:3000']);
-    expect(env.SHIFT_HOURS_ALWAYS_OPEN).toBe(false);
+    expect(env).not.toHaveProperty('SHIFT_HOURS_ALWAYS_OPEN');
   });
 
   it('refuses the local bypass and a non-TLS database in production, auth first', () => {
@@ -40,7 +40,7 @@ describe('configuration', () => {
   });
 
   it('knows every key it reads', () => {
-    expect(ENV_KEYS).toHaveLength(25);
+    expect(ENV_KEYS).toHaveLength(24);
     expect(new Set(ENV_KEYS).size).toBe(ENV_KEYS.length);
   });
 });

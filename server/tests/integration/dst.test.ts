@@ -74,7 +74,7 @@ async function shiftOn(date: string, template: string) {
 /** Which templates are running at an instant, through the production filter. */
 async function runningAt(iso: string): Promise<string[]> {
   const shifts = await rawDb.shift.findMany({
-    where: { eventId: london.eventId, ...(await runningShifts(london, new Date(iso))) },
+    where: { ...(await runningShifts(london, new Date(iso))), eventId: london.eventId },
     select: { template: { select: { code: true } } },
   });
   return shifts.map((shift) => shift.template.code).sort();

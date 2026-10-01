@@ -149,10 +149,9 @@ async function shiftBlocks(page, accessToken) {
 /**
  * Freeze the page clock an hour into a shift block, today, in the event's zone.
  *
- * This is the client half. The server half is `SHIFT_HOURS_ALWAYS_OPEN=true`
- * in the dev `.env`: server time cannot be frozen from a browser, so the server
- * keeps capture open and the client shows what a volunteer sees mid-shift.
- * The event zone is fixed at UTC+8 here because the product fixes it (F01 T-01).
+ * Historical P02 screenshot helper, using the old shift-block settings and
+ * UTC+8 fixture. Current fixtures use REHEARSAL for capture outside hours;
+ * current browser suites use the event's timezone and explicit test clocks.
  */
 export async function freezeInShift(page, { block = 'MORNING', accessToken } = {}) {
   const blocks = await shiftBlocks(page, accessToken);

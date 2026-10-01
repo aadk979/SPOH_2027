@@ -1,4 +1,4 @@
-import { captureProvenance } from '../../../platform/db/captureProvenance.js';
+import { captureStation } from '../../../platform/access/captureStation.js';
 import type { RedeemGiftRequest, RedeemGiftResponse } from '@spoh/shared';
 import { auditStationScopeBypass, writeAudit } from '../../../platform/audit/index.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
@@ -105,7 +105,7 @@ interface RecordInput {
 async function recordRedemption(tx: PrismaTransactionClient, input: RecordInput) {
   const { request, stationId, context, recordedAt } = input;
   const { scope } = context;
-  await captureProvenance(tx, scope, request);
+  const { stationScopeBypass } = await captureStation(tx, context, request);
   // Gift type first, then the card (in checkCard): one order, so no deadlock.
   await lockGiftType(tx, scope, request.giftTypeId);
   const giftType = await findGiftType(scope, request.giftTypeId, tx);
@@ -131,7 +131,7 @@ async function recordRedemption(tx: PrismaTransactionClient, input: RecordInput)
     flag,
   });
 
-  await auditStationScopeBypass(tx, context.actor.stationScopeBypass, context.audit);
+  await auditStationScopeBypass(tx, stationScopeBypass, context.audit);
   await writeAudit(tx, {
     ...context.audit,
     action: 'gift.redeem',

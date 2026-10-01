@@ -1,4 +1,4 @@
-import { captureProvenance } from '../../../platform/db/captureProvenance.js';
+import { captureStation } from '../../../platform/access/captureStation.js';
 import type { CreateFootfallBulkRequest, CreateFootfallTickResponse } from '@spoh/shared';
 import { auditStationScopeBypass, writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
@@ -23,7 +23,7 @@ export async function recordBulk(
   const timeBlockStart = new Date(request.timeBlockStart);
 
   const tick = await prisma.$transaction(async (tx) => {
-    await captureProvenance(tx, scope, request);
+    const { stationScopeBypass } = await captureStation(tx, { scope, actor, clock }, request);
     const row = await createTick(tx, scope, {
       stationId: station.id,
       recordedById: actor.volunteerId,
@@ -36,7 +36,7 @@ export async function recordBulk(
       recordedAt: timeBlockStart,
       idempotencyKey: request.idempotencyKey,
     });
-    await auditStationScopeBypass(tx, actor.stationScopeBypass, audit);
+    await auditStationScopeBypass(tx, stationScopeBypass, audit);
     await writeAudit(tx, {
       ...audit,
       action: 'footfall.bulk',

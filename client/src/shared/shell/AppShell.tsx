@@ -7,6 +7,7 @@ import type { ReactNode } from 'react';
 import { GlobalNav } from '@/shared/shell/GlobalNav';
 import { SectionNav } from '@/shared/shell/SectionNav';
 import { LostPersonBanner } from '@/features/lostPerson/components/LostPersonBanner';
+import { RehearsalBanner } from '@/features/events';
 import { SyncWarningBanner } from '@/shared/shell/SyncIndicator';
 import { cx } from '@/shared/ui/cx';
 
@@ -97,6 +98,7 @@ export function AppShell({
 
       <div className="sticky top-0 z-40">
         <LostPersonBanner />
+        <RehearsalBanner />
         <GlobalNav />
 
         {/*

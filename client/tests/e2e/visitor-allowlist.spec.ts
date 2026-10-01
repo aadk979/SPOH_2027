@@ -27,6 +27,9 @@ test('an event declares a visitor field, captures it, and purges it on switch-of
   test.setTimeout(90_000);
   const db = new pg.Client({ connectionString: checkedTestDatabase() });
   await db.connect();
+  const original = await db.query<{ status: string }>('SELECT status FROM "Event" WHERE id = $1', [
+    EVENT_ID,
+  ]);
   const code = `contact_${Date.now().toString(36)}`;
   const label = `Contact ${code}`;
   try {
@@ -46,6 +49,7 @@ test('an event declares a visitor field, captures it, and purges it on switch-of
 
     const booth = await browser.newPage();
     try {
+      await db.query('UPDATE "Event" SET status = $1 WHERE id = $2', ['REHEARSAL', EVENT_ID]);
       await signIn(booth, 'booth@spoh2027.test');
       await booth.goto('/e/spoh2027/capture/registration');
       await expect(
@@ -64,6 +68,8 @@ test('an event declares a visitor field, captures it, and purges it on switch-of
       await booth.close();
     }
 
+    await db.query('UPDATE "Event" SET status = $1 WHERE id = $2', ['READY', EVENT_ID]);
+    await page.reload();
     await page.getByText('None', { exact: true }).click();
     await page.getByRole('button', { name: 'Save visitor data' }).click();
     await expect
@@ -86,7 +92,10 @@ test('an event declares a visitor field, captures it, and purges it on switch-of
       EVENT_ID,
       'product.visitorDataMode',
     ]);
-    await db.query('UPDATE "Event" SET status = $1 WHERE id = $2', ['LIVE', EVENT_ID]);
+    await db.query('UPDATE "Event" SET status = $1 WHERE id = $2', [
+      original.rows[0]?.status,
+      EVENT_ID,
+    ]);
     await db.end();
   }
 });

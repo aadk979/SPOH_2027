@@ -27,7 +27,7 @@ import {
  * (P10 set-up), never from a script, so production gets the administrator
  * account and nothing else. Development and test databases get the fixture in
  * `fixtures/devEvent.ts`, generated relative to today on the event's clock,
- * so it is always live. Idempotent: every write finds or upserts, so a re-run
+ * in REHEARSAL, with practice cards and stock. Idempotent: every write finds or upserts, so a re-run
  * on another day adds that day's rows and changes nothing else.
  */
 
@@ -122,7 +122,7 @@ async function seedEvent(): Promise<Scope & { today: string }> {
   });
   await prisma.event.upsert({
     where: { id: FIXTURE_EVENT.id },
-    create: { ...FIXTURE_EVENT, organisationId: organisation.id, status: 'LIVE' },
+    create: { ...FIXTURE_EVENT, organisationId: organisation.id, status: 'REHEARSAL' },
     update: {},
   });
   const scope = { eventId: FIXTURE_EVENT.id };
@@ -196,7 +196,7 @@ async function seedGiftTypes(scope: Scope): Promise<void> {
     // Stock is operational: a re-run never resets a threshold tuned during the event.
     await prisma.giftType.upsert({
       where: { eventId_name: { eventId: scope.eventId, name: gift.name } },
-      create: { ...scope, ...gift },
+      create: { ...scope, ...gift, initialStock: 0, rehearsalInitialStock: gift.initialStock },
       update: {},
     });
   }
@@ -361,7 +361,8 @@ async function seedMissionCards(scope: Scope): Promise<void> {
       ...scope,
       shortCode: code,
       qrPayload: `spoh2027:dev-${String(index + 1).padStart(4, '0')}`,
-      batchLabel: 'DEV',
+      batchLabel: 'DEV REHEARSAL',
+      rehearsal: true,
     };
   });
   await prisma.missionCard.createMany({ data: rows, skipDuplicates: true });
@@ -383,7 +384,7 @@ async function seedSecondEvent(first: Scope, today: string): Promise<void> {
       slug: event.slug,
       name: event.name,
       timezone: FIXTURE_EVENT.timezone,
-      status: 'LIVE',
+      status: 'REHEARSAL',
     },
     update: {},
   });
