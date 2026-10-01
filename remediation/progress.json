@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-01T01:54:14.403Z",
+  "updatedAt": "2026-10-01T07:07:53.548Z",
   "current": {
     "phase": "P09",
     "step": "P09.14"
@@ -20,9 +20,9 @@
       "id": "G0",
       "title": "Facts established: baseline and audits",
       "signoff": false,
-      "status": "pending",
-      "passedAt": null,
-      "note": null
+      "status": "passed",
+      "passedAt": "2026-10-01T07:07:53.475Z",
+      "note": "P00-P04 completed with baseline and audit reports; D-01 through D-13 answered, including later D-08 owner amendment (verified 2026-10-01)."
     },
     {
       "id": "G1",
@@ -36,9 +36,9 @@
       "id": "G2",
       "title": "Clean architecture, identical behaviour",
       "signoff": false,
-      "status": "pending",
-      "passedAt": null,
-      "note": null
+      "status": "passed",
+      "passedAt": "2026-10-01T07:07:53.547Z",
+      "note": "P06-P07 completed; full suites and architecture/lint checks passed with identical default behaviour (verified 2026-10-01)."
     },
     {
       "id": "G3",
@@ -135,8 +135,8 @@
       "owner": "you",
       "blocks": ["P08.5", "P12.2"],
       "status": "answered",
-      "answer": "A domain registered in Route 53, with ACM certificates and SES + DKIM (owner, G1 2026-09-26). Domain name not yet named: CDK config carries a placeholder, flagged in the P08 report; P08.5 and P12.2 use the placeholder and the owner supplies the name before cutover",
-      "answeredAt": "2026-09-26T15:26:02.540Z"
+      "answer": "Owner amendment 2026-09-30: Firebase Hosting (*.web.app) client; DuckDNS HTTPS API; no Route 53, ACM or SES. Price a static-IP Let's Encrypt entry and obtain added monthly cost approval before P08.5. SNS email and AWS Budgets for alerts; Cognito default invite sender. Session design must work without a third-party refresh cookie.",
+      "answeredAt": "2026-10-01T07:07:53.390Z"
     },
     {
       "id": "D-09",
@@ -1911,11 +1911,16 @@
         {
           "id": "P09.14",
           "title": "Per-event product rules (D-04)",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-01T01:54:14.403Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-10-01T07:07:53.313Z",
+          "commits": ["e5b8d3b"],
+          "notes": [
+            {
+              "at": "2026-10-01T07:07:53.314Z",
+              "text": "Both count modes and visitor modes verified. Allowlist fields, direct online capture, role-filtered reads/exports, retention purgeAfter and field deadlines; root typecheck/lint/architecture/hardcoding/format, server build, 455 unit, 474 integration (7 skipped), 229 client unit, 30 E2E, 58 visual and event totals checks passed."
+            }
+          ]
         },
         {
           "id": "P09.13",
