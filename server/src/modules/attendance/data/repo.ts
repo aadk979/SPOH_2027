@@ -1,3 +1,4 @@
+import { captureProvenance } from '../../../platform/db/captureProvenance.js';
 import type { AttendanceMethod, Prisma } from '../../../generated/prisma/client.js';
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
@@ -60,7 +61,10 @@ export async function findAttendance(
   key: PersonDay,
 ): Promise<AttendanceWithVerifier | null> {
   return db.attendance.findUnique({
-    where: { volunteerId_eventDayId: { ...key, rehearsal: false }, eventId: scope.eventId },
+    where: {
+      volunteerId_eventDayId: { ...key, ...(await captureProvenance(db, scope)) },
+      eventId: scope.eventId,
+    },
     include: withVerifier,
   });
 }
@@ -68,7 +72,10 @@ export async function findAttendance(
 /** Presence without the verifier's row, for the issuer checks. */
 export async function findPresence(db: PrismaTransactionClient, scope: EventScope, key: PersonDay) {
   return db.attendance.findUnique({
-    where: { volunteerId_eventDayId: { ...key, rehearsal: false }, eventId: scope.eventId },
+    where: {
+      volunteerId_eventDayId: { ...key, ...(await captureProvenance(db, scope)) },
+      eventId: scope.eventId,
+    },
   });
 }
 
@@ -81,7 +88,13 @@ export async function createAttendance(
   const membershipId = await membershipIdOf(tx, scope, data.volunteerId);
   const verifiedByMembershipId = await membershipIdOf(tx, scope, data.verifiedById);
   return tx.attendance.create({
-    data: { ...data, eventId: scope.eventId, membershipId, verifiedByMembershipId },
+    data: {
+      ...data,
+      ...(await captureProvenance(tx, scope)),
+      eventId: scope.eventId,
+      membershipId,
+      verifiedByMembershipId,
+    },
     include: withVerifier,
   });
 }
@@ -161,12 +174,19 @@ export async function replaceChallenge(
     expiresAt: Date;
   },
 ): Promise<void> {
+  const provenance = await captureProvenance(tx, scope);
   await tx.attendanceChallenge.deleteMany({
-    where: { eventId: scope.eventId, issuerId: data.issuerId, eventDayId: data.eventDayId },
+    where: {
+      eventId: scope.eventId,
+      issuerId: data.issuerId,
+      eventDayId: data.eventDayId,
+      ...provenance,
+    },
   });
   await tx.attendanceChallenge.create({
     data: {
       ...data,
+      ...provenance,
       eventId: scope.eventId,
       issuerMembershipId: await membershipIdOf(tx, scope, data.issuerId),
     },
@@ -178,5 +198,7 @@ export async function findChallenge(
   scope: EventScope,
   where: { id: string } | { pinHash: string },
 ) {
-  return tx.attendanceChallenge.findUnique({ where: { ...where, eventId: scope.eventId } });
+  return tx.attendanceChallenge.findUnique({
+    where: { ...where, eventId: scope.eventId, ...(await captureProvenance(tx, scope)) },
+  });
 }

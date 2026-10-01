@@ -1,3 +1,4 @@
+import { captureProvenance } from '../../../platform/db/captureProvenance.js';
 import type { CreateRegistrationRequest, CreateRegistrationResponse } from '@spoh/shared';
 import { auditStationScopeBypass, writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
@@ -29,6 +30,7 @@ export async function recordRegistration(
   const recordedAt = clock.now();
 
   const registration = await prisma.$transaction(async (tx) => {
+    await captureProvenance(tx, scope, request);
     const category = await requireCategory(tx, scope, request.category);
     const row = await createRegistration(tx, scope, {
       categoryId: category.id,

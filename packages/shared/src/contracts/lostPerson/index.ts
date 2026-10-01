@@ -16,6 +16,7 @@ import { Id, IdempotencyKey, IsoDateTime } from '../common/index.js';
 
 export const RaiseLostPersonRequest = z
   .object({
+    rehearsal: z.boolean().optional(),
     idempotencyKey: IdempotencyKey,
     approxAge: z.string().trim().max(40).optional(),
     descriptionText: z.string().trim().min(3).max(500),

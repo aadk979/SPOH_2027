@@ -18,6 +18,7 @@ import { api } from '@/shared/lib/api';
 import { ApiError, NetworkError } from '@/shared/lib/apiErrors';
 import { enqueue } from '@/shared/lib/outbox';
 import { TEST_EVENT } from '../helpers/event';
+import * as eventContext from '@/shared/lib/eventContext';
 
 /** The test event's API paths and screen addresses (tests/setup.ts). */
 const API = `/events/${TEST_EVENT.id}`;
@@ -60,6 +61,7 @@ function wrapper({ children }: { children: ReactNode }) {
 const offline = () => new NetworkError(new TypeError('fetch failed'));
 
 beforeEach(() => {
+  vi.spyOn(eventContext, 'useEvent').mockReturnValue({ ...TEST_EVENT, status: 'REHEARSAL' });
   mockedApi.mockReset();
   mockedEnqueue.mockReset();
   mockedEnqueue.mockResolvedValue({} as Awaited<ReturnType<typeof enqueue>>);
@@ -76,7 +78,10 @@ describe('stamps', () => {
     const { result } = renderHook(() => useStampCapture(), { wrapper });
     await act(() => result.current.stamp('ABC123'));
 
-    const sent = mockedApi.mock.calls[0]![1] as { body: { idempotencyKey: string } };
+    const sent = mockedApi.mock.calls[0]![1] as {
+      body: { idempotencyKey: string; rehearsal: boolean };
+    };
+    expect(sent.body.rehearsal).toBe(true);
     expect(mockedEnqueue).toHaveBeenCalledWith({
       idempotencyKey: sent.body.idempotencyKey,
       eventId: TEST_EVENT.id,
@@ -109,7 +114,8 @@ describe('redemptions', () => {
     await act(() => result.current.redeem('ABC123'));
 
     const call = mockedApi.mock.calls.find(([, options]) => options?.method);
-    const sent = call![1] as { body: { idempotencyKey: string } };
+    const sent = call![1] as { body: { idempotencyKey: string; rehearsal: boolean } };
+    expect(sent.body.rehearsal).toBe(true);
     expect(mockedEnqueue).toHaveBeenCalledWith({
       idempotencyKey: sent.body.idempotencyKey,
       eventId: TEST_EVENT.id,
@@ -129,7 +135,10 @@ describe('incident reports', () => {
     fireEvent.submit(description.closest('form')!);
 
     await screen.findByText('Queued. If anyone is hurt or in danger, tell your IC now.');
-    const sent = mockedApi.mock.calls[0]![1] as { body: { idempotencyKey: string } };
+    const sent = mockedApi.mock.calls[0]![1] as {
+      body: { idempotencyKey: string; rehearsal: boolean };
+    };
+    expect(sent.body.rehearsal).toBe(true);
     expect(mockedEnqueue).toHaveBeenCalledWith({
       idempotencyKey: sent.body.idempotencyKey,
       eventId: TEST_EVENT.id,
@@ -151,6 +160,7 @@ describe('lost-person alerts', () => {
     await screen.findByText(/Call your IC on the radio now/);
     expect(mockedEnqueue).not.toHaveBeenCalled();
     expect((description as HTMLTextAreaElement).value).toBe('Child in a red shirt');
+    expect(mockedApi.mock.calls[0]![1]?.body).toMatchObject({ rehearsal: true });
     await waitFor(() =>
       expect(
         screen.getByRole('button', { name: 'Send the alert now' }).hasAttribute('disabled'),

@@ -1,3 +1,4 @@
+import { captureProvenance } from '../../../platform/db/captureProvenance.js';
 import type { CreateIncidentRequest, IncidentRecord } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
@@ -7,14 +8,16 @@ import { createIncident, findIncidentById } from '../data/repo.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { toRecordWithAuthors } from './incidentRecord.js';
 import { notifySafetyChain } from './notifySafetyChain.js';
+import { systemClock, type Clock } from '../../../platform/time/index.js';
 
 /** Record an incident as reported, and push a severe one to the safety chain. */
 export async function reportIncident(
   request: CreateIncidentRequest,
-  { volunteerId, scope, audit }: ActorContext,
+  { volunteerId, scope, audit, clock = systemClock }: ActorContext & { clock?: Clock },
 ): Promise<IncidentRecord> {
   const stationId = await requireEventStation(scope, request.stationId);
   const incident = await prisma.$transaction(async (tx) => {
+    await captureProvenance(tx, scope, request);
     const row = await createIncident(tx, scope, {
       type: request.type,
       severity: request.severity,
@@ -23,7 +26,7 @@ export async function reportIncident(
       description: request.description,
       reportedById: volunteerId,
       occurredAt: new Date(request.occurredAt),
-      reportedAt: new Date(),
+      reportedAt: clock.now(),
       idempotencyKey: request.idempotencyKey,
     });
     await writeAudit(tx, {
@@ -34,7 +37,12 @@ export async function reportIncident(
       // The description is deliberately not copied into the audit payload: it
       // is already immutable on the incident, and duplicating free text into a
       // second table doubles the surface for anything that should not be there.
-      after: { type: row.type, severity: row.severity, stationId: row.stationId },
+      after: {
+        type: row.type,
+        severity: row.severity,
+        stationId: row.stationId,
+        rehearsal: row.rehearsal,
+      },
     });
     return row;
   });

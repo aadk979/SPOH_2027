@@ -5,9 +5,10 @@ import { importFallback } from '../api';
 import { parseCsv } from '../model/parseImportCsv';
 import { toImportRequest, type ImportFormRequest, type ImportValues } from '../model/importRequest';
 import type { z } from 'zod';
-import { useEventId } from '@/shared/lib/eventContext';
+import { useEvent } from '@/shared/lib/eventContext';
 interface ImportAction {
   values: ImportValues;
+  preview: ImportResponse | null;
   validate(input: unknown): z.output<typeof ImportFormRequest> | null;
   setPending: Dispatch<SetStateAction<boolean>>;
   setError: Dispatch<SetStateAction<string | null>>;
@@ -19,8 +20,15 @@ function failureMessage(cause: unknown): string {
   return cause instanceof Error ? cause.message : 'The import failed.';
 }
 
-export function useRunImport({ values, validate, setPending, setError, setOutcome }: ImportAction) {
-  const eventId = useEventId();
+export function useRunImport({
+  values,
+  preview,
+  validate,
+  setPending,
+  setError,
+  setOutcome,
+}: ImportAction) {
+  const { id: eventId, status } = useEvent();
   async function run(commit: boolean): Promise<void> {
     setPending(true);
     setError(null);
@@ -33,7 +41,11 @@ export function useRunImport({ values, validate, setPending, setError, setOutcom
         return;
       }
 
-      const request = validate(toImportRequest(values, rows, commit));
+      const input = toImportRequest(values, rows, commit);
+      const rehearsal = commit
+        ? (preview?.rehearsal ?? status === 'REHEARSAL')
+        : status === 'REHEARSAL';
+      const request = validate({ ...input, body: { ...input.body, rehearsal } });
       if (!request) return;
       setOutcome(commit, await importFallback(eventId, request.target, request.body));
     } catch (cause) {

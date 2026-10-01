@@ -1,3 +1,4 @@
+import { captureProvenance } from '../../../platform/db/captureProvenance.js';
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import { pageArgs, type PageRequest } from '../../../platform/db/pagination.js';
@@ -24,6 +25,7 @@ export async function createItem(
   return tx.lostFoundItem.create({
     data: {
       ...data,
+      ...(await captureProvenance(tx, scope)),
       eventId: scope.eventId,
       loggedByMembershipId: await membershipIdOf(tx, scope, data.loggedById),
     },

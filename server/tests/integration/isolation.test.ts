@@ -467,10 +467,27 @@ const CASES: Record<string, Case> = {
   },
   'POST /fallback/windows/:id/close': { params: (b) => ({ id: b.window }), body: () => ({}) },
   'GET /fallback/windows': LIST,
-  'POST /fallback/imports/registrations': noId(
-    'rows name stations by code, resolved in the path event',
-  ),
-  'POST /fallback/imports/footfall': noId('rows name stations by code, resolved in the path event'),
+  'POST /fallback/imports/registrations': {
+    body: (b) => ({
+      source: 'FALLBACK_SHEET',
+      fallbackWindowId: b.window,
+      rows: [
+        {
+          stationCode: 'A-DESK',
+          category: 'SEC_1',
+          count: 1,
+          recordedAt: FROZEN_NOW.toISOString(),
+        },
+      ],
+    }),
+  },
+  'POST /fallback/imports/footfall': {
+    body: (b) => ({
+      source: 'FALLBACK_SHEET',
+      fallbackWindowId: b.window,
+      rows: [{ stationCode: 'A-DESK', quantity: 1, timeBlockStart: FROZEN_NOW.toISOString() }],
+    }),
+  },
 };
 
 // ── The suite ───────────────────────────────────────────────────────────────

@@ -1,3 +1,5 @@
+import { assertCardProvenance } from '../domain/cardRules.js';
+import { captureProvenance } from '../../../platform/db/captureProvenance.js';
 import type { ReissueCardRequest, ReissueCardResponse } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
@@ -13,6 +15,7 @@ import { normaliseShortCode } from '../domain/shortCode.js';
 import { getCard } from './getCard.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
+import { systemClock, type Clock } from '../../../platform/time/index.js';
 
 type CardWithStamps = NonNullable<Awaited<ReturnType<typeof findCardWithStamps>>>;
 
@@ -28,6 +31,7 @@ async function copyStamps(
   const { original, replacementId } = journey;
   for (const stamp of original.stampEvents) {
     await createStamp(tx, scope, {
+      rehearsal: stamp.rehearsal,
       missionCardId: replacementId,
       stationId: stamp.stationId,
       recordedById: stamp.recordedById,
@@ -50,20 +54,23 @@ async function copyStamps(
 export async function reissueCard(
   shortCodeInput: string,
   request: ReissueCardRequest,
-  { scope, audit }: ActorContext,
+  { scope, audit, clock = systemClock }: ActorContext & { clock?: Clock },
 ): Promise<ReissueCardResponse> {
   const originalCode = normaliseShortCode(shortCodeInput);
   const replacementCode = normaliseShortCode(request.replacementShortCode);
   assertDifferentCards(originalCode, replacementCode);
-  const now = new Date();
+  const now = clock.now();
 
   const result = await prisma.$transaction(async (tx) => {
+    const provenance = await captureProvenance(tx, scope);
     const original = requireCard(await findCardWithStamps(tx, scope, originalCode));
+    assertCardProvenance(original, provenance);
     assertReissuable(original);
     const replacement = requireCard(
       await findCardRow(tx, scope, replacementCode),
       'No replacement card with that code',
     );
+    assertCardProvenance(replacement, provenance);
     assertReplacementUnissued(replacement);
 
     await updateCard(tx, scope, {

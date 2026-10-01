@@ -46,6 +46,7 @@ export async function markPresent(
       entityId: row.id,
       after: { eventDayId: dayId, method, verifiedById: verifierId, presentAt: now.toISOString() },
     });
+  if (row.rehearsal) return toAttendanceRecord(row);
   const shifts = await findUncheckedShifts(tx, scope, {
     volunteerId: personId,
     running: await runningShifts(scope, now),

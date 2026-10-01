@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { enqueue, cancel as cancelOutboxEntry } from '@/shared/lib/outbox';
-import { useEventId } from '@/shared/lib/eventContext';
+import { useEvent } from '@/shared/lib/eventContext';
 import { ms } from '@/shared/lib/runtimeSettings';
 
 /**
@@ -62,7 +62,8 @@ export function useCapture(): UseCaptureResult {
   const [undoable, setUndoable] = useState<CaptureTap | null>(null);
   const [error, setError] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const eventId = useEventId();
+  const { id: eventId, status } = useEvent();
+  const rehearsal = status === 'REHEARSAL';
 
   useEffect(
     () => () => {
@@ -82,6 +83,7 @@ export function useCapture(): UseCaptureResult {
           path: input.endpoint,
           body: {
             ...input.body,
+            rehearsal,
             idempotencyKey,
             // The moment the volunteer actually tapped. The server stamps its
             // own time on receipt; storing both is what makes a phone that
@@ -108,7 +110,7 @@ export function useCapture(): UseCaptureResult {
       if (timer.current) clearTimeout(timer.current);
       timer.current = setTimeout(() => setUndoable(null), ms.undoWindow());
     },
-    [eventId],
+    [eventId, rehearsal],
   );
 
   const undo = useCallback(async (): Promise<void> => {

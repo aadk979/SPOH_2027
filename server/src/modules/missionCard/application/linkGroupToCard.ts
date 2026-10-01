@@ -1,3 +1,4 @@
+import { captureProvenance } from '../../../platform/db/captureProvenance.js';
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import { findCardRow, updateCard } from '../data/repo.js';
 import { isOutOfUse } from '../domain/cardRules.js';
@@ -16,12 +17,21 @@ import type { EventScope } from '../../../platform/db/eventScope.js';
 export async function linkGroupToCard(
   tx: PrismaTransactionClient,
   scope: EventScope,
-  link: { shortCode: string; issuedAt: Date },
+  link: { shortCode?: string; issuedAt: Date },
 ): Promise<{ cardId: string | null; linkError: string | null }> {
+  if (!link.shortCode) return { cardId: null, linkError: null };
+  const provenance = await captureProvenance(tx, scope);
   const card = await findCardRow(tx, scope, normaliseShortCode(link.shortCode));
 
   if (!card) {
     return { cardId: null, linkError: 'Card not found. The registrations were still recorded.' };
+  }
+  if (card.rehearsal !== provenance.rehearsal) {
+    return {
+      cardId: null,
+      linkError:
+        'The card belongs to a different rehearsal/live batch. The registrations were still recorded.',
+    };
   }
   if (isOutOfUse(card.status)) {
     return {

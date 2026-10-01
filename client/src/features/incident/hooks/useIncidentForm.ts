@@ -7,14 +7,15 @@ import type { IncidentSeverity, IncidentType } from '@spoh/shared';
 import { useCreateIncident } from '../queries';
 import { incidentEndpoints } from '../api';
 import { sendOrQueue } from '@/shared/lib/sendOrQueue';
-import { useEventId } from '@/shared/lib/eventContext';
+import { useEvent } from '@/shared/lib/eventContext';
 import { toIncidentRequest } from '../model/incidentRequest';
 export function useIncidentForm() {
   const fields = useIncidentFields();
   const router = useAppRouter();
   const mutation = useCreateIncident();
   const { data: me } = useMe();
-  const eventId = useEventId();
+  const { id: eventId, status } = useEvent();
+  const rehearsal = status === 'REHEARSAL';
 
   const [pending, setPending] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -27,7 +28,10 @@ export function useIncidentForm() {
     setQueued(false);
 
     try {
-      const request = fields.validate(toIncidentRequest(fields, me?.currentAssignment?.station.id));
+      const request = fields.validate({
+        ...toIncidentRequest(fields, me?.currentAssignment?.station.id),
+        rehearsal,
+      });
       if (!request) return;
       const outcome = await sendOrQueue({
         eventId,
@@ -54,12 +58,7 @@ export function useIncidentForm() {
     ...fields,
     pending,
     queued,
-    formError:
-      formError ??
-      fields.errors.stationId ??
-      fields.errors.occurredAt ??
-      fields.errors.idempotencyKey ??
-      fields.errors._form,
+    formError: formError ?? fields.requestError,
     submit,
     me,
   };
@@ -81,6 +80,11 @@ function useIncidentFields() {
     setLocationNote: (value: typeof form.values.locationNote) =>
       form.setField('locationNote', value),
     errors: form.errors,
+    requestError:
+      form.errors.stationId ??
+      form.errors.occurredAt ??
+      form.errors.idempotencyKey ??
+      form.errors._form,
     descriptionError: form.errors.description,
     validate: form.validate,
     reset: () => form.reset(),

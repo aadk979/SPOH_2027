@@ -4,12 +4,13 @@ import type { Tone } from '@/shared/ui';
 import { useMe } from '@/features/session';
 import { UNRESOLVED_SCAN, useCardScanner } from '@/features/capture';
 import { sendOrQueue } from '@/shared/lib/sendOrQueue';
-import { useEventId } from '@/shared/lib/eventContext';
+import { useEvent } from '@/shared/lib/eventContext';
 import { cardEndpoints, stampCard } from '../api';
 import { QUEUED_STAMP, stampFailureMessage, stampMessage } from '../model/stampMessage';
 export function useStampCapture() {
   const { data: me } = useMe();
-  const eventId = useEventId();
+  const { id: eventId, status } = useEvent();
+  const rehearsal = status === 'REHEARSAL';
   const [card, setCard] = useState<MissionCardRecord | null>(null);
   const [message, setMessage] = useState<{ tone: Tone; text: string } | null>(null);
   const [pending, setPending] = useState(false);
@@ -25,6 +26,7 @@ export function useStampCapture() {
 
       try {
         const body = {
+          rehearsal,
           stationId: station.id,
           idempotencyKey: crypto.randomUUID(),
           clientRecordedAt: new Date().toISOString(),
@@ -54,7 +56,7 @@ export function useStampCapture() {
         setPending(false);
       }
     },
-    [eventId, station, pending],
+    [eventId, rehearsal, station, pending],
   );
 
   const onUnresolvedScan = useCallback(() => setMessage(UNRESOLVED_SCAN), []);

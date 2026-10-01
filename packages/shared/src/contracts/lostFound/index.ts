@@ -17,6 +17,7 @@ import { Id, IsoDateTime, PaginationQuery } from '../common/index.js';
 
 export const CreateLostFoundRequest = z
   .object({
+    rehearsal: z.boolean().optional(),
     itemLabel: z.string().trim().min(2).max(120),
     categoryLabel: z.string().trim().max(60).optional(),
     foundStationId: Id.nullish(),

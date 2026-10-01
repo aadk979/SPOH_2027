@@ -1,3 +1,5 @@
+import { assertCardProvenance } from '../domain/cardRules.js';
+import { captureProvenance } from '../../../platform/db/captureProvenance.js';
 import type { IssueCardRequest, MissionCardRecord } from '@spoh/shared';
 import { auditStationScopeBypass, writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
@@ -29,7 +31,9 @@ export async function issueCard(
   const shortCode = normaliseShortCode(shortCodeInput);
 
   const cardId = await prisma.$transaction(async (tx) => {
+    const provenance = await captureProvenance(tx, scope, request);
     const existing = requireCard(await findCardRow(tx, scope, shortCode));
+    assertCardProvenance(existing, provenance);
     assertCardNotVoided(existing, 'That card has been voided. Issue a fresh one.');
 
     if (existing.status === 'UNISSUED') {

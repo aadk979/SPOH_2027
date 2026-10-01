@@ -1,3 +1,4 @@
+import { captureProvenance } from '../../../platform/db/captureProvenance.js';
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
@@ -20,6 +21,7 @@ export async function createAlert(
   return tx.lostPersonAlert.create({
     data: {
       ...data,
+      ...(await captureProvenance(tx, scope)),
       eventId: scope.eventId,
       raisedByMembershipId: await membershipIdOf(tx, scope, data.raisedById),
     },
@@ -123,6 +125,7 @@ export async function purgeAlert(
     outcome: 'RESOLVED_FOUND' | 'RESOLVED_OTHER';
     ackCount: number;
     resolutionMinutes: number;
+    rehearsal: boolean;
   },
 ): Promise<boolean> {
   // Claim the alert first, conditionally: every worker runs the purge, and the
@@ -138,6 +141,7 @@ export async function purgeAlert(
   await tx.lostPersonSummary.create({
     data: {
       eventId: scope.eventId,
+      rehearsal: alert.rehearsal,
       raisedAt: alert.raisedAt,
       resolvedAt: alert.resolvedAt,
       resolutionMinutes: alert.resolutionMinutes,

@@ -1,3 +1,8 @@
+import {
+  importBatchScope,
+  resolveImportProvenance,
+  type ImportProvenance,
+} from './importProvenance.js';
 import type { ImportRegistrationsRequest, ImportResponse } from '@spoh/shared';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import {
@@ -20,6 +25,8 @@ type Row = ImportRegistrationsRequest['rows'][number];
 function registrationRecords(
   request: ImportRegistrationsRequest,
   context: {
+    batchScope: string;
+    provenance: ImportProvenance;
     recorder: { recordedById: string; recordedByMembershipId: string };
     categoryIds: ReadonlyMap<string, string>;
   },
@@ -27,7 +34,7 @@ function registrationRecords(
   return (row: Row, { rowNumber, stationId }: { rowNumber: number; stationId: string }) => {
     const recordedAt = new Date(row.recordedAt ?? (row.timeBlockStart as string));
     return Array.from({ length: row.count }, (_, occurrence) => {
-      const key = importKey(request.source, request.fileName ?? 'manual', [
+      const key = importKey(request.source, context.batchScope, [
         rowNumber,
         row.stationCode,
         row.category,
@@ -40,6 +47,7 @@ function registrationRecords(
         ...context.recorder,
         // Source-tagged, so no report can mistake this for an app tap.
         source: request.source,
+        rehearsal: context.provenance.rehearsal,
         recordedAt,
         idempotencyKey: key,
       };
@@ -63,7 +71,9 @@ export async function importRegistrations(
 ): Promise<ImportResponse> {
   const recorder = { recordedById: actor.volunteerId, recordedByMembershipId: actor.membershipId };
   const categoryIds = await categoryIdsByCode(actor.scope);
-  const expand = registrationRecords(request, { recorder, categoryIds });
+  const provenance = await resolveImportProvenance(actor.scope, request);
+  const batchScope = importBatchScope(actor.scope, { ...request, ...provenance });
+  const expand = registrationRecords(request, { recorder, categoryIds, provenance, batchScope });
   const rowIssue = unknownCategory(categoryIds);
 
   const stationIds = await stationIdsByCode(actor.scope);
@@ -84,6 +94,7 @@ export async function importRegistrations(
       fileName: request.fileName ?? null,
       notes: request.notes ?? null,
       plan,
+      provenance,
       insert: insertRegistrations,
     },
     actor,

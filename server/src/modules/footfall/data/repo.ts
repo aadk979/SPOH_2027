@@ -1,3 +1,4 @@
+import { captureProvenance } from '../../../platform/db/captureProvenance.js';
 import type { FootfallTick, Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
@@ -16,7 +17,9 @@ export async function createTick(
   scope: EventScope,
   data: Omit<Prisma.FootfallTickUncheckedCreateInput, 'eventId'>,
 ): Promise<FootfallTick> {
-  return tx.footfallTick.create({ data: { ...data, eventId: scope.eventId } });
+  return tx.footfallTick.create({
+    data: { ...data, eventId: scope.eventId, ...(await captureProvenance(tx, scope)) },
+  });
 }
 
 export async function findTickById(scope: EventScope, id: string): Promise<FootfallTick | null> {

@@ -1,12 +1,13 @@
 'use client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { CreateLostFoundRequest } from '@spoh/shared';
-import { useEventId } from '@/shared/lib/eventContext';
+import { useEvent, useEventId } from '@/shared/lib/eventContext';
 import { createLostFound, listLostFound, claimLostFound, type LostFoundFilters } from './api';
 export function useCreateLostFound() {
-  const eventId = useEventId();
+  const { id: eventId, status } = useEvent();
   return useMutation({
-    mutationFn: (body: CreateLostFoundRequest) => createLostFound(eventId, body),
+    mutationFn: (body: CreateLostFoundRequest) =>
+      createLostFound(eventId, { ...body, rehearsal: status === 'REHEARSAL' }),
   });
 }
 export const lostFoundKeys = {

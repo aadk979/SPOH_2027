@@ -5,6 +5,7 @@ import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { createImportBatch } from '../data/repo.js';
 import type { ImportPlan } from '../domain/importPlan.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
+import { assertImportProvenance, type ImportProvenance } from './importProvenance.js';
 
 interface ImportInput<T> {
   source: 'FALLBACK_SHEET' | 'PAPER';
@@ -14,6 +15,7 @@ interface ImportInput<T> {
   fileName: string | null;
   notes: string | null;
   plan: ImportPlan<T>;
+  provenance: ImportProvenance;
   insert(tx: PrismaTransactionClient, scope: EventScope, records: T[]): Promise<number>;
 }
 
@@ -44,6 +46,7 @@ export async function runImport<T>(
     recordsSkipped: outcome.skipped,
     issues: input.plan.issues,
     importBatchId: outcome.importBatchId,
+    rehearsal: input.provenance.rehearsal,
   };
 }
 
@@ -58,6 +61,7 @@ async function applyPlan<T>(
 ): Promise<Outcome> {
   const { plan } = input;
   return prisma.$transaction(async (tx) => {
+    await assertImportProvenance(tx, scope, input.provenance);
     const created = await input.insert(
       tx,
       scope,
@@ -73,6 +77,7 @@ async function applyPlan<T>(
       importedById: volunteerId,
       importedByMembershipId: membershipId,
       notes: input.notes,
+      rehearsal: input.provenance.rehearsal,
     });
 
     await writeAudit(tx, {
@@ -82,6 +87,8 @@ async function applyPlan<T>(
       entityId: batch.id,
       after: {
         source: input.source,
+        rehearsal: input.provenance.rehearsal,
+        fallbackWindowId: input.provenance.fallbackWindowId ?? null,
         targetTable: input.targetTable,
         rowsRead: input.rowCount,
         created,

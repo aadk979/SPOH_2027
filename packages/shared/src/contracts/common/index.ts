@@ -35,6 +35,8 @@ export const CaptureEnvelope = z
   .object({
     idempotencyKey: IdempotencyKey,
     clientRecordedAt: IsoDateTime.optional(),
+    /** Captured on the device before queueing; refused if the event has changed mode. */
+    rehearsal: z.boolean().optional(),
   })
   .strict();
 export type CaptureEnvelope = z.infer<typeof CaptureEnvelope>;

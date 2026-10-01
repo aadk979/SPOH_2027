@@ -111,6 +111,9 @@ export const ImportRequest = <T extends z.ZodType>(row: T) =>
       rows: z.array(row).min(1).max(2000),
       commit: z.boolean().default(false),
       fileName: z.string().trim().max(200).optional(),
+      /** Retains a rehearsal window's provenance when its sheet is imported later. */
+      fallbackWindowId: z.string().min(1).max(128).optional(),
+      rehearsal: z.boolean().optional(),
       notes: z.string().trim().max(500).optional(),
     })
     .strict();
@@ -140,6 +143,7 @@ export const ImportResponse = z
     recordsSkipped: z.number().int().nonnegative(),
     issues: z.array(ImportIssue),
     importBatchId: Id.nullable(),
+    rehearsal: z.boolean().optional(),
   })
   .strict();
 export type ImportResponse = z.infer<typeof ImportResponse>;

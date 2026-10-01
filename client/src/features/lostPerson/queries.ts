@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 import type { ActiveLostPersonResponse, RaiseLostPersonRequest } from '@spoh/shared';
-import { useEventId } from '@/shared/lib/eventContext';
+import { useEvent, useEventId } from '@/shared/lib/eventContext';
 import { getActiveAlerts, acknowledgeAlert, resolveAlert } from './api';
 
 export const lostPersonKeys = {
@@ -75,8 +75,9 @@ export function useResolveAlert(): ReturnType<
 
 import { raiseLostPerson } from './api';
 export function useRaiseLostPerson() {
-  const eventId = useEventId();
+  const { id: eventId, status } = useEvent();
   return useMutation({
-    mutationFn: (body: RaiseLostPersonRequest) => raiseLostPerson(eventId, body),
+    mutationFn: (body: RaiseLostPersonRequest) =>
+      raiseLostPerson(eventId, { ...body, rehearsal: status === 'REHEARSAL' }),
   });
 }

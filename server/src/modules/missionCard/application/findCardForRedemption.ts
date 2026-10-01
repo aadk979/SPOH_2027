@@ -1,3 +1,5 @@
+import { assertCardProvenance } from '../domain/cardRules.js';
+import { captureProvenance } from '../../../platform/db/captureProvenance.js';
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import { findCardStatus, lockCard } from '../data/repo.js';
 import { normaliseShortCode } from '../domain/shortCode.js';
@@ -15,7 +17,10 @@ export async function findCardForRedemption(
   scope: EventScope,
   shortCodeInput: string,
 ) {
+  const provenance = await captureProvenance(tx, scope);
   const shortCode = normaliseShortCode(shortCodeInput);
   await lockCard(tx, scope, shortCode);
-  return findCardStatus(tx, scope, shortCode);
+  const card = await findCardStatus(tx, scope, shortCode);
+  if (card) assertCardProvenance(card, provenance);
+  return card;
 }

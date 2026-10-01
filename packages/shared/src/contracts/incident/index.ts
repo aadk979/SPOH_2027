@@ -14,6 +14,7 @@ export const IncidentDescription = z.string().trim().min(10).max(2000);
 
 export const CreateIncidentRequest = z
   .object({
+    rehearsal: z.boolean().optional(),
     idempotencyKey: IdempotencyKey,
     type: IncidentType,
     severity: IncidentSeverity,

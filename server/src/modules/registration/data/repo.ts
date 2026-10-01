@@ -1,3 +1,4 @@
+import { captureProvenance } from '../../../platform/db/captureProvenance.js';
 import type { Prisma, Registration } from '../../../generated/prisma/client.js';
 import { prisma } from '../../../platform/db/client.js';
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
@@ -48,7 +49,7 @@ export async function createRegistration(
   data: NewRegistration,
 ): Promise<RegistrationRow> {
   return tx.registration.create({
-    data: { ...data, eventId: scope.eventId },
+    data: { ...data, eventId: scope.eventId, ...(await captureProvenance(tx, scope)) },
     include: WITH_CATEGORY,
   });
 }
@@ -58,10 +59,11 @@ export async function createRegistrationsForGroup(
   scope: EventScope,
   rows: NewRegistration[],
 ): Promise<RegistrationRow[]> {
+  const provenance = await captureProvenance(tx, scope);
   // createManyAndReturn keeps this one round trip while still yielding the rows
   // the response needs; a family of four is four inserts either way.
   return tx.registration.createManyAndReturn({
-    data: rows.map((row) => ({ ...row, eventId: scope.eventId })),
+    data: rows.map((row) => ({ ...row, eventId: scope.eventId, ...provenance })),
     include: WITH_CATEGORY,
   });
 }

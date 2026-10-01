@@ -1,3 +1,4 @@
+import { captureProvenance } from '../../../platform/db/captureProvenance.js';
 import type { GiftType, Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
@@ -16,6 +17,7 @@ import type { EventScope } from '../../../platform/db/eventScope.js';
 export interface GiftTotals {
   redeemed: number;
   adjustment: number;
+  rehearsal?: boolean;
 }
 
 export async function listGiftTypes(
@@ -52,30 +54,29 @@ export async function findGiftType(
 
 /** Redemption and adjustment totals for every gift type, in two queries. */
 export async function giftTotals(
-  scope: EventScope,
+  scope: EventScope & { rehearsal?: boolean },
   tx: PrismaTransactionClient = prisma,
 ): Promise<Map<string, GiftTotals>> {
-  const [redemptions, adjustments] = await Promise.all([
-    tx.giftRedemption.groupBy({
-      by: ['giftTypeId'],
-      where: { eventId: scope.eventId, voided: false },
-      _count: { _all: true },
-    }),
-    tx.giftStockAdjustment.groupBy({
-      by: ['giftTypeId'],
-      where: { eventId: scope.eventId },
-      _sum: { delta: true },
-    }),
-  ]);
+  const rehearsal = scope.rehearsal ?? (await captureProvenance(tx, scope)).rehearsal;
+  const redemptions = await tx.giftRedemption.groupBy({
+    by: ['giftTypeId'],
+    where: { eventId: scope.eventId, rehearsal, voided: false },
+    _count: { _all: true },
+  });
+  const adjustments = await tx.giftStockAdjustment.groupBy({
+    by: ['giftTypeId'],
+    where: { eventId: scope.eventId, rehearsal },
+    _sum: { delta: true },
+  });
 
   const totals = new Map<string, GiftTotals>();
 
   for (const row of redemptions) {
-    totals.set(row.giftTypeId, { redeemed: row._count._all, adjustment: 0 });
+    totals.set(row.giftTypeId, { redeemed: row._count._all, adjustment: 0, rehearsal });
   }
 
   for (const row of adjustments) {
-    const existing = totals.get(row.giftTypeId) ?? { redeemed: 0, adjustment: 0 };
+    const existing = totals.get(row.giftTypeId) ?? { redeemed: 0, adjustment: 0, rehearsal };
     totals.set(row.giftTypeId, { ...existing, adjustment: row._sum.delta ?? 0 });
   }
 
@@ -88,12 +89,15 @@ export async function totalsForGiftType(
   giftTypeId: string,
 ): Promise<GiftTotals> {
   const { eventId } = scope;
-  const [redeemed, adjustment] = await Promise.all([
-    tx.giftRedemption.count({ where: { eventId, giftTypeId, voided: false } }),
-    tx.giftStockAdjustment.aggregate({ where: { eventId, giftTypeId }, _sum: { delta: true } }),
-  ]);
-
-  return { redeemed, adjustment: adjustment._sum.delta ?? 0 };
+  const { rehearsal } = await captureProvenance(tx, scope);
+  const redeemed = await tx.giftRedemption.count({
+    where: { eventId, giftTypeId, rehearsal, voided: false },
+  });
+  const adjustment = await tx.giftStockAdjustment.aggregate({
+    where: { eventId, giftTypeId, rehearsal },
+    _sum: { delta: true },
+  });
+  return { redeemed, adjustment: adjustment._sum.delta ?? 0, rehearsal };
 }
 
 export async function createRedemption(
@@ -101,7 +105,9 @@ export async function createRedemption(
   scope: EventScope,
   data: Omit<Prisma.GiftRedemptionUncheckedCreateInput, 'eventId'>,
 ) {
-  return tx.giftRedemption.create({ data: { ...data, eventId: scope.eventId } });
+  return tx.giftRedemption.create({
+    data: { ...data, eventId: scope.eventId, ...(await captureProvenance(tx, scope)) },
+  });
 }
 
 export async function createAdjustment(
@@ -109,7 +115,9 @@ export async function createAdjustment(
   scope: EventScope,
   data: Omit<Prisma.GiftStockAdjustmentUncheckedCreateInput, 'eventId'>,
 ): Promise<void> {
-  await tx.giftStockAdjustment.create({ data: { ...data, eventId: scope.eventId } });
+  await tx.giftStockAdjustment.create({
+    data: { ...data, eventId: scope.eventId, ...(await captureProvenance(tx, scope)) },
+  });
 }
 
 /** Has any of these cards (one journey) already been given a gift? */

@@ -11,6 +11,7 @@ import { api } from '@/shared/lib/api';
 import { enqueue } from '@/shared/lib/outbox';
 import { openSession } from '@/shared/lib/session';
 import { TEST_EVENT, TEST_CATEGORIES } from '../helpers/event';
+import * as eventContext from '@/shared/lib/eventContext';
 vi.mock('@/features/registration/queries', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/features/registration/queries')>()),
   useCaptureCategories: () => ({ data: TEST_CATEGORIES }),
@@ -57,7 +58,11 @@ function show(node: ReactNode) {
     defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
   });
   clients.push(client);
-  render(<QueryClientProvider client={client}>{node}</QueryClientProvider>);
+  return render(node, {
+    wrapper: ({ children }) => (
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    ),
+  });
 }
 
 function posts(path: string) {
@@ -144,6 +149,31 @@ describe('fallback declaration', () => {
 });
 
 describe('reconciliation import', () => {
+  it('commits with the preview mode after the event changes phase', async () => {
+    const event = vi.spyOn(eventContext, 'useEvent');
+    event.mockReturnValue({ ...TEST_EVENT, status: 'REHEARSAL' });
+    mockedApi.mockResolvedValue({
+      rowsRead: 1,
+      recordsCreated: 2,
+      recordsSkipped: 0,
+      issues: [],
+      rehearsal: true,
+    });
+    const view = show(<ImportsScreen />);
+    fireEvent.change(screen.getByLabelText('Rows (CSV)'), { target: { value: csv('2') } });
+    fireEvent.click(screen.getByRole('button', { name: 'Preview — writes nothing' }));
+    const commit = await screen.findByRole('button', {
+      name: 'Import 2 records as fallback sheet',
+    });
+    event.mockReturnValue({ ...TEST_EVENT, status: 'LIVE' });
+    view.rerender(<ImportsScreen />);
+    fireEvent.click(commit);
+    await waitFor(() => expect(posts(`${API}/fallback/imports/registrations`)).toHaveLength(2));
+    expect(posts(`${API}/fallback/imports/registrations`)[1]![1]?.body).toMatchObject({
+      commit: true,
+      rehearsal: true,
+    });
+  });
   const csv = (count: string) =>
     `category,stationCode,timeBlockStart,count\nSEC_4,BOOTH,2027-01-07T03:30:00.000Z,${count}`;
 
@@ -172,6 +202,7 @@ describe('reconciliation import', () => {
     expect(posts(`${API}/fallback/imports/registrations`)[0]![1]?.body).toEqual({
       source: 'FALLBACK_SHEET',
       commit: false,
+      rehearsal: false,
       rows: [
         { category: 'SEC_4', stationCode: 'BOOTH', timeBlockStart: expect.any(String), count: 12 },
       ],

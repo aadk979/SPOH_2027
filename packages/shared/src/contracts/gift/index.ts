@@ -17,6 +17,7 @@ export const GiftTypeRecord = z
     id: Id,
     name: z.string(),
     initialStock: z.number().int(),
+    rehearsal: z.boolean().optional(),
     lowStockThreshold: z.number().int(),
     active: z.boolean(),
     /** Derived: initialStock + adjustments − redemptions. */

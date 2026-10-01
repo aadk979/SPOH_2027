@@ -114,7 +114,10 @@ describe.each(forms)('$name form', (form) => {
     fireEvent.change(screen.getByLabelText(form.label), { target: { value: form.value } });
     fireEvent.submit(screen.getByLabelText(form.label).closest('form')!);
     await waitFor(() => expect(state.replace).toHaveBeenCalledWith(form.destination));
-    expect(mockedApi).toHaveBeenCalledWith(form.endpoint, { method: 'POST', body: form.body });
+    expect(mockedApi).toHaveBeenCalledWith(form.endpoint, {
+      method: 'POST',
+      body: { ...form.body, rehearsal: false },
+    });
   });
   it('retains the entered description and gives the existing escalation message on failure', async () => {
     mockedApi.mockRejectedValue(new Error('offline'));
@@ -159,6 +162,9 @@ describe.each(forms)('$name form validation', (form) => {
     fireEvent.submit(optional.closest('form')!);
     await waitFor(() => expect(state.replace).toHaveBeenCalledWith(form.destination));
     // A blank optional field is omitted, exactly as before the migration.
-    expect(mockedApi).toHaveBeenCalledWith(form.endpoint, { method: 'POST', body: form.body });
+    expect(mockedApi).toHaveBeenCalledWith(form.endpoint, {
+      method: 'POST',
+      body: { ...form.body, rehearsal: false },
+    });
   });
 });

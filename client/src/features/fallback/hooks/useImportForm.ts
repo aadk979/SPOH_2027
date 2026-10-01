@@ -23,6 +23,7 @@ export function useImportForm() {
 
   const run = useRunImport({
     values: form.values,
+    preview,
     validate: form.validate,
     setPending,
     setError,

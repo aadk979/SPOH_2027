@@ -25,6 +25,7 @@ async function purgeOne(
   return prisma.$transaction(async (tx) => {
     const claimed = await purgeAlert(tx, scope, {
       id: alert.id,
+      rehearsal: alert.rehearsal,
       raisedAt: alert.raisedAt,
       resolvedAt: alert.resolvedAt,
       outcome,

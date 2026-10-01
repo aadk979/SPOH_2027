@@ -1,3 +1,4 @@
+import { captureProvenance } from '../../../platform/db/captureProvenance.js';
 import { randomUUID } from 'node:crypto';
 import type { CreateGroupRegistrationRequest, CreateGroupRegistrationResponse } from '@spoh/shared';
 import { auditStationScopeBypass, writeAudit } from '../../../platform/audit/index.js';
@@ -25,12 +26,11 @@ export async function recordGroupRegistration(
   const groupId = randomUUID();
 
   const { registrations, cardId, linkError } = await prisma.$transaction(async (tx) => {
-    const link = request.missionCardShortCode
-      ? await linkGroupToCard(tx, scope, {
-          shortCode: request.missionCardShortCode,
-          issuedAt: recordedAt,
-        })
-      : { cardId: null, linkError: null };
+    await captureProvenance(tx, scope, request);
+    const link = await linkGroupToCard(tx, scope, {
+      shortCode: request.missionCardShortCode,
+      issuedAt: recordedAt,
+    });
 
     const codes = request.members.map((member) => member.category);
     const rows = expandGroupMembers(request, await requireCategories(tx, scope, codes), {

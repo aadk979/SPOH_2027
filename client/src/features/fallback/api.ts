@@ -14,6 +14,8 @@ export interface FallbackImport {
   rows: Array<Record<string, unknown>>;
   commit: boolean;
   fileName?: string;
+  rehearsal?: boolean;
+  fallbackWindowId?: string;
   notes?: string;
 }
 export function importFallback(

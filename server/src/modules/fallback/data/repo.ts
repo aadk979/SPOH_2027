@@ -1,3 +1,4 @@
+import { captureProvenance } from '../../../platform/db/captureProvenance.js';
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
@@ -55,7 +56,12 @@ export async function findOpenWindow(
   stationId: string | null,
 ) {
   return tx.fallbackWindow.findFirst({
-    where: { eventId: scope.eventId, endedAt: null, stationId },
+    where: {
+      eventId: scope.eventId,
+      endedAt: null,
+      stationId,
+      ...(await captureProvenance(tx, scope)),
+    },
     select: { id: true },
   });
 }
@@ -74,6 +80,7 @@ export async function createWindow(
   return tx.fallbackWindow.create({
     data: {
       ...data,
+      ...(await captureProvenance(tx, scope)),
       eventId: scope.eventId,
       declaredByMembershipId: await membershipIdOf(tx, scope, data.declaredById),
     },
@@ -193,6 +200,7 @@ export async function createImportBatch(
   tx: PrismaTransactionClient,
   scope: EventScope,
   data: {
+    rehearsal: boolean;
     source: 'FALLBACK_SHEET' | 'PAPER';
     targetTable: string;
     rowCount: number;

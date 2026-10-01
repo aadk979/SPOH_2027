@@ -1,3 +1,5 @@
+import { assertCardProvenance } from '../domain/cardRules.js';
+import { captureProvenance } from '../../../platform/db/captureProvenance.js';
 import type { StampCardRequest, StampCardResponse } from '@spoh/shared';
 import { auditStationScopeBypass, writeAudit } from '../../../platform/audit/index.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
@@ -43,8 +45,10 @@ interface StampOutcome {
 async function applyStamp(tx: PrismaTransactionClient, input: StampInput): Promise<StampOutcome> {
   const { station, recordedAt, context } = input;
   const { scope } = context;
+  const provenance = await captureProvenance(tx, scope, input.request);
   await lockCard(tx, scope, input.shortCode);
   const existing = requireCard(await findCardWithStampStations(tx, scope, input.shortCode));
+  assertCardProvenance(existing, provenance);
   assertCardNotVoided(existing, 'That card has been voided.');
 
   if (existing.stampEvents.some((stamp) => stamp.stationId === station.id)) {

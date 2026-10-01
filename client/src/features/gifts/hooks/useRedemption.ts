@@ -3,7 +3,7 @@ import type { Tone } from '@/shared/ui';
 import { useMe } from '@/features/session';
 import { UNRESOLVED_SCAN, useCardScanner } from '@/features/capture';
 import { sendOrQueue } from '@/shared/lib/sendOrQueue';
-import { useEventId } from '@/shared/lib/eventContext';
+import { useEvent } from '@/shared/lib/eventContext';
 import { useGifts } from '../queries';
 import { giftEndpoints, redeemGift } from '../api';
 import {
@@ -13,7 +13,8 @@ import {
 } from '../model/redemptionMessage';
 export function useRedemption(enabled: boolean) {
   const { data: me } = useMe();
-  const eventId = useEventId();
+  const { id: eventId, status } = useEvent();
+  const rehearsal = status === 'REHEARSAL';
   const [selected, setSelected] = useState<string | null>(null);
   const [message, setMessage] = useState<{ tone: Tone; text: string } | null>(null);
   const [pending, setPending] = useState(false);
@@ -30,6 +31,7 @@ export function useRedemption(enabled: boolean) {
 
       try {
         const body = {
+          rehearsal,
           giftTypeId: selected,
           stationId: station.id,
           ...(cardShortCode ? { cardShortCode } : {}),
@@ -58,7 +60,7 @@ export function useRedemption(enabled: boolean) {
         setPending(false);
       }
     },
-    [eventId, station, selected, pending, gifts],
+    [eventId, rehearsal, station, selected, pending, gifts],
   );
 
   const onUnresolvedScan = useCallback(() => setMessage(UNRESOLVED_SCAN), []);

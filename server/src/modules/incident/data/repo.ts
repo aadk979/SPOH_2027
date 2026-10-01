@@ -1,3 +1,4 @@
+import { captureProvenance } from '../../../platform/db/captureProvenance.js';
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { pageArgs } from '../../../platform/db/pagination.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
@@ -37,14 +38,16 @@ export async function createIncident(
   type: string;
   severity: IncidentWithContext['severity'];
   stationId: string | null;
+  rehearsal: boolean;
 }> {
   return tx.incident.create({
     data: {
       ...data,
+      ...(await captureProvenance(tx, scope)),
       eventId: scope.eventId,
       reportedByMembershipId: await membershipIdOf(tx, scope, data.reportedById),
     },
-    select: { id: true, type: true, severity: true, stationId: true },
+    select: { id: true, type: true, severity: true, stationId: true, rehearsal: true },
   });
 }
 

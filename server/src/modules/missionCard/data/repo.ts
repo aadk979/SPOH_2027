@@ -1,3 +1,4 @@
+import { captureProvenance } from '../../../platform/db/captureProvenance.js';
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
@@ -93,7 +94,7 @@ export async function findCardStatus(
 ) {
   return tx.missionCard.findUnique({
     where: { shortCode, eventId: scope.eventId },
-    select: { id: true, status: true },
+    select: { id: true, status: true, rehearsal: true },
   });
 }
 
@@ -144,7 +145,12 @@ export async function attachGroupRegistrations(
   link: { groupId: string; cardId: string },
 ): Promise<void> {
   await tx.registration.updateMany({
-    where: { eventId: scope.eventId, groupId: link.groupId, missionCardId: null },
+    where: {
+      eventId: scope.eventId,
+      groupId: link.groupId,
+      missionCardId: null,
+      ...(await captureProvenance(tx, scope)),
+    },
     data: { missionCardId: link.cardId },
   });
 }
@@ -159,8 +165,9 @@ export async function createCardBatch(
   scope: EventScope,
   rows: Array<{ shortCode: string; qrPayload: string; batchLabel: string }>,
 ): Promise<Array<{ shortCode: string; qrPayload: string; batchLabel: string }>> {
+  const provenance = await captureProvenance(tx, scope);
   const created = await tx.missionCard.createManyAndReturn({
-    data: rows.map((row) => ({ ...row, eventId: scope.eventId })),
+    data: rows.map((row) => ({ ...row, eventId: scope.eventId, ...provenance })),
     skipDuplicates: true,
     select: { shortCode: true, qrPayload: true, batchLabel: true },
   });
@@ -183,7 +190,9 @@ export async function createStamp(
   scope: EventScope,
   data: Omit<Prisma.CardStampEventUncheckedCreateInput, 'eventId'>,
 ): Promise<void> {
-  await tx.cardStampEvent.create({ data: { ...data, eventId: scope.eventId } });
+  await tx.cardStampEvent.create({
+    data: { ...(await captureProvenance(tx, scope)), ...data, eventId: scope.eventId },
+  });
 }
 
 export async function countStampsForCard(

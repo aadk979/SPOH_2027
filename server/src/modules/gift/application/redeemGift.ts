@@ -1,3 +1,4 @@
+import { captureProvenance } from '../../../platform/db/captureProvenance.js';
 import type { RedeemGiftRequest, RedeemGiftResponse } from '@spoh/shared';
 import { auditStationScopeBypass, writeAudit } from '../../../platform/audit/index.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
@@ -104,12 +105,14 @@ interface RecordInput {
 async function recordRedemption(tx: PrismaTransactionClient, input: RecordInput) {
   const { request, stationId, context, recordedAt } = input;
   const { scope } = context;
+  await captureProvenance(tx, scope, request);
   // Gift type first, then the card (in checkCard): one order, so no deadlock.
   await lockGiftType(tx, scope, request.giftTypeId);
   const giftType = await findGiftType(scope, request.giftTypeId, tx);
   if (!giftType) throw new NotFoundError('Gift type');
   const before = await totalsForGiftType(tx, scope, giftType.id);
-  const remaining = giftType.initialStock + before.adjustment - before.redeemed;
+  const initialStock = before.rehearsal ? giftType.rehearsalInitialStock : giftType.initialStock;
+  const remaining = initialStock + before.adjustment - before.redeemed;
   // Stock before the card, as before: online, running out is the answer the desk gets first.
   const overStock = stockFlag(giftType, remaining, request.queued) !== null;
   const card = await checkCard(tx, scope, request);
@@ -141,6 +144,7 @@ async function recordRedemption(tx: PrismaTransactionClient, input: RecordInput)
       remainingAfter: remaining - 1,
       warning,
       flag,
+      rehearsal: redemption.rehearsal,
     },
   });
 
@@ -162,6 +166,7 @@ export async function redeemGift(
 
   // Low stock alerts are an IC duty in the deck; automating it beats relying on
   // someone noticing (§5).
-  if (result.record.lowStock) notifyLowStock(context.scope, result.record);
+  if (!result.record.rehearsal && result.record.lowStock)
+    notifyLowStock(context.scope, result.record);
   return toResponse(result);
 }

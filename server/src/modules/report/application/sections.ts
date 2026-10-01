@@ -103,7 +103,7 @@ export async function giftsReport(
   names: Names,
 ): Promise<Report['gifts']> {
   const [gifts, byDay, byStation] = await Promise.all([
-    listGifts(scope),
+    listGifts({ ...scope, rehearsal: false }),
     giftRedemptionsByDay(scope, range, range.zone),
     giftRedemptionsByStation(scope, range),
   ]);

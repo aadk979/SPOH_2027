@@ -24,6 +24,18 @@ export function assertCardNotVoided(card: { status: CardStatus }, message: strin
   if (isOutOfUse(card.status)) throw new AppError(409, ERROR_CODES.CARD_VOIDED, message);
 }
 
+/** Practice and live cards are distinct journeys even when their physical designs match. */
+export function assertCardProvenance(
+  card: { rehearsal: boolean },
+  provenance: { rehearsal: boolean },
+): void {
+  if (card.rehearsal === provenance.rehearsal) return;
+  const message = card.rehearsal
+    ? 'A rehearsal card cannot be used in live operations.'
+    : 'A live card cannot be used in rehearsal. Use a rehearsal batch.';
+  throw new AppError(409, ERROR_CODES.CONFLICT, message);
+}
+
 export function assertStationStamps(station: { name: string; issuesStamp: boolean }): void {
   if (!station.issuesStamp) {
     throw new AppError(
