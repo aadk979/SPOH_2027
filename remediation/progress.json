@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-01T16:02:34.370Z",
+  "updatedAt": "2026-10-01T16:47:40.449Z",
   "current": {
     "phase": "P10",
     "step": "P10.5"
@@ -3054,6 +3054,10 @@
     {
       "at": "2026-10-01T16:02:34.369Z",
       "text": "P10.5 capture totals and registration summary slice verified and pushed as d2cfb86: mode-specific write response totals; category/hour/day summaries default live with explicit inclusion. Full integration 527 passed/4 existing skips; server unit 467; typecheck/lint/architecture/hardcoding/format/build passed. P10.4/P10.5 remain in progress."
+    },
+    {
+      "at": "2026-10-01T16:47:40.448Z",
+      "text": "P10.4/P10.5 verified slice 23dfd10 pushed: REHEARSAL permits assigned-station captures outside hours; LIVE refuses, including a concurrent phase change. Actual staffing/attendance hours preserved, SHIFT_HOURS_ALWAYS_OPEN removed, practice fixtures and persistent phone/laptop/TV banner added. Full integration 533 passed/4 existing skips, server unit 467, client unit 243, E2E 41, visual 58; typechecks/lint/architecture/hardcoding/format/build passed. 56 changed images reviewed. Both steps remain in progress for operational provenance reads, explicit batch/window UI and audited lifecycle admission/transitions/side effects."
     }
   ]
 }
