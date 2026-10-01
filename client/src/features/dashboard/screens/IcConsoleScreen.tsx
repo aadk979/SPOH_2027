@@ -6,6 +6,7 @@ import { Field, Select, Stack } from '@/shared/ui';
 import { SwapQueue } from '../components/SwapQueue';
 import { StationBoard } from '../components/StationBoard';
 import { useIcConsole } from '../hooks/useIcConsole';
+import { RehearsalDashboardControl } from '../components/RehearsalDashboardControl';
 
 /**
  * The IC console (remediation/phases/P07-client-refactor.md).
@@ -17,13 +18,23 @@ import { useIcConsole } from '../hooks/useIcConsole';
  * usually means somebody is tapping to catch up.
  */
 export default function IcConsoleScreen(): ReactNode {
-  const { session, stations, selected, setStationId, dashboard, canDecideSwaps, swaps } =
-    useIcConsole();
+  const {
+    session,
+    stations,
+    selected,
+    setStationId,
+    dashboard,
+    canDecideSwaps,
+    swaps,
+    includeRehearsal,
+    setIncludeRehearsal,
+  } = useIcConsole();
   if (!session) return null;
 
   return (
     <AppShell width="wide" title="IC console" back={{ href: '/home', label: 'Home' }}>
       <Stack>
+        <RehearsalDashboardControl included={includeRehearsal} onChange={setIncludeRehearsal} />
         {/*
           The picker is capped at a phone's width even on a console. A select
           stretched across 1600px puts its chevron a full head-turn away from

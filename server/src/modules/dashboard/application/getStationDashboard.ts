@@ -1,3 +1,4 @@
+import { systemClock } from '../../../platform/time/index.js';
 import { toShiftRef } from '../../../platform/db/shiftRef.js';
 import type { StationDashboardResponse } from '@spoh/shared';
 import { NotFoundError } from '../../../platform/errors/index.js';
@@ -15,7 +16,7 @@ import {
 } from '../data/repo.js';
 import { deviceRate } from '../domain/signals.js';
 import { flaggedRedemptions } from '../data/flaggedRedemptions.js';
-import type { EventScope } from '../../../platform/db/eventScope.js';
+import type { ReportingScope } from '../../../platform/db/rehearsalFilter.js';
 
 /**
  * The same picture scoped to one station, for an IC.
@@ -25,9 +26,9 @@ import type { EventScope } from '../../../platform/db/eventScope.js';
  * becomes visible before it becomes a reconciliation problem (§2.4).
  */
 export async function getStationDashboard(
-  scope: EventScope,
+  scope: ReportingScope,
   stationId: string,
-  now = new Date(),
+  now = systemClock.now(),
 ): Promise<StationDashboardResponse> {
   const station = await findStationById(scope, stationId);
   if (!station) throw new NotFoundError('Station');
@@ -44,6 +45,7 @@ export async function getStationDashboard(
   ]);
 
   return {
+    rehearsalIncluded: scope.includeRehearsal ?? false,
     asOf: now.toISOString(),
     stationId: station.id,
     stationName: station.name,
@@ -58,7 +60,7 @@ export async function getStationDashboard(
 type Panels = StationDashboardResponse;
 
 async function registrationsPanel(
-  scope: EventScope,
+  scope: ReportingScope,
   stationId: string,
   window: Window,
 ): Promise<Panels['registrations']> {
@@ -81,7 +83,7 @@ async function registrationsPanel(
 }
 
 async function footfallPanel(
-  scope: EventScope,
+  scope: ReportingScope,
   stationId: string,
   window: Window,
 ): Promise<Panels['footfall']> {
@@ -104,7 +106,7 @@ async function footfallPanel(
 }
 
 async function rosterPanel(
-  scope: EventScope,
+  scope: ReportingScope,
   stationId: string,
   day: Date,
 ): Promise<Panels['roster']> {

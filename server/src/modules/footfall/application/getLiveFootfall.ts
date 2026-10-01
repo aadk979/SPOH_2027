@@ -4,7 +4,8 @@ import { eventTodayStart } from '../../../platform/event/today.js';
 import { listCountedStations } from '../../station/index.js';
 import { liveStationStats } from '../data/repo.js';
 import { liveStationRow } from '../domain/footfallRules.js';
-import type { EventScope } from '../../../platform/db/eventScope.js';
+import type { ReportingScope } from '../../../platform/db/rehearsalFilter.js';
+import { systemClock } from '../../../platform/time/index.js';
 
 /**
  * A station silent for longer than this during event hours is flagged. The
@@ -20,8 +21,8 @@ export const SILENT_STATION_MINUTES = DEFAULT_SETTINGS.silentStationMinutes;
  * nobody notices has stopped (PRODUCT_BRIEF §9).
  */
 export async function getLiveFootfall(
-  scope: EventScope,
-  now = new Date(),
+  scope: ReportingScope,
+  now = systemClock.now(),
 ): Promise<FootfallLiveResponse> {
   const silentAfterMinutes = getSettings().silentStationMinutes;
   const since = await eventTodayStart(scope, now);
@@ -32,6 +33,7 @@ export async function getLiveFootfall(
   const statsByStation = new Map(stats.map((row) => [row.stationId, row]));
 
   return {
+    rehearsalIncluded: scope.includeRehearsal ?? false,
     unit: 'roomEntries',
     asOf: now.toISOString(),
     stations: stations.map((station) =>

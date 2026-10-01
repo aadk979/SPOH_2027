@@ -1,12 +1,12 @@
 import type { Request, Response } from 'express';
 import type {
   CardLookupParams,
+  CardFunnelQuery,
   CardQrParams,
   GenerateCardBatchRequest,
   IssueCardRequest,
   ReissueCardRequest,
   StampCardRequest,
-  TimeRangeQuery,
   VoidCardRequest,
 } from '@spoh/shared';
 import { actorContextFrom } from '../../../platform/http/auditContext.js';
@@ -29,7 +29,7 @@ export async function generateBatchHandler(req: Request, res: Response): Promise
 }
 
 export async function funnelHandler(req: Request, res: Response): Promise<void> {
-  res.status(200).json(await getFunnel(scopeOf(req), validatedQuery<TimeRangeQuery>(req)));
+  res.status(200).json(await getFunnel(scopeOf(req), validatedQuery<CardFunnelQuery>(req)));
 }
 
 export async function getCardHandler(req: Request, res: Response): Promise<void> {

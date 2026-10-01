@@ -3,6 +3,7 @@ import type {
   CreateFootfallBulkRequest,
   CreateFootfallTickRequest,
   FootfallSummaryQuery,
+  RehearsalInclusionQuery,
   VoidFootfallTickRequest,
 } from '@spoh/shared';
 import { actorContextFrom } from '../../../platform/http/auditContext.js';
@@ -38,5 +39,9 @@ export async function summariseFootfallHandler(req: Request, res: Response): Pro
 }
 
 export async function liveFootfallHandler(req: Request, res: Response): Promise<void> {
-  res.status(200).json(await getLiveFootfall(scopeOf(req)));
+  res
+    .status(200)
+    .json(
+      await getLiveFootfall({ ...scopeOf(req), ...validatedQuery<RehearsalInclusionQuery>(req) }),
+    );
 }

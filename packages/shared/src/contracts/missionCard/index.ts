@@ -1,7 +1,14 @@
 import { z } from 'zod';
 import { CARD_CODE_LENGTH, normaliseCardCode } from './cardCode.js';
 import { CardStatus, DataSource } from '../../invariants/enums.js';
-import { CaptureEnvelope, Id, IsoDateTime, ReasonText } from '../common/index.js';
+import {
+  CaptureEnvelope,
+  Id,
+  IsoDateTime,
+  ReasonText,
+  TimeRangeQuery,
+  RehearsalInclusionQuery,
+} from '../common/index.js';
 
 /**
  * COUNT 3 of the three counts (PRODUCT_BRIEF §0.1, §4).
@@ -168,8 +175,12 @@ export const FunnelStage = z
   .strict();
 export type FunnelStage = z.infer<typeof FunnelStage>;
 
+export const CardFunnelQuery = TimeRangeQuery.extend(RehearsalInclusionQuery.shape).strict();
+export type CardFunnelQuery = z.infer<typeof CardFunnelQuery>;
+
 export const CardFunnelResponse = z
   .object({
+    rehearsalIncluded: z.boolean().optional(),
     unit: z.literal('cards'),
     issued: z.number().int().nonnegative(),
     completed: z.number().int().nonnegative(),

@@ -1,18 +1,19 @@
 import type { FlaggedRedemption } from '@spoh/shared';
 import { prisma } from '../../../platform/db/client.js';
-import type { EventScope } from '../../../platform/db/eventScope.js';
+import { rehearsalFilter, type ReportingScope } from '../../../platform/db/rehearsalFilter.js';
 
 /**
  * Queued redemptions that broke a rule on sync, over a range, optionally at one
  * station: what the IC follows up (ADR-007 §5, F03-034). Voided ones are done.
  */
 export async function flaggedRedemptions(
-  scope: EventScope,
+  scope: ReportingScope,
   input: { since: Date; until: Date; stationId?: string },
 ): Promise<FlaggedRedemption[]> {
   const rows = await prisma.giftRedemption.findMany({
     where: {
       eventId: scope.eventId,
+      ...rehearsalFilter(scope),
       flag: { not: null },
       voided: false,
       recordedAt: { gte: input.since, lte: input.until },

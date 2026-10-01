@@ -5,6 +5,7 @@ import {
   CreateFootfallTickRequest,
   FootfallSummaryQuery,
   Id,
+  RehearsalInclusionQuery,
   VoidFootfallTickRequest,
 } from '@spoh/shared';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
@@ -72,5 +73,6 @@ footfallRouter.get(
   '/live',
   defaultRateLimit,
   requireCapability('dashboard.station.read'),
+  validate({ query: RehearsalInclusionQuery }),
   liveFootfallHandler,
 );

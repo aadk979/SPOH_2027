@@ -1,4 +1,4 @@
-import type { CardFunnelResponse } from '@spoh/shared';
+import type { CardFunnelQuery, CardFunnelResponse } from '@spoh/shared';
 import { rangeOverlapsFallbackWindow } from '../../fallback/index.js';
 import { listStampingStations } from '../../station/index.js';
 import {
@@ -9,16 +9,17 @@ import {
   countVoided,
 } from '../data/repo.js';
 import { buildFunnelStages } from '../domain/funnel.js';
-import type { EventScope } from '../../../platform/db/eventScope.js';
+import type { ReportingScope } from '../../../platform/db/rehearsalFilter.js';
 
 /** The card funnel for a time range. Every stage is a count of cards. */
 export async function getFunnel(
-  scope: EventScope,
-  range: {
-    from?: string;
-    to?: string;
-  },
+  eventScope: ReportingScope,
+  range: CardFunnelQuery,
 ): Promise<CardFunnelResponse> {
+  const scope = {
+    ...eventScope,
+    includeRehearsal: range.includeRehearsal ?? eventScope.includeRehearsal ?? false,
+  };
   const filter = {
     ...(range.from ? { from: new Date(range.from) } : {}),
     ...(range.to ? { to: new Date(range.to) } : {}),
@@ -36,6 +37,7 @@ export async function getFunnel(
     ]);
 
   return {
+    rehearsalIncluded: scope.includeRehearsal,
     unit: 'cards',
     issued,
     completed,

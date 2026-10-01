@@ -10,11 +10,22 @@ export function useIcConsole() {
   const session = useRequireSession();
   const { data: me } = useMe();
   const [stationId, setStationId] = useState<string | null>(null);
+  const [includeRehearsal, setIncludeRehearsal] = useState(false);
   const stations = useStations(session !== null);
   const selected = stationId ?? defaultStationId(me);
-  const dashboard = useStationDashboard(selected);
+  const dashboard = useStationDashboard(selected, includeRehearsal);
   // Only a role that decides swaps sees the queue, or asks for it (F02-020).
   const canDecideSwaps = me?.capabilities.includes('swap.approve') ?? false;
   const swaps = usePendingSwaps(session !== null && canDecideSwaps);
-  return { session, stations, selected, setStationId, dashboard, canDecideSwaps, swaps };
+  return {
+    session,
+    stations,
+    selected,
+    setStationId,
+    dashboard,
+    canDecideSwaps,
+    swaps,
+    includeRehearsal,
+    setIncludeRehearsal,
+  };
 }

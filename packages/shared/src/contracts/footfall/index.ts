@@ -1,6 +1,13 @@
 import { z } from 'zod';
 import { DataSource } from '../../invariants/enums.js';
-import { CaptureEnvelope, Id, IsoDateTime, ReasonText, TimeRangeQuery } from '../common/index.js';
+import {
+  CaptureEnvelope,
+  Id,
+  IsoDateTime,
+  ReasonText,
+  TimeRangeQuery,
+  RehearsalInclusionQuery,
+} from '../common/index.js';
 
 /**
  * COUNT 2 of the three counts (PRODUCT_BRIEF §0.1).
@@ -60,6 +67,7 @@ export const FootfallBucketSize = z.enum(['15m', '30m', '1h']);
 export type FootfallBucketSize = z.infer<typeof FootfallBucketSize>;
 
 export const FootfallSummaryQuery = TimeRangeQuery.extend({
+  ...RehearsalInclusionQuery.shape,
   stationId: Id.optional(),
   eventDayId: Id.optional(),
   bucket: FootfallBucketSize.default('30m'),
@@ -86,6 +94,7 @@ export type FootfallStationSummary = z.infer<typeof FootfallStationSummary>;
 
 export const FootfallSummaryResponse = z
   .object({
+    rehearsalIncluded: z.boolean().optional(),
     unit: z.literal('roomEntries'),
     bucket: FootfallBucketSize,
     total: z.number().int().nonnegative(),
@@ -115,6 +124,7 @@ export type FootfallLiveStation = z.infer<typeof FootfallLiveStation>;
 
 export const FootfallLiveResponse = z
   .object({
+    rehearsalIncluded: z.boolean().optional(),
     unit: z.literal('roomEntries'),
     asOf: IsoDateTime,
     stations: z.array(FootfallLiveStation),

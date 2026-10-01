@@ -16,20 +16,21 @@ import { useEventId } from '@/shared/lib/eventContext';
  */
 /** Shipped default; the live cadence is a runtime setting. */
 export const dashboardKeys = {
-  live: (eventId: string) => [eventId, 'dashboard', 'live'] as const,
-  station: (eventId: string, stationId: string | undefined) =>
-    [eventId, 'dashboard', 'station', stationId] as const,
+  live: (eventId: string, includeRehearsal = false) =>
+    [eventId, 'dashboard', 'live', includeRehearsal] as const,
+  station: (eventId: string, stationId: string | undefined, includeRehearsal = false) =>
+    [eventId, 'dashboard', 'station', stationId, includeRehearsal] as const,
 };
 
 export const DASHBOARD_POLL_MS = DEFAULT_CLIENT_SETTINGS.dashboardPollSeconds * 1000;
 
-export function useLiveDashboard(): UseQueryResult<LiveDashboardResponse> {
+export function useLiveDashboard(includeRehearsal = false): UseQueryResult<LiveDashboardResponse> {
   const session = useCurrentSession();
   const eventId = useEventId();
 
   return useQuery({
-    queryKey: dashboardKeys.live(eventId),
-    queryFn: () => getLiveDashboard(eventId),
+    queryKey: dashboardKeys.live(eventId, includeRehearsal),
+    queryFn: () => getLiveDashboard(eventId, includeRehearsal),
     enabled: session !== null,
     refetchInterval: ms.dashboardPoll(),
     // The ops-room display is never focused. Without this it would silently
@@ -41,13 +42,14 @@ export function useLiveDashboard(): UseQueryResult<LiveDashboardResponse> {
 
 export function useStationDashboard(
   stationId: string | undefined,
+  includeRehearsal = false,
 ): UseQueryResult<StationDashboardResponse> {
   const session = useCurrentSession();
   const eventId = useEventId();
 
   return useQuery({
-    queryKey: dashboardKeys.station(eventId, stationId),
-    queryFn: () => getStationDashboard(eventId, stationId ?? ''),
+    queryKey: dashboardKeys.station(eventId, stationId, includeRehearsal),
+    queryFn: () => getStationDashboard(eventId, stationId ?? '', includeRehearsal),
     enabled: session !== null && Boolean(stationId),
     refetchInterval: ms.dashboardPoll(),
     staleTime: 0,

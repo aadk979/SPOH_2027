@@ -80,6 +80,7 @@ export type SafetyLiveBreakdown = z.infer<typeof SafetyLiveBreakdown>;
  */
 export const DataHealthResponse = z
   .object({
+    rehearsalIncluded: z.boolean().optional(),
     asOf: IsoDateTime,
     /** Counted rooms with no activity for 15+ minutes during event hours. */
     silentStations: z.array(
@@ -126,6 +127,7 @@ export type StaffingLiveBreakdown = z.infer<typeof StaffingLiveBreakdown>;
 
 export const LiveDashboardResponse = z
   .object({
+    rehearsalIncluded: z.boolean().optional(),
     asOf: IsoDateTime,
     eventDayLabel: z.string().nullable(),
     withinEventHours: z.boolean(),
@@ -145,6 +147,7 @@ export type LiveDashboardResponse = z.infer<typeof LiveDashboardResponse>;
 /** The same picture, scoped to one station, for an IC. */
 export const StationDashboardResponse = z
   .object({
+    rehearsalIncluded: z.boolean().optional(),
     asOf: IsoDateTime,
     stationId: Id,
     stationName: z.string(),

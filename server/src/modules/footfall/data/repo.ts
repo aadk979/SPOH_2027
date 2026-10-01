@@ -2,6 +2,7 @@ import { captureProvenance } from '../../../platform/db/captureProvenance.js';
 import type { FootfallTick, Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
+import { rehearsalFilter, type ReportingScope } from '../../../platform/db/rehearsalFilter.js';
 import { localBucketStartSql } from '../../../platform/db/zonedSql.js';
 
 /**
@@ -72,11 +73,12 @@ export interface FootfallFilter {
 }
 
 function whereFrom(
-  scope: EventScope,
+  scope: ReportingScope,
   filter: FootfallFilter,
 ): Prisma.FootfallTickWhereInput & EventScope {
   return {
     eventId: scope.eventId,
+    ...rehearsalFilter(scope),
     voided: false,
     ...(filter.stationId ? { stationId: filter.stationId } : {}),
     ...(filter.from || filter.to
@@ -90,7 +92,7 @@ function whereFrom(
   };
 }
 
-export async function sumMatching(scope: EventScope, filter: FootfallFilter): Promise<number> {
+export async function sumMatching(scope: ReportingScope, filter: FootfallFilter): Promise<number> {
   return sumQuantity(whereFrom(scope, filter));
 }
 
@@ -105,7 +107,7 @@ export async function sumMatching(scope: EventScope, filter: FootfallFilter): Pr
  * 60), never free text.
  */
 export async function sumByBucket(
-  scope: EventScope,
+  scope: ReportingScope,
   filter: FootfallFilter,
   bucket: { minutes: number; timezone: string },
 ): Promise<Array<{ stationId: string; bucket: Date; total: number }>> {
@@ -120,6 +122,7 @@ export async function sumByBucket(
       SUM("quantity")::bigint AS total
     FROM "FootfallTick"
     WHERE "eventId" = ${scope.eventId}
+      AND (${scope.includeRehearsal ?? false} OR "rehearsal" = false)
       AND "voided" = false
       AND "recordedAt" >= ${from}
       AND "recordedAt" < ${to}
@@ -140,7 +143,7 @@ export async function sumByBucket(
  * stopped counting is invisible in a total and obvious here.
  */
 export async function liveStationStats(
-  scope: EventScope,
+  scope: ReportingScope,
   window: { since: Date; until: Date },
 ): Promise<
   Array<{ stationId: string; total: number; lastActivityAt: Date | null; counters: number }>
@@ -155,6 +158,7 @@ export async function liveStationStats(
       COUNT(DISTINCT "recordedById")::bigint         AS counters
     FROM "FootfallTick"
     WHERE "eventId" = ${scope.eventId}
+      AND (${scope.includeRehearsal ?? false} OR "rehearsal" = false)
       AND "voided" = false AND "recordedAt" >= ${window.since} AND "recordedAt" <= ${window.until}
     GROUP BY "stationId"`;
 

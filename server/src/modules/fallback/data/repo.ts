@@ -2,6 +2,7 @@ import { captureProvenance } from '../../../platform/db/captureProvenance.js';
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
+import { rehearsalFilter, type ReportingScope } from '../../../platform/db/rehearsalFilter.js';
 import { membershipIdOf } from '../../../platform/db/membershipMirror.js';
 
 /**
@@ -15,7 +16,7 @@ import { membershipIdOf } from '../../../platform/db/membershipMirror.js';
  * being retrofitted once the importers exist.
  */
 export async function rangeOverlapsFallbackWindow(
-  scope: EventScope,
+  scope: ReportingScope,
   range: { from?: Date; to?: Date; stationId?: string },
 ): Promise<boolean> {
   const from = range.from ?? new Date(0);
@@ -24,6 +25,7 @@ export async function rangeOverlapsFallbackWindow(
   const overlapping = await prisma.fallbackWindow.findFirst({
     where: {
       eventId: scope.eventId,
+      ...rehearsalFilter(scope),
       startedAt: { lt: to },
       AND: [
         // An open window (endedAt null) extends to now, so it overlaps anything

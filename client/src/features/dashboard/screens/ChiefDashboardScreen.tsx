@@ -7,8 +7,9 @@ import { CardFunnelPanel } from '../components/CardFunnelPanel';
 import { RoomEntriesPanel } from '../components/RoomEntriesPanel';
 import { ArrivalsPanel } from '../components/ArrivalsPanel';
 import { TodayTotals } from '../components/TodayTotals';
+import { RehearsalDashboardControl } from '../components/RehearsalDashboardControl';
 
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { LiveDashboardResponse } from '@spoh/shared';
 import { AppShell } from '@/shared/shell/AppShell';
 import { ButtonLink, Callout, LoadingCards, Section, Stack } from '@/shared/ui';
@@ -28,7 +29,8 @@ import { useRequireSession } from '@/features/session';
  */
 export default function ChiefDashboardScreen(): ReactNode {
   const session = useRequireSession();
-  const { data, isLoading, isError } = useLiveDashboard();
+  const [includeRehearsal, setIncludeRehearsal] = useState(false);
+  const { data, isLoading, isError } = useLiveDashboard(includeRehearsal);
 
   if (!session) return null;
 
@@ -43,6 +45,7 @@ export default function ChiefDashboardScreen(): ReactNode {
         </ButtonLink>
       }
     >
+      <RehearsalDashboardControl included={includeRehearsal} onChange={setIncludeRehearsal} />
       {isError ? (
         <Callout tone="alert" title="The dashboard could not be loaded">
           Capture is unaffected — volunteers keep working.

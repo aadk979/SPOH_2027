@@ -76,6 +76,26 @@ Database tests cover both LIVE and REHEARSAL phases and the explicit inclusion q
 visitor exports and XLSX labels. The visual database received only the additive migration;
 its original fixture dates were preserved.
 
-Remaining: dashboard filters and labelled inclusion, explicit card batch selection, import
-window selection in the UI, rehearsal shift logic and fixture/banner updates, then audited
-lifecycle admission, transitions and close/archive side effects. P10.4/P10.5 remain in progress.
+## Dashboard filtering and inclusion
+
+Chief, IC and TV dashboards default to live captures. Footfall and card summary APIs follow the
+same rule. Filters cover counts and source breakdowns, station/device activity timestamps, safety
+counts, flagged redemptions and fallback indicators. A recent practice capture cannot conceal
+an older live capture in a station's silence or device-staleness warning. Explicit inclusion
+combines capture totals and signals while keeping live/practice gift stock in separate labelled
+rows. Each screen starts with inclusion switched off; polling and query caches retain the selected
+scope. TV inclusion also has a display-sized warning.
+
+Verification: full integration **522 passed / 4 existing skips**, server unit **467**, client
+unit **234**, full browser E2E **39**. The four new database cases cover default exclusion in
+LIVE and REHEARSAL, explicit inclusion, separate gift pools, safety/fallback flags and practice
+activity that cannot hide stale live devices. Browser coverage includes Chief, IC and TV at phone
+and laptop sizes; a query test proves cache separation. Visual verification passed on **52
+unchanged screens**, with **6 inspected, updated and re-asserted dashboard baselines**. A subsequent
+visual sign-in reached the frozen clock's rate bucket; restarting the fixture API cleared it
+before the successful baseline runs. Typecheck, lint, architecture, hardcoding, formatting and
+server build passed by exit code.
+
+Remaining: explicit card batch selection, import window selection in the UI, rehearsal shift
+logic and fixture/banner updates, operational reads after a phase change, then audited lifecycle
+admission, transitions and close/archive side effects. P10.4/P10.5 remain in progress.

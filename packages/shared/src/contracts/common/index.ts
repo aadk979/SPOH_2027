@@ -89,6 +89,17 @@ export const TimeRangeQuery = z
   .strict();
 export type TimeRangeQuery = z.infer<typeof TimeRangeQuery>;
 
+/** Explicit inclusion only: the string "false" must never coerce to true. */
+export const RehearsalInclusionQuery = z
+  .object({
+    includeRehearsal: z
+      .enum(['true', 'false'])
+      .transform((value) => value === 'true')
+      .optional(),
+  })
+  .strict();
+export type RehearsalInclusionQuery = z.infer<typeof RehearsalInclusionQuery>;
+
 /** Collection envelope: `{ data, meta }` for every list response. */
 export function collection<T extends z.ZodType>(item: T) {
   return z

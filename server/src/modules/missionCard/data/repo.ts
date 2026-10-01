@@ -2,6 +2,7 @@ import { captureProvenance } from '../../../platform/db/captureProvenance.js';
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
+import { rehearsalFilter, type ReportingScope } from '../../../platform/db/rehearsalFilter.js';
 
 /** Data access for COUNT 3 — Mission Cards. Every query names its event (ADR-001 §2). */
 
@@ -214,11 +215,12 @@ export interface CardFunnelFilter {
  * so each chain of reissues counts once (ADR-002 §3, F03-028).
  */
 function issuedWhere(
-  scope: EventScope,
+  scope: ReportingScope,
   filter: CardFunnelFilter,
 ): Prisma.MissionCardWhereInput & EventScope {
   return {
     eventId: scope.eventId,
+    ...rehearsalFilter(scope),
     status: { notIn: ['UNISSUED', 'LOST'] },
     ...(filter.from || filter.to
       ? {
@@ -231,19 +233,25 @@ function issuedWhere(
   };
 }
 
-export async function countIssued(scope: EventScope, filter: CardFunnelFilter): Promise<number> {
+export async function countIssued(
+  scope: ReportingScope,
+  filter: CardFunnelFilter,
+): Promise<number> {
   return prisma.missionCard.count({ where: issuedWhere(scope, filter) });
 }
 
 export async function countByStatus(
-  scope: EventScope,
+  scope: ReportingScope,
   status: Prisma.MissionCardWhereInput['status'],
   filter: CardFunnelFilter,
 ): Promise<number> {
   return prisma.missionCard.count({ where: { ...issuedWhere(scope, filter), status } });
 }
 
-export async function countVoided(scope: EventScope, filter: CardFunnelFilter): Promise<number> {
+export async function countVoided(
+  scope: ReportingScope,
+  filter: CardFunnelFilter,
+): Promise<number> {
   return prisma.missionCard.count({ where: { ...issuedWhere(scope, filter), status: 'VOIDED' } });
 }
 
@@ -256,7 +264,7 @@ export async function countVoided(scope: EventScope, filter: CardFunnelFilter): 
  * constraint ever changes.
  */
 export async function countCardsPerStation(
-  scope: EventScope,
+  scope: ReportingScope,
   filter: CardFunnelFilter,
 ): Promise<Map<string, number>> {
   const from = filter.from ?? new Date(0);
@@ -267,6 +275,8 @@ export async function countCardsPerStation(
     FROM "CardStampEvent" s
     JOIN "MissionCard" c ON c."id" = s."missionCardId"
     WHERE s."eventId" = ${scope.eventId}
+      AND c."eventId" = ${scope.eventId}
+      AND (${scope.includeRehearsal ?? false} OR (s."rehearsal" = false AND c."rehearsal" = false))
       AND s."recordedAt" >= ${from} AND s."recordedAt" < ${to}
       AND c."status" <> 'LOST'
     GROUP BY s."stationId"`;
@@ -275,7 +285,7 @@ export async function countCardsPerStation(
 }
 
 export async function countRedeemedCards(
-  scope: EventScope,
+  scope: ReportingScope,
   filter: CardFunnelFilter,
 ): Promise<number> {
   const from = filter.from ?? new Date(0);
@@ -285,6 +295,7 @@ export async function countRedeemedCards(
     SELECT COUNT(DISTINCT "missionCardId")::bigint AS cards
     FROM "GiftRedemption"
     WHERE "eventId" = ${scope.eventId}
+      AND (${scope.includeRehearsal ?? false} OR "rehearsal" = false)
       AND "voided" = false
       AND "missionCardId" IS NOT NULL
       AND "recordedAt" >= ${from} AND "recordedAt" < ${to}`;

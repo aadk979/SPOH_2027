@@ -8,9 +8,10 @@ import type { EventScope } from '../../../platform/db/eventScope.js';
 import { eventTimezone } from '../../../platform/event/events.js';
 
 export async function summariseFootfall(
-  scope: EventScope,
+  eventScope: EventScope,
   query: FootfallSummaryQuery,
 ): Promise<FootfallSummaryResponse> {
+  const scope = { ...eventScope, includeRehearsal: query.includeRehearsal ?? false };
   const filter: FootfallFilter = {
     ...(query.stationId ? { stationId: query.stationId } : {}),
     ...(query.from ? { from: new Date(query.from) } : {}),
@@ -31,6 +32,7 @@ export async function summariseFootfall(
     : stations;
 
   return {
+    rehearsalIncluded: scope.includeRehearsal,
     unit: 'roomEntries',
     bucket: query.bucket,
     total,

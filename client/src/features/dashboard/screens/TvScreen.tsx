@@ -4,8 +4,9 @@ import { useTvWakeLock } from '../hooks/useTvWakeLock';
 import { TvWarnings } from '../components/TvWarnings';
 import { TvBreakdowns } from '../components/TvBreakdowns';
 import { TvAlerts } from '../components/TvAlerts';
+import { RehearsalDashboardControl } from '../components/RehearsalDashboardControl';
 
-import { type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useLiveDashboard } from '@/features/dashboard';
 import { useRequireSession, useEventTime } from '@/features/session';
 import { AppLink } from '@/shared/lib/AppLink';
@@ -31,7 +32,8 @@ export default function TvScreen(): ReactNode {
   const format = useEventTime();
   const event = useEvent();
   const session = useRequireSession();
-  const { data } = useLiveDashboard();
+  const [includeRehearsal, setIncludeRehearsal] = useState(false);
+  const { data } = useLiveDashboard(includeRehearsal);
 
   useTvWakeLock();
 
@@ -57,6 +59,12 @@ export default function TvScreen(): ReactNode {
       className="flex min-h-dvh flex-col gap-[2vw] bg-void p-[2vw] text-on-dark"
     >
       <TvAlerts data={data} />
+      <RehearsalDashboardControl included={includeRehearsal} onChange={setIncludeRehearsal} />
+      {data.rehearsalIncluded ? (
+        <p className="text-tv-row font-semibold">
+          Rehearsal data included · counts contain practice captures
+        </p>
+      ) : null}
 
       <header className="flex flex-wrap items-baseline justify-between gap-sm">
         <div className="flex items-baseline gap-sm">

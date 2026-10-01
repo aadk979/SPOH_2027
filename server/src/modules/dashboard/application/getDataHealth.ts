@@ -1,3 +1,4 @@
+import { systemClock } from '../../../platform/time/index.js';
 import type { DataHealthResponse } from '@spoh/shared';
 import { getSettings } from '../../../platform/settings/index.js';
 import { runningShifts } from '../../../platform/event/runningShifts.js';
@@ -12,7 +13,7 @@ import {
 } from '../data/repo.js';
 import { staleDevices as staleDevicesOf } from '../domain/signals.js';
 import { flaggedRedemptions } from '../data/flaggedRedemptions.js';
-import type { EventScope } from '../../../platform/db/eventScope.js';
+import type { ReportingScope } from '../../../platform/db/rehearsalFilter.js';
 
 /**
  * Data health (PRODUCT_BRIEF §9) — the early warning that a station has quietly
@@ -23,8 +24,8 @@ import type { EventScope } from '../../../platform/db/eventScope.js';
  * it. Outside event hours silence is expected, so nothing is flagged.
  */
 export async function getDataHealth(
-  scope: EventScope,
-  now = new Date(),
+  scope: ReportingScope,
+  now = systemClock.now(),
 ): Promise<DataHealthResponse> {
   const since = await eventTodayStart(scope, now);
   const today = await eventToday(scope, now);
@@ -48,8 +49,6 @@ export async function getDataHealth(
         }))
     : [];
 
-  const staleAfter = getSettings().staleDeviceMinutes;
-
   const staleDevices =
     withinEventHours && eventDay
       ? staleDevicesOf(
@@ -64,11 +63,12 @@ export async function getDataHealth(
               ? minutesBetween(row.lastCaptureAt, now)
               : null,
           })),
-          staleAfter,
+          getSettings().staleDeviceMinutes,
         )
       : [];
 
   return {
+    rehearsalIncluded: scope.includeRehearsal ?? false,
     asOf: now.toISOString(),
     silentStations,
     staleDevices,

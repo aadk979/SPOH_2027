@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import {
   CardLookupParams,
+  CardFunnelQuery,
   CardQrParams,
   GenerateCardBatchRequest,
   IssueCardRequest,
   ReissueCardRequest,
   StampCardRequest,
-  TimeRangeQuery,
   VoidCardRequest,
 } from '@spoh/shared';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
@@ -51,7 +51,7 @@ missionCardRouter.get(
   '/funnel',
   defaultRateLimit,
   requireCapability('dashboard.station.read'),
-  validate({ query: TimeRangeQuery }),
+  validate({ query: CardFunnelQuery }),
   funnelHandler,
 );
 

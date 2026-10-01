@@ -49,6 +49,25 @@ it('does not query a station dashboard until a station is selected', async () =>
   );
 });
 
+it('keeps practice dashboard results out of the default cache', async () => {
+  const { wrapper } = setup();
+  vi.mocked(api).mockImplementation(async (path) => ({
+    rehearsalIncluded: path.includes('includeRehearsal=true'),
+  }));
+  const { result, rerender } = renderHook(
+    ({ included }) => useStationDashboard('station-42', included),
+    {
+      wrapper,
+      initialProps: { included: false },
+    },
+  );
+  await waitFor(() => expect(result.current.data?.rehearsalIncluded).toBe(false));
+  rerender({ included: true });
+  await waitFor(() => expect(result.current.data?.rehearsalIncluded).toBe(true));
+  rerender({ included: false });
+  await waitFor(() => expect(result.current.data?.rehearsalIncluded).toBe(false));
+});
+
 it('acknowledges an alert and invalidates the active-alert cache', async () => {
   const { client, wrapper } = setup();
   const invalidate = vi.spyOn(client, 'invalidateQueries');

@@ -8,8 +8,12 @@ export function GiftStockPanel({ data }: { data: LiveDashboardResponse }): React
       <CardGrid columns={2}>
         {data.gifts.map((gift) => (
           <StatTile
-            key={gift.id}
-            label={gift.name}
+            key={`${gift.id}:${gift.rehearsal ?? false}`}
+            label={
+              data.rehearsalIncluded
+                ? `${gift.name} · ${gift.rehearsal ? 'practice' : 'live'}`
+                : gift.name
+            }
             value={gift.remaining}
             unit="remaining"
             note={`${gift.redeemed} redeemed`}

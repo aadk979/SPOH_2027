@@ -1,3 +1,4 @@
+import { systemClock } from '../../../platform/time/index.js';
 import { headlineOf, type LiveDashboardResponse } from '@spoh/shared';
 import { eventSetting } from '../../../platform/settings/eventSettings.js';
 import { runningShifts } from '../../../platform/event/runningShifts.js';
@@ -18,7 +19,7 @@ import {
   type Window,
 } from '../data/repo.js';
 import { getDataHealth } from './getDataHealth.js';
-import type { EventScope } from '../../../platform/db/eventScope.js';
+import type { ReportingScope } from '../../../platform/db/rehearsalFilter.js';
 
 /**
  * The live operations dashboard (PRODUCT_BRIEF §9).
@@ -32,8 +33,8 @@ import type { EventScope } from '../../../platform/db/eventScope.js';
  * by its own function, from its own queries, and composed here.
  */
 export async function getLiveDashboard(
-  scope: EventScope,
-  now = new Date(),
+  scope: ReportingScope,
+  now = systemClock.now(),
 ): Promise<LiveDashboardResponse> {
   const since = await eventTodayStart(scope, now);
   const today = await eventToday(scope, now);
@@ -47,7 +48,7 @@ export async function getLiveDashboard(
     registrationsPanel(scope, { since, until: now }),
     footfallPanel(scope, now),
     cardsPanel(scope, { since, now }),
-    listGifts(scope),
+    giftsPanel(scope),
     safetyPanel(scope),
     staffingPanel(scope, { eventDayId: eventDay?.id ?? null, running }, now),
     getDataHealth(scope, now),
@@ -64,6 +65,7 @@ export async function getLiveDashboard(
   });
 
   return {
+    rehearsalIncluded: scope.includeRehearsal ?? false,
     asOf: now.toISOString(),
     eventDayLabel: eventDay?.label ?? null,
     withinEventHours,
@@ -80,8 +82,16 @@ export async function getLiveDashboard(
 
 type Panels = LiveDashboardResponse;
 
+async function giftsPanel(scope: ReportingScope): Promise<Panels['gifts']> {
+  const pools = await Promise.all([
+    listGifts({ ...scope, rehearsal: false }),
+    scope.includeRehearsal ? listGifts({ ...scope, rehearsal: true }) : [],
+  ]);
+  return pools.flat();
+}
+
 async function registrationsPanel(
-  scope: EventScope,
+  scope: ReportingScope,
   window: Window,
 ): Promise<Panels['registrations']> {
   const lastHourStart = new Date(window.until.getTime() - 60 * 60 * 1000);
@@ -93,7 +103,7 @@ async function registrationsPanel(
   return { unit: 'registrations', todayTotal, byCategory, lastHour };
 }
 
-async function footfallPanel(scope: EventScope, now: Date): Promise<Panels['footfall']> {
+async function footfallPanel(scope: ReportingScope, now: Date): Promise<Panels['footfall']> {
   const footfall = await getLiveFootfall(scope, now);
   return {
     unit: 'roomEntries',
@@ -103,7 +113,7 @@ async function footfallPanel(scope: EventScope, now: Date): Promise<Panels['foot
 }
 
 async function cardsPanel(
-  scope: EventScope,
+  scope: ReportingScope,
   { since, now }: { since: Date; now: Date },
 ): Promise<Panels['cards']> {
   const funnel = await getFunnel(scope, { from: since.toISOString(), to: now.toISOString() });
@@ -116,7 +126,7 @@ async function cardsPanel(
   };
 }
 
-async function safetyPanel(scope: EventScope): Promise<Panels['safety']> {
+async function safetyPanel(scope: ReportingScope): Promise<Panels['safety']> {
   const [incidents, lostPersons] = await Promise.all([
     openIncidentCounts(scope),
     activeLostPersonCount(scope),
@@ -129,7 +139,7 @@ async function safetyPanel(scope: EventScope): Promise<Panels['safety']> {
 }
 
 async function staffingPanel(
-  scope: EventScope,
+  scope: ReportingScope,
   {
     eventDayId,
     running,
