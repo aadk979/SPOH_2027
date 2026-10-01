@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-01T07:07:53.548Z",
+  "updatedAt": "2026-10-01T07:16:22.399Z",
   "current": {
     "phase": "P09",
-    "step": "P09.14"
+    "step": "P09.13"
   },
   "gates": [
     {
@@ -135,8 +135,8 @@
       "owner": "you",
       "blocks": ["P08.5", "P12.2"],
       "status": "answered",
-      "answer": "Owner amendment 2026-09-30: Firebase Hosting (*.web.app) client; DuckDNS HTTPS API; no Route 53, ACM or SES. Price a static-IP Let's Encrypt entry and obtain added monthly cost approval before P08.5. SNS email and AWS Budgets for alerts; Cognito default invite sender. Session design must work without a third-party refresh cookie.",
-      "answeredAt": "2026-10-01T07:07:53.390Z"
+      "answer": "Owner 2026-09-30: Firebase Hosting (*.web.app) client, DuckDNS HTTPS API, no Route 53/ACM/SES; SNS email, AWS Budgets, Cognito default invite sender; sessions cannot depend on a third-party refresh cookie. Owner 2026-10-01 approved Singapore Lightsail Micro Caddy proxy at US/month with 2 TB included and US.12/GB excess outbound transfer. Production stack still waits for 28 October go decision.",
+      "answeredAt": "2026-10-01T07:16:22.398Z"
     },
     {
       "id": "D-09",
@@ -1925,8 +1925,8 @@
         {
           "id": "P09.13",
           "title": "Verify and report",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-01T07:08:34.243Z",
           "completedAt": null,
           "commits": [],
           "notes": []

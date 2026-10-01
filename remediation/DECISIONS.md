@@ -176,6 +176,10 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
     third-party cookie, which Safari's ITP and strict browser settings block, so the session design
     (ADR-006, P12) must not depend on it. CORS must allow the Firebase origin. The static export is
     deployed to Firebase instead of being served by the API (ADR-008 §1 amended).
+    **Cost approval** (owner, 2026-10-01): a Singapore Lightsail Micro Caddy proxy may add US$7/month,
+  with 2 TB transfer included and US$0.12/GB excess outbound transfer. The priced design is in
+    `reports/P08/duckdns-https-pricing.md`. This does not authorise production stack creation before
+    the 28 October go decision.
 
 ### D-09 — Scheduler engine
 
