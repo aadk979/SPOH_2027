@@ -95,17 +95,9 @@ async function upsertMembership(
   });
 }
 
-/**
- * The administrator: from the environment in a deployment, the fixture's own
- * otherwise. The only thing production gets: a platform administrator of the
- * organisation, who sets the first event up (D-12).
- */
+/** The initial platform admin; the event's attendance root is chosen in settings. */
 async function seedAdmin(): Promise<string> {
-  const email = (
-    process.env.ATTENDANCE_ROOT_EMAIL ??
-    process.env.SEED_ADMIN_EMAIL ??
-    'admin@spoh2027.test'
-  ).toLowerCase();
+  const email = (process.env.SEED_ADMIN_EMAIL ?? 'admin@spoh2027.test').toLowerCase();
   const personId = await upsertPerson({
     email,
     displayName: process.env.SEED_ADMIN_NAME ?? 'Administrator',
@@ -475,7 +467,25 @@ async function seedFixture(): Promise<void> {
   await seedAssignments(event, { days, stations, people });
   await seedBriefingSlots(event, days);
   await seedMissionCards(event);
-  await upsertMembership(event, await seedAdmin(), { role: 'ADMIN' });
+  const root = await upsertMembership(event, await seedAdmin(), { role: 'ADMIN' });
+  await prisma.setting.upsert({
+    where: {
+      scope_scopeId_key: {
+        scope: 'EVENT',
+        scopeId: event.eventId,
+        key: 'attendance.rootMembershipId',
+      },
+    },
+    create: {
+      scope: 'EVENT',
+      scopeId: event.eventId,
+      eventId: event.eventId,
+      key: 'attendance.rootMembershipId',
+      value: root.id,
+      version: 1,
+    },
+    update: {},
+  });
   await seedSecondEvent(event, today);
   console.log(`seed: ${FIXTURE_EVENT.name} and ${SECOND_EVENT.name}, days from ${today}`);
   console.log(

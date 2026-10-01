@@ -25,7 +25,6 @@ $env:PORT='4012'
 $env:LOG_LEVEL='silent'
 $env:SHIFT_HOURS_ALWAYS_OPEN='true'
 $env:CORS_ALLOWED_ORIGINS='http://localhost:3001'
-$env:ATTENDANCE_ROOT_EMAIL='admin@spoh2027.test'
 $env:RATE_LIMIT_MAX_DEFAULT='100000'
 $env:RATE_LIMIT_MAX_ADMIN='100000'
 node --import ./client/tests/visual/freeze-clock.mjs server/dist/index.js

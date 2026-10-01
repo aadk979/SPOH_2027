@@ -63,6 +63,7 @@ export async function presignUpload(input: {
   key: string;
   contentType: string;
   maxBytes: number;
+  ttlSeconds: number;
 }): Promise<{ url: string; fields: Record<string, string> }> {
   return createPresignedPost(requireClient(), {
     Bucket: env.S3_MEDIA_BUCKET as string,
@@ -73,23 +74,15 @@ export async function presignUpload(input: {
       ['eq', '$Content-Type', input.contentType],
     ],
     Fields: { 'Content-Type': input.contentType },
-    Expires: env.S3_UPLOAD_TTL_SECONDS,
+    Expires: input.ttlSeconds,
   });
 }
 
 /** A short-lived read URL for one object. */
-export async function presignRead(key: string): Promise<string> {
+export async function presignRead(key: string, ttlSeconds: number): Promise<string> {
   return getSignedUrl(
     requireClient(),
     new GetObjectCommand({ Bucket: env.S3_MEDIA_BUCKET as string, Key: key }),
-    { expiresIn: env.S3_UPLOAD_TTL_SECONDS },
+    { expiresIn: ttlSeconds },
   );
-}
-
-export function uploadTtlSeconds(): number {
-  return env.S3_UPLOAD_TTL_SECONDS;
-}
-
-export function maxUploadBytes(): number {
-  return env.S3_MAX_UPLOAD_BYTES;
 }

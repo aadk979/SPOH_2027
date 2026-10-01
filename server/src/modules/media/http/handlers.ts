@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import type { CreateUploadRequest } from '@spoh/shared';
 import { actorContextFrom } from '../../../platform/http/auditContext.js';
+import { scopeOf } from '../../../platform/http/requireAuth.js';
 import { validatedBody, validatedQuery } from '../../../platform/http/validate.js';
 import { createUpload } from '../application/createUpload.js';
 import { readUrl } from '../application/readUrl.js';
@@ -17,5 +18,5 @@ export async function createUploadHandler(req: Request, res: Response): Promise<
 
 export async function readUrlHandler(req: Request, res: Response): Promise<void> {
   const { key } = validatedQuery<{ key: string }>(req);
-  res.status(200).json(await readUrl(key));
+  res.status(200).json(await readUrl(key, scopeOf(req)));
 }

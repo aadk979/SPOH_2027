@@ -6,7 +6,8 @@ import { ValidationError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { buildKey } from '../domain/mediaKeys.js';
-import { assertConfigured, maxUploadBytes, presignUpload, uploadTtlSeconds } from './s3.js';
+import { assertConfigured, presignUpload } from './s3.js';
+import { mediaLimits } from './limits.js';
 
 /**
  * Sign an upload policy. The file never passes through the API: the client
@@ -14,11 +15,11 @@ import { assertConfigured, maxUploadBytes, presignUpload, uploadTtlSeconds } fro
  */
 export async function createUpload(
   request: CreateUploadRequest,
-  { audit }: ActorContext,
+  { scope, audit }: ActorContext,
   clock: Clock = systemClock,
 ): Promise<CreateUploadResponse> {
   assertConfigured();
-  const maxBytes = maxUploadBytes();
+  const { maxBytes, ttlSeconds } = await mediaLimits(scope);
 
   if (request.contentLength > maxBytes) {
     throw new ValidationError('That photo is too large. Take a smaller one.', {
@@ -32,6 +33,7 @@ export async function createUpload(
     key,
     contentType: request.contentType,
     maxBytes,
+    ttlSeconds,
   });
 
   // Audited when the policy is issued: that is the moment someone was allowed
@@ -46,5 +48,5 @@ export async function createUpload(
     });
   });
 
-  return { url, fields, key, expiresIn: uploadTtlSeconds(), maxBytes };
+  return { url, fields, key, expiresIn: ttlSeconds, maxBytes };
 }

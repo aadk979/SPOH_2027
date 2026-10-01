@@ -34,16 +34,13 @@ describe('configuration', () => {
     expect(message.indexOf('AUTH_PROVIDER')).toBeLessThan(message.indexOf('sslmode=require'));
   });
 
-  it('refuses half a VAPID pair and a bad campus range', () => {
-    const message = messageOf(() =>
-      parseEnv({ ...DEV, VAPID_PUBLIC_KEY: 'key', ATTENDANCE_SP_CIDRS: '10.0.0.0/33' }),
-    );
+  it('refuses half a VAPID pair', () => {
+    const message = messageOf(() => parseEnv({ ...DEV, VAPID_PUBLIC_KEY: 'key' }));
     expect(message).toContain('VAPID_PUBLIC_KEY');
-    expect(message).toContain('Invalid campus CIDR');
   });
 
   it('knows every key it reads', () => {
-    expect(ENV_KEYS).toHaveLength(35);
+    expect(ENV_KEYS).toHaveLength(31);
     expect(new Set(ENV_KEYS).size).toBe(ENV_KEYS.length);
   });
 });
