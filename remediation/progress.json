@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-01T11:13:22.460Z",
+  "updatedAt": "2026-10-01T11:34:54.367Z",
   "current": {
     "phase": "P10",
-    "step": "P10.2"
+    "step": "P10.3"
   },
   "gates": [
     {
@@ -1982,11 +1982,16 @@
         {
           "id": "P10.3",
           "title": "Cache bus (fixes PF-01)",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-10-01T11:14:19.722Z",
+          "completedAt": "2026-10-01T11:34:54.365Z",
+          "commits": ["8f21b21"],
+          "notes": [
+            {
+              "at": "2026-10-01T11:34:54.367Z",
+              "text": "Postgres cache bus propagates settings, membership, and session invalidations across instances within 2s; degrades safely, reconnects with full refresh; server unit 460, integration 488 passed/4 skipped, typecheck/lint/format/architecture/hardcoding passed."
+            }
+          ]
         },
         {
           "id": "P10.4",
