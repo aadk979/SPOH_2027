@@ -1,6 +1,7 @@
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
+import { SHIFT_REF_SELECT } from '../../../platform/db/shiftRef.js';
 
 /**
  * Data access for event days: the dates the event runs, how many shifts each
@@ -9,6 +10,7 @@ import type { EventScope } from '../../../platform/db/eventScope.js';
 
 const withAssignmentCount = {
   _count: { select: { shiftAssignments: true } },
+  shifts: { select: SHIFT_REF_SELECT, orderBy: { startsAt: 'asc' } },
 } satisfies Prisma.EventDayInclude;
 
 export type EventDayRow = Prisma.EventDayGetPayload<{ include: typeof withAssignmentCount }>;
@@ -27,6 +29,14 @@ export async function findEventDayByDate(scope: EventScope, date: Date) {
 
 export async function findEventDayRow(scope: EventScope, id: string) {
   return prisma.eventDay.findFirst({ where: { eventId: scope.eventId, id } });
+}
+
+/** A day as the API returns it: with its assignment count and shifts. */
+export async function findEventDayRecordRow(scope: EventScope, id: string) {
+  return prisma.eventDay.findFirst({
+    where: { eventId: scope.eventId, id },
+    include: withAssignmentCount,
+  });
 }
 
 export async function createEventDayRow(
@@ -77,21 +87,47 @@ export async function insertShifts(
   });
 }
 
-/** Set a template's wall-clock hours; null when the event has no template of that code. */
-export async function updateTemplateHours(
+const TEMPLATE_FIELDS = {
+  id: true,
+  code: true,
+  label: true,
+  startLocal: true,
+  endLocal: true,
+  endsNextDay: true,
+  sortOrder: true,
+} satisfies Prisma.ShiftTemplateSelect;
+
+export type TemplateRow = Prisma.ShiftTemplateGetPayload<{ select: typeof TEMPLATE_FIELDS }>;
+
+/** The event's active shift templates, in the order the event runs them. */
+export async function listTemplateRows(scope: EventScope): Promise<TemplateRow[]> {
+  return prisma.shiftTemplate.findMany({
+    where: { eventId: scope.eventId, active: true },
+    orderBy: { sortOrder: 'asc' },
+    select: TEMPLATE_FIELDS,
+  });
+}
+
+export async function findTemplateRow(
   tx: PrismaTransactionClient,
   scope: EventScope,
-  hours: { code: string; startLocal: string; endLocal: string },
-) {
-  const template = await tx.shiftTemplate.findUnique({
-    where: { eventId_code: { eventId: scope.eventId, code: hours.code } },
-    select: { id: true },
+  id: string,
+): Promise<TemplateRow | null> {
+  return tx.shiftTemplate.findFirst({
+    where: { eventId: scope.eventId, id },
+    select: TEMPLATE_FIELDS,
   });
-  if (!template) return null;
+}
+
+export async function updateTemplateRow(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  change: { id: string; data: { label?: string; startLocal?: string; endLocal?: string } },
+): Promise<TemplateRow> {
   return tx.shiftTemplate.update({
-    where: { id: template.id, eventId: scope.eventId },
-    data: { startLocal: hours.startLocal, endLocal: hours.endLocal },
-    select: { id: true, startLocal: true, endLocal: true, endsNextDay: true },
+    where: { id: change.id, eventId: scope.eventId },
+    data: change.data,
+    select: TEMPLATE_FIELDS,
   });
 }
 

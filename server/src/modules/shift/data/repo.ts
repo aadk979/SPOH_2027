@@ -2,17 +2,20 @@ import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { membershipIdOf } from '../../../platform/db/membershipMirror.js';
+import { SHIFT_REF_SELECT, toShiftRef, type ShiftRefRow } from '../../../platform/db/shiftRef.js';
 
 /**
  * Data access for swaps, briefing waves and staffing (PRODUCT_BRIEF §6). Every
  * query names its event (ADR-001 §2).
  */
 
-type Block = NonNullable<Prisma.ShiftAssignmentWhereInput['block']>;
-
 const swapInclude = {
   assignment: {
-    include: { station: { select: { name: true } }, eventDay: { select: { date: true } } },
+    include: {
+      station: { select: { name: true } },
+      eventDay: { select: { date: true } },
+      shift: { select: SHIFT_REF_SELECT },
+    },
   },
   requester: { select: { displayName: true } },
   target: { select: { displayName: true } },
@@ -52,7 +55,7 @@ export async function findSwapForDecision(
       requesterId: true,
       targetId: true,
       assignmentId: true,
-      assignment: { select: { volunteerId: true, eventDayId: true, block: true } },
+      assignment: { select: { volunteerId: true, shiftId: true } },
     },
   });
 }
@@ -111,8 +114,8 @@ export async function claimDecision(
 
 /**
  * Move the assignment to the target volunteer, with the target's membership.
- * The unique key (volunteer, day, block) means a target already working that
- * block would collide — the use case checks for that before it gets here.
+ * The unique key (volunteer, shift) means a target already on that shift
+ * would collide — the use case checks for that before it gets here.
  */
 export async function moveAssignment(
   tx: PrismaTransactionClient,
@@ -130,11 +133,11 @@ export async function moveAssignment(
   });
 }
 
-/** Is this volunteer already working that day and block? */
-export async function hasAssignmentInBlock(
+/** Is this volunteer already working that shift? */
+export async function hasAssignmentOnShift(
   tx: PrismaTransactionClient,
   scope: EventScope,
-  input: { volunteerId: string; eventDayId: string; block: Block },
+  input: { volunteerId: string; shiftId: string },
 ): Promise<boolean> {
   const existing = await tx.shiftAssignment.findFirst({
     where: { eventId: scope.eventId, ...input },
@@ -183,22 +186,18 @@ export async function completeSlot(
   });
 }
 
-/** The template codes of the event's shifts running now: the blocks on duty. */
-/** The shifts running now, one per template, with the template's code and label. */
-export async function runningShiftRefs(
-  scope: EventScope,
-  running: Prisma.ShiftWhereInput,
-): Promise<Array<{ code: string; label: string; startsAt: Date; endsAt: Date }>> {
+/** The shifts running now, one per template, named and timed. */
+export async function runningShiftRefs(scope: EventScope, running: Prisma.ShiftWhereInput) {
   const shifts = await prisma.shift.findMany({
     where: { eventId: scope.eventId, ...running },
-    select: { startsAt: true, endsAt: true, template: { select: { code: true, label: true } } },
+    select: SHIFT_REF_SELECT,
     orderBy: { startsAt: 'asc' },
   });
-  const byCode = new Map<string, { code: string; label: string; startsAt: Date; endsAt: Date }>();
-  for (const { startsAt, endsAt, template } of shifts) {
-    if (!byCode.has(template.code)) byCode.set(template.code, { ...template, startsAt, endsAt });
+  const byCode = new Map<string, ShiftRefRow>();
+  for (const shift of shifts) {
+    if (!byCode.has(shift.template.code)) byCode.set(shift.template.code, shift);
   }
-  return [...byCode.values()];
+  return [...byCode.values()].map(toShiftRef);
 }
 
 /**
@@ -213,7 +212,7 @@ export async function staffingByStation(
   Array<{
     stationId: string;
     stationName: string;
-    block: Block;
+    shiftCode: string;
     assigned: number;
     checkedIn: number;
   }>
@@ -222,24 +221,31 @@ export async function staffingByStation(
     where: { eventId: scope.eventId, shift: running },
     select: {
       stationId: true,
-      block: true,
       checkedInAt: true,
       checkedOutAt: true,
       station: { select: { name: true } },
+      shift: { select: { template: { select: { code: true } } } },
     },
   });
 
   const byKey = new Map<
     string,
-    { stationId: string; stationName: string; block: Block; assigned: number; checkedIn: number }
+    {
+      stationId: string;
+      stationName: string;
+      shiftCode: string;
+      assigned: number;
+      checkedIn: number;
+    }
   >();
 
   for (const assignment of assignments) {
-    const key = `${assignment.stationId}:${assignment.block}`;
+    const shiftCode = assignment.shift.template.code;
+    const key = `${assignment.stationId}:${shiftCode}`;
     const entry = byKey.get(key) ?? {
       stationId: assignment.stationId,
       stationName: assignment.station.name,
-      block: assignment.block,
+      shiftCode,
       assigned: 0,
       checkedIn: 0,
     };
@@ -287,7 +293,7 @@ export async function findAssignmentForSwap(
 ) {
   return tx.shiftAssignment.findUnique({
     where: { id, eventId: scope.eventId },
-    select: { id: true, volunteerId: true, eventDayId: true, block: true },
+    select: { id: true, volunteerId: true, shiftId: true },
   });
 }
 

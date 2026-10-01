@@ -3,14 +3,14 @@ import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../../src/app/createApp.js';
 import { prisma } from '../../../src/platform/db/client.js';
-import { resetDatabase, rawDb } from '../../helpers/db.js';
+import { resetDatabase } from '../../helpers/db.js';
 import {
   bearer,
+  createEventDayOn,
   createEventDayToday,
   createStation,
   createVolunteer,
   type TestVolunteer,
-  testEvent,
 } from '../../helpers/fixtures.js';
 
 /**
@@ -119,13 +119,7 @@ describe('roster import and provisioning (P03 repros)', () => {
 
   // F03-025
   it('counts a new person with two shifts as one created volunteer, not one created and one updated', async () => {
-    await rawDb.eventDay.create({
-      data: {
-        eventId: (await testEvent()).eventId,
-        date: new Date('2027-01-08T00:00:00.000Z'),
-        label: 'Day 2',
-      },
-    });
+    await createEventDayOn('2027-01-08', 'Day 2');
 
     const response = await importRoster(
       chief,
@@ -135,14 +129,14 @@ describe('roster import and provisioning (P03 repros)', () => {
           email: 'twice@roster.test',
           stationCode: 'DCS',
           eventDate: '2027-01-07',
-          block: 'MORNING',
+          shift: 'MORNING',
         },
         {
           displayName: 'Twice',
           email: 'twice@roster.test',
           stationCode: 'DCS',
           eventDate: '2027-01-08',
-          block: 'MORNING',
+          shift: 'MORNING',
         },
       ],
       false,

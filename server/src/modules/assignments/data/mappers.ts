@@ -1,4 +1,5 @@
 import type { ShiftAssignmentRecord } from '@spoh/shared';
+import { toShiftRef } from '../../../platform/db/shiftRef.js';
 import type { AssignmentWithNames } from './repo.js';
 
 export function toAssignmentRecord(row: AssignmentWithNames): ShiftAssignmentRecord {
@@ -11,7 +12,7 @@ export function toAssignmentRecord(row: AssignmentWithNames): ShiftAssignmentRec
     stationName: row.station.name,
     eventDayId: row.eventDayId,
     date: row.eventDay.date.toISOString().slice(0, 10),
-    block: row.block,
+    shift: toShiftRef(row.shift),
     roleLabel: row.roleLabel,
     checkedInAt: row.checkedInAt?.toISOString() ?? null,
     checkedOutAt: row.checkedOutAt?.toISOString() ?? null,

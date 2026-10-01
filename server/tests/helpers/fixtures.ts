@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
-import type { CommitteeRole, ShiftBlock } from '@spoh/shared';
+import type { CommitteeRole } from '@spoh/shared';
 import { env } from '../../src/config/env.js';
 import { prisma } from '../../src/platform/db/client.js';
 import type { EventScope } from '../../src/platform/db/eventScope.js';
@@ -94,24 +94,28 @@ function subFor(email: string): string {
   return `local:${createHash('sha256').update(email).digest('hex').slice(0, 32)}`;
 }
 
-export async function createEventDayToday(): Promise<{ id: string }> {
+/** A day of the test event, with a shift per template, as the real use case makes it. */
+export async function createEventDayOn(date: string, label = 'Test Day'): Promise<{ id: string }> {
   const scope = await testEvent();
-  const today = zonedDate(new Date(), TEST_EVENT_TIMEZONE);
-  const date = eventDayAnchor(today);
+  const anchor = eventDayAnchor(date);
   const day = await prisma.eventDay.upsert({
-    where: { eventId_date: { eventId: scope.eventId, date } },
+    where: { eventId_date: { eventId: scope.eventId, date: anchor } },
     create: {
       eventId: scope.eventId,
-      date,
-      label: 'Test Day',
+      date: anchor,
+      label,
       isPublicDay: true,
       isTourDay: false,
     },
     update: {},
     select: { id: true },
   });
-  await addShiftsForDay(prisma, scope, { id: day.id, date: today });
+  await addShiftsForDay(prisma, scope, { id: day.id, date });
   return day;
+}
+
+export async function createEventDayToday(): Promise<{ id: string }> {
+  return createEventDayOn(zonedDate(new Date(), TEST_EVENT_TIMEZONE));
 }
 
 /** A station type of the test event with these capabilities, made on first use. */
@@ -184,30 +188,36 @@ export async function createVolunteer(input: {
   return { id: volunteer.id, email: input.email, sub, role: input.role, token };
 }
 
+/** The test event's shift on a day, by its template's code. */
+export async function shiftOn(eventDayId: string, code = 'MORNING'): Promise<string> {
+  const shift = await prisma.shift.findFirstOrThrow({
+    where: { eventId: (await testEvent()).eventId, eventDayId, template: { code } },
+    select: { id: true },
+  });
+  return shift.id;
+}
+
 export async function assignToStation(input: {
   volunteerId: string;
   stationId: string;
   eventDayId: string;
-  block?: ShiftBlock;
+  /** The shift's template code; MORNING when absent. */
+  shift?: string;
   roleLabel?: string;
 }): Promise<{ id: string }> {
-  const block = input.block ?? 'MORNING';
-  const links = await assignmentLinks(prisma, await testEvent(), { ...input, block });
+  const shiftId = await shiftOn(input.eventDayId, input.shift);
+  const links = await assignmentLinks(prisma, await testEvent(), input.volunteerId);
 
   return prisma.shiftAssignment.upsert({
     where: {
-      volunteerId_eventDayId_block: {
-        volunteerId: input.volunteerId,
-        eventDayId: input.eventDayId,
-        block,
-      },
+      volunteerId_shiftId: { volunteerId: input.volunteerId, shiftId },
       eventId: links.eventId,
     },
     create: {
       volunteerId: input.volunteerId,
       stationId: input.stationId,
       eventDayId: input.eventDayId,
-      block,
+      shiftId,
       roleLabel: input.roleLabel ?? 'Volunteer',
       ...links,
     },
@@ -217,7 +227,7 @@ export async function assignToStation(input: {
 }
 
 /**
- * Assign to both blocks, so a test passes regardless of the wall-clock hour it
+ * Assign to both shifts, so a test passes regardless of the wall-clock hour it
  * runs at. Shift scoping is time-sensitive by design and the suite should not
  * be.
  */
@@ -227,8 +237,8 @@ export async function assignToStationAllBlocks(input: {
   eventDayId: string;
   roleLabel?: string;
 }): Promise<void> {
-  for (const block of ['MORNING', 'AFTERNOON'] as ShiftBlock[]) {
-    await assignToStation({ ...input, block });
+  for (const shift of ['MORNING', 'AFTERNOON']) {
+    await assignToStation({ ...input, shift });
   }
 }
 

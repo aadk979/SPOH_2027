@@ -10,6 +10,7 @@ import {
   ListVolunteersQuery,
   UpdateEventDayRequest,
   UpdateGiftTypeRequest,
+  UpdateShiftTemplateRequest,
   UpdateSettingsRequest,
   UpdateStationRequest,
   UpdateVolunteerRequest,
@@ -36,7 +37,9 @@ import { createGiftTypeHandler, updateGiftTypeHandler } from '../../gift/index.j
 import {
   createEventDayHandler,
   listEventDaysHandler,
+  listShiftTemplatesHandler,
   updateEventDayHandler,
+  updateShiftTemplateHandler,
 } from '../../eventDays/index.js';
 
 /**
@@ -178,6 +181,25 @@ adminRouter.patch(
   requireCapability('config.manage'),
   validate({ params: IdParams, body: UpdateEventDayRequest }),
   updateEventDayHandler,
+);
+
+// ─────────────────────────────────────────────────────────────
+// SHIFT TEMPLATES (ADR-002): the hours capture and check-in obey
+// ─────────────────────────────────────────────────────────────
+
+adminRouter.get(
+  '/shift-templates',
+  defaultRateLimit,
+  requireCapability('user.read'),
+  listShiftTemplatesHandler,
+);
+
+adminRouter.patch(
+  '/shift-templates/:id',
+  adminRateLimit,
+  requireCapability('config.manage'),
+  validate({ params: IdParams, body: UpdateShiftTemplateRequest }),
+  updateShiftTemplateHandler,
 );
 
 // ─────────────────────────────────────────────────────────────

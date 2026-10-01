@@ -12,31 +12,30 @@ import {
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 
 /**
- * Roster a volunteer into a block. Upsert rather than fail on the (volunteer,
- * day, block) key, because "move them to the other station" is the operation
- * an IC actually wants.
+ * Roster a volunteer onto a shift. Upsert rather than fail on the (volunteer,
+ * shift) key, because "move them to the other station" is the operation an IC
+ * actually wants.
  */
 export async function createAssignment(
   request: CreateAssignmentRequest,
   { scope, audit }: ActorContext,
 ): Promise<ShiftAssignmentRecord> {
-  const { volunteer, station, eventDay } = await findAssignmentTargets(scope, request);
+  const { volunteer, station, shift } = await findAssignmentTargets(scope, request);
   if (!volunteer?.active) throw new NotFoundError('Volunteer');
   if (!station?.active) throw new NotFoundError('Station');
-  if (!eventDay) throw new NotFoundError('Event day');
+  if (!shift) throw new NotFoundError('Shift');
 
   const row = await prisma.$transaction(async (tx) => {
     // A move is audited as one, with where the person was before (F03-018).
     const previous = await findAssignmentInSlot(tx, scope, {
       volunteerId: request.volunteerId,
-      eventDayId: request.eventDayId,
-      block: request.block,
+      shiftId: request.shiftId,
     });
     const assignment = await upsertAssignmentRow(tx, scope, {
       volunteerId: request.volunteerId,
       stationId: request.stationId,
-      eventDayId: request.eventDayId,
-      block: request.block,
+      eventDayId: shift.eventDayId,
+      shiftId: request.shiftId,
       roleLabel: request.roleLabel,
     });
     await writeAudit(tx, {
@@ -48,7 +47,7 @@ export async function createAssignment(
       after: {
         volunteerId: request.volunteerId,
         stationId: request.stationId,
-        block: request.block,
+        shiftId: request.shiftId,
       },
     });
     return assignment;

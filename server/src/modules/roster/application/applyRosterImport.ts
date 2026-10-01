@@ -61,7 +61,7 @@ export async function applyRosterImport(
       volunteerId: ids.get(step.email) as string,
       stationId: step.stationId,
       eventDayId: step.eventDayId,
-      block: step.block,
+      shiftId: step.shiftId,
       roleLabel: step.roleLabel,
     });
   }

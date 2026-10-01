@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ShiftBlock, SwapStatus } from '../../invariants/enums.js';
+import { SwapStatus } from '../../invariants/enums.js';
 import { Id, IsoDate, IsoDateTime, ReasonText } from '../common/index.js';
 
 /**
@@ -12,6 +12,7 @@ import { Id, IsoDate, IsoDateTime, ReasonText } from '../common/index.js';
  */
 export const ShiftRef = z
   .object({
+    id: Id,
     code: z.string(),
     label: z.string(),
     startsAt: IsoDateTime,
@@ -50,7 +51,7 @@ export const SwapRequestRecord = z
     assignmentId: Id,
     stationName: z.string(),
     date: IsoDate,
-    block: ShiftBlock,
+    shift: ShiftRef,
     requesterId: Id,
     requesterName: z.string(),
     targetId: Id,
@@ -123,7 +124,6 @@ export const StaffingGap = z
   .object({
     stationId: Id,
     stationName: z.string(),
-    block: ShiftBlock,
     shift: ShiftRef,
     assigned: z.number().int().nonnegative(),
     checkedIn: z.number().int().nonnegative(),
@@ -137,7 +137,6 @@ export type StaffingGap = z.infer<typeof StaffingGap>;
 export const StaffingGapsResponse = z
   .object({
     asOf: IsoDateTime,
-    activeBlocks: z.array(ShiftBlock),
     /** The shifts on duty now, by their templates. */
     activeShifts: z.array(ShiftRef),
     gaps: z.array(StaffingGap),

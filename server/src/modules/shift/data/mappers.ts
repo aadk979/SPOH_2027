@@ -1,4 +1,5 @@
 import type { BriefingSlotRecord, SwapRequestRecord } from '@spoh/shared';
+import { toShiftRef } from '../../../platform/db/shiftRef.js';
 import type { SlotWithContext, SwapWithContext } from './repo.js';
 
 export function toSwapRecord(swap: SwapWithContext): SwapRequestRecord {
@@ -7,7 +8,7 @@ export function toSwapRecord(swap: SwapWithContext): SwapRequestRecord {
     assignmentId: swap.assignmentId,
     stationName: swap.assignment.station.name,
     date: swap.assignment.eventDay.date.toISOString().slice(0, 10),
-    block: swap.assignment.block,
+    shift: toShiftRef(swap.assignment.shift),
     requesterId: swap.requesterId,
     requesterName: swap.requester.displayName,
     targetId: swap.targetId,

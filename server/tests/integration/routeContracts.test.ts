@@ -12,6 +12,7 @@ import {
   createStation,
   createVolunteer,
   idempotencyKey,
+  shiftOn,
   type TestVolunteer,
 } from '../helpers/fixtures.js';
 import { FROZEN_NOW } from '../setup.js';
@@ -66,7 +67,7 @@ function as(actor: TestVolunteer) {
 describe('me and attendance', () => {
   it('POST /me/check-out ends a shift the volunteer checked in to', async () => {
     const assignment = await rawDb.shiftAssignment.findFirstOrThrow({
-      where: { volunteerId: volunteer.id, block: 'MORNING' },
+      where: { volunteerId: volunteer.id, shift: { template: { code: 'MORNING' } } },
     });
     await rawDb.shiftAssignment.update({
       where: { id: assignment.id },
@@ -82,7 +83,7 @@ describe('me and attendance', () => {
 
   it('POST /me/check-out refuses someone else’s shift', async () => {
     const assignment = await rawDb.shiftAssignment.findFirstOrThrow({
-      where: { volunteerId: ic.id, block: 'MORNING' },
+      where: { volunteerId: ic.id, shift: { template: { code: 'MORNING' } } },
     });
 
     const response = await as(volunteer).post('/me/check-out', { assignmentId: assignment.id });
@@ -221,7 +222,8 @@ describe('roster reads', () => {
 describe('admin writes', () => {
   it('POST /admin/assignments rosters a volunteer (roster.edit)', async () => {
     const newcomer = await createVolunteer({ email: 'new@contracts.test', role: 'VOLUNTEER' });
-    const body = { volunteerId: newcomer.id, stationId, eventDayId, block: 'AFTERNOON' };
+    const shiftId = await shiftOn(eventDayId, 'AFTERNOON');
+    const body = { volunteerId: newcomer.id, stationId, shiftId };
 
     expect((await as(ic).post('/admin/assignments', body)).status).toBe(403);
     const response = await as(chief).post('/admin/assignments', body);
@@ -229,7 +231,7 @@ describe('admin writes', () => {
     expect(response.status).toBe(201);
     expect(
       await rawDb.shiftAssignment.count({
-        where: { volunteerId: newcomer.id, block: 'AFTERNOON' },
+        where: { volunteerId: newcomer.id, shiftId },
       }),
     ).toBe(1);
   });
@@ -341,7 +343,7 @@ describe('push and media without their AWS configuration', () => {
 });
 
 describe('an assignment helper sanity check', () => {
-  it('rosters the fixture volunteers in both blocks', async () => {
+  it('rosters the fixture volunteers on both shifts', async () => {
     await assignToStation({ volunteerId: chief.id, stationId, eventDayId });
     expect(await rawDb.shiftAssignment.count({ where: { stationId } })).toBe(5);
   });

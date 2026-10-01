@@ -5,8 +5,9 @@
 export {
   createEventDayHandler,
   listEventDaysHandler,
+  listShiftTemplatesHandler,
   updateEventDayHandler,
+  updateShiftTemplateHandler,
 } from './http/handlers.js';
 export { addShiftsForDay } from './application/addShiftsForDay.js';
-export { applyShiftHours } from './application/applyShiftHours.js';
 export { requireEventDay } from './application/requireEventDay.js';

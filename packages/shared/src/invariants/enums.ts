@@ -29,9 +29,6 @@ export type DataSource = z.infer<typeof DataSource>;
 export const RedemptionFlag = z.enum(['OVER_STOCK', 'SECOND_GIFT']);
 export type RedemptionFlag = z.infer<typeof RedemptionFlag>;
 
-export const ShiftBlock = z.enum(['MORNING', 'AFTERNOON']);
-export type ShiftBlock = z.infer<typeof ShiftBlock>;
-
 export const SwapStatus = z.enum(['REQUESTED', 'APPROVED', 'REJECTED', 'CANCELLED']);
 export type SwapStatus = z.infer<typeof SwapStatus>;
 

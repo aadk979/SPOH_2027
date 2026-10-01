@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { wallTimeToInstant, zonedDate } from '@spoh/shared';
 import { PrismaClient } from '../src/generated/prisma/client.js';
-import type { CommitteeRole, ShiftBlock } from '../src/generated/prisma/enums.js';
+import type { CommitteeRole } from '../src/generated/prisma/enums.js';
 import {
   ASSIGNMENTS,
   CATEGORIES,
@@ -203,7 +203,8 @@ async function seedGiftTypes(scope: Scope): Promise<void> {
 
 // ── Days and shifts ────────────────────────────────────────────────────────
 
-type Day = { id: string; date: string; isTourDay: boolean; shifts: Map<ShiftBlock, string> };
+/** A seeded day: its shifts by template code. */
+type Day = { id: string; date: string; isTourDay: boolean; shifts: Map<string, string> };
 
 async function seedTemplates(scope: Scope, timezone: string) {
   const templates = [];
@@ -230,7 +231,7 @@ async function seedDay(
     create: { ...scope, date: anchor(date), ...fields },
     update: fields,
   });
-  const shifts = new Map<ShiftBlock, string>();
+  const shifts = new Map<string, string>();
   for (const template of plan.templates) {
     const shift = await prisma.shift.upsert({
       where: { eventDayId_templateId: { eventDayId: row.id, templateId: template.id } },
@@ -243,7 +244,7 @@ async function seedDay(
       },
       update: {},
     });
-    shifts.set(template.code as ShiftBlock, shift.id);
+    shifts.set(template.code, shift.id);
   }
   return { id: row.id, date, isTourDay: day.isTourDay, shifts };
 }
@@ -286,21 +287,20 @@ async function seedPeople(
 async function assign(
   scope: Scope,
   who: { personId: string; membershipId: string; stationId: string; roleLabel: string },
-  shift: { day: Day; block: ShiftBlock },
+  shift: { day: Day; code: string },
 ): Promise<void> {
-  const { day, block } = shift;
+  const { day, code } = shift;
+  const shiftId = day.shifts.get(code);
+  if (!shiftId) throw new Error(`no ${code} shift on ${day.date}`);
   await prisma.shiftAssignment.upsert({
-    where: {
-      volunteerId_eventDayId_block: { volunteerId: who.personId, eventDayId: day.id, block },
-    },
+    where: { volunteerId_shiftId: { volunteerId: who.personId, shiftId } },
     create: {
       ...scope,
       volunteerId: who.personId,
       membershipId: who.membershipId,
       stationId: who.stationId,
       eventDayId: day.id,
-      shiftId: day.shifts.get(block) ?? null,
-      block,
+      shiftId,
       roleLabel: who.roleLabel,
     },
     update: { stationId: who.stationId, roleLabel: who.roleLabel },
@@ -320,11 +320,11 @@ async function seedAssignments(
     const stationId = input.stations.get(assignment.stationCode);
     if (!person || !stationId) continue;
     for (const day of input.days) {
-      for (const block of ['MORNING', 'AFTERNOON'] as ShiftBlock[]) {
+      for (const code of day.shifts.keys()) {
         await assign(
           scope,
           { ...person, stationId, roleLabel: assignment.roleLabel },
-          { day, block },
+          { day, code },
         );
       }
     }
@@ -429,7 +429,7 @@ async function seedSecondEvent(first: Scope, today: string): Promise<void> {
   await assign(
     scope,
     { personId, membershipId: membership.id, stationId: booth.id, roleLabel: 'Booth IC' },
-    { day, block: 'MORNING' },
+    { day, code: 'MORNING' },
   );
   await seedMultiInFirstEvent(first, personId);
 }
@@ -454,7 +454,7 @@ async function seedMultiInFirstEvent(first: Scope, personId: string): Promise<vo
     await assign(
       first,
       { personId, membershipId: membership.id, stationId: booth.id, roleLabel: 'Registration' },
-      { day, block: 'MORNING' },
+      { day, code: 'MORNING' },
     );
   }
 }

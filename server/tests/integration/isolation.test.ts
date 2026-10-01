@@ -62,6 +62,8 @@ interface EventB {
   person: string;
   station: string;
   day: string;
+  shift: string;
+  template: string;
   assignment: string;
   registration: string;
   tick: string;
@@ -119,13 +121,30 @@ async function seedEventB(): Promise<EventB> {
   const day = await rawDb.eventDay.create({
     data: { eventId, date: eventDayAnchor('2027-01-08'), label: 'B day' },
   });
+  const templates = await rawDb.shiftTemplate.findMany({
+    where: { eventId },
+    orderBy: { sortOrder: 'asc' },
+  });
+  const [morning, afternoon] = await Promise.all(
+    templates.map((template) =>
+      rawDb.shift.create({
+        data: {
+          eventId,
+          eventDayId: day.id,
+          templateId: template.id,
+          startsAt: FROZEN_NOW,
+          endsAt: FROZEN_NOW,
+        },
+      }),
+    ),
+  );
   const assignment = await rawDb.shiftAssignment.create({
     data: {
       eventId,
       volunteerId: person,
       stationId: station.id,
       eventDayId: day.id,
-      block: 'MORNING',
+      shiftId: (morning as { id: string }).id,
       roleLabel: 'Volunteer',
     },
   });
@@ -174,6 +193,8 @@ async function seedEventB(): Promise<EventB> {
   });
   return {
     scope,
+    shift: (afternoon as { id: string }).id,
+    template: (templates[0] as { id: string }).id,
     person,
     station: station.id,
     day: day.id,
@@ -381,8 +402,7 @@ const CASES: Record<string, Case> = {
     body: (b) => ({
       volunteerId: b.person,
       stationId: b.station,
-      eventDayId: b.day,
-      block: 'AFTERNOON',
+      shiftId: b.shift,
     }),
   },
   'DELETE /admin/assignments/:id': { params: (b) => ({ id: b.assignment }) },
@@ -390,6 +410,11 @@ const CASES: Record<string, Case> = {
   'POST /admin/stations': noId('creates a station in the path event'),
   'PATCH /admin/stations/:id': { params: (b) => ({ id: b.station }), body: () => ({ name: 'X' }) },
   'GET /admin/event-days': LIST,
+  'GET /admin/shift-templates': LIST,
+  'PATCH /admin/shift-templates/:id': {
+    params: (b) => ({ id: b.template }),
+    body: () => ({ label: 'X' }),
+  },
   'POST /admin/event-days': noId('creates a day in the path event'),
   'PATCH /admin/event-days/:id': { params: (b) => ({ id: b.day }), body: () => ({ label: 'X' }) },
   'POST /admin/gift-types': noId('creates a gift type in the path event'),

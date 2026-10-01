@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { CommitteeRole, ShiftBlock } from '../../invariants/enums.js';
+import { CommitteeRole } from '../../invariants/enums.js';
+import { ShiftRef } from '../shift/index.js';
 import { Id, IsoDate, IsoDateTime } from '../common/index.js';
 
 /**
@@ -66,7 +67,8 @@ export const RosterImportRow = z
     reportsToEmail: VolunteerEmail.optional(),
     stationCode: z.string().trim().max(64).optional(),
     eventDate: IsoDate.optional(),
-    block: ShiftBlock.optional(),
+    /** The shift on that date, by its template's code (MORNING, NIGHT, ...). */
+    shift: z.string().trim().min(1).max(40).optional(),
     roleLabel: z.string().trim().max(64).optional(),
   })
   .strict();
@@ -111,7 +113,7 @@ export const ShiftAssignmentRecord = z
     stationName: z.string(),
     eventDayId: Id,
     date: IsoDate,
-    block: ShiftBlock,
+    shift: ShiftRef,
     roleLabel: z.string(),
     checkedInAt: IsoDateTime.nullable(),
     checkedOutAt: IsoDateTime.nullable(),

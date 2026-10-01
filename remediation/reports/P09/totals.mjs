@@ -7,7 +7,7 @@
  * difference: every event-owned row belongs to an event, registrations per
  * category and per station and day agree, every station's type is its own
  * event's (it granted exactly what its kind and flags did until P09.10), every assignment sits on the shift for its day
- * and block, and every volunteer has an Event #1 membership with the same role,
+ * (and, until P09.10, its block), and every volunteer has an Event #1 membership with the same role,
  * portfolio, reporting line and standing, and every membership column names
  * the same person's membership in the row's own event.
  *
@@ -91,11 +91,11 @@ const CHECKS = {
   'stations typed from another event': `
     SELECT count(*) AS n FROM "Station" s JOIN "StationType" t ON t."id" = s."typeId"
     WHERE t."eventId" <> s."eventId"`,
-  'assignments off their day and block': `
+  // The block column is gone (P09.10); an assignment's day must be its shift's.
+  'assignments on a shift of another day': `
     SELECT count(*) AS n FROM "ShiftAssignment" a
-    LEFT JOIN "Shift" sh ON sh."id" = a."shiftId"
-    LEFT JOIN "ShiftTemplate" t ON t."id" = sh."templateId"
-    WHERE sh."id" IS NULL OR sh."eventDayId" <> a."eventDayId" OR t."code" <> a."block"::text`,
+    JOIN "Shift" sh ON sh."id" = a."shiftId"
+    WHERE sh."eventDayId" <> a."eventDayId" OR sh."eventId" <> a."eventId"`,
   'volunteers without a matching membership': `
     SELECT count(*) AS n FROM "Volunteer" v
     CROSS JOIN (SELECT "id" FROM "Event" ORDER BY "createdAt" LIMIT 1) e

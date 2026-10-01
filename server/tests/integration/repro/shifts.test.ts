@@ -8,11 +8,12 @@ import { FROZEN_NOW } from '../../setup.js';
 import {
   assignToStation,
   bearer,
+  createEventDayOn,
   createEventDayToday,
   createStation,
   createVolunteer,
-  type TestVolunteer,
   testEvent,
+  type TestVolunteer,
 } from '../../helpers/fixtures.js';
 
 /**
@@ -96,13 +97,7 @@ describe('shifts and swaps (P03 repros)', () => {
     // A race: five rounds make it lose every run.
     const statuses: number[][] = [];
     for (let round = 0; round < 5; round += 1) {
-      const day = await rawDb.eventDay.create({
-        data: {
-          eventId: (await testEvent()).eventId,
-          date: new Date(Date.UTC(2027, 1, 1 + round)),
-          label: `Round ${round}`,
-        },
-      });
+      const day = await createEventDayOn(`2027-02-0${1 + round}`, `Round ${round}`);
       const shift = await assignToStation({ volunteerId: owner.id, stationId, eventDayId: day.id });
       const swapId = (await askSwap(shift.id, first)).body.swap.id as string;
       const pair = await Promise.all([decide(swapId, 'APPROVED'), decide(swapId, 'REJECTED')]);
@@ -141,7 +136,7 @@ describe('shifts and swaps (P03 repros)', () => {
       volunteerId: owner.id,
       stationId,
       eventDayId: dayId,
-      block: 'AFTERNOON',
+      shift: 'AFTERNOON',
     });
     await presentToday(owner);
 
@@ -192,13 +187,7 @@ describe('shifts and swaps (P03 repros)', () => {
 
   // F03-023
   it('does not warn about a shift from a previous day that nobody checked out of', async () => {
-    const yesterday = await rawDb.eventDay.create({
-      data: {
-        eventId: (await testEvent()).eventId,
-        date: new Date('2027-01-06T00:00:00.000Z'),
-        label: 'Day 0',
-      },
-    });
+    const yesterday = await createEventDayOn('2027-01-06', 'Day 0');
     const old = await assignToStation({
       volunteerId: owner.id,
       stationId,

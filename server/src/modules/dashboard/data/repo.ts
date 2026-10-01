@@ -1,6 +1,7 @@
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
+import { SHIFT_REF_SELECT } from '../../../platform/db/shiftRef.js';
 
 /**
  * Reads for the live dashboard (PRODUCT_BRIEF §9), in the event the request
@@ -257,17 +258,14 @@ export async function stationRoster(scope: EventScope, stationId: string, day: D
     where: { eventId: scope.eventId, stationId, eventDay: { date: day } },
     select: {
       id: true,
-      block: true,
       volunteerId: true,
       roleLabel: true,
       checkedInAt: true,
       checkedOutAt: true,
       volunteer: { select: { displayName: true } },
-      shift: {
-        select: { startsAt: true, endsAt: true, template: { select: { code: true, label: true } } },
-      },
+      shift: { select: SHIFT_REF_SELECT },
     },
-    orderBy: [{ roleLabel: 'asc' }, { block: 'asc' }],
+    orderBy: [{ roleLabel: 'asc' }, { shift: { startsAt: 'asc' } }],
   });
 }
 

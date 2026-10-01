@@ -138,7 +138,7 @@ test.describe('roster administration', () => {
     await page.getByRole('link', { name: /Event settings/ }).click();
     await page.waitForURL('**/admin/settings');
 
-    await expect(page.getByRole('heading', { name: 'Shift blocks' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Shift hours' })).toBeVisible();
 
     // The two times that decide whether the capture screens work at all.
     await expect(page.getByLabel('Morning starts')).toHaveValue('09:30');

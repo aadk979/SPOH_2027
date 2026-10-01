@@ -9,7 +9,7 @@ import {
   findAssignmentForSwap,
   findSwapById,
   findVolunteerActive,
-  hasAssignmentInBlock,
+  hasAssignmentOnShift,
 } from '../data/repo.js';
 import { assertNotSelf, assertOwnShift, assertTargetFree } from '../domain/swapRules.js';
 
@@ -29,12 +29,11 @@ export async function requestSwap(
     // Caught here rather than at approval so the requester finds out now,
     // while there is still time to ask somebody else.
     assertTargetFree(
-      await hasAssignmentInBlock(tx, scope, {
+      await hasAssignmentOnShift(tx, scope, {
         volunteerId: target.id,
-        eventDayId: assignment.eventDayId,
-        block: assignment.block,
+        shiftId: assignment.shiftId,
       }),
-      'That volunteer is already working this block. Ask someone else.',
+      'That volunteer is already working this shift. Ask someone else.',
     );
 
     const row = await createSwap(tx, scope, {

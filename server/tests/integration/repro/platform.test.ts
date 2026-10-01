@@ -14,8 +14,9 @@ import {
   createStation,
   createVolunteer,
   idempotencyKey,
-  type TestVolunteer,
+  shiftOn,
   testEvent,
+  type TestVolunteer,
 } from '../../helpers/fixtures.js';
 
 /**
@@ -197,8 +198,7 @@ describe('cross-cutting rules (P03 repros)', () => {
       .send({
         volunteerId: volunteer.id,
         stationId: other,
-        eventDayId: dayId,
-        block: 'MORNING',
+        shiftId: await shiftOn(dayId),
         roleLabel: 'Volunteer',
       });
     expect(response.status).toBe(201);

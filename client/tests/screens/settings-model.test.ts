@@ -11,8 +11,6 @@ function validValues(): SettingsValues {
   return {
     ...Object.fromEntries(NUMERIC_FIELDS.map((field) => [field.key, '2'])),
     eventName: ' Test event ',
-    morning: { start: '09:00', end: '13:00' },
-    afternoon: { start: '12:00', end: '18:00' },
   };
 }
 
@@ -23,7 +21,7 @@ function issuesFor(values: SettingsValues) {
 }
 
 describe('settings request', () => {
-  it('trims names and numbers, keeps overlapping blocks and includes every setting', () => {
+  it('trims names and numbers and includes every setting', () => {
     const values = validValues();
     values.implausibleTapsPerMinute = ' 2.5 ';
     const parsed = RuntimeSettings.parse(toSettingsRequest(values));
@@ -35,7 +33,6 @@ describe('settings request', () => {
           field.key === 'implausibleTapsPerMinute' ? 2.5 : 2,
         ]),
       ),
-      shiftBlocks: { MORNING: values.morning, AFTERNOON: values.afternoon },
     });
     // The full object is also a valid patch: the server accepts what the screen sends.
     expect(UpdateSettingsRequest.safeParse(parsed).success).toBe(true);
@@ -63,23 +60,6 @@ describe('settings request', () => {
     'requires a whole number for $key',
     (field) => {
       expect(issuesFor({ ...validValues(), [field.key]: '1.5' })).toEqual([field.key]);
-    },
-  );
-
-  it.each(['morning', 'afternoon'] as const)(
-    'requires both %s times and rejects reversed or equal blocks',
-    (block) => {
-      const key = block === 'morning' ? 'MORNING' : 'AFTERNOON';
-      for (const endpoint of ['start', 'end'] as const) {
-        const values = validValues();
-        values[block] = { ...values[block], [endpoint]: '' };
-        expect(issuesFor(values)).toEqual([`shiftBlocks.${key}.${endpoint}`]);
-      }
-      for (const end of ['09:00', '08:00']) {
-        const values = validValues();
-        values[block] = { start: '09:00', end };
-        expect(issuesFor(values)).toEqual([`shiftBlocks.${key}.end`]);
-      }
     },
   );
 });

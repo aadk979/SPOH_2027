@@ -12,7 +12,9 @@ export interface ImportSnapshot {
   existing: ReadonlyMap<string, { id: string; role: CommitteeRole; active: boolean }>;
   stationIdByCode: ReadonlyMap<string, string>;
   eventDayIdByDate: ReadonlyMap<string, string>;
-  /** Slots existing volunteers hold, as volunteerId|eventDayId|block. */
+  /** The event's shifts, as eventDayId|templateCode → shiftId. */
+  shiftIdByDayAndCode: ReadonlyMap<string, string>;
+  /** Shifts existing volunteers hold, as volunteerId|shiftId. */
   heldSlots: ReadonlySet<string>;
   /** Managers the file names who are on the roster but not in the file, by email. */
   rosterManagers: ReadonlyMap<string, { id: string; active: boolean }>;
@@ -36,7 +38,7 @@ export interface AssignmentStep {
   email: string;
   stationId: string;
   eventDayId: string;
-  block: NonNullable<RosterImportRow['block']>;
+  shiftId: string;
   roleLabel: string;
   created: boolean;
 }
@@ -207,15 +209,15 @@ function planLink(state: PlanState, { row, rowNumber }: RowAt) {
 /** The row's shift, if it names a whole one; an issue for any part it gets wrong. */
 function resolveShift(state: PlanState, { row, rowNumber }: RowAt) {
   const { snapshot, plan } = state;
-  // An assignment needs all three of station, date and block. A row with only
+  // An assignment needs all three of station, date and shift. A row with only
   // some of them describes a person, not a shift, and is skipped rather than
   // guessed at.
-  if (!row.stationCode || !row.eventDate || !row.block) {
-    if (row.stationCode || row.eventDate || row.block) {
+  if (!row.stationCode || !row.eventDate || !row.shift) {
+    if (row.stationCode || row.eventDate || row.shift) {
       plan.issues.push({
         rowNumber,
-        field: 'stationCode/eventDate/block',
-        message: 'A shift assignment needs all of stationCode, eventDate and block',
+        field: 'stationCode/eventDate/shift',
+        message: 'A shift assignment needs all of stationCode, eventDate and shift',
       });
     }
     return null;
@@ -238,7 +240,16 @@ function resolveShift(state: PlanState, { row, rowNumber }: RowAt) {
     });
     return null;
   }
-  return { stationId, eventDayId, block: row.block };
+  const shiftId = snapshot.shiftIdByDayAndCode.get(`${eventDayId}|${row.shift}`);
+  if (!shiftId) {
+    plan.issues.push({
+      rowNumber,
+      field: 'shift',
+      message: `No ${row.shift} shift on ${row.eventDate}`,
+    });
+    return null;
+  }
+  return { stationId, eventDayId, shiftId };
 }
 
 function planAssignment(state: PlanState, at: RowAt) {
@@ -248,7 +259,7 @@ function planAssignment(state: PlanState, at: RowAt) {
   if (!shift || seen.get(row.email) !== 'active') return;
 
   const owner = snapshot.existing.get(row.email)?.id ?? row.email;
-  const slot = `${owner}|${shift.eventDayId}|${shift.block}`;
+  const slot = `${owner}|${shift.shiftId}`;
   const created = !snapshot.heldSlots.has(slot) && !planned.has(slot);
   planned.add(slot);
   plan.assignments.push({

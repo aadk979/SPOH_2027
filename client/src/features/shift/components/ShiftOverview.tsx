@@ -10,13 +10,13 @@ import { NavTile } from '@/shared/ui/NavTile';
 import { Callout, ButtonLink, Card, CardGrid, CardTitle, Section } from '@/shared/ui';
 
 import { useAttendance } from '@/features/attendance';
+import { useEventTime } from '@/features/session';
 import { useCheckIn, useCheckOut } from '../queries';
-import { blockLabel, readableRole } from '@/shared/lib/format';
-import { useClientSettings } from '@/shared/lib/runtimeSettings';
+import { readableRole } from '@/shared/lib/format';
 
 export function ShiftCard({ me }: { me: MeResponse }): ReactNode {
   const assignment = me.currentAssignment;
-  const { shiftBlocks } = useClientSettings();
+  const format = useEventTime();
   const [confirmingCheckOut, setConfirmingCheckOut] = useState(false);
   const attendance = useAttendance();
   const checkIn = useCheckIn(assignment);
@@ -46,7 +46,7 @@ export function ShiftCard({ me }: { me: MeResponse }): ReactNode {
   return (
     <Card>
       <p className="text-caption font-semibold tracking-[0.06em] text-text-muted uppercase">
-        {assignment.dayLabel} · {blockLabel(assignment.block, shiftBlocks)}
+        {assignment.dayLabel} · {format.shiftHours(assignment.shift)}
       </p>
 
       {/* The station name is the largest thing on the home screen, because it

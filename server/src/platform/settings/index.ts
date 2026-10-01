@@ -43,13 +43,6 @@ export const DEFAULT_SETTINGS: RuntimeSettings = Object.freeze({
   // Superseded by the event's own name (Event.name); retired with the global settings in P10.
   eventName: 'Event',
 
-  // BUILD_PLAN §1.1. The blocks overlap between 13:30 and 14:00; that handover
-  // is intentional and means a moment can belong to both.
-  shiftBlocks: {
-    MORNING: { start: '09:30', end: '14:00' },
-    AFTERNOON: { start: '13:30', end: '18:00' },
-  },
-
   silentStationMinutes: 15,
   staleDeviceMinutes: 15,
   implausibleTapsPerMinute: 20,
@@ -175,8 +168,8 @@ export async function updateSettings(
     for (const [key, value] of entries) {
       await tx.appSetting.upsert({
         where: { key },
-        create: { key, value: value as object, updatedById: actorId },
-        update: { value: value as object, updatedById: actorId },
+        create: { key, value, updatedById: actorId },
+        update: { value, updatedById: actorId },
       });
     }
 

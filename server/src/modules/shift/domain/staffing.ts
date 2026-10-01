@@ -2,13 +2,13 @@ import type { LongShiftWarning, ShiftRef, StaffingGap } from '@spoh/shared';
 import { minutesBetween } from '../../../platform/time/index.js';
 
 /**
- * Which stations are understaffed, per running block. Three distinct problems,
+ * Which stations are understaffed, per running shift. Three distinct problems,
  * because they need three different responses: nobody rostered at all,
  * everyone rostered but nobody arrived, and some but not all of the team.
  */
 interface StaffingRow {
   stationId: string;
-  block: unknown;
+  shiftCode: string;
   assigned: number;
   checkedIn: number;
 }
@@ -25,7 +25,6 @@ function gapAt(
   return {
     stationId: station.id,
     stationName: station.name,
-    block: shift.code as StaffingGap['block'],
     shift,
     assigned,
     checkedIn,
@@ -41,7 +40,9 @@ export function staffingGaps(input: {
 }): StaffingGap[] {
   return input.shifts.flatMap((shift) =>
     input.stations.flatMap((station) => {
-      const row = input.staffing.find((s) => s.stationId === station.id && s.block === shift.code);
+      const row = input.staffing.find(
+        (s) => s.stationId === station.id && s.shiftCode === shift.code,
+      );
       const gap = gapAt(station, shift, row);
       return gap ? [gap] : [];
     }),

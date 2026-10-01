@@ -7,8 +7,6 @@ import { useSyncDiagnostics } from '../hooks/useSyncDiagnostics';
 import { SyncDiagnostics } from '../components/SyncDiagnostics';
 import { ButtonLink, Card, EmptyState, Section, Stack, StatusText } from '@/shared/ui';
 import { useMe, useRequireSession, useEventTime } from '@/features/session';
-import { blockLabel } from '@/shared/lib/format';
-import { useClientSettings } from '@/shared/lib/runtimeSettings';
 
 /**
  * My shift, plus the sync diagnostics panel (remediation/phases/P07-client-refactor.md).
@@ -22,7 +20,6 @@ export default function ShiftScreen(): ReactNode {
   const format = useEventTime();
   const session = useRequireSession();
   const { data: me } = useMe();
-  const { shiftBlocks } = useClientSettings();
   const diagnostics = useSyncDiagnostics();
   if (!session) return null;
 
@@ -39,7 +36,7 @@ export default function ShiftScreen(): ReactNode {
                 <Card as="li" variant="flat" key={assignment.id}>
                   <p className="font-semibold">{assignment.station.name}</p>
                   <p className="text-caption text-text-muted">
-                    {assignment.dayLabel} · {blockLabel(assignment.block, shiftBlocks)} ·{' '}
+                    {assignment.dayLabel} · {format.shiftHours(assignment.shift)} ·{' '}
                     {assignment.roleLabel}
                   </p>
                   {assignment.checkedInAt ? (

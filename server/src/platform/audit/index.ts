@@ -61,6 +61,7 @@ export type AuditAction =
   | 'station.update'
   | 'eventDay.create'
   | 'eventDay.update'
+  | 'shiftTemplate.update'
   | 'giftType.create'
   | 'giftType.update'
   | 'settings.update'

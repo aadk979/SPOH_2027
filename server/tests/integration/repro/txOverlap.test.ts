@@ -11,8 +11,9 @@ import {
   createStation,
   createVolunteer,
   idempotencyKey,
-  type TestVolunteer,
+  shiftOn,
   testEvent,
+  type TestVolunteer,
 } from '../../helpers/fixtures.js';
 
 /**
@@ -54,6 +55,7 @@ let target: TestVolunteer;
 let chief: TestVolunteer;
 let admin: TestVolunteer;
 let dayId: string;
+let afternoon: string;
 let stationId: string;
 
 beforeAll(() => {
@@ -63,6 +65,7 @@ beforeAll(() => {
 beforeEach(async () => {
   await resetDatabase();
   dayId = (await createEventDayToday()).id;
+  afternoon = await shiftOn(dayId, 'AFTERNOON');
   stationId = (await createStation({ code: 'DESK' })).id;
   owner = await createVolunteer({ email: 'owner@tx.test', role: 'VOLUNTEER' });
   target = await createVolunteer({ email: 'target@tx.test', role: 'VOLUNTEER' });
@@ -113,7 +116,7 @@ describe('no overlapping queries on a transaction connection (F03-019)', () => {
         request(app)
           .post('/api/v1/admin/assignments')
           .set('Authorization', bearer(chief))
-          .send({ volunteerId: target.id, stationId, eventDayId: dayId, block: 'AFTERNOON' }),
+          .send({ volunteerId: target.id, stationId, shiftId: afternoon }),
       ),
     ).toBe(0);
   });

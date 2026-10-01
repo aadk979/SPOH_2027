@@ -4,6 +4,7 @@ import {
   existingSlots,
   findVolunteerByEmail,
   findVolunteersByEmails,
+  shiftIdsByDayAndCode,
   stationIdsByCode,
   type Volunteer,
 } from '../data/repo.js';
@@ -42,20 +43,23 @@ export async function loadImportSnapshot(
   const managerEmails = request.rows.flatMap((row) =>
     row.reportsToEmail && !inFile.has(row.reportsToEmail) ? [row.reportsToEmail] : [],
   );
-  const [stationIdByCode, eventDayIdByDate, heldSlots, rosterManagers] = await Promise.all([
-    stationIdsByCode(actor.scope),
-    eventDayIdsByDate(actor.scope),
-    existingSlots(
-      actor.scope,
-      [...accounts.values()].map((account) => account.id),
-    ),
-    findVolunteersByEmails([...new Set(managerEmails)]),
-  ]);
+  const [stationIdByCode, eventDayIdByDate, shiftIdByDayAndCode, heldSlots, rosterManagers] =
+    await Promise.all([
+      stationIdsByCode(actor.scope),
+      eventDayIdsByDate(actor.scope),
+      shiftIdsByDayAndCode(actor.scope),
+      existingSlots(
+        actor.scope,
+        [...accounts.values()].map((account) => account.id),
+      ),
+      findVolunteersByEmails([...new Set(managerEmails)]),
+    ]);
   return {
     existing: accounts,
     accounts,
     stationIdByCode,
     eventDayIdByDate,
+    shiftIdByDayAndCode,
     heldSlots,
     rosterManagers,
   };

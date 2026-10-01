@@ -1,41 +1,20 @@
 import type { RuntimeSettings } from '@spoh/shared';
 import { NUMERIC_FIELDS } from './numericFields';
 
-export interface ShiftBlockValue {
-  start: string;
-  end: string;
-}
-
 /** What the settings screen edits: text as typed, numbers as their input strings. */
-export type SettingsValues = Record<string, string | ShiftBlockValue> & {
-  eventName: string;
-  morning: ShiftBlockValue;
-  afternoon: ShiftBlockValue;
-};
+export type SettingsValues = Record<string, string> & { eventName: string };
 
-export const EMPTY_SETTINGS: SettingsValues = {
-  eventName: '',
-  morning: { start: '', end: '' },
-  afternoon: { start: '', end: '' },
-};
-
-/** A shift block's errors belong to the row that edits it. */
-export const SETTINGS_ERROR_FIELDS = {
-  'shiftBlocks.MORNING': 'morning',
-  'shiftBlocks.AFTERNOON': 'afternoon',
-} as const;
+export const EMPTY_SETTINGS: SettingsValues = { eventName: '' };
 
 export function toSettingsValues(settings: RuntimeSettings): SettingsValues {
   return {
     ...Object.fromEntries(NUMERIC_FIELDS.map((field) => [field.key, String(settings[field.key])])),
     eventName: settings.eventName ?? '',
-    morning: settings.shiftBlocks.MORNING,
-    afternoon: settings.shiftBlocks.AFTERNOON,
   };
 }
 
-function toNumber(raw: string | ShiftBlockValue | undefined): number | undefined {
-  const text = typeof raw === 'string' ? raw.trim() : '';
+function toNumber(raw: string | undefined): number | undefined {
+  const text = raw?.trim() ?? '';
   return text ? Number(text) : undefined;
 }
 
@@ -48,6 +27,5 @@ export function toSettingsRequest(values: SettingsValues) {
   return {
     eventName: values.eventName.trim(),
     ...Object.fromEntries(NUMERIC_FIELDS.map((field) => [field.key, toNumber(values[field.key])])),
-    shiftBlocks: { MORNING: values.morning, AFTERNOON: values.afternoon },
   };
 }

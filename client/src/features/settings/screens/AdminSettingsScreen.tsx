@@ -6,7 +6,7 @@ import { useMe, useRequireSession } from '@/features/session';
 import { useSettingsForm } from '../hooks/useSettingsForm';
 import { SettingsFeedback } from '../components/SettingsFeedback';
 import { EventNameField } from '../components/EventNameField';
-import { ShiftBlocksForm } from '../components/ShiftBlocksForm';
+import { ShiftHoursForm } from '../components/ShiftHoursForm';
 import { ThresholdsForm } from '../components/ThresholdsForm';
 import { SettingsApply } from '../components/SettingsApply';
 export default function AdminSettingsScreen(): ReactNode {
@@ -24,7 +24,7 @@ export default function AdminSettingsScreen(): ReactNode {
         ) : (
           <>
             <EventNameField form={form} canEdit={canEdit} />
-            <ShiftBlocksForm form={form} canEdit={canEdit} />
+            <ShiftHoursForm enabled={session !== null} canEdit={canEdit} />
             <ThresholdsForm form={form} canEdit={canEdit} />
             <SettingsApply form={form} canEdit={canEdit} />
           </>

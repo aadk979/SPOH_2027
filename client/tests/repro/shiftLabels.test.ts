@@ -1,64 +1,41 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { blockLabel } from '@/shared/lib/format';
+import { describe, expect, it } from 'vitest';
+import { shiftHours } from '@/shared/lib/format';
+import { shiftHoursError } from '@/features/settings/model/shiftHours';
 
 /**
- * F01-046: shift labels must follow the configured shift hours, which an admin
- * changes for a dry run, not the hours the client was compiled with.
+ * F01-046: shift labels must follow the shift's own hours, which an admin
+ * moves for a dry run, not the hours the client was compiled with. Since
+ * P09.10 the hours come with the shift itself (ADR-002).
  */
 
-vi.mock('@/shared/lib/api', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/shared/lib/api')>();
-  return { ...actual, api: vi.fn() };
-});
-
-const apiModule = await import('@/shared/lib/api');
-const mockedApi = vi.mocked(apiModule.api);
-
 const MOVED = {
-  MORNING: { start: '08:00', end: '12:30' },
-  AFTERNOON: { start: '12:00', end: '16:00' },
+  label: 'Morning',
+  // 08:00–12:30 in Singapore (UTC+8).
+  startsAt: '2027-01-07T00:00:00.000Z',
+  endsAt: '2027-01-07T04:30:00.000Z',
 };
 
-afterEach(() => {
-  mockedApi.mockReset();
-});
-
 describe('shift labels (F01-046)', () => {
-  it('labels a block with the hours it is given', () => {
-    expect(blockLabel('MORNING', MOVED)).toBe('08:00–12:30');
-    expect(blockLabel('AFTERNOON', MOVED)).toBe('12:00–16:00');
+  it("labels a shift with its own hours on the event's clock", () => {
+    expect(shiftHours(MOVED, 'Asia/Singapore')).toBe('08:00–12:30');
+    expect(shiftHours(MOVED, 'Europe/London')).toBe('00:00–04:30');
   });
 
-  it('loads the configured shift hours with the other runtime settings', async () => {
-    const { getClientSettings, loadClientSettings } = await import('@/shared/lib/runtimeSettings');
-    const { setSession } = await import('@/shared/lib/session');
-    // Settings are read signed in (F02-010).
-    setSession({
-      accessToken: 'token',
-      volunteerId: 'v1',
-      displayName: 'Sam',
-      role: 'VOLUNTEER',
-      capabilities: [],
-      expiresAt: Date.now() + 60_000,
-      refreshAvailable: false,
-    });
-    mockedApi.mockResolvedValueOnce({
-      settings: {
-        dashboardPollSeconds: 3,
-        alertPollSeconds: 10,
-        captureUndoWindowSeconds: 10,
-        captureSendGraceSeconds: 2,
-        outboxWarningCount: 20,
-        outboxWarningAgeMinutes: 5,
-        silentStationMinutes: 15,
-        staleDeviceMinutes: 15,
-        eventName: 'SPOH 2027',
-        shiftBlocks: MOVED,
-      },
-    });
+  it("names the shift until the event's clock is known", () => {
+    expect(shiftHours(MOVED, undefined)).toBe('Morning');
+  });
+});
 
-    await loadClientSettings();
+describe('shift hours on the settings screen', () => {
+  it('refuses a shift that ends before it starts, unless it runs past midnight', () => {
+    expect(shiftHoursError({ start: '09:00', end: '13:00' }, false)).toBeUndefined();
+    expect(shiftHoursError({ start: '09:00', end: '09:00' }, false)).toBeDefined();
+    expect(shiftHoursError({ start: '22:00', end: '06:00' }, false)).toBeDefined();
+    expect(shiftHoursError({ start: '22:00', end: '06:00' }, true)).toBeUndefined();
+  });
 
-    expect(getClientSettings().shiftBlocks).toEqual(MOVED);
+  it('requires both times', () => {
+    expect(shiftHoursError({ start: '', end: '13:00' }, false)).toBe('Enter both times');
+    expect(shiftHoursError({ start: '09:00', end: '' }, false)).toBe('Enter both times');
   });
 });

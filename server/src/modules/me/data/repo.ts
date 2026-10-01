@@ -1,5 +1,6 @@
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
+import { SHIFT_REF_SELECT } from '../../../platform/db/shiftRef.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { STATION_WITH_TYPE } from '../../station/index.js';
 
@@ -12,6 +13,7 @@ import { STATION_WITH_TYPE } from '../../station/index.js';
 const assignmentInclude = {
   station: { include: STATION_WITH_TYPE },
   eventDay: true,
+  shift: { select: SHIFT_REF_SELECT },
 } satisfies Prisma.ShiftAssignmentInclude;
 
 export type AssignmentWithContext = Prisma.ShiftAssignmentGetPayload<{
@@ -48,7 +50,7 @@ export async function listAssignmentsForVolunteer(
   return prisma.shiftAssignment.findMany({
     where: { eventId: scope.eventId, volunteerId },
     include: assignmentInclude,
-    orderBy: [{ eventDay: { date: 'asc' } }, { block: 'asc' }],
+    orderBy: [{ shift: { startsAt: 'asc' } }],
   });
 }
 

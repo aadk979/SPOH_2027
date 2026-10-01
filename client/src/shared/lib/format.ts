@@ -1,4 +1,4 @@
-import type { ShiftBlock, ShiftBlockWindows } from '@spoh/shared';
+import { zonedWallTime, type ShiftRef } from '@spoh/shared';
 
 /**
  * Display formatting.
@@ -74,24 +74,17 @@ export function formatDuration(minutes: number | null | undefined): string {
 }
 
 /**
- * A shift block as the roster prints it, from the configured hours: an admin
- * moves them for a dry run, and a label compiled into the client then showed
- * the old times while attendance followed the new ones (F01-046).
+ * "09:30–14:00": a shift's own hours on the event's clock (P09.12). They come
+ * with the shift, so a template an admin moves for a dry run shows its new
+ * hours everywhere at once (F01-046). Without the clock, the shift's name.
  */
-export function blockLabel(block: ShiftBlock, blocks: ShiftBlockWindows): string {
-  const window = blocks[block];
-  return `${window.start}–${window.end}`;
-}
-
-/**
- * The same two blocks as a word.
- *
- * A swap request reads "Room A, 7 Jan, morning" — the exact times are not what
- * an IC is deciding on, and printing them there makes the line long enough to
- * wrap on a phone.
- */
-export function blockWord(block: string): string {
-  return block === 'MORNING' ? 'morning' : 'afternoon';
+export function shiftHours(
+  shift: Pick<ShiftRef, 'label' | 'startsAt' | 'endsAt'>,
+  timeZone: string | null | undefined,
+): string {
+  if (!timeZone) return shift.label;
+  const at = (iso: string) => zonedWallTime(new Date(iso), timeZone).slice(11, 16);
+  return `${at(shift.startsAt)}–${at(shift.endsAt)}`;
 }
 
 /** SAFETY_IC → Safety Ic. Good enough for a fallback beside a real job title. */

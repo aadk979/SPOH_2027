@@ -1,8 +1,9 @@
 import { z } from 'zod';
 import { Capability } from '../../access/capabilities.js';
-import { CommitteeRole, ShiftBlock } from '../../invariants/enums.js';
+import { CommitteeRole } from '../../invariants/enums.js';
 import { Id, IsoDate, IsoDateTime } from '../common/index.js';
 import { EventSummary } from '../event/index.js';
+import { ShiftRef } from '../shift/index.js';
 import { StationSummary } from '../station/index.js';
 
 /** A volunteer the caller may need to contact — their IC, their Deputy, the Chief. */
@@ -23,7 +24,8 @@ export const MyAssignment = z
     eventDayId: Id,
     date: IsoDate,
     dayLabel: z.string(),
-    block: ShiftBlock,
+    /** The shift, named and timed by the event (ADR-002). */
+    shift: ShiftRef,
     roleLabel: z.string(),
     station: StationSummary,
     checkedInAt: IsoDateTime.nullable(),

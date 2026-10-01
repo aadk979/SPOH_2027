@@ -8,7 +8,7 @@ import {
   claimDecision,
   findSwapById,
   findSwapForDecision,
-  hasAssignmentInBlock,
+  hasAssignmentOnShift,
   moveAssignment,
   type SwapForDecision,
 } from '../data/repo.js';
@@ -27,12 +27,11 @@ async function approve(tx: PrismaTransactionClient, scope: EventScope, swap: Swa
   // Re-checked at approval: the target may have picked up another shift in the
   // time between the request and the decision.
   assertTargetFree(
-    await hasAssignmentInBlock(tx, scope, {
+    await hasAssignmentOnShift(tx, scope, {
       volunteerId: swap.targetId,
-      eventDayId: swap.assignment.eventDayId,
-      block: swap.assignment.block,
+      shiftId: swap.assignment.shiftId,
     }),
-    'That volunteer has since been assigned to this block. The swap cannot be approved.',
+    'That volunteer has since been assigned to this shift. The swap cannot be approved.',
   );
   await moveAssignment(tx, scope, { assignmentId: swap.assignmentId, targetId: swap.targetId });
 }

@@ -35,7 +35,7 @@ beforeEach(async () => {
   eventDayId = (await createEventDayToday()).id;
   stationId = (await createStation({ code: 'BOOTH' })).id;
   booth = await createVolunteer({ email: 'booth@shifts.test', role: 'VOLUNTEER' });
-  await assignToStation({ volunteerId: booth.id, stationId, eventDayId, block: 'MORNING' });
+  await assignToStation({ volunteerId: booth.id, stationId, eventDayId, shift: 'MORNING' });
 });
 
 async function moveMorningShift(window: { startsAt: Date; endsAt: Date }): Promise<void> {

@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { ShiftBlock } from '../../invariants/enums.js';
 import { Id, IsoDateTime } from '../common/index.js';
 
 /**
@@ -27,26 +26,6 @@ export const WallClockTime = z
   .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'must be HH:MM on a 24-hour clock');
 export type WallClockTime = z.infer<typeof WallClockTime>;
 
-export const ShiftBlockWindow = z
-  .object({
-    start: WallClockTime,
-    end: WallClockTime,
-  })
-  .strict()
-  .refine((w) => w.start < w.end, {
-    message: 'a shift block must end after it starts',
-    path: ['end'],
-  });
-export type ShiftBlockWindow = z.infer<typeof ShiftBlockWindow>;
-
-/**
- * The two blocks are enum members in the database, so the set is fixed; their
- * boundaries are not. They are allowed to overlap — the 13:30–14:00 handover is
- * deliberate and means a moment can legitimately belong to both.
- */
-export const ShiftBlockWindows = z.record(ShiftBlock, ShiftBlockWindow);
-export type ShiftBlockWindows = z.infer<typeof ShiftBlockWindows>;
-
 const Minutes = z.number().int().min(1).max(1440);
 const Seconds = z.number().int().min(1).max(3600);
 
@@ -54,9 +33,6 @@ export const RuntimeSettings = z
   .object({
     /** Display name for the event, used in exports and the ops-room display. */
     eventName: z.string().trim().min(1).max(80),
-
-    /** Shift block boundaries. Station scoping is derived from these. */
-    shiftBlocks: ShiftBlockWindows,
 
     /** A counted room silent for this long during event hours is flagged. */
     silentStationMinutes: Minutes,

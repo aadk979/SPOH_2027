@@ -64,11 +64,6 @@ enum DataSource {
   MANUAL_ADJUSTMENT
 }
 
-enum ShiftBlock {
-  MORNING // 09:30 - 14:00
-  AFTERNOON // 13:30 - 18:00
-}
-
 enum SwapStatus {
   REQUESTED
   APPROVED
@@ -358,8 +353,8 @@ model StationTagging {
   @@index([eventId, tagId])
 }
 
-/// A shift pattern in the event's local time; replaces ShiftBlock and the
-/// shiftBlocks setting. endsNextDay lets a shift cross midnight.
+/// A shift pattern in the event's local time (ADR-002). endsNextDay lets a
+/// shift cross midnight.
 /// @eventOwned
 model ShiftTemplate {
   id          String   @id @default(cuid())
@@ -538,14 +533,13 @@ model ShiftAssignment {
   id           String     @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2). Nullable until P09.10 backfills and contracts.
   eventId      String?
-  /// The materialised shift (ADR-002); eventDayId + block stay authoritative until P09.5.
-  shiftId      String?
+  /// The materialised shift (ADR-002): its day and template.
+  shiftId      String
   volunteerId  String
   /// The EventMembership behind volunteerId (ADR-001); backfilled in P09.4, read from P09.5.
   membershipId String?
   stationId    String
   eventDayId   String
-  block        ShiftBlock
   /// "Usher", "Counter", "Lead Facilitator"
   roleLabel    String
   checkedInAt  DateTime?  @db.Timestamptz(3)
@@ -558,10 +552,11 @@ model ShiftAssignment {
   swapRequests ShiftSwapRequest[]
 
   event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
-  shift Shift? @relation(fields: [shiftId], references: [id], onDelete: Restrict)
+  shift Shift  @relation(fields: [shiftId], references: [id], onDelete: Restrict)
 
-  @@unique([volunteerId, eventDayId, block])
-  @@index([stationId, eventDayId, block])
+  /// One person cannot be on the same shift twice.
+  @@unique([volunteerId, shiftId])
+  @@index([stationId, shiftId])
   @@index([eventId, stationId])
   @@index([shiftId])
   @@index([membershipId])

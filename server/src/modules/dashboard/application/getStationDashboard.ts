@@ -1,3 +1,4 @@
+import { toShiftRef } from '../../../platform/db/shiftRef.js';
 import type { StationDashboardResponse } from '@spoh/shared';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { getSettings } from '../../../platform/settings/index.js';
@@ -110,15 +111,7 @@ async function rosterPanel(
   const roster = await stationRoster(scope, stationId, day);
   return roster.map((assignment) => ({
     assignmentId: assignment.id,
-    block: assignment.block,
-    shift: assignment.shift
-      ? {
-          code: assignment.shift.template.code,
-          label: assignment.shift.template.label,
-          startsAt: assignment.shift.startsAt.toISOString(),
-          endsAt: assignment.shift.endsAt.toISOString(),
-        }
-      : null,
+    shift: toShiftRef(assignment.shift),
     volunteerId: assignment.volunteerId,
     volunteerName: assignment.volunteer.displayName,
     roleLabel: assignment.roleLabel,

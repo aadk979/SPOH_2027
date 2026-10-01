@@ -1,7 +1,7 @@
 'use client';
 
 import { useSyncExternalStore } from 'react';
-import type { RuntimeSettings, SettingsResponse, ShiftBlockWindows } from '@spoh/shared';
+import type { RuntimeSettings, SettingsResponse } from '@spoh/shared';
 import { api } from '@/shared/lib/api';
 import { getSession, subscribeToSession } from '@/shared/lib/session';
 
@@ -34,8 +34,6 @@ export interface ClientSettings {
   silentStationMinutes: number;
   staleDeviceMinutes: number;
   eventName: string;
-  /** The configured shift hours, which the shift labels print (F01-046). */
-  shiftBlocks: ShiftBlockWindows;
 }
 
 export const DEFAULT_CLIENT_SETTINGS: Readonly<ClientSettings> = Object.freeze({
@@ -48,10 +46,6 @@ export const DEFAULT_CLIENT_SETTINGS: Readonly<ClientSettings> = Object.freeze({
   silentStationMinutes: 15,
   staleDeviceMinutes: 15,
   eventName: 'Event',
-  shiftBlocks: {
-    MORNING: { start: '09:30', end: '14:00' },
-    AFTERNOON: { start: '13:30', end: '18:00' },
-  },
 });
 
 let cache: Readonly<ClientSettings> = DEFAULT_CLIENT_SETTINGS;
@@ -133,7 +127,6 @@ export async function loadClientSettings(): Promise<void> {
       silentStationMinutes: settings.silentStationMinutes,
       staleDeviceMinutes: settings.staleDeviceMinutes,
       eventName: settings.eventName,
-      shiftBlocks: settings.shiftBlocks,
     });
 
     for (const listener of listeners) listener();

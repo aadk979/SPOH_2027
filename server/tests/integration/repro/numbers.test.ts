@@ -5,14 +5,15 @@ import { createApp } from '../../../src/app/createApp.js';
 import { logger } from '../../../src/platform/logger/index.js';
 import { resetDatabase, rawDb } from '../../helpers/db.js';
 import {
-  type TestVolunteer,
   assignToStation,
   bearer,
   categoryId,
+  createEventDayOn,
   createEventDayToday,
   createStation,
   createVolunteer,
   testEvent,
+  type TestVolunteer,
 } from '../../helpers/fixtures.js';
 
 /**
@@ -83,13 +84,7 @@ describe('dashboard, report and import numbers (P03 repros)', () => {
 
   // F02-027
   it('does not count shifts that have not happened yet as no-shows', async () => {
-    const tomorrow = await rawDb.eventDay.create({
-      data: {
-        eventId: (await testEvent()).eventId,
-        date: new Date('2027-01-08T00:00:00.000Z'),
-        label: 'Day 2',
-      },
-    });
+    const tomorrow = await createEventDayOn('2027-01-08', 'Day 2');
     const today = await assignToStation({
       volunteerId: volunteer.id,
       stationId,
@@ -166,7 +161,7 @@ describe('dashboard, report and import numbers (P03 repros)', () => {
       volunteerId: volunteer.id,
       stationId,
       eventDayId: dayId,
-      block: 'AFTERNOON',
+      shift: 'AFTERNOON',
     });
 
     const response = await request(app)

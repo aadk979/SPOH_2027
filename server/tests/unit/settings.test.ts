@@ -36,22 +36,9 @@ describe('the update schema', () => {
     expect(UpdateSettingsRequest.safeParse({ notASetting: 1 }).success).toBe(false);
   });
 
-  it('rejects a shift block that ends before it starts', () => {
+  it('no longer takes shift hours: they are the templates (ADR-002)', () => {
     const result = UpdateSettingsRequest.safeParse({
-      shiftBlocks: {
-        MORNING: { start: '14:00', end: '09:30' },
-        AFTERNOON: { start: '13:30', end: '18:00' },
-      },
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it('rejects a time that is not a 24-hour clock reading', () => {
-    const result = UpdateSettingsRequest.safeParse({
-      shiftBlocks: {
-        MORNING: { start: '9:30am', end: '14:00' },
-        AFTERNOON: { start: '13:30', end: '18:00' },
-      },
+      shiftBlocks: { MORNING: { start: '09:30', end: '14:00' } },
     });
     expect(result.success).toBe(false);
   });

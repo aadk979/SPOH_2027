@@ -1,6 +1,7 @@
 'use client';
 import { useMemo } from 'react';
-import { formatDateTime, formatTime, type EventClockFormat } from '@/shared/lib/format';
+import type { ShiftRef } from '@spoh/shared';
+import { formatDateTime, formatTime, shiftHours, type EventClockFormat } from '@/shared/lib/format';
 import { useMe } from './queries';
 
 export interface EventTimeFormat {
@@ -8,6 +9,8 @@ export interface EventTimeFormat {
   time: (iso: string | null | undefined) => string;
   /** 7 Jan, 14:05 on the event's clock. */
   dateTime: (iso: string | null | undefined) => string;
+  /** 09:30–14:00: a shift's hours on the event's clock. */
+  shiftHours: (shift: ShiftRef) => string;
 }
 
 /**
@@ -27,6 +30,7 @@ export function useEventTime(): EventTimeFormat {
     return {
       time: (iso) => formatTime(iso, clock),
       dateTime: (iso) => formatDateTime(iso, clock),
+      shiftHours: (shift) => shiftHours(shift, clock?.timeZone),
     };
   }, [timeZone, locale]);
 }

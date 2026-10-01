@@ -71,8 +71,8 @@ export async function upsertVolunteer(
 }
 
 /**
- * Upsert an assignment. The unique key is (volunteer, day, block) — one person
- * cannot be in two places in the same block, which is exactly the constraint
+ * Upsert an assignment. The unique key is (volunteer, shift) — one person
+ * cannot be in two places on the same shift, which is exactly the constraint
  * that makes a re-run of the roster import safe.
  */
 export async function upsertAssignment(
@@ -82,22 +82,18 @@ export async function upsertAssignment(
     volunteerId: string;
     stationId: string;
     eventDayId: string;
-    block: Prisma.ShiftAssignmentUncheckedCreateInput['block'];
+    shiftId: string;
     roleLabel: string;
   },
 ): Promise<{ created: boolean }> {
   const existing = await tx.shiftAssignment.findUnique({
     where: {
-      volunteerId_eventDayId_block: {
-        volunteerId: data.volunteerId,
-        eventDayId: data.eventDayId,
-        block: data.block,
-      },
+      volunteerId_shiftId: { volunteerId: data.volunteerId, shiftId: data.shiftId },
       eventId: scope.eventId,
     },
     select: { id: true },
   });
-  const links = await assignmentLinks(tx, scope, data);
+  const links = await assignmentLinks(tx, scope, data.volunteerId);
 
   if (existing) {
     await tx.shiftAssignment.update({
@@ -138,7 +134,16 @@ export async function stationIdsByCode(scope: EventScope): Promise<Map<string, s
   return new Map(stations.map((station) => [station.code, station.id]));
 }
 
-/** The (day, block) slots these volunteers already hold, as volunteerId|eventDayId|block. */
+/** The event's shifts, as eventDayId|templateCode → shiftId, for matching import rows. */
+export async function shiftIdsByDayAndCode(scope: EventScope): Promise<Map<string, string>> {
+  const shifts = await prisma.shift.findMany({
+    where: { eventId: scope.eventId },
+    select: { id: true, eventDayId: true, template: { select: { code: true } } },
+  });
+  return new Map(shifts.map((shift) => [`${shift.eventDayId}|${shift.template.code}`, shift.id]));
+}
+
+/** The shifts these volunteers already hold, as volunteerId|shiftId. */
 export async function existingSlots(
   scope: EventScope,
   volunteerIds: readonly string[],
@@ -146,9 +151,9 @@ export async function existingSlots(
   if (volunteerIds.length === 0) return new Set();
   const rows = await prisma.shiftAssignment.findMany({
     where: { eventId: scope.eventId, volunteerId: { in: [...volunteerIds] } },
-    select: { volunteerId: true, eventDayId: true, block: true },
+    select: { volunteerId: true, shiftId: true },
   });
-  return new Set(rows.map((row) => `${row.volunteerId}|${row.eventDayId}|${row.block}`));
+  return new Set(rows.map((row) => `${row.volunteerId}|${row.shiftId}`));
 }
 
 export async function setManager(

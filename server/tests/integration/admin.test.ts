@@ -10,6 +10,7 @@ import {
   createEventDayToday,
   createStation,
   createVolunteer,
+  shiftOn,
   testEvent,
 } from '../helpers/fixtures.js';
 import type { TestVolunteer } from '../helpers/fixtures.js';
@@ -360,48 +361,66 @@ describe('runtime settings', () => {
   });
 
   /**
-   * The shift boundaries decide whether a capture screen works at all, because
-   * station scoping requires a block to be running. This is the setting whose
-   * change has to actually take effect.
+   * The shift hours decide whether a capture screen works at all, because
+   * station scoping requires a shift to be running. They are the templates'
+   * (ADR-002), and a change has to actually take effect.
    */
-  it('applies a changed shift boundary to the running server', async () => {
+  it("moves a template's hours, and the day's shifts with it", async () => {
     const day = await createEventDayToday();
-    await request(app)
-      .patch('/api/v1/admin/settings')
+    const { eventId } = await testEvent();
+    const template = await rawDb.shiftTemplate.findFirstOrThrow({
+      where: { eventId, code: 'MORNING' },
+    });
+    const response = await request(app)
+      .patch(`/api/v1/admin/shift-templates/${template.id}`)
       .set('Authorization', bearer(chief))
-      .send({
-        shiftBlocks: {
-          MORNING: { start: '06:00', end: '07:00' },
-          AFTERNOON: { start: '19:00', end: '20:00' },
-        },
-      })
-      .expect(200);
+      .send({ label: 'Early', startLocal: '06:00', endLocal: '07:00' });
 
-    expect(getSettings().shiftBlocks.MORNING.start).toBe('06:00');
-    // The event's templates and today's shifts follow (P09.5), in its timezone.
+    expect(response.status).toBe(200);
+    expect(response.body.template).toMatchObject({ code: 'MORNING', label: 'Early' });
+    // Today's shift follows, in the event's timezone.
     const morning = await rawDb.shift.findFirstOrThrow({
-      where: {
-        eventId: (await testEvent()).eventId,
-        eventDayId: day.id,
-        template: { code: 'MORNING' },
-      },
+      where: { eventId, eventDayId: day.id, templateId: template.id },
     });
     expect(morning.startsAt.toISOString()).toBe('2027-01-06T22:00:00.000Z');
     expect(morning.endsAt.toISOString()).toBe('2027-01-06T23:00:00.000Z');
+    const listed = await request(app)
+      .get('/api/v1/admin/shift-templates')
+      .set('Authorization', bearer(chief));
+    expect(listed.body.data.map((row: { label: string }) => row.label)).toEqual([
+      'Early',
+      'Afternoon',
+    ]);
   });
 
-  it('rejects a shift block that ends before it starts', async () => {
+  it('rejects a shift that ends before it starts, and leaves the shifts alone', async () => {
+    const day = await createEventDayToday();
+    const { eventId } = await testEvent();
+    const template = await rawDb.shiftTemplate.findFirstOrThrow({
+      where: { eventId, code: 'MORNING' },
+    });
+    const before = await rawDb.shift.findFirstOrThrow({
+      where: { eventId, eventDayId: day.id, templateId: template.id },
+    });
     const response = await request(app)
-      .patch('/api/v1/admin/settings')
+      .patch(`/api/v1/admin/shift-templates/${template.id}`)
       .set('Authorization', bearer(chief))
-      .send({
-        shiftBlocks: {
-          MORNING: { start: '14:00', end: '09:30' },
-          AFTERNOON: { start: '13:30', end: '18:00' },
-        },
-      });
+      .send({ startLocal: '14:00', endLocal: '09:30' });
 
     expect(response.status).toBe(400);
+    const after = await rawDb.shift.findUniqueOrThrow({ where: { id: before.id } });
+    expect(after.startsAt).toEqual(before.startsAt);
+  });
+
+  it('lists each day with its shifts, so an assignment can name one', async () => {
+    await createEventDayToday();
+    const response = await request(app)
+      .get('/api/v1/admin/event-days')
+      .set('Authorization', bearer(chief));
+    expect(response.body.data[0].shifts.map((shift: { code: string }) => shift.code)).toEqual([
+      'MORNING',
+      'AFTERNOON',
+    ]);
   });
 
   it('rejects an unknown setting rather than ignoring it', async () => {
@@ -545,7 +564,7 @@ describe('stations, days and gifts', () => {
         volunteerId: volunteer.id,
         stationId: station.id,
         eventDayId: day.id,
-        block: 'MORNING',
+        shiftId: await shiftOn(day.id),
         roleLabel: 'Usher',
         checkedInAt: new Date(),
       },

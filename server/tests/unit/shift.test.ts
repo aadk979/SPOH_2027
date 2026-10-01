@@ -52,6 +52,7 @@ describe('staffingGaps', () => {
   it('names each kind of gap and skips a fully checked-in station', () => {
     const morning = {
       code: 'MORNING',
+      id: 'shift-am',
       label: 'Morning',
       startsAt: '2027-01-07T01:30:00.000Z',
       endsAt: '2027-01-07T06:00:00.000Z',
@@ -65,9 +66,9 @@ describe('staffingGaps', () => {
         { id: 'd', name: 'D' },
       ],
       staffing: [
-        { stationId: 'b', block: 'MORNING', assigned: 2, checkedIn: 0 },
-        { stationId: 'c', block: 'MORNING', assigned: 2, checkedIn: 1 },
-        { stationId: 'd', block: 'MORNING', assigned: 2, checkedIn: 2 },
+        { stationId: 'b', shiftCode: 'MORNING', assigned: 2, checkedIn: 0 },
+        { stationId: 'c', shiftCode: 'MORNING', assigned: 2, checkedIn: 1 },
+        { stationId: 'd', shiftCode: 'MORNING', assigned: 2, checkedIn: 2 },
       ],
     });
     expect(gaps.map((gap) => [gap.stationId, gap.severity, gap.missing])).toEqual([

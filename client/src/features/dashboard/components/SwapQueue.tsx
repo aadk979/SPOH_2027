@@ -2,7 +2,6 @@ import { useState, type ReactNode } from 'react';
 import type { SwapRequestRecord } from '@spoh/shared';
 import { Button, Callout, Card, Section } from '@/shared/ui';
 import { useDecideSwap } from '@/features/roster';
-import { blockWord } from '@/shared/lib/format';
 /** Swap approvals. Two taps, per remediation/phases/P07-client-refactor.md. */
 export function SwapQueue({
   swaps,
@@ -45,7 +44,7 @@ export function SwapQueue({
               <span className="sr-only">wants to swap with</span> <strong>{swap.targetName}</strong>
             </p>
             <p className="text-caption text-text-muted">
-              {swap.stationName} · {swap.date} · {blockWord(swap.block)}
+              {swap.stationName} · {swap.date} · {swap.shift.label}
               {swap.reason ? ` · ${swap.reason}` : ''}
             </p>
 

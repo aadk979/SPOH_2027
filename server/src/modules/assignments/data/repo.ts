@@ -1,47 +1,40 @@
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
+import { SHIFT_REF_SELECT } from '../../../platform/db/shiftRef.js';
 
 /**
- * Data access for shift assignments: who is rostered where, on which day, in
- * which block. The unique key is (volunteer, day, block): one person cannot be
- * in two places in the same block. Every query names its event (ADR-001 §2).
+ * Data access for shift assignments: who is rostered where, on which shift.
+ * The unique key is (volunteer, shift): one person cannot be in two places on
+ * the same shift. Every query names its event (ADR-001 §2).
  */
 
 export const assignmentInclude = {
   volunteer: { select: { displayName: true, phone: true } },
   station: { select: { name: true } },
   eventDay: { select: { date: true } },
+  shift: { select: SHIFT_REF_SELECT },
 } satisfies Prisma.ShiftAssignmentInclude;
 
 export type AssignmentWithNames = Prisma.ShiftAssignmentGetPayload<{
   include: typeof assignmentInclude;
 }>;
 
-type Block = Prisma.ShiftAssignmentUncheckedCreateInput['block'];
-
 /**
- * What an assignment row points at besides the old columns (P09.5): the event,
- * the person's membership of it, and the day's shift for the block. Every
- * writer of assignments goes through this, so the new columns never lag.
+ * What an assignment row points at besides the person: the event and the
+ * person's membership of it. Every writer of assignments goes through this.
  */
 export async function assignmentLinks(
   tx: PrismaTransactionClient,
   scope: EventScope,
-  slot: { volunteerId: string; eventDayId: string; block: Block },
-): Promise<{ eventId: string; membershipId: string | null; shiftId: string | null }> {
+  volunteerId: string,
+): Promise<{ eventId: string; membershipId: string | null }> {
   const { eventId } = scope;
-  // One after the other: a transaction has one connection, and parallel queries
-  // on it overlap (F03-019).
   const membership = await tx.eventMembership.findUnique({
-    where: { eventId_personId: { eventId, personId: slot.volunteerId } },
+    where: { eventId_personId: { eventId, personId: volunteerId } },
     select: { id: true },
   });
-  const shift = await tx.shift.findFirst({
-    where: { eventId, eventDayId: slot.eventDayId, template: { code: slot.block } },
-    select: { id: true },
-  });
-  return { eventId, membershipId: membership?.id ?? null, shiftId: shift?.id ?? null };
+  return { eventId, membershipId: membership?.id ?? null };
 }
 
 export async function listAssignmentsForStation(
@@ -55,26 +48,26 @@ export async function listAssignmentsForStation(
       ...(query.eventDayId ? { eventDayId: query.eventDayId } : {}),
     },
     include: assignmentInclude,
-    orderBy: [{ eventDay: { date: 'asc' } }, { block: 'asc' }, { roleLabel: 'asc' }],
+    orderBy: [{ shift: { startsAt: 'asc' } }, { roleLabel: 'asc' }],
   });
 }
 
-/** Whether the volunteer and station exist and are active, and the day exists, in this event. */
+/** Whether the volunteer and station exist and are active, and the shift exists, in this event. */
 export async function findAssignmentTargets(
   scope: EventScope,
-  ids: { volunteerId: string; stationId: string; eventDayId: string },
+  ids: { volunteerId: string; stationId: string; shiftId: string },
 ) {
   const { eventId } = scope;
-  const [membership, station, eventDay] = await Promise.all([
+  const [membership, station, shift] = await Promise.all([
     prisma.eventMembership.findUnique({
       where: { eventId_personId: { eventId, personId: ids.volunteerId } },
       select: { status: true },
     }),
     prisma.station.findFirst({ where: { eventId, id: ids.stationId }, select: { active: true } }),
-    prisma.eventDay.findFirst({ where: { eventId, id: ids.eventDayId }, select: { id: true } }),
+    prisma.shift.findFirst({ where: { eventId, id: ids.shiftId }, select: { eventDayId: true } }),
   ]);
   const volunteer = membership ? { active: membership.status === 'ACTIVE' } : null;
-  return { volunteer, station, eventDay };
+  return { volunteer, station, shift };
 }
 
 /** Whether this person is rostered at this station on any day of the event. */
@@ -97,14 +90,14 @@ export async function stationExists(scope: EventScope, stationId: string): Promi
   return station !== null;
 }
 
-/** The assignment already in this person's (day, block) slot, if any. */
+/** The assignment already in this person's shift, if any. */
 export async function findAssignmentInSlot(
   tx: PrismaTransactionClient,
   scope: EventScope,
-  slot: { volunteerId: string; eventDayId: string; block: Block },
+  slot: { volunteerId: string; shiftId: string },
 ) {
   return tx.shiftAssignment.findUnique({
-    where: { volunteerId_eventDayId_block: slot, eventId: scope.eventId },
+    where: { volunteerId_shiftId: slot, eventId: scope.eventId },
     select: { stationId: true, roleLabel: true },
   });
 }
@@ -112,16 +105,12 @@ export async function findAssignmentInSlot(
 export async function upsertAssignmentRow(
   tx: PrismaTransactionClient,
   scope: EventScope,
-  data: Omit<Prisma.ShiftAssignmentUncheckedCreateInput, 'eventId'> & { block: Block },
+  data: Omit<Prisma.ShiftAssignmentUncheckedCreateInput, 'eventId'>,
 ): Promise<{ id: string }> {
-  const links = await assignmentLinks(tx, scope, data);
+  const links = await assignmentLinks(tx, scope, data.volunteerId);
   return tx.shiftAssignment.upsert({
     where: {
-      volunteerId_eventDayId_block: {
-        volunteerId: data.volunteerId,
-        eventDayId: data.eventDayId,
-        block: data.block,
-      },
+      volunteerId_shiftId: { volunteerId: data.volunteerId, shiftId: data.shiftId },
       eventId: scope.eventId,
     },
     create: { ...data, ...links },
@@ -143,7 +132,7 @@ export async function findAssignmentWithNames(
 export async function findAssignmentForRemoval(scope: EventScope, id: string) {
   return prisma.shiftAssignment.findFirst({
     where: { eventId: scope.eventId, id },
-    select: { id: true, volunteerId: true, stationId: true, block: true, checkedInAt: true },
+    select: { id: true, volunteerId: true, stationId: true, shiftId: true, checkedInAt: true },
   });
 }
 

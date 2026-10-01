@@ -14,12 +14,16 @@ const snapshot = (overrides: Partial<ImportSnapshot> = {}): ImportSnapshot => ({
   existing: new Map(),
   stationIdByCode: new Map([['DESK', 's-desk']]),
   eventDayIdByDate: new Map([['2027-01-07', 'd-1']]),
+  shiftIdByDayAndCode: new Map([
+    ['d-1|MORNING', 'sh-am'],
+    ['d-1|AFTERNOON', 'sh-pm'],
+  ]),
   heldSlots: new Set(),
   rosterManagers: new Map(),
   ...overrides,
 });
 
-const shift = { stationCode: 'DESK', eventDate: '2027-01-07', block: 'MORNING' as const };
+const shift = { stationCode: 'DESK', eventDate: '2027-01-07', shift: 'MORNING' };
 
 describe('planRosterImport', () => {
   it('creates new people and their shifts', () => {
@@ -44,7 +48,7 @@ describe('planRosterImport', () => {
       [row({ email: 'b@x', role: 'IC', ...shift })],
       snapshot({
         existing: new Map([['b@x', { id: 'v-b', role: 'VOLUNTEER' as const, active: true }]]),
-        heldSlots: new Set(['v-b|d-1|MORNING']),
+        heldSlots: new Set(['v-b|sh-am']),
       }),
     );
     expect(plan.counters).toMatchObject({ volunteersUpdated: 1, assignmentsUpdated: 1 });
@@ -73,7 +77,7 @@ describe('planRosterImport', () => {
       snapshot(),
     );
     expect(plan.issues.map((issue) => [issue.rowNumber, issue.field])).toEqual([
-      [1, 'stationCode/eventDate/block'],
+      [1, 'stationCode/eventDate/shift'],
       [2, 'stationCode'],
       [3, 'eventDate'],
     ]);
@@ -95,7 +99,7 @@ describe('planRosterImport', () => {
 
   it('counts people once each, however many rows they have (F03-025)', () => {
     const plan = planRosterImport(
-      [row({ email: 'n@x', ...shift }), row({ email: 'n@x', ...shift, block: 'AFTERNOON' })],
+      [row({ email: 'n@x', ...shift }), row({ email: 'n@x', ...shift, shift: 'AFTERNOON' })],
       snapshot(),
     );
     expect(plan.counters).toMatchObject({
