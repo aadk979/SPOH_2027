@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-01T07:24:41.450Z",
+  "updatedAt": "2026-10-01T10:48:25.840Z",
   "current": {
-    "phase": "P08",
-    "step": null
+    "phase": "P10",
+    "step": "P10.1"
   },
   "gates": [
     {
@@ -135,8 +135,8 @@
       "owner": "you",
       "blocks": ["P08.5", "P12.2"],
       "status": "answered",
-      "answer": "Owner 2026-09-30: Firebase Hosting (*.web.app) client, DuckDNS HTTPS API, no Route 53/ACM/SES; SNS email, AWS Budgets, Cognito default invite sender; sessions cannot depend on a third-party refresh cookie. Owner 2026-10-01 approved Singapore Lightsail Micro Caddy proxy at US/month with 2 TB included and US.12/GB excess outbound transfer. Production stack still waits for 28 October go decision.",
-      "answeredAt": "2026-10-01T07:16:22.398Z"
+      "answer": "Owner 2026-09-30: Firebase Hosting (*.web.app) client, DuckDNS HTTPS API, no Route 53/ACM/SES; SNS email, AWS Budgets, Cognito default invite sender; sessions cannot depend on a third-party refresh cookie. Owner 2026-10-01 approved Singapore Lightsail Micro Caddy proxy at US$7/month with 2 TB included and US$0.12/GB excess outbound transfer. Production stack still waits for 28 October go decision.",
+      "answeredAt": "2026-10-01T10:48:25.839Z"
     },
     {
       "id": "D-09",
@@ -1954,11 +1954,16 @@
         {
           "id": "P10.1",
           "title": "Settings registry",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-10-01T07:26:01.905Z",
+          "completedAt": "2026-10-01T10:47:45.117Z",
+          "commits": ["5ecd95e"],
+          "notes": [
+            {
+              "at": "2026-10-01T10:47:45.118Z",
+              "text": "Registry generates 36 bounded setting contracts, defaults and UI metadata. Server unit 457, client unit 229, integration 474 passed/7 skipped, visual 58, browser 30, production builds and quality gates pass."
+            }
+          ]
         },
         {
           "id": "P10.2",
@@ -2033,8 +2038,8 @@
           "notes": []
         }
       ],
-      "status": "not_started",
-      "startedAt": null,
+      "status": "in_progress",
+      "startedAt": "2026-10-01T07:26:01.906Z",
       "completedAt": null
     },
     {
