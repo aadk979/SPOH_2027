@@ -198,4 +198,7 @@ After this phase a second event can exist beside the first without code, seed or
 
 ## Phase report
 
-_Fill in on completion._
+The [P09 verification report](../reports/P09/verification-2026-10-01.md) records the full local suites,
+the zero-drift event totals, the staging migration and smoke, and two synthetic events coexisting
+on staging with zero cross-event relationship mismatches. No production data or `pg_dump` exists;
+the owner confirmed production starts empty and events come from the event factory.

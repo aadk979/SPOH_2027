@@ -78,7 +78,10 @@ test('an event declares a visitor field, captures it, and purges it on switch-of
   } finally {
     // This test's state must not leak into the other browser journeys.
     await db.query('DELETE FROM "VisitorRecord" WHERE "eventId" = $1', [EVENT_ID]);
-    await db.query('DELETE FROM "VisitorField" WHERE "eventId" = $1 AND code = $2', [EVENT_ID, code]);
+    await db.query('DELETE FROM "VisitorField" WHERE "eventId" = $1 AND code = $2', [
+      EVENT_ID,
+      code,
+    ]);
     await db.query('DELETE FROM "Setting" WHERE "eventId" = $1 AND key = $2', [
       EVENT_ID,
       'product.visitorDataMode',
