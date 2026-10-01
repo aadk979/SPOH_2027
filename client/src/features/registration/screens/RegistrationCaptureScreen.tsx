@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { RegistrationButtons } from '../components/RegistrationButtons';
+import { VisitorCaptureAvailability } from '../components/VisitorCaptureAvailability';
 import { AppShell } from '@/shared/shell/AppShell';
 import { SyncIndicator } from '@/shared/shell/SyncIndicator';
 import { Button, ButtonLink, Callout, EmptyState } from '@/shared/ui';
@@ -87,6 +88,7 @@ export default function RegistrationCaptureScreen(): ReactNode {
           and the e2e suite measures it.
         */}
         <RegistrationButtons stationId={stationId} capture={capture} />
+        <VisitorCaptureAvailability stationId={stationId} />
 
         {/* Holds its height so the grid never shifts under a thumb mid-queue. */}
         <div className="flex min-h-[56px] items-center justify-between gap-sm">

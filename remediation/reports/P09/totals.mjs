@@ -30,6 +30,8 @@ const EVENT_OWNED = [
   'ShiftSwapRequest',
   'BriefingSlot',
   'Registration',
+  'VisitorField',
+  'VisitorRecord',
   'FootfallTick',
   'MissionCard',
   'CardStampEvent',

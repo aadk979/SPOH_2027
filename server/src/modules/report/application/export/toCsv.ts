@@ -1,4 +1,4 @@
-import type { FullReport } from '@spoh/shared';
+import type { FullReport, VisitorRecordsResponse } from '@spoh/shared';
 import { headlineLine, rows, eventTime } from './format.js';
 
 type Cell = string | number | null;
@@ -16,14 +16,15 @@ interface CsvSection {
  * marker between blocks. Less pretty than the XLSX, but it opens anywhere and
  * survives being emailed — which is the point of offering it at all.
  */
-export function toCsv(report: FullReport): string {
+export function toCsv(report: FullReport, visitors: VisitorRecordsResponse | null = null): string {
   const lines = [
     `# ${report.event.name} post-event report`,
     `# Generated,${report.generatedAt}`,
     `# ${report.countingNote.replace(/,/g, ';')}`,
     ...(report.headline ? [`# ${headlineLine(report.headline).replace(/,/g, ';')}`] : []),
   ];
-  for (const section of sections(report)) {
+  const all = [...sections(report), ...(visitors ? [visitorSection(visitors)] : [])];
+  for (const section of all) {
     lines.push('', `## ${section.title}`);
     for (const cells of section.rows) lines.push(cells.map(escapeCsv).join(','));
   }
@@ -116,4 +117,18 @@ function escapeCsv(value: Cell): string {
   if (value === null || value === undefined) return '';
   const text = String(value);
   return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+/** The values the caller's role reads, apart from the counts (ADR-002 §4). */
+function visitorSection(visitors: VisitorRecordsResponse): CsvSection {
+  return {
+    title: 'Visitor details (personal data: keep only as long as the event allows)',
+    rows: [
+      ['Registered at (UTC)', ...visitors.fields.map((field) => field.label)],
+      ...visitors.data.map((row) => [
+        row.recordedAt,
+        ...visitors.fields.map((field) => row.values[field.code] ?? null),
+      ]),
+    ],
+  };
 }

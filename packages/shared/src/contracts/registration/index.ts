@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { VisitorValues } from '../visitor/index.js';
 import { DataSource } from '../../invariants/enums.js';
 import { CaptureEnvelope, Id, IsoDateTime, ReasonText, TimeRangeQuery } from '../common/index.js';
 
@@ -36,6 +37,11 @@ export type CaptureCategoriesResponse = z.infer<typeof CaptureCategoriesResponse
 export const CreateRegistrationRequest = CaptureEnvelope.extend({
   category: CategoryCode,
   stationId: Id,
+  /**
+   * The event's declared visitor fields, in `allowlist` mode only (ADR-002
+   * §4). Stored apart from the registration, never echoed back.
+   */
+  visitor: VisitorValues.optional(),
 }).strict();
 export type CreateRegistrationRequest = z.infer<typeof CreateRegistrationRequest>;
 

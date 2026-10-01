@@ -18,6 +18,7 @@ import { meRouter } from '../modules/me/index.js';
 import { missionCardRouter } from '../modules/missionCard/index.js';
 import { registrationRouter } from '../modules/registration/index.js';
 import { reportRouter } from '../modules/report/index.js';
+import { visitorRouter } from '../modules/visitor/index.js';
 import { rosterRouter } from '../modules/roster/index.js';
 import { shiftRouter } from '../modules/shift/index.js';
 import { stationRouter } from '../modules/station/index.js';
@@ -73,6 +74,8 @@ export const EVENT_ROUTES: readonly ModuleRoutes[] = [
   { path: '/dashboard', router: dashboardRouter },
   { path: '/lost-found', router: lostFoundRouter },
   { path: '/reports', router: reportRouter },
+  // Visitor values in allowlist mode, read by each field's reader roles (ADR-002 §4).
+  { path: '/visitors', router: visitorRouter },
   { path: '/audit', router: auditRouter },
   // People, places, days, gift types and the runtime tuning values. Split by capability inside
   // the router rather than by path.

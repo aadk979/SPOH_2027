@@ -76,6 +76,7 @@ interface EventB {
   swap: string;
   slot: string;
   window: string;
+  visitorField: string;
 }
 
 async function createEventB(): Promise<EventScope> {
@@ -191,6 +192,17 @@ async function seedEventB(): Promise<EventB> {
   const window = await rawDb.fallbackWindow.create({
     data: { eventId, tier: 3, startedAt: FROZEN_NOW, declaredById: person, reason: 'B outage' },
   });
+  const visitorField = await rawDb.visitorField.create({
+    data: {
+      eventId,
+      code: 'b_field',
+      label: 'B field',
+      type: 'text',
+      classification: 'visitor-personal',
+      retentionDays: 7,
+      readers: ['ADMIN'],
+    },
+  });
   return {
     scope,
     shift: (afternoon as { id: string }).id,
@@ -210,6 +222,7 @@ async function seedEventB(): Promise<EventB> {
     swap: swap.id,
     slot: slot.id,
     window: window.id,
+    visitorField: visitorField.id,
   };
 }
 
@@ -385,6 +398,7 @@ const CASES: Record<string, Case> = {
 
   'GET /reports/summary': LIST,
   'GET /reports/export': LIST,
+  'GET /visitors': LIST,
   'GET /audit': LIST,
 
   'GET /admin/volunteers': LIST,
@@ -426,6 +440,12 @@ const CASES: Record<string, Case> = {
   'PATCH /admin/settings': noId('runtime settings are platform-wide until P10'),
   'GET /admin/event-settings': noId("reads the path event's settings"),
   'PATCH /admin/event-settings': noId("changes the path event's settings"),
+  'GET /admin/visitor-fields': LIST,
+  'POST /admin/visitor-fields': noId('creates a field in the path event'),
+  'PATCH /admin/visitor-fields/:id': {
+    params: (b) => ({ id: b.visitorField }),
+    body: () => ({ label: 'Foreign field' }),
+  },
 
   'GET /notifications/config': noId('push configuration is platform-wide'),
   'POST /notifications/subscriptions': noId("registers the caller's own device"),

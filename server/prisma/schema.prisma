@@ -266,6 +266,9 @@ model Event {
   /// @class operational
   branding           Json?
   clonedFromEventId  String?
+  /// When the event closed: visitor data retention counts from it (ADR-002 §4).
+  /// Set by the lifecycle (ADR-004).
+  closedAt           DateTime?   @db.Timestamptz(3)
   archivedAt         DateTime?   @db.Timestamptz(3)
   createdAt          DateTime    @default(now()) @db.Timestamptz(3)
   updatedAt          DateTime    @updatedAt @db.Timestamptz(3)
@@ -275,6 +278,8 @@ model Event {
   clones               Event[]               @relation("EventClone")
   memberships          EventMembership[]
   settings             Setting[]
+  visitorFields        VisitorField[]
+  visitorRecords       VisitorRecord[]
   settingChanges       SettingChange[]
   captureCategories    CaptureCategory[]
   stationTypes         StationType[]
@@ -809,6 +814,9 @@ model Registration {
   // Their memberships, inside the event (ADR-001 §2).
   recordedByMembership EventMembership? @relation("RegistrationRecordedByMembership", fields: [eventId, recordedByMembershipId], references: [eventId, id], onDelete: Restrict)
 
+  visitorRecord VisitorRecord?
+
+  @@unique([eventId, id])
   @@index([recordedAt])
   @@index([groupId])
   @@index([eventId, recordedAt])
@@ -1407,6 +1415,59 @@ model IdempotencyRecord {
 
   @@index([createdAt])
   @@index([eventId])
+}
+
+/// A visitor field an event declares in allowlist mode (ADR-002 §4): what may
+/// be collected, how long it is kept after the event closes, and who reads it.
+/// @eventOwned
+model VisitorField {
+  id             String          @id @default(cuid())
+  /// The event this row belongs to (ADR-001 §2).
+  eventId        String
+  /// @class operational
+  code           String
+  /// @class operational
+  label          String
+  /// text, email, phone or number.
+  /// @class operational
+  type           String
+  /// visitor-personal, or operational for a field that identifies nobody.
+  /// @class operational
+  classification String
+  retentionDays  Int
+  readers        CommitteeRole[]
+  sortOrder      Int             @default(0)
+  active         Boolean         @default(true)
+  createdAt      DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime        @updatedAt @db.Timestamptz(3)
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Restrict)
+
+  @@unique([eventId, code])
+  @@unique([eventId, id])
+}
+
+/// One registration's declared visitor values, kept apart from every count:
+/// a purge deletes these and leaves the counts untouched (ADR-002 §4).
+/// @eventOwned
+model VisitorRecord {
+  id             String   @id @default(cuid())
+  /// The event this row belongs to (ADR-001 §2).
+  eventId        String
+  registrationId String   @unique
+  /// Values by field code, each checked against the event's fields.
+  /// @class visitor-personal
+  data           Json
+  /// Deadline for the last remaining value, set when the event closes.
+  purgeAfter     DateTime? @db.Timestamptz(3)
+  createdAt      DateTime @default(now()) @db.Timestamptz(3)
+
+  event        Event        @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  registration Registration @relation(fields: [eventId, registrationId], references: [eventId, id], onDelete: Restrict)
+
+  @@unique([eventId, registrationId])
+  @@index([eventId, createdAt])
+  @@index([eventId, purgeAfter])
 }
 
 enum SettingScope {

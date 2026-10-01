@@ -33,6 +33,9 @@ export const ERROR_CODES = {
   SETTING_VERSION_CONFLICT: 'SETTING_VERSION_CONFLICT',
   /// The event's state does not allow this setting to change (ADR-004).
   SETTING_LOCKED: 'SETTING_LOCKED',
+  /// Visitor values were sent, but the event keeps no visitor data, or a value
+  /// does not fit its declared field (ADR-002 §4).
+  VISITOR_DATA_REFUSED: 'VISITOR_DATA_REFUSED',
   ALREADY_VOIDED: 'ALREADY_VOIDED',
   NOT_ON_SHIFT: 'NOT_ON_SHIFT',
   ALREADY_CHECKED_IN: 'ALREADY_CHECKED_IN',

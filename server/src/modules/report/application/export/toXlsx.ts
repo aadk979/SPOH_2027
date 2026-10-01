@@ -1,5 +1,5 @@
 import ExcelJS from 'exceljs';
-import type { FullReport } from '@spoh/shared';
+import type { FullReport, VisitorRecordsResponse } from '@spoh/shared';
 import { writeCardsSheet } from './sheets/cards.js';
 import { writeFootfallSheet } from './sheets/footfall.js';
 import { writeGiftsSheet } from './sheets/gifts.js';
@@ -7,6 +7,7 @@ import { writeIntegritySheet } from './sheets/integrity.js';
 import { writeReadMeSheet } from './sheets/readMe.js';
 import { writeRegistrationsSheet } from './sheets/registrations.js';
 import { writeSafetySheet } from './sheets/safety.js';
+import { writeVisitorsSheet } from './sheets/visitors.js';
 import { writeVolunteersSheet } from './sheets/volunteers.js';
 
 /**
@@ -20,7 +21,10 @@ import { writeVolunteersSheet } from './sheets/volunteers.js';
  * the room-entry total, and the sheet that opens by default is the cheapest
  * place to say why that number would be meaningless.
  */
-export async function toXlsx(report: FullReport): Promise<Buffer> {
+export async function toXlsx(
+  report: FullReport,
+  visitors: VisitorRecordsResponse | null = null,
+): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
   workbook.creator = report.event.name;
   workbook.created = new Date(report.generatedAt);
@@ -33,6 +37,7 @@ export async function toXlsx(report: FullReport): Promise<Buffer> {
   writeSafetySheet(workbook, report);
   writeVolunteersSheet(workbook, report);
   writeIntegritySheet(workbook, report);
+  if (visitors) writeVisitorsSheet(workbook, visitors);
 
   const buffer = await workbook.xlsx.writeBuffer();
   return Buffer.from(buffer);

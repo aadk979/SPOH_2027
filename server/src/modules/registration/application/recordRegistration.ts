@@ -5,6 +5,7 @@ import type { CaptureContext } from '../../../platform/http/captureActor.js';
 import { eventTodayStart } from '../../../platform/event/today.js';
 import { systemClock } from '../../../platform/time/index.js';
 import { requireActiveStation } from '../../station/index.js';
+import { recordVisitorValues } from '../../visitor/index.js';
 import { toRegistrationRecord } from '../data/mappers.js';
 import { countForRecorderSince, countForStationSince, createRegistration } from '../data/repo.js';
 import { requireCategory } from './requireCategory.js';
@@ -12,9 +13,10 @@ import { requireCategory } from './requireCategory.js';
 /**
  * COUNT 1 — one tap, one registration (PRODUCT_BRIEF §0.1, §2).
  *
- * One row, no confirmation. Nothing here can be made to write a name, a school
- * or a contact detail: the request has nowhere to put one, and neither does
- * the table.
+ * One row, no confirmation. The registration can never hold a name, a school
+ * or a contact detail. An event in allowlist mode may send its declared
+ * visitor fields; they go to the visitor record, apart from the count, and
+ * are never echoed back (ADR-002 §4).
  */
 export async function recordRegistration(
   request: CreateRegistrationRequest,
@@ -38,6 +40,9 @@ export async function recordRegistration(
       idempotencyKey: request.idempotencyKey,
       source: 'APP',
     });
+    if (request.visitor) {
+      await recordVisitorValues(tx, scope, { registrationId: row.id, values: request.visitor });
+    }
     await auditStationScopeBypass(tx, actor.stationScopeBypass, audit);
     await writeAudit(tx, {
       ...audit,

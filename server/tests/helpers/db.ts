@@ -81,6 +81,7 @@ export async function resetDatabase(): Promise<void> {
   await wipe('GiftType');
 
   await wipe('CardStampEvent');
+  await wipe('VisitorRecord');
   await wipe('Registration');
   await wipe('FootfallTick');
   await wipe('MissionCard');
@@ -114,6 +115,7 @@ export async function resetDatabase(): Promise<void> {
   // Settings and their history name the event (ADR-003 §2).
   await wipe('SettingChange');
   await wipe('Setting');
+  await wipe('VisitorField');
 
   // Event #1 and its memberships (P09.3/P09.4), before the people they name.
   await prisma.$executeRawUnsafe('UPDATE "EventMembership" SET "reportsToId" = NULL');

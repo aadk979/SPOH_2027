@@ -34,6 +34,8 @@ export const EVENT_OWNED_MODELS = [
   'StationTag',
   'StationTagging',
   'StationType',
+  'VisitorField',
+  'VisitorRecord',
 ] as const;
 
 export type EventOwnedModel = (typeof EVENT_OWNED_MODELS)[number];

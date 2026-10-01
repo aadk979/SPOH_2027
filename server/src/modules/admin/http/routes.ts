@@ -6,6 +6,7 @@ import {
   CreateEventDayRequest,
   CreateGiftTypeRequest,
   CreateStationRequest,
+  CreateVisitorFieldRequest,
   DeactivateVolunteerRequest,
   Id,
   ListVolunteersQuery,
@@ -14,6 +15,7 @@ import {
   UpdateShiftTemplateRequest,
   UpdateSettingsRequest,
   UpdateStationRequest,
+  UpdateVisitorFieldRequest,
   UpdateVolunteerRequest,
 } from '@spoh/shared';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
@@ -39,6 +41,11 @@ import {
   getSettingsHandler,
   updateSettingsHandler,
 } from '../../settings/index.js';
+import {
+  createVisitorFieldHandler,
+  listVisitorFieldsHandler,
+  updateVisitorFieldHandler,
+} from '../../visitor/index.js';
 import { createGiftTypeHandler, updateGiftTypeHandler } from '../../gift/index.js';
 import {
   createEventDayHandler,
@@ -267,4 +274,32 @@ adminRouter.patch(
   requireCapability('config.manage'),
   validate({ body: ChangeEventSettingRequest }),
   changeEventSettingHandler,
+);
+
+// ─────────────────────────────────────────────────────────────
+// VISITOR FIELDS (ADR-002 §4): what an allowlist event may collect
+// ─────────────────────────────────────────────────────────────
+
+/** Every member: the booth shows the fields, and the copy says what is kept. */
+adminRouter.get(
+  '/visitor-fields',
+  defaultRateLimit,
+  requireCapability('own.read'),
+  listVisitorFieldsHandler,
+);
+
+adminRouter.post(
+  '/visitor-fields',
+  adminRateLimit,
+  requireCapability('config.manage'),
+  validate({ body: CreateVisitorFieldRequest }),
+  createVisitorFieldHandler,
+);
+
+adminRouter.patch(
+  '/visitor-fields/:id',
+  adminRateLimit,
+  requireCapability('config.manage'),
+  validate({ params: IdParams, body: UpdateVisitorFieldRequest }),
+  updateVisitorFieldHandler,
 );

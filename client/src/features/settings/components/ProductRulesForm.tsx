@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Card, LoadingRows, Section } from '@/shared/ui';
 import { useEventSettings } from '../queries';
+import { VisitorFieldEditor } from '@/features/visitor';
 import { CountsModeField } from './CountsModeField';
 import { VisitorDataField } from './VisitorDataField';
 
@@ -34,6 +35,10 @@ export function ProductRulesForm({
               key={`visitors:${data.versions['product.visitorDataMode']}`}
               current={data.settings['product.visitorDataMode']}
               version={data.versions['product.visitorDataMode']}
+              canEdit={canEdit}
+            />
+            <VisitorFieldEditor
+              enabled={enabled && data.settings['product.visitorDataMode'] === 'allowlist'}
               canEdit={canEdit}
             />
           </>

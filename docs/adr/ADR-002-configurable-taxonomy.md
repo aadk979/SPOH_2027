@@ -129,6 +129,11 @@ stays an invariant of the code.
 
 - **Counts never depend on personal data.** `Registration` has no personal columns in either mode.
   A purge deletes `VisitorRecord` rows and leaves every count untouched.
+- **Retention with different field periods:** `VisitorRecord.purgeAfter` is nullable until the event
+  closes, then names the latest deadline among the values still in that record. The purge removes
+  each field's value at its own `retentionDays` deadline and deletes an empty record. It also deletes
+  any record at `purgeAfter` as a backstop. The deadline is refreshed before each purge run; P10.7
+  stamps it when the close transition is scheduled.
 - **Readers are enforced by policy.** Reading a `VisitorRecord` is its own Cedar action, allowed
   only to the field's reader roles (ADR-005). Exports include visitor data only for a caller with
   that permission, and only as a separate sheet.
