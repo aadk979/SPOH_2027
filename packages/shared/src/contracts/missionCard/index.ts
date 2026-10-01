@@ -4,6 +4,7 @@ import { CardStatus, DataSource } from '../../invariants/enums.js';
 import {
   CaptureEnvelope,
   Id,
+  IdempotencyKey,
   IsoDateTime,
   ReasonText,
   TimeRangeQuery,
@@ -42,6 +43,7 @@ export type CardShortCode = z.infer<typeof CardShortCode>;
 export const CardStampRecord = z
   .object({
     id: Id,
+    rehearsal: z.boolean(),
     stationId: Id,
     stationName: z.string(),
     recordedAt: IsoDateTime,
@@ -54,6 +56,7 @@ export type CardStampRecord = z.infer<typeof CardStampRecord>;
 export const MissionCardRecord = z
   .object({
     id: Id,
+    rehearsal: z.boolean(),
     shortCode: z.string(),
     status: CardStatus,
     issuedAt: IsoDateTime.nullable(),
@@ -141,6 +144,9 @@ export type ReissueCardResponse = z.infer<typeof ReissueCardResponse>;
  */
 export const GenerateCardBatchRequest = z
   .object({
+    idempotencyKey: IdempotencyKey,
+    /** A print run's mode is chosen explicitly, independently of the current event phase. */
+    rehearsal: z.boolean(),
     count: z.number().int().min(1).max(5000),
     batchLabel: z.string().trim().min(1).max(64),
   })
@@ -150,8 +156,9 @@ export type GenerateCardBatchRequest = z.infer<typeof GenerateCardBatchRequest>;
 export const GenerateCardBatchResponse = z
   .object({
     batchLabel: z.string(),
+    rehearsal: z.boolean(),
     created: z.number().int().nonnegative(),
-    /** `shortCode,qrPayload` rows, ready to hand to the printer. */
+    /** `shortCode,qrPayload,batchLabel,mode` rows, explicitly labelled for the printer. */
     csv: z.string(),
   })
   .strict();

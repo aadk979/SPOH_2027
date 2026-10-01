@@ -79,9 +79,13 @@ async function takeOverAbandoned(ctx: KeyContext, existing: Reservation): Promis
 async function resolveExisting(
   ctx: KeyContext,
   existing: Reservation,
-  actorSub: string,
+  actor: Pick<ReturnType<typeof getAuth>, 'sub' | 'eventId'>,
 ): Promise<AppError | 'replayed' | null> {
-  if (existing.endpoint !== ctx.endpointName || existing.actorSub !== actorSub) {
+  if (
+    existing.endpoint !== ctx.endpointName ||
+    existing.actorSub !== actor.sub ||
+    existing.eventId !== actor.eventId
+  ) {
     return new IdempotencyKeyReuseError();
   }
   if (existing.statusCode !== IN_PROGRESS) {
@@ -110,7 +114,7 @@ function idempotencyMiddleware(endpointName: string, options: IdempotentOptions)
           eventId: auth.eventId,
         });
         const ctx: KeyContext = { req, res, key, endpointName, options };
-        const outcome = existing ? await resolveExisting(ctx, existing, auth.sub) : null;
+        const outcome = existing ? await resolveExisting(ctx, existing, auth) : null;
         if (outcome === 'replayed') return;
         if (outcome) {
           next(outcome);

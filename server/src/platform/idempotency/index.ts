@@ -1,4 +1,5 @@
-import { prisma } from '../db/client.js';
+import { prisma, type PrismaTransactionClient } from '../db/client.js';
+import type { EventScope } from '../db/eventScope.js';
 import { getSettings, DEFAULT_SETTINGS } from '../settings/index.js';
 
 /**
@@ -53,6 +54,7 @@ export const IN_PROGRESS = 0;
 const STALE_RESERVATION_MS = 60_000;
 
 export interface Reservation {
+  eventId: string | null;
   endpoint: string;
   actorSub: string;
   statusCode: number;
@@ -105,6 +107,28 @@ export async function settle(key: string, statusCode: number, body: object): Pro
   await prisma.idempotencyRecord.update({
     where: { key },
     data: { statusCode, responseBody: body },
+  });
+}
+
+/** Print runs have no per-row retry key: their replay must commit with the minted cards. */
+export async function lockReserved(
+  tx: Pick<PrismaTransactionClient, '$queryRaw'>,
+  scope: EventScope,
+  key: string,
+): Promise<void> {
+  await tx.$queryRaw`SELECT key FROM "IdempotencyRecord"
+    WHERE key = ${key} AND "eventId" = ${scope.eventId} FOR UPDATE`;
+}
+
+/** Complete the already locked reservation inside its effect transaction. */
+export async function settleReserved(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  result: { key: string; statusCode: number; body: object },
+): Promise<void> {
+  await tx.idempotencyRecord.update({
+    where: { key: result.key, eventId: scope.eventId },
+    data: { statusCode: result.statusCode, responseBody: result.body },
   });
 }
 

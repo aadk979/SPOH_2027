@@ -44,6 +44,7 @@ missionCardRouter.post(
   sensitiveRateLimit,
   requireCapability('user.provision'),
   validate({ body: GenerateCardBatchRequest }),
+  idempotent('POST /cards/batch'),
   generateBatchHandler,
 );
 

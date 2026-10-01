@@ -165,6 +165,32 @@ phone/laptop practice-alert removal on go-live and the two-device acknowledgemen
 flow. All workspace typechecks, root lint, architecture, hardcoding and server build passed.
 Full visual assertion **58 passed** against the existing baselines; no images changed.
 
-Remaining: explicit card batch selection, import window selection in the UI, derived safety
+## Explicit card print mode and durable retries
+
+Batch generation requires a chosen `rehearsal` boolean and UUID retry key. Printing is preparation,
+so the chosen mode is independent of the current event phase: live cards can be printed before
+go-live. Every new card, batch response, audit and print-file row retains that choice. The CSV
+labels rows LIVE or REHEARSAL, quotes labels with commas/quotes and prevents formula labels from
+executing in a spreadsheet. Card/stamp response contracts expose provenance, and the card summary
+labels practice cards from the record.
+
+Print generation locks its retry reservation before minting. The cards, audit and replay response
+commit in one transaction, so lost response bookkeeping or a stale-reservation takeover cannot
+mint a second batch. The shared retry middleware also checks event ownership before replay or
+takeover; another event's administrator receives a key-reuse refusal, even when the same person
+administers both events. Unscoped legacy keys fail closed. The old takeover regression fixture
+now names its event and uses rawDb for direct access.
+
+Verification on 2026-10-02: full integration **547 passed / 4 existing skips**, server unit **475**, client unit **249**,
+full browser E2E **41**, and the phone/laptop stamp visual assertions **2** passed; no images
+changed. Nine new database cases cover preparation in different phases, stored/printed labels,
+required inputs, cross-event replay, normal retries, lost bookkeeping and reservation locking.
+Two component cases cover stored card labels; unit cases cover both print modes, CSV labels and
+foreign/unscoped takeover refusal. All workspace typechecks, root lint, architecture, hardcoding,
+formatting and server build passed by exit code. The initial full run exposed an abandoned-key
+fixture missing event ownership; the corrected fixture passed in the final full run.
+Batch printing UI is built with the card administration screen in P13.3.
+
+Remaining: import window selection in the UI, derived safety
 acknowledgement/follow-up provenance, then audited lifecycle admission, transitions and
 close/archive side effects. P10.4/P10.5 remain in progress.

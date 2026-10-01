@@ -326,13 +326,18 @@ describe('batch generation', () => {
     const response = await request(app)
       .post('/api/v1/cards/batch')
       .set('Authorization', bearer(admin))
-      .send({ count: 25, batchLabel: 'PRINT-RUN-1' });
+      .send({
+        count: 25,
+        batchLabel: 'PRINT-RUN-1',
+        rehearsal: false,
+        idempotencyKey: idempotencyKey(),
+      });
 
     expect(response.status).toBe(201);
     expect(response.body.created).toBe(25);
 
     const lines = (response.body.csv as string).trim().split('\n');
-    expect(lines[0]).toBe('shortCode,qrPayload,batchLabel');
+    expect(lines[0]).toBe('shortCode,qrPayload,batchLabel,mode');
     expect(lines).toHaveLength(26);
 
     const created = await rawDb.missionCard.findMany({ where: { batchLabel: 'PRINT-RUN-1' } });
@@ -348,7 +353,7 @@ describe('batch generation', () => {
     const response = await request(app)
       .post('/api/v1/cards/batch')
       .set('Authorization', bearer(ic))
-      .send({ count: 5, batchLabel: 'NOPE' });
+      .send({ count: 5, batchLabel: 'NOPE', rehearsal: false, idempotencyKey: idempotencyKey() });
 
     expect(response.status).toBe(403);
   });

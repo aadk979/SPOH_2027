@@ -1,9 +1,8 @@
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../../../src/app/createApp.js';
-import { prisma } from '../../../src/platform/db/client.js';
 import { resetDatabase, rawDb } from '../../helpers/db.js';
-import { bearer, createVolunteer, testEvent } from '../../helpers/fixtures.js';
+import { bearer, createVolunteer, idempotencyKey, testEvent } from '../../helpers/fixtures.js';
 
 /**
  * P03 bug reproduction: a printed card batch that includes a code the
@@ -46,7 +45,7 @@ describe('card batches (P03 repros)', () => {
     const response = await request(app)
       .post('/api/v1/cards/batch')
       .set('Authorization', bearer(admin))
-      .send({ count: 2, batchLabel: 'repro' });
+      .send({ count: 2, batchLabel: 'repro', rehearsal: false, idempotencyKey: idempotencyKey() });
     expect(response.status).toBe(201);
 
     const printed = (response.body.csv as string)
@@ -65,11 +64,16 @@ describe('card batch audit (F03-018)', () => {
     const response = await request(app)
       .post('/api/v1/cards/batch')
       .set('Authorization', bearer(admin))
-      .send({ count: 3, batchLabel: 'audited' });
+      .send({
+        count: 3,
+        batchLabel: 'audited',
+        rehearsal: false,
+        idempotencyKey: idempotencyKey(),
+      });
     expect(response.status).toBe(201);
 
-    const entries = await prisma.auditLog.findMany({ where: { entityType: 'MissionCardBatch' } });
+    const entries = await rawDb.auditLog.findMany({ where: { entityType: 'MissionCardBatch' } });
     expect(entries.map((entry) => entry.action)).toEqual(['card.batch']);
-    expect(entries[0]?.after).toEqual({ requested: 3, created: 3 });
+    expect(entries[0]?.after).toEqual({ requested: 3, created: 3, rehearsal: false });
   });
 });

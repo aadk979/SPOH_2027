@@ -6,6 +6,9 @@ export function CardSummary({ card }: { card: MissionCardRecord }): ReactNode {
   return (
     <Card>
       <CardTitle className="font-display tracking-[0.15em]">{card.shortCode}</CardTitle>
+      {card.rehearsal ? (
+        <p className="text-caption font-semibold">REHEARSAL · Practice card</p>
+      ) : null}
       <p className="text-caption text-text-muted">
         {card.status === 'COMPLETED' ? 'Journey complete' : `${card.stamps.length} stamps so far`}
       </p>

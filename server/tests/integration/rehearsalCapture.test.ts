@@ -251,9 +251,16 @@ describe('rehearsal capture provenance', () => {
       (await post('/lost-found', { itemLabel: 'Practice bottle', foundStationId: stationId }))
         .status,
     ).toBe(201);
-    expect((await post('/cards/batch', { count: 2, batchLabel: 'Practice batch' })).status).toBe(
-      201,
-    );
+    expect(
+      (
+        await post('/cards/batch', {
+          count: 2,
+          batchLabel: 'Practice batch',
+          rehearsal: true,
+          idempotencyKey: idempotencyKey(),
+        })
+      ).status,
+    ).toBe(201);
     expect(
       (await post('/fallback/windows', { tier: 4, reason: 'Practice paper tally' })).status,
     ).toBe(201);

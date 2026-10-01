@@ -3,7 +3,6 @@ import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../../src/app/createApp.js';
 import { SYSTEM_AUDIT_CONTEXT } from '../../../src/platform/http/auditContext.js';
-import { prisma } from '../../../src/platform/db/client.js';
 import { clearSettings } from '../../../src/platform/settings/index.js';
 import { resetDatabase, rawDb } from '../../helpers/db.js';
 import {
@@ -73,9 +72,10 @@ describe('cross-cutting rules (P03 repros)', () => {
     // A race: five abandoned keys, each retried three times at once.
     for (let round = 0; round < 5; round += 1) {
       const key = idempotencyKey();
-      await prisma.idempotencyRecord.create({
+      await rawDb.idempotencyRecord.create({
         data: {
           key,
+          eventId: (await testEvent()).eventId,
           endpoint: 'POST /registrations',
           actorSub: volunteer.sub,
           statusCode: 0,
@@ -138,7 +138,7 @@ describe('cross-cutting rules (P03 repros)', () => {
       .send({});
     expect(ack.status).toBe(200);
 
-    expect(await prisma.auditLog.count({ where: { actorId: ic.id } })).toBe(1);
+    expect(await rawDb.auditLog.count({ where: { actorId: ic.id } })).toBe(1);
   });
 
   // F03-018
@@ -158,7 +158,7 @@ describe('cross-cutting rules (P03 repros)', () => {
       expect(ack.status).toBe(200);
     }
 
-    const entries = await prisma.auditLog.findMany({ where: { actorId: volunteer.id } });
+    const entries = await rawDb.auditLog.findMany({ where: { actorId: volunteer.id } });
     expect(entries.map((entry) => entry.action)).toEqual(['announcement.ack']);
   });
 
@@ -177,7 +177,7 @@ describe('cross-cutting rules (P03 repros)', () => {
       .send({ assignmentId: shift.id, targetVolunteerId: other.id });
     expect(response.status).toBe(201);
 
-    const row = await prisma.auditLog.findFirstOrThrow({
+    const row = await rawDb.auditLog.findFirstOrThrow({
       where: { entityType: 'ShiftSwapRequest' },
     });
     expect(row.action).not.toBe('swap.decide');
@@ -204,20 +204,20 @@ describe('cross-cutting rules (P03 repros)', () => {
     expect(response.status).toBe(201);
     expect(response.body.assignment.id).toBe(shift.id);
 
-    const row = await prisma.auditLog.findFirstOrThrow({ where: { entityId: shift.id } });
+    const row = await rawDb.auditLog.findFirstOrThrow({ where: { entityId: shift.id } });
     expect(row.before).toMatchObject({ stationId });
   });
 
   // F03-021
   it('keeps a setting when resetting it cannot be audited', async () => {
-    await prisma.appSetting.create({ data: { key: 'eventName', value: 'Dry Run 1' } });
+    await rawDb.appSetting.create({ data: { key: 'eventName', value: 'Dry Run 1' } });
 
     // An actor id that is not a volunteer makes the audit insert fail.
     await expect(
       clearSettings(['eventName'], { ...SYSTEM_AUDIT_CONTEXT, actorId: 'no-such-volunteer' }),
     ).rejects.toThrow();
 
-    expect(await prisma.appSetting.count({ where: { key: 'eventName' } })).toBe(1);
+    expect(await rawDb.appSetting.count({ where: { key: 'eventName' } })).toBe(1);
   });
 
   // F03-024

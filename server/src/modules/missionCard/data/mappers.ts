@@ -9,6 +9,7 @@ export function toMissionCardRecord(
 
   return {
     id: card.id,
+    rehearsal: card.rehearsal,
     shortCode: card.shortCode,
     status: card.status,
     issuedAt: card.issuedAt?.toISOString() ?? null,
@@ -18,6 +19,7 @@ export function toMissionCardRecord(
     batchLabel: card.batchLabel,
     stamps: card.stampEvents.map((stamp) => ({
       id: stamp.id,
+      rehearsal: stamp.rehearsal,
       stationId: stamp.stationId,
       stationName: stamp.station.name,
       recordedAt: stamp.recordedAt.toISOString(),

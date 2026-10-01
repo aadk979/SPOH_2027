@@ -1,4 +1,5 @@
 import { captureProvenance } from '../../../platform/db/captureProvenance.js';
+import type { BatchRow } from '../domain/cardBatch.js';
 import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
@@ -164,13 +165,12 @@ export async function attachGroupRegistrations(
 export async function createCardBatch(
   tx: PrismaTransactionClient,
   scope: EventScope,
-  rows: Array<{ shortCode: string; qrPayload: string; batchLabel: string }>,
-): Promise<Array<{ shortCode: string; qrPayload: string; batchLabel: string }>> {
-  const provenance = await captureProvenance(tx, scope);
+  rows: BatchRow[],
+): Promise<BatchRow[]> {
   const created = await tx.missionCard.createManyAndReturn({
-    data: rows.map((row) => ({ ...row, eventId: scope.eventId, ...provenance })),
+    data: rows.map((row) => ({ ...row, eventId: scope.eventId })),
     skipDuplicates: true,
-    select: { shortCode: true, qrPayload: true, batchLabel: true },
+    select: { shortCode: true, qrPayload: true, batchLabel: true, rehearsal: true },
   });
   return created.map((row) => ({ ...row, batchLabel: row.batchLabel ?? '' }));
 }

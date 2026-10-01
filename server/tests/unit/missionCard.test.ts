@@ -66,13 +66,29 @@ describe('card rules', () => {
 });
 
 describe('card batch', () => {
-  it('generates distinct codes and a CSV the printer reads', () => {
-    const rows = generateBatchRows(50, 'batch-1');
-    expect(new Set(rows.map((row) => row.shortCode)).size).toBe(50);
+  it.each([false, true])(
+    'generates distinct codes and labels the print file (practice %s)',
+    (rehearsal) => {
+      const rows = generateBatchRows(50, { batchLabel: 'batch-1', rehearsal });
+      expect(new Set(rows.map((row) => row.shortCode)).size).toBe(50);
 
-    const csv = toBatchCsv(rows.slice(0, 2)).split('\n');
-    expect(csv[0]).toBe('shortCode,qrPayload,batchLabel');
-    expect(csv[1]).toBe(`${rows[0]?.shortCode},${rows[0]?.qrPayload},batch-1`);
+      const csv = toBatchCsv(rows.slice(0, 2)).split('\n');
+      expect(csv[0]).toBe('shortCode,qrPayload,batchLabel,mode');
+      expect(csv[1]).toBe(
+        `${rows[0]?.shortCode},${rows[0]?.qrPayload},batch-1,${rehearsal ? 'REHEARSAL' : 'LIVE'}`,
+      );
+    },
+  );
+
+  it.each([
+    ['Practice, "Desk"', '"Practice, ""Desk"""'],
+    ['=1+1', "'=1+1"],
+    ['  @SUM(1)', "'  @SUM(1)"],
+  ])('keeps the label %s in one safe spreadsheet cell', (batchLabel, expected) => {
+    const csv = toBatchCsv([
+      { shortCode: 'ABC234', qrPayload: 'opaque', batchLabel, rehearsal: true },
+    ]);
+    expect(csv.split('\n')[1]).toBe(`ABC234,opaque,${expected},REHEARSAL`);
   });
 });
 
