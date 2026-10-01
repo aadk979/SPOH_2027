@@ -76,6 +76,18 @@ transition names its Cedar action (ADR-005), its guard and its side effects:
 - Development uses the same mechanism: the dev fixture event is created in `REHEARSAL`. The env
   flag is deleted.
 
+**Provenance storage (P10.5, 2026-10-01).** Supporting rows also retain practice provenance:
+`MissionCard`, `LostPersonSummary`, `GiftStockAdjustment`, `FallbackWindow`, `ImportBatch`,
+`Attendance` and `AttendanceChallenge`. Purging an alert copies its provenance to the summary;
+an import carries the mode of its source window. Attendance and challenge uniqueness includes
+`rehearsal`, so practice presence and codes cannot replace or block live ones. Practice attendance
+does not mark the live roster's check-in timestamps. Failed PIN counters remain shared security
+state, so switching mode cannot bypass their limit. Gift types have a separate
+`rehearsalInitialStock` (zero by default); stock calculations select adjustments and redemptions
+of the same mode. The additive migration defaults existing provenance to `false` and preserves
+live counts, card status, stock and attendance. These supporting fields implement the isolation
+already required by rehearsal; they do not add a new lifecycle state.
+
 ### 3. Day boundary and shifts past midnight (Q-P2, **assumed**)
 
 - `Event.dayBoundaryMinutes` (default 240, which is 04:00) says when an event's "today" begins in

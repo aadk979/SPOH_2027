@@ -60,7 +60,7 @@ export async function findAttendance(
   key: PersonDay,
 ): Promise<AttendanceWithVerifier | null> {
   return db.attendance.findUnique({
-    where: { volunteerId_eventDayId: key, eventId: scope.eventId },
+    where: { volunteerId_eventDayId: { ...key, rehearsal: false }, eventId: scope.eventId },
     include: withVerifier,
   });
 }
@@ -68,7 +68,7 @@ export async function findAttendance(
 /** Presence without the verifier's row, for the issuer checks. */
 export async function findPresence(db: PrismaTransactionClient, scope: EventScope, key: PersonDay) {
   return db.attendance.findUnique({
-    where: { volunteerId_eventDayId: key, eventId: scope.eventId },
+    where: { volunteerId_eventDayId: { ...key, rehearsal: false }, eventId: scope.eventId },
   });
 }
 

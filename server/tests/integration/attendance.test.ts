@@ -143,7 +143,13 @@ describe('verified attendance', () => {
     expect(
       (
         await rawDb.attendance.findUniqueOrThrow({
-          where: { volunteerId_eventDayId: { volunteerId: volunteer.id, eventDayId: dayId } },
+          where: {
+            volunteerId_eventDayId: {
+              volunteerId: volunteer.id,
+              eventDayId: dayId,
+              rehearsal: false,
+            },
+          },
         })
       ).verifiedById,
     ).toBe(exco.id);
@@ -154,7 +160,9 @@ describe('verified attendance', () => {
     expect(
       (
         await rawDb.attendanceChallenge.findUniqueOrThrow({
-          where: { issuerId_eventDayId: { issuerId: exco.id, eventDayId: dayId } },
+          where: {
+            issuerId_eventDayId: { issuerId: exco.id, eventDayId: dayId, rehearsal: false },
+          },
         })
       ).pinHash,
     ).not.toBe(code.pin);

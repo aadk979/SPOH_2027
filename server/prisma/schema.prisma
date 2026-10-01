@@ -635,6 +635,8 @@ model Attendance {
   id                     String           @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2).
   eventId                String
+  /// Practice provenance is retained across imports and derived rows (ADR-004).
+  rehearsal              Boolean          @default(false)
   volunteerId            String
   /// The EventMembership behind volunteerId (ADR-001); backfilled in P09.4, read from P09.5.
   membershipId           String?
@@ -654,11 +656,12 @@ model Attendance {
   membership           EventMembership? @relation("AttendanceMembership", fields: [eventId, membershipId], references: [eventId, id], onDelete: Restrict)
   verifiedByMembership EventMembership? @relation("AttendanceVerifiedByMembership", fields: [eventId, verifiedByMembershipId], references: [eventId, id], onDelete: Restrict)
 
-  @@unique([volunteerId, eventDayId])
+  @@unique([volunteerId, eventDayId, rehearsal], name: "volunteerId_eventDayId")
   @@index([eventDayId, presentAt])
   @@index([eventId, eventDayId])
   @@index([membershipId])
   @@index([verifiedByMembershipId])
+  @@index([eventId, rehearsal])
 }
 
 /// @eventOwned
@@ -666,6 +669,8 @@ model AttendanceChallenge {
   id                 String   @id
   /// The event this row belongs to (ADR-001 §2).
   eventId            String
+  /// Practice provenance is retained across imports and derived rows (ADR-004).
+  rehearsal          Boolean  @default(false)
   issuerId           String
   /// The EventMembership behind issuerId (ADR-001); backfilled in P09.4, read from P09.5.
   issuerMembershipId String?
@@ -682,10 +687,11 @@ model AttendanceChallenge {
   // Their memberships, inside the event (ADR-001 §2).
   issuerMembership EventMembership? @relation("AttendanceChallengeIssuerMembership", fields: [eventId, issuerMembershipId], references: [eventId, id], onDelete: Restrict)
 
-  @@unique([issuerId, eventDayId])
+  @@unique([issuerId, eventDayId, rehearsal], name: "issuerId_eventDayId")
   @@index([expiresAt])
   @@index([eventId])
   @@index([issuerMembershipId])
+  @@index([eventId, rehearsal])
 }
 
 // Persisted across processes and restarts so PIN guessing cannot evade limits.
@@ -786,6 +792,8 @@ model Registration {
   id                     String     @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2).
   eventId                String
+  /// Practice provenance is retained across imports and derived rows (ADR-004).
+  rehearsal              Boolean    @default(false)
   /// The event's capture category (ADR-002): the only record of what was counted (P09.10).
   categoryId             String
   stationId              String
@@ -822,6 +830,7 @@ model Registration {
   @@index([eventId, recordedAt])
   @@index([eventId, categoryId, recordedAt])
   @@index([recordedByMembershipId])
+  @@index([eventId, rehearsal])
 }
 
 // ─────────────────────────────────────────────
@@ -833,6 +842,8 @@ model FootfallTick {
   id                     String     @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2).
   eventId                String
+  /// Practice provenance is retained across imports and derived rows (ADR-004).
+  rehearsal              Boolean    @default(false)
   stationId              String
   recordedById           String
   /// The EventMembership behind recordedById (ADR-001); backfilled in P09.4, read from P09.5.
@@ -859,6 +870,7 @@ model FootfallTick {
   @@index([recordedAt])
   @@index([eventId, recordedAt])
   @@index([recordedByMembershipId])
+  @@index([eventId, rehearsal])
 }
 
 // ─────────────────────────────────────────────
@@ -870,6 +882,8 @@ model MissionCard {
   id             String     @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2).
   eventId        String
+  /// Practice provenance is retained across imports and derived rows (ADR-004).
+  rehearsal      Boolean    @default(false)
   /// 6 chars, printed at production time, ambiguity-free alphabet.
   /// @class operational
   shortCode      String     @unique
@@ -896,6 +910,7 @@ model MissionCard {
   @@unique([eventId, id])
   @@index([status])
   @@index([eventId, status])
+  @@index([eventId, rehearsal])
 }
 
 /// @eventOwned
@@ -903,6 +918,8 @@ model CardStampEvent {
   id                     String     @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2).
   eventId                String
+  /// Practice provenance is retained across imports and derived rows (ADR-004).
+  rehearsal              Boolean    @default(false)
   missionCardId          String
   stationId              String
   recordedById           String
@@ -926,6 +943,7 @@ model CardStampEvent {
   @@index([recordedAt])
   @@index([eventId, recordedAt])
   @@index([recordedByMembershipId])
+  @@index([eventId, rehearsal])
 }
 
 // ─────────────────────────────────────────────
@@ -934,14 +952,16 @@ model CardStampEvent {
 
 /// @eventOwned
 model GiftType {
-  id                String  @id @default(cuid())
+  id                    String  @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2).
-  eventId           String
+  eventId               String
   /// @class operational
-  name              String
-  initialStock      Int
-  lowStockThreshold Int     @default(50)
-  active            Boolean @default(true)
+  name                  String
+  initialStock          Int
+  /// Separate practice inventory; never deducted from live stock.
+  rehearsalInitialStock Int     @default(0)
+  lowStockThreshold     Int     @default(50)
+  active                Boolean @default(true)
 
   redemptions GiftRedemption[]
   adjustments GiftStockAdjustment[]
@@ -958,6 +978,8 @@ model GiftRedemption {
   id                     String          @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2).
   eventId                String
+  /// Practice provenance is retained across imports and derived rows (ADR-004).
+  rehearsal              Boolean         @default(false)
   giftTypeId             String
   missionCardId          String?
   stationId              String
@@ -985,6 +1007,7 @@ model GiftRedemption {
   @@index([flag, recordedAt])
   @@index([eventId, recordedAt])
   @@index([recordedByMembershipId])
+  @@index([eventId, rehearsal])
 }
 
 /// @eventOwned
@@ -992,6 +1015,8 @@ model GiftStockAdjustment {
   id                    String   @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2).
   eventId               String
+  /// Practice provenance is retained across imports and derived rows (ADR-004).
+  rehearsal             Boolean  @default(false)
   giftTypeId            String
   delta                 Int
   /// @class operational
@@ -1012,6 +1037,7 @@ model GiftStockAdjustment {
   @@index([giftTypeId, createdAt])
   @@index([eventId])
   @@index([createdByMembershipId])
+  @@index([eventId, rehearsal])
 }
 
 // ─────────────────────────────────────────────
@@ -1023,6 +1049,8 @@ model Incident {
   id                     String           @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2).
   eventId                String
+  /// Practice provenance is retained across imports and derived rows (ADR-004).
+  rehearsal              Boolean          @default(false)
   type                   IncidentType
   severity               IncidentSeverity
   status                 IncidentStatus   @default(OPEN)
@@ -1053,6 +1081,7 @@ model Incident {
   @@index([reportedAt])
   @@index([eventId, status])
   @@index([reportedByMembershipId])
+  @@index([eventId, rehearsal])
 }
 
 /// @eventOwned
@@ -1087,6 +1116,8 @@ model LostPersonAlert {
   id                   String           @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2).
   eventId              String
+  /// Practice provenance is retained across imports and derived rows (ADR-004).
+  rehearsal            Boolean          @default(false)
   status               LostPersonStatus @default(ACTIVE)
   /// @class visitor-transient
   approxAge            String?
@@ -1116,6 +1147,7 @@ model LostPersonAlert {
   @@index([status])
   @@index([eventId, status])
   @@index([raisedByMembershipId])
+  @@index([eventId, rehearsal])
 }
 
 /// @eventOwned
@@ -1148,6 +1180,8 @@ model LostPersonSummary {
   id                String           @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2).
   eventId           String
+  /// Practice provenance is retained across imports and derived rows (ADR-004).
+  rehearsal         Boolean          @default(false)
   raisedAt          DateTime         @db.Timestamptz(3)
   resolvedAt        DateTime         @db.Timestamptz(3)
   resolutionMinutes Int
@@ -1158,6 +1192,7 @@ model LostPersonSummary {
   event Event @relation(fields: [eventId], references: [id], onDelete: Restrict)
 
   @@index([eventId])
+  @@index([eventId, rehearsal])
 }
 
 /// @eventOwned
@@ -1165,6 +1200,8 @@ model LostFoundItem {
   id                   String          @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2).
   eventId              String
+  /// Practice provenance is retained across imports and derived rows (ADR-004).
+  rehearsal            Boolean         @default(false)
   /// @class operational
   itemLabel            String
   /// @class operational
@@ -1196,6 +1233,7 @@ model LostFoundItem {
   @@index([foundAt])
   @@index([eventId, status])
   @@index([loggedByMembershipId])
+  @@index([eventId, rehearsal])
 }
 
 // ─────────────────────────────────────────────
@@ -1271,6 +1309,8 @@ model FallbackWindow {
   id                     String    @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2).
   eventId                String
+  /// Practice provenance is retained across imports and derived rows (ADR-004).
+  rehearsal              Boolean   @default(false)
   /// 3 = google sheets, 4 = paper
   tier                   Int
   startedAt              DateTime  @db.Timestamptz(3)
@@ -1297,6 +1337,7 @@ model FallbackWindow {
   @@index([endedAt])
   @@index([eventId, startedAt])
   @@index([declaredByMembershipId])
+  @@index([eventId, rehearsal])
 }
 
 /// @eventOwned
@@ -1304,6 +1345,8 @@ model ImportBatch {
   id                     String     @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2).
   eventId                String
+  /// Practice provenance is retained across imports and derived rows (ADR-004).
+  rehearsal              Boolean    @default(false)
   source                 DataSource
   /// @class operational
   targetTable            String
@@ -1327,6 +1370,7 @@ model ImportBatch {
   @@index([importedAt])
   @@index([eventId])
   @@index([importedByMembershipId])
+  @@index([eventId, rehearsal])
 }
 
 enum AuditSeverity {

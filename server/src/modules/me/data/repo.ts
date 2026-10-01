@@ -82,7 +82,7 @@ export async function hasAttendance(
   where: { volunteerId: string; eventDayId: string },
 ): Promise<boolean> {
   const attendance = await tx.attendance.findUnique({
-    where: { volunteerId_eventDayId: where, eventId: scope.eventId },
+    where: { volunteerId_eventDayId: { ...where, rehearsal: false }, eventId: scope.eventId },
     select: { id: true },
   });
   return attendance !== null;
