@@ -1,4 +1,4 @@
-import type { FullReport, ReportQuery } from '@spoh/shared';
+import { headlineOf, type FullReport, type ReportQuery } from '@spoh/shared';
 import { listStations } from '../../station/index.js';
 import { COUNTING_NOTE } from '../domain/countingNote.js';
 import {
@@ -14,6 +14,7 @@ import {
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { eventSlug, eventZone } from '../../../platform/event/events.js';
 import { getEventSummary } from '../../event/index.js';
+import { eventSetting } from '../../../platform/settings/eventSettings.js';
 import type { EventZone } from '../../../platform/time/index.js';
 
 /** Absent bounds mean the whole event. */
@@ -48,12 +49,23 @@ export async function generateReport(scope: EventScope, query: ReportQuery): Pro
       integrityReport(scope, range),
     ]);
 
+  const headline = headlineOf(await eventSetting(scope, 'product.countsMode'), {
+    registrations: registrations.total,
+    journeys: cards.issued,
+    footfall: footfall.byStation.map(({ stationId, stationName, total }) => ({
+      stationId,
+      stationName,
+      value: total,
+    })),
+  });
+
   return {
     generatedAt: now.toISOString(),
     range: { from: query.from ?? null, to: query.to ?? null },
     timezone: zone.timezone,
     event: { name: summary.name, slug, status: summary.status },
     countingNote: COUNTING_NOTE,
+    headline,
     registrations,
     footfall,
     cards,

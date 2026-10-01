@@ -1,5 +1,5 @@
 import type { FullReport } from '@spoh/shared';
-import { rows, eventTime } from './format.js';
+import { headlineLine, rows, eventTime } from './format.js';
 
 type Cell = string | number | null;
 
@@ -21,6 +21,7 @@ export function toCsv(report: FullReport): string {
     `# ${report.event.name} post-event report`,
     `# Generated,${report.generatedAt}`,
     `# ${report.countingNote.replace(/,/g, ';')}`,
+    ...(report.headline ? [`# ${headlineLine(report.headline).replace(/,/g, ';')}`] : []),
   ];
   for (const section of sections(report)) {
     lines.push('', `## ${section.title}`);

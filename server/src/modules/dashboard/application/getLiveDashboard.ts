@@ -1,4 +1,5 @@
-import type { LiveDashboardResponse } from '@spoh/shared';
+import { headlineOf, type LiveDashboardResponse } from '@spoh/shared';
+import { eventSetting } from '../../../platform/settings/eventSettings.js';
 import { runningShifts } from '../../../platform/event/runningShifts.js';
 import { eventToday, eventTodayStart } from '../../../platform/event/today.js';
 import { getLiveFootfall } from '../../footfall/index.js';
@@ -52,10 +53,21 @@ export async function getLiveDashboard(
     getDataHealth(scope, now),
   ]);
 
+  const headline = headlineOf(await eventSetting(scope, 'product.countsMode'), {
+    registrations: registrations.todayTotal,
+    journeys: cards.issued,
+    footfall: footfall.stations.map(({ stationId, stationName, todayTotal }) => ({
+      stationId,
+      stationName,
+      value: todayTotal,
+    })),
+  });
+
   return {
     asOf: now.toISOString(),
     eventDayLabel: eventDay?.label ?? null,
     withinEventHours,
+    headline,
     registrations,
     footfall,
     cards,

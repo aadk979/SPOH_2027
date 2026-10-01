@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { Id, IsoDateTime } from '../common/index.js';
+import { Headline } from '../eventSettings/index.js';
 import { FootfallLiveStation } from '../footfall/index.js';
 import { FunnelStage } from '../missionCard/index.js';
 import { FlaggedRedemption, GiftTypeRecord } from '../gift/index.js';
@@ -128,6 +129,8 @@ export const LiveDashboardResponse = z
     asOf: IsoDateTime,
     eventDayLabel: z.string().nullable(),
     withinEventHours: z.boolean(),
+    /** Today's headline figure, when the event asks for one (ADR-002 §4); never a sum. */
+    headline: Headline.nullable(),
     registrations: RegistrationLiveBreakdown,
     footfall: FootfallLiveBreakdown,
     cards: CardLiveBreakdown,

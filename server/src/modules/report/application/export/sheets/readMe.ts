@@ -1,6 +1,6 @@
 import type { FullReport } from '@spoh/shared';
 import type { ExcelJS } from '../format.js';
-import { SHEETS } from '../format.js';
+import { headlineLine, SHEETS } from '../format.js';
 
 export function writeReadMeSheet(workbook: ExcelJS.Workbook, report: FullReport): void {
   const sheet = workbook.addWorksheet(SHEETS.readMe);
@@ -22,6 +22,11 @@ export function writeReadMeSheet(workbook: ExcelJS.Workbook, report: FullReport)
     `Times marked "local" are on the event's clock (${report.timezone}), each with its UTC offset.`,
   ]);
   sheet.addRow([]);
+
+  if (report.headline) {
+    sheet.addRow([headlineLine(report.headline)]).font = { bold: true, size: 12 };
+    sheet.addRow([]);
+  }
 
   sheet.addRow(['How to read the numbers']).font = { bold: true };
   const note = sheet.addRow([report.countingNote]);

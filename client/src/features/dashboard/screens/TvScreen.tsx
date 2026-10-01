@@ -73,6 +73,14 @@ export default function TvScreen(): ReactNode {
         <p className="text-tv-row tabular-nums text-on-dark-muted">{format.time(data.asOf)}</p>
       </header>
 
+      {data.headline ? (
+        <TvStat
+          label="Visitors"
+          value={data.headline.value}
+          unit={`${data.headline.sourceLabel} · one of the three below, not their sum`}
+        />
+      ) : null}
+
       <div className="grid gap-[1.5vw] sm:grid-cols-3">
         <TvStat label="Registered" value={data.registrations.todayTotal} unit="registrations" />
         <TvStat label="Room entries" value={data.footfall.todayTotal} unit="entries, not people" />

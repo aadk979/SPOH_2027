@@ -60,3 +60,11 @@ export const rows = {
 };
 
 export type { ExcelJS };
+
+/** The headline as one line of an export: the figure, its source, and what it is not. */
+export function headlineLine(headline: NonNullable<FullReport['headline']>): string {
+  return (
+    `Headline: ${headline.value}, ${headline.sourceLabel}. ` +
+    'It is one of the three counts below, not their sum.'
+  );
+}

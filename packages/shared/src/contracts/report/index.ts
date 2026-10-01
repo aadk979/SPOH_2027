@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { Headline } from '../eventSettings/index.js';
 import {
   IncidentSeverity,
   IncidentStatus,
@@ -284,6 +285,8 @@ export const FullReport = z
      * counted three ways.
      */
     countingNote: z.string(),
+    /** The event's headline figure, when it asks for one (ADR-002 §4); never a sum. */
+    headline: Headline.nullable(),
     registrations: RegistrationReport,
     footfall: FootfallReport,
     cards: CardReport,

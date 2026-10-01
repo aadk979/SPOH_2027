@@ -72,3 +72,46 @@ export const ChangeEventSettingRequest = z.discriminatedUnion('key', [
   change('product.visitorDataMode', VisitorDataMode),
 ]);
 export type ChangeEventSettingRequest = z.infer<typeof ChangeEventSettingRequest>;
+
+/**
+ * One count shown on top, saying where it comes from (ADR-002 §4). It is
+ * always that source's own figure, and the three counts are always shown
+ * with it. Null in `separate` mode.
+ */
+export const Headline = z
+  .object({
+    source: HeadlineSource,
+    /** Where the figure comes from, in words: "from registrations". */
+    sourceLabel: z.string(),
+    value: z.number().int().nonnegative(),
+  })
+  .strict();
+export type Headline = z.infer<typeof Headline>;
+
+/** The three counts as one response has them, for taking a headline from. */
+export interface HeadlineCounts {
+  registrations: number;
+  journeys: number;
+  footfall: ReadonlyArray<{ stationId: string; stationName: string; value: number }>;
+}
+
+/**
+ * The headline a counts rule asks for: the chosen source's own figure, or
+ * null. There is no branch that adds counts together (F01-048).
+ */
+export function headlineOf(mode: CountsMode, counts: HeadlineCounts): Headline | null {
+  if (mode.mode === 'separate') return null;
+  const { source } = mode;
+  if (source.count === 'registrations') {
+    return { source, sourceLabel: 'from registrations', value: counts.registrations };
+  }
+  if (source.count === 'journeys') {
+    return { source, sourceLabel: 'from card journeys', value: counts.journeys };
+  }
+  const station = counts.footfall.find((row) => row.stationId === source.stationId);
+  return {
+    source,
+    sourceLabel: `from entries counted at ${station?.stationName ?? 'the chosen station'}`,
+    value: station?.value ?? 0,
+  };
+}

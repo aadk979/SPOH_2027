@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react';
 import type { LiveDashboardResponse } from '@spoh/shared';
 import { CardGrid, Section } from '@/shared/ui';
-import { StatTile } from '@/features/dashboard';
+import { HeadlineTile, StatTile } from '@/features/dashboard';
 export function TodayTotals({ data }: { data: LiveDashboardResponse }): ReactNode {
   return (
     <Section title={`Today — ${data.eventDayLabel ?? 'not an event day'}`}>
+      <HeadlineTile headline={data.headline} />
       <CardGrid>
         <StatTile
           label="Registered"
