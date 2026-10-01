@@ -1,5 +1,5 @@
-import { prisma } from '../../../platform/db/client.js';
-import { rehearsalFilter, type ReportingScope } from '../../../platform/db/rehearsalFilter.js';
+import type { ReportReadScope } from './readScope.js';
+import { rehearsalFilter } from '../../../platform/db/rehearsalFilter.js';
 import type { Range } from './repo.js';
 
 /**
@@ -9,7 +9,7 @@ import type { Range } from './repo.js';
  */
 
 /** Rows of the event recorded in the range, voided or not. */
-function recorded(scope: ReportingScope, range: Range, voided: boolean | null = false) {
+function recorded(scope: ReportReadScope, range: Range, voided: boolean | null = false) {
   return {
     eventId: scope.eventId,
     ...rehearsalFilter(scope),
@@ -18,8 +18,8 @@ function recorded(scope: ReportingScope, range: Range, voided: boolean | null = 
   };
 }
 
-export async function importBatches(scope: ReportingScope, range: Range) {
-  return prisma.importBatch.findMany({
+export async function importBatches(scope: ReportReadScope, range: Range) {
+  return scope.db.importBatch.findMany({
     where: {
       eventId: scope.eventId,
       ...rehearsalFilter(scope),
@@ -30,22 +30,30 @@ export async function importBatches(scope: ReportingScope, range: Range) {
 }
 
 /** How many rows in each capture table came from each source. */
-export async function recordsBySource(scope: ReportingScope, range: Range) {
+export async function recordsBySource(scope: ReportReadScope, range: Range) {
   const count = { _count: { _all: true } } as const;
-  const [registrations, footfall, stamps, redemptions] = await Promise.all([
-    prisma.registration.groupBy({ by: ['source'], where: recorded(scope, range), ...count }),
-    prisma.footfallTick.groupBy({
+  const [registrations, footfall, stamps, redemptions] = [
+    await scope.db.registration.groupBy({
+      by: ['source'],
+      where: recorded(scope, range),
+      ...count,
+    }),
+    await scope.db.footfallTick.groupBy({
       by: ['source'],
       where: recorded(scope, range),
       _sum: { quantity: true },
     }),
-    prisma.cardStampEvent.groupBy({
+    await scope.db.cardStampEvent.groupBy({
       by: ['source'],
       where: recorded(scope, range, null),
       ...count,
     }),
-    prisma.giftRedemption.groupBy({ by: ['source'], where: recorded(scope, range), ...count }),
-  ]);
+    await scope.db.giftRedemption.groupBy({
+      by: ['source'],
+      where: recorded(scope, range),
+      ...count,
+    }),
+  ];
 
   return [
     ...registrations.map((row) => ({
@@ -71,12 +79,12 @@ export async function recordsBySource(scope: ReportingScope, range: Range) {
   ];
 }
 
-export async function voidedCounts(scope: ReportingScope, range: Range) {
-  const [registrations, footfall, redemptions] = await Promise.all([
-    prisma.registration.count({ where: recorded(scope, range, true) }),
-    prisma.footfallTick.count({ where: recorded(scope, range, true) }),
-    prisma.giftRedemption.count({ where: recorded(scope, range, true) }),
-  ]);
+export async function voidedCounts(scope: ReportReadScope, range: Range) {
+  const [registrations, footfall, redemptions] = [
+    await scope.db.registration.count({ where: recorded(scope, range, true) }),
+    await scope.db.footfallTick.count({ where: recorded(scope, range, true) }),
+    await scope.db.giftRedemption.count({ where: recorded(scope, range, true) }),
+  ];
 
   return [
     { table: 'Registration', value: registrations },

@@ -12,8 +12,8 @@ import {
   type ReportSpan,
 } from './sections.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
-import { eventSlug, eventZone } from '../../../platform/event/events.js';
-import { getEventSummary } from '../../event/index.js';
+import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
+import { findReportEvent } from '../data/readScope.js';
 import { eventSetting } from '../../../platform/settings/eventSettings.js';
 import type { EventZone } from '../../../platform/time/index.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
@@ -36,26 +36,35 @@ export async function generateReport(
   query: ReportQuery,
   clock: Clock = systemClock,
 ): Promise<FullReport> {
-  const scope = { ...eventScope, includeRehearsal: query.includeRehearsal ?? false };
-  const zone = await eventZone(scope);
-  const [summary, slug] = [await getEventSummary(scope), await eventSlug(scope)];
+  return prisma.$transaction(
+    (tx) => generateReportInTransaction(tx, eventScope, { query, clock }),
+    { isolationLevel: 'RepeatableRead', timeout: 30_000 },
+  );
+}
+
+/** Close-out supplies its transaction so its frozen report shares the mutation's fate. */
+export async function generateReportInTransaction(
+  tx: PrismaTransactionClient,
+  eventScope: EventScope,
+  { query, clock = systemClock }: { query: ReportQuery; clock?: Clock },
+): Promise<FullReport> {
+  const scope = { ...eventScope, includeRehearsal: query.includeRehearsal ?? false, db: tx };
+  const summary = await findReportEvent(scope);
+  const zone = { timezone: summary.timezone, dayBoundaryMinutes: summary.dayBoundaryMinutes };
   const range = resolveRange(query, zone);
-  const stations = await listStations(scope, { includeInactive: true });
+  const stations = await listStations(scope, { includeInactive: true }, tx);
   const names = new Map(stations.map((station) => [station.id, station.name]));
   const now = clock.now();
 
-  const [registrations, footfall, cards, gifts, safety, volunteers, dataIntegrity] =
-    await Promise.all([
-      registrationsReport(scope, range),
-      footfallReport(scope, range, names),
-      cardsReport(scope, range, names),
-      giftsReport(scope, range, names),
-      safetyReport(scope, range),
-      volunteersReport(scope, range, { names, now }),
-      integrityReport(scope, range),
-    ]);
+  const registrations = await registrationsReport(scope, range);
+  const footfall = await footfallReport(scope, range, names);
+  const cards = await cardsReport(scope, range, names);
+  const gifts = await giftsReport(scope, range, names);
+  const safety = await safetyReport(scope, range);
+  const volunteers = await volunteersReport(scope, range, { names, now });
+  const dataIntegrity = await integrityReport(scope, range);
 
-  const headline = headlineOf(await eventSetting(scope, 'product.countsMode'), {
+  const headline = headlineOf(await eventSetting(scope, 'product.countsMode', tx), {
     registrations: registrations.total,
     journeys: cards.issued,
     footfall: footfall.byStation.map(({ stationId, stationName, total }) => ({
@@ -70,7 +79,7 @@ export async function generateReport(
     generatedAt: now.toISOString(),
     range: { from: query.from ?? null, to: query.to ?? null },
     timezone: zone.timezone,
-    event: { name: summary.name, slug, status: summary.status },
+    event: { name: summary.name, slug: summary.slug, status: summary.status },
     countingNote: COUNTING_NOTE,
     headline,
     registrations,

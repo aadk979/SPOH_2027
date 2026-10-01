@@ -23,8 +23,9 @@ export interface GiftTotals {
 export async function listGiftTypes(
   scope: EventScope,
   includeInactive = false,
+  db: PrismaTransactionClient = prisma,
 ): Promise<GiftType[]> {
-  return prisma.giftType.findMany({
+  return db.giftType.findMany({
     where: { eventId: scope.eventId, ...(includeInactive ? {} : { active: true }) },
     orderBy: { name: 'asc' },
   });

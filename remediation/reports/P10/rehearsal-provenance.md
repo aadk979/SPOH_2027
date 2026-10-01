@@ -311,5 +311,28 @@ hardcoding, formatting and server build passed by exit code. The three dedicated
 databases received the migration; a read-only Prisma comparison found no drift. No client layout
 or visual baseline changed in this slice.
 
+## Report transaction foundation for close-out
+
+All report sections now read through the same supplied database transaction, including event
+metadata, station/declarer names, counts settings, gift stock and fallback windows. Ordinary
+report generation opens a repeatable-read transaction; close-out can supply its own transaction
+through the report module's public API. Reads run sequentially on that connection. Visitor
+personal values remain outside the report document and are loaded separately for authorised
+exports under their existing retention rules.
+
+A deterministic concurrency regression commits footfall, stock and incident changes between
+section reads. It failed with read-committed isolation (a mixed report included the later
+footfall) and passed with repeatable-read restored. This uses PostgreSQL's
+[repeatable-read snapshot semantics](https://www.postgresql.org/docs/17/transaction-iso.html).
+A second database case verifies uncommitted changes across all sections and supporting data,
+explicit practice inclusion, and complete rollback. This is the transaction foundation; a
+persistent final snapshot and its lifecycle close/reopen use cases are still pending.
+
+Verification on 2026-10-02: full integration **609 passed / 4 existing skips**, server unit
+**491**, and report/dashboard/import/preparation browser E2E **12** passed. Server typechecks,
+root lint, architecture, hardcoding, formatting and server build passed by exit code. The
+two new cases use direct access through the raw test client and a dedicated `_test` database.
+No schema, request contract, client layout or visual baseline changed.
+
 Remaining: go-live guards and overrides, close/archive side effects, including the general
 archived-write forbid and its Cedar context in P11. P10.4/P10.5 remain in progress.

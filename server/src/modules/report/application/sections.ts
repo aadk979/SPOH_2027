@@ -1,3 +1,4 @@
+import type { ReportReadScope } from '../data/readScope.js';
 import type { FullReport } from '@spoh/shared';
 import { listFallbackWindows } from '../../fallback/index.js';
 import { listGifts } from '../../gift/index.js';
@@ -26,7 +27,7 @@ import { importBatches, recordsBySource, voidedCounts } from '../data/integrity.
 import { hourlyRows } from '../domain/hours.js';
 import { footfallSection, safetySection, volunteersSection } from '../domain/sections.js';
 import type { EventZone } from '../../../platform/time/index.js';
-import { rehearsalFilter, type ReportingScope } from '../../../platform/db/rehearsalFilter.js';
+import { rehearsalFilter } from '../../../platform/db/rehearsalFilter.js';
 
 /** One loader per report section: its own queries, then its builder. */
 
@@ -39,14 +40,14 @@ export interface ReportSpan extends Range {
 }
 
 export async function registrationsReport(
-  scope: ReportingScope,
+  scope: ReportReadScope,
   range: ReportSpan,
 ): Promise<Report['registrations']> {
-  const [totals, byDay, byHour] = await Promise.all([
-    registrationTotals(scope, range),
-    registrationsByDay(scope, range, range.zone),
-    registrationsByHour(scope, range, range.zone.timezone),
-  ]);
+  const [totals, byDay, byHour] = [
+    await registrationTotals(scope, range),
+    await registrationsByDay(scope, range, range.zone),
+    await registrationsByHour(scope, range, range.zone.timezone),
+  ];
   return {
     unit: 'registrations',
     total: totals.total,
@@ -59,29 +60,29 @@ export async function registrationsReport(
 }
 
 export async function footfallReport(
-  scope: ReportingScope,
+  scope: ReportReadScope,
   range: ReportSpan,
   names: Names,
 ): Promise<Report['footfall']> {
-  const [total, curve, bySource] = await Promise.all([
-    footfallTotals(scope, range),
-    footfallCurve(scope, range, range.zone.timezone),
-    footfallBySource(scope, range),
-  ]);
+  const [total, curve, bySource] = [
+    await footfallTotals(scope, range),
+    await footfallCurve(scope, range, range.zone.timezone),
+    await footfallBySource(scope, range),
+  ];
   return footfallSection({ total, curve, bySource }, names);
 }
 
 export async function cardsReport(
-  scope: ReportingScope,
+  scope: ReportReadScope,
   range: ReportSpan,
   names: Names,
 ): Promise<Report['cards']> {
-  const [cards, issuedByDay, completedByDay, perStation] = await Promise.all([
-    cardTotals(scope, range),
-    cardsByDay(scope, range, { column: 'issuedAt', zone: range.zone }),
-    cardsByDay(scope, range, { column: 'completedAt', zone: range.zone }),
-    cardsPerStation(scope, range),
-  ]);
+  const [cards, issuedByDay, completedByDay, perStation] = [
+    await cardTotals(scope, range),
+    await cardsByDay(scope, range, { column: 'issuedAt', zone: range.zone }),
+    await cardsByDay(scope, range, { column: 'completedAt', zone: range.zone }),
+    await cardsPerStation(scope, range),
+  ];
   return {
     unit: 'cards',
     issued: cards.issued,
@@ -99,17 +100,17 @@ export async function cardsReport(
 }
 
 export async function giftsReport(
-  scope: ReportingScope,
+  scope: ReportReadScope,
   range: ReportSpan,
   names: Names,
 ): Promise<Report['gifts']> {
-  const [live, practice, counts, byDay, byStation] = await Promise.all([
-    listGifts({ ...scope, rehearsal: false }),
-    scope.includeRehearsal ? listGifts({ ...scope, rehearsal: true }) : [],
-    giftRedemptionsByType(scope, range),
-    giftRedemptionsByDay(scope, range, range.zone),
-    giftRedemptionsByStation(scope, range),
-  ]);
+  const [live, practice, counts, byDay, byStation] = [
+    await listGifts({ ...scope, rehearsal: false }, scope.db),
+    scope.includeRehearsal ? await listGifts({ ...scope, rehearsal: true }, scope.db) : [],
+    await giftRedemptionsByType(scope, range),
+    await giftRedemptionsByDay(scope, range, range.zone),
+    await giftRedemptionsByStation(scope, range),
+  ];
   const gifts = [...live, ...practice];
   return {
     unit: 'redemptions',
@@ -132,38 +133,45 @@ export async function giftsReport(
   };
 }
 
-export async function safetyReport(scope: ReportingScope, range: Range): Promise<Report['safety']> {
-  const [incidents, summaries, unpurged, lostFound] = await Promise.all([
-    incidentsInRange(scope, range),
-    lostPersonSummaries(scope, range),
-    unpurgedLostPersonCount(scope, range),
-    lostFoundCounts(scope, range),
-  ]);
+export async function safetyReport(
+  scope: ReportReadScope,
+  range: Range,
+): Promise<Report['safety']> {
+  const [incidents, summaries, unpurged, lostFound] = [
+    await incidentsInRange(scope, range),
+    await lostPersonSummaries(scope, range),
+    await unpurgedLostPersonCount(scope, range),
+    await lostFoundCounts(scope, range),
+  ];
   return safetySection({ incidents, summaries, unpurged, lostFound });
 }
 
 export async function volunteersReport(
-  scope: ReportingScope,
+  scope: ReportReadScope,
   range: Range,
   { names, now }: { names: Names; now: Date },
 ): Promise<Report['volunteers']> {
-  const [attendance, volunteersActive] = await Promise.all([
-    volunteerAttendance(scope, range),
-    countActiveVolunteers(scope),
-  ]);
+  const [attendance, volunteersActive] = [
+    await volunteerAttendance(scope, range),
+    await countActiveVolunteers(scope),
+  ];
   return volunteersSection(attendance, { volunteersActive, stationName: names, now });
 }
 
 export async function integrityReport(
-  scope: ReportingScope,
+  scope: ReportReadScope,
   range: Range,
 ): Promise<Report['dataIntegrity']> {
-  const [windows, imports, sources, voided] = await Promise.all([
-    listFallbackWindows(scope, { from: range.from, to: range.to, ...rehearsalFilter(scope) }),
-    importBatches(scope, range),
-    recordsBySource(scope, range),
-    voidedCounts(scope, range),
-  ]);
+  const [windows, imports, sources, voided] = [
+    await listFallbackWindows(
+      scope,
+      { from: range.from, to: range.to, ...rehearsalFilter(scope) },
+      scope.db,
+    ),
+    await importBatches(scope, range),
+    await recordsBySource(scope, range),
+    await voidedCounts(scope, range),
+  ];
   return {
     containsFallbackData: windows.length > 0,
     fallbackWindows: windows,

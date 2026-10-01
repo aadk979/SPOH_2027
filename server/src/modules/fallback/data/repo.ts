@@ -119,8 +119,9 @@ export async function endRehearsalWindows(
 export async function listWindows(
   scope: EventScope,
   range: { from?: Date; to?: Date; rehearsal?: boolean },
+  db: PrismaTransactionClient = prisma,
 ): Promise<WindowRow[]> {
-  return prisma.fallbackWindow.findMany({
+  return db.fallbackWindow.findMany({
     where: {
       eventId: scope.eventId,
       ...(range.rehearsal === undefined ? {} : { rehearsal: range.rehearsal }),
@@ -135,9 +136,12 @@ export async function listWindows(
  * `declaredById` and `stationId` are plain scalars with no Prisma relation
  * (see the note at the top of schema.prisma), so names are looked up by id.
  */
-export async function findVolunteerNames(ids: readonly string[]): Promise<Map<string, string>> {
+export async function findVolunteerNames(
+  ids: readonly string[],
+  db: PrismaTransactionClient = prisma,
+): Promise<Map<string, string>> {
   if (ids.length === 0) return new Map();
-  const rows = await prisma.person.findMany({
+  const rows = await db.person.findMany({
     where: { id: { in: [...new Set(ids)] } },
     select: { id: true, displayName: true },
   });

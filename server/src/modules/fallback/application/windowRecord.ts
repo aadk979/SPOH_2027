@@ -4,6 +4,7 @@ import { findStationNames } from '../../station/index.js';
 import { toWindowRecord } from '../data/mappers.js';
 import { findVolunteerNames, type WindowRow } from '../data/repo.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
+import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 
 /**
  * Windows as the API shows them: who declared each, where, and for how long.
@@ -13,14 +14,17 @@ import type { EventScope } from '../../../platform/db/eventScope.js';
 export async function windowRecords(
   scope: EventScope,
   windows: readonly WindowRow[],
+  db: PrismaTransactionClient = prisma,
 ): Promise<FallbackWindowRecord[]> {
-  const [declarers, stations] = await Promise.all([
-    findVolunteerNames(windows.map((window) => window.declaredById)),
-    findStationNames(
-      scope,
-      windows.flatMap((window) => (window.stationId ? [window.stationId] : [])),
-    ),
-  ]);
+  const declarers = await findVolunteerNames(
+    windows.map((window) => window.declaredById),
+    db,
+  );
+  const stations = await findStationNames(
+    scope,
+    windows.flatMap((window) => (window.stationId ? [window.stationId] : [])),
+    db,
+  );
   return windows.map((window) =>
     toWindowRecord(
       window,
