@@ -183,16 +183,20 @@ export async function updateSettings(
 export async function clearSettings(
   keys: SettingKey[],
   audit: AuditContext,
-  tx: PrismaTransactionClient = prisma,
+  tx?: PrismaTransactionClient,
 ): Promise<RuntimeSettings> {
-  await tx.appSetting.deleteMany({ where: { key: { in: keys } } });
-  await writeAudit(tx, {
-    ...audit,
-    action: 'settings.update',
-    entityType: 'AppSetting',
-    entityId: null,
-    after: { reset: keys } as object,
-  });
+  const reset = async (db: PrismaTransactionClient): Promise<void> => {
+    await db.appSetting.deleteMany({ where: { key: { in: keys } } });
+    await writeAudit(db, {
+      ...audit,
+      action: 'settings.update',
+      entityType: 'AppSetting',
+      entityId: null,
+      after: { reset: keys } as object,
+    });
+  };
+  if (tx) await reset(tx);
+  else await prisma.$transaction(reset);
   return loadSettings();
 }
 

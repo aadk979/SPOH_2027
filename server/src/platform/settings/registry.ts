@@ -114,7 +114,7 @@ export const SETTINGS = {
     'Silent station',
     'A counted room with no entries for this long during shift hours is flagged on the dashboard.',
     'Alerts',
-    { ...visible, scopes: ['event', 'station'], unit: 'minutes' },
+    { ...visible, scopes: ['platform', 'event', 'station'], unit: 'minutes' },
   ),
   staleDeviceMinutes: setting(
     'staleDeviceMinutes',
@@ -132,7 +132,7 @@ export const SETTINGS = {
     'Implausible tap rate',
     'Registrations per minute above which the IC console flags a device.',
     'Alerts',
-    { scopes: ['event', 'station'], unit: 'taps/minute' },
+    { scopes: ['platform', 'event', 'station'], unit: 'taps/minute' },
   ),
   longShiftMinutes: setting(
     'longShiftMinutes',

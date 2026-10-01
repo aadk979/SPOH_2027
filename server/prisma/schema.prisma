@@ -1527,6 +1527,8 @@ model SettingChange {
   reason        String?
   source        SettingChangeSource
   actorPersonId String?
+  /// Set when a scheduled action applies the change (P10.6).
+  scheduledActionId String?
   createdAt     DateTime            @default(now()) @db.Timestamptz(3)
 
   event Event?  @relation(fields: [eventId], references: [id], onDelete: Restrict)

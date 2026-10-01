@@ -1,5 +1,5 @@
 import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient, type Prisma } from '../../generated/prisma/client.js';
+import { Prisma, PrismaClient } from '../../generated/prisma/client.js';
 import { env, isTest } from '../../config/env.js';
 import { logger } from '../logger/index.js';
 import { assertEventScoped, isScopeEnforced } from './eventScope.js';
@@ -79,3 +79,6 @@ export type PrismaTransactionClient = Omit<
 
 /** A JSON value Prisma will store in a Json column, for callers outside data/. */
 export type JsonValue = Prisma.InputJsonValue;
+/** Explicit JSON null and SQL NULL for Prisma's distinct nullable JSON inputs. */
+export const jsonNull = Prisma.JsonNull;
+export const dbNull = Prisma.DbNull;

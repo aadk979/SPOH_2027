@@ -209,7 +209,7 @@ describe('cross-cutting rules (P03 repros)', () => {
   });
 
   // F03-021
-  it.skip('keeps a setting when resetting it cannot be audited', async () => {
+  it('keeps a setting when resetting it cannot be audited', async () => {
     await prisma.appSetting.create({ data: { key: 'eventName', value: 'Dry Run 1' } });
 
     // An actor id that is not a volunteer makes the audit insert fail.

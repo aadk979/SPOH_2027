@@ -333,7 +333,7 @@ export const GENERATED_SETTING_METADATA = {
   },
   implausibleTapsPerMinute: {
     key: 'implausibleTapsPerMinute',
-    scopes: ['event', 'station'],
+    scopes: ['platform', 'event', 'station'],
     default: 20,
     label: 'Implausible tap rate',
     description: 'Registrations per minute above which the IC console flags a device.',
@@ -774,7 +774,7 @@ export const GENERATED_SETTING_METADATA = {
   },
   silentStationMinutes: {
     key: 'silentStationMinutes',
-    scopes: ['event', 'station'],
+    scopes: ['platform', 'event', 'station'],
     default: 15,
     label: 'Silent station',
     description:
