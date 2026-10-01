@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-01T13:36:53.853Z",
+  "updatedAt": "2026-10-01T13:44:55.376Z",
   "current": {
     "phase": "P10",
-    "step": "P10.4"
+    "step": "P10.5"
   },
   "gates": [
     {
@@ -2005,8 +2005,8 @@
         {
           "id": "P10.5",
           "title": "Event lifecycle",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-01T13:40:50.186Z",
           "completedAt": null,
           "commits": [],
           "notes": []
@@ -2702,6 +2702,10 @@
     {
       "at": "2026-10-01T13:36:53.852Z",
       "text": "P10.4 attendance administration slice at 6e25071: Event settings now selects an active admin root, edits versioned trusted CIDRs, and tests unsaved ranges against the request IP. Integration 500 passed / 4 skipped, server unit 460, client unit 229, admin E2E 8, visual 56 unchanged plus 2 reviewed/updated and re-asserted; typechecks, builds, lint, architecture, hardcoding, generated settings and format passed. P10.4 remains in progress for rehearsal/env exit work."
+    },
+    {
+      "at": "2026-10-01T13:44:55.375Z",
+      "text": "P10.5 lifecycle foundation at 1b66d13: pure ADR-004 transition table and guard evaluation, including all state pairs, structure, complete go-live checklist, 48-hour platform-admin reopen with reason, and archive prerequisites. Server unit 467 passed; server typecheck, lint, architecture, hardcoding and format passed. No lifecycle API or capture effects are wired yet. P10.4 and P10.5 remain in progress."
     }
   ]
 }
