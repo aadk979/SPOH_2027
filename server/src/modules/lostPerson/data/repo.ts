@@ -103,6 +103,16 @@ export async function findPurgeCandidates(scope: EventScope, before: Date) {
   });
 }
 
+/**
+ * The description of a lost person, cleared once the case is resolved: the
+ * schema's `visitor-transient` columns, exactly (ADR-002 §5).
+ */
+export const CLEARED_ON_PURGE = {
+  approxAge: null,
+  descriptionText: null,
+  clothingText: null,
+} as const;
+
 export async function purgeAlert(
   tx: PrismaTransactionClient,
   scope: EventScope,
@@ -121,7 +131,7 @@ export async function purgeAlert(
   // same transaction, so the fields are never nulled without one.
   const { count } = await tx.lostPersonAlert.updateMany({
     where: { eventId: scope.eventId, id: alert.id, purgedAt: null },
-    data: { approxAge: null, descriptionText: null, clothingText: null, purgedAt: new Date() },
+    data: { ...CLEARED_ON_PURGE, purgedAt: new Date() },
   });
   if (count === 0) return false;
 

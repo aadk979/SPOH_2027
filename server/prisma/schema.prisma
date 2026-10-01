@@ -162,6 +162,7 @@ model EventMembership {
   eventId           String
   personId          String
   role              CommitteeRole    @default(VOLUNTEER)
+  /// @class operational
   portfolio         String?
   /// Another membership of the same event.
   reportsToId       String?
@@ -169,6 +170,7 @@ model EventMembership {
   invitedAt         DateTime?        @db.Timestamptz(3)
   acceptedAt        DateTime?        @db.Timestamptz(3)
   deactivatedAt     DateTime?        @db.Timestamptz(3)
+  /// @class staff-personal
   deactivatedReason String?
   lastSeenAt        DateTime?        @db.Timestamptz(3)
   createdAt         DateTime         @default(now()) @db.Timestamptz(3)
@@ -213,11 +215,17 @@ model EventMembership {
 /// (D-02 B) stays a data change (ADR-001 §1).
 model Organisation {
   id              String   @id @default(cuid())
+  /// @class operational
   slug            String   @unique
+  /// @class operational
   name            String
+  /// @class operational
   appName         String
+  /// @class operational
   locale          String   @default("en-SG")
+  /// @class operational
   defaultTimezone String
+  /// @class operational
   branding        Json?
   createdAt       DateTime @default(now()) @db.Timestamptz(3)
   updatedAt       DateTime @updatedAt @db.Timestamptz(3)
@@ -241,15 +249,21 @@ enum EventStatus {
 model Event {
   id                 String      @id @default(cuid())
   organisationId     String
+  /// @class operational
   slug               String
+  /// @class operational
   name               String
+  /// @class operational
   venue              String?
   /// IANA timezone every wall-clock time of the event is read in (ADR-007 §7).
+  /// @class operational
   timezone           String
+  /// @class operational
   locale             String      @default("en-SG")
   status             EventStatus @default(DRAFT)
   /// Minutes after local midnight at which "today" starts (ADR-004 §3).
   dayBoundaryMinutes Int         @default(0)
+  /// @class operational
   branding           Json?
   clonedFromEventId  String?
   archivedAt         DateTime?   @db.Timestamptz(3)
@@ -308,7 +322,9 @@ model CaptureCategory {
   id        String   @id @default(cuid())
   eventId   String
   /// Stable: CSV imports and content refer to it. The label is free.
+  /// @class operational
   code      String
+  /// @class operational
   label     String
   sortOrder Int      @default(0)
   active    Boolean  @default(true)
@@ -329,7 +345,9 @@ model CaptureCategory {
 model StationType {
   id                String   @id @default(cuid())
   eventId           String
+  /// @class operational
   code              String
+  /// @class operational
   label             String
   registersVisitors Boolean  @default(false)
   countsEntry       Boolean  @default(false)
@@ -352,8 +370,11 @@ model StationType {
 model StationTag {
   id          String   @id @default(cuid())
   eventId     String
+  /// @class operational
   code        String
+  /// @class operational
   label       String
+  /// @class operational
   description String?
   active      Boolean  @default(true)
   createdAt   DateTime @default(now()) @db.Timestamptz(3)
@@ -386,10 +407,14 @@ model StationTagging {
 model ShiftTemplate {
   id          String   @id @default(cuid())
   eventId     String
+  /// @class operational
   code        String
+  /// @class operational
   label       String
   /// HH:MM on the event's wall clock.
+  /// @class operational
   startLocal  String
+  /// @class operational
   endLocal    String
   endsNextDay Boolean  @default(false)
   sortOrder   Int      @default(0)
@@ -435,6 +460,7 @@ model EventDay {
   eventId     String
   date        DateTime @db.Date
   /// "Sec 4 Tour Day 1", "Open House Day 2"
+  /// @class operational
   label       String
   isPublicDay Boolean  @default(true)
   isTourDay   Boolean  @default(false)
@@ -463,8 +489,11 @@ model Station {
   /// What happens at the station: its type's capability flags (ADR-002).
   typeId    String
   /// "DAAA_STATION", "SIGNUP_BOOTH"
+  /// @class operational
   code      String
+  /// @class operational
   name      String
+  /// @class operational
   floor     String?
   active    Boolean @default(true)
   sortOrder Int     @default(0)
@@ -497,9 +526,13 @@ model Station {
 
 model Person {
   id          String    @id @default(cuid())
+  /// @class staff-personal
   cognitoSub  String    @unique
+  /// @class staff-personal
   displayName String
+  /// @class staff-personal
   email       String    @unique
+  /// @class staff-personal
   phone       String?
   /// Last authenticated request. Lets an admin see who has actually signed in
   /// before the event, rather than discovering it at 09:25 on the day.
@@ -560,6 +593,7 @@ model ShiftAssignment {
   stationId    String
   eventDayId   String
   /// "Usher", "Counter", "Lead Facilitator"
+  /// @class operational
   roleLabel    String
   checkedInAt  DateTime? @db.Timestamptz(3)
   checkedOutAt DateTime? @db.Timestamptz(3)
@@ -631,6 +665,7 @@ model AttendanceChallenge {
   /// The EventMembership behind issuerId (ADR-001); backfilled in P09.4, read from P09.5.
   issuerMembershipId String?
   eventDayId         String
+  /// @class credential
   pinHash            String   @unique
   campusNetwork      Boolean
   expiresAt          DateTime @db.Timestamptz(3)
@@ -682,6 +717,7 @@ model ShiftSwapRequest {
   /// The EventMembership behind targetId (ADR-001); backfilled in P09.4, read from P09.5.
   targetMembershipId    String?
   status                SwapStatus @default(REQUESTED)
+  /// @class staff-personal
   reason                String?
   decidedById           String?
   /// The EventMembership behind decidedById (ADR-001); backfilled in P09.4, read from P09.5.
@@ -720,6 +756,7 @@ model BriefingSlot {
   briefierMembershipId String?
   waveSize             Int       @default(20)
   completedAt          DateTime? @db.Timestamptz(3)
+  /// @class operational
   notes                String?
 
   eventDay EventDay @relation(fields: [eventId, eventDayId], references: [eventId, id], onDelete: Restrict)
@@ -759,6 +796,7 @@ model Registration {
   clientRecordedAt       DateTime?  @db.Timestamptz(3)
   idempotencyKey         String     @unique
   voided                 Boolean    @default(false)
+  /// @class operational
   voidedReason           String?
 
   station     Station      @relation(fields: [eventId, stationId], references: [eventId, id], onDelete: Restrict)
@@ -825,7 +863,9 @@ model MissionCard {
   /// The event this row belongs to (ADR-001 §2).
   eventId        String
   /// 6 chars, printed at production time, ambiguity-free alphabet.
+  /// @class operational
   shortCode      String     @unique
+  /// @class operational
   qrPayload      String     @unique
   status         CardStatus @default(UNISSUED)
   issuedAt       DateTime?  @db.Timestamptz(3)
@@ -833,6 +873,7 @@ model MissionCard {
   voidedAt       DateTime?  @db.Timestamptz(3)
   reissuedFromId String?
   /// print batch
+  /// @class operational
   batchLabel     String?
   createdAt      DateTime   @default(now()) @db.Timestamptz(3)
 
@@ -888,6 +929,7 @@ model GiftType {
   id                String  @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2).
   eventId           String
+  /// @class operational
   name              String
   initialStock      Int
   lowStockThreshold Int     @default(50)
@@ -944,6 +986,7 @@ model GiftStockAdjustment {
   eventId               String
   giftTypeId            String
   delta                 Int
+  /// @class operational
   reason                String
   createdById           String
   /// The EventMembership behind createdById (ADR-001); backfilled in P09.4, read from P09.5.
@@ -976,8 +1019,10 @@ model Incident {
   severity               IncidentSeverity
   status                 IncidentStatus   @default(OPEN)
   stationId              String?
+  /// @class staff-personal
   locationNote           String?
   /// Describes the EVENT, not the person.
+  /// @class staff-personal
   description            String
   reportedById           String
   /// The EventMembership behind reportedById (ADR-001); backfilled in P09.4, read from P09.5.
@@ -1008,6 +1053,7 @@ model IncidentFollowUp {
   /// The event this row belongs to (ADR-001 §2).
   eventId            String
   incidentId         String
+  /// @class staff-personal
   note               String
   authorId           String
   /// The EventMembership behind authorId (ADR-001); backfilled in P09.4, read from P09.5.
@@ -1034,8 +1080,11 @@ model LostPersonAlert {
   /// The event this row belongs to (ADR-001 §2).
   eventId              String
   status               LostPersonStatus @default(ACTIVE)
+  /// @class visitor-transient
   approxAge            String?
+  /// @class visitor-transient
   descriptionText      String?
+  /// @class visitor-transient
   clothingText         String?
   lastSeenStationId    String?
   lastSeenAt           DateTime?        @db.Timestamptz(3)
@@ -1108,13 +1157,17 @@ model LostFoundItem {
   id                   String          @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2).
   eventId              String
+  /// @class operational
   itemLabel            String
+  /// @class operational
   categoryLabel        String?
   foundStationId       String?
   foundAt              DateTime        @db.Timestamptz(3)
   /// "held at Mission Complete desk"
+  /// @class staff-personal
   holderNote           String?
   /// S3 key
+  /// @class media
   photoKey             String?
   status               LostFoundStatus @default(HELD)
   loggedById           String
@@ -1146,6 +1199,7 @@ model Announcement {
   id                 String               @id @default(cuid())
   /// The event this row belongs to (ADR-001 §2).
   eventId            String
+  /// @class operational
   body               String
   priority           AnnouncementPriority @default(INFO)
   targetRole         CommitteeRole?
@@ -1218,6 +1272,7 @@ model FallbackWindow {
   declaredById           String
   /// The EventMembership behind declaredById (ADR-001); backfilled in P09.4, read from P09.5.
   declaredByMembershipId String?
+  /// @class operational
   reason                 String
   createdAt              DateTime  @default(now()) @db.Timestamptz(3)
 
@@ -1242,13 +1297,16 @@ model ImportBatch {
   /// The event this row belongs to (ADR-001 §2).
   eventId                String
   source                 DataSource
+  /// @class operational
   targetTable            String
   rowCount               Int
+  /// @class operational
   fileName               String?
   importedById           String
   /// The EventMembership behind importedById (ADR-001); backfilled in P09.4, read from P09.5.
   importedByMembershipId String?
   importedAt             DateTime   @default(now()) @db.Timestamptz(3)
+  /// @class operational
   notes                  String?
 
   importedBy Person @relation(fields: [importedById], references: [id], onDelete: Restrict)
@@ -1283,21 +1341,30 @@ model AuditLog {
   actorId      String?
   /// The EventMembership behind actorId (ADR-001); backfilled in P09.4, read from P09.5.
   membershipId String?
+  /// @class staff-personal
   actorSub     String?
   /// "registration.void", "card.reissue", "auth.signInFailed"
+  /// @class operational
   action       String
   severity     AuditSeverity @default(INFO)
   outcome      AuditOutcome  @default(SUCCESS)
+  /// @class operational
   entityType   String
   entityId     String?
+  /// @class staff-personal
   before       Json?
+  /// @class staff-personal
   after        Json?
   /// Transport detail. Set on security events, null on change events, which
   /// describe themselves through before/after instead.
+  /// @class operational
   method       String?
+  /// @class operational
   path         String?
   statusCode   Int?
+  /// @class staff-personal
   ip           String?
+  /// @class staff-personal
   userAgent    String?
   requestId    String?
   createdAt    DateTime      @default(now()) @db.Timestamptz(3)
@@ -1323,11 +1390,15 @@ model AuditLog {
 /// Makes the client's retry-on-failure loop safe, which is what makes the local
 /// write buffer possible without duplicate counts (BUILD_PLAN §7.4).
 model IdempotencyRecord {
+  /// @class operational
   key          String   @id
   /// The event, when the row was written inside one; null for platform actions (ADR-001 §3).
   eventId      String?
+  /// @class operational
   endpoint     String
+  /// @class staff-personal
   actorSub     String
+  /// @class staff-personal
   responseBody Json
   statusCode   Int
   createdAt    DateTime @default(now()) @db.Timestamptz(3)
@@ -1362,7 +1433,9 @@ model Setting {
   /// The organisation, event or station the value applies to.
   scopeId           String
   eventId           String?
+  /// @class operational
   key               String
+  /// @class operational
   value             Json
   /// 1 on the first write; a change names the version it read.
   version           Int
@@ -1382,10 +1455,14 @@ model SettingChange {
   scope         SettingScope
   scopeId       String
   eventId       String?
+  /// @class operational
   key           String
   version       Int
+  /// @class operational
   before        Json?
+  /// @class operational
   after         Json?
+  /// @class operational
   reason        String?
   source        SettingChangeSource
   actorPersonId String?
@@ -1407,7 +1484,9 @@ model SettingChange {
 /// last changed it. Unknown or unset keys fall back to the compiled defaults,
 /// so an empty table is a working system.
 model AppSetting {
+  /// @class operational
   key         String   @id
+  /// @class operational
   value       Json
   updatedById String?
   updatedAt   DateTime @updatedAt @db.Timestamptz(3)
@@ -1425,9 +1504,13 @@ model AppSetting {
 model PushSubscription {
   id           String   @id @default(cuid())
   volunteerId  String
+  /// @class staff-personal
   endpoint     String   @unique
+  /// @class credential
   p256dh       String
+  /// @class credential
   auth         String
+  /// @class staff-personal
   userAgent    String?
   failureCount Int      @default(0)
   createdAt    DateTime @default(now()) @db.Timestamptz(3)
@@ -1452,15 +1535,19 @@ model RefreshSession {
   id            String    @id @default(cuid())
   volunteerId   String
   /// SHA-256 hex of the opaque token. Never the token itself.
+  /// @class credential
   tokenHash     String    @unique
   familyId      String
+  /// @class staff-personal
   userAgent     String?
+  /// @class staff-personal
   ip            String?
   issuedAt      DateTime  @default(now()) @db.Timestamptz(3)
   expiresAt     DateTime  @db.Timestamptz(3)
   lastUsedAt    DateTime? @db.Timestamptz(3)
   revokedAt     DateTime? @db.Timestamptz(3)
   /// Why it was revoked: "rotated", "signed-out", "reuse-detected", "deactivated".
+  /// @class operational
   revokedReason String?
 
   volunteer Person @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
