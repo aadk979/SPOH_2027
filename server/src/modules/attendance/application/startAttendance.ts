@@ -7,7 +7,7 @@ import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { findEventDayOn, lockPerson } from '../data/repo.js';
 import { requireVolunteer } from './requireVolunteer.js';
 import { assertEventToday, isRoot } from '../domain/attendanceRules.js';
-import { rootEmail } from './config.js';
+import { rootMembershipId } from './config.js';
 import { markPresent } from './markPresent.js';
 
 /** The root admin marks themself present, which opens the day's verification chain. */
@@ -20,7 +20,7 @@ export async function startAttendance(
     const now = clock.now();
     const person = await requireVolunteer(tx, scope, volunteerId);
     const day = await findEventDayOn(tx, scope, await eventToday(scope, now));
-    if (!isRoot(person, rootEmail()))
+    if (!isRoot(person, await rootMembershipId(scope, tx)))
       throw new ForbiddenError('Only the configured root admin can open attendance.');
     assertEventToday(day);
     return markPresent(

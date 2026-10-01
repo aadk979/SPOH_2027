@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { changeSetting, resetSetting, revertSetting } from '../../src/platform/settings/change.js';
 import { loadResolvedSetting } from '../../src/platform/settings/scopedStore.js';
 import { rawDb, resetDatabase } from '../helpers/db.js';
-import { createStation, testEvent } from '../helpers/fixtures.js';
+import { createStation, createVolunteer, testEvent } from '../helpers/fixtures.js';
 
 const audit = {
   actorId: null,
@@ -142,6 +142,10 @@ describe('scoped setting store (P10.2)', () => {
 
   it('can revert a nullable setting without exposing its value in audit', async () => {
     const { eventId } = await testEvent();
+    const admin = await createVolunteer({ email: 'root@settings.test', role: 'ADMIN' });
+    const member = await rawDb.eventMembership.findUniqueOrThrow({
+      where: { eventId_personId: { eventId, personId: admin.id } },
+    });
     const input = {
       target: { scope: 'event' as const, eventId },
       key: 'attendance.rootMembershipId' as const,
@@ -149,16 +153,80 @@ describe('scoped setting store (P10.2)', () => {
       audit,
     };
     await changeSetting({ ...input, value: null, expectedVersion: 0 });
-    await changeSetting({ ...input, value: 'member-id', expectedVersion: 1 });
+    await changeSetting({ ...input, value: member.id, expectedVersion: 1 });
     expect(await revertSetting({ ...input, expectedVersion: 2, toVersion: 1 })).toBe(3);
     const auditRow = await rawDb.auditLog.findFirstOrThrow({
       where: { eventId, action: 'setting.change' },
       orderBy: { createdAt: 'desc' },
     });
-    expect(JSON.stringify(auditRow.after)).not.toContain('member-id');
+    expect(JSON.stringify(auditRow.after)).not.toContain(member.id);
     expect(
       (await rawDb.setting.findFirstOrThrow({ where: { eventId, key: input.key } })).value,
     ).toBeNull();
+  });
+
+  it('accepts only an active admin membership in the target event as attendance root', async () => {
+    const { eventId } = await testEvent();
+    const admin = await createVolunteer({ email: 'admin@root-setting.test', role: 'ADMIN' });
+    const volunteer = await createVolunteer({
+      email: 'volunteer@root-setting.test',
+      role: 'VOLUNTEER',
+    });
+    const members = await rawDb.eventMembership.findMany({
+      where: { eventId, personId: { in: [admin.id, volunteer.id] } },
+    });
+    const adminMember = members.find((member) => member.personId === admin.id)!;
+    const volunteerMember = members.find((member) => member.personId === volunteer.id)!;
+    const input = {
+      target: { scope: 'event' as const, eventId },
+      key: 'attendance.rootMembershipId' as const,
+      expectedVersion: 0,
+      actorPersonId: admin.id,
+      audit,
+    };
+    await expect(changeSetting({ ...input, value: volunteerMember.id })).rejects.toMatchObject({
+      statusCode: 400,
+    });
+    const event = await rawDb.event.findUniqueOrThrow({ where: { id: eventId } });
+    const other = await rawDb.event.create({
+      data: {
+        organisationId: event.organisationId,
+        slug: 'other-attendance-root-event',
+        name: 'Other attendance root',
+        timezone: event.timezone,
+      },
+    });
+    await expect(
+      changeSetting({
+        ...input,
+        target: { scope: 'event', eventId: other.id },
+        value: adminMember.id,
+      }),
+    ).rejects.toMatchObject({ statusCode: 400 });
+    expect(await changeSetting({ ...input, value: adminMember.id })).toBe(1);
+    await rawDb.eventMembership.update({
+      where: { id: adminMember.id },
+      data: { status: 'DEACTIVATED' },
+    });
+    await expect(
+      changeSetting({ ...input, value: adminMember.id, expectedVersion: 1 }),
+    ).rejects.toMatchObject({
+      statusCode: 400,
+    });
+  });
+
+  it('rejects malformed trusted network CIDRs', async () => {
+    const { eventId } = await testEvent();
+    await expect(
+      changeSetting({
+        target: { scope: 'event', eventId },
+        key: 'attendance.campusCidrs',
+        value: ['10.0.0.0/33'],
+        expectedVersion: 0,
+        actorPersonId: null,
+        audit,
+      }),
+    ).rejects.toMatchObject({ statusCode: 400 });
   });
 
   it('can revert to a previous reset version', async () => {

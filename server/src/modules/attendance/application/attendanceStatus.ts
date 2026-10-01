@@ -7,7 +7,7 @@ import { toAttendanceRecord } from '../data/mappers.js';
 import { findAttendance, findEventDayOn } from '../data/repo.js';
 import { requireVolunteer } from './requireVolunteer.js';
 import { assertActiveAccount, isRoot } from '../domain/attendanceRules.js';
-import { networkConfigured, onCampus, rootEmail } from './config.js';
+import { campusCidrs, onCampus, rootMembershipId } from './config.js';
 import { assertIssuer } from './issuer.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 
@@ -23,6 +23,7 @@ export async function attendanceStatus(
     requireVolunteer(prisma, scope, volunteerId),
     findEventDayOn(prisma, scope, today),
   ]);
+  const [configuredRoot, cidrs] = await Promise.all([rootMembershipId(scope), campusCidrs(scope)]);
   assertActiveAccount(person);
   const attendance = day
     ? await findAttendance(prisma, scope, { volunteerId, eventDayId: day.id })
@@ -38,11 +39,11 @@ export async function attendanceStatus(
   }
   return {
     eventDay: day ? { id: day.id, label: day.label } : null,
-    configured: Boolean(rootEmail()),
-    isRoot: isRoot(person, rootEmail()),
+    configured: Boolean(configuredRoot),
+    isRoot: isRoot(person, configuredRoot),
     isExco: person.role !== 'VOLUNTEER',
-    onCampusNetwork: onCampus(ip),
-    networkConfigured: networkConfigured(),
+    onCampusNetwork: onCampus(ip, cidrs),
+    networkConfigured: cidrs.length > 0,
     attendance: attendance ? toAttendanceRecord(attendance) : null,
     canIssue,
     serverTime: now.toISOString(),

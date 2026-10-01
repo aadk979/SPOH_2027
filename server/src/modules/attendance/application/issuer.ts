@@ -6,7 +6,7 @@ import {
   isRoot,
   type Person,
 } from '../domain/attendanceRules.js';
-import { rootEmail } from './config.js';
+import { rootMembershipId } from './config.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /** The verifier, if they may issue codes today; a 403 otherwise. */
@@ -16,14 +16,15 @@ export async function assertIssuer(
   issuance: { issuerId: string; dayId: string },
 ): Promise<Person> {
   const { issuerId, dayId } = issuance;
+  const configuredRoot = await rootMembershipId(scope, db);
   const issuer = await findVolunteer(db, scope, issuerId);
   const present = await findPresence(db, scope, { volunteerId: issuerId, eventDayId: dayId });
-  assertIssuerPresent(issuer, present, rootEmail());
-  if (!isRoot(issuer, rootEmail())) {
+  assertIssuerPresent(issuer, present, configuredRoot);
+  if (!isRoot(issuer, configuredRoot)) {
     const root = present?.verifiedById
       ? await findVolunteer(db, scope, present.verifiedById)
       : null;
-    assertVerifiedByRoot(root, rootEmail());
+    assertVerifiedByRoot(root, configuredRoot);
   }
   return issuer;
 }

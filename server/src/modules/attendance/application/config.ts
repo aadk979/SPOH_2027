@@ -1,15 +1,42 @@
-import { env } from '../../../config/env.js';
+import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
 import { isCampusIp } from '../../../platform/http/campusNetwork.js';
+import { resolveSetting, type SettingLayer } from '../../../platform/settings/resolve.js';
+import { storedSetting } from '../../../platform/settings/scopedStore.js';
 
-/** The configured root admin's email, if attendance is configured at all. */
-export function rootEmail(): string | undefined {
-  return env.ATTENDANCE_ROOT_EMAIL;
+/** Read an event-only setting; malformed stored values fall back to the registry default. */
+async function eventValue(
+  scope: EventScope,
+  key: 'attendance.rootMembershipId' | 'attendance.campusCidrs',
+  db: PrismaTransactionClient,
+): Promise<unknown> {
+  const row = await storedSetting({ scope: 'event', eventId: scope.eventId }, key, db);
+  const layers: SettingLayer[] = row ? [{ scope: 'event', ...row }] : [];
+  return resolveSetting(key, layers).value;
 }
 
-export function onCampus(ip: string | null | undefined): boolean {
-  return isCampusIp(ip, env.ATTENDANCE_SP_CIDRS);
+/** The event member designated to open attendance, or no one until configured. */
+export async function rootMembershipId(
+  scope: EventScope,
+  db: PrismaTransactionClient = prisma,
+): Promise<string | null> {
+  const id = (await eventValue(scope, 'attendance.rootMembershipId', db)) as string | null;
+  if (!id) return null;
+  const member = await db.eventMembership.findFirst({
+    where: { id, eventId: scope.eventId, status: 'ACTIVE', role: 'ADMIN' },
+    select: { id: true },
+  });
+  return member?.id ?? null;
 }
 
-export function networkConfigured(): boolean {
-  return env.ATTENDANCE_SP_CIDRS.length > 0;
+/** QR attendance is allowed only from this event's validated trusted ranges. */
+export async function campusCidrs(
+  scope: EventScope,
+  db: PrismaTransactionClient = prisma,
+): Promise<string[]> {
+  return (await eventValue(scope, 'attendance.campusCidrs', db)) as string[];
+}
+
+export function onCampus(ip: string | null | undefined, cidrs: readonly string[]): boolean {
+  return isCampusIp(ip, cidrs);
 }

@@ -20,31 +20,33 @@ const codeOf = (run: () => unknown): string | undefined => {
   }
 };
 
-const ROOT_EMAIL = 'root@spoh.test';
-const root = { id: 'r', email: 'Root@spoh.test', role: 'ADMIN', active: true };
-const exco = { id: 'e', email: 'exco@spoh.test', role: 'IC', active: true };
-const volunteer = { id: 'v', email: 'v@spoh.test', role: 'VOLUNTEER', active: true };
+const ROOT_MEMBERSHIP_ID = 'root-member';
+const root = { id: 'r', membershipId: ROOT_MEMBERSHIP_ID, role: 'ADMIN', active: true };
+const exco = { id: 'e', membershipId: 'exco-member', role: 'IC', active: true };
+const volunteer = { id: 'v', membershipId: 'volunteer-member', role: 'VOLUNTEER', active: true };
 const now = new Date('2027-01-07T02:00:00.000Z');
 
 describe('attendance rules', () => {
-  it('knows the root by the configured email, case-insensitively, while active', () => {
-    expect(isRoot(root, ROOT_EMAIL)).toBe(true);
-    expect(isRoot({ ...root, active: false }, ROOT_EMAIL)).toBe(false);
-    expect(isRoot(exco, ROOT_EMAIL)).toBe(false);
-    expect(isRoot(root, undefined)).toBe(false);
+  it('knows the root by the configured event membership while active', () => {
+    expect(isRoot(root, ROOT_MEMBERSHIP_ID)).toBe(true);
+    expect(isRoot({ ...root, active: false }, ROOT_MEMBERSHIP_ID)).toBe(false);
+    expect(isRoot(exco, ROOT_MEMBERSHIP_ID)).toBe(false);
+    expect(isRoot(root, null)).toBe(false);
   });
 
   it('lets only a present admin or exco issue codes', () => {
     const present = { method: 'PIN' as const };
-    expect(codeOf(() => assertIssuerPresent(exco, present, ROOT_EMAIL))).toBeUndefined();
-    expect(codeOf(() => assertIssuerPresent(exco, null, ROOT_EMAIL))).toBe('FORBIDDEN');
-    expect(codeOf(() => assertIssuerPresent(volunteer, present, ROOT_EMAIL))).toBe('FORBIDDEN');
-    expect(codeOf(() => assertIssuerPresent(exco, present, undefined))).toBe('FORBIDDEN');
-    expect(codeOf(() => assertIssuerPresent(exco, { method: 'ROOT' }, ROOT_EMAIL))).toBe(
+    expect(codeOf(() => assertIssuerPresent(exco, present, ROOT_MEMBERSHIP_ID))).toBeUndefined();
+    expect(codeOf(() => assertIssuerPresent(exco, null, ROOT_MEMBERSHIP_ID))).toBe('FORBIDDEN');
+    expect(codeOf(() => assertIssuerPresent(volunteer, present, ROOT_MEMBERSHIP_ID))).toBe(
       'FORBIDDEN',
     );
-    expect(codeOf(() => assertVerifiedByRoot(exco, ROOT_EMAIL))).toBe('FORBIDDEN');
-    expect(codeOf(() => assertVerifiedByRoot(root, ROOT_EMAIL))).toBeUndefined();
+    expect(codeOf(() => assertIssuerPresent(exco, present, null))).toBe('FORBIDDEN');
+    expect(codeOf(() => assertIssuerPresent(exco, { method: 'ROOT' }, ROOT_MEMBERSHIP_ID))).toBe(
+      'FORBIDDEN',
+    );
+    expect(codeOf(() => assertVerifiedByRoot(exco, ROOT_MEMBERSHIP_ID))).toBe('FORBIDDEN');
+    expect(codeOf(() => assertVerifiedByRoot(root, ROOT_MEMBERSHIP_ID))).toBeUndefined();
   });
 
   it('counts attempts in a five-minute window and stops the sixth', () => {
@@ -70,7 +72,11 @@ describe('attendance rules', () => {
   });
 
   it('refuses self-verification, an exco verified by a non-root, and QR off campus, as rules (F03-026)', () => {
-    const base = { rootEmail: ROOT_EMAIL, method: 'PIN' as const, bothOnCampus: false };
+    const base = {
+      rootMembershipId: ROOT_MEMBERSHIP_ID,
+      method: 'PIN' as const,
+      bothOnCampus: false,
+    };
     expect(codeOf(() => assertMayVerify({ ...base, person: exco, issuer: exco }))).toBe(
       'VERIFICATION_NOT_ALLOWED',
     );

@@ -22,7 +22,7 @@ import {
   codeInvalid,
   type Person,
 } from '../domain/attendanceRules.js';
-import { onCampus, rootEmail } from './config.js';
+import { campusCidrs, onCampus, rootMembershipId } from './config.js';
 import { assertIssuer } from './issuer.js';
 import { markPresent } from './markPresent.js';
 import { hashPin, verifyAttendanceToken } from './tokens.js';
@@ -101,12 +101,13 @@ async function verify(
       throw error;
     },
   );
+  const cidrs = await campusCidrs(scope, tx);
   assertMayVerify({
     person,
     issuer,
-    rootEmail: rootEmail(),
+    rootMembershipId: await rootMembershipId(scope, tx),
     method: proof.method,
-    bothOnCampus: challenge.campusNetwork && onCampus(audit.ip),
+    bothOnCampus: challenge.campusNetwork && onCampus(audit.ip, cidrs),
   });
   const presence = {
     scope,

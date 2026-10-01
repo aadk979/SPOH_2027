@@ -171,7 +171,7 @@ export const GENERATED_SETTING_METADATA = {
     requiredAction: 'platform.settings.manage',
     jsonSchema: {
       $schema: 'https://json-schema.org/draft/2020-12/schema',
-      anyOf: [{ type: 'string', maxLength: 64 }, { type: 'null' }],
+      anyOf: [{ type: 'string', minLength: 1, maxLength: 64 }, { type: 'null' }],
     },
   },
   'auth.accessTokenTtlSeconds': {
@@ -866,7 +866,7 @@ export const GENERATED_SETTING_SCHEMAS: {
   }) as z.ZodType<GeneratedSettingValues['attendance.pinAllowedOffNetwork']>,
   'attendance.rootMembershipId': z.fromJSONSchema({
     $schema: 'https://json-schema.org/draft/2020-12/schema',
-    anyOf: [{ type: 'string', maxLength: 64 }, { type: 'null' }],
+    anyOf: [{ type: 'string', minLength: 1, maxLength: 64 }, { type: 'null' }],
   }) as z.ZodType<GeneratedSettingValues['attendance.rootMembershipId']>,
   'auth.accessTokenTtlSeconds': z.fromJSONSchema({
     $schema: 'https://json-schema.org/draft/2020-12/schema',

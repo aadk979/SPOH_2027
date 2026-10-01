@@ -8,7 +8,7 @@ export async function requireVolunteer(
   db: PrismaTransactionClient,
   scope: EventScope,
   id: string,
-): Promise<{ id: string; email: string; role: string; active: boolean }> {
+): Promise<{ id: string; membershipId: string; role: string; active: boolean }> {
   const person = await findVolunteer(db, scope, id);
   if (!person) throw new NotFoundError('Volunteer');
   return person;

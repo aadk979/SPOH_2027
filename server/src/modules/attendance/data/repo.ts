@@ -35,14 +35,19 @@ export async function findVolunteer(
   db: PrismaTransactionClient,
   scope: EventScope,
   id: string,
-): Promise<{ id: string; email: string; role: string; active: boolean } | null> {
+): Promise<{ id: string; membershipId: string; role: string; active: boolean } | null> {
   const membership = await db.eventMembership.findUnique({
     where: { eventId_personId: { eventId: scope.eventId, personId: id } },
-    select: { role: true, status: true, person: { select: { id: true, email: true } } },
+    select: { id: true, role: true, status: true, person: { select: { id: true } } },
   });
   if (!membership) return null;
   const { person } = membership;
-  return { ...person, role: membership.role, active: membership.status === 'ACTIVE' };
+  return {
+    ...person,
+    membershipId: membership.id,
+    role: membership.role,
+    active: membership.status === 'ACTIVE',
+  };
 }
 
 export async function findEventDayOn(db: PrismaTransactionClient, scope: EventScope, date: Date) {

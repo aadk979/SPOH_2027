@@ -50,6 +50,28 @@ async function assertUnlocked(
   }
 }
 
+/** The root must be an active admin membership of this very event. */
+async function assertAttendanceRoot(
+  tx: PrismaTransactionClient,
+  input: Pick<ChangeSettingInput, 'target' | 'key'>,
+  value: unknown,
+): Promise<void> {
+  if (input.key !== 'attendance.rootMembershipId' || value === null) return;
+  if (input.target.scope !== 'event' || typeof value !== 'string') {
+    throw new ValidationError('Attendance root requires an event member');
+  }
+  const member = await tx.eventMembership.findFirst({
+    where: {
+      id: value,
+      eventId: input.target.eventId,
+      status: 'ACTIVE',
+      role: 'ADMIN',
+    },
+    select: { id: true },
+  });
+  if (!member) throw new ValidationError('Choose an active admin from this event');
+}
+
 async function nextVersion(
   tx: PrismaTransactionClient,
   request: { target: SettingTarget; key: SettingKey; currentVersion: number },
@@ -148,6 +170,7 @@ export async function changeSetting(input: ChangeSettingInput): Promise<number> 
   return prisma.$transaction(async (tx) => {
     await assertSettingTarget(tx, input.target);
     await assertUnlocked(tx, input.target, input.key);
+    await assertAttendanceRoot(tx, input, parsed.data);
     const current = await storedSetting(input.target, input.key, tx);
     if ((current?.version ?? 0) !== input.expectedVersion) throw versionConflict();
     const version = await nextVersion(tx, {

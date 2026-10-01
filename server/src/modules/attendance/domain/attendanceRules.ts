@@ -8,14 +8,14 @@ export const MAX_ATTEMPTS = 5;
 
 export interface Person {
   id: string;
-  email: string;
+  membershipId: string;
   role: string;
   active: boolean;
 }
 
-/** The one admin, named in configuration, who opens attendance each day. */
-export function isRoot(person: Person, rootEmail: string | undefined): boolean {
-  return person.active && person.role === 'ADMIN' && person.email.toLowerCase() === rootEmail;
+/** The event member chosen as root, if still an active admin. */
+export function isRoot(person: Person, rootMembershipId: string | null): boolean {
+  return person.active && person.role === 'ADMIN' && person.membershipId === rootMembershipId;
 }
 
 export function assertActiveAccount(person: { active: boolean }): void {
@@ -29,14 +29,14 @@ export function assertActiveAccount(person: { active: boolean }): void {
 export function assertIssuerPresent<P extends Person>(
   issuer: P | null,
   presence: { method: AttendanceRecord['method'] } | null,
-  rootEmail: string | undefined,
+  rootMembershipId: string | null,
 ): asserts issuer is P {
   if (
-    !rootEmail ||
+    !rootMembershipId ||
     !issuer?.active ||
     issuer.role === 'VOLUNTEER' ||
     !presence ||
-    (presence.method === 'ROOT' && !isRoot(issuer, rootEmail))
+    (presence.method === 'ROOT' && !isRoot(issuer, rootMembershipId))
   ) {
     throw new ForbiddenError(
       'The verifier must be an active admin or exco with verified attendance today.',
@@ -45,8 +45,8 @@ export function assertIssuerPresent<P extends Person>(
 }
 
 /** An exco can verify others only once the current root has verified them. */
-export function assertVerifiedByRoot(root: Person | null, rootEmail: string | undefined): void {
-  if (!root || !isRoot(root, rootEmail))
+export function assertVerifiedByRoot(root: Person | null, rootMembershipId: string | null): void {
+  if (!root || !isRoot(root, rootMembershipId))
     throw new ForbiddenError('Excos must first verify attendance through the current root admin.');
 }
 
@@ -100,17 +100,17 @@ export function assertChallengeUsable<
 export function assertMayVerify(input: {
   person: Person;
   issuer: Person;
-  rootEmail: string | undefined;
+  rootMembershipId: string | null;
   method: AttendanceRecord['method'];
   bothOnCampus: boolean;
 }): void {
-  const { person, issuer, rootEmail, method, bothOnCampus } = input;
+  const { person, issuer, rootMembershipId, method, bothOnCampus } = input;
   if (issuer.id === person.id)
     throw new RuleError(
       ERROR_CODES.VERIFICATION_NOT_ALLOWED,
       'You cannot verify your own attendance.',
     );
-  if (person.role !== 'VOLUNTEER' && !isRoot(issuer, rootEmail))
+  if (person.role !== 'VOLUNTEER' && !isRoot(issuer, rootMembershipId))
     throw new RuleError(
       ERROR_CODES.VERIFICATION_NOT_ALLOWED,
       'Excos must scan the root admin’s QR or enter their PIN.',

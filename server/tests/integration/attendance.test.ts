@@ -12,6 +12,7 @@ import {
   createStation,
   createVolunteer,
   setMembership,
+  testEvent,
   type TestVolunteer,
 } from '../helpers/fixtures.js';
 import { FROZEN_NOW } from '../setup.js';
@@ -46,6 +47,30 @@ beforeEach(async () => {
   root = await createVolunteer({ email: 'root@attendance.test', role: 'ADMIN' });
   exco = await createVolunteer({ email: 'exco@attendance.test', role: 'IC' });
   volunteer = await createVolunteer({ email: 'volunteer@attendance.test', role: 'VOLUNTEER' });
+  const { eventId } = await testEvent();
+  const rootMember = await rawDb.eventMembership.findUniqueOrThrow({
+    where: { eventId_personId: { eventId, personId: root.id } },
+  });
+  await rawDb.setting.createMany({
+    data: [
+      {
+        scope: 'EVENT',
+        scopeId: eventId,
+        eventId,
+        key: 'attendance.rootMembershipId',
+        value: rootMember.id,
+        version: 1,
+      },
+      {
+        scope: 'EVENT',
+        scopeId: eventId,
+        eventId,
+        key: 'attendance.campusCidrs',
+        value: ['127.0.0.1/32', '::1/128', '203.0.113.0/24'],
+        version: 1,
+      },
+    ],
+  });
   for (const person of [root, exco, volunteer]) sensitiveRateLimit.resetKey(`sub:${person.sub}`);
   dayId = (await createEventDayToday()).id;
   const station = await createStation({ code: 'ATTENDANCE' });
@@ -55,6 +80,35 @@ beforeEach(async () => {
 });
 
 describe('verified attendance', () => {
+  it('uses the selected event member as root immediately after a setting change', async () => {
+    const other = await createVolunteer({ email: 'new-root@attendance.test', role: 'ADMIN' });
+    const { eventId } = await testEvent();
+    const member = await rawDb.eventMembership.findUniqueOrThrow({
+      where: { eventId_personId: { eventId, personId: other.id } },
+    });
+    await rawDb.setting.updateMany({
+      where: { eventId, key: 'attendance.rootMembershipId' },
+      data: { value: member.id, version: 2 },
+    });
+    expect((await post(root, '/attendance/start')).status).toBe(403);
+    const status = await request(app).get('/api/v1/attendance').set('Authorization', bearer(other));
+    expect(status.body.isRoot).toBe(true);
+    expect((await post(other, '/attendance/start')).status).toBe(200);
+  });
+
+  it('uses trusted networks from the event setting immediately', async () => {
+    const { eventId } = await testEvent();
+    await rawDb.setting.updateMany({
+      where: { eventId, key: 'attendance.campusCidrs' },
+      data: { value: [], version: 2 },
+    });
+    const status = await request(app).get('/api/v1/attendance').set('Authorization', bearer(root));
+    expect(status.body.networkConfigured).toBe(false);
+    expect(status.body.onCampusNetwork).toBe(false);
+    await post(root, '/attendance/start').expect(200);
+    expect((await post(root, '/attendance/challenge')).body.qrEnabled).toBe(false);
+  });
+
   it('requires authentication and only the configured root can bootstrap', async () => {
     expect((await request(app).post('/api/v1/attendance/start')).status).toBe(401);
     expect((await post(exco, '/attendance/start')).status).toBe(403);

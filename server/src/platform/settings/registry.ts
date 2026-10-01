@@ -1,5 +1,6 @@
 import { CountsMode, VisitorDataMode, type EventStatus } from '@spoh/shared';
 import { z } from 'zod';
+import { parseCidr } from '../http/campusNetwork.js';
 
 /** The one authored catalogue of settings, including their schemas and UI copy (ADR-003 §1). */
 export type SettingScope = 'platform' | 'event' | 'station';
@@ -227,7 +228,7 @@ export const SETTINGS = {
 
   'attendance.rootMembershipId': setting(
     'attendance.rootMembershipId',
-    z.string().max(64).nullable(),
+    z.string().min(1).max(64).nullable(),
     null,
     'Attendance root',
     'The event member allowed to issue and rotate attendance verifier credentials.',
@@ -236,7 +237,24 @@ export const SETTINGS = {
   ),
   'attendance.campusCidrs': setting(
     'attendance.campusCidrs',
-    z.array(z.string().max(64)).max(20),
+    z
+      .array(
+        z
+          .string()
+          .max(64)
+          .refine(
+            (cidr) => {
+              try {
+                parseCidr(cidr);
+                return true;
+              } catch {
+                return false;
+              }
+            },
+            { message: 'Enter a valid IPv4 or IPv6 CIDR range.' },
+          ),
+      )
+      .max(20),
     [],
     'Trusted networks',
     'Venue IP ranges inside which QR attendance verification is allowed.',

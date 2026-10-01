@@ -7,7 +7,7 @@ import { eventToday } from '../../../platform/event/today.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { findEventDayOn, lockPerson, replaceChallenge } from '../data/repo.js';
 import { ATTENDANCE_TTL_MS, assertEventToday } from '../domain/attendanceRules.js';
-import { onCampus } from './config.js';
+import { campusCidrs, onCampus } from './config.js';
 import { assertIssuer } from './issuer.js';
 import { hashPin, signAttendanceToken } from './tokens.js';
 
@@ -22,6 +22,7 @@ export async function issueChallenge(
     const day = await findEventDayOn(tx, scope, await eventToday(scope, now));
     assertEventToday(day);
     await assertIssuer(tx, scope, { issuerId: volunteerId, dayId: day.id });
+    const cidrs = await campusCidrs(scope, tx);
     const id = randomUUID();
     const pin = randomInt(0, 10_000_000_000).toString().padStart(10, '0');
     const expiresAt = new Date(now.getTime() + ATTENDANCE_TTL_MS);
@@ -30,7 +31,7 @@ export async function issueChallenge(
       issuerId: volunteerId,
       eventDayId: day.id,
       pinHash: hashPin(pin),
-      campusNetwork: onCampus(audit.ip),
+      campusNetwork: onCampus(audit.ip, cidrs),
       expiresAt,
     });
     await writeAudit(tx, {
@@ -45,7 +46,7 @@ export async function issueChallenge(
       pin,
       expiresAt: expiresAt.toISOString(),
       serverTime: now.toISOString(),
-      qrEnabled: onCampus(audit.ip),
+      qrEnabled: onCampus(audit.ip, cidrs),
     };
   });
 }
