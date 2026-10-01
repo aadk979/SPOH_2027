@@ -280,6 +280,36 @@ fixtures passed in the final full run. All workspace typechecks, root lint, arch
 hardcoding, formatting and server build passed by exit code. No client layout or visual baseline
 changed in this slice.
 
-Remaining: audited lifecycle transitions and close/archive side effects, including the general
-archived-write forbid and its Cedar context in P11.
-P10.4/P10.5 remain in progress.
+## Audited preparation transitions
+
+The event lifecycle API now supports DRAFT → READY, READY → DRAFT, READY → REHEARSAL and
+REHEARSAL → READY. Structure guards use current server-owned days, active templates and
+station types, the event timezone and registration categories. Requests carry the expected
+version; competing or stale decisions are refused. LIVE, CLOSED and ARCHIVED targets remain
+unavailable until their guards and close-out effects are implemented.
+
+The additive migration records sticky observed live history and a lifecycle version. Existing
+LIVE/CLOSED/ARCHIVED events are backfilled as having been live. A trigger preserves that history
+and increments the version on actual phase changes, including writes from an older API during
+a rolling deployment; unrelated edits and repeated phase values do not increment it.
+
+Each transition locks the event, rechecks the actor's current event permission under a membership
+lock, evaluates guards, writes its audit and retry response, and publishes the saved state/version
+in one transaction. Ending rehearsal closes only open practice fallback windows and retains
+their rows and captured data. New fallback declarations hold the capture phase lock, preventing
+a practice window from opening after rehearsal ends. Event and identity caches subscribe to the
+post-commit `event.state` channel and refresh on reconnect.
+
+Verification on 2026-10-02: full integration **607 passed / 4 existing skips**, server unit
+**491**, client unit **257**, and targeted browser E2E **7** passed. Fourteen new API cases cover
+all preparation edges, structure guards, invalid and stale decisions, sticky history, concurrent
+transitions, rollback, durable replay, changed permissions and post-commit notification. Eleven
+scratch migration cases cover all existing phases, legacy writers, protected history/version and
+required/default columns. Phone/laptop journeys verify window closure, audited versions and
+banner updates without a page reload. All workspace typechecks, root lint, architecture,
+hardcoding, formatting and server build passed by exit code. The three dedicated `_test`
+databases received the migration; a read-only Prisma comparison found no drift. No client layout
+or visual baseline changed in this slice.
+
+Remaining: go-live guards and overrides, close/archive side effects, including the general
+archived-write forbid and its Cedar context in P11. P10.4/P10.5 remain in progress.

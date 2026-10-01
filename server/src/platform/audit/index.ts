@@ -76,7 +76,8 @@ export type AuditAction =
   | 'notification.dispatch'
   | 'media.upload'
   | 'auth.stationScopeBypass'
-  | 'event.clone';
+  | 'event.clone'
+  | 'event.transition';
 
 export interface AuditContext {
   /** `Volunteer.id`. Null only for system-initiated actions such as the purge job. */

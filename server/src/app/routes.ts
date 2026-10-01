@@ -23,7 +23,7 @@ import { rosterRouter } from '../modules/roster/index.js';
 import { shiftRouter } from '../modules/shift/index.js';
 import { stationRouter } from '../modules/station/index.js';
 import { createDevAuthRouter } from '../modules/devAuth/index.js';
-import { eventListRouter } from '../modules/event/index.js';
+import { eventLifecycleRouter, eventListRouter } from '../modules/event/index.js';
 import { eventFromAlias, eventFromPath } from '../platform/http/eventContext.js';
 
 /** A module's routes and where they are mounted under /api/v1. */
@@ -57,6 +57,7 @@ export const PLATFORM_ROUTES: readonly ModuleRoutes[] = [
  * path's event.
  */
 export const EVENT_ROUTES: readonly ModuleRoutes[] = [
+  { path: '/lifecycle', router: eventLifecycleRouter },
   { path: '/me', router: meRouter },
   { path: '/attendance', router: attendanceRouter },
   { path: '/stations', router: stationRouter },

@@ -110,7 +110,7 @@ export async function settle(key: string, statusCode: number, body: object): Pro
   });
 }
 
-/** Print runs have no per-row retry key: their replay must commit with the minted cards. */
+/** Mutations without a per-row retry key must commit their replay with their effects. */
 export async function lockReserved(
   tx: Pick<PrismaTransactionClient, '$queryRaw'>,
   scope: EventScope,

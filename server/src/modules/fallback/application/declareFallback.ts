@@ -8,6 +8,7 @@ import { requireEventStation } from '../../station/index.js';
 import { createWindow, findOpenWindow } from '../data/repo.js';
 import { assertNoOpenWindow } from '../domain/windowRules.js';
 import { windowRecord } from './windowRecord.js';
+import { admitCapture } from '../../../platform/db/captureAdmission.js';
 
 /** Declare degraded operation, event-wide or for one station. */
 export async function declareFallback(
@@ -18,6 +19,7 @@ export async function declareFallback(
   const stationId = await requireEventStation(scope, request.stationId);
 
   const window = await prisma.$transaction(async (tx) => {
+    await admitCapture(tx, scope, { clock });
     assertNoOpenWindow(await findOpenWindow(tx, scope, stationId), stationId);
 
     const row = await createWindow(tx, scope, {

@@ -261,6 +261,9 @@ model Event {
   /// @class operational
   locale             String      @default("en-SG")
   status             EventStatus @default(DRAFT)
+  /// Monotonic preparation history, maintained for older writers too.
+  hasBeenLive        Boolean     @default(false)
+  lifecycleVersion   Int         @default(0)
   /// Minutes after local midnight at which "today" starts (ADR-004 §3).
   dayBoundaryMinutes Int         @default(0)
   /// @class operational

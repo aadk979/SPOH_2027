@@ -105,6 +105,17 @@ export async function endWindow(
   });
 }
 
+export async function endRehearsalWindows(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  now: Date,
+) {
+  const windows = await tx.$queryRaw<Array<{ id: string }>>`
+    UPDATE "FallbackWindow" SET "endedAt" = ${now}
+    WHERE "eventId" = ${scope.eventId} AND rehearsal = true AND "endedAt" IS NULL RETURNING id`;
+  return windows.map((window) => window.id);
+}
+
 export async function listWindows(
   scope: EventScope,
   range: { from?: Date; to?: Date; rehearsal?: boolean },

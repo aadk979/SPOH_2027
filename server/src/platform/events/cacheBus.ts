@@ -3,9 +3,15 @@ import { env } from '../../config/env.js';
 import type { PrismaTransactionClient } from '../db/client.js';
 import { logger } from '../logger/index.js';
 
-export type CacheChannel = 'settings' | 'access' | 'membership' | 'session';
+export type CacheChannel = 'settings' | 'access' | 'membership' | 'session' | 'event.state';
 type Listener = (payload: Record<string, unknown>) => void | Promise<void>;
-const CHANNELS: readonly CacheChannel[] = ['settings', 'access', 'membership', 'session'];
+const CHANNELS: readonly CacheChannel[] = [
+  'settings',
+  'access',
+  'membership',
+  'session',
+  'event.state',
+];
 const listeners = new Map<CacheChannel, Set<Listener>>();
 const recovered = new Set<() => void | Promise<void>>();
 

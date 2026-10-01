@@ -2,6 +2,7 @@ import { prisma } from '../db/client.js';
 import type { EventScope } from '../db/eventScope.js';
 import { ServiceUnavailableError } from '../errors/index.js';
 import type { EventZone } from '../time/index.js';
+import { onCacheBusRecovered, subscribeCacheEvent } from '../events/cacheBus.js';
 
 /**
  * The event the pre-P09.7 paths (`/api/v1/registrations` …) still work in:
@@ -36,6 +37,8 @@ export function invalidateEventCache(): void {
 }
 
 const zones = new Map<string, EventZone & { slug: string }>();
+subscribeCacheEvent('event.state', () => invalidateEventCache());
+onCacheBusRecovered(() => invalidateEventCache());
 
 /**
  * An event's wall clock: its IANA timezone and day boundary. Neither changes

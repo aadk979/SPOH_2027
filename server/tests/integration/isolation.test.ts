@@ -251,6 +251,10 @@ const LIST = noId('lists the path event only');
 const ACTOR = noId("acts on the caller's own records in the path event");
 
 const CASES: Record<string, Case> = {
+  'GET /lifecycle': LIST,
+  'POST /lifecycle': noId(
+    'transitions only the event named in the path; no body event id is accepted',
+  ),
   'GET /me': ACTOR,
   'POST /me/check-in': { body: (b) => ({ assignmentId: b.assignment }) },
   'POST /me/check-out': { body: (b) => ({ assignmentId: b.assignment }) },

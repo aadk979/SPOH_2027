@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { CommitteeRole, MembershipStatus } from '../../invariants/enums.js';
-import { Id } from '../common/index.js';
+import { Id, IdempotencyKey, ReasonText } from '../common/index.js';
 
 /**
  * The event a caller works in, as the client needs it to show anything: its
@@ -10,6 +10,29 @@ import { Id } from '../common/index.js';
 /** An event's lifecycle state (ADR-004). */
 export const EventStatus = z.enum(['DRAFT', 'READY', 'REHEARSAL', 'LIVE', 'CLOSED', 'ARCHIVED']);
 export type EventStatus = z.infer<typeof EventStatus>;
+
+/** Preparation edges; go-live and close/archive will extend this after their guards/effects exist. */
+export const TransitionEventRequest = z
+  .object({
+    idempotencyKey: IdempotencyKey,
+    to: z.enum(['DRAFT', 'READY', 'REHEARSAL']),
+    expectedVersion: z.number().int().nonnegative(),
+    reason: ReasonText.optional(),
+  })
+  .strict();
+export type TransitionEventRequest = z.infer<typeof TransitionEventRequest>;
+
+export const EventLifecycleState = z
+  .object({
+    eventId: Id,
+    status: EventStatus,
+    version: z.number().int().nonnegative(),
+    hasBeenLive: z.boolean(),
+  })
+  .strict();
+export type EventLifecycleState = z.infer<typeof EventLifecycleState>;
+export const EventLifecycleResponse = z.object({ lifecycle: EventLifecycleState }).strict();
+export type EventLifecycleResponse = z.infer<typeof EventLifecycleResponse>;
 
 export const EventSummary = z
   .object({

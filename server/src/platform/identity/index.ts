@@ -132,6 +132,7 @@ export function invalidateSessionCache(sessionId?: string): void {
 }
 
 subscribeCacheEvent('membership', () => invalidateVolunteerCache());
+subscribeCacheEvent('event.state', () => invalidateVolunteerCache());
 subscribeCacheEvent('session', () => invalidateSessionCache());
 onCacheBusRecovered(() => invalidateVolunteerCache());
 
