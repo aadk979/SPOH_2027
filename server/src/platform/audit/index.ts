@@ -1,4 +1,5 @@
 import type { JsonValue, PrismaTransactionClient } from '../db/client.js';
+import { publishCacheEvent } from '../events/cacheBus.js';
 
 /**
  * Audit logging (BUILD_PLAN §8.7).
@@ -101,6 +102,28 @@ export interface AuditEntry extends AuditContext {
   after?: JsonValue;
 }
 
+const MEMBERSHIP_CHANGES = new Set<AuditAction>([
+  'roster.edit',
+  'roster.import',
+  'user.provision',
+  'user.update',
+  'user.deactivate',
+  'user.reactivate',
+]);
+
+async function publishInvalidation(tx: PrismaTransactionClient, entry: AuditEntry): Promise<void> {
+  if (entry.action === 'settings.update' || entry.action === 'setting.change') {
+    await publishCacheEvent(tx, 'settings', { eventId: entry.eventId, key: entry.entityId });
+  }
+  if (MEMBERSHIP_CHANGES.has(entry.action)) {
+    await publishCacheEvent(tx, 'membership', { eventId: entry.eventId });
+    await publishCacheEvent(tx, 'access', { eventId: entry.eventId });
+  }
+  if (entry.action === 'session.revoke' || entry.action === 'session.reuseDetected') {
+    await publishCacheEvent(tx, 'session', { personId: entry.actorId });
+  }
+}
+
 /**
  * Write one audit row. Must be called with an open transaction client so it
  * shares the fate of the mutation.
@@ -122,6 +145,7 @@ export async function writeAudit(tx: PrismaTransactionClient, entry: AuditEntry)
       requestId: entry.requestId,
     },
   });
+  await publishInvalidation(tx, entry);
 }
 
 /**

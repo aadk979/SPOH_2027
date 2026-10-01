@@ -6,6 +6,7 @@ import {
 import { prisma, type PrismaTransactionClient } from '../db/client.js';
 import { logger } from '../logger/index.js';
 import { writeAudit, type AuditContext } from '../audit/index.js';
+import { onCacheBusRecovered, subscribeCacheEvent } from '../events/cacheBus.js';
 
 /**
  * Runtime settings.
@@ -33,10 +34,8 @@ import { writeAudit, type AuditContext } from '../audit/index.js';
  *   - an empty settings table is a working system
  *   - unit tests need no database
  *
- * A write refreshes this instance immediately and every other instance within
- * one refresh interval. That is the right trade: these values change a handful
- * of times across the event's life, and a minute of skew on a threshold is
- * unnoticeable where a minute of unavailability is not.
+ * A write refreshes this instance immediately. Postgres notifications refresh
+ * other instances, with the minute timer as a missed-notification backstop.
  */
 
 /**
@@ -58,6 +57,7 @@ export type SettingKey = keyof RuntimeSettings;
 const KEY_SCHEMAS = RuntimeSettings.shape;
 
 let cache: RuntimeSettings = DEFAULT_SETTINGS;
+let loadGeneration = 0;
 let overridden: SettingKey[] = [];
 let meta: { updatedAt: Date | null; updatedById: string | null } = {
   updatedAt: null,
@@ -91,6 +91,7 @@ export function settingsMeta(): {
  * definition a value that worked.
  */
 export async function loadSettings(): Promise<RuntimeSettings> {
+  const generation = ++loadGeneration;
   let rows: Array<{ key: string; value: unknown; updatedAt: Date; updatedById: string | null }>;
 
   try {
@@ -134,12 +135,16 @@ export async function loadSettings(): Promise<RuntimeSettings> {
     }
   }
 
+  if (generation !== loadGeneration) return cache;
   cache = Object.freeze(next) as RuntimeSettings;
   overridden = applied;
   meta = { updatedAt: latest, updatedById: latestBy };
 
   return cache;
 }
+
+subscribeCacheEvent('settings', () => loadSettings().then(() => undefined));
+onCacheBusRecovered(() => loadSettings().then(() => undefined));
 
 /**
  * Write a patch and refresh this instance immediately.

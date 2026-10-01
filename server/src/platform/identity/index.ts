@@ -10,6 +10,11 @@ import { logger } from '../logger/index.js';
 import { prisma } from '../db/client.js';
 import type { RequestAuth } from '../../types/express.js';
 import { verifyAccessToken } from './sessionTokens.js';
+import {
+  isCacheBusDegraded,
+  onCacheBusRecovered,
+  subscribeCacheEvent,
+} from '../events/cacheBus.js';
 import { createCognitoAuthProvider } from './cognitoProvider.js';
 import { createCognitoIdentityProvider } from './cognitoIdentityProvider.js';
 import { createLocalIdentityProvider } from './localIdentityProvider.js';
@@ -75,8 +80,9 @@ logger.info({ authProvider: authProvider.name }, 'authentication provider select
  *
  * The `sub -> Volunteer` mapping changes when someone is provisioned or
  * deactivated, which is rare, but it is read on literally every request. A
- * 60-second TTL keeps a booth tap from paying for a database round trip it does
- * not need, while bounding how long a deactivated account keeps working.
+ * A 60-second TTL avoids a database round trip on every booth tap. Bus
+ * notifications evict changed memberships promptly; a periodic refresh backs
+ * up missed notifications. While disconnected, lookups bypass this cache.
  */
 const VOLUNTEER_CACHE_TTL_MS = 60_000;
 
@@ -85,9 +91,9 @@ const VOLUNTEER_CACHE_TTL_MS = 60_000;
  *
  * An access token is short-lived but not instantly revocable, and "sign this
  * device out" has to mean something sooner than the token's own expiry. So the
- * session row backing a token is checked — cached on the same 60-second budget,
- * which turns it into roughly one extra query per device per minute rather than
- * one per capture tap.
+ * session row backing a token is checked and cached for up to 60 seconds.
+ * Revocation notifications evict it promptly; a periodic refresh backs up
+ * missed notifications. While disconnected, every request checks the database.
  */
 const SESSION_CACHE_TTL_MS = 60_000;
 
@@ -125,6 +131,10 @@ export function invalidateSessionCache(sessionId?: string): void {
   else sessionCache.delete(sessionId);
 }
 
+subscribeCacheEvent('membership', () => invalidateVolunteerCache());
+subscribeCacheEvent('session', () => invalidateSessionCache());
+onCacheBusRecovered(() => invalidateVolunteerCache());
+
 /**
  * The event a request works in, and whether its path named it (ADR-001 §4).
  * An alias path (the pre-P09.7 surface) works in Event #1 without naming it.
@@ -145,7 +155,7 @@ export interface RequestedEvent {
 async function resolveVolunteer(sub: string, event: RequestedEvent): Promise<CachedVolunteer> {
   const { eventId } = event;
   const cached = volunteerCache.get(cacheKey(sub, eventId));
-  if (cached && cached.expiresAt > Date.now()) return cached;
+  if (!isCacheBusDegraded() && cached && cached.expiresAt > Date.now()) return cached;
 
   const volunteer = await prisma.person.findUnique({
     where: { cognitoSub: sub },
@@ -181,7 +191,9 @@ async function resolveVolunteer(sub: string, event: RequestedEvent): Promise<Cac
  */
 async function sessionIsLive(sessionId: string, sub: string): Promise<boolean> {
   const cached = sessionCache.get(sessionId);
-  if (cached && cached.expiresAt > Date.now()) return cached.live && cached.sub === sub;
+  if (!isCacheBusDegraded() && cached && cached.expiresAt > Date.now()) {
+    return cached.live && cached.sub === sub;
+  }
 
   const session = await prisma.refreshSession.findUnique({
     where: { id: sessionId },

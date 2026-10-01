@@ -5,6 +5,7 @@ import { disconnectPrisma, pingDatabase } from './platform/db/client.js';
 import { loadSettings } from './platform/settings/index.js';
 import { JOBS } from './app/jobs.js';
 import { startJobs } from './platform/scheduler/index.js';
+import { startCacheBus, stopCacheBus } from './platform/events/cacheBus.js';
 
 /**
  * The server's start-up, top to bottom: database, settings, app, jobs, listen,
@@ -22,6 +23,7 @@ async function main(): Promise<void> {
   // by design: a failure here logs and leaves the defaults in place rather than
   // stopping the server.
   await loadSettings();
+  await startCacheBus();
 
   const app = createApp();
   const jobs = startJobs(JOBS);
@@ -36,7 +38,9 @@ async function main(): Promise<void> {
     jobs.stop();
 
     server.close(() => {
-      void disconnectPrisma().finally(() => process.exit(0));
+      void stopCacheBus()
+        .then(() => disconnectPrisma())
+        .finally(() => process.exit(0));
     });
 
     // Hard limit: a deploy must not hang on a stuck connection.
