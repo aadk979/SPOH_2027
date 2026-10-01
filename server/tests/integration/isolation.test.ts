@@ -424,6 +424,8 @@ const CASES: Record<string, Case> = {
   },
   'GET /admin/settings': noId('runtime settings are platform-wide until P10'),
   'PATCH /admin/settings': noId('runtime settings are platform-wide until P10'),
+  'GET /admin/event-settings': noId("reads the path event's settings"),
+  'PATCH /admin/event-settings': noId("changes the path event's settings"),
 
   'GET /notifications/config': noId('push configuration is platform-wide'),
   'POST /notifications/subscriptions': noId("registers the caller's own device"),

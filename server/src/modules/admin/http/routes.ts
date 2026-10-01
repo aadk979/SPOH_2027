@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import {
+  ChangeEventSettingRequest,
   CreateAssignmentRequest,
   CreateEventDayRequest,
   CreateGiftTypeRequest,
@@ -32,7 +33,12 @@ import {
   updateVolunteerHandler,
 } from '../../people/index.js';
 import { createAssignmentHandler, deleteAssignmentHandler } from '../../assignments/index.js';
-import { getSettingsHandler, updateSettingsHandler } from '../../settings/index.js';
+import {
+  changeEventSettingHandler,
+  getEventSettingsHandler,
+  getSettingsHandler,
+  updateSettingsHandler,
+} from '../../settings/index.js';
 import { createGiftTypeHandler, updateGiftTypeHandler } from '../../gift/index.js';
 import {
   createEventDayHandler,
@@ -241,4 +247,24 @@ adminRouter.patch(
   requireCapability('config.manage'),
   validate({ body: UpdateSettingsRequest }),
   updateSettingsHandler,
+);
+
+// ─────────────────────────────────────────────────────────────
+// EVENT SETTINGS (ADR-003): the event's product rules (ADR-002 §4)
+// ─────────────────────────────────────────────────────────────
+
+/** Readable by every member: the client shows counts the way the event chose. */
+adminRouter.get(
+  '/event-settings',
+  defaultRateLimit,
+  requireCapability('own.read'),
+  getEventSettingsHandler,
+);
+
+adminRouter.patch(
+  '/event-settings',
+  adminRateLimit,
+  requireCapability('config.manage'),
+  validate({ body: ChangeEventSettingRequest }),
+  changeEventSettingHandler,
 );

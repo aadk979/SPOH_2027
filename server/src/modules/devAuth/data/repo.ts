@@ -9,7 +9,7 @@ export async function findVolunteerByEmail(email: string) {
       displayName: true,
       eventMemberships: {
         where: { status: 'ACTIVE', event: { status: { notIn: ['CLOSED', 'ARCHIVED'] } } },
-        orderBy: { event: { createdAt: 'asc' } },
+        orderBy: [{ event: { createdAt: 'asc' } }, { event: { id: 'asc' } }],
         take: 1,
         select: { role: true },
       },

@@ -260,6 +260,8 @@ model Event {
   clonedFrom           Event?                @relation("EventClone", fields: [clonedFromEventId], references: [id], onDelete: Restrict)
   clones               Event[]               @relation("EventClone")
   memberships          EventMembership[]
+  settings             Setting[]
+  settingChanges       SettingChange[]
   captureCategories    CaptureCategory[]
   stationTypes         StationType[]
   stationTags          StationTag[]
@@ -533,6 +535,8 @@ model Person {
   fallbackWindows   FallbackWindow[]
   importBatches     ImportBatch[]
   settingsChanged   AppSetting[]
+  settingsUpdated   Setting[]             @relation("SettingUpdatedBy")
+  settingChanges    SettingChange[]       @relation("SettingChangedBy")
   pushSubscriptions PushSubscription[]
   refreshSessions   RefreshSession[]
 
@@ -1331,6 +1335,66 @@ model IdempotencyRecord {
   event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
 
   @@index([createdAt])
+  @@index([eventId])
+}
+
+enum SettingScope {
+  PLATFORM
+  EVENT
+  STATION
+}
+
+enum SettingChangeSource {
+  USER
+  SCHEDULE
+  REVERT
+  RESET
+  CLONE
+  MIGRATION
+}
+
+/// A stored setting at one scope (ADR-003 §2): the organisation (platform), an
+/// event, or a station. Resolution is station, event, platform, then the
+/// compiled default. An event or station row carries its eventId.
+model Setting {
+  id                String       @id @default(cuid())
+  scope             SettingScope
+  /// The organisation, event or station the value applies to.
+  scopeId           String
+  eventId           String?
+  key               String
+  value             Json
+  /// 1 on the first write; a change names the version it read.
+  version           Int
+  updatedAt         DateTime     @updatedAt @db.Timestamptz(3)
+  updatedByPersonId String?
+
+  event     Event?  @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  updatedBy Person? @relation("SettingUpdatedBy", fields: [updatedByPersonId], references: [id], onDelete: SetNull)
+
+  @@unique([scope, scopeId, key])
+  @@index([eventId])
+}
+
+/// Every version a setting has had, append-only (ADR-003 §2).
+model SettingChange {
+  id            String              @id @default(cuid())
+  scope         SettingScope
+  scopeId       String
+  eventId       String?
+  key           String
+  version       Int
+  before        Json?
+  after         Json?
+  reason        String?
+  source        SettingChangeSource
+  actorPersonId String?
+  createdAt     DateTime            @default(now()) @db.Timestamptz(3)
+
+  event Event?  @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  actor Person? @relation("SettingChangedBy", fields: [actorPersonId], references: [id], onDelete: SetNull)
+
+  @@index([scope, scopeId, key, version])
   @@index([eventId])
 }
 

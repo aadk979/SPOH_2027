@@ -30,7 +30,7 @@ export async function findLiveMemberships(personId: string) {
       eventMemberships: {
         where: { event: { status: { notIn: ['CLOSED', 'ARCHIVED'] } } },
         select: { id: true, eventId: true, role: true, status: true },
-        orderBy: { event: { createdAt: 'asc' } },
+        orderBy: [{ event: { createdAt: 'asc' } }, { event: { id: 'asc' } }],
       },
     },
   });
@@ -49,7 +49,7 @@ export async function findVolunteerByEmail(email: string) {
       cognitoSub: true,
       eventMemberships: {
         where: { status: 'ACTIVE', event: { status: { notIn: ['CLOSED', 'ARCHIVED'] } } },
-        orderBy: { event: { createdAt: 'asc' } },
+        orderBy: [{ event: { createdAt: 'asc' } }, { event: { id: 'asc' } }],
         take: 1,
         select: { role: true },
       },

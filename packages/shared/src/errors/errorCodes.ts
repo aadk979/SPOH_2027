@@ -29,6 +29,10 @@ export const ERROR_CODES = {
   // domain
   NOT_FOUND: 'NOT_FOUND',
   CONFLICT: 'CONFLICT',
+  /// A setting changed since the caller read it: reload and decide again.
+  SETTING_VERSION_CONFLICT: 'SETTING_VERSION_CONFLICT',
+  /// The event's state does not allow this setting to change (ADR-004).
+  SETTING_LOCKED: 'SETTING_LOCKED',
   ALREADY_VOIDED: 'ALREADY_VOIDED',
   NOT_ON_SHIFT: 'NOT_ON_SHIFT',
   ALREADY_CHECKED_IN: 'ALREADY_CHECKED_IN',

@@ -128,6 +128,18 @@ describe('operations screen safety net', () => {
 
   it('rejects an empty event name with the server schema message before submitting', async () => {
     state.capabilities = ['config.manage'];
+    // The product rules load beside the settings (P09.14).
+    mockedApi.mockImplementation(async (path: string) =>
+      path.endsWith('/admin/event-settings')
+        ? {
+            settings: {
+              'product.countsMode': { mode: 'separate' },
+              'product.visitorDataMode': 'none',
+            },
+            versions: { 'product.countsMode': 0, 'product.visitorDataMode': 0 },
+          }
+        : { data: [], meta: { count: 0, nextCursor: null } },
+    );
     show(<SettingsPage />);
     fireEvent.click(await screen.findByRole('button', { name: 'Save settings' }));
     const name = screen.getByLabelText('Event name');

@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-01T01:53:58.752Z",
+  "updatedAt": "2026-10-01T01:54:14.403Z",
   "current": {
     "phase": "P09",
-    "step": "P09.6"
+    "step": "P09.14"
   },
   "gates": [
     {
@@ -1911,8 +1911,8 @@
         {
           "id": "P09.14",
           "title": "Per-event product rules (D-04)",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-01T01:54:14.403Z",
           "completedAt": null,
           "commits": [],
           "notes": []

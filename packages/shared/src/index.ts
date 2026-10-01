@@ -39,6 +39,7 @@ export * from './contracts/people/index.js';
 export * from './contracts/assignments/index.js';
 export * from './contracts/eventDays/index.js';
 export * from './contracts/settings/index.js';
+export * from './contracts/eventSettings/index.js';
 export * from './contracts/notification/index.js';
 export * from './contracts/media/index.js';
 export * from './contracts/attendance/index.js';

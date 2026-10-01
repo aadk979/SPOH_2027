@@ -1,1 +1,7 @@
-export { useSettings, useSaveSettings, settingsKeys } from './queries';
+export {
+  useEventSettings,
+  useChangeEventSetting,
+  useSettings,
+  useSaveSettings,
+  settingsKeys,
+} from './queries';

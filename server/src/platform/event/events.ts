@@ -20,7 +20,7 @@ export async function aliasEvent(): Promise<EventScope> {
   if (cached && cached.expiresAt > Date.now()) return cached.event;
   const row = await prisma.event.findFirst({
     where: { status: { not: 'ARCHIVED' } },
-    orderBy: { createdAt: 'asc' },
+    orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
     select: { id: true },
   });
   if (!row) throw new ServiceUnavailableError('No event is set up yet');
@@ -75,7 +75,7 @@ export async function eventTimezone(scope: EventScope): Promise<string> {
 export async function allEventScopes(): Promise<EventScope[]> {
   const events = await prisma.event.findMany({
     select: { id: true },
-    orderBy: { createdAt: 'asc' },
+    orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
   });
   return events.map((event) => ({ eventId: event.id }));
 }

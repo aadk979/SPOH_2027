@@ -1,4 +1,6 @@
 import type {
+  ChangeEventSettingRequest,
+  EventSettingsResponse,
   RuntimeSettings,
   SettingsResponse,
   ShiftTemplateRecord,
@@ -31,4 +33,19 @@ export async function saveShiftTemplate(
       body: change.body,
     })
   ).template;
+}
+
+/** The event's product rules, with the version of each (ADR-003). */
+export function getEventSettings(eventId: string): Promise<EventSettingsResponse> {
+  return eventApi<EventSettingsResponse>(eventId, '/admin/event-settings');
+}
+
+export function changeEventSetting(
+  eventId: string,
+  body: ChangeEventSettingRequest,
+): Promise<EventSettingsResponse> {
+  return eventApi<EventSettingsResponse>(eventId, '/admin/event-settings', {
+    method: 'PATCH',
+    body,
+  });
 }

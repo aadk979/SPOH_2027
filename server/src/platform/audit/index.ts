@@ -65,6 +65,7 @@ export type AuditAction =
   | 'giftType.create'
   | 'giftType.update'
   | 'settings.update'
+  | 'setting.change'
   | 'session.create'
   | 'session.revoke'
   | 'session.reuseDetected'

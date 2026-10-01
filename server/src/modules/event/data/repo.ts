@@ -80,7 +80,7 @@ export async function findMembershipsWithEvents(personId: string) {
     select: {
       eventMemberships: {
         where: { event: { status: { not: 'ARCHIVED' } } },
-        orderBy: { event: { createdAt: 'asc' } },
+        orderBy: [{ event: { createdAt: 'asc' } }, { event: { id: 'asc' } }],
         select: {
           role: true,
           status: true,

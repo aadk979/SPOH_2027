@@ -111,3 +111,18 @@ export type OrganisationRole = z.infer<typeof OrganisationRole>;
 /** A person's standing in one event (ADR-001 §1). */
 export const MembershipStatus = z.enum(['INVITED', 'ACTIVE', 'DEACTIVATED', 'ENDED']);
 export type MembershipStatus = z.infer<typeof MembershipStatus>;
+
+/** Where a stored setting applies (ADR-003 §2). */
+export const SettingScope = z.enum(['PLATFORM', 'EVENT', 'STATION']);
+export type SettingScope = z.infer<typeof SettingScope>;
+
+/** What wrote a setting's version (ADR-003 §2). */
+export const SettingChangeSource = z.enum([
+  'USER',
+  'SCHEDULE',
+  'REVERT',
+  'RESET',
+  'CLONE',
+  'MIGRATION',
+]);
+export type SettingChangeSource = z.infer<typeof SettingChangeSource>;

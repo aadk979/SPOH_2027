@@ -28,7 +28,7 @@ const owned = models.filter((model) => model.owned);
 const ownedNames = new Set(owned.map((model) => model.name));
 
 /** Rows about the platform, not one event: their eventId is null for those. */
-const PLATFORM_LEVEL = new Set(['AuditLog', 'IdempotencyRecord']);
+const PLATFORM_LEVEL = new Set(['AuditLog', 'IdempotencyRecord', 'Setting', 'SettingChange']);
 
 /** `…Id` columns on event-owned rows that name nothing in the database. */
 const NOT_REFERENCES = new Set(['Registration.groupId']);
