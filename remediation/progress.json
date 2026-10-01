@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-01T17:01:50.033Z",
+  "updatedAt": "2026-10-01T17:26:18.472Z",
   "current": {
     "phase": "P10",
     "step": "P10.5"
@@ -3062,6 +3062,10 @@
     {
       "at": "2026-10-01T17:01:50.003Z",
       "text": "P10.5 verified safety slice 2d60288 pushed: practice alerts interrupt only REHEARSAL; real searches remain visible in every phase. Safety DTOs/client records and pushes retain labelled row provenance after go-live. Concurrent resolution now writes one outcome/audit under a row lock. Targeted integration runs 27 and 28 passed, server unit 469, client unit 247, E2E 4, full visual 58 with unchanged baselines; typechecks/lint/architecture/hardcoding/format/build passed. P10.4/P10.5 remain in progress; next explicit batch mode and source-window UI, derived safety flags and audited lifecycle wiring."
+    },
+    {
+      "at": "2026-10-01T17:26:18.471Z",
+      "text": "P10.5 verified batch slice 0f1e8fc pushed: explicit practice/live batch choice and retry key; labelled CSV/card/stamp responses and audited mode. Print cards/audit/replay commit atomically under reservation lock. Shared middleware refuses cross-event and unscoped replay/takeover. Nine new DB cases cover phase-independent preparation, durable retry failure/locking and isolation; full integration 547 passed/4 existing skips, server unit 475, client unit 249, full E2E 41, stamp visual 2 unchanged; typecheck/lint/architecture/hardcoding/format/build passed. Both P10.4/P10.5 remain in progress; next import source-window UI, derived safety provenance and lifecycle admission/transitions/side effects. Batch administration UI remains P13.3."
     }
   ]
 }
