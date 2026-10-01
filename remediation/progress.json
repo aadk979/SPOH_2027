@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-01T11:34:54.367Z",
+  "updatedAt": "2026-10-01T11:53:25.897Z",
   "current": {
     "phase": "P10",
-    "step": "P10.3"
+    "step": "P10.4"
   },
   "gates": [
     {
@@ -1996,8 +1996,8 @@
         {
           "id": "P10.4",
           "title": "Move operational config out of env",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-01T11:37:19.193Z",
           "completedAt": null,
           "commits": [],
           "notes": []
@@ -2682,6 +2682,10 @@
     {
       "at": "2026-09-30T11:18:05.049Z",
       "text": "Session end 2026-09-30: P09.5 done (six slices), staging totals 58/58 after the catch-up migration. P09.4 waits only on the owner's production pg_dump. Next: P09.6. Handoff: reports/HANDOFF-2026-09-29.md (evening)."
+    },
+    {
+      "at": "2026-10-01T11:53:25.896Z",
+      "text": "P10.4 first slice 56275e4: attendance root and trusted CIDRs now resolve per event; membership validation and live-change tests. Full integration 492 passed/4 skipped; server unit 460, workspace typecheck/lint/format/architecture, settings generation and hardcoding gates passed. P10.4 remains in progress for UI, remaining env settings and rehearsal lifecycle."
     }
   ]
 }
