@@ -150,10 +150,10 @@ function save(state) {
 
 /** Keep the file prettier-clean when the repo's prettier is installed; never required. */
 function formatIfPossible() {
-  const bin = join(REPO, 'node_modules', '.bin', 'prettier');
+  const bin = join(REPO, 'node_modules', 'prettier', 'bin', 'prettier.cjs');
   if (!existsSync(bin)) return;
   try {
-    execFileSync(bin, ['--write', PROGRESS], { stdio: 'ignore' });
+    execFileSync(process.execPath, [bin, '--write', PROGRESS], { stdio: 'ignore' });
   } catch {
     // Formatting is cosmetic; the JSON is already valid.
   }

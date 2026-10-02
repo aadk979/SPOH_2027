@@ -49,6 +49,9 @@ pinned-host SSH to repair this new staging instance. Its historical cloud-init e
 represented as a successful initial bootstrap. **24 infra tests**, typecheck, lint, shell
 syntax and the runtime shell probe pass. The inspected follow-up CDK diff changes only
 launch data in place; AWS documents [UserData updates without interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-lightsail-instance.html).
+The follow-up edge deployment completed successfully with the same attached static IP;
+the already repaired service remains active. Tracker formatting now invokes Prettier's Node
+entrypoint directly, fixing Windows execution of the POSIX `.bin/prettier` shim.
 
 Both public staging names still resolve to `13.251.60.83` at this checkpoint. The owner has
 received the new static IP; certificate and HTTPS verification await their DNS routing.
