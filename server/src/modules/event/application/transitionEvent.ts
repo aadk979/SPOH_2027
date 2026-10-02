@@ -37,6 +37,7 @@ export async function transitionEvent(
         closeOut,
         reopen,
         reason: request.reason,
+        goLiveOverrides: request.goLiveOverrides,
       });
       const response = toLifecycleResponse(row);
       await settleReserved(tx, scope, {

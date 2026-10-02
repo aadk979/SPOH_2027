@@ -1,6 +1,6 @@
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 
-/** Reopening uses current organisation authority, never a token's event role. */
+/** Reopening and go-live overrides use current organisation authority, never a token role. */
 export async function currentOrganisationRole(
   tx: PrismaTransactionClient,
   input: { organisationId: string; personId: string },

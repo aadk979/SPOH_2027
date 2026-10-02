@@ -1,20 +1,15 @@
-import type { EventStatus } from '@spoh/shared';
+import type { EventStatus, GoLiveCheckCode, GoLiveOverride } from '@spoh/shared';
+import { goLiveCheckBlockers } from './goLiveChecks.js';
+export { GO_LIVE_CHECKS } from './goLiveChecks.js';
 
-/** P13.6 supplies every result before go-live can be considered. */
-export const GO_LIVE_CHECKS = [
-  'shift-coverage',
-  'categories',
-  'card-batch',
-  'gift-stock',
-  'content',
-  'attendance',
-  'role-permissions',
-  'notifications',
-  'staging-smoke',
-  'backups',
-  'alarms',
-] as const;
-export type GoLiveCheckCode = (typeof GO_LIVE_CHECKS)[number];
+export type { GoLiveCheckCode } from '@spoh/shared';
+export interface LifecycleContext {
+  now: Date;
+  platformAdmin?: boolean;
+  reason?: string;
+  goLiveOverrides?: readonly GoLiveOverride[];
+}
+type VerifiedLifecycleContext = LifecycleContext & { platformAdmin: boolean };
 
 /** Inputs read before a transition. The evaluator itself has no database or clock. */
 export interface LifecycleSnapshot {
@@ -103,21 +98,11 @@ function structureBlockers(snapshot: LifecycleSnapshot): string[] {
   return blockers;
 }
 
-function goLiveBlockers(snapshot: LifecycleSnapshot): string[] {
-  const blockers = structureBlockers(snapshot);
-  if (snapshot.goLiveChecks.length === 0) return [...blockers, 'go-live-checklist-unavailable'];
-  const checks = new Map(snapshot.goLiveChecks.map((check) => [check.code, check.passed]));
-  for (const code of GO_LIVE_CHECKS) {
-    if (!checks.has(code)) blockers.push(`go-live:${code}:missing`);
-    else if (!checks.get(code)) blockers.push(`go-live:${code}`);
-  }
-  return blockers;
+function goLiveBlockers(snapshot: LifecycleSnapshot, context: VerifiedLifecycleContext): string[] {
+  return [...structureBlockers(snapshot), ...goLiveCheckBlockers(snapshot.goLiveChecks, context)];
 }
 
-function reopenBlockers(
-  snapshot: LifecycleSnapshot,
-  context: { now: Date; platformAdmin: boolean; reason?: string },
-): string[] {
+function reopenBlockers(snapshot: LifecycleSnapshot, context: VerifiedLifecycleContext): string[] {
   const blockers: string[] = [];
   const elapsed = snapshot.closedAt ? context.now.getTime() - snapshot.closedAt.getTime() : NaN;
   if (!Number.isFinite(elapsed) || elapsed < 0 || elapsed > 48 * 3600_000) {
@@ -138,10 +123,7 @@ function archiveBlockers(snapshot: LifecycleSnapshot): string[] {
 
 const GUARDS: Record<
   Transition['guard'],
-  (
-    snapshot: LifecycleSnapshot,
-    context: { now: Date; platformAdmin: boolean; reason?: string },
-  ) => string[]
+  (snapshot: LifecycleSnapshot, context: VerifiedLifecycleContext) => string[]
 > = {
   structure: structureBlockers,
   'never-live': (snapshot) => (snapshot.hasBeenLive ? ['already-live'] : []),
@@ -155,7 +137,7 @@ const GUARDS: Record<
 export function evaluateTransition(
   snapshot: LifecycleSnapshot,
   to: EventStatus,
-  context: { now: Date; platformAdmin?: boolean; reason?: string },
+  context: LifecycleContext,
 ): TransitionEvaluation {
   const edge = LIFECYCLE_TRANSITIONS[snapshot.from][to];
   if (!edge) {
@@ -172,6 +154,9 @@ export function evaluateTransition(
     ...context,
     platformAdmin: context.platformAdmin ?? false,
   });
+  if (context.goLiveOverrides?.length && edge.action !== 'Event.GoLive') {
+    blockers.push('overrides-only-for-go-live');
+  }
   return {
     from: snapshot.from,
     to,

@@ -118,6 +118,34 @@ describe('event lifecycle (ADR-004)', () => {
     expect(evaluateTransition(ready, 'DRAFT', context).blockers).toEqual(['already-live']);
   });
 
+  it('does not let go-live overrides waive required structure', () => {
+    const ready = snapshot('READY');
+    ready.structure.eventDays = 0;
+    ready.goLiveChecks = ready.goLiveChecks.map((check) => ({
+      ...check,
+      passed: check.code !== 'attendance',
+    }));
+    expect(
+      evaluateTransition(ready, 'LIVE', {
+        ...context,
+        goLiveOverrides: [{ code: 'attendance', reason: 'Reviewed exception' }],
+      }).blockers,
+    ).toEqual(['event-days']);
+  });
+
+  it('refuses go-live overrides during reopening or another lifecycle transition', () => {
+    const withOverride = {
+      ...context,
+      goLiveOverrides: [{ code: 'attendance' as const, reason: 'Reviewed exception' }],
+    };
+    expect(evaluateTransition(snapshot('CLOSED'), 'LIVE', withOverride).blockers).toEqual([
+      'overrides-only-for-go-live',
+    ]);
+    expect(evaluateTransition(snapshot('READY'), 'REHEARSAL', withOverride).blockers).toEqual([
+      'overrides-only-for-go-live',
+    ]);
+  });
+
   it('reopens only within 48 hours for a platform admin giving a reason', () => {
     const closed = snapshot('CLOSED');
     closed.closedAt = new Date(NOW.getTime() - 48 * 3600_000);

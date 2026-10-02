@@ -11,6 +11,31 @@ import { Id, IdempotencyKey, ReasonText } from '../common/index.js';
 export const EventStatus = z.enum(['DRAFT', 'READY', 'REHEARSAL', 'LIVE', 'CLOSED', 'ARCHIVED']);
 export type EventStatus = z.infer<typeof EventStatus>;
 
+/** Server-owned go-live checks; a reason acknowledges one failing item only. */
+export const GoLiveCheckCode = z.enum([
+  'shift-coverage',
+  'categories',
+  'card-batch',
+  'gift-stock',
+  'content',
+  'attendance',
+  'role-permissions',
+  'notifications',
+  'staging-smoke',
+  'backups',
+  'alarms',
+]);
+export type GoLiveCheckCode = z.infer<typeof GoLiveCheckCode>;
+export const GoLiveOverride = z.object({ code: GoLiveCheckCode, reason: ReasonText }).strict();
+export type GoLiveOverride = z.infer<typeof GoLiveOverride>;
+const GoLiveOverrides = z
+  .array(GoLiveOverride)
+  .max(GoLiveCheckCode.options.length)
+  .refine(
+    (items) => new Set(items.map((item) => item.code)).size === items.length,
+    'Each go-live check can be overridden only once',
+  );
+
 /** LIVE reopening is supported; first go-live fails closed until its checklist is available. */
 export const TransitionEventRequest = z
   .object({
@@ -18,8 +43,13 @@ export const TransitionEventRequest = z
     to: z.enum(['DRAFT', 'READY', 'REHEARSAL', 'LIVE', 'CLOSED']),
     expectedVersion: z.number().int().nonnegative(),
     reason: ReasonText.optional(),
+    goLiveOverrides: GoLiveOverrides.optional(),
   })
-  .strict();
+  .strict()
+  .refine((request) => !request.goLiveOverrides?.length || request.to === 'LIVE', {
+    path: ['goLiveOverrides'],
+    message: 'Overrides apply only to go-live',
+  });
 export type TransitionEventRequest = z.infer<typeof TransitionEventRequest>;
 
 export const EventLifecycleState = z

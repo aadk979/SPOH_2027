@@ -34,7 +34,7 @@ export async function prepareLifecycleTransition(
   const now = (actor.clock ?? systemClock).now();
   const snapshot = await lifecycleSnapshot(tx, scope, { event, now });
   const organisationMember =
-    request.to === 'LIVE' && event.status === 'CLOSED'
+    request.to === 'LIVE' && (event.status === 'CLOSED' || !!request.goLiveOverrides?.length)
       ? await currentOrganisationRole(tx, {
           organisationId: event.organisationId,
           personId: actor.volunteerId,
@@ -44,6 +44,7 @@ export async function prepareLifecycleTransition(
     now,
     reason: request.reason,
     platformAdmin: organisationMember?.role === 'PLATFORM_ADMIN',
+    goLiveOverrides: request.goLiveOverrides,
   });
   if (!decision.allowed) {
     throw new ConflictError(ERROR_CODES.CONFLICT, 'The event cannot make this transition.', {

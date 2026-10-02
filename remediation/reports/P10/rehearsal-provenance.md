@@ -518,3 +518,40 @@ scope and grace boundaries. Server typechecks, root lint, architecture, hardcodi
 settings, changed-file formatting and server build passed by exit code. No new browser or
 visual run was needed for this server-only prerequisite; preceding browser evidence remains
 recorded in its own slice.
+
+## Per-item go-live override authority
+
+The transition contract accepts only named go-live items with bounded, trimmed written
+reasons; duplicate items, forged passed/authority fields and use on other targets are
+rejected. The item catalogue now has one shared definition. The pure evaluator permits
+an override only for an actually failing server result and a current platform admin;
+it cannot waive missing evidence or required event structure. Reopening also refuses
+go-live acknowledgements rather than ignoring them.
+
+The READY → LIVE path rechecks current event `config.manage` and, when overrides are
+requested, locks and checks the platform role in the event's own organisation. It uses
+the existing retry → event → event-membership → organisation-membership order. Successful
+go-live audit data includes every server check, each accepted reason and its platform
+authority; publication and retry settlement remain atomic with the phase write.
+
+The actual checklist producer remains unavailable, so first go-live is still refused
+even when every override is requested. This is an enforcement prerequisite, not completed
+P13.6 readiness or an available production go-live workflow. Database cases substitute
+only the future checklist producer to exercise successful/failed transition wiring;
+permissions, locks, phase/history, audit and retry storage use real PostgreSQL. The real
+producer's unavailable response is tested without substitution.
+
+Verification on 2026-10-02: focused preparation/reopen/go-live integration **46**;
+full integration **754 passed / 4 existing skips**; server unit **531**, shared unit **23**
+and client unit **262** passed. Eleven new database cases cover atomic audit/replay,
+same-organisation/current authority, competing authority updates, rollback and absent
+real readiness. Twenty-six new unit cases cover every item, contract validation, reasons,
+missing evidence, structure and inapplicable overrides. All workspace typechecks, root
+lint, architecture, hardcoding, generated settings, changed-file formatting and server
+production build passed. The audit guard formatter was extracted to keep size metrics
+from adding a long event function. The initial foreign-organisation fixture lacked its
+required timezone; it was corrected before the passing full run.
+
+P10.5 remains open for complete server readiness, archive effects, ended-membership
+read access, archived-write enforcement, retention and Cedar integration. No rendering,
+baseline, migration, cloud routing or production data changed in this slice.
