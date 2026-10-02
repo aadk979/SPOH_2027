@@ -198,3 +198,39 @@ locking, and retain immutable synthetic receipts in the dedicated E2E `_test` da
 No schema, client layout, visual baseline or infrastructure definition changed. P10.5/P10.7
 remain open for the rest of their exit criteria. Next: lifecycle handler transaction/authority
 integration and the reminder delivery dependencies, while advancing independent P08 work.
+
+## Timed lifecycle transitions (2026-10-03)
+
+`event.transition` is registered in the actual API worker. The strict shared input requires
+the target state and expected lifecycle version, permits bounded reasons and per-item go-live
+overrides, and refuses event selectors, client readiness evidence and HTTP retry keys. Its
+creator must currently have an active membership with `config.manage`. System/platform actions
+and user recurrence cannot perform a user transition. Schedule CRUD/UI and Cedar remain pending.
+
+Manual transitions keep their reservation/settlement wrapper. Both paths use the extracted
+provided-transaction core for current guards, side effects, audit and cache publication. The
+worker's Event-before-action order and post-wait clock are preserved; it opens no nested lifecycle
+transaction and invents no retry reservation. Changed lifecycle versions, structure, event
+permission or same-organisation platform authority are observed before any effect. Late execution
+uses these guards rather than a new generic timeout. First go-live still refuses unavailable
+checklist evidence, and public/scheduled ARCHIVED remains unsupported.
+
+Close-out's windows, held items, live-only FINAL report and reminder storage commit with the
+scheduled completion. Reopen retains its written reason, current same-organisation platform-admin
+permission and inclusive 48-hour bound; immutable snapshot supersession and reminder cancellation
+share that completion. Faults after snapshot, reminder, audit, publication or completion roll all
+effects back, before a clean retry. Claimed reminders are cancelled under the same Event-first
+order. Archive reminder delivery remains pending.
+
+Focused verification: **101 database checks**, including **47 new timed lifecycle cases**.
+Ten serial browser journeys passed across two rebuilt, fresh disposable-API runs, including
+phone/laptop proof that the actual polling worker closes a practice window, updates the banner,
+refuses READY capture and admits a labelled practice capture after returning to REHEARSAL.
+The browser fixtures cancel leftover synthetic work under Event-first locking and retain immutable
+schedule/audit receipts in the dedicated local E2E `_test` database. Full integration:
+**961 passed/four existing skips, 77 files**. All workspace types, **538 server units**,
+**23 shared units**, lint, architecture, hardcoding, generated settings, shared/server build,
+changed formatting and diff checks passed. The first typecheck corrected two fixture-schema
+mistakes. The first full run then exposed a retained-organisation slug collision; an idempotent
+fixture upsert fixed it, and the complete rerun passed. No schema, client layout, visual baseline
+or infrastructure definition changed. P10.5/P10.7 stay open for their remaining exit criteria.

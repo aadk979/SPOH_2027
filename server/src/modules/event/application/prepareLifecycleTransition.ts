@@ -1,9 +1,8 @@
-import { ERROR_CODES, type TransitionEventRequest } from '@spoh/shared';
+import { ERROR_CODES, type LifecycleTransitionInput } from '@spoh/shared';
 import { requireCurrentCapability } from '../../../platform/access/currentCapability.js';
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import { ConflictError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
-import { lockReserved } from '../../../platform/idempotency/index.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { currentOrganisationRole } from '../data/lifecycleAuthorityRepo.js';
 import { lockLifecycleEvent } from '../data/lifecycleRepo.js';
@@ -13,11 +12,10 @@ import { lifecycleSnapshot } from './lifecycleSnapshot.js';
 /** Every guard is evaluated under the event lock and current membership authority. */
 export async function prepareLifecycleTransition(
   tx: PrismaTransactionClient,
-  input: { request: TransitionEventRequest; actor: ActorContext & { clock?: Clock } },
+  input: { request: LifecycleTransitionInput; actor: ActorContext & { clock?: Clock } },
 ) {
   const { request, actor } = input;
   const { scope } = actor;
-  await lockReserved(tx, scope, request.idempotencyKey);
   const event = await lockLifecycleEvent(tx, scope);
   await requireCurrentCapability(tx, {
     scope,

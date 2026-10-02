@@ -36,10 +36,9 @@ const GoLiveOverrides = z
     'Each go-live check can be overridden only once',
   );
 
-/** LIVE reopening is supported; first go-live fails closed until its checklist is available. */
-export const TransitionEventRequest = z
+/** Shared manual/scheduled input; evidence and event identity always come from the server. */
+export const LifecycleTransitionInput = z
   .object({
-    idempotencyKey: IdempotencyKey,
     to: z.enum(['DRAFT', 'READY', 'REHEARSAL', 'LIVE', 'CLOSED']),
     expectedVersion: z.number().int().nonnegative(),
     reason: ReasonText.optional(),
@@ -50,6 +49,12 @@ export const TransitionEventRequest = z
     path: ['goLiveOverrides'],
     message: 'Overrides apply only to go-live',
   });
+export type LifecycleTransitionInput = z.infer<typeof LifecycleTransitionInput>;
+
+/** LIVE reopening is supported; first go-live fails closed until its checklist is available. */
+export const TransitionEventRequest = LifecycleTransitionInput.safeExtend({
+  idempotencyKey: IdempotencyKey,
+});
 export type TransitionEventRequest = z.infer<typeof TransitionEventRequest>;
 
 export const EventLifecycleState = z

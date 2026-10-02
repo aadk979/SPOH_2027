@@ -157,7 +157,7 @@ scheduled action therefore cannot outlive its author's authority.
 
 | Type                                   | Payload                                                    | Registered by   | Replaces                       |
 | -------------------------------------- | ---------------------------------------------------------- | --------------- | ------------------------------ |
-| `event.transition`                     | `{ to }`                                                   | `events`        | —                              |
+| `event.transition`                     | `{ to, expectedVersion, reason?, goLiveOverrides? }`       | `event`         | —                              |
 | `announcement.publish`                 | `{ announcementId }` (a saved draft)                       | `announcements` | —                              |
 | `setting.apply`                        | `{ scope, scopeId, key, value }`                           | `settings`      | —                              |
 | `taxonomy.setActive`                   | `{ kind: category \| stationType \| station, id, active }` | `taxonomy`      | —                              |
@@ -193,6 +193,18 @@ checked inside execution; a changed version or archived event refuses the action
 history, scheduled audit, transactional cache notification and job completion share the worker
 transaction. Platform scope and other keys remain unavailable until their consumer and
 authority work passes. Schedule CRUD/timeline and Cedar authorization integration remain P10.8/P11.
+
+**Timed lifecycle transitions (P10.7, 2026-10-03).** User-created event actions use the same
+strict transition input, current permission checks and provided-transaction core as manual
+transitions. Event identity comes from the stored action; no HTTP retry reservation or client
+readiness evidence is accepted. The engine locks Event before ScheduledAction and samples its
+clock after waiting. Current lifecycle version, structure and same-organisation platform-admin
+authority are checked again before effects. Close-out, frozen report, reminder storage, reopen
+supersession/cancellation, audit, cache publication and completion commit together. Reopen retains
+the inclusive 48-hour limit and reason requirement. First go-live still refuses unavailable
+checklist evidence; ARCHIVED remains unsupported until its access/retention dependencies pass.
+Late execution is decided by those current guards, without an arbitrary additional lateness cutoff.
+System/platform creators and user recurrence cannot bypass the user transition contract.
 
 Recurring system jobs are created at boot by `ensureRecurring(type, interval)`, an upsert by
 `dedupeKey`. Every instance calls it, and only one row results.
