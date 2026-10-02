@@ -11,11 +11,11 @@ import { Id, IdempotencyKey, ReasonText } from '../common/index.js';
 export const EventStatus = z.enum(['DRAFT', 'READY', 'REHEARSAL', 'LIVE', 'CLOSED', 'ARCHIVED']);
 export type EventStatus = z.infer<typeof EventStatus>;
 
-/** Preparation edges; go-live and close/archive will extend this after their guards/effects exist. */
+/** Supported effects; go-live and archive extend this when their guards/effects are wired. */
 export const TransitionEventRequest = z
   .object({
     idempotencyKey: IdempotencyKey,
-    to: z.enum(['DRAFT', 'READY', 'REHEARSAL']),
+    to: z.enum(['DRAFT', 'READY', 'REHEARSAL', 'CLOSED']),
     expectedVersion: z.number().int().nonnegative(),
     reason: ReasonText.optional(),
   })

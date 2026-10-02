@@ -1,6 +1,6 @@
 import { writeAudit } from '../../../platform/audit/index.js';
 import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
-import { prisma } from '../../../platform/db/client.js';
+import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import { markHeldUnclaimed } from '../data/repo.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 
@@ -12,17 +12,24 @@ import type { ActorContext } from '../../../platform/http/auditContext.js';
 export async function markUnclaimedAtClose({ scope, audit }: ActorContext): Promise<number> {
   return prisma.$transaction(async (tx) => {
     await holdCaptureEvent(tx, scope);
-    const count = await markHeldUnclaimed(tx, scope);
-    if (count > 0) {
-      await writeAudit(tx, {
-        ...audit,
-        // Its own action: it was audited as a claim, which it is not (F03-018).
-        action: 'lostFound.closeOut',
-        entityType: 'LostFoundItem',
-        entityId: null,
-        after: { markedUnclaimedAtClose: count },
-      });
-    }
-    return count;
+    return markUnclaimedInTransaction(tx, { scope, audit });
   });
+}
+
+/** Lifecycle close-out uses the owning transaction, including the found-item audit. */
+export async function markUnclaimedInTransaction(
+  tx: PrismaTransactionClient,
+  { scope, audit }: Pick<ActorContext, 'scope' | 'audit'>,
+): Promise<number> {
+  const count = await markHeldUnclaimed(tx, scope);
+  if (count > 0) {
+    await writeAudit(tx, {
+      ...audit,
+      action: 'lostFound.closeOut',
+      entityType: 'LostFoundItem',
+      entityId: null,
+      after: { markedUnclaimedAtClose: count },
+    });
+  }
+  return count;
 }

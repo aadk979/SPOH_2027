@@ -8,12 +8,13 @@ const LIFECYCLE = {
   status: true,
   lifecycleVersion: true,
   hasBeenLive: true,
+  closedAt: true,
 } satisfies Prisma.EventSelect;
 export type LifecycleStateRow = Prisma.EventGetPayload<{ select: typeof LIFECYCLE }>;
 const STRUCTURE = {
   ...LIFECYCLE,
   timezone: true,
-  closedAt: true,
+  organisationId: true,
   _count: {
     select: {
       days: true,
@@ -44,7 +45,7 @@ export async function registrationStationTypeCount(tx: PrismaTransactionClient, 
 export async function writeEventPhase(
   tx: PrismaTransactionClient,
   scope: EventScope,
-  status: EventStatus,
+  phase: { status: EventStatus; closedAt?: Date },
 ) {
-  return tx.event.update({ where: { id: scope.eventId }, data: { status }, select: LIFECYCLE });
+  return tx.event.update({ where: { id: scope.eventId }, data: phase, select: LIFECYCLE });
 }

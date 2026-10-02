@@ -1,4 +1,5 @@
 import type { FullReport } from '@spoh/shared';
+import { reportReadLabel } from '@spoh/shared';
 import type { ExcelJS } from '../format.js';
 import { headlineLine, SHEETS } from '../format.js';
 
@@ -9,6 +10,10 @@ export function writeReadMeSheet(workbook: ExcelJS.Workbook, report: FullReport)
   sheet.addRow([`${report.event.name} — post-event report`]).font = { bold: true, size: 14 };
   sheet.addRow([]);
   sheet.addRow([`Generated ${new Date(report.generatedAt).toISOString()}`]);
+  sheet.addRow([reportReadLabel(report)]).font = { bold: true };
+  sheet.addRow([
+    'Visitor details, if included, are a current permission-controlled read and are separate from the frozen report.',
+  ]);
   sheet.addRow([
     `Range: ${report.range.from ?? 'start of event'} to ${report.range.to ?? 'end of event'}`,
   ]);

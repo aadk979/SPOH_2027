@@ -17,6 +17,7 @@ import { GiftSection } from '../components/GiftSection';
 import { SafetySection } from '../components/SafetySection';
 import { VolunteerSection } from '../components/VolunteerSection';
 import { RehearsalReportControl } from '../components/RehearsalReportControl';
+import { CurrentReportControl } from '../components/CurrentReportControl';
 
 /**
  * The post-event report (PRODUCT_BRIEF §10).
@@ -32,16 +33,20 @@ import { RehearsalReportControl } from '../components/RehearsalReportControl';
 export default function ReportsScreen(): ReactNode {
   const session = useRequireSession();
   const [includeRehearsal, setIncludeRehearsal] = useState(false);
-  const report = useReport(session !== null, includeRehearsal);
-  const { downloading, exportError, download } = useReportExport(includeRehearsal);
+  const [current, setCurrent] = useState(false);
+  const report = useReport(session !== null, includeRehearsal, current);
+  const data = report.data;
+  const { downloading, exportError, download } = useReportExport(includeRehearsal, {
+    current,
+    snapshot: data?.snapshot,
+  });
 
   if (!session) return null;
-
-  const data = report.data;
 
   return (
     <AppShell width="wide" title="Post-event report" back={{ href: '/home', label: 'Home' }}>
       <RehearsalReportControl included={includeRehearsal} onChange={setIncludeRehearsal} />
+      <CurrentReportControl current={current} onChange={setCurrent} />
       {report.isLoading ? (
         <LoadingCards count={3} label="Generating the report" />
       ) : !data ? (

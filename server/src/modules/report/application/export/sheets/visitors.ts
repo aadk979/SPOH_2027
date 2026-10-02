@@ -10,7 +10,9 @@ export function writeVisitorsSheet(
   visitors: VisitorRecordsResponse,
 ): void {
   const sheet = workbook.addWorksheet('Visitor details');
-  sheet.addRow(['Personal data: keep only as long as the event allows.']).font = { bold: true };
+  sheet.addRow([
+    'Current visitor details — separate from the frozen report. Personal data: keep only as long as the event allows.',
+  ]).font = { bold: true };
   sheet.addRow([
     'Registered at (UTC)',
     ...visitors.fields.map((field) => field.label),

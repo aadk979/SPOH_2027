@@ -19,8 +19,8 @@ export async function findMembership(scope: EventScope, personId: string) {
 }
 
 /**
- * A person's memberships of events that are still running (not closed or
- * archived), oldest event first. A platform read about the person, so it goes
+ * A person's memberships of unarchived events, including CLOSED for reports
+ * and late sync, oldest event first. A platform read about the person, so it goes
  * through the person rather than naming one event (ADR-001 §4).
  */
 export async function findLiveMemberships(personId: string) {
@@ -28,7 +28,7 @@ export async function findLiveMemberships(personId: string) {
     where: { id: personId },
     select: {
       eventMemberships: {
-        where: { event: { status: { notIn: ['CLOSED', 'ARCHIVED'] } } },
+        where: { event: { status: { not: 'ARCHIVED' } } },
         select: { id: true, eventId: true, role: true, status: true },
         orderBy: [{ event: { createdAt: 'asc' } }, { event: { id: 'asc' } }],
       },
@@ -48,7 +48,7 @@ export async function findVolunteerByEmail(email: string) {
     select: {
       cognitoSub: true,
       eventMemberships: {
-        where: { status: 'ACTIVE', event: { status: { notIn: ['CLOSED', 'ARCHIVED'] } } },
+        where: { status: 'ACTIVE', event: { status: { not: 'ARCHIVED' } } },
         orderBy: [{ event: { createdAt: 'asc' } }, { event: { id: 'asc' } }],
         take: 1,
         select: { role: true },

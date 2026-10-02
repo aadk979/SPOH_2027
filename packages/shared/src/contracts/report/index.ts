@@ -26,6 +26,11 @@ import { FallbackWindowRecord } from '../fallback/index.js';
 
 export const ReportQuery = TimeRangeQuery.extend({
   eventDayId: Id.optional(),
+  /** Explicitly read current data after close, instead of the frozen whole-event report. */
+  current: z
+    .enum(['true', 'false'])
+    .transform((value) => value === 'true')
+    .optional(),
   includeRehearsal: z
     .enum(['true', 'false'])
     .transform((value) => value === 'true')
@@ -271,6 +276,16 @@ export type DataIntegrityReport = z.infer<typeof DataIntegrityReport>;
 
 export const FullReport = z
   .object({
+    snapshot: z
+      .object({
+        id: Id,
+        kind: z.literal('FINAL'),
+        lifecycleVersion: z.number().int().nonnegative(),
+        createdAt: IsoDateTime,
+      })
+      .strict()
+      .nullable()
+      .optional(),
     rehearsalIncluded: z.boolean().optional(),
     generatedAt: IsoDateTime,
     range: z.object({ from: IsoDateTime.nullable(), to: IsoDateTime.nullable() }).strict(),
@@ -281,7 +296,7 @@ export const FullReport = z
       .object({
         name: z.string(),
         slug: z.string(),
-        /** The current lifecycle state; inclusion depends on row provenance. */
+        /** The lifecycle state at generation or freeze time. */
         status: EventStatus,
       })
       .strict(),
@@ -303,6 +318,17 @@ export const FullReport = z
   })
   .strict();
 export type FullReport = z.infer<typeof FullReport>;
+
+/** The same provenance label is shown on screen and in both export formats. */
+export function reportReadLabel(report: Pick<FullReport, 'snapshot' | 'event'>): string {
+  if (report.snapshot) {
+    return `Frozen final report — closed at ${report.snapshot.createdAt}. Late sync and later corrections are excluded.`;
+  }
+  if (report.event.status === 'CLOSED' || report.event.status === 'ARCHIVED') {
+    return 'Current report — includes changes after close. The frozen final report is unchanged.';
+  }
+  return 'Current report — figures can change while the event is open.';
+}
 
 export const ReportExportQuery = ReportQuery.extend({
   format: z.enum(['csv', 'xlsx']).default('xlsx'),

@@ -111,7 +111,7 @@ export async function endRehearsalWindows(
   now: Date,
 ) {
   const windows = await tx.$queryRaw<Array<{ id: string }>>`
-    UPDATE "FallbackWindow" SET "endedAt" = ${now}
+    UPDATE "FallbackWindow" SET "endedAt" = GREATEST("startedAt", ${now})
     WHERE "eventId" = ${scope.eventId} AND rehearsal = true AND "endedAt" IS NULL RETURNING id`;
   return windows.map((window) => window.id);
 }

@@ -16,6 +16,7 @@ export async function recordLifecycleTransition(
     snapshot: LifecycleSnapshot;
     decision: TransitionEvaluation;
     closedWindows: string[];
+    closeOut?: { unclaimedItems: number; finalSnapshotId: string; archiveReminderId: string };
     reason?: string;
   },
 ): Promise<void> {
@@ -37,6 +38,9 @@ export async function recordLifecycleTransition(
       },
       effects: [...decision.effects],
       closedWindows,
+      ...(input.closeOut
+        ? { closeOut: input.closeOut, closedAt: after.closedAt?.toISOString() }
+        : {}),
       reason: reason ?? null,
     },
   });

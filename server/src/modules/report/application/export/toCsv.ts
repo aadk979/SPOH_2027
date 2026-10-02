@@ -1,4 +1,5 @@
 import type { FullReport, VisitorRecordsResponse } from '@spoh/shared';
+import { reportReadLabel } from '@spoh/shared';
 import { headlineLine, rows, eventTime } from './format.js';
 
 type Cell = string | number | null;
@@ -20,6 +21,7 @@ export function toCsv(report: FullReport, visitors: VisitorRecordsResponse | nul
   const lines = [
     `# ${report.event.name} post-event report`,
     `# Generated,${report.generatedAt}`,
+    `# ${reportReadLabel(report)}`,
     `# ${report.countingNote.replace(/,/g, ';')}`,
     report.rehearsalIncluded
       ? '# Includes rehearsal data: totals combine live and practice captures. Gift stock pools stay separate.'
@@ -125,7 +127,8 @@ function escapeCsv(value: Cell): string {
 /** The values the caller's role reads, apart from the counts (ADR-002 §4). */
 function visitorSection(visitors: VisitorRecordsResponse): CsvSection {
   return {
-    title: 'Visitor details (personal data: keep only as long as the event allows)',
+    title:
+      'Visitor details (current; separate from the frozen report; keep only as long as the event allows)',
     rows: [
       ['Registered at (UTC)', ...visitors.fields.map((field) => field.label), 'Mode'],
       ...visitors.data.map((row) => [

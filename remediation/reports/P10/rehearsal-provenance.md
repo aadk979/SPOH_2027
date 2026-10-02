@@ -405,3 +405,53 @@ frozen-report reads are the next slice; none was enabled by these locking change
 Remaining: go-live guards and overrides, close/archive side effects, including the general
 archived-write forbid and its Cedar context in P11. P10.4/P10.5 remain in progress; P10.6 has
 not started beyond its shared storage prerequisite.
+
+## Atomic close-out and frozen final reports
+
+The lifecycle API now supports LIVE → CLOSED. One transaction reserves the retry key,
+locks the event, rechecks current event permission and version, captures the close time,
+closes all open fallback windows, marks held found items unclaimed, freezes the live-only
+final report, stores the archive reminder, audits, publishes the state notification and
+settles the retry response. A failure in any of these writes rolls back every effect.
+Open safety cases do not block close. Future-dated fallback declarations close at their
+start time, producing a zero-length interval instead of a negative interval.
+
+Close-out uses read committed under the exclusive event lock. Deterministic PostgreSQL
+lock probes prove it waits for admitted captures and corrections, then includes their
+committed results. Both tests failed when close-out was temporarily changed to repeatable
+read, which started its snapshot before that wait. The correct isolation was restored in
+`finally`. Ordinary generated reports still use repeatable read. Global staff display
+names are read through the report transaction; they are descriptive metadata outside the
+event-owned writer lock, and close-out does not add cross-event person locks.
+
+Default whole-event reports in CLOSED and ARCHIVED read the latest active FINAL snapshot.
+Stored JSON is parsed through the shared report schema. Late sync, corrections and later
+metadata edits leave the final document unchanged. Explicit current, practice-inclusive
+or range reads generate current results. A missing snapshot returns a conflict with an
+explicit current-read option; malformed stored JSON fails instead of silently substituting
+fresh totals. Phone/laptop screens, CSV and XLSX clearly identify frozen and current reports;
+frozen filenames carry `-frozen-final`. Permission-controlled visitor export values remain
+current, separately labelled and absent from the final snapshot, as are lost-person
+descriptions. Existing staff names and operational notes remain protected report content.
+
+The archive reminder uses the generic resolved `capture.lateSyncHours` value, including
+its full 1–72 hour bounds and default for malformed overrides. It is queue storage only;
+no worker or delivery handler is enabled by this slice. Active CLOSED memberships can
+still sign in and refresh for reports and eligible late sync. The browser regression
+exposed the former CLOSED exclusion; restoring that exclusion caused refresh to return
+403 in the new database test.
+
+P10.5 remains open for go-live readiness/overrides, reopen, archive and its write/retention
+effects, plus Cedar context in P11. No migration, cloud resource or production data changed.
+
+Verification on 2026-10-02: full integration **693 passed / 4 existing skips**, shared unit
+**23**, server unit **493**, client unit **262**, serial phone/laptop close/preparation,
+late-sync and practice-report browser E2E **7**, and full visual assertion **58** passed.
+Nineteen new database cases cover atomic effects, rollback at every settlement boundary,
+replay/races, current authority, event isolation, resolved reminder grace, waiting writers,
+frozen/current exports and CLOSED sign-in. The two intentional report-screen baseline
+changes were inspected, as were separate frozen phone/laptop screenshots; a freshly restarted
+visual API then passed the complete run. All workspace typechecks, root lint, architecture,
+hardcoding, generated settings, changed-file formatting, server build and production client
+build passed by exit code. Browser groups ran serially with fresh disposable APIs to respect
+the sensitive-request limit. The visitor-sheet label preserves its existing row positions.

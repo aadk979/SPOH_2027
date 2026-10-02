@@ -1,8 +1,11 @@
 import { useState } from 'react';
-import { zonedDate } from '@spoh/shared';
+import { zonedDate, type FullReport } from '@spoh/shared';
 import { useEvent } from '@/shared/lib/eventContext';
 import { exportReport } from '../api';
-export function useReportExport(includeRehearsal = false) {
+export function useReportExport(
+  includeRehearsal = false,
+  options: { current?: boolean; snapshot?: FullReport['snapshot'] } = {},
+) {
   const event = useEvent();
   const [downloading, setDownloading] = useState<string | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
@@ -18,14 +21,18 @@ export function useReportExport(includeRehearsal = false) {
     setExportError(null);
 
     try {
-      const blob = await exportReport(event.id, format, includeRehearsal);
+      const blob = await exportReport(event.id, format, {
+        includeRehearsal,
+        current: options.current,
+      });
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
 
       anchor.href = url;
       // Named for the event and dated on its clock, not in UTC (F01 T-16).
-      const today = zonedDate(new Date(), event.timezone);
-      anchor.download = `${event.slug}-report-${today}${includeRehearsal ? '-with-rehearsal' : ''}.${format}`;
+      const date = options.snapshot ? new Date(options.snapshot.createdAt) : new Date();
+      const today = zonedDate(date, event.timezone);
+      anchor.download = `${event.slug}-report-${today}${options.snapshot ? '-frozen-final' : ''}${includeRehearsal ? '-with-rehearsal' : ''}.${format}`;
       anchor.click();
 
       URL.revokeObjectURL(url);
