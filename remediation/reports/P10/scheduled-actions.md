@@ -38,6 +38,29 @@ API, both phone/laptop reopen journeys passed with unchanged default limits: sev
 journeys across those runs. No client layout, visual baseline, schema or infrastructure definition
 changed in this slice. The real `spoh2027` database and live production were untouched.
 
-Next module dependency: move idempotency pruning into the handler transaction, then migrate
-the per-event privacy purges without nested transactions. P08.8 still needs log metric filters
-and alarm/notification verification for the engine's gauges.
+## Idempotency pruning (2026-10-02)
+
+- Every API instance now seeds both daily system actions. The legacy idempotency interval is
+  removed; the handler accepts only an empty payload and a platform-system principal.
+- The worker transaction reads the current existing global `AppSetting` compatibility policy,
+  validates it through the sole registry definition and defaults missing/invalid values to seven
+  days. This slice preserves the operative global policy; it does not claim migration of the
+  generic organisation-scoped setting consumers. That integration remains part of P10.
+- Only records strictly older than the cutoff are deleted, including both event and platform
+  replays. Equality survives. A policy changed after enqueue takes effect even if this API's
+  compatibility cache is stale. Client-selected keys, cutoffs and retention are refused.
+- Deletion, count-only `idempotency.prune` audit, completion and recurring successor share the
+  worker transaction. Audit/completion failure rolls deletion back before retry. Receipts contain
+  only removed count and applied retention, with no replay keys, subjects, endpoints or bodies.
+  A no-op gets only the completion receipt. The manual entry point uses the same prune helper
+  inside its own system transaction.
+
+Verification: 11 new handler checks and the existing session/manual-prune tests passed (21
+focused database checks); full integration **827 passed/four existing skips, 69 files**; all
+workspace types, 538 server units, lint, architecture, hardcoding, settings generation, server
+build and changed formatting passed. Seven serial browser journeys
+passed against the rebuilt API across two disposable-API runs, without changing default limits.
+No schema, client layout, visual baseline or infrastructure definition changed.
+
+Next module dependency: migrate per-event privacy purges without nested transactions. P08.8
+still needs log metric filters and alarm/notification verification for the engine's gauges.

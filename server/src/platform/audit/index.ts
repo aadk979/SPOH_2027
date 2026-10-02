@@ -75,6 +75,7 @@ export type AuditAction =
   | 'session.revoke'
   | 'session.reuseDetected'
   | 'session.prune'
+  | 'idempotency.prune'
   | 'notification.dispatch'
   | 'media.upload'
   | 'auth.stationScopeBypass'

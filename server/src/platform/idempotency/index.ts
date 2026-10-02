@@ -1,6 +1,9 @@
 import { prisma, type PrismaTransactionClient } from '../db/client.js';
 import type { EventScope } from '../db/eventScope.js';
-import { getSettings, DEFAULT_SETTINGS } from '../settings/index.js';
+import { DEFAULT_SETTINGS } from '../settings/index.js';
+import { SYSTEM_AUDIT_CONTEXT } from '../http/auditContext.js';
+import { systemClock } from '../time/index.js';
+import { pruneReplayInTransaction } from './prune.js';
 
 /**
  * Idempotency for every create endpoint (BUILD_PLAN §7.4).
@@ -140,11 +143,8 @@ export async function release(key: string): Promise<void> {
 /** Records older than this are pruned by the daily job (BUILD_PLAN §7.4). */
 export const IDEMPOTENCY_RETENTION_DAYS = DEFAULT_SETTINGS.idempotencyRetentionDays;
 
-export async function pruneIdempotencyRecords(now: Date = new Date()): Promise<number> {
-  const days = getSettings().idempotencyRetentionDays;
-  const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
-  const { count } = await prisma.idempotencyRecord.deleteMany({
-    where: { createdAt: { lt: cutoff } },
-  });
-  return count;
+export async function pruneIdempotencyRecords(now: Date = systemClock.now()): Promise<number> {
+  return prisma.$transaction((tx) =>
+    pruneReplayInTransaction(tx, { now, audit: SYSTEM_AUDIT_CONTEXT }),
+  );
 }

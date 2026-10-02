@@ -2,7 +2,7 @@ import { logger } from '../logger/index.js';
 
 /**
  * Legacy interval composition during P10.7's handler migration. Refresh-session
- * pruning already runs through the durable engine in app/startScheduledJobs.ts.
+ * and replay pruning run through the durable engine in app/startScheduledJobs.ts.
  * Remaining business jobs move there one verified module at a time; only cache
  * maintenance remains a local tick when the migration is complete.
  */
