@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T14:54:49.500Z",
+  "updatedAt": "2026-10-02T15:13:41.387Z",
   "current": {
     "phase": "P10",
     "step": "P10.7"
@@ -2157,7 +2157,10 @@
           "status": "in_progress",
           "startedAt": "2026-10-02T14:26:45.064Z",
           "completedAt": null,
-          "commits": ["c0b5105ae3b26f36887ef0c32136a36b5c0c2085"],
+          "commits": [
+            "c0b5105ae3b26f36887ef0c32136a36b5c0c2085",
+            "df85f7b1e710dda56f51d11e4ce2598fcba31d95"
+          ],
           "notes": [
             {
               "at": "2026-10-02T14:26:45.065Z",
@@ -2166,6 +2169,10 @@
             {
               "at": "2026-10-02T14:50:59.511Z",
               "text": "First maintenance handler migrated: platform-system-only strict session.prune; deletion/audit/cache/completion/successor atomic, existing expiry and seven-day revocation boundaries preserved. 8 new module cases plus shutdown tests and full regression green. Remaining business intervals/handlers and archive retention pending."
+            },
+            {
+              "at": "2026-10-02T15:13:41.386Z",
+              "text": "Verified daily idempotency.prune migration: strict platform-system handler; current compatibility policy read in worker transaction; deletion, count-only audit, completion and successor atomic. 11 new cases, 827 integration passes/4 existing skips, 538 units and 7 browser journeys across two serial runs; all workspace types/static/settings/build/format passed. Generic organisation-scoped setting consumer integration and per-event privacy handlers remain pending; P10.5/P10.6/P10.7 stay open."
             }
           ]
         },
