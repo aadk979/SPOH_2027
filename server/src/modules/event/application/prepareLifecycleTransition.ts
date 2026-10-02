@@ -32,7 +32,7 @@ export async function prepareLifecycleTransition(
     );
   }
   const now = (actor.clock ?? systemClock).now();
-  const snapshot = await lifecycleSnapshot(tx, scope, event);
+  const snapshot = await lifecycleSnapshot(tx, scope, { event, now });
   const organisationMember =
     request.to === 'LIVE' && event.status === 'CLOSED'
       ? await currentOrganisationRole(tx, {

@@ -35,6 +35,7 @@ export async function recordLifecycleTransition(
       guardResults: {
         structure: snapshot.structure,
         hasBeenLive: snapshot.hasBeenLive,
+        archive: snapshot.archive,
         ...(decision.action === 'Event.Reopen'
           ? { platformAdmin: true, closedAt: snapshot.closedAt?.toISOString(), reopenHours: 48 }
           : {}),

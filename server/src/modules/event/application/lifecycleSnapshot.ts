@@ -2,6 +2,7 @@ import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { registrationStationTypeCount, type LifecycleEvent } from '../data/lifecycleRepo.js';
 import type { LifecycleSnapshot } from '../domain/lifecycle.js';
+import { archiveReadiness } from './archiveReadiness.js';
 
 function timezoneValid(timeZone: string): boolean {
   try {
@@ -12,12 +13,13 @@ function timezoneValid(timeZone: string): boolean {
   }
 }
 
-/** Only server-owned structure supplies the preparation guard; clients cannot submit checks. */
+/** Server-owned structure and close-out evidence supply guards; clients cannot submit checks. */
 export async function lifecycleSnapshot(
   tx: PrismaTransactionClient,
   scope: EventScope,
-  event: LifecycleEvent,
+  input: { event: LifecycleEvent; now: Date },
 ): Promise<LifecycleSnapshot> {
+  const { event } = input;
   return {
     from: event.status,
     hasBeenLive: event.hasBeenLive,
@@ -31,10 +33,6 @@ export async function lifecycleSnapshot(
       registrationStationTypes: await registrationStationTypeCount(tx, scope),
     },
     goLiveChecks: [],
-    archive: {
-      lostPersonPurgeComplete: false,
-      finalReportExists: false,
-      captureGracePeriodComplete: false,
-    },
+    archive: await archiveReadiness(tx, scope, input),
   };
 }

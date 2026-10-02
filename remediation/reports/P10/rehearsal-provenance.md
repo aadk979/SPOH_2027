@@ -489,3 +489,32 @@ role changes, rollback, retries, races, reminder leases, immutable snapshots and
 All workspace typechecks, root lint, architecture, hardcoding, generated settings,
 changed-file formatting and server build passed by exit code. No client rendering, visual
 baseline, migration, cloud resource or production data changed in this slice.
+
+## Server-owned archive readiness
+
+The lifecycle snapshot now reads archive evidence inside its supplied transaction and
+event lock. Both live and practice resolved alerts must have a purge marker and cleared
+transient descriptions. The current close version must have an active, schema-valid,
+whole-event, live-only FINAL report generated in CLOSED. Another event's evidence, DAILY
+snapshots, superseded or stale versions and malformed/practice/range documents cannot pass.
+Active alerts do not invent an extra blocker beyond ADR-004's resolved-alert purge rule.
+
+Grace uses the generic event-scoped `capture.lateSyncHours` resolver and injected transition
+time. Archive becomes eligible strictly after its 1–72 hour boundary, because capture still
+accepts eligible offline rows at the exact boundary. Missing/future close times fail closed;
+unsupported platform rows are ignored and malformed event values use the registry default.
+The successful transition audit now retains the archive evidence alongside its other guards.
+
+ARCHIVED requests remain unavailable pending the general write prohibition, ended-membership
+read access and atomic archive/retention effects. No memberships are ended and no timers are
+started by this prerequisite. P10.5 stays open, and no migration or client rendering changed.
+The boundary test failed when its comparison was temporarily changed to allow equality;
+the correct source was restored in `finally` before the full verification run.
+
+Verification on 2026-10-02: full integration **738 passed / 4 existing skips**, server unit
+**493**, and focused close/reopen/archive-readiness integration **64** passed. Twenty-four
+new database cases cover guard evidence, transaction reads, privacy state, snapshot validity,
+scope and grace boundaries. Server typechecks, root lint, architecture, hardcoding, generated
+settings, changed-file formatting and server build passed by exit code. No new browser or
+visual run was needed for this server-only prerequisite; preceding browser evidence remains
+recorded in its own slice.
