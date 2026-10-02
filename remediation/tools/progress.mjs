@@ -11,6 +11,8 @@
  *   node remediation/tools/progress.mjs status             where are we, what is next
  *   node remediation/tools/progress.mjs next               the next actionable step only
  *   node remediation/tools/progress.mjs start P06.3        mark a step (or phase) in progress
+ *   node remediation/tools/progress.mjs start P06.3 --commit abc1234 --replace-commit HEAD
+ *                                                        repair an incorrectly recorded ref
  *   node remediation/tools/progress.mjs done P06.3 --commit abc1234 --note "split admin"
  *   node remediation/tools/progress.mjs skip P00.9 --note "no staging access"
  *   node remediation/tools/progress.mjs block P08.5 --note "waiting on domain (D-08)"
@@ -252,6 +254,22 @@ function parseFlags(args) {
   return flags;
 }
 
+/** Resolve refs before recording them so a moving HEAD cannot become evidence. */
+function recordCommit(step, flags) {
+  if (!flags.commit) throw new Error('--replace-commit requires --commit');
+  const commit = execFileSync('git', ['rev-parse', '--verify', `${flags.commit}^{commit}`], {
+    cwd: REPO,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  }).trim();
+  if (flags['replace-commit']) {
+    const previous = String(flags['replace-commit']);
+    if (!step.commits.includes(previous)) throw new Error(`no recorded commit ${previous}`);
+    step.commits = step.commits.filter((entry) => entry !== previous);
+  }
+  if (!step.commits.includes(commit)) step.commits.push(commit);
+}
+
 function setStepStatus(state, id, status, flags) {
   const step = findStep(state, id);
   if (!step) throw new Error(`unknown step ${id}`);
@@ -261,7 +279,7 @@ function setStepStatus(state, id, status, flags) {
   if (status === 'in_progress') step.startedAt ??= now();
   if (FINISHED.has(status)) step.completedAt = now();
   if (status === 'not_started') Object.assign(step, { startedAt: null, completedAt: null });
-  if (flags.commit) step.commits.push(String(flags.commit));
+  if (flags.commit || flags['replace-commit']) recordCommit(step, flags);
   if (flags.note) step.notes.push({ at: now(), text: String(flags.note) });
   if (status === 'in_progress' && phase.status === 'not_started') {
     phase.status = 'in_progress';

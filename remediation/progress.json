@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T12:07:33.968Z",
+  "updatedAt": "2026-10-02T12:12:41.640Z",
   "current": {
     "phase": "P08",
     "step": "P08.6"
@@ -1660,11 +1660,15 @@
           "status": "in_progress",
           "startedAt": "2026-10-02T12:07:33.967Z",
           "completedAt": null,
-          "commits": ["HEAD"],
+          "commits": ["d362d1765ff9c8512750cdd34a518a2020a30102"],
           "notes": [
             {
               "at": "2026-10-02T12:07:33.968Z",
               "text": "14 existing non-secret infrastructure values now defined as standard stage-scoped SSM parameters and injected by ECS execution roles; app 14 and migrate 2 exact ARNs, task roles gain no SSM access. Infra 19 and configuration contract 6 tests, release-context CLI synth/nag, infra typecheck, lint/architecture/hardcoding/format passed. Read-only staging diff reviewed; authorised CI deployment evidence pending. Remaining secrets/rotation/Access Analyzer keep step open."
+            },
+            {
+              "at": "2026-10-02T12:12:41.639Z",
+              "text": "Corrected symbolic HEAD evidence to the verified SSM source commit. Tracker now resolves commit refs before storage."
             }
           ]
         },
