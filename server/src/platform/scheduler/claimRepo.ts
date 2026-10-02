@@ -7,6 +7,7 @@ export interface ClaimedAction {
   readonly type: string;
   readonly payload: unknown;
   readonly runAt: Date;
+  readonly scheduledFor: Date;
   readonly attempts: number;
   readonly maxAttempts: number;
   readonly lockedBy: string;
@@ -39,9 +40,10 @@ export async function claimActions(tx: PrismaTransactionClient, input: ClaimInpu
     )
     UPDATE "ScheduledAction" AS action
        SET status = 'RUNNING', "lockedBy" = ${input.workerId}, "lockedUntil" = ${input.leaseUntil},
+           "scheduledFor" = COALESCE(action."scheduledFor", action."runAt"),
            attempts = LEAST(attempts + 1, "maxAttempts"), version = version + 1
       FROM due WHERE action.id = due.id
-    RETURNING action.id, action."eventId", action.type, action.payload, action."runAt",
+    RETURNING action.id, action."eventId", action.type, action.payload, action."runAt", action."scheduledFor",
               action.attempts, action."maxAttempts", action."lockedBy", action."lockedUntil",
               action.recurrence, action."dedupeKey", action.version, action."createdByPersonId", due.exhausted
   `;

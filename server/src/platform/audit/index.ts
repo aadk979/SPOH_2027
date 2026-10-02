@@ -1,4 +1,4 @@
-import type { AuditSource } from '@spoh/shared';
+import type { AuditOutcome, AuditSeverity, AuditSource } from '@spoh/shared';
 import type { JsonValue, PrismaTransactionClient } from '../db/client.js';
 import { publishCacheEvent } from '../events/cacheBus.js';
 
@@ -78,7 +78,8 @@ export type AuditAction =
   | 'media.upload'
   | 'auth.stationScopeBypass'
   | 'event.clone'
-  | 'event.transition';
+  | 'event.transition'
+  | 'schedule.execute';
 
 export interface AuditContext {
   /** `Volunteer.id`. Null only for system-initiated actions such as the purge job. */
@@ -97,6 +98,8 @@ export interface AuditContext {
 }
 
 export interface AuditEntry extends AuditContext {
+  severity?: AuditSeverity;
+  outcome?: AuditOutcome;
   action: AuditAction;
   entityType: string;
   entityId: string | null;
@@ -148,6 +151,8 @@ export async function writeAudit(tx: PrismaTransactionClient, entry: AuditEntry)
       eventId: entry.eventId,
       membershipId: entry.membershipId,
       action: entry.action,
+      ...(entry.severity !== undefined ? { severity: entry.severity } : {}),
+      ...(entry.outcome !== undefined ? { outcome: entry.outcome } : {}),
       entityType: entry.entityType,
       entityId: entry.entityId,
       ...(entry.before !== undefined ? { before: entry.before } : {}),

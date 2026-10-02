@@ -91,7 +91,13 @@ it('walks preparation edges, audits server guards and replays without a second c
     orderBy: { createdAt: 'asc' },
   });
   expect(audit).toHaveLength(4);
-  expect(audit[0]?.after).toMatchObject({
+  // Frozen clocks can tie audit timestamps; lifecycle versions identify each transition.
+  expect(audit.map((entry) => (entry.after as { version: number }).version).sort()).toEqual([
+    1, 2, 3, 4,
+  ]);
+  expect(
+    audit.find((entry) => (entry.after as { version: number }).version === 1)?.after,
+  ).toMatchObject({
     status: 'READY',
     version: 1,
     action: 'Event.MarkReady',

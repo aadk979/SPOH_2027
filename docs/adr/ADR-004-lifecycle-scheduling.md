@@ -135,6 +135,12 @@ by the handler's schema), `runAt`, `status` (`PENDING`, `RUNNING`, `SUCCEEDED`, 
    sense refuses it with a reason, recorded as `FAILED`, never silently. For example, an
    announcement past its expiry, or a lifecycle transition whose guard now fails.
 
+**Retry deadline storage (P10.6, 2026-10-02).** The additive nullable `scheduledFor` column keeps
+the original due instant required by late-running handlers. First claim initialises it from
+`runAt`; retries advance `runAt` without moving that deadline. Successful recurring actions
+keep their original cadence and skip missed occurrences. A future edit of a pending action must
+set both instants to its new due time. Existing enqueue writers remain compatible.
+
 **Two kinds of job**, both registered through `platform/scheduler`:
 
 - **Scheduled actions** (above): cluster-wide, exactly once, audited, visible on the schedule

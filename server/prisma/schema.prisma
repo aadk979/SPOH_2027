@@ -1457,6 +1457,8 @@ model ScheduledAction {
   type              String
   /// @class staff-personal
   payload           Json
+  /// Original due instant, initialised on first claim; runAt then controls retry eligibility.
+  scheduledFor      DateTime?             @db.Timestamptz(3)
   runAt             DateTime              @db.Timestamptz(3)
   status            ScheduledActionStatus @default(PENDING)
   attempts          Int                   @default(0)
