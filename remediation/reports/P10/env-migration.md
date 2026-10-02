@@ -1,6 +1,6 @@
 # P10.4 operational environment migration
 
-The server loads infrastructure addresses and secrets from its environment. Operational values live in versioned settings and can change without a process restart. The migration is in progress; this note records each removed key as its use is moved.
+The server loads infrastructure addresses and secrets from its environment. Operational values live in versioned settings and can change without a process restart. The migration is complete for P10.4; the rehearsal lifecycle is exposed through the audited preparation API and enforced in capture, attendance, cards, stock, reports and dashboards.
 
 | Removed key                | Setting                       | Scope    | Default and migration                                                                                                                                                                                  |
 | -------------------------- | ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -22,4 +22,46 @@ An event configuration manager can choose the attendance root from active admins
 
 Rate-limit settings are read from a short-lived per-process policy cache, invalidated by the settings bus. Counter buckets remain in-process until P15.2 replaces the store with a shared Postgres counter and proves a multi-instance limit. A live setting change does not require a restart; the bounded value applies to the next request after invalidation or the one-second cache expiry.
 
-`ATTENDANCE_SIGNING_SECRET` remains a secret. `SEED_ADMIN_EMAIL` and `SEED_ADMIN_SUB` are seed-time inputs only; they do not choose the attendance root. The 24 remaining schema keys hold infrastructure and secrets. Infra does not define an SSM parameter for the removed shift flag. P10.4 remains in progress until the rehearsal lifecycle is exposed and enforced through the audited transition API.
+`ATTENDANCE_SIGNING_SECRET` remains a secret. `SEED_ADMIN_EMAIL` and `SEED_ADMIN_SUB` are seed-time inputs only; they do not choose the attendance root.
+
+## Final environment and parameter audit — 2026-10-02
+
+The remaining 24 schema keys are infrastructure or secrets:
+
+| Purpose                                           | Keys                                                                                                                  |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Runtime and observability                         | `NODE_ENV`, `PORT`, `LOG_LEVEL`                                                                                       |
+| Network and static client                         | `CORS_ALLOWED_ORIGINS`, `TRUST_PROXY_HOPS`, `CLIENT_DIR`, `APP_BASE_URL`                                              |
+| Database connection                               | `DATABASE_URL`, `DATABASE_POOL_MAX`                                                                                   |
+| Identity provider                                 | `AUTH_PROVIDER`, `LOCAL_AUTH_SECRET`, `COGNITO_REGION`, `COGNITO_USER_POOL_ID`, `COGNITO_CLIENT_ID`, `COGNITO_DOMAIN` |
+| Session and attendance secrets / cookie transport | `SESSION_SIGNING_SECRET`, `SESSION_COOKIE_DOMAIN`, `SESSION_COOKIE_CROSS_SITE`, `ATTENDANCE_SIGNING_SECRET`           |
+| AWS storage and Web Push                          | `S3_MEDIA_BUCKET`, `AWS_REGION`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`                             |
+
+`server/.env.example` documents exactly these keys; its contract tests compare the example
+against the pure schema. Every removed key above is absent from the schema and the CDK task
+injection. The development fixture uses REHEARSAL instead of an environment bypass. The
+preparation API authorises, versions, audits and atomically settles rehearsal transitions;
+capture rechecks the phase in its transaction. LIVE uses actual assignment hours. Historical
+practice records and offline entries retain their mode, and the default report/dashboard
+reads exclude them with explicit, labelled inclusion available.
+
+Read-only AWS inventory in `ap-southeast-1` found only the CDK bootstrap version parameter
+(`/cdk-bootstrap/hnb659fds/version`) in SSM and **no application parameters**. The active
+staging task definition revision 54 injects 14 infrastructure environment names and two
+secret names; none of the eleven removed operational keys is injected. The repository likewise
+defines no application SSM parameters, so no deployed application parameter requires deletion.
+No AWS values, secrets or resources were changed for this audit.
+
+The SSM migration instruction for P08.6 is therefore to create only non-secret infrastructure
+parameters when that step is implemented, and keep all eleven removed names out of the task
+definition and SSM. Existing operational values belong in audited, revertible settings, never
+in new SSM parameters. `DB_HOST`, `DB_NAME` and credential transport names are container
+entrypoint inputs used to construct `DATABASE_URL`, rather than additional server schema keys.
+This closes the P10.4 environment reduction; the P08.6 SSM injection/secret-rotation work,
+remaining P10.5 lifecycle edges and later Cedar enforcement retain their own exit criteria.
+
+Verification: configuration example/schema tests, shared **23**, server **493** and client
+**262** unit tests, full integration **693 passed / 4 existing skips**, serial browser **7**,
+full visual **58**, all workspace typechecks, lint, architecture, generated settings and
+hardcoding checks passed at the close-out checkpoint. Earlier per-key migration and rehearsal
+regression evidence is in `rehearsal-provenance.md` and the P10.4 tracker commits.

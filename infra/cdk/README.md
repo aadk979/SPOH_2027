@@ -51,3 +51,17 @@ node infra/scripts/run-migrate-task.mjs - Spoh-staging-Platform totals  # P09 to
 `-` reads the stack outputs from CloudFormation; the task's log is printed when it stops. All run
 as the app role. `seed-fixture` overrides `NODE_ENV` for that one-off staging task only. The API
 service stays in production mode, and a production stack name is refused before any AWS call.
+
+## Configuration migration boundary (P10.4 / P08.6)
+
+The P10.4 audit found no application SSM parameters to remove in Singapore; only the CDK
+bootstrap version parameter exists. Current task definitions inject non-secret infrastructure
+directly and secrets through Secrets Manager. P08.6 will create SSM parameters for non-secret
+infrastructure and add its remaining secret/rotation checks.
+
+Do not introduce operational parameters or environment overrides for attendance root/networks,
+rehearsal, upload lifetime/size, access-token lifetime or rate limits. They use the versioned
+settings registry or event lifecycle, as listed in
+[`env-migration.md`](../../remediation/reports/P10/env-migration.md). Container `DB_HOST`,
+`DB_NAME` and credential inputs construct the server's `DATABASE_URL` at entrypoint; they do
+not add operational configuration. Keep this boundary when adding SSM injection in P08.6.
