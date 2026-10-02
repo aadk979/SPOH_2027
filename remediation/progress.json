@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T09:53:23.340Z",
+  "updatedAt": "2026-10-02T10:11:06.866Z",
   "current": {
     "phase": "P10",
     "step": "P10.5"
@@ -2008,7 +2008,16 @@
           "status": "in_progress",
           "startedAt": "2026-10-01T13:40:50.186Z",
           "completedAt": null,
-          "commits": ["6ac79bf", "efff58c", "e3cb374", "17ddfab", "30a7010", "85fc514", "9a4cca0"],
+          "commits": [
+            "6ac79bf",
+            "efff58c",
+            "e3cb374",
+            "17ddfab",
+            "30a7010",
+            "85fc514",
+            "9a4cca0",
+            "8b3bc17"
+          ],
           "notes": [
             {
               "at": "2026-10-01T17:53:43.239Z",
@@ -2037,6 +2046,10 @@
             {
               "at": "2026-10-02T09:53:23.263Z",
               "text": "Thirteen correction surfaces hold the compatible event lock; registration and footfall void decisions now lock/reread their row inside the audit transaction. Close-out API remains pending metadata/roster/maintenance locking and atomic effects."
+            },
+            {
+              "at": "2026-10-02T10:11:06.784Z",
+              "text": "Report metadata, roster, attendance, membership, assignment, setting and resolved-alert purge writers now lock the event before report data or advisory locks. Preparation and capture semantics retained; close-out API and frozen reads are next."
             }
           ]
         },
@@ -2799,6 +2812,10 @@
     {
       "at": "2026-10-02T09:53:23.339Z",
       "text": "2026-10-02 correction locks 9a4cca0: full integration 650 passed/4 skips, server unit 493, browser 4; static gates/build exit 0. Previous implementations failed deterministic lifecycle lock checks and admitted duplicate footfall voids; restored fixed sources then all 17 new cases and full suite passed. No schema or client layout changes; P10.4/P10.5 remain in progress."
+    },
+    {
+      "at": "2026-10-02T10:11:06.865Z",
+      "text": "2026-10-02 metadata locks 8b3bc17: full integration 674 passed/4 skips, server unit 493, browser administration/preparation 10; typecheck/lint/architecture/hardcoding/format/build exit 0. Twenty-four new cases pass; previous template/purge/count-setting writers and attendance advisory-lock order failed the regression. Initial wrong row-lock probe corrected and verified against the actual advisory lock. No schema/client layout changes. P10.4/P10.5 stay in progress."
     }
   ]
 }
