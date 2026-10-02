@@ -50,3 +50,19 @@ expression (US$0.10/month); staging's old log-only model gains US$0.30/month. Th
 estimate using the existing price snapshot, not a measured bill or a claim that the overall
 US$100 budget fits after the approved US$7 staging edge and other monitoring additions.
 P08.10 must reconcile actual costs and the amended model.
+
+## Deployed definition verification (2026-10-03)
+
+At 02:11 SGT, `f0f647f` is actually deployed: CloudFormation UPDATE_COMPLETE and matching
+`ServiceImageTag`, with successful [CI](https://github.com/aadk979/SPOH_2027/actions/runs/37044009013),
+[infra checks](https://github.com/aadk979/SPOH_2027/actions/runs/37044008982) and
+[staging release](https://github.com/aadk979/SPOH_2027/actions/runs/37044593281).
+
+Read-only `DescribeAlarms` verifies the deployed rate's exact math expression, both native
+Sum inputs and five-minute period; latency's native p95, one-minute period and low-sample
+evaluation; both alarms' actual `ApiId=wdgdtbz846`, thresholds, evaluation periods,
+non-breaching missing-data policy and absence of all three action types. Stack outputs match
+their alarm names. Both are OK after their initial evaluation **because request data was
+missing and treated as non-breaching**. Healthy request observations above validate the
+expression's query, not an ALARM trigger or an availability test. No failure/notification
+probe was added. P08.8 remains open for owner delivery and the remaining catalogue.
