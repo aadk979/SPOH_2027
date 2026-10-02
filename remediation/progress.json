@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T19:04:07.758Z",
+  "updatedAt": "2026-10-02T19:18:01.125Z",
   "current": {
     "phase": "P10",
     "step": "P10.7"
@@ -2204,7 +2204,8 @@
             "e362c571db7303a1c7526f9a17444c6518dba5a8",
             "961a04137201b75bd5d37f959d90cf58be823efe",
             "41bed1e3fce6fcc97ebd596b9da312b6a6144406",
-            "f100d533c7fba078a48510cb2edec4169e33a156"
+            "f100d533c7fba078a48510cb2edec4169e33a156",
+            "46ce29115a890a162eaeb97ee4865bac049e7735"
           ],
           "notes": [
             {
@@ -2254,6 +2255,10 @@
             {
               "at": "2026-10-02T19:04:07.190Z",
               "text": "Verified category capture admission for single/group/import consumers: Event locking, atomic group/card rollback, valid CLOSED offline grace, historical reports and import commit recheck. Full 1034 passes/four existing skips (82 files), 538 server units and ten serial browser journeys; types/static/settings/build/format/diff pass. Initial full run interrupted by confirmed Windows standby; held-awake complete rerun passed. P10.7 remains open for further handlers and full criteria."
+            },
+            {
+              "at": "2026-10-02T19:18:00.886Z",
+              "text": "Verified category-only taxonomy.setActive with strict payload/current authority, Event-first atomic activity/audit/completion, no-op outcome semantics and live booth category refresh. 77 focused, full 1069 passes/four existing skips (83 files), 538 server/262 client units and twelve serial browser journeys including actual-worker phone/laptop button changes without refresh. Types/static/settings/build/format/diff pass; no schema/layout/baseline change. Full step stays open."
             }
           ]
         },
@@ -3042,6 +3047,10 @@
     {
       "at": "2026-10-02T19:04:07.758Z",
       "text": "Published category consumer prerequisite; next timed category activity. Staging verified at 7f2c3fc with successful CI/deploy and matching UPDATE_COMPLETE image. Edge 3.0.69.248 exists; DNS still old, owner will route. No programme-wide owner blocker."
+    },
+    {
+      "at": "2026-10-02T19:18:01.124Z",
+      "text": "Timed category activity verified and published; continue independent native RDS CPU alarm slice under P08.8. Announcement drafts/durable delivery, reminders, further taxonomy/settings/day consumers, schedule CRUD/UI and archived/P11/P12 dependencies remain open; no programme-wide owner blocker."
     }
   ]
 }
