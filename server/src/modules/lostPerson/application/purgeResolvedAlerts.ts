@@ -1,10 +1,11 @@
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { SYSTEM_AUDIT_CONTEXT } from '../../../platform/http/auditContext.js';
 import { allEventScopes } from '../../../platform/event/events.js';
 import { logger } from '../../../platform/logger/index.js';
 import { getSettings } from '../../../platform/settings/index.js';
-import { minutesBetween } from '../../../platform/time/index.js';
+import { minutesBetween, systemClock } from '../../../platform/time/index.js';
 import { findPurgeCandidates, purgeAlert, scrubLegacyReplay } from '../data/repo.js';
 import { purgeCutoff } from '../domain/alertRules.js';
 import { RAISE_ENDPOINT } from './constants.js';
@@ -23,6 +24,7 @@ async function purgeOne(
 ) {
   const outcome = alert.status;
   return prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, scope);
     const claimed = await purgeAlert(tx, scope, {
       id: alert.id,
       rehearsal: alert.rehearsal,
@@ -64,7 +66,7 @@ async function purgeEvent(scope: EventScope, cutoff: Date): Promise<number> {
   return purged;
 }
 
-export async function purgeResolvedAlerts(now = new Date()): Promise<number> {
+export async function purgeResolvedAlerts(now = systemClock.now()): Promise<number> {
   const cutoff = purgeCutoff(now, getSettings().lostPersonPurgeHours);
   let purged = 0;
   for (const scope of await allEventScopes()) purged += await purgeEvent(scope, cutoff);

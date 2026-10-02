@@ -1,6 +1,7 @@
 import type { ShiftTemplateRecord, UpdateShiftTemplateRequest } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { eventTimezone } from '../../../platform/event/events.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
@@ -40,6 +41,7 @@ export async function updateShiftTemplate(
   { scope, audit }: ActorContext,
 ): Promise<ShiftTemplateRecord> {
   const row = await prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, scope);
     const existing = await findTemplateRow(tx, scope, id);
     if (!existing) throw new NotFoundError('Shift template');
     assertTemplateHours({ ...existing, ...patch });

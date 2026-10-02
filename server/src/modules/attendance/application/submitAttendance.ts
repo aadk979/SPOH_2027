@@ -1,6 +1,7 @@
 import type { AttendanceProof, AttendanceRecord } from '@spoh/shared';
 import type { AuditContext } from '../../../platform/audit/index.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { AppError, ForbiddenError, RateLimitedError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { eventToday } from '../../../platform/event/today.js';
@@ -41,6 +42,7 @@ export async function submitAttendance(
   clock: Clock = systemClock,
 ): Promise<AttendanceRecord> {
   const result = await prisma.$transaction(async (tx): Promise<Outcome> => {
+    await holdCaptureEvent(tx, scope);
     await lockPerson(tx, volunteerId);
     const now = clock.now();
     const person = await requireVolunteer(tx, scope, volunteerId);

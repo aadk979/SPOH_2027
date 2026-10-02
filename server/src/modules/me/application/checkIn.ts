@@ -1,6 +1,7 @@
 import { ERROR_CODES, type MyAssignment } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { ConflictError, NotFoundError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
@@ -34,6 +35,7 @@ export async function checkIn(
   });
 
   await prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, scope);
     const present = await hasAttendance(tx, scope, {
       volunteerId,
       eventDayId: assignment.eventDayId,

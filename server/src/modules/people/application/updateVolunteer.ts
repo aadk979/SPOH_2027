@@ -5,6 +5,7 @@ import type {
 } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { invalidateVolunteerCache } from '../../../platform/identity/index.js';
@@ -79,6 +80,7 @@ export async function updateVolunteer(
   const roleChanged = patch.role !== undefined && patch.role !== target.role;
 
   const updated = await prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, actor.scope);
     const row = await updateVolunteerRow(tx, actor.scope, toChange(id, patch));
     await writeAudit(tx, {
       ...actor.audit,

@@ -1,6 +1,7 @@
 import { ERROR_CODES, type CreateEventDayRequest, type EventDayRecord } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { ConflictError, NotFoundError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { eventDayAnchor } from '../../../platform/time/index.js';
@@ -23,6 +24,7 @@ export async function createEventDay(
   }
 
   const row = await prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, scope);
     const created = await createEventDayRow(tx, scope, {
       date,
       label: request.label,

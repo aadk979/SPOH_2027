@@ -1,6 +1,7 @@
 import type { StationSummary, UpdateStationRequest } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { toStationSummary, toStationUpdate } from '../data/mappers.js';
@@ -25,6 +26,7 @@ export async function updateStation(
   if (!existing) throw new NotFoundError('Station');
 
   const station = await prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, scope);
     const typeId = patch.typeCode ? await requireStationType(tx, scope, patch.typeCode) : undefined;
     const row = await updateStationRow(tx, scope, {
       id,

@@ -2,6 +2,7 @@ import type { MyAssignment } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { prisma } from '../../../platform/db/client.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { toMyAssignment } from '../data/mappers.js';
@@ -21,6 +22,7 @@ export async function checkOut(
   const now = clock.now();
 
   await prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, scope);
     // Conditional, so two taps racing each other cannot both write (F03-015).
     if (!(await markCheckedOut(tx, scope, { id: assignmentId, at: now })))
       throw alreadyCheckedOut();

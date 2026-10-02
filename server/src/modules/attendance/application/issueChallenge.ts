@@ -2,6 +2,7 @@ import { randomInt, randomUUID } from 'node:crypto';
 import type { AttendanceChallenge } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { eventToday } from '../../../platform/event/today.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
@@ -17,6 +18,7 @@ export async function issueChallenge(
   clock: Clock = systemClock,
 ): Promise<AttendanceChallenge> {
   return prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, scope);
     await lockPerson(tx, volunteerId);
     const now = clock.now();
     const day = await findEventDayOn(tx, scope, await eventToday(scope, now));

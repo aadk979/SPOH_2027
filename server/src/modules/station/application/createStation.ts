@@ -1,6 +1,7 @@
 import { ERROR_CODES, type CreateStationRequest, type StationSummary } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { ConflictError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { toStationSummary } from '../data/mappers.js';
@@ -21,6 +22,7 @@ export async function createStation(
   }
 
   const station = await prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, scope);
     const row = await createStationRow(tx, scope, {
       code: request.code,
       name: request.name,

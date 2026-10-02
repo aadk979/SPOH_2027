@@ -1,6 +1,7 @@
 import type { DeactivateVolunteerRequest, VolunteerMutationResponse } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { invalidateVolunteerCache } from '../../../platform/identity/index.js';
 import { logger } from '../../../platform/logger/index.js';
 import { revokeAllForVolunteer } from '../../auth/index.js';
@@ -10,6 +11,7 @@ import { deletePushSubscriptions, updateVolunteerRow } from '../data/repo.js';
 import { assertActive } from '../domain/escalation.js';
 import type { ManagerContext } from './context.js';
 import { loadTarget } from './queries.js';
+import { systemClock, type Clock } from '../../../platform/time/index.js';
 
 /**
  * The roster flag already blocks every request, so access is withdrawn either
@@ -36,13 +38,14 @@ async function disableIdentity(target: { id: string; email: string }): Promise<b
 export async function deactivateVolunteer(
   id: string,
   request: DeactivateVolunteerRequest,
-  actor: ManagerContext,
+  actor: ManagerContext & { clock?: Clock },
 ): Promise<VolunteerMutationResponse> {
   const target = await loadTarget(id, actor, 'deactivate');
   assertActive(target, true);
-  const now = new Date();
+  const now = (actor.clock ?? systemClock).now();
 
   const updated = await prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, actor.scope);
     const row = await updateVolunteerRow(tx, actor.scope, {
       id,
       membership: { status: 'DEACTIVATED', deactivatedAt: now, deactivatedReason: request.reason },

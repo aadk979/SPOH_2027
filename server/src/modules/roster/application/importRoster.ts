@@ -1,6 +1,7 @@
 import type { RosterImportRequest, RosterImportResponse } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { invalidateVolunteerCache } from '../../../platform/identity/index.js';
 import { planRosterImport } from '../domain/planRosterImport.js';
 import { applyRosterImport } from './applyRosterImport.js';
@@ -25,6 +26,7 @@ export async function importRoster(
 
   const identities = await mintIdentities(request.rows, snapshot.accounts);
   await prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, actor.scope);
     await applyRosterImport(tx, plan, { identities, scope: actor.scope, audit: actor.audit });
     await writeAudit(tx, {
       ...actor.audit,

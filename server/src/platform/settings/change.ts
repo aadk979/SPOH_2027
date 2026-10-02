@@ -1,4 +1,5 @@
 import { ERROR_CODES } from '@spoh/shared';
+import { holdCaptureEvent } from '../db/captureProvenance.js';
 import { writeAudit, type AuditContext } from '../audit/index.js';
 import {
   dbNull,
@@ -40,10 +41,7 @@ async function assertUnlocked(
   key: SettingKey,
 ): Promise<void> {
   if (target.scope === 'platform') return;
-  const event = await tx.event.findUniqueOrThrow({
-    where: { id: target.eventId },
-    select: { status: true },
-  });
+  const event = await holdCaptureEvent(tx, target);
   if (SETTINGS[key].lockedIn.includes(event.status)) {
     throw new ConflictError(
       ERROR_CODES.SETTING_LOCKED,

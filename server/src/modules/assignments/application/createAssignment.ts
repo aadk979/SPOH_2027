@@ -1,6 +1,7 @@
 import type { CreateAssignmentRequest, ShiftAssignmentRecord } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { toAssignmentRecord } from '../data/mappers.js';
 import {
@@ -26,6 +27,7 @@ export async function createAssignment(
   if (!shift) throw new NotFoundError('Shift');
 
   const row = await prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, scope);
     // A move is audited as one, with where the person was before (F03-018).
     const previous = await findAssignmentInSlot(tx, scope, {
       volunteerId: request.volunteerId,

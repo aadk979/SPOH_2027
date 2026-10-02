@@ -1,5 +1,6 @@
 import type { AttendanceRecord } from '@spoh/shared';
 import { prisma } from '../../../platform/db/client.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { ForbiddenError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { eventToday } from '../../../platform/event/today.js';
@@ -16,6 +17,7 @@ export async function startAttendance(
   clock: Clock = systemClock,
 ): Promise<AttendanceRecord> {
   return prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, scope);
     await lockPerson(tx, volunteerId);
     const now = clock.now();
     const person = await requireVolunteer(tx, scope, volunteerId);

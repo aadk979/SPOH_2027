@@ -1,6 +1,7 @@
 import type { ProvisionVolunteerRequest, ProvisionVolunteerResponse } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { ValidationError } from '../../../platform/errors/index.js';
 import { invalidateVolunteerCache } from '../../../platform/identity/index.js';
 import { identityProvider } from '../../../platform/identity/index.js';
@@ -41,6 +42,7 @@ export async function provisionVolunteer(
       });
 
   const volunteer = await prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, actor.scope);
     const { volunteer: row } = await upsertVolunteer(tx, actor.scope, {
       cognitoSub: identity.sub,
       displayName: request.displayName,

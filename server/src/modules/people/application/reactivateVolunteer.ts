@@ -1,6 +1,7 @@
 import type { VolunteerMutationResponse } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { invalidateVolunteerCache } from '../../../platform/identity/index.js';
 import { logger } from '../../../platform/logger/index.js';
 import { identityProvider } from '../../../platform/identity/index.js';
@@ -35,6 +36,7 @@ export async function reactivateVolunteer(
   assertActive(target, false);
 
   const updated = await prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, actor.scope);
     const row = await updateVolunteerRow(tx, actor.scope, {
       id,
       membership: { status: 'ACTIVE', deactivatedAt: null, deactivatedReason: null },

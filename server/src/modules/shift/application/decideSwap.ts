@@ -1,6 +1,7 @@
 import type { DecideSwapRequest, SwapRequestRecord } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { toSwapRecord } from '../data/mappers.js';
@@ -42,6 +43,7 @@ export async function decideSwap(
   { volunteerId: deciderId, scope, audit }: ActorContext,
 ): Promise<SwapRequestRecord> {
   await prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, scope);
     const swap = await findSwapForDecision(tx, scope, swapId);
     if (!swap) throw new NotFoundError('Swap request');
     assertSwapPending(swap);

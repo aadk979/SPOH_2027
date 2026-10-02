@@ -1,5 +1,6 @@
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { deleteAssignmentRow, findAssignmentForRemoval } from '../data/repo.js';
 import { assertNotWorked } from '../domain/assignmentRules.js';
@@ -11,6 +12,7 @@ export async function deleteAssignment(id: string, { scope, audit }: ActorContex
   assertNotWorked(existing);
 
   await prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, scope);
     await deleteAssignmentRow(tx, scope, id);
     await writeAudit(tx, {
       ...audit,

@@ -1,6 +1,7 @@
 import type { EventDayRecord, UpdateEventDayRequest } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { toEventDayRecord } from '../data/mappers.js';
@@ -15,6 +16,7 @@ export async function updateEventDay(
   if (!existing) throw new NotFoundError('Event day');
 
   const row = await prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, scope);
     const updated = await updateEventDayRow(tx, scope, {
       id,
       data: {

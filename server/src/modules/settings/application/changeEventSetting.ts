@@ -87,7 +87,7 @@ export async function changeEventSetting(
 ): Promise<EventSettingsResponse> {
   const { scope } = actor;
   await prisma.$transaction(async (tx) => {
-    if (change.key === 'product.visitorDataMode') await lockVisitorEvent(tx, scope);
+    await lockVisitorEvent(tx, scope);
     const status = await eventStatusOf(tx, scope);
     const current = await eventSettings(scope, tx);
     const readVersion = current.versions[change.key];

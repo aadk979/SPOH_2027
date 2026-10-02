@@ -380,6 +380,28 @@ lint, architecture, hardcoding, formatting and server build passed by exit code.
 client layout or baseline changed. Report metadata, roster, attendance and maintenance writers
 still need the same locking protocol before the close-out API can be enabled.
 
+## Report metadata and maintenance locks
+
+Station/day/template edits, assignments and swap decisions, shift check-in/out, roster imports
+and provisioning, membership administration, attendance and resolved-alert purges now hold the
+event share lock before changing report inputs. Generic event/station setting changes, reset
+and revert hold that lock while checking the phase. The existing product-settings API takes
+its exclusive event lock for every change, retaining the visitor-purge lock order.
+
+Attendance takes the event lock before its per-person advisory lock. A direct advisory-lock
+probe proves that order; the initial row-lock probe was corrected because it did not test the
+lock attendance actually uses. Tests against the previous implementations then failed for
+template edits, purge work, count settings and the advisory-lock order. Corrected sources
+were restored in `finally` before the full verification. Deactivation and default purge receipt
+times now use the clock abstraction.
+
+Verification on 2026-10-02: full integration **674 passed / 4 existing skips**, server unit
+**493**, and real browser administration/preparation E2E **10** passed. Twenty-four new database
+cases exercise twenty-three writer surfaces behind the lifecycle lock and the attendance lock
+order. Server typechecks, root lint, architecture, hardcoding, formatting and server build
+passed by exit code. No schema, client layout or visual baseline changed. The close-out API and
+frozen-report reads are the next slice; none was enabled by these locking changes.
+
 Remaining: go-live guards and overrides, close/archive side effects, including the general
 archived-write forbid and its Cedar context in P11. P10.4/P10.5 remain in progress; P10.6 has
 not started beyond its shared storage prerequisite.
