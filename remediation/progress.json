@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T12:47:16.663Z",
+  "updatedAt": "2026-10-02T13:03:40.680Z",
   "current": {
-    "phase": "P08",
-    "step": "P08.5"
+    "phase": "P10",
+    "step": "P10.5"
   },
   "gates": [
     {
@@ -2057,7 +2057,8 @@
             "8b3bc17",
             "3344a29",
             "91f6943",
-            "2db2108"
+            "2db2108",
+            "a79b131b0150c00f210be5e1a6d5a924de14d187"
           ],
           "notes": [
             {
@@ -2103,6 +2104,10 @@
             {
               "at": "2026-10-02T11:56:44.558Z",
               "text": "Archive readiness now uses transaction-scoped purge evidence, valid active FINAL for current close version and strictly expired resolved late-sync grace. 24 new database cases; full integration 738 passed/4 existing skips, server unit 493, focused 64; type/lint/architecture/hardcoding/settings/build clean. Archive request remains unavailable pending atomic effects/read-only/membership access; readiness/override and Cedar work remain open."
+            },
+            {
+              "at": "2026-10-02T13:03:40.679Z",
+              "text": "Per-item go-live override contract, pure guard/current own-org platform authority and atomic reason/check audit implemented. First go-live still fails closed with unavailable actual checklist. Focused DB46/full754+4skip/server531/shared23/client262 and type/lint/arch/hardcode/settings/format/build pass. New successful DB cases substitute only future checklist producer. Complete readiness/archive/read-only/retention/Cedar remain open."
             }
           ]
         },
