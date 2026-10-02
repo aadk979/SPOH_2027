@@ -1,7 +1,8 @@
 import { writeAudit } from '../../../platform/audit/index.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { prisma } from '../../../platform/db/client.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
-import { findTickById, voidTick } from '../data/repo.js';
+import { findTickForUpdate, voidTick } from '../data/repo.js';
 import { assertTickNotVoided } from '../domain/footfallRules.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 
@@ -11,11 +12,11 @@ export async function voidTickById(
   reason: string,
   { scope, audit }: ActorContext,
 ): Promise<void> {
-  const existing = await findTickById(scope, id);
-  if (!existing) throw new NotFoundError('Footfall tick');
-  assertTickNotVoided(existing);
-
   await prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, scope);
+    const existing = await findTickForUpdate(tx, scope, id);
+    if (!existing) throw new NotFoundError('Footfall tick');
+    assertTickNotVoided(existing);
     await voidTick(tx, scope, id);
     await writeAudit(tx, {
       ...audit,

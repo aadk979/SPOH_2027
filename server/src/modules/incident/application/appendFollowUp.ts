@@ -1,5 +1,6 @@
 import type { CreateIncidentFollowUpRequest, IncidentRecord } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { prisma } from '../../../platform/db/client.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
@@ -13,6 +14,7 @@ export async function appendFollowUp(
   { volunteerId, scope, audit }: ActorContext,
 ): Promise<IncidentRecord> {
   await prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, scope);
     const existing = await findIncidentForUpdate(tx, scope, incidentId);
     if (!existing) throw new NotFoundError('Incident');
     await addFollowUp(tx, scope, {

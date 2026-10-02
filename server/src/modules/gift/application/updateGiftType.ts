@@ -1,5 +1,6 @@
 import type { GiftTypeRecord, UpdateGiftTypeRequest } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { prisma } from '../../../platform/db/client.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { toGiftTypeRecord } from '../data/mappers.js';
@@ -15,6 +16,7 @@ export async function updateGiftType(
   if (!existing) throw new NotFoundError('Gift type');
 
   const gift = await prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, scope);
     const row = await updateGiftTypeRow(tx, scope, {
       id,
       data: {

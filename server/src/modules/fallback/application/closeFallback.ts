@@ -1,5 +1,6 @@
 import type { CloseFallbackRequest, FallbackWindowRecord } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { prisma } from '../../../platform/db/client.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { minutesBetween, systemClock } from '../../../platform/time/index.js';
@@ -15,6 +16,7 @@ export async function closeFallback(
   { scope, audit }: ActorContext,
 ): Promise<FallbackWindowRecord> {
   const closed = await prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, scope);
     const existing = await findWindow(tx, scope, windowId);
     if (!existing) throw new NotFoundError('Fallback window');
     assertWindowOpen(existing);

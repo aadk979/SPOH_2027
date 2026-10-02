@@ -1,5 +1,6 @@
 import type { GenerateCardBatchRequest, GenerateCardBatchResponse } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import { lockReserved, settleReserved } from '../../../platform/idempotency/index.js';
 import { createCardBatch } from '../data/repo.js';
@@ -48,6 +49,7 @@ export async function generateBatch(
   // action: it was audited as card.issue, after the insert (F03-018).
   return prisma.$transaction(async (tx) => {
     await lockReserved(tx, scope, request.idempotencyKey);
+    await holdCaptureEvent(tx, scope);
     const inserted = await insertFreshCards(tx, scope, request);
     await writeAudit(tx, {
       ...audit,

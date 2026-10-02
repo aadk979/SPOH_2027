@@ -26,8 +26,21 @@ export async function createTick(
   });
 }
 
-export async function findTickById(scope: EventScope, id: string): Promise<FootfallTick | null> {
-  return prisma.footfallTick.findFirst({ where: { eventId: scope.eventId, id } });
+export async function findTickById(
+  scope: EventScope,
+  id: string,
+  db: PrismaTransactionClient = prisma,
+): Promise<FootfallTick | null> {
+  return db.footfallTick.findFirst({ where: { eventId: scope.eventId, id } });
+}
+
+export async function findTickForUpdate(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  id: string,
+) {
+  await tx.$queryRaw`SELECT id FROM "FootfallTick" WHERE "eventId" = ${scope.eventId} AND id = ${id} FOR UPDATE`;
+  return findTickById(scope, id, tx);
 }
 
 export async function voidTick(

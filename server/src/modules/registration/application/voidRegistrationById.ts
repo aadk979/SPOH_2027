@@ -1,7 +1,8 @@
 import { writeAudit } from '../../../platform/audit/index.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { prisma } from '../../../platform/db/client.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
-import { findRegistrationById, voidRegistration } from '../data/repo.js';
+import { findRegistrationForUpdate, voidRegistration } from '../data/repo.js';
 import { assertNotVoided } from '../domain/voiding.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 
@@ -15,11 +16,11 @@ export async function voidRegistrationById(
   reason: string,
   { scope, audit }: ActorContext,
 ): Promise<void> {
-  const existing = await findRegistrationById(scope, id);
-  if (!existing) throw new NotFoundError('Registration');
-  assertNotVoided(existing);
-
   await prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, scope);
+    const existing = await findRegistrationForUpdate(tx, scope, id);
+    if (!existing) throw new NotFoundError('Registration');
+    assertNotVoided(existing);
     const updated = await voidRegistration(tx, scope, { id, reason });
     await writeAudit(tx, {
       ...audit,

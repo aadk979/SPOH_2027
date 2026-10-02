@@ -358,6 +358,28 @@ architecture, hardcoding, generated settings, formatting and server build passed
 Only the three dedicated `_test` databases received the migration. No client layout or visual
 baseline changed. This is storage only; no scheduler worker or close-out API was enabled.
 
+## Correction locks before close-out
+
+Registration/footfall/card voids, card batches, incident status and follow-ups, lost-person
+acknowledgements and resolution, found-item claims and close-out, fallback closure, and gift
+creation/edits now take the compatible event share lock before changing report inputs. The
+lifecycle's exclusive lock waits for those transactions and their audits to commit. Gift stock
+adjustments and card reissues already take that lock through their provenance reads.
+
+Registration and footfall voids now load and lock their row inside the correction transaction.
+Concurrent voids produce one correction/audit and one refusal. A regression run against the
+previous implementations failed: they ignored the lifecycle lock, and two footfall voids both
+returned success. Corrected sources were restored in a `finally` block before verification.
+Card void and found-item claim timestamps now use an injected clock.
+
+Verification on 2026-10-02: full integration **650 passed / 4 existing skips**, server unit
+**493**, and preparation/report browser E2E **4** passed. Seventeen new database cases cover
+thirteen correction surfaces waiting behind a lifecycle lock, concurrent voids, a close waiting
+for a correction before reading the report, and injected timestamps. Server typechecks, root
+lint, architecture, hardcoding, formatting and server build passed by exit code. No schema,
+client layout or baseline changed. Report metadata, roster, attendance and maintenance writers
+still need the same locking protocol before the close-out API can be enabled.
+
 Remaining: go-live guards and overrides, close/archive side effects, including the general
 archived-write forbid and its Cedar context in P11. P10.4/P10.5 remain in progress; P10.6 has
 not started beyond its shared storage prerequisite.

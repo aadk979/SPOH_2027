@@ -1,5 +1,6 @@
 import { ERROR_CODES, type CreateGiftTypeRequest, type GiftTypeRecord } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { prisma } from '../../../platform/db/client.js';
 import { ConflictError } from '../../../platform/errors/index.js';
 import { toGiftTypeRecord } from '../data/mappers.js';
@@ -15,6 +16,7 @@ export async function createGiftType(
   }
 
   const gift = await prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, scope);
     const row = await createGiftTypeRow(tx, scope, {
       name: request.name,
       initialStock: request.initialStock,

@@ -1,24 +1,27 @@
 import type { ClaimLostFoundRequest, LostFoundRecord } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { prisma } from '../../../platform/db/client.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { findItemRow, markClaimed } from '../data/repo.js';
 import { assertNotClaimed } from '../domain/itemRules.js';
 import { toRecordWithStation } from './itemRecord.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
+import { systemClock, type Clock } from '../../../platform/time/index.js';
 
 /** Hand an item back. A claim is a status change; the claimant is never recorded. */
 export async function claimItem(
   itemId: string,
   request: ClaimLostFoundRequest,
-  { scope, audit }: ActorContext,
+  { scope, audit, clock = systemClock }: ActorContext & { clock?: Clock },
 ): Promise<LostFoundRecord> {
   const claimed = await prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, scope);
     const existing = await findItemRow(tx, scope, itemId);
     if (!existing) throw new NotFoundError('Lost and found item');
     assertNotClaimed(existing);
 
-    const row = await markClaimed(tx, scope, { id: itemId, at: new Date(), note: request.note });
+    const row = await markClaimed(tx, scope, { id: itemId, at: clock.now(), note: request.note });
     await writeAudit(tx, {
       ...audit,
       action: 'lostFound.claim',

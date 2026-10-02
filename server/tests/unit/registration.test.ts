@@ -5,13 +5,14 @@ import { assertNotVoided } from '../../src/modules/registration/domain/voiding.j
 /** Registration rules and the void use case (P06.5), without a database. */
 
 vi.mock('../../src/modules/registration/data/repo.js', () => ({
-  findRegistrationById: vi.fn(),
+  findRegistrationForUpdate: vi.fn(),
   voidRegistration: vi.fn(),
 }));
 vi.mock('../../src/platform/db/client.js', () => ({
   prisma: { $transaction: vi.fn((work: (tx: unknown) => unknown) => work({})) },
 }));
 vi.mock('../../src/platform/audit/index.js', () => ({ writeAudit: vi.fn() }));
+vi.mock('../../src/platform/db/captureProvenance.js', () => ({ holdCaptureEvent: vi.fn() }));
 
 const repo = vi.mocked(await import('../../src/modules/registration/data/repo.js'));
 const { writeAudit } = vi.mocked(await import('../../src/platform/audit/index.js'));
@@ -79,7 +80,7 @@ describe('voidRegistrationById', () => {
   });
 
   it('voids and audits with the before and after state', async () => {
-    repo.findRegistrationById.mockResolvedValueOnce({
+    repo.findRegistrationForUpdate.mockResolvedValueOnce({
       id: 'r',
       voided: false,
       captureCategory: { code: 'SEC_3', label: 'Sec 3' },
@@ -94,7 +95,7 @@ describe('voidRegistrationById', () => {
       audit: AUDIT,
     });
 
-    expect(repo.findRegistrationById).toHaveBeenCalledWith(scope, 'r');
+    expect(repo.findRegistrationForUpdate).toHaveBeenCalledWith({}, scope, 'r');
     expect(repo.voidRegistration).toHaveBeenCalledWith({}, scope, { id: 'r', reason: 'mis-tap' });
     expect(writeAudit).toHaveBeenCalledWith(
       {},
@@ -107,7 +108,7 @@ describe('voidRegistrationById', () => {
   });
 
   it('refuses a missing registration with 404 and writes nothing', async () => {
-    repo.findRegistrationById.mockResolvedValueOnce(null);
+    repo.findRegistrationForUpdate.mockResolvedValueOnce(null);
 
     await expect(
       voidRegistrationById('r', 'x', {

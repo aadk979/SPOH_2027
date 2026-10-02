@@ -75,11 +75,21 @@ export async function createRegistrationsForGroup(
 export async function findRegistrationById(
   scope: EventScope,
   id: string,
+  db: PrismaTransactionClient = prisma,
 ): Promise<RegistrationRow | null> {
-  return prisma.registration.findFirst({
+  return db.registration.findFirst({
     where: { eventId: scope.eventId, id },
     include: WITH_CATEGORY,
   });
+}
+
+export async function findRegistrationForUpdate(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  id: string,
+) {
+  await tx.$queryRaw`SELECT id FROM "Registration" WHERE "eventId" = ${scope.eventId} AND id = ${id} FOR UPDATE`;
+  return findRegistrationById(scope, id, tx);
 }
 
 export async function voidRegistration(

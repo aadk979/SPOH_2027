@@ -1,5 +1,6 @@
 import type { LostPersonAlertRecord, ResolveLostPersonRequest } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { prisma } from '../../../platform/db/client.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { minutesBetween, systemClock, type Clock } from '../../../platform/time/index.js';
@@ -16,6 +17,7 @@ export async function resolve(
   { scope, audit, clock = systemClock }: ActorContext & { clock?: Clock },
 ): Promise<LostPersonAlertRecord> {
   const existing = await prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, scope);
     const alert = await findAlertForUpdate(tx, scope, alertId);
     if (!alert) throw new NotFoundError('Lost person alert');
     assertAlertActive(alert);

@@ -1,5 +1,6 @@
 import type { LostPersonAlertRecord } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { prisma } from '../../../platform/db/client.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
@@ -15,6 +16,7 @@ export async function acknowledge(
   { volunteerId, scope, audit }: ActorContext,
 ): Promise<LostPersonAlertRecord> {
   await prisma.$transaction(async (tx) => {
+    await holdCaptureEvent(tx, scope);
     const alert = await findAlertForUpdate(tx, scope, alertId);
     if (!alert) throw new NotFoundError('Lost person alert');
     // A second tap is a no-op, and writes no second audit row (F03-018).
