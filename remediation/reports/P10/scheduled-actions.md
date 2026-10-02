@@ -1,8 +1,8 @@
 # P10.7 — Schedulable module actions
 
-P10.7 is in progress. Only the verified handlers listed here are activated. Lifecycle,
-archive reminders, announcement/taxonomy/report actions, other setting actions, prunes and retention
-are still pending. P10.6 is complete; P10.5/P10.7 remain open.
+P10.7 is in progress. Only the verified handlers in the dated sections below are activated.
+Archive/fallback reminders, announcement/taxonomy actions, other setting keys/scopes and
+remaining retention classes are still pending. P10.6 is complete; P10.5/P10.7 remain open.
 
 ## Refresh-session pruning and worker activation (2026-10-02)
 
@@ -255,8 +255,9 @@ Documents retain their range, generation time, practice label and lifecycle vers
 database immutability protects them. A later occurrence can freeze new data without editing its
 predecessor. DAILY never replaces or supersedes the FINAL document or frozen default reads;
 FINAL remains owned by close-out. The public report schema excludes visitor values and transient
-lost-person descriptions. Snapshot listing/reads/UI and automatic recurrence declarations remain
-pending; no new public scheduler endpoint is implied.
+lost-person descriptions. At this generation checkpoint, snapshot listing/reads/UI and automatic
+recurrence declarations were pending; the later read slice below adds APIs. No new public scheduler
+endpoint is implied.
 
 Focused verification: **81 database checks** passed after correcting new fixture/schema/date
 mistakes, including 36 new cases; the additional waiting-capture concurrency check passed in the
@@ -270,3 +271,12 @@ fixture/schema errors; server types, lint and architecture passed again after th
 test. The new audit action is explicitly catalogued. Snapshot stored bodies and outcome errors
 contain no transient descriptions or private exception text.
 No schema, client layout, visual baseline or infrastructure definition changed.
+
+## Stored report reads and exports (2026-10-03)
+
+The event-scoped snapshot list/detail/export APIs require the existing report permission and
+return immutable DAILY/FINAL documents with explicit practice and supersession provenance.
+Metadata-only keyset paging never loads full bodies for the list. Stored exports include no
+current visitor sheet; default whole-event frozen FINAL reads are unchanged. See the
+[read/export evidence](report-snapshot-reads.md). Snapshot selection UI and automatic scheduling
+declarations remain pending; this read API does not expose schedule creation.

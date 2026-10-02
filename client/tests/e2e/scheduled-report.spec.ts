@@ -150,6 +150,7 @@ for (const [name, width, height] of [
           .toBe('SUCCEEDED');
         const snapshot = (
           await db.query<{
+            id: string;
             kind: string;
             rehearsalIncluded: boolean;
             report: {
@@ -158,7 +159,7 @@ for (const [name, width, height] of [
               registrations: { total: number };
             };
           }>(
-            'SELECT kind,"rehearsalIncluded",report FROM "ReportSnapshot" WHERE "eventId"=$1 AND "dedupeKey"=$2',
+            'SELECT id,kind,"rehearsalIncluded",report FROM "ReportSnapshot" WHERE "eventId"=$1 AND "dedupeKey"=$2',
             [EVENT_ID, `daily:scheduled:${id}`],
           )
         ).rows[0]!;
@@ -178,6 +179,32 @@ for (const [name, width, height] of [
         expect(current.status()).toBe(200);
         expect(snapshot.report.registrations.total).toBe(
           (await current.json()).registrations.total,
+        );
+        const stored = await page.request.get(`${base}/reports/snapshots/${snapshot.id}`, {
+          headers,
+        });
+        expect(stored.status()).toBe(200);
+        expect(stored.headers()['cache-control']).toBe('no-store');
+        expect(await stored.json()).toMatchObject({
+          ...snapshot.report,
+          snapshot: { id: snapshot.id, kind: 'DAILY', supersededAt: null },
+        });
+        const list = await page.request.get(`${base}/reports/snapshots?kind=DAILY`, { headers });
+        expect(list.status()).toBe(200);
+        expect((await list.json()).data).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ id: snapshot.id, rehearsalIncluded: includeRehearsal }),
+          ]),
+        );
+        const csv = await page.request.get(
+          `${base}/reports/snapshots/${snapshot.id}/export?format=csv`,
+          { headers },
+        );
+        expect(csv.status()).toBe(200);
+        expect(csv.headers()['content-disposition']).toContain(`-frozen-daily-${snapshot.id}`);
+        expect(await csv.text()).toContain('Frozen daily report');
+        expect(await csv.text()).toContain(
+          includeRehearsal ? 'Includes rehearsal data' : 'Rehearsal data is excluded.',
         );
         expect(
           (

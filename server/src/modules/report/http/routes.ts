@@ -1,15 +1,49 @@
 import { Router } from 'express';
-import { ReportExportQuery, ReportQuery } from '@spoh/shared';
+import {
+  ReportExportQuery,
+  ReportQuery,
+  ReportSnapshotExportQuery,
+  ReportSnapshotParams,
+  ReportSnapshotReadQuery,
+  ReportSnapshotsQuery,
+} from '@spoh/shared';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { sensitiveRateLimit } from '../../../platform/http/rateLimit.js';
 import { requireCapability } from '../../../platform/http/access.js';
 import { validate } from '../../../platform/http/validate.js';
 import { exportReportHandler, reportSummaryHandler } from './handlers.js';
+import {
+  exportSnapshotHandler,
+  listSnapshotsHandler,
+  readSnapshotHandler,
+} from './snapshotHandlers.js';
 
 /** Post-event reporting (BUILD_PLAN §7.2). */
 export const reportRouter: Router = Router();
 
 reportRouter.use(requireAuth);
+
+reportRouter.get(
+  '/snapshots',
+  sensitiveRateLimit,
+  requireCapability('report.generate'),
+  validate({ query: ReportSnapshotsQuery }),
+  listSnapshotsHandler,
+);
+reportRouter.get(
+  '/snapshots/:id',
+  sensitiveRateLimit,
+  requireCapability('report.generate'),
+  validate({ params: ReportSnapshotParams, query: ReportSnapshotReadQuery }),
+  readSnapshotHandler,
+);
+reportRouter.get(
+  '/snapshots/:id/export',
+  sensitiveRateLimit,
+  requireCapability('report.generate'),
+  validate({ params: ReportSnapshotParams, query: ReportSnapshotExportQuery }),
+  exportSnapshotHandler,
+);
 
 /**
  * The whole dataset in one payload. Rate limited as a sensitive endpoint: it is

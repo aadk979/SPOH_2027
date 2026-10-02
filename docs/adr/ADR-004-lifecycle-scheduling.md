@@ -217,6 +217,12 @@ they do not rewrite older snapshots. FINAL stays owned by atomic close-out, and 
 replaces frozen default final reads. System/platform actions, user recurrence, arbitrary ranges
 and ARCHIVED writes remain unavailable. Automatic declarations and snapshot browser UI stay open.
 
+**Stored snapshot reads (P10.7, 2026-10-03).** Event-scoped list/detail/export endpoints retain
+the report permission boundary. Lists project bounded metadata/ranges with stable keyset paging;
+detail and exports parse the saved document without regeneration. DAILY and superseded FINAL
+have explicit provenance labels, and stored exports contain no current visitor sheet. A DAILY
+document never replaces the active FINAL default. Snapshot selection UI remains pending.
+
 Recurring system jobs are created at boot by `ensureRecurring(type, interval)`, an upsert by
 `dedupeKey`. Every instance calls it, and only one row results.
 

@@ -77,6 +77,7 @@ interface EventB {
   slot: string;
   window: string;
   visitorField: string;
+  reportSnapshot: string;
 }
 
 async function createEventB(): Promise<EventScope> {
@@ -203,6 +204,15 @@ async function seedEventB(): Promise<EventB> {
       readers: ['ADMIN'],
     },
   });
+  const reportSnapshot = await rawDb.reportSnapshot.create({
+    data: {
+      eventId,
+      kind: 'DAILY',
+      lifecycleVersion: 0,
+      dedupeKey: 'daily:isolation',
+      report: { range: { from: null, to: null } },
+    },
+  });
   return {
     scope,
     shift: (afternoon as { id: string }).id,
@@ -223,6 +233,7 @@ async function seedEventB(): Promise<EventB> {
     slot: slot.id,
     window: window.id,
     visitorField: visitorField.id,
+    reportSnapshot: reportSnapshot.id,
   };
 }
 
@@ -402,6 +413,9 @@ const CASES: Record<string, Case> = {
 
   'GET /reports/summary': LIST,
   'GET /reports/export': LIST,
+  'GET /reports/snapshots': { query: (b) => ({ cursor: b.reportSnapshot }) },
+  'GET /reports/snapshots/:id': { params: (b) => ({ id: b.reportSnapshot }) },
+  'GET /reports/snapshots/:id/export': { params: (b) => ({ id: b.reportSnapshot }) },
   'GET /visitors': LIST,
   'GET /audit': LIST,
 
@@ -534,10 +548,10 @@ function ghostOf(real: EventB): EventB {
   return replace(real) as EventB;
 }
 
-/** Bodies equal apart from the moment they were computed. */
+/** Bodies equal apart from computation time and per-request correlation ids. */
 function sameBody(left: unknown, right: unknown): boolean {
   const strip = (body: unknown) =>
-    JSON.stringify(body).replace(/"(serverTime|asOf|generatedAt)":"[^"]*"/g, '"$1":""');
+    JSON.stringify(body).replace(/"(serverTime|asOf|generatedAt|requestId)":"[^"]*"/g, '"$1":""');
   return strip(left) === strip(right);
 }
 

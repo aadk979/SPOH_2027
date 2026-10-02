@@ -13,7 +13,7 @@ export const reportRegistry = new HandlerRegistry(reportScheduledHandlers);
 export const reportNow = FROZEN_NOW;
 export const reportAt = (offset: number) => new Date(reportNow.getTime() + offset);
 
-export async function scheduledReportFixture() {
+export async function scheduledReportFixture(input: { creatorEmail?: string } = {}) {
   const { eventId } = await testEvent();
   const event = await rawDb.event.findUniqueOrThrow({ where: { id: eventId } });
   const date = previousDate(eventDateOf(reportNow, event));
@@ -21,7 +21,10 @@ export async function scheduledReportFixture() {
     data: { eventId, date: eventDayAnchor(date), label: 'Finished day' },
   });
   const { start, end } = zonedDayWindow(date, event.timezone, event.dayBoundaryMinutes);
-  const creator = await createVolunteer({ email: 'timed-report@test.example', role: 'LEAD' });
+  const creator = await createVolunteer({
+    email: input.creatorEmail ?? 'timed-report@test.example',
+    role: 'LEAD',
+  });
   const membershipId = (
     await rawDb.eventMembership.findFirstOrThrow({ where: { eventId, personId: creator.id } })
   ).id;

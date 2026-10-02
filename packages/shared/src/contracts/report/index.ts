@@ -9,6 +9,9 @@ import {
 import { Id, IsoDate, IsoDateTime, TimeRangeQuery } from '../common/index.js';
 import { EventStatus } from '../event/index.js';
 import { FallbackWindowRecord } from '../fallback/index.js';
+import { ReportRange, ReportSnapshotMetadata } from './snapshots.js';
+
+export * from './snapshots.js';
 
 /**
  * Post-event reporting (PRODUCT_BRIEF §10).
@@ -276,19 +279,10 @@ export type DataIntegrityReport = z.infer<typeof DataIntegrityReport>;
 
 export const FullReport = z
   .object({
-    snapshot: z
-      .object({
-        id: Id,
-        kind: z.literal('FINAL'),
-        lifecycleVersion: z.number().int().nonnegative(),
-        createdAt: IsoDateTime,
-      })
-      .strict()
-      .nullable()
-      .optional(),
+    snapshot: ReportSnapshotMetadata.nullable().optional(),
     rehearsalIncluded: z.boolean().optional(),
     generatedAt: IsoDateTime,
-    range: z.object({ from: IsoDateTime.nullable(), to: IsoDateTime.nullable() }).strict(),
+    range: ReportRange,
     /** The event's IANA timezone: every local date, hour and label below is read in it. */
     timezone: z.string(),
     /** The event reported on: its name titles the export, its slug names the file. */
@@ -321,6 +315,12 @@ export type FullReport = z.infer<typeof FullReport>;
 
 /** The same provenance label is shown on screen and in both export formats. */
 export function reportReadLabel(report: Pick<FullReport, 'snapshot' | 'event'>): string {
+  if (report.snapshot?.kind === 'DAILY') {
+    return `Frozen daily report — generated at ${report.snapshot.createdAt}. Later corrections are excluded.`;
+  }
+  if (report.snapshot?.supersededAt) {
+    return `Superseded final report — closed at ${report.snapshot.createdAt}; superseded at ${report.snapshot.supersededAt}. Late sync and later corrections are excluded.`;
+  }
   if (report.snapshot) {
     return `Frozen final report — closed at ${report.snapshot.createdAt}. Late sync and later corrections are excluded.`;
   }
