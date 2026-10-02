@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T09:34:57.380Z",
+  "updatedAt": "2026-10-02T09:53:23.340Z",
   "current": {
     "phase": "P10",
     "step": "P10.5"
@@ -2008,7 +2008,7 @@
           "status": "in_progress",
           "startedAt": "2026-10-01T13:40:50.186Z",
           "completedAt": null,
-          "commits": ["6ac79bf", "efff58c", "e3cb374", "17ddfab", "30a7010", "85fc514"],
+          "commits": ["6ac79bf", "efff58c", "e3cb374", "17ddfab", "30a7010", "85fc514", "9a4cca0"],
           "notes": [
             {
               "at": "2026-10-01T17:53:43.239Z",
@@ -2033,6 +2033,10 @@
             {
               "at": "2026-10-02T09:34:57.290Z",
               "text": "Protected close-out storage verified: immutable event report snapshots; bounded scheduler state/leases; scoped schedule audit/history references; compatible legacy writers. Storage prerequisite only; lifecycle close/archive and scheduler worker remain pending."
+            },
+            {
+              "at": "2026-10-02T09:53:23.263Z",
+              "text": "Thirteen correction surfaces hold the compatible event lock; registration and footfall void decisions now lock/reread their row inside the audit transaction. Close-out API remains pending metadata/roster/maintenance locking and atomic effects."
             }
           ]
         },
@@ -2791,6 +2795,10 @@
     {
       "at": "2026-10-02T09:34:57.379Z",
       "text": "2026-10-02 close-out storage 85fc514: integration 633 passed/4 skipped, server unit 493, browser 5; all workspace typechecks, lint, architecture, hardcoding, settings generation, formatting and server build exit 0; three dedicated _test databases migrated and schema drift 0. P10.4/P10.5 remain in progress; P10.6 worker not started."
+    },
+    {
+      "at": "2026-10-02T09:53:23.339Z",
+      "text": "2026-10-02 correction locks 9a4cca0: full integration 650 passed/4 skips, server unit 493, browser 4; static gates/build exit 0. Previous implementations failed deterministic lifecycle lock checks and admitted duplicate footfall voids; restored fixed sources then all 17 new cases and full suite passed. No schema or client layout changes; P10.4/P10.5 remain in progress."
     }
   ]
 }
