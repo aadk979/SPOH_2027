@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T11:12:37.237Z",
+  "updatedAt": "2026-10-02T11:14:34.513Z",
   "current": {
     "phase": "P10",
     "step": "P10.5"
@@ -1996,11 +1996,16 @@
         {
           "id": "P10.4",
           "title": "Move operational config out of env",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-01T11:37:19.193Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-10-02T11:14:34.512Z",
+          "commits": ["55a2904"],
+          "notes": [
+            {
+              "at": "2026-10-02T11:14:34.513Z",
+              "text": "All 11 operational env keys migrated to audited settings/rehearsal; 24 remaining keys reviewed as infrastructure/secrets, exact .env.example contract passes. Read-only Singapore SSM audit found only bootstrap version and no app parameters to remove; active staging revision 54 injects no removed operational names. Documented SSM migration boundary for open P08.6; rehearsal preparation/capture enforcement and full verification are recorded in 3344a29."
+            }
+          ]
         },
         {
           "id": "P10.5",
