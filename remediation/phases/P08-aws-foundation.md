@@ -92,6 +92,8 @@ staging client is `secure-channel.duckdns.org` and staging API is
      automated. Candidates: a small EC2/Lightsail reverse proxy (Caddy) in front of the service, or
      an NLB with an Elastic IP and the imported certificate. Show the owner the monthly cost of the
      chosen option before building it (it is outside ADR-008's plan).
+     Owner amendment on 2026-10-02: the owner points staging DNS at the supplied proxy IP;
+     Caddy may use HTTP/TLS-ALPN validation and automatic renewal without a DuckDNS token.
   2. Serve the staging static export through the client DuckDNS host and proxy API requests through
      the separate API DuckDNS host. Verify nested-name DNS, HTTPS renewal, host routing and CORS.
      Deploy the production client's static export to Firebase Hosting (`*.web.app`) from CI, with the API base

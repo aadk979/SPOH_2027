@@ -1,0 +1,25 @@
+{
+	acme_ca https://acme-v02.api.letsencrypt.org/directory
+}
+
+http://:80 {
+	@health path /healthz
+	respond @health "staging edge ready" 200
+	respond "Not found" 404
+}
+
+@@CLIENT_HOST@@ {
+	@private path /readyz
+	respond @private "Not found" 404
+	reverse_proxy @@API_ORIGIN@@
+}
+
+@@API_HOST@@ {
+	@api path /api/* /healthz
+	handle @api {
+		reverse_proxy @@API_ORIGIN@@
+	}
+	handle {
+		respond "Not found" 404
+	}
+}

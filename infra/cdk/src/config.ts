@@ -38,6 +38,16 @@ export const REPOSITORY = 'aadk979@138833125/SPOH_2027@1379786785';
 
 export const ACCOUNT_ENV = { account: '665146708212', region: 'ap-southeast-1' };
 
+/** D-08 staging proxy only; production creation still waits for the owner go decision. */
+export const STAGING_EDGE = {
+  instanceName: 'spoh-staging-edge',
+  staticIpName: 'spoh-staging-edge-ip',
+  clientHost: 'secure-channel.duckdns.org',
+  apiHost: 'api.secure-channel.duckdns.org',
+  bundleId: 'micro_3_0',
+  blueprintId: 'ubuntu_24_04',
+} as const;
+
 const tags = (env: StageName): StageConfig['tags'] => ({
   app: 'spoh-platform',
   env,

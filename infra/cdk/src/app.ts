@@ -1,10 +1,11 @@
-import { App, Tags, Validations } from 'aws-cdk-lib';
+import { App, type Stack, Tags, Validations } from 'aws-cdk-lib';
 import { AwsSolutionsChecks } from 'cdk-nag';
 import { ACCOUNT_ENV, REPOSITORY, STAGES, type StageConfig } from './config.js';
 import { DeployAccessStack } from './deployAccessStack.js';
 import { PlatformStack } from './platformStack.js';
+import { StagingEdgeStack } from './stagingEdgeStack.js';
 
-function tag(stage: StageConfig, stack: PlatformStack): void {
+function tag(stage: StageConfig, stack: Stack): void {
   for (const [key, value] of Object.entries(stage.tags)) Tags.of(stack).add(key, value);
 }
 
@@ -24,6 +25,11 @@ export function buildApp(app: App = new App()): App {
       description: `SPOH platform, ${stage.name} (ADR-008)`,
     });
     tag(stage, stack);
+  }
+  // Explicit provisioning does not change the automatic platform release or create a prod edge.
+  if ([true, 'true'].includes(app.node.tryGetContext('stagingEdge'))) {
+    const edge = new StagingEdgeStack(app, 'Spoh-staging-Edge', { env: ACCOUNT_ENV });
+    tag(STAGES.staging, edge);
   }
   // A finding fails synth; an accepted one needs a suppression with its reason.
   Validations.of(app).addPlugins(new AwsSolutionsChecks(app, { verbose: true }));

@@ -68,6 +68,18 @@ settings retain their database/cache-bus path. See the
 [`P08.6 verification report`](../../remediation/reports/P08/infrastructure-configuration.md).
 Secret completion, rotation and Access Analyzer verification remain open.
 
+## Staging HTTPS proxy (P08.5)
+
+`-c stagingEdge=true` adds the separate `Spoh-staging-Edge` stack. Provision only that stack,
+with its `ApiOrigin` parameter set to staging's `AppUrl` and `OperatorSshCidr` to the current
+operator IPv4 /32. It creates the approved new US$7/month Micro and attached static IP;
+the automatic platform release does not deploy this stack. The owner points the client/API
+DuckDNS names at the `PublicIp` output. Caddy's HTTP/TLS-ALPN validation then obtains and
+renews certificates without a DuckDNS token. See the
+[`staging proxy report`](../../remediation/reports/P08/staging-edge.md) for verification and limits.
+Updating instance user data is not a live Caddy configuration reload; deploy/reload verified
+configuration on the named new proxy explicitly. Preserve the existing live Lightsail site.
+
 Do not introduce operational parameters or environment overrides for attendance root/networks,
 rehearsal, upload lifetime/size, access-token lifetime or rate limits. They use the versioned
 settings registry or event lifecycle, as listed in

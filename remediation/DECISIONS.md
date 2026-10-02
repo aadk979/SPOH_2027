@@ -187,6 +187,10 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
     host routing to the existing staging service. This does not authorise changes to the live
     Lightsail site or creation of the production stack before the go decision. Same-site staging
     does not waive the production requirement to work without a third-party refresh cookie.
+    **DNS operation** (owner, 2026-10-02): the owner will point the staging DNS at the new
+    proxy after receiving its public IP, and explicitly authorised proceeding with provisioning.
+    Caddy uses HTTP/TLS-ALPN certificate validation and automatic renewal once both names resolve
+    to that IP; a DuckDNS token and DNS-01 integration are no longer required for this staging edge.
 
 ### D-09 — Scheduler engine
 
