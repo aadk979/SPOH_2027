@@ -19,3 +19,27 @@ export function enqueueArchiveReminder(
     select: { id: true },
   });
 }
+
+/** A worker must take the event lock before its action row when executing this reminder. */
+export async function cancelArchiveReminders(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  now: Date,
+) {
+  const rows = await tx.scheduledAction.updateManyAndReturn({
+    where: {
+      eventId: scope.eventId,
+      type: 'event.archiveReminder',
+      status: { in: ['PENDING', 'RUNNING'] },
+    },
+    data: {
+      status: 'CANCELLED',
+      completedAt: now,
+      lockedBy: null,
+      lockedUntil: null,
+      version: { increment: 1 },
+    },
+    select: { id: true },
+  });
+  return rows.map((row) => row.id);
+}

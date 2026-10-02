@@ -17,6 +17,7 @@ export async function recordLifecycleTransition(
     decision: TransitionEvaluation;
     closedWindows: string[];
     closeOut?: { unclaimedItems: number; finalSnapshotId: string; archiveReminderId: string };
+    reopen?: { supersededFinalSnapshotIds: string[]; cancelledArchiveReminderIds: string[] };
     reason?: string;
   },
 ): Promise<void> {
@@ -34,6 +35,9 @@ export async function recordLifecycleTransition(
       guardResults: {
         structure: snapshot.structure,
         hasBeenLive: snapshot.hasBeenLive,
+        ...(decision.action === 'Event.Reopen'
+          ? { platformAdmin: true, closedAt: snapshot.closedAt?.toISOString(), reopenHours: 48 }
+          : {}),
         blockers: [],
       },
       effects: [...decision.effects],
@@ -42,6 +46,7 @@ export async function recordLifecycleTransition(
         ? { closeOut: input.closeOut, closedAt: after.closedAt?.toISOString() }
         : {}),
       reason: reason ?? null,
+      ...(input.reopen ? { reopen: input.reopen } : {}),
     },
   });
   await publishCacheEvent(tx, 'event.state', {

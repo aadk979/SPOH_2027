@@ -4,6 +4,7 @@ import { closeRehearsalWindows } from '../../fallback/index.js';
 import { writeEventPhase, type LifecycleEvent } from '../data/lifecycleRepo.js';
 import type { TransitionEvaluation } from '../domain/lifecycle.js';
 import { closeEvent } from './closeEvent.js';
+import { reopenEvent } from './reopenEvent.js';
 
 /** Only effects of an already allowed transition execute, in the owning transaction. */
 export async function applyLifecycleEffects(
@@ -17,6 +18,7 @@ export async function applyLifecycleEffects(
   const row = await writeEventPhase(tx, actor.scope, {
     status: decision.to,
     ...(decision.to === 'CLOSED' ? { closedAt: now } : {}),
+    ...(decision.effects.includes('close.reopen') ? { closedAt: null } : {}),
   });
   const closeOut =
     decision.to === 'CLOSED'
@@ -27,5 +29,8 @@ export async function applyLifecycleEffects(
           now,
         })
       : undefined;
-  return { row, closedWindows: closeOut?.closedWindows ?? closedWindows, closeOut };
+  const reopen = decision.effects.includes('close.reopen')
+    ? await reopenEvent(tx, actor.scope, now)
+    : undefined;
+  return { row, closedWindows: closeOut?.closedWindows ?? closedWindows, closeOut, reopen };
 }

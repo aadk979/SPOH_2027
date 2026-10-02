@@ -45,7 +45,7 @@ export async function registrationStationTypeCount(tx: PrismaTransactionClient, 
 export async function writeEventPhase(
   tx: PrismaTransactionClient,
   scope: EventScope,
-  phase: { status: EventStatus; closedAt?: Date },
+  phase: { status: EventStatus; closedAt?: Date | null },
 ) {
   return tx.event.update({ where: { id: scope.eventId }, data: phase, select: LIFECYCLE });
 }

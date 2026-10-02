@@ -27,3 +27,16 @@ export function activeFinalSnapshot(tx: PrismaTransactionClient, scope: EventSco
     orderBy: { lifecycleVersion: 'desc' },
   });
 }
+
+export async function supersedeFinalSnapshots(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  now: Date,
+) {
+  const rows = await tx.reportSnapshot.updateManyAndReturn({
+    where: { eventId: scope.eventId, kind: 'FINAL', supersededAt: null },
+    data: { supersededAt: now },
+    select: { id: true },
+  });
+  return rows.map((row) => row.id);
+}

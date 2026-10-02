@@ -455,3 +455,37 @@ visual API then passed the complete run. All workspace typechecks, root lint, ar
 hardcoding, generated settings, changed-file formatting, server build and production client
 build passed by exit code. Browser groups ran serially with fresh disposable APIs to respect
 the sensitive-request limit. The visitor-sheet label preserves its existing row positions.
+
+## Audited reopening and reclose
+
+CLOSED → LIVE is now available within 48 hours of the recorded close, for a current
+platform admin in the event's own organisation with a written reason. The use case retains
+the retry → event → event-membership lock order and locks organisation membership while
+checking its role. Event Admin alone, another organisation's platform role, client-supplied
+authority, missing reasons and untrustworthy/expired close times cannot reopen the event.
+
+Reopening clears `closedAt`, supersedes active final snapshots without changing their
+documents, cancels pending or claimed obsolete archive reminders and records the reason,
+authority/window checks and affected IDs in the lifecycle audit. State/cache publication
+and retry settlement commit with those effects. Reclosing produces a new final snapshot and
+reminder, while the superseded evidence and cancelled reminder remain historical. Unrelated
+or terminal scheduled actions and other events are preserved. A future reminder handler must
+lock its event before its action row, consistent with the lifecycle lock order.
+
+READY → LIVE still fails closed with an unavailable server checklist. Allowing the LIVE
+request target for reopening does not bypass go-live readiness. ARCHIVED remains unavailable;
+its guards, effects and general write prohibition are separate work. P10.5 remains open.
+
+The organisation-authority concurrency test deliberately failed after removing the role
+share lock, because a role change could commit before the transition finished. The source
+was restored in `finally`. The boundary tests sign in again after advancing 48 hours, and
+browser tests use the rotated access token after page reload. The foreign-organisation
+fixture uses an upsert because the shared test reset retains organisations.
+
+Verification on 2026-10-02: full integration **714 passed / 4 existing skips**, server unit
+**493**, and serial phone/laptop close/preparation/reopen and late-sync browser E2E **7**
+passed. Twenty-one new database cases cover boundary time, current authority, concurrent
+role changes, rollback, retries, races, reminder leases, immutable snapshots and reclose.
+All workspace typechecks, root lint, architecture, hardcoding, generated settings,
+changed-file formatting and server build passed by exit code. No client rendering, visual
+baseline, migration, cloud resource or production data changed in this slice.
