@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T19:18:01.125Z",
+  "updatedAt": "2026-10-02T19:22:39.537Z",
   "current": {
-    "phase": "P10",
-    "step": "P10.7"
+    "phase": "P08",
+    "step": "P08.8"
   },
   "gates": [
     {
@@ -1715,7 +1715,8 @@
             "a852c535d1181d6073ac591a41ca6a1df09d2ede",
             "1a87f4ff0a529d2fa36e33c5e9f3ced488d933fb",
             "210db7b675173634aa4aa5c26d1c7979c27eb607",
-            "cd4c94083212889170ee741c4691c0256ff4ecea"
+            "cd4c94083212889170ee741c4691c0256ff4ecea",
+            "79c95b26ccf78ee0227671a0d64615da1588575a"
           ],
           "notes": [
             {
@@ -1733,6 +1734,10 @@
             {
               "at": "2026-10-02T18:20:08.560Z",
               "text": "HTTP definitions actually deployed at f0f647f: CI/infra/staging successful, UPDATE_COMPLETE matching image; exact native API dimensions/metrics/statistics/evaluation/no actions verified. Both OK solely from non-breaching missing data; no ALARM trigger/availability/notification claim. P08.8 owner delivery/catalogue still open."
+            },
+            {
+              "at": "2026-10-02T19:22:39.192Z",
+              "text": "Native RDS CPU detection: actual DB identifier, Average >90% in five consecutive minutes, missing data insufficient, no actions or DB changes. 37 infra tests/seven files including actual staging/prod nag synth; infra types/root lint/architecture/format/diff pass. Read-only diff pinned to deployed 6877a0e adds only alarm/output; 24 healthy native observations validate series, no ALARM trigger/deployment claimed. Initial test-only type assertion corrected. P08.8 stays open; storage must respect autoscaling, connections need verified limits, owner delivery/budget/dashboard remain."
             }
           ]
         },
@@ -3051,6 +3056,10 @@
     {
       "at": "2026-10-02T19:18:01.124Z",
       "text": "Timed category activity verified and published; continue independent native RDS CPU alarm slice under P08.8. Announcement drafts/durable delivery, reminders, further taxonomy/settings/day consumers, schedule CRUD/UI and archived/P11/P12 dependencies remain open; no programme-wide owner blocker."
+    },
+    {
+      "at": "2026-10-02T19:22:39.536Z",
+      "text": "Published bounded CPU monitoring slice; next actual-cost/model reconciliation and further P10 catalogue dependencies. Category source/tracker 46ce291/0d487a3 verified; no programme-wide owner blocker, no production/live changes."
     }
   ]
 }
