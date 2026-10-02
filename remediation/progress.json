@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T15:44:57.495Z",
+  "updatedAt": "2026-10-02T15:49:25.869Z",
   "current": {
     "phase": "P10",
     "step": "P10.7"
@@ -1711,11 +1711,18 @@
           "status": "in_progress",
           "startedAt": "2026-10-02T15:20:43.846Z",
           "completedAt": null,
-          "commits": ["a852c535d1181d6073ac591a41ca6a1df09d2ede"],
+          "commits": [
+            "a852c535d1181d6073ac591a41ca6a1df09d2ede",
+            "1a87f4ff0a529d2fa36e33c5e9f3ced488d933fb"
+          ],
           "notes": [
             {
               "at": "2026-10-02T15:20:43.895Z",
               "text": "Verified scheduler monitoring definitions: 29 infra tests/nag, infra types, lint/architecture/format; AWS filter probes accept valid gauges and reject invalid/unrelated observations. Real staging worker log observations verified. Read-only diff adds only 2 metric filters, 2 detection alarms and 2 outputs, using maximum and no default zeros. Deployment/real metric/alarm verification, SNS delivery, availability and broader observability remain pending. No notification sent; email needed only at notification deployment."
+            },
+            {
+              "at": "2026-10-02T15:49:25.159Z",
+              "text": "Staging 1e702e7 CI/infra/deploy successful; real worker gauges reach CloudWatch. Labelled finite synthetic current-time log observations triggered dead/lag ALARM at 15:42:35/15:43:31 UTC and normal zero gauges recovered OK at 15:46:35/15:46:31. No forced alarm state, queue/database mutation or notification actions. P08.8 stays open for SNS owner delivery, availability and remaining catalogue."
             }
           ]
         },
@@ -2124,15 +2131,16 @@
         {
           "id": "P10.6",
           "title": "Scheduler engine (D-09)",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-02T13:31:30.367Z",
-          "completedAt": null,
+          "completedAt": "2026-10-02T15:49:25.444Z",
           "commits": [
             "4c283d4140e62d7bc2fd999284cd75d4523bf510",
             "8a0449683ca3c0cb707124f22dc2944c92ff0f66",
             "a124bf6a9f8d5aaa6dd3ecfe97bd4acc419fb6c0",
             "c0b5105ae3b26f36887ef0c32136a36b5c0c2085",
-            "a852c535d1181d6073ac591a41ca6a1df09d2ede"
+            "a852c535d1181d6073ac591a41ca6a1df09d2ede",
+            "1a87f4ff0a529d2fa36e33c5e9f3ced488d933fb"
           ],
           "notes": [
             {
@@ -2158,6 +2166,10 @@
             {
               "at": "2026-10-02T15:20:44.288Z",
               "text": "Worker gauges now have reviewed CloudWatch metric filters and lag/dead alarm definitions. Engine stays open until deployed metric/alarm evidence; P08.8 owner notification delivery remains pending."
+            },
+            {
+              "at": "2026-10-02T15:49:25.494Z",
+              "text": "Full engine criteria pass: real concurrent claims/executions, fencing/current authority, atomic outcomes/audit/recurrence, rollback/retries/dead/crash recovery, API worker boot and shutdown, and deployed metric/filter/alarm triggering/recovery verified. Latest full local 846 DB/4 existing skips, 538 units, 7 browser journeys and all workspace/static/build gates pass. Remaining business catalogue/lifecycle belong to P10.7/P10.5; broader observability/notification delivery remains P08.8."
             }
           ]
         },
@@ -2188,6 +2200,10 @@
             {
               "at": "2026-10-02T15:44:57.494Z",
               "text": "Verified per-event lostPerson.purge migration and minute event discovery on existing worker tick: Event-first current-policy/alert locks; descriptions, summaries, scoped/legacy replay redaction, audits, completion and successor atomic without nested transactions. 13 new module plus 6 real discovery cases, 75 focused passes; full 846 DB/4 existing skips, 538 units, 7 browser journeys; all types/static/settings/build/format green. Visitor purge, remaining catalogue, generic consumers and lifecycle admission still open."
+            },
+            {
+              "at": "2026-10-02T15:49:25.868Z",
+              "text": "Continue visitor-field purge migration with locked fresh lifecycle/retention and atomic completion/audit; engine P10.6 complete, P10.5/P10.7 remain open."
             }
           ]
         },
