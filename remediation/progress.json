@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T12:38:09.722Z",
+  "updatedAt": "2026-10-02T12:47:16.663Z",
   "current": {
     "phase": "P08",
-    "step": "P08.6"
+    "step": "P08.5"
   },
   "gates": [
     {
@@ -1653,7 +1653,8 @@
           "completedAt": null,
           "commits": [
             "ff8fe1f7a78514d57c54abf4de5dbf59795d3f43",
-            "89366e4e207cec0b678823ea76d38973b9101ec4"
+            "89366e4e207cec0b678823ea76d38973b9101ec4",
+            "5b30b3b685cc5a8240e2ed205d885f22ca496596"
           ],
           "notes": [
             {
@@ -1663,6 +1664,10 @@
             {
               "at": "2026-10-02T12:36:53.599Z",
               "text": "Explicit Bash wrapper fixes observed Lightsail sh bootstrap failure; repaired new instance through pinned-host SSH. Public health 200; Caddy restricted service active/enabled. 24 infra tests/type/lint/shell syntax and sh-to-Bash runtime probe pass. DNS still old IP; no TLS completion claimed."
+            },
+            {
+              "at": "2026-10-02T12:47:16.662Z",
+              "text": "Verified separate client landing origin without changing API OAuth callback/state/PKCE or active staging routing. Optional canonical CLIENT_BASE_URL documented as 25th infra/secret key. Focused hosted14, full integration743+4 skips, server505 units; workspace types/lint/arch/hardcoding/settings/serverbuild/format pass. Runtime client config and DNS/HTTPS/Cognito/CORS/browser activation remain open."
             }
           ]
         },
