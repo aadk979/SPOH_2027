@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T13:03:40.680Z",
+  "updatedAt": "2026-10-02T13:25:32.326Z",
   "current": {
     "phase": "P10",
     "step": "P10.5"
@@ -2058,7 +2058,8 @@
             "3344a29",
             "91f6943",
             "2db2108",
-            "a79b131b0150c00f210be5e1a6d5a924de14d187"
+            "a79b131b0150c00f210be5e1a6d5a924de14d187",
+            "05fc4c40a69612a61412093408d427c681234e4b"
           ],
           "notes": [
             {
@@ -2108,6 +2109,10 @@
             {
               "at": "2026-10-02T13:03:40.679Z",
               "text": "Per-item go-live override contract, pure guard/current own-org platform authority and atomic reason/check audit implemented. First go-live still fails closed with unavailable actual checklist. Focused DB46/full754+4skip/server531/shared23/client262 and type/lint/arch/hardcode/settings/format/build pass. New successful DB cases substitute only future checklist producer. Complete readiness/archive/read-only/retention/Cedar remain open."
+            },
+            {
+              "at": "2026-10-02T13:25:32.325Z",
+              "text": "Private archive storage composition adds injected archivedAt, all-standing membership ending, obsolete reminder cancellation, guard/effect audit and atomic membership/state invalidation. Public ARCHIVED remains unsupported pending write/read/retention enforcement. Focused72/full762+4skip/server531/types/lint/arch/hardcode/settings/format/build pass. Frozen reports, shared personal fields and other events preserved; no timers/backup job enabled."
             }
           ]
         },
