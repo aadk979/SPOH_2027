@@ -49,7 +49,7 @@ Read-only AWS inventory in `ap-southeast-1` found only the CDK bootstrap version
 (`/cdk-bootstrap/hnb659fds/version`) in SSM and **no application parameters**. The active
 staging task definition revision 54 injects 14 infrastructure environment names and two
 secret names; none of the eleven removed operational keys is injected. The repository likewise
-defines no application SSM parameters, so no deployed application parameter requires deletion.
+defined no application SSM parameters at that checkpoint, so none required deletion.
 No AWS values, secrets or resources were changed for this audit.
 
 The SSM migration instruction for P08.6 is therefore to create only non-secret infrastructure
@@ -59,6 +59,10 @@ in new SSM parameters. `DB_HOST`, `DB_NAME` and credential transport names are c
 entrypoint inputs used to construct `DATABASE_URL`, rather than additional server schema keys.
 This closes the P10.4 environment reduction; the P08.6 SSM injection/secret-rotation work,
 remaining P10.5 lifecycle edges and later Cedar enforcement retain their own exit criteria.
+
+The subsequent [P08.6 infrastructure injection slice](../P08/infrastructure-configuration.md)
+defines the 14 existing non-secret container infrastructure values in SSM. It preserves this
+completed audit's operational boundary and leaves the server schema's 24 keys unchanged.
 
 Verification: configuration example/schema tests, shared **23**, server **493** and client
 **262** unit tests, full integration **693 passed / 4 existing skips**, serial browser **7**,

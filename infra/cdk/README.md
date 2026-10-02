@@ -54,10 +54,19 @@ service stays in production mode, and a production stack name is refused before 
 
 ## Configuration migration boundary (P10.4 / P08.6)
 
-The P10.4 audit found no application SSM parameters to remove in Singapore; only the CDK
-bootstrap version parameter exists. Current task definitions inject non-secret infrastructure
-directly and secrets through Secrets Manager. P08.6 will create SSM parameters for non-secret
-infrastructure and add its remaining secret/rotation checks.
+The P10.4 audit checkpoint found no application SSM parameters to remove in Singapore.
+P08.6 now defines 14 standard `String` parameters under `/spoh/<stage>/infra/<ENV_NAME>` and
+injects them at task startup. The app execution role can read only its 14 parameters; the
+migration execution role reads only `DB_HOST` and `DB_NAME`. Application task roles do not gain
+SSM access. Credentials remain in Secrets Manager, and no environment file is included in an image.
+
+The parameter values preserve the existing API Gateway origin, Cognito settings and one-proxy
+configuration. P08.5 will change routing when its DuckDNS edge is verified. Infrastructure
+values are code-owned and released through CDK/CI: ECS does not reload changed parameters into
+running containers, so changing a parameter requires a new task deployment. Operational live
+settings retain their database/cache-bus path. See the
+[`P08.6 verification report`](../../remediation/reports/P08/infrastructure-configuration.md).
+Secret completion, rotation and Access Analyzer verification remain open.
 
 Do not introduce operational parameters or environment overrides for attendance root/networks,
 rehearsal, upload lifetime/size, access-token lifetime or rate limits. They use the versioned

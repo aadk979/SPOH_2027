@@ -28,6 +28,7 @@ import type { AppSecrets } from './appSecrets.js';
 import type { StageConfig } from './config.js';
 import type { NetworkDatabase } from './networkDatabase.js';
 import type { CognitoSettings } from './stagingIdentity.js';
+import { AppInfrastructureConfig } from './appInfrastructureConfig.js';
 
 const PORT = 4000;
 
@@ -53,6 +54,7 @@ export interface AppServiceProps {
 export class AppService extends Construct {
   readonly service?: FargateService;
   readonly migrateTask: FargateTaskDefinition;
+  private readonly configuration: AppInfrastructureConfig;
 
   constructor(scope: Construct, id: string, props: AppServiceProps) {
     super(scope, id);
@@ -72,6 +74,13 @@ export class AppService extends Construct {
       removalPolicy: stage.name === 'prod' ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
     });
     const imageOf = (tag: string) => ContainerImage.fromEcrRepository(props.repository, tag);
+    this.configuration = new AppInfrastructureConfig(this, 'Configuration', {
+      stage,
+      databaseHost: data.database.dbInstanceEndpointAddress,
+      appOrigin: props.api.apiEndpoint,
+      cognito: props.cognito,
+      port: PORT,
+    });
 
     this.migrateTask = this.migrationTask(props, imageOf(props.imageTag), logs);
     // Egress for Cognito, Secrets Manager, ECR and S3; RDS has its own rule.
@@ -114,7 +123,7 @@ export class AppService extends Construct {
   }
 
   private appTask(props: AppServiceProps, image: ContainerImage, logs: LogGroup) {
-    const { stage, data, secrets, cognito, api } = props;
+    const { stage, secrets } = props;
     const task = new FargateTaskDefinition(this, 'AppTask', {
       cpu: stage.app.cpu,
       memoryLimitMiB: stage.app.memoryMiB,
@@ -123,30 +132,13 @@ export class AppService extends Construct {
         operatingSystemFamily: OperatingSystemFamily.LINUX,
       },
     });
-    const origin = api.apiEndpoint;
     task.addContainer('app', {
       image,
       command: ['serve'],
       logging: LogDrivers.awsLogs({ logGroup: logs, streamPrefix: 'app' }),
       portMappings: [{ containerPort: PORT, name: 'http' }],
-      environment: {
-        NODE_ENV: 'production',
-        PORT: String(PORT),
-        LOG_LEVEL: 'info',
-        DB_HOST: data.database.dbInstanceEndpointAddress,
-        DB_NAME: 'spoh',
-        AUTH_PROVIDER: 'cognito',
-        COGNITO_REGION: stage.region,
-        COGNITO_USER_POOL_ID: cognito.userPoolId,
-        COGNITO_CLIENT_ID: cognito.clientId,
-        COGNITO_DOMAIN: cognito.domain,
-        APP_BASE_URL: origin,
-        CORS_ALLOWED_ORIGINS: origin,
-        // API Gateway is the one proxy in front of the task.
-        TRUST_PROXY_HOPS: '1',
-        AWS_REGION: stage.region,
-      },
       secrets: {
+        ...this.configuration.appInjections,
         DB_APP_PASSWORD: EcsSecret.fromSecretsManager(secrets.appDbPassword),
         SESSION_SIGNING_SECRET: EcsSecret.fromSecretsManager(secrets.sessionSigningSecret),
       },
@@ -184,8 +176,8 @@ export class AppService extends Construct {
       image,
       command: ['migrate'],
       logging: LogDrivers.awsLogs({ logGroup: logs, streamPrefix: 'migrate' }),
-      environment: { DB_HOST: data.database.dbInstanceEndpointAddress, DB_NAME: 'spoh' },
       secrets: {
+        ...this.configuration.migrationInjections,
         DB_ADMIN_USER: EcsSecret.fromSecretsManager(admin, 'username'),
         DB_ADMIN_PASSWORD: EcsSecret.fromSecretsManager(admin, 'password'),
         DB_MIGRATOR_PASSWORD: EcsSecret.fromSecretsManager(secrets.migratorDbPassword),
@@ -257,11 +249,6 @@ function acknowledgeTask(task: FargateTaskDefinition): void {
   Validations.of(task).acknowledge({
     id: 'AwsSolutions-IAM5[Resource::*]',
     reason:
-      'The execution role ecr:GetAuthorizationToken, which AWS only grants on "*"; image pulls and secret reads are scoped to their resources.',
-  });
-  Validations.of(task).acknowledge({
-    id: 'AwsSolutions-ECS2',
-    reason:
-      'The environment holds non-secret configuration only (hosts, ids, flags); every secret is injected from Secrets Manager.',
+      'The execution role ecr:GetAuthorizationToken, which AWS only grants on "*"; image pulls, secret reads and SSM reads are scoped to their resources.',
   });
 }
