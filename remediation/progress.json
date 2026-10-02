@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T16:27:46.631Z",
+  "updatedAt": "2026-10-02T16:44:46.403Z",
   "current": {
     "phase": "P10",
     "step": "P10.7"
@@ -2184,7 +2184,8 @@
             "df85f7b1e710dda56f51d11e4ce2598fcba31d95",
             "453169767bd56c45e0466996b879ef261c29fe1a",
             "0c15ca0935d42bfaf3ef9bf272a9c11da55e1048",
-            "a283d4a16bc2ba932267bab09334b2028abc1872"
+            "a283d4a16bc2ba932267bab09334b2028abc1872",
+            "66f57b7cc87f685ae6f72f3364ba68599e38b511"
           ],
           "notes": [
             {
@@ -2214,6 +2215,10 @@
             {
               "at": "2026-10-02T16:27:46.630Z",
               "text": "Live capture.open consumer: current event/station count controls, atomic mixed imports, preserved safety and CLOSED offline grace, completed replay, exclusive policy writes/reset against admitted captures. Focused 60, full integration 887+4 skips/73 files, 538 unit, ten browser journeys, all types/static/settings/build/format pass. Timed handler/UI and other actions pending."
+            },
+            {
+              "at": "2026-10-02T16:44:46.402Z",
+              "text": "Timed setting.apply for event/station capture.open: current creator capability, strict scope/value/version, provided transaction for policy/history/audit/notification/completion, stale and concurrent version refusals. Focused 62, full integration 914+4 existing skips/74 files, 538 unit, 14 distinct browser journeys including actual-worker pause/resume; all types/static/settings/build/format pass. Other keys/platform scope, UI and catalogue actions remain pending."
             }
           ]
         },
