@@ -179,6 +179,13 @@ Its values, count-only receipts, job completion and successor share the worker t
 `capture.open` setting (event or station scope), or `taxonomy.setActive` for a category. It is not
 a separate mechanism.
 
+**Capture control consumer (P10.7, 2026-10-03).** `capture.open` controls count/journey
+writes and import commits using the current station → event → default policy. Card issuance
+has no station in its existing request and uses the event policy. A policy write takes the
+exclusive Event lock against captures' shared lock. Station overrides cannot bypass lifecycle
+admission. Valid pre-close offline captures retain CLOSED's bounded receipt grace. Safety actions
+remain a separate functional group (ADR-005): pausing counts does not disable safety reporting.
+
 Recurring system jobs are created at boot by `ensureRecurring(type, interval)`, an upsert by
 `dedupeKey`. Every instance calls it, and only one row results.
 

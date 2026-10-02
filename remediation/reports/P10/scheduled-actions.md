@@ -127,3 +127,36 @@ or visual baseline changed. Only dedicated localhost:5435 `_test` databases were
 Generic setting consumers, further handlers and lifecycle admission remain open. P08.8's
 lag/dead-action filters and detection alarms are deployed and their real triggering/recovery
 is verified; notification delivery and the remaining observability criteria are still pending.
+
+## Live count-capture controls (2026-10-03)
+
+`capture.open` now controls count/journey writes before scheduling is exposed. Every registration,
+group, footfall tick/bulk capture, stamp and gift redemption resolves its current event/station
+policy inside the capture transaction. Card issue has no station in its existing contract, so it
+uses the event policy. Import commits check every distinct station in the planned new rows before
+inserting any; a mixed-station refusal rolls the whole batch back. Previews stay read-only.
+
+Station overrides retain ADR-003's station → event → default precedence. They cannot bypass
+lifecycle admission. LIVE and REHEARSAL both respect the control; invalid stored overrides fall
+back through the existing validated resolver. Reset/resume takes effect on the next write without
+depending on the compatibility cache. Completed retries replay their committed result after a
+pause, while a fresh key is refused. Valid strictly pre-close queued captures retain ADR-004's
+CLOSED receipt-grace exception; new/at-close captures remain refused.
+
+Count controls are separate from Safety actions in ADR-005. Pausing counts does not disable
+incident, lost-person or found-item reporting; those keep the existing lifecycle admission.
+Generic event/station setting writes and resets now take the exclusive Event lock. A previously
+admitted capture finishes before its policy changes; an admission waiting behind that change
+reads the newly committed value. Concurrent captures can still share the Event lock.
+
+Focused verification: **60 database checks** passed, including 19 new control cases. The initial
+HTTP lock probe did not observe the intended admission boundary; the corrected test calls the
+admission boundary directly and waits for its actual Event share lock. All workspace types,
+538 server units, lint, architecture, hardcoding, generated settings and server build passed.
+Full integration: **887 passed/four existing skips, 73 files**. Ten serial browser journeys
+passed against the rebuilt API: count capture/undo/offline sync, two-device safety delivery,
+pre-close incident sync and phone/laptop close-out labels. Changed formatting and diff checks
+passed. No schema/client layout/baseline changed; dedicated local `_test` databases only.
+
+The timed `setting.apply` handler, scheduling endpoints/timeline and client pause controls are
+still pending. This slice establishes the actual capture consumer and its transaction ordering.

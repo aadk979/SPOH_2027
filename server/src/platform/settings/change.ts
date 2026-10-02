@@ -41,6 +41,8 @@ async function assertUnlocked(
   key: SettingKey,
 ): Promise<void> {
   if (target.scope === 'platform') return;
+  // Capture holds a share lock: policy changes wait for admitted writes, then exclude new ones.
+  await tx.$queryRaw`SELECT id FROM "Event" WHERE id = ${target.eventId} FOR UPDATE`;
   const event = await holdCaptureEvent(tx, target);
   if (SETTINGS[key].lockedIn.includes(event.status)) {
     throw new ConflictError(

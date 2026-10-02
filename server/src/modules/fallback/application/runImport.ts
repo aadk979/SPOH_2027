@@ -6,8 +6,9 @@ import { createImportBatch } from '../data/repo.js';
 import type { ImportPlan } from '../domain/importPlan.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { assertImportProvenance, type ImportProvenance } from './importProvenance.js';
+import { assertCountCaptureOpen } from '../../../platform/db/countCaptureAdmission.js';
 
-interface ImportInput<T> {
+interface ImportInput<T extends { stationId: string }> {
   source: 'FALLBACK_SHEET' | 'PAPER';
   commit: boolean;
   rowCount: number;
@@ -30,7 +31,7 @@ interface Outcome {
  * transaction with its ImportBatch and audit row — the same plan/apply shape
  * as the roster import.
  */
-export async function runImport<T>(
+export async function runImport<T extends { stationId: string }>(
   input: ImportInput<T>,
   actor: ActorContext,
 ): Promise<ImportResponse> {
@@ -55,13 +56,16 @@ export async function runImport<T>(
  * another import wrote since the plan was made are skipped by the insert
  * rather than written twice, and counted as skipped.
  */
-async function applyPlan<T>(
+async function applyPlan<T extends { stationId: string }>(
   input: ImportInput<T>,
   { volunteerId, membershipId, scope, audit }: ActorContext,
 ): Promise<Outcome> {
   const { plan } = input;
   return prisma.$transaction(async (tx) => {
     await assertImportProvenance(tx, scope, input.provenance);
+    for (const stationId of new Set(plan.creates.map(({ record }) => record.stationId))) {
+      await assertCountCaptureOpen(tx, scope, stationId);
+    }
     const created = await input.insert(
       tx,
       scope,

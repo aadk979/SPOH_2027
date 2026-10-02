@@ -1,6 +1,7 @@
 import { roleMeets } from '@spoh/shared';
 import type { PrismaTransactionClient } from '../db/client.js';
-import { admitCapture, type CaptureAdmissionRequest } from '../db/captureAdmission.js';
+import type { CaptureAdmissionRequest } from '../db/captureAdmission.js';
+import { admitCountCapture } from '../db/countCaptureAdmission.js';
 import { StationScopeError } from '../errors/index.js';
 import { shiftFilter } from '../event/runningShifts.js';
 import type { CaptureContext } from '../http/captureActor.js';
@@ -12,8 +13,9 @@ export async function captureStation(
   request: CaptureAdmissionRequest & { stationId: string },
 ) {
   const { scope, actor } = context;
-  const { shiftAt, ...provenance } = await admitCapture(tx, scope, {
+  const { shiftAt, ...provenance } = await admitCountCapture(tx, scope, {
     request,
+    stationId: request.stationId,
     clock: context.clock,
   });
   const membership = await tx.eventMembership.findFirst({
