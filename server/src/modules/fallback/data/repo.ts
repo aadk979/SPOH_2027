@@ -157,10 +157,10 @@ export async function stationIdsByCode(scope: EventScope): Promise<Map<string, s
   return new Map(stations.map((station) => [station.code.toUpperCase(), station.id]));
 }
 
-/** The event's categories by code, for placing imported rows. */
+/** Only current active categories can be planned for a new registration import. */
 export async function categoryIdsByCode(scope: EventScope): Promise<Map<string, string>> {
   const categories = await prisma.captureCategory.findMany({
-    where: { eventId: scope.eventId },
+    where: { eventId: scope.eventId, active: true },
     select: { id: true, code: true },
   });
   return new Map(categories.map((category) => [category.code, category.id]));

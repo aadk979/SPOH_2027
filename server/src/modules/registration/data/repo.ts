@@ -31,10 +31,10 @@ export async function findCategory(
   db: PrismaTransactionClient,
   scope: EventScope,
   code: string,
-): Promise<{ id: string; code: string; label: string } | null> {
+): Promise<{ id: string; code: string; label: string; active: boolean } | null> {
   return db.captureCategory.findUnique({
     where: { eventId_code: { eventId: scope.eventId, code } },
-    select: { id: true, code: true, label: true },
+    select: { id: true, code: true, label: true, active: true },
   });
 }
 

@@ -35,7 +35,7 @@ export async function recordRegistration(
 
   const registration = await prisma.$transaction(async (tx) => {
     const mode = await captureStation(tx, { scope, actor, clock }, request);
-    const category = await requireCategory(tx, scope, request.category);
+    const category = await requireCategory(tx, scope, { code: request.category, admission: mode });
     const row = await createRegistration(tx, scope, {
       categoryId: category.id,
       stationId: station.id,

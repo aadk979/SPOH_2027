@@ -5,6 +5,9 @@ import {
 } from './importProvenance.js';
 import type { ImportRegistrationsRequest, ImportResponse } from '@spoh/shared';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
+import type { PrismaTransactionClient } from '../../../platform/db/client.js';
+import type { EventScope } from '../../../platform/db/eventScope.js';
+import { assertActiveCategoryIds } from '../../../platform/db/categoryCaptureAdmission.js';
 import {
   categoryIdsByCode,
   existingRegistrationKeys,
@@ -95,7 +98,7 @@ export async function importRegistrations(
       notes: request.notes ?? null,
       plan,
       provenance,
-      insert: insertRegistrations,
+      insert: insertActiveRegistrations,
     },
     actor,
   );
@@ -103,4 +106,13 @@ export async function importRegistrations(
 
 function keyOf(keyed: KeyedRecord<unknown>): string {
   return keyed.key;
+}
+
+async function insertActiveRegistrations(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  rows: Parameters<typeof insertRegistrations>[2],
+) {
+  await assertActiveCategoryIds(scope, { db: tx, ids: rows.map((row) => row.categoryId) });
+  return insertRegistrations(tx, scope, rows);
 }

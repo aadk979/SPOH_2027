@@ -280,3 +280,12 @@ Metadata-only keyset paging never loads full bodies for the list. Stored exports
 current visitor sheet; default whole-event frozen FINAL reads are unchanged. See the
 [read/export evidence](report-snapshot-reads.md). Snapshot selection UI and automatic scheduling
 declarations remain pending; this read API does not expose schedule creation.
+
+## Category capture consumer (2026-10-03)
+
+Single/group registration enforces category activity under Event admission; group card
+issuance rolls back with a refused member. Import planning filters inactive categories,
+and commit rechecks planned ids under the same shared Event lock. Completed replay,
+historical report labels/counts and valid CLOSED pre-close offline receipts remain intact.
+Timed category activity writes remain the next slice. See the
+[admission evidence](category-capture-controls.md). P10.5/P10.7 stay open.

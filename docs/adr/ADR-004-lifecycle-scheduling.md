@@ -223,6 +223,14 @@ detail and exports parse the saved document without regeneration. DAILY and supe
 have explicit provenance labels, and stored exports contain no current visitor sheet. A DAILY
 document never replaces the active FINAL default. Snapshot selection UI remains pending.
 
+**Category capture consumer (P10.7, 2026-10-03).** Registration checks current category activity
+under the shared Event admission lock, including every group member and planned import id.
+Import planning retains row-issue/partial-import semantics; commit rechecks after waiting on
+the lock. Activity changes must take the exclusive Event lock first. Completed retry receipts
+and valid CLOSED pre-close offline receipts retain their existing semantics; imports gain no
+CLOSED grace. Inactive categories keep their historical counts and labels in reports. Timed
+category activity writes are a separate subsequent slice.
+
 Recurring system jobs are created at boot by `ensureRecurring(type, interval)`, an upsert by
 `dedupeKey`. Every instance calls it, and only one row results.
 
