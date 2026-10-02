@@ -1,5 +1,10 @@
 # P10.6 — Durable scheduler engine
 
+Current continuation: API boot now activates the verified `session.prune` handler. See
+[scheduled-actions.md](scheduled-actions.md). The sections below record each earlier verified
+slice; their activation-pending statements describe those checkpoints. P10.6 remains open for
+complete integration and P08.8 alarm verification.
+
 P10.6 is in progress. P10.5 remains open: archive retention needs the durable engine before
 it can be enabled. This is an internal prerequisite, not a completed lifecycle or scheduler gate.
 

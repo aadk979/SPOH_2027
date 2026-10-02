@@ -1,19 +1,10 @@
 import { logger } from '../logger/index.js';
 
 /**
- * In-process scheduled jobs.
- *
- * Deliberately a `setInterval` rather than EventBridge or a queue: there are
- * four jobs, all idempotent, all cheap, and none is worth a second piece of
- * infrastructure to operate at 10am on 7 January (BUILD_PLAN §1.1).
- *
- * Every job is safe to run concurrently on multiple instances — the purge
- * claims each alert with a conditional write, the prunes are bounded deletes
- * and the settings refresh only reads — so no leader election is needed.
- *
- * Modules and platform services declare their jobs; the composition root
- * (app/jobs.ts) lists them and starts them here. P10 replaces the interval
- * with the job table.
+ * Legacy interval composition during P10.7's handler migration. Refresh-session
+ * pruning already runs through the durable engine in app/startScheduledJobs.ts.
+ * Remaining business jobs move there one verified module at a time; only cache
+ * maintenance remains a local tick when the migration is complete.
  */
 
 /** A job a module registers: a name for the logs, how often, and what to run. */

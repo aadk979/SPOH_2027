@@ -2,4 +2,4 @@
 export { authRouter } from './http/routes.js';
 export { pruneRefreshSessions } from './application/pruneSessions.js';
 export { revokeAllForVolunteer } from './application/revokeSessions.js';
-export { authJobs } from './jobs.js';
+export { authScheduledHandlers, authRecurringActions } from './jobs.js';

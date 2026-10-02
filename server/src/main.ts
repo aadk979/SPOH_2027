@@ -1,11 +1,13 @@
 import { createApp } from './app/createApp.js';
 import { env } from './config/env.js';
 import { logger } from './platform/logger/index.js';
-import { disconnectPrisma, pingDatabase } from './platform/db/client.js';
+import { pingDatabase } from './platform/db/client.js';
 import { loadSettings } from './platform/settings/index.js';
 import { JOBS } from './app/jobs.js';
 import { startJobs } from './platform/scheduler/index.js';
-import { startCacheBus, stopCacheBus } from './platform/events/cacheBus.js';
+import { startCacheBus } from './platform/events/cacheBus.js';
+import { registerShutdown } from './app/shutdown.js';
+import { startScheduledJobs } from './app/startScheduledJobs.js';
 
 /**
  * The server's start-up, top to bottom: database, settings, app, jobs, listen,
@@ -26,32 +28,14 @@ async function main(): Promise<void> {
   await startCacheBus();
 
   const app = createApp();
+  const scheduler = await startScheduledJobs();
   const jobs = startJobs(JOBS);
 
   const server = app.listen(env.PORT, () => {
     logger.info({ port: env.PORT, env: env.NODE_ENV }, 'server listening');
   });
 
-  // Give in-flight capture writes a chance to finish before the process exits.
-  const shutdown = (signal: string): void => {
-    logger.info({ signal }, 'shutting down');
-    jobs.stop();
-
-    server.close(() => {
-      void stopCacheBus()
-        .then(() => disconnectPrisma())
-        .finally(() => process.exit(0));
-    });
-
-    // Hard limit: a deploy must not hang on a stuck connection.
-    setTimeout(() => {
-      logger.warn('forced shutdown after timeout');
-      process.exit(1);
-    }, 10_000).unref();
-  };
-
-  process.on('SIGTERM', () => shutdown('SIGTERM'));
-  process.on('SIGINT', () => shutdown('SIGINT'));
+  registerShutdown({ server, jobs, scheduler });
 }
 
 main().catch((error: unknown) => {

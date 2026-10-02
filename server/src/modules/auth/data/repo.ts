@@ -145,8 +145,12 @@ export async function listLiveSessions(volunteerId: string, now: Date) {
 }
 
 /** Expired rows, and rows revoked before the cutoff. Returns how many went. */
-export async function deleteStaleSessions(now: Date, revokedBefore: Date): Promise<number> {
-  const { count } = await prisma.refreshSession.deleteMany({
+export async function deleteStaleSessions(
+  tx: PrismaTransactionClient,
+  cutoff: { now: Date; revokedBefore: Date },
+): Promise<number> {
+  const { now, revokedBefore } = cutoff;
+  const { count } = await tx.refreshSession.deleteMany({
     where: {
       OR: [{ expiresAt: { lt: now } }, { revokedAt: { lt: revokedBefore } }],
     },
