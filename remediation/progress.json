@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T17:12:56.790Z",
+  "updatedAt": "2026-10-02T17:34:30.707Z",
   "current": {
     "phase": "P10",
     "step": "P10.7"
@@ -2191,7 +2191,8 @@
             "0c15ca0935d42bfaf3ef9bf272a9c11da55e1048",
             "a283d4a16bc2ba932267bab09334b2028abc1872",
             "66f57b7cc87f685ae6f72f3364ba68599e38b511",
-            "e362c571db7303a1c7526f9a17444c6518dba5a8"
+            "e362c571db7303a1c7526f9a17444c6518dba5a8",
+            "961a04137201b75bd5d37f959d90cf58be823efe"
           ],
           "notes": [
             {
@@ -2229,6 +2230,10 @@
             {
               "at": "2026-10-02T17:12:56.492Z",
               "text": "Verified timed event.transition: strict shared input, current event/organisation authority, expected versions, post-wait clock and atomic close/reopen. 47 new cases; 101 focused, full 961 integration/4 existing skips/77 files, 538 server+23 shared units, ten serial browser journeys. All types/static/settings/shared-server build/format/diff pass. Initial retained-organisation fixture collision corrected; remaining catalogue/CRUD/UI dependencies stay open."
+            },
+            {
+              "at": "2026-10-02T17:34:30.334Z",
+              "text": "Verified one-off DAILY report.snapshot: current report permission, completed event day from current timezone/boundary, live-only default and explicit practice label; immutable action-keyed document/audit/completion atomic. 37 new cases, focused 81, full 998 integration/4 skips/80 files, 538 units, ten serial browser journeys and all types/static/settings/build/format/diff checks pass. Fixture schema/date errors corrected. FINAL stays close-out-owned; automatic declarations, snapshot reads/UI and catalogue dependencies remain open."
             }
           ]
         },
@@ -2997,6 +3002,10 @@
     {
       "at": "2026-10-02T17:12:56.789Z",
       "text": "Published lifecycle source e362c57. Read-only staging verifies actual image 011eb9c, CI 37036021368/deploy 37036451555 success and both scheduler alarms OK; DNS still 13.251.60.83 at 01:02 SGT, approved edge 3.0.69.248. P08 and programme remain active; no owner-controlled programme blocker."
+    },
+    {
+      "at": "2026-10-02T17:34:30.706Z",
+      "text": "Published daily snapshot source 961a041. Previous lifecycle 53c67aa actual staging image verified, CI 37039209382/deploy 37039707778 succeeded. Continue independent P08 native HTTP metric/alarms while pending owner DNS leaves approved edge at 3.0.69.248; programme remains active without owner-controlled programme blocker."
     }
   ]
 }
