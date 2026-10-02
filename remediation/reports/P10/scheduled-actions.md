@@ -234,3 +234,39 @@ changed formatting and diff checks passed. The first typecheck corrected two fix
 mistakes. The first full run then exposed a retained-organisation slug collision; an idempotent
 fixture upsert fixed it, and the complete rerun passed. No schema, client layout, visual baseline
 or infrastructure definition changed. P10.5/P10.7 stay open for their remaining exit criteria.
+
+## Timed daily report snapshots (2026-10-03)
+
+`report.snapshot` is registered in the real API worker for **one-off user DAILY snapshots**.
+Its strict payload requires the event day; practice inclusion is an optional boolean, default
+false. Event identity comes from the stored action. Current active `report.generate` authority
+is checked under a membership lock. System/platform creators, user recurrence, foreign/missing
+days, arbitrary date bounds, FINAL requests and ARCHIVED writes are refused.
+
+The worker's exclusive Event lock keeps captures, corrections and configuration stable while
+the existing transaction-aware report generator runs. The day range uses the current event's
+timezone/day boundary, includes its start, excludes its end and can run at the exact completion
+instant. Spring/fall DST days remain 23/25 hours. A late execution includes committed corrections
+without moving the selected day. The provided transaction owns generation, DAILY document
+storage, metadata-only SCHEDULE audit and completion. A five-boundary failure rollback permits
+one clean retry; competing executors of a single claim produce one document and one outcome.
+
+Documents retain their range, generation time, practice label and lifecycle version. Existing
+database immutability protects them. A later occurrence can freeze new data without editing its
+predecessor. DAILY never replaces or supersedes the FINAL document or frozen default reads;
+FINAL remains owned by close-out. The public report schema excludes visitor values and transient
+lost-person descriptions. Snapshot listing/reads/UI and automatic recurrence declarations remain
+pending; no new public scheduler endpoint is implied.
+
+Focused verification: **81 database checks** passed after correcting new fixture/schema/date
+mistakes, including 36 new cases; the additional waiting-capture concurrency check passed in the
+full suite, for 37 new cases. **Ten serial browser journeys** passed across two fresh rebuilt disposable API runs,
+including phone/laptop actual-worker generation of live-only and explicitly practice-inclusive
+daily documents. The local guarded fixtures cancel leftovers Event-first, restore synthetic
+capture/day fixtures and retain immutable document/audit receipts. Types/static/settings/server
+build, changed formatting/diff checks and **538 server units** pass. Full integration:
+**998 passed/four existing skips, 80 files**. All workspace types passed after fixing the
+fixture/schema errors; server types, lint and architecture passed again after the added concurrency
+test. The new audit action is explicitly catalogued. Snapshot stored bodies and outcome errors
+contain no transient descriptions or private exception text.
+No schema, client layout, visual baseline or infrastructure definition changed.

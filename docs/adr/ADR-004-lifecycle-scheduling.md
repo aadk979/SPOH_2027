@@ -162,7 +162,7 @@ scheduled action therefore cannot outlive its author's authority.
 | `setting.apply`                        | `{ scope, scopeId, key, value }`                           | `settings`      | —                              |
 | `taxonomy.setActive`                   | `{ kind: category \| stationType \| station, id, active }` | `taxonomy`      | —                              |
 | `fallback.remind`                      | `{ windowId }`                                             | `fallback`      | —                              |
-| `report.snapshot`                      | `{ kind: daily \| final }`                                 | `reports`       | —                              |
+| `report.snapshot`                      | `{ kind: daily, eventDayId, includeRehearsal? }`           | `report`        | —                              |
 | `lostPerson.purge` (recurring, 15 min) | —                                                          | `lostPersons`   | the per-worker purge (F03-031) |
 | `visitor.purge` (hourly)               | —                                                          | `visitor`       | the visitor-field interval     |
 | `idempotency.prune` (daily)            | —                                                          | `platform`      | the interval job               |
@@ -205,6 +205,17 @@ the inclusive 48-hour limit and reason requirement. First go-live still refuses 
 checklist evidence; ARCHIVED remains unsupported until its access/retention dependencies pass.
 Late execution is decided by those current guards, without an arbitrary additional lateness cutoff.
 System/platform creators and user recurrence cannot bypass the user transition contract.
+
+**Daily report snapshots (P10.7, 2026-10-03).** One-off user actions require a completed event
+day in the action's own event and current `report.generate` permission. The range is derived
+under the Event lock from the current timezone/day boundary, with an inclusive completion
+boundary and half-open capture range; DST days retain their actual length. Default reports
+exclude practice data, and explicit inclusion is labelled in the immutable document and audit.
+Generation, protected DAILY storage keyed by scheduled action, metadata-only audit and completion
+share the worker transaction. Late runs include currently committed corrections in that range;
+they do not rewrite older snapshots. FINAL stays owned by atomic close-out, and DAILY never
+replaces frozen default final reads. System/platform actions, user recurrence, arbitrary ranges
+and ARCHIVED writes remain unavailable. Automatic declarations and snapshot browser UI stay open.
 
 Recurring system jobs are created at boot by `ensureRecurring(type, interval)`, an upsert by
 `dedupeKey`. Every instance calls it, and only one row results.

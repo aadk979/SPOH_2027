@@ -81,6 +81,7 @@ export type AuditAction =
   | 'auth.stationScopeBypass'
   | 'event.clone'
   | 'event.transition'
+  | 'report.snapshot'
   | 'schedule.execute';
 
 export interface AuditContext {
