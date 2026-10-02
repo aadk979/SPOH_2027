@@ -1,12 +1,31 @@
 # P10.6 — Durable scheduler engine
 
-Current continuation: API boot now activates the verified `session.prune` handler. See
-[scheduled-actions.md](scheduled-actions.md). The sections below record each earlier verified
-slice; their activation-pending statements describe those checkpoints. P10.6 remains open for
-complete integration and P08.8 alarm verification.
+P10.6's engine exit criteria passed on 2026-10-02. The sections below record earlier verified
+slices; their pending-status statements describe historical checkpoints. P10.5/P10.7 and
+P08.8 remain open for lifecycle/handler completion and broader observability/notification delivery.
 
-P10.6 is in progress. P10.5 remains open: archive retention needs the durable engine before
-it can be enabled. This is an internal prerequisite, not a completed lifecycle or scheduler gate.
+## Engine completion evidence (2026-10-02)
+
+- Claim, fencing, atomic execution/outcomes, retries/dead letters, crash recovery and recurrence
+  pass real PostgreSQL checks including concurrent claimers/executors, cancellation lock order,
+  fresh authority/payload checks and failures at every persistence boundary.
+- Every API instance runs the real serial worker; boot/restart does not revive terminal work.
+  Shutdown drains its current transaction before database closure. System maintenance activation
+  includes refresh sessions, replay records and per-event lost-person purging, with post-startup
+  event discovery. Remaining module actions belong to P10.7; see
+  [scheduled-actions.md](scheduled-actions.md).
+- Latest complete local verification: **846 database passes/four existing skips**, **538 server
+  units**, seven successful serial browser journeys, all workspace types/static/settings/build
+  and formatting green. Dedicated `_test` databases only; no real database reset/seed.
+- Staging's `1e702e7` CI/infra/deploy succeeded. Its real worker logs feed the two reviewed metric
+  filters and detection alarms. A labelled current-time CloudWatch log probe supplied lag 90 s
+  and dead count 1 without mutating the queue or forcing alarm state. Dead entered ALARM at
+  15:42:35 UTC, lag at 15:43:31; both recovered to OK at 15:46:35/31 respectively from normal
+  zero gauges. See [deployed monitoring proof](../P08/scheduler-monitoring.md).
+
+P10.6's metric-to-alarm requirement is verified. P08.8's owner email test, SNS actions,
+availability monitoring and remaining alarm catalogue are still pending; no notification
+delivery or complete P10 phase exit is claimed.
 
 ## Claim and lease storage (2026-10-02)
 

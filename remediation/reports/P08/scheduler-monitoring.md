@@ -2,7 +2,7 @@
 
 P08.8 remains in progress. This slice defines the lag/dead-action gauges and alarms; it does
 not claim SNS delivery, owner email verification, availability alarms or the broader twelve-alarm
-catalogue. P10.6 remains open until deployed metric/alarm verification is recorded.
+catalogue. P10.6's engine metric-to-alarm criterion is verified below.
 
 Each environment's existing `/spoh/<stage>/app` log group has two metric filters. They require
 the `metric: scheduler` marker and a nonnegative numeric field. Values go to `SPOH/<stage>` as
@@ -40,6 +40,30 @@ this is a bounded model, not a measured bill. AWS documents hourly metric prorat
 [metric-filter guidance](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/MonitoringLogData.html)
 describes numeric extraction and dimension cardinality.
 
-No alarm test or notification has been sent to the owner in this slice. Read the owner email
-only at notification deployment and never commit it. Verify real metric arrival, alarm state
-changes and owner delivery before closing P08.8/P10.6 as applicable.
+## Deployed metric/alarm verification (2026-10-02)
+
+CI, infra checks and staging deployment succeeded for `1e702e7`:
+[CI](https://github.com/aadk979/SPOH_2027/actions/runs/37026332526),
+[infra](https://github.com/aadk979/SPOH_2027/actions/runs/37026332583),
+[staging](https://github.com/aadk979/SPOH_2027/actions/runs/37026877789).
+CloudFormation is UPDATE_COMPLETE and its service image output matches that commit.
+
+The real worker's five-second observations arrive in both CloudWatch metrics with the correct
+namespace, units and Maximum statistic. Both detection alarms initially were OK.
+After checking both alarms had no ALARM/OK/insufficient-data actions, a labelled synthetic
+log stream `remediation-scheduler-verification-20261002T153835Z` supplied lag 90 seconds and
+dead count 1. The first two historical samples reached the metrics without triggering an
+alarm; seven current-time observations at thirty-second intervals then verified evaluation.
+No `SetAlarmState` call, queued action or database row was used or changed by the probe.
+
+| Alarm                         | Entered ALARM (UTC) | Recovered to OK (UTC) |
+| ----------------------------- | ------------------- | --------------------- |
+| `spoh-staging-scheduler-dead` | 2026-10-02 15:42:35 | 2026-10-02 15:46:35   |
+| `spoh-staging-scheduler-lag`  | 2026-10-02 15:43:31 | 2026-10-02 15:46:31   |
+
+Normal worker zero gauges drove recovery after the finite probe stopped. The labelled probe
+observations stay in the existing retained application log group as verification evidence;
+they are not represented as real queue failures. Production and existing live Lightsail are
+unchanged. No alarm test or notification has been sent to the owner. Read the owner email
+only at notification deployment and never commit it. P08.8 still requires owner delivery and
+the remaining observability criteria; P10.6's deployed metric/alarm criterion passes.
