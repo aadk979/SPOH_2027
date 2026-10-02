@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T10:11:06.866Z",
+  "updatedAt": "2026-10-02T10:23:01.556Z",
   "current": {
     "phase": "P10",
     "step": "P10.5"
@@ -2816,6 +2816,10 @@
     {
       "at": "2026-10-02T10:11:06.865Z",
       "text": "2026-10-02 metadata locks 8b3bc17: full integration 674 passed/4 skips, server unit 493, browser administration/preparation 10; typecheck/lint/architecture/hardcoding/format/build exit 0. Twenty-four new cases pass; previous template/purge/count-setting writers and attendance advisory-lock order failed the regression. Initial wrong row-lock probe corrected and verified against the actual advisory lock. No schema/client layout changes. P10.4/P10.5 stay in progress."
+    },
+    {
+      "at": "2026-10-02T10:23:01.556Z",
+      "text": "Owner-requested handoff: remediation/reports/HANDOFF-2026-10-02-P10.md records all rehearsal/lifecycle continuation commits through 70b1f61, latest 674 integration / 493 unit / 10 browser verification, runtime and approval boundaries, and the unimplemented atomic LIVE-to-CLOSED next slice. P10.4/P10.5 remain in progress; no owner-controlled blocker reached."
     }
   ]
 }
