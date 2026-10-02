@@ -317,6 +317,8 @@ model Event {
   importBatches        ImportBatch[]
   auditLogs            AuditLog[]
   idempotencyRecords   IdempotencyRecord[]
+  reportSnapshots      ReportSnapshot[]
+  scheduledActions     ScheduledAction[]
 
   @@unique([organisationId, slug])
   @@index([status])
@@ -580,6 +582,8 @@ model Person {
   settingChanges    SettingChange[]       @relation("SettingChangedBy")
   pushSubscriptions PushSubscription[]
   refreshSessions   RefreshSession[]
+  reportSnapshots   ReportSnapshot[]
+  scheduledActions  ScheduledAction[]
 
   eventMemberships        EventMembership[]
   organisationMemberships OrganisationMembership[]
@@ -1398,44 +1402,131 @@ enum AuditOutcome {
   FAILURE
 }
 
-model AuditLog {
-  id           String        @id @default(cuid())
-  /// The event, when the row was written inside one; null for platform actions (ADR-001 §3).
-  eventId      String?
-  actorId      String?
-  /// The EventMembership behind actorId (ADR-001); backfilled in P09.4, read from P09.5.
-  membershipId String?
+enum AuditSource {
+  USER
+  SYSTEM
+  SCHEDULE
+}
+
+enum ReportSnapshotKind {
+  DAILY
+  FINAL
+}
+
+/// The report document contains no allowlisted visitor values or lost-person descriptions.
+/// @eventOwned
+model ReportSnapshot {
+  id                String             @id @default(cuid())
+  eventId           String
+  kind              ReportSnapshotKind
+  lifecycleVersion  Int
+  /// A final phase version, or the daily job's occurrence key.
+  /// @class operational
+  dedupeKey         String
+  rehearsalIncluded Boolean            @default(false)
+  /// Includes operational notes and staff names, with the report's existing access boundary.
   /// @class staff-personal
-  actorSub     String?
+  report            Json
+  createdByPersonId String?
+  createdAt         DateTime           @default(now()) @db.Timestamptz(3)
+  supersededAt      DateTime?          @db.Timestamptz(3)
+
+  event     Event   @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  createdBy Person? @relation(fields: [createdByPersonId], references: [id], onDelete: Restrict)
+
+  @@unique([eventId, id])
+  @@unique([eventId, dedupeKey])
+  @@index([eventId, kind, supersededAt])
+}
+
+enum ScheduledActionStatus {
+  PENDING
+  RUNNING
+  SUCCEEDED
+  FAILED
+  DEAD
+  CANCELLED
+}
+
+/// Platform queue; eventId is null only for platform maintenance actions (ADR-004 §4).
+model ScheduledAction {
+  id                String                @id @default(cuid())
+  eventId           String?
+  /// Handler catalogue key, validated before enqueueing and again at execution.
+  /// @class operational
+  type              String
+  /// @class staff-personal
+  payload           Json
+  runAt             DateTime              @db.Timestamptz(3)
+  status            ScheduledActionStatus @default(PENDING)
+  attempts          Int                   @default(0)
+  maxAttempts       Int                   @default(5)
+  /// @class operational
+  lastError         String?
+  /// @class operational
+  lockedBy          String?
+  lockedUntil       DateTime?             @db.Timestamptz(3)
+  /// Recurrence interval in seconds; null for one-off actions.
+  recurrence        Int?
+  /// System occurrence key, including its event scope; null for unscheduled deduplication.
+  /// @class operational
+  dedupeKey         String?               @unique
+  version           Int                   @default(1)
+  createdByPersonId String?
+  createdAt         DateTime              @default(now()) @db.Timestamptz(3)
+  completedAt       DateTime?             @db.Timestamptz(3)
+
+  event          Event?          @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  createdBy      Person?         @relation(fields: [createdByPersonId], references: [id], onDelete: Restrict)
+  auditLogs      AuditLog[]
+  settingChanges SettingChange[]
+
+  @@index([status, runAt])
+  @@index([status, lockedUntil])
+  @@index([eventId, runAt, id])
+}
+
+model AuditLog {
+  id                String        @id @default(cuid())
+  /// The event, when the row was written inside one; null for platform actions (ADR-001 §3).
+  eventId           String?
+  actorId           String?
+  /// The EventMembership behind actorId (ADR-001); backfilled in P09.4, read from P09.5.
+  membershipId      String?
+  /// @class staff-personal
+  actorSub          String?
   /// "registration.void", "card.reissue", "auth.signInFailed"
   /// @class operational
-  action       String
-  severity     AuditSeverity @default(INFO)
-  outcome      AuditOutcome  @default(SUCCESS)
+  action            String
+  severity          AuditSeverity @default(INFO)
+  outcome           AuditOutcome  @default(SUCCESS)
+  source            AuditSource   @default(USER)
+  scheduledActionId String?
   /// @class operational
-  entityType   String
-  entityId     String?
+  entityType        String
+  entityId          String?
   /// @class staff-personal
-  before       Json?
+  before            Json?
   /// @class staff-personal
-  after        Json?
+  after             Json?
   /// Transport detail. Set on security events, null on change events, which
   /// describe themselves through before/after instead.
   /// @class operational
-  method       String?
+  method            String?
   /// @class operational
-  path         String?
-  statusCode   Int?
+  path              String?
+  statusCode        Int?
   /// @class staff-personal
-  ip           String?
+  ip                String?
   /// @class staff-personal
-  userAgent    String?
-  requestId    String?
-  createdAt    DateTime      @default(now()) @db.Timestamptz(3)
+  userAgent         String?
+  requestId         String?
+  createdAt         DateTime      @default(now()) @db.Timestamptz(3)
 
   actor Person? @relation(fields: [actorId], references: [id], onDelete: SetNull)
 
-  event Event? @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  event           Event?           @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  scheduledAction ScheduledAction? @relation(fields: [scheduledActionId], references: [id], onDelete: Restrict)
 
   @@index([entityType, entityId])
   @@index([createdAt])
@@ -1449,6 +1540,7 @@ model AuditLog {
   @@index([id, createdAt])
   @@index([eventId, createdAt])
   @@index([membershipId])
+  @@index([scheduledActionId])
 }
 
 /// Makes the client's retry-on-failure loop safe, which is what makes the local
@@ -1572,27 +1664,28 @@ model Setting {
 
 /// Every version a setting has had, append-only (ADR-003 §2).
 model SettingChange {
-  id            String              @id @default(cuid())
-  scope         SettingScope
-  scopeId       String
-  eventId       String?
+  id                String              @id @default(cuid())
+  scope             SettingScope
+  scopeId           String
+  eventId           String?
   /// @class operational
-  key           String
-  version       Int
+  key               String
+  version           Int
   /// @class operational
-  before        Json?
+  before            Json?
   /// @class operational
-  after         Json?
+  after             Json?
   /// @class operational
-  reason        String?
-  source        SettingChangeSource
-  actorPersonId String?
+  reason            String?
+  source            SettingChangeSource
+  actorPersonId     String?
   /// Set when a scheduled action applies the change (P10.6).
   scheduledActionId String?
-  createdAt     DateTime            @default(now()) @db.Timestamptz(3)
+  createdAt         DateTime            @default(now()) @db.Timestamptz(3)
 
-  event Event?  @relation(fields: [eventId], references: [id], onDelete: Restrict)
-  actor Person? @relation("SettingChangedBy", fields: [actorPersonId], references: [id], onDelete: SetNull)
+  event           Event?           @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  actor           Person?          @relation("SettingChangedBy", fields: [actorPersonId], references: [id], onDelete: SetNull)
+  scheduledAction ScheduledAction? @relation(fields: [scheduledActionId], references: [id], onDelete: Restrict)
 
   @@index([scope, scopeId, key, version])
   @@index([eventId])

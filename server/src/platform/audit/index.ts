@@ -1,3 +1,4 @@
+import type { AuditSource } from '@spoh/shared';
 import type { JsonValue, PrismaTransactionClient } from '../db/client.js';
 import { publishCacheEvent } from '../events/cacheBus.js';
 
@@ -91,6 +92,8 @@ export interface AuditContext {
   ip: string | null;
   userAgent: string | null;
   requestId: string | null;
+  source?: AuditSource;
+  scheduledActionId?: string;
 }
 
 export interface AuditEntry extends AuditContext {
@@ -152,6 +155,8 @@ export async function writeAudit(tx: PrismaTransactionClient, entry: AuditEntry)
       ip: entry.ip,
       userAgent: entry.userAgent,
       requestId: entry.requestId,
+      source: entry.source ?? (entry.actorSub === 'system' ? 'SYSTEM' : 'USER'),
+      scheduledActionId: entry.scheduledActionId ?? null,
     },
   });
   await publishInvalidation(tx, entry);

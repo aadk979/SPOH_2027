@@ -104,6 +104,25 @@ export type AuditSeverity = z.infer<typeof AuditSeverity>;
 export const AuditOutcome = z.enum(['SUCCESS', 'DENIED', 'FAILURE']);
 export type AuditOutcome = z.infer<typeof AuditOutcome>;
 
+/** Whether a person, a system worker, or a scheduled action caused the audit. */
+export const AuditSource = z.enum(['USER', 'SYSTEM', 'SCHEDULE']);
+export type AuditSource = z.infer<typeof AuditSource>;
+
+/** The lifecycle checkpoint represented by a frozen report. */
+export const ReportSnapshotKind = z.enum(['DAILY', 'FINAL']);
+export type ReportSnapshotKind = z.infer<typeof ReportSnapshotKind>;
+
+/** Persisted execution state for the scheduler's leased work. */
+export const ScheduledActionStatus = z.enum([
+  'PENDING',
+  'RUNNING',
+  'SUCCEEDED',
+  'FAILED',
+  'DEAD',
+  'CANCELLED',
+]);
+export type ScheduledActionStatus = z.infer<typeof ScheduledActionStatus>;
+
 /** Organisation-level access; platform admins own events and guardrails (ADR-001 §1). */
 export const OrganisationRole = z.enum(['MEMBER', 'PLATFORM_ADMIN']);
 export type OrganisationRole = z.infer<typeof OrganisationRole>;

@@ -334,5 +334,30 @@ root lint, architecture, hardcoding, formatting and server build passed by exit 
 two new cases use direct access through the raw test client and a dedicated `_test` database.
 No schema, request contract, client layout or visual baseline changed.
 
+## Close-out storage foundation
+
+The additive migration provides event-owned report snapshots and the platform scheduler queue.
+Final snapshots exclude rehearsal data, deduplicate by event and lifecycle version, and cannot
+be edited or revived after being superseded. Daily snapshots use separate occurrence keys.
+The stored report document contains no visitor allowlist values or lost-person descriptions;
+its staff names and operational notes retain the report's existing access boundary.
+
+Scheduled actions store bounded attempts, leases, recurrence intervals and completion state.
+Database checks refuse inconsistent leases, impossible terminal states and unbounded errors.
+The action's event scope is immutable. Scheduled audit and setting-history rows must reference
+an existing action in exactly the same event or platform scope. Creator references are retained,
+so removing a person cannot turn their scheduled action into a system action. Existing human
+and system audit payloads and setting history are preserved; the migration creates no jobs or
+reports. Older audit writers may omit the new source metadata during a rolling deployment.
+
+Verification on 2026-10-02: full integration **633 passed / 4 existing skips**, server unit
+**493**, and preparation/late-sync/report browser E2E **5** passed. Twenty-four new scratch
+migration cases cover existing rows, legacy writers, retry/lease bounds, frozen documents,
+deduplication, ownership and schedule-history references. All workspace typechecks, root lint,
+architecture, hardcoding, generated settings, formatting and server build passed by exit code.
+Only the three dedicated `_test` databases received the migration. No client layout or visual
+baseline changed. This is storage only; no scheduler worker or close-out API was enabled.
+
 Remaining: go-live guards and overrides, close/archive side effects, including the general
-archived-write forbid and its Cedar context in P11. P10.4/P10.5 remain in progress.
+archived-write forbid and its Cedar context in P11. P10.4/P10.5 remain in progress; P10.6 has
+not started beyond its shared storage prerequisite.

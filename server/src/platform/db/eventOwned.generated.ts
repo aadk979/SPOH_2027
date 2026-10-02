@@ -26,6 +26,7 @@ export const EVENT_OWNED_MODELS = [
   'LostPersonSummary',
   'MissionCard',
   'Registration',
+  'ReportSnapshot',
   'Shift',
   'ShiftAssignment',
   'ShiftSwapRequest',

@@ -64,6 +64,9 @@ export async function resetDatabase(): Promise<void> {
   assertTestDatabase();
 
   await wipe('AuditLog');
+  await wipe('SettingChange');
+  await wipe('ReportSnapshot');
+  await wipe('ScheduledAction');
   await wipe('IdempotencyRecord');
 
   await wipe('AnnouncementAck');
@@ -114,7 +117,6 @@ export async function resetDatabase(): Promise<void> {
   await wipe('EventDay');
 
   // Settings and their history name the event (ADR-003 §2).
-  await wipe('SettingChange');
   await wipe('Setting');
   await wipe('VisitorField');
 
