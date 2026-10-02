@@ -73,3 +73,28 @@ P10.6's complete exit criteria have not passed.
 
 Worker polling, boot-time recurring seeding, production module handlers, scheduler metrics and
 P08.8 alarms remain pending. Execution is not activated in the API boot path by this slice.
+
+## Polling and recurring boot primitives (2026-10-02)
+
+- A five-second worker polls immediately, executes claimed batches serially, coalesces overlapping
+  ticks and resumes after a failed poll. Stop drains the current action and leaves any remaining
+  claimed leases for recovery. Poll logging exposes only `SCHEDULER_POLL_FAILED`.
+- Recurring boot seeds require a registered type and valid payload/interval. A unique tuple key
+  separates platform and event scope. Conflict-safe insert/read preserves existing payload,
+  cadence, attempts, terminal status and leases; boot cannot revive failed/dead/cancelled work.
+  Event seeds acquire the Event lock before queue insertion.
+- The production factory composes the real claim/execution/metrics paths. Numeric structured
+  gauges `schedulerLagSeconds` and `schedulerDeadActions`, tagged `metric=scheduler`, can feed
+  per-environment P08.8 log metric filters. Gauges survive raised application log thresholds;
+  tests stay silent. Lag uses original deadlines of eligible/reclaimable registered work and
+  excludes active leases, backed-off future work and unregistered types.
+- Four worker unit cases and 12 real-database boot/metric/composition cases passed. Eight concurrent
+  boot seeders create one row; boot racing completion leaves one successor. The focused scheduler
+  coverage totals 46 cases across claims, execution and boot, with 535 server unit passes.
+- Server types, lint, architecture, hardcoding, server build and changed formatting passed. This
+  slice adds no schema/client/cloud change. The prior complete database suite is 796 passes plus
+  four existing skips; the new focused checks cover the unused engine's changes.
+
+API boot activation and module maintenance handlers are the next dependency slice. All existing
+business interval jobs still run through the legacy wrapper. P10.5/P10.6 remain open; no complete
+scheduler exit or P08 alarm notification success is claimed.

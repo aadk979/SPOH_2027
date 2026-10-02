@@ -13,6 +13,7 @@ export interface ScheduleContext {
 
 export interface ScheduledHandler {
   readonly type: string;
+  validatePayload(payload: unknown): void;
   execute(context: ScheduleContext): Promise<void>;
 }
 
@@ -26,13 +27,20 @@ export function defineScheduledHandler<T>(definition: {
   if (!/^[a-zA-Z][a-zA-Z0-9.]{0,99}$/.test(definition.type)) {
     throw new Error('Invalid scheduled handler type');
   }
+  const parsePayload = (input: unknown) => {
+    const payload = definition.schema.safeParse(input);
+    if (!payload.success) throw new ScheduleRefusal('INVALID_PAYLOAD');
+    return payload.data;
+  };
   return Object.freeze({
     type: definition.type,
+    validatePayload(input: unknown) {
+      parsePayload(input);
+    },
     async execute(context: ScheduleContext) {
-      const payload = definition.schema.safeParse(context.action.payload);
-      if (!payload.success) throw new ScheduleRefusal('INVALID_PAYLOAD');
-      await definition.authorize(context, payload.data);
-      await definition.run(context, payload.data);
+      const payload = parsePayload(context.action.payload);
+      await definition.authorize(context, payload);
+      await definition.run(context, payload);
     },
   });
 }
