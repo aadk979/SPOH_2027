@@ -50,12 +50,20 @@ export async function listFieldRows(
   });
 }
 
-export async function findFieldRow(scope: EventScope, id: string): Promise<FieldRow | null> {
-  return prisma.visitorField.findFirst({ where: { eventId: scope.eventId, id }, select: FIELD });
+export async function findFieldRow(
+  scope: EventScope,
+  id: string,
+  db: PrismaTransactionClient = prisma,
+): Promise<FieldRow | null> {
+  return db.visitorField.findFirst({ where: { eventId: scope.eventId, id }, select: FIELD });
 }
 
-export async function findFieldByCode(scope: EventScope, code: string) {
-  return prisma.visitorField.findFirst({
+export async function findFieldByCode(
+  scope: EventScope,
+  code: string,
+  db: PrismaTransactionClient = prisma,
+) {
+  return db.visitorField.findFirst({
     where: { eventId: scope.eventId, code },
     select: { id: true },
   });

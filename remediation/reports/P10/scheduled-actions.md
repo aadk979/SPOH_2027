@@ -2,7 +2,7 @@
 
 P10.7 is in progress. Only the verified handlers listed here are activated. Lifecycle,
 archive reminders, announcement/taxonomy/setting/report actions, remaining prunes and retention
-are still pending; P10.5/P10.6 also remain open.
+are still pending. P10.6 is complete; P10.5/P10.7 remain open.
 
 ## Refresh-session pruning and worker activation (2026-10-02)
 
@@ -94,7 +94,36 @@ changed formatting passed. Full integration **846 passed/four existing skips, 71
 Seven browser journeys passed across two serial, rate-isolated
 disposable API runs. No schema, client layout or visual baseline changed.
 
-Next module dependency: migrate visitor-field purging with fresh locked lifecycle/field policy
-and atomic receipts. Generic setting consumers, further handlers and lifecycle admission remain
-open. P08.8's lag/dead-action filters and detection alarms are deployed; notification delivery
-and the remaining observability criteria are still pending.
+## Per-event visitor purge (2026-10-03)
+
+- Each event now has one hourly `visitor.purge` occurrence, discovered at boot and on the same
+  minute discovery pass. The module owns a strict empty payload and event-system authority
+  check. A user creator, platform scope or caller-selected field/cutoff is refused.
+- Execution reads the fresh locked Event and current field policy inside the worker's supplied
+  transaction. Only CLOSED/ARCHIVED events with a close timestamp are eligible. Reopening,
+  a new close time or longer retention committed while the worker waits is seen before deletion.
+  Inclusive field deadlines apply to both live and rehearsal values. Empty visitor records and
+  records past their last known field deadline are deleted; registrations and their counts stay.
+- Deadline synchronization, field scrubbing, count-only receipts, completion and successor share
+  one transaction. Failures at each boundary roll values and deadlines back before a clean retry.
+  The backstop deletion now has its own count-only receipt. No receipt contains visitor values.
+  The manual compatibility entry point reuses the same helper in one transaction per event.
+- Field creation and updates acquire the same exclusive Event lock. Duplicate lookup and the
+  audit's previous policy are read after that lock, so a concurrent create gets a conflict and
+  an update records the latest committed policy. This closes the retention-policy race.
+- All four former business prune intervals have been removed. The remaining settings and
+  identity cache refreshes are per-instance local maintenance, registered through
+  `platform/scheduler` as ADR-004 requires. Other catalogue actions remain unimplemented.
+
+Focused verification: **53 database checks** passed, including 22 new visitor cases. The first
+run exposed a test assertion using `status` instead of `statusCode`; typechecking also caught
+the fixture's missing sort order and overly narrow JSON type. Those fixture issues were corrected
+before the passing run. Full integration: **868 passed/four existing skips, 72 files**.
+All workspace typechecks, **538 server units**, lint, architecture, hardcoding, generated
+settings, server build, changed formatting and `git diff --check` passed. Seven browser journeys
+passed against the rebuilt API across two serial disposable-API runs. No schema, client layout
+or visual baseline changed. Only dedicated localhost:5435 `_test` databases were used.
+
+Generic setting consumers, further handlers and lifecycle admission remain open. P08.8's
+lag/dead-action filters and detection alarms are deployed and their real triggering/recovery
+is verified; notification delivery and the remaining observability criteria are still pending.

@@ -36,7 +36,7 @@ it('two real API worker boots create one event recurrence and remove the legacy 
   const workers = await Promise.all([startScheduledJobs(clock), startScheduledJobs(clock)]);
   try {
     await Promise.all(workers.map((worker) => worker.tick()));
-    expect(await rawDb.scheduledAction.count()).toBe(3);
+    expect(await rawDb.scheduledAction.count()).toBe(4);
     expect(await occurrence()).toMatchObject({
       createdByPersonId: null,
       payload: {},
@@ -75,7 +75,9 @@ it('discovers events created after boot at the one-minute boundary without postp
     await worker.tick();
     expect((await occurrence(fresh.id)).status).toBe('SUCCEEDED');
     expect(
-      await rawDb.scheduledAction.count({ where: { eventId: fresh.id, status: 'PENDING' } }),
+      await rawDb.scheduledAction.count({
+        where: { eventId: fresh.id, type: 'lostPerson.purge', status: 'PENDING' },
+      }),
     ).toBe(1);
   } finally {
     await worker.stop();
@@ -126,7 +128,9 @@ it.each(['FAILED', 'DEAD', 'CANCELLED'] as const)(
       instant = at(60_000);
       await worker.tick();
       expect(await occurrence()).toEqual(terminal);
-      expect(await rawDb.scheduledAction.count({ where: { eventId } })).toBe(1);
+      expect(
+        await rawDb.scheduledAction.count({ where: { eventId, type: 'lostPerson.purge' } }),
+      ).toBe(1);
     } finally {
       await worker.stop();
     }

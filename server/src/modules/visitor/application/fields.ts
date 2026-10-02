@@ -15,6 +15,7 @@ import {
   findFieldByCode,
   findFieldRow,
   listFieldRows,
+  lockVisitorEvent,
   updateFieldRow,
 } from '../data/repo.js';
 
@@ -27,23 +28,27 @@ export async function createVisitorField(
   request: CreateVisitorFieldRequest,
   { scope, audit }: ActorContext,
 ): Promise<VisitorFieldRecord> {
-  if (await findFieldByCode(scope, request.code)) {
-    throw new ConflictError(
-      ERROR_CODES.CONFLICT,
-      `The event already has a field "${request.code}".`,
-    );
-  }
-  const row = await prisma.$transaction(async (tx) => {
-    const created = await createFieldRow(tx, scope, request);
-    await writeAudit(tx, {
-      ...audit,
-      action: 'visitorField.create',
-      entityType: 'VisitorField',
-      entityId: created.id,
-      after: { ...request },
-    });
-    return created;
-  });
+  const row = await prisma.$transaction(
+    async (tx) => {
+      await lockVisitorEvent(tx, scope);
+      if (await findFieldByCode(scope, request.code, tx)) {
+        throw new ConflictError(
+          ERROR_CODES.CONFLICT,
+          `The event already has a field "${request.code}".`,
+        );
+      }
+      const created = await createFieldRow(tx, scope, request);
+      await writeAudit(tx, {
+        ...audit,
+        action: 'visitorField.create',
+        entityType: 'VisitorField',
+        entityId: created.id,
+        after: { ...request },
+      });
+      return created;
+    },
+    { isolationLevel: 'ReadCommitted', timeout: 30_000 },
+  );
   return toFieldRecord(row);
 }
 
@@ -53,24 +58,28 @@ export async function updateVisitorField(
   patch: UpdateVisitorFieldRequest,
   { scope, audit }: ActorContext,
 ): Promise<VisitorFieldRecord> {
-  const existing = await findFieldRow(scope, id);
-  if (!existing) throw new NotFoundError('Visitor field');
-  const row = await prisma.$transaction(async (tx) => {
-    const updated = await updateFieldRow(tx, scope, { id, data: patch });
-    await writeAudit(tx, {
-      ...audit,
-      action: 'visitorField.update',
-      entityType: 'VisitorField',
-      entityId: id,
-      before: {
-        label: existing.label,
-        retentionDays: existing.retentionDays,
-        readers: existing.readers,
-        active: existing.active,
-      },
-      after: { ...patch },
-    });
-    return updated;
-  });
+  const row = await prisma.$transaction(
+    async (tx) => {
+      await lockVisitorEvent(tx, scope);
+      const existing = await findFieldRow(scope, id, tx);
+      if (!existing) throw new NotFoundError('Visitor field');
+      const updated = await updateFieldRow(tx, scope, { id, data: patch });
+      await writeAudit(tx, {
+        ...audit,
+        action: 'visitorField.update',
+        entityType: 'VisitorField',
+        entityId: id,
+        before: {
+          label: existing.label,
+          retentionDays: existing.retentionDays,
+          readers: existing.readers,
+          active: existing.active,
+        },
+        after: { ...patch },
+      });
+      return updated;
+    },
+    { isolationLevel: 'ReadCommitted', timeout: 30_000 },
+  );
   return toFieldRecord(row);
 }

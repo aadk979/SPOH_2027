@@ -12,5 +12,5 @@ export { visitorRouter } from './http/routes.js';
 export { recordVisitorValues } from './application/recordVisitorValues.js';
 export { visitorRecordsFor } from './application/readVisitorRecords.js';
 export { purgeAllVisitorRecords, purgeVisitorData } from './application/purgeVisitorData.js';
-export { visitorJobs } from './jobs.js';
+export { visitorScheduledHandlers, visitorRecurringActions } from './jobs.js';
 export { lockVisitorEvent } from './data/repo.js';

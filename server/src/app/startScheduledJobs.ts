@@ -1,4 +1,5 @@
 import { authRecurringActions, authScheduledHandlers } from '../modules/auth/index.js';
+import { visitorRecurringActions, visitorScheduledHandlers } from '../modules/visitor/index.js';
 import {
   lostPersonRecurringActions,
   lostPersonScheduledHandlers,
@@ -19,13 +20,14 @@ export async function startScheduledJobs(clock?: Clock) {
     ...authScheduledHandlers,
     ...idempotencyScheduledHandlers,
     ...lostPersonScheduledHandlers,
+    ...visitorScheduledHandlers,
   ]);
   for (const action of [...authRecurringActions, ...idempotencyRecurringActions]) {
     await ensureRecurring({ ...action, registry, clock });
   }
   const syncEvents = createEventRecurringSync({
     registry,
-    actions: lostPersonRecurringActions,
+    actions: [...lostPersonRecurringActions, ...visitorRecurringActions],
     clock,
   });
   await syncEvents();

@@ -1,8 +1,10 @@
-import { writeAudit } from '../../../platform/audit/index.js';
+import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { SYSTEM_AUDIT_CONTEXT } from '../../../platform/http/auditContext.js';
 import { logger } from '../../../platform/logger/index.js';
+import { systemClock } from '../../../platform/time/index.js';
 import {
   deleteAllRecords,
   deleteDueRecords,
@@ -13,45 +15,68 @@ import {
 } from '../data/repo.js';
 import { expiredFields } from '../domain/visitorRules.js';
 
-/** One closed event: each field past its retention is removed from every record. */
-async function purgeEvent(scope: EventScope, closedAt: Date, now: Date): Promise<number> {
-  // P10's close transition will stamp these immediately. This also catches
-  // older rows and retention edits before each run, with no visitor values in logs.
-  await prisma.$transaction((tx) => syncPurgeDeadlines(tx, scope, closedAt));
-  const expired = expiredFields(await listFieldRows(scope), closedAt, now);
+/** Fresh locked lifecycle, field policy, values and receipts share the caller's transaction. */
+export async function purgeVisitorDataInTransaction(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  input: { now: Date; audit: AuditContext },
+): Promise<number> {
+  const event = await holdCaptureEvent(tx, scope);
+  if (!event.closedAt || !['CLOSED', 'ARCHIVED'].includes(event.status)) return 0;
+  await syncPurgeDeadlines(tx, scope, event.closedAt);
+  const expired = expiredFields(await listFieldRows(scope, tx), event.closedAt, input.now);
   let cleared = 0;
   for (const field of expired) {
-    cleared += await prisma.$transaction(async (tx) => {
-      const count = await purgeFieldValues(tx, scope, field.code);
-      if (count > 0) {
-        await writeAudit(tx, {
-          ...SYSTEM_AUDIT_CONTEXT,
-          eventId: scope.eventId,
-          action: 'visitor.purge',
-          entityType: 'VisitorField',
-          entityId: field.id,
-          after: { field: field.code, records: count, reason: 'retention' },
-        });
-      }
-      return count;
+    const count = await purgeFieldValues(tx, scope, field.code);
+    if (count > 0) {
+      await writeAudit(tx, {
+        ...input.audit,
+        eventId: scope.eventId,
+        action: 'visitor.purge',
+        entityType: 'VisitorField',
+        entityId: field.id,
+        after: { field: field.code, records: count, reason: 'retention' },
+      });
+    }
+    cleared += count;
+  }
+  const deleted = await deleteDueRecords(tx, scope, input.now);
+  if (deleted > 0) {
+    await writeAudit(tx, {
+      ...input.audit,
+      eventId: scope.eventId,
+      action: 'visitor.purge',
+      entityType: 'VisitorRecord',
+      entityId: null,
+      after: { records: deleted, reason: 'deadline' },
     });
   }
-  cleared += await prisma.$transaction((tx) => deleteDueRecords(tx, scope, now));
-  return cleared;
+  return cleared + deleted;
 }
 
 /**
  * The retention handler (ADR-003 §8): a field's values go its retentionDays
  * after the event closes. Idempotent, audited with counts, and it never
- * touches a registration. P10.7 moves it onto the job table.
+ * touches a registration. The manual entry point shares the worker's per-event helper.
  */
-export async function purgeVisitorData(now: Date = new Date()): Promise<number> {
+export async function purgeVisitorData(now: Date = systemClock.now()): Promise<number> {
   let cleared = 0;
   for (const event of await findClosedEvents()) {
     try {
-      cleared += await purgeEvent({ eventId: event.id }, event.closedAt, now);
-    } catch (error) {
-      logger.error({ err: error, eventId: event.id }, 'visitor data purge failed for an event');
+      cleared += await prisma.$transaction(
+        (tx) =>
+          purgeVisitorDataInTransaction(
+            tx,
+            { eventId: event.id },
+            { now, audit: SYSTEM_AUDIT_CONTEXT },
+          ),
+        { isolationLevel: 'ReadCommitted', timeout: 30_000 },
+      );
+    } catch {
+      logger.error(
+        { code: 'VISITOR_PURGE_FAILED', eventId: event.id },
+        'visitor data purge failed for an event',
+      );
     }
   }
   return cleared;
