@@ -186,6 +186,14 @@ exclusive Event lock against captures' shared lock. Station overrides cannot byp
 admission. Valid pre-close offline captures retain CLOSED's bounded receipt grace. Safety actions
 remain a separate functional group (ADR-005): pausing counts does not disable safety reporting.
 
+**Timed capture settings (P10.7, 2026-10-03).** The verified `setting.apply` slice currently
+accepts only `capture.open` at event/station scope. Its strict payload also requires
+`expectedVersion` and permits a bounded reason. The creator's current event permission is
+checked inside execution; a changed version or archived event refuses the action. Setting,
+history, scheduled audit, transactional cache notification and job completion share the worker
+transaction. Platform scope and other keys remain unavailable until their consumer and
+authority work passes. Schedule CRUD/timeline and Cedar authorization integration remain P10.8/P11.
+
 Recurring system jobs are created at boot by `ensureRecurring(type, interval)`, an upsert by
 `dedupeKey`. Every instance calls it, and only one row results.
 

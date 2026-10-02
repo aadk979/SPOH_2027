@@ -1,7 +1,7 @@
 # P10.7 — Schedulable module actions
 
 P10.7 is in progress. Only the verified handlers listed here are activated. Lifecycle,
-archive reminders, announcement/taxonomy/setting/report actions, remaining prunes and retention
+archive reminders, announcement/taxonomy/report actions, other setting actions, prunes and retention
 are still pending. P10.6 is complete; P10.5/P10.7 remain open.
 
 ## Refresh-session pruning and worker activation (2026-10-02)
@@ -160,3 +160,41 @@ passed. No schema/client layout/baseline changed; dedicated local `_test` databa
 
 The timed `setting.apply` handler, scheduling endpoints/timeline and client pause controls are
 still pending. This slice establishes the actual capture consumer and its transaction ordering.
+
+## Timed capture setting changes (2026-10-03)
+
+The real API composition now registers `setting.apply` for **`capture.open` at event/station
+scope only**. A strict payload requires the target, registry-validated boolean and expected
+setting version, with an optional bounded reason. Other keys/platform scope remain unavailable
+until their consumer/authority dependencies pass. No public scheduling CRUD/UI is exposed yet.
+
+Execution uses the stored action's current payload and the creator's current active membership
+and `config.manage` capability. Demotion/deactivation/end committed after scheduling or while
+the worker waits is refused. System creators, platform actions, foreign event/station targets
+and ARCHIVED events cannot apply this user action. Cedar integration remains P11.
+
+`changeSettingInTransaction` extracts the existing validated/versioned mutation so the worker
+never opens a nested setting transaction. Setting value, monotonic history, attributed SCHEDULE
+audit, transactional cache notification and completion commit together. The manual wrapper
+keeps its post-commit local rate-policy invalidation and now uses explicit Read Committed/30 s.
+An intervening manual version or a competing action refuses the stale expected version instead
+of silently overwriting it. No endpoint/path or raw exception is copied into queue errors.
+
+Verification: **62 focused database checks**, including 27 new handler checks; full integration
+**914 passed/four existing skips, 74 files**; all workspace types, **538 server units**, lint,
+architecture, hardcoding, generated settings, server build, changed formatting and diff checks
+passed. Time travel covers inclusive pause/resume due boundaries and current capture effects.
+Five fault boundaries roll values/history/receipts back before a single clean retry.
+
+Twelve serial browser journeys passed against the rebuilt API, including phone/laptop tests
+that enqueue synthetic local actions and wait for the actual polling worker to pause/resume
+capture. The first browser fixture named a nonexistent queue column; it was corrected after
+inspecting the failure output/screenshot. Lint then caught a cleanup throw inside `finally`;
+cleanup was extracted, lint/types passed, and the two timed cases plus two reopen cases passed
+again on a fresh disposable API. Fourteen distinct journeys passed across these runs.
+The guarded tests restore policy/count fixtures, cancel leftover pending work with Event-first
+locking, and retain immutable synthetic receipts in the dedicated E2E `_test` database.
+
+No schema, client layout, visual baseline or infrastructure definition changed. P10.5/P10.7
+remain open for the rest of their exit criteria. Next: lifecycle handler transaction/authority
+integration and the reminder delivery dependencies, while advancing independent P08 work.

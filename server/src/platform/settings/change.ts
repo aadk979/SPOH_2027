@@ -161,39 +161,48 @@ async function recordChange(
   });
 }
 
-/** Versioned write, history and audit have one transaction boundary (ADR-003 §2). */
-export async function changeSetting(input: ChangeSettingInput): Promise<number> {
+/** The scheduler supplies its transaction so the setting and completion cannot split. */
+export async function changeSettingInTransaction(
+  tx: PrismaTransactionClient,
+  input: ChangeSettingInput,
+): Promise<number> {
   const definition = SETTINGS[input.key];
   if (!definition.scopes.includes(input.target.scope)) {
     throw new ValidationError(`${input.key} cannot be set at ${input.target.scope} scope`);
   }
   const parsed = definition.schema.safeParse(input.value);
   if (!parsed.success) throw new ValidationError('Invalid setting value', parsed.error.issues);
-  const version = await prisma.$transaction(async (tx) => {
-    await assertSettingTarget(tx, input.target);
-    await assertUnlocked(tx, input.target, input.key);
-    await assertAttendanceRoot(tx, input, parsed.data);
-    const current = await storedSetting(input.target, input.key, tx);
-    if ((current?.version ?? 0) !== input.expectedVersion) throw versionConflict();
-    const version = await nextVersion(tx, {
-      target: input.target,
-      key: input.key,
-      currentVersion: current?.version ?? 0,
-    });
-    const changed = { ...input, value: parsed.data };
-    await writeVersion(tx, changed, version);
-    await recordChange(tx, {
-      input: changed,
-      before: current?.value ?? definition.default,
-      version,
-    });
-    await publishCacheEvent(tx, 'settings', {
-      scope: input.target.scope,
-      scopeId: scopeOf(input.target).scopeId,
-      key: input.key,
-      version,
-    });
-    return version;
+  await assertSettingTarget(tx, input.target);
+  await assertUnlocked(tx, input.target, input.key);
+  await assertAttendanceRoot(tx, input, parsed.data);
+  const current = await storedSetting(input.target, input.key, tx);
+  if ((current?.version ?? 0) !== input.expectedVersion) throw versionConflict();
+  const version = await nextVersion(tx, {
+    target: input.target,
+    key: input.key,
+    currentVersion: current?.version ?? 0,
+  });
+  const changed = { ...input, value: parsed.data };
+  await writeVersion(tx, changed, version);
+  await recordChange(tx, {
+    input: changed,
+    before: current?.value ?? definition.default,
+    version,
+  });
+  await publishCacheEvent(tx, 'settings', {
+    scope: input.target.scope,
+    scopeId: scopeOf(input.target).scopeId,
+    key: input.key,
+    version,
+  });
+  return version;
+}
+
+/** Versioned write, history and audit have one transaction boundary (ADR-003 §2). */
+export async function changeSetting(input: ChangeSettingInput): Promise<number> {
+  const version = await prisma.$transaction((tx) => changeSettingInTransaction(tx, input), {
+    isolationLevel: 'ReadCommitted',
+    timeout: 30_000,
   });
   invalidateRateLimitPolicy();
   return version;

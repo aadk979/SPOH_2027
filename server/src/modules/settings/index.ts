@@ -8,3 +8,4 @@ export {
   getSettingsHandler,
   updateSettingsHandler,
 } from './http/handlers.js';
+export { settingsScheduledHandlers } from './jobs.js';
