@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T16:44:46.403Z",
+  "updatedAt": "2026-10-02T17:12:56.790Z",
   "current": {
     "phase": "P10",
     "step": "P10.7"
@@ -2071,7 +2071,8 @@
             "91f6943",
             "2db2108",
             "a79b131b0150c00f210be5e1a6d5a924de14d187",
-            "05fc4c40a69612a61412093408d427c681234e4b"
+            "05fc4c40a69612a61412093408d427c681234e4b",
+            "e362c571db7303a1c7526f9a17444c6518dba5a8"
           ],
           "notes": [
             {
@@ -2125,6 +2126,10 @@
             {
               "at": "2026-10-02T13:25:32.325Z",
               "text": "Private archive storage composition adds injected archivedAt, all-standing membership ending, obsolete reminder cancellation, guard/effect audit and atomic membership/state invalidation. Public ARCHIVED remains unsupported pending write/read/retention enforcement. Focused72/full762+4skip/server531/types/lint/arch/hardcode/settings/format/build pass. Frozen reports, shared personal fields and other events preserved; no timers/backup job enabled."
+            },
+            {
+              "at": "2026-10-02T17:12:56.142Z",
+              "text": "Timed lifecycle core shared with manual path; close-out/reopen effects, current authority, audit/cache and worker completion atomic. First go-live and archive dependencies remain; P10.5 stays open."
             }
           ]
         },
@@ -2185,7 +2190,8 @@
             "453169767bd56c45e0466996b879ef261c29fe1a",
             "0c15ca0935d42bfaf3ef9bf272a9c11da55e1048",
             "a283d4a16bc2ba932267bab09334b2028abc1872",
-            "66f57b7cc87f685ae6f72f3364ba68599e38b511"
+            "66f57b7cc87f685ae6f72f3364ba68599e38b511",
+            "e362c571db7303a1c7526f9a17444c6518dba5a8"
           ],
           "notes": [
             {
@@ -2219,6 +2225,10 @@
             {
               "at": "2026-10-02T16:44:46.402Z",
               "text": "Timed setting.apply for event/station capture.open: current creator capability, strict scope/value/version, provided transaction for policy/history/audit/notification/completion, stale and concurrent version refusals. Focused 62, full integration 914+4 existing skips/74 files, 538 unit, 14 distinct browser journeys including actual-worker pause/resume; all types/static/settings/build/format pass. Other keys/platform scope, UI and catalogue actions remain pending."
+            },
+            {
+              "at": "2026-10-02T17:12:56.492Z",
+              "text": "Verified timed event.transition: strict shared input, current event/organisation authority, expected versions, post-wait clock and atomic close/reopen. 47 new cases; 101 focused, full 961 integration/4 existing skips/77 files, 538 server+23 shared units, ten serial browser journeys. All types/static/settings/shared-server build/format/diff pass. Initial retained-organisation fixture collision corrected; remaining catalogue/CRUD/UI dependencies stay open."
             }
           ]
         },
@@ -2983,6 +2993,10 @@
     {
       "at": "2026-10-02T16:11:36.879Z",
       "text": "2026-10-03 visitor purge 0c15ca0 verified; latest handoff checkpoint reconciles completed P10.4/P10.6, four active maintenance handlers, current staging CI/deploy and pending owner DNS. No programme-wide owner blocker."
+    },
+    {
+      "at": "2026-10-02T17:12:56.789Z",
+      "text": "Published lifecycle source e362c57. Read-only staging verifies actual image 011eb9c, CI 37036021368/deploy 37036451555 success and both scheduler alarms OK; DNS still 13.251.60.83 at 01:02 SGT, approved edge 3.0.69.248. P08 and programme remain active; no owner-controlled programme blocker."
     }
   ]
 }
