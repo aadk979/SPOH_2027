@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T10:23:01.556Z",
+  "updatedAt": "2026-10-02T11:12:37.237Z",
   "current": {
     "phase": "P10",
     "step": "P10.5"
@@ -2016,7 +2016,8 @@
             "30a7010",
             "85fc514",
             "9a4cca0",
-            "8b3bc17"
+            "8b3bc17",
+            "3344a29"
           ],
           "notes": [
             {
@@ -2050,6 +2051,10 @@
             {
               "at": "2026-10-02T10:11:06.784Z",
               "text": "Report metadata, roster, attendance, membership, assignment, setting and resolved-alert purge writers now lock the event before report data or advisory locks. Preparation and capture semantics retained; close-out API and frozen reads are next."
+            },
+            {
+              "at": "2026-10-02T11:12:37.236Z",
+              "text": "Atomic LIVE to CLOSED, live-only final snapshots, frozen/default and explicit current report reads, labels/exports and CLOSED sign-in verified: 693 integration with 4 skips, 23 shared/493 server/262 client unit, 7 serial browser and 58 visual checks. Go-live, reopen, archive/retention and Cedar remain open."
             }
           ]
         },
