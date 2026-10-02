@@ -79,6 +79,11 @@ previous state. Alarm names are stack outputs. SNS actions/subscriptions, worker
 and the remaining alarm catalogue are pending; these detection alarms alone do not notify the
 owner. See the [verification and cost boundary](../../remediation/reports/P08/scheduler-monitoring.md).
 
+The native HTTP API alarms detect a five-minute 5xx rate over 1% and p95 latency over 300 ms
+in two of three minutes. They use only the actual API id and existing basic metrics, with no
+paid route dimensions. Missing request data is non-breaching; availability and owner SNS
+delivery remain pending. See the [HTTP alarm evidence and cost](../../remediation/reports/P08/http-monitoring.md).
+
 ## Staging HTTPS proxy (P08.5)
 
 `-c stagingEdge=true` adds the separate `Spoh-staging-Edge` stack. Provision only that stack,

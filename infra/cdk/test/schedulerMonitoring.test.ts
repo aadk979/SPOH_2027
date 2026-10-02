@@ -56,7 +56,6 @@ describe('scheduler gauge alarms (P08.8/P10.6)', () => {
     'uses maximum observations without filling silent workers with zero in %s',
     (stage) => {
       const template = templateFor(stage);
-      template.resourceCountIs('AWS::CloudWatch::Alarm', 2);
       for (const [suffix, name, threshold, periods, unit] of [
         ['lag', 'SchedulerLagSeconds', 60, 2, 'Seconds'],
         ['dead', 'SchedulerDeadActions', 0, 1, 'Count'],
@@ -75,7 +74,11 @@ describe('scheduler gauge alarms (P08.8/P10.6)', () => {
           TreatMissingData: 'ignore',
         });
       }
-      for (const alarm of Object.values(template.findResources('AWS::CloudWatch::Alarm'))) {
+      const schedulerAlarms = Object.values(
+        template.findResources('AWS::CloudWatch::Alarm'),
+      ).filter((alarm) => alarm.Properties.Namespace === `SPOH/${stage}`);
+      expect(schedulerAlarms).toHaveLength(2);
+      for (const alarm of schedulerAlarms) {
         expect(alarm.Properties.Dimensions).toBeUndefined();
         expect(alarm.Properties.AlarmActions).toBeUndefined();
       }

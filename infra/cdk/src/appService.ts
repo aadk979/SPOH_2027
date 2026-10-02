@@ -30,6 +30,7 @@ import type { NetworkDatabase } from './networkDatabase.js';
 import type { CognitoSettings } from './stagingIdentity.js';
 import { AppInfrastructureConfig } from './appInfrastructureConfig.js';
 import { SchedulerMonitoring } from './schedulerMonitoring.js';
+import { HttpMonitoring } from './httpMonitoring.js';
 
 const PORT = 4000;
 
@@ -244,6 +245,7 @@ export function createHttpApi(scope: Construct, stage: StageConfig): HttpApi {
       'The app authenticates every API route itself (requireAuth, default deny) and serves the public client pages; an API Gateway authorizer would duplicate it.',
   });
   new CfnOutput(Stack.of(scope), 'AppUrl', { value: api.apiEndpoint });
+  new HttpMonitoring(scope, 'HttpMonitoring', { stage: stage.name, api });
   return api;
 }
 
