@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T18:20:08.849Z",
+  "updatedAt": "2026-10-02T19:04:07.758Z",
   "current": {
-    "phase": "P08",
-    "step": "P08.8"
+    "phase": "P10",
+    "step": "P10.7"
   },
   "gates": [
     {
@@ -2203,7 +2203,8 @@
             "66f57b7cc87f685ae6f72f3364ba68599e38b511",
             "e362c571db7303a1c7526f9a17444c6518dba5a8",
             "961a04137201b75bd5d37f959d90cf58be823efe",
-            "41bed1e3fce6fcc97ebd596b9da312b6a6144406"
+            "41bed1e3fce6fcc97ebd596b9da312b6a6144406",
+            "f100d533c7fba078a48510cb2edec4169e33a156"
           ],
           "notes": [
             {
@@ -2249,6 +2250,10 @@
             {
               "at": "2026-10-02T18:18:32.299Z",
               "text": "Stored DAILY/FINAL list/detail/CSV/XLSX with current report permission, event-scoped keyset metadata, immutable content, explicit practice/supersession labels and no current visitor sheet. 108 focused/31 final checks, 1019 integration +4 skips/81 files, 538 server/23 shared/262 client units, types/static/settings/build/format/diff and 6 serial browser journeys pass. Initial fixture rate/type mistakes corrected; inspected browser 429 then fresh reopen passes. UI/automatic declarations and remaining catalogue open."
+            },
+            {
+              "at": "2026-10-02T19:04:07.190Z",
+              "text": "Verified category capture admission for single/group/import consumers: Event locking, atomic group/card rollback, valid CLOSED offline grace, historical reports and import commit recheck. Full 1034 passes/four existing skips (82 files), 538 server units and ten serial browser journeys; types/static/settings/build/format/diff pass. Initial full run interrupted by confirmed Windows standby; held-awake complete rerun passed. P10.7 remains open for further handlers and full criteria."
             }
           ]
         },
@@ -3033,6 +3038,10 @@
     {
       "at": "2026-10-02T18:20:08.848Z",
       "text": "HTTP release evidence committed; continue P10.7 category activity consumers before timed taxonomy actions. Reports read/export at 41bed1e verified and pushed in f16a5e2; phase remains open. No programme-wide owner blocker."
+    },
+    {
+      "at": "2026-10-02T19:04:07.758Z",
+      "text": "Published category consumer prerequisite; next timed category activity. Staging verified at 7f2c3fc with successful CI/deploy and matching UPDATE_COMPLETE image. Edge 3.0.69.248 exists; DNS still old, owner will route. No programme-wide owner blocker."
     }
   ]
 }
