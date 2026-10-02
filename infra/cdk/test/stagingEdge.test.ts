@@ -76,6 +76,8 @@ it('renders separate hosts, verified upstream TLS and a public bootstrap health 
 
 it('pins and verifies Caddy, persists certificates and runs an unprivileged systemd service', () => {
   const bootstrap = stagingEdgeBootstrap(UPSTREAM);
+  expect(bootstrap.startsWith("bash <<'SPOH_EDGE_BOOTSTRAP'\n")).toBe(true);
+  expect(bootstrap.endsWith('\nSPOH_EDGE_BOOTSTRAP\n')).toBe(true);
   expect(bootstrap).toContain('caddy_2.11.6_linux_amd64.tar.gz');
   expect(bootstrap).toContain('sha512sum --check');
   expect(bootstrap).toContain("--proto '=https'");

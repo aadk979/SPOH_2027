@@ -17,7 +17,9 @@ export function stagingCaddyfile(apiOrigin: string) {
 }
 
 export function stagingEdgeBootstrap(apiOrigin: string) {
-  return asset('bootstrap.sh')
+  const script = asset('bootstrap.sh')
     .replace('@@CADDYFILE@@', stagingCaddyfile(apiOrigin))
     .replace('@@SERVICE@@', asset('caddy.service'));
+  // Lightsail appends user data to its own /bin/sh script; an embedded shebang is ignored.
+  return `bash <<'SPOH_EDGE_BOOTSTRAP'\n${script}\nSPOH_EDGE_BOOTSTRAP\n`;
 }

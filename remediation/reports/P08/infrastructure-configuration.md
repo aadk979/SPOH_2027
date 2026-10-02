@@ -47,3 +47,11 @@ two new task-definition versions and their scoped execution-role read policies. 
 Cognito, network, production or existing Lightsail resource changes are present. Image-tag
 differences reflect the release context while the authorised staging pipeline advances. A
 read-only SSM inventory before this slice found only the CDK bootstrap version parameter.
+
+Staging release verification on 2026-10-02: [CI](https://github.com/aadk979/SPOH_2027/actions/runs/37004867493)
+and [Deploy staging](https://github.com/aadk979/SPOH_2027/actions/runs/37005407334) both passed
+for `56146bd`. Read-only AWS inventory confirms all 14 named parameters are Standard/String.
+The subsequent running task revision 60 uses the same 14 SSM ARN references plus the existing
+two Secrets Manager references, with **zero inline environment entries**. ECS reports one
+desired/running task and zero pending tasks while the next authorised release rolls out.
+No parameter values or secret contents were read or exported for this verification.
