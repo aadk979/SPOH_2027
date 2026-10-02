@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T15:20:44.290Z",
+  "updatedAt": "2026-10-02T15:44:57.495Z",
   "current": {
     "phase": "P10",
-    "step": "P10.6"
+    "step": "P10.7"
   },
   "gates": [
     {
@@ -2169,7 +2169,8 @@
           "completedAt": null,
           "commits": [
             "c0b5105ae3b26f36887ef0c32136a36b5c0c2085",
-            "df85f7b1e710dda56f51d11e4ce2598fcba31d95"
+            "df85f7b1e710dda56f51d11e4ce2598fcba31d95",
+            "453169767bd56c45e0466996b879ef261c29fe1a"
           ],
           "notes": [
             {
@@ -2183,6 +2184,10 @@
             {
               "at": "2026-10-02T15:13:41.386Z",
               "text": "Verified daily idempotency.prune migration: strict platform-system handler; current compatibility policy read in worker transaction; deletion, count-only audit, completion and successor atomic. 11 new cases, 827 integration passes/4 existing skips, 538 units and 7 browser journeys across two serial runs; all workspace types/static/settings/build/format passed. Generic organisation-scoped setting consumer integration and per-event privacy handlers remain pending; P10.5/P10.6/P10.7 stay open."
+            },
+            {
+              "at": "2026-10-02T15:44:57.494Z",
+              "text": "Verified per-event lostPerson.purge migration and minute event discovery on existing worker tick: Event-first current-policy/alert locks; descriptions, summaries, scoped/legacy replay redaction, audits, completion and successor atomic without nested transactions. 13 new module plus 6 real discovery cases, 75 focused passes; full 846 DB/4 existing skips, 538 units, 7 browser journeys; all types/static/settings/build/format green. Visitor purge, remaining catalogue, generic consumers and lifecycle admission still open."
             }
           ]
         },
