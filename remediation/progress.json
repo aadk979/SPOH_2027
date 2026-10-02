@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T16:11:36.881Z",
+  "updatedAt": "2026-10-02T16:27:46.631Z",
   "current": {
     "phase": "P10",
     "step": "P10.7"
@@ -2183,7 +2183,8 @@
             "c0b5105ae3b26f36887ef0c32136a36b5c0c2085",
             "df85f7b1e710dda56f51d11e4ce2598fcba31d95",
             "453169767bd56c45e0466996b879ef261c29fe1a",
-            "0c15ca0935d42bfaf3ef9bf272a9c11da55e1048"
+            "0c15ca0935d42bfaf3ef9bf272a9c11da55e1048",
+            "a283d4a16bc2ba932267bab09334b2028abc1872"
           ],
           "notes": [
             {
@@ -2209,6 +2210,10 @@
             {
               "at": "2026-10-02T16:11:36.487Z",
               "text": "Atomic hourly event-system visitor purge: fresh locked close/field policy, live/practice deadlines, count-only audits, rollback and field-writer serialization. Focused 53, full integration 868+4 existing skips/72 files, 538 unit, seven browser journeys; all workspace types/static/settings/build/format checks pass. P10.7 stays open for remaining catalogue actions."
+            },
+            {
+              "at": "2026-10-02T16:27:46.630Z",
+              "text": "Live capture.open consumer: current event/station count controls, atomic mixed imports, preserved safety and CLOSED offline grace, completed replay, exclusive policy writes/reset against admitted captures. Focused 60, full integration 887+4 skips/73 files, 538 unit, ten browser journeys, all types/static/settings/build/format pass. Timed handler/UI and other actions pending."
             }
           ]
         },
