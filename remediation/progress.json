@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T14:08:47.933Z",
+  "updatedAt": "2026-10-02T14:23:59.308Z",
   "current": {
     "phase": "P10",
     "step": "P10.6"
@@ -2124,7 +2124,8 @@
           "completedAt": null,
           "commits": [
             "4c283d4140e62d7bc2fd999284cd75d4523bf510",
-            "8a0449683ca3c0cb707124f22dc2944c92ff0f66"
+            "8a0449683ca3c0cb707124f22dc2944c92ff0f66",
+            "a124bf6a9f8d5aaa6dd3ecfe97bd4acc419fb6c0"
           ],
           "notes": [
             {
@@ -2138,6 +2139,10 @@
             {
               "at": "2026-10-02T14:08:47.932Z",
               "text": "Verified executor slice: 796 integration passes/4 existing skips, 531 server units; all workspace types/lint/architecture/hardcoding/settings/build/format passed. Real two-worker execution, event-first cancellation mutant, authority removal, rollback/retry/dead-letter and original deadlines/recurrence verified. Additive migration only on 3 _test DBs, drift zero. Worker boot/handlers/metrics pending; P10.5/P10.6 remain open."
+            },
+            {
+              "at": "2026-10-02T14:23:59.307Z",
+              "text": "Verified polling/recurring boot/metric primitives: 46 focused DB cases including production worker composition and concurrent boot/completion; 535 server units, server types/lint/architecture/hardcoding/build/format passed. Metrics use original deadlines and bounded poll logs. Legacy intervals still active; module handler activation and P08 alarms pending. P10.5/P10.6 stay open."
             }
           ]
         },
