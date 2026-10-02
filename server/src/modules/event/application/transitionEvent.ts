@@ -20,7 +20,7 @@ export async function transitionEvent(
         actor,
         request,
       });
-      const { row, closedWindows, closeOut, reopen } = await applyLifecycleEffects(tx, {
+      const { row, closedWindows, closeOut, reopen, archive } = await applyLifecycleEffects(tx, {
         actor,
         event,
         decision,
@@ -36,6 +36,7 @@ export async function transitionEvent(
         closedWindows,
         closeOut,
         reopen,
+        archive,
         reason: request.reason,
         goLiveOverrides: request.goLiveOverrides,
       });

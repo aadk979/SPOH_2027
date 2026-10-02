@@ -555,3 +555,31 @@ required timezone; it was corrected before the passing full run.
 P10.5 remains open for complete server readiness, archive effects, ended-membership
 read access, archived-write enforcement, retention and Cedar integration. No rendering,
 baseline, migration, cloud routing or production data changed in this slice.
+
+## Atomic archive storage effects
+
+The private lifecycle composition now records the injected `archivedAt`, ends all of
+that event's non-ended memberships and cancels its pending/claimed archive reminders
+in the phase transaction. Already ended memberships, other events, unrelated/terminal
+actions, personal metadata and the frozen final report remain unchanged. The archive
+audit records the guard facts, timestamp, ended count and cancelled IDs; membership
+and phase cache invalidations commit with the same transaction.
+
+ARCHIVED remains unavailable through the public request contract. These storage effects
+do not provide general write prohibition, platform-admin archive read access or retention
+execution, and no retention timers or database backup job are started yet. The isolated
+effects tests enter through the private composition under real event/member locks and
+real archive evidence; they do not represent a completed public archive workflow.
+
+Verification on 2026-10-02: focused archive effects/readiness/close/reopen integration
+**72**, full integration **762 passed / 4 existing skips**, server unit **531** passed.
+Eight new database cases verify atomic storage/audit, both invalidation channels, rollback
+at membership/reminder/publication boundaries, immutable final evidence, every membership
+standing and cross-event isolation. Server types, root lint, architecture, hardcoding,
+generated settings, changed-file formatting and server production build passed. No new
+long event function, migration, client rendering or cloud change was introduced.
+
+The fixtures use the current schema: membership portfolio/deactivation metadata and
+global `Person.phone` are preserved. Future staff retention must respect a person's
+remaining memberships instead of clearing shared personal data merely because one
+event archived. P10.5 remains open for its outstanding enforcement/integration criteria.

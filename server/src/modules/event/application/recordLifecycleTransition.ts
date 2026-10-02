@@ -16,6 +16,7 @@ interface LifecycleAuditInput {
   closedWindows: string[];
   closeOut?: { unclaimedItems: number; finalSnapshotId: string; archiveReminderId: string };
   reopen?: { supersededFinalSnapshotIds: string[]; cancelledArchiveReminderIds: string[] };
+  archive?: { endedMemberships: number; cancelledArchiveReminderIds: string[] };
   reason?: string;
   goLiveOverrides?: readonly GoLiveOverride[];
 }
@@ -64,8 +65,12 @@ export async function recordLifecycleTransition(
         : {}),
       reason: reason ?? null,
       ...(input.reopen ? { reopen: input.reopen } : {}),
+      ...(input.archive
+        ? { archive: input.archive, archivedAt: after.archivedAt?.toISOString() }
+        : {}),
     },
   });
+  if (input.archive) await publishCacheEvent(tx, 'membership', { eventId: scope.eventId });
   await publishCacheEvent(tx, 'event.state', {
     eventId: scope.eventId,
     status: after.status,
