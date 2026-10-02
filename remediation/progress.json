@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T18:18:32.742Z",
+  "updatedAt": "2026-10-02T18:20:08.849Z",
   "current": {
-    "phase": "P10",
-    "step": "P10.7"
+    "phase": "P08",
+    "step": "P08.8"
   },
   "gates": [
     {
@@ -1714,7 +1714,8 @@
           "commits": [
             "a852c535d1181d6073ac591a41ca6a1df09d2ede",
             "1a87f4ff0a529d2fa36e33c5e9f3ced488d933fb",
-            "210db7b675173634aa4aa5c26d1c7979c27eb607"
+            "210db7b675173634aa4aa5c26d1c7979c27eb607",
+            "cd4c94083212889170ee741c4691c0256ff4ecea"
           ],
           "notes": [
             {
@@ -1728,6 +1729,10 @@
             {
               "at": "2026-10-02T17:55:30.919Z",
               "text": "Native API-id-scoped 5xx rate and p95 alarms; 34 infra tests, nag/types/lint/architecture/format/diff pass. Read-only staging diff changes only alarms/outputs; exact native math returns healthy real data. Three billable metrics model USD0.30/env-month; actual budget remains P08.10. Release alarm verification, owner delivery and catalogue still pending."
+            },
+            {
+              "at": "2026-10-02T18:20:08.560Z",
+              "text": "HTTP definitions actually deployed at f0f647f: CI/infra/staging successful, UPDATE_COMPLETE matching image; exact native API dimensions/metrics/statistics/evaluation/no actions verified. Both OK solely from non-breaching missing data; no ALARM trigger/availability/notification claim. P08.8 owner delivery/catalogue still open."
             }
           ]
         },
@@ -3024,6 +3029,10 @@
     {
       "at": "2026-10-02T18:18:32.741Z",
       "text": "Verified P10.7 stored report reads/exports at 41bed1e. HTTP alarm checkpoint f0f647f deployed: CI/infra/staging successful and matching stack image; natural missing-data OK, no trigger or owner delivery claim. Continue category activity consumer/handler review and independent P08; no programme-wide owner blocker."
+    },
+    {
+      "at": "2026-10-02T18:20:08.848Z",
+      "text": "HTTP release evidence committed; continue P10.7 category activity consumers before timed taxonomy actions. Reports read/export at 41bed1e verified and pushed in f16a5e2; phase remains open. No programme-wide owner blocker."
     }
   ]
 }
