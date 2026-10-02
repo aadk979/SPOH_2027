@@ -21,6 +21,7 @@ export type AuditAction =
   | 'registration.create'
   | 'registration.createGroup'
   | 'registration.void'
+  | 'category.setActive'
   | 'footfall.tick'
   | 'footfall.bulk'
   | 'footfall.void'

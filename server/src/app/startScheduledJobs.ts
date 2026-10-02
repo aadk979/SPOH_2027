@@ -2,6 +2,7 @@ import { authRecurringActions, authScheduledHandlers } from '../modules/auth/ind
 import { settingsScheduledHandlers } from '../modules/settings/index.js';
 import { eventScheduledHandlers } from '../modules/event/index.js';
 import { reportScheduledHandlers } from '../modules/report/index.js';
+import { registrationScheduledHandlers } from '../modules/registration/index.js';
 import { visitorRecurringActions, visitorScheduledHandlers } from '../modules/visitor/index.js';
 import {
   lostPersonRecurringActions,
@@ -27,6 +28,7 @@ export async function startScheduledJobs(clock?: Clock) {
     ...settingsScheduledHandlers,
     ...eventScheduledHandlers,
     ...reportScheduledHandlers,
+    ...registrationScheduledHandlers,
   ]);
   for (const action of [...authRecurringActions, ...idempotencyRecurringActions]) {
     await ensureRecurring({ ...action, registry, clock });

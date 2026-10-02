@@ -229,7 +229,16 @@ Import planning retains row-issue/partial-import semantics; commit rechecks afte
 the lock. Activity changes must take the exclusive Event lock first. Completed retry receipts
 and valid CLOSED pre-close offline receipts retain their existing semantics; imports gain no
 CLOSED grace. Inactive categories keep their historical counts and labels in reports. Timed
-category activity writes are a separate subsequent slice.
+category activity writes are supplied by the following slice.
+
+**Timed category activity (P10.7, 2026-10-03).** The real worker supports only category
+`taxonomy.setActive` payloads, with current active creator `config.manage` authority and
+event-scoped ids. Its provided transaction takes Event UPDATE before category reads/writes;
+ARCHIVED writes, foreign targets, system/platform creators and user recurrence are refused.
+Absolute desired states follow the catalogue contract: matching values complete without
+fabricating a change, while actual changes share activity/audit/completion atomically. Open
+booths refresh categories at the existing live polling cadence. Station/type kinds and public
+schedule producers remain pending.
 
 Recurring system jobs are created at boot by `ensureRecurring(type, interval)`, an upsert by
 `dedupeKey`. Every instance calls it, and only one row results.

@@ -289,3 +289,13 @@ and commit rechecks planned ids under the same shared Event lock. Completed repl
 historical report labels/counts and valid CLOSED pre-close offline receipts remain intact.
 Timed category activity writes remain the next slice. See the
 [admission evidence](category-capture-controls.md). P10.5/P10.7 stay open.
+
+## Timed category activity (2026-10-03)
+
+The real worker registers category-only `taxonomy.setActive`, with strict payload and current
+creator `config.manage` permission. Supplied-transaction activity changes take Event UPDATE,
+preserve historical counts, refuse ARCHIVED writes and share their fate with attributed audit
+and completion. A matching absolute desired value completes without fabricating a change.
+Open booth category queries use the existing live polling cadence. See the
+[timed category evidence](scheduled-category.md). Station/type kinds, schedule CRUD and other
+catalogue/retention dependencies remain open.

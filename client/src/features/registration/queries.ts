@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useEventId } from '@/shared/lib/eventContext';
 import { getRegistrationSummary, listCategories } from './api';
 import { cacheCategories, readCachedCategories } from './model/categoryCache';
+import { ms } from '@/shared/lib/runtimeSettings';
 export const registrationKeys = {
   categories: (eventId: string) => [eventId, 'registrations', 'categories'] as const,
   summary: (eventId: string, stationId: string | undefined) =>
@@ -32,6 +33,8 @@ export function useCaptureCategories() {
     },
     initialData: () => readCachedCategories(eventId),
     initialDataUpdatedAt: 0,
-    staleTime: 5 * 60_000,
+    // Timed activity changes reach open booths without a navigation or manual refresh.
+    refetchInterval: ms.dashboardPoll(),
+    staleTime: 0,
   });
 }
