@@ -116,15 +116,32 @@ export async function resolveAlert(
 }
 
 /** Resolved, past the retention window, and not yet purged. */
-export async function findPurgeCandidates(scope: EventScope, before: Date) {
-  return prisma.lostPersonAlert.findMany({
+export async function findPurgeCandidates(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  before: Date,
+) {
+  const locked = await tx.$queryRaw<Array<{ id: string }>>`
+    SELECT id FROM "LostPersonAlert" WHERE "eventId" = ${scope.eventId}
+      AND status <> 'ACTIVE' AND "resolvedAt" < ${before} AND "purgedAt" IS NULL
+    ORDER BY id FOR UPDATE`;
+  return tx.lostPersonAlert.findMany({
     where: {
+      id: { in: locked.map((row) => row.id) },
       eventId: scope.eventId,
       status: { not: 'ACTIVE' },
       resolvedAt: { lt: before },
       purgedAt: null,
     },
-    include: alertInclude,
+    select: {
+      id: true,
+      status: true,
+      raisedAt: true,
+      resolvedAt: true,
+      rehearsal: true,
+      _count: { select: { acknowledgements: true } },
+    },
+    orderBy: { id: 'asc' },
   });
 }
 
@@ -149,6 +166,7 @@ export async function purgeAlert(
     ackCount: number;
     resolutionMinutes: number;
     rehearsal: boolean;
+    purgedAt: Date;
   },
 ): Promise<boolean> {
   // Claim the alert first, conditionally: every worker runs the purge, and the
@@ -157,7 +175,7 @@ export async function purgeAlert(
   // same transaction, so the fields are never nulled without one.
   const { count } = await tx.lostPersonAlert.updateMany({
     where: { eventId: scope.eventId, id: alert.id, purgedAt: null },
-    data: { ...CLEARED_ON_PURGE, purgedAt: new Date() },
+    data: { ...CLEARED_ON_PURGE, purgedAt: alert.purgedAt },
   });
   if (count === 0) return false;
 
@@ -181,11 +199,13 @@ export async function purgeAlert(
  */
 export async function scrubLegacyReplay(
   tx: PrismaTransactionClient,
+  scope: EventScope,
   replay: { endpoint: string; alertId: string },
 ): Promise<void> {
   await tx.idempotencyRecord.updateMany({
     where: {
       endpoint: replay.endpoint,
+      OR: [{ eventId: scope.eventId }, { eventId: null }],
       responseBody: { path: ['alert', 'id'], equals: replay.alertId },
     },
     data: { responseBody: { alertId: replay.alertId } },

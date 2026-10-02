@@ -1,5 +1,9 @@
 import { authRecurringActions, authScheduledHandlers } from '../modules/auth/index.js';
 import {
+  lostPersonRecurringActions,
+  lostPersonScheduledHandlers,
+} from '../modules/lostPerson/index.js';
+import {
   idempotencyRecurringActions,
   idempotencyScheduledHandlers,
 } from '../platform/idempotency/jobs.js';
@@ -7,12 +11,23 @@ import { ensureRecurring } from '../platform/scheduler/ensureRecurring.js';
 import { HandlerRegistry } from '../platform/scheduler/registry.js';
 import { startSchedulerWorker } from '../platform/scheduler/startWorker.js';
 import type { Clock } from '../platform/time/index.js';
+import { createEventRecurringSync } from './syncEventRecurring.js';
 
 /** Module catalogue and recurring declarations are composed once per API instance. */
 export async function startScheduledJobs(clock?: Clock) {
-  const registry = new HandlerRegistry([...authScheduledHandlers, ...idempotencyScheduledHandlers]);
+  const registry = new HandlerRegistry([
+    ...authScheduledHandlers,
+    ...idempotencyScheduledHandlers,
+    ...lostPersonScheduledHandlers,
+  ]);
   for (const action of [...authRecurringActions, ...idempotencyRecurringActions]) {
     await ensureRecurring({ ...action, registry, clock });
   }
-  return startSchedulerWorker({ registry, clock });
+  const syncEvents = createEventRecurringSync({
+    registry,
+    actions: lostPersonRecurringActions,
+    clock,
+  });
+  await syncEvents();
+  return startSchedulerWorker({ registry, clock, beforeClaim: syncEvents });
 }

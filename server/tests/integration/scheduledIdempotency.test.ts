@@ -65,7 +65,10 @@ it('boots both daily handlers and prunes event and platform replays at the stric
   const worker = await startScheduledJobs({ now: () => instant });
   try {
     await worker.tick();
-    const boot = await rawDb.scheduledAction.findMany({ orderBy: { type: 'asc' } });
+    const boot = await rawDb.scheduledAction.findMany({
+      where: { eventId: null },
+      orderBy: { type: 'asc' },
+    });
     expect(boot.map((row) => row.type)).toEqual(['idempotency.prune', 'session.prune']);
     expect(
       boot.every(

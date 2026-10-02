@@ -16,13 +16,17 @@ export function startSchedulerWorker(input: {
   registry: HandlerRegistry;
   clock?: Clock;
   workerId?: string;
+  beforeClaim?: () => Promise<void>;
 }) {
   const clock = input.clock ?? systemClock;
   const workerId = input.workerId ?? randomUUID();
   if (!workerId.trim()) throw new Error('A scheduler worker ID is required');
   const types = input.registry.types();
   return startWorkerLoop({
-    claim: () => claimDueActions({ workerId, types, clock }),
+    claim: async () => {
+      await input.beforeClaim?.();
+      return claimDueActions({ workerId, types, clock });
+    },
     execute: (claim) => runClaimedAction({ claim, registry: input.registry, clock }),
     async recordMetrics() {
       const metrics = await readSchedulerMetrics({ types, now: clock.now() });
