@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T17:34:30.707Z",
+  "updatedAt": "2026-10-02T17:55:31.217Z",
   "current": {
-    "phase": "P10",
-    "step": "P10.7"
+    "phase": "P08",
+    "step": "P08.8"
   },
   "gates": [
     {
@@ -1713,7 +1713,8 @@
           "completedAt": null,
           "commits": [
             "a852c535d1181d6073ac591a41ca6a1df09d2ede",
-            "1a87f4ff0a529d2fa36e33c5e9f3ced488d933fb"
+            "1a87f4ff0a529d2fa36e33c5e9f3ced488d933fb",
+            "210db7b675173634aa4aa5c26d1c7979c27eb607"
           ],
           "notes": [
             {
@@ -1723,6 +1724,10 @@
             {
               "at": "2026-10-02T15:49:25.159Z",
               "text": "Staging 1e702e7 CI/infra/deploy successful; real worker gauges reach CloudWatch. Labelled finite synthetic current-time log observations triggered dead/lag ALARM at 15:42:35/15:43:31 UTC and normal zero gauges recovered OK at 15:46:35/15:46:31. No forced alarm state, queue/database mutation or notification actions. P08.8 stays open for SNS owner delivery, availability and remaining catalogue."
+            },
+            {
+              "at": "2026-10-02T17:55:30.919Z",
+              "text": "Native API-id-scoped 5xx rate and p95 alarms; 34 infra tests, nag/types/lint/architecture/format/diff pass. Read-only staging diff changes only alarms/outputs; exact native math returns healthy real data. Three billable metrics model USD0.30/env-month; actual budget remains P08.10. Release alarm verification, owner delivery and catalogue still pending."
             }
           ]
         },
@@ -3006,6 +3011,10 @@
     {
       "at": "2026-10-02T17:34:30.706Z",
       "text": "Published daily snapshot source 961a041. Previous lifecycle 53c67aa actual staging image verified, CI 37039209382/deploy 37039707778 succeeded. Continue independent P08 native HTTP metric/alarms while pending owner DNS leaves approved edge at 3.0.69.248; programme remains active without owner-controlled programme blocker."
+    },
+    {
+      "at": "2026-10-02T17:55:31.216Z",
+      "text": "P08.8 HTTP definitions verified at 210db7b. Daily snapshot 94e6c5a deployed with successful CI/staging and matching image. DNS still old IP; edge 3.0.69.248. Continue useful P10/P08 work while HTTP release/DNS pending; no programme-wide owner blocker."
     }
   ]
 }
