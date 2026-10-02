@@ -30,3 +30,16 @@ Free storage and connections are later slices. AWS's cited guidance cautions aga
 free-space percentage alarm when storage autoscaling is enabled, as it is here. A suitable
 ceiling/headroom signal and verified connection limit are required before those definitions.
 Production creation/deployment and live Lightsail approvals remain unchanged.
+
+## Deployed verification at the owner-requested handoff
+
+At 03:46–03:48 SGT on 3 October, the staging stack is UPDATE_COMPLETE with actual image
+`02bff990adf854908dbf980b8113b04dab9b1fee`; exact-hash
+[CI](https://github.com/aadk979/SPOH_2027/actions/runs/37053731304),
+[Infra](https://github.com/aadk979/SPOH_2027/actions/runs/37053730974) and
+[deployment](https://github.com/aadk979/SPOH_2027/actions/runs/37054265503) succeeded.
+Read-only resource/CloudWatch checks confirm `spoh-staging-rds-cpu` is CREATE_COMPLETE/OK
+and targets the actual RDS instance, with Average, 60-second periods, 5/5 evaluation,
+GreaterThanThreshold 90, missing-data treatment `missing` and no alarm actions.
+This supersedes the earlier definition-only deployment limitation; no trigger or delivery
+test is claimed. See the [current handoff](../HANDOFF-2026-10-03.md).
