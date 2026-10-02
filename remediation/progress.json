@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T11:41:43.205Z",
+  "updatedAt": "2026-10-02T11:56:44.559Z",
   "current": {
     "phase": "P10",
     "step": "P10.5"
@@ -2023,7 +2023,8 @@
             "9a4cca0",
             "8b3bc17",
             "3344a29",
-            "91f6943"
+            "91f6943",
+            "2db2108"
           ],
           "notes": [
             {
@@ -2065,6 +2066,10 @@
             {
               "at": "2026-10-02T11:41:43.204Z",
               "text": "Audited CLOSED-to-LIVE reopening and reclose verified: current same-organisation platform authority locked in transaction, 48-hour reason guard, immutable snapshot supersession and pending/running reminder cancellation. Full integration 714 passed/4 existing skips, server unit 493, serial browser 7; type/lint/architecture/hardcoding/settings/build clean. Go-live checklist, archive effects/read-only and Cedar context remain open."
+            },
+            {
+              "at": "2026-10-02T11:56:44.558Z",
+              "text": "Archive readiness now uses transaction-scoped purge evidence, valid active FINAL for current close version and strictly expired resolved late-sync grace. 24 new database cases; full integration 738 passed/4 existing skips, server unit 493, focused 64; type/lint/architecture/hardcoding/settings/build clean. Archive request remains unavailable pending atomic effects/read-only/membership access; readiness/override and Cedar work remain open."
             }
           ]
         },
