@@ -84,6 +84,10 @@ what is allowed when.
 
 ### P10.6 — Scheduler engine (D-09)
 
+The durable engine is also a prerequisite for P10.5's archive retention timers. Its internal
+storage/execution slices can advance while P10.5 stays open; neither step is complete until its
+full criteria pass. Evidence is recorded in [scheduler-engine.md](../reports/P10/scheduler-engine.md).
+
 - **Do:**
   1. `ScheduledAction(eventId, type, payload, runAt, status, attempts, lastError, createdBy)`.
   2. A worker loop in every instance: claim with `FOR UPDATE SKIP LOCKED`, run the handler inside a
