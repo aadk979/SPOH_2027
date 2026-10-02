@@ -7,6 +7,7 @@ import { AppSecrets } from './appSecrets.js';
 import { AppService, createHttpApi } from './appService.js';
 import { IMAGE_REPOSITORY } from './deployAccessStack.js';
 import { StagingIdentity, type CognitoSettings } from './stagingIdentity.js';
+import { DatabaseCpuMonitoring } from './databaseCpuMonitoring.js';
 
 export interface PlatformStackProps extends StackProps {
   stage: StageConfig;
@@ -25,6 +26,10 @@ export class PlatformStack extends Stack {
     super(scope, id, props);
     this.stage = props.stage;
     this.network = new NetworkDatabase(this, 'Data', props.stage);
+    new DatabaseCpuMonitoring(this, 'DatabaseMonitoring', {
+      stage: props.stage.name,
+      database: this.network.database,
+    });
     const secrets = new AppSecrets(this, 'Secrets', `spoh/${props.stage.name}`);
     const api = createHttpApi(this, props.stage);
     const cognito = this.cognito(props.stage, api.apiEndpoint);

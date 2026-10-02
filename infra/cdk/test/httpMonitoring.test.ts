@@ -82,7 +82,10 @@ describe('native HTTP API monitoring (P08.8)', () => {
         EvaluateLowSampleCountPercentile: 'evaluate',
         TreatMissingData: 'notBreaching',
       });
-      template.resourceCountIs('AWS::CloudWatch::Alarm', 4);
+      const httpAlarms = Object.values(template.findResources('AWS::CloudWatch::Alarm')).filter(
+        (alarm) => alarm.Properties.AlarmName.startsWith(`spoh-${stage}-http-`),
+      );
+      expect(httpAlarms).toHaveLength(2);
       template.resourceCountIs('AWS::Logs::MetricFilter', 2);
       for (const stageResource of Object.values(
         template.findResources('AWS::ApiGatewayV2::Stage'),

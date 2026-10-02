@@ -84,6 +84,11 @@ in two of three minutes. They use only the actual API id and existing basic metr
 paid route dimensions. Missing request data is non-breaching; availability and owner SNS
 delivery remain pending. See the [HTTP alarm evidence and cost](../../remediation/reports/P08/http-monitoring.md).
 
+The native RDS CPU alarm uses the actual database identifier, Average over 90% in five
+consecutive minutes, with missing observations left insufficient. It changes no database
+parameters and has no notification actions. Free storage/connection limits and owner delivery
+remain pending. See the [database CPU evidence and cost](../../remediation/reports/P08/database-cpu-monitoring.md).
+
 ## Staging HTTPS proxy (P08.5)
 
 `-c stagingEdge=true` adds the separate `Spoh-staging-Edge` stack. Provision only that stack,
