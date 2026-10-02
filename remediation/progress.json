@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T15:49:25.869Z",
+  "updatedAt": "2026-10-02T16:11:36.881Z",
   "current": {
     "phase": "P10",
     "step": "P10.7"
@@ -2182,7 +2182,8 @@
           "commits": [
             "c0b5105ae3b26f36887ef0c32136a36b5c0c2085",
             "df85f7b1e710dda56f51d11e4ce2598fcba31d95",
-            "453169767bd56c45e0466996b879ef261c29fe1a"
+            "453169767bd56c45e0466996b879ef261c29fe1a",
+            "0c15ca0935d42bfaf3ef9bf272a9c11da55e1048"
           ],
           "notes": [
             {
@@ -2204,6 +2205,10 @@
             {
               "at": "2026-10-02T15:49:25.868Z",
               "text": "Continue visitor-field purge migration with locked fresh lifecycle/retention and atomic completion/audit; engine P10.6 complete, P10.5/P10.7 remain open."
+            },
+            {
+              "at": "2026-10-02T16:11:36.487Z",
+              "text": "Atomic hourly event-system visitor purge: fresh locked close/field policy, live/practice deadlines, count-only audits, rollback and field-writer serialization. Focused 53, full integration 868+4 existing skips/72 files, 538 unit, seven browser journeys; all workspace types/static/settings/build/format checks pass. P10.7 stays open for remaining catalogue actions."
             }
           ]
         },
@@ -2964,6 +2969,10 @@
     {
       "at": "2026-10-02T14:54:49.498Z",
       "text": "Updated Oct2 P10 handoff with verified continuation through c0b5105/5cc5cf0: lifecycle/reopen/archive storage, completed P10.4, active session-prune worker and 816 DB/538 unit/7 browser evidence, new static staging proxy IP and unchanged approval boundaries. Next idempotency handler; no new blocker."
+    },
+    {
+      "at": "2026-10-02T16:11:36.879Z",
+      "text": "2026-10-03 visitor purge 0c15ca0 verified; latest handoff checkpoint reconciles completed P10.4/P10.6, four active maintenance handlers, current staging CI/deploy and pending owner DNS. No programme-wide owner blocker."
     }
   ]
 }
