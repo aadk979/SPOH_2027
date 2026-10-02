@@ -29,6 +29,7 @@ import type { StageConfig } from './config.js';
 import type { NetworkDatabase } from './networkDatabase.js';
 import type { CognitoSettings } from './stagingIdentity.js';
 import { AppInfrastructureConfig } from './appInfrastructureConfig.js';
+import { SchedulerMonitoring } from './schedulerMonitoring.js';
 
 const PORT = 4000;
 
@@ -73,6 +74,7 @@ export class AppService extends Construct {
       retention: RetentionDays.ONE_MONTH,
       removalPolicy: stage.name === 'prod' ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
     });
+    new SchedulerMonitoring(this, 'SchedulerMonitoring', { stage: stage.name, logGroup: logs });
     const imageOf = (tag: string) => ContainerImage.fromEcrRepository(props.repository, tag);
     this.configuration = new AppInfrastructureConfig(this, 'Configuration', {
       stage,

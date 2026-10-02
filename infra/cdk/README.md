@@ -70,6 +70,15 @@ settings retain their database/cache-bus path. See the
 [`P08.6 verification report`](../../remediation/reports/P08/infrastructure-configuration.md).
 Secret completion, rotation and Access Analyzer verification remain open.
 
+## Scheduler monitoring (P08.8 / P10.6)
+
+The app log group supplies two fixed-cardinality scheduler gauges in `SPOH/<stage>`;
+one-minute alarms use Maximum across worker observations. The lag alarm requires two minutes
+over 60 seconds; any dead action alarms after one minute. Missing observations preserve the
+previous state. Alarm names are stack outputs. SNS actions/subscriptions, worker availability
+and the remaining alarm catalogue are pending; these detection alarms alone do not notify the
+owner. See the [verification and cost boundary](../../remediation/reports/P08/scheduler-monitoring.md).
+
 ## Staging HTTPS proxy (P08.5)
 
 `-c stagingEdge=true` adds the separate `Spoh-staging-Edge` stack. Provision only that stack,
