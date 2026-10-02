@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T17:55:31.217Z",
+  "updatedAt": "2026-10-02T18:18:32.742Z",
   "current": {
-    "phase": "P08",
-    "step": "P08.8"
+    "phase": "P10",
+    "step": "P10.7"
   },
   "gates": [
     {
@@ -2197,7 +2197,8 @@
             "a283d4a16bc2ba932267bab09334b2028abc1872",
             "66f57b7cc87f685ae6f72f3364ba68599e38b511",
             "e362c571db7303a1c7526f9a17444c6518dba5a8",
-            "961a04137201b75bd5d37f959d90cf58be823efe"
+            "961a04137201b75bd5d37f959d90cf58be823efe",
+            "41bed1e3fce6fcc97ebd596b9da312b6a6144406"
           ],
           "notes": [
             {
@@ -2239,6 +2240,10 @@
             {
               "at": "2026-10-02T17:34:30.334Z",
               "text": "Verified one-off DAILY report.snapshot: current report permission, completed event day from current timezone/boundary, live-only default and explicit practice label; immutable action-keyed document/audit/completion atomic. 37 new cases, focused 81, full 998 integration/4 skips/80 files, 538 units, ten serial browser journeys and all types/static/settings/build/format/diff checks pass. Fixture schema/date errors corrected. FINAL stays close-out-owned; automatic declarations, snapshot reads/UI and catalogue dependencies remain open."
+            },
+            {
+              "at": "2026-10-02T18:18:32.299Z",
+              "text": "Stored DAILY/FINAL list/detail/CSV/XLSX with current report permission, event-scoped keyset metadata, immutable content, explicit practice/supersession labels and no current visitor sheet. 108 focused/31 final checks, 1019 integration +4 skips/81 files, 538 server/23 shared/262 client units, types/static/settings/build/format/diff and 6 serial browser journeys pass. Initial fixture rate/type mistakes corrected; inspected browser 429 then fresh reopen passes. UI/automatic declarations and remaining catalogue open."
             }
           ]
         },
@@ -3015,6 +3020,10 @@
     {
       "at": "2026-10-02T17:55:31.216Z",
       "text": "P08.8 HTTP definitions verified at 210db7b. Daily snapshot 94e6c5a deployed with successful CI/staging and matching image. DNS still old IP; edge 3.0.69.248. Continue useful P10/P08 work while HTTP release/DNS pending; no programme-wide owner blocker."
+    },
+    {
+      "at": "2026-10-02T18:18:32.741Z",
+      "text": "Verified P10.7 stored report reads/exports at 41bed1e. HTTP alarm checkpoint f0f647f deployed: CI/infra/staging successful and matching stack image; natural missing-data OK, no trigger or owner delivery claim. Continue category activity consumer/handler review and independent P08; no programme-wide owner blocker."
     }
   ]
 }
