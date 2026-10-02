@@ -3,6 +3,11 @@ import { env } from '../../../config/env.js';
 import { AppError } from '../../../platform/errors/index.js';
 import { logger } from '../../../platform/logger/index.js';
 
+/** Only configured infrastructure chooses the browser destination, never callback input. */
+export function clientSignInOrigin(): string {
+  return (env.CLIENT_BASE_URL ?? env.APP_BASE_URL ?? '').replace(/\/$/, '');
+}
+
 /** The Cognito Hosted UI settings, or a 500 when this server has none. */
 export function hostedSignInConfig(): { domain: string; clientId: string; appBaseUrl: string } {
   if (!env.COGNITO_DOMAIN || !env.COGNITO_CLIENT_ID || !env.APP_BASE_URL) {

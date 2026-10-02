@@ -16,7 +16,9 @@ go decision. Bootstrapping, the GitHub OIDC role and releases are described belo
 
 - The production Cognito pool `ap-southeast-1_9bwl2nGF7` is referenced by id, never owned: every
   `Volunteer.cognitoSub` points into it.
-- The production domain is a placeholder (`spoh.example.invalid`) until the owner names it (D-08).
+- Production routing still has unused placeholders: D-08 now requires Firebase Hosting for
+  the client and a DuckDNS HTTPS API. Its concrete identifiers and deployment remain subject
+  to the owner boundaries; no Route 53 domain is required.
 
 ## Access from CI (P08.2)
 
@@ -79,6 +81,12 @@ renews certificates without a DuckDNS token. See the
 [`staging proxy report`](../../remediation/reports/P08/staging-edge.md) for verification and limits.
 Updating instance user data is not a live Caddy configuration reload; deploy/reload verified
 configuration on the named new proxy explicitly. Preserve the existing live Lightsail site.
+
+For separate client/API origins, `APP_BASE_URL` keeps the API callback and optional
+`CLIENT_BASE_URL` selects the post-sign-in browser destination. See the
+[`sign-in origin report`](../../remediation/reports/P08/sign-in-origins.md). This optional
+key is not injected into the existing staging service until HTTPS and the combined routing,
+Cognito and CORS change are verified. Client API routing must use ADR-003 runtime config.
 
 Do not introduce operational parameters or environment overrides for attendance root/networks,
 rehearsal, upload lifetime/size, access-token lifetime or rate limits. They use the versioned

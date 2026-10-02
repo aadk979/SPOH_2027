@@ -1,9 +1,8 @@
 import { ERROR_CODES } from '@spoh/shared';
-import { env } from '../../../config/env.js';
 import type { AuditContext } from '../../../platform/audit/index.js';
 import { AppError } from '../../../platform/errors/index.js';
 import { authProvider } from '../../../platform/identity/index.js';
-import { exchangeCode, hostedSignInConfig } from './hostedSignIn.js';
+import { clientSignInOrigin, exchangeCode, hostedSignInConfig } from './hostedSignIn.js';
 import type { OpenedSession, SessionContext } from './issueSession.js';
 import { openSession } from './openSession.js';
 
@@ -28,7 +27,7 @@ export async function completeCallback(
   audit: AuditContext,
 ): Promise<{ redirectTo: string; session?: OpenedSession }> {
   const failed = (reason: string) => ({
-    redirectTo: `${env.APP_BASE_URL ?? ''}/sign-in?error=${encodeURIComponent(reason)}`,
+    redirectTo: `${clientSignInOrigin()}/sign-in?error=${encodeURIComponent(reason)}`,
   });
   if (input.error) return failed(String(input.error));
 
@@ -48,7 +47,7 @@ export async function completeCallback(
 
   try {
     const session = await openSession(sub, context, audit);
-    return { redirectTo: `${config.appBaseUrl}/`, session };
+    return { redirectTo: `${clientSignInOrigin()}/`, session };
   } catch (cause) {
     return failed(cause instanceof AppError ? cause.code : ERROR_CODES.INTERNAL_ERROR);
   }

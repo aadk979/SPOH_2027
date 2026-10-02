@@ -2,9 +2,9 @@
  * The two environments (ADR-008 §3), in one typed place. Everything a stack
  * varies by environment reads from here; nothing reads an env var.
  *
- * The production domain is still a placeholder: D-08 chose a Route 53 domain
- * but the owner has not named it, and P08.5/P12.2 build against this value
- * until they do (the P08 report flags it).
+ * The unused domain placeholders predate D-08's Firebase client/DuckDNS API
+ * amendment. Concrete production routing is supplied before the approved cutover;
+ * staging uses the separate explicit edge names below. No Route 53 domain is required.
  */
 export type StageName = 'staging' | 'prod';
 

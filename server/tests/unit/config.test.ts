@@ -40,8 +40,31 @@ describe('configuration', () => {
   });
 
   it('knows every key it reads', () => {
-    expect(ENV_KEYS).toHaveLength(24);
+    expect(ENV_KEYS).toHaveLength(25);
     expect(new Set(ENV_KEYS).size).toBe(ENV_KEYS.length);
+  });
+
+  it.each(['https://client.example', 'https://client.example/', 'http://localhost:3000'])(
+    'accepts a configured client origin %s',
+    (origin) => {
+      expect(parseEnv({ ...DEV, CLIENT_BASE_URL: origin }).CLIENT_BASE_URL).toBe(origin);
+    },
+  );
+
+  it.each([
+    '//client.example',
+    'javascript:alert(1)',
+    'https://user:pass@client.example',
+    'https://client.example/path',
+    'https://client.example?next=evil',
+    'https://client.example#token',
+    ' https://client.example',
+    'https://client.example/a/..',
+    'not-a-url',
+  ])('rejects an unsafe or non-origin client destination %s', (origin) => {
+    expect(messageOf(() => parseEnv({ ...DEV, CLIENT_BASE_URL: origin }))).toContain(
+      'CLIENT_BASE_URL',
+    );
   });
 });
 

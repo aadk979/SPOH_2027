@@ -1,6 +1,18 @@
 import { z } from 'zod';
 import type { EnvRule, NodeEnv } from './common.js';
 
+function isHttpOrigin(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return (
+      ['http:', 'https:'].includes(url.protocol) &&
+      (value === url.origin || value === `${url.origin}/`)
+    );
+  } catch {
+    return false;
+  }
+}
+
 /** Identity provider, the API's own session tokens and the refresh cookie. */
 export const authFields = {
   AUTH_PROVIDER: z.enum(['cognito', 'local']).default('cognito'),
@@ -12,6 +24,11 @@ export const authFields = {
   COGNITO_DOMAIN: z.string().optional(),
   /** This deployment's own public origin, used to build the OAuth redirect_uri. */
   APP_BASE_URL: z.string().optional(),
+  /** Browser landing origin after sign-in; defaults to APP_BASE_URL for a shared origin. */
+  CLIENT_BASE_URL: z
+    .string()
+    .refine(isHttpOrigin, 'must be an http(s) origin without credentials, query or fragment')
+    .optional(),
 
   /**
    * Signing key for the API's own access tokens.

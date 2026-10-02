@@ -23,6 +23,7 @@ const HOSTED = {
   COGNITO_DOMAIN: 'https://spoh-test.auth.ap-southeast-1.amazoncognito.com',
   COGNITO_CLIENT_ID: 'test-client-id',
   APP_BASE_URL: 'https://app.spoh.test',
+  CLIENT_BASE_URL: undefined,
 };
 
 let app: Express;
@@ -51,6 +52,67 @@ beforeEach(async () => {
 afterEach(() => {
   vi.unstubAllGlobals();
   tokenEndpoint.mockReset();
+  env.CLIENT_BASE_URL = undefined;
+});
+
+describe('separate client and API origins', () => {
+  const CLIENT = 'https://client.spoh.test';
+  beforeEach(() => {
+    env.CLIENT_BASE_URL = `${CLIENT}/`;
+  });
+
+  it('keeps OAuth callback and host-only state cookies on the API origin', async () => {
+    const response = await request(app).get('/api/v1/auth/login');
+    const authorize = new URL(response.headers.location as string);
+    expect(authorize.searchParams.get('redirect_uri')).toBe(
+      `${HOSTED.APP_BASE_URL}/api/v1/auth/callback`,
+    );
+    for (const cookie of cookiesOf(response)) {
+      expect(cookie).not.toMatch(/Domain=/i);
+      expect(cookie).toMatch(/HttpOnly/i);
+      expect(cookie).toMatch(/SameSite=Lax/i);
+    }
+  });
+
+  it('exchanges the code at the API callback and redirects the opened session to the client', async () => {
+    const { state, cookie } = await beginLogin();
+    tokenEndpoint.mockResolvedValueOnce(tokenResponse(200, { access_token: volunteer.token }));
+    const response = await callback(
+      `code=abc&state=${state}&redirect_uri=https://evil.example`,
+      cookie,
+    );
+    expect(response.status).toBe(302);
+    expect(response.headers.location).toBe(`${CLIENT}/`);
+    const [, init] = tokenEndpoint.mock.calls[0] as [URL, RequestInit];
+    expect(new URLSearchParams(String(init.body)).get('redirect_uri')).toBe(
+      `${HOSTED.APP_BASE_URL}/api/v1/auth/callback`,
+    );
+    const refresh = cookiesOf(response).find((value) => value.startsWith('spoh_refresh='));
+    expect(refresh).toBeTruthy();
+    expect(refresh).not.toMatch(/Domain=/i);
+    expect(refresh).toMatch(/HttpOnly/i);
+    expect(refresh).toMatch(/SameSite=Lax/i);
+    expect(await prisma.refreshSession.count({ where: { volunteerId: volunteer.id } })).toBe(1);
+  });
+
+  it.each(['error=access_denied', 'code=abc&state=forged'])(
+    'returns callback failure %s to the configured client only',
+    async (query) => {
+      const response = await callback(`${query}&next=https://evil.example`);
+      expect(response.status).toBe(302);
+      expect(response.headers.location).toMatch(/^https:\/\/client\.spoh\.test\/sign-in\?error=/);
+      expect(tokenEndpoint).not.toHaveBeenCalled();
+      expect(cookieValue(response, 'spoh_refresh')).toBeUndefined();
+    },
+  );
+
+  it('returns a rejected code exchange to the client without opening a session', async () => {
+    const { state, cookie } = await beginLogin();
+    tokenEndpoint.mockResolvedValueOnce(tokenResponse(400, { error: 'invalid_grant' }));
+    const response = await callback(`code=abc&state=${state}`, cookie);
+    expect(response.headers.location).toBe(`${CLIENT}/sign-in?error=exchange`);
+    expect(await prisma.refreshSession.count()).toBe(0);
+  });
 });
 
 function cookiesOf(response: request.Response): string[] {

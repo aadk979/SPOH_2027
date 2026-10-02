@@ -28,6 +28,11 @@ Rate-limit settings are read from a short-lived per-process policy cache, invali
 
 The remaining 24 schema keys are infrastructure or secrets:
 
+This is the P10.4 audit checkpoint. The subsequent P08.5 separate-origin sign-in slice
+adds only the optional infrastructure key `CLIENT_BASE_URL`, taking the schema to 25.
+It chooses the browser landing origin while `APP_BASE_URL` keeps the API OAuth callback.
+See [sign-in-origins.md](../P08/sign-in-origins.md); no operational tunable is reintroduced.
+
 | Purpose                                           | Keys                                                                                                                  |
 | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | Runtime and observability                         | `NODE_ENV`, `PORT`, `LOG_LEVEL`                                                                                       |
