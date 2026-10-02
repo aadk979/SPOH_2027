@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T13:25:32.326Z",
+  "updatedAt": "2026-10-02T13:36:45.763Z",
   "current": {
     "phase": "P10",
-    "step": "P10.5"
+    "step": "P10.6"
   },
   "gates": [
     {
@@ -2119,11 +2119,20 @@
         {
           "id": "P10.6",
           "title": "Scheduler engine (D-09)",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-02T13:31:30.367Z",
           "completedAt": null,
-          "commits": [],
-          "notes": []
+          "commits": ["4c283d4140e62d7bc2fd999284cd75d4523bf510"],
+          "notes": [
+            {
+              "at": "2026-10-02T13:31:30.368Z",
+              "text": "Starting durable claim/lease engine required by P10.5 retention; P10.5 remains open. Business handlers and worker boot activation stay pending verification."
+            },
+            {
+              "at": "2026-10-02T13:36:45.761Z",
+              "text": "Verified claim/lease slice: 7 database cases including eight two-worker rounds, locked-row skip, due/lease boundaries, scope and exhausted crash recovery; server 531 units, types/lint/architecture/hardcoding/build/format passed. Executor/handlers/metrics/boot pending; P10.5 and P10.6 remain open."
+            }
+          ]
         },
         {
           "id": "P10.7",
