@@ -61,6 +61,26 @@ CI/deployment/staging UI evidence is recorded in the continuation report once ve
 Staging checks must use the restricted synthetic
 identity without recording credentials or raw session responses.
 
+## Staging review and hover correction
+
+Exact tracker image `e1ca59038468db0b45c25771a631fb292387d393` passed
+[CI](https://github.com/aadk979/SPOH_2027/actions/runs/37137172048) and
+[deployment](https://github.com/aadk979/SPOH_2027/actions/runs/37137538407).
+The stack is UPDATE_COMPLETE; application task definition revision 101 runs that
+exact image with desired/running one, completed rollout and zero failed tasks.
+
+The first installed-Chrome probes stopped before any lifecycle mutation. They found
+that the existing fixture is READY, then detected a hovered toggle contrast of 4.45:1
+against the 4.5:1 WCAG requirement. The toggle now uses the semantic surface background
+while hovered; its collapsed appearance remains unchanged. Both local journeys pass
+again with zero WCAG 2 A/AA axe violations while the expanded toggle is hovered. The
+laptop case now explicitly uses a desktop pointer context; the phone retains touch.
+The 20 affected client checks, client types and changed-file lint pass again.
+Both settings visual baselines reassert unchanged, and the 32-page static export passes again.
+
+Final staging UI transition evidence follows the correction's deployment, using a
+normal READY → REHEARSAL → READY round trip and restoring the original preparation phase.
+
 ## Remaining scope
 
 Generated settings controls/history/revert and the general event schedule timeline

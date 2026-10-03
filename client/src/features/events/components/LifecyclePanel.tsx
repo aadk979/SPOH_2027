@@ -18,6 +18,7 @@ export function LifecyclePanel({ enabled }: { enabled: boolean }) {
       <Card className="flex flex-col gap-md">
         <Button
           variant="secondary"
+          className="hover:bg-surface"
           aria-expanded={expanded}
           aria-controls="event-lifecycle-controls"
           onClick={() => setExpanded(!expanded)}
