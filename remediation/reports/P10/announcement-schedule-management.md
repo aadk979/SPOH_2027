@@ -45,7 +45,12 @@ edited/cancelled status without making another action.
 - Full integration passes **1,266 checks / four existing skips in 90 files** (451.70 seconds).
   Changed formatting/diff checks pass; the temporary awake hold was restored in `finally`.
 
-D-11 source/tracker commit/push and exact pipeline checks follow. Only guarded
+D-11 source `5ea2d31358cd21659331a70d040698a20861ea27` and tracker
+`522635f010bc5c41812c87e864c3017a869796d6` were committed and pushed directly to main.
+[CI](https://github.com/aadk979/SPOH_2027/actions/runs/37127764523) and
+[staging deploy](https://github.com/aadk979/SPOH_2027/actions/runs/37127984874) succeeded.
+At 22:17 Singapore, the stack was `UPDATE_COMPLETE` and application task definition
+revision 98 used that exact tracker image. Only guarded
 `spoh2027_test`, the existing 30 migrations and no new migration are involved.
 A Docker runtime-socket recurrence was repaired reversibly;
 the existing container/volume and real database were preserved. No production resource,

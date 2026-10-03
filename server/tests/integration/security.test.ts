@@ -281,6 +281,25 @@ describe('errors and audit', () => {
 
 /** §8.2 — CORS. */
 describe('CORS', () => {
+  it('allows authenticated PUT preflights only for the exact client origin', async () => {
+    const allowed = await request(app)
+      .options('/api/v1/events/fixture/announcements/drafts/fixture')
+      .set('Origin', 'http://localhost:3000')
+      .set('Access-Control-Request-Method', 'PUT')
+      .set('Access-Control-Request-Headers', 'authorization,content-type');
+    expect(allowed.status).toBe(204);
+    expect(allowed.headers['access-control-allow-origin']).toBe('http://localhost:3000');
+    expect((allowed.headers['access-control-allow-methods'] ?? '').split(',')).toContain('PUT');
+    expect((allowed.headers['access-control-allow-headers'] ?? '').toLowerCase()).toContain(
+      'authorization',
+    );
+    const denied = await request(app)
+      .options('/api/v1/events/fixture/announcements/drafts/fixture')
+      .set('Origin', 'https://evil.example')
+      .set('Access-Control-Request-Method', 'PUT');
+    expect(denied.headers['access-control-allow-origin']).toBeUndefined();
+    expect(denied.headers['access-control-allow-methods']).toBeUndefined();
+  });
   it('reflects only an allowlisted origin', async () => {
     const allowed = await request(app).get('/healthz').set('Origin', 'http://localhost:3000');
 

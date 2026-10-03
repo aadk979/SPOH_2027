@@ -167,8 +167,12 @@ Event-before-action locks, PENDING-only mutations, both due instants updated tog
 metadata-only atomic USER audits and current creation replay. **37 new DB cases**, 80
 shared checks, 562 units, workspace types/build/static and source/shared/fixture/history
 scans pass. Full integration passes **1,266 checks / four existing skips in 90 files**
-(451.70 seconds), with formatting/diff passing and wake hold restored. D-11 source/tracker
-commit/push and exact pipeline checks follow. General timeline and UI remain open.
+(451.70 seconds), with formatting/diff passing and wake hold restored. D-11 source
+`5ea2d31` / tracker `522635f010bc5c41812c87e864c3017a869796d6` were committed/pushed.
+[CI](https://github.com/aadk979/SPOH_2027/actions/runs/37127764523) and
+[deploy](https://github.com/aadk979/SPOH_2027/actions/runs/37127984874) succeeded; at
+22:17 Singapore the stack was `UPDATE_COMPLETE` with that exact app image on task
+definition revision 98. General timeline and UI remain open.
 
 Docker exited again before these checks; readiness failed before tests ran. Repeating the
 reversible socket/process repair restored the original sole Postgres container and volume,

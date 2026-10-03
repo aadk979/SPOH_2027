@@ -1,6 +1,7 @@
 'use client';
 
 import { Composer } from '../components/Composer';
+import { PrivateDraftPanel } from '../components/PrivateDraftPanel';
 import { PRIORITY_LABELS, PRIORITY_TONE, type Priority } from '../model/priority';
 
 import { type ReactNode } from 'react';
@@ -35,6 +36,7 @@ export default function InboxScreen(): ReactNode {
     <AppShell width="reading" title="Announcements" back={{ href: '/home', label: 'Home' }}>
       <Stack>
         {canSend ? <Composer me={me} /> : null}
+        {canSend && me ? <PrivateDraftPanel key={session.volunteerId} me={me} /> : null}
 
         <Section title="Your messages">
           {inbox.isLoading ? (

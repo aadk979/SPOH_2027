@@ -76,7 +76,7 @@ function allowOrigins(app: Express): void {
       // returned to an origin we do not serve, and env validation refuses a
       // wildcard in production.
       credentials: true,
-      methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id'],
       exposedHeaders: ['X-Request-Id'],
       maxAge: 600,

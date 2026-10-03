@@ -141,6 +141,13 @@ The general event timeline/UI remains open.
 
 ### P10.8 — Admin UI: settings, schedule and lifecycle
 
+[Private draft and publication controls](../reports/P10/announcement-draft-ui.md)
+add private reviewed-content editing, event-clock schedule creation, pending edit/cancel
+and live status to the inbox. Client units, phone/laptop real-worker journeys, affected
+CORS/configuration integration and 58 reviewed visual checks pass. This is partial
+progress: generated settings/history/revert, general event timeline and lifecycle/readiness
+controls retain the full criteria below, so the step remains open.
+
 - **Do:**
   1. A settings screen generated from the registry: grouped, scoped (event or station tabs), with
      descriptions, validation, change history and revert.
