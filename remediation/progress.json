@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-03T11:21:38.116Z",
+  "updatedAt": "2026-10-03T12:01:01.977Z",
   "current": {
     "phase": "P10",
     "step": "P10.7"
@@ -2256,7 +2256,8 @@
             "b13f48a9e4d59e17b69015bfe1c76ada9c82778e",
             "0df8c8269bf27792eb411dda33bb116d5a2130ba",
             "191690228070d1b47d1a3bdc74a0fabdb6fffb6b",
-            "2231d547d5a9c3b9a4297958657d99b2ff4199e0"
+            "2231d547d5a9c3b9a4297958657d99b2ff4199e0",
+            "c074c07cbca2c090155c2b3b5fd05077f449d9db"
           ],
           "notes": [
             {
@@ -2326,6 +2327,10 @@
             {
               "at": "2026-10-03T11:21:38.116Z",
               "text": "Verified frozen delivery storage only: 67 focused DB checks (22 new), 1120 full integration passes/four existing skips in 86 files, 555 server units, 47 shared; workspace types/static/build/secret scans pass. Additive migration 28 only on local guarded test DB. Supplied publishing transaction owns source/plan/device/audit fate; no text or credentials copied, no retry audience expansion, immutable source/plan/recipient identity and scoped FK/state bounds. No producer/network worker registered; publication, after-commit delivery, retention and UI remain pending."
+            },
+            {
+              "at": "2026-10-03T12:01:01.707Z",
+              "text": "Timed publication verified: strict saved-version payload, current author/IC/day authority, immutable publication provenance, atomic source/plan/intents/audits/scheduler completion and real worker registration. 105 focused DB, 1158 full DB/four existing skips/87 files, 556 server units, 59 shared checks; workspace types/static/build/format/secret scans pass. Migration 29 applied only to guarded spoh2027_test. Storage caf309a CI/deploy and exact staging task revision 93 verified. P10.7 remains open for after-commit delivery, legitimate schedule producer/CRUD/UI, reminders, retention and remaining catalogue. Production approvals preserved."
             }
           ]
         },
@@ -3146,6 +3151,10 @@
     {
       "at": "2026-10-03T10:51:35.037Z",
       "text": "Starting next P10.7 slice after verified draft source/CI/actual staging and pushed evidence 1916902/040babc: frozen per-announcement delivery plan plus per-device durable storage and atomic enqueue only. No external delivery, publication handler or network worker until this storage foundation passes. CLI-only, no subagents, guarded test databases only."
+    },
+    {
+      "at": "2026-10-03T12:01:01.976Z",
+      "text": "Verified timed publication source c074c07 under D-11 after complete local checks; verify source/tracker push and exact staging pipeline next, then bounded fenced after-commit device delivery. No actual cloud schedule/external delivery claim. CLI-only, no subagents, V1-main only, real local database and inherited pricing artifacts preserved."
     }
   ]
 }
