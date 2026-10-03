@@ -31,7 +31,20 @@ unmounts the view, and person switching cannot display the previous person's dat
   phone/laptop baselines were updated, then both assertions passed again.
 - Client types, root lint, architecture, hardcoding and generated settings checks
   pass. The production static export generates all 32 pages. Source, tests and P10
-  evidence scans find no leaks. Exact D-11 pipeline/image evidence follows deployment.
+  evidence scans find no leaks.
+
+CI [37141395948](https://github.com/aadk979/SPOH_2027/actions/runs/37141395948)
+and staging deployment
+[37141784321](https://github.com/aadk979/SPOH_2027/actions/runs/37141784321)
+succeeded for tracker `c977832bc2af31d8fffac6bd7bf190fc7ca11950`
+(UI source `f0bf5db`). CloudFormation is UPDATE_COMPLETE; the exact image runs on
+ECS revision 104 with desired/running 1, completed rollout and zero failed tasks.
+At 01:57 Singapore on 4 October, installed Chrome 154 verified normal Cognito
+sign-in, strict no-store API responses for every status, the expanded settings UI,
+All statuses, hard reload, hover accessibility with zero axe violations, zero page
+errors and normal sign-out. The [sanitised evidence](staging-schedule-timeline-ui-evidence-2026-10-04.json)
+records this read-only staging journey. No schedule, lifecycle, announcement or
+external delivery writes were requested.
 
 This completes the bounded general metadata list/status/error view. Authorised
 general create/edit/cancel consumers and generated settings/history/revert still

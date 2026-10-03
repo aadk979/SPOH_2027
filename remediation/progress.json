@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-03T17:40:40.686Z",
+  "updatedAt": "2026-10-03T17:58:34.064Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -3247,6 +3247,10 @@
     {
       "at": "2026-10-03T17:19:33.267Z",
       "text": "Installed Chrome on exact 458903e verifies normal Cognito, authoritative no-store lifecycle controls, deliberate READY/rehearsal/READY UI round trip with version increments, restored READY, reload/sign-out, zero page errors and zero collapsed/expanded-hover axe violations. Sanitized evidence committed; no credentials/private IDs or close/go-live/archive/external delivery."
+    },
+    {
+      "at": "2026-10-03T17:58:34.063Z",
+      "text": "Verified timeline UI c977832 exact CI 37141395948 and staging deploy 37141784321; CloudFormation UPDATE_COMPLETE, ECS revision 104 exact image desired/running 1 completed failed 0. Normal Cognito and installed Chrome read-only UI/filter/reload/sign-out, all six strict no-store API filters, zero hover axe/page errors; evidence recorded. Three inherited P08 pricing fingerprints remain byte-identical. P10.8 remains open."
     }
   ]
 }
