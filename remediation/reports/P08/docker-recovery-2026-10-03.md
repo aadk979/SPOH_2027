@@ -54,3 +54,14 @@ kernel cause on this machine. [Docker issue 448](https://github.com/docker/deskt
 
 The container deletion affects other local projects too, as the owner requested.
 Their volumes remain available, but their containers were not recreated.
+
+## Recurrence at 21:39 Singapore
+
+Docker Desktop had exited before the schedule-management database checks; those checks
+failed their readiness hook without running test mutations. A CLI start reproduced the
+same inaccessible `dockerInference` socket. The verified Docker processes were stopped,
+only `docker-desktop` WSL was terminated, and runtime directories were reversibly moved
+to `run.recovery-20261003-2145` / `docker-secrets-engine.recovery-20261003-2145`.
+After `docker desktop start --detach`, the existing sole Postgres container returned
+healthy on localhost:5435 and `pg_isready` passed. No containers, images, volumes,
+settings or database data were deleted during this recurrence repair.

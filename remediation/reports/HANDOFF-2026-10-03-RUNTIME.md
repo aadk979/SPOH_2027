@@ -161,6 +161,20 @@ new-intent refusal, sign-out and zero page errors passed. The sanitized
 P10.9's actual-announcement subcriterion is met; its full step remains open. No urgent
 push, invitation or external device receipt is claimed.
 
+[Private schedule management](P10/announcement-schedule-management.md) is the next
+verified local slice: owned-draft list/edit/cancel, strict separate action/draft versions,
+Event-before-action locks, PENDING-only mutations, both due instants updated together,
+metadata-only atomic USER audits and current creation replay. **37 new DB cases**, 80
+shared checks, 562 units, workspace types/build/static and source/shared/fixture/history
+scans pass. Full integration passes **1,266 checks / four existing skips in 90 files**
+(451.70 seconds), with formatting/diff passing and wake hold restored. D-11 source/tracker
+commit/push and exact pipeline checks follow. General timeline and UI remain open.
+
+Docker exited again before these checks; readiness failed before tests ran. Repeating the
+reversible socket/process repair restored the original sole Postgres container and volume,
+with new runtime quarantines suffixed `recovery-20261003-2145`. No data was deleted in
+that recurrence. The management checks then ran successfully on `spoh2027_test` only.
+
 P08.5 must stay open, but **the staging browser blocker is cleared** by the owner's
 Chrome amendment and the installed Chrome result. Do not ask for actual iOS Safari
 evidence again. No renewal-cycle test is claimed. Production Firebase configuration

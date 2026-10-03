@@ -8,6 +8,8 @@ import {
   PaginationQuery,
   UpdateAnnouncementDraftRequest,
   ScheduleAnnouncementDraftRequest,
+  UpdateAnnouncementPublicationScheduleRequest,
+  CancelAnnouncementPublicationScheduleRequest,
 } from '@spoh/shared';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { defaultRateLimit } from '../../../platform/http/rateLimit.js';
@@ -24,6 +26,9 @@ import { draftReplay } from './draftReplay.js';
 import {
   createPublicationScheduleHandler,
   readPublicationScheduleHandler,
+  listPublicationSchedulesHandler,
+  updatePublicationScheduleHandler,
+  cancelPublicationScheduleHandler,
 } from './publicationScheduleHandlers.js';
 import { publicationScheduleReplay } from './publicationScheduleReplay.js';
 import { acknowledgeHandler, listInboxHandler, sendAnnouncementHandler } from './handlers.js';
@@ -32,6 +37,7 @@ import { acknowledgeHandler, listInboxHandler, sendAnnouncementHandler } from '.
 export const announcementRouter: Router = Router();
 
 const IdParams = z.object({ id: Id }).strict();
+const ScheduleParams = z.object({ id: Id, scheduleId: Id }).strict();
 
 announcementRouter.use(requireAuth);
 announcementRouter.use('/drafts', (_req, res, next) => {
@@ -80,8 +86,29 @@ announcementRouter.get(
   '/drafts/:id/schedules/:scheduleId',
   defaultRateLimit,
   requireCapability('announcement.station.send'),
-  validate({ params: z.object({ id: Id, scheduleId: Id }).strict() }),
+  validate({ params: ScheduleParams }),
   readPublicationScheduleHandler,
+);
+announcementRouter.get(
+  '/drafts/:id/schedules',
+  defaultRateLimit,
+  requireCapability('announcement.station.send'),
+  validate({ params: IdParams, query: PaginationQuery.strict() }),
+  listPublicationSchedulesHandler,
+);
+announcementRouter.put(
+  '/drafts/:id/schedules/:scheduleId',
+  defaultRateLimit,
+  requireCapability('announcement.station.send'),
+  validate({ params: ScheduleParams, body: UpdateAnnouncementPublicationScheduleRequest }),
+  updatePublicationScheduleHandler,
+);
+announcementRouter.post(
+  '/drafts/:id/schedules/:scheduleId/cancel',
+  defaultRateLimit,
+  requireCapability('announcement.station.send'),
+  validate({ params: ScheduleParams, body: CancelAnnouncementPublicationScheduleRequest }),
+  cancelPublicationScheduleHandler,
 );
 
 /**

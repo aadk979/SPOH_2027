@@ -118,6 +118,13 @@ passed, and normal Cognito/API creation led to a real staging INFO publication o
 in installed Chrome and after hard reload. General list/edit/cancel/timeline and UI remain
 pending; no external device receipt is claimed.
 
+[Private schedule management](../reports/P10/announcement-schedule-management.md) adds
+owned-draft keyset lists, PENDING-only versioned edits and cancellation. Its 37 new
+database cases verify revised due times, current reviewed content, atomic audits,
+cancelled actions, stale/concurrent workers and post-wait policy. Full integration passes
+1,266 checks with four existing skips in 90 files; D-11 commit/pipeline checks follow.
+The general event timeline/UI remains open.
+
 - **Do:** Handlers for:
   - lifecycle transitions
   - publishing an announcement at a time

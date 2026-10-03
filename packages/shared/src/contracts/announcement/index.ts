@@ -66,6 +66,28 @@ export const ScheduleAnnouncementDraftRequest = z
   .strict();
 export type ScheduleAnnouncementDraftRequest = z.infer<typeof ScheduleAnnouncementDraftRequest>;
 
+export const UpdateAnnouncementPublicationScheduleRequest = z
+  .object({
+    expectedVersion: z.number().int().min(1),
+    expectedDraftVersion: z.number().int().min(1),
+    runAt: IsoDateTime,
+    reason: z.string().trim().min(3).max(500).optional(),
+  })
+  .strict();
+export type UpdateAnnouncementPublicationScheduleRequest = z.infer<
+  typeof UpdateAnnouncementPublicationScheduleRequest
+>;
+
+export const CancelAnnouncementPublicationScheduleRequest = z
+  .object({
+    expectedVersion: z.number().int().min(1),
+    reason: z.string().trim().min(3).max(500).optional(),
+  })
+  .strict();
+export type CancelAnnouncementPublicationScheduleRequest = z.infer<
+  typeof CancelAnnouncementPublicationScheduleRequest
+>;
+
 /** Public errors are catalogue codes, never raw worker/provider exceptions. */
 export const AnnouncementScheduleError = z.enum([
   'INVALID_PAYLOAD',

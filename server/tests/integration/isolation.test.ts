@@ -445,6 +445,21 @@ const CASES: Record<string, Case> = {
   'GET /announcements/drafts/:id/schedules/:scheduleId': {
     params: (b) => ({ id: b.announcementDraft, scheduleId: b.announcementSchedule }),
   },
+  'GET /announcements/drafts/:id/schedules': {
+    params: (b) => ({ id: b.announcementDraft }),
+  },
+  'PUT /announcements/drafts/:id/schedules/:scheduleId': {
+    params: (b) => ({ id: b.announcementDraft, scheduleId: b.announcementSchedule }),
+    body: () => ({
+      expectedVersion: 1,
+      expectedDraftVersion: 1,
+      runAt: new Date(FROZEN_NOW.getTime() + 120_000).toISOString(),
+    }),
+  },
+  'POST /announcements/drafts/:id/schedules/:scheduleId/cancel': {
+    params: (b) => ({ id: b.announcementDraft, scheduleId: b.announcementSchedule }),
+    body: () => ({ expectedVersion: 1 }),
+  },
 
   'GET /dashboard/live': LIST,
   'GET /dashboard/data-health': LIST,

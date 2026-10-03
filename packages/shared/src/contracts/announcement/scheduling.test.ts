@@ -2,6 +2,8 @@ import { expect, it } from 'vitest';
 import {
   AnnouncementPublicationScheduleRecord,
   ScheduleAnnouncementDraftRequest,
+  UpdateAnnouncementPublicationScheduleRequest,
+  CancelAnnouncementPublicationScheduleRequest,
 } from './index.js';
 
 const input = {
@@ -16,6 +18,48 @@ it('requires explicit version, time and retry UUID', () => {
     delete incomplete[key];
     expect(ScheduleAnnouncementDraftRequest.safeParse(incomplete).success).toBe(false);
   }
+});
+it('requires separate current action and reviewed draft versions for editing', () => {
+  const update = {
+    expectedVersion: 2,
+    expectedDraftVersion: 3,
+    runAt: input.runAt,
+    reason: 'Correct timing',
+  };
+  expect(UpdateAnnouncementPublicationScheduleRequest.parse(update)).toEqual(update);
+  for (const key of ['expectedVersion', 'expectedDraftVersion', 'runAt']) {
+    const incomplete = { ...update } as Record<string, unknown>;
+    delete incomplete[key];
+    expect(UpdateAnnouncementPublicationScheduleRequest.safeParse(incomplete).success).toBe(false);
+  }
+});
+it.each([
+  { expectedVersion: 0 },
+  { expectedDraftVersion: 0 },
+  { body: 'Unreviewed' },
+  { recurrence: 60 },
+  { reason: 'x' },
+])('refuses invalid edit input %j', (patch) => {
+  expect(
+    UpdateAnnouncementPublicationScheduleRequest.safeParse({
+      expectedVersion: 1,
+      expectedDraftVersion: 1,
+      runAt: input.runAt,
+      ...patch,
+    }).success,
+  ).toBe(false);
+});
+it('requires current action version and a bounded optional cancellation reason', () => {
+  expect(CancelAnnouncementPublicationScheduleRequest.parse({ expectedVersion: 1 })).toEqual({
+    expectedVersion: 1,
+  });
+  for (const invalid of [
+    {},
+    { expectedVersion: 0 },
+    { expectedVersion: 1, status: 'SUCCEEDED' },
+    { expectedVersion: 1, reason: 'x'.repeat(501) },
+  ])
+    expect(CancelAnnouncementPublicationScheduleRequest.safeParse(invalid).success).toBe(false);
 });
 it.each(['type', 'body', 'eventId', 'createdByPersonId', 'recurrence', 'maxAttempts', 'expiresAt'])(
   'refuses injected %s',

@@ -12,7 +12,7 @@ import { prepareDraftMutation, type DraftActor } from './prepareDraftMutation.js
 
 function verifyPublicationTime(
   draft: { id: string; version: number; expiresAt: Date | null },
-  request: ScheduleAnnouncementDraftRequest,
+  request: Pick<ScheduleAnnouncementDraftRequest, 'expectedVersion' | 'runAt'>,
   now: Date,
 ) {
   const runAt = new Date(request.runAt);
@@ -34,7 +34,11 @@ function verifyPublicationTime(
 
 export async function preparePublicationSchedule(
   tx: PrismaTransactionClient,
-  input: { id: string; request: ScheduleAnnouncementDraftRequest; actor: DraftActor },
+  input: {
+    id: string;
+    request: Pick<ScheduleAnnouncementDraftRequest, 'expectedVersion' | 'runAt'>;
+    actor: DraftActor;
+  },
 ) {
   const { actor, request } = input;
   await lockDraftEvent(actor.scope, tx);
