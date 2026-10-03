@@ -55,6 +55,10 @@ export class PlatformStack extends Stack {
   /** Staging gets its own pool; production references the existing one by id. */
   private cognito(stage: StageConfig, appOrigin: string): CognitoSettings {
     if (stage.existingCognito) return stage.existingCognito;
-    return new StagingIdentity(this, 'Identity', { appOrigin, stageName: stage.name }).settings;
+    return new StagingIdentity(this, 'Identity', {
+      appOrigin: stage.publicOrigins?.api ?? appOrigin,
+      clientOrigin: stage.publicOrigins?.client ?? appOrigin,
+      stageName: stage.name,
+    }).settings;
   }
 }

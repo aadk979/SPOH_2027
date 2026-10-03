@@ -57,13 +57,16 @@ service stays in production mode, and a production stack name is refused before 
 ## Configuration migration boundary (P10.4 / P08.6)
 
 The P10.4 audit checkpoint found no application SSM parameters to remove in Singapore.
-P08.6 now defines 14 standard `String` parameters under `/spoh/<stage>/infra/<ENV_NAME>` and
-injects them at task startup. The app execution role can read only its 14 parameters; the
+P08.6 defines standard `String` parameters under `/spoh/<stage>/infra/<ENV_NAME>` and
+injects them at task startup: 16 for staging, 14 for the unchanged production definition.
+The app execution role can read only its stage's exact injected parameters; the
 migration execution role reads only `DB_HOST` and `DB_NAME`. Application task roles do not gain
 SSM access. Credentials remain in Secrets Manager, and no environment file is included in an image.
 
-The parameter values preserve the existing API Gateway origin, Cognito settings and one-proxy
-configuration. P08.5 will change routing when its DuckDNS edge is verified. Infrastructure
+Staging now selects the verified DuckDNS API/client origins together for callback,
+browser redirects, logout and credentialed CORS, and injects `DEPLOYMENT_ENV=staging`.
+Production retains the previous API Gateway origin and reference-only Cognito configuration.
+The closest API Gateway hop remains the only trusted proxy hop. Infrastructure
 values are code-owned and released through CDK/CI: ECS does not reload changed parameters into
 running containers, so changing a parameter requires a new task deployment. Operational live
 settings retain their database/cache-bus path. See the
@@ -104,8 +107,11 @@ configuration on the named new proxy explicitly. Preserve the existing live Ligh
 For separate client/API origins, `APP_BASE_URL` keeps the API callback and optional
 `CLIENT_BASE_URL` selects the post-sign-in browser destination. See the
 [`sign-in origin report`](../../remediation/reports/P08/sign-in-origins.md). This optional
-key is not injected into the existing staging service until HTTPS and the combined routing,
-Cognito and CORS change are verified. Client API routing must use ADR-003 runtime config.
+key is injected for staging with the combined routing, Cognito and CORS change after
+HTTPS and the [runtime client startup](../../remediation/reports/P08/client-runtime-startup.md)
+were verified. Client API routing uses ADR-003 runtime config. See the
+[combined staging wiring report](../../remediation/reports/P08/staging-origins.md) for the
+deployment checkpoint and remaining real-account/iOS verification.
 
 Do not introduce operational parameters or environment overrides for attendance root/networks,
 rehearsal, upload lifetime/size, access-token lifetime or rate limits. They use the versioned

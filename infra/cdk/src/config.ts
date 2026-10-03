@@ -16,6 +16,8 @@ export interface StageConfig {
   tags: { app: string; env: StageName; owner: string; 'cost-centre': string };
   /** The app's hostname under the D-08 domain. */
   domainName: string;
+  /** Verified public edge origins; omitted until a stage's routing is ready. */
+  publicOrigins?: { api: string; client: string };
   /** ADR-008 §3 sizing, off-season; event days scale by owner-approved schedule (P08.4). */
   app: { cpu: number; memoryMiB: number; desiredCount: number };
   database: { instanceClass: string; allocatedStorageGiB: number; maxStorageGiB: number };
@@ -62,6 +64,10 @@ export const STAGES: Record<StageName, StageConfig> = {
     region: REGION,
     tags: tags('staging'),
     domainName: `staging.${DOMAIN}`,
+    publicOrigins: {
+      api: `https://${STAGING_EDGE.apiHost}`,
+      client: `https://${STAGING_EDGE.clientHost}`,
+    },
     app: { cpu: 512, memoryMiB: 1024, desiredCount: 1 },
     database: { instanceClass: 't4g.micro', allocatedStorageGiB: 20, maxStorageGiB: 100 },
   },

@@ -25,7 +25,11 @@ export class StagingIdentity extends Construct {
   readonly pool: IUserPool;
   readonly settings: CognitoSettings;
 
-  constructor(scope: Construct, id: string, props: { appOrigin: string; stageName: string }) {
+  constructor(
+    scope: Construct,
+    id: string,
+    props: { appOrigin: string; clientOrigin: string; stageName: string },
+  ) {
     super(scope, id);
     const pool = new UserPool(this, 'Pool', {
       userPoolName: `spoh-${props.stageName}`,
@@ -56,7 +60,7 @@ export class StagingIdentity extends Construct {
         flows: { authorizationCodeGrant: true },
         scopes: [OAuthScope.OPENID, OAuthScope.EMAIL, OAuthScope.PROFILE],
         callbackUrls: [`${props.appOrigin}/api/v1/auth/callback`],
-        logoutUrls: [`${props.appOrigin}/sign-in`],
+        logoutUrls: [`${props.clientOrigin}/sign-in`],
       },
       preventUserExistenceErrors: true,
     });

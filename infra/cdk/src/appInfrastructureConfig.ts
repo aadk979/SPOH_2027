@@ -27,9 +27,15 @@ function infrastructureValues(props: InfrastructureProps) {
     COGNITO_USER_POOL_ID: cognito.userPoolId,
     COGNITO_CLIENT_ID: cognito.clientId,
     COGNITO_DOMAIN: cognito.domain,
-    APP_BASE_URL: appOrigin,
-    CORS_ALLOWED_ORIGINS: appOrigin,
-    // API Gateway is currently the one proxy in front of the task.
+    APP_BASE_URL: stage.publicOrigins?.api ?? appOrigin,
+    CORS_ALLOWED_ORIGINS: stage.publicOrigins?.client ?? appOrigin,
+    ...(stage.publicOrigins
+      ? {
+          CLIENT_BASE_URL: stage.publicOrigins.client,
+          DEPLOYMENT_ENV: stage.name === 'prod' ? 'production' : 'staging',
+        }
+      : {}),
+    // Trust the closest API Gateway hop; the native endpoint remains reachable directly.
     TRUST_PROXY_HOPS: '1',
     AWS_REGION: stage.region,
   };
