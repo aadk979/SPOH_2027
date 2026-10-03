@@ -1,0 +1,30 @@
+{
+  "observedAt": "2026-10-03T17:13:40.471Z",
+  "deployedImageTag": "458903e32cd1c3de9ad74cde922515a075dd852c",
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  "scope": "Normal Cognito Authorization Code + PKCE; established synthetic staging preparation fixture; actual UI transitions with server-owned readiness",
+  "checks": {
+    "normalSignIn": true,
+    "noStoreReadiness": true,
+    "deliberateConfirmation": true,
+    "browserStartRehearsal": 200,
+    "unavailableGoLiveDisabled": true,
+    "explicitCurrentReview": true,
+    "browserEndRehearsal": 200,
+    "versionIncrementPerTransition": true,
+    "originalReadyPhaseRestored": true,
+    "hardReloadStateVisible": true,
+    "collapsedAxeViolations": [],
+    "expandedAxeViolations": [],
+    "appPageErrors": [],
+    "normalSignOut": true
+  },
+  "fixtures": "Two normal audited synthetic preparation transitions retained; phase restored to READY. No go-live, close, archive, announcement, invitation or external delivery requested."
+}

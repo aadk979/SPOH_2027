@@ -78,8 +78,20 @@ laptop case now explicitly uses a desktop pointer context; the phone retains tou
 The 20 affected client checks, client types and changed-file lint pass again.
 Both settings visual baselines reassert unchanged, and the 32-page static export passes again.
 
-Final staging UI transition evidence follows the correction's deployment, using a
-normal READY → REHEARSAL → READY round trip and restoring the original preparation phase.
+At 01:13 SGT on 4 October, installed Chrome verified the corrected controls on exact
+image `458903e32cd1c3de9ad74cde922515a075dd852c`, application task definition revision 102.
+[CI](https://github.com/aadk979/SPOH_2027/actions/runs/37138788666),
+[Infra](https://github.com/aadk979/SPOH_2027/actions/runs/37138788629) and
+[deployment](https://github.com/aadk979/SPOH_2027/actions/runs/37139142979) succeeded;
+the stack is UPDATE_COMPLETE with a completed one-task rollout and zero failures.
+Normal Cognito/PKCE, authoritative no-store readiness, explicit confirmation/review,
+disabled first go-live, actual READY → REHEARSAL → READY UI responses with one version
+increment each, hard reload, normal sign-out and zero page errors passed. Both collapsed
+and expanded hovered WCAG 2 A/AA checks have zero violations. The original READY phase
+is restored; two normal synthetic transition audits/receipts remain. No close, go-live,
+archive or external delivery was requested. The
+[sanitized evidence](staging-lifecycle-ui-evidence-2026-10-04.json) contains no credentials
+or private fixture identifiers.
 
 ## Remaining scope
 

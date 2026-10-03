@@ -33,8 +33,20 @@ availability and owner SNS delivery remain separate P08.8 criteria.
   one alarm and one output. No database, network, task, identity or API route changes
   are present. Normal local worker logs confirm healthy gauge emission.
 
-The exact CI/Infra/deployment and actual CloudWatch observation are recorded after
-deployment. Definition/filter checks are not a forced alarm or email delivery result.
+Definition/filter checks are not a forced alarm or email delivery result; exact
+deployment and healthy CloudWatch observations are recorded below.
+
+## Deployed observation
+
+At 01:13 SGT on 4 October, exact `458903e32cd1c3de9ad74cde922515a075dd852c` has green
+[CI](https://github.com/aadk979/SPOH_2027/actions/runs/37138788666),
+[Infra](https://github.com/aadk979/SPOH_2027/actions/runs/37138788629) and
+[deployment](https://github.com/aadk979/SPOH_2027/actions/runs/37139142979).
+The stack is UPDATE_COMPLETE and task definition revision 102 runs that image with
+one desired/running task, completed rollout and zero failed tasks. CloudWatch confirms
+the exact `spoh-staging-cache-bus-degraded` alarm definition, no actions and state OK.
+Four one-minute Count samples at 01:09–01:12 SGT have Maximum zero. This proves actual
+log-to-metric healthy observations; it is not a forced degradation/ALARM or email test.
 
 ## Cost and remaining scope
 
