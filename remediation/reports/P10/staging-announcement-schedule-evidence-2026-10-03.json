@@ -1,0 +1,34 @@
+{
+  "observedAt": "2026-10-03T13:39:00.910Z",
+  "deployedImageTag": "2ecabfd07c23dd194576ea9c034adbd6d4dfd1de",
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97"
+  },
+  "scope": "Normal Cognito Authorization Code + PKCE; existing legitimate synthetic ADMIN; API producer and real staging scheduler; installed Chrome inbox and hard reload",
+  "checks": {
+    "draftCreate": 201,
+    "scheduleCreate": 201,
+    "privateNoStore": true,
+    "reviewedVersion": 1,
+    "pendingReplay": 201,
+    "noPreDueInboxPublication": true,
+    "statusRead": 200,
+    "completedStatus": "SUCCEEDED",
+    "publicationAtOrAfterDue": true,
+    "completedReplay": 201,
+    "replayRebuildsCurrentStatus": true,
+    "exactlyOneMatchingInboxMessage": true,
+    "newPublicationIntentRefused": 409,
+    "chromeInboxVisible": true,
+    "hardReloadInboxVisible": true,
+    "signOut": 204,
+    "appPageErrors": []
+  },
+  "timing": {
+    "runAt": "2026-10-03T13:38:52.716Z",
+    "publishedAt": "2026-10-03T13:38:57.272Z",
+    "completedAt": "2026-10-03T13:38:57.272Z"
+  },
+  "fixtures": "One synthetic INFO announcement addressed to ADMIN members and its private draft/action/audit/retry records retained. No invitation or urgent push requested. No external device receipt claimed."
+}

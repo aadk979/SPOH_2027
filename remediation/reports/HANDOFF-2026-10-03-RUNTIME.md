@@ -149,8 +149,17 @@ Creation audit/action/id-only replay receipt are atomic; replay reads current st
 The USER creation audit links by entity ID without weakening execution provenance.
 **35 new API cases**, **186 focused DB checks**, **73 shared checks**, **562 server units**,
 workspace types/static/build/format/scans and **1,229 full DB passes / four existing skips in
-89 files** (444.42 seconds) pass. D-11 source/tracker and exact CI/deploy verification follow;
-the actual staging schedule remains to be run through normal Cognito/API creation.
+89 files** (444.42 seconds) pass. Source `bb00322` / tracker
+`2ecabfd07c23dd194576ea9c034adbd6d4dfd1de` were committed/pushed with green
+[CI](https://github.com/aadk979/SPOH_2027/actions/runs/37126024953) and
+[deploy](https://github.com/aadk979/SPOH_2027/actions/runs/37126302059); the stack is
+`UPDATE_COMPLETE` with that exact image. At 21:39 Singapore, a normal Cognito/API-created
+synthetic INFO schedule was completed by the real staging worker, appeared exactly once
+in the installed Chrome inbox and survived hard reload. Private current status/replay,
+new-intent refusal, sign-out and zero page errors passed. The sanitized
+[evidence](P10/staging-announcement-schedule-evidence-2026-10-03.json) retains no credentials.
+P10.9's actual-announcement subcriterion is met; its full step remains open. No urgent
+push, invitation or external device receipt is claimed.
 
 P08.5 must stay open, but **the staging browser blocker is cleared** by the owner's
 Chrome amendment and the installed Chrome result. Do not ask for actual iOS Safari

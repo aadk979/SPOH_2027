@@ -113,9 +113,10 @@ Its full suite passes 1,194 checks with four existing skips; D-11 CI/deploy and 
 [Private publication schedule creation/status](../reports/P10/announcement-schedule-api.md)
 adds the legitimate producer with current authority, saved-version/time guards, atomic
 metadata audit/id-only retry receipt and current private status. Its 35 new API cases,
-186 focused checks and full 1,229-pass/four-skip suite are green. D-11/pipeline verification
-and a real staging schedule follow. General list/edit/cancel/timeline and UI remain pending;
-no actual cloud scheduled-announcement or external device receipt is claimed yet.
+186 focused checks and full 1,229-pass/four-skip suite are green. Exact `2ecabfd` CI/deploy
+passed, and normal Cognito/API creation led to a real staging INFO publication observed
+in installed Chrome and after hard reload. General list/edit/cancel/timeline and UI remain
+pending; no external device receipt is claimed.
 
 - **Do:** Handlers for:
   - lifecycle transitions
@@ -141,6 +142,11 @@ no actual cloud scheduled-announcement or external device receipt is claimed yet
 - **Done when:** e2e covers changing a setting, scheduling it, watching it apply, and reverting it.
 
 ### P10.9 — Verify and report
+
+The [actual staging announcement](../reports/P10/announcement-schedule-api.md) subcriterion
+passed at 21:39 Singapore on 3 October: normal Cognito/API producer, real worker, one
+scheduled synthetic INFO message, private current status/replay and Chrome inbox/hard reload.
+The full step remains open for the other phase dependencies and verification criteria.
 
 - **Do:**
   1. Time-travel tests for scheduled actions, the two-instance propagation test, and lifecycle

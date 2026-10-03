@@ -46,7 +46,29 @@ error codes; unexpected stored exception text becomes `EXECUTION_FAILED`.
 - Full integration passes **1,229 checks / four existing skips in 89 files** (444.42 seconds).
   The temporary awake hold was restored in `finally`.
 
-D-11 commit/push and exact pipeline verification follow; no deployment or actual staging
-schedule is claimed yet. Dedicated `spoh2027_test` only is used locally, with the existing
-30 migrations and no new migration. General list/edit/cancel/timeline and UI remain open.
-P10.7 and P10.9 are not complete.
+Source `bb00322` / tracker `2ecabfd07c23dd194576ea9c034adbd6d4dfd1de` were committed/pushed
+under D-11. Exact [CI](https://github.com/aadk979/SPOH_2027/actions/runs/37126024953) and
+[deploy](https://github.com/aadk979/SPOH_2027/actions/runs/37126302059) succeeded; the staging
+stack is `UPDATE_COMPLETE` and serves that exact image.
+
+At **21:39 Singapore**, installed Chrome **154.0.8037.97** completed normal Cognito
+Authorization Code + PKCE sign-in using the existing legitimate synthetic ADMIN identity.
+The [sanitized evidence](staging-announcement-schedule-evidence-2026-10-03.json) records:
+
+- Private draft creation and normal authenticated schedule creation/replay: **201**;
+  owned status read **200**, `no-store`, reviewed version 1 and unchanged inbox before due.
+- The real staging worker completed **SUCCEEDED**, publishing at **21:38:57.272** for a
+  **21:38:52.716** due time. Draft publication and action completion timestamps match.
+- Completed creation replay rebuilt current status; the inbox held exactly one matching
+  message. A new publication intent from the same published draft was refused **409**.
+- The message appeared in the existing Chrome inbox and survived a hard reload;
+  sign-out returned **204**, with no application page errors.
+
+Only one explicitly synthetic **INFO** message addressed to **ADMIN** members and its
+draft/action/audit/retry records were retained. Creation used the normal API producer;
+there was no direct database/queue insertion or auth bypass. No urgent push or invitation
+was requested, and no external device receipt is claimed.
+
+Dedicated `spoh2027_test` only is used locally, with the existing 30 migrations and no
+new migration. General list/edit/cancel/timeline and UI remain open. P10.7 and P10.9 are
+not complete; this meets P10.9's actual staging-announcement subcriterion only.
