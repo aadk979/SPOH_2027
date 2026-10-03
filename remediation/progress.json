@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-03T13:53:58.527Z",
+  "updatedAt": "2026-10-03T14:59:11.424Z",
   "current": {
     "phase": "P10",
-    "step": "P10.7"
+    "step": "P10.8"
   },
   "gates": [
     {
@@ -2352,11 +2352,16 @@
         {
           "id": "P10.8",
           "title": "Admin UI: settings, schedule and lifecycle",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-03T14:59:10.795Z",
           "completedAt": null,
-          "commits": [],
-          "notes": []
+          "commits": ["e9b1be7ccdc6ff48193efb01d008209fd5ef799c"],
+          "notes": [
+            {
+              "at": "2026-10-03T14:59:10.845Z",
+              "text": "Partial private draft/publication UI: 326 client checks, 28 affected security/config DB checks, 2 real-worker phone/laptop journeys, 58 visual checks with 2 reviewed inbox baselines, 32-page static export, types/lint/architecture/scans pass. Source e9b1be7 pushed. Exact pipelines/cloud UI proof pending; general settings/history/revert, event timeline and lifecycle criteria remain open."
+            }
+          ]
         },
         {
           "id": "P10.9",
@@ -3191,6 +3196,10 @@
     {
       "at": "2026-10-03T13:53:58.526Z",
       "text": "Private schedule management source 5ea2d31 verified and committed under D-11. Docker recurrence repaired through reversible runtime-directory quarantines suffixed 2145; original sole Postgres container/volume retained, no data deletion. Proceed to P10.8 private draft/schedule UI while exact pipeline checks continue; preserve broad step exit criteria."
+    },
+    {
+      "at": "2026-10-03T14:59:11.423Z",
+      "text": "Owner requested overall status: verified 105/171 steps (61.4%), 9/17 phases; P10 private publication UI advances one verified slice while full steps remain open. Overall status report added. No current owner-controlled blocker; continue authorized programme work."
     }
   ]
 }

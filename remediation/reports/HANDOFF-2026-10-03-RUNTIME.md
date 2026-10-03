@@ -179,6 +179,24 @@ reversible socket/process repair restored the original sole Postgres container a
 with new runtime quarantines suffixed `recovery-20261003-2145`. No data was deleted in
 that recurrence. The management checks then ran successfully on `spoh2027_test` only.
 
+[Private draft/publication UI](P10/announcement-draft-ui.md) is the next verified
+partial P10.8 slice, committed/pushed as `e9b1be7ccdc6ff48193efb01d008209fd5ef799c`.
+It adds private saved-content editing and reviewed-version event-clock publication
+creation, pending edit/cancel and live status. Current-session query keys, zero unused
+cache retention, account unmount, explicit concurrent-version reload and denied-access
+content hiding protect the private workspace. PUT was added to exact-origin CORS after
+the real browser caught the missing preflight verb. **326 client checks**, **28 affected
+backend integration checks**, **two phone/laptop real-worker journeys**, **58 serial visual
+checks** and the **32-page static export** pass, with root types/lint/architecture/scans.
+Only two reviewed inbox baselines changed. General settings/history/revert, event timeline,
+lifecycle/readiness and catalogue work remain open. Tracker and exact pipeline/staging
+checks follow; do not claim the new UI has yet passed on cloud Chrome.
+
+The owner-facing [project status](PROJECT-STATUS-2026-10-03.md) records **105/171 steps**
+and **9/17 phases** closed, with G3–G5 pending. These are counts, not an effort estimate.
+The week includes agreed audits/refactors, verification and Docker recovery; there is
+no current owner-controlled gate to continuing development and no reliable finish date.
+
 P08.5 must stay open, but **the staging browser blocker is cleared** by the owner's
 Chrome amendment and the installed Chrome result. Do not ask for actual iOS Safari
 evidence again. No renewal-cycle test is claimed. Production Firebase configuration
@@ -223,11 +241,11 @@ were used instead.
   `spoh2027_visual_test`. The one-image proof used `spoh2027_container_test` only.
   Run browser suites serially and restart the visual API before each full run.
   Retain existing visual fixtures/limits; inspect baseline changes.
-- Local preview was restored to E2E mode with a normal clock: API 4012, client
-  3001, healthy runtime metadata with explicit local auth. Tool-managed sessions
-  at checkpoint are API **36918** and Next client **26444**; confirm listeners
-  and exact executable/command before stopping anything. Services can stop when
-  the computer sleeps.
+- The prior preview was stopped after serial E2E, restarted frozen visual verification
+  and static export. At the UI source checkpoint there are no preview listeners.
+  Restart normal-clock E2E API/client through `.local/e2e-api.ps1` and
+  `.local/dev-client.ps1` when needed; confirm listeners and exact executables/commands
+  before stopping anything. Never leave the frozen visual API as the normal preview.
 - Long DB verification used a temporary wake hold restored in `finally`; no
   persistent power settings changed. Cloud/browser probes never enable local
   auth in the running staging API.
