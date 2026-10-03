@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-03T15:17:59.128Z",
+  "updatedAt": "2026-10-03T16:31:31.139Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -2355,7 +2355,10 @@
           "status": "in_progress",
           "startedAt": "2026-10-03T14:59:10.795Z",
           "completedAt": null,
-          "commits": ["e9b1be7ccdc6ff48193efb01d008209fd5ef799c"],
+          "commits": [
+            "e9b1be7ccdc6ff48193efb01d008209fd5ef799c",
+            "b71fe5003685854aeb7c27332cfedee149d7a29f"
+          ],
           "notes": [
             {
               "at": "2026-10-03T14:59:10.845Z",
@@ -2364,6 +2367,10 @@
             {
               "at": "2026-10-03T15:17:58.349Z",
               "text": "Partial private draft/publication UI verified locally and on exact eeb2c26 staging image: green CI 37131607882/deploy 37131985966, UPDATE_COMPLETE/ECS99 healthy, installed Chrome 154 normal Cognito UI edit/cancel, reviewed version/ADMIN audience, actual worker publication, one inbox message, reload/sign-out, zero axe/page errors. General settings/history/revert, timeline and lifecycle criteria remain open."
+            },
+            {
+              "at": "2026-10-03T16:31:31.138Z",
+              "text": "Lifecycle readiness and reviewed controls verified locally: 18 new readiness integrations, 20 client checks, phone/laptop worker journeys, 58 visual checks including two reviewed baselines, 32-page static export; P10.8 remains open for generated settings/history/revert and general timeline. Exact staging verification follows."
             }
           ]
         },
@@ -3208,6 +3215,10 @@
     {
       "at": "2026-10-03T15:17:59.127Z",
       "text": "Recorded actual staging Chrome UI verification at 23:16 Singapore; 105/171 steps and 9/17 phases remain closed. Normal local preview restored (API11067/client99378). Continue remaining P10/P08 work; no owner-controlled blocker."
+    },
+    {
+      "at": "2026-10-03T15:51:14.671Z",
+      "text": "Resumed P10.8 after clean main/origin/ls-remote 46a73d7. Its CI 37132767132 and deployment 37133023285 succeeded; stack UPDATE_COMPLETE reports exact image. Next bounded slice: server-owned lifecycle readiness and versioned admin controls, preserving unavailable go-live/archive dependencies. CLI-only, no subagents, V1-main only."
     }
   ]
 }
