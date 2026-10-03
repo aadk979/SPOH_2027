@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-02T19:53:36.714Z",
+  "updatedAt": "2026-10-03T07:04:57.958Z",
   "current": {
     "phase": "P08",
-    "step": "P08.8"
+    "step": "P08.10"
   },
   "gates": [
     {
@@ -1756,11 +1756,19 @@
           "status": "in_progress",
           "startedAt": "2026-09-29T08:43:49.981Z",
           "completedAt": null,
-          "commits": [],
+          "commits": ["d6fe080b11c4d9479357688a83c94aa9faf37bbd"],
           "notes": [
             {
               "at": "2026-09-29T12:44:19.588Z",
               "text": "Staging seeded with the production-shape fixture through the one-off seed task (56a0c3e). Cost report due after 3 days of running."
+            },
+            {
+              "at": "2026-10-03T06:58:14.933Z",
+              "text": "Resumed at verified d9faf61 with all five preserved pricing fingerprints matching. Reconcile current hosting, actual account-region Cost Explorer usage and deployed staging inventory; retain P05 evidence and keep P08.10 open pending isolated measured cost and budget criteria."
+            },
+            {
+              "at": "2026-10-03T07:04:57.957Z",
+              "text": "Pricing reconciliation verified: 6 CLI regressions, root lint, architecture, changed formatting and diff pass. Original P05 prices/report and handoff P08 draft snapshots preserved. Account-region usage recorded, tags inactive and October estimated/incomplete; isolated measured cost still unavailable. Conditional known totals 46.80/87.34/66.76/105.66/52.34; continuous staging November112.26/January141.95 exceed D-10. January approx130 exception applied; historical protection allowances raise conditional January to135.13 before unmeasured items. P08.10 remains open."
             }
           ]
         },
