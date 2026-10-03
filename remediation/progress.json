@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-03T09:19:03.317Z",
+  "updatedAt": "2026-10-03T09:26:11.922Z",
   "current": {
     "phase": "P08",
     "step": "P08.5"
@@ -135,8 +135,8 @@
       "owner": "you",
       "blocks": ["P08.5", "P12.2"],
       "status": "answered",
-      "answer": "Owner 2026-09-30: Firebase Hosting (*.web.app) client, DuckDNS HTTPS API, no Route 53/ACM/SES; SNS email, AWS Budgets, Cognito default invite sender; sessions cannot depend on a third-party refresh cookie. Owner 2026-10-01 approved Singapore Lightsail Micro Caddy proxy at US$7/month with 2 TB included and US$0.12/GB excess outbound transfer. Production stack still waits for 28 October go decision. 2026-10-02: owner will route both staging DNS names after receiving new static IP and explicitly said proceed. HTTP/TLS-ALPN validation replaces staging DNS-01; DuckDNS token is unnecessary. New isolated approved proxy static IP 3.0.69.248 supplied. Production and existing live approvals remain unchanged.",
-      "answeredAt": "2026-10-02T12:36:53.823Z"
+      "answer": "Owner 2026-09-30: Firebase Hosting (*.web.app) client, DuckDNS HTTPS API, no Route 53/ACM/SES; SNS email, AWS Budgets, Cognito default invite sender; sessions cannot depend on a third-party refresh cookie. Owner 2026-10-01 approved Singapore Lightsail Micro Caddy proxy at US$7/month with 2 TB included and US$0.12/GB excess outbound transfer. Production stack still waits for 28 October go decision. 2026-10-02: owner will route both staging DNS names after receiving new static IP and explicitly said proceed. HTTP/TLS-ALPN validation replaces staging DNS-01; DuckDNS token is unnecessary. New isolated approved proxy static IP 3.0.69.248 supplied. Production and existing live approvals remain unchanged. Owner 2026-10-03 accepts Chrome for staging and waives actual iOS Safari evidence. Installed Chrome 154 passed normal Cognito login, membership, hard-reload refresh, sign-out and signed-out reload at 17:20 SGT. This clears the staging browser blocker only; production Firebase sessions must still work without third-party refresh cookies.",
+      "answeredAt": "2026-10-03T09:26:11.610Z"
     },
     {
       "id": "D-09",
@@ -1648,7 +1648,7 @@
         {
           "id": "P08.5",
           "title": "DNS, TLS and edge (needs D-08)",
-          "status": "blocked",
+          "status": "in_progress",
           "startedAt": "2026-10-02T12:36:53.451Z",
           "completedAt": null,
           "commits": [
@@ -1658,7 +1658,8 @@
             "33f8d68c6e5ed8514ab457e52e23baa7db72e11a",
             "a07e5e526fb8a83889024307df9229a5fd26a8f4",
             "a46e297aa0095523a0164a00c5a120ed94debe6e",
-            "18b6dbe0e85d6db86e73d6dfc818cdb7459fc522"
+            "18b6dbe0e85d6db86e73d6dfc818cdb7459fc522",
+            "ce0a83a64b057295ea71c5d10e283d98855e97f8"
           ],
           "notes": [
             {
@@ -1692,6 +1693,10 @@
             {
               "at": "2026-10-03T09:19:03.316Z",
               "text": "Exact 7d0dbd9 CI/Infra/staging deploy and UPDATE_COMPLETE verified. Normal synthetic Cognito code/PKCE login, active membership, reload refresh and sign-out pass; seeded under Sep30 owner authorization with mail SUPPRESS. Awaiting owner-provided actual iOS Safari version/results for sign-in, reload, background/resume and sign-out/reload. Production Firebase/session and other full criteria remain open."
+            },
+            {
+              "at": "2026-10-03T09:26:11.921Z",
+              "text": "Owner Chrome acceptance clears the iOS blocker. Installed Google Chrome 154 normal staging session proof passes; ce0a83a records sanitized evidence and amended criterion. Keep P08.5 in progress for reviewable production Firebase configuration/session dependency and remaining HTTPS criteria."
             }
           ]
         },
