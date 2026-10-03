@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-03T10:26:47.596Z",
+  "updatedAt": "2026-10-03T10:34:07.744Z",
   "current": {
     "phase": "P10",
     "step": "P10.7"
@@ -2253,7 +2253,8 @@
             "41bed1e3fce6fcc97ebd596b9da312b6a6144406",
             "f100d533c7fba078a48510cb2edec4169e33a156",
             "46ce29115a890a162eaeb97ee4865bac049e7735",
-            "b13f48a9e4d59e17b69015bfe1c76ada9c82778e"
+            "b13f48a9e4d59e17b69015bfe1c76ada9c82778e",
+            "0df8c8269bf27792eb411dda33bb116d5a2130ba"
           ],
           "notes": [
             {
@@ -2311,6 +2312,10 @@
             {
               "at": "2026-10-03T10:26:47.352Z",
               "text": "Verified private announcement draft foundation: 47 shared checks, 548 server units, full integration 1098 passed/four existing skips in 85 files; types/lint/architecture/build checks pass. Additive migration 27 only on guarded local test DB. Atomic attributed drafts, metadata audit and id-only replay; optimistic version/current authority/expiry guards. No inbox or push effect. Timed publication/durable delivery/retention/UI remain pending; step stays open."
+            },
+            {
+              "at": "2026-10-03T10:34:07.743Z",
+              "text": "CI secret scan identified synthetic retry UUID fixture b13f48a, not a credential. Corrected literals and ignored only two exact historical false-positive fingerprints (new draft test and older go-live test). Official checksum-verified Gitleaks 8.30.1 full-history/current-fixture scans pass; 47 shared and 24 focused lifecycle contract checks pass. No product behavior or production security rule relaxation."
             }
           ]
         },
