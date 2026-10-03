@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-03T13:23:36.145Z",
+  "updatedAt": "2026-10-03T13:41:28.282Z",
   "current": {
     "phase": "P10",
-    "step": "P10.7"
+    "step": "P10.9"
   },
   "gates": [
     {
@@ -2356,11 +2356,16 @@
         {
           "id": "P10.9",
           "title": "Verify and report",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-03T13:41:27.997Z",
           "completedAt": null,
-          "commits": [],
-          "notes": []
+          "commits": ["4b597947d4722334554322fc76a95fecacb73364"],
+          "notes": [
+            {
+              "at": "2026-10-03T13:41:28.035Z",
+              "text": "Actual staging-announcement subcriterion passed at 21:39 Singapore on exact 2ecabfd after green CI/deploy: normal Cognito/API owned-draft producer, real scheduled INFO publication, private current status/replay, one Chrome inbox message and hard reload, sign-out. Full P10.9 remains open for phase dependencies/remaining verification; no external device receipt claimed."
+            }
+          ]
         }
       ],
       "status": "in_progress",
@@ -3173,6 +3178,10 @@
     {
       "at": "2026-10-03T13:23:36.144Z",
       "text": "Verified d1cdbee delivery-worker CI 37123708233 and deploy 37124020942: UPDATE_COMPLETE, exact staging app image on task definition revision 95. New schedule producer source bb00322 committed under D-11; exact pipeline and actual normal Cognito staging schedule follow. Production approvals and test database constraints preserved."
+    },
+    {
+      "at": "2026-10-03T13:41:28.281Z",
+      "text": "Owner status response: 105/171 steps (61% by unequal step count), 9/17 phases closed before P10.9 partial evidence; current work P10.7, broad P08/P10 open. Creation/status bb00322/2ecabfd has green CI 37126024953 and deploy 37126302059, exact UPDATE_COMPLETE app revision 96. Real staging proof 4b59794 committed. Local Docker exited before management DB checks; uncommitted list/edit/cancel retained for CLI recovery/verification."
     }
   ]
 }
