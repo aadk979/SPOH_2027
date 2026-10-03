@@ -159,7 +159,11 @@ prerequisites. This completes the bounded lifecycle UI subcriterion, not the ful
 current-authority, no-store, status-filtered foundation for the general timeline.
 It omits private payloads and uses creation-time/ID keyset bounds that retain the next
 row when a cursor action changes status. Its 24 database and four new shared checks
-pass; the general timeline UI and create/edit/cancel consumers remain open.
+pass. [The metadata view](../reports/P10/schedule-timeline-ui.md) adds a collapsed
+event-settings list, all status filters, event-clock dates, bounded outcome wording,
+pagination and current-person/cache protection. Its client and phone/laptop checks
+and reviewed visual baselines pass. General create/edit/cancel consumers and
+generated settings/history/revert remain open.
 
 - **Do:**
   1. A settings screen generated from the registry: grouped, scoped (event or station tabs), with

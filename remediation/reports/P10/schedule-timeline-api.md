@@ -37,9 +37,22 @@ existing authorised paths.
   final 24-check pass.
 - Server/client types and the server build, root lint/architecture/hardcoding and
   generated settings checks pass. Source/shared/test/evidence scans find no leaks.
-  Exact D-11 pipeline/image evidence follows deployment. No client journey is claimed
-  for this API foundation.
+  No client journey is claimed for this API foundation.
 
-The general timeline UI and authorised create/edit/cancel consumers remain open in
-P10.8. The full schedule catalogue, generated settings/history/revert and later phase
-criteria remain unchanged. This foundation alone does not close P10.8 or P10.
+CI [37140098344](https://github.com/aadk979/SPOH_2027/actions/runs/37140098344)
+and staging deployment
+[37140455639](https://github.com/aadk979/SPOH_2027/actions/runs/37140455639)
+succeeded for tracker commit `9bd7af51543ca6cc5b4bae048c0a4c6bb167f2d7`
+(API source `a25970d`). CloudFormation reached UPDATE_COMPLETE; ECS revision 103
+runs that exact image with desired/running 1, completed rollout and zero failed
+tasks. Installed Chrome 154 verified normal Cognito sign-in, every status-filtered
+metadata response, no-store headers, strict event contracts, rejected unknown query
+and missing cursor, and normal sign-out with no page errors at 01:37 Singapore on
+4 October. [Sanitised evidence](staging-schedule-timeline-api-evidence-2026-10-04.json)
+contains only bounded counts/statuses and runtime references. This probe made no
+schedule, lifecycle, announcement or delivery writes.
+
+The [metadata UI](schedule-timeline-ui.md) is a separate bounded slice. Authorised
+general create/edit/cancel consumers remain open in P10.8. The full schedule catalogue,
+generated settings/history/revert and later phase criteria remain unchanged.
+This foundation alone does not close P10.8 or P10.

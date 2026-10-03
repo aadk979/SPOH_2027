@@ -1,0 +1,54 @@
+{
+  "observedAt": "2026-10-03T17:37:43.042Z",
+  "deployedImageTag": "9bd7af51543ca6cc5b4bae048c0a4c6bb167f2d7",
+  "taskRevision": 103,
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  "scope": "Normal Cognito Authorization Code + PKCE; read-only event schedule metadata from the established synthetic staging fixture",
+  "checks": {
+    "normalSignIn": true,
+    "statuses": {
+      "ALL": {
+        "status": 200,
+        "count": 20
+      },
+      "PENDING": {
+        "status": 200,
+        "count": 2
+      },
+      "RUNNING": {
+        "status": 200,
+        "count": 0
+      },
+      "SUCCEEDED": {
+        "status": 200,
+        "count": 20
+      },
+      "FAILED": {
+        "status": 200,
+        "count": 0
+      },
+      "DEAD": {
+        "status": 200,
+        "count": 0
+      },
+      "CANCELLED": {
+        "status": 200,
+        "count": 1
+      }
+    },
+    "strictEventMetadata": true,
+    "noStore": true,
+    "unknownQueryRejected": 400,
+    "missingCursorRejected": 404,
+    "normalSignOut": true,
+    "appPageErrors": []
+  },
+  "fixtureEffects": "No schedule, lifecycle, announcement or external delivery writes requested."
+}
