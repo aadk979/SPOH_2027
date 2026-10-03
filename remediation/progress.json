@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-03T07:46:40.361Z",
+  "updatedAt": "2026-10-03T08:42:38.296Z",
   "current": {
     "phase": "P08",
     "step": "P08.5"
@@ -1655,7 +1655,8 @@
             "ff8fe1f7a78514d57c54abf4de5dbf59795d3f43",
             "89366e4e207cec0b678823ea76d38973b9101ec4",
             "5b30b3b685cc5a8240e2ed205d885f22ca496596",
-            "33f8d68c6e5ed8514ab457e52e23baa7db72e11a"
+            "33f8d68c6e5ed8514ab457e52e23baa7db72e11a",
+            "a07e5e526fb8a83889024307df9229a5fd26a8f4"
           ],
           "notes": [
             {
@@ -1677,6 +1678,10 @@
             {
               "at": "2026-10-03T07:46:40.360Z",
               "text": "Verified public runtime client configuration foundation; 36 shared and 543 server units; 5 focused and 1074 full DB passes/four existing skips; workspace types/lint/arch/hardcoding/settings/format/diff and shared/server builds pass. Reports: P08/client-runtime-configuration.md and P08/docker-recovery-2026-10-03.md. Docker recovered via CLI socket/process repair; owner-requested 21-container deletion completed with volumes retained and healthy Postgres restored. Manual factory reset was rejected before execution. Client startup gate, staging origins/Cognito, real session and iOS criteria remain open."
+            },
+            {
+              "at": "2026-10-03T08:42:38.296Z",
+              "text": "Verified runtime client startup: 291 client units, 547 server units, all 58 distinct E2E cases across serial fresh-API runs and 58 unchanged visual assertions. Same-image local/Cognito metadata and failure/retry proof. Staging combined origins, legitimate cloud session and iOS Safari remain open; no production changes."
             }
           ]
         },
@@ -3081,6 +3086,10 @@
     {
       "at": "2026-10-02T19:53:36.713Z",
       "text": "Owner requested stopping implementation and a takeover for tomorrow. Handoff ae5d8d5260e7d959a4e78d60f1202386539deab0 documents all verified slices and deliberately preserved uncommitted pricing work. Exact 02bff990adf854908dbf980b8113b04dab9b1fee passed CI/Infra/staging deployment and matches UPDATE_COMPLETE; deployed RDS CPU definition verified. Both staging DuckDNS names now point to 3.0.69.248 and trusted HTTPS/routing checks pass after one staging-only Caddy restart. Cloud runtime configuration/sign-in remains unwired. P10.5/P10.7 and P08.5/P08.8/P08.10 remain open; no programme-wide owner-controlled blocker. Resume from HANDOFF-2026-10-03.md and TAKEOVER-2026-10-03.md; preserve production approvals."
+    },
+    {
+      "at": "2026-10-03T07:48:05.595Z",
+      "text": "Continuing P08.5 after verified foundation source/tracker 33f8d68/24eb43d: implement runtime client startup gating/failure/retry and consistent API consumers; CLI-only local environment operations, no subagents, no staging-origin switch until client verification."
     }
   ]
 }
