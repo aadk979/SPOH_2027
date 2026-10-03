@@ -60,9 +60,13 @@ definition changed; no new browser/visual or actual external delivery result is 
 The preceding draft checkpoint `040babc32990453bc0b734651cdf5e5e38d0c730` has successful
 [CI](https://github.com/aadk979/SPOH_2027/actions/runs/37117761446) and
 [staging deployment](https://github.com/aadk979/SPOH_2027/actions/runs/37117985791), with
-a matching `UPDATE_COMPLETE` stack. This newer storage source still requires its own
-verified commit/push and pipeline result; the earlier private draft Chrome proof does not
-prove delivery storage or external push.
+a matching `UPDATE_COMPLETE` stack. Storage source `2231d54` and tracker
+`caf309a5d088c2850ad895349b4b7dbc88d63ca6` were committed/pushed under D-11. Their
+[CI](https://github.com/aadk979/SPOH_2027/actions/runs/37119410440) and
+[staging deployment](https://github.com/aadk979/SPOH_2027/actions/runs/37119621113) passed;
+the stack is `UPDATE_COMPLETE`, with the exact `caf309a` image on application task
+definition revision 93. The earlier private draft Chrome proof does not prove delivery
+storage or external push. No storage producer/worker was active at this checkpoint.
 
 P10.7 stays **in progress**. Timed publication/attribution and a bounded, fenced after-commit
 delivery worker remain required. A push-service acceptance is not device receipt, and a

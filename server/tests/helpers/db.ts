@@ -64,6 +64,7 @@ export async function resetDatabase(): Promise<void> {
   assertTestDatabase();
 
   await wipe('AuditLog');
+  await wipe('AnnouncementPublication');
   await wipe('SettingChange');
   await wipe('ReportSnapshot');
   await wipe('ScheduledAction');

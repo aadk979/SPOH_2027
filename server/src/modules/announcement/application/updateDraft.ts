@@ -20,6 +20,12 @@ export async function updateDraft(
       const { now, scope } = await prepareDraftMutation(tx, { request: input.request, actor });
       const row = await findOwnDraft(scope, { id: input.id, authorId: actor.volunteerId }, tx);
       if (!row) throw new NotFoundError('Announcement draft');
+      if (row.publication) {
+        throw new ConflictError(
+          ERROR_CODES.CONFLICT,
+          'Published drafts are read-only. Create a new draft for another announcement.',
+        );
+      }
       if (row.version !== input.request.expectedVersion) {
         throw new ConflictError(
           ERROR_CODES.CONFLICT,

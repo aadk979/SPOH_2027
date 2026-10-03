@@ -155,21 +155,21 @@ scheduled action therefore cannot outlive its author's authority.
 
 ### 5. Handler catalogue
 
-| Type                                   | Payload                                                    | Registered by   | Replaces                       |
-| -------------------------------------- | ---------------------------------------------------------- | --------------- | ------------------------------ |
-| `event.transition`                     | `{ to, expectedVersion, reason?, goLiveOverrides? }`       | `event`         | —                              |
-| `announcement.publish`                 | `{ announcementId }` (a saved draft)                       | `announcements` | —                              |
-| `setting.apply`                        | `{ scope, scopeId, key, value }`                           | `settings`      | —                              |
-| `taxonomy.setActive`                   | `{ kind: category \| stationType \| station, id, active }` | `taxonomy`      | —                              |
-| `fallback.remind`                      | `{ windowId }`                                             | `fallback`      | —                              |
-| `report.snapshot`                      | `{ kind: daily, eventDayId, includeRehearsal? }`           | `report`        | —                              |
-| `lostPerson.purge` (recurring, 15 min) | —                                                          | `lostPersons`   | the per-worker purge (F03-031) |
-| `visitor.purge` (hourly)               | —                                                          | `visitor`       | the visitor-field interval     |
-| `idempotency.prune` (daily)            | —                                                          | `platform`      | the interval job               |
-| `session.prune` (daily)                | —                                                          | `identity`      | the interval job               |
-| `retention.purge` (daily)              | `{ class }`, one per ADR-003 §8 row                        | `platform`      | —                              |
-| `rateLimit.prune` (hourly)             | —                                                          | `platform`      | —                              |
-| `event.archiveReminder`                | —                                                          | `events`        | —                              |
+| Type                                   | Payload                                                    | Registered by  | Replaces                       |
+| -------------------------------------- | ---------------------------------------------------------- | -------------- | ------------------------------ |
+| `event.transition`                     | `{ to, expectedVersion, reason?, goLiveOverrides? }`       | `event`        | —                              |
+| `announcement.publish`                 | `{ draftId, expectedVersion }` (private saved content)     | `announcement` | —                              |
+| `setting.apply`                        | `{ scope, scopeId, key, value }`                           | `settings`     | —                              |
+| `taxonomy.setActive`                   | `{ kind: category \| stationType \| station, id, active }` | `taxonomy`     | —                              |
+| `fallback.remind`                      | `{ windowId }`                                             | `fallback`     | —                              |
+| `report.snapshot`                      | `{ kind: daily, eventDayId, includeRehearsal? }`           | `report`       | —                              |
+| `lostPerson.purge` (recurring, 15 min) | —                                                          | `lostPersons`  | the per-worker purge (F03-031) |
+| `visitor.purge` (hourly)               | —                                                          | `visitor`      | the visitor-field interval     |
+| `idempotency.prune` (daily)            | —                                                          | `platform`     | the interval job               |
+| `session.prune` (daily)                | —                                                          | `identity`     | the interval job               |
+| `retention.purge` (daily)              | `{ class }`, one per ADR-003 §8 row                        | `platform`     | —                              |
+| `rateLimit.prune` (hourly)             | —                                                          | `platform`     | —                              |
+| `event.archiveReminder`                | —                                                          | `events`       | —                              |
 
 `visitor.purge` implements ADR-003 §8's per-field visitor retention after CLOSED. It reads the
 current locked close time and each field's retention policy; it also runs for archived events.

@@ -3,6 +3,8 @@ import { prisma, type PrismaTransactionClient } from '../../../platform/db/clien
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { pageArgs } from '../../../platform/db/pagination.js';
 
+const publicationMetadata = { select: { announcementId: true, publishedAt: true } } as const;
+
 export async function lockDraftEvent(scope: EventScope, tx: PrismaTransactionClient) {
   await tx.$queryRaw`SELECT id FROM "Event" WHERE id = ${scope.eventId} FOR UPDATE`;
   return tx.event.findUniqueOrThrow({
@@ -16,7 +18,10 @@ export function findOwnDraft(
   input: { id: string; authorId: string },
   tx: Pick<PrismaTransactionClient, 'announcementDraft'> = prisma,
 ) {
-  return tx.announcementDraft.findFirst({ where: { eventId: scope.eventId, ...input } });
+  return tx.announcementDraft.findFirst({
+    where: { eventId: scope.eventId, ...input },
+    include: { publication: publicationMetadata },
+  });
 }
 
 export function listOwnDraftRows(
@@ -26,6 +31,7 @@ export function listOwnDraftRows(
   return prisma.announcementDraft.findMany({
     where: { eventId: scope.eventId, authorId: input.authorId },
     orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
+    include: { publication: publicationMetadata },
     ...pageArgs(input),
   });
 }

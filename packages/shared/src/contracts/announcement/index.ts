@@ -47,6 +47,12 @@ export const UpdateAnnouncementDraftRequest = CreateAnnouncementRequest.extend({
 }).strict();
 export type UpdateAnnouncementDraftRequest = z.infer<typeof UpdateAnnouncementDraftRequest>;
 
+/** Scheduled publication references immutable saved content, never a body or author in the job. */
+export const PublishAnnouncementPayload = z
+  .object({ draftId: Id, expectedVersion: z.number().int().min(1) })
+  .strict();
+export type PublishAnnouncementPayload = z.infer<typeof PublishAnnouncementPayload>;
+
 export const AnnouncementDraftRecord = CreateAnnouncementRequest.extend({
   id: Id,
   eventId: Id,
@@ -56,6 +62,8 @@ export const AnnouncementDraftRecord = CreateAnnouncementRequest.extend({
   createdAt: IsoDateTime,
   updatedAt: IsoDateTime,
   expiresAt: IsoDateTime.nullable(),
+  publishedAt: IsoDateTime.nullable(),
+  publishedAnnouncementId: Id.nullable(),
 }).strict();
 export type AnnouncementDraftRecord = z.infer<typeof AnnouncementDraftRecord>;
 

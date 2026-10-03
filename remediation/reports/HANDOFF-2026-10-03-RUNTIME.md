@@ -13,16 +13,17 @@ CLI/terminal actions only; all subsequent work, including headless Playwright,
 used that constraint. D-11 source/tracker commits were pushed directly to main
 and verified against `origin/main` and `ls-remote`.
 
-| Source / tracker      | Verified slice                                                            |
-| --------------------- | ------------------------------------------------------------------------- |
-| `d6fe080` / `8892864` | Preserved pricing draft completed and reconciled; P08.10 stays open.      |
-| `33f8d68` / `24eb43d` | Strict public runtime-configuration server foundation; P08.5 stays open.  |
-| `a07e5e5` / `91c202f` | Runtime client startup gate, deferred auth/API origins and retry/refusal. |
-| `a46e297` / `7d0dbd9` | Combined staging API/client origins, CORS, callback/logout and label.     |
-| `ce0a83a` / `b70817c` | Owner Chrome amendment and actual installed Chrome session evidence.      |
-| `3f4f6a1` / `3a3d197` | Production Firebase static preparation and local emulator verification.   |
-| `b13f48a` / `e878481` | Private, versioned announcement draft storage and APIs.                   |
-| `0df8c82` / `4844360` | Synthetic UUID fixture correction and exact historical scan exceptions.   |
+| Source / tracker      | Verified slice                                                                  |
+| --------------------- | ------------------------------------------------------------------------------- |
+| `d6fe080` / `8892864` | Preserved pricing draft completed and reconciled; P08.10 stays open.            |
+| `33f8d68` / `24eb43d` | Strict public runtime-configuration server foundation; P08.5 stays open.        |
+| `a07e5e5` / `91c202f` | Runtime client startup gate, deferred auth/API origins and retry/refusal.       |
+| `a46e297` / `7d0dbd9` | Combined staging API/client origins, CORS, callback/logout and label.           |
+| `ce0a83a` / `b70817c` | Owner Chrome amendment and actual installed Chrome session evidence.            |
+| `3f4f6a1` / `3a3d197` | Production Firebase static preparation and local emulator verification.         |
+| `b13f48a` / `e878481` | Private, versioned announcement draft storage and APIs.                         |
+| `0df8c82` / `4844360` | Synthetic UUID fixture correction and exact historical scan exceptions.         |
+| `2231d54` / `caf309a` | Durable announcement delivery storage; green CI/deploy and exact staging image. |
 
 Before the private draft slice, main/origin/main/ls-remote matched full hash
 `3a3d19779f79040242ad7db7bd08fd30c0dbd84f`. Subsequent draft source/tracker and
@@ -107,9 +108,19 @@ producer or network worker. **67 focused checks**, **555 server units**, **47 sh
 checks**, **1,120 full database passes / four existing skips in 86 files**, workspace
 types/static/build and secret scans pass. The additive 28th migration was applied only
 to guarded `spoh2027_test` locally. Source/plan/intent/audit rollback, concurrent and
-zero-device deduplication, current day/authority scope and database immutability are
-covered. Actual delivery remains unverified and inactive. The preceding `040babc`
-checkpoint also has green CI/deploy and a matching `UPDATE_COMPLETE` staging stack.
+zero-device deduplication, current recipient/day scope and database immutability are
+covered. Exact `caf309a5d088c2850ad895349b4b7dbc88d63ca6` has green
+[CI](https://github.com/aadk979/SPOH_2027/actions/runs/37119410440) and
+[deploy](https://github.com/aadk979/SPOH_2027/actions/runs/37119621113), a matching
+`UPDATE_COMPLETE` stack and application task definition revision 93. Actual external
+delivery remains unverified and inactive.
+
+[Timed publication](P10/scheduled-announcement-publication.md) is the next verified local
+slice: strict saved-version payload, current author/IC/day authority, immutable publication
+provenance, atomic message/plan/intents/audit/completion and actual worker registration.
+Its **105 focused database checks**, **59 shared checks**, **556 server units**, all workspace
+types/static/build/format/secret checks and **1,158 full DB passes / four existing skips in
+87 files** pass. D-11 source/tracker and exact pipeline verification are the next checkpoint.
 
 P08.5 must stay open, but **the staging browser blocker is cleared** by the owner's
 Chrome amendment and the installed Chrome result. Do not ask for actual iOS Safari
@@ -125,9 +136,9 @@ claimed. Production deployment identity/site mapping and P12 session changes rem
 
 P08.6/.8/.10 and other P08 criteria remain open. P10.5/.7 and P10.8/.9, then later
 phases, retain their original dependencies. The private draft foundation advances
-P10.7 without repeating close-out or scheduler execution. Timed publication still
-needs durable delivery storage/worker integration; schedule UI, retention and other
-catalogue consumers/authority remain pending. Continue
+P10.7 without repeating close-out or scheduler execution. The timed publication handler
+still needs after-commit delivery and legitimate schedule producer/CRUD integration;
+schedule UI, retention and other catalogue consumers/authority remain pending. Continue
 independent authorized work on resume; there is no remaining iOS owner gate.
 
 No production stack/cutover or existing live Lightsail change was made. Production

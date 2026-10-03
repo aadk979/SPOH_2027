@@ -53,6 +53,7 @@ export type AuditAction =
   | 'announcement.draft.create'
   | 'announcement.draft.update'
   | 'announcement.delivery.enqueue'
+  | 'announcement.publish'
   | 'announcement.ack'
   | 'fallback.declare'
   | 'fallback.close'

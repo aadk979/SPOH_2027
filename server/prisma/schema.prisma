@@ -317,6 +317,7 @@ model Event {
   announcementDrafts         AnnouncementDraft[]
   announcementAcks           AnnouncementAck[]
   announcementDeliveryPlans  AnnouncementDeliveryPlan[]
+  announcementPublications   AnnouncementPublication[]
   announcementPushDeliveries AnnouncementPushDelivery[]
   fallbackWindows            FallbackWindow[]
   importBatches              ImportBatch[]
@@ -1284,15 +1285,41 @@ model AnnouncementDraft {
   createdAt          DateTime             @default(now()) @db.Timestamptz(3)
   updatedAt          DateTime             @default(now()) @db.Timestamptz(3)
 
-  event            Event           @relation(fields: [eventId], references: [id], onDelete: Restrict)
-  author           Person          @relation(fields: [authorId], references: [id], onDelete: Restrict)
-  authorMembership EventMembership @relation("AnnouncementDraftAuthorMembership", fields: [eventId, authorMembershipId], references: [eventId, id], onDelete: Restrict)
-  targetStation    Station?        @relation(fields: [eventId, targetStationId], references: [eventId, id], onDelete: Restrict)
-  targetDay        EventDay?       @relation(fields: [eventId, targetEventDayId], references: [eventId, id], onDelete: Restrict)
+  event            Event                    @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  author           Person                   @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  authorMembership EventMembership          @relation("AnnouncementDraftAuthorMembership", fields: [eventId, authorMembershipId], references: [eventId, id], onDelete: Restrict)
+  targetStation    Station?                 @relation(fields: [eventId, targetStationId], references: [eventId, id], onDelete: Restrict)
+  targetDay        EventDay?                @relation(fields: [eventId, targetEventDayId], references: [eventId, id], onDelete: Restrict)
+  publication      AnnouncementPublication?
 
   @@unique([eventId, id])
+  @@unique([eventId, id, version])
   @@index([eventId, authorId, updatedAt])
   @@index([authorMembershipId])
+}
+
+/// Immutable link from a saved private version to its published message and real scheduled action.
+/// @eventOwned
+model AnnouncementPublication {
+  id                String   @id @default(cuid())
+  eventId           String
+  draftId           String
+  version           Int
+  announcementId    String
+  scheduledActionId String
+  publishedAt       DateTime @db.Timestamptz(3)
+
+  event           Event             @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  draft           AnnouncementDraft @relation(fields: [eventId, draftId, version], references: [eventId, id, version], onDelete: Restrict, onUpdate: Restrict)
+  announcement    Announcement      @relation(fields: [eventId, announcementId], references: [eventId, id], onDelete: Restrict, onUpdate: Restrict)
+  scheduledAction ScheduledAction   @relation(fields: [eventId, scheduledActionId], references: [eventId, id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([eventId, id])
+  @@unique([eventId, draftId])
+  @@unique([eventId, draftId, version])
+  @@unique([eventId, announcementId])
+  @@unique([eventId, scheduledActionId])
+  @@index([eventId, publishedAt])
 }
 
 /// @eventOwned
@@ -1318,6 +1345,7 @@ model Announcement {
   targetDay     EventDay?                 @relation(fields: [eventId, targetEventDayId], references: [eventId, id], onDelete: Cascade)
   acks          AnnouncementAck[]
   deliveryPlan  AnnouncementDeliveryPlan?
+  publication   AnnouncementPublication?
 
   event Event @relation(fields: [eventId], references: [id], onDelete: Restrict)
 
@@ -1599,11 +1627,13 @@ model ScheduledAction {
   createdAt         DateTime              @default(now()) @db.Timestamptz(3)
   completedAt       DateTime?             @db.Timestamptz(3)
 
-  event          Event?          @relation(fields: [eventId], references: [id], onDelete: Restrict)
-  createdBy      Person?         @relation(fields: [createdByPersonId], references: [id], onDelete: Restrict)
-  auditLogs      AuditLog[]
-  settingChanges SettingChange[]
+  event                    Event?                    @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  createdBy                Person?                   @relation(fields: [createdByPersonId], references: [id], onDelete: Restrict)
+  auditLogs                AuditLog[]
+  settingChanges           SettingChange[]
+  announcementPublications AnnouncementPublication[]
 
+  @@unique([eventId, id])
   @@index([status, runAt])
   @@index([status, lockedUntil])
   @@index([eventId, runAt, id])

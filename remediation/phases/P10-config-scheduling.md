@@ -99,13 +99,15 @@ full criteria pass. Evidence is recorded in [scheduler-engine.md](../reports/P10
 ### P10.7 — Schedulable actions
 
 The private, versioned announcement draft foundation is verified separately in
-[announcement-drafts.md](../reports/P10/announcement-drafts.md). Drafts cannot publish or
-request delivery. Durable delivery storage and timed publication remain pending; this
-foundation does not complete P10.7.
+[announcement-drafts.md](../reports/P10/announcement-drafts.md). Saving a draft cannot publish
+or request delivery; this foundation alone does not complete P10.7.
 
 [Durable delivery storage](../reports/P10/announcement-delivery-storage.md) adds a
 frozen per-announcement plan and per-device records without a producer or network worker.
-Publication and after-commit delivery remain separate pending slices.
+[Timed publication](../reports/P10/scheduled-announcement-publication.md) registers the strict
+saved-version handler and commits the attributed message, plan/intents, audit and scheduler
+outcome together. After-commit network delivery, a legitimate schedule producer/CRUD and UI
+remain pending; no actual cloud scheduled-announcement result is claimed.
 
 - **Do:** Handlers for:
   - lifecycle transitions

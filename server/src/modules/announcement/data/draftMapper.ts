@@ -14,7 +14,11 @@ export function draftContent(request: CreateAnnouncementRequest): DraftContent {
   };
 }
 
-export function toDraftRecord(row: AnnouncementDraft): AnnouncementDraftRecord {
+export function toDraftRecord(
+  row: AnnouncementDraft & {
+    publication?: { announcementId: string; publishedAt: Date } | null;
+  },
+): AnnouncementDraftRecord {
   return {
     id: row.id,
     eventId: row.eventId,
@@ -32,6 +36,8 @@ export function toDraftRecord(row: AnnouncementDraft): AnnouncementDraftRecord {
     expiresAt: row.expiresAt?.toISOString() ?? null,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
+    publishedAt: row.publication?.publishedAt.toISOString() ?? null,
+    publishedAnnouncementId: row.publication?.announcementId ?? null,
   };
 }
 
@@ -58,5 +64,17 @@ export function draftAuditMetadata(row: AnnouncementDraft) {
     targetEventDayId: row.targetEventDayId,
     requiresAck: row.requiresAck,
     expiresAt: row.expiresAt?.toISOString() ?? null,
+  };
+}
+
+export function publicationAuditMetadata(
+  row: AnnouncementDraft,
+  plan: { recipientCount: number; deviceCount: number } | null,
+) {
+  return {
+    draftId: row.id,
+    ...draftAuditMetadata(row),
+    recipientCount: plan?.recipientCount ?? null,
+    deviceCount: plan?.deviceCount ?? 0,
   };
 }
