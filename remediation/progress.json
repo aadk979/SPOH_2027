@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-03T12:01:01.977Z",
+  "updatedAt": "2026-10-03T12:41:49.297Z",
   "current": {
     "phase": "P10",
     "step": "P10.7"
@@ -2257,7 +2257,8 @@
             "0df8c8269bf27792eb411dda33bb116d5a2130ba",
             "191690228070d1b47d1a3bdc74a0fabdb6fffb6b",
             "2231d547d5a9c3b9a4297958657d99b2ff4199e0",
-            "c074c07cbca2c090155c2b3b5fd05077f449d9db"
+            "c074c07cbca2c090155c2b3b5fd05077f449d9db",
+            "3b4e5cf10c2c9136a479c6bab22574ee6e1d867d"
           ],
           "notes": [
             {
@@ -2331,6 +2332,10 @@
             {
               "at": "2026-10-03T12:01:01.707Z",
               "text": "Timed publication verified: strict saved-version payload, current author/IC/day authority, immutable publication provenance, atomic source/plan/intents/audits/scheduler completion and real worker registration. 105 focused DB, 1158 full DB/four existing skips/87 files, 556 server units, 59 shared checks; workspace types/static/build/format/secret scans pass. Migration 29 applied only to guarded spoh2027_test. Storage caf309a CI/deploy and exact staging task revision 93 verified. P10.7 remains open for after-commit delivery, legitimate schedule producer/CRUD/UI, reminders, retention and remaining catalogue. Production approvals preserved."
+            },
+            {
+              "at": "2026-10-03T12:41:49.057Z",
+              "text": "After-commit device worker verified: five-row bounded short claims/leases, Event-first current source/recipient/device checks, versioned send reservation, external bounded port outside transactions, fenced outcomes, shrinking original TTL/backoff/dead letters and owner/key-safe gone-device pruning. 141 focused DB, 1194 full DB/four existing skips/88 files, 562 server units, 59 shared checks; workspace types/static/build/format/source/full-history scans pass. Migration 30 only adds bounded recipient-scope code and was applied locally only to spoh2027_test. Publication a21c0a5 CI/deploy and exact staging revision 94 verified. No actual external receipt/cloud schedule claim. P10.7 remains open for legitimate schedule producer/CRUD/UI, reminders, retention and catalogue dependencies."
             }
           ]
         },
@@ -3155,6 +3160,10 @@
     {
       "at": "2026-10-03T12:01:01.976Z",
       "text": "Verified timed publication source c074c07 under D-11 after complete local checks; verify source/tracker push and exact staging pipeline next, then bounded fenced after-commit device delivery. No actual cloud schedule/external delivery claim. CLI-only, no subagents, V1-main only, real local database and inherited pricing artifacts preserved."
+    },
+    {
+      "at": "2026-10-03T12:41:49.296Z",
+      "text": "Verified delivery worker source 3b4e5cf under D-11 after complete local checks. Verify source/tracker push and exact pipeline next, then authenticated saved-draft schedule creation/status so actual staging verification uses the normal owner/authority/idempotency flow. External acceptance/persistence retry window remains at least once. CLI-only, no subagents, V1-main only; production approvals, real local DB, sibling V1 and pricing artifacts preserved."
     }
   ]
 }
