@@ -522,6 +522,9 @@ const CASES: Record<string, Case> = {
     'reads only the current manager’s path-event/key history; explicit foreign event/key/scope cursors are covered by eventSettingHistory tests',
   ),
   'PATCH /admin/event-settings': noId("changes the path event's settings"),
+  'POST /admin/event-settings/revert': noId(
+    'restores a guarded product setting in the path event; foreign history targets and replay identity are covered by eventSettingRevert tests',
+  ),
   'GET /admin/attendance-settings': noId("reads the path event's attendance setup"),
   'PATCH /admin/attendance-settings': noId(
     'changes path event settings; root membership scope is checked by settingStore tests',

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import {
   ChangeEventSettingRequest,
   EventSettingHistoryQuery,
+  RevertEventSettingRequest,
   ChangeAttendanceConfigRequest,
   CreateAssignmentRequest,
   CreateEventDayRequest,
@@ -25,6 +26,7 @@ import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { adminRateLimit, defaultRateLimit } from '../../../platform/http/rateLimit.js';
 import { requireCapability } from '../../../platform/http/access.js';
 import { validate } from '../../../platform/http/validate.js';
+import { idempotent } from '../../../platform/http/idempotency.js';
 import {
   createStationHandler,
   listAllStationsHandler,
@@ -44,6 +46,8 @@ import {
   getSettingsHandler,
   updateSettingsHandler,
   getEventSettingHistoryHandler,
+  revertEventSettingHandler,
+  eventSettingRevertReplay,
 } from '../../settings/index.js';
 import {
   changeAttendanceConfigHandler,
@@ -291,6 +295,19 @@ adminRouter.get(
   requireCapability('config.manage'),
   validate({ query: EventSettingHistoryQuery }),
   getEventSettingHistoryHandler,
+);
+
+adminRouter.use('/event-settings/revert', (_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+});
+adminRouter.post(
+  '/event-settings/revert',
+  adminRateLimit,
+  requireCapability('config.manage'),
+  validate({ body: RevertEventSettingRequest }),
+  idempotent('setting.product.revert', { redacted: eventSettingRevertReplay }),
+  revertEventSettingHandler,
 );
 
 // The attendance root and trusted networks are event-scoped security settings.

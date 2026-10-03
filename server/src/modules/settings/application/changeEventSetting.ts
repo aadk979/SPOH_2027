@@ -12,12 +12,14 @@ import { NotFoundError, RuleError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { eventSettings } from '../../../platform/settings/eventSettings.js';
 import { EVENT_SETTINGS } from '../../../platform/settings/registry.js';
-import { lockVisitorEvent, purgeAllVisitorRecords } from '../../visitor/index.js';
+import { purgeAllVisitorRecords } from '../../visitor/index.js';
+import { lockEventSettingAuthority } from './lockEventSettingAuthority.js';
 import {
   appendSettingChange,
   eventStatusOf,
   findStationCounting,
   writeEventSetting,
+  nextEventSettingVersion,
 } from '../data/repo.js';
 import {
   assertReadVersion,
@@ -56,11 +58,21 @@ async function recordChange(
     version: number;
     reason: string | null;
     purged: number | null;
+    source: 'USER' | 'REVERT';
+    revertedFrom?: { historyId: string; version: number };
   },
-): Promise<void> {
+): Promise<{ id: string; version: number }> {
   const { key, before, after, version, reason, purged } = change;
   const personId = actor.volunteerId;
-  await appendSettingChange(tx, actor.scope, { key, version, before, after, reason, personId });
+  const history = await appendSettingChange(tx, actor.scope, {
+    key,
+    version,
+    before,
+    after,
+    reason,
+    personId,
+    source: change.source,
+  });
   await writeAudit(tx, {
     ...actor.audit,
     action: 'setting.change',
@@ -72,48 +84,69 @@ async function recordChange(
       version,
       ...(reason ? { reason } : {}),
       ...(purged !== null ? { visitorRecordsPurged: purged } : {}),
+      ...(change.revertedFrom ? { source: 'REVERT', revertedFrom: change.revertedFrom } : {}),
     },
   });
+  return history;
 }
 
 /**
- * Change one event setting (ADR-003 §2): checked against the event's state
- * and the version the caller read, stored as the next version, with its
- * history row and audit entry, in one transaction.
+ * The caller holds Event and current authority in this transaction. Both ordinary
+ * changes and reverts use these exact lifecycle, reviewed-version, headline and purge guards.
  */
+export async function applyEventSettingChange(
+  tx: PrismaTransactionClient,
+  input: {
+    change: ChangeEventSettingRequest;
+    actor: ActorContext;
+    source: 'USER' | 'REVERT';
+    revertedFrom?: { historyId: string; version: number };
+  },
+) {
+  const { change, actor } = input;
+  const { scope } = actor;
+  const status = await eventStatusOf(tx, scope);
+  const current = await eventSettings(scope, tx);
+  const readVersion = current.versions[change.key];
+  assertUnlocked(EVENT_SETTINGS[change.key], status);
+  assertReadVersion(readVersion, change.expectedVersion);
+  assertVisitorDataChange(change, current.settings, status);
+  await assertHeadlineSource(tx, scope, change);
+  const { key, value } = change;
+  const personId = actor.volunteerId;
+  const version = await nextEventSettingVersion(tx, scope, { key, currentVersion: readVersion });
+  // Another writer committed between this read and this write.
+  assertWritten(await writeEventSetting(tx, scope, { key, value, readVersion, version, personId }));
+  const before = current.settings[key];
+  // Switching visitor data off removes every record first (ADR-002 §4).
+  const purged =
+    key === 'product.visitorDataMode' && before === 'allowlist' && value === 'none'
+      ? await purgeAllVisitorRecords(tx, scope)
+      : null;
+  const reason = change.reason ?? null;
+  return recordChange(tx, actor, {
+    key,
+    before,
+    after: value,
+    version,
+    reason,
+    purged,
+    source: input.source,
+    ...(input.revertedFrom ? { revertedFrom: input.revertedFrom } : {}),
+  });
+}
+
 export async function changeEventSetting(
   change: ChangeEventSettingRequest,
   actor: ActorContext,
 ): Promise<EventSettingsResponse> {
   const { scope } = actor;
-  await prisma.$transaction(async (tx) => {
-    await lockVisitorEvent(tx, scope);
-    const status = await eventStatusOf(tx, scope);
-    const current = await eventSettings(scope, tx);
-    const readVersion = current.versions[change.key];
-    assertUnlocked(EVENT_SETTINGS[change.key], status);
-    assertReadVersion(readVersion, change.expectedVersion);
-    assertVisitorDataChange(change, current.settings, status);
-    await assertHeadlineSource(tx, scope, change);
-    const { key, value } = change;
-    const personId = actor.volunteerId;
-    // Another writer committed between this read and this write.
-    assertWritten(await writeEventSetting(tx, scope, { key, value, readVersion, personId }));
-    const before = current.settings[key];
-    // Switching visitor data off removes every record first (ADR-002 §4).
-    const purged =
-      key === 'product.visitorDataMode' && before === 'allowlist' && value === 'none'
-        ? await purgeAllVisitorRecords(tx, scope)
-        : null;
-    const reason = change.reason ?? null;
-    await recordChange(tx, actor, {
-      key,
-      before,
-      after: value,
-      version: readVersion + 1,
-      reason,
-      purged,
-    });
-  });
+  await prisma.$transaction(
+    async (tx) => {
+      await lockEventSettingAuthority(tx, actor);
+      await applyEventSettingChange(tx, { change, actor, source: 'USER' });
+    },
+    { isolationLevel: 'ReadCommitted', timeout: 30_000 },
+  );
   return eventSettings(scope);
 }

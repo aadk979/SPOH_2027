@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { GENERATED_SETTING_SCHEMAS as settings } from '../../generated/settings/index.js';
 import { CountsMode, HeadlineSource, VisitorDataMode } from './modes.js';
 import { SettingChangeSource } from '../../invariants/enums.js';
-import { Id, IsoDateTime, PaginationQuery, collection } from '../common/index.js';
+import { Id, IdempotencyKey, IsoDateTime, PaginationQuery, collection } from '../common/index.js';
 export { CountsMode, HeadlineSource, VisitorDataMode } from './modes.js';
 
 /**
@@ -98,6 +98,28 @@ export const EventSettingHistoryResponse = collection(EventSettingHistoryRecord)
       new Set(response.data.map(({ id }) => id)).size === response.data.length,
   );
 export type EventSettingHistoryResponse = z.infer<typeof EventSettingHistoryResponse>;
+
+/** Restoring a historical value is a new, reviewed and attributed write. */
+export const RevertEventSettingRequest = z
+  .object({
+    key: EventSettingKey,
+    historyId: Id,
+    expectedVersion: Version,
+    reason: z.string().trim().min(3).max(500),
+    idempotencyKey: IdempotencyKey,
+  })
+  .strict();
+export type RevertEventSettingRequest = z.infer<typeof RevertEventSettingRequest>;
+export const RevertEventSettingResponse = z
+  .object({
+    history: EventSettingHistoryRecord,
+    current: EventSettingsResponse,
+    reviewedVersion: Version,
+    revertedFrom: z.object({ historyId: Id, version: z.number().int().positive() }).strict(),
+  })
+  .strict()
+  .refine((response) => response.history.source === 'REVERT');
+export type RevertEventSettingResponse = z.infer<typeof RevertEventSettingResponse>;
 
 /**
  * One count shown on top, saying where it comes from (ADR-002 §4). It is

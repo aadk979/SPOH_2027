@@ -1,4 +1,4 @@
-import type { EventSettingHistoryQuery } from '@spoh/shared';
+import type { EventSettingHistoryQuery, EventSettingKey } from '@spoh/shared';
 import type { Prisma } from '../../../generated/prisma/client.js';
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
@@ -57,5 +57,16 @@ export function eventSettingHistoryRows(
     select: HISTORY,
     orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     take: query.limit + 1,
+  });
+}
+
+export function eventSettingHistoryById(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  input: { key: EventSettingKey; id: string },
+) {
+  return tx.settingChange.findFirst({
+    where: { ...ownedHistory(scope, input.key), id: input.id },
+    select: HISTORY,
   });
 }

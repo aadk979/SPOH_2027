@@ -40,7 +40,13 @@ export async function findStationCounting(
 export async function writeEventSetting(
   tx: PrismaTransactionClient,
   scope: EventScope,
-  write: { key: EventSettingKey; value: unknown; readVersion: number; personId: string },
+  write: {
+    key: EventSettingKey;
+    value: unknown;
+    readVersion: number;
+    version: number;
+    personId: string;
+  },
 ): Promise<boolean> {
   const { eventId } = scope;
   const value = write.value as Prisma.InputJsonValue;
@@ -53,7 +59,7 @@ export async function writeEventSetting(
           eventId,
           key: write.key,
           value,
-          version: 1,
+          version: write.version,
           updatedByPersonId: write.personId,
         },
       ],
@@ -62,8 +68,14 @@ export async function writeEventSetting(
     return created.count === 1;
   }
   const updated = await tx.setting.updateMany({
-    where: { scope: 'EVENT', scopeId: eventId, key: write.key, version: write.readVersion },
-    data: { value, version: write.readVersion + 1, updatedByPersonId: write.personId },
+    where: {
+      eventId,
+      scope: 'EVENT',
+      scopeId: eventId,
+      key: write.key,
+      version: write.readVersion,
+    },
+    data: { value, version: write.version, updatedByPersonId: write.personId },
   });
   return updated.count === 1;
 }
@@ -79,10 +91,11 @@ export async function appendSettingChange(
     after: unknown;
     reason: string | null;
     personId: string;
+    source: 'USER' | 'REVERT';
   },
-): Promise<void> {
+): Promise<{ id: string; version: number }> {
   const { eventId } = scope;
-  await tx.settingChange.create({
+  return tx.settingChange.create({
     data: {
       scope: 'EVENT',
       scopeId: eventId,
@@ -92,8 +105,23 @@ export async function appendSettingChange(
       before: change.before as Prisma.InputJsonValue,
       after: change.after as Prisma.InputJsonValue,
       reason: change.reason,
-      source: 'USER',
+      source: change.source,
       actorPersonId: change.personId,
     },
+    select: { id: true, version: true },
   });
+}
+
+/** History remains monotonic even after an older writer removed the override. */
+export async function nextEventSettingVersion(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  input: { key: EventSettingKey; currentVersion: number },
+) {
+  const latest = await tx.settingChange.findFirst({
+    where: { eventId: scope.eventId, scope: 'EVENT', scopeId: scope.eventId, key: input.key },
+    orderBy: { version: 'desc' },
+    select: { version: true },
+  });
+  return Math.max(input.currentVersion, latest?.version ?? 0) + 1;
 }

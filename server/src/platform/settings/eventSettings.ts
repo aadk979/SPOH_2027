@@ -28,7 +28,7 @@ export async function eventSettings(
   db: PrismaTransactionClient = prisma,
 ): Promise<EventSettingsResponse> {
   const rows = await db.setting.findMany({
-    where: { scope: 'EVENT', scopeId: scope.eventId, key: { in: KEYS } },
+    where: { eventId: scope.eventId, scope: 'EVENT', scopeId: scope.eventId, key: { in: KEYS } },
     select: { key: true, value: true, version: true },
   });
   const byKey = new Map(rows.map((row) => [row.key, row]));

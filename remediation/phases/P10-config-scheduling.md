@@ -168,8 +168,15 @@ generated settings/history/revert remain open.
 [The product setting history read](../reports/P10/product-setting-history-api.md)
 adds current-authority, no-store, strictly validated history for the two existing
 product settings. Invalid historical JSON is omitted, and exact event/scope/key
-cursor isolation and post-wait clock/authority are verified. Guarded product reverts,
-history UI and the complete generated event/station controls remain open.
+cursor isolation and post-wait clock/authority are verified. The corresponding
+history/revert UI and complete generated event/station controls remain open.
+
+[Guarded product reverts](../reports/P10/product-setting-revert-api.md) restore a
+reviewed historical value through the existing counts/privacy guards, appending a
+new version and attributed audit. Event/current-member lock ordering, exact scope
+filters, monotonic legacy RESET versions, atomic purge/rollback and id-only replay
+are verified. The history/revert UI and full generated event/station criteria
+remain open; this bounded API does not complete the step.
 
 - **Do:**
   1. A settings screen generated from the registry: grouped, scoped (event or station tabs), with
