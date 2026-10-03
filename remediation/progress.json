@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-03T16:58:01.189Z",
+  "updatedAt": "2026-10-03T17:19:33.637Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -1777,6 +1777,10 @@
             {
               "at": "2026-10-03T16:58:00.905Z",
               "text": "Cache-bus heartbeat and Maximum degradation alarm verified: 41 infrastructure checks, real listener disconnection/recovery in six-pass/one-existing-skip multi-instance suite, four worker checks, types/build/static/scans and reviewed staging diff adding only filter/alarm/output. Notification and full observability criteria remain open; exact deployment follows."
+            },
+            {
+              "at": "2026-10-03T17:19:32.967Z",
+              "text": "Exact 458903e CI/Infra/deploy and revision 102 image verified. Deployed cache-bus alarm is OK; four one-minute Maximum=0 Count observations prove healthy log-to-metric reporting. Full observability, notification and budget criteria remain open."
             }
           ]
         },
@@ -2363,7 +2367,8 @@
           "commits": [
             "e9b1be7ccdc6ff48193efb01d008209fd5ef799c",
             "b71fe5003685854aeb7c27332cfedee149d7a29f",
-            "60cbe619b85e35ee4bfdd3b153c21f468808a6b3"
+            "60cbe619b85e35ee4bfdd3b153c21f468808a6b3",
+            "a25970d2778afc7023f6845b6b27df720b9e55cd"
           ],
           "notes": [
             {
@@ -2381,6 +2386,10 @@
             {
               "at": "2026-10-03T16:58:01.189Z",
               "text": "Exact e1ca590 CI/deployment/image verified. Actual Chrome read-only probe found toggle hover contrast below WCAG; corrected and reran both journeys with zero hovered axe violations, 20 client checks, types/lint, unchanged settings visuals and 32-page static export. Synthetic fixture is READY; final staging READY/rehearsal/READY proof follows correction deployment."
+            },
+            {
+              "at": "2026-10-03T17:19:33.636Z",
+              "text": "Event timeline metadata API verified: 24 new DB checks, four new shared checks/all 84, 47 existing isolation/private management passes, build/types/static/scans. Strict no-store current-authority read omits payloads/private identities; explicit creation-time/ID keyset handles changed-status cursors. Timeline UI and producers remain open; exact deployment follows."
             }
           ]
         },
@@ -3229,6 +3238,10 @@
     {
       "at": "2026-10-03T15:51:14.671Z",
       "text": "Resumed P10.8 after clean main/origin/ls-remote 46a73d7. Its CI 37132767132 and deployment 37133023285 succeeded; stack UPDATE_COMPLETE reports exact image. Next bounded slice: server-owned lifecycle readiness and versioned admin controls, preserving unavailable go-live/archive dependencies. CLI-only, no subagents, V1-main only."
+    },
+    {
+      "at": "2026-10-03T17:19:33.267Z",
+      "text": "Installed Chrome on exact 458903e verifies normal Cognito, authoritative no-store lifecycle controls, deliberate READY/rehearsal/READY UI round trip with version increments, restored READY, reload/sign-out, zero page errors and zero collapsed/expanded-hover axe violations. Sanitized evidence committed; no credentials/private IDs or close/go-live/archive/external delivery."
     }
   ]
 }
