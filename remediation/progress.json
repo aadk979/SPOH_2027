@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-03T09:47:05.441Z",
+  "updatedAt": "2026-10-03T10:26:47.596Z",
   "current": {
-    "phase": "P08",
-    "step": "P08.5"
+    "phase": "P10",
+    "step": "P10.7"
   },
   "gates": [
     {
@@ -2252,7 +2252,8 @@
             "961a04137201b75bd5d37f959d90cf58be823efe",
             "41bed1e3fce6fcc97ebd596b9da312b6a6144406",
             "f100d533c7fba078a48510cb2edec4169e33a156",
-            "46ce29115a890a162eaeb97ee4865bac049e7735"
+            "46ce29115a890a162eaeb97ee4865bac049e7735",
+            "b13f48a9e4d59e17b69015bfe1c76ada9c82778e"
           ],
           "notes": [
             {
@@ -2306,6 +2307,10 @@
             {
               "at": "2026-10-02T19:18:00.886Z",
               "text": "Verified category-only taxonomy.setActive with strict payload/current authority, Event-first atomic activity/audit/completion, no-op outcome semantics and live booth category refresh. 77 focused, full 1069 passes/four existing skips (83 files), 538 server/262 client units and twelve serial browser journeys including actual-worker phone/laptop button changes without refresh. Types/static/settings/build/format/diff pass; no schema/layout/baseline change. Full step stays open."
+            },
+            {
+              "at": "2026-10-03T10:26:47.352Z",
+              "text": "Verified private announcement draft foundation: 47 shared checks, 548 server units, full integration 1098 passed/four existing skips in 85 files; types/lint/architecture/build checks pass. Additive migration 27 only on guarded local test DB. Atomic attributed drafts, metadata audit and id-only replay; optimistic version/current authority/expiry guards. No inbox or push effect. Timed publication/durable delivery/retention/UI remain pending; step stays open."
             }
           ]
         },
@@ -3114,6 +3119,14 @@
     {
       "at": "2026-10-03T08:44:39.756Z",
       "text": "Continuing P08.5 with staging-only combined public origins: DuckDNS API callback, client redirect/logout, credentialed CORS and deployment label. Production Cognito remains reference-only; no production deploy or account invitations. CLI-only, no subagents."
+    },
+    {
+      "at": "2026-10-03T09:56:22.999Z",
+      "text": "Continuing authorized P10.7 after verified Firebase source/tracker 3f4f6a1/3a3d197: private versioned announcement drafts only. No timed publication handler until durable delivery storage/worker integration is verified. CLI-only, no subagents, test databases only."
+    },
+    {
+      "at": "2026-10-03T10:26:47.596Z",
+      "text": "Committed private draft source b13f48a under D-11; full DB rerun green after adding all four route isolation cases. Verifying exact staged deployment and legitimate Cognito private API behavior next. Production approvals, sibling V1, pricing artifacts and real local database preserved."
     }
   ]
 }
