@@ -1,7 +1,7 @@
 'use client';
 
 import type { Capability, CommitteeRole, SessionResponse } from '@spoh/shared';
-import { clientEnv } from '@/shared/lib/env';
+import { ClientConfigurationError, loadClientConfiguration } from '@/shared/lib/env';
 
 /**
  * Access-token storage and session recovery.
@@ -162,6 +162,7 @@ export function sessionFromResponse(response: SessionResponse): Session {
  * would be a cycle: a failed refresh would trigger a refresh.
  */
 async function postAuth(path: string, body?: unknown): Promise<Response> {
+  const clientEnv = await loadClientConfiguration();
   return fetch(`${clientEnv.apiBaseUrl}/api/v1/auth${path}`, {
     method: 'POST',
     // The refresh cookie is httpOnly and scoped to this path. Without this it
@@ -197,7 +198,8 @@ export function refreshSession(): Promise<Session | null> {
       const next = sessionFromResponse(payload);
       setSession(next);
       return next;
-    } catch {
+    } catch (cause) {
+      if (cause instanceof ClientConfigurationError) throw cause;
       // Offline. Keep whatever session we have — the outbox will hold captures
       // and the next attempt happens when the network returns.
       if (!session) {
@@ -222,7 +224,12 @@ export function refreshSession(): Promise<Session | null> {
 let bootstrapping: Promise<void> | null = null;
 
 export function bootstrapSession(): Promise<void> {
-  bootstrapping ??= refreshSession().then(() => undefined);
+  bootstrapping ??= refreshSession()
+    .then(() => undefined)
+    .catch((cause: unknown) => {
+      bootstrapping = null;
+      throw cause;
+    });
   return bootstrapping;
 }
 
@@ -261,6 +268,7 @@ export async function signOut(): Promise<void> {
   // network call is in flight and nothing renders with a stale identity.
   clearSession();
 
+  const clientEnv = await loadClientConfiguration();
   try {
     // Awaited, not fire-and-forget. The cookie is httpOnly, so only the server
     // can clear it — redirecting before this settles leaves a live refresh

@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs';
 import { join, normalize, sep } from 'node:path';
 import express, { Router, type Request, type Response, type NextFunction } from 'express';
 import helmet from 'helmet';
+import { isClientConfigOrigin } from '@spoh/shared';
 
 /**
  * The client as a static export, served beside the API (ADR-008 §2, P08.4).
@@ -17,26 +18,28 @@ import helmet from 'helmet';
  */
 
 /** The client's own policy; the API keeps its stricter one. Hashes replace 'unsafe-inline' in P15.3. */
-const clientHeaders = helmet({
-  contentSecurityPolicy: {
-    useDefaults: false,
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", 'data:', 'blob:'],
-      fontSrc: ["'self'", 'data:'],
-      connectSrc: ["'self'"],
-      frameAncestors: ["'none'"],
-      objectSrc: ["'none'"],
-      baseUri: ["'self'"],
-      formAction: ["'self'"],
+function clientHeaders(apiOrigin: string) {
+  return helmet({
+    contentSecurityPolicy: {
+      useDefaults: false,
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'blob:'],
+        fontSrc: ["'self'", 'data:'],
+        connectSrc: ["'self'", ...(isClientConfigOrigin(apiOrigin) ? [apiOrigin] : [])],
+        frameAncestors: ["'none'"],
+        objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+      },
     },
-  },
-  hsts: { maxAge: 31_536_000, includeSubDomains: true },
-  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
-  crossOriginEmbedderPolicy: false,
-});
+    hsts: { maxAge: 31_536_000, includeSubDomains: true },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    crossOriginEmbedderPolicy: false,
+  });
+}
 
 const HASHED = /^\/_next\/static\//;
 const EVENT_SEGMENT = /^\/e\/[^/]+(?=\/|$)/;
@@ -67,14 +70,14 @@ function setCacheHeaders(res: Response, path: string): void {
   );
 }
 
-export function staticClient(root: string): Router {
+export function staticClient(root: string, apiOrigin = ''): Router {
   const router = Router();
   const inside = (relative: string): boolean => {
     const full = normalize(join(root, relative));
     return full.startsWith(normalize(root) + sep) && existsSync(full);
   };
 
-  router.use(clientHeaders);
+  router.use(clientHeaders(apiOrigin));
   router.use((req: Request, _res: Response, next: NextFunction) => {
     const query = req.url.slice(req.path.length);
     req.url = exportedPath(req.path, inside) + query;

@@ -8,7 +8,11 @@ import type { NextConfig } from 'next';
  * app has any business with either, and denying them here means a future
  * dependency cannot quietly start asking.
  */
-const apiOrigin = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4010';
+// Server-only destination for the local bootstrap request; absent from static exports.
+const apiOrigin = process.env.SPOH_DEV_API_ORIGIN ?? 'http://localhost:4010';
+if (new URL(apiOrigin).origin !== apiOrigin || !/^https?:\/\//.test(apiOrigin)) {
+  throw new Error('SPOH_DEV_API_ORIGIN must be a canonical HTTP(S) origin');
+}
 const isDev = process.env.NODE_ENV !== 'production';
 
 /**
@@ -52,8 +56,13 @@ const nextConfig: NextConfig = {
   env: { NEXT_PUBLIC_SW_VERSION: swVersion },
   poweredByHeader: false,
 
-  ...(staticExport ? {} : { headers }),
+  ...(staticExport ? {} : { headers, rewrites }),
 };
+
+/** Only bootstrap metadata is proxied by the local Next server; operational API calls remain direct. */
+async function rewrites() {
+  return [{ source: '/api/v1/client-config', destination: `${apiOrigin}/api/v1/client-config` }];
+}
 
 async function headers() {
   return [

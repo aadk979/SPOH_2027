@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { api, ApiError, NetworkError } from '@/shared/lib/api';
 import { clearSession, refreshSession } from '@/shared/lib/session';
-vi.mock('@/shared/lib/env', () => ({ clientEnv: { apiBaseUrl: 'http://fixture' } }));
+vi.mock('@/shared/lib/env', () => ({
+  loadClientConfiguration: async () => ({ apiBaseUrl: 'http://fixture' }),
+}));
 vi.mock('@/shared/lib/session', () => ({
   getAccessToken: () => 'old-token',
   refreshSession: vi.fn(),

@@ -2,6 +2,24 @@ import 'fake-indexeddb/auto';
 import { afterEach, vi } from 'vitest';
 import { TEST_EVENT } from './helpers/event';
 
+/** Screen/API units have an explicit local fixture; startup contract tests unmock this. */
+vi.mock('@/shared/lib/env', async (original) => {
+  const actual = await original<typeof import('@/shared/lib/env')>();
+  const fixture = {
+    version: 1 as const,
+    apiBaseUrl: 'http://localhost:4010',
+    envLabel: 'development' as const,
+    authProvider: 'local' as const,
+    cognito: null,
+  };
+  return {
+    ...actual,
+    getClientEnv: () => fixture,
+    loadClientConfiguration: async () => fixture,
+    isDevAuth: () => true,
+  };
+});
+
 /**
  * Client test setup.
  *

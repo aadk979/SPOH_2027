@@ -1,0 +1,48 @@
+{
+  "observedAt": "2026-10-03T08:29:14.258Z",
+  "kind": "local Docker/Chromium fixtures; not cloud or iOS session evidence",
+  "imageIds": [
+    "sha256:ce4618f6d80896bd1e0dc83d6e79339232df42b4d0f537190c38639a797c912a",
+    "sha256:ce4618f6d80896bd1e0dc83d6e79339232df42b4d0f537190c38639a797c912a"
+  ],
+  "identicalHtmlSha256": "a3498d31adf78b27a9bdb5592bce891147aa120e9b71c1bfbb6e0f967ebaf4f1",
+  "publicConfigurations": [
+    {
+      "version": 1,
+      "apiBaseUrl": "http://localhost:4050",
+      "envLabel": "development",
+      "authProvider": "local",
+      "cognito": null
+    },
+    {
+      "version": 1,
+      "apiBaseUrl": "http://localhost:4051",
+      "envLabel": "staging",
+      "authProvider": "cognito",
+      "cognito": {
+        "region": "ap-southeast-1",
+        "userPoolId": "ap-southeast-1_runtimeFixture",
+        "clientId": "runtime-fixture-client",
+        "domain": "https://auth.example.test"
+      }
+    }
+  ],
+  "checks": [
+    {
+      "host": "http://localhost:4050",
+      "provider": "local",
+      "expectedSignIn": true,
+      "pageErrors": []
+    },
+    {
+      "host": "http://localhost:4051",
+      "provider": "cognito",
+      "expectedSignIn": true,
+      "pageErrors": []
+    },
+    {
+      "failureBlocksAuthAndScreen": true,
+      "retryUsesCognito": true
+    }
+  ]
+}

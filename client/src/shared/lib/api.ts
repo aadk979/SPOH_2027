@@ -3,7 +3,7 @@
 import type { ErrorBody } from '@spoh/shared';
 import { ApiError, NetworkError } from './apiErrors';
 export { ApiError, NetworkError } from './apiErrors';
-import { clientEnv } from '@/shared/lib/env';
+import { loadClientConfiguration } from '@/shared/lib/env';
 import { clearSession, getAccessToken, refreshSession } from '@/shared/lib/session';
 
 /**
@@ -22,6 +22,7 @@ export interface ApiRequest {
 }
 
 async function send(path: string, options: ApiRequest, token: string | null): Promise<Response> {
+  const clientEnv = await loadClientConfiguration();
   const headers: Record<string, string> = { Accept: 'application/json' };
   if (options.body !== undefined) headers['Content-Type'] = 'application/json';
   if (token) headers.Authorization = `Bearer ${token}`;

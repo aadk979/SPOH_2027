@@ -87,6 +87,27 @@ describe('serving', () => {
     expect(response.text).toBe('not found page');
   });
 
+  it('permits the runtime API origin without changing the exported files or widening other directives', async () => {
+    const stage = express().use(staticClient(root, 'https://api.example.test'));
+    const response = await request(stage).get('/sign-in');
+    expect(response.text).toBe('sign-in page');
+    expect(response.headers['content-security-policy']).toContain(
+      "connect-src 'self' https://api.example.test;",
+    );
+    expect(response.headers['content-security-policy']).toContain("form-action 'self'");
+  });
+
+  it.each([
+    'https://api.example.test/path',
+    'https://api.example.test; script-src *',
+    'https://user:pass@api.example.test',
+  ])('refuses an unsafe CSP destination %s', async (origin) => {
+    const unsafe = express().use(staticClient(root, origin));
+    const csp = (await request(unsafe).get('/sign-in')).headers['content-security-policy'];
+    expect(csp).toContain("connect-src 'self';");
+    expect(csp).not.toContain(origin);
+  });
+
   it('never serves outside the export', async () => {
     const response = await request(app).get('/..%2f..%2fpackage.json');
     expect(response.status).toBe(404);

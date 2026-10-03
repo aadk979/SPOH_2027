@@ -1,53 +1,59 @@
-/**
- * Client configuration.
- *
- * Next inlines `NEXT_PUBLIC_*` at build time, so these must be referenced by
- * their full literal names — a computed lookup would come back undefined in the
- * browser bundle.
- *
- * Checked by hand rather than with zod: this module loads on every route, and
- * zod here put ~90 KB gzip on screens that validate nothing (F03-037).
- */
-export interface ClientEnv {
-  apiBaseUrl: string;
-  envLabel: string;
-  cognitoRegion?: string;
-  cognitoUserPoolId?: string;
-  cognitoClientId?: string;
+import type { ClientConfiguration } from '@spoh/shared';
+import { readClientEnv } from './clientConfigValidation';
+export { readClientEnv } from './clientConfigValidation';
+export type ClientEnv = ClientConfiguration;
+
+export class ClientConfigurationError extends Error {
+  constructor(cause?: unknown) {
+    super('Application configuration is unavailable.', { cause });
+    this.name = 'ClientConfigurationError';
+  }
 }
 
-type RawClientEnv = { [Key in keyof ClientEnv]?: string | undefined };
+let configuration: ClientEnv | null = null;
+let pending: Promise<ClientEnv> | null = null;
 
-function isHttpUrl(value: string): boolean {
+/** Consumers may read only the immutable configuration accepted during startup. */
+export function getClientEnv(): ClientEnv {
+  if (!configuration) throw new ClientConfigurationError();
+  return configuration;
+}
+
+async function fetchConfiguration(): Promise<ClientEnv> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10_000);
   try {
-    return ['http:', 'https:'].includes(new URL(value).protocol);
-  } catch {
-    return false;
+    const response = await fetch('/api/v1/client-config', {
+      headers: { Accept: 'application/json' },
+      credentials: 'omit',
+      cache: 'no-store',
+      redirect: 'error',
+      signal: controller.signal,
+    });
+    if (!response.ok) throw new Error('Configuration request failed');
+    const payload: unknown = await response.json();
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload))
+      throw new Error('Invalid configuration response');
+    const value = readClientEnv((payload as { data?: unknown }).data);
+    configuration = value;
+    return value;
+  } catch (cause) {
+    throw new ClientConfigurationError(cause);
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
-/** A misconfigured build fails at load, not at the first request. */
-export function readClientEnv(raw: RawClientEnv): ClientEnv {
-  // Empty means the API is on this page's own origin, as it is when the API
-  // container serves the exported client (ADR-008 §2).
-  const apiBaseUrl = raw.apiBaseUrl ?? '';
-  if (apiBaseUrl !== '' && !isHttpUrl(apiBaseUrl)) {
-    throw new Error(`API base URL is not an http(s) URL: "${apiBaseUrl}"`);
-  }
-  const env: ClientEnv = { apiBaseUrl, envLabel: raw.envLabel || 'development' };
-  for (const key of ['cognitoRegion', 'cognitoUserPoolId', 'cognitoClientId'] as const) {
-    if (raw[key]) env[key] = raw[key];
-  }
-  return env;
+/** One bootstrap request; failed attempts can retry, accepted configuration stays fixed. */
+export function loadClientConfiguration(): Promise<ClientEnv> {
+  if (configuration) return Promise.resolve(configuration);
+  pending ??= fetchConfiguration().finally(() => {
+    pending = null;
+  });
+  return pending;
 }
 
-export const clientEnv: ClientEnv = readClientEnv({
-  apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4010',
-  envLabel: process.env.NEXT_PUBLIC_ENV_LABEL,
-  cognitoRegion: process.env.NEXT_PUBLIC_COGNITO_REGION,
-  cognitoUserPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID,
-  cognitoClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID,
-});
-
-/** True when the app is talking to a server running the dev auth provider. */
-export const isDevAuth = !clientEnv.cognitoUserPoolId;
+/** Missing Cognito metadata never selects local authentication. */
+export function isDevAuth(): boolean {
+  return getClientEnv().authProvider === 'local';
+}

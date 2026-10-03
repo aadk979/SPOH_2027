@@ -1,11 +1,9 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useEffect, useState, type ReactNode } from 'react';
-import { startOutboxFlushLoop } from '@/shared/lib/outbox';
-import { loadClientSettings } from '@/shared/lib/runtimeSettings';
-import { bootstrapSession } from '@/shared/lib/session';
-import { usePushSubscriptionSync } from '@/features/notification';
+import { useState, type ReactNode } from 'react';
+import { ClientStartup } from './ClientStartup';
+import { RuntimeEffects } from './RuntimeEffects';
 
 /**
  * Client providers.
@@ -14,7 +12,8 @@ import { usePushSubscriptionSync } from '@/features/notification';
  * client-side through TanStack Query (BUILD_PLAN §9.1). Server Components
  * render the shell only.
  *
- * Three things start here, in this order and for this reason:
+ * Public runtime configuration is accepted before operational children mount.
+ * Then three things start here, in this order and for this reason:
  *
  *  1. Session recovery, first and awaited by the guards. On a hard refresh the
  *     access token is gone from memory and has to be renewed from the httpOnly
@@ -54,13 +53,11 @@ export function Providers({ children }: { children: ReactNode }): ReactNode {
       }),
   );
 
-  useEffect(() => {
-    void bootstrapSession().then(() => loadClientSettings());
-  }, []);
-
-  useEffect(() => startOutboxFlushLoop(), []);
-
-  usePushSubscriptionSync();
-
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ClientStartup>
+        <RuntimeEffects>{children}</RuntimeEffects>
+      </ClientStartup>
+    </QueryClientProvider>
+  );
 }

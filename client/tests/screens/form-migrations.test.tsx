@@ -32,11 +32,11 @@ vi.mock('@/features/session', async (original) => ({
   ...(await original<typeof import('@/features/session')>()),
   useRequireSession: () => ({ accessToken: 'fixture' }),
   useMe: () => ({ data: { currentAssignment: { station: { id: 'own-station' } } } }),
-  hostedSignInUrl: '/hosted',
+  getHostedSignInUrl: () => '/hosted',
 }));
 vi.mock('@/shared/lib/env', async (original) => ({
   ...(await original<typeof import('@/shared/lib/env')>()),
-  isDevAuth: true,
+  isDevAuth: () => true,
 }));
 vi.mock('@/shared/lib/api', async (original) => ({
   ...(await original<typeof import('@/shared/lib/api')>()),

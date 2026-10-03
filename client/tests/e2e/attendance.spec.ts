@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import type { AttendanceStatus } from '@spoh/shared';
-import { MOCK_EVENT } from './mockEvent';
+import { MOCK_EVENT, fulfillClientConfiguration } from './mockEvent';
 
 async function attendanceSession(page: Page, root = false) {
   const now = new Date().toISOString();
@@ -32,6 +32,7 @@ async function attendanceSession(page: Page, root = false) {
     });
   });
   await page.route('**/api/v1/**', async (route) => {
+    if (await fulfillClientConfiguration(route)) return;
     const path = new URL(route.request().url()).pathname;
     if (path.endsWith('/attendance/submit')) {
       const body: unknown = route.request().postDataJSON();

@@ -3,7 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import { Suspense, type FormEvent, type ReactNode } from 'react';
 import { isDevAuth } from '@/shared/lib/env';
-import { hostedSignInUrl } from '@/features/session';
+import { getHostedSignInUrl } from '@/features/session';
 import { useSignInForm } from '../hooks/useSignInForm';
 import { Button, ButtonLink, Card, Field, Input, Skeleton } from '@/shared/ui';
 
@@ -26,14 +26,14 @@ function SignInForm(): ReactNode {
     params.get('returnTo') ?? '/',
   );
 
-  if (!isDevAuth) {
+  if (!isDevAuth()) {
     return (
       <Card className="flex flex-col gap-md">
         <p>
           Sign in with the email address on your volunteer roster entry. Your account was created
           for you — there is no sign-up.
         </p>
-        <ButtonLink href={hostedSignInUrl} size="lg" block>
+        <ButtonLink href={getHostedSignInUrl()} size="lg" block>
           Continue to sign in
         </ButtonLink>
       </Card>

@@ -3,7 +3,7 @@
 import { AppLink as Link } from '@/shared/lib/AppLink';
 import { useAppPathname } from '@/shared/lib/appPath';
 import type { ReactNode } from 'react';
-import { clientEnv } from '@/shared/lib/env';
+import { getClientEnv } from '@/shared/lib/env';
 import { useCurrentSession } from '@/features/session';
 import { EventSwitcher } from '@/features/events';
 import { useOptionalEvent } from '@/shared/lib/eventContext';
@@ -33,6 +33,7 @@ export function GlobalNav(): ReactNode {
   const pathname = useAppPathname();
   const session = useCurrentSession();
   const event = useOptionalEvent();
+  const clientEnv = getClientEnv();
 
   return (
     <nav
@@ -47,7 +48,7 @@ export function GlobalNav(): ReactNode {
       </Link>
 
       {/*
-        Which backend this build is pointed at. Shown everywhere except
+        Which backend this session is pointed at. Shown everywhere except
         production, because the single most expensive mistake in a rehearsal is
         entering real counts into staging — or worse, staging counts into real.
       */}

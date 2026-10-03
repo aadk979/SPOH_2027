@@ -21,7 +21,7 @@ COPY server server
 COPY client client
 RUN npm run build --workspace packages/shared \
  && DATABASE_URL=postgresql://build:build@localhost:5432/build npm run build --workspace server  && npm run build:seed --workspace server \
- && SPOH_STATIC_EXPORT=1 NEXT_PUBLIC_API_BASE_URL= npm run build --workspace client
+ && SPOH_STATIC_EXPORT=1 npm run build --workspace client
 
 # Runtime dependencies of the server and the shared package, the Prisma CLI
 # (which the migrate task runs) among them. No client or dev dependencies.

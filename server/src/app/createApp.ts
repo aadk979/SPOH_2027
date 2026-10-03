@@ -30,7 +30,7 @@ export function createApp(): Express {
 
   app.use(healthRouter);
   app.use('/api/v1', createApiRouter());
-  if (env.CLIENT_DIR) app.use(staticClient(env.CLIENT_DIR));
+  if (env.CLIENT_DIR) app.use(staticClient(env.CLIENT_DIR, env.APP_BASE_URL?.replace(/\/$/, '')));
 
   app.use(notFoundHandler);
   app.use(errorHandler);

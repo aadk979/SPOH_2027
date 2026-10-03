@@ -53,6 +53,10 @@ browser, visual, cloud sign-in or staging-origin verification is claimed.
 
 ## Remaining exit criteria
 
+The following describes the server-foundation checkpoint. The subsequent
+[runtime startup slice](client-runtime-startup.md) records the browser consumer
+and its verification; the wider P08.5 exit criteria remain open.
+
 P08.5 stays open. The browser still reads environment-specific build-time values
 and has not consumed this endpoint. The next slice must validate configuration
 before mounting auth/session-dependent consumers, block development-auth fallback

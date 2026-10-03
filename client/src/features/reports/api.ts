@@ -1,6 +1,6 @@
 import type { FullReport } from '@spoh/shared';
 import { eventApi, eventApiPath } from '@/shared/lib/eventApi';
-import { clientEnv } from '@/shared/lib/env';
+import { loadClientConfiguration } from '@/shared/lib/env';
 import { getAccessToken } from '@/shared/lib/session';
 export function getReport(
   eventId: string,
@@ -17,6 +17,7 @@ export async function exportReport(
   format: 'xlsx' | 'csv',
   options: { includeRehearsal?: boolean; current?: boolean } = {},
 ): Promise<Blob> {
+  const clientEnv = await loadClientConfiguration();
   const path = eventApiPath(
     eventId,
     `/reports/export?format=${format}${options.includeRehearsal ? '&includeRehearsal=true' : options.current ? '&current=true' : ''}`,

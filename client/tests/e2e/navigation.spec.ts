@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
-import { MOCK_EVENT } from './mockEvent';
+import { MOCK_EVENT, fulfillClientConfiguration } from './mockEvent';
 
 const axe = readFileSync('../node_modules/axe-core/axe.min.js', 'utf8');
 
@@ -12,6 +12,7 @@ async function mockSession(page: Page, leader = false, failMe = false) {
     role: leader ? 'CHIEF' : 'VOLUNTEER',
   };
   await page.route('**/api/v1/**', async (route) => {
+    if (await fulfillClientConfiguration(route)) return;
     const path = new URL(route.request().url()).pathname;
     if (path.endsWith('/me') && failMe) {
       await route.fulfill({ status: 503, json: { error: { message: 'Unavailable' } } });
