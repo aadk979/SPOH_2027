@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-03T16:31:31.139Z",
+  "updatedAt": "2026-10-03T16:58:01.189Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -1750,7 +1750,8 @@
             "1a87f4ff0a529d2fa36e33c5e9f3ced488d933fb",
             "210db7b675173634aa4aa5c26d1c7979c27eb607",
             "cd4c94083212889170ee741c4691c0256ff4ecea",
-            "79c95b26ccf78ee0227671a0d64615da1588575a"
+            "79c95b26ccf78ee0227671a0d64615da1588575a",
+            "6dd233b6f76e2c798c1f52e4364cf892ac0f498b"
           ],
           "notes": [
             {
@@ -1772,6 +1773,10 @@
             {
               "at": "2026-10-02T19:22:39.192Z",
               "text": "Native RDS CPU detection: actual DB identifier, Average >90% in five consecutive minutes, missing data insufficient, no actions or DB changes. 37 infra tests/seven files including actual staging/prod nag synth; infra types/root lint/architecture/format/diff pass. Read-only diff pinned to deployed 6877a0e adds only alarm/output; 24 healthy native observations validate series, no ALARM trigger/deployment claimed. Initial test-only type assertion corrected. P08.8 stays open; storage must respect autoscaling, connections need verified limits, owner delivery/budget/dashboard remain."
+            },
+            {
+              "at": "2026-10-03T16:58:00.905Z",
+              "text": "Cache-bus heartbeat and Maximum degradation alarm verified: 41 infrastructure checks, real listener disconnection/recovery in six-pass/one-existing-skip multi-instance suite, four worker checks, types/build/static/scans and reviewed staging diff adding only filter/alarm/output. Notification and full observability criteria remain open; exact deployment follows."
             }
           ]
         },
@@ -2357,7 +2362,8 @@
           "completedAt": null,
           "commits": [
             "e9b1be7ccdc6ff48193efb01d008209fd5ef799c",
-            "b71fe5003685854aeb7c27332cfedee149d7a29f"
+            "b71fe5003685854aeb7c27332cfedee149d7a29f",
+            "60cbe619b85e35ee4bfdd3b153c21f468808a6b3"
           ],
           "notes": [
             {
@@ -2371,6 +2377,10 @@
             {
               "at": "2026-10-03T16:31:31.138Z",
               "text": "Lifecycle readiness and reviewed controls verified locally: 18 new readiness integrations, 20 client checks, phone/laptop worker journeys, 58 visual checks including two reviewed baselines, 32-page static export; P10.8 remains open for generated settings/history/revert and general timeline. Exact staging verification follows."
+            },
+            {
+              "at": "2026-10-03T16:58:01.189Z",
+              "text": "Exact e1ca590 CI/deployment/image verified. Actual Chrome read-only probe found toggle hover contrast below WCAG; corrected and reran both journeys with zero hovered axe violations, 20 client checks, types/lint, unchanged settings visuals and 32-page static export. Synthetic fixture is READY; final staging READY/rehearsal/READY proof follows correction deployment."
             }
           ]
         },
