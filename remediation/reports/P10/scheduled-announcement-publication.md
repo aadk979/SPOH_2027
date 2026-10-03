@@ -58,7 +58,15 @@ local database, sibling `V1`, pricing artifacts, client layouts, visual baseline
 and production resources are unchanged. Full verification uses a temporary awake hold
 restored in `finally`. No actual cloud schedule or external push result is claimed here.
 
-P10.7 remains **in progress**. The after-commit delivery worker, authenticated schedule
-producer/CRUD, UI, reminders, retention and remaining catalogue dependencies are pending.
+Publication source `c074c07` and tracker `a21c0a5b212f9b8c8bed229be327b600d0d99d6e`
+were committed/pushed under D-11. Exact-head
+[CI](https://github.com/aadk979/SPOH_2027/actions/runs/37121508303) and
+[staging deployment](https://github.com/aadk979/SPOH_2027/actions/runs/37121805736) passed.
+The stack is `UPDATE_COMPLETE`, and application task definition revision 94 uses that
+exact image. This proves deployment of the handler, not an actual cloud scheduled message.
+
+P10.7 remains **in progress**. The [after-commit delivery worker](announcement-delivery-worker.md)
+is the next local slice; authenticated schedule producer/CRUD, UI, reminders, retention
+and remaining catalogue dependencies are pending.
 P10.9 still requires scheduling a real announcement through the legitimate staging flow.
 Polling is the inbox guarantee; external delivery cannot be claimed exactly once.

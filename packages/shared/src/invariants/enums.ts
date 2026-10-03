@@ -137,6 +137,7 @@ export type AnnouncementPushDeliveryStatus = z.infer<typeof AnnouncementPushDeli
 export const AnnouncementPushDeliveryError = z.enum([
   'UNCONFIGURED',
   'RECIPIENT_INACTIVE',
+  'RECIPIENT_OUT_OF_SCOPE',
   'SUBSCRIPTION_GONE',
   'SUBSCRIPTION_REASSIGNED',
   'EXPIRED',

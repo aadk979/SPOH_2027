@@ -13,17 +13,18 @@ CLI/terminal actions only; all subsequent work, including headless Playwright,
 used that constraint. D-11 source/tracker commits were pushed directly to main
 and verified against `origin/main` and `ls-remote`.
 
-| Source / tracker      | Verified slice                                                                  |
-| --------------------- | ------------------------------------------------------------------------------- |
-| `d6fe080` / `8892864` | Preserved pricing draft completed and reconciled; P08.10 stays open.            |
-| `33f8d68` / `24eb43d` | Strict public runtime-configuration server foundation; P08.5 stays open.        |
-| `a07e5e5` / `91c202f` | Runtime client startup gate, deferred auth/API origins and retry/refusal.       |
-| `a46e297` / `7d0dbd9` | Combined staging API/client origins, CORS, callback/logout and label.           |
-| `ce0a83a` / `b70817c` | Owner Chrome amendment and actual installed Chrome session evidence.            |
-| `3f4f6a1` / `3a3d197` | Production Firebase static preparation and local emulator verification.         |
-| `b13f48a` / `e878481` | Private, versioned announcement draft storage and APIs.                         |
-| `0df8c82` / `4844360` | Synthetic UUID fixture correction and exact historical scan exceptions.         |
-| `2231d54` / `caf309a` | Durable announcement delivery storage; green CI/deploy and exact staging image. |
+| Source / tracker      | Verified slice                                                                    |
+| --------------------- | --------------------------------------------------------------------------------- |
+| `d6fe080` / `8892864` | Preserved pricing draft completed and reconciled; P08.10 stays open.              |
+| `33f8d68` / `24eb43d` | Strict public runtime-configuration server foundation; P08.5 stays open.          |
+| `a07e5e5` / `91c202f` | Runtime client startup gate, deferred auth/API origins and retry/refusal.         |
+| `a46e297` / `7d0dbd9` | Combined staging API/client origins, CORS, callback/logout and label.             |
+| `ce0a83a` / `b70817c` | Owner Chrome amendment and actual installed Chrome session evidence.              |
+| `3f4f6a1` / `3a3d197` | Production Firebase static preparation and local emulator verification.           |
+| `b13f48a` / `e878481` | Private, versioned announcement draft storage and APIs.                           |
+| `0df8c82` / `4844360` | Synthetic UUID fixture correction and exact historical scan exceptions.           |
+| `2231d54` / `caf309a` | Durable announcement delivery storage; green CI/deploy and exact staging image.   |
+| `c074c07` / `a21c0a5` | Transactional saved-version publication; green CI/deploy and exact staging image. |
 
 Before the private draft slice, main/origin/main/ls-remote matched full hash
 `3a3d19779f79040242ad7db7bd08fd30c0dbd84f`. Subsequent draft source/tracker and
@@ -120,7 +121,22 @@ slice: strict saved-version payload, current author/IC/day authority, immutable 
 provenance, atomic message/plan/intents/audit/completion and actual worker registration.
 Its **105 focused database checks**, **59 shared checks**, **556 server units**, all workspace
 types/static/build/format/secret checks and **1,158 full DB passes / four existing skips in
-87 files** pass. D-11 source/tracker and exact pipeline verification are the next checkpoint.
+87 files** pass. Source `c074c07` and tracker `a21c0a5b212f9b8c8bed229be327b600d0d99d6e`
+are committed/pushed, with successful
+[CI](https://github.com/aadk979/SPOH_2027/actions/runs/37121508303) and
+[deploy](https://github.com/aadk979/SPOH_2027/actions/runs/37121805736). Staging is
+`UPDATE_COMPLETE` with the exact image on application task definition revision 94.
+No real cloud scheduled-announcement result is claimed; the legitimate producer is pending.
+
+[After-commit device delivery](P10/announcement-delivery-worker.md) is the next local slice.
+The bounded claim/preflight/send-reservation/external-port/fenced-outcome flow passes **141
+focused database checks**, **562 server units**, **59 shared checks**, workspace types and
+static/build/source scan checks. Current scope, duplicate execution, post-wait deadlines,
+safe pruning and the unavoidable external acceptance/persistence crash window are covered.
+Full integration passes **1,194 checks / four existing skips in 88 files** (373.40 seconds).
+Formatting/diff and current source/gateway/fixture/unit/full-history scans pass. D-11
+commit/push and exact pipeline verification follow; do not claim deployment or actual
+external receipt from these local port tests.
 
 P08.5 must stay open, but **the staging browser blocker is cleared** by the owner's
 Chrome amendment and the installed Chrome result. Do not ask for actual iOS Safari

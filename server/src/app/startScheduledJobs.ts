@@ -1,5 +1,9 @@
+import { randomUUID } from 'node:crypto';
 import { authRecurringActions, authScheduledHandlers } from '../modules/auth/index.js';
-import { announcementScheduledHandlers } from '../modules/announcement/index.js';
+import {
+  announcementScheduledHandlers,
+  deliverAnnouncementBatch,
+} from '../modules/announcement/index.js';
 import { settingsScheduledHandlers } from '../modules/settings/index.js';
 import { eventScheduledHandlers } from '../modules/event/index.js';
 import { reportScheduledHandlers } from '../modules/report/index.js';
@@ -21,6 +25,7 @@ import { createEventRecurringSync } from './syncEventRecurring.js';
 
 /** Module catalogue and recurring declarations are composed once per API instance. */
 export async function startScheduledJobs(clock?: Clock) {
+  const workerId = randomUUID();
   const registry = new HandlerRegistry([
     ...authScheduledHandlers,
     ...idempotencyScheduledHandlers,
@@ -41,5 +46,11 @@ export async function startScheduledJobs(clock?: Clock) {
     clock,
   });
   await syncEvents();
-  return startSchedulerWorker({ registry, clock, beforeClaim: syncEvents });
+  return startSchedulerWorker({
+    registry,
+    clock,
+    workerId,
+    beforeClaim: syncEvents,
+    afterActions: () => deliverAnnouncementBatch({ workerId, clock }),
+  });
 }

@@ -17,6 +17,7 @@ export function startSchedulerWorker(input: {
   clock?: Clock;
   workerId?: string;
   beforeClaim?: () => Promise<void>;
+  afterActions?: () => Promise<void>;
 }) {
   const clock = input.clock ?? systemClock;
   const workerId = input.workerId ?? randomUUID();
@@ -28,6 +29,7 @@ export function startSchedulerWorker(input: {
       return claimDueActions({ workerId, types, clock });
     },
     execute: (claim) => runClaimedAction({ claim, registry: input.registry, clock }),
+    afterActions: input.afterActions,
     async recordMetrics() {
       const metrics = await readSchedulerMetrics({ types, now: clock.now() });
       metricsLogger.info(metrics, 'scheduler queue metrics');

@@ -106,8 +106,11 @@ or request delivery; this foundation alone does not complete P10.7.
 frozen per-announcement plan and per-device records without a producer or network worker.
 [Timed publication](../reports/P10/scheduled-announcement-publication.md) registers the strict
 saved-version handler and commits the attributed message, plan/intents, audit and scheduler
-outcome together. After-commit network delivery, a legitimate schedule producer/CRUD and UI
-remain pending; no actual cloud scheduled-announcement result is claimed.
+outcome together. The [after-commit worker](../reports/P10/announcement-delivery-worker.md)
+adds bounded device claims, current preflight checks, send reservations and fenced outcomes.
+Its full suite passes 1,194 checks with four existing skips; D-11/pipeline verification follows.
+A legitimate schedule producer/CRUD and UI
+remain pending; no actual cloud scheduled-announcement or external delivery result is claimed.
 
 - **Do:** Handlers for:
   - lifecycle transitions

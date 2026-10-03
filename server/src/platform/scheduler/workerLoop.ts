@@ -4,6 +4,7 @@ export interface WorkerPorts {
   claim(): Promise<readonly ClaimedAction[]>;
   execute(action: ClaimedAction): Promise<unknown>;
   recordMetrics(): Promise<void>;
+  afterActions?(): Promise<void>;
   /** The composition root logs a fixed operational code, never a raw handler exception. */
   pollFailed(): void;
 }
@@ -23,6 +24,7 @@ export function startWorkerLoop(ports: WorkerPorts): SchedulerWorker {
       if (stopped) break;
       await ports.execute(action);
     }
+    if (!stopped) await ports.afterActions?.();
     if (!stopped) await ports.recordMetrics();
   };
   const tick = () => {

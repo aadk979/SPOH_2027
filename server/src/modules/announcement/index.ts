@@ -1,3 +1,4 @@
 /** The announcement module's public API: the only file another module may import. */
 export { announcementRouter } from './http/routes.js';
 export { announcementScheduledHandlers } from './jobs.js';
+export { deliverAnnouncementBatch } from './application/deliverAnnouncementBatch.js';
