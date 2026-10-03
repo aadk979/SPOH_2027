@@ -59,7 +59,18 @@ All local database work used guarded `spoh2027_test` on localhost:5435. The real
 `spoh2027` was not reset, seeded or migrated. The full run uses a temporary wake hold restored
 in `finally`; no persistent power setting changes. No client layout, browser baseline or
 infrastructure definition changed, so no new visual/client journey result is claimed.
-Actual staging deployment and private API evidence remain a separate subsequent check.
+Actual staging verification also passed at **18:49 SGT**, on exact deployed image
+`4844360fa0f49adcfe10bcdc623aa1e9609c1c23`, with successful
+[CI](https://github.com/aadk979/SPOH_2027/actions/runs/37116845053) and
+[staging deployment](https://github.com/aadk979/SPOH_2027/actions/runs/37117164613).
+The stack is `UPDATE_COMPLETE`. Installed Chrome 154.0.8037.97 used normal Cognito
+Authorization Code + PKCE and the existing legitimate synthetic admin membership.
+Create/read/edit/list passed, stale version returned 409, retry rebuilt version 2,
+the inbox stayed unchanged and acknowledgement was refused. Sign-out returned 204;
+there were no app page errors. See [sanitized evidence](staging-draft-evidence-2026-10-03.json).
+The first probe stopped on a hidden duplicate Cognito field before authentication;
+visible-field selection fixed the probe. The synthetic private draft and immutable
+receipts remain in staging; no announcement, invitation or push was requested.
 
 P10.7 stays **in progress**. Timed publication needs durable delivery storage and a verified
 handler before registration. External push must run after the publishing transaction;

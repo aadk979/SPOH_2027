@@ -21,6 +21,8 @@ and verified against `origin/main` and `ls-remote`.
 | `a46e297` / `7d0dbd9` | Combined staging API/client origins, CORS, callback/logout and label.     |
 | `ce0a83a` / `b70817c` | Owner Chrome amendment and actual installed Chrome session evidence.      |
 | `3f4f6a1` / `3a3d197` | Production Firebase static preparation and local emulator verification.   |
+| `b13f48a` / `e878481` | Private, versioned announcement draft storage and APIs.                   |
+| `0df8c82` / `4844360` | Synthetic UUID fixture correction and exact historical scan exceptions.   |
 
 Before the private draft slice, main/origin/main/ls-remote matched full hash
 `3a3d19779f79040242ad7db7bd08fd30c0dbd84f`. Subsequent draft source/tracker and
@@ -79,7 +81,14 @@ pricing work is committed, with its three inherited artifacts preserved byte-for
   all workspace types and static/build checks pass. The additive 27th migration was
   applied only to guarded `spoh2027_test` locally. Draft attribution, content/version,
   metadata audit and id-only replay settle atomically. No inbox/publication/push effect.
-  Actual staging deployment of this newer source remains a subsequent verification.
+  Exact **`4844360fa0f49adcfe10bcdc623aa1e9609c1c23`** passed
+  [CI](https://github.com/aadk979/SPOH_2027/actions/runs/37116845053) and
+  [staging deployment](https://github.com/aadk979/SPOH_2027/actions/runs/37117164613),
+  with matching `UPDATE_COMPLETE` stack. At 18:49 SGT, installed Chrome plus normal
+  Cognito/PKCE verified create/read/edit/replay/private listing, stale-version refusal,
+  unchanged inbox and refused acknowledgement, followed by successful sign-out.
+  [Public evidence](P10/staging-draft-evidence-2026-10-03.json) contains no credentials.
+  The synthetic private draft/audit receipts remain; no publication or delivery occurred.
 
 The synthetic Cognito identity was seeded under the owner's 30 September test-data
 authorization. Invitation delivery was suppressed; no email was sent. Its actual

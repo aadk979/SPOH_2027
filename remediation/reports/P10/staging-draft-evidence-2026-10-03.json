@@ -1,0 +1,25 @@
+{
+  "observedAt": "2026-10-03T10:49:15.657Z",
+  "deployedImageTag": "4844360fa0f49adcfe10bcdc623aa1e9609c1c23",
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97"
+  },
+  "scope": "Existing legitimate synthetic staging admin; normal Cognito Authorization Code + PKCE; private API draft verification only",
+  "checks": {
+    "create": 201,
+    "read": 200,
+    "noStore": true,
+    "edit": 200,
+    "version": 2,
+    "staleEdit": 409,
+    "replay": 201,
+    "replayRebuildsCurrentVersion": true,
+    "list": 200,
+    "inboxUnchanged": true,
+    "acknowledgementRefused": 404,
+    "signOut": 204,
+    "appPageErrors": []
+  },
+  "fixtures": "Synthetic private draft and immutable audit/replay receipts retained; no publication, invitation or push requested"
+}
