@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-03T13:41:28.282Z",
+  "updatedAt": "2026-10-03T13:53:58.527Z",
   "current": {
     "phase": "P10",
-    "step": "P10.9"
+    "step": "P10.7"
   },
   "gates": [
     {
@@ -2259,7 +2259,8 @@
             "2231d547d5a9c3b9a4297958657d99b2ff4199e0",
             "c074c07cbca2c090155c2b3b5fd05077f449d9db",
             "3b4e5cf10c2c9136a479c6bab22574ee6e1d867d",
-            "bb00322e2604c6393fdd80142f8a11e0544f23c0"
+            "bb00322e2604c6393fdd80142f8a11e0544f23c0",
+            "5ea2d31358cd21659331a70d040698a20861ea27"
           ],
           "notes": [
             {
@@ -2341,6 +2342,10 @@
             {
               "at": "2026-10-03T13:23:35.904Z",
               "text": "Verified private announcement schedule creation/status: 35 new API cases, 186 focused DB checks, 73 shared checks, 562 units, full 1229 passes/4 existing skips in 89 files; all workspace types/static/build/format/scans pass. General CRUD/UI, remaining handlers/retention and staging evidence remain open."
+            },
+            {
+              "at": "2026-10-03T13:53:58.165Z",
+              "text": "Verified private publication schedule list/edit/cancel: 37 new DB cases, 80 shared checks, 562 units, all workspace types/static/build/format/scans; full 1266 DB passes/4 existing skips in 90 files. Event-before-action locks, current ownership/capability, PENDING-only optimistic changes, both due instants, safe cancellation and atomic metadata audits verified. General timeline/UI and remaining catalogue/retention criteria remain open."
             }
           ]
         },
@@ -3182,6 +3187,10 @@
     {
       "at": "2026-10-03T13:41:28.281Z",
       "text": "Owner status response: 105/171 steps (61% by unequal step count), 9/17 phases closed before P10.9 partial evidence; current work P10.7, broad P08/P10 open. Creation/status bb00322/2ecabfd has green CI 37126024953 and deploy 37126302059, exact UPDATE_COMPLETE app revision 96. Real staging proof 4b59794 committed. Local Docker exited before management DB checks; uncommitted list/edit/cancel retained for CLI recovery/verification."
+    },
+    {
+      "at": "2026-10-03T13:53:58.526Z",
+      "text": "Private schedule management source 5ea2d31 verified and committed under D-11. Docker recurrence repaired through reversible runtime-directory quarantines suffixed 2145; original sole Postgres container/volume retained, no data deletion. Proceed to P10.8 private draft/schedule UI while exact pipeline checks continue; preserve broad step exit criteria."
     }
   ]
 }
