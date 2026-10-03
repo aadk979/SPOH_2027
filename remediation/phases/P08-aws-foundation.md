@@ -133,6 +133,12 @@ staging client is `secure-channel.duckdns.org` and staging API is
 
 ### P08.8 — Observability
 
+[Cache-bus degradation detection](../reports/P08/cache-bus-monitoring.md) adds a bounded
+connection gauge on the existing worker heartbeat and one Maximum alarm per environment.
+Real listener disconnection/recovery, 41 infrastructure checks, nag synth and a reviewed
+read-only diff pass. It has no notification actions; the full catalogue, delivery,
+budget and dashboard criteria below remain open.
+
 - **Do:**
   1. CloudWatch log groups `app` and `audit`, with retention set.
   2. Structured JSON logs with request ids.

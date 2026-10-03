@@ -21,6 +21,7 @@ interface Instance {
   disconnect: () => Promise<void>;
   clearCaches: () => Promise<void>;
   busStatus: () => 'unstarted' | 'connected' | 'degraded';
+  busGauge: () => number;
 }
 
 async function startInstance(): Promise<Instance> {
@@ -30,14 +31,26 @@ async function startInstance(): Promise<Instance> {
   const { disconnectPrisma } = await import('../../../src/platform/db/client.js');
   const { startCacheBus, stopCacheBus, cacheBusStatus } =
     await import('../../../src/platform/events/cacheBus.js');
+  const { recordCacheBusMetrics } = await import('../../../src/platform/events/cacheBusMetrics.js');
+  const busGauge = () => {
+    let value = -1;
+    recordCacheBusMetrics({
+      info: (fields) => {
+        value = fields.cacheBusDegraded;
+      },
+    });
+    return value;
+  };
   const { invalidateVolunteerCache } = await import('../../../src/platform/identity/index.js');
   const { invalidateEventCache } = await import('../../../src/platform/event/events.js');
   const { loadSettings } = await import('../../../src/platform/settings/index.js');
+  expect(busGauge()).toBe(1);
   await startCacheBus();
   return {
     app: createApp(),
     purgeResolvedAlerts,
     busStatus: cacheBusStatus,
+    busGauge,
     clearCaches: async () => {
       invalidateVolunteerCache();
       invalidateEventCache();
@@ -172,6 +185,8 @@ describe('two instances, one database (P03.5 repros)', () => {
   });
 
   it('bypasses identity caches while disconnected and refreshes after reconnecting', async () => {
+    expect(a.busGauge()).toBe(0);
+    expect(b.busGauge()).toBe(0);
     const { eventId } = await testEvent();
     const me = () => request(b.app).get('/api/v1/me').set('Authorization', bearer(volunteer));
     const settings = () =>
@@ -186,6 +201,7 @@ describe('two instances, one database (P03.5 repros)', () => {
         AND pid <> pg_backend_pid()
     `;
     await expect.poll(b.busStatus, { timeout: 2_000, interval: 50 }).toBe('degraded');
+    expect(b.busGauge()).toBe(1);
     await rawDb.eventMembership.updateMany({
       where: { eventId, personId: volunteer.id },
       data: { status: 'DEACTIVATED' },
@@ -196,6 +212,7 @@ describe('two instances, one database (P03.5 repros)', () => {
       data: { status: 'ACTIVE' },
     });
     await expect.poll(b.busStatus, { timeout: 5_000, interval: 50 }).toBe('connected');
+    expect(b.busGauge()).toBe(0);
     await expect
       .poll(async () => (await settings()).body.settings.eventName, {
         timeout: 2_000,

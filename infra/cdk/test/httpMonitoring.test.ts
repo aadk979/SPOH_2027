@@ -1,5 +1,6 @@
 import { App } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
+import { MetricFilter } from 'aws-cdk-lib/aws-logs';
 import { describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { PlatformStack } from '../src/platformStack.js';
@@ -86,7 +87,10 @@ describe('native HTTP API monitoring (P08.8)', () => {
         (alarm) => alarm.Properties.AlarmName.startsWith(`spoh-${stage}-http-`),
       );
       expect(httpAlarms).toHaveLength(2);
-      template.resourceCountIs('AWS::Logs::MetricFilter', 2);
+      const monitoring = app.node
+        .findChild(`Spoh-${stage}-Platform`)
+        .node.findChild('HttpMonitoring');
+      expect(monitoring.node.findAll().some((node) => node instanceof MetricFilter)).toBe(false);
       for (const stageResource of Object.values(
         template.findResources('AWS::ApiGatewayV2::Stage'),
       )) {
@@ -98,7 +102,7 @@ describe('native HTTP API monitoring (P08.8)', () => {
         }>)
           expect(route.DetailedMetricsEnabled).not.toBe(true);
       }
-      for (const alarm of Object.values(template.findResources('AWS::CloudWatch::Alarm'))) {
+      for (const alarm of httpAlarms) {
         expect(alarm.Properties.AlarmActions).toBeUndefined();
         expect(alarm.Properties.OKActions).toBeUndefined();
         expect(alarm.Properties.InsufficientDataActions).toBeUndefined();

@@ -23,7 +23,9 @@ describe('scheduler gauge alarms (P08.8/P10.6)', () => {
     'uses exactly two fixed-cardinality gauges in %s',
     (stage) => {
       const template = templateFor(stage);
-      const filters = Object.values(template.findResources('AWS::Logs::MetricFilter'));
+      const filters = Object.values(template.findResources('AWS::Logs::MetricFilter')).filter(
+        (row) => row.Properties.MetricTransformations[0].MetricName.startsWith('Scheduler'),
+      );
       expect(filters).toHaveLength(2);
       for (const [field, name, unit] of [
         ['schedulerLagSeconds', 'SchedulerLagSeconds', 'Seconds'],
@@ -76,7 +78,7 @@ describe('scheduler gauge alarms (P08.8/P10.6)', () => {
       }
       const schedulerAlarms = Object.values(
         template.findResources('AWS::CloudWatch::Alarm'),
-      ).filter((alarm) => alarm.Properties.Namespace === `SPOH/${stage}`);
+      ).filter((alarm) => alarm.Properties.AlarmName.startsWith(`spoh-${stage}-scheduler-`));
       expect(schedulerAlarms).toHaveLength(2);
       for (const alarm of schedulerAlarms) {
         expect(alarm.Properties.Dimensions).toBeUndefined();

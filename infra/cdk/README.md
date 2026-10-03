@@ -92,6 +92,13 @@ consecutive minutes, with missing observations left insufficient. It changes no 
 parameters and has no notification actions. Free storage/connection limits and owner delivery
 remain pending. See the [database CPU evidence and cost](../../remediation/reports/P08/database-cpu-monitoring.md).
 
+The cache-bus heartbeat reports connection bypass as a bounded 0/1 gauge before each
+worker claim. Maximum across reporting instances alarms for two of three minutes of
+degradation; missing observations remain insufficient. It uses the existing app log
+group without per-instance metric dimensions or extra permissions. Owner delivery and
+worker availability remain pending. See the
+[cache-bus evidence and cost](../../remediation/reports/P08/cache-bus-monitoring.md).
+
 ## Staging HTTPS proxy (P08.5)
 
 `-c stagingEdge=true` adds the separate `Spoh-staging-Edge` stack. Provision only that stack,

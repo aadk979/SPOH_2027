@@ -31,6 +31,7 @@ import type { CognitoSettings } from './stagingIdentity.js';
 import { AppInfrastructureConfig } from './appInfrastructureConfig.js';
 import { SchedulerMonitoring } from './schedulerMonitoring.js';
 import { HttpMonitoring } from './httpMonitoring.js';
+import { CacheBusMonitoring } from './cacheBusMonitoring.js';
 
 const PORT = 4000;
 
@@ -76,6 +77,7 @@ export class AppService extends Construct {
       removalPolicy: stage.name === 'prod' ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
     });
     new SchedulerMonitoring(this, 'SchedulerMonitoring', { stage: stage.name, logGroup: logs });
+    new CacheBusMonitoring(this, 'CacheBusMonitoring', { stage: stage.name, logGroup: logs });
     const imageOf = (tag: string) => ContainerImage.fromEcrRepository(props.repository, tag);
     this.configuration = new AppInfrastructureConfig(this, 'Configuration', {
       stage,

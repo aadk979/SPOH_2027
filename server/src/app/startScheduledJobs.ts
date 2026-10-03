@@ -22,6 +22,7 @@ import { HandlerRegistry } from '../platform/scheduler/registry.js';
 import { startSchedulerWorker } from '../platform/scheduler/startWorker.js';
 import type { Clock } from '../platform/time/index.js';
 import { createEventRecurringSync } from './syncEventRecurring.js';
+import { recordCacheBusMetrics } from '../platform/events/cacheBusMetrics.js';
 
 /** Module catalogue and recurring declarations are composed once per API instance. */
 export async function startScheduledJobs(clock?: Clock) {
@@ -50,7 +51,10 @@ export async function startScheduledJobs(clock?: Clock) {
     registry,
     clock,
     workerId,
-    beforeClaim: syncEvents,
+    beforeClaim: async () => {
+      recordCacheBusMetrics();
+      await syncEvents();
+    },
     afterActions: () => deliverAnnouncementBatch({ workerId, clock }),
   });
 }
