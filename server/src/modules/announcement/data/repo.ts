@@ -4,6 +4,7 @@ import { pageArgs } from '../../../platform/db/pagination.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { membershipIdOf } from '../../../platform/db/membershipMirror.js';
+import { audienceMembershipWhere } from './audienceWhere.js';
 
 /** Data access for announcements (PRODUCT_BRIEF §8). Every query names its event (ADR-001 §2). */
 
@@ -139,27 +140,8 @@ export async function findAudienceIds(
   audience: { role: CommitteeRole | null; stationId: string | null; eventDayId: string | null },
   today: Date,
 ): Promise<string[]> {
-  const { eventId } = scope;
   const rows = await prisma.eventMembership.findMany({
-    where: {
-      eventId,
-      status: 'ACTIVE',
-      ...(audience.role ? { role: audience.role } : {}),
-      ...(audience.stationId || audience.eventDayId
-        ? {
-            person: {
-              shiftAssignments: {
-                some: {
-                  eventId,
-                  eventDay: { date: today },
-                  ...(audience.stationId ? { stationId: audience.stationId } : {}),
-                  ...(audience.eventDayId ? { eventDayId: audience.eventDayId } : {}),
-                },
-              },
-            },
-          }
-        : {}),
-    },
+    where: audienceMembershipWhere(scope, { audience, today }),
     select: { personId: true },
   });
   return rows.map((row) => row.personId);

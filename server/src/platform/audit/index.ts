@@ -52,6 +52,7 @@ export type AuditAction =
   | 'announcement.send'
   | 'announcement.draft.create'
   | 'announcement.draft.update'
+  | 'announcement.delivery.enqueue'
   | 'announcement.ack'
   | 'fallback.declare'
   | 'fallback.close'

@@ -182,30 +182,31 @@ model EventMembership {
   directReports EventMembership[] @relation("MembershipHierarchy")
 
   // Every row that names this membership, each inside the event.
-  importBatchImportedByMembership        ImportBatch[]         @relation("ImportBatchImportedByMembership")
-  fallbackWindowDeclaredByMembership     FallbackWindow[]      @relation("FallbackWindowDeclaredByMembership")
-  announcementAckMembership              AnnouncementAck[]     @relation("AnnouncementAckMembership")
-  announcementAuthorMembership           Announcement[]        @relation("AnnouncementAuthorMembership")
-  announcementDraftAuthorMembership      AnnouncementDraft[]   @relation("AnnouncementDraftAuthorMembership")
-  lostFoundItemLoggedByMembership        LostFoundItem[]       @relation("LostFoundItemLoggedByMembership")
-  lostPersonAckMembership                LostPersonAck[]       @relation("LostPersonAckMembership")
-  lostPersonAlertRaisedByMembership      LostPersonAlert[]     @relation("LostPersonAlertRaisedByMembership")
-  incidentFollowUpAuthorMembership       IncidentFollowUp[]    @relation("IncidentFollowUpAuthorMembership")
-  incidentReportedByMembership           Incident[]            @relation("IncidentReportedByMembership")
-  giftStockAdjustmentCreatedByMembership GiftStockAdjustment[] @relation("GiftStockAdjustmentCreatedByMembership")
-  giftRedemptionRecordedByMembership     GiftRedemption[]      @relation("GiftRedemptionRecordedByMembership")
-  cardStampEventRecordedByMembership     CardStampEvent[]      @relation("CardStampEventRecordedByMembership")
-  footfallTickRecordedByMembership       FootfallTick[]        @relation("FootfallTickRecordedByMembership")
-  registrationRecordedByMembership       Registration[]        @relation("RegistrationRecordedByMembership")
-  briefingSlotBriefierMembership         BriefingSlot[]        @relation("BriefingSlotBriefierMembership")
-  shiftSwapRequestRequesterMembership    ShiftSwapRequest[]    @relation("ShiftSwapRequestRequesterMembership")
-  shiftSwapRequestTargetMembership       ShiftSwapRequest[]    @relation("ShiftSwapRequestTargetMembership")
-  shiftSwapRequestDecidedByMembership    ShiftSwapRequest[]    @relation("ShiftSwapRequestDecidedByMembership")
-  attendanceAttemptMembership            AttendanceAttempt[]   @relation("AttendanceAttemptMembership")
-  attendanceChallengeIssuerMembership    AttendanceChallenge[] @relation("AttendanceChallengeIssuerMembership")
-  attendanceMembership                   Attendance[]          @relation("AttendanceMembership")
-  attendanceVerifiedByMembership         Attendance[]          @relation("AttendanceVerifiedByMembership")
-  shiftAssignmentMembership              ShiftAssignment[]     @relation("ShiftAssignmentMembership")
+  importBatchImportedByMembership        ImportBatch[]              @relation("ImportBatchImportedByMembership")
+  fallbackWindowDeclaredByMembership     FallbackWindow[]           @relation("FallbackWindowDeclaredByMembership")
+  announcementAckMembership              AnnouncementAck[]          @relation("AnnouncementAckMembership")
+  announcementAuthorMembership           Announcement[]             @relation("AnnouncementAuthorMembership")
+  announcementDraftAuthorMembership      AnnouncementDraft[]        @relation("AnnouncementDraftAuthorMembership")
+  announcementPushRecipientMembership    AnnouncementPushDelivery[] @relation("AnnouncementPushRecipientMembership")
+  lostFoundItemLoggedByMembership        LostFoundItem[]            @relation("LostFoundItemLoggedByMembership")
+  lostPersonAckMembership                LostPersonAck[]            @relation("LostPersonAckMembership")
+  lostPersonAlertRaisedByMembership      LostPersonAlert[]          @relation("LostPersonAlertRaisedByMembership")
+  incidentFollowUpAuthorMembership       IncidentFollowUp[]         @relation("IncidentFollowUpAuthorMembership")
+  incidentReportedByMembership           Incident[]                 @relation("IncidentReportedByMembership")
+  giftStockAdjustmentCreatedByMembership GiftStockAdjustment[]      @relation("GiftStockAdjustmentCreatedByMembership")
+  giftRedemptionRecordedByMembership     GiftRedemption[]           @relation("GiftRedemptionRecordedByMembership")
+  cardStampEventRecordedByMembership     CardStampEvent[]           @relation("CardStampEventRecordedByMembership")
+  footfallTickRecordedByMembership       FootfallTick[]             @relation("FootfallTickRecordedByMembership")
+  registrationRecordedByMembership       Registration[]             @relation("RegistrationRecordedByMembership")
+  briefingSlotBriefierMembership         BriefingSlot[]             @relation("BriefingSlotBriefierMembership")
+  shiftSwapRequestRequesterMembership    ShiftSwapRequest[]         @relation("ShiftSwapRequestRequesterMembership")
+  shiftSwapRequestTargetMembership       ShiftSwapRequest[]         @relation("ShiftSwapRequestTargetMembership")
+  shiftSwapRequestDecidedByMembership    ShiftSwapRequest[]         @relation("ShiftSwapRequestDecidedByMembership")
+  attendanceAttemptMembership            AttendanceAttempt[]        @relation("AttendanceAttemptMembership")
+  attendanceChallengeIssuerMembership    AttendanceChallenge[]      @relation("AttendanceChallengeIssuerMembership")
+  attendanceMembership                   Attendance[]               @relation("AttendanceMembership")
+  attendanceVerifiedByMembership         Attendance[]               @relation("AttendanceVerifiedByMembership")
+  shiftAssignmentMembership              ShiftAssignment[]          @relation("ShiftAssignmentMembership")
 
   @@unique([eventId, personId])
   @@unique([eventId, id])
@@ -277,50 +278,52 @@ model Event {
   createdAt          DateTime    @default(now()) @db.Timestamptz(3)
   updatedAt          DateTime    @updatedAt @db.Timestamptz(3)
 
-  organisation         Organisation          @relation(fields: [organisationId], references: [id], onDelete: Restrict)
-  clonedFrom           Event?                @relation("EventClone", fields: [clonedFromEventId], references: [id], onDelete: Restrict)
-  clones               Event[]               @relation("EventClone")
-  memberships          EventMembership[]
-  settings             Setting[]
-  visitorFields        VisitorField[]
-  visitorRecords       VisitorRecord[]
-  settingChanges       SettingChange[]
-  captureCategories    CaptureCategory[]
-  stationTypes         StationType[]
-  stationTags          StationTag[]
-  stationTaggings      StationTagging[]
-  shiftTemplates       ShiftTemplate[]
-  shifts               Shift[]
-  days                 EventDay[]
-  stations             Station[]
-  shiftAssignments     ShiftAssignment[]
-  attendances          Attendance[]
-  attendanceChallenges AttendanceChallenge[]
-  attendanceAttempts   AttendanceAttempt[]
-  shiftSwapRequests    ShiftSwapRequest[]
-  briefingSlots        BriefingSlot[]
-  registrations        Registration[]
-  footfallTicks        FootfallTick[]
-  missionCards         MissionCard[]
-  cardStampEvents      CardStampEvent[]
-  giftTypes            GiftType[]
-  giftRedemptions      GiftRedemption[]
-  giftStockAdjustments GiftStockAdjustment[]
-  incidents            Incident[]
-  incidentFollowUps    IncidentFollowUp[]
-  lostPersonAlerts     LostPersonAlert[]
-  lostPersonAcks       LostPersonAck[]
-  lostPersonSummaries  LostPersonSummary[]
-  lostFoundItems       LostFoundItem[]
-  announcements        Announcement[]
-  announcementDrafts   AnnouncementDraft[]
-  announcementAcks     AnnouncementAck[]
-  fallbackWindows      FallbackWindow[]
-  importBatches        ImportBatch[]
-  auditLogs            AuditLog[]
-  idempotencyRecords   IdempotencyRecord[]
-  reportSnapshots      ReportSnapshot[]
-  scheduledActions     ScheduledAction[]
+  organisation               Organisation               @relation(fields: [organisationId], references: [id], onDelete: Restrict)
+  clonedFrom                 Event?                     @relation("EventClone", fields: [clonedFromEventId], references: [id], onDelete: Restrict)
+  clones                     Event[]                    @relation("EventClone")
+  memberships                EventMembership[]
+  settings                   Setting[]
+  visitorFields              VisitorField[]
+  visitorRecords             VisitorRecord[]
+  settingChanges             SettingChange[]
+  captureCategories          CaptureCategory[]
+  stationTypes               StationType[]
+  stationTags                StationTag[]
+  stationTaggings            StationTagging[]
+  shiftTemplates             ShiftTemplate[]
+  shifts                     Shift[]
+  days                       EventDay[]
+  stations                   Station[]
+  shiftAssignments           ShiftAssignment[]
+  attendances                Attendance[]
+  attendanceChallenges       AttendanceChallenge[]
+  attendanceAttempts         AttendanceAttempt[]
+  shiftSwapRequests          ShiftSwapRequest[]
+  briefingSlots              BriefingSlot[]
+  registrations              Registration[]
+  footfallTicks              FootfallTick[]
+  missionCards               MissionCard[]
+  cardStampEvents            CardStampEvent[]
+  giftTypes                  GiftType[]
+  giftRedemptions            GiftRedemption[]
+  giftStockAdjustments       GiftStockAdjustment[]
+  incidents                  Incident[]
+  incidentFollowUps          IncidentFollowUp[]
+  lostPersonAlerts           LostPersonAlert[]
+  lostPersonAcks             LostPersonAck[]
+  lostPersonSummaries        LostPersonSummary[]
+  lostFoundItems             LostFoundItem[]
+  announcements              Announcement[]
+  announcementDrafts         AnnouncementDraft[]
+  announcementAcks           AnnouncementAck[]
+  announcementDeliveryPlans  AnnouncementDeliveryPlan[]
+  announcementPushDeliveries AnnouncementPushDelivery[]
+  fallbackWindows            FallbackWindow[]
+  importBatches              ImportBatch[]
+  auditLogs                  AuditLog[]
+  idempotencyRecords         IdempotencyRecord[]
+  reportSnapshots            ReportSnapshot[]
+  scheduledActions           ScheduledAction[]
 
   @@unique([organisationId, slug])
   @@index([status])
@@ -576,19 +579,20 @@ model Person {
   briefingSlots      BriefingSlot[]
 
   // Back-relations for the foreign keys that used to be scalars by convention.
-  giftAdjustments   GiftStockAdjustment[]
-  incidentFollowUps IncidentFollowUp[]
-  lostPersonAcks    LostPersonAck[]
-  announcementAcks  AnnouncementAck[]
-  fallbackWindows   FallbackWindow[]
-  importBatches     ImportBatch[]
-  settingsChanged   AppSetting[]
-  settingsUpdated   Setting[]             @relation("SettingUpdatedBy")
-  settingChanges    SettingChange[]       @relation("SettingChangedBy")
-  pushSubscriptions PushSubscription[]
-  refreshSessions   RefreshSession[]
-  reportSnapshots   ReportSnapshot[]
-  scheduledActions  ScheduledAction[]
+  giftAdjustments            GiftStockAdjustment[]
+  incidentFollowUps          IncidentFollowUp[]
+  lostPersonAcks             LostPersonAck[]
+  announcementAcks           AnnouncementAck[]
+  fallbackWindows            FallbackWindow[]
+  importBatches              ImportBatch[]
+  settingsChanged            AppSetting[]
+  settingsUpdated            Setting[]                  @relation("SettingUpdatedBy")
+  settingChanges             SettingChange[]            @relation("SettingChangedBy")
+  pushSubscriptions          PushSubscription[]
+  announcementPushDeliveries AnnouncementPushDelivery[]
+  refreshSessions            RefreshSession[]
+  reportSnapshots            ReportSnapshot[]
+  scheduledActions           ScheduledAction[]
 
   eventMemberships        EventMembership[]
   organisationMemberships OrganisationMembership[]
@@ -1309,10 +1313,11 @@ model Announcement {
   createdAt          DateTime             @default(now()) @db.Timestamptz(3)
   expiresAt          DateTime?            @db.Timestamptz(3)
 
-  author        Person            @relation(fields: [authorId], references: [id], onDelete: Restrict)
-  targetStation Station?          @relation(fields: [eventId, targetStationId], references: [eventId, id], onDelete: Cascade)
-  targetDay     EventDay?         @relation(fields: [eventId, targetEventDayId], references: [eventId, id], onDelete: Cascade)
+  author        Person                    @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  targetStation Station?                  @relation(fields: [eventId, targetStationId], references: [eventId, id], onDelete: Cascade)
+  targetDay     EventDay?                 @relation(fields: [eventId, targetEventDayId], references: [eventId, id], onDelete: Cascade)
   acks          AnnouncementAck[]
+  deliveryPlan  AnnouncementDeliveryPlan?
 
   event Event @relation(fields: [eventId], references: [id], onDelete: Restrict)
 
@@ -1347,6 +1352,87 @@ model AnnouncementAck {
   @@unique([announcementId, volunteerId])
   @@index([eventId])
   @@index([membershipId])
+}
+
+/// One immutable audience/device snapshot, even when it contains no subscribed devices.
+/// No message text, endpoint or push credential is copied here.
+/// @eventOwned
+model AnnouncementDeliveryPlan {
+  id             String   @id @default(cuid())
+  eventId        String
+  announcementId String
+  recipientCount Int
+  deviceCount    Int
+  createdAt      DateTime @db.Timestamptz(3)
+  expiresAt      DateTime @db.Timestamptz(3)
+
+  event        Event                      @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  announcement Announcement               @relation(fields: [eventId, announcementId], references: [eventId, id], onDelete: Cascade)
+  deliveries   AnnouncementPushDelivery[]
+
+  @@unique([eventId, id])
+  @@unique([eventId, announcementId])
+  @@index([eventId, expiresAt])
+}
+
+enum AnnouncementPushDeliveryStatus {
+  PENDING
+  RUNNING
+  SENT
+  SKIPPED
+  DEAD
+}
+
+enum AnnouncementPushDeliveryError {
+  UNCONFIGURED
+  RECIPIENT_INACTIVE
+  SUBSCRIPTION_GONE
+  SUBSCRIPTION_REASSIGNED
+  EXPIRED
+  ARCHIVED
+  SOURCE_UNAVAILABLE
+  SOURCE_CHANGED
+  PUSH_FAILED
+  RETRY_EXHAUSTED
+}
+
+/// Technical delivery state; the future worker rechecks source, membership and device ownership.
+/// @eventOwned
+model AnnouncementPushDelivery {
+  id                    String                         @id @default(cuid())
+  eventId               String
+  planId                String
+  recipientPersonId     String
+  recipientMembershipId String
+  subscriptionId        String?
+  /// Opaque subscription identity retained for deduplication after unsubscribe deletes the FK.
+  /// @class operational
+  deviceKey             String
+  status                AnnouncementPushDeliveryStatus @default(PENDING)
+  attempts              Int                            @default(0)
+  maxAttempts           Int                            @default(5)
+  version               Int                            @default(0)
+  runAt                 DateTime                       @db.Timestamptz(3)
+  /// @class operational
+  lockedBy              String?
+  lockedUntil           DateTime?                      @db.Timestamptz(3)
+  completedAt           DateTime?                      @db.Timestamptz(3)
+  /// Fixed operational codes only; never raw exception text, endpoint or credential.
+  lastError             AnnouncementPushDeliveryError?
+  createdAt             DateTime                       @db.Timestamptz(3)
+
+  event        Event                    @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  plan         AnnouncementDeliveryPlan @relation(fields: [eventId, planId], references: [eventId, id], onDelete: Cascade)
+  recipient    Person                   @relation(fields: [recipientPersonId], references: [id], onDelete: Restrict)
+  membership   EventMembership          @relation("AnnouncementPushRecipientMembership", fields: [eventId, recipientMembershipId], references: [eventId, id], onDelete: Restrict)
+  subscription PushSubscription?        @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@unique([eventId, id])
+  @@unique([planId, deviceKey])
+  @@index([status, runAt])
+  @@index([eventId, planId])
+  @@index([recipientMembershipId])
+  @@index([subscriptionId])
 }
 
 // ─────────────────────────────────────────────
@@ -1770,6 +1856,8 @@ model PushSubscription {
   lastSeenAt   DateTime @default(now()) @db.Timestamptz(3)
 
   volunteer Person @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+
+  announcementDeliveries AnnouncementPushDelivery[]
 
   @@index([volunteerId])
 }

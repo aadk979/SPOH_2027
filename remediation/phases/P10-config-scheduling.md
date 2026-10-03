@@ -103,6 +103,10 @@ The private, versioned announcement draft foundation is verified separately in
 request delivery. Durable delivery storage and timed publication remain pending; this
 foundation does not complete P10.7.
 
+[Durable delivery storage](../reports/P10/announcement-delivery-storage.md) adds a
+frozen per-announcement plan and per-device records without a producer or network worker.
+Publication and after-commit delivery remain separate pending slices.
+
 - **Do:** Handlers for:
   - lifecycle transitions
   - publishing an announcement at a time

@@ -101,6 +101,16 @@ and immutable audit/session receipts.
 
 ## Remaining work
 
+[Durable announcement delivery storage](P10/announcement-delivery-storage.md) advances
+P10.7 with a frozen audience/device plan and per-device state, without registering a
+producer or network worker. **67 focused checks**, **555 server units**, **47 shared
+checks**, **1,120 full database passes / four existing skips in 86 files**, workspace
+types/static/build and secret scans pass. The additive 28th migration was applied only
+to guarded `spoh2027_test` locally. Source/plan/intent/audit rollback, concurrent and
+zero-device deduplication, current day/authority scope and database immutability are
+covered. Actual delivery remains unverified and inactive. The preceding `040babc`
+checkpoint also has green CI/deploy and a matching `UPDATE_COMPLETE` staging stack.
+
 P08.5 must stay open, but **the staging browser blocker is cleared** by the owner's
 Chrome amendment and the installed Chrome result. Do not ask for actual iOS Safari
 evidence again. No renewal-cycle test is claimed. Production Firebase configuration

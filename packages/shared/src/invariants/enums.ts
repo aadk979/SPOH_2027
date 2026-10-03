@@ -123,6 +123,31 @@ export const ScheduledActionStatus = z.enum([
 ]);
 export type ScheduledActionStatus = z.infer<typeof ScheduledActionStatus>;
 
+/** Durable device delivery state; SENT means accepted by the push service. */
+export const AnnouncementPushDeliveryStatus = z.enum([
+  'PENDING',
+  'RUNNING',
+  'SENT',
+  'SKIPPED',
+  'DEAD',
+]);
+export type AnnouncementPushDeliveryStatus = z.infer<typeof AnnouncementPushDeliveryStatus>;
+
+/** Persisted fixed codes keep device endpoints, credentials and raw errors out of outcomes. */
+export const AnnouncementPushDeliveryError = z.enum([
+  'UNCONFIGURED',
+  'RECIPIENT_INACTIVE',
+  'SUBSCRIPTION_GONE',
+  'SUBSCRIPTION_REASSIGNED',
+  'EXPIRED',
+  'ARCHIVED',
+  'SOURCE_UNAVAILABLE',
+  'SOURCE_CHANGED',
+  'PUSH_FAILED',
+  'RETRY_EXHAUSTED',
+]);
+export type AnnouncementPushDeliveryError = z.infer<typeof AnnouncementPushDeliveryError>;
+
 /** Organisation-level access; platform admins own events and guardrails (ADR-001 §1). */
 export const OrganisationRole = z.enum(['MEMBER', 'PLATFORM_ADMIN']);
 export type OrganisationRole = z.infer<typeof OrganisationRole>;
