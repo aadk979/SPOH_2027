@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { GENERATED_SETTING_SCHEMAS as settings } from '../../generated/settings/index.js';
 import { CountsMode, HeadlineSource, VisitorDataMode } from './modes.js';
+import { SettingChangeSource } from '../../invariants/enums.js';
+import { Id, IsoDateTime, PaginationQuery, collection } from '../common/index.js';
 export { CountsMode, HeadlineSource, VisitorDataMode } from './modes.js';
 
 /**
@@ -50,6 +52,52 @@ export const ChangeEventSettingRequest = z.discriminatedUnion('key', [
   change('product.visitorDataMode', VisitorDataMode),
 ]);
 export type ChangeEventSettingRequest = z.infer<typeof ChangeEventSettingRequest>;
+
+/** Only the product settings whose guarded consumers already exist are exposed. */
+export const EventSettingHistoryQuery = PaginationQuery.extend({ key: EventSettingKey }).strict();
+export type EventSettingHistoryQuery = z.infer<typeof EventSettingHistoryQuery>;
+
+function historyRecord<Key extends EventSettingKey, Value extends z.ZodType>(
+  key: Key,
+  value: Value,
+) {
+  return z
+    .object({
+      id: Id,
+      eventId: Id,
+      key: z.literal(key),
+      version: z.number().int().positive(),
+      source: SettingChangeSource,
+      createdAt: IsoDateTime,
+      createdByYou: z.boolean(),
+      reason: z.string().max(500).nullable(),
+      values: z.discriminatedUnion('available', [
+        z.object({ available: z.literal(true), before: value.nullable(), after: value }).strict(),
+        z.object({ available: z.literal(false) }).strict(),
+      ]),
+    })
+    .strict();
+}
+export const EventSettingHistoryRecord = z.discriminatedUnion('key', [
+  historyRecord('product.countsMode', CountsMode),
+  historyRecord('product.visitorDataMode', VisitorDataMode),
+]);
+export type EventSettingHistoryRecord = z.infer<typeof EventSettingHistoryRecord>;
+export const EventSettingHistoryResponse = collection(EventSettingHistoryRecord)
+  .extend({
+    eventId: Id,
+    key: EventSettingKey,
+    evaluatedAt: IsoDateTime,
+    data: z.array(EventSettingHistoryRecord).max(200),
+  })
+  .strict()
+  .refine(
+    (response) =>
+      response.meta.count === response.data.length &&
+      response.data.every((row) => row.eventId === response.eventId && row.key === response.key) &&
+      new Set(response.data.map(({ id }) => id)).size === response.data.length,
+  );
+export type EventSettingHistoryResponse = z.infer<typeof EventSettingHistoryResponse>;
 
 /**
  * One count shown on top, saying where it comes from (ADR-002 §4). It is

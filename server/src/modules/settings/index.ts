@@ -9,3 +9,4 @@ export {
   updateSettingsHandler,
 } from './http/handlers.js';
 export { settingsScheduledHandlers } from './jobs.js';
+export { getEventSettingHistoryHandler } from './http/historyHandler.js';

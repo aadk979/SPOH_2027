@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import {
   ChangeEventSettingRequest,
+  EventSettingHistoryQuery,
   ChangeAttendanceConfigRequest,
   CreateAssignmentRequest,
   CreateEventDayRequest,
@@ -42,6 +43,7 @@ import {
   getEventSettingsHandler,
   getSettingsHandler,
   updateSettingsHandler,
+  getEventSettingHistoryHandler,
 } from '../../settings/index.js';
 import {
   changeAttendanceConfigHandler,
@@ -281,6 +283,14 @@ adminRouter.patch(
   requireCapability('config.manage'),
   validate({ body: ChangeEventSettingRequest }),
   changeEventSettingHandler,
+);
+
+adminRouter.get(
+  '/event-settings/history',
+  defaultRateLimit,
+  requireCapability('config.manage'),
+  validate({ query: EventSettingHistoryQuery }),
+  getEventSettingHistoryHandler,
 );
 
 // The attendance root and trusted networks are event-scoped security settings.

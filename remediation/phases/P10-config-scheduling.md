@@ -165,6 +165,12 @@ pagination and current-person/cache protection. Its client and phone/laptop chec
 and reviewed visual baselines pass. General create/edit/cancel consumers and
 generated settings/history/revert remain open.
 
+[The product setting history read](../reports/P10/product-setting-history-api.md)
+adds current-authority, no-store, strictly validated history for the two existing
+product settings. Invalid historical JSON is omitted, and exact event/scope/key
+cursor isolation and post-wait clock/authority are verified. Guarded product reverts,
+history UI and the complete generated event/station controls remain open.
+
 - **Do:**
   1. A settings screen generated from the registry: grouped, scoped (event or station tabs), with
      descriptions, validation, change history and revert.

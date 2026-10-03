@@ -518,6 +518,9 @@ const CASES: Record<string, Case> = {
   'GET /admin/settings': noId('runtime settings are platform-wide until P10'),
   'PATCH /admin/settings': noId('runtime settings are platform-wide until P10'),
   'GET /admin/event-settings': noId("reads the path event's settings"),
+  'GET /admin/event-settings/history': noId(
+    'reads only the current manager’s path-event/key history; explicit foreign event/key/scope cursors are covered by eventSettingHistory tests',
+  ),
   'PATCH /admin/event-settings': noId("changes the path event's settings"),
   'GET /admin/attendance-settings': noId("reads the path event's attendance setup"),
   'PATCH /admin/attendance-settings': noId(
