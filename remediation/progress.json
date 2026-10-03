@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-03T09:26:11.922Z",
+  "updatedAt": "2026-10-03T09:47:05.441Z",
   "current": {
     "phase": "P08",
     "step": "P08.5"
@@ -1659,7 +1659,8 @@
             "a07e5e526fb8a83889024307df9229a5fd26a8f4",
             "a46e297aa0095523a0164a00c5a120ed94debe6e",
             "18b6dbe0e85d6db86e73d6dfc818cdb7459fc522",
-            "ce0a83a64b057295ea71c5d10e283d98855e97f8"
+            "ce0a83a64b057295ea71c5d10e283d98855e97f8",
+            "3f4f6a1c83cdfbfb2c40893d368dfd349a253b42"
           ],
           "notes": [
             {
@@ -1697,6 +1698,10 @@
             {
               "at": "2026-10-03T09:26:11.921Z",
               "text": "Owner Chrome acceptance clears the iOS blocker. Installed Google Chrome 154 normal staging session proof passes; ce0a83a records sanitized evidence and amended criterion. Keep P08.5 in progress for reviewable production Firebase configuration/session dependency and remaining HTTPS criteria."
+            },
+            {
+              "at": "2026-10-03T09:47:05.440Z",
+              "text": "Reviewable Firebase static runtime preparation verified: nine regressions; all 216 export files unchanged; Linux Firebase CLI 15.32.1 demo hosting and installed Chrome 154 pass routing, exact CSP, bootstrap/worker/asset cache checks and same-document navigation with mocked operational APIs. No production deploy/session proof. P12 cross-site session and full HTTPS/release criteria remain open."
             }
           ]
         },
