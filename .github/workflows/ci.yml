@@ -33,6 +33,7 @@ jobs:
       - run: npm run build:shared
       - run: npm run settings:check
       - run: npm run check:pricing
+      - run: npm run check:firebase
 
       # prisma.config.ts refuses to load without DATABASE_URL, even though
       # generate never connects. A placeholder satisfies it.

@@ -32,6 +32,7 @@ export default tseslint.config(
   {
     ignores: [
       '**/node_modules/**',
+      '**/.local/**', // Private, Git-ignored verification artifacts and credentials.
       '**/dist/**',
       '**/.next/**',
       'client/out/**',

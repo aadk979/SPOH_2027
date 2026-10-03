@@ -96,8 +96,9 @@ staging client is `secure-channel.duckdns.org` and staging API is
      Caddy may use HTTP/TLS-ALPN validation and automatic renewal without a DuckDNS token.
   2. Serve the staging static export through the client DuckDNS host and proxy API requests through
      the separate API DuckDNS host. Verify nested-name DNS, HTTPS renewal, host routing and CORS.
-     Deploy the production client's static export to Firebase Hosting (`*.web.app`) from CI, with the API base
-     URL built in; the API stops serving the client in production. CORS allows the Firebase origin
+     Deploy the production client's static export to Firebase Hosting (`*.web.app`) from CI, with
+     strict public runtime metadata supplied by the static release; the API stops serving the
+     client in production. CORS allows the Firebase origin
      only in production, and the exact staging client origin in staging.
   3. Sessions across two sites: the refresh cookie would be third-party and is blocked by Safari
      ITP, so the session design (ADR-006) moves off it before production (with P12).

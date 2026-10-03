@@ -1,0 +1,22 @@
+{
+  "observedAt": "2026-10-03T09:45:31.617Z",
+  "scope": "Linux Firebase demo hosting emulator, production-shaped synthetic public metadata, mocked operational API; no production deployment or auth/session proof",
+  "firebaseCliVersion": "15.32.1",
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97"
+  },
+  "checks": {
+    "unchangedExportedFiles": 216,
+    "hashedAssetImmutable": true,
+    "documentAndPayloadByteMatches": 6,
+    "exactApiCsp": true,
+    "bootstrapJsonNoStore": true,
+    "workerNoStore": true,
+    "unknownPaths404": 3,
+    "hostedSignInSelected": true,
+    "navigationSameDocument": ["Guide", "Safety", "Home"],
+    "appPageErrors": [],
+    "failedPayloads": []
+  }
+}

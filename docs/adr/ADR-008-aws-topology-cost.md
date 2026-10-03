@@ -58,6 +58,13 @@ No Route 53, ACM or SES resources. Production stack creation waits for the 28 Oc
 decision; the live Lightsail site is untouched without owner approval. Production starts empty,
 with an event from the factory. See `remediation/reports/P08/duckdns-https-pricing.md` for pricing.
 
+**Runtime client configuration (2026-10-03, P08.5).** The export remains independent of the
+environment. Staging reads strict public metadata from its same-origin bootstrap API; the
+production Firebase release supplies the same envelope through a static JSON rewrite. See
+`infra/firebase/README.md` for preparation, headers, event/payload routing and release gates.
+No Firebase project or deployment is created by that preparation. P12 must still replace the
+production third-party refresh-cookie dependency before release.
+
 ```
 Route 53 (zone for <domain>)  ─ ACM certificate
         │

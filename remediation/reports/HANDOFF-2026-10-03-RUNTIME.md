@@ -85,6 +85,13 @@ Chrome amendment and the installed Chrome result. Do not ask for actual iOS Safa
 evidence again. No renewal-cycle test is claimed. Production Firebase configuration
 and its session design remain distinct and must not depend on third-party cookies.
 
+[Firebase static preparation](P08/firebase-static-configuration.md) now makes the
+production hosting configuration reviewable without owner identifiers or a deploy.
+Nine preparation regressions and Linux Firebase demo emulator/installed Chrome
+routing/startup checks pass, preserving all 216 export files. Production-shaped
+synthetic metadata and mocked APIs were used; no production session result is
+claimed. Production deployment identity/site mapping and P12 session changes remain.
+
 P08.6/.8/.10 and other P08 criteria remain open. P10.5/.7 and P10.8/.9, then later
 phases, retain their original dependencies. No P10 implementation was repeated
 or added here; the action-catalogue review found further consumers/authority still

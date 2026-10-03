@@ -40,6 +40,7 @@
     "settings:generate": "node --import tsx scripts/generate-settings.mjs",
     "settings:check": "node --import tsx scripts/generate-settings.mjs --check",
     "check:pricing": "node --test remediation/reports/P08/pricing/cost-model.test.mjs",
+    "check:firebase": "node --test infra/firebase/hosting.test.mjs",
     "dev:shared": "npm run dev --workspace packages/shared",
     "infra:synth": "npm run synth --workspace infra/cdk",
     "infra:diff": "npm run diff --workspace infra/cdk"

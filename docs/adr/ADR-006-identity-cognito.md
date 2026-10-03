@@ -34,7 +34,8 @@
 a Firebase client and a DuckDNS API, so its session flow must work with third-party cookies
 blocked. P12 must replace the cross-site refresh-cookie dependency before production deployment.
 Staging uses `secure-channel.duckdns.org` and `api.secure-channel.duckdns.org`; its Cognito
-callback and logout URLs use the client host. Same-site staging success does not prove the
+callback uses the API host's `/api/v1/auth/callback`; logout and app redirects use the client
+host (verified staging wiring, 2026-10-03). Same-site staging success does not prove the
 production session flow. Invites use Cognito's default sender; no SES. Production identity
 resources and the live Lightsail site retain their owner approval boundaries.
 
