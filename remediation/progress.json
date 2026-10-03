@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-03T17:58:34.064Z",
+  "updatedAt": "2026-10-03T17:59:15.868Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -2369,7 +2369,8 @@
             "b71fe5003685854aeb7c27332cfedee149d7a29f",
             "60cbe619b85e35ee4bfdd3b153c21f468808a6b3",
             "a25970d2778afc7023f6845b6b27df720b9e55cd",
-            "f0bf5db3b5575e7bebeadb972eca5430fc3e9fe5"
+            "f0bf5db3b5575e7bebeadb972eca5430fc3e9fe5",
+            "f363cd9d070fb32f190bf85053fedcc6f70ce3b3"
           ],
           "notes": [
             {
@@ -2395,6 +2396,10 @@
             {
               "at": "2026-10-03T17:40:40.686Z",
               "text": "Verified partial event schedule metadata UI: collapsed current-manager panel, all six statuses and all-filter, event-clock due/retry/completion, safe outcomes, cursor pagination, person/event keys and cached-data hiding on denial. All 364 client checks, two phone/laptop legitimate schedule/cancel journeys with hover axe, 56 unchanged visual routes plus two reviewed and reasserted settings baselines, 32-page export, types/lint/architecture/hardcoding/settings and source/test/evidence scans pass. API 9bd7af5 exact CI/deploy and healthy ECS revision 103 verified; normal Cognito/Chrome read-only six-status/API evidence recorded. General create/edit/cancel and generated settings/history/revert remain open; no step closed."
+            },
+            {
+              "at": "2026-10-03T17:59:15.867Z",
+              "text": "Verified partial current-authority product setting history read for the two existing guarded keys: strict schema values, malformed legacy JSON omitted, bounded reasons/source/current-person metadata, no-store, Event-first/member locks and post-wait clock, exact event/scope/key cursor bounds. All 24 new plus 17 affected DB checks, 89 shared checks, server/client types, server build, root lint/architecture/hardcoding/settings and source/shared/test/evidence scans pass. No new writes/schema/migration. Guarded product revert/history UI and full generated event/station settings remain open. Timeline UI c977832 exact CI/deploy/healthy revision 104 and normal Cognito/Chrome read-only UI evidence separately committed as 1f8e153."
             }
           ]
         },
