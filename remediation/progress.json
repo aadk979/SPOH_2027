@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-03T18:28:37.888Z",
+  "updatedAt": "2026-10-03T18:37:14.797Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -2370,7 +2370,8 @@
             "60cbe619b85e35ee4bfdd3b153c21f468808a6b3",
             "a25970d2778afc7023f6845b6b27df720b9e55cd",
             "f0bf5db3b5575e7bebeadb972eca5430fc3e9fe5",
-            "f363cd9d070fb32f190bf85053fedcc6f70ce3b3"
+            "f363cd9d070fb32f190bf85053fedcc6f70ce3b3",
+            "7f32c6912bf8ddeb9cf2de39f4ac4a16fd12f749"
           ],
           "notes": [
             {
@@ -2400,6 +2401,10 @@
             {
               "at": "2026-10-03T17:59:15.867Z",
               "text": "Verified partial current-authority product setting history read for the two existing guarded keys: strict schema values, malformed legacy JSON omitted, bounded reasons/source/current-person metadata, no-store, Event-first/member locks and post-wait clock, exact event/scope/key cursor bounds. All 24 new plus 17 affected DB checks, 89 shared checks, server/client types, server build, root lint/architecture/hardcoding/settings and source/shared/test/evidence scans pass. No new writes/schema/migration. Guarded product revert/history UI and full generated event/station settings remain open. Timeline UI c977832 exact CI/deploy/healthy revision 104 and normal Cognito/Chrome read-only UI evidence separately committed as 1f8e153."
+            },
+            {
+              "at": "2026-10-03T18:37:14.796Z",
+              "text": "Guarded product revert API verified: 23 new/92 affected DB checks, full 1356 pass with four existing skips, 92 shared and 562 server units, types/build/lint/architecture/settings/hardcoding and source scans green. Same Event-before-member guard kernel for ordinary writes/reverts, exact event scope, monotonic history, atomic visitor purge/audit/id-only receipt and current-authority replay. History/revert UI and full generated/timeline criteria remain open; exact CI/deployment pending."
             }
           ]
         },
