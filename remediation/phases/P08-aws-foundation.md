@@ -106,7 +106,8 @@ staging client is `secure-channel.duckdns.org` and staging API is
   5. Staging's own Cognito pool (ADR-006 §1) with the staging DuckDNS client callback and logout URLs. The
      production pool is referenced by id only and is not modified here.
 - **Done when:** the staging DuckDNS client signs in against the API's DuckDNS HTTPS address end to
-  end, including on iOS Safari; production Firebase configuration is reviewable and its cross-site
+  end in Chrome (owner amendment, 2026-10-03, waives actual iOS Safari evidence);
+  production Firebase configuration is reviewable and its cross-site
   session dependency is addressed in P12 before production deployment.
 
 ### P08.6 — Secrets and configuration

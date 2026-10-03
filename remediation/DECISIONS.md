@@ -191,6 +191,11 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
     proxy after receiving its public IP, and explicitly authorised proceeding with provisioning.
     Caddy uses HTTP/TLS-ALPN certificate validation and automatic renewal once both names resolve
     to that IP; a DuckDNS token and DNS-01 integration are no longer required for this staging edge.
+    **Browser acceptance** (owner, 2026-10-03): Chrome is sufficient for staging sign-in/session
+    verification; actual iOS Safari evidence is waived. Installed Google Chrome 154 passed normal
+    Cognito sign-in, authenticated reads, hard-reload refresh, sign-out and signed-out reload
+    at 17:20 SGT. This changes the staging browser criterion only. Production Firebase sessions
+    must still work without third-party refresh cookies; production and live-site approvals remain.
 
 ### D-09 — Scheduler engine
 

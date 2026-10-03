@@ -63,6 +63,11 @@ or uncommitted pricing draft remains.
   hard-reload refresh, sign-out/cookie clearing and refusal after signed-out
   reload. Evidence is sanitized JSON linked from the report. This is headless
   Chromium with a phone viewport, **not actual iOS Safari**.
+- **Owner amendment, 3 October:** Chrome is sufficient for staging verification;
+  actual iOS Safari evidence is waived. Installed Google Chrome **154.0.8037.97**
+  passed the same normal sign-in, membership, hard-reload refresh, sign-out and
+  signed-out reload flow at 17:20 SGT, with zero app page errors. See
+  [Chrome evidence](P08/staging-chrome-session-evidence-2026-10-03.json).
 
 The synthetic Cognito identity was seeded under the owner's 30 September test-data
 authorization. Invitation delivery was suppressed; no email was sent. Its actual
@@ -73,20 +78,18 @@ or commit them. The current session was signed out; the first probe's leftover
 session was revoked through the normal API. Staging retains synthetic fixtures
 and immutable audit/session receipts.
 
-## Owner-controlled verification and remaining work
+## Remaining work
 
-P08.5 must stay open. **Actual iOS Safari evidence is pending owner input**:
-sign in at `https://secure-channel.duckdns.org`, hard reload, background/resume,
-then sign out and reload; record the iOS version and each result. Credentials
-should be entered privately from the restricted local file. Do not infer success
-from elapsed time, headless Chromium or a WebKit emulator. No renewal-cycle test
-is claimed. Production Firebase configuration/session design remains distinct.
+P08.5 must stay open, but **the staging browser blocker is cleared** by the owner's
+Chrome amendment and the installed Chrome result. Do not ask for actual iOS Safari
+evidence again. No renewal-cycle test is claimed. Production Firebase configuration
+and its session design remain distinct and must not depend on third-party cookies.
 
 P08.6/.8/.10 and other P08 criteria remain open. P10.5/.7 and P10.8/.9, then later
 phases, retain their original dependencies. No P10 implementation was repeated
 or added here; the action-catalogue review found further consumers/authority still
 needed before widening the strict category/capture-setting handlers. Continue
-independent authorized work on resume while preserving the existing owner gate.
+independent authorized work on resume; there is no remaining iOS owner gate.
 
 No production stack/cutover or existing live Lightsail change was made. Production
 still waits for the 28 October go decision; scaling dates, deployment-time email

@@ -63,6 +63,12 @@ reads returned one membership, hard reload renewed the session, and sign-out
 cleared the API-host Secure/HttpOnly/Lax refresh cookie. Reload after sign-out
 received 401 and displayed hosted sign-in, with zero app page errors.
 
+The [17:20 SGT installed Google Chrome evidence](staging-chrome-session-evidence-2026-10-03.json)
+repeats the normal flow with Chrome **154.0.8037.97**, through its headless channel.
+Sign-in, membership, hard-reload refresh, sign-out/cookie clearing and signed-out
+reload passed with zero app page errors. The owner accepted Chrome on 3 October
+and waived actual iOS Safari evidence for this staging criterion.
+
 The first session probe expected `/home`, while the correctly scoped client went
 to `/e/spoh2027/home`. Its timeout is not passing evidence. The corrected probe
 completed the full flow and revoked the earlier probe's leftover session through
@@ -81,13 +87,12 @@ throughout; no authentication bypass or local provider was enabled.
 
 The test credential is stored only in restricted, Git-ignored
 `.local/staging-smoke-identity.json`, excluded from Docker context. It remains
-available for the owner's device verification; no credential, OAuth state/code,
+available for later authorized verification; no credential, OAuth state/code,
 token or cookie value is in the committed evidence. Synthetic seed/audit/session
 records are retained in staging.
 
-**Actual iOS Safari verification is owner-controlled and still required.** The
-owner was asked to check sign-in, hard reload, background/resume and sign-out
-followed by reload, recording iOS version and results. P08.5 remains open for that
-evidence, production Firebase/session configuration and the other full exit
-criteria. No renewal-cycle test is claimed. Production deployment still waits
-for the owner's go decision.
+**The staging browser criterion passes under the owner's Chrome amendment.** No
+actual iOS Safari result is claimed or required. P08.5 remains open for production
+Firebase/session configuration and the other full exit criteria. No renewal-cycle
+test is claimed. Production sessions must work without third-party refresh
+cookies, and production deployment still waits for the owner's go decision.
