@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-03T17:59:15.868Z",
+  "updatedAt": "2026-10-03T18:28:37.888Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -3256,6 +3256,10 @@
     {
       "at": "2026-10-03T17:58:34.063Z",
       "text": "Verified timeline UI c977832 exact CI 37141395948 and staging deploy 37141784321; CloudFormation UPDATE_COMPLETE, ECS revision 104 exact image desired/running 1 completed failed 0. Normal Cognito and installed Chrome read-only UI/filter/reload/sign-out, all six strict no-store API filters, zero hover axe/page errors; evidence recorded. Three inherited P08 pricing fingerprints remain byte-identical. P10.8 remains open."
+    },
+    {
+      "at": "2026-10-03T18:28:37.888Z",
+      "text": "Verified product-history read on exact staging image 858c2d67: CI 37142522457 and deployment 37142908747 successful, healthy ECS revision 105; normal Cognito/Chrome no-store strict empty history for both supported keys, invalid query/cursor rejections, sign-out and zero page errors. Populated history remains proven by local DB cases. P10.8 stays open; guarded product revert implementation is undergoing verification."
     }
   ]
 }

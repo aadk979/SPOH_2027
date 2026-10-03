@@ -1,0 +1,35 @@
+{
+  "observedAt": "2026-10-03T18:18:08.116Z",
+  "deployedImageTag": "858c2d67dca8cfe82f2cf58a08134e253054f46b",
+  "taskRevision": 105,
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  "scope": "Normal Cognito Authorization Code + PKCE; read-only product setting history from the established synthetic staging fixture",
+  "checks": {
+    "normalSignIn": true,
+    "keys": {
+      "product.countsMode": {
+        "status": 200,
+        "count": 0
+      },
+      "product.visitorDataMode": {
+        "status": 200,
+        "count": 0
+      }
+    },
+    "strictEventMetadata": true,
+    "noStore": true,
+    "unsupportedKeyRejected": 400,
+    "unknownScopeRejected": 400,
+    "missingCursorRejected": 404,
+    "normalSignOut": true,
+    "appPageErrors": []
+  },
+  "fixtureEffects": "No setting, revert, reset, schedule, lifecycle, announcement or external delivery writes requested."
+}

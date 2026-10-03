@@ -32,7 +32,21 @@ The route is included in the complete cross-event route inventory.
   event factory input; the route uses the established flat admin inventory structure.
 - Server/client types, the server build, root lint, architecture, hardcoding and
   generated settings checks pass. Source/shared/test/evidence scans find no leaks.
-  Exact D-11 pipeline and image verification follows deployment.
+
+CI [37142522457](https://github.com/aadk979/SPOH_2027/actions/runs/37142522457)
+and staging deployment
+[37142908747](https://github.com/aadk979/SPOH_2027/actions/runs/37142908747)
+succeeded for tracker `858c2d67dca8cfe82f2cf58a08134e253054f46b`
+(history source `f363cd9`). CloudFormation is UPDATE_COMPLETE; the exact image runs
+on healthy ECS revision 105 with desired/running 1, completed rollout and zero
+failed tasks. At 02:18 Singapore on 4 October, installed Chrome 154 verified normal
+Cognito sign-in, both strict event/key/no-store responses, rejected unsupported
+keys/extra scopes/missing cursors, zero page errors and normal sign-out. The established
+synthetic fixture has no product-setting history, so staging verifies the empty
+read contract; populated cases are covered by the local database checks above.
+[Sanitised evidence](staging-product-setting-history-api-evidence-2026-10-04.json)
+records this read-only probe. No setting, revert, reset, schedule, lifecycle,
+announcement or delivery writes were requested.
 
 This read introduces no write, revert, reset, schedule, schema or migration.
 The existing privacy purge, counts-mode/headline validation and versioned writes
