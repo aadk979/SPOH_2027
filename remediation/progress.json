@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-03T12:41:49.297Z",
+  "updatedAt": "2026-10-03T13:23:36.145Z",
   "current": {
     "phase": "P10",
     "step": "P10.7"
@@ -2258,7 +2258,8 @@
             "191690228070d1b47d1a3bdc74a0fabdb6fffb6b",
             "2231d547d5a9c3b9a4297958657d99b2ff4199e0",
             "c074c07cbca2c090155c2b3b5fd05077f449d9db",
-            "3b4e5cf10c2c9136a479c6bab22574ee6e1d867d"
+            "3b4e5cf10c2c9136a479c6bab22574ee6e1d867d",
+            "bb00322e2604c6393fdd80142f8a11e0544f23c0"
           ],
           "notes": [
             {
@@ -2336,6 +2337,10 @@
             {
               "at": "2026-10-03T12:41:49.057Z",
               "text": "After-commit device worker verified: five-row bounded short claims/leases, Event-first current source/recipient/device checks, versioned send reservation, external bounded port outside transactions, fenced outcomes, shrinking original TTL/backoff/dead letters and owner/key-safe gone-device pruning. 141 focused DB, 1194 full DB/four existing skips/88 files, 562 server units, 59 shared checks; workspace types/static/build/format/source/full-history scans pass. Migration 30 only adds bounded recipient-scope code and was applied locally only to spoh2027_test. Publication a21c0a5 CI/deploy and exact staging revision 94 verified. No actual external receipt/cloud schedule claim. P10.7 remains open for legitimate schedule producer/CRUD/UI, reminders, retention and catalogue dependencies."
+            },
+            {
+              "at": "2026-10-03T13:23:35.904Z",
+              "text": "Verified private announcement schedule creation/status: 35 new API cases, 186 focused DB checks, 73 shared checks, 562 units, full 1229 passes/4 existing skips in 89 files; all workspace types/static/build/format/scans pass. General CRUD/UI, remaining handlers/retention and staging evidence remain open."
             }
           ]
         },
@@ -3164,6 +3169,10 @@
     {
       "at": "2026-10-03T12:41:49.296Z",
       "text": "Verified delivery worker source 3b4e5cf under D-11 after complete local checks. Verify source/tracker push and exact pipeline next, then authenticated saved-draft schedule creation/status so actual staging verification uses the normal owner/authority/idempotency flow. External acceptance/persistence retry window remains at least once. CLI-only, no subagents, V1-main only; production approvals, real local DB, sibling V1 and pricing artifacts preserved."
+    },
+    {
+      "at": "2026-10-03T13:23:36.144Z",
+      "text": "Verified d1cdbee delivery-worker CI 37123708233 and deploy 37124020942: UPDATE_COMPLETE, exact staging app image on task definition revision 95. New schedule producer source bb00322 committed under D-11; exact pipeline and actual normal Cognito staging schedule follow. Production approvals and test database constraints preserved."
     }
   ]
 }
