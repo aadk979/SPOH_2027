@@ -4,3 +4,4 @@ export { EventSwitcher } from './components/EventSwitcher';
 export { RehearsalBanner } from './components/RehearsalBanner';
 export { useMyEvents, eventListKey } from './queries';
 export { useHomeEvent, type HomeEvent } from './hooks/useHomeEvent';
+export { LifecyclePanel } from './components/LifecyclePanel';

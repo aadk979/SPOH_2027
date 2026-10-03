@@ -10,6 +10,7 @@ export interface LifecycleContext {
   goLiveOverrides?: readonly GoLiveOverride[];
 }
 type VerifiedLifecycleContext = LifecycleContext & { platformAdmin: boolean };
+export const REOPEN_HOURS = 48;
 
 /** Inputs read before a transition. The evaluator itself has no database or clock. */
 export interface LifecycleSnapshot {
@@ -105,7 +106,7 @@ function goLiveBlockers(snapshot: LifecycleSnapshot, context: VerifiedLifecycleC
 function reopenBlockers(snapshot: LifecycleSnapshot, context: VerifiedLifecycleContext): string[] {
   const blockers: string[] = [];
   const elapsed = snapshot.closedAt ? context.now.getTime() - snapshot.closedAt.getTime() : NaN;
-  if (!Number.isFinite(elapsed) || elapsed < 0 || elapsed > 48 * 3600_000) {
+  if (!Number.isFinite(elapsed) || elapsed < 0 || elapsed > REOPEN_HOURS * 3600_000) {
     blockers.push('reopen-window-expired');
   }
   if (!context.platformAdmin) blockers.push('platform-admin-required');

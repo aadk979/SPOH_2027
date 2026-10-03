@@ -145,8 +145,15 @@ The general event timeline/UI remains open.
 add private reviewed-content editing, event-clock schedule creation, pending edit/cancel
 and live status to the inbox. Client units, phone/laptop real-worker journeys, affected
 CORS/configuration integration and 58 reviewed visual checks pass. This is partial
-progress: generated settings/history/revert, general event timeline and lifecycle/readiness
-controls retain the full criteria below, so the step remains open.
+progress: generated settings/history/revert and the general event timeline retain the
+full criteria below, so the step remains open.
+
+[Lifecycle readiness and reviewed controls](../reports/P10/lifecycle-readiness-ui.md)
+add authoritative no-store readiness, event-clock reopening deadlines and deliberate
+versioned preparation/rehearsal/close/reopen controls. Current authority and post-wait
+guard evidence, stable retry intent, phone/laptop worker journeys and reviewed settings
+visuals pass. First go-live and public archive remain unavailable behind their existing
+prerequisites. This completes the bounded lifecycle UI subcriterion, not the full step.
 
 - **Do:**
   1. A settings screen generated from the registry: grouped, scoped (event or station tabs), with

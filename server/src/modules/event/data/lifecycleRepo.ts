@@ -36,6 +36,12 @@ export async function lockLifecycleEvent(tx: PrismaTransactionClient, scope: Eve
   return tx.event.findUniqueOrThrow({ where: { id: scope.eventId }, select: STRUCTURE });
 }
 
+/** Readiness holds admission open while excluding lifecycle and report-input writers. */
+export async function lockReadinessEvent(tx: PrismaTransactionClient, scope: EventScope) {
+  await tx.$queryRaw`SELECT id FROM "Event" WHERE id = ${scope.eventId} FOR SHARE`;
+  return tx.event.findUniqueOrThrow({ where: { id: scope.eventId }, select: STRUCTURE });
+}
+
 export async function registrationStationTypeCount(tx: PrismaTransactionClient, scope: EventScope) {
   return tx.stationType.count({
     where: { eventId: scope.eventId, active: true, registersVisitors: true },

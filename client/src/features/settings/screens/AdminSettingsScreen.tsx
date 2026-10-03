@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { AppShell } from '@/shared/shell/AppShell';
 import { LoadingCards, Stack } from '@/shared/ui';
 import { useMe, useRequireSession } from '@/features/session';
+import { LifecyclePanel } from '@/features/events';
 import { useSettingsForm } from '../hooks/useSettingsForm';
 import { SettingsFeedback } from '../components/SettingsFeedback';
 import { EventNameField } from '../components/EventNameField';
@@ -26,6 +27,7 @@ export default function AdminSettingsScreen(): ReactNode {
         ) : (
           <>
             <EventNameField form={form} canEdit={canEdit} />
+            <LifecyclePanel enabled={canEdit} />
             <ShiftHoursForm enabled={session !== null} canEdit={canEdit} />
             <ProductRulesForm enabled={session !== null} canEdit={canEdit} />
             <AttendanceSettingsForm enabled={canEdit} />

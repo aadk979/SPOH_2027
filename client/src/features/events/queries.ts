@@ -1,13 +1,42 @@
 'use client';
 import { useEffect, useRef } from 'react';
-import { useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
-import type { MyEvent } from '@spoh/shared';
+import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
+import type { MyEvent, TransitionEventRequest } from '@spoh/shared';
 import { useCurrentSession } from '@/features/session';
-import { listMyEvents } from './api';
+import { getLifecycleReadiness, listMyEvents, transitionLifecycle } from './api';
 import { ms } from '@/shared/lib/runtimeSettings';
+import { useEventId } from '@/shared/lib/eventContext';
 
 /** The one key outside an event: every other key starts with an event id (ADR-001 §5). */
 export const eventListKey = ['events'] as const;
+export const lifecycleKeys = {
+  readiness: (eventId: string, personId: string | undefined) =>
+    [eventId, 'lifecycle-readiness', personId ?? 'signed-out'] as const,
+};
+
+export function useLifecycleReadiness(enabled: boolean) {
+  const eventId = useEventId();
+  const session = useCurrentSession();
+  return useQuery({
+    queryKey: lifecycleKeys.readiness(eventId, session?.volunteerId),
+    queryFn: () => getLifecycleReadiness(eventId),
+    enabled: enabled && !!session,
+    gcTime: 0,
+  });
+}
+
+export function useTransitionLifecycle() {
+  const eventId = useEventId();
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (body: TransitionEventRequest) => transitionLifecycle(eventId, body),
+    gcTime: 0,
+    onSuccess: async () => {
+      await client.invalidateQueries({ queryKey: [eventId] });
+      await client.invalidateQueries({ queryKey: eventListKey });
+    },
+  });
+}
 
 export function useMyEvents(): UseQueryResult<MyEvent[]> {
   const session = useCurrentSession();

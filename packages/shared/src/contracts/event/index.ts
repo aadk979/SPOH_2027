@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { CommitteeRole, MembershipStatus } from '../../invariants/enums.js';
-import { Id, IdempotencyKey, ReasonText } from '../common/index.js';
+import { Id, IdempotencyKey, IsoDateTime, ReasonText } from '../common/index.js';
 
 /**
  * The event a caller works in, as the client needs it to show anything: its
@@ -68,6 +68,32 @@ export const EventLifecycleState = z
 export type EventLifecycleState = z.infer<typeof EventLifecycleState>;
 export const EventLifecycleResponse = z.object({ lifecycle: EventLifecycleState }).strict();
 export type EventLifecycleResponse = z.infer<typeof EventLifecycleResponse>;
+
+/** Advisory server guards; every transition checks current evidence again when it writes. */
+export const LifecycleTransitionOption = z
+  .object({
+    to: EventStatus,
+    allowed: z.boolean(),
+    requiresReason: z.boolean(),
+    blockers: z.array(z.string().min(1).max(100)).max(32),
+  })
+  .strict()
+  .refine((option) => option.allowed === (option.blockers.length === 0));
+export type LifecycleTransitionOption = z.infer<typeof LifecycleTransitionOption>;
+
+export const LifecycleReadinessResponse = z
+  .object({
+    lifecycle: EventLifecycleState,
+    evaluatedAt: IsoDateTime,
+    reopenUntil: IsoDateTime.nullable(),
+    transitions: z.array(LifecycleTransitionOption).max(EventStatus.options.length),
+  })
+  .strict()
+  .refine(
+    (response) =>
+      new Set(response.transitions.map((item) => item.to)).size === response.transitions.length,
+  );
+export type LifecycleReadinessResponse = z.infer<typeof LifecycleReadinessResponse>;
 
 export const EventSummary = z
   .object({

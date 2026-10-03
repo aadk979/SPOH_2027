@@ -41,3 +41,8 @@ export const BUCKET_MINUTES: Readonly<Record<'15m' | '30m' | '1h', number>> = Ob
 export function minutesBetween(from: Date, to: Date): number {
   return Math.max(0, Math.floor((to.getTime() - from.getTime()) / 60_000));
 }
+
+/** Elapsed hours from a supplied instant; callers still obtain now through their Clock. */
+export function hoursAfter(instant: Date, hours: number): Date {
+  return new Date(instant.getTime() + hours * 3600_000);
+}
