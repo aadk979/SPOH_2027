@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-03T08:42:38.296Z",
+  "updatedAt": "2026-10-03T08:48:25.162Z",
   "current": {
     "phase": "P08",
     "step": "P08.5"
@@ -1656,7 +1656,8 @@
             "89366e4e207cec0b678823ea76d38973b9101ec4",
             "5b30b3b685cc5a8240e2ed205d885f22ca496596",
             "33f8d68c6e5ed8514ab457e52e23baa7db72e11a",
-            "a07e5e526fb8a83889024307df9229a5fd26a8f4"
+            "a07e5e526fb8a83889024307df9229a5fd26a8f4",
+            "a46e297aa0095523a0164a00c5a120ed94debe6e"
           ],
           "notes": [
             {
@@ -1682,6 +1683,10 @@
             {
               "at": "2026-10-03T08:42:38.296Z",
               "text": "Verified runtime client startup: 291 client units, 547 server units, all 58 distinct E2E cases across serial fresh-API runs and 58 unchanged visual assertions. Same-image local/Cognito metadata and failure/retry proof. Staging combined origins, legitimate cloud session and iOS Safari remain open; no production changes."
+            },
+            {
+              "at": "2026-10-03T08:48:25.161Z",
+              "text": "Verified staging-only combined origins with 38 infra tests, actual staging/prod nag synth, types, lint, architecture and read-only deployed-image diff. CI rollout pending; pool inventory has zero users. Keep real account/membership, iOS Safari and production Firebase/session exit criteria open."
             }
           ]
         },
@@ -3090,6 +3095,10 @@
     {
       "at": "2026-10-03T07:48:05.595Z",
       "text": "Continuing P08.5 after verified foundation source/tracker 33f8d68/24eb43d: implement runtime client startup gating/failure/retry and consistent API consumers; CLI-only local environment operations, no subagents, no staging-origin switch until client verification."
+    },
+    {
+      "at": "2026-10-03T08:44:39.756Z",
+      "text": "Continuing P08.5 with staging-only combined public origins: DuckDNS API callback, client redirect/logout, credentialed CORS and deployment label. Production Cognito remains reference-only; no production deploy or account invitations. CLI-only, no subagents."
     }
   ]
 }
