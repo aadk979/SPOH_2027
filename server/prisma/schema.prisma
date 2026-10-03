@@ -186,6 +186,7 @@ model EventMembership {
   fallbackWindowDeclaredByMembership     FallbackWindow[]      @relation("FallbackWindowDeclaredByMembership")
   announcementAckMembership              AnnouncementAck[]     @relation("AnnouncementAckMembership")
   announcementAuthorMembership           Announcement[]        @relation("AnnouncementAuthorMembership")
+  announcementDraftAuthorMembership      AnnouncementDraft[]   @relation("AnnouncementDraftAuthorMembership")
   lostFoundItemLoggedByMembership        LostFoundItem[]       @relation("LostFoundItemLoggedByMembership")
   lostPersonAckMembership                LostPersonAck[]       @relation("LostPersonAckMembership")
   lostPersonAlertRaisedByMembership      LostPersonAlert[]     @relation("LostPersonAlertRaisedByMembership")
@@ -312,6 +313,7 @@ model Event {
   lostPersonSummaries  LostPersonSummary[]
   lostFoundItems       LostFoundItem[]
   announcements        Announcement[]
+  announcementDrafts   AnnouncementDraft[]
   announcementAcks     AnnouncementAck[]
   fallbackWindows      FallbackWindow[]
   importBatches        ImportBatch[]
@@ -479,6 +481,7 @@ model EventDay {
   shiftAssignments     ShiftAssignment[]
   briefingSlots        BriefingSlot[]
   announcements        Announcement[]
+  announcementDrafts   AnnouncementDraft[]
   attendance           Attendance[]
   attendanceChallenges AttendanceChallenge[]
 
@@ -508,15 +511,16 @@ model Station {
   active    Boolean @default(true)
   sortOrder Int     @default(0)
 
-  registrations    Registration[]
-  footfallTicks    FootfallTick[]
-  stampEvents      CardStampEvent[]
-  shiftAssignments ShiftAssignment[]
-  incidents        Incident[]
-  redemptions      GiftRedemption[]
-  lostFoundItems   LostFoundItem[]
-  announcements    Announcement[]
-  fallbackWindows  FallbackWindow[]
+  registrations      Registration[]
+  footfallTicks      FootfallTick[]
+  stampEvents        CardStampEvent[]
+  shiftAssignments   ShiftAssignment[]
+  incidents          Incident[]
+  redemptions        GiftRedemption[]
+  lostFoundItems     LostFoundItem[]
+  announcements      Announcement[]
+  announcementDrafts AnnouncementDraft[]
+  fallbackWindows    FallbackWindow[]
 
   event Event            @relation(fields: [eventId], references: [id], onDelete: Restrict)
   type  StationType      @relation(fields: [eventId, typeId], references: [eventId, id], onDelete: Restrict)
@@ -555,20 +559,21 @@ model Person {
   attendanceChallenges AttendanceChallenge[]
   attendanceAttempt    AttendanceAttempt?
 
-  shiftAssignments ShiftAssignment[]
-  registrations    Registration[]
-  footfallTicks    FootfallTick[]
-  stampEvents      CardStampEvent[]
-  redemptions      GiftRedemption[]
-  incidentsRaised  Incident[]         @relation("IncidentReporter")
-  lostPersonAlerts LostPersonAlert[]
-  lostFoundItems   LostFoundItem[]
-  announcements    Announcement[]
-  auditLogs        AuditLog[]
-  swapsRequested   ShiftSwapRequest[] @relation("SwapRequester")
-  swapsTargeted    ShiftSwapRequest[] @relation("SwapTarget")
-  swapsDecided     ShiftSwapRequest[] @relation("SwapDecider")
-  briefingSlots    BriefingSlot[]
+  shiftAssignments   ShiftAssignment[]
+  registrations      Registration[]
+  footfallTicks      FootfallTick[]
+  stampEvents        CardStampEvent[]
+  redemptions        GiftRedemption[]
+  incidentsRaised    Incident[]          @relation("IncidentReporter")
+  lostPersonAlerts   LostPersonAlert[]
+  lostFoundItems     LostFoundItem[]
+  announcements      Announcement[]
+  announcementDrafts AnnouncementDraft[]
+  auditLogs          AuditLog[]
+  swapsRequested     ShiftSwapRequest[]  @relation("SwapRequester")
+  swapsTargeted      ShiftSwapRequest[]  @relation("SwapTarget")
+  swapsDecided       ShiftSwapRequest[]  @relation("SwapDecider")
+  briefingSlots      BriefingSlot[]
 
   // Back-relations for the foreign keys that used to be scalars by convention.
   giftAdjustments   GiftStockAdjustment[]
@@ -1255,6 +1260,36 @@ model LostFoundItem {
 // ─────────────────────────────────────────────
 // COMMS
 // ─────────────────────────────────────────────
+
+/// Private unpublished content; publication and durable delivery are separate operations.
+/// @eventOwned
+model AnnouncementDraft {
+  id                 String               @id @default(cuid())
+  eventId            String
+  authorId           String
+  authorMembershipId String
+  /// @class operational
+  body               String
+  priority           AnnouncementPriority @default(INFO)
+  targetRole         CommitteeRole?
+  targetStationId    String?
+  targetEventDayId   String?
+  requiresAck        Boolean              @default(false)
+  expiresAt          DateTime?            @db.Timestamptz(3)
+  version            Int                  @default(1)
+  createdAt          DateTime             @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime             @default(now()) @db.Timestamptz(3)
+
+  event            Event           @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  author           Person          @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  authorMembership EventMembership @relation("AnnouncementDraftAuthorMembership", fields: [eventId, authorMembershipId], references: [eventId, id], onDelete: Restrict)
+  targetStation    Station?        @relation(fields: [eventId, targetStationId], references: [eventId, id], onDelete: Restrict)
+  targetDay        EventDay?       @relation(fields: [eventId, targetEventDayId], references: [eventId, id], onDelete: Restrict)
+
+  @@unique([eventId, id])
+  @@index([eventId, authorId, updatedAt])
+  @@index([authorMembershipId])
+}
 
 /// @eventOwned
 model Announcement {

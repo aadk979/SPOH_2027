@@ -4,6 +4,7 @@
 export const EVENT_OWNED_MODELS = [
   'Announcement',
   'AnnouncementAck',
+  'AnnouncementDraft',
   'Attendance',
   'AttendanceAttempt',
   'AttendanceChallenge',

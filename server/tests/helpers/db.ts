@@ -70,6 +70,7 @@ export async function resetDatabase(): Promise<void> {
   await wipe('IdempotencyRecord');
 
   await wipe('AnnouncementAck');
+  await wipe('AnnouncementDraft');
   await wipe('Announcement');
 
   await wipe('LostPersonAck');

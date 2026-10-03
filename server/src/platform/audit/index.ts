@@ -50,6 +50,8 @@ export type AuditAction =
   | 'shift.checkOut'
   | 'swap.decide'
   | 'announcement.send'
+  | 'announcement.draft.create'
+  | 'announcement.draft.update'
   | 'announcement.ack'
   | 'fallback.declare'
   | 'fallback.close'

@@ -2,7 +2,7 @@
 
 Read `HANDOFF-2026-09-29.md` first, including the owner answers, then the takeover
 and authoritative `HANDOFF-2026-10-03.md`. This continuation updates the runtime,
-Docker, pricing and cloud-verification checkpoints. Their scope, production
+Docker, pricing, cloud verification and private announcement draft checkpoints. Their scope, production
 approvals, transaction/retention cautions and remaining P10 catalogue still apply.
 
 ## Scope and Git
@@ -19,12 +19,13 @@ and verified against `origin/main` and `ls-remote`.
 | `33f8d68` / `24eb43d` | Strict public runtime-configuration server foundation; P08.5 stays open.  |
 | `a07e5e5` / `91c202f` | Runtime client startup gate, deferred auth/API origins and retry/refusal. |
 | `a46e297` / `7d0dbd9` | Combined staging API/client origins, CORS, callback/logout and label.     |
+| `ce0a83a` / `b70817c` | Owner Chrome amendment and actual installed Chrome session evidence.      |
+| `3f4f6a1` / `3a3d197` | Production Firebase static preparation and local emulator verification.   |
 
-Before this evidence/handoff update, main/origin/main matched full hash
-`7d0dbd975dc5a993dae2d97e0be66411a4c0a4af`, with only the newly generated public
-origin/session evidence untracked. Subsequent documentation/tracker commits are
-expected; verify Git again before editing. No unfinished product implementation
-or uncommitted pricing draft remains.
+Before the private draft slice, main/origin/main/ls-remote matched full hash
+`3a3d19779f79040242ad7db7bd08fd30c0dbd84f`. Subsequent draft source/tracker and
+staging evidence commits are expected; verify Git again before editing. The inherited
+pricing work is committed, with its three inherited artifacts preserved byte-for-byte.
 
 ## Verification and what is deployed
 
@@ -68,6 +69,17 @@ or uncommitted pricing draft remains.
   passed the same normal sign-in, membership, hard-reload refresh, sign-out and
   signed-out reload flow at 17:20 SGT, with zero app page errors. See
   [Chrome evidence](P08/staging-chrome-session-evidence-2026-10-03.json).
+- Exact **`3a3d19779f79040242ad7db7bd08fd30c0dbd84f`** subsequently passed
+  [CI](https://github.com/aadk979/SPOH_2027/actions/runs/37114213639),
+  [Infra](https://github.com/aadk979/SPOH_2027/actions/runs/37114213661) and
+  [staging deployment](https://github.com/aadk979/SPOH_2027/actions/runs/37114513664).
+  The stack was `UPDATE_COMPLETE` with that exact image at approximately 18:10 SGT.
+- [Private draft foundation](P10/announcement-drafts.md): **47 shared checks**, **548
+  server units**, **1,098 full database passes / four existing skips in 85 files**,
+  all workspace types and static/build checks pass. The additive 27th migration was
+  applied only to guarded `spoh2027_test` locally. Draft attribution, content/version,
+  metadata audit and id-only replay settle atomically. No inbox/publication/push effect.
+  Actual staging deployment of this newer source remains a subsequent verification.
 
 The synthetic Cognito identity was seeded under the owner's 30 September test-data
 authorization. Invitation delivery was suppressed; no email was sent. Its actual
@@ -93,9 +105,10 @@ synthetic metadata and mocked APIs were used; no production session result is
 claimed. Production deployment identity/site mapping and P12 session changes remain.
 
 P08.6/.8/.10 and other P08 criteria remain open. P10.5/.7 and P10.8/.9, then later
-phases, retain their original dependencies. No P10 implementation was repeated
-or added here; the action-catalogue review found further consumers/authority still
-needed before widening the strict category/capture-setting handlers. Continue
+phases, retain their original dependencies. The private draft foundation advances
+P10.7 without repeating close-out or scheduler execution. Timed publication still
+needs durable delivery storage/worker integration; schedule UI, retention and other
+catalogue consumers/authority remain pending. Continue
 independent authorized work on resume; there is no remaining iOS owner gate.
 
 No production stack/cutover or existing live Lightsail change was made. Production

@@ -98,6 +98,11 @@ full criteria pass. Evidence is recorded in [scheduler-engine.md](../reports/P10
 
 ### P10.7 — Schedulable actions
 
+The private, versioned announcement draft foundation is verified separately in
+[announcement-drafts.md](../reports/P10/announcement-drafts.md). Drafts cannot publish or
+request delivery. Durable delivery storage and timed publication remain pending; this
+foundation does not complete P10.7.
+
 - **Do:** Handlers for:
   - lifecycle transitions
   - publishing an announcement at a time

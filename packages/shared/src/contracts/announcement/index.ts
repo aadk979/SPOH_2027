@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { AnnouncementPriority, CommitteeRole } from '../../invariants/enums.js';
-import { Id, IsoDateTime, PaginationQuery } from '../common/index.js';
+import { Id, IdempotencyKey, IsoDateTime, PaginationQuery } from '../common/index.js';
 
 /**
  * Broadcast and comms (PRODUCT_BRIEF §8).
@@ -33,6 +33,31 @@ export const CreateAnnouncementRequest = z
   })
   .strict();
 export type CreateAnnouncementRequest = z.infer<typeof CreateAnnouncementRequest>;
+
+/** Saving a draft never publishes to an inbox or requests device delivery. */
+export const CreateAnnouncementDraftRequest = CreateAnnouncementRequest.extend({
+  idempotencyKey: IdempotencyKey,
+}).strict();
+export type CreateAnnouncementDraftRequest = z.infer<typeof CreateAnnouncementDraftRequest>;
+
+/** Full replacement under an optimistic version; attribution remains server-owned. */
+export const UpdateAnnouncementDraftRequest = CreateAnnouncementRequest.extend({
+  expectedVersion: z.number().int().min(1),
+  reason: z.string().trim().min(1).max(500).optional(),
+}).strict();
+export type UpdateAnnouncementDraftRequest = z.infer<typeof UpdateAnnouncementDraftRequest>;
+
+export const AnnouncementDraftRecord = CreateAnnouncementRequest.extend({
+  id: Id,
+  eventId: Id,
+  authorId: Id,
+  authorMembershipId: Id,
+  version: z.number().int().min(1),
+  createdAt: IsoDateTime,
+  updatedAt: IsoDateTime,
+  expiresAt: IsoDateTime.nullable(),
+}).strict();
+export type AnnouncementDraftRecord = z.infer<typeof AnnouncementDraftRecord>;
 
 export const AnnouncementRecord = z
   .object({

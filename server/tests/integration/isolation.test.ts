@@ -73,6 +73,7 @@ interface EventB {
   card: { shortCode: string; qrPayload: string };
   giftType: string;
   announcement: string;
+  announcementDraft: string;
   swap: string;
   slot: string;
   window: string;
@@ -184,6 +185,17 @@ async function seedEventB(): Promise<EventB> {
   const announcement = await rawDb.announcement.create({
     data: { eventId, body: 'B notice', authorId: person, requiresAck: true },
   });
+  const membership = await rawDb.eventMembership.findUniqueOrThrow({
+    where: { eventId_personId: { eventId, personId: person } },
+  });
+  const announcementDraft = await rawDb.announcementDraft.create({
+    data: {
+      eventId,
+      body: 'B private draft',
+      authorId: person,
+      authorMembershipId: membership.id,
+    },
+  });
   const swap = await rawDb.shiftSwapRequest.create({
     data: { eventId, assignmentId: assignment.id, requesterId: person, targetId: other },
   });
@@ -229,6 +241,7 @@ async function seedEventB(): Promise<EventB> {
     card: { shortCode: card.shortCode, qrPayload: card.qrPayload },
     giftType: giftType.id,
     announcement: announcement.id,
+    announcementDraft: announcementDraft.id,
     swap: swap.id,
     slot: slot.id,
     window: window.id,
@@ -401,6 +414,15 @@ const CASES: Record<string, Case> = {
   },
   'GET /announcements': LIST,
   'POST /announcements/:id/ack': { params: (b) => ({ id: b.announcement }) },
+  'POST /announcements/drafts': {
+    body: (b) => ({ ...capture(), body: 'isolation check', target: { stationId: b.station } }),
+  },
+  'GET /announcements/drafts': { query: (b) => ({ cursor: b.announcementDraft }) },
+  'GET /announcements/drafts/:id': { params: (b) => ({ id: b.announcementDraft }) },
+  'PUT /announcements/drafts/:id': {
+    params: (b) => ({ id: b.announcementDraft }),
+    body: () => ({ body: 'isolation check', expectedVersion: 1 }),
+  },
 
   'GET /dashboard/live': LIST,
   'GET /dashboard/data-health': LIST,
@@ -556,7 +578,8 @@ function sameBody(left: unknown, right: unknown): boolean {
 }
 
 function send(method: string, path: string, body?: object) {
-  const call = request(app)[method.toLowerCase() as 'get' | 'post' | 'patch' | 'delete'](path);
+  const call =
+    request(app)[method.toLowerCase() as 'get' | 'post' | 'put' | 'patch' | 'delete'](path);
   const authed = call.set('Authorization', bearer(admin));
   return body ? authed.send(body) : authed;
 }
