@@ -74,6 +74,7 @@ interface EventB {
   giftType: string;
   announcement: string;
   announcementDraft: string;
+  announcementSchedule: string;
   swap: string;
   slot: string;
   window: string;
@@ -196,6 +197,15 @@ async function seedEventB(): Promise<EventB> {
       authorMembershipId: membership.id,
     },
   });
+  const announcementSchedule = await rawDb.scheduledAction.create({
+    data: {
+      eventId,
+      type: 'announcement.publish',
+      payload: { draftId: announcementDraft.id, expectedVersion: 1 },
+      createdByPersonId: person,
+      runAt: new Date(FROZEN_NOW.getTime() + 60_000),
+    },
+  });
   const swap = await rawDb.shiftSwapRequest.create({
     data: { eventId, assignmentId: assignment.id, requesterId: person, targetId: other },
   });
@@ -242,6 +252,7 @@ async function seedEventB(): Promise<EventB> {
     giftType: giftType.id,
     announcement: announcement.id,
     announcementDraft: announcementDraft.id,
+    announcementSchedule: announcementSchedule.id,
     swap: swap.id,
     slot: slot.id,
     window: window.id,
@@ -422,6 +433,17 @@ const CASES: Record<string, Case> = {
   'PUT /announcements/drafts/:id': {
     params: (b) => ({ id: b.announcementDraft }),
     body: () => ({ body: 'isolation check', expectedVersion: 1 }),
+  },
+  'POST /announcements/drafts/:id/schedules': {
+    params: (b) => ({ id: b.announcementDraft }),
+    body: () => ({
+      ...capture(),
+      expectedVersion: 1,
+      runAt: new Date(FROZEN_NOW.getTime() + 60_000).toISOString(),
+    }),
+  },
+  'GET /announcements/drafts/:id/schedules/:scheduleId': {
+    params: (b) => ({ id: b.announcementDraft, scheduleId: b.announcementSchedule }),
   },
 
   'GET /dashboard/live': LIST,

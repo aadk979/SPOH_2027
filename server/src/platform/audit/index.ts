@@ -87,7 +87,8 @@ export type AuditAction =
   | 'event.clone'
   | 'event.transition'
   | 'report.snapshot'
-  | 'schedule.execute';
+  | 'schedule.execute'
+  | 'schedule.create';
 
 export interface AuditContext {
   /** `Volunteer.id`. Null only for system-initiated actions such as the purge job. */

@@ -7,6 +7,7 @@ import {
   ListAnnouncementsQuery,
   PaginationQuery,
   UpdateAnnouncementDraftRequest,
+  ScheduleAnnouncementDraftRequest,
 } from '@spoh/shared';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { defaultRateLimit } from '../../../platform/http/rateLimit.js';
@@ -20,6 +21,11 @@ import {
   updateDraftHandler,
 } from './draftHandlers.js';
 import { draftReplay } from './draftReplay.js';
+import {
+  createPublicationScheduleHandler,
+  readPublicationScheduleHandler,
+} from './publicationScheduleHandlers.js';
+import { publicationScheduleReplay } from './publicationScheduleReplay.js';
 import { acknowledgeHandler, listInboxHandler, sendAnnouncementHandler } from './handlers.js';
 
 /** Targeted announcements with acknowledgement tracking (BUILD_PLAN §7.2). */
@@ -61,6 +67,21 @@ announcementRouter.put(
   requireCapability('announcement.station.send'),
   validate({ params: IdParams, body: UpdateAnnouncementDraftRequest }),
   updateDraftHandler,
+);
+announcementRouter.post(
+  '/drafts/:id/schedules',
+  defaultRateLimit,
+  requireCapability('announcement.station.send'),
+  validate({ params: IdParams, body: ScheduleAnnouncementDraftRequest }),
+  idempotent('announcement.schedule.create', { redacted: publicationScheduleReplay }),
+  createPublicationScheduleHandler,
+);
+announcementRouter.get(
+  '/drafts/:id/schedules/:scheduleId',
+  defaultRateLimit,
+  requireCapability('announcement.station.send'),
+  validate({ params: z.object({ id: Id, scheduleId: Id }).strict() }),
+  readPublicationScheduleHandler,
 );
 
 /**

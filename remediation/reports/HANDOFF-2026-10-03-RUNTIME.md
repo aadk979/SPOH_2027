@@ -25,6 +25,7 @@ and verified against `origin/main` and `ls-remote`.
 | `0df8c82` / `4844360` | Synthetic UUID fixture correction and exact historical scan exceptions.           |
 | `2231d54` / `caf309a` | Durable announcement delivery storage; green CI/deploy and exact staging image.   |
 | `c074c07` / `a21c0a5` | Transactional saved-version publication; green CI/deploy and exact staging image. |
+| `3b4e5cf` / `d1cdbee` | After-commit delivery worker; green CI/deploy and exact staging image.            |
 
 Before the private draft slice, main/origin/main/ls-remote matched full hash
 `3a3d19779f79040242ad7db7bd08fd30c0dbd84f`. Subsequent draft source/tracker and
@@ -135,8 +136,21 @@ static/build/source scan checks. Current scope, duplicate execution, post-wait d
 safe pruning and the unavoidable external acceptance/persistence crash window are covered.
 Full integration passes **1,194 checks / four existing skips in 88 files** (373.40 seconds).
 Formatting/diff and current source/gateway/fixture/unit/full-history scans pass. D-11
-commit/push and exact pipeline verification follow; do not claim deployment or actual
-external receipt from these local port tests.
+source `3b4e5cf` / tracker `d1cdbee252fff69d6b0801c36eb4aea4177d6762` were committed/pushed.
+[CI](https://github.com/aadk979/SPOH_2027/actions/runs/37123708233) and
+[deploy](https://github.com/aadk979/SPOH_2027/actions/runs/37124020942) succeeded; staging
+is `UPDATE_COMPLETE` with that exact application image on task definition revision 95.
+No actual external receipt is claimed from the local port tests.
+
+[Private publication schedule creation/status](P10/announcement-schedule-api.md) is the next
+verified local slice: normal authenticated owned-draft producer, exact reviewed version,
+future/pre-expiry time guards, current post-wait authority and private bounded status.
+Creation audit/action/id-only replay receipt are atomic; replay reads current status.
+The USER creation audit links by entity ID without weakening execution provenance.
+**35 new API cases**, **186 focused DB checks**, **73 shared checks**, **562 server units**,
+workspace types/static/build/format/scans and **1,229 full DB passes / four existing skips in
+89 files** (444.42 seconds) pass. D-11 source/tracker and exact CI/deploy verification follow;
+the actual staging schedule remains to be run through normal Cognito/API creation.
 
 P08.5 must stay open, but **the staging browser blocker is cleared** by the owner's
 Chrome amendment and the installed Chrome result. Do not ask for actual iOS Safari
@@ -153,8 +167,9 @@ claimed. Production deployment identity/site mapping and P12 session changes rem
 P08.6/.8/.10 and other P08 criteria remain open. P10.5/.7 and P10.8/.9, then later
 phases, retain their original dependencies. The private draft foundation advances
 P10.7 without repeating close-out or scheduler execution. The timed publication handler
-still needs after-commit delivery and legitimate schedule producer/CRUD integration;
-schedule UI, retention and other catalogue consumers/authority remain pending. Continue
+now includes after-commit delivery and a verified private producer/status slice. General
+list/edit/cancel/timeline, schedule UI, retention and other catalogue consumers/authority
+remain pending. Continue
 independent authorized work on resume; there is no remaining iOS owner gate.
 
 No production stack/cutover or existing live Lightsail change was made. Production

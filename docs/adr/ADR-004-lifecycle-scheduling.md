@@ -126,8 +126,10 @@ by the handler's schema), `runAt`, `status` (`PENDING`, `RUNNING`, `SUCCEEDED`, 
    the next occurrence (by `dedupeKey`, so there is only ever one). A handler whose effects are all
    in the database therefore happens **exactly once**. Its effects and its completion commit
    together, or neither does.
-3. **External effects** (push, email) run **after** the commit, from the rows the handler wrote,
-   and are idempotent per recipient (a delivery key). A retry never double-sends.
+3. **External effects** (push, email) run **after** the commit, from durable per-recipient
+   delivery records. Claims and outcomes are fenced; an external acceptance followed by
+   failed outcome persistence can be retried. Delivery is at least once across that crash
+   window, using a stable collapse tag; service acceptance is not device/user receipt.
 4. **Failure:** the transaction rolls back. The action goes back to `PENDING` with `runAt` backed
    off (30 s, 2 min, 10 min, 30 min) and `lastError` set. After `maxAttempts` it becomes `DEAD`, an
    alarm fires (ADR-008), and it appears red on the schedule screen.

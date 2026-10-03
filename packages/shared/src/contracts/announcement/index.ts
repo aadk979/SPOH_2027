@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import { AnnouncementPriority, CommitteeRole } from '../../invariants/enums.js';
+import {
+  AnnouncementPriority,
+  CommitteeRole,
+  ScheduledActionStatus,
+} from '../../invariants/enums.js';
 import { Id, IdempotencyKey, IsoDateTime, PaginationQuery } from '../common/index.js';
 
 /**
@@ -52,6 +56,46 @@ export const PublishAnnouncementPayload = z
   .object({ draftId: Id, expectedVersion: z.number().int().min(1) })
   .strict();
 export type PublishAnnouncementPayload = z.infer<typeof PublishAnnouncementPayload>;
+
+export const ScheduleAnnouncementDraftRequest = z
+  .object({
+    expectedVersion: z.number().int().min(1),
+    runAt: IsoDateTime,
+    idempotencyKey: IdempotencyKey,
+  })
+  .strict();
+export type ScheduleAnnouncementDraftRequest = z.infer<typeof ScheduleAnnouncementDraftRequest>;
+
+/** Public errors are catalogue codes, never raw worker/provider exceptions. */
+export const AnnouncementScheduleError = z.enum([
+  'INVALID_PAYLOAD',
+  'AUTHORITY_CHANGED',
+  'GUARD_FAILED',
+  'TOO_LATE',
+  'TARGET_MISSING',
+  'SYSTEM_ONLY',
+  'HANDLER_UNAVAILABLE',
+  'EXECUTION_FAILED',
+  'ATTEMPTS_EXHAUSTED',
+]);
+export const AnnouncementPublicationScheduleRecord = z
+  .object({
+    id: Id,
+    eventId: Id,
+    draftId: Id,
+    draftVersion: z.number().int().min(1),
+    runAt: IsoDateTime,
+    scheduledFor: IsoDateTime,
+    status: ScheduledActionStatus,
+    version: z.number().int().min(1),
+    createdAt: IsoDateTime,
+    completedAt: IsoDateTime.nullable(),
+    lastError: AnnouncementScheduleError.nullable(),
+  })
+  .strict();
+export type AnnouncementPublicationScheduleRecord = z.infer<
+  typeof AnnouncementPublicationScheduleRecord
+>;
 
 export const AnnouncementDraftRecord = CreateAnnouncementRequest.extend({
   id: Id,

@@ -56,8 +56,13 @@ retain or roll back the lease/version appropriately; fixed worker logs identify 
   application, with only data queries, supplied instants and callbacks in the repositories.
 - Full integration passed **1,194 checks / four existing skips in 88 files** (373.40 seconds),
   including all 36 new worker cases. Changed formatting/diff and source/gateway/fixture/unit/
-  full committed-history secret scans pass. No worker deployment or actual external delivery
-  is claimed by these local checks.
+  full committed-history secret scans pass. Source `3b4e5cf` and tracker
+  `d1cdbee252fff69d6b0801c36eb4aea4177d6762` were committed/pushed under D-11.
+  [CI](https://github.com/aadk979/SPOH_2027/actions/runs/37123708233) and
+  [deploy](https://github.com/aadk979/SPOH_2027/actions/runs/37124020942) succeeded.
+  The staging stack is `UPDATE_COMPLETE`; application task definition revision 95 uses
+  that exact tracker image, verified at 21:03 Singapore. No actual external delivery
+  or device receipt is claimed.
 
 Local migrations/data use guarded `spoh2027_test` only. The real local database, sibling
 `V1`, pricing artifacts, client/visual baselines, operational limits and production resources

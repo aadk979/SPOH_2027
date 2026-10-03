@@ -108,9 +108,14 @@ frozen per-announcement plan and per-device records without a producer or networ
 saved-version handler and commits the attributed message, plan/intents, audit and scheduler
 outcome together. The [after-commit worker](../reports/P10/announcement-delivery-worker.md)
 adds bounded device claims, current preflight checks, send reservations and fenced outcomes.
-Its full suite passes 1,194 checks with four existing skips; D-11/pipeline verification follows.
-A legitimate schedule producer/CRUD and UI
-remain pending; no actual cloud scheduled-announcement or external delivery result is claimed.
+Its full suite passes 1,194 checks with four existing skips; D-11 CI/deploy and the exact
+`d1cdbee` staging image on task definition revision 95 are verified.
+[Private publication schedule creation/status](../reports/P10/announcement-schedule-api.md)
+adds the legitimate producer with current authority, saved-version/time guards, atomic
+metadata audit/id-only retry receipt and current private status. Its 35 new API cases,
+186 focused checks and full 1,229-pass/four-skip suite are green. D-11/pipeline verification
+and a real staging schedule follow. General list/edit/cancel/timeline and UI remain pending;
+no actual cloud scheduled-announcement or external device receipt is claimed yet.
 
 - **Do:** Handlers for:
   - lifecycle transitions
