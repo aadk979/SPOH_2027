@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-03T10:51:07.834Z",
+  "updatedAt": "2026-10-03T11:21:38.116Z",
   "current": {
     "phase": "P10",
     "step": "P10.7"
@@ -2255,7 +2255,8 @@
             "46ce29115a890a162eaeb97ee4865bac049e7735",
             "b13f48a9e4d59e17b69015bfe1c76ada9c82778e",
             "0df8c8269bf27792eb411dda33bb116d5a2130ba",
-            "191690228070d1b47d1a3bdc74a0fabdb6fffb6b"
+            "191690228070d1b47d1a3bdc74a0fabdb6fffb6b",
+            "2231d547d5a9c3b9a4297958657d99b2ff4199e0"
           ],
           "notes": [
             {
@@ -2321,6 +2322,10 @@
             {
               "at": "2026-10-03T10:51:07.833Z",
               "text": "Actual staging 4844360 has successful CI 37116845053/deploy 37117164613 and matching UPDATE_COMPLETE stack. Installed Chrome 154 normal Cognito+PKCE private create/read/edit/list/replay pass, stale version 409, no-store, inbox unchanged, ack 404, sign-out 204, zero app errors. Synthetic private fixture/receipts retained under existing owner test-data approval. Draft foundation verified; delivery storage/worker/publication still pending."
+            },
+            {
+              "at": "2026-10-03T11:21:38.116Z",
+              "text": "Verified frozen delivery storage only: 67 focused DB checks (22 new), 1120 full integration passes/four existing skips in 86 files, 555 server units, 47 shared; workspace types/static/build/secret scans pass. Additive migration 28 only on local guarded test DB. Supplied publishing transaction owns source/plan/device/audit fate; no text or credentials copied, no retry audience expansion, immutable source/plan/recipient identity and scoped FK/state bounds. No producer/network worker registered; publication, after-commit delivery, retention and UI remain pending."
             }
           ]
         },
@@ -3137,6 +3142,10 @@
     {
       "at": "2026-10-03T10:26:47.596Z",
       "text": "Committed private draft source b13f48a under D-11; full DB rerun green after adding all four route isolation cases. Verifying exact staged deployment and legitimate Cognito private API behavior next. Production approvals, sibling V1, pricing artifacts and real local database preserved."
+    },
+    {
+      "at": "2026-10-03T10:51:35.037Z",
+      "text": "Starting next P10.7 slice after verified draft source/CI/actual staging and pushed evidence 1916902/040babc: frozen per-announcement delivery plan plus per-device durable storage and atomic enqueue only. No external delivery, publication handler or network worker until this storage foundation passes. CLI-only, no subagents, guarded test databases only."
     }
   ]
 }
