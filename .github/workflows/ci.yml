@@ -32,6 +32,7 @@ jobs:
       # so it has to exist before anything else compiles.
       - run: npm run build:shared
       - run: npm run settings:check
+      - run: npm run check:pricing
 
       # prisma.config.ts refuses to load without DATABASE_URL, even though
       # generate never connects. A placeholder satisfies it.

@@ -1,0 +1,6 @@
+{
+  "stagingEdgeUsdMonth": 7,
+  "stagingAlarmMetrics": 13,
+  "stagingCustomMetrics": 5,
+  "extraProdAlarmMetrics": 1
+}

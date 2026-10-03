@@ -16,10 +16,12 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createInterface } from 'node:readline';
 import { Readable } from 'node:stream';
+import { parseArgs } from 'node:util';
 
 const HOST = 'https://pricing.us-east-1.amazonaws.com';
 const REGION = 'ap-southeast-1';
-const OUT = join(dirname(fileURLToPath(import.meta.url)), 'prices.json');
+const { values } = parseArgs({ options: { output: { type: 'string' } } });
+const OUT = values.output ?? join(dirname(fileURLToPath(import.meta.url)), 'prices.json');
 
 async function getJson(path) {
   const res = await fetch(HOST + path);
