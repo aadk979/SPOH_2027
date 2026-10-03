@@ -36,16 +36,58 @@ still directly reachable.
   revision and its exact additional parameter grants. There was no pool, RDS,
   edge, migration-task, production or other resource replacement.
 
-Release verification is pending the normal CI/staging pipeline. A separate dated
-checkpoint will record the exact deployed hash and public metadata/CORS/OAuth
-observations; local synth is not deployment evidence.
+## Deployed checkpoint
+
+The normal pipeline completed for exact image tag
+`7d0dbd975dc5a993dae2d97e0be66411a4c0a4af`:
+[CI](https://github.com/aadk979/SPOH_2027/actions/runs/37110928650),
+[Infra](https://github.com/aadk979/SPOH_2027/actions/runs/37110928681) and
+[Deploy staging](https://github.com/aadk979/SPOH_2027/actions/runs/37111159938) all
+succeeded. Read-only CloudFormation verification found `UPDATE_COMPLETE` with
+that exact `ServiceImageTag`. Actual Cognito callback/logout URLs match the two
+configured origins; its pool/client ids are unchanged.
+
+The [17:10 SGT origin evidence](staging-origin-evidence-2026-10-03.json) verifies
+trusted HTTPS, identical public metadata through both hosts, client shell/API
+host routing, private-readiness refusal, runtime CSP and credentialed CORS for
+the exact client origin with an unrelated origin refused. Headless Chromium
+reached Cognito's real credential form, with no local roster auth or app page
+errors. OAuth uses code/S256, API-host Secure/HttpOnly/Lax state and PKCE cookies,
+and client-host failure redirects. The first cookie probe incorrectly filtered
+at the API root; correcting it to the cookies' auth path made the check pass.
+
+The [17:15 SGT session evidence](staging-session-evidence-2026-10-03.json) verifies
+normal Cognito Authorization Code + PKCE with a real subject and active staging
+event membership. Callback and initial refresh succeeded, authenticated event
+reads returned one membership, hard reload renewed the session, and sign-out
+cleared the API-host Secure/HttpOnly/Lax refresh cookie. Reload after sign-out
+received 401 and displayed hosted sign-in, with zero app page errors.
+
+The first session probe expected `/home`, while the correctly scoped client went
+to `/e/spoh2027/home`. Its timeout is not passing evidence. The corrected probe
+completed the full flow and revoked the earlier probe's leftover session through
+the normal self-session API before signing out.
 
 ## Remaining exit criteria
 
-Read-only Cognito inventory found **zero users** in staging's pool
-`ap-southeast-1_SWU8lHDQe`. No account, invitation, email or authentication bypass
-was created. A legitimate owner-approved test identity with event membership is
-needed for real login, session recovery and sign-out evidence. Actual iOS Safari
-verification remains required; headless Chromium cannot satisfy it. P08.5 remains
-in progress. Production Firebase/session work remains distinct and its deployment
-still waits for the owner's go decision.
+Initial read-only inventory found zero users. The owner's 30 September
+authorization to seed test data covered a synthetic staging identity for this
+check. Cognito created it with `MessageAction=SUPPRESS`, without an invitation or
+email. The existing fixture seed ran only in the guarded staging cluster/task,
+using `SEED_ADMIN_SUB` from Cognito to create a new bootstrap administrator and
+its membership; no existing person's identity was overwritten. Only this seed
+task used development mode. The running API retained Cognito/production mode
+throughout; no authentication bypass or local provider was enabled.
+
+The test credential is stored only in restricted, Git-ignored
+`.local/staging-smoke-identity.json`, excluded from Docker context. It remains
+available for the owner's device verification; no credential, OAuth state/code,
+token or cookie value is in the committed evidence. Synthetic seed/audit/session
+records are retained in staging.
+
+**Actual iOS Safari verification is owner-controlled and still required.** The
+owner was asked to check sign-in, hard reload, background/resume and sign-out
+followed by reload, recording iOS version and results. P08.5 remains open for that
+evidence, production Firebase/session configuration and the other full exit
+criteria. No renewal-cycle test is claimed. Production deployment still waits
+for the owner's go decision.

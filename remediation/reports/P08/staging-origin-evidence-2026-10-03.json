@@ -1,0 +1,74 @@
+{
+  "observedAt": "2026-10-03T09:10:31.303Z",
+  "scope": "deployed staging HTTPS, runtime metadata, credentialed CORS and anonymous OAuth navigation; no authenticated session or iOS evidence",
+  "publicConfigurations": {
+    "https://secure-channel.duckdns.org": {
+      "version": 1,
+      "apiBaseUrl": "https://api.secure-channel.duckdns.org",
+      "envLabel": "staging",
+      "authProvider": "cognito",
+      "cognito": {
+        "region": "ap-southeast-1",
+        "userPoolId": "ap-southeast-1_SWU8lHDQe",
+        "clientId": "rbcbgp9pmugpkf7hsnpcud4gd",
+        "domain": "https://spoh-staging-665146708212.auth.ap-southeast-1.amazoncognito.com"
+      }
+    },
+    "https://api.secure-channel.duckdns.org": {
+      "version": 1,
+      "apiBaseUrl": "https://api.secure-channel.duckdns.org",
+      "envLabel": "staging",
+      "authProvider": "cognito",
+      "cognito": {
+        "region": "ap-southeast-1",
+        "userPoolId": "ap-southeast-1_SWU8lHDQe",
+        "clientId": "rbcbgp9pmugpkf7hsnpcud4gd",
+        "domain": "https://spoh-staging-665146708212.auth.ap-southeast-1.amazoncognito.com"
+      }
+    }
+  },
+  "routing": {
+    "clientShell": 200,
+    "apiShell": 404,
+    "healthBoth": 200,
+    "privateReadyBoth": 404
+  },
+  "cspConnect": ["'self'", "https://api.secure-channel.duckdns.org"],
+  "cors": {
+    "preflightStatus": 204,
+    "allowedOrigin": "https://secure-channel.duckdns.org",
+    "credentials": true,
+    "unrelatedOriginRefused": true
+  },
+  "browser": {
+    "hostedSignInVisible": true,
+    "noLocalRosterAuth": true,
+    "anonymousRefreshStatus": 401,
+    "appPageErrors": [],
+    "cognitoCredentialFormReached": true,
+    "oauth": {
+      "responseType": "code",
+      "pkce": "S256",
+      "callbackOrigin": "https://api.secure-channel.duckdns.org",
+      "failedCallbackDestination": "https://secure-channel.duckdns.org"
+    },
+    "oauthCookieProperties": [
+      {
+        "name": "spoh_oauth_state",
+        "domain": "api.secure-channel.duckdns.org",
+        "path": "/api/v1/auth",
+        "secure": true,
+        "httpOnly": true,
+        "sameSite": "Lax"
+      },
+      {
+        "name": "spoh_pkce_verifier",
+        "domain": "api.secure-channel.duckdns.org",
+        "path": "/api/v1/auth",
+        "secure": true,
+        "httpOnly": true,
+        "sameSite": "Lax"
+      }
+    ]
+  }
+}

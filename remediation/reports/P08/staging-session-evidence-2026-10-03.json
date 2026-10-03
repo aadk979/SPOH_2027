@@ -1,0 +1,29 @@
+{
+  "observedAt": "2026-10-03T09:15:26.889Z",
+  "deployedImageTag": "7d0dbd975dc5a993dae2d97e0be66411a4c0a4af",
+  "scope": "normal Cognito Authorization Code + PKCE, real staging membership, phone-sized headless Chromium; not actual iOS Safari",
+  "identity": {
+    "kind": "synthetic staging fixture",
+    "invitationDelivery": "SUPPRESS",
+    "seededVia": "existing SEED_ADMIN_SUB bootstrap",
+    "seedTaskArn": "arn:aws:ecs:ap-southeast-1:665146708212:task/Spoh-staging-Platform-AppCluster68CC0559-SBkskbPFfWde/c62f6f53a90c4a5d9a8e20aa65dd40b7"
+  },
+  "checks": {
+    "callbackStatus": 302,
+    "initialRefresh": 200,
+    "authenticatedEvents": 1,
+    "hardReloadRefresh": 200,
+    "historicalSessionsRevoked": 1,
+    "signOut": 204,
+    "refreshCookieCleared": true,
+    "reloadAfterSignOutRefresh": 401,
+    "appPageErrors": []
+  },
+  "refreshCookieProperties": {
+    "domain": "api.secure-channel.duckdns.org",
+    "path": "/api/v1/auth",
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  }
+}
