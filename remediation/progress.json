@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-03T17:19:33.637Z",
+  "updatedAt": "2026-10-03T17:40:40.686Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -2368,7 +2368,8 @@
             "e9b1be7ccdc6ff48193efb01d008209fd5ef799c",
             "b71fe5003685854aeb7c27332cfedee149d7a29f",
             "60cbe619b85e35ee4bfdd3b153c21f468808a6b3",
-            "a25970d2778afc7023f6845b6b27df720b9e55cd"
+            "a25970d2778afc7023f6845b6b27df720b9e55cd",
+            "f0bf5db3b5575e7bebeadb972eca5430fc3e9fe5"
           ],
           "notes": [
             {
@@ -2390,6 +2391,10 @@
             {
               "at": "2026-10-03T17:19:33.636Z",
               "text": "Event timeline metadata API verified: 24 new DB checks, four new shared checks/all 84, 47 existing isolation/private management passes, build/types/static/scans. Strict no-store current-authority read omits payloads/private identities; explicit creation-time/ID keyset handles changed-status cursors. Timeline UI and producers remain open; exact deployment follows."
+            },
+            {
+              "at": "2026-10-03T17:40:40.686Z",
+              "text": "Verified partial event schedule metadata UI: collapsed current-manager panel, all six statuses and all-filter, event-clock due/retry/completion, safe outcomes, cursor pagination, person/event keys and cached-data hiding on denial. All 364 client checks, two phone/laptop legitimate schedule/cancel journeys with hover axe, 56 unchanged visual routes plus two reviewed and reasserted settings baselines, 32-page export, types/lint/architecture/hardcoding/settings and source/test/evidence scans pass. API 9bd7af5 exact CI/deploy and healthy ECS revision 103 verified; normal Cognito/Chrome read-only six-status/API evidence recorded. General create/edit/cancel and generated settings/history/revert remain open; no step closed."
             }
           ]
         },
