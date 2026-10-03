@@ -40,8 +40,23 @@ describe('configuration', () => {
   });
 
   it('knows every key it reads', () => {
-    expect(ENV_KEYS).toHaveLength(25);
+    expect(ENV_KEYS).toHaveLength(26);
     expect(new Set(ENV_KEYS).size).toBe(ENV_KEYS.length);
+  });
+
+  it.each(['development', 'test', 'staging', 'production'])(
+    'accepts the runtime deployment label %s independently of NODE_ENV',
+    (label) => {
+      const env = parseEnv({ ...DEV, DEPLOYMENT_ENV: label });
+      expect(env.NODE_ENV).toBe('development');
+      expect(env.DEPLOYMENT_ENV).toBe(label);
+    },
+  );
+
+  it('rejects an unknown runtime deployment label', () => {
+    expect(messageOf(() => parseEnv({ ...DEV, DEPLOYMENT_ENV: 'stagin' }))).toContain(
+      'DEPLOYMENT_ENV',
+    );
   });
 
   it.each(['https://client.example', 'https://client.example/', 'http://localhost:3000'])(

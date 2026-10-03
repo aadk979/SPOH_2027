@@ -25,6 +25,7 @@ import { stationRouter } from '../modules/station/index.js';
 import { createDevAuthRouter } from '../modules/devAuth/index.js';
 import { eventLifecycleRouter, eventListRouter } from '../modules/event/index.js';
 import { eventFromAlias, eventFromPath } from '../platform/http/eventContext.js';
+import { clientConfigRouter } from '../modules/clientConfig/index.js';
 
 /** A module's routes and where they are mounted under /api/v1. */
 export interface ModuleRoutes {
@@ -33,12 +34,13 @@ export interface ModuleRoutes {
 }
 
 /**
- * Platform routes (ADR-001 §4): about the person and their session, outside
- * any event. The only routes inside `/api/v1` reachable without a bearer
- * token are here — opening a session is how you get one — and they carry
- * their own origin check and the sensitive rate limit instead.
+ * Platform routes (ADR-001 §4): bootstrap metadata and the person's session,
+ * outside any event. Public configuration uses the default rate limit; session
+ * creation carries its own origin check and sensitive limit. Each router owns
+ * its authentication requirements.
  */
 export const PLATFORM_ROUTES: readonly ModuleRoutes[] = [
+  { path: '/client-config', router: clientConfigRouter },
   { path: '/auth', router: authRouter },
   // The caller's events, for the client's picker and switcher.
   { path: '/events', router: eventListRouter },

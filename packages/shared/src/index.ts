@@ -35,6 +35,7 @@ export * from './contracts/fallback/index.js';
 export * from './contracts/lostFound/index.js';
 export * from './contracts/report/index.js';
 export * from './contracts/auth/index.js';
+export * from './contracts/clientConfig/index.js';
 export * from './contracts/people/index.js';
 export * from './contracts/assignments/index.js';
 export * from './contracts/eventDays/index.js';
