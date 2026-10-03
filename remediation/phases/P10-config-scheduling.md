@@ -155,6 +155,12 @@ guard evidence, stable retry intent, phone/laptop worker journeys and reviewed s
 visuals pass. First go-live and public archive remain unavailable behind their existing
 prerequisites. This completes the bounded lifecycle UI subcriterion, not the full step.
 
+[The event schedule metadata API](../reports/P10/schedule-timeline-api.md) supplies a
+current-authority, no-store, status-filtered foundation for the general timeline.
+It omits private payloads and uses creation-time/ID keyset bounds that retain the next
+row when a cursor action changes status. Its 24 database and four new shared checks
+pass; the general timeline UI and create/edit/cancel consumers remain open.
+
 - **Do:**
   1. A settings screen generated from the registry: grouped, scoped (event or station tabs), with
      descriptions, validation, change history and revert.

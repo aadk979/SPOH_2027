@@ -19,6 +19,7 @@ export * from './contracts/missionCard/cardCode.js';
 
 export * from './contracts/common/index.js';
 export * from './contracts/event/index.js';
+export * from './contracts/schedule/index.js';
 export * from './contracts/station/index.js';
 export * from './contracts/me/index.js';
 export * from './contracts/registration/index.js';

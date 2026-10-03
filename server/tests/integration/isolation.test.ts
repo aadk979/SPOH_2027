@@ -288,6 +288,7 @@ const ACTOR = noId("acts on the caller's own records in the path event");
 const CASES: Record<string, Case> = {
   'GET /lifecycle': LIST,
   'GET /lifecycle/readiness': LIST,
+  'GET /schedules': LIST,
   'POST /lifecycle': noId(
     'transitions only the event named in the path; no body event id is accepted',
   ),

@@ -5,6 +5,7 @@ import {
   ScheduledActionStatus,
 } from '../../invariants/enums.js';
 import { Id, IdempotencyKey, IsoDateTime, PaginationQuery } from '../common/index.js';
+import { ScheduleError } from '../schedule/index.js';
 
 /**
  * Broadcast and comms (PRODUCT_BRIEF §8).
@@ -89,17 +90,7 @@ export type CancelAnnouncementPublicationScheduleRequest = z.infer<
 >;
 
 /** Public errors are catalogue codes, never raw worker/provider exceptions. */
-export const AnnouncementScheduleError = z.enum([
-  'INVALID_PAYLOAD',
-  'AUTHORITY_CHANGED',
-  'GUARD_FAILED',
-  'TOO_LATE',
-  'TARGET_MISSING',
-  'SYSTEM_ONLY',
-  'HANDLER_UNAVAILABLE',
-  'EXECUTION_FAILED',
-  'ATTEMPTS_EXHAUSTED',
-]);
+export const AnnouncementScheduleError = ScheduleError;
 export const AnnouncementPublicationScheduleRecord = z
   .object({
     id: Id,

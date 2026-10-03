@@ -26,6 +26,7 @@ import { createDevAuthRouter } from '../modules/devAuth/index.js';
 import { eventLifecycleRouter, eventListRouter } from '../modules/event/index.js';
 import { eventFromAlias, eventFromPath } from '../platform/http/eventContext.js';
 import { clientConfigRouter } from '../modules/clientConfig/index.js';
+import { scheduleRouter } from '../modules/schedule/index.js';
 
 /** A module's routes and where they are mounted under /api/v1. */
 export interface ModuleRoutes {
@@ -60,6 +61,7 @@ export const PLATFORM_ROUTES: readonly ModuleRoutes[] = [
  */
 export const EVENT_ROUTES: readonly ModuleRoutes[] = [
   { path: '/lifecycle', router: eventLifecycleRouter },
+  { path: '/schedules', router: scheduleRouter },
   { path: '/me', router: meRouter },
   { path: '/attendance', router: attendanceRouter },
   { path: '/stations', router: stationRouter },
