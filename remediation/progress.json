@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-03T07:04:57.958Z",
+  "updatedAt": "2026-10-03T07:46:40.361Z",
   "current": {
     "phase": "P08",
-    "step": "P08.10"
+    "step": "P08.5"
   },
   "gates": [
     {
@@ -1654,7 +1654,8 @@
           "commits": [
             "ff8fe1f7a78514d57c54abf4de5dbf59795d3f43",
             "89366e4e207cec0b678823ea76d38973b9101ec4",
-            "5b30b3b685cc5a8240e2ed205d885f22ca496596"
+            "5b30b3b685cc5a8240e2ed205d885f22ca496596",
+            "33f8d68c6e5ed8514ab457e52e23baa7db72e11a"
           ],
           "notes": [
             {
@@ -1668,6 +1669,14 @@
             {
               "at": "2026-10-02T12:47:16.662Z",
               "text": "Verified separate client landing origin without changing API OAuth callback/state/PKCE or active staging routing. Optional canonical CLIENT_BASE_URL documented as 25th infra/secret key. Focused hosted14, full integration743+4 skips, server505 units; workspace types/lint/arch/hardcoding/settings/serverbuild/format pass. Runtime client config and DNS/HTTPS/Cognito/CORS/browser activation remain open."
+            },
+            {
+              "at": "2026-10-03T07:13:27.482Z",
+              "text": "Pricing slice committed/pushed and P08.10 remains open. Beginning public runtime configuration foundation; installed Next environment/static-export guides read. No staging origin/Cognito switch or production action yet. Docker daemon currently stopped; restarting existing Docker Desktop before DB verification."
+            },
+            {
+              "at": "2026-10-03T07:46:40.360Z",
+              "text": "Verified public runtime client configuration foundation; 36 shared and 543 server units; 5 focused and 1074 full DB passes/four existing skips; workspace types/lint/arch/hardcoding/settings/format/diff and shared/server builds pass. Reports: P08/client-runtime-configuration.md and P08/docker-recovery-2026-10-03.md. Docker recovered via CLI socket/process repair; owner-requested 21-container deletion completed with volumes retained and healthy Postgres restored. Manual factory reset was rejected before execution. Client startup gate, staging origins/Cognito, real session and iOS criteria remain open."
             }
           ]
         },
