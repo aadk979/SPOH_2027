@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { CreateAnnouncementDraftRequest, UpdateAnnouncementDraftRequest } from './index.js';
 
 describe('private announcement draft inputs', () => {
-  const input = { body: ' Draft message ', idempotencyKey: '6d68c0d8-414d-4c28-b5f2-8f081cdb94e6' };
+  const input = { body: ' Draft message ', idempotencyKey: '11111111-1111-4111-8111-111111111111' };
   it('requires a retry UUID and retains content defaults', () => {
     expect(CreateAnnouncementDraftRequest.parse(input)).toEqual({
       body: 'Draft message',

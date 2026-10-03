@@ -11,7 +11,7 @@ const checks = (failed: string = '') =>
 const body = (patch: object = {}) => ({
   to: 'LIVE',
   expectedVersion: 0,
-  idempotencyKey: 'd3db614a-0791-47c3-b040-1f83aa2a6ef9',
+  idempotencyKey: '11111111-1111-4111-8111-111111111111',
   goLiveOverrides: [{ code: 'attendance', reason: REASON }],
   ...patch,
 });

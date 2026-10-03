@@ -1,0 +1,5 @@
+# Synthetic UUID literal in a shared contract test; never a credential.
+# The fixture now uses an obvious repeated-digit UUID. Ignore only its historical finding.
+b13f48a9e4d59e17b69015bfe1c76ada9c82778e:packages/shared/src/contracts/announcement/drafts.test.ts:generic-api-key:5
+# A full history scan also found the same synthetic UUID pattern in an older lifecycle test.
+a79b131b0150c00f210be5e1a6d5a924de14d187:server/tests/unit/goLiveOverrides.test.ts:generic-api-key:14

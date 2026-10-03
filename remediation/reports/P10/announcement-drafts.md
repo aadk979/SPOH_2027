@@ -46,6 +46,15 @@ station and day references. It does not rewrite existing announcement rows.
   membership status and concurrency setup: retry keys are reserved before holding Event
   so the race tests reach the mutation guard directly.
 
+CI initially flagged the new contract test's random-looking literal retry UUID as
+`generic-api-key`. It was synthetic, never an authentication credential. The fixture
+now uses an obvious repeated-digit UUID. A full-history scan also found the same
+synthetic fixture pattern in the older go-live override test; its literal was corrected
+without changing lifecycle behavior. `.gitleaksignore` names only those two exact
+historical commit/file/rule/line fingerprints; no file or rule is broadly excluded.
+Local Gitleaks 8.30.1, downloaded into ignored workspace storage and checksum-verified
+against the official release, verifies the history after this correction.
+
 All local database work used guarded `spoh2027_test` on localhost:5435. The real local
 `spoh2027` was not reset, seeded or migrated. The full run uses a temporary wake hold restored
 in `finally`; no persistent power setting changes. No client layout, browser baseline or
