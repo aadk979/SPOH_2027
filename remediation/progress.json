@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-03T08:48:25.162Z",
+  "updatedAt": "2026-10-03T09:19:03.317Z",
   "current": {
     "phase": "P08",
     "step": "P08.5"
@@ -1648,7 +1648,7 @@
         {
           "id": "P08.5",
           "title": "DNS, TLS and edge (needs D-08)",
-          "status": "in_progress",
+          "status": "blocked",
           "startedAt": "2026-10-02T12:36:53.451Z",
           "completedAt": null,
           "commits": [
@@ -1657,7 +1657,8 @@
             "5b30b3b685cc5a8240e2ed205d885f22ca496596",
             "33f8d68c6e5ed8514ab457e52e23baa7db72e11a",
             "a07e5e526fb8a83889024307df9229a5fd26a8f4",
-            "a46e297aa0095523a0164a00c5a120ed94debe6e"
+            "a46e297aa0095523a0164a00c5a120ed94debe6e",
+            "18b6dbe0e85d6db86e73d6dfc818cdb7459fc522"
           ],
           "notes": [
             {
@@ -1687,6 +1688,10 @@
             {
               "at": "2026-10-03T08:48:25.161Z",
               "text": "Verified staging-only combined origins with 38 infra tests, actual staging/prod nag synth, types, lint, architecture and read-only deployed-image diff. CI rollout pending; pool inventory has zero users. Keep real account/membership, iOS Safari and production Firebase/session exit criteria open."
+            },
+            {
+              "at": "2026-10-03T09:19:03.316Z",
+              "text": "Exact 7d0dbd9 CI/Infra/staging deploy and UPDATE_COMPLETE verified. Normal synthetic Cognito code/PKCE login, active membership, reload refresh and sign-out pass; seeded under Sep30 owner authorization with mail SUPPRESS. Awaiting owner-provided actual iOS Safari version/results for sign-in, reload, background/resume and sign-out/reload. Production Firebase/session and other full criteria remain open."
             }
           ]
         },
