@@ -26,8 +26,12 @@ hardening phase remain unfinished.
 The latest verified backend management slice passed **1,266 database checks with
 four existing skips**, then CI and staging deployment. Local and remote main matched
 `522635f010bc5c41812c87e864c3017a869796d6`, and staging used that exact application
-image when checked at 22:17 Singapore. The following private draft/schedule UI slice
-is still being verified; its new UI does not imply a closed P10.8 step.
+image when checked at 22:17 Singapore. The following private draft/schedule UI source
+`e9b1be7` and tracker `eeb2c26` passed 326 client checks, 28 affected backend checks,
+phone/laptop worker journeys, 58 visual checks and the static export, then CI and exact
+staging deployment. At 23:16 Singapore its actual installed Chrome workflow passed,
+including edit/cancel, publication, reload, sign-out and zero checked accessibility
+violations/page errors. This verified slice does not imply a closed P10.8 step.
 
 The programme tracker began on 25 September, eight calendar days ago. It does not
 record eight days of continuous coding or provide a measured active-hours total.

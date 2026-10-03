@@ -190,7 +190,15 @@ backend integration checks**, **two phone/laptop real-worker journeys**, **58 se
 checks** and the **32-page static export** pass, with root types/lint/architecture/scans.
 Only two reviewed inbox baselines changed. General settings/history/revert, event timeline,
 lifecycle/readiness and catalogue work remain open. Tracker and exact pipeline/staging
-checks follow; do not claim the new UI has yet passed on cloud Chrome.
+checks passed on tracker `eeb2c264b2167cf18e1fb7db83057240dd080115`:
+[CI](https://github.com/aadk979/SPOH_2027/actions/runs/37131607882) and
+[deploy](https://github.com/aadk979/SPOH_2027/actions/runs/37131985966) succeeded, with
+`UPDATE_COMPLETE` and that exact app image on revision 99. At 23:16 Singapore,
+[actual Chrome UI evidence](P10/staging-announcement-ui-evidence-2026-10-03.json)
+passed private PUT edit, saved version/ADMIN audience, schedule/edit/cancel, real
+publication, one inbox message, read-only result, reload/sign-out, zero page errors
+and zero collapsed/expanded WCAG 2 A/AA axe violations. No credentials or private IDs
+are in that evidence; no urgent push or invitation was requested.
 
 The owner-facing [project status](PROJECT-STATUS-2026-10-03.md) records **105/171 steps**
 and **9/17 phases** closed, with G3–G5 pending. These are counts, not an effort estimate.
@@ -243,7 +251,8 @@ were used instead.
   Retain existing visual fixtures/limits; inspect baseline changes.
 - The prior preview was stopped after serial E2E, restarted frozen visual verification
   and static export. At the UI source checkpoint there are no preview listeners.
-  Restart normal-clock E2E API/client through `.local/e2e-api.ps1` and
+  The normal-clock E2E preview was subsequently restored at API 4012/client 3001,
+  with tool-managed sessions **11067** and **99378**, respectively. Restart through `.local/e2e-api.ps1` and
   `.local/dev-client.ps1` when needed; confirm listeners and exact executables/commands
   before stopping anything. Never leave the frozen visual API as the normal preview.
 - Long DB verification used a temporary wake hold restored in `finally`; no

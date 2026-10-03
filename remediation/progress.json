@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-03T14:59:11.424Z",
+  "updatedAt": "2026-10-03T15:17:59.128Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -2360,6 +2360,10 @@
             {
               "at": "2026-10-03T14:59:10.845Z",
               "text": "Partial private draft/publication UI: 326 client checks, 28 affected security/config DB checks, 2 real-worker phone/laptop journeys, 58 visual checks with 2 reviewed inbox baselines, 32-page static export, types/lint/architecture/scans pass. Source e9b1be7 pushed. Exact pipelines/cloud UI proof pending; general settings/history/revert, event timeline and lifecycle criteria remain open."
+            },
+            {
+              "at": "2026-10-03T15:17:58.349Z",
+              "text": "Partial private draft/publication UI verified locally and on exact eeb2c26 staging image: green CI 37131607882/deploy 37131985966, UPDATE_COMPLETE/ECS99 healthy, installed Chrome 154 normal Cognito UI edit/cancel, reviewed version/ADMIN audience, actual worker publication, one inbox message, reload/sign-out, zero axe/page errors. General settings/history/revert, timeline and lifecycle criteria remain open."
             }
           ]
         },
@@ -3200,6 +3204,10 @@
     {
       "at": "2026-10-03T14:59:11.423Z",
       "text": "Owner requested overall status: verified 105/171 steps (61.4%), 9/17 phases; P10 private publication UI advances one verified slice while full steps remain open. Overall status report added. No current owner-controlled blocker; continue authorized programme work."
+    },
+    {
+      "at": "2026-10-03T15:17:59.127Z",
+      "text": "Recorded actual staging Chrome UI verification at 23:16 Singapore; 105/171 steps and 9/17 phases remain closed. Normal local preview restored (API11067/client99378). Continue remaining P10/P08 work; no owner-controlled blocker."
     }
   ]
 }

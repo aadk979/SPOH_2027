@@ -1,0 +1,38 @@
+{
+  "observedAt": "2026-10-03T15:16:07.491Z",
+  "deployedImageTag": "eeb2c264b2167cf18e1fb7db83057240dd080115",
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  "scope": "Normal Cognito Authorization Code + PKCE; legitimate synthetic ADMIN-owned INFO draft; actual UI and real staging worker",
+  "checks": {
+    "draftCreate": 201,
+    "browserPutDraftEdit": true,
+    "reviewedContentVersion": 2,
+    "preservedAdminAudience": true,
+    "privateNoStore": true,
+    "privateSaveHasNoInboxEffect": true,
+    "browserScheduleCreate": true,
+    "browserPendingTimeEdit": true,
+    "browserCancel": true,
+    "statuses": ["CANCELLED", "SUCCEEDED"],
+    "publicationAtOrAfterEditedDue": true,
+    "publishedContentReadOnly": true,
+    "exactlyOneMatchingInboxMessage": true,
+    "hardReloadInboxVisible": true,
+    "collapsedAxeViolations": [],
+    "expandedAxeViolations": [],
+    "appPageErrors": [],
+    "signOut": 204
+  },
+  "timing": {
+    "editedRunAt": "2026-10-03T15:16:00.000Z",
+    "completedAt": "2026-10-03T15:16:02.184Z"
+  },
+  "fixtures": "One synthetic INFO announcement addressed to ADMIN members, its private draft and two actions retained. No invitation, urgent push or external device receipt requested."
+}

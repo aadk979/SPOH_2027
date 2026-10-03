@@ -58,6 +58,23 @@ without this fix and still refuses an unapproved origin.
 Only local dedicated `_test` databases were migrated to the existing 30 migrations;
 they were not reseeded. The real database, sibling `V1`, production and the inherited
 pricing artifacts were untouched. Browser suites were serial and the visual API was
-restarted before the full run. D-11 source/tracker commit and exact CI/deployment checks
-follow. General settings/history/revert, event schedule timeline and lifecycle/readiness
+restarted before the full run. D-11 source `e9b1be7ccdc6ff48193efb01d008209fd5ef799c`
+and tracker `eeb2c264b2167cf18e1fb7db83057240dd080115` were committed/pushed directly
+to main. [CI](https://github.com/aadk979/SPOH_2027/actions/runs/37131607882) and
+[deploy](https://github.com/aadk979/SPOH_2027/actions/runs/37131985966) succeeded;
+staging was `UPDATE_COMPLETE`, with the exact tracker image on app task revision 99
+and a healthy completed rollout with zero failed tasks.
+
+At **23:16 Singapore**, installed **Chrome 154.0.8037.97** passed the actual cloud
+workflow through normal Cognito sign-in: legitimate synthetic ADMIN-owned INFO draft,
+UI PUT edit to saved version two with its ADMIN audience preserved, private `no-store`
+reads, no inbox effect before publication, UI schedule/cancel, another schedule with
+UI-edited due time, worker publication after that time, exactly one inbox message,
+published read-only content, hard reload and sign-out. Collapsed and expanded WCAG
+2 A/AA axe checks returned zero violations; there were zero app page errors.
+The [sanitized evidence](staging-announcement-ui-evidence-2026-10-03.json) retains no
+body, draft/action identifiers or credentials. One synthetic INFO message and two
+actions remain as legitimate fixtures; no invitation or urgent push was requested.
+
+General settings/history/revert, event schedule timeline and lifecycle/readiness
 UI remain pending, so P10.7/P10.8/P10.9 remain open.
