@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-04T09:49:04.605Z",
+  "updatedAt": "2026-10-04T09:58:39.169Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -2371,7 +2371,8 @@
             "a25970d2778afc7023f6845b6b27df720b9e55cd",
             "f0bf5db3b5575e7bebeadb972eca5430fc3e9fe5",
             "f363cd9d070fb32f190bf85053fedcc6f70ce3b3",
-            "7f32c6912bf8ddeb9cf2de39f4ac4a16fd12f749"
+            "7f32c6912bf8ddeb9cf2de39f4ac4a16fd12f749",
+            "62d01caec4f565a250002fd5dcff7d0d260cbd2c"
           ],
           "notes": [
             {
@@ -2405,6 +2406,10 @@
             {
               "at": "2026-10-03T18:37:14.796Z",
               "text": "Guarded product revert API verified: 23 new/92 affected DB checks, full 1356 pass with four existing skips, 92 shared and 562 server units, types/build/lint/architecture/settings/hardcoding and source scans green. Same Event-before-member guard kernel for ordinary writes/reverts, exact event scope, monotonic history, atomic visitor purge/audit/id-only receipt and current-authority replay. History/revert UI and full generated/timeline criteria remain open; exact CI/deployment pending."
+            },
+            {
+              "at": "2026-10-04T09:58:39.168Z",
+              "text": "Product history/revert UI verified: 25 new history checks plus no-store-through-refresh wrapper check; all 390 client checks pass, two serial phone/laptop count-change/history/restore/hard-reload/hover-axe journeys pass, full visual 56 unchanged plus only two reviewed settings baselines reasserted, 32-page export/types/lint/arch (1003/4403)/settings/hardcoding/scans green. Event/person/key remount and gcTime 0, bounded errors and stable request replay after lost responses/polling. General generated controls and schedule management remain open; exact CI/deployment and populated staging UI proof pending."
             }
           ]
         },
