@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-04T12:10:09.316Z",
+  "updatedAt": "2026-10-04T12:34:56.039Z",
   "current": {
     "phase": "P08",
     "step": "P08.7"
@@ -3313,6 +3313,10 @@
     {
       "at": "2026-10-04T12:10:09.314Z",
       "text": "Advanced independent P08.7 media ownership prerequisite after exact scoped catalogue CI/deploy/Cognito proof; P10.8 remains open. All fixture changes stayed in spoh2027_test; inherited pricing/P05 preserved. Prepare storage infrastructure and exact media source verification without touching production or applying upload-age retention in place of the configured post-close rule."
+    },
+    {
+      "at": "2026-10-04T12:34:56.037Z",
+      "text": "P08.7 media event-ownership prerequisite source 0ec4703 deployed exact tracker image 7b4cae5: CI 37201187226 and staging deployment 37201543193 succeeded; actual CloudFormation UPDATE_COMPLETE/ECS revision 112, desired/running 1, single COMPLETED deployment, failed tasks 0. Normal Cognito Chrome 154 read-only probe 20:33 SGT 4 Oct proves disabled media config/503 no-store, strict 400/anonymous 401 no-store, reload and sign-out without app errors; compatibility/product settings preserved. Real S3 upload/private-read/public-denial criteria remain open. Private storage foundation is the next independent slice."
     }
   ]
 }

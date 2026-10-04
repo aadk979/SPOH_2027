@@ -1,0 +1,31 @@
+{
+  "observedAt": "2026-10-04T12:33:29.228Z",
+  "deployedImageTag": "7b4cae5ffd846c6577b02d3c34c0999250dc88c5",
+  "taskRevision": 112,
+  "ci": "https://github.com/aadk979/SPOH_2027/actions/runs/37201187226",
+  "deployment": "https://github.com/aadk979/SPOH_2027/actions/runs/37201543193",
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  "scope": "Normal Cognito Authorization Code + PKCE; read-only disabled media API in the established synthetic staging event",
+  "checks": {
+    "normalSignIn": true,
+    "mediaDisabled": true,
+    "readReturns503": true,
+    "noStoreFailures": true,
+    "strictQueriesRejected": true,
+    "anonymousRejected": true,
+    "hardReloadStable": true,
+    "compatibilitySettingsUnchanged": true,
+    "guardedProductValuesAndVersionsUnchanged": true,
+    "normalSignOut": true,
+    "appPageErrors": []
+  },
+  "fixtureEffects": "Only GETs to media and existing settings endpoints. No upload policy, object, found item, setting, visitor, lifecycle or delivery writes requested.",
+  "limitation": "Real S3 upload, signed private reads and direct public denial await separate storage wiring. Event ownership and current revocation are proven by local real-Postgres integration tests with a fake S3 signer."
+}

@@ -45,3 +45,21 @@ current membership revocation.
 Storage remains disabled until its infrastructure and real private-upload criteria
 are verified. This application prerequisite does not complete P08.7 or P08. No
 production storage, existing backup bucket or live Lightsail deployment is changed.
+
+## Exact staging release
+
+Source `0ec4703` and tracker image
+`7b4cae5ffd846c6577b02d3c34c0999250dc88c5` passed
+[CI](https://github.com/aadk979/SPOH_2027/actions/runs/37201187226) and
+[staging deployment](https://github.com/aadk979/SPOH_2027/actions/runs/37201543193).
+CloudFormation is UPDATE_COMPLETE; ECS revision 112 runs that exact image with
+one desired/running task, one completed deployment and zero failed tasks.
+
+At 20:33 Singapore time on 4 October, installed Chrome 154 completed normal
+Cognito sign-in, a hard reload and sign-out with zero app page errors. The
+read-only probe confirmed media remains disabled, URL issuance returns 503,
+malformed queries return 400, anonymous requests return 401, and all URL failures
+are no-store. Existing compatibility settings and guarded product values/versions
+were unchanged. It requested no upload policy, object or found-item write. The
+[sanitised evidence](staging-media-ownership-evidence-2026-10-04.json) records the
+checks and the real-S3 limitation.
