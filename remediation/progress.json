@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-04T15:55:08.630Z",
+  "updatedAt": "2026-10-04T16:48:28.266Z",
   "current": {
     "phase": "P08",
     "step": "P08.7"
@@ -1742,7 +1742,8 @@
             "71955e6c7af20c3debff9976895c20996007705b",
             "f87f6b78a66e5d3baee38eb8d6f28f245aeccd23",
             "ac6a186dad23c5b354e0aef2f6d43a79d5c82783",
-            "e5a2a1cd0961df4d21721419ec9a2e8e5dd11fa3"
+            "e5a2a1cd0961df4d21721419ec9a2e8e5dd11fa3",
+            "619094980810de06afa1a8e0bf147f124fb057d9"
           ],
           "notes": [
             {
@@ -1776,6 +1777,10 @@
             {
               "at": "2026-10-04T15:55:08.387Z",
               "text": "Verified scoped private media task wiring: one standard S3_MEDIA_BUCKET SSM parameter, app-only GetObject/PutObject on exact owned media lost-found/*, no migration/content/export/backup/list/delete/ACL access; derived regional static CSP and signed no-store reads. 61 infra, 587 unit and 112 focused DB checks pass; both nag synths, actual-image read-only diff, server/infra types/build, lint/architecture/hardcoding/format and redacted source/test/report/history scans pass. Existing client/full DB evidence reused for unchanged code. Incorrect root test selection investigated read-only, no recent real-DB row writes found, harness root/include now isolated. Enabled staging upload/read/public-denial evidence pending; broad step stays open."
+            },
+            {
+              "at": "2026-10-04T16:48:27.942Z",
+              "text": "Private S3 exact a7118ed staging upload/replay/practice attachment and private-read/public-denial evidence recorded; one object retained and event READY. CSP-safe client startup follow-up passes 426 interpreter units and real 32-page static-export browser regression; exact-image CI/deploy and normal Cognito continuation pending. Broad storage criteria remain open."
             }
           ]
         },
@@ -3380,6 +3385,10 @@
     {
       "at": "2026-10-04T15:55:08.629Z",
       "text": "P08.7 source e5a2a1c: private media wiring ready for CI/staging after local verification. App permissions cover only owned photo objects, migration stays separate, production disabled until approved origin. Prior exact capture-authority evidence 324ca10 is included in this push. P08.7 and programme counts remain open/unchanged."
+    },
+    {
+      "at": "2026-10-04T16:48:28.265Z",
+      "text": "Verified source 6190949: configure browser Zod interpreter before schemas/hydration; RED strict CSP eval event reproduced and GREEN phone/laptop load/reload/invalid-config refusal. Quality and scans clean, pricing unchanged. Actual a7118ed ECS118 private storage evidence records combined bounded probe and one caught eval event; no further fixture writes. P08.7 and P10.8 stay open."
     }
   ]
 }
