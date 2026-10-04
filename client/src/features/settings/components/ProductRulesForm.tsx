@@ -4,6 +4,7 @@ import { useEventSettings } from '../queries';
 import { VisitorFieldEditor } from '@/features/visitor';
 import { CountsModeField } from './CountsModeField';
 import { VisitorDataField } from './VisitorDataField';
+import { ProductHistoryPanel } from './ProductHistoryPanel';
 
 /** The event's product rules (ADR-002 §4): each saved on its own, at the version read. */
 export function ProductRulesForm({
@@ -41,6 +42,7 @@ export function ProductRulesForm({
               enabled={enabled && data.settings['product.visitorDataMode'] === 'allowlist'}
               canEdit={canEdit}
             />
+            <ProductHistoryPanel enabled={enabled && canEdit} />
           </>
         )}
       </Card>

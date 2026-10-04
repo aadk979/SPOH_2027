@@ -178,6 +178,13 @@ filters, monotonic legacy RESET versions, atomic purge/rollback and id-only repl
 are verified. The history/revert UI and full generated event/station criteria
 remain open; this bounded API does not complete the step.
 
+[Product history and reviewed restore](../reports/P10/product-setting-history-ui.md)
+adds the collapsed two-key consumer, required reason/confirmation, event/person/key
+cache isolation and stable retry intent through ambiguous responses. Phone/laptop
+count change/history/restore/hard-reload journeys and reviewed settings visuals
+pass. Complete generated event/station controls and general schedule management
+remain open.
+
 - **Do:**
   1. A settings screen generated from the registry: grouped, scoped (event or station tabs), with
      descriptions, validation, change history and revert.

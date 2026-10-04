@@ -58,4 +58,23 @@ describe('API response and refresh contract', () => {
     await expect(api('/fixture')).rejects.toBeInstanceOf(NetworkError);
     expect(clearSession).not.toHaveBeenCalled();
   });
+  it('keeps a reviewed read out of the HTTP cache through a transparent session refresh', async () => {
+    vi.mocked(refreshSession).mockResolvedValue({
+      accessToken: 'new-token',
+      expiresAt: Date.now() + 60000,
+    } as Awaited<ReturnType<typeof refreshSession>>);
+    fetchMock
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({ error: { code: 'UNAUTHORIZED', message: 'Expired', requestId: 'r' } }),
+          { status: 401 },
+        ),
+      )
+      .mockResolvedValueOnce(new Response(JSON.stringify({ version: 3 }), { status: 200 }));
+    expect(await api('/reviewed-setting', { cache: 'no-store' })).toEqual({ version: 3 });
+    expect(fetchMock.mock.calls.map(([, options]) => options?.cache)).toEqual([
+      'no-store',
+      'no-store',
+    ]);
+  });
 });

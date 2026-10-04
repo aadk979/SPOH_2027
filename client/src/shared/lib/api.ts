@@ -19,6 +19,7 @@ export interface ApiRequest {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: unknown;
   signal?: AbortSignal;
+  cache?: 'no-store';
 }
 
 async function send(path: string, options: ApiRequest, token: string | null): Promise<Response> {
@@ -31,6 +32,7 @@ async function send(path: string, options: ApiRequest, token: string | null): Pr
     return await fetch(`${clientEnv.apiBaseUrl}/api/v1${path}`, {
       method: options.method ?? 'GET',
       headers,
+      ...(options.cache ? { cache: options.cache } : {}),
       ...(options.body !== undefined ? { body: JSON.stringify(options.body) } : {}),
       ...(options.signal ? { signal: options.signal } : {}),
     });

@@ -1,13 +1,17 @@
 'use client';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import type {
   ChangeAttendanceConfigRequest,
   ChangeEventSettingRequest,
   RuntimeSettings,
   TestAttendanceNetworkRequest,
   UpdateShiftTemplateRequest,
+  EventSettingKey,
+  RevertEventSettingRequest,
 } from '@spoh/shared';
 import { useEventId } from '@/shared/lib/eventContext';
+import { useCurrentSession } from '@/features/session';
+import { ms } from '@/shared/lib/runtimeSettings';
 import {
   changeAttendanceConfig,
   changeEventSetting,
@@ -18,6 +22,9 @@ import {
   saveSettings,
   saveShiftTemplate,
   testAttendanceNetwork,
+  getEventSettingHistory,
+  getReviewedEventSettings,
+  revertEventSetting,
 } from './api';
 export const settingsKeys = {
   current: (eventId: string) => [eventId, 'admin', 'settings'] as const,
@@ -118,5 +125,50 @@ export function useTestAttendanceNetwork() {
   const eventId = useEventId();
   return useMutation({
     mutationFn: (body: TestAttendanceNetworkRequest) => testAttendanceNetwork(eventId, body),
+  });
+}
+
+export const productHistoryKeys = {
+  list: (eventId: string, personId: string | undefined, key: EventSettingKey) =>
+    [eventId, 'product-setting-history', personId ?? 'signed-out', key] as const,
+  current: (eventId: string, personId: string | undefined) =>
+    [eventId, 'product-setting-review', personId ?? 'signed-out'] as const,
+};
+export function useProductHistory(key: EventSettingKey) {
+  const eventId = useEventId();
+  const session = useCurrentSession();
+  return useInfiniteQuery({
+    queryKey: productHistoryKeys.list(eventId, session?.volunteerId, key),
+    queryFn: ({ pageParam }) => getEventSettingHistory(eventId, { key, cursor: pageParam }),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (last) => last.meta.nextCursor ?? undefined,
+    enabled: !!session,
+    gcTime: 0,
+    refetchInterval: ms.dashboardPoll(),
+    refetchIntervalInBackground: false,
+  });
+}
+export function useProductReviewCurrent() {
+  const eventId = useEventId();
+  const session = useCurrentSession();
+  return useQuery({
+    queryKey: productHistoryKeys.current(eventId, session?.volunteerId),
+    queryFn: () => getReviewedEventSettings(eventId),
+    enabled: !!session,
+    gcTime: 0,
+    refetchInterval: ms.dashboardPoll(),
+    refetchIntervalInBackground: false,
+  });
+}
+export function useRevertProductSetting() {
+  const eventId = useEventId();
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (body: RevertEventSettingRequest) => revertEventSetting(eventId, body),
+    gcTime: 0,
+    onSuccess: async (response) => {
+      client.setQueryData(settingsKeys.event(eventId), response.current);
+      await client.invalidateQueries({ queryKey: [eventId] });
+    },
   });
 }
