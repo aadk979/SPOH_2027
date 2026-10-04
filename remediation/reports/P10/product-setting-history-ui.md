@@ -45,8 +45,26 @@ including through a transparent session refresh. No intent is stored offline.
   E2E API restored afterward. The browser selector was corrected to account for a
   radio name containing its help text; no production code was changed for that.
 - The 32-page static export, client types, lint, architecture, generated settings,
-  hardcoding and source/test scans pass. Final build and CI/deployment evidence
-  will be attached to the exact source/tracker image.
+  hardcoding and source/test scans pass. The final static build also passes.
+
+Source `62d01ca` and tracker image `9d2748e` are pushed directly to main under
+D-11. Exact-image CI [37193871396](https://github.com/aadk979/SPOH_2027/actions/runs/37193871396)
+passes. The staging release [37194095422](https://github.com/aadk979/SPOH_2027/actions/runs/37194095422)
+reaches CloudFormation UPDATE_COMPLETE and ECS task revision 107, with one desired
+and running task, one COMPLETED deployment and zero failed tasks. Its task image
+matches the full tracker SHA.
+
+At 18:12 Singapore on 4 October, installed Chrome 154 passes normal Cognito
+Authorization Code + PKCE sign-in, collapsed history, a normal counts selection,
+current-version/history review with reason and confirmation, a new REVERT version,
+same-intent replay without an additional history row, persisted history after hard
+reload and normal sign-out. The original separate counts value is restored; visitor
+mode stays none and its history remains empty. The review hover state has zero
+WCAG 2A/2AA violations and the journey has no application page errors. Sanitised
+[staging evidence](staging-product-setting-history-ui-evidence-2026-10-04.json)
+records only bounded outcomes. Three legitimate audited synthetic counts changes
+and one replay are used; no visitor, lifecycle, schedule, announcement or delivery
+writes are requested.
 
 The guarded revert API's full 1,356 database checks (four existing skips), 92 shared
 and 562 server units remain valid: this consumer adds no server, schema or migration

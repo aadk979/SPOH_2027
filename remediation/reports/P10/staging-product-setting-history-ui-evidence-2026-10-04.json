@@ -1,0 +1,33 @@
+{
+  "observedAt": "2026-10-04T10:12:22.010Z",
+  "deployedImageTag": "9d2748e78c9f34fe549631ac1072aadb8d1e7dae",
+  "taskRevision": 107,
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  "scope": "Normal Cognito Authorization Code + PKCE; bounded guarded counts setting change/history/UI restore in the established synthetic staging event",
+  "checks": {
+    "normalSignIn": true,
+    "collapsedHistoryByDefault": true,
+    "reviewedCurrentVersion": true,
+    "reasonAndConfirmationRequired": true,
+    "originalCountsRestored": true,
+    "appendOnlyRevert": true,
+    "newVersion": 3,
+    "noStoreHistoryAndRevert": true,
+    "successfulSameIntentReplay": true,
+    "replayCreatedNoAdditionalHistory": true,
+    "historyAfterHardReload": true,
+    "visitorModeUnchanged": "none",
+    "visitorHistoryEmpty": true,
+    "reviewHoverAxeViolations": [],
+    "normalSignOut": true,
+    "appPageErrors": []
+  },
+  "fixtureEffects": "Three normal audited counts changes (baseline, headline selection, REVERT) and one successful same-intent replay. Original separate counts value restored. No visitor collection, lifecycle, schedule, announcement or external delivery writes requested."
+}

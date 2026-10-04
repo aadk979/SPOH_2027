@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-04T09:58:39.169Z",
+  "updatedAt": "2026-10-04T10:13:11.636Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -3274,6 +3274,10 @@
     {
       "at": "2026-10-04T09:49:04.604Z",
       "text": "Exact guarded-product-revert tracker 4b9993f CI 37144887297/deploy 37145271865 succeeded; CloudFormation UPDATE_COMPLETE and ECS revision 106 desired/running 1, one completed rollout, failed 0, exact image verified. Populated staging proof will use the forthcoming UI to avoid duplicate synthetic writes. Local UI 24 new units plus two phone/laptop count-change/history/restore/hard-reload/hover-axe journeys pass; full visual verification ongoing, P10.8 remains open."
+    },
+    {
+      "at": "2026-10-04T10:13:11.635Z",
+      "text": "P10.8 guarded product history/restore UI: exact 9d2748e CI 37193871396 and staging deploy 37194095422 succeeded. Actual CloudFormation UPDATE_COMPLETE and ECS revision 107 healthy with exact image. Normal Cognito/Chrome at 18:12 SGT verified reviewed counts restore, same-intent replay without another history row, hard reload, sign-out and zero review hover WCAG/page errors. Original separate counts restored; visitor none unchanged. Sanitised evidence committed separately; full generated event/station and general schedule criteria remain open."
     }
   ]
 }
