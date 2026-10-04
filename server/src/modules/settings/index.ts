@@ -11,3 +11,4 @@ export {
 export { settingsScheduledHandlers } from './jobs.js';
 export { getEventSettingHistoryHandler } from './http/historyHandler.js';
 export { eventSettingRevertReplay, revertEventSettingHandler } from './http/revertHandlers.js';
+export { getScopedSettingsHandler } from './http/scopedReadHandler.js';

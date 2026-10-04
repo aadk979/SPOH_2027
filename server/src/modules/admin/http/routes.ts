@@ -3,6 +3,7 @@ import { z } from 'zod';
 import {
   ChangeEventSettingRequest,
   EventSettingHistoryQuery,
+  ScopedSettingsReadQuery,
   RevertEventSettingRequest,
   ChangeAttendanceConfigRequest,
   CreateAssignmentRequest,
@@ -46,6 +47,7 @@ import {
   getSettingsHandler,
   updateSettingsHandler,
   getEventSettingHistoryHandler,
+  getScopedSettingsHandler,
   revertEventSettingHandler,
   eventSettingRevertReplay,
 } from '../../settings/index.js';
@@ -81,6 +83,10 @@ export const adminRouter: Router = Router();
 
 const IdParams = z.object({ id: Id }).strict();
 
+adminRouter.use('/settings/catalogue', (_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+});
 adminRouter.use(requireAuth);
 
 // ─────────────────────────────────────────────────────────────
@@ -260,6 +266,14 @@ adminRouter.patch(
  * sensitive — it is the tuning of an event, not a secret.
  */
 adminRouter.get('/settings', defaultRateLimit, requireCapability('own.read'), getSettingsHandler);
+
+adminRouter.get(
+  '/settings/catalogue',
+  defaultRateLimit,
+  requireCapability('config.manage'),
+  validate({ query: ScopedSettingsReadQuery }),
+  getScopedSettingsHandler,
+);
 
 adminRouter.patch(
   '/settings',

@@ -190,6 +190,13 @@ correct the F02-005 client payload and the legacy refresh race found by its real
 browser journey. Complete generated scopes, history and reviewed-version controls
 remain open; this bounded fix does not complete the step.
 
+[The scoped operational settings read](../reports/P10/scoped-settings-read-api.md)
+adds strict, current-authority event/station values with validated inheritance and
+stored versions. It excludes private and guarded keys, preserves malformed stored
+rows while omitting their JSON, and verifies exact event/organisation/station
+ownership. Legacy consumer migration and generated edit/history/schedule/revert
+controls remain open.
+
 - **Do:**
   1. A settings screen generated from the registry: grouped, scoped (event or station tabs), with
      descriptions, validation, change history and revert.
