@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-04T11:43:12.735Z",
+  "updatedAt": "2026-10-04T12:08:44.451Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -3300,6 +3300,10 @@
     {
       "at": "2026-10-04T11:43:12.733Z",
       "text": "Scoped catalogue API locally verified and committed under D-11; P10.8 remains open. Preceding c2bf3d7 evidence CI 37197387641 and staging deploy 37197755850 succeeded, actual stack exact image and healthy ECS revision 110. Independent P08 storage review found media key reads need event ownership before bucket enablement; next bounded prerequisite after scoped API exact-image verification."
+    },
+    {
+      "at": "2026-10-04T12:08:44.449Z",
+      "text": "Scoped operational catalogue on exact 8594f2d: CI 37199688135 and staging deploy 37199997815 succeeded; actual stack UPDATE_COMPLETE/ECS 111 exact image desired/running 1, completed rollout, zero failed tasks. Normal Cognito/Chrome at 20:06 SGT verified 14 event/3 owned-station keys, strict no-store success/rejections, reload stability, unchanged compatibility/product values and versions, sign-out and zero page errors. Read-only evidence recorded; P10.8 remains open. Independent P08 media ownership prerequisite has failing-before/passing-after regressions and full 1406-pass/four-existing-skip verification."
     }
   ]
 }

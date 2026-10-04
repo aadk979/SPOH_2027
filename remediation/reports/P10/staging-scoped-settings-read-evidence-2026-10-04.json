@@ -1,0 +1,33 @@
+{
+  "observedAt": "2026-10-04T12:06:43.681Z",
+  "deployedImageTag": "8594f2dece473ef0a1703a62b371b9550eb55c77",
+  "taskRevision": 111,
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  "scope": "Normal Cognito Authorization Code + PKCE; read-only scoped settings API in the established synthetic staging event",
+  "checks": {
+    "normalSignIn": true,
+    "strictEventRead": true,
+    "eventKeyCount": 14,
+    "strictOwnedStationRead": true,
+    "stationKeyCount": 3,
+    "noStoreSuccessAndRejections": true,
+    "unsupportedQueriesRejected": true,
+    "missingStationRejected": true,
+    "anonymousRejected": true,
+    "privateAndGuardedKeysExcluded": true,
+    "hardReloadReadStable": true,
+    "compatibilitySettingsUnchanged": true,
+    "guardedProductValuesAndVersionsUnchanged": true,
+    "normalSignOut": true,
+    "appPageErrors": []
+  },
+  "fixtureEffects": "Only GETs to scoped catalogue, station and existing settings endpoints. No setting, visitor, lifecycle, schedule, announcement or delivery writes requested.",
+  "limitation": "The catalogue resolves the scoped Setting store. Remaining legacy AppSetting consumers and complete generated edit/history/schedule/revert UI remain open."
+}

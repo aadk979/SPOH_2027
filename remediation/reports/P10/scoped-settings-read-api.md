@@ -42,12 +42,27 @@ authorization, validation and missing-station responses are no-store.
   four existing skips (484.04 seconds). Cross-instance/cache tests remain green.
 - The server build, server/client types, 565 server units, lint, architecture,
   generated settings, hardcoding and source/test/report secret scans pass. Full
-  Git-history scanning covers 602 commits without leaks. The inherited P08 pricing
+  Git-history scanning covers 604 commits without leaks. The inherited P08 pricing
   hashes and historical P05 files remain unchanged. No client source, schema,
   migration, timer, audit/write producer or generic setting write is introduced.
 
-Full-suite, D-11 exact-image CI/deployment and normal-Cognito read evidence are
-recorded after completion. The real local spoh2027 database is not reset, seeded
+Source c19a9fe and tracker image 8594f2d are pushed directly to main under D-11.
+Exact-image [CI 37199688135](https://github.com/aadk979/SPOH_2027/actions/runs/37199688135)
+and [staging deployment 37199997815](https://github.com/aadk979/SPOH_2027/actions/runs/37199997815)
+succeed. CloudFormation reports UPDATE_COMPLETE and ECS revision 111 runs the
+exact image with one desired/running task, one COMPLETED rollout and zero failed
+tasks.
+
+At 20:06 Singapore, normal Cognito Authorization Code + PKCE and installed Chrome
+154 verify strict event and owned-station catalogue reads, no-store successes and
+rejections, unsupported queries, missing stations, anonymous denial and stable
+values after hard reload. Existing compatibility settings and guarded product
+values/versions remain unchanged. Sign-out succeeds with zero application page
+errors. Sanitised [staging evidence](staging-scoped-settings-read-evidence-2026-10-04.json)
+contains bounded outcomes without credentials, actor/event IDs or raw values.
+Only reads are requested outside the normal authentication session.
+
+The real local spoh2027 database is not reset, seeded
 or migrated. All database fixture changes use the dedicated spoh2027_test database.
 
 The catalogue resolves the scoped Setting store. It does not replace or claim to
