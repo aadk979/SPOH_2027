@@ -12,7 +12,7 @@ export async function readUrl(key: string, actor: ActorContext): Promise<MediaUr
   assertConfigured();
   return prisma.$transaction(
     async (tx) => {
-      await holdCaptureEvent(tx, actor.scope);
+      const event = await holdCaptureEvent(tx, actor.scope);
       await requireCurrentCapability(tx, {
         scope: actor.scope,
         membershipId: actor.membershipId,
@@ -20,7 +20,7 @@ export async function readUrl(key: string, actor: ActorContext): Promise<MediaUr
         capability: 'own.read',
       });
       await requireIssuedMediaKey(tx, actor.scope, key);
-      const { ttlSeconds } = await mediaLimits(actor.scope);
+      const { ttlSeconds } = await mediaLimits(tx, event.organisationId);
       return { url: await presignRead(key, ttlSeconds), expiresIn: ttlSeconds };
     },
     { isolationLevel: 'ReadCommitted', timeout: 30_000 },

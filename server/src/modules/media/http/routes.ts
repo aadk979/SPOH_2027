@@ -15,7 +15,7 @@ import { createUploadHandler, mediaConfigHandler, readUrlHandler } from './handl
  */
 export const mediaRouter: Router = Router();
 
-mediaRouter.use('/url', (_req, res, next) => {
+mediaRouter.use(['/url', '/uploads'], (_req, res, next) => {
   res.setHeader('Cache-Control', 'no-store');
   next();
 });

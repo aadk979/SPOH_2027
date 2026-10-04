@@ -135,6 +135,11 @@ with exact-origin signed-upload CORS and reference-only existing backups. It
 grants no application access; real uploads, content wiring and event-aware media
 retention remain open.
 
+[Media upload admission](../reports/P08/media-upload-admission.md) holds current
+membership, event phase and size/lifetime resolution through signing and its
+audit commit. New photos are admitted only in LIVE/REHEARSAL; retry receipts and
+real private-upload wiring remain separate criteria.
+
 - **Do:**
   1. S3 buckets `media`, `content` and `exports`: Block Public Access, SSE (AWS-managed key),
      versioning on content, lifecycle rules (ADR-003 §8), CORS limited to the app origin for
