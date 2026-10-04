@@ -62,6 +62,26 @@ do not claim real S3 evidence. After restarting the visual API with this build,
 all 58 visual checks match unchanged baselines. The static export passes all 32
 pages. Exact staging release evidence is recorded after deployment finishes.
 
+## Exact staging release
+
+Source `ac6a186` and tracker image
+`1498a74a7a13d30bed8c19d8d827f432599619b4` passed
+[CI](https://github.com/aadk979/SPOH_2027/actions/runs/37212371475) and
+[staging deployment](https://github.com/aadk979/SPOH_2027/actions/runs/37212757905).
+At 23:40 Singapore on 4 October, CloudFormation was UPDATE_COMPLETE. ECS
+revision 116 ran that exact image with one desired/running task, one completed
+deployment and zero failed tasks.
+
+Chrome 154 completed normal Cognito sign-in, hard reload and sign-out with no
+app page errors. The disabled producer still returns 503/no-store for a valid
+UUID request; malformed/missing UUIDs and client-selected authority return
+400/no-store, and anonymous requests return 401/no-store. A valid found-item
+request with an unissued photo is refused with 409 in READY and creates no item.
+Compatibility settings and guarded product values/versions are unchanged. The
+[sanitised evidence](staging-media-capture-authority-evidence-2026-10-04.json)
+records these checks. Capture-mode and expiry ownership behavior are proven by
+the local suites above; no real S3 upload is claimed for this disabled release.
+
 ## Remaining storage work
 
 P08.7 still needs task IAM/SSM and exact S3 CSP wiring, real browser upload/private

@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-04T15:16:17.782Z",
+  "updatedAt": "2026-10-04T15:41:36.121Z",
   "current": {
     "phase": "P08",
     "step": "P08.7"
@@ -1767,6 +1767,10 @@
             {
               "at": "2026-10-04T15:16:17.477Z",
               "text": "Verified photo attachment mode/current-member admission and retained File intent through token expiry/lifecycle changes. 110 focused and 1468 full DB checks plus four existing skips; 426 client, 565 server unit, types/build/lint/architecture, two Chrome retry/a11y journeys, fresh 58 visual baseline matches and 32-page static export pass. Source/tests/reports/history scans clean; pricing preserved. S3 grants/configuration, real private upload/read/public denial, content and event-aware retention remain open; exact release evidence pending CI/deploy."
+            },
+            {
+              "at": "2026-10-04T15:41:35.711Z",
+              "text": "Photo capture authority release verified: CI 37212371475 and deployment 37212757905 succeeded; actual CloudFormation UPDATE_COMPLETE, ECS 116 exact image 1498a74, one completed deployment/desired/running task and zero failed tasks. At 23:40 SGT Chrome 154 normal Cognito sign-in/reload/sign-out passed with no errors, disabled media 503/no-store, strict/anonymous refusals and READY item-with-photo 409; settings values/versions unchanged. Local 1468 DB plus four skips, 426 client, 565 units, two retry/a11y journeys, fresh 58 visuals and 32-page export. S3 wiring/private upload/content/retention remain open."
             }
           ]
         },
@@ -3363,6 +3367,10 @@
     {
       "at": "2026-10-04T15:16:17.781Z",
       "text": "P08.7 source ac6a186 verified: current item admission locks Event then exact member, validates explicit receipt mode, and retains retry UUID across token expiry while clearing lifecycle changes. Push includes prior exact retry release evidence 9a71b4c. Broad storage and phase criteria remain open."
+    },
+    {
+      "at": "2026-10-04T15:41:36.120Z",
+      "text": "P08.7 exact photo capture authority release verified on staging image 1498a74/ECS 116, normal Cognito Chrome and guarded READY item refusal with unchanged settings. Preparing the separate prefix-only private media wiring slice; programme counts remain 105/171 and 9/17."
     }
   ]
 }

@@ -1,0 +1,37 @@
+{
+  "observedAt": "2026-10-04T15:40:06.187Z",
+  "deployedImageTag": "1498a74a7a13d30bed8c19d8d827f432599619b4",
+  "taskRevision": 116,
+  "ci": "https://github.com/aadk979/SPOH_2027/actions/runs/37212371475",
+  "deployment": "https://github.com/aadk979/SPOH_2027/actions/runs/37212757905",
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  "scope": "Normal Cognito Authorization Code + PKCE; bounded disabled media and READY capture refusals in the established synthetic staging event",
+  "checks": {
+    "normalSignIn": true,
+    "mediaDisabled": true,
+    "readReturns503": true,
+    "uploadReturns503NoStore": true,
+    "noStoreFailures": true,
+    "strictQueriesRejected": true,
+    "missingUploadUuidRejected": true,
+    "invalidUploadUuidRejected": true,
+    "clientSelectedAuthorityRejected": true,
+    "anonymousUploadRejected": true,
+    "anonymousRejected": true,
+    "readyItemAttachmentRefused": true,
+    "hardReloadStable": true,
+    "compatibilitySettingsUnchanged": true,
+    "guardedProductValuesAndVersionsUnchanged": true,
+    "normalSignOut": true,
+    "appPageErrors": []
+  },
+  "fixtureEffects": "GETs plus one valid policy request after confirming media is disabled: the unavailable producer returns 503 before its transaction. A valid found-item request with an unissued photo key also returns 409 in READY. No policy, object, found item, setting, visitor, lifecycle or delivery effect created. The transient idempotency reservation for the valid disabled request is released by the existing failure protocol; malformed and anonymous requests reserve nothing.",
+  "limitation": "Real S3 upload, signed private reads and direct public denial await separate guarded storage wiring. Current attachment mode/current-member admission, upload lifecycle/revocation, event ownership and identifier-only retry behavior are proven by local real-Postgres integration tests with a fake S3 signer. Token-expiry and lifecycle intent ownership are covered by local client tests. Retry-button journeys use a permitted local cross-origin adapter, not real S3."
+}

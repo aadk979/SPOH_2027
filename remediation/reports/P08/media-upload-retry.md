@@ -92,14 +92,15 @@ are released by the existing middleware protocol.
 Before storage wiring, two further regressions were confirmed against this
 release: the attachment path accepts a photo issued in the other capture mode,
 and a temporary expired-token null session changes a retained File's UUID.
-Those follow-up guards remain open; routine nonempty token replacement and
-explicit sign-out checks already pass.
+Those follow-up guards are closed by the separately verified
+[photo capture authority slice](media-capture-authority.md), source `ac6a186`
+and staging image `1498a74`. Routine nonempty token replacement and explicit
+sign-out checks already passed in this retry release.
 
 ## Remaining storage criteria
 
 Least-privilege task grants and SSM wiring, exact S3-origin CSP, real signed
-browser upload/private read/public denial, attachment provenance across rehearsal
-and live mode, intent retention through a temporary expired-token session gap,
-content publishing/proxying and event-aware media retention remain
+browser upload/private read/public denial, content publishing/proxying and
+event-aware media retention remain
 open. A bucket foundation and retry receipt do not close P08.7 or authorize
 production creation before the owner's 28 October go decision.
