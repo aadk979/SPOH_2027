@@ -30,8 +30,8 @@ including authentication, validation and replay failures, are no-store.
 
 The client retains the actual File object and UUID only in memory. “Retry photo”
 resends that intent after policy or object-upload failure. A different File,
-reset, event/person change or unmount invalidates it; token renewal for the same
-person preserves it. The synchronous person store also blocks a sign-out response
+reset, event/person change or unmount invalidates it; replacing a nonempty token
+for the same person preserves it. The synchronous person store also blocks a sign-out response
 before React commits the new render. Pending responses cannot start an object upload or attach
 a key after that invalidation. New attempts clear any earlier attached key and
 release replaced preview URLs. Multipart upload carries signed fields before
@@ -71,10 +71,35 @@ nonvisual synchronous identity guard is covered by the repeated client suite
 and phone/laptop journeys. The final static export passes all 32 pages. Exact
 staging release evidence is recorded after deployment finishes.
 
+## Exact staging release
+
+Source `f87f6b7` and tracker image
+`8fb7fd68c33805de5a276cb63090083efb45a5c3` passed
+[CI](https://github.com/aadk979/SPOH_2027/actions/runs/37209262654) and
+[staging deployment](https://github.com/aadk979/SPOH_2027/actions/runs/37209520272).
+CloudFormation is UPDATE_COMPLETE. ECS revision 115 runs that exact image with
+one desired/running task, one completed deployment and zero failed tasks.
+
+At 22:41 Singapore on 4 October, Chrome 154 completed normal Cognito sign-in,
+hard reload and sign-out with no app page errors. The disabled producer returns
+503/no-store for a valid UUID request; missing/malformed UUIDs and client-selected
+event authority return 400/no-store, and anonymous uploads return 401/no-store.
+Compatibility settings and guarded product values/versions were unchanged. The
+[sanitised evidence](staging-media-upload-retry-evidence-2026-10-04.json) records
+these checks. No policy or object was created; failed-request replay reservations
+are released by the existing middleware protocol.
+
+Before storage wiring, two further regressions were confirmed against this
+release: the attachment path accepts a photo issued in the other capture mode,
+and a temporary expired-token null session changes a retained File's UUID.
+Those follow-up guards remain open; routine nonempty token replacement and
+explicit sign-out checks already pass.
+
 ## Remaining storage criteria
 
 Least-privilege task grants and SSM wiring, exact S3-origin CSP, real signed
 browser upload/private read/public denial, attachment provenance across rehearsal
-and live mode, content publishing/proxying and event-aware media retention remain
+and live mode, intent retention through a temporary expired-token session gap,
+content publishing/proxying and event-aware media retention remain
 open. A bucket foundation and retry receipt do not close P08.7 or authorize
 production creation before the owner's 28 October go decision.

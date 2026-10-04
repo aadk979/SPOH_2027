@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-04T14:26:15.726Z",
+  "updatedAt": "2026-10-04T14:42:46.746Z",
   "current": {
     "phase": "P08",
     "step": "P08.7"
@@ -1758,6 +1758,10 @@
             {
               "at": "2026-10-04T14:26:15.392Z",
               "text": "Photo upload requests require a stable client UUID. Issuance and identifier-only replay settle atomically; retries recheck current event/member authority, matching immutable intent and mode. Client Retry photo retains the File only in memory and rejects stale or synchronously signed-out responses. Local verification: 1450 integration checks plus 4 existing skips, 417 client, 565 server unit, 105 shared, 2 Chrome journeys, 58 unchanged visual baselines, 32 exported pages; source/test/report/history scans clean. Media remains disabled; exact release evidence, guarded storage wiring, attachment provenance, content and retention remain open."
+            },
+            {
+              "at": "2026-10-04T14:42:46.201Z",
+              "text": "Upload retry source f87f6b7 and exact image 8fb7fd68c33805de5a276cb63090083efb45a5c3 passed CI 37209262654 and deployment 37209520272. Actual CloudFormation UPDATE_COMPLETE, ECS 115 one completed desired/running task with no failed tasks. Normal Cognito Chrome sign-in, UUID/authority validation, no-store disabled request failures, reload and sign-out passed at 22:41 SGT with settings/product versions unchanged. Local 1450 integration checks plus 4 existing skips, 417 client, 565 server unit, 105 shared, 2 Chrome journeys, 58 unchanged visuals and 32 exported pages. P08.7 remains open: attachment-mode and transient token-expiry regressions confirmed for next guarded slice; no S3 app access, content or retention closure."
             }
           ]
         },
@@ -3346,6 +3350,10 @@
     {
       "at": "2026-10-04T14:26:15.725Z",
       "text": "Verified media upload retry slice f87f6b7 for P08.7; 27 new backend and 14 new client checks, stable-file Retry photo, id-only atomic receipts, current replay authority and synchronous sign-out guard. Exact staging CI/deployment pending; P08.7 stays open and programme counts remain 105/171, 9/17. Inherited pricing preserved; reversible Docker socket recovery retained original volume."
+    },
+    {
+      "at": "2026-10-04T14:42:46.745Z",
+      "text": "Exact media retry staging release verified at 22:41 SGT: f87f6b7 / 8fb7fd6, CI 37209262654, deploy 37209520272, ECS 115. Normal Cognito, strict upload UUID/authority validation, disabled 503/no-store, unchanged settings/versions, reload/sign-out and zero app errors. Before storage enablement, next red regressions demonstrate cross-mode attachment and expiry-gap UUID loss. P08.7 stays open."
     }
   ]
 }

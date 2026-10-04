@@ -1,0 +1,36 @@
+{
+  "observedAt": "2026-10-04T14:41:02.414Z",
+  "deployedImageTag": "8fb7fd68c33805de5a276cb63090083efb45a5c3",
+  "taskRevision": 115,
+  "ci": "https://github.com/aadk979/SPOH_2027/actions/runs/37209262654",
+  "deployment": "https://github.com/aadk979/SPOH_2027/actions/runs/37209520272",
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  "scope": "Normal Cognito Authorization Code + PKCE; read-only disabled media API in the established synthetic staging event",
+  "checks": {
+    "normalSignIn": true,
+    "mediaDisabled": true,
+    "readReturns503": true,
+    "uploadReturns503NoStore": true,
+    "noStoreFailures": true,
+    "strictQueriesRejected": true,
+    "missingUploadUuidRejected": true,
+    "invalidUploadUuidRejected": true,
+    "clientSelectedAuthorityRejected": true,
+    "anonymousUploadRejected": true,
+    "anonymousRejected": true,
+    "hardReloadStable": true,
+    "compatibilitySettingsUnchanged": true,
+    "guardedProductValuesAndVersionsUnchanged": true,
+    "normalSignOut": true,
+    "appPageErrors": []
+  },
+  "fixtureEffects": "GETs plus one valid policy request after confirming media is disabled: the unavailable producer returns 503 before its transaction. No policy, object, found item, setting, visitor, lifecycle or delivery effect created. The transient idempotency reservation for the valid disabled request is released by the existing failure protocol; malformed and anonymous requests reserve nothing.",
+  "limitation": "Real S3 upload, signed private reads and direct public denial await separate guarded storage wiring. Current upload admission/lifecycle/revocation, event ownership and identifier-only retry behavior are proven by local real-Postgres integration tests with a fake S3 signer. Retry-button journeys use a permitted local cross-origin adapter, not real S3."
+}
