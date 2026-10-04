@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-04T12:37:51.175Z",
+  "updatedAt": "2026-10-04T12:56:51.374Z",
   "current": {
     "phase": "P08",
     "step": "P08.7"
@@ -3324,6 +3324,10 @@
     {
       "at": "2026-10-04T12:34:56.037Z",
       "text": "P08.7 media event-ownership prerequisite source 0ec4703 deployed exact tracker image 7b4cae5: CI 37201187226 and staging deployment 37201543193 succeeded; actual CloudFormation UPDATE_COMPLETE/ECS revision 112, desired/running 1, single COMPLETED deployment, failed tasks 0. Normal Cognito Chrome 154 read-only probe 20:33 SGT 4 Oct proves disabled media config/503 no-store, strict 400/anonymous 401 no-store, reload and sign-out without app errors; compatibility/product settings preserved. Real S3 upload/private-read/public-denial criteria remain open. Private storage foundation is the next independent slice."
+    },
+    {
+      "at": "2026-10-04T12:56:51.373Z",
+      "text": "P08.7 private storage foundation source 2cd80a3 and exact image 86cd807: CI 37202778997, Infra 37202778995 and staging deployment 37203012917 succeeded. Read-only actual AWS evidence at 20:54 SGT verifies CloudFormation UPDATE_COMPLETE/ECS revision 113, desired/running 1, single COMPLETED deployment/0 failed tasks; 4 private retained AES256/ACL-disabled/TLS-only buckets, exact log delivery/CORS, content versioning, 90-day exports/30-day logs, no upload-age media expiry; anonymous listings 403. Eight backup configuration hashes match pre-release baseline; app S3 permissions/injection remain absent. P08.7 remains open. Next prerequisite: media upload admission current authority/lifecycle locks, proven by two real-Postgres red regressions; upload replay protocol and actual wiring still pending."
     }
   ]
 }

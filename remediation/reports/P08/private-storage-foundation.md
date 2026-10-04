@@ -66,3 +66,28 @@ verification, least-privilege task wiring, a real presigned staging upload and
 private read with public denial, content publishing/proxy integration, and the
 event-aware media retention dependency. Private bucket creation alone does not
 complete P08.7 or P08.
+
+## Actual staging controls
+
+Source `2cd80a3` and tracker image
+`86cd807e65749412a2a7d5a062571ccc7040424e` passed
+[CI](https://github.com/aadk979/SPOH_2027/actions/runs/37202778997),
+[infrastructure CI](https://github.com/aadk979/SPOH_2027/actions/runs/37202778995) and
+[staging deployment](https://github.com/aadk979/SPOH_2027/actions/runs/37203012917).
+At 20:54 Singapore time on 4 October, CloudFormation was UPDATE_COMPLETE and ECS
+revision 113 ran the exact image with one desired/running task, one completed
+deployment and zero failed tasks.
+
+The read-only AWS probe verified all four actual bucket policies and their
+public-access blocks, ACL-disabled ownership, AES256 encryption, TLS denial and
+retained CloudFormation delete/replacement policies. Exact-source/account/prefix
+log delivery, one-day multipart aborts, content versioning, exact media CORS,
+90-day exports and 30-day logs match the definition. Media/content have no
+object-age expiry. Anonymous listings return 403 for every new bucket. The app
+task has no S3 permission or bucket injection. Hashes of eight existing backup
+configuration reads match the pre-release baseline, including policy, lifecycle,
+logging, ownership, encryption, versioning, public-access blocks and tags.
+
+The [sanitised actual-resource evidence](staging-private-storage-evidence-2026-10-04.json)
+records these checks. It performs no object upload/removal or AWS configuration
+mutation. Public denial for a real uploaded object remains a separate criterion.

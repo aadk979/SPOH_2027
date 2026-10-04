@@ -1,0 +1,68 @@
+{
+  "observedAt": "2026-10-04T12:54:37.837Z",
+  "deployedImageTag": "86cd807e65749412a2a7d5a062571ccc7040424e",
+  "taskRevision": 113,
+  "ci": "https://github.com/aadk979/SPOH_2027/actions/runs/37202778997",
+  "infrastructureCi": "https://github.com/aadk979/SPOH_2027/actions/runs/37202778995",
+  "deployment": "https://github.com/aadk979/SPOH_2027/actions/runs/37203012917",
+  "cloudformationState": "UPDATE_COMPLETE",
+  "ecs": {
+    "desired": 1,
+    "running": 1,
+    "deployments": 1,
+    "rolloutState": "COMPLETED",
+    "failedTasks": 0
+  },
+  "scope": "Read-only actual staging CloudFormation, ECS, IAM and S3 controls; anonymous bucket listing checks",
+  "bucketChecks": [
+    {
+      "name": "Media",
+      "allPublicAccessBlocked": true,
+      "aclDisabled": true,
+      "sseS3": true,
+      "tlsPolicy": true,
+      "retainedOnDeleteAndReplacement": true,
+      "anonymousListingDenied": true,
+      "retentionAndLoggingVerified": true
+    },
+    {
+      "name": "Content",
+      "allPublicAccessBlocked": true,
+      "aclDisabled": true,
+      "sseS3": true,
+      "tlsPolicy": true,
+      "retainedOnDeleteAndReplacement": true,
+      "anonymousListingDenied": true,
+      "retentionAndLoggingVerified": true
+    },
+    {
+      "name": "Exports",
+      "allPublicAccessBlocked": true,
+      "aclDisabled": true,
+      "sseS3": true,
+      "tlsPolicy": true,
+      "retainedOnDeleteAndReplacement": true,
+      "anonymousListingDenied": true,
+      "retentionAndLoggingVerified": true
+    },
+    {
+      "name": "AccessLogs",
+      "allPublicAccessBlocked": true,
+      "aclDisabled": true,
+      "sseS3": true,
+      "tlsPolicy": true,
+      "retainedOnDeleteAndReplacement": true,
+      "anonymousListingDenied": true,
+      "retentionAndLoggingVerified": true
+    }
+  ],
+  "exactMediaCors": true,
+  "contentVersioning": true,
+  "noUploadAgeMediaExpiration": true,
+  "existingBackupsConfigurationUnchanged": true,
+  "backupBaselineObservedAt": "2026-10-04T12:41:02.756Z",
+  "applicationS3PermissionsAndInjectionAbsent": true,
+  "productionNotDeployed": true,
+  "fixtureEffects": "No object upload, removal, policy mutation or bucket write performed by this probe.",
+  "limitation": "Anonymous listings are denied for the new buckets. Real presigned upload, signed read and anonymous access to that uploaded object await guarded application wiring. Content publishing and event-aware media purge remain open."
+}
