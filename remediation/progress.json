@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-04T11:02:50.302Z",
+  "updatedAt": "2026-10-04T11:43:12.735Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -2373,7 +2373,8 @@
             "f363cd9d070fb32f190bf85053fedcc6f70ce3b3",
             "7f32c6912bf8ddeb9cf2de39f4ac4a16fd12f749",
             "62d01caec4f565a250002fd5dcff7d0d260cbd2c",
-            "8357ec88035299bda1b661c4d9ca0cdfd0dc8776"
+            "8357ec88035299bda1b661c4d9ca0cdfd0dc8776",
+            "c19a9fe7403036b3c7afb44f89dd5c98e465d48a"
           ],
           "notes": [
             {
@@ -2415,6 +2416,10 @@
             {
               "at": "2026-10-04T10:46:17.077Z",
               "text": "F02-005 compatibility settings fix: full form validates before only changed keys are sent; no-op/loading/failed-read/pending guards, draft/event baseline isolation and serial legacy refreshes. 403 client, 565 server units, full 1356 database checks/four existing skips, two normal phone/laptop journeys, 56 unchanged visuals plus two reviewed/passing settings baselines, 32-page export/types/static/scans pass. Exact-image CI/staging proof pending. Full generated event/station and general schedule criteria remain open."
+            },
+            {
+              "at": "2026-10-04T11:43:12.154Z",
+              "text": "Scoped operational catalogue read: strict generated event/station keys and registered values, inherited source and selected stored versions; Event/current-member locks, post-wait clock and exact ownership; no generic writes. Nine shared and 29 new database checks, full 1385-pass/four-existing-skip serial suite, server/client types, build, 565 server units, lint/architecture/static/scans pass. Exact CI/deploy and normal Cognito read proof pending; full generated edit/history/schedule/revert and legacy consumers remain open."
             }
           ]
         },
@@ -3291,6 +3296,10 @@
     {
       "at": "2026-10-04T11:02:50.301Z",
       "text": "P10.8 F02-005 compatibility save/cache slice: exact c5b9e88 CI 37196456461 and staging deploy 37196788580 succeeded. Actual CloudFormation UPDATE_COMPLETE/ECS 109 healthy with exact image. Normal Cognito/Chrome at 19:01 SGT verified no-op sends nothing, one-key change/restore, committed response, two hard reloads, untouched overrides/product versions, sign-out, zero WCAG/page errors. Original effective threshold restored; sanitised evidence recorded. Full generated event/station controls and general schedule criteria remain open; continuing with scoped registry reads."
+    },
+    {
+      "at": "2026-10-04T11:43:12.733Z",
+      "text": "Scoped catalogue API locally verified and committed under D-11; P10.8 remains open. Preceding c2bf3d7 evidence CI 37197387641 and staging deploy 37197755850 succeeded, actual stack exact image and healthy ECS revision 110. Independent P08 storage review found media key reads need event ownership before bucket enablement; next bounded prerequisite after scoped API exact-image verification."
     }
   ]
 }
