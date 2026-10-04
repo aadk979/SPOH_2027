@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-04T12:56:51.374Z",
+  "updatedAt": "2026-10-04T13:12:12.762Z",
   "current": {
     "phase": "P08",
     "step": "P08.7"
@@ -1738,7 +1738,8 @@
           "completedAt": null,
           "commits": [
             "0ec47031f1d2fcf6c64db27decc8d887d22a1211",
-            "2cd80a382d7073b021b7a209803ff1818470a0a4"
+            "2cd80a382d7073b021b7a209803ff1818470a0a4",
+            "71955e6c7af20c3debff9976895c20996007705b"
           ],
           "notes": [
             {
@@ -1748,6 +1749,10 @@
             {
               "at": "2026-10-04T12:37:51.174Z",
               "text": "Private object storage foundation: 3 private data buckets plus retained private access logs; exact-origin signed POST CORS; content version history, exports 90 days, logs 30 days; multipart abort 1 day. Reference-only existing backups; no app task S3 grants or configuration. 15 new/56 total infra checks, types, both-stage nag synth, lint and actual-image read-only diff passed (only 4 buckets/4 policies/4 outputs; DeployAccess unchanged). Media expiry after CLOSED and producer/wiring/content/real-upload criteria remain open. Pricing drafts/P05 preserved; no budget compliance claim."
+            },
+            {
+              "at": "2026-10-04T13:12:12.761Z",
+              "text": "Media upload admission: two red real-Postgres regressions proved signing behind revoked membership and DRAFT event. Event SHARE then current member SHARE/permission, post-wait clock, existing LIVE/REHEARSAL capture admission, sequential scoped limits in same RC30s transaction, signing and event/rehearsal audit before response; upload successes/failures no-store. 17 new/77 affected integrations, 565 backend units, server types/build, lint/arch 1013/4449, full 1423 checks/4 existing skips/97 files (462.97s) passed. Source/test/report scans clean; pricing/P05 preserved; unchanged client evidence reused. Upload retry receipts, task/CSP wiring, real private upload, content and event-close media retention remain open. Staging S3 costs are additional unmeasured allowance; inherited five-GB S3 forecast covers production only."
             }
           ]
         },
