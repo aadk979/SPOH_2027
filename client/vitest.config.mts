@@ -10,7 +10,7 @@ export default defineConfig({
     // hooks need `navigator`, and it starts an order of magnitude faster.
     environment: 'happy-dom',
     include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx'],
-    setupFiles: ['tests/setup.ts'],
+    setupFiles: ['src/instrumentation-client.ts', 'tests/setup.ts'],
     // Measured, not gated: the client starts far below the server's
     // thresholds, and a gate nobody can pass gets ignored rather than met.
     coverage: {

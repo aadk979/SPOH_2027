@@ -1,0 +1,81 @@
+{
+  "observedAt": "2026-10-04T16:36:43.896Z",
+  "deployedImageTag": "a7118ed515bc7b267d092bef45d06a715bec18aa",
+  "sourceCommit": "e5a2a1c",
+  "taskRevision": 118,
+  "ci": "https://github.com/aadk979/SPOH_2027/actions/runs/37214810096",
+  "infrastructureCi": "https://github.com/aadk979/SPOH_2027/actions/runs/37214810104",
+  "deployment": "https://github.com/aadk979/SPOH_2027/actions/runs/37215221440",
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97",
+    "viewports": [
+      {
+        "width": 390,
+        "height": 844
+      },
+      {
+        "width": 1440,
+        "height": 900
+      }
+    ],
+    "serviceWorkers": "blocked"
+  },
+  "scope": "Normal Cognito Authorization Code + PKCE; legitimate synthetic staging ADMIN; one browser S3 POST and practice found-item creation, followed by read-only continuation against that same fixture.",
+  "checks": {
+    "exactStableRelease": true,
+    "standardNonSecretBucketInjection": true,
+    "taskActions": ["s3:GetObject", "s3:PutObject"],
+    "taskPrefix": "lost-found/*",
+    "migrationStorageAccess": false,
+    "allPublicAccessBlocks": true,
+    "exactCspConnectAndImageOrigin": true,
+    "backupConfigurationHashCount": 8,
+    "backupConfigurationHashesUnchanged": true,
+    "mediaEnabled": true,
+    "readyUploadRefused409NoStore": true,
+    "guardedSyntheticRehearsalEntry": true,
+    "browserPost204": true,
+    "previewDecoded": true,
+    "signedSizeCondition": true,
+    "sameIntentReplaySameKey": true,
+    "practiceUiPost201": true,
+    "practicePhotoMatchesIssuedObject": true,
+    "eventRestoredReady": true,
+    "privateRead200NoStore": true,
+    "privateImageByteMatch": true,
+    "browserPrivateImageLoads": {
+      "width": 1,
+      "height": 1
+    },
+    "publicRead403": true,
+    "unknownKey404NoStore": true,
+    "anonymousRead401NoStore": true,
+    "noBearerOrCookieToS3": true,
+    "phoneAndLaptopPracticeItemVisible": true,
+    "hardReloadReady": true,
+    "settingsValuesAndVersionsUnchanged": true,
+    "normalSignOut": true,
+    "appPageErrors": [],
+    "cspViolations": [
+      {
+        "directive": "script-src",
+        "blockedKind": "eval",
+        "sourcePath": "/_next/static/chunks/13ncysqdn_99i.js",
+        "line": 1,
+        "disposition": "enforce"
+      }
+    ]
+  },
+  "syntheticObject": {
+    "objectCount": 1,
+    "bytes": 68,
+    "uploadedAt": "2026-10-04T16:17:59+00:00",
+    "width": 1,
+    "height": 1,
+    "mimeType": "image/png"
+  },
+  "fixtureEffects": "Exactly one tiny synthetic image and one practice found item retained. Upload issuance/replay and the guarded READY-to-REHEARSAL-to-READY round trip retain their legitimate audit/replay receipts. The event ends READY. Continuations issue no new object, item or lifecycle write. Normal authentication sessions are created/revoked. No visitor, settings, live capture, invitation, announcement, push, production or backup configuration mutation requested.",
+  "verificationMethod": "The upload run reached the item list but stopped on an exact Photo on file text locator because the displayed label includes its camera symbol. Its finally restored the owned rehearsal to READY. Read-only inventory confirms one practice item with the exact uploaded object; the corrected label locator, private reads, denials, reload and sign-out pass on the same fixture. This is combined evidence, not a claimed uninterrupted pass.",
+  "limitations": "The real browser also observes one caught Zod eval-availability probe blocked by script-src. The private-media origin policy passes; the separate CSP-safe validation startup follow-up must remove this event before clean-browser release evidence is claimed. The app list shows Photo on file without an image viewer; image loading is explicitly probed. Event-aware retention, content publishing/proxying, measured storage cost and production routing remain open. No iOS or external delivery proof claimed."
+}

@@ -58,8 +58,35 @@ Formatting and source/test/report scans pass without new exceptions; the
 The preceding capture-authority full database suite passed 1,468 checks with four
 existing skips. Its 426 client checks, two retry/a11y journeys, fresh 58 unchanged
 visual baselines and 32-page static export are reused: this slice changes no
-client, database use case, DTO or schema. CI and real enabled-staging browser
-upload/read/public-denial evidence are recorded after release.
+client, database use case, DTO or schema.
+
+Source `e5a2a1c` and tracker image
+`a7118ed515bc7b267d092bef45d06a715bec18aa` are pushed under D-11.
+[CI 37214810096](https://github.com/aadk979/SPOH_2027/actions/runs/37214810096),
+[infrastructure 37214810104](https://github.com/aadk979/SPOH_2027/actions/runs/37214810104)
+and [deployment 37215221440](https://github.com/aadk979/SPOH_2027/actions/runs/37215221440)
+succeed. CloudFormation is UPDATE_COMPLETE. Actual ECS revision 118 runs the exact
+image with desired/running one, one completed rollout and zero failed tasks.
+
+Normal Cognito and Chrome 154 verify the actual task's two-action photo-prefix
+grant, standard bucket injection, migration separation, all public-access blocks,
+exact CSP destinations and eight unchanged backup configuration hashes. A guarded
+synthetic rehearsal permits a real 68-byte PNG browser POST (204), matching preview,
+same-intent/same-key policy replay and practice found-item UI creation (201).
+The event returns to READY. Signed historical reads still work in READY and return
+the exact bytes with no-store; unsigned S3 access returns 403, unissued keys 404
+and anonymous API requests 401. S3 receives no bearer token or cookie. Phone/laptop
+list visibility, hard reload, unchanged settings values/versions and normal
+sign-out pass without application page errors.
+
+The upload run stopped at a probe text locator that omitted the label's camera
+symbol. Its guarded finally restored READY. Read-only inventory and the corrected
+continuation verify the same one item/object, without another fixture write.
+[Combined staging evidence](staging-private-media-evidence-2026-10-05.json)
+describes both executions rather than claiming an uninterrupted pass. It also
+records one caught Zod evaluation probe blocked by script-src. The
+[CSP-safe validation follow-up](csp-safe-validation.md) addresses that separately;
+this evidence does not claim a clean CSP event list or an implemented image viewer.
 
 An incorrect root infrastructure-test invocation was excluded from accepted
 verification. The [test-selection note](verification-harness-scope.md) records

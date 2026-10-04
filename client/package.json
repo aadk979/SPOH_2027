@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "sideEffects": [
-    "*.css"
+    "*.css",
+    "./src/instrumentation-client.ts"
   ],
   "description": "SPOH 2027 volunteer PWA — Next.js App Router.",
   "scripts": {
@@ -16,7 +17,8 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:visual": "playwright test --config playwright.visual.config.ts"
+    "test:visual": "playwright test --config playwright.visual.config.ts",
+    "test:static-csp": "node --import tsx --test tests/static/csp-validation.test.mjs"
   },
   "dependencies": {
     "@spoh/shared": "*",
