@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-04T15:41:36.121Z",
+  "updatedAt": "2026-10-04T15:55:08.630Z",
   "current": {
     "phase": "P08",
     "step": "P08.7"
@@ -1741,7 +1741,8 @@
             "2cd80a382d7073b021b7a209803ff1818470a0a4",
             "71955e6c7af20c3debff9976895c20996007705b",
             "f87f6b78a66e5d3baee38eb8d6f28f245aeccd23",
-            "ac6a186dad23c5b354e0aef2f6d43a79d5c82783"
+            "ac6a186dad23c5b354e0aef2f6d43a79d5c82783",
+            "e5a2a1cd0961df4d21721419ec9a2e8e5dd11fa3"
           ],
           "notes": [
             {
@@ -1771,6 +1772,10 @@
             {
               "at": "2026-10-04T15:41:35.711Z",
               "text": "Photo capture authority release verified: CI 37212371475 and deployment 37212757905 succeeded; actual CloudFormation UPDATE_COMPLETE, ECS 116 exact image 1498a74, one completed deployment/desired/running task and zero failed tasks. At 23:40 SGT Chrome 154 normal Cognito sign-in/reload/sign-out passed with no errors, disabled media 503/no-store, strict/anonymous refusals and READY item-with-photo 409; settings values/versions unchanged. Local 1468 DB plus four skips, 426 client, 565 units, two retry/a11y journeys, fresh 58 visuals and 32-page export. S3 wiring/private upload/content/retention remain open."
+            },
+            {
+              "at": "2026-10-04T15:55:08.387Z",
+              "text": "Verified scoped private media task wiring: one standard S3_MEDIA_BUCKET SSM parameter, app-only GetObject/PutObject on exact owned media lost-found/*, no migration/content/export/backup/list/delete/ACL access; derived regional static CSP and signed no-store reads. 61 infra, 587 unit and 112 focused DB checks pass; both nag synths, actual-image read-only diff, server/infra types/build, lint/architecture/hardcoding/format and redacted source/test/report/history scans pass. Existing client/full DB evidence reused for unchanged code. Incorrect root test selection investigated read-only, no recent real-DB row writes found, harness root/include now isolated. Enabled staging upload/read/public-denial evidence pending; broad step stays open."
             }
           ]
         },
@@ -3371,6 +3376,10 @@
     {
       "at": "2026-10-04T15:41:36.120Z",
       "text": "P08.7 exact photo capture authority release verified on staging image 1498a74/ECS 116, normal Cognito Chrome and guarded READY item refusal with unchanged settings. Preparing the separate prefix-only private media wiring slice; programme counts remain 105/171 and 9/17."
+    },
+    {
+      "at": "2026-10-04T15:55:08.629Z",
+      "text": "P08.7 source e5a2a1c: private media wiring ready for CI/staging after local verification. App permissions cover only owned photo objects, migration stays separate, production disabled until approved origin. Prior exact capture-authority evidence 324ca10 is included in this push. P08.7 and programme counts remain open/unchanged."
     }
   ]
 }
