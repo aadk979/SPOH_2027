@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-04T10:13:11.636Z",
+  "updatedAt": "2026-10-04T10:46:17.354Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -2372,7 +2372,8 @@
             "f0bf5db3b5575e7bebeadb972eca5430fc3e9fe5",
             "f363cd9d070fb32f190bf85053fedcc6f70ce3b3",
             "7f32c6912bf8ddeb9cf2de39f4ac4a16fd12f749",
-            "62d01caec4f565a250002fd5dcff7d0d260cbd2c"
+            "62d01caec4f565a250002fd5dcff7d0d260cbd2c",
+            "8357ec88035299bda1b661c4d9ca0cdfd0dc8776"
           ],
           "notes": [
             {
@@ -2410,6 +2411,10 @@
             {
               "at": "2026-10-04T09:58:39.168Z",
               "text": "Product history/revert UI verified: 25 new history checks plus no-store-through-refresh wrapper check; all 390 client checks pass, two serial phone/laptop count-change/history/restore/hard-reload/hover-axe journeys pass, full visual 56 unchanged plus only two reviewed settings baselines reasserted, 32-page export/types/lint/arch (1003/4403)/settings/hardcoding/scans green. Event/person/key remount and gcTime 0, bounded errors and stable request replay after lost responses/polling. General generated controls and schedule management remain open; exact CI/deployment and populated staging UI proof pending."
+            },
+            {
+              "at": "2026-10-04T10:46:17.077Z",
+              "text": "F02-005 compatibility settings fix: full form validates before only changed keys are sent; no-op/loading/failed-read/pending guards, draft/event baseline isolation and serial legacy refreshes. 403 client, 565 server units, full 1356 database checks/four existing skips, two normal phone/laptop journeys, 56 unchanged visuals plus two reviewed/passing settings baselines, 32-page export/types/static/scans pass. Exact-image CI/staging proof pending. Full generated event/station and general schedule criteria remain open."
             }
           ]
         },
@@ -3278,6 +3283,10 @@
     {
       "at": "2026-10-04T10:13:11.635Z",
       "text": "P10.8 guarded product history/restore UI: exact 9d2748e CI 37193871396 and staging deploy 37194095422 succeeded. Actual CloudFormation UPDATE_COMPLETE and ECS revision 107 healthy with exact image. Normal Cognito/Chrome at 18:12 SGT verified reviewed counts restore, same-intent replay without another history row, hard reload, sign-out and zero review hover WCAG/page errors. Original separate counts restored; visitor none unchanged. Sanitised evidence committed separately; full generated event/station and general schedule criteria remain open."
+    },
+    {
+      "at": "2026-10-04T10:46:17.353Z",
+      "text": "P10.8 changed-key settings save/cache slice locally verified and committed. Real browser discovery of the post-write cache race is covered by a failing-before/passing-after deterministic regression. Normal preview restored; inherited pricing/P05 preserved. Proceeding to exact-source/tracker CI/deploy and bounded normal-Cognito threshold UI proof."
     }
   ]
 }
