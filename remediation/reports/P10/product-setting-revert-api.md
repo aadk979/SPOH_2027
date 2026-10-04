@@ -52,9 +52,15 @@ failed transactions release their unsuccessful reservation.
   Source, shared, test and evidence scans find no leaks. The synthetic contract
   UUID uses an obvious repeated-digit value without a scanner exception.
 
-The source is ready for CI and exact-image staging deployment verification.
-Production remains unchanged. A populated staging revert will be verified through
-the forthcoming UI consumer, avoiding an extra synthetic write sequence here.
+CI [37144887297](https://github.com/aadk979/SPOH_2027/actions/runs/37144887297)
+and deployment
+[37145271865](https://github.com/aadk979/SPOH_2027/actions/runs/37145271865)
+succeeded for tracker `4b9993fdcf5b0d1989f7f71f3fcb0491fb0ef07f`
+(source `7f32c69`). CloudFormation is UPDATE_COMPLETE. Actual ECS revision 106
+uses that exact image, with desired/running 1, one completed deployment and zero
+failed tasks. Production remains unchanged. A populated staging revert will be
+verified through the forthcoming UI consumer, avoiding an extra synthetic write
+sequence here.
 
 This slice adds no schema or migration. The corresponding history/revert UI and
 full generated event/station controls remain open; it does not close P10.8 or P10.

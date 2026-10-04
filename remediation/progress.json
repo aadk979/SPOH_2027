@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-03T18:37:14.797Z",
+  "updatedAt": "2026-10-04T09:49:04.605Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -3265,6 +3265,10 @@
     {
       "at": "2026-10-03T18:28:37.888Z",
       "text": "Verified product-history read on exact staging image 858c2d67: CI 37142522457 and deployment 37142908747 successful, healthy ECS revision 105; normal Cognito/Chrome no-store strict empty history for both supported keys, invalid query/cursor rejections, sign-out and zero page errors. Populated history remains proven by local DB cases. P10.8 stays open; guarded product revert implementation is undergoing verification."
+    },
+    {
+      "at": "2026-10-04T09:49:04.604Z",
+      "text": "Exact guarded-product-revert tracker 4b9993f CI 37144887297/deploy 37145271865 succeeded; CloudFormation UPDATE_COMPLETE and ECS revision 106 desired/running 1, one completed rollout, failed 0, exact image verified. Populated staging proof will use the forthcoming UI to avoid duplicate synthetic writes. Local UI 24 new units plus two phone/laptop count-change/history/restore/hard-reload/hover-axe journeys pass; full visual verification ongoing, P10.8 remains open."
     }
   ]
 }
