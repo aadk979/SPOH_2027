@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-04T14:42:46.746Z",
+  "updatedAt": "2026-10-04T15:16:17.782Z",
   "current": {
     "phase": "P08",
     "step": "P08.7"
@@ -1740,7 +1740,8 @@
             "0ec47031f1d2fcf6c64db27decc8d887d22a1211",
             "2cd80a382d7073b021b7a209803ff1818470a0a4",
             "71955e6c7af20c3debff9976895c20996007705b",
-            "f87f6b78a66e5d3baee38eb8d6f28f245aeccd23"
+            "f87f6b78a66e5d3baee38eb8d6f28f245aeccd23",
+            "ac6a186dad23c5b354e0aef2f6d43a79d5c82783"
           ],
           "notes": [
             {
@@ -1762,6 +1763,10 @@
             {
               "at": "2026-10-04T14:42:46.201Z",
               "text": "Upload retry source f87f6b7 and exact image 8fb7fd68c33805de5a276cb63090083efb45a5c3 passed CI 37209262654 and deployment 37209520272. Actual CloudFormation UPDATE_COMPLETE, ECS 115 one completed desired/running task with no failed tasks. Normal Cognito Chrome sign-in, UUID/authority validation, no-store disabled request failures, reload and sign-out passed at 22:41 SGT with settings/product versions unchanged. Local 1450 integration checks plus 4 existing skips, 417 client, 565 server unit, 105 shared, 2 Chrome journeys, 58 unchanged visuals and 32 exported pages. P08.7 remains open: attachment-mode and transient token-expiry regressions confirmed for next guarded slice; no S3 app access, content or retention closure."
+            },
+            {
+              "at": "2026-10-04T15:16:17.477Z",
+              "text": "Verified photo attachment mode/current-member admission and retained File intent through token expiry/lifecycle changes. 110 focused and 1468 full DB checks plus four existing skips; 426 client, 565 server unit, types/build/lint/architecture, two Chrome retry/a11y journeys, fresh 58 visual baseline matches and 32-page static export pass. Source/tests/reports/history scans clean; pricing preserved. S3 grants/configuration, real private upload/read/public denial, content and event-aware retention remain open; exact release evidence pending CI/deploy."
             }
           ]
         },
@@ -3354,6 +3359,10 @@
     {
       "at": "2026-10-04T14:42:46.745Z",
       "text": "Exact media retry staging release verified at 22:41 SGT: f87f6b7 / 8fb7fd6, CI 37209262654, deploy 37209520272, ECS 115. Normal Cognito, strict upload UUID/authority validation, disabled 503/no-store, unchanged settings/versions, reload/sign-out and zero app errors. Before storage enablement, next red regressions demonstrate cross-mode attachment and expiry-gap UUID loss. P08.7 stays open."
+    },
+    {
+      "at": "2026-10-04T15:16:17.781Z",
+      "text": "P08.7 source ac6a186 verified: current item admission locks Event then exact member, validates explicit receipt mode, and retains retry UUID across token expiry while clearing lifecycle changes. Push includes prior exact retry release evidence 9a71b4c. Broad storage and phase criteria remain open."
     }
   ]
 }
