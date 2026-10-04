@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-04T12:34:56.039Z",
+  "updatedAt": "2026-10-04T12:37:51.175Z",
   "current": {
     "phase": "P08",
     "step": "P08.7"
@@ -1736,11 +1736,18 @@
           "status": "in_progress",
           "startedAt": "2026-10-04T12:10:08.912Z",
           "completedAt": null,
-          "commits": ["0ec47031f1d2fcf6c64db27decc8d887d22a1211"],
+          "commits": [
+            "0ec47031f1d2fcf6c64db27decc8d887d22a1211",
+            "2cd80a382d7073b021b7a209803ff1818470a0a4"
+          ],
           "notes": [
             {
               "at": "2026-10-04T12:10:08.963Z",
               "text": "Media event ownership prerequisite verified: foreign issued-key read (old 200) and found-item attachment (old 201) regressions now reject; exact successful event upload receipts, current-member/Event locks through signing, no-store read responses, atomic attachment guard. 21 new ownership, 72 affected and full 1406 database checks/four existing skips; shared 103, build/types/lint/architecture/scans pass. No S3 resources or migrations. Exact CI/deploy pending; bucket/content/backups/private-upload criteria remain open."
+            },
+            {
+              "at": "2026-10-04T12:37:51.174Z",
+              "text": "Private object storage foundation: 3 private data buckets plus retained private access logs; exact-origin signed POST CORS; content version history, exports 90 days, logs 30 days; multipart abort 1 day. Reference-only existing backups; no app task S3 grants or configuration. 15 new/56 total infra checks, types, both-stage nag synth, lint and actual-image read-only diff passed (only 4 buckets/4 policies/4 outputs; DeployAccess unchanged). Media expiry after CLOSED and producer/wiring/content/real-upload criteria remain open. Pricing drafts/P05 preserved; no budget compliance claim."
             }
           ]
         },
