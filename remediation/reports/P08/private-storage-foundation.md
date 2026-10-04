@@ -54,9 +54,10 @@ verification and exact release CI/deployment evidence are recorded after release
 ## Cost and completion boundary
 
 No compute service, customer-managed KMS key, NAT gateway, endpoint, public
-domain or extra application metric is added. The existing forecast reserves S3
-storage, but S3 requests, version history and access-log volume remain unmeasured
-allowances. This release does not establish budget compliance: the preserved
+domain or extra application metric is added. The preserved model's five-GB S3
+allowance covers production only (`P05/pricing/cost-model.mjs`, A.s3Gb and the
+prod S3 row). New staging storage, S3 requests, version history and access-log
+volume are additional unmeasured allowances. This release does not establish budget compliance: the preserved
 reconciled January protection forecast is $135.13 against about $130, before
 unmeasured costs. The three inherited pricing drafts and historical P05 pricing
 are preserved byte-for-byte; no budget or protection policy is changed.
