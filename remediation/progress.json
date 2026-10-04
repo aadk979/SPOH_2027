@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-04T10:46:17.354Z",
+  "updatedAt": "2026-10-04T11:02:50.302Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -3287,6 +3287,10 @@
     {
       "at": "2026-10-04T10:46:17.353Z",
       "text": "P10.8 changed-key settings save/cache slice locally verified and committed. Real browser discovery of the post-write cache race is covered by a failing-before/passing-after deterministic regression. Normal preview restored; inherited pricing/P05 preserved. Proceeding to exact-source/tracker CI/deploy and bounded normal-Cognito threshold UI proof."
+    },
+    {
+      "at": "2026-10-04T11:02:50.301Z",
+      "text": "P10.8 F02-005 compatibility save/cache slice: exact c5b9e88 CI 37196456461 and staging deploy 37196788580 succeeded. Actual CloudFormation UPDATE_COMPLETE/ECS 109 healthy with exact image. Normal Cognito/Chrome at 19:01 SGT verified no-op sends nothing, one-key change/restore, committed response, two hard reloads, untouched overrides/product versions, sign-out, zero WCAG/page errors. Original effective threshold restored; sanitised evidence recorded. Full generated event/station controls and general schedule criteria remain open; continuing with scoped registry reads."
     }
   ]
 }

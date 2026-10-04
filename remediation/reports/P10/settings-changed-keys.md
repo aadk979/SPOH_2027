@@ -48,8 +48,26 @@ queries, timers, generic setting keys, schema or migration are introduced.
   Save button. Both actual images and the diff are inspected, only those two
   baselines updated, and both assertions pass. The normal API is restored afterward.
 
-Exact-image CI/staging results will be attached
-before this slice is reported as verified on staging.
+Source `8357ec8` and tracker image `c5b9e88` are pushed directly to main under D-11.
+Exact-image [CI 37196456461](https://github.com/aadk979/SPOH_2027/actions/runs/37196456461)
+passes, including server integration, architecture, lint/type/build and security
+jobs. [Staging deployment 37196788580](https://github.com/aadk979/SPOH_2027/actions/runs/37196788580)
+passes. Actual CloudFormation reaches UPDATE_COMPLETE and ECS task revision 109
+runs the exact tracker image, with one desired/running task, one COMPLETED rollout
+and zero failed tasks.
+
+At 19:01 Singapore, normal Cognito Authorization Code + PKCE and installed Chrome
+154 verify the deployed form. Untouched and whitespace-only forms send nothing.
+Both successful UI PATCHes name only staleDeviceMinutes; the committed response,
+persisted change after hard reload, ordinary UI restore and restored value after
+another reload all match. Untouched settings/overrides and guarded product values
+and versions are unchanged. Sign-out succeeds, with zero application page errors
+and save-hover WCAG 2A/2AA violations. The original effective threshold is restored;
+an ordinary restore may retain this changed key's stored override at that original
+value. No unrelated setting, visitor, lifecycle, schedule, announcement or delivery
+writes are requested. Sanitised [staging evidence](staging-settings-changed-keys-evidence-2026-10-04.json)
+records bounded outcomes and request keys without credentials, actor/event IDs or
+raw setting values.
 
 This is a bounded correction to the existing compatibility form and cache. The
 legacy platform-wide AppSetting adapter remains; complete generated event/station

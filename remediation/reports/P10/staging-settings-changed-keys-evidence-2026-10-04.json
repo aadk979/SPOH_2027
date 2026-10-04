@@ -1,0 +1,32 @@
+{
+  "observedAt": "2026-10-04T11:01:36.628Z",
+  "deployedImageTag": "c5b9e88028d2166e2e853528849d93454d11cf6e",
+  "taskRevision": 109,
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  "scope": "Normal Cognito Authorization Code + PKCE; bounded single-key compatibility settings UI change and restore in the established synthetic staging event",
+  "checks": {
+    "normalSignIn": true,
+    "unchangedFormDisabled": true,
+    "normalisedNoOpSentNothing": true,
+    "changeStatus": 200,
+    "patchKeys": [["staleDeviceMinutes"], ["staleDeviceMinutes"]],
+    "writeResponseMatchesCommittedChange": true,
+    "untouchedSettingsAndOverridesUnchanged": true,
+    "changeAfterHardReload": true,
+    "restoreStatus": 200,
+    "originalEffectiveSettingsRestored": true,
+    "restoredValueAfterHardReload": true,
+    "guardedProductValuesAndVersionsUnchanged": true,
+    "saveHoverAxeViolations": [],
+    "normalSignOut": true,
+    "appPageErrors": []
+  },
+  "fixtureEffects": "Two normal audited writes to staleDeviceMinutes only. Original effective value restored. If this key was previously inherited, the ordinary restore retains its stored override at that original value. No untouched override, guarded product, visitor, lifecycle, schedule, announcement or delivery writes requested."
+}
