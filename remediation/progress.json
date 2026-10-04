@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-04T13:36:56.549Z",
+  "updatedAt": "2026-10-04T14:26:15.726Z",
   "current": {
     "phase": "P08",
     "step": "P08.7"
@@ -1739,7 +1739,8 @@
           "commits": [
             "0ec47031f1d2fcf6c64db27decc8d887d22a1211",
             "2cd80a382d7073b021b7a209803ff1818470a0a4",
-            "71955e6c7af20c3debff9976895c20996007705b"
+            "71955e6c7af20c3debff9976895c20996007705b",
+            "f87f6b78a66e5d3baee38eb8d6f28f245aeccd23"
           ],
           "notes": [
             {
@@ -1753,6 +1754,10 @@
             {
               "at": "2026-10-04T13:12:12.761Z",
               "text": "Media upload admission: two red real-Postgres regressions proved signing behind revoked membership and DRAFT event. Event SHARE then current member SHARE/permission, post-wait clock, existing LIVE/REHEARSAL capture admission, sequential scoped limits in same RC30s transaction, signing and event/rehearsal audit before response; upload successes/failures no-store. 17 new/77 affected integrations, 565 backend units, server types/build, lint/arch 1013/4449, full 1423 checks/4 existing skips/97 files (462.97s) passed. Source/test/report scans clean; pricing/P05 preserved; unchanged client evidence reused. Upload retry receipts, task/CSP wiring, real private upload, content and event-close media retention remain open. Staging S3 costs are additional unmeasured allowance; inherited five-GB S3 forecast covers production only."
+            },
+            {
+              "at": "2026-10-04T14:26:15.392Z",
+              "text": "Photo upload requests require a stable client UUID. Issuance and identifier-only replay settle atomically; retries recheck current event/member authority, matching immutable intent and mode. Client Retry photo retains the File only in memory and rejects stale or synchronously signed-out responses. Local verification: 1450 integration checks plus 4 existing skips, 417 client, 565 server unit, 105 shared, 2 Chrome journeys, 58 unchanged visual baselines, 32 exported pages; source/test/report/history scans clean. Media remains disabled; exact release evidence, guarded storage wiring, attachment provenance, content and retention remain open."
             }
           ]
         },
@@ -3337,6 +3342,10 @@
     {
       "at": "2026-10-04T13:36:56.548Z",
       "text": "P08.7 media upload admission source 71955e6/exact b71cd26 passed CI 37204784193 and staging deployment 37205108317; actual CF UPDATE_COMPLETE/ECS114 single completed desired/running1 failed0. Normal Cognito Chrome154 at21:27SGT verifies disabled media, bounded policy503 noStore creates no credential/object; read503/strict400/anonymous401 noStore; hard reload/signout zero app errors, settings/products+versions unchanged. Retry protocol tests now red; stable UUID, identifier-only replay, current authority/limits on replay are next. Storage/content/retention and production boundaries remain open."
+    },
+    {
+      "at": "2026-10-04T14:26:15.725Z",
+      "text": "Verified media upload retry slice f87f6b7 for P08.7; 27 new backend and 14 new client checks, stable-file Retry photo, id-only atomic receipts, current replay authority and synchronous sign-out guard. Exact staging CI/deployment pending; P08.7 stays open and programme counts remain 105/171, 9/17. Inherited pricing preserved; reversible Docker socket recovery retained original volume."
     }
   ]
 }
