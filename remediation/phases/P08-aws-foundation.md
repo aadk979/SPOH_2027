@@ -140,6 +140,11 @@ membership, event phase and size/lifetime resolution through signing and its
 audit commit. New photos are admitted only in LIVE/REHEARSAL; retry receipts and
 real private-upload wiring remain separate criteria.
 
+[Media upload retry](../reports/P08/media-upload-retry.md) commits identifier-only
+receipts with issuance and rechecks current capture authority on replay. The
+client retains one File/UUID in memory and exposes a retry action. Storage access,
+real private-upload evidence, content wiring and retention remain open.
+
 - **Do:**
   1. S3 buckets `media`, `content` and `exports`: Block Public Access, SSE (AWS-managed key),
      versioning on content, lifecycle rules (ADR-003 §8), CORS limited to the app origin for

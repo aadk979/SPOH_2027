@@ -1,10 +1,12 @@
 import { beforeEach, expect, it, vi } from 'vitest';
+import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { createApp } from '../../src/app/createApp.js';
 import { createUpload } from '../../src/modules/media/application/createUpload.js';
 import { presignUpload } from '../../src/modules/media/application/s3.js';
 import { SYSTEM_AUDIT_CONTEXT } from '../../src/platform/http/auditContext.js';
 import { fixedClock } from '../../src/platform/time/index.js';
+import { reserve } from '../../src/platform/idempotency/index.js';
 import { rawDb, resetDatabase } from '../helpers/db.js';
 import { bearer } from '../helpers/fixtures.js';
 import {
@@ -22,6 +24,7 @@ vi.mock('../../src/modules/media/application/s3.js', () => ({
 let f: ScheduledLifecycleFixture;
 const app = createApp();
 const intent = {
+  idempotencyKey: randomUUID(),
   purpose: 'lostFound' as const,
   contentType: 'image/jpeg' as const,
   contentLength: 1000,
@@ -42,6 +45,11 @@ beforeEach(async () => {
   await resetDatabase();
   f = await scheduledLifecycleFixture();
   await rawDb.event.update({ where: { id: f.eventId }, data: { status: 'REHEARSAL' } });
+  await reserve(intent.idempotencyKey, {
+    endpoint: 'media.upload',
+    actorSub: f.creator.sub,
+    eventId: f.eventId,
+  });
   vi.clearAllMocks();
 });
 it.each(['DEACTIVATED', 'INVITED', 'ENDED'] as const)(
@@ -218,7 +226,7 @@ it('rejects an oversized photo before signing with current scoped limits', async
 
 it('keeps issued upload credentials and route failures no-store', async () => {
   const path = `/api/v1/events/${f.eventId}/media/uploads`;
-  const post = (body: object = intent) =>
+  const post = (body: object = { ...intent, idempotencyKey: randomUUID() }) =>
     request(app).post(path).set('Authorization', bearer(f.creator)).send(body);
   const accepted = await post();
   expect(accepted.status).toBe(201);

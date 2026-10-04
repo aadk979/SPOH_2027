@@ -34,6 +34,12 @@ export function FoundItemPhoto({ form }: { form: FoundItemFormState }): ReactNod
                 <p className="text-caption text-text-muted">Uploading…</p>
               ) : null}
 
+              {photo.canRetry ? (
+                <Button variant="quiet" size="sm" type="button" onClick={() => void photo.retry()}>
+                  Retry photo
+                </Button>
+              ) : null}
+
               {photo.state === 'done' && photo.previewUrl ? (
                 <div className="flex items-center gap-sm">
                   {/*

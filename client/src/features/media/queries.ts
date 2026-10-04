@@ -1,119 +1,50 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import type { UploadContentType } from '@spoh/shared';
-import { createUpload, uploadFile } from './api';
-import { useMediaAvailability } from './hooks/useMediaAvailability';
+import { useCurrentSession } from '@/features/session';
 import { useEventId } from '@/shared/lib/eventContext';
+import { useMediaAvailability } from './hooks/useMediaAvailability';
+import { usePhotoIntent } from './hooks/usePhotoIntent';
+import { usePhotoSubmission } from './hooks/usePhotoSubmission';
+import { EMPTY_PHOTO, type PhotoState } from './model/photoState';
+export type { UploadState } from './model/photoState';
 
-/**
- * Photo upload.
- *
- * The file never passes through the API: the client asks for a presigned S3
- * policy, posts the file straight to the bucket, and hands back only the key.
- * A phone photo is two orders of magnitude larger than the 100 KB the API's
- * body parser accepts, and the instances doing this work are the ones answering
- * booth taps.
- *
- * The whole feature is optional. A deployment without a bucket reports
- * `available: false` and the caller hides the button — which is better than
- * offering a camera that 503s at the lost-and-found desk.
- *
- * docs/adr/ADR-003-configuration-model.md §8 still governs what may be photographed: an object, never a
- * person.
- */
-
-const ACCEPTED: Record<string, UploadContentType> = {
-  'image/jpeg': 'image/jpeg',
-  'image/png': 'image/png',
-  'image/webp': 'image/webp',
-};
-
-export type UploadState = 'idle' | 'uploading' | 'done' | 'error';
-
-export interface UsePhotoUploadResult {
-  /** False when the deployment has no media bucket configured. */
+export interface UsePhotoUploadResult extends PhotoState {
   available: boolean;
-  state: UploadState;
-  /** S3 key to store on the record, once an upload has succeeded. */
-  key: string | null;
-  /** Local object URL for a preview. Revoked when replaced. */
-  previewUrl: string | null;
-  error: string | null;
+  canRetry: boolean;
   upload(file: File): Promise<void>;
+  retry(): Promise<void>;
   reset(): void;
 }
 
-/** Ask for a presigned upload in the event, then send the file straight to S3. */
-async function uploadPhoto(
-  eventId: string,
-  file: File,
-  contentType: UploadContentType,
-): Promise<string> {
-  const policy = await createUpload(eventId, {
-    purpose: 'lostFound',
-    contentType,
-    contentLength: file.size,
-  });
-  await uploadFile(policy, file);
-  return policy.key;
-}
-
+/** Photo retries retain one UUID until the file, event, person or form changes. */
 export function usePhotoUpload(): UsePhotoUploadResult {
-  const available = useMediaAvailability();
-  const eventId = useEventId();
-  const [state, setState] = useState<UploadState>('idle');
-  const [key, setKey] = useState<string | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  // An object URL that outlives its preview is a leak that grows with every
-  // photo taken at a busy desk.
+  const configured = useMediaAvailability();
+  const personId = useCurrentSession()?.volunteerId ?? null;
+  const owner = usePhotoIntent(useEventId(), personId);
+  const [saved, setSaved] = useState<{ owner: typeof owner; photo: PhotoState } | null>(null);
+  const photo = saved?.owner === owner ? saved.photo : EMPTY_PHOTO;
+  const save = useCallback((photo: PhotoState) => setSaved({ owner, photo }), [owner]);
   useEffect(() => {
     return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      if (photo.previewUrl) URL.revokeObjectURL(photo.previewUrl);
     };
-  }, [previewUrl]);
-
+  }, [photo.previewUrl]);
   const reset = useCallback(() => {
-    setState('idle');
-    setKey(null);
-    setError(null);
-    setPreviewUrl((current) => {
-      if (current) URL.revokeObjectURL(current);
-      return null;
-    });
-  }, []);
-
-  const upload = useCallback(
-    async (file: File): Promise<void> => {
-      const contentType = ACCEPTED[file.type];
-
-      if (!contentType) {
-        setError('That file is not a photo. Use the camera, or pick a JPEG or PNG.');
-        setState('error');
-        return;
-      }
-
-      setState('uploading');
-      setError(null);
-
-      try {
-        setKey(await uploadPhoto(eventId, file, contentType));
-        setPreviewUrl((current) => {
-          if (current) URL.revokeObjectURL(current);
-          return URL.createObjectURL(file);
-        });
-        setState('done');
-      } catch {
-        // Never fatal: the item record is what matters and the photo is a
-        // convenience. The caller keeps the form submittable.
-        setError('The photo did not upload. You can still save the item without it.');
-        setState('error');
-      }
-    },
-    [eventId],
-  );
-
-  return { available, state, key, previewUrl, error, upload, reset };
+    owner.discard();
+    save(EMPTY_PHOTO);
+  }, [owner, save]);
+  const upload = usePhotoSubmission(owner, save);
+  const retry = useCallback(async () => {
+    const file = owner.selectedFile();
+    if (file) await upload(file);
+  }, [owner, upload]);
+  return {
+    ...photo,
+    available: configured && personId !== null,
+    upload,
+    reset,
+    retry,
+    canRetry: photo.state === 'error' && owner.selectedFile() !== null,
+  };
 }

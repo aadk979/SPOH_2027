@@ -322,6 +322,7 @@ describe('push and media without their AWS configuration', () => {
     expect(
       (
         await as(lead).post('/media/uploads', {
+          idempotencyKey: crypto.randomUUID(),
           purpose: 'lostFound',
           contentType: 'image/jpeg',
           contentLength: 1000,
@@ -330,6 +331,7 @@ describe('push and media without their AWS configuration', () => {
     ).toBe(403);
 
     const upload = await as(ic).post('/media/uploads', {
+      idempotencyKey: crypto.randomUUID(),
       purpose: 'lostFound',
       contentType: 'image/jpeg',
       contentLength: 1000,

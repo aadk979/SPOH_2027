@@ -4,7 +4,9 @@ import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { defaultRateLimit, sensitiveRateLimit } from '../../../platform/http/rateLimit.js';
 import { requireCapability } from '../../../platform/http/access.js';
 import { validate } from '../../../platform/http/validate.js';
+import { idempotent } from '../../../platform/http/idempotency.js';
 import { createUploadHandler, mediaConfigHandler, readUrlHandler } from './handlers.js';
+import { mediaUploadReplay } from './uploadReplay.js';
 
 /**
  * Presigned media access.
@@ -33,6 +35,7 @@ mediaRouter.post(
   sensitiveRateLimit,
   requireCapability('lostFound.log'),
   validate({ body: CreateUploadRequest }),
+  idempotent('media.upload', { redacted: mediaUploadReplay }),
   createUploadHandler,
 );
 

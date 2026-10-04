@@ -1,4 +1,5 @@
 import request from 'supertest';
+import { randomUUID } from 'node:crypto';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { createApp } from '../../src/app/createApp.js';
 import type { Prisma } from '../../src/generated/prisma/client.js';
@@ -56,7 +57,12 @@ it('cannot sign another event’s legitimate upload key even when the caller bel
   const upload = await request(app)
     .post(`/api/v1/events/${other.eventId}/media/uploads`)
     .set('Authorization', bearer(f.creator))
-    .send({ purpose: 'lostFound', contentType: 'image/jpeg', contentLength: 1000 });
+    .send({
+      idempotencyKey: randomUUID(),
+      purpose: 'lostFound',
+      contentType: 'image/jpeg',
+      contentLength: 1000,
+    });
   expect(upload.status).toBe(201);
   expect(
     await rawDb.auditLog.findFirst({
@@ -75,7 +81,12 @@ it('cannot attach another event’s issued key to a found item', async () => {
   const upload = await request(app)
     .post(`/api/v1/events/${other.eventId}/media/uploads`)
     .set('Authorization', bearer(f.creator))
-    .send({ purpose: 'lostFound', contentType: 'image/jpeg', contentLength: 1000 });
+    .send({
+      idempotencyKey: randomUUID(),
+      purpose: 'lostFound',
+      contentType: 'image/jpeg',
+      contentLength: 1000,
+    });
   expect(upload.status).toBe(201);
   await rawDb.event.update({ where: { id: f.eventId }, data: { status: 'REHEARSAL' } });
   const response = await request(app)
@@ -109,7 +120,12 @@ it('allows a normally issued own-event photo to be attached inside the item tran
   const upload = await request(app)
     .post(`/api/v1/events/${f.eventId}/media/uploads`)
     .set('Authorization', bearer(f.creator))
-    .send({ purpose: 'lostFound', contentType: 'image/png', contentLength: 1000 });
+    .send({
+      idempotencyKey: randomUUID(),
+      purpose: 'lostFound',
+      contentType: 'image/png',
+      contentLength: 1000,
+    });
   expect(upload.status).toBe(201);
   const response = await request(app)
     .post(`/api/v1/events/${f.eventId}/lost-found`)

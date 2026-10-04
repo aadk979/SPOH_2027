@@ -1,4 +1,5 @@
 import request from 'supertest';
+import { randomUUID } from 'node:crypto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../../src/app/createApp.js';
 import { prisma } from '../../src/platform/db/client.js';
@@ -30,7 +31,12 @@ describe('media uploads', () => {
     const response = await request(app)
       .post('/api/v1/media/uploads')
       .set('Authorization', bearer(desk))
-      .send({ purpose: 'lostFound', contentType: 'image/jpeg', contentLength: 1000 });
+      .send({
+        idempotencyKey: randomUUID(),
+        purpose: 'lostFound',
+        contentType: 'image/jpeg',
+        contentLength: 1000,
+      });
 
     expect(response.status).toBe(201);
     const entry = await prisma.auditLog.findFirst({ where: { actorId: desk.id } });
@@ -61,10 +67,12 @@ describe('media uploads', () => {
       ],
     });
     const send = (contentLength: number) =>
-      request(app)
-        .post('/api/v1/media/uploads')
-        .set('Authorization', bearer(desk))
-        .send({ purpose: 'lostFound', contentType: 'image/jpeg', contentLength });
+      request(app).post('/api/v1/media/uploads').set('Authorization', bearer(desk)).send({
+        idempotencyKey: randomUUID(),
+        purpose: 'lostFound',
+        contentType: 'image/jpeg',
+        contentLength,
+      });
     expect((await send(2000)).status).toBe(400);
     const accepted = await send(1000);
     expect(accepted.status).toBe(201);

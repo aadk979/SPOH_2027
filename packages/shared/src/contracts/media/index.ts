@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { IdempotencyKey } from '../common/index.js';
 
 /** An opaque object key carries no event authority; the server checks its issuance receipt. */
 export const MediaUrlQuery = z.object({ key: z.string().min(1).max(200) }).strict();
@@ -29,6 +30,8 @@ export type UploadContentType = z.infer<typeof UploadContentType>;
 
 export const CreateUploadRequest = z
   .object({
+    /** One photo intent reuses this UUID across policy-request retries. */
+    idempotencyKey: IdempotencyKey,
     purpose: UploadPurpose,
     contentType: UploadContentType,
     /**

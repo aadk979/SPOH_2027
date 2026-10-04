@@ -2,15 +2,12 @@ import { randomUUID } from 'node:crypto';
 import type { CreateUploadRequest, CreateUploadResponse } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
-import { admittedCaptureTime } from '../../../platform/db/captureAdmission.js';
-import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
-import { requireCurrentCapability } from '../../../platform/access/currentCapability.js';
-import { ValidationError } from '../../../platform/errors/index.js';
+import { lockReserved, settleReserved } from '../../../platform/idempotency/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { buildKey } from '../domain/mediaKeys.js';
 import { assertConfigured, presignUpload } from './s3.js';
-import { mediaLimits } from './limits.js';
+import { holdUploadAuthority, resolveUploadPolicy } from './uploadAdmission.js';
 
 /**
  * Sign an upload policy. The file never passes through the API: the client
@@ -34,24 +31,13 @@ async function issueUpload(
   { request, actor, clock }: { request: CreateUploadRequest; actor: ActorContext; clock: Clock },
 ): Promise<CreateUploadResponse> {
   const { scope, audit } = actor;
-  const event = await holdCaptureEvent(tx, scope);
-  await requireCurrentCapability(tx, {
-    scope,
-    membershipId: actor.membershipId,
-    personId: actor.volunteerId,
-    capability: 'lostFound.log',
+  const event = await holdUploadAuthority(tx, actor);
+  await lockReserved(tx, scope, request.idempotencyKey);
+  const { now, maxBytes, ttlSeconds } = await resolveUploadPolicy(tx, {
+    event,
+    contentLength: request.contentLength,
+    clock,
   });
-  // New photos are online captures; a pre-close offline timestamp cannot admit a new upload.
-  const now = clock.now();
-  admittedCaptureTime({ ...event, now, graceHours: 0 });
-  const { maxBytes, ttlSeconds } = await mediaLimits(tx, event.organisationId);
-
-  if (request.contentLength > maxBytes) {
-    throw new ValidationError('That photo is too large. Take a smaller one.', {
-      field: 'contentLength',
-      maxBytes,
-    });
-  }
 
   const key = buildKey(request, now, randomUUID());
   const { url, fields } = await presignUpload({
@@ -72,8 +58,14 @@ async function issueUpload(
     after: {
       purpose: request.purpose,
       contentType: request.contentType,
+      contentLength: request.contentLength,
       rehearsal: event.status === 'REHEARSAL',
     },
+  });
+  await settleReserved(tx, scope, {
+    key: request.idempotencyKey,
+    statusCode: 201,
+    body: { key },
   });
 
   return { url, fields, key, expiresIn: ttlSeconds, maxBytes };

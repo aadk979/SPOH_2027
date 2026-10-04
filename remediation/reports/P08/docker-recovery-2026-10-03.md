@@ -65,3 +65,16 @@ to `run.recovery-20261003-2145` / `docker-secrets-engine.recovery-20261003-2145`
 After `docker desktop start --detach`, the existing sole Postgres container returned
 healthy on localhost:5435 and `pg_isready` passed. No containers, images, volumes,
 settings or database data were deleted during this recurrence repair.
+
+## Recurrence on 4 October during media retry verification
+
+The engine was unavailable before the focused tests' readiness hooks. A bounded
+CLI start again reported the inaccessible `Docker/run/dockerInference` socket.
+After the failed backend exited and verified Docker process inventory was empty,
+only `docker-desktop` WSL was terminated. The same two runtime directories were
+reversibly quarantined as `run.recovery-20261004-2157` and
+`docker-secrets-engine.recovery-20261004-2157`, using checked absolute paths and
+native PowerShell moves. A detached CLI start recovered the existing sole
+Postgres container: healthy, localhost:5435, original `v1_spoh-pgdata` mount.
+No containers, images, volumes, settings or database data were deleted. The
+focused media retry checks then passed on `spoh2027_test` only.

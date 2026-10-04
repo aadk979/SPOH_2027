@@ -547,7 +547,7 @@ const CASES: Record<string, Case> = {
   'DELETE /notifications/subscriptions': noId("removes the caller's own device"),
 
   'GET /media/config': noId('upload configuration is platform-wide'),
-  'POST /media/uploads': noId('issues a fresh upload key'),
+  'POST /media/uploads': noId('uses a validated client retry UUID, never a supplied object key'),
   'GET /media/url': noId(
     'signs only a key with a successful upload receipt in the path event; foreign keys are covered by mediaEventOwnership tests',
   ),
