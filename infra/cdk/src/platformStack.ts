@@ -8,6 +8,7 @@ import { AppService, createHttpApi } from './appService.js';
 import { IMAGE_REPOSITORY } from './deployAccessStack.js';
 import { StagingIdentity, type CognitoSettings } from './stagingIdentity.js';
 import { DatabaseCpuMonitoring } from './databaseCpuMonitoring.js';
+import { ObjectStorage } from './objectStorage.js';
 
 export interface PlatformStackProps extends StackProps {
   stage: StageConfig;
@@ -25,6 +26,7 @@ export class PlatformStack extends Stack {
   constructor(scope: Construct, id: string, props: PlatformStackProps) {
     super(scope, id, props);
     this.stage = props.stage;
+    new ObjectStorage(this, 'Storage', props.stage);
     this.network = new NetworkDatabase(this, 'Data', props.stage);
     new DatabaseCpuMonitoring(this, 'DatabaseMonitoring', {
       stage: props.stage.name,

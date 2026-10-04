@@ -73,6 +73,39 @@ settings retain their database/cache-bus path. See the
 [`P08.6 verification report`](../../remediation/reports/P08/infrastructure-configuration.md).
 Secret completion, rotation and Access Analyzer verification remain open.
 
+## Private storage foundation (partial P08.7)
+
+`ObjectStorage` defines retained media, versioned content and 90-day exports,
+with a separate 30-day access-log bucket. All four block public access, disable
+ACLs, use S3-managed encryption and deny non-TLS access. Log delivery is scoped
+to the exact source bucket, account and prefix. Media CORS permits only signed
+POSTs from the configured exact HTTPS client origin; no production origin means
+no production CORS rule.
+
+The existing `spoh2027-backups-665146708212` bucket is referenced by name only.
+CDK takes no ownership of it and changes none of its policies, lifecycle or
+permissions. Stack outputs expose the three data bucket names and the existing
+backup name. Application access and SSM injection remain separate: this
+foundation grants no task S3 permissions and does not enable media uploads.
+
+Media expiry must follow the event's CLOSED instant (ADR-003 §8); there is no
+upload-age deletion rule. Content versions are retained. Deleting or replacing a
+stack retains all owned buckets and their objects; any later removal is a
+separate, explicit data-disposal operation. See the
+[verification, retention and cost boundary](../../remediation/reports/P08/private-storage-foundation.md).
+
+For a review that preserves the actual running app, supply its verified image
+tag in both contexts:
+
+```bash
+npx cdk diff Spoh-staging-Platform Spoh-DeployAccess --no-change-set \
+  -c imageTag=<verified-current-image> -c serviceImageTag=<verified-current-image>
+```
+
+An image-less platform diff omits the existing app construct and therefore also
+shows proposed app removals; review with both image contexts before a release.
+Production remains review-only until the owner go decision.
+
 ## Scheduler monitoring (P08.8 / P10.6)
 
 The app log group supplies two fixed-cardinality scheduler gauges in `SPOH/<stage>`;

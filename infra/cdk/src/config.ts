@@ -21,6 +21,8 @@ export interface StageConfig {
   /** ADR-008 §3 sizing, off-season; event days scale by owner-approved schedule (P08.4). */
   app: { cpu: number; memoryMiB: number; desiredCount: number };
   database: { instanceClass: string; allocatedStorageGiB: number; maxStorageGiB: number };
+  /** Existing owner backups: reference only, without lifecycle, policy or task grants. */
+  existingBackupsBucket: string;
   /** An existing Cognito pool this stage must reference and never own (P08 risk). */
   existingUserPoolId?: string;
   /** How the app reaches that existing pool; the domain is confirmed at cutover (P12). */
@@ -30,6 +32,7 @@ export interface StageConfig {
 const ACCOUNT = '665146708212';
 const REGION = 'ap-southeast-1';
 const DOMAIN = 'spoh.example.invalid';
+const EXISTING_BACKUPS_BUCKET = 'spoh2027-backups-665146708212';
 
 /**
  * The only repository whose workflows may deploy (P08.2), as GitHub's OIDC
@@ -70,6 +73,7 @@ export const STAGES: Record<StageName, StageConfig> = {
     },
     app: { cpu: 512, memoryMiB: 1024, desiredCount: 1 },
     database: { instanceClass: 't4g.micro', allocatedStorageGiB: 20, maxStorageGiB: 100 },
+    existingBackupsBucket: EXISTING_BACKUPS_BUCKET,
   },
   prod: {
     name: 'prod',
@@ -79,6 +83,7 @@ export const STAGES: Record<StageName, StageConfig> = {
     domainName: DOMAIN,
     app: { cpu: 256, memoryMiB: 512, desiredCount: 1 },
     database: { instanceClass: 't4g.micro', allocatedStorageGiB: 20, maxStorageGiB: 100 },
+    existingBackupsBucket: EXISTING_BACKUPS_BUCKET,
     // Every Volunteer.cognitoSub points into this pool: referenced, never replaced.
     existingUserPoolId: 'ap-southeast-1_9bwl2nGF7',
     existingCognito: {

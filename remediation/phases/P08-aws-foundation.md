@@ -129,6 +129,12 @@ before storage is enabled: issued-key reads and found-item attachments must prov
 the path event's successful upload receipt. The bounded application fix does not
 complete the bucket, content, backup-reference or real private-upload criteria.
 
+[Private storage foundation](../reports/P08/private-storage-foundation.md) defines
+retained, encrypted, ACL-disabled media/content/exports and access-log buckets,
+with exact-origin signed-upload CORS and reference-only existing backups. It
+grants no application access; real uploads, content wiring and event-aware media
+retention remain open.
+
 - **Do:**
   1. S3 buckets `media`, `content` and `exports`: Block Public Access, SSE (AWS-managed key),
      versioning on content, lifecycle rules (ADR-003 §8), CORS limited to the app origin for
