@@ -1,0 +1,31 @@
+{
+  "observedAt": "2026-10-04T17:07:15.974Z",
+  "taskRevision": 119,
+  "deployedImageTag": "97b6c760da2df87b3de1088147988ad105f30306",
+  "browserVersion": "154.0.8037.97",
+  "observedListPath": "/e/spoh2027/safety/lost-found",
+  "existingPracticePhotoMatchesObject": true,
+  "privateRead200NoStore": true,
+  "privateImageByteMatch": true,
+  "browserImage": {
+    "width": 1,
+    "height": 1
+  },
+  "publicRead403": true,
+  "unknownKey404NoStore": true,
+  "anonymousRead401NoStore": true,
+  "noBearerOrCookieToS3": true,
+  "phoneAndLaptopPracticeItemVisible": true,
+  "hardReloadReady": true,
+  "settingsValuesAndVersionsUnchanged": true,
+  "normalSignOut": true,
+  "cspViolations": [],
+  "appPageErrors": [],
+  "newObjectOrItemWrites": false,
+  "allClientNavigationsCspClean": true,
+  "allClientCspReports": [],
+  "ci": "https://github.com/aadk979/SPOH_2027/actions/runs/37218130276",
+  "deployment": "https://github.com/aadk979/SPOH_2027/actions/runs/37218522148",
+  "scriptPolicyUnchanged": true,
+  "scope": "Normal Cognito Authorization Code + PKCE; read-only continuation against the existing one synthetic private S3 object and practice item; event READY. Normal auth sessions created/revoked; no new object, item, lifecycle, settings, visitor, announcement, push, production or backup mutation requested."
+}

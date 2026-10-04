@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-04T16:48:28.266Z",
+  "updatedAt": "2026-10-04T17:08:39.571Z",
   "current": {
     "phase": "P08",
     "step": "P08.7"
@@ -1781,6 +1781,10 @@
             {
               "at": "2026-10-04T16:48:27.942Z",
               "text": "Private S3 exact a7118ed staging upload/replay/practice attachment and private-read/public-denial evidence recorded; one object retained and event READY. CSP-safe client startup follow-up passes 426 interpreter units and real 32-page static-export browser regression; exact-image CI/deploy and normal Cognito continuation pending. Broad storage criteria remain open."
+            },
+            {
+              "at": "2026-10-04T17:08:39.257Z",
+              "text": "CSP-safe validation verified: CI 37218130276 and deploy 37218522148 succeed for 97b6c76; actual ECS119 healthy exact image. Normal Cognito/Chrome at 01:07 Singapore verifies private reads/denials/reload/sign-out with no CSP or app errors; no new fixture writes. Broad storage criteria remain open."
             }
           ]
         },
@@ -3389,6 +3393,10 @@
     {
       "at": "2026-10-04T16:48:28.265Z",
       "text": "Verified source 6190949: configure browser Zod interpreter before schemas/hydration; RED strict CSP eval event reproduced and GREEN phone/laptop load/reload/invalid-config refusal. Quality and scans clean, pricing unchanged. Actual a7118ed ECS118 private storage evidence records combined bounded probe and one caught eval event; no further fixture writes. P08.7 and P10.8 stay open."
+    },
+    {
+      "at": "2026-10-04T17:08:39.570Z",
+      "text": "Completed bounded CSP follow-up: source 6190949, deployed 97b6c76 ECS119, exact CI/deploy and normal Cognito read-only continuation pass. Existing one private synthetic photo/item retained; event READY, settings unchanged, no additional fixture writes. P08.7 remains partial; continue P10.8 scoped operational set/reset foundation."
     }
   ]
 }
