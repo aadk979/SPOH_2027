@@ -185,6 +185,11 @@ count change/history/restore/hard-reload journeys and reviewed settings visuals
 pass. Complete generated event/station controls and general schedule management
 remain open.
 
+[Changed-key compatibility settings saves](../reports/P10/settings-changed-keys.md)
+correct the F02-005 client payload and the legacy refresh race found by its real
+browser journey. Complete generated scopes, history and reviewed-version controls
+remain open; this bounded fix does not complete the step.
+
 - **Do:**
   1. A settings screen generated from the registry: grouped, scoped (event or station tabs), with
      descriptions, validation, change history and revert.

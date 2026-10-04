@@ -19,13 +19,30 @@ function toNumber(raw: string | undefined): number | undefined {
 }
 
 /**
- * The full settings object before schema validation. The screen saves every
- * value, unchanged ones included, so the payload is validated as a complete
- * `RuntimeSettings`, which the `UpdateSettingsRequest` patch schema accepts.
+ * Validate the complete form before selecting the changed keys for its patch.
  */
 export function toSettingsRequest(values: SettingsValues) {
   return {
     eventName: values.eventName.trim(),
     ...Object.fromEntries(NUMERIC_FIELDS.map((field) => [field.key, toNumber(values[field.key])])),
   };
+}
+
+/** Compare normalised input with the values this draft was seeded from. */
+export function hasSettingsChanges(values: SettingsValues, baseline: RuntimeSettings): boolean {
+  return Object.entries(toSettingsRequest(values)).some(
+    ([key, value]) => value !== baseline[key as keyof RuntimeSettings],
+  );
+}
+
+/** Only a parsed complete form may become a patch (ADR-003 §2, F02-005). */
+export function toSettingsPatch(
+  settings: RuntimeSettings,
+  baseline: RuntimeSettings,
+): Partial<RuntimeSettings> {
+  return Object.fromEntries(
+    Object.entries(settings).filter(
+      ([key, value]) => value !== baseline[key as keyof RuntimeSettings],
+    ),
+  );
 }

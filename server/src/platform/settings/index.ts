@@ -57,7 +57,7 @@ export type SettingKey = keyof RuntimeSettings;
 const KEY_SCHEMAS = RuntimeSettings.shape;
 
 let cache: RuntimeSettings = DEFAULT_SETTINGS;
-let loadGeneration = 0;
+let queuedLoad: Promise<RuntimeSettings> = Promise.resolve(cache);
 let overridden: SettingKey[] = [];
 let meta: { updatedAt: Date | null; updatedById: string | null } = {
   updatedAt: null,
@@ -90,8 +90,14 @@ export function settingsMeta(): {
  * booting on the morning of the event. The default it falls back to is by
  * definition a value that worked.
  */
-export async function loadSettings(): Promise<RuntimeSettings> {
-  const generation = ++loadGeneration;
+export function loadSettings(): Promise<RuntimeSettings> {
+  // A write must read after any older refresh. Serial reads also prevent a
+  // notification starting mid-read from making that write return the old cache.
+  queuedLoad = queuedLoad.then(readSettings);
+  return queuedLoad;
+}
+
+async function readSettings(): Promise<RuntimeSettings> {
   let rows: Array<{ key: string; value: unknown; updatedAt: Date; updatedById: string | null }>;
 
   try {
@@ -135,7 +141,6 @@ export async function loadSettings(): Promise<RuntimeSettings> {
     }
   }
 
-  if (generation !== loadGeneration) return cache;
   cache = Object.freeze(next) as RuntimeSettings;
   overridden = applied;
   meta = { updatedAt: latest, updatedById: latestBy };

@@ -21,7 +21,7 @@ export function EventNameField({
             {(props) => (
               <Input
                 {...props}
-                disabled={!canEdit}
+                disabled={!canEdit || form.save.isPending}
                 value={values.eventName}
                 onChange={(event) => setField('eventName', event.target.value)}
                 maxLength={80}

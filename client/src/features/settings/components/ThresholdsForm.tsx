@@ -40,7 +40,7 @@ export function ThresholdsForm({
                         inputMode="numeric"
                         min={field.min}
                         max={field.max}
-                        disabled={!canEdit}
+                        disabled={!canEdit || form.save.isPending}
                         value={(values[field.key] as string | undefined) ?? ''}
                         onChange={(event) => setField(field.key, event.target.value)}
                         className={`max-w-[140px] ${isChanged ? 'font-bold text-primary' : ''}`}

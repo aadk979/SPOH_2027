@@ -18,7 +18,7 @@ export function SettingsApply({
           <p className="text-caption text-text-muted">
             Recorded in the audit log against your name, with the previous value.
           </p>
-          <Button size="lg" block disabled={save.isPending} onClick={onSave}>
+          <Button size="lg" block disabled={!form.canSave} onClick={onSave}>
             {save.isPending ? 'Saving…' : 'Save settings'}
           </Button>
         </Card>

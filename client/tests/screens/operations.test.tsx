@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
-import { RuntimeSettings } from '@spoh/shared';
+import { GENERATED_SETTING_DEFAULTS, RuntimeSettings } from '@spoh/shared';
 import { api } from '@/shared/lib/api';
 import ImportsPage from '@/app/e/[event]/chief/imports/page';
 import ReportsPage from '@/app/e/[event]/reports/page';
@@ -135,6 +135,20 @@ describe('operations screen safety net', () => {
     state.capabilities = ['config.manage'];
     // The product rules load beside the settings (P09.14).
     mockedApi.mockImplementation(async (path: string) => {
+      if (path.endsWith('/admin/settings')) {
+        return {
+          settings: Object.fromEntries(
+            Object.keys(RuntimeSettings.shape).map((key) => [
+              key,
+              GENERATED_SETTING_DEFAULTS[key as keyof RuntimeSettings],
+            ]),
+          ),
+          overriddenKeys: [],
+          updatedAt: null,
+          updatedById: null,
+          updatedByName: null,
+        };
+      }
       if (path.endsWith('/admin/event-settings')) {
         return {
           settings: {
@@ -156,8 +170,12 @@ describe('operations screen safety net', () => {
       return { data: [], meta: { count: 0, nextCursor: null } };
     });
     show(<SettingsPage />);
+    const name = await screen.findByLabelText('Event name');
+    await waitFor(() =>
+      expect((name as HTMLInputElement).value).toBe(GENERATED_SETTING_DEFAULTS.eventName),
+    );
+    fireEvent.change(name, { target: { value: '' } });
     fireEvent.click(await screen.findByRole('button', { name: 'Save settings' }));
-    const name = screen.getByLabelText('Event name');
     const expected = RuntimeSettings.shape.eventName.safeParse('').error?.issues[0]?.message;
     expect(name.getAttribute('aria-invalid')).toBe('true');
     expect(document.getElementById('event-name-error')?.textContent).toBe(expected);

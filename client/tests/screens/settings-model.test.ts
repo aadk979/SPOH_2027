@@ -4,6 +4,8 @@ import { NUMERIC_FIELDS } from '@/features/settings/model/numericFields';
 import {
   toSettingsRequest,
   toSettingsValues,
+  hasSettingsChanges,
+  toSettingsPatch,
   type SettingsValues,
 } from '@/features/settings/model/settingsValues';
 
@@ -36,13 +38,54 @@ describe('settings request', () => {
         ]),
       ),
     });
-    // The full object is also a valid patch: the server accepts what the screen sends.
+    // Full-form validation precedes selecting the keys for the actual patch.
     expect(UpdateSettingsRequest.safeParse(parsed).success).toBe(true);
   });
 
   it('round-trips the server values through the editable form', () => {
     const settings = RuntimeSettings.parse(toSettingsRequest(validValues()));
     expect(RuntimeSettings.parse(toSettingsRequest(toSettingsValues(settings)))).toEqual(settings);
+  });
+
+  it('makes an untouched valid form an empty patch', () => {
+    const original = RuntimeSettings.parse(toSettingsRequest(validValues()));
+    expect(hasSettingsChanges(toSettingsValues(original), original)).toBe(false);
+    expect(toSettingsPatch(original, original)).toEqual({});
+  });
+
+  it('selects only changed parsed keys, including decimal numeric settings', () => {
+    const original = RuntimeSettings.parse(toSettingsRequest(validValues()));
+    const parsed = RuntimeSettings.parse({
+      ...original,
+      eventName: 'Reviewed',
+      implausibleTapsPerMinute: 3.5,
+    });
+    const patch = toSettingsPatch(parsed, original);
+    expect(patch).toEqual({ eventName: 'Reviewed', implausibleTapsPerMinute: 3.5 });
+    expect(UpdateSettingsRequest.parse(patch)).toEqual(patch);
+  });
+
+  it('normalises whitespace and numeric formatting before checking for changes', () => {
+    const original = RuntimeSettings.parse(toSettingsRequest(validValues()));
+    const values = {
+      ...toSettingsValues(original),
+      eventName: ` ${original.eventName} `,
+      implausibleTapsPerMinute: ` ${original.implausibleTapsPerMinute}.0 `,
+    };
+    expect(hasSettingsChanges(values, original)).toBe(false);
+  });
+
+  it('keeps invalid numeric edits dirty so validation can explain the error', () => {
+    const original = RuntimeSettings.parse(toSettingsRequest(validValues()));
+    expect(
+      hasSettingsChanges({ ...toSettingsValues(original), implausibleTapsPerMinute: '' }, original),
+    ).toBe(true);
+    expect(
+      hasSettingsChanges(
+        { ...toSettingsValues(original), implausibleTapsPerMinute: 'NaN' },
+        original,
+      ),
+    ).toBe(true);
   });
 
   it.each(['', '   ', 'a'.repeat(81)])('rejects event name %j', (eventName) => {

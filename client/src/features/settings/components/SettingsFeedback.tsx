@@ -18,6 +18,11 @@ export function SettingsFeedback({
           only.
         </Callout>
       ) : null}
+      {form.settings.isError ? (
+        <Callout tone="alert" role="alert" title="Settings unavailable">
+          Current settings could not be loaded. Refresh before saving.
+        </Callout>
+      ) : null}
       {hasErrors ? (
         <Callout tone="alert" role="alert" title="Invalid input">
           Nothing was saved. Correct the highlighted values and save again.
