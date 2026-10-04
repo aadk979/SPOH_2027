@@ -145,6 +145,11 @@ receipts with issuance and rechecks current capture authority on replay. The
 client retains one File/UUID in memory and exposes a retry action. Storage access,
 real private-upload evidence, content wiring and retention remain open.
 
+[Photo capture authority](../reports/P08/media-capture-authority.md) binds new
+attachments to the receipt's explicit rehearsal/live marker and current member.
+The client preserves intent through token expiry and clears photos on lifecycle
+changes. Historical event-owned reads retain their receipt rules.
+
 - **Do:**
   1. S3 buckets `media`, `content` and `exports`: Block Public Access, SSE (AWS-managed key),
      versioning on content, lifecycle rules (ADR-003 §8), CORS limited to the app origin for

@@ -1,23 +1,27 @@
-import { admitCapture } from '../../../platform/db/captureAdmission.js';
 import type { CreateLostFoundRequest, LostFoundRecord } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { requireEventStation } from '../../station/index.js';
-import { requireIssuedMediaKey } from '../../media/index.js';
 import { createItem } from '../data/repo.js';
 import { toRecordWithStation } from './itemRecord.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
+import { admitFoundItem } from './admitFoundItem.js';
 
 /** Log a found item: what it is, where it was found, where it is kept. */
 export async function logItem(
   request: CreateLostFoundRequest,
-  { volunteerId, scope, audit, clock = systemClock }: ActorContext & { clock?: Clock },
+  {
+    volunteerId,
+    membershipId,
+    scope,
+    audit,
+    clock = systemClock,
+  }: ActorContext & { clock?: Clock },
 ): Promise<LostFoundRecord> {
   const foundStationId = await requireEventStation(scope, request.foundStationId);
   const item = await prisma.$transaction(async (tx) => {
-    await admitCapture(tx, scope, { request, clock });
-    if (request.photoKey !== undefined) await requireIssuedMediaKey(tx, scope, request.photoKey);
+    await admitFoundItem(tx, { request, actor: { scope, membershipId, volunteerId }, clock });
     const row = await createItem(tx, scope, {
       itemLabel: request.itemLabel,
       categoryLabel: request.categoryLabel ?? null,

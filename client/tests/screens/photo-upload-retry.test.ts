@@ -5,12 +5,16 @@ import { createUpload, uploadFile } from '@/features/media/api';
 
 const context = vi.hoisted(() => ({
   eventId: 'first-event',
+  status: 'LIVE' as 'LIVE' | 'REHEARSAL' | 'READY' | 'DRAFT' | 'CLOSED' | 'ARCHIVED',
   session: { volunteerId: 'first-person', accessToken: 'first-token' } as {
     volunteerId: string;
     accessToken: string;
   } | null,
 }));
-vi.mock('@/shared/lib/eventContext', () => ({ useEventId: () => context.eventId }));
+vi.mock('@/shared/lib/eventContext', () => ({
+  useEventId: () => context.eventId,
+  useEvent: () => ({ id: context.eventId, status: context.status }),
+}));
 vi.mock('@/features/session', () => ({ useCurrentSession: () => context.session }));
 vi.mock('@/shared/lib/session', () => ({
   currentVolunteerId: () => context.session?.volunteerId ?? null,
@@ -29,6 +33,7 @@ const policy = {
 const photo = () => new File(['synthetic-image'], 'photo.png', { type: 'image/png' });
 beforeEach(() => {
   context.eventId = 'first-event';
+  context.status = 'LIVE';
   context.session = { volunteerId: 'first-person', accessToken: 'first-token' };
   vi.mocked(createUpload).mockReset().mockResolvedValue(policy);
   vi.mocked(uploadFile).mockReset().mockResolvedValue(undefined);
@@ -210,3 +215,55 @@ it('rejects a response after synchronous sign-out before React commits its rende
   expect(uploadFile).not.toHaveBeenCalled();
   expect(URL.createObjectURL).not.toHaveBeenCalled();
 });
+
+it.each(['REHEARSAL', 'READY', 'CLOSED'] as const)(
+  'discards a pending photo after lifecycle changes to %s',
+  async (status) => {
+    let resolve!: (value: typeof policy) => void;
+    vi.mocked(createUpload).mockReturnValueOnce(
+      new Promise((done) => {
+        resolve = done;
+      }),
+    );
+    const { result, rerender } = renderHook(() => usePhotoUpload());
+    let pending!: Promise<void>;
+    act(() => {
+      pending = result.current.upload(photo());
+    });
+    context.status = status;
+    rerender();
+    await act(async () => {
+      resolve(policy);
+      await pending;
+    });
+    expect(uploadFile).not.toHaveBeenCalled();
+    expect(result.current.key).toBeNull();
+    expect(result.current.canRetry).toBe(false);
+  },
+);
+
+it('removes a completed practice photo when the event becomes live', async () => {
+  context.status = 'REHEARSAL';
+  const { result, rerender } = renderHook(() => usePhotoUpload());
+  await act(() => result.current.upload(photo()));
+  context.status = 'LIVE';
+  rerender();
+  expect(result.current).toMatchObject({
+    state: 'idle',
+    key: null,
+    previewUrl: null,
+    canRetry: false,
+  });
+  expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:synthetic-preview');
+});
+
+it.each(['DRAFT', 'READY', 'CLOSED', 'ARCHIVED'] as const)(
+  'does not offer or start new photo capture in %s',
+  async (status) => {
+    context.status = status;
+    const { result } = renderHook(() => usePhotoUpload());
+    expect(result.current.available).toBe(false);
+    await act(() => result.current.upload(photo()));
+    expect(createUpload).not.toHaveBeenCalled();
+  },
+);

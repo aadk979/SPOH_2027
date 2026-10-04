@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useCurrentSession } from '@/features/session';
-import { useEventId } from '@/shared/lib/eventContext';
+import { useEvent } from '@/shared/lib/eventContext';
+import { currentVolunteerId } from '@/shared/lib/session';
 import { useMediaAvailability } from './hooks/useMediaAvailability';
 import { usePhotoIntent } from './hooks/usePhotoIntent';
 import { usePhotoSubmission } from './hooks/usePhotoSubmission';
@@ -20,8 +21,11 @@ export interface UsePhotoUploadResult extends PhotoState {
 /** Photo retries retain one UUID until the file, event, person or form changes. */
 export function usePhotoUpload(): UsePhotoUploadResult {
   const configured = useMediaAvailability();
-  const personId = useCurrentSession()?.volunteerId ?? null;
-  const owner = usePhotoIntent(useEventId(), personId);
+  const session = useCurrentSession();
+  const event = useEvent();
+  // Expiry drops a token temporarily; only explicit identity changes discard the File.
+  const personId = session?.volunteerId ?? currentVolunteerId();
+  const owner = usePhotoIntent(event.id, personId, event.status);
   const [saved, setSaved] = useState<{ owner: typeof owner; photo: PhotoState } | null>(null);
   const photo = saved?.owner === owner ? saved.photo : EMPTY_PHOTO;
   const save = useCallback((photo: PhotoState) => setSaved({ owner, photo }), [owner]);
@@ -41,7 +45,8 @@ export function usePhotoUpload(): UsePhotoUploadResult {
   }, [owner, upload]);
   return {
     ...photo,
-    available: configured && personId !== null,
+    available:
+      configured && session !== null && (event.status === 'LIVE' || event.status === 'REHEARSAL'),
     upload,
     reset,
     retry,

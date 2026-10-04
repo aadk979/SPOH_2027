@@ -11,6 +11,6 @@ export function mediaUploadReceipt(tx: PrismaTransactionClient, scope: EventScop
       entityId: key,
       outcome: 'SUCCESS',
     },
-    select: { id: true },
+    select: { id: true, after: true },
   });
 }
