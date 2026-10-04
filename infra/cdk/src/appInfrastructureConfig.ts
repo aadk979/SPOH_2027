@@ -11,6 +11,7 @@ interface InfrastructureProps {
   appOrigin: string;
   cognito: CognitoSettings;
   port: number;
+  mediaBucketName?: string;
 }
 
 /** Infrastructure only: operational choices belong to the live settings registry (P10.4). */
@@ -38,6 +39,7 @@ function infrastructureValues(props: InfrastructureProps) {
     // Trust the closest API Gateway hop; the native endpoint remains reachable directly.
     TRUST_PROXY_HOPS: '1',
     AWS_REGION: stage.region,
+    ...(props.mediaBucketName ? { S3_MEDIA_BUCKET: props.mediaBucketName } : {}),
   };
 }
 

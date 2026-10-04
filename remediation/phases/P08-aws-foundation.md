@@ -150,6 +150,11 @@ attachments to the receipt's explicit rehearsal/live marker and current member.
 The client preserves intent through token expiry and clears photos on lifecycle
 changes. Historical event-owned reads retain their receipt rules.
 
+[Private media task wiring](../reports/P08/private-media-wiring.md) scopes app
+signing to photo objects, injects the exact bucket through SSM, and derives the
+static client's exact S3 CSP origin. Real enabled upload/read/public-denial
+evidence, content and event-aware retention still govern completion.
+
 - **Do:**
   1. S3 buckets `media`, `content` and `exports`: Block Public Access, SSE (AWS-managed key),
      versioning on content, lifecycle rules (ADR-003 §8), CORS limited to the app origin for

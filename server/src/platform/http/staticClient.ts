@@ -3,6 +3,7 @@ import { join, normalize, sep } from 'node:path';
 import express, { Router, type Request, type Response, type NextFunction } from 'express';
 import helmet from 'helmet';
 import { isClientConfigOrigin } from '@spoh/shared';
+import { mediaObjectOrigin, type MediaStorageLocation } from '../aws/mediaOrigin.js';
 
 /**
  * The client as a static export, served beside the API (ADR-008 §2, P08.4).
@@ -18,7 +19,8 @@ import { isClientConfigOrigin } from '@spoh/shared';
  */
 
 /** The client's own policy; the API keeps its stricter one. Hashes replace 'unsafe-inline' in P15.3. */
-function clientHeaders(apiOrigin: string) {
+function clientHeaders(apiOrigin: string, mediaOrigin: string | null) {
+  const mediaSources = mediaOrigin ? [mediaOrigin] : [];
   return helmet({
     contentSecurityPolicy: {
       useDefaults: false,
@@ -26,9 +28,13 @@ function clientHeaders(apiOrigin: string) {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'", "'unsafe-inline'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", 'data:', 'blob:'],
+        imgSrc: ["'self'", 'data:', 'blob:', ...mediaSources],
         fontSrc: ["'self'", 'data:'],
-        connectSrc: ["'self'", ...(isClientConfigOrigin(apiOrigin) ? [apiOrigin] : [])],
+        connectSrc: [
+          "'self'",
+          ...(isClientConfigOrigin(apiOrigin) ? [apiOrigin] : []),
+          ...mediaSources,
+        ],
         frameAncestors: ["'none'"],
         objectSrc: ["'none'"],
         baseUri: ["'self'"],
@@ -70,14 +76,14 @@ function setCacheHeaders(res: Response, path: string): void {
   );
 }
 
-export function staticClient(root: string, apiOrigin = ''): Router {
+export function staticClient(root: string, apiOrigin = '', storage?: MediaStorageLocation): Router {
   const router = Router();
   const inside = (relative: string): boolean => {
     const full = normalize(join(root, relative));
     return full.startsWith(normalize(root) + sep) && existsSync(full);
   };
 
-  router.use(clientHeaders(apiOrigin));
+  router.use(clientHeaders(apiOrigin, storage ? mediaObjectOrigin(storage) : null));
   router.use((req: Request, _res: Response, next: NextFunction) => {
     const query = req.url.slice(req.path.length);
     req.url = exportedPath(req.path, inside) + query;

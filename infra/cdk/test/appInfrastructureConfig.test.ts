@@ -24,7 +24,12 @@ const INFRA_NAMES = [
   'PORT',
   'TRUST_PROXY_HOPS',
 ];
-const STAGING_INFRA_NAMES = [...INFRA_NAMES, 'CLIENT_BASE_URL', 'DEPLOYMENT_ENV'].sort();
+const STAGING_INFRA_NAMES = [
+  ...INFRA_NAMES,
+  'CLIENT_BASE_URL',
+  'DEPLOYMENT_ENV',
+  'S3_MEDIA_BUCKET',
+].sort();
 interface Container {
   Name: string;
   Environment?: Array<{ Name: string; Value: unknown }>;

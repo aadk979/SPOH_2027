@@ -94,6 +94,15 @@ stack retains all owned buckets and their objects; any later removal is a
 separate, explicit data-disposal operation. See the
 [verification, retention and cost boundary](../../remediation/reports/P08/private-storage-foundation.md).
 
+The separate app wiring enables media when the stage has an approved exact
+public client origin. A standard `/spoh/<stage>/infra/S3_MEDIA_BUCKET` parameter
+injects the owned bucket name into the app only. Its task role has GetObject and
+PutObject on that bucket's `lost-found/*` prefix; migration tasks have no storage
+injection or S3 grant. The static client's CSP derives the exact regional bucket
+origin, and signed private GETs return `no-store`. Content/exports/backups and
+object deletion receive no application grant. See the
+[private media verification](../../remediation/reports/P08/private-media-wiring.md).
+
 For a review that preserves the actual running app, supply its verified image
 tag in both contexts:
 

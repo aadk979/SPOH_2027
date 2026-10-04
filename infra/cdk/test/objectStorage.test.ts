@@ -186,7 +186,7 @@ describe('private object storage foundation (P08.7)', () => {
   });
 
   it.each(['staging', 'prod'] as const)(
-    'references existing backups without taking ownership or enabling %s application S3 access',
+    'references existing backups without taking ownership or giving %s tasks backup access',
     (stage) => {
       const template = templateFor(stage);
       const resources = JSON.stringify(template.toJSON().Resources);
@@ -195,10 +195,12 @@ describe('private object storage foundation (P08.7)', () => {
         Value: STAGES[stage].existingBackupsBucket,
       });
       for (const resource of Object.values(template.findResources('AWS::IAM::Policy')))
-        expect(JSON.stringify(resource.Properties.PolicyDocument)).not.toMatch(/s3:/);
+        expect(JSON.stringify(resource.Properties.PolicyDocument)).not.toContain(
+          STAGES[stage].existingBackupsBucket,
+        );
       for (const resource of Object.values(template.findResources('AWS::ECS::TaskDefinition')))
         expect(JSON.stringify(resource.Properties.ContainerDefinitions)).not.toMatch(
-          /S3_BUCKET|MEDIA_BUCKET|CONTENT_BUCKET|EXPORTS_BUCKET|AWS_ACCESS_KEY/,
+          /CONTENT_BUCKET|EXPORTS_BUCKET|AWS_ACCESS_KEY/,
         );
     },
   );

@@ -112,4 +112,20 @@ describe('serving', () => {
     const response = await request(app).get('/..%2f..%2fpackage.json');
     expect(response.status).toBe(404);
   });
+
+  it('allows only the configured regional media origin for photo upload and images', async () => {
+    const stage = express().use(
+      staticClient(root, 'https://api.example.test', {
+        bucket: 'spoh-synthetic-media',
+        region: 'ap-southeast-1',
+      }),
+    );
+    const csp = (await request(stage).get('/sign-in')).headers['content-security-policy'];
+    const media = 'https://spoh-synthetic-media.s3.ap-southeast-1.amazonaws.com';
+    expect(csp).toContain(`connect-src 'self' https://api.example.test ${media};`);
+    expect(csp).toContain(`img-src 'self' data: blob: ${media};`);
+    expect(csp).toContain("form-action 'self'");
+    expect(csp).toContain("script-src 'self' 'unsafe-inline';");
+    expect(csp).not.toContain('*.amazonaws.com');
+  });
 });

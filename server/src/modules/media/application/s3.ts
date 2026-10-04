@@ -82,7 +82,11 @@ export async function presignUpload(input: {
 export async function presignRead(key: string, ttlSeconds: number): Promise<string> {
   return getSignedUrl(
     requireClient(),
-    new GetObjectCommand({ Bucket: env.S3_MEDIA_BUCKET as string, Key: key }),
+    new GetObjectCommand({
+      Bucket: env.S3_MEDIA_BUCKET as string,
+      Key: key,
+      ResponseCacheControl: 'no-store',
+    }),
     { expiresIn: ttlSeconds },
   );
 }

@@ -32,6 +32,8 @@ import { AppInfrastructureConfig } from './appInfrastructureConfig.js';
 import { SchedulerMonitoring } from './schedulerMonitoring.js';
 import { HttpMonitoring } from './httpMonitoring.js';
 import { CacheBusMonitoring } from './cacheBusMonitoring.js';
+import type { Bucket } from 'aws-cdk-lib/aws-s3';
+import { grantPhotoObjects } from './mediaAccess.js';
 
 const PORT = 4000;
 
@@ -47,6 +49,8 @@ export interface AppServiceProps {
   /** The HTTP API this service sits behind (created first, so its URL is known). */
   api: HttpApi;
   cognito: CognitoSettings;
+  /** Enabled only after the stage has an approved exact client origin for S3 CORS. */
+  mediaBucket?: Bucket;
 }
 
 /**
@@ -85,6 +89,7 @@ export class AppService extends Construct {
       appOrigin: props.api.apiEndpoint,
       cognito: props.cognito,
       port: PORT,
+      ...(props.mediaBucket ? { mediaBucketName: props.mediaBucket.bucketName } : {}),
     });
 
     this.migrateTask = this.migrationTask(props, imageOf(props.imageTag), logs);
@@ -160,6 +165,7 @@ export class AppService extends Construct {
         retries: 3,
       },
     });
+    if (props.mediaBucket) grantPhotoObjects(task, props.mediaBucket);
     acknowledgeTask(task);
     return task;
   }

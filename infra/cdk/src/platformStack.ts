@@ -26,7 +26,7 @@ export class PlatformStack extends Stack {
   constructor(scope: Construct, id: string, props: PlatformStackProps) {
     super(scope, id, props);
     this.stage = props.stage;
-    new ObjectStorage(this, 'Storage', props.stage);
+    const storage = new ObjectStorage(this, 'Storage', props.stage);
     this.network = new NetworkDatabase(this, 'Data', props.stage);
     new DatabaseCpuMonitoring(this, 'DatabaseMonitoring', {
       stage: props.stage.name,
@@ -50,6 +50,7 @@ export class PlatformStack extends Stack {
         ...(serviceImageTag ? { serviceImageTag } : {}),
         api,
         cognito,
+        ...(props.stage.publicOrigins ? { mediaBucket: storage.media } : {}),
       });
     }
   }

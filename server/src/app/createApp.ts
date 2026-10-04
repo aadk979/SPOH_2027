@@ -30,7 +30,13 @@ export function createApp(): Express {
 
   app.use(healthRouter);
   app.use('/api/v1', createApiRouter());
-  if (env.CLIENT_DIR) app.use(staticClient(env.CLIENT_DIR, env.APP_BASE_URL?.replace(/\/$/, '')));
+  if (env.CLIENT_DIR)
+    app.use(
+      staticClient(env.CLIENT_DIR, env.APP_BASE_URL?.replace(/\/$/, ''), {
+        bucket: env.S3_MEDIA_BUCKET,
+        region: env.AWS_REGION,
+      }),
+    );
 
   app.use(notFoundHandler);
   app.use(errorHandler);
