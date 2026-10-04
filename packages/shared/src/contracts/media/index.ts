@@ -1,5 +1,9 @@
 import { z } from 'zod';
 
+/** An opaque object key carries no event authority; the server checks its issuance receipt. */
+export const MediaUrlQuery = z.object({ key: z.string().min(1).max(200) }).strict();
+export type MediaUrlQuery = z.infer<typeof MediaUrlQuery>;
+
 /**
  * Media uploads — currently only a photograph of a found item.
  *

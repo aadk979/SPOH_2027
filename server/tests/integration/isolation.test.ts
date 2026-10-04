@@ -548,7 +548,9 @@ const CASES: Record<string, Case> = {
 
   'GET /media/config': noId('upload configuration is platform-wide'),
   'POST /media/uploads': noId('issues a fresh upload key'),
-  'GET /media/url': noId('signs an object key; the key is not an event-owned row'),
+  'GET /media/url': noId(
+    'signs only a key with a successful upload receipt in the path event; foreign keys are covered by mediaEventOwnership tests',
+  ),
 
   'POST /fallback/windows': {
     body: (b) => ({ tier: 3, reason: 'isolation check', stationId: b.station }),

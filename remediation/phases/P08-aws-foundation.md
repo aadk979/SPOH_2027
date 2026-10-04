@@ -124,6 +124,11 @@ staging client is `secure-channel.duckdns.org` and staging API is
 
 ### P08.7 — Storage
 
+[Media event ownership](../reports/P08/media-event-ownership.md) is a prerequisite
+before storage is enabled: issued-key reads and found-item attachments must prove
+the path event's successful upload receipt. The bounded application fix does not
+complete the bucket, content, backup-reference or real private-upload criteria.
+
 - **Do:**
   1. S3 buckets `media`, `content` and `exports`: Block Public Access, SSE (AWS-managed key),
      versioning on content, lifecycle rules (ADR-003 §8), CORS limited to the app origin for

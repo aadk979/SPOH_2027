@@ -4,6 +4,7 @@ import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { requireEventStation } from '../../station/index.js';
+import { requireIssuedMediaKey } from '../../media/index.js';
 import { createItem } from '../data/repo.js';
 import { toRecordWithStation } from './itemRecord.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
@@ -16,6 +17,7 @@ export async function logItem(
   const foundStationId = await requireEventStation(scope, request.foundStationId);
   const item = await prisma.$transaction(async (tx) => {
     await admitCapture(tx, scope, { request, clock });
+    if (request.photoKey !== undefined) await requireIssuedMediaKey(tx, scope, request.photoKey);
     const row = await createItem(tx, scope, {
       itemLabel: request.itemLabel,
       categoryLabel: request.categoryLabel ?? null,

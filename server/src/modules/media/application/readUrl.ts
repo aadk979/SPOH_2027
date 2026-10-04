@@ -1,14 +1,28 @@
 import type { MediaUrlResponse } from '@spoh/shared';
-import { NotFoundError } from '../../../platform/errors/index.js';
-import type { EventScope } from '../../../platform/db/eventScope.js';
-import { isReadableKey } from '../domain/mediaKeys.js';
+import { requireCurrentCapability } from '../../../platform/access/currentCapability.js';
+import { prisma } from '../../../platform/db/client.js';
+import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
+import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { assertConfigured, presignRead } from './s3.js';
 import { mediaLimits } from './limits.js';
+import { requireIssuedMediaKey } from './requireIssuedMediaKey.js';
 
-/** A short-lived read URL, only for a key this app could have issued. */
-export async function readUrl(key: string, scope: EventScope): Promise<MediaUrlResponse> {
+/** Mint a short-lived URL while current event membership and exact ownership are held. */
+export async function readUrl(key: string, actor: ActorContext): Promise<MediaUrlResponse> {
   assertConfigured();
-  if (!isReadableKey(key)) throw new NotFoundError('Media object');
-  const { ttlSeconds } = await mediaLimits(scope);
-  return { url: await presignRead(key, ttlSeconds), expiresIn: ttlSeconds };
+  return prisma.$transaction(
+    async (tx) => {
+      await holdCaptureEvent(tx, actor.scope);
+      await requireCurrentCapability(tx, {
+        scope: actor.scope,
+        membershipId: actor.membershipId,
+        personId: actor.volunteerId,
+        capability: 'own.read',
+      });
+      await requireIssuedMediaKey(tx, actor.scope, key);
+      const { ttlSeconds } = await mediaLimits(actor.scope);
+      return { url: await presignRead(key, ttlSeconds), expiresIn: ttlSeconds };
+    },
+    { isolationLevel: 'ReadCommitted', timeout: 30_000 },
+  );
 }

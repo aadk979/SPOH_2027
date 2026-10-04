@@ -1,6 +1,5 @@
 import { Router } from 'express';
-import { z } from 'zod';
-import { CreateUploadRequest } from '@spoh/shared';
+import { CreateUploadRequest, MediaUrlQuery } from '@spoh/shared';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { defaultRateLimit, sensitiveRateLimit } from '../../../platform/http/rateLimit.js';
 import { requireCapability } from '../../../platform/http/access.js';
@@ -16,8 +15,10 @@ import { createUploadHandler, mediaConfigHandler, readUrlHandler } from './handl
  */
 export const mediaRouter: Router = Router();
 
-const MediaUrlQuery = z.object({ key: z.string().min(1).max(200) }).strict();
-
+mediaRouter.use('/url', (_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+});
 mediaRouter.use(requireAuth);
 
 /** Lets the client hide the camera button rather than offer one that 503s. */
