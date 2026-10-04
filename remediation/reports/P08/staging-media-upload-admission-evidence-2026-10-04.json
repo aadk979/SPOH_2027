@@ -1,0 +1,32 @@
+{
+  "observedAt": "2026-10-04T13:27:02.034Z",
+  "deployedImageTag": "b71cd261c82b94e68689b69d693f62862425341d",
+  "taskRevision": 114,
+  "ci": "https://github.com/aadk979/SPOH_2027/actions/runs/37204784193",
+  "deployment": "https://github.com/aadk979/SPOH_2027/actions/runs/37205108317",
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  "scope": "Normal Cognito Authorization Code + PKCE; read-only disabled media API in the established synthetic staging event",
+  "checks": {
+    "normalSignIn": true,
+    "mediaDisabled": true,
+    "readReturns503": true,
+    "uploadReturns503NoStore": true,
+    "noStoreFailures": true,
+    "strictQueriesRejected": true,
+    "anonymousRejected": true,
+    "hardReloadStable": true,
+    "compatibilitySettingsUnchanged": true,
+    "guardedProductValuesAndVersionsUnchanged": true,
+    "normalSignOut": true,
+    "appPageErrors": []
+  },
+  "fixtureEffects": "GETs plus one valid policy request after confirming media is disabled: the unavailable producer returns 503 before its transaction. No policy, object, found item, setting, visitor, lifecycle or delivery effect created.",
+  "limitation": "Real S3 upload, signed private reads and direct public denial await separate guarded storage wiring. Current upload admission/lifecycle/revocation and event ownership are proven by local real-Postgres integration tests with a fake S3 signer."
+}

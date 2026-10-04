@@ -51,3 +51,20 @@ client intent, least-privilege task grants and SSM injection, exact storage-orig
 client CSP, real presigned browser upload/private-read/public-denial evidence,
 content integration and event-aware media retention remain open. This admission
 fix alone does not complete P08.7 or authorise production storage creation.
+
+## Exact staging release
+
+Source `71955e6` and tracker image
+`b71cd261c82b94e68689b69d693f62862425341d` passed
+[CI](https://github.com/aadk979/SPOH_2027/actions/runs/37204784193) and
+[staging deployment](https://github.com/aadk979/SPOH_2027/actions/runs/37205108317).
+CloudFormation is UPDATE_COMPLETE; ECS revision 114 runs the exact image with
+one desired/running task, one completed deployment and zero failed tasks.
+
+At 21:27 Singapore time on 4 October, installed Chrome 154 completed normal
+Cognito sign-in, hard reload and sign-out without app page errors. The probe
+confirmed media is disabled before a bounded policy request returned 503/no-store;
+no policy or object was created. URL 503, strict query 400 and anonymous 401
+responses are also no-store. Existing compatibility and product settings/versions
+were unchanged. The [sanitised evidence](staging-media-upload-admission-evidence-2026-10-04.json)
+records these checks; real S3 issuance awaits separate guarded wiring.

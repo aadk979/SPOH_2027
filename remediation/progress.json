@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-04T13:12:12.762Z",
+  "updatedAt": "2026-10-04T13:36:56.549Z",
   "current": {
     "phase": "P08",
     "step": "P08.7"
@@ -3333,6 +3333,10 @@
     {
       "at": "2026-10-04T12:56:51.373Z",
       "text": "P08.7 private storage foundation source 2cd80a3 and exact image 86cd807: CI 37202778997, Infra 37202778995 and staging deployment 37203012917 succeeded. Read-only actual AWS evidence at 20:54 SGT verifies CloudFormation UPDATE_COMPLETE/ECS revision 113, desired/running 1, single COMPLETED deployment/0 failed tasks; 4 private retained AES256/ACL-disabled/TLS-only buckets, exact log delivery/CORS, content versioning, 90-day exports/30-day logs, no upload-age media expiry; anonymous listings 403. Eight backup configuration hashes match pre-release baseline; app S3 permissions/injection remain absent. P08.7 remains open. Next prerequisite: media upload admission current authority/lifecycle locks, proven by two real-Postgres red regressions; upload replay protocol and actual wiring still pending."
+    },
+    {
+      "at": "2026-10-04T13:36:56.548Z",
+      "text": "P08.7 media upload admission source 71955e6/exact b71cd26 passed CI 37204784193 and staging deployment 37205108317; actual CF UPDATE_COMPLETE/ECS114 single completed desired/running1 failed0. Normal Cognito Chrome154 at21:27SGT verifies disabled media, bounded policy503 noStore creates no credential/object; read503/strict400/anonymous401 noStore; hard reload/signout zero app errors, settings/products+versions unchanged. Retry protocol tests now red; stable UUID, identifier-only replay, current authority/limits on replay are next. Storage/content/retention and production boundaries remain open."
     }
   ]
 }
