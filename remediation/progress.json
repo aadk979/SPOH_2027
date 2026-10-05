@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T14:11:18.127Z",
+  "updatedAt": "2026-10-05T14:30:29.346Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -3586,6 +3586,10 @@
     {
       "at": "2026-10-05T13:52:10.268Z",
       "text": "P08.9 application coverage ratchet exact CI 37317255252 and deployment 37318198668 succeed on a58b186. All three instrumented suites, 16 checker tests, unchanged-floor comparison and seven-day artifact execute; six retained files downloaded/inspected with matching raw counters. Read-only staging at 21:50 Singapore confirms exact image on healthy ECS revision 128, one desired/running and completed rollout. No app source or setting writes in this correction. P08.9/G5 stay open for other pipeline criteria and client model/library line target. Independent generated catalogue reader is still under local verification."
+    },
+    {
+      "at": "2026-10-05T14:30:29.345Z",
+      "text": "Generated catalogue reader accepted: cc55dd7 CI 37322694543 and deploy 37323752826 succeed; retained six coverage files match all raw counters. Exact healthy ECS revision 129 and normal Cognito Chrome phone event/laptop station values/history/reload/logout pass at 22:29 SGT without admin writes or value/history changes. P10.8 remains open; continuing reviewed catalogue history restores."
     }
   ]
 }
