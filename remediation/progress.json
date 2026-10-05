@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T10:49:10.571Z",
+  "updatedAt": "2026-10-05T10:57:36.774Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -3536,6 +3536,10 @@
     {
       "at": "2026-10-05T10:49:10.570Z",
       "text": "P08.9 partial: locally verified shared-contract CI correction cb506cf/tracker74defb8 is pushed in aa42013. Exact CI37298082070 SUCCESS; Tests job metadata explicitly confirms Shared contract tests step executed SUCCESS. Current local standalone command173/15files PASS. Seeded browser journeys, coverage ratchet, rollback rehearsal, dependency automation and park/unpark remain open. Current P10.8 capture management staging deploy37298820871 is running; no phase or gate closure."
+    },
+    {
+      "at": "2026-10-05T10:57:36.773Z",
+      "text": "P08.9 partial inventory: accepted explicit test-only Node24 server coverage2301 pass+4 existing skips/158files585.30s; configured scope lines95.58% branches86.53% exceeds recorded P07. Client460/56files29.76s lines69.73% branches61.37% exceeds P07. First server invocation omitted local-auth unit configuration, owned coverage process/worker stopped and incomplete results excluded. Real local/staging/cloud/browser state untouched by measurements. Full server router/composition scope, actual CI coverage ratchet/floors and broader pipeline criteria remain open; no closure."
     }
   ]
 }

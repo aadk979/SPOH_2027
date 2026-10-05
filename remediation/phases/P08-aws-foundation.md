@@ -199,6 +199,10 @@ verify detection, notification delivery, the full catalogue or budget compliance
 existing standalone shared suite to the Tests job. Exact-head CI 37298082070
 executes that new step successfully. The remaining pipeline criteria stay open.
 
+The [fresh coverage inventory](../reports/P08/coverage-inventory.md) measures
+current configured server and overall client coverage above recorded P07 values.
+Expanded server router/composition scope and the actual CI ratchet remain open.
+
 - **Do:** GitHub Actions:
   1. The existing checks.
   2. Build images, push to ECR, run migrations, and deploy **staging** on merge to `main`.

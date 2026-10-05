@@ -1,0 +1,36 @@
+{
+  "measuredOn": "2026-10-05",
+  "applicationSource": "22a12eb4eba66233a8d4e9c4befb52594a3038bf",
+  "pushedRelease": "aa42013d6f7f255114cec8992219edcb03066542",
+  "runtime": "Node 24, Vitest 4.1.11 and coverage-v8 4.1.11",
+  "serverConfiguredScope": {
+    "command": "npm run test:coverage --workspace server",
+    "environment": "Explicit local-auth test-only configuration; DATABASE_URL and TEST_DATABASE_URL name spoh2027_test, dotenv disabled",
+    "scope": "src/modules/**/*.ts and src/platform/**/*.ts; generated files, tests and **/router.ts excluded. App/config/main composition outside this configured scope is not measured.",
+    "passed": 2301,
+    "existingSkipped": 4,
+    "files": 158,
+    "durationSeconds": 585.3,
+    "statements": { "covered": 5762, "total": 6129, "percent": 94.01 },
+    "branches": { "covered": 3027, "total": 3498, "percent": 86.53 },
+    "functions": { "covered": 1735, "total": 1820, "percent": 95.32 },
+    "lines": { "covered": 5329, "total": 5575, "percent": 95.58 },
+    "recordedP07": { "linesPercent": 91.29, "branchesPercent": 77.26 },
+    "configuredThresholdsPassed": true
+  },
+  "clientOverall": {
+    "command": "npm run test:coverage --workspace client",
+    "scope": "src/**/*.{ts,tsx}",
+    "passed": 460,
+    "files": 56,
+    "durationSeconds": 29.76,
+    "statements": { "covered": 2639, "total": 3876, "percent": 68.08 },
+    "branches": { "covered": 1705, "total": 2778, "percent": 61.37 },
+    "functions": { "covered": 954, "total": 1475, "percent": 64.67 },
+    "lines": { "covered": 2431, "total": 3486, "percent": 69.73 },
+    "recordedP07": { "linesPercent": 59.06, "branchesPercent": 45.34 }
+  },
+  "excludedRun": "The first server coverage invocation disabled dotenv but omitted the unit project's local-auth fixture configuration. Seven unit files imported zero tests. Only that owned Node24 coverage run and its verified test worker were stopped; the incomplete measurement is excluded. The accepted run above supplies explicit test-only authentication configuration and passes every unit/integration file.",
+  "effects": "Only the dedicated integration database was reset by guarded test helpers. No real local database, staging fixture, cloud resource or browser session was changed by these measurements.",
+  "limitations": "This inventory does not implement the ADR-007 coverage ratchet. The CI workflow still does not execute coverage. Expanded server scope including routers/composition, ratchet/floor implementation, domain/application target checks and seeded browser CI remain open. Existing configured thresholds are not equivalent to the specified phase ratchet or full G5 targets."
+}
