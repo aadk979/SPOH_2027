@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T04:00:27.548Z",
+  "updatedAt": "2026-10-05T04:40:53.187Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -2426,7 +2426,8 @@
             "c19a9fe7403036b3c7afb44f89dd5c98e465d48a",
             "39b9d72cf5a923ac6e6bc4184361fbb3d4152ab7",
             "b6a22c15f2fdaf2d48477f0a3b1fbee3cac921fb",
-            "ccf3921971487b0fb447a122653d3b1f369f03d4"
+            "ccf3921971487b0fb447a122653d3b1f369f03d4",
+            "3f4ac1861db793246dd84e5f4e954168158f9c0a"
           ],
           "notes": [
             {
@@ -2496,6 +2497,14 @@
             {
               "at": "2026-10-05T04:00:27.216Z",
               "text": "Exact-image CI 37260469999 and staging deploy 37260940702 succeeded; CF UPDATE_COMPLETE and ECS121 exact image/one desired-running/one completed/zero failed. Normal Cognito Chrome154 read-only actual browser CORS verified prior USER/RESET history across two keyset pages, exact registered values/removal semantics, attribution, owned station read, strict/missing/anonymous no-store refusals, hard reload/sign-out, preserved catalogue inheritance/product/compatibility values and READY state, zero app/CSP errors. No new setting fixtures. Partial P10.8 remains open."
+            },
+            {
+              "at": "2026-10-05T04:02:51.488Z",
+              "text": "Begin bounded scoped operational history revert producer after exact history staging verification. Initial two actual event/station HTTP restore cases fail with expected 404. Strict reviewed owned history, existing guarded set/reset transaction, attributed selected-history audit and identifier-only current-authority retries; no generic guarded keys or raw values. Generated UI/schedules/consumers remain open."
+            },
+            {
+              "at": "2026-10-05T04:40:52.918Z",
+              "text": "Scoped operational restore API locally verified: two initial HTTP missing-route failures then green; six new shared cases/all124 shared; 53 new real-Postgres restore cases, 261 focused checks in 11 files, full1593-pass/four-existing-skip suite in102 files (520.73s); 587 server/426 client units, workspace types/lint, architecture1052 modules/4670 dependencies, generated settings/hardcoding, maintained formatting/scans634commits, pricing preserved, final build/32-page static export and phone/laptop actual CSP checks. Existing guarded writer/reset, selected-history audit provenance, identifier-only current-authority retries, malformed/foreign refusal and actual lock/rollback/count admission evidence. No schema or real spoh2027 reset/seed/migration. Exact-image CI/deploy and normal Cognito restores pending; full UI/schedules/consumers remain open."
             }
           ]
         },
@@ -3452,6 +3461,10 @@
     {
       "at": "2026-10-05T04:00:27.546Z",
       "text": "Scoped operational history foundation fully verified locally and on exact ccf3921 staging at 11:58 SGT. Continue with reviewed operational history revert producer; generated UI, operational schedules, legacy consumers and broad P10 criteria remain open. Independent P08 IAM/monitoring observations are committed locally for next verified batch."
+    },
+    {
+      "at": "2026-10-05T04:40:53.186Z",
+      "text": "Verified scoped operational restore source3f4ac18; batch push includes completed ccf3921 normal-Cognito history read evidence and independent read-only P08 IAM/secret metadata and six-alarm/log-group inventories. No broad phase closure, external-access/rotation/notification or budget compliance claimed. Continue to real staging restore verification, then a bounded generated capture-control UI consumer."
     }
   ]
 }
