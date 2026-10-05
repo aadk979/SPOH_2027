@@ -11,6 +11,7 @@ import type {
   ScopedSettingsTarget,
   ScopedSettingsMutationResponse,
   ScopedSettingsRevertResponse,
+  ScopedSettingsReadResponse,
 } from '@spoh/shared';
 import { useEventId } from '@/shared/lib/eventContext';
 import { useCurrentSession } from '@/features/session';
@@ -195,13 +196,13 @@ export const scopedSettingsKeys = {
   history: (eventId: string, personId: string | undefined, target: ScopedSettingsTarget) =>
     [...scopedSettingsKeys.current(eventId, personId, target), 'capture.open', 'history'] as const,
 };
-export function useScopedCaptureCurrent(target: ScopedSettingsTarget) {
+export function useScopedCaptureCurrent(target: ScopedSettingsTarget, enabled = true) {
   const eventId = useEventId();
   const session = useCurrentSession();
   return useQuery({
     queryKey: scopedSettingsKeys.current(eventId, session?.volunteerId, target),
     queryFn: () => getScopedSettings(eventId, target),
-    enabled: !!session,
+    enabled: enabled && !!session,
     gcTime: 0,
     refetchInterval: ms.dashboardPoll(),
     refetchIntervalInBackground: false,
@@ -248,4 +249,21 @@ export function useApplyCaptureChange() {
         client.removeQueries({ queryKey: scopedSettingsKeys.owner(eventId, session?.volunteerId) });
     },
   });
+}
+
+export function useCaptureScheduleSettings() {
+  const eventId = useEventId();
+  const session = useCurrentSession();
+  const client = useQueryClient();
+  const owner = scopedSettingsKeys.owner(eventId, session?.volunteerId);
+  return {
+    clear: () => client.removeQueries({ queryKey: owner }),
+    accept: (current: ScopedSettingsReadResponse) => {
+      client.setQueryData(
+        scopedSettingsKeys.current(eventId, session?.volunteerId, current.target),
+        current,
+      );
+      void client.invalidateQueries({ queryKey: owner });
+    },
+  };
 }

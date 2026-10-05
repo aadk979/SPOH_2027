@@ -7,6 +7,7 @@ import {
   type ScopedSettingsHistoryRecord,
 } from '@spoh/shared';
 import { ApiError } from '@/shared/lib/apiErrors';
+import { scopedSettingRow, scopedSettingReviewChanged } from '@/shared/lib/scopedSettingReview';
 
 export const CAPTURE_KEY = 'capture.open';
 export const captureMetadata = GENERATED_SETTING_METADATA[CAPTURE_KEY];
@@ -18,9 +19,7 @@ export type CaptureRequest =
   | { kind: 'change'; body: ScopedSettingsMutationRequest }
   | { kind: 'restore'; body: ScopedSettingsRevertRequest };
 export function captureRow(current: ScopedSettingsReadResponse) {
-  const row = current.data.find(({ key }) => key === CAPTURE_KEY);
-  if (!row) throw new Error('Capture setting is unavailable');
-  return row;
+  return scopedSettingRow(current, CAPTURE_KEY);
 }
 export function captureValue(value: unknown) {
   return value === true ? 'Open' : value === false ? 'Paused' : 'Previous value unavailable';
@@ -36,12 +35,7 @@ export function captureActionLabel(action: CaptureAction) {
   return `Restore historical version ${action.history.version}`;
 }
 export function captureReviewChanged(a: ScopedOperationalSetting, b: ScopedOperationalSetting) {
-  return (
-    a.storedVersion !== b.storedVersion ||
-    a.value !== b.value ||
-    a.source.scope !== b.source.scope ||
-    a.source.version !== b.source.version
-  );
+  return scopedSettingReviewChanged(a, b);
 }
 export function captureReviewBlocked(input: {
   current: ScopedSettingsReadResponse;

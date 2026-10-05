@@ -229,8 +229,14 @@ retries. Schedule list/edit/cancel/UI and broader phase criteria remain open.
 [Reviewed capture schedule management](../reports/P10/capture-schedule-management-api.md)
 adds exact-target private list, creator-owned pending edit and current-manager
 cancellation, with reviewed versions, immutable retry intent and worker/action
-lock guards. Its verification is in progress; scheduling UI and broader phase
-criteria remain open.
+lock guards. Its exact staging image and normal Cognito management probe pass;
+broader phase criteria remain open.
+
+[Reviewed capture scheduling controls](../reports/P10/capture-schedule-controls-ui.md)
+add event/station lists, event-clock future creation, creator edit and manager
+cancellation with separate reviewed versions and frozen retry intent. Client,
+real-worker browser and 70 reviewed visual checks pass; D-11 CI/deployment is being
+verified. Broader generated consumers and phase criteria remain open.
 
 - **Do:**
   1. A settings screen generated from the registry: grouped, scoped (event or station tabs), with
