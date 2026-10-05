@@ -74,9 +74,36 @@ reads are verified by the separate browser suite.
 
 ## Staging acceptance
 
-The local slice is verified. D-11 CI, exact deployed image and a normal Cognito
-Chrome catalogue/history journey are pending; no staging acceptance is claimed
-by this initial report.
+Source bcff7e1 and release cc55dd75d0ad2d4b87b74f6fe99643048da580d3 are pushed
+directly to main under D-11. Exact-release
+[CI 37322694543](https://github.com/aadk979/SPOH_2027/actions/runs/37322694543)
+passes, including the actual shared, server, client and ratchet steps. The retained
+application-coverage artifact 11350523632 contains all six summary/LCOV files;
+every package's raw covered/total counters match the accepted local reports.
+It is created at 14:19:13 UTC on 5 October and expires at the same time on 12 October.
+CI passes 173 shared checks, 2,308 server checks with four existing skips and 526
+client checks. The new client inventory includes all 418 maintained source files.
+
+[Staging deployment 37323752826](https://github.com/aadk979/SPOH_2027/actions/runs/37323752826)
+also succeeds. At 22:29 SGT, read-only AWS checks verify UPDATE_COMPLETE, the sole
+desired/running healthy task's exact cc55dd7 image, task definition revision 129,
+zero pending tasks and a single completed rollout before the browser starts.
+
+Normal Cognito Authorization Code + PKCE in installed Chrome 154 then verifies
+the collapsed reader, all 14 phone event rows, ten existing private capture
+history records, settled hard reload with unchanged values, and all three laptop
+owned-station rows with empty private capture history. No older-page cursor is
+present in these staging collections; cursor behaviour uses local evidence.
+All catalogue/history reads are no-store. Event/station values, existing event
+capture history, compatibility/product settings and READY lifecycle remain
+unchanged. No admin write is requested. Normal sign-out returns 204, with zero
+application page errors, CSP violations or actual 429/5xx failures.
+
+The [sanitised staging evidence](staging-operational-catalogue-ui-evidence-2026-10-05.json)
+contains bounded outcomes without credentials, raw values or event/person/station
+IDs. Only this owned normal synthetic authentication session is established and
+revoked. Archive, malformed/history variants and authority loss use local/API
+evidence. The successful read probe does not need repeating for documentation.
 
 ## Remaining scope
 

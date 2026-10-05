@@ -242,8 +242,9 @@ remain open.
 [The generated operational catalogue reader](../reports/P10/operational-catalogue-ui.md)
 adds grouped metadata, event/station scoped values, inheritance/versions and owned
 private history for all supported keys. Client, real-browser, static/CSP and 76
-reviewed visual checks pass locally. Generated editing/revert/scheduling, legacy
-consumer migration and staging acceptance remain open.
+reviewed visual checks pass. Actual CI/coverage artifacts, exact staging revision
+129 and the normal Cognito Chrome reader journey also pass. Generated editing/
+revert/scheduling and legacy consumer migration remain open.
 
 - **Do:**
   1. A settings screen generated from the registry: grouped, scoped (event or station tabs), with

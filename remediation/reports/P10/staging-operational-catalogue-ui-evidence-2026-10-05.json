@@ -1,0 +1,40 @@
+{
+  "observedAt": "2026-10-05T14:29:34.454Z",
+  "deployedImageTag": "cc55dd75d0ad2d4b87b74f6fe99643048da580d3",
+  "taskRevision": 129,
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97",
+    "phone": [390, 844],
+    "laptop": [1440, 900]
+  },
+  "authentication": "Normal Cognito Authorization Code + PKCE and current roster session",
+  "checks": {
+    "exactHealthyRunningImage": true,
+    "collapsedUntilRequested": true,
+    "phoneEventKeyCount": 14,
+    "eventPrivateHistory": true,
+    "eventHistory": {
+      "rows": 10,
+      "olderPage": false
+    },
+    "settledHardReloadValuesUnchanged": true,
+    "laptopOwnedStationKeyCount": 3,
+    "stationPrivateHistory": true,
+    "stationHistory": {
+      "rows": 0,
+      "olderPage": false
+    },
+    "privateReadsNoStore": true,
+    "eventAndStationValuesUnchanged": true,
+    "eventHistoryUnchanged": true,
+    "legacyProductsAndReadyUnchanged": true,
+    "adminWrites": [],
+    "normalSignOut204": true,
+    "appPageErrors": [],
+    "cspViolations": [],
+    "backendFailures": []
+  },
+  "fixtureEffects": "Only GETs to catalogue/history and existing settings/me endpoints. No setting, schedule, lifecycle, visitor, announcement or delivery write requested. Normal authentication establishes and revokes only this owned synthetic session.",
+  "limitations": "Staging verifies one synthetic event and one owned station using existing history. Archive, malformed values, access loss and additional history states use local/API evidence. Legacy runtime migration, generated editing/revert/scheduling and broader phase criteria remain open. The separately observed intermittent immediate reload symptom is not claimed fixed."
+}
