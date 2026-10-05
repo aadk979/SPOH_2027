@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T15:25:20.971Z",
+  "updatedAt": "2026-10-05T16:32:04.742Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -3604,6 +3604,10 @@
     {
       "at": "2026-10-05T15:25:20.970Z",
       "text": "Accepted generated catalogue restores: 21 new client checks, 547 full client passes, 12 serial real browser checks, 80 reviewed visual checks, static/CSP and quality checks; actual CI all package raw coverage counters match local, exact healthy ECS 131 and normal Cognito Chrome owned restore/retry/cleanup pass. Preserve 105/171 and 9/17; continue generated editor."
+    },
+    {
+      "at": "2026-10-05T16:32:04.741Z",
+      "text": "Owner 2026-10-06 authorized faster process: ADR-010 uses milestone pushes, full CI for application/validation/unknown inputs and dependency-free docs checks plus secret scan; run-bound staging selection with ancestry/anti-rollback guards and retained queue. Named P11.1-P11.3/P13.6 prerequisite start overrides and independent file ownership replace whole-phase stalls. P10 editor draft preserved; no product step or gate closed. Local safety tests and rollout verification recorded in HANDOFF-2026-10-06-PROCESS."
     }
   ]
 }

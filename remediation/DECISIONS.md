@@ -233,6 +233,11 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
 - **Answer:** **Work directly on `main`** (owner, amended 2026-09-25). No feature branches, pull
   requests or tags. Every step is committed to `main` and pushed to `main`. The first answer, A, was
   used once: PR #1 carried the plan and P00 and was merged.
+  **Delivery amendment, 2026-10-06:** the owner instructed the agent to fix and
+  implement the faster process. [ADR-010](../docs/adr/ADR-010-delivery-process.md)
+  records milestone pushes, lightweight documentation acceptance, preserved full
+  application gates and bounded prerequisite/parallel work. Main-only commits and
+  existing owner/production approvals remain.
 
 ### D-12 — Existing data
 

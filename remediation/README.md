@@ -161,6 +161,13 @@ the baseline, and it only ever receives P06.12 cherry-picks. What each fix chang
 
 ## Resuming (read this first in a fresh session)
 
+The owner approved the faster delivery process on **6 October 2026**. Read
+[the latest handoff](reports/HANDOFF-2026-10-06-PROCESS.md) and
+[ADR-010](../docs/adr/ADR-010-delivery-process.md) first. They supersede historical
+whole-phase start ordering, no-subagent instructions and documentation deployment
+cycles. Read older handoffs only for the relevant feature's detailed constraints;
+do not restart completed work or reread every historical handoff on each takeover.
+
 1. **Get oriented**
    ```bash
    cd /home/user/SPOH_2027
@@ -171,7 +178,10 @@ the baseline, and it only ever receives P06.12 cherry-picks. What each fix chang
    `standards/engineering-standards.md` → the current phase file (its **Context for a fresh
    session** section first, then the current step).
 3. **Bootstrap the environment** if `node_modules` is missing. See [Environment bootstrap](#environment-bootstrap).
-4. **Work one step at a time:**
+4. **Work a coherent feature milestone:** use focused checks during iteration,
+   retain logical green commits and prepare source/tracker notes before one push.
+   Full application CI still gates release; reuse unchanged evidence and do not
+   redeploy documentation to make its SHA match the image. For example:
    ```bash
    node remediation/tools/progress.mjs start P06.3
    # … do the step, run the phase's verification commands …
@@ -183,8 +193,11 @@ the baseline, and it only ever receives P06.12 cherry-picks. What each fix chang
 5. **At the end of a phase:** fill in the phase file's **Phase report** section, snapshot metrics to
    `reports/metrics/<phase>.json`, run `progress.mjs done P06`, commit, push, then tell the owner
    the phase is done and that this is a good moment to clear context.
-6. **Never** start a phase whose dependencies are not `done`, never pass G1 without the owner's
-   recorded sign-off, and never change behaviour in P06/P07.
+6. Start work when its concrete prerequisites are ready. ADR-010 explicitly allows
+   bounded P11.1–P11.3 and P13.6 prerequisite work before whole-phase dependencies
+   close, using a recorded tracker override. All other dependency rules and owner
+   gates remain. Never force completion, pass G1 without recorded sign-off, or
+   change behaviour in P06/P07.
 
 **Git workflow (D-11): `main` only.** Commit each step to `main` and push to `main`. Do not create
 branches, pull requests or tags. If the environment assigns a session branch, still commit to `main`

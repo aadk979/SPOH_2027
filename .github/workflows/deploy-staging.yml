@@ -1,6 +1,8 @@
 name: Deploy staging
 
-# Every green main reaches staging with no manual step (P08.9): after CI passes,
+# Every accepted application change reaches staging automatically (P08.9).
+# Documentation CI is checked but does not build an image or acquire cloud access.
+# After full CI passes,
 # build the ARM64 image, define the migrate task for it, run migrations, then
 # move the service (ADR-008 §1, P08.4). Rollback is redeploying an earlier
 # commit's image: run this workflow by hand with that commit's SHA.
@@ -15,12 +17,8 @@ on:
         description: Commit whose image to deploy (defaults to the branch head)
         required: false
 
-concurrency:
-  group: deploy-staging
-  cancel-in-progress: false
-
 permissions:
-  id-token: write
+  actions: read
   contents: read
 
 env:
@@ -31,15 +29,61 @@ env:
   STACK: Spoh-staging-Platform
 
 jobs:
+  release:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.id == github.repository_id)
+    name: Select an accepted application release
+    runs-on: ubuntu-latest
+    outputs:
+      eligible: ${{ steps.select.outputs.eligible }}
+      sha: ${{ steps.select.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.sha || github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: actions/download-artifact@v4
+        if: github.event_name == 'workflow_run'
+        with:
+          name: delivery-decision
+          path: .delivery
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+      - id: select
+        # Older rollback commits may predate the release helper.
+        run: |
+          if [ "$DELIVERY_MANUAL" = "true" ]; then
+            echo 'eligible=true' >> "$GITHUB_OUTPUT"
+            echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          else
+            node scripts/staging-release.mjs
+          fi
+        env:
+          DELIVERY_MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
+          DELIVERY_MANIFEST: .delivery/delivery-decision.json
+
   image:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    needs: release
+    if: needs.release.outputs.eligible == 'true'
     name: Build the image
     runs-on: ubuntu-24.04-arm
+    permissions:
+      id-token: write
+      contents: read
     outputs:
       sha: ${{ steps.sha.outputs.sha }}
     steps:
       - id: sha
-        run: echo "sha=${{ inputs.sha || github.event.workflow_run.head_sha || github.sha }}" >> "$GITHUB_OUTPUT"
+        run: echo "sha=$RELEASE_SHA" >> "$GITHUB_OUTPUT"
+        env:
+          RELEASE_SHA: ${{ needs.release.outputs.sha }}
 
       - uses: actions/checkout@v4
         with:
@@ -69,19 +113,36 @@ jobs:
     needs: image
     runs-on: ubuntu-latest
     environment: staging
+    # Only eligible application releases enter this queue. Retain pending jobs;
+    # recheck ordering under the lock before any migration or service change.
+    concurrency:
+      group: deploy-staging
+      cancel-in-progress: false
+      queue: max
+    permissions:
+      actions: read
+      id-token: write
+      contents: read
     env:
       SHA: ${{ needs.image.outputs.sha }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ env.SHA }}
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
-      - run: npm ci
+      - uses: actions/download-artifact@v4
+        if: github.event_name == 'workflow_run'
+        with:
+          name: delivery-decision
+          path: .delivery
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -96,20 +157,44 @@ jobs:
           [ "$tag" = "None" ] && tag=""
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
+      - name: Recheck source and actual deployed image under the deployment lock
+        id: guard
+        run: |
+          if [ "$DELIVERY_MANUAL" = "true" ]; then
+            echo 'eligible=true' >> "$GITHUB_OUTPUT"
+          else
+            node scripts/staging-release.mjs
+          fi
+        env:
+          DELIVERY_MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
+          DELIVERY_MANIFEST: .delivery/delivery-decision.json
+          DELIVERY_CHECK_DEPLOYED: 'true'
+          DELIVERY_DEPLOYED_SHA: ${{ steps.current.outputs.tag }}
+          DELIVERY_CHECK_MANUAL: 'true'
+          DELIVERY_CI_STARTED_AT: ${{ github.event.workflow_run.created_at }}
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - run: npm ci
+        if: steps.guard.outputs.eligible == 'true'
+
       - name: Define the migrate task for this release
+        if: steps.guard.outputs.eligible == 'true'
         working-directory: infra/cdk
         run: |
           npx cdk deploy "$STACK" --require-approval never --outputs-file ../../outputs.json \
             -c imageTag="$SHA" ${{ steps.current.outputs.tag && format('-c serviceImageTag={0}', steps.current.outputs.tag) || '' }}
 
       - name: Run migrations
+        if: steps.guard.outputs.eligible == 'true'
         run: node infra/scripts/run-migrate-task.mjs outputs.json "$STACK"
 
       - name: Move the service to this release
+        if: steps.guard.outputs.eligible == 'true'
         working-directory: infra/cdk
         run: |
           npx cdk deploy "$STACK" --require-approval never --outputs-file ../../outputs.json \
             -c imageTag="$SHA" -c serviceImageTag="$SHA"
 
       - name: Smoke
+        if: steps.guard.outputs.eligible == 'true'
         run: node infra/scripts/smoke.mjs "$(node -e "console.log(require('./outputs.json')['$STACK'].AppUrl)")"

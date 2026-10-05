@@ -31,6 +31,7 @@
     "test:integration": "npm run test:integration --workspace server",
     "test:coverage": "npm run test:coverage --workspaces --if-present && npm run check:coverage",
     "check:coverage": "node --test scripts/check-coverage.test.mjs && node scripts/check-coverage.mjs",
+    "check:delivery": "node --test scripts/delivery-changes.test.mjs scripts/staging-release.test.mjs",
     "db:up": "docker compose up -d postgres",
     "db:down": "docker compose down",
     "db:migrate": "npm run db:migrate --workspace server",

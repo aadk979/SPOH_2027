@@ -171,6 +171,10 @@ client/src/
 
 ## 10. Commits and progress
 
+- [ADR-010](../../docs/adr/ADR-010-delivery-process.md) defines the current delivery
+  cadence: affected checks during iteration, required acceptance at coherent feature
+  milestones, no application deployment for allowlisted documentation, and bounded
+  prerequisite work across phase boundaries. All completion and coverage rules remain.
 - Small commits, each green, each carrying a `Remediation-Step: P06.3` trailer.
 - One logical change per commit. Moves and edits go in separate commits so reviews can diff moves as renames.
 - Update `progress.json` through `tools/progress.mjs` after every step, and push to `main`. There are

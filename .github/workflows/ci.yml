@@ -1,20 +1,54 @@
 name: CI
 
-# Every PR, plus main. BUILD_PLAN §11.3.
+# Every PR and main push is checked. Only explicitly allowlisted documentation
+# avoids the application suites; unknown paths and unavailable history run them.
 on:
   pull_request:
   push:
     branches: [main]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # A later documentation push must not cancel application acceptance.
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.sha }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
 
 env:
   NODE_VERSION: '24'
 
 jobs:
+  changes:
+    name: Delivery classification and tracker checks
+    runs-on: ubuntu-latest
+    outputs:
+      full_ci: ${{ steps.classify.outputs.full_ci }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      # Dependency-free safety tests run even on the lightweight docs path.
+      - run: node --test scripts/delivery-changes.test.mjs scripts/staging-release.test.mjs
+      - id: classify
+        name: Classify the entire push or PR range
+        run: node scripts/delivery-changes.mjs
+        env:
+          DELIVERY_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+      - run: node remediation/tools/progress.mjs validate
+      - uses: actions/upload-artifact@v4
+        with:
+          name: delivery-decision
+          path: delivery-decision.json
+          retention-days: 14
+          if-no-files-found: error
+
   quality:
+    needs: changes
+    if: needs.changes.outputs.full_ci == 'true'
     name: Lint, typecheck, build
     runs-on: ubuntu-latest
     steps:
@@ -51,6 +85,8 @@ jobs:
           NEXT_PUBLIC_API_BASE_URL: https://api.example.invalid
 
   test:
+    needs: changes
+    if: needs.changes.outputs.full_ci == 'true'
     name: Tests
     runs-on: ubuntu-latest
 
@@ -135,6 +171,8 @@ jobs:
             client/coverage/lcov.info
 
   architecture:
+    needs: changes
+    if: needs.changes.outputs.full_ci == 'true'
     # Blocking: any boundary violation fails the build (server, shared and cycles
     # since P06.10, the client since P07.9). The size guards are lint errors in the
     # quality job; the guard counts here are a report.
@@ -172,7 +210,8 @@ jobs:
         run: npm run check:hardcoding
 
   security:
-    name: Security checks
+    name: Secret scan and applicable dependency audit
+    needs: changes
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -181,15 +220,18 @@ jobs:
           fetch-depth: 0
 
       - uses: actions/setup-node@v4
+        if: needs.changes.outputs.full_ci == 'true'
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
       - run: npm ci
+        if: needs.changes.outputs.full_ci == 'true'
 
       # Fails the build on a high or critical advisory (BUILD_PLAN §8.6), save
       # the narrow, expiring exceptions in scripts/audit-exceptions.json.
       - name: Dependency audit
+        if: needs.changes.outputs.full_ci == 'true'
         run: node scripts/audit.mjs
 
       - name: Secret scan

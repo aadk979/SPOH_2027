@@ -53,3 +53,7 @@ remediation/tools/journeys/.state/
 
 # CDK synth output
 infra/cdk/cdk.out/
+
+# Run-bound CI delivery evidence, never an application input.
+/delivery-decision.json
+/.delivery/
