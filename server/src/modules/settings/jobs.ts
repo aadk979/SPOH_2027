@@ -8,7 +8,7 @@ import { changeSettingInTransaction } from '../../platform/settings/change.js';
 import { SETTINGS } from '../../platform/settings/registry.js';
 
 /** Further setting keys/scopes stay unavailable until their consumers and authority are wired. */
-const captureSettingPayload = z
+export const captureSettingPayload = z
   .object({
     scope: z.enum(['event', 'station']),
     scopeId: Id,

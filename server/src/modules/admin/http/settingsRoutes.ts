@@ -1,4 +1,5 @@
 import type { Router } from 'express';
+import { z } from 'zod';
 import {
   ChangeEventSettingRequest,
   EventSettingHistoryQuery,
@@ -8,6 +9,8 @@ import {
   ScopedSettingsRevertRequest,
   RevertEventSettingRequest,
   UpdateSettingsRequest,
+  CreateCaptureScheduleRequest,
+  Id,
 } from '@spoh/shared';
 import { adminRateLimit, defaultRateLimit } from '../../../platform/http/rateLimit.js';
 import { requireCapability } from '../../../platform/http/access.js';
@@ -27,12 +30,34 @@ import {
   scopedSettingMutationReplay,
   revertEventSettingHandler,
   eventSettingRevertReplay,
+  captureScheduleReplay,
+  createCaptureScheduleHandler,
+  getCaptureScheduleHandler,
 } from '../../settings/index.js';
 
 /** Register directly on the authenticated admin router, keeping the isolation inventory flat. */
 export function registerSettingsRoutes(router: Router): void {
   registerOperationalSettingsRoutes(router);
+  registerCaptureScheduleRoutes(router);
   registerProductSettingsRoutes(router);
+}
+
+function registerCaptureScheduleRoutes(router: Router): void {
+  router.post(
+    '/settings/catalogue/schedules',
+    adminRateLimit,
+    requireCapability('config.manage'),
+    validate({ body: CreateCaptureScheduleRequest }),
+    idempotent('setting.capture.schedule', { redacted: captureScheduleReplay }),
+    createCaptureScheduleHandler,
+  );
+  router.get(
+    '/settings/catalogue/schedules/:id',
+    defaultRateLimit,
+    requireCapability('config.manage'),
+    validate({ params: z.object({ id: Id }).strict(), query: z.object({}).strict() }),
+    getCaptureScheduleHandler,
+  );
 }
 
 function registerOperationalSettingsRoutes(router: Router): void {

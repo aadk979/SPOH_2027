@@ -221,6 +221,11 @@ the generated capture.open catalogue at event and station scope, with inherited
 values, reviewed set/reset/history/restore and a frozen retry intent. The broader
 generated catalogue, operational scheduling and phase criteria remain open.
 
+[Reviewed capture schedule creation/status](../reports/P10/capture-schedule-api.md)
+adds a bounded future producer for the existing event/station setting.apply worker,
+current-authority private status, immutable creation intent and identifier-only
+retries. Schedule list/edit/cancel/UI and broader phase criteria remain open.
+
 - **Do:**
   1. A settings screen generated from the registry: grouped, scoped (event or station tabs), with
      descriptions, validation, change history and revert.

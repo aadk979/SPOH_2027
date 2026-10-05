@@ -528,6 +528,12 @@ const CASES: Record<string, Case> = {
   'POST /admin/settings/catalogue/revert': noId(
     'restores only the current manager’s owned path-event/scope/key history; foreign selections and reviewed versions/replay identity are covered by scopedSettingsRevert tests',
   ),
+  'POST /admin/settings/catalogue/schedules': noId(
+    'creates only a reviewed capture schedule in the path event; foreign event/station/retry scope is covered by captureSchedule tests',
+  ),
+  'GET /admin/settings/catalogue/schedules/:id': {
+    params: (b) => ({ id: b.announcementSchedule }),
+  },
   'PATCH /admin/settings': noId('runtime settings are platform-wide until P10'),
   'GET /admin/event-settings': noId("reads the path event's settings"),
   'GET /admin/event-settings/history': noId(

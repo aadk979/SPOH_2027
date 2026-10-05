@@ -208,6 +208,16 @@ checklist evidence; ARCHIVED remains unsupported until its access/retention depe
 Late execution is decided by those current guards, without an arbitrary additional lateness cutoff.
 System/platform creators and user recurrence cannot bypass the user transition contract.
 
+**Reviewed capture producer (P10.8, 2026-10-05).** The bounded public producer accepts
+only future capture.open SETs at event or owned-station scope, with the current
+selected stored version, reason and UUID. Creation rechecks current config.manage
+under Event/member/station locks and changes no setting immediately. Action,
+operational creation audit and identifier-only retry receipt commit together.
+Private status and retries recheck current authority and rebuild status/values.
+Immutable creation audit binds retry intent even after later schedule changes.
+The existing worker performs its independent current execution checks. Capture
+schedule list/edit/cancel and creation UI remain separate P10.8 consumers.
+
 **Daily report snapshots (P10.7, 2026-10-03).** One-off user actions require a completed event
 day in the action's own event and current `report.generate` permission. The range is derived
 under the Event lock from the current timezone/day boundary, with an inclusive completion
