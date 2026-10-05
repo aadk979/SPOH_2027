@@ -1,0 +1,156 @@
+{
+  "observedAt": "2026-10-05T03:51:06.414Z",
+  "scope": "Read-only inventory of exact staging CloudFormation-owned alarms, dashboards and log-group metadata",
+  "alarmCount": 6,
+  "alarms": [
+    {
+      "logicalResourceId": "AppCacheBusMonitoringDegradedAlarmC8A4FA8D",
+      "state": "OK",
+      "stateUpdatedAt": "2026-10-04T01:10:36.552000+08:00",
+      "actionsEnabled": true,
+      "alarmActionCount": 0,
+      "okActionCount": 0,
+      "insufficientDataActionCount": 0,
+      "metric": {
+        "namespace": "SPOH/staging",
+        "name": "CacheBusDegraded",
+        "statistic": "Maximum"
+      },
+      "metricQueryCount": 0,
+      "evaluationPeriods": 3,
+      "datapointsToAlarm": 2,
+      "periodSeconds": 60,
+      "threshold": 0,
+      "comparison": "GreaterThanThreshold",
+      "treatMissingData": "missing"
+    },
+    {
+      "logicalResourceId": "HttpMonitoringErrorRateAlarm5CA79837",
+      "state": "OK",
+      "stateUpdatedAt": "2026-10-04T23:56:24.740000+08:00",
+      "actionsEnabled": true,
+      "alarmActionCount": 0,
+      "okActionCount": 0,
+      "insufficientDataActionCount": 0,
+      "metric": null,
+      "metricQueryCount": 3,
+      "evaluationPeriods": 1,
+      "datapointsToAlarm": 1,
+      "periodSeconds": null,
+      "threshold": 1,
+      "comparison": "GreaterThanThreshold",
+      "treatMissingData": "notBreaching"
+    },
+    {
+      "logicalResourceId": "HttpMonitoringLatencyAlarm5DD49D16",
+      "state": "OK",
+      "stateUpdatedAt": "2026-10-03T02:04:53.744000+08:00",
+      "actionsEnabled": true,
+      "alarmActionCount": 0,
+      "okActionCount": 0,
+      "insufficientDataActionCount": 0,
+      "metric": {
+        "namespace": "AWS/ApiGateway",
+        "name": "Latency",
+        "statistic": "p95"
+      },
+      "metricQueryCount": 0,
+      "evaluationPeriods": 3,
+      "datapointsToAlarm": 2,
+      "periodSeconds": 60,
+      "threshold": 300,
+      "comparison": "GreaterThanThreshold",
+      "treatMissingData": "notBreaching"
+    },
+    {
+      "logicalResourceId": "DatabaseMonitoringCpuAlarm171430C0",
+      "state": "OK",
+      "stateUpdatedAt": "2026-10-03T03:32:46.404000+08:00",
+      "actionsEnabled": true,
+      "alarmActionCount": 0,
+      "okActionCount": 0,
+      "insufficientDataActionCount": 0,
+      "metric": {
+        "namespace": "AWS/RDS",
+        "name": "CPUUtilization",
+        "statistic": "Average"
+      },
+      "metricQueryCount": 0,
+      "evaluationPeriods": 5,
+      "datapointsToAlarm": 5,
+      "periodSeconds": 60,
+      "threshold": 90,
+      "comparison": "GreaterThanThreshold",
+      "treatMissingData": "missing"
+    },
+    {
+      "logicalResourceId": "AppSchedulerMonitoringDeadAlarmE510AAEB",
+      "state": "OK",
+      "stateUpdatedAt": "2026-10-02T23:46:35.441000+08:00",
+      "actionsEnabled": true,
+      "alarmActionCount": 0,
+      "okActionCount": 0,
+      "insufficientDataActionCount": 0,
+      "metric": {
+        "namespace": "SPOH/staging",
+        "name": "SchedulerDeadActions",
+        "statistic": "Maximum"
+      },
+      "metricQueryCount": 0,
+      "evaluationPeriods": 1,
+      "datapointsToAlarm": 1,
+      "periodSeconds": 60,
+      "threshold": 0,
+      "comparison": "GreaterThanThreshold",
+      "treatMissingData": "ignore"
+    },
+    {
+      "logicalResourceId": "AppSchedulerMonitoringLagAlarm0EE2965C",
+      "state": "OK",
+      "stateUpdatedAt": "2026-10-02T23:46:31.723000+08:00",
+      "actionsEnabled": true,
+      "alarmActionCount": 0,
+      "okActionCount": 0,
+      "insufficientDataActionCount": 0,
+      "metric": {
+        "namespace": "SPOH/staging",
+        "name": "SchedulerLagSeconds",
+        "statistic": "Maximum"
+      },
+      "metricQueryCount": 0,
+      "evaluationPeriods": 2,
+      "datapointsToAlarm": 2,
+      "periodSeconds": 60,
+      "threshold": 60,
+      "comparison": "GreaterThanThreshold",
+      "treatMissingData": "ignore"
+    }
+  ],
+  "stackDashboardCount": 0,
+  "logGroups": [
+    {
+      "logicalResourceId": "ApiAccessLogsE9DF007D",
+      "retentionInDays": 30,
+      "storedBytesAtInventory": 326173,
+      "logGroupClass": "STANDARD"
+    },
+    {
+      "logicalResourceId": "AppAppLogsC0533AD7",
+      "retentionInDays": 30,
+      "storedBytesAtInventory": 6104639,
+      "logGroupClass": "STANDARD"
+    },
+    {
+      "logicalResourceId": "DataFlowLogsD68DE740",
+      "retentionInDays": 30,
+      "storedBytesAtInventory": 20126755,
+      "logGroupClass": "STANDARD"
+    }
+  ],
+  "fixtureEffects": "Only caller identity, stack-resource list, CloudWatch alarm metadata and exact log-group metadata calls. No logs, metric bodies, notification endpoints, alarm tests, actions, subscriptions or resource changes requested.",
+  "limitations": [
+    "Alarm state is an observation, not a tested detection or notification result. INSUFFICIENT_DATA remains unknown.",
+    "The inventory covers stack-owned resources only; it does not enumerate unrelated account resources or prove notification delivery.",
+    "Log-group storedBytes is service metadata at the observation time, not monthly usage or billed cost. Budget and complete catalogue/notification criteria remain open."
+  ]
+}

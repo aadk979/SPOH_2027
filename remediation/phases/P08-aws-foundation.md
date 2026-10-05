@@ -170,6 +170,11 @@ Real listener disconnection/recovery, 41 infrastructure checks, nag synth and a 
 read-only diff pass. It has no notification actions; the full catalogue, delivery,
 budget and dashboard criteria below remain open.
 
+The subsequent [staging monitoring inventory](../reports/P08/staging-monitoring-inventory.md)
+records six deployed alarms, their current states and zero notification actions,
+three retained log groups and the missing dashboard. Observation alone does not
+verify detection, notification delivery, the full catalogue or budget compliance.
+
 - **Do:**
   1. CloudWatch log groups `app` and `audit`, with retention set.
   2. Structured JSON logs with request ids.
