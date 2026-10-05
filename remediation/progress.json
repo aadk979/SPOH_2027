@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-04T17:08:39.571Z",
+  "updatedAt": "2026-10-05T02:45:08.677Z",
   "current": {
-    "phase": "P08",
-    "step": "P08.7"
+    "phase": "P10",
+    "step": "P10.8"
   },
   "gates": [
     {
@@ -2423,7 +2423,8 @@
             "7f32c6912bf8ddeb9cf2de39f4ac4a16fd12f749",
             "62d01caec4f565a250002fd5dcff7d0d260cbd2c",
             "8357ec88035299bda1b661c4d9ca0cdfd0dc8776",
-            "c19a9fe7403036b3c7afb44f89dd5c98e465d48a"
+            "c19a9fe7403036b3c7afb44f89dd5c98e465d48a",
+            "39b9d72cf5a923ac6e6bc4184361fbb3d4152ab7"
           ],
           "notes": [
             {
@@ -2469,6 +2470,14 @@
             {
               "at": "2026-10-04T11:43:12.154Z",
               "text": "Scoped operational catalogue read: strict generated event/station keys and registered values, inherited source and selected stored versions; Event/current-member locks, post-wait clock and exact ownership; no generic writes. Nine shared and 29 new database checks, full 1385-pass/four-existing-skip serial suite, server/client types, build, 565 server units, lint/architecture/static/scans pass. Exact CI/deploy and normal Cognito read proof pending; full generated edit/history/schedule/revert and legacy consumers remain open."
+            },
+            {
+              "at": "2026-10-04T17:08:40.688Z",
+              "text": "Begin one bounded scoped operational settings set/reset API after exact-image private S3 and CSP continuation passed. Reuse the existing versioned store, preserve Event/current-member locking and identifier-only atomic replay; guarded product/privacy/platform controls remain excluded."
+            },
+            {
+              "at": "2026-10-05T02:45:08.385Z",
+              "text": "Verified scoped operational SET/RESET API foundation: strict generated 14 event/3 station keys, reviewed stored versions, post-lock current authority, archived new-write refusal, atomic history/audit/identifier-only receipt, current semantic retry and inherited-before audit safeguards. Seven shared and 33 DB cases; fresh focused 109, full serial 1501 passed/four existing skips in 100 files (492.26s), shared 112/server 587/client 426, all workspace types, final builds/static CSP/lint/architecture/settings/hardcoding/maintained formatting/scans passed. Docker stale sockets reversibly quarantined; original volume preserved. Pricing unchanged. Exact CI/deploy/staging producer verification pending. Generated UI/history/revert/schedules and legacy consumers remain open; P10.8 stays open."
             }
           ]
         },
@@ -3397,6 +3406,10 @@
     {
       "at": "2026-10-04T17:08:39.570Z",
       "text": "Completed bounded CSP follow-up: source 6190949, deployed 97b6c76 ECS119, exact CI/deploy and normal Cognito read-only continuation pass. Existing one private synthetic photo/item retained; event READY, settings unchanged, no additional fixture writes. P08.7 remains partial; continue P10.8 scoped operational set/reset foundation."
+    },
+    {
+      "at": "2026-10-05T02:45:08.676Z",
+      "text": "P10.8 scoped operational mutation source 39b9d72 locally verified. The interrupted overnight scheduler failures did not reproduce: fresh focused 109 and full 1501/four skips pass after original-volume Docker recovery. Source/tracker and the preceding CSP staging evidence are being pushed together under D-11; await exact-image CI/deploy and bounded normal Cognito set/reset restoration before claiming staging success."
     }
   ]
 }
