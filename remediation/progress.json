@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T13:05:43.358Z",
+  "updatedAt": "2026-10-05T13:29:51.712Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -1841,7 +1841,8 @@
           "completedAt": null,
           "commits": [
             "cb506cf8ace20c07c9c4e26e1b1de53eda9f3589",
-            "73d1849a09afefb40f741528c46dd80f5bc3dfcd"
+            "73d1849a09afefb40f741528c46dd80f5bc3dfcd",
+            "ba183cca8352e529c64cfb3f062e24e6bee836a6"
           ],
           "notes": [
             {
@@ -1851,6 +1852,10 @@
             {
               "at": "2026-10-05T13:05:42.721Z",
               "text": "Measured application coverage ratchet locally verified: full2301 server/four existing skips158 files629.22s includes all587 source files; client505/59 includes413 source and CSP startup; shared173/15 includes44 source. Floors server95.20L86.19B/client71.50L63.84B/shared51.66L80.92B;16 checker regressions; exact counters/all-source inventory/nondecreasing base floors/CI summaries. Tied audit test now selects exact update identity. Failed full/setup measurements excluded; reversible Docker socket quarantine preserved original volume/settings/earlier backups. Types/lint/architecture1099/4960/format/secrets/pricing unchanged. Actual new CI pending; broader step/G5 and client model90% line target remain open."
+            },
+            {
+              "at": "2026-10-05T13:29:51.413Z",
+              "text": "The first exact CI executes 173 shared, 2301 server plus four existing skips and 505 client checks but correctly fails server branches at 3070/3563 versus unchanged 86.19 floor. Retained artifact identifies the single timing-dependent cache-bus stop branch. Seven deterministic transport tests now verify reconnect cancellation/backoff/recovery/subscriber isolation; full fresh server coverage passes 2308 plus four skips, 95.36 lines/86.41 branches, and the unchanged three-package ratchet passes. Types/lint/architecture/formatting/scans pass. Replacement exact CI remains pending; P08.9 stays open."
             }
           ]
         },
@@ -2552,6 +2557,10 @@
             {
               "at": "2026-10-05T12:26:26.136Z",
               "text": "Reviewed capture schedule UI source verified locally: 45 new client cases, full505/59 files, ten serial event/station browser journeys with real worker and owned restoration, 70 reviewed visual checks, 32-page export/CSP, types/lint/architecture and secret/format checks. Nine frozen memberships/eight person markers and preserved P08/P05 unchanged. Earlier fixture/acceptance failures excluded and owned effects restored. CI/deploy/normal Cognito UI pending; broader P10 remains open."
+            },
+            {
+              "at": "2026-10-05T13:29:51.712Z",
+              "text": "Preserve the verified capture-scheduling consumer; next generated catalogue consumer is being reviewed while the independent P08 coverage correction executes in CI. Full phase criteria stay open."
             }
           ]
         },
