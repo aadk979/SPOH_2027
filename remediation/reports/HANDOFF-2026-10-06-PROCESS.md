@@ -107,3 +107,10 @@ Actionlint 1.7.12 validates the rest of both workflows but predates GitHub's doc
 real GitHub run must confirm the supported retained-queue syntax. The source commit,
 full CI/deployment result, and subsequent documentation-only proof will be recorded
 here after observation. Until then do not claim remote rollout acceptance.
+
+Process source commit `75ceb60d0954b635668d783b1dbcc04f7ae5b2db` is pushed to main.
+[Full CI 37342645280](https://github.com/aadk979/SPOH_2027/actions/runs/37342645280)
+has passed classification/tracker checks and started all four application jobs.
+This documentation update is deliberately pushed while that CI is in flight, to
+verify the cheap docs path and prove it cannot cancel or replace source acceptance.
+Final CI/deployment and documentation proof remain pending at this checkpoint.
