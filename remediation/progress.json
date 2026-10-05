@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T11:09:19.689Z",
+  "updatedAt": "2026-10-05T12:26:26.471Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -2438,7 +2438,8 @@
             "00dbc2a9d263f741852c31f1a399f4e2d639fd72",
             "6eade954cbd5fa40b2558343243343fb36592bbb",
             "c96db0c1d95eae341ace88b2368b5fa20415ac8b",
-            "22a12eb4eba66233a8d4e9c4befb52594a3038bf"
+            "22a12eb4eba66233a8d4e9c4befb52594a3038bf",
+            "e6718c1bd566a5310973abb6d1c37904ee757f73"
           ],
           "notes": [
             {
@@ -2540,6 +2541,10 @@
             {
               "at": "2026-10-05T10:40:28.032Z",
               "text": "Partial: audit-backed capture schedule list/edit/cancel; creator-owned editing, current-manager cancellation, reviewed schedule/setting versions, immutable per-version retries and Event/member/station/action/reservation guards. Local 63 new/299 focused/1714 full checks plus four existing skips pass; 173 shared and 587 server units, workspace guards, build32/static CSP pass. Exact-image CI/deploy/staging verification pending; scheduling UI and broader criteria remain open."
+            },
+            {
+              "at": "2026-10-05T12:26:26.136Z",
+              "text": "Reviewed capture schedule UI source verified locally: 45 new client cases, full505/59 files, ten serial event/station browser journeys with real worker and owned restoration, 70 reviewed visual checks, 32-page export/CSP, types/lint/architecture and secret/format checks. Nine frozen memberships/eight person markers and preserved P08/P05 unchanged. Earlier fixture/acceptance failures excluded and owned effects restored. CI/deploy/normal Cognito UI pending; broader P10 remains open."
             }
           ]
         },
@@ -3544,6 +3549,10 @@
     {
       "at": "2026-10-05T11:09:19.688Z",
       "text": "P10.8 capture schedule management source 22a12eb / release aa42013 accepted at 19:08 SGT on exact ECS image/task 125: CI37298082070 and deploy37298820871 success; normal Cognito Chrome private list, reviewed edit/cancel, immutable retries/current definitions, stale/altered/anonymous guards, unchanged inheritance/products/READY, settled reload/sign-out and zero CSP/page errors. One owned schedule CANCELLED v3 with zero attempts. Two pre-write harness failures from wrongly requiring no-store on legacy reads excluded; own sessions revoked204. Scheduling UI/broader phase remain open; continuing."
+    },
+    {
+      "at": "2026-10-05T12:26:26.469Z",
+      "text": "P10.8 source e6718c1 adds reviewed event/station capture schedule list/create/edit/cancel with independent versions, event clock, frozen UUID retries, current response definitions and denied-cache privacy. All local consumer checks pass; D11 release verification pending. Continuing programme, no full step/gate closure."
     }
   ]
 }
