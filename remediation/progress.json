@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T09:22:58.669Z",
+  "updatedAt": "2026-10-05T09:28:18.849Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -1836,11 +1836,16 @@
         {
           "id": "P08.9",
           "title": "CI/CD",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-05T09:28:18.296Z",
           "completedAt": null,
-          "commits": [],
-          "notes": []
+          "commits": ["cb506cf8ace20c07c9c4e26e1b1de53eda9f3589"],
+          "notes": [
+            {
+              "at": "2026-10-05T09:28:18.342Z",
+              "text": "Bounded CI correction: execute existing shared units before server/client tests; exact command146 checks/14 files on Node24, workflow formatting/diff/secret checks pass. New step execution in actual CI follows next verified push; seeded E2E, coverage gate, rollback rehearsal, dependency automation and park/unpark criteria remain open."
+            }
+          ]
         },
         {
           "id": "P08.10",
@@ -2431,7 +2436,8 @@
             "9fac3c1d7e23e52ce76646e94cbf92d50c699700",
             "5d1e018810531f9ccdc91b3658d7835b8d737ed9",
             "00dbc2a9d263f741852c31f1a399f4e2d639fd72",
-            "6eade954cbd5fa40b2558343243343fb36592bbb"
+            "6eade954cbd5fa40b2558343243343fb36592bbb",
+            "c96db0c1d95eae341ace88b2368b5fa20415ac8b"
           ],
           "notes": [
             {
@@ -2525,6 +2531,10 @@
             {
               "at": "2026-10-05T09:22:58.397Z",
               "text": "Reviewed event/station capture schedule creation/status locally verified: 58 new DB cases, 273 focused, full1651+4 existing skips/103 files; 146 shared/587 server units, types/lint/arch1069/4778, 32-page build/static CSP, scans/format/pricing pass. Future-time check follows Event/member/station/retry locks. Immutable creation audit binds id-only retry/current status. Exact staging pipeline/probe follows; list/edit/cancel/UI remain open."
+            },
+            {
+              "at": "2026-10-05T09:28:18.616Z",
+              "text": "Retain capture schedule exact-image staging verification as current work. Independent P08.9 shared-test workflow correction is locally prepared; do not supersede the current CI/deployment before its legitimate normal-session worker evidence."
             }
           ]
         },
@@ -3505,6 +3515,10 @@
     {
       "at": "2026-10-05T09:22:58.668Z",
       "text": "P10.8 capture schedule source verified locally; full backend1651 passes/4 existing skips531.62s, all58 producer cases green incl11 real lock waits. Normal preview API4012 rebuilt/ready and cache bus connected. Prepare exact-image CI/deploy and normal Cognito real-worker evidence; no broad step/phase/gate closure."
+    },
+    {
+      "at": "2026-10-05T09:28:18.848Z",
+      "text": "Prepared P08.9 shared-contract CI step with local146-check evidence and no new resource/database work; actual new CI step awaits next batch. Current capture schedule release c96db0c continues exact pipeline validation. P08/P10 and broad gates stay open."
     }
   ]
 }
