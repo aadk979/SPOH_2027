@@ -51,10 +51,10 @@ export default defineConfig({
     ],
     coverage: {
       provider: 'v8',
-      include: ['src/modules/**/*.ts', 'src/platform/**/*.ts'],
-      exclude: ['src/generated/**', '**/*.test.ts', 'src/modules/**/router.ts'],
-      thresholds: { lines: 80, functions: 80, branches: 70, statements: 80 },
-      reporter: ['text', 'lcov'],
+      // Routers, configuration and process composition are part of the application.
+      include: ['src/**/*.ts'],
+      exclude: ['src/generated/**', '**/*.test.ts', '**/*.d.ts'],
+      reporter: ['text-summary', 'lcov', 'json-summary'],
     },
   },
 });

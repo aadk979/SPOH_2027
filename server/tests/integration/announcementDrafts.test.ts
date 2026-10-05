@@ -191,8 +191,15 @@ it('atomically replays creation by id using the current draft after a later edit
   expect(
     (await rawDb.idempotencyRecord.findUniqueOrThrow({ where: { key } })).responseBody,
   ).toEqual({ draftId: first.body.draft.id });
-  expect(await receipts()).toHaveLength(2);
-  expect((await receipts())[1]?.after).toMatchObject({
+  const audits = await receipts();
+  expect(audits).toHaveLength(2);
+  // Both timestamps are frozen; tied ordering cannot identify the update audit.
+  const updates = audits.filter(
+    (audit) =>
+      audit.action === 'announcement.draft.update' && audit.entityId === first.body.draft.id,
+  );
+  expect(updates).toHaveLength(1);
+  expect(updates[0]?.after).toMatchObject({
     version: 2,
     bodyChanged: true,
     reason: 'Correct wording',

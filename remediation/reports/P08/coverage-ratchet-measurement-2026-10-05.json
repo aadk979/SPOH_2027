@@ -1,0 +1,182 @@
+{
+  "measuredAt": "2026-10-05T13:03:14.838Z",
+  "applicationSource": "e6718c1bd566a5310973abb6d1c37904ee757f73",
+  "measurementBase": "cf13029f24d0364c7fd1211ded2005396ffd0e27",
+  "runtime": "Node 24 / Vitest and coverage-v8 4.1.11",
+  "packages": {
+    "server": {
+      "scope": "All server/src/**/*.ts, including routers, app/config/main composition; generated Prisma dependencies, test and declaration files excluded.",
+      "files": 587,
+      "total": {
+        "lines": {
+          "total": 5720,
+          "covered": 5446,
+          "skipped": 0,
+          "pct": 95.2
+        },
+        "statements": {
+          "total": 6285,
+          "covered": 5890,
+          "skipped": 0,
+          "pct": 93.71
+        },
+        "functions": {
+          "total": 1863,
+          "covered": 1773,
+          "skipped": 0,
+          "pct": 95.16
+        },
+        "branches": {
+          "total": 3563,
+          "covered": 3071,
+          "skipped": 0,
+          "pct": 86.19
+        },
+        "branchesTrue": {
+          "total": 0,
+          "covered": 0,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "floor": {
+        "lines": 95.2,
+        "branches": 86.19
+      },
+      "durationSeconds": 629.22
+    },
+    "client": {
+      "scope": "All client/src/**/*.{ts,tsx}; startup instrumentation imported normally from test setup and measured.",
+      "files": 413,
+      "total": {
+        "lines": {
+          "total": 3727,
+          "covered": 2665,
+          "skipped": 0,
+          "pct": 71.5
+        },
+        "statements": {
+          "total": 4137,
+          "covered": 2886,
+          "skipped": 0,
+          "pct": 69.76
+        },
+        "functions": {
+          "total": 1566,
+          "covered": 1042,
+          "skipped": 0,
+          "pct": 66.53
+        },
+        "branches": {
+          "total": 3029,
+          "covered": 1934,
+          "skipped": 0,
+          "pct": 63.84
+        },
+        "branchesTrue": {
+          "total": 0,
+          "covered": 0,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "floor": {
+        "lines": 71.5,
+        "branches": 63.84
+      },
+      "durationSeconds": 20.28
+    },
+    "shared": {
+      "scope": "All packages/shared/src/**/*.ts, including versioned generated settings contracts; tests/declarations excluded.",
+      "files": 44,
+      "total": {
+        "lines": {
+          "total": 509,
+          "covered": 263,
+          "skipped": 0,
+          "pct": 51.66
+        },
+        "statements": {
+          "total": 523,
+          "covered": 268,
+          "skipped": 0,
+          "pct": 51.24
+        },
+        "functions": {
+          "total": 91,
+          "covered": 53,
+          "skipped": 0,
+          "pct": 58.24
+        },
+        "branches": {
+          "total": 173,
+          "covered": 140,
+          "skipped": 0,
+          "pct": 80.92
+        },
+        "branchesTrue": {
+          "total": 0,
+          "covered": 0,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "floor": {
+        "lines": 51.66,
+        "branches": 80.92
+      },
+      "durationSeconds": 1.11
+    }
+  },
+  "g5TargetObservations": {
+    "serverDomainApplication": {
+      "files": 291,
+      "counters": {
+        "lines": {
+          "covered": 2796,
+          "total": 2894
+        },
+        "branches": {
+          "covered": 1733,
+          "total": 1944
+        }
+      },
+      "percentages": {
+        "lines": 96.61,
+        "branches": 89.14
+      },
+      "targets": {
+        "lines": 90,
+        "branches": 80
+      }
+    },
+    "clientModelAndSharedLib": {
+      "files": 53,
+      "counters": {
+        "lines": {
+          "covered": 541,
+          "total": 648
+        },
+        "branches": {
+          "covered": 462,
+          "total": 565
+        }
+      },
+      "percentages": {
+        "lines": 83.48,
+        "branches": 81.76
+      },
+      "targets": {
+        "lines": 90,
+        "branches": 80
+      }
+    }
+  },
+  "excludedRuns": [
+    "Initial expanded server run: 2300 passed/four existing skips and one failed existing audit-position assertion; tied frozen timestamps selected creation v1 instead of update v2. Test now identifies the exact update action/entity. No measurement accepted from that run.",
+    "First focused retry: Docker engine and preview listeners unavailable before database readiness; all 24 cases skipped. Only runtime socket directories moved to new recoverable quarantines. Original database volume, containers, settings and both earlier recovery backups preserved.",
+    "Initial client measurement omitted CSP startup instrumentation as a Vitest setup file. Fresh full-scope client coverage includes it and preserves jitless startup behaviour."
+  ],
+  "effects": "Only the dedicated spoh2027_test database is used by guarded integration helpers. No real local spoh2027 reset/seed/migration, staging fixture or cloud configuration write occurs in coverage verification.",
+  "limitations": "Coverage floors implement a bounded application-package ratchet. G5 target observations are not programme readiness or closure; access-policy coverage awaits its P11 package and broader P08.9 criteria remain open. CI execution is recorded only after the new workflow passes."
+}

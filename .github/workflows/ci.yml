@@ -77,11 +77,15 @@ jobs:
       TEST_DATABASE_URL: postgresql://spoh:spoh@localhost:5432/spoh2027_test
       AUTH_PROVIDER: local
       LOCAL_AUTH_SECRET: ci-only-secret-at-least-thirty-two-characters
+      SESSION_SIGNING_SECRET: test-only-shared-session-secret-at-least-thirty-two-chars
       CORS_ALLOWED_ORIGINS: http://localhost:3000
       SPOH_SKIP_DOTENV: '1'
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Compare floors to the PR base or previous main commit.
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -100,16 +104,35 @@ jobs:
         working-directory: server
 
       - name: Shared contract tests
-        run: npm run test:unit --workspace packages/shared
+        run: npm run test:coverage --workspace packages/shared
 
-      - name: Server unit tests
-        run: npm run test:unit --workspace server
+      # One instrumented run includes both projects; the integration project
+      # still serialises files against this job's dedicated PostgreSQL database.
+      - name: Server unit and integration coverage
+        run: npm run test:coverage --workspace server
 
-      - name: Server integration tests
-        run: npm run test:integration --workspace server
+      - name: Client coverage
+        run: npm run test:coverage --workspace client
 
-      - name: Client tests
-        run: npm run test --workspace client
+      - name: Application coverage ratchet
+        run: npm run check:coverage
+        env:
+          COVERAGE_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+
+      - name: Save coverage measurements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: application-coverage
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            packages/shared/coverage/coverage-summary.json
+            packages/shared/coverage/lcov.info
+            server/coverage/coverage-summary.json
+            server/coverage/lcov.info
+            client/coverage/coverage-summary.json
+            client/coverage/lcov.info
 
   architecture:
     # Blocking: any boundary violation fails the build (server, shared and cycles

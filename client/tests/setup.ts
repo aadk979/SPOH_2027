@@ -1,3 +1,6 @@
+// Import the real startup module without marking application source as a setup file:
+// Vitest automatically excludes setup files from measured coverage.
+import '../src/instrumentation-client';
 import 'fake-indexeddb/auto';
 import { afterEach, vi } from 'vitest';
 import { TEST_EVENT } from './helpers/event';

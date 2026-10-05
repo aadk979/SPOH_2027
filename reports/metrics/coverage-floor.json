@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "establishedAt": "2026-10-05T13:03:14.838Z",
+  "policy": "ADR-007 section 4: compare raw coverage counters to package floors; never lower an existing floor; raise after phase closure.",
+  "packages": {
+    "server": {
+      "lines": 95.2,
+      "branches": 86.19
+    },
+    "client": {
+      "lines": 71.5,
+      "branches": 63.84
+    },
+    "shared": {
+      "lines": 51.66,
+      "branches": 80.92
+    }
+  }
+}

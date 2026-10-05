@@ -203,6 +203,12 @@ The [fresh coverage inventory](../reports/P08/coverage-inventory.md) measures
 current configured server and overall client coverage above recorded P07 values.
 Expanded server router/composition scope and the actual CI ratchet remain open.
 
+[The application coverage ratchet](../reports/P08/coverage-ratchet.md) measures all
+maintained server/client/shared source, includes routers/composition and the CSP
+startup module, and establishes exact-counter package floors with nondecreasing
+base comparison. Local checks pass; exact new CI execution is being verified.
+The client model/library line target and other pipeline criteria remain open.
+
 - **Do:** GitHub Actions:
   1. The existing checks.
   2. Build images, push to ECR, run migrations, and deploy **staging** on merge to `main`.
