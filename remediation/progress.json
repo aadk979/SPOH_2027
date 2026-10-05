@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T13:29:51.712Z",
+  "updatedAt": "2026-10-05T13:52:10.269Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -3577,6 +3577,10 @@
     {
       "at": "2026-10-05T13:05:43.357Z",
       "text": "P08.9 source73d1849 implements measured application floors and complete-source CI coverage enforcement; all local checks pass, initial and expanded-red measurement failures excluded. Current programme pointer remains P10.8,105/171 and9/17 phases; awaiting actual new CI ratchet execution while continuing next bounded catalogue consumer analysis."
+    },
+    {
+      "at": "2026-10-05T13:52:10.268Z",
+      "text": "P08.9 application coverage ratchet exact CI 37317255252 and deployment 37318198668 succeed on a58b186. All three instrumented suites, 16 checker tests, unchanged-floor comparison and seven-day artifact execute; six retained files downloaded/inspected with matching raw counters. Read-only staging at 21:50 Singapore confirms exact image on healthy ECS revision 128, one desired/running and completed rollout. No app source or setting writes in this correction. P08.9/G5 stay open for other pipeline criteria and client model/library line target. Independent generated catalogue reader is still under local verification."
     }
   ]
 }
