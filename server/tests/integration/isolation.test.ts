@@ -519,6 +519,9 @@ const CASES: Record<string, Case> = {
   'GET /admin/settings/catalogue': noId(
     'reads the current manager’s scoped operational settings; foreign station, event and organisation layers are covered by scopedSettingsRead tests',
   ),
+  'POST /admin/settings/catalogue': noId(
+    'changes only current-manager operational keys in the path event; foreign stations, history scope and replay identity are covered by scopedSettingsMutation tests',
+  ),
   'PATCH /admin/settings': noId('runtime settings are platform-wide until P10'),
   'GET /admin/event-settings': noId("reads the path event's settings"),
   'GET /admin/event-settings/history': noId(

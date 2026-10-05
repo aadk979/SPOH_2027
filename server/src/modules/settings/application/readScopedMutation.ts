@@ -1,13 +1,16 @@
-import type { ScopedSettingsReadQuery } from '@spoh/shared';
+import type { ScopedSettingsMutationRequest } from '@spoh/shared';
 import { requireCurrentCapability } from '../../../platform/access/currentCapability.js';
-import { prisma } from '../../../platform/db/client.js';
 import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
+import { prisma } from '../../../platform/db/client.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import type { Clock } from '../../../platform/time/index.js';
-import { scopedReadResponse } from './scopedReadResponse.js';
+import type { ScopedMutationReceipt } from '../domain/scopedMutationReceipt.js';
+import { scopedMutationResponse } from './scopedMutationResponse.js';
 
-export function readScopedSettings(
-  query: ScopedSettingsReadQuery,
+/** A successful retry is a current-authority read, including after event archive. */
+export function readScopedMutation(
+  receipt: ScopedMutationReceipt,
+  request: ScopedSettingsMutationRequest,
   actor: ActorContext & { clock?: Clock },
 ) {
   return prisma.$transaction(
@@ -19,7 +22,7 @@ export function readScopedSettings(
         personId: actor.volunteerId,
         capability: 'config.manage',
       });
-      return scopedReadResponse(tx, { query, actor, event });
+      return scopedMutationResponse(tx, { receipt, request, actor, event });
     },
     { isolationLevel: 'ReadCommitted', timeout: 30_000 },
   );

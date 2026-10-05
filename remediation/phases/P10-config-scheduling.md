@@ -197,6 +197,13 @@ rows while omitting their JSON, and verifies exact event/organisation/station
 ownership. Legacy consumer migration and generated edit/history/schedule/revert
 controls remain open.
 
+[Scoped operational set/reset](../reports/P10/scoped-settings-mutation-api.md)
+adds the bounded event/station producer through the existing setting guards,
+with reviewed stored versions, atomic history/audit and identifier-only retries.
+Replay rechecks current authority and rebuilds current values. Local and staging
+verification are recorded in its report; this producer does not complete the
+generated UI, history/revert, scheduling or consumer migration criteria.
+
 - **Do:**
   1. A settings screen generated from the registry: grouped, scoped (event or station tabs), with
      descriptions, validation, change history and revert.

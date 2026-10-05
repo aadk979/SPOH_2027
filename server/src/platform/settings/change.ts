@@ -12,6 +12,8 @@ import { ConflictError, NotFoundError, ValidationError } from '../errors/index.j
 import { publishCacheEvent } from '../events/cacheBus.js';
 import { invalidateRateLimitPolicy } from '../http/rateLimitPolicy.js';
 import { SETTINGS, type SettingKey } from './registry.js';
+import { settingAuditValue } from './auditValue.js';
+import { settingChangeBefore } from './changeBefore.js';
 import { assertSettingTarget, scopeOf, storedSetting, type SettingTarget } from './scopedStore.js';
 
 export type SettingChangeSource = 'USER' | 'SCHEDULE' | 'REVERT' | 'RESET' | 'CLONE';
@@ -127,8 +129,8 @@ async function recordChange(
   const { input, before, version } = change;
   const { scope, scopeId, eventId } = scopeOf(input.target);
   const after = input.value === null ? jsonNull : input.value;
-  const auditBefore = SETTINGS[input.key].class === 'operational' ? before : '[redacted]';
-  const auditAfter = SETTINGS[input.key].class === 'operational' ? input.value : '[redacted]';
+  const auditBefore = settingAuditValue(input.key, before);
+  const auditAfter = settingAuditValue(input.key, input.value);
   await tx.settingChange.create({
     data: {
       scope,
@@ -183,10 +185,15 @@ export async function changeSettingInTransaction(
     currentVersion: current?.version ?? 0,
   });
   const changed = { ...input, value: parsed.data };
+  const before = await settingChangeBefore(tx, {
+    target: input.target,
+    key: input.key,
+    stored: current,
+  });
   await writeVersion(tx, changed, version);
   await recordChange(tx, {
     input: changed,
-    before: current?.value ?? definition.default,
+    before,
     version,
   });
   await publishCacheEvent(tx, 'settings', {
@@ -223,52 +230,58 @@ export async function revertSetting(
 }
 
 /** Remove an override while preserving its next history version and audit row. */
-export async function resetSetting(
+export async function resetSettingInTransaction(
+  tx: PrismaTransactionClient,
   input: Omit<ChangeSettingInput, 'value' | 'source'>,
 ): Promise<number> {
   if (!SETTINGS[input.key].scopes.includes(input.target.scope)) {
     throw new ValidationError(`${input.key} cannot be reset at ${input.target.scope} scope`);
   }
-  const version = await prisma.$transaction(async (tx) => {
-    await assertSettingTarget(tx, input.target);
-    await assertUnlocked(tx, input.target, input.key);
-    const current = await storedSetting(input.target, input.key, tx);
-    if (!current || current.version !== input.expectedVersion) throw versionConflict();
-    const version = await nextVersion(tx, {
-      target: input.target,
-      key: input.key,
-      currentVersion: current.version,
-    });
-    const { scope, scopeId, eventId } = scopeOf(input.target);
-    const deleted = await tx.setting.deleteMany({
-      where: { scope, scopeId, eventId, key: input.key, version: input.expectedVersion },
-    });
-    if (deleted.count !== 1) throw versionConflict();
-    await tx.settingChange.create({
-      data: {
-        scope,
-        scopeId,
-        eventId,
-        key: input.key,
-        version,
-        before: (current.value === null ? jsonNull : current.value) as JsonValue,
-        after: dbNull,
-        reason: input.reason ?? null,
-        source: 'RESET',
-        actorPersonId: input.actorPersonId,
-      },
-    });
-    await writeAudit(tx, {
-      ...input.audit,
-      eventId,
-      action: 'setting.change',
-      entityType: 'Setting',
-      entityId: input.key,
-      after: { scope, scopeId, reset: true, version },
-    });
-    await publishCacheEvent(tx, 'settings', { scope, scopeId, key: input.key, version });
-    return version;
+  await assertSettingTarget(tx, input.target);
+  await assertUnlocked(tx, input.target, input.key);
+  const current = await storedSetting(input.target, input.key, tx);
+  if (!current || current.version !== input.expectedVersion) throw versionConflict();
+  const version = await nextVersion(tx, {
+    target: input.target,
+    key: input.key,
+    currentVersion: current.version,
   });
+  const { scope, scopeId, eventId } = scopeOf(input.target);
+  const deleted = await tx.setting.deleteMany({
+    where: { scope, scopeId, eventId, key: input.key, version: input.expectedVersion },
+  });
+  if (deleted.count !== 1) throw versionConflict();
+  await tx.settingChange.create({
+    data: {
+      scope,
+      scopeId,
+      eventId,
+      key: input.key,
+      version,
+      before: (current.value === null ? jsonNull : current.value) as JsonValue,
+      after: dbNull,
+      reason: input.reason ?? null,
+      source: 'RESET',
+      actorPersonId: input.actorPersonId,
+    },
+  });
+  await writeAudit(tx, {
+    ...input.audit,
+    eventId,
+    action: 'setting.change',
+    entityType: 'Setting',
+    entityId: input.key,
+    after: { scope, scopeId, reset: true, version },
+  });
+  await publishCacheEvent(tx, 'settings', { scope, scopeId, key: input.key, version });
+  return version;
+}
+
+/** The standalone store and HTTP producers share the exact reset transaction. */
+export async function resetSetting(
+  input: Omit<ChangeSettingInput, 'value' | 'source'>,
+): Promise<number> {
+  const version = await prisma.$transaction((tx) => resetSettingInTransaction(tx, input));
   invalidateRateLimitPolicy();
   return version;
 }

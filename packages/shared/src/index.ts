@@ -42,6 +42,7 @@ export * from './contracts/assignments/index.js';
 export * from './contracts/eventDays/index.js';
 export * from './contracts/settings/index.js';
 export * from './contracts/settings/scopedRead.js';
+export * from './contracts/settings/scopedMutation.js';
 export * from './contracts/eventSettings/index.js';
 export * from './contracts/visitor/index.js';
 export * from './generated/settings/index.js';

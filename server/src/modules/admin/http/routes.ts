@@ -4,6 +4,7 @@ import {
   ChangeEventSettingRequest,
   EventSettingHistoryQuery,
   ScopedSettingsReadQuery,
+  ScopedSettingsMutationRequest,
   RevertEventSettingRequest,
   ChangeAttendanceConfigRequest,
   CreateAssignmentRequest,
@@ -48,6 +49,8 @@ import {
   updateSettingsHandler,
   getEventSettingHistoryHandler,
   getScopedSettingsHandler,
+  mutateScopedSettingHandler,
+  scopedSettingMutationReplay,
   revertEventSettingHandler,
   eventSettingRevertReplay,
 } from '../../settings/index.js';
@@ -281,6 +284,15 @@ adminRouter.patch(
   requireCapability('config.manage'),
   validate({ body: UpdateSettingsRequest }),
   updateSettingsHandler,
+);
+
+adminRouter.post(
+  '/settings/catalogue',
+  adminRateLimit,
+  requireCapability('config.manage'),
+  validate({ body: ScopedSettingsMutationRequest }),
+  idempotent('setting.operational.change', { redacted: scopedSettingMutationReplay }),
+  mutateScopedSettingHandler,
 );
 
 // ─────────────────────────────────────────────────────────────

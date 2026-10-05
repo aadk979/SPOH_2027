@@ -55,10 +55,11 @@ export const ScopedSettingsReadQuery = z
   .strict()
   .superRefine(validateTarget);
 export type ScopedSettingsReadQuery = z.infer<typeof ScopedSettingsReadQuery>;
-const Target = z
-  .object({ scope: SettingReadScope, stationId: Id.optional() })
-  .strict()
-  .superRefine(validateTarget);
+export const ScopedSettingsTarget = z.discriminatedUnion('scope', [
+  z.object({ scope: z.literal('event') }).strict(),
+  z.object({ scope: z.literal('station'), stationId: Id }).strict(),
+]);
+export type ScopedSettingsTarget = z.infer<typeof ScopedSettingsTarget>;
 
 export const ScopedOperationalSetting = z
   .object({
@@ -107,7 +108,7 @@ export const ScopedOperationalSetting = z
 export type ScopedOperationalSetting = z.infer<typeof ScopedOperationalSetting>;
 
 type ScopedRead = {
-  target: z.infer<typeof Target>;
+  target: ScopedSettingsTarget;
   data: ScopedOperationalSetting[];
 };
 function validateKeys(response: ScopedRead, ctx: z.RefinementCtx): void {
@@ -155,7 +156,7 @@ function validateLayer(
 export const ScopedSettingsReadResponse = z
   .object({
     eventId: Id,
-    target: Target,
+    target: ScopedSettingsTarget,
     eventStatus: EventStatus,
     evaluatedAt: IsoDateTime,
     data: z.array(ScopedOperationalSetting).max(SCOPED_OPERATIONAL_KEYS.length),
