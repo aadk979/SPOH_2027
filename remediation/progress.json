@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T15:00:38.509Z",
+  "updatedAt": "2026-10-05T15:25:20.971Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -2453,7 +2453,8 @@
             "22a12eb4eba66233a8d4e9c4befb52594a3038bf",
             "e6718c1bd566a5310973abb6d1c37904ee757f73",
             "bcff7e15862d7be1e4c9cc8955d1bf613484fc93",
-            "5859d8de214f06ec8fabbe102fbf4104a865a89d"
+            "5859d8de214f06ec8fabbe102fbf4104a865a89d",
+            "5acc87829e063c77202c489852052aa7acecf098"
           ],
           "notes": [
             {
@@ -2571,6 +2572,10 @@
             {
               "at": "2026-10-05T15:00:38.508Z",
               "text": "Partial generated catalogue history restores: reviewed scope/history/version and required reason, frozen UUID/body retry, authority/cache guards and structural array comparison. 547 client checks, 12 real-browser journeys, 32-page static/CSP and 80 reviewed visual checks pass. CI/exact staging restore acceptance pending; generated editing, broader scheduling and legacy consumers remain open."
+            },
+            {
+              "at": "2026-10-05T15:25:20.721Z",
+              "text": "Partial: generated catalogue history restores accepted on exact healthy staging revision 131, release f52eade, CI 37329349688 and deployment 37330429904; normal Cognito Chrome lost-receipt same-intent retry and provenance-checked public RESET restore original values/versions. Generated editing, broader schedules, legacy migration and full criteria remain open."
             }
           ]
         },
@@ -3595,6 +3600,10 @@
     {
       "at": "2026-10-05T14:30:29.345Z",
       "text": "Generated catalogue reader accepted: cc55dd7 CI 37322694543 and deploy 37323752826 succeed; retained six coverage files match all raw counters. Exact healthy ECS revision 129 and normal Cognito Chrome phone event/laptop station values/history/reload/logout pass at 22:29 SGT without admin writes or value/history changes. P10.8 remains open; continuing reviewed catalogue history restores."
+    },
+    {
+      "at": "2026-10-05T15:25:20.970Z",
+      "text": "Accepted generated catalogue restores: 21 new client checks, 547 full client passes, 12 serial real browser checks, 80 reviewed visual checks, static/CSP and quality checks; actual CI all package raw coverage counters match local, exact healthy ECS 131 and normal Cognito Chrome owned restore/retry/cleanup pass. Preserve 105/171 and 9/17; continue generated editor."
     }
   ]
 }
