@@ -1,0 +1,59 @@
+{
+  "applicationSource": "6eade954cbd5fa40b2558343243343fb36592bbb",
+  "deployedImageTag": "c96db0c1d95eae341ace88b2368b5fa20415ac8b",
+  "taskRevision": 124,
+  "ci": { "runId": 37289672127, "conclusion": "success" },
+  "deployment": {
+    "runId": 37290434592,
+    "conclusion": "success",
+    "cloudFormation": "UPDATE_COMPLETE",
+    "actualRunningTaskMatchesImage": true
+  },
+  "browser": { "channel": "chrome", "headless": true, "width": 390, "height": 844 },
+  "authentication": "Normal Cognito Authorization Code + PKCE and current roster session",
+  "apiAndWorker": {
+    "fixtureRestoredAt": "2026-10-05T09:41:46.000Z",
+    "reviewedFutureEventCaptureProducer": true,
+    "pendingLeavesCaptureUnchanged": true,
+    "sameUuidOneAction": true,
+    "alteredIntentAndStaleVersionRefused": true,
+    "guardedProductKeyRefused": true,
+    "anonymousReadAndWriteRefusedNoStore": true,
+    "oneMetadataTimelineRow": true,
+    "realWorkerSucceededOneAttempt": true,
+    "attributedScheduledHistory": true,
+    "completedRetryCurrentStatus": true,
+    "originalInheritanceRestoredThroughReviewedReset": true,
+    "oldProducerRetryReturnsFreshRestoredValues": true,
+    "compatibilityAndProductsUnchanged": true,
+    "readyLifecyclePreserved": true,
+    "privateNoStore": true
+  },
+  "separateReadOnlyConsumerChecks": [
+    {
+      "observedAt": "2026-10-05T09:45:24.004Z",
+      "waitedForPageBeforeReload": true,
+      "ownedStatusSucceededOneAttempt": true,
+      "originalInheritanceRestored": true,
+      "hardReloadScheduledHistoryVisible": true,
+      "normalSignOut": true,
+      "noSettingOrScheduleMutation": true,
+      "appPageErrors": [],
+      "cspViolations": []
+    },
+    {
+      "observedAt": "2026-10-05T09:58:36.548Z",
+      "immediateNavigationThenReload": true,
+      "ownedStatusSucceededOneAttempt": true,
+      "originalInheritanceRestored": true,
+      "hardReloadScheduledHistoryVisible": true,
+      "normalSignOut": true,
+      "noSettingOrScheduleMutation": true,
+      "appPageErrors": [],
+      "cspViolations": []
+    }
+  ],
+  "excludedChecks": "The initial composite probe reached its final reload/history/sign-out stage only after all listed API, worker and restoration assertions passed, but failed there. A separate immediate-reload reproduction timed out before capture panel expansion; its own-session cleanup returned 204. The next immediate-reload diagnostic passed. The intermittent failure's cause remains unresolved; neither failed run is counted as a complete consumer pass, and initial-session server revocation was not confirmed. Successful consumer evidence comes from the two separate read-only normal sessions above.",
+  "fixtureEffects": "One legitimate synthetic event capture schedule, its audit and identifier-only receipt remain. The worker appended one attributed SCHEDULE change; a reviewed RESET removed the owned override and restored original inheritance and selected stored version zero. Immutable history and audit remain. No count, visitor, lifecycle, announcement or delivery write was requested. Subsequent consumer checks made no setting or schedule mutation.",
+  "limitations": "Station scheduling and concurrency/post-wait guards have local evidence. Creation UI and capture schedule list/edit/cancel remain open. The intermittent immediate reload issue remains open for session investigation. No production creation, cutover or programme closure is claimed. Credentials, actor/action identifiers, private reasons and raw responses are omitted."
+}

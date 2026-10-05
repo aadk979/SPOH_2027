@@ -69,7 +69,23 @@ generic-key scanner is replaced with a recognisable test UUID, without exclusion
 All three preserved P08 fingerprints and historical P05 pricing are unchanged.
 Normal preview is rebuilt/restored; no real local database is reset or migrated.
 
-Exact-image CI/deployment and normal Cognito worker verification are pending.
+CI 37289672127 and deployment 37290434592 succeed for c96db0c. CloudFormation
+is UPDATE_COMPLETE; ECS revision 124 has one completed deployment and its actual
+running task uses that exact image. Normal Cognito Chrome verifies one synthetic
+event schedule, same-UUID replay, altered intent/stale version/key/anonymous
+refusals, its real one-attempt worker application and reviewed RESET restoration.
+The original inherited value and selected stored version zero are restored;
+legacy/product settings and READY lifecycle remain unchanged.
+
+The composite probe fails at its final immediate reload/history/sign-out stage
+after these API checks pass. Two separate read-only normal sessions verify owned
+status, restored inheritance, hard reload, scheduled history and normal sign-out,
+with no application errors or CSP violations. An intervening immediate-reload
+reproduction times out before the capture panel; its own-session cleanup returns 204. The next immediate-reload diagnostic passes. This intermittent failure's
+cause remains unresolved, and failed consumer runs are excluded. Initial-session
+server revocation was not confirmed. The [sanitised evidence](staging-capture-schedule-api-evidence-2026-10-05.json)
+keeps API/worker assertions, separate successful consumers and exclusions distinct.
+
 Existing client/visual evidence is reused because this slice changes no client
 source, layout or database schema.
 

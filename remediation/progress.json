@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T09:28:18.849Z",
+  "updatedAt": "2026-10-05T10:00:31.576Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -3519,6 +3519,10 @@
     {
       "at": "2026-10-05T09:28:18.848Z",
       "text": "Prepared P08.9 shared-contract CI step with local146-check evidence and no new resource/database work; actual new CI step awaits next batch. Current capture schedule release c96db0c continues exact pipeline validation. P08/P10 and broad gates stay open."
+    },
+    {
+      "at": "2026-10-05T10:00:31.575Z",
+      "text": "P10.8 partial: capture producer/status source 6eade954, exact c96db0c CI 37289672127 and staging deploy 37290434592 succeed; actual running task TD124 confirmed. Normal Cognito verifies one real scheduled pause and reviewed RESET restoring inheritance zero. Composite final immediate reload failed; separate read-only normal sessions pass reload/history/sign-out at 17:45 and 17:58 SGT with zero app/CSP errors. An intervening immediate reload timed out; own-session cleanup 204, cause unresolved and failed consumers excluded. Continue bounded capture list/edit/cancel; broader steps remain open."
     }
   ]
 }
