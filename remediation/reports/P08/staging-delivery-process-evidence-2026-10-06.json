@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "clientDate": "2026-10-06",
+  "sourceCommit": "75ceb60d0954b635668d783b1dbcc04f7ae5b2db",
+  "localSafetyTests": 24,
+  "inheritedDraftsPreserved": 18,
+  "fullCi": {
+    "runId": 37342645280,
+    "conclusion": "success",
+    "jobs": {
+      "deliveryAndTracker": "success",
+      "lintTypesBuild": "success",
+      "testsAndCoverage": "success",
+      "architectureAndHardcoding": "success",
+      "dependencyAuditAndSecretScan": "success"
+    }
+  },
+  "documentationProbe": {
+    "commit": "facd9143db56a24c4a41acbce7f36e5a5a252b0b",
+    "pushedDuringSourceCi": true,
+    "ciRunId": 37342816751,
+    "ciConclusion": "success",
+    "ciSeconds": 27,
+    "deliveryAndTracker": "success",
+    "secretScan": "success",
+    "applicationJobs": "skipped",
+    "releaseRunId": 37342876706,
+    "releaseConclusion": "success",
+    "releaseSeconds": 13,
+    "imageJob": "skipped",
+    "migrationAndDeployJob": "skipped",
+    "sourceCiWasCancelled": false
+  },
+  "staging": {
+    "runId": 37343472764,
+    "conclusion": "success",
+    "completedAtUtc": "2026-10-05T16:55:55Z",
+    "stackStatus": "UPDATE_COMPLETE",
+    "imageTag": "75ceb60d0954b635668d783b1dbcc04f7ae5b2db",
+    "taskRevision": 133,
+    "runningTasks": 1,
+    "taskStatus": "RUNNING",
+    "healthStatus": "HEALTHY",
+    "imageDigest": "sha256:efe4ee9446decf486c66b313950aae8667b177a703ad0a5276343a2d91911aed",
+    "migration": "success",
+    "smoke": "success"
+  },
+  "productStepsOrGatesClosed": false,
+  "editorStagingAcceptanceClaimed": false,
+  "productionChanged": false
+}

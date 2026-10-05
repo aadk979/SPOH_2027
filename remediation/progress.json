@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T16:32:04.742Z",
+  "updatedAt": "2026-10-05T16:58:50.575Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -3608,6 +3608,10 @@
     {
       "at": "2026-10-05T16:32:04.741Z",
       "text": "Owner 2026-10-06 authorized faster process: ADR-010 uses milestone pushes, full CI for application/validation/unknown inputs and dependency-free docs checks plus secret scan; run-bound staging selection with ancestry/anti-rollback guards and retained queue. Named P11.1-P11.3/P13.6 prerequisite start overrides and independent file ownership replace whole-phase stalls. P10 editor draft preserved; no product step or gate closed. Local safety tests and rollout verification recorded in HANDOFF-2026-10-06-PROCESS."
+    },
+    {
+      "at": "2026-10-05T16:58:50.574Z",
+      "text": "ADR-010 process rollout accepted: source75ceb60 full CI37342645280 all5 jobs and deploy37343472764 migration/smoke success; exact UPDATE_COMPLETE healthy ECS133/image75ceb60. Docs probe facd914 during fullCI passed CI37342816751 in27s and release37342876706 in13s, app/image/migration jobs skipped, sourceCI not cancelled. 24 safety tests; all18 inherited editor drafts byte-identical. G3-G5/P08/P10 remain open; next core follows TAKEOVER-2026-10-06 and finishes retained editor before next usable milestones."
     }
   ]
 }

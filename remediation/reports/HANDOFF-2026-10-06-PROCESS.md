@@ -103,14 +103,37 @@ evidence, release ordering and manual deployment fencing. The manual-conclusion
 regression failed before the guard fix and passes afterward.
 
 Actionlint 1.7.12 validates the rest of both workflows but predates GitHub's documented
-`queue: max` property. A temporary copy omitting only that property passes lint; the
-real GitHub run must confirm the supported retained-queue syntax. The source commit,
-full CI/deployment result, and subsequent documentation-only proof will be recorded
-here after observation. Until then do not claim remote rollout acceptance.
+`queue: max` property. A temporary copy omitting only that property passes lint.
+GitHub accepted the actual retained-queue workflow and executed its jobs successfully.
 
 Process source commit `75ceb60d0954b635668d783b1dbcc04f7ae5b2db` is pushed to main.
 [Full CI 37342645280](https://github.com/aadk979/SPOH_2027/actions/runs/37342645280)
-has passed classification/tracker checks and started all four application jobs.
-This documentation update is deliberately pushed while that CI is in flight, to
-verify the cheap docs path and prove it cannot cancel or replace source acceptance.
-Final CI/deployment and documentation proof remain pending at this checkpoint.
+passed all five jobs: classification/tracker, lint/types/build, tests/coverage,
+architecture/hardcoding, and dependency audit/secret scan. No application gate
+was lowered or omitted.
+
+Documentation probe `facd9143db56a24c4a41acbce7f36e5a5a252b0b` was pushed while
+source CI was running. Its
+[CI 37342816751](https://github.com/aadk979/SPOH_2027/actions/runs/37342816751)
+passed in 27 seconds, retaining delivery tests/tracker checks and secret scanning
+while all three expensive application jobs were skipped. Its
+[release check 37342876706](https://github.com/aadk979/SPOH_2027/actions/runs/37342876706)
+passed in 13 seconds with image and migration/deployment jobs skipped. Source CI
+continued and passed, proving the docs push neither cancelled it nor stole its release.
+
+The application
+[deployment 37343472764](https://github.com/aadk979/SPOH_2027/actions/runs/37343472764)
+selected the accepted source and built its image despite main advancing through
+documentation. Migration, service movement and smoke passed at **00:55:55 Singapore
+on 6 October**. CloudFormation is UPDATE_COMPLETE with the exact source image;
+the sole running task is revision **133**, RUNNING/HEALTHY with image tag
+`75ceb60d0954b635668d783b1dbcc04f7ae5b2db` and digest
+`sha256:efe4ee9446decf486c66b313950aae8667b177a703ad0a5276343a2d91911aed`.
+A workflow_run's own head_sha can be the newer docs commit;
+verify the triggering CI head and actual release image rather than that field alone.
+
+The sanitized [rollout evidence](P08/staging-delivery-process-evidence-2026-10-06.json)
+records these observed results. Application server/client/shared source is unchanged
+from the preceding accepted product checkpoint; no editor staging acceptance is
+claimed. All 18 inherited editor drafts remain byte-identical. Product steps and
+G3–G5 remain open. Later evidence/main commits need not redeploy this image.
