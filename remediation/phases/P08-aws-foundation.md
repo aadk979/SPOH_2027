@@ -206,7 +206,9 @@ Expanded server router/composition scope and the actual CI ratchet remain open.
 [The application coverage ratchet](../reports/P08/coverage-ratchet.md) measures all
 maintained server/client/shared source, includes routers/composition and the CSP
 startup module, and establishes exact-counter package floors with nondecreasing
-base comparison. Local checks pass; exact new CI execution is being verified.
+base comparison. Local checks and exact-head CI 37317255252 execute the gate
+successfully after deterministic cache-bus transport coverage removes a timing
+dependency. Retained measurements and exact staging task revision 128 are verified.
 The client model/library line target and other pipeline criteria remain open.
 
 - **Do:** GitHub Actions:

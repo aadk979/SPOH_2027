@@ -68,8 +68,8 @@ with maintained formatting and script/integration/full-history secret scans
 clear. All three preserved P08 pricing fingerprints and historical P05 pricing
 remain unchanged. Application source is byte-unchanged in this slice, so existing
 32-page static export, browser/CSP and staging UI evidence is reusable. Normal
-local previews are restored after the runtime recovery. Exact execution of the
-new CI ratchet remains pending until its pushed run succeeds.
+local previews are restored after the runtime recovery. Actual CI execution and
+the deterministic correction are recorded below.
 
 ### First CI execution and deterministic cache-bus coverage
 
@@ -93,8 +93,19 @@ lines (95.36%) and 3,079/3,563 branches (86.41%), above the unchanged floors.
 The actual package ratchet and committed-base comparison pass. Formatting,
 architecture and test/report/full-history secret scans remain clear.
 The [CI evidence](coverage-ratchet-ci-evidence-2026-10-05.json) preserves the
-first failed comparison and retained measurements. Replacement exact-head CI
-execution remains pending.
+first failed comparison and retained measurements.
+
+[CI 37317255252](https://github.com/aadk979/SPOH_2027/actions/runs/37317255252)
+on `a58b186` succeeds. It actually executes 173 shared, 2,308 server/four existing
+skips and 505 client checks, all 16 ratchet tests and the final unchanged-floor
+comparison. Its seven-day coverage artifact is downloaded and all six JSON/LCOV
+files are inspected. The raw counters match the accepted measurements exactly.
+[Deployment 37318198668](https://github.com/aadk979/SPOH_2027/actions/runs/37318198668)
+also succeeds. At 21:50 Singapore, read-only AWS checks verify UPDATE_COMPLETE
+and task revision 128 running the exact `a58b186` image, one desired/running
+healthy task, no pending tasks and one completed rollout. Application source is
+byte-unchanged from the previously accepted normal Cognito capture UI release;
+its browser evidence is reused without another setting write.
 
 ## Remaining scope
 

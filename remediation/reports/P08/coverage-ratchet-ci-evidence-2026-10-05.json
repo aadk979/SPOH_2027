@@ -1,13 +1,26 @@
 {
-  "observedAt": "2026-10-05T13:22:17Z",
+  "observedAt": "2026-10-05T13:52:07.041Z",
   "firstExecution": {
     "head": "75d19b3d0be29973014313eb5e00aaf8837ea951",
     "run": 37314188045,
     "url": "https://github.com/aadk979/SPOH_2027/actions/runs/37314188045",
     "conclusion": "failure",
-    "shared": { "passed": 173, "testFiles": 15, "sourceFiles": 44 },
-    "server": { "passed": 2301, "skipped": 4, "testFiles": 158, "sourceFiles": 587 },
-    "client": { "passed": 505, "testFiles": 59, "sourceFiles": 413 },
+    "shared": {
+      "passed": 173,
+      "testFiles": 15,
+      "sourceFiles": 44
+    },
+    "server": {
+      "passed": 2301,
+      "skipped": 4,
+      "testFiles": 158,
+      "sourceFiles": 587
+    },
+    "client": {
+      "passed": 505,
+      "testFiles": 59,
+      "sourceFiles": 413
+    },
     "ratchetUnitTestsPassed": 16,
     "failedComparison": {
       "package": "server",
@@ -39,9 +52,89 @@
       "skipped": 4,
       "testFiles": 159,
       "durationSeconds": 606.83,
-      "lines": { "covered": 5455, "total": 5720 },
-      "branches": { "covered": 3079, "total": 3563 }
+      "lines": {
+        "covered": 5455,
+        "total": 5720
+      },
+      "branches": {
+        "covered": 3079,
+        "total": 3563
+      }
     },
-    "exactHeadCi": "pending"
+    "exactHeadCi": {
+      "head": "a58b186f1ba9a25af37ffe8e81e877ed391e6214",
+      "run": 37317255252,
+      "url": "https://github.com/aadk979/SPOH_2027/actions/runs/37317255252",
+      "conclusion": "success",
+      "executedSteps": [
+        "Shared contract tests",
+        "Server unit and integration coverage",
+        "Client coverage",
+        "Application coverage ratchet",
+        "Save coverage measurements"
+      ],
+      "ratchetUnitTestsPassed": 16,
+      "sharedPassed": 173,
+      "serverPassed": 2308,
+      "serverSkipped": 4,
+      "clientPassed": 505,
+      "measured": {
+        "server": {
+          "sourceFiles": 587,
+          "lines": {
+            "covered": 5455,
+            "total": 5720
+          },
+          "branches": {
+            "covered": 3079,
+            "total": 3563
+          }
+        },
+        "client": {
+          "sourceFiles": 413,
+          "lines": {
+            "covered": 2665,
+            "total": 3727
+          },
+          "branches": {
+            "covered": 1934,
+            "total": 3029
+          }
+        },
+        "shared": {
+          "sourceFiles": 44,
+          "lines": {
+            "covered": 263,
+            "total": 509
+          },
+          "branches": {
+            "covered": 140,
+            "total": 173
+          }
+        }
+      },
+      "artifact": {
+        "id": 11348696477,
+        "name": "application-coverage",
+        "sizeBytes": 126328,
+        "createdAt": "2026-10-05T13:36:57Z",
+        "expiresAt": "2026-10-12T13:36:56Z",
+        "downloadedAndInspected": true,
+        "allThreeSummariesAndLcovPresent": true
+      }
+    },
+    "staging": {
+      "observedAt": "2026-10-05T13:50:37.5859024Z",
+      "image": "a58b186f1ba9a25af37ffe8e81e877ed391e6214",
+      "cloudFormation": "UPDATE_COMPLETE",
+      "taskRevision": 128,
+      "running": 1,
+      "desired": 1,
+      "pending": 0,
+      "rollout": "COMPLETED",
+      "health": "HEALTHY",
+      "deployRun": 37318198668,
+      "deployConclusion": "success"
+    }
   }
 }
