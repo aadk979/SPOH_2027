@@ -12,10 +12,14 @@ The exact command is already verified locally on Node 24: all 146 checks across
 formatting and diff checks pass. No new test implementation, action, dependency,
 service, resource or database writer is introduced by the workflow change.
 
-The current capture release remains immutable at c96db0c. This independent
-workflow change is prepared locally and will be pushed with the next verified
-batch after its staging verification. Actual execution of the new shared step
-in CI is pending; it is not inferred from the earlier workflow's green jobs.
+The workflow correction cb506cf and tracker 74defb8 are pushed in the verified
+capture-management batch aa42013. [CI 37298082070](https://github.com/aadk979/SPOH_2027/actions/runs/37298082070)
+succeeds for that exact head; job metadata confirms the new Shared contract tests
+step actually executes and succeeds. The same existing command passes 173
+checks across 15 files locally after the 27 management contract cases are added.
+This evidence verifies execution of the shared gate, without inferring it from
+an earlier workflow's compilation or application tests. The capture release's
+deployment and bounded staging management verification remain separate work.
 
 P08.9 remains open for its complete pipeline criteria, including seeded browser
 journeys, the required coverage gate, documented/rehearsed rollback, dependency

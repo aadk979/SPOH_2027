@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T10:40:28.381Z",
+  "updatedAt": "2026-10-05T10:49:10.571Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -3532,6 +3532,10 @@
     {
       "at": "2026-10-05T10:40:28.380Z",
       "text": "P10.8 capture management local verification: full1714+4 existing skips/104 files516.44s;63 new cases and19 true PG wait cases;focused299/8files82.29s;shared173/15files;server587/54files;types/lint/arch1082/4875/settings/hardcoding/maintained format/646-history secrets/build32/static CSP pass. Preserved P08 fingerprints/P05 pricing unchanged. Node24 API preview PID49992 ready on4012, client PID8772 retained. Batch includes locally verified shared-contract CI correction; actual CI step and staging probe remain pending. Intermittent immediate reload remains open session investigation."
+    },
+    {
+      "at": "2026-10-05T10:49:10.570Z",
+      "text": "P08.9 partial: locally verified shared-contract CI correction cb506cf/tracker74defb8 is pushed in aa42013. Exact CI37298082070 SUCCESS; Tests job metadata explicitly confirms Shared contract tests step executed SUCCESS. Current local standalone command173/15files PASS. Seeded browser journeys, coverage ratchet, rollback rehearsal, dependency automation and park/unpark remain open. Current P10.8 capture management staging deploy37298820871 is running; no phase or gate closure."
     }
   ]
 }
