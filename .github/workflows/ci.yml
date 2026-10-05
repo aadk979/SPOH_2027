@@ -99,6 +99,9 @@ jobs:
       - run: npx prisma migrate deploy
         working-directory: server
 
+      - name: Shared contract tests
+        run: npm run test:unit --workspace packages/shared
+
       - name: Server unit tests
         run: npm run test:unit --workspace server
 

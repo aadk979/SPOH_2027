@@ -195,6 +195,10 @@ verify detection, notification delivery, the full catalogue or budget compliance
 
 ### P08.9 — CI/CD
 
+[Shared contract CI execution](../reports/P08/shared-contract-ci.md) adds the
+existing standalone shared suite to the Tests job. It is a bounded correction;
+actual new-step CI execution and the remaining pipeline criteria stay open.
+
 - **Do:** GitHub Actions:
   1. The existing checks.
   2. Build images, push to ECR, run migrations, and deploy **staging** on merge to `main`.
