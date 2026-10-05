@@ -8,10 +8,14 @@ import type {
   UpdateShiftTemplateRequest,
   EventSettingKey,
   RevertEventSettingRequest,
+  ScopedSettingsTarget,
+  ScopedSettingsMutationResponse,
+  ScopedSettingsRevertResponse,
 } from '@spoh/shared';
 import { useEventId } from '@/shared/lib/eventContext';
 import { useCurrentSession } from '@/features/session';
 import { ms } from '@/shared/lib/runtimeSettings';
+import { ApiError } from '@/shared/lib/apiErrors';
 import {
   changeAttendanceConfig,
   changeEventSetting,
@@ -25,7 +29,12 @@ import {
   getEventSettingHistory,
   getReviewedEventSettings,
   revertEventSetting,
+  getScopedSettings,
+  getScopedSettingHistory,
+  changeScopedSetting,
+  revertScopedSetting,
 } from './api';
+import type { CaptureRequest } from './model/captureControl';
 export const settingsKeys = {
   current: (eventId: string) => [eventId, 'admin', 'settings'] as const,
   shiftTemplates: (eventId: string) => [eventId, 'admin', 'shift-templates'] as const,
@@ -169,6 +178,74 @@ export function useRevertProductSetting() {
     onSuccess: async (response) => {
       client.setQueryData(settingsKeys.event(eventId), response.current);
       await client.invalidateQueries({ queryKey: [eventId] });
+    },
+  });
+}
+
+export const scopedSettingsKeys = {
+  owner: (eventId: string, personId: string | undefined) =>
+    [eventId, 'scoped-settings', personId ?? 'signed-out'] as const,
+  current: (eventId: string, personId: string | undefined, target: ScopedSettingsTarget) =>
+    [
+      ...scopedSettingsKeys.owner(eventId, personId),
+      target.scope,
+      target.scope === 'station' ? target.stationId : 'event',
+      'current',
+    ] as const,
+  history: (eventId: string, personId: string | undefined, target: ScopedSettingsTarget) =>
+    [...scopedSettingsKeys.current(eventId, personId, target), 'capture.open', 'history'] as const,
+};
+export function useScopedCaptureCurrent(target: ScopedSettingsTarget) {
+  const eventId = useEventId();
+  const session = useCurrentSession();
+  return useQuery({
+    queryKey: scopedSettingsKeys.current(eventId, session?.volunteerId, target),
+    queryFn: () => getScopedSettings(eventId, target),
+    enabled: !!session,
+    gcTime: 0,
+    refetchInterval: ms.dashboardPoll(),
+    refetchIntervalInBackground: false,
+  });
+}
+export function useScopedCaptureHistory(target: ScopedSettingsTarget) {
+  const eventId = useEventId();
+  const session = useCurrentSession();
+  return useInfiniteQuery({
+    queryKey: scopedSettingsKeys.history(eventId, session?.volunteerId, target),
+    queryFn: ({ pageParam }) =>
+      getScopedSettingHistory(eventId, { target, key: 'capture.open', cursor: pageParam }),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (last) => last.meta.nextCursor ?? undefined,
+    enabled: !!session,
+    gcTime: 0,
+    refetchInterval: ms.dashboardPoll(),
+    refetchIntervalInBackground: false,
+  });
+}
+export function useApplyCaptureChange() {
+  const eventId = useEventId();
+  const session = useCurrentSession();
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (
+      request: CaptureRequest,
+    ): Promise<ScopedSettingsMutationResponse | ScopedSettingsRevertResponse> =>
+      request.kind === 'change'
+        ? changeScopedSetting(eventId, request.body)
+        : revertScopedSetting(eventId, request.body),
+    gcTime: 0,
+    onSuccess: async (response) => {
+      client.setQueryData(
+        scopedSettingsKeys.current(eventId, session?.volunteerId, response.current.target),
+        response.current,
+      );
+      await client.invalidateQueries({
+        queryKey: scopedSettingsKeys.owner(eventId, session?.volunteerId),
+      });
+    },
+    onError: (failure) => {
+      if (failure instanceof ApiError && [401, 403].includes(failure.status))
+        client.removeQueries({ queryKey: scopedSettingsKeys.owner(eventId, session?.volunteerId) });
     },
   });
 }

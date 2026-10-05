@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { primeVisualAccounts } from './primeAccounts';
 
 // Every app page appears here, including the root redirect. Accounts come from
 // the disposable visual seed; capture screens use a posted volunteer.
@@ -34,17 +35,9 @@ const routes = [
   '/capture/registration/group',
 ];
 
-// Sign-in updates lastSeenAt. Prime every seeded account before either viewport
-// captures the roster, so test order cannot change its "never signed in" rows.
-test.beforeAll(async ({ request }) => {
-  const apiBase = process.env.VISUAL_API_URL ?? 'http://localhost:4012';
-  for (const name of ['admin', 'lead', 'chief', 'dc', 'ic', 'booth', 'counter']) {
-    const response = await request.post(`${apiBase}/api/v1/dev-auth/sign-in`, {
-      data: { email: `${name}@spoh2027.test` },
-    });
-    expect(response.ok()).toBe(true);
-  }
-});
+// Check seeded identities before the spec. UI sessions touch event-membership
+// lastSeenAt; use the existing chief account for additional settings visual states.
+test.beforeAll(async ({ request }) => primeVisualAccounts(request));
 for (const route of routes) {
   test(route, async ({ page }) => {
     const serverFailures: string[] = [];

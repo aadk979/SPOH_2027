@@ -18,6 +18,16 @@ import {
   RevertEventSettingRequest,
   RevertEventSettingResponse,
   type EventSettingKey,
+  ScopedSettingsReadQuery,
+  ScopedSettingsReadResponse,
+  ScopedSettingsHistoryQuery,
+  ScopedSettingsHistoryResponse,
+  ScopedSettingsMutationRequest,
+  ScopedSettingsMutationResponse,
+  ScopedSettingsRevertRequest,
+  ScopedSettingsRevertResponse,
+  type ScopedSettingsTarget,
+  type ScopedOperationalSettingKey,
 } from '@spoh/shared';
 export function getSettings(eventId: string): Promise<SettingsResponse> {
   return eventApi<SettingsResponse>(eventId, '/admin/settings');
@@ -128,4 +138,94 @@ export function testAttendanceNetwork(
       body,
     },
   );
+}
+
+function assertScopedTarget(
+  eventId: string,
+  target: ScopedSettingsTarget,
+  response: { eventId: string; target: ScopedSettingsTarget },
+) {
+  if (
+    response.eventId !== eventId ||
+    response.target.scope !== target.scope ||
+    (target.scope === 'station' &&
+      (response.target.scope !== 'station' || response.target.stationId !== target.stationId))
+  )
+    throw new Error('Setting response does not match this event and scope');
+}
+export async function getScopedSettings(eventId: string, input: ScopedSettingsTarget) {
+  const query = ScopedSettingsReadQuery.parse(input);
+  const params = new URLSearchParams({ scope: query.scope });
+  if (query.stationId) params.set('stationId', query.stationId);
+  const response = ScopedSettingsReadResponse.parse(
+    await eventApi<unknown>(eventId, `/admin/settings/catalogue?${params}`, { cache: 'no-store' }),
+  );
+  assertScopedTarget(eventId, input, response);
+  return response;
+}
+export async function getScopedSettingHistory(
+  eventId: string,
+  input: {
+    target: ScopedSettingsTarget;
+    key: ScopedOperationalSettingKey;
+    cursor?: string;
+  },
+) {
+  const query = ScopedSettingsHistoryQuery.parse({
+    ...input.target,
+    key: input.key,
+    cursor: input.cursor,
+    limit: 20,
+  });
+  const params = new URLSearchParams({
+    scope: query.scope,
+    key: query.key,
+    limit: String(query.limit),
+  });
+  if (query.stationId) params.set('stationId', query.stationId);
+  if (query.cursor) params.set('cursor', query.cursor);
+  const response = ScopedSettingsHistoryResponse.parse(
+    await eventApi<unknown>(eventId, `/admin/settings/catalogue/history?${params}`, {
+      cache: 'no-store',
+    }),
+  );
+  assertScopedTarget(eventId, input.target, response);
+  if (response.key !== input.key) throw new Error('Setting history does not match this key');
+  return response;
+}
+export async function changeScopedSetting(eventId: string, input: ScopedSettingsMutationRequest) {
+  const body = ScopedSettingsMutationRequest.parse(input);
+  const response = ScopedSettingsMutationResponse.parse(
+    await eventApi<unknown>(eventId, '/admin/settings/catalogue', {
+      method: 'POST',
+      body,
+      cache: 'no-store',
+    }),
+  );
+  assertScopedTarget(eventId, body.target, response.current);
+  if (
+    response.change.key !== body.key ||
+    response.change.operation !== body.operation ||
+    response.reviewedVersion !== body.expectedVersion
+  )
+    throw new Error('Setting change does not match this review');
+  return response;
+}
+export async function revertScopedSetting(eventId: string, input: ScopedSettingsRevertRequest) {
+  const body = ScopedSettingsRevertRequest.parse(input);
+  const response = ScopedSettingsRevertResponse.parse(
+    await eventApi<unknown>(eventId, '/admin/settings/catalogue/revert', {
+      method: 'POST',
+      body,
+      cache: 'no-store',
+    }),
+  );
+  assertScopedTarget(eventId, body.target, response.current);
+  if (
+    response.history.key !== body.key ||
+    response.revertedFrom.historyId !== body.historyId ||
+    response.reviewedVersion !== body.expectedVersion
+  )
+    throw new Error('Setting restore does not match this review');
+  return response;
 }

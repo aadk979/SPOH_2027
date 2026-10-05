@@ -216,6 +216,11 @@ selected-history audit provenance and identifier-only current-value retries.
 Historical reset restores removal using current inheritance. The generated UI,
 operational schedules, legacy consumers and broad step criteria remain open.
 
+[Reviewed capture controls](../reports/P10/scoped-capture-controls-ui.md) consume
+the generated capture.open catalogue at event and station scope, with inherited
+values, reviewed set/reset/history/restore and a frozen retry intent. The broader
+generated catalogue, operational scheduling and phase criteria remain open.
+
 - **Do:**
   1. A settings screen generated from the registry: grouped, scoped (event or station tabs), with
      descriptions, validation, change history and revert.

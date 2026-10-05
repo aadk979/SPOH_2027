@@ -64,6 +64,6 @@ describe('configuration startup gate', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
     await screen.findByText('Operational screen');
     expect(state.load).toHaveBeenCalledTimes(2);
-    expect(state.bootstrap).toHaveBeenCalledOnce();
+    await waitFor(() => expect(state.bootstrap).toHaveBeenCalledOnce());
   });
 });
