@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T03:52:04.564Z",
+  "updatedAt": "2026-10-05T04:00:27.548Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -2425,7 +2425,8 @@
             "8357ec88035299bda1b661c4d9ca0cdfd0dc8776",
             "c19a9fe7403036b3c7afb44f89dd5c98e465d48a",
             "39b9d72cf5a923ac6e6bc4184361fbb3d4152ab7",
-            "b6a22c15f2fdaf2d48477f0a3b1fbee3cac921fb"
+            "b6a22c15f2fdaf2d48477f0a3b1fbee3cac921fb",
+            "ccf3921971487b0fb447a122653d3b1f369f03d4"
           ],
           "notes": [
             {
@@ -2491,6 +2492,10 @@
             {
               "at": "2026-10-05T03:41:57.131Z",
               "text": "Scoped operational history API locally verified: six new shared contracts, 39 new PostgreSQL cases, 171 focused checks, full 1540-pass/four-existing-skip suite in 101 files, 118 shared/587 server/426 client units, workspace types/lint, flat route isolation, architecture 1044 modules/4612 dependencies, maintained formatting, settings/hardcoding, final build/32-page static export and actual CSP startup checks. Pricing preserved; no real spoh2027 reset/seed/migration. P10.8 remains open for generated controls/reverts/scheduling/consumers; exact-image CI/deploy and normal Cognito history read pending."
+            },
+            {
+              "at": "2026-10-05T04:00:27.216Z",
+              "text": "Exact-image CI 37260469999 and staging deploy 37260940702 succeeded; CF UPDATE_COMPLETE and ECS121 exact image/one desired-running/one completed/zero failed. Normal Cognito Chrome154 read-only actual browser CORS verified prior USER/RESET history across two keyset pages, exact registered values/removal semantics, attribution, owned station read, strict/missing/anonymous no-store refusals, hard reload/sign-out, preserved catalogue inheritance/product/compatibility values and READY state, zero app/CSP errors. No new setting fixtures. Partial P10.8 remains open."
             }
           ]
         },
@@ -3443,6 +3448,10 @@
     {
       "at": "2026-10-05T03:52:04.563Z",
       "text": "Independent read-only P08.8 inventory: six exact CF-owned staging alarms currently OK with zero alarm/OK/insufficient-data notification actions; three STANDARD log groups at 30-day retention; no stack dashboard. Missing six catalogue detectors, separate audit-group evidence, notification delivery and budget criteria remain open. No alarm tests, log bodies, endpoints, metric writes or resource changes requested."
+    },
+    {
+      "at": "2026-10-05T04:00:27.546Z",
+      "text": "Scoped operational history foundation fully verified locally and on exact ccf3921 staging at 11:58 SGT. Continue with reviewed operational history revert producer; generated UI, operational schedules, legacy consumers and broad P10 criteria remain open. Independent P08 IAM/monitoring observations are committed locally for next verified batch."
     }
   ]
 }

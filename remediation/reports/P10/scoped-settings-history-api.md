@@ -85,6 +85,34 @@ configuration still refuses startup. Existing reviewed visual evidence is reused
 because no client UI or baseline changes. The local preview API is restarted
 from the rebuilt server after database verification finishes.
 
+## Exact-image pipeline and staging verification
+
+Source b6a22c1 and tracker image
+ccf3921971487b0fb447a122653d3b1f369f03d4 are pushed under D-11.
+[CI 37260469999](https://github.com/aadk979/SPOH_2027/actions/runs/37260469999)
+and [deployment 37260940702](https://github.com/aadk979/SPOH_2027/actions/runs/37260940702)
+succeed. CloudFormation is UPDATE_COMPLETE. ECS revision 121 runs the exact image
+with one desired/running task, one completed rollout and zero failed tasks.
+
+At 11:58 Singapore, installed Chrome 154 and normal Cognito Authorization Code
+with PKCE verify actual cross-origin browser GETs. The prior legitimate USER set
+and RESET are found across two one-row pages with no duplicate IDs. Attribution
+and reasons match the original synthetic intent. The set shows its registered
+before/after; reset describes removal and contains no invented after value.
+Owned station history also reads successfully. Guarded keys, forged queries,
+missing owned cursors/stations and anonymous requests are refused. Successes and
+rejections are no-store. Private actor fields are absent.
+
+Hard reload preserves history and current catalogue inheritance. Compatibility
+settings, guarded product values/versions and READY phase remain unchanged.
+Normal sign-out passes with zero application errors or CSP violations. The
+[sanitised evidence](staging-scoped-settings-history-evidence-2026-10-05.json)
+contains no credentials, actor/event/station IDs, cursor IDs, UUIDs, raw values or
+reasons. Only read endpoints are requested; no new setting fixture, audit or
+retry receipt is produced by the reader. Normal session receipts are
+created/revoked. The complete local history scan also passes across 633 commits,
+including the independent P08 observation commits awaiting the next batch push.
+
 Generated event/station edit/history/revert controls, operational revert and
 schedule producers, remaining legacy consumers and broad P10 exit criteria
 remain open. This bounded read does not complete P10.8 or P10.

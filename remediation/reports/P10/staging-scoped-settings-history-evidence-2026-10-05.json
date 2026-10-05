@@ -1,0 +1,40 @@
+{
+  "observedAt": "2026-10-05T03:58:35.968Z",
+  "deployedImageTag": "ccf3921971487b0fb447a122653d3b1f369f03d4",
+  "taskRevision": 121,
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  "scope": "Normal Cognito Authorization Code + PKCE; read-only scoped operational history of the existing legitimate synthetic set/reset records",
+  "checks": {
+    "normalSignIn": true,
+    "actualBrowserCorsGets": true,
+    "strictHistoryResponse": true,
+    "reviewedSetHistoryMatchesPriorMutation": true,
+    "resetDescribesOverrideRemovalWithoutInventedAfter": true,
+    "priorMutationsAttributedToCurrentUser": true,
+    "boundedKeysetPagination": true,
+    "observedPages": 2,
+    "ownedStationHistoryRead": true,
+    "guardedKeyAndForgedQueryRejected": true,
+    "missingOwnedCursorAndStationRejected": true,
+    "anonymousRejected": true,
+    "noStoreSuccessAndRejections": true,
+    "privateActorFieldsExcluded": true,
+    "hardReloadHistoryStable": true,
+    "catalogueInheritanceUnchanged": true,
+    "compatibilitySettingsUnchanged": true,
+    "guardedProductValuesAndVersionsUnchanged": true,
+    "eventRemainsReady": true,
+    "normalSignOut": true,
+    "appPageErrors": [],
+    "cspViolations": []
+  },
+  "fixtureEffects": "Only scoped history/catalogue, station and compatibility/product GETs; no new setting fixtures or setting, audit, retry, count, visitor, lifecycle, schedule, announcement or delivery writes requested. Normal session receipts are created/revoked.",
+  "limitation": "This verifies the authenticated history API. Generated edit/history/revert UI, operational revert and schedule producers, remaining legacy consumers and broad P10 criteria remain open."
+}
