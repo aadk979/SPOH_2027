@@ -113,6 +113,6 @@ retry receipt is produced by the reader. Normal session receipts are
 created/revoked. The complete local history scan also passes across 633 commits,
 including the independent P08 observation commits awaiting the next batch push.
 
-Generated event/station edit/history/revert controls, operational revert and
-schedule producers, remaining legacy consumers and broad P10 exit criteria
+Generated event/station edit/history/revert controls, operational schedule
+producers, remaining legacy consumers and broad P10 exit criteria
 remain open. This bounded read does not complete P10.8 or P10.

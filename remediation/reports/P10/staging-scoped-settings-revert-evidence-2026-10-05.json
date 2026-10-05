@@ -1,0 +1,44 @@
+{
+  "observedAt": "2026-10-05T04:58:21.340Z",
+  "deployedImageTag": "9fac3c1d7e23e52ce76646e94cbf92d50c699700",
+  "taskRevision": 122,
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  "scope": "Normal Cognito Authorization Code + PKCE; bounded reviewed operational history restores using existing legitimate set/reset records",
+  "checks": {
+    "normalSignIn": true,
+    "actualBrowserCorsPosts": true,
+    "registeredHistoricalValueRestored": true,
+    "newAttributedRevertHistory": true,
+    "immutableSelectedHistoryProvenance": true,
+    "setRestoreReplayOneChange": true,
+    "staleReviewRefused": true,
+    "changedHistoryAndReasonUuidRefused": true,
+    "historicalResetRemovesOverride": true,
+    "resetHasNoInventedAfter": true,
+    "resetAdvancesHistory": true,
+    "originalInheritanceRestored": true,
+    "originalRestoreRetryRebuildsCurrentValues": true,
+    "resetRestoreReplayOneChange": true,
+    "newRestoreRowsInHistory": true,
+    "guardedProductKeyRejected": true,
+    "anonymousRejected": true,
+    "noStoreSuccessAndRejections": true,
+    "otherCatalogueValuesAndVersionsUnchanged": true,
+    "compatibilitySettingsUnchanged": true,
+    "guardedProductValuesAndVersionsUnchanged": true,
+    "eventRemainsReady": true,
+    "hardReloadStable": true,
+    "normalSignOut": true,
+    "appPageErrors": [],
+    "cspViolations": []
+  },
+  "fixtureEffects": "Two successful restore mutations: existing saved capture pause restored as REVERT, followed by existing RESET history restoring original inheritance and selected stored version zero. Append-only history/audit and identifier-only retry receipts remain. No count, visitor, lifecycle, schedule, announcement or delivery write requested. Normal session receipts are created/revoked.",
+  "limitation": "This verifies the authenticated restore API. Generated edit/history/revert UI, operational schedule producer and remaining legacy consumers remain open."
+}

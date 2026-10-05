@@ -91,6 +91,35 @@ still refuses startup. No client UI or visual baseline changes, so existing
 reviewed visual evidence is reused. The preview API is restarted from the final
 server build after database verification completes.
 
+## Exact-image pipeline and staging verification
+
+Source 3f4ac186 and tracker image 9fac3c1d7e23e52ce76646e94cbf92d50c699700
+are pushed under D-11. [CI 37264581444](https://github.com/aadk979/SPOH_2027/actions/runs/37264581444)
+and [deployment 37264970940](https://github.com/aadk979/SPOH_2027/actions/runs/37264970940)
+succeed. CloudFormation is UPDATE_COMPLETE; ECS revision 122 runs the exact image
+with one desired/running task, one completed rollout and zero failed tasks.
+
+At 12:58 Singapore, installed Chrome 154 and normal Cognito Authorization Code
+with PKCE verify actual cross-origin browser restores. The existing legitimate
+saved capture pause restores as a new attributed REVERT with immutable selected
+history provenance. Exact retries append no duplicate change. Stale reviews and
+the same UUID with a different selected history or reason are refused. Restoring
+the prior RESET removes the override, appends RESET and restores original current
+inheritance with selected stored version zero. It contains no invented after.
+Retrying the first restore after removal returns its original applied history
+and fresh restored current values. Both new rows remain visible in history.
+
+Guarded product keys and anonymous writes are refused; successes and rejections
+are no-store. Other catalogue values/versions, compatibility settings, guarded
+product values/versions and READY phase remain unchanged. Hard reload and normal
+sign-out pass with zero application errors or CSP violations. The
+[sanitised evidence](staging-scoped-settings-revert-evidence-2026-10-05.json)
+contains no credentials, actor/event/station/history IDs, UUIDs, raw setting
+values or reasons. Exactly two successful setting restores retain append-only
+history/audit and identifier-only receipts. No count, visitor, lifecycle,
+schedule, announcement or delivery writes are requested; normal session
+receipts are created/revoked.
+
 Generated event/station controls/history/revert UI, operational scheduling,
 remaining legacy consumers and broad P10 criteria remain open. This bounded
 restore producer does not complete P10.8 or P10.
