@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T14:30:29.346Z",
+  "updatedAt": "2026-10-05T15:00:38.509Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -2452,7 +2452,8 @@
             "c96db0c1d95eae341ace88b2368b5fa20415ac8b",
             "22a12eb4eba66233a8d4e9c4befb52594a3038bf",
             "e6718c1bd566a5310973abb6d1c37904ee757f73",
-            "bcff7e15862d7be1e4c9cc8955d1bf613484fc93"
+            "bcff7e15862d7be1e4c9cc8955d1bf613484fc93",
+            "5859d8de214f06ec8fabbe102fbf4104a865a89d"
           ],
           "notes": [
             {
@@ -2566,6 +2567,10 @@
             {
               "at": "2026-10-05T14:11:18.126Z",
               "text": "Partial generated event/station catalogue and private history reader: 526 client checks, four real-browser reads, 32-page static/CSP and 76 reviewed visual checks pass; no settings writes. Full generated editing/revert/scheduling and legacy consumers remain open. CI/exact staging acceptance pending."
+            },
+            {
+              "at": "2026-10-05T15:00:38.508Z",
+              "text": "Partial generated catalogue history restores: reviewed scope/history/version and required reason, frozen UUID/body retry, authority/cache guards and structural array comparison. 547 client checks, 12 real-browser journeys, 32-page static/CSP and 80 reviewed visual checks pass. CI/exact staging restore acceptance pending; generated editing, broader scheduling and legacy consumers remain open."
             }
           ]
         },
