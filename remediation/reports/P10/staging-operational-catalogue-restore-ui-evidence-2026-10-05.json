@@ -1,0 +1,35 @@
+{
+  "observedAt": "2026-10-05T15:18:32.200Z",
+  "deployedImageTag": "f52eade68888fb91dcec2d25f92cf4d3d6c8d4b6",
+  "taskRevision": 131,
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97",
+    "phone": [390, 844],
+    "laptop": [1440, 900]
+  },
+  "authentication": "Normal Cognito Authorization Code + PKCE and current roster session",
+  "checks": {
+    "exactHealthyRunningImage": true,
+    "phoneGeneratedOwnedHistoryReview": true,
+    "requiredReasonAndConfirmation": true,
+    "realCommittedReceiptDeliberatelyLost": true,
+    "frozenFieldsScopeCollapseAndNavigation": true,
+    "sameUuidAndBodyRetry": true,
+    "oneAttributedRevert": true,
+    "originalHistoryRecordsUnchanged": true,
+    "ownEffectRemovedByReviewedPublicReset": true,
+    "originalValuesAndVersionsRestored": true,
+    "restoredStateAndNewHistoryVisibleAfterSettledHardReload": true,
+    "laptopOwnedStationReadOnly": true,
+    "stationValuesUnchanged": true,
+    "privateReadsNoStore": true,
+    "legacyProductsAndReadyUnchanged": true,
+    "normalSignOut204": true,
+    "appPageErrors": [],
+    "cspViolations": [],
+    "backendFailures": []
+  },
+  "fixtureEffects": "One legitimate restore of existing owned synthetic event capture history and one provenance-checked public RESET remain as attributed history/audit and identifier-only receipts. The original inherited capture and all catalogue/compatibility/product values and versions are restored. No schedule, lifecycle, count, visitor, announcement, delivery or station mutation is requested.",
+  "limitations": "Staging restores one owned boolean event history record and reads one station. Numeric/text/array/removal, station restore, archive, authority loss and malformed response cases use existing local/API evidence. Generated editing, broader schedules, legacy migration and the known intermittent immediate reload/session symptom remain open."
+}

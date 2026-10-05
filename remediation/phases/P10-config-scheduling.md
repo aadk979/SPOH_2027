@@ -249,9 +249,11 @@ revert/scheduling and legacy consumer migration remain open.
 [Reviewed catalogue history restores](../reports/P10/operational-catalogue-restore-ui.md)
 add generated event/station historical value/removal reviews through the existing
 guarded writer. Stable retry intent, scope/collapse locks, typed values, current
-authority/cache protection and structural array comparisons are verified locally.
-Generated editing, broader schedules, legacy consumers and staging acceptance
-remain open.
+authority/cache protection and structural array comparisons pass local checks,
+including 80 reviewed visual checks. Actual CI/coverage artifacts, exact healthy
+staging revision 131 and the normal Cognito restore/identical retry/owned public
+cleanup journey pass. Generated editing, broader schedules, legacy consumers and
+the full step criteria remain open.
 
 - **Do:**
   1. A settings screen generated from the registry: grouped, scoped (event or station tabs), with

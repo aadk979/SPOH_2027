@@ -90,9 +90,39 @@ recoverable runtime quarantines are preserved.
 
 ## Staging acceptance
 
-This initial report records local verification only. D-11 CI, retained coverage,
-exact deployed image and a normal Cognito bounded synthetic restore/owned cleanup
-remain pending. No staging restore acceptance is claimed yet.
+Source 5859d8d and release f52eade68888fb91dcec2d25f92cf4d3d6c8d4b6 are pushed
+directly to main under D-11.
+[CI 37329349688](https://github.com/aadk979/SPOH_2027/actions/runs/37329349688)
+passes, including the actual package coverage and ratchet steps. Retained artifact
+11353488204 contains all six summary/LCOV files. It is created at 15:08:41 UTC on
+5 October and expires at the same time on 12 October. All four raw covered/total
+metrics match the accepted local summaries for all three packages, including the
+424 maintained client files. Actual CI passes 173 shared checks, 2,308 server
+checks with four existing skips, 547 client checks and the 16 checker tests.
+
+[Deployment 37330429904](https://github.com/aadk979/SPOH_2027/actions/runs/37330429904)
+succeeds. At 23:18 Singapore on 5 October, CloudFormation is UPDATE_COMPLETE and
+the sole healthy running ECS task is revision 131 with the exact release image.
+The normal Cognito Authorization Code + PKCE journey in installed Chrome passes;
+its bounded [staging evidence](staging-operational-catalogue-restore-ui-evidence-2026-10-05.json)
+records the observed image and acceptance checks.
+
+On a phone, the generated panel reviews an existing owned synthetic capture
+history record. A real committed restore receipt is deliberately lost; fields,
+scope, collapse and navigation stay locked, and the identical body/UUID retry
+returns the same single attributed REVERT. A provenance-checked public RESET
+removes only this temporary override. All original catalogue values and versions
+are restored, and old history records remain unchanged. The two legitimate
+attributed history/audit records and identifier-only receipts remain as evidence.
+Settled hard reload shows the restored value and new history. Laptop station
+reads preserve the original values. Private reads use no-store; compatibility
+settings, product values and READY lifecycle remain unchanged. Normal sign-out
+returns 204, with no application errors, CSP violations or actual backend failures.
+
+Staging restores one event boolean history record and reads one station. Numeric,
+text, array, removal, station restore, archive and authority-loss cases rely on the
+separate accepted local/API evidence; this probe does not claim those staging
+writes. The known intermittent immediate reload/session symptom remains open.
 
 ## Remaining scope
 
