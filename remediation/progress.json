@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T10:00:31.576Z",
+  "updatedAt": "2026-10-05T10:40:28.381Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -2437,7 +2437,8 @@
             "5d1e018810531f9ccdc91b3658d7835b8d737ed9",
             "00dbc2a9d263f741852c31f1a399f4e2d639fd72",
             "6eade954cbd5fa40b2558343243343fb36592bbb",
-            "c96db0c1d95eae341ace88b2368b5fa20415ac8b"
+            "c96db0c1d95eae341ace88b2368b5fa20415ac8b",
+            "22a12eb4eba66233a8d4e9c4befb52594a3038bf"
           ],
           "notes": [
             {
@@ -2535,6 +2536,10 @@
             {
               "at": "2026-10-05T09:28:18.616Z",
               "text": "Retain capture schedule exact-image staging verification as current work. Independent P08.9 shared-test workflow correction is locally prepared; do not supersede the current CI/deployment before its legitimate normal-session worker evidence."
+            },
+            {
+              "at": "2026-10-05T10:40:28.032Z",
+              "text": "Partial: audit-backed capture schedule list/edit/cancel; creator-owned editing, current-manager cancellation, reviewed schedule/setting versions, immutable per-version retries and Event/member/station/action/reservation guards. Local 63 new/299 focused/1714 full checks plus four existing skips pass; 173 shared and 587 server units, workspace guards, build32/static CSP pass. Exact-image CI/deploy/staging verification pending; scheduling UI and broader criteria remain open."
             }
           ]
         },
@@ -3523,6 +3528,10 @@
     {
       "at": "2026-10-05T10:00:31.575Z",
       "text": "P10.8 partial: capture producer/status source 6eade954, exact c96db0c CI 37289672127 and staging deploy 37290434592 succeed; actual running task TD124 confirmed. Normal Cognito verifies one real scheduled pause and reviewed RESET restoring inheritance zero. Composite final immediate reload failed; separate read-only normal sessions pass reload/history/sign-out at 17:45 and 17:58 SGT with zero app/CSP errors. An intervening immediate reload timed out; own-session cleanup 204, cause unresolved and failed consumers excluded. Continue bounded capture list/edit/cancel; broader steps remain open."
+    },
+    {
+      "at": "2026-10-05T10:40:28.380Z",
+      "text": "P10.8 capture management local verification: full1714+4 existing skips/104 files516.44s;63 new cases and19 true PG wait cases;focused299/8files82.29s;shared173/15files;server587/54files;types/lint/arch1082/4875/settings/hardcoding/maintained format/646-history secrets/build32/static CSP pass. Preserved P08 fingerprints/P05 pricing unchanged. Node24 API preview PID49992 ready on4012, client PID8772 retained. Batch includes locally verified shared-contract CI correction; actual CI step and staging probe remain pending. Intermittent immediate reload remains open session investigation."
     }
   ]
 }
