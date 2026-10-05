@@ -15,6 +15,13 @@ export {
   getCaptureScheduleHandler,
 } from './http/captureScheduleHandlers.js';
 export { getEventSettingHistoryHandler } from './http/historyHandler.js';
+export {
+  captureScheduleEditReplay,
+  captureScheduleCancelReplay,
+  listCaptureSchedulesHandler,
+  updateCaptureScheduleHandler,
+  cancelCaptureScheduleHandler,
+} from './http/captureScheduleManagementHandlers.js';
 export { eventSettingRevertReplay, revertEventSettingHandler } from './http/revertHandlers.js';
 export { getScopedSettingsHandler } from './http/scopedReadHandler.js';
 export { getScopedHistoryHandler } from './http/scopedHistoryHandler.js';

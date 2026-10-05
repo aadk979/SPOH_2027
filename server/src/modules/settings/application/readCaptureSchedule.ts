@@ -2,10 +2,11 @@ import { CaptureScheduleIntent, type CreateCaptureScheduleRequest } from '@spoh/
 import { requireCurrentCapability } from '../../../platform/access/currentCapability.js';
 import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { prisma } from '../../../platform/db/client.js';
-import { IdempotencyKeyReuseError, NotFoundError } from '../../../platform/errors/index.js';
-import { findCaptureCreationAudit, findCaptureSchedule } from '../data/captureScheduleRepo.js';
+import { IdempotencyKeyReuseError } from '../../../platform/errors/index.js';
+import { findCaptureSchedule } from '../data/captureScheduleRepo.js';
 import { captureScheduleResponse } from './captureScheduleResponse.js';
 import type { CaptureScheduleActor } from './prepareCaptureSchedule.js';
+import { requireCaptureSchedule } from './requireCaptureSchedule.js';
 
 /** A replay binds immutable creation intent, but always returns current status and values. */
 export function readCaptureSchedule(
@@ -21,19 +22,16 @@ export function readCaptureSchedule(
         personId: actor.volunteerId,
         capability: 'config.manage',
       });
-      const row = await findCaptureSchedule(tx, actor.scope, input.id);
-      if (!row || !row.createdByPersonId) throw new NotFoundError('Capture schedule');
-      const audit = await findCaptureCreationAudit(tx, actor.scope, {
-        id: row.id,
-        personId: row.createdByPersonId,
+      const { row, original } = await requireCaptureSchedule(tx, {
+        scope: actor.scope,
+        row: await findCaptureSchedule(tx, actor.scope, input.id),
       });
-      const original = CaptureScheduleIntent.safeParse(audit?.after);
-      if (!original.success) throw new NotFoundError('Capture schedule');
       if (input.request) {
         const { idempotencyKey: _key, ...intent } = input.request;
         if (
           row.createdByPersonId !== actor.volunteerId ||
-          JSON.stringify(CaptureScheduleIntent.parse(intent)) !== JSON.stringify(original.data)
+          JSON.stringify(CaptureScheduleIntent.parse(intent)) !==
+            JSON.stringify(CaptureScheduleIntent.parse(original))
         )
           throw new IdempotencyKeyReuseError();
       }

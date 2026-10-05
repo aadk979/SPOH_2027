@@ -226,6 +226,12 @@ adds a bounded future producer for the existing event/station setting.apply work
 current-authority private status, immutable creation intent and identifier-only
 retries. Schedule list/edit/cancel/UI and broader phase criteria remain open.
 
+[Reviewed capture schedule management](../reports/P10/capture-schedule-management-api.md)
+adds exact-target private list, creator-owned pending edit and current-manager
+cancellation, with reviewed versions, immutable retry intent and worker/action
+lock guards. Its verification is in progress; scheduling UI and broader phase
+criteria remain open.
+
 - **Do:**
   1. A settings screen generated from the registry: grouped, scoped (event or station tabs), with
      descriptions, validation, change history and revert.

@@ -272,6 +272,16 @@ immediate defect and the later step makes it structural.
 | F04-021 | Capacity measured for captures on a laptop, not the event's mix on its server   | P16.2  | P08.10 (staging at target size)                               | open                                                  |
 | PF-11   | Documentation drift                                                             | P16.5  | ADR-007 (the missing brief and build plan)                    | open                                                  |
 
+An additional session symptom was observed during P10 staging verification on
+5 October: immediate navigation followed by reload intermittently fails before
+the capture panel appears, while a fresh read-only immediate-reload diagnostic
+and a reload after readiness pass. Its cause is not established as F02-032 or
+F03-010. Preserve it for P12.5 session investigation alongside the still-skipped
+concurrent refresh reproductions; do not relax token-reuse protection or claim
+this symptom fixed from a later successful attempt. The
+[capture producer evidence](../reports/P10/staging-capture-schedule-api-evidence-2026-10-05.json)
+records the separate successful consumers and excluded failures.
+
 ### Low
 
 | ID      | Title                                                                     | Home   | Also                                         | Status                                    |

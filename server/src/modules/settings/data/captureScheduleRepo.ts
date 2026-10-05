@@ -30,7 +30,7 @@ export function insertCaptureSchedule(
 }
 export function findCaptureSchedule(tx: PrismaTransactionClient, scope: EventScope, id: string) {
   return tx.scheduledAction.findFirst({
-    where: { eventId: scope.eventId, id, type: 'setting.apply', recurrence: null },
+    where: { eventId: scope.eventId, id, type: 'setting.apply', recurrence: null, dedupeKey: null },
   });
 }
 export type CaptureScheduleRow = NonNullable<Awaited<ReturnType<typeof findCaptureSchedule>>>;

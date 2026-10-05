@@ -4,10 +4,10 @@ import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { ConflictError, NotFoundError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { lockReserved } from '../../../platform/idempotency/index.js';
-import { storedSetting } from '../../../platform/settings/scopedStore.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { holdScopedMutationStation } from '../data/scopedMutationRepo.js';
 import { lockEventSettingAuthority } from './lockEventSettingAuthority.js';
+import { reviewCaptureScheduleIntent } from './reviewCaptureScheduleIntent.js';
 
 export type CaptureScheduleActor = ActorContext & { clock?: Clock };
 export async function prepareCaptureSchedule(
@@ -26,21 +26,6 @@ export async function prepareCaptureSchedule(
     throw new NotFoundError('Station');
   await lockReserved(tx, actor.scope, input.idempotencyKey);
   const now = (actor.clock ?? systemClock).now();
-  if (new Date(intent.runAt).getTime() <= now.getTime())
-    throw new ConflictError(ERROR_CODES.CONFLICT, 'Choose a future capture change time.');
-  const target =
-    intent.target.scope === 'event'
-      ? { scope: 'event' as const, eventId: actor.scope.eventId }
-      : {
-          scope: 'station' as const,
-          eventId: actor.scope.eventId,
-          stationId: intent.target.stationId,
-        };
-  const stored = await storedSetting(target, intent.key, tx);
-  if ((stored?.version ?? 0) !== intent.expectedVersion)
-    throw new ConflictError(
-      ERROR_CODES.SETTING_VERSION_CONFLICT,
-      'Capture changed. Review its current version before scheduling again.',
-    );
+  await reviewCaptureScheduleIntent(tx, { scope: actor.scope, intent, now });
   return { event, now };
 }

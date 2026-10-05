@@ -216,7 +216,21 @@ operational creation audit and identifier-only retry receipt commit together.
 Private status and retries recheck current authority and rebuild status/values.
 Immutable creation audit binds retry intent even after later schedule changes.
 The existing worker performs its independent current execution checks. Capture
-schedule list/edit/cancel and creation UI remain separate P10.8 consumers.
+schedule creation UI remains a separate P10.8 consumer.
+
+**Reviewed capture management (P10.8, 2026-10-05).** The private collection lists
+only exact event/owned-station, one-off, creation-audit-backed capture actions.
+Status changes do not invalidate owned keyset cursors, and malformed raw rows
+are omitted with continuing page progress. Only the creator can edit pending
+intent; target/key/creator remain fixed. Any current event configuration manager
+can cancel pending capture work. Both operations review the schedule version,
+append an atomic actor audit and identifier/version-only receipt, and take
+Event/member/station/action/reservation locks before sampling time. A worker
+claim that wins first refuses the mutation; an editor's action lock excludes
+the claim until commit. Immutable mutation audit binds retry intent, while
+current-authority retries return fresh status/values even after archive or later
+changes. Neither edit nor cancel executes a setting change. Recurrence, generic
+handlers, other settings and system/platform actions remain unavailable.
 
 **Daily report snapshots (P10.7, 2026-10-03).** One-off user actions require a completed event
 day in the action's own event and current `report.generate` permission. The range is derived

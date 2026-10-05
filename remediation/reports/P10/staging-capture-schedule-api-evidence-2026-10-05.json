@@ -12,7 +12,7 @@
   "browser": { "channel": "chrome", "headless": true, "width": 390, "height": 844 },
   "authentication": "Normal Cognito Authorization Code + PKCE and current roster session",
   "apiAndWorker": {
-    "fixtureRestoredAt": "2026-10-05T09:41:46.000Z",
+    "fixtureRestoredAt": "2026-10-05T09:41:46.107Z",
     "reviewedFutureEventCaptureProducer": true,
     "pendingLeavesCaptureUnchanged": true,
     "sameUuidOneAction": true,

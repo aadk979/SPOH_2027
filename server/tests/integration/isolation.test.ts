@@ -534,6 +534,28 @@ const CASES: Record<string, Case> = {
   'GET /admin/settings/catalogue/schedules/:id': {
     params: (b) => ({ id: b.announcementSchedule }),
   },
+  'GET /admin/settings/catalogue/schedules': noId(
+    'lists only exact path-event capture targets; foreign target/cursors are covered by captureScheduleManagement tests',
+  ),
+  'PATCH /admin/settings/catalogue/schedules/:id': {
+    params: (b) => ({ id: b.announcementSchedule }),
+    body: () => ({
+      expectedScheduleVersion: 1,
+      expectedVersion: 0,
+      value: false,
+      runAt: '2027-01-07T05:00:00Z',
+      reason: 'Reviewed edit',
+      idempotencyKey: idempotencyKey(),
+    }),
+  },
+  'POST /admin/settings/catalogue/schedules/:id/cancel': {
+    params: (b) => ({ id: b.announcementSchedule }),
+    body: () => ({
+      expectedScheduleVersion: 1,
+      reason: 'Reviewed cancellation',
+      idempotencyKey: idempotencyKey(),
+    }),
+  },
   'PATCH /admin/settings': noId('runtime settings are platform-wide until P10'),
   'GET /admin/event-settings': noId("reads the path event's settings"),
   'GET /admin/event-settings/history': noId(

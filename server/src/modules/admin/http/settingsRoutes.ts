@@ -10,6 +10,9 @@ import {
   RevertEventSettingRequest,
   UpdateSettingsRequest,
   CreateCaptureScheduleRequest,
+  CaptureScheduleListQuery,
+  UpdateCaptureScheduleRequest,
+  CancelCaptureScheduleRequest,
   Id,
 } from '@spoh/shared';
 import { adminRateLimit, defaultRateLimit } from '../../../platform/http/rateLimit.js';
@@ -33,13 +36,53 @@ import {
   captureScheduleReplay,
   createCaptureScheduleHandler,
   getCaptureScheduleHandler,
+  listCaptureSchedulesHandler,
+  updateCaptureScheduleHandler,
+  cancelCaptureScheduleHandler,
+  captureScheduleEditReplay,
+  captureScheduleCancelReplay,
 } from '../../settings/index.js';
 
 /** Register directly on the authenticated admin router, keeping the isolation inventory flat. */
 export function registerSettingsRoutes(router: Router): void {
   registerOperationalSettingsRoutes(router);
   registerCaptureScheduleRoutes(router);
+  registerCaptureScheduleManagementRoutes(router);
   registerProductSettingsRoutes(router);
+}
+
+function registerCaptureScheduleManagementRoutes(router: Router): void {
+  router.get(
+    '/settings/catalogue/schedules',
+    defaultRateLimit,
+    requireCapability('config.manage'),
+    validate({ query: CaptureScheduleListQuery }),
+    listCaptureSchedulesHandler,
+  );
+  router.patch(
+    '/settings/catalogue/schedules/:id',
+    adminRateLimit,
+    requireCapability('config.manage'),
+    validate({
+      params: z.object({ id: Id }).strict(),
+      body: UpdateCaptureScheduleRequest,
+      query: z.object({}).strict(),
+    }),
+    idempotent('setting.capture.schedule.update', { redacted: captureScheduleEditReplay }),
+    updateCaptureScheduleHandler,
+  );
+  router.post(
+    '/settings/catalogue/schedules/:id/cancel',
+    adminRateLimit,
+    requireCapability('config.manage'),
+    validate({
+      params: z.object({ id: Id }).strict(),
+      body: CancelCaptureScheduleRequest,
+      query: z.object({}).strict(),
+    }),
+    idempotent('setting.capture.schedule.cancel', { redacted: captureScheduleCancelReplay }),
+    cancelCaptureScheduleHandler,
+  );
 }
 
 function registerCaptureScheduleRoutes(router: Router): void {
