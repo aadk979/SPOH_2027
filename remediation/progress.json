@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T03:04:06.465Z",
+  "updatedAt": "2026-10-05T03:41:57.392Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -2424,7 +2424,8 @@
             "62d01caec4f565a250002fd5dcff7d0d260cbd2c",
             "8357ec88035299bda1b661c4d9ca0cdfd0dc8776",
             "c19a9fe7403036b3c7afb44f89dd5c98e465d48a",
-            "39b9d72cf5a923ac6e6bc4184361fbb3d4152ab7"
+            "39b9d72cf5a923ac6e6bc4184361fbb3d4152ab7",
+            "b6a22c15f2fdaf2d48477f0a3b1fbee3cac921fb"
           ],
           "notes": [
             {
@@ -2482,6 +2483,14 @@
             {
               "at": "2026-10-05T03:04:06.203Z",
               "text": "Scoped operational SET/RESET API verified locally and in staging. Full DB1501/four existing skips/100 files, final focused109, shared112/server587/client426, quality/build/static CSP/scans pass. Source39b9d72/tracker image28ec157 pushed under D11; CI37256627582 and deploy37257073164 succeed, actual UPDATE_COMPLETE/ECS120 exact28ec157/one desired-running/completed/zero failures. Normal Cognito+Chrome154 real browser CORS POST verifies inherited event pause/reset, stable same-intent retries, current values after reset, stale/different-intent/guarded/anonymous refusal, no-store, original inheritance/restored storedVersion0, unchanged other catalogue/legacy/product values and versions/READY, hard reload and signout with zero app/CSP errors at11:02SGT. Two legitimate history/audit/retry effects remain. Generated UI/history/revert/schedules and legacy consumers stay open; no broad step closure."
+            },
+            {
+              "at": "2026-10-05T03:04:43.450Z",
+              "text": "Next bounded slice after exact-image scoped set/reset verification: read-only generated operational history for exact event/station/key, strict bounded metadata and validated historical values, explicit RESET removes-override semantics, owned keyset cursors and current post-lock manager authority. No new mutation, schema or migration; generated UI/reverts/schedules/legacy consumers remain open. Design in ignored .local/scoped-settings-history-plan.json."
+            },
+            {
+              "at": "2026-10-05T03:41:57.131Z",
+              "text": "Scoped operational history API locally verified: six new shared contracts, 39 new PostgreSQL cases, 171 focused checks, full 1540-pass/four-existing-skip suite in 101 files, 118 shared/587 server/426 client units, workspace types/lint, flat route isolation, architecture 1044 modules/4612 dependencies, maintained formatting, settings/hardcoding, final build/32-page static export and actual CSP startup checks. Pricing preserved; no real spoh2027 reset/seed/migration. P10.8 remains open for generated controls/reverts/scheduling/consumers; exact-image CI/deploy and normal Cognito history read pending."
             }
           ]
         },
@@ -3422,6 +3431,10 @@
     {
       "at": "2026-10-05T03:04:06.465Z",
       "text": "P10.8 scoped mutation slice complete as a bounded API milestone: exact28ec157 CI/deploy and actual normal Cognito/Chrome browser producer passed at11:02SGT; original inherited capture restored and READY preserved. Sanitized report/evidence and independent read-only P08 storage measurement committed for batching with the next verified source push. Continue bounded operational history read from the ignored design; P10.8/P08 stay open, counts105/171 and9/17 unchanged."
+    },
+    {
+      "at": "2026-10-05T03:41:57.391Z",
+      "text": "Verified P10.8 scoped history read source b6a22c1; strict owned keyset pagination, registered historical JSON validation, private actor exclusion and RESET removal semantics. Batch pushing with prior verified set/reset staging and read-only P08 storage inventory evidence; no phase closure or budget compliance claimed."
     }
   ]
 }
