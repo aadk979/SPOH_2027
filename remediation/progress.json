@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T13:52:10.269Z",
+  "updatedAt": "2026-10-05T14:11:18.127Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -2451,7 +2451,8 @@
             "6eade954cbd5fa40b2558343243343fb36592bbb",
             "c96db0c1d95eae341ace88b2368b5fa20415ac8b",
             "22a12eb4eba66233a8d4e9c4befb52594a3038bf",
-            "e6718c1bd566a5310973abb6d1c37904ee757f73"
+            "e6718c1bd566a5310973abb6d1c37904ee757f73",
+            "bcff7e15862d7be1e4c9cc8955d1bf613484fc93"
           ],
           "notes": [
             {
@@ -2561,6 +2562,10 @@
             {
               "at": "2026-10-05T13:29:51.712Z",
               "text": "Preserve the verified capture-scheduling consumer; next generated catalogue consumer is being reviewed while the independent P08 coverage correction executes in CI. Full phase criteria stay open."
+            },
+            {
+              "at": "2026-10-05T14:11:18.126Z",
+              "text": "Partial generated event/station catalogue and private history reader: 526 client checks, four real-browser reads, 32-page static/CSP and 76 reviewed visual checks pass; no settings writes. Full generated editing/revert/scheduling and legacy consumers remain open. CI/exact staging acceptance pending."
             }
           ]
         },
