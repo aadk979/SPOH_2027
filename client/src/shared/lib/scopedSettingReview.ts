@@ -18,7 +18,7 @@ export function scopedSettingReviewChanged(
 ) {
   return (
     a.storedVersion !== b.storedVersion ||
-    a.value !== b.value ||
+    JSON.stringify(a.value) !== JSON.stringify(b.value) ||
     a.source.scope !== b.source.scope ||
     a.source.version !== b.source.version
   );

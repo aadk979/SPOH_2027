@@ -1,9 +1,15 @@
 import { expect, test } from '@playwright/test';
-import { ScopedSettingsHistoryResponse } from '@spoh/shared';
+import { ScopedSettingsHistoryResponse, ScopedSettingsReadResponse } from '@spoh/shared';
 import { primeVisualAccounts } from './primeAccounts';
 
 test.beforeAll(async ({ request }) => primeVisualAccounts(request));
-for (const state of ['event values', 'station values', 'history'] as const) {
+for (const state of [
+  'event values',
+  'station values',
+  'history',
+  'restore value',
+  'restore removal',
+] as const) {
   test(`operational catalogue ${state}`, async ({ page }) => {
     const errors: string[] = [],
       failures: number[] = [],
@@ -30,6 +36,27 @@ for (const state of ['event values', 'station values', 'history'] as const) {
       );
     });
     // History-only GET fixtures show validated set/removal semantics without changing frozen rows.
+    if (state === 'restore removal')
+      await page.route('**/admin/settings/catalogue?*', async (route) => {
+        expect(route.request().method()).toBe('GET');
+        const response = await route.fetch();
+        expect(response.status()).toBe(200);
+        const current = ScopedSettingsReadResponse.parse(await response.json());
+        expect(current.target).toEqual({ scope: 'event' });
+        const fixture = ScopedSettingsReadResponse.parse({
+          ...current,
+          data: current.data.map((row) =>
+            row.key === 'silentStationMinutes'
+              ? { ...row, value: 20, source: { scope: 'event', version: 3 }, storedVersion: 3 }
+              : row,
+          ),
+        });
+        await route.fulfill({
+          status: 200,
+          headers: { 'cache-control': 'no-store' },
+          json: fixture,
+        });
+      });
     await page.route('**/admin/settings/catalogue/history?*', async (route) => {
       expect(route.request().method()).toBe('GET');
       const url = new URL(route.request().url());
@@ -84,7 +111,7 @@ for (const state of ['event values', 'station values', 'history'] as const) {
       await expect(selector.locator('option')).not.toHaveCount(1);
       await selector.selectOption((await selector.locator('option').nth(1).getAttribute('value'))!);
       await expect(page.getByRole('button', { name: /^View history:/ })).toHaveCount(3);
-    } else if (state === 'history') {
+    } else if (state === 'history' || state === 'restore value' || state === 'restore removal') {
       await page.getByRole('button', { name: 'View history: Silent station', exact: true }).click();
       await expect(
         page.getByRole('heading', { name: 'History: Silent station', exact: true }),
@@ -92,6 +119,24 @@ for (const state of ['event values', 'station values', 'history'] as const) {
       await expect(
         page.getByText('Override removed. The inherited value at that time is not recorded.'),
       ).toBeVisible();
+      if (state !== 'history') {
+        await page
+          .getByRole('button', {
+            name: `Review catalogue version ${state === 'restore value' ? 1 : 2}`,
+            exact: true,
+          })
+          .click();
+        await page
+          .getByLabel('Reason for catalogue restore')
+          .fill('Restore the reviewed operational setting');
+        await page
+          .getByRole('group', { name: 'Review catalogue restore' })
+          .getByRole('checkbox')
+          .check();
+        await expect(
+          page.getByRole('button', { name: 'Restore catalogue setting', exact: true }),
+        ).toBeEnabled();
+      }
     }
     await page.waitForLoadState('networkidle');
     const panel = page.locator('#operational-catalogue');

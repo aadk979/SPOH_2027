@@ -4,6 +4,7 @@ import {
   type ScopedOperationalSettingKey,
   type ScopedSettingsHistoryRecord,
   type ScopedSettingsTarget,
+  type ScopedSettingsReadResponse,
 } from '@spoh/shared';
 import { useEventTime } from '@/features/session';
 import { Button, Callout, Card, LoadingRows } from '@/shared/ui';
@@ -11,11 +12,14 @@ import { ApiError } from '@/shared/lib/apiErrors';
 import { useScopedSettingHistory } from '../queries';
 import { catalogueValue } from '../model/operationalCatalogue';
 import { settingSourceLabels } from '../model/productHistory';
+import { scopedSettingRow } from '@/shared/lib/scopedSettingReview';
 
 export function OperationalCatalogueHistory(input: {
   target: ScopedSettingsTarget;
   settingKey: ScopedOperationalSettingKey;
   onDenied: () => void;
+  current: ScopedSettingsReadResponse;
+  onReview: (row: ScopedSettingsHistoryRecord) => void;
 }) {
   const history = useScopedSettingHistory({ target: input.target, key: input.settingKey });
   const clock = useEventTime();
@@ -55,7 +59,19 @@ export function OperationalCatalogueHistory(input: {
       {!rows.length ? <p>No recorded changes for this setting at this scope.</p> : null}
       <ul aria-label="Catalogue history results" className="flex flex-col gap-md">
         {rows.map((row) => (
-          <CatalogueHistoryRow key={row.id} row={row} />
+          <CatalogueHistoryRow
+            key={row.id}
+            row={row}
+            onReview={input.onReview}
+            alreadyInherited={scopedSettingRow(input.current, row.key).storedVersion === 0}
+            disabled={
+              input.current.eventStatus === 'ARCHIVED' ||
+              history.isFetching ||
+              (row.values.available &&
+                row.values.operation === 'reset' &&
+                scopedSettingRow(input.current, row.key).storedVersion === 0)
+            }
+          />
         ))}
       </ul>
       {history.hasNextPage ? (
@@ -72,7 +88,13 @@ export function OperationalCatalogueHistory(input: {
     </section>
   );
 }
-function CatalogueHistoryRow({ row }: { row: ScopedSettingsHistoryRecord }) {
+function CatalogueHistoryRow(input: {
+  row: ScopedSettingsHistoryRecord;
+  disabled: boolean;
+  alreadyInherited: boolean;
+  onReview: (row: ScopedSettingsHistoryRecord) => void;
+}) {
+  const { row } = input;
   const clock = useEventTime();
   return (
     <li>
@@ -98,6 +120,14 @@ function CatalogueHistoryRow({ row }: { row: ScopedSettingsHistoryRecord }) {
           <p>This historical value is unavailable.</p>
         )}
         {row.reason ? <p className="break-words">Reason: {row.reason}</p> : null}
+        {input.alreadyInherited && row.values.available && row.values.operation === 'reset' ? (
+          <p>This scope already inherits a value. There is no override to remove.</p>
+        ) : null}
+        {row.values.available ? (
+          <Button variant="secondary" disabled={input.disabled} onClick={() => input.onReview(row)}>
+            Review catalogue version {row.version}
+          </Button>
+        ) : null}
       </Card>
     </li>
   );

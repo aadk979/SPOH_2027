@@ -6,8 +6,8 @@ import {
   type ScopedSettingsReadResponse,
   type ScopedSettingsHistoryRecord,
 } from '@spoh/shared';
-import { ApiError } from '@/shared/lib/apiErrors';
 import { scopedSettingRow, scopedSettingReviewChanged } from '@/shared/lib/scopedSettingReview';
+import { scopedSettingFailure } from './scopedSettingChange';
 
 export const CAPTURE_KEY = 'capture.open';
 export const captureMetadata = GENERATED_SETTING_METADATA[CAPTURE_KEY];
@@ -15,9 +15,6 @@ export type CaptureAction =
   | { operation: 'set'; value: boolean }
   | { operation: 'reset' }
   | { operation: 'restore'; history: ScopedSettingsHistoryRecord };
-export type CaptureRequest =
-  | { kind: 'change'; body: ScopedSettingsMutationRequest }
-  | { kind: 'restore'; body: ScopedSettingsRevertRequest };
 export function captureRow(current: ScopedSettingsReadResponse) {
   return scopedSettingRow(current, CAPTURE_KEY);
 }
@@ -74,16 +71,5 @@ export function captureReviewSchema(action: CaptureAction) {
     : ScopedSettingsMutationRequest;
 }
 export function captureFailure(failure: unknown) {
-  const api = failure instanceof ApiError ? failure : null;
-  const uncertain =
-    !api || api.status >= 500 || api.status === 429 || api.code === 'IDEMPOTENCY_IN_PROGRESS';
-  const denied = !!api && [401, 403].includes(api.status);
-  const message = denied
-    ? 'Capture settings access is unavailable. Reload your session.'
-    : uncertain
-      ? 'The outcome is unavailable. Retry the same change to check it safely.'
-      : api.code === 'SETTING_VERSION_CONFLICT'
-        ? 'Capture settings changed after your review. Review current values again.'
-        : 'This change is unavailable. Reload current values before reviewing again.';
-  return { uncertain, denied, blocked: !uncertain && !denied, error: message };
+  return scopedSettingFailure(failure, 'Capture settings');
 }

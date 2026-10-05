@@ -14,21 +14,26 @@ export function OperationalCataloguePanel({ enabled }: { enabled: boolean }) {
 }
 function OperationalCatalogueOwner() {
   const [expanded, setExpanded] = useState(false);
+  const [locked, setLocked] = useState(false);
   return (
     <div className="flex flex-col gap-md">
       <Button
         variant="secondary"
+        disabled={locked}
         aria-expanded={expanded}
         aria-controls="operational-catalogue"
         onClick={() => setExpanded(!expanded)}
       >
         Settings catalogue
       </Button>
-      {expanded ? <OperationalCatalogueScope /> : null}
+      {expanded ? <OperationalCatalogueScope locked={locked} onLockChange={setLocked} /> : null}
     </div>
   );
 }
-function OperationalCatalogueScope() {
+function OperationalCatalogueScope(input: {
+  locked: boolean;
+  onLockChange: (locked: boolean) => void;
+}) {
   const stations = useStations();
   const [selection, setSelection] = useState('event');
   const target: ScopedSettingsTarget =
@@ -40,6 +45,7 @@ function OperationalCatalogueScope() {
         {(props) => (
           <Select
             {...props}
+            disabled={input.locked}
             value={selection}
             onChange={(event) => setSelection(event.target.value)}
           >
@@ -53,7 +59,12 @@ function OperationalCatalogueScope() {
         )}
       </Field>
       {stations.isError ? <p>Stations are unavailable. Event settings remain available.</p> : null}
-      <OperationalCatalogueContents key={selection} target={target} />
+      <OperationalCatalogueContents
+        key={selection}
+        target={target}
+        onLockChange={input.onLockChange}
+        locked={input.locked}
+      />
     </div>
   );
 }

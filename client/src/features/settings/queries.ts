@@ -37,7 +37,7 @@ import {
   changeScopedSetting,
   revertScopedSetting,
 } from './api';
-import type { CaptureRequest } from './model/captureControl';
+import type { ScopedSettingRequest } from './model/scopedSettingChange';
 export const settingsKeys = {
   current: (eventId: string) => [eventId, 'admin', 'settings'] as const,
   shiftTemplates: (eventId: string) => [eventId, 'admin', 'shift-templates'] as const,
@@ -234,13 +234,13 @@ export function useScopedSettingHistory(input: {
     refetchIntervalInBackground: false,
   });
 }
-export function useApplyCaptureChange() {
+export function useApplyScopedSettingChange() {
   const eventId = useEventId();
   const session = useCurrentSession();
   const client = useQueryClient();
   return useMutation({
     mutationFn: (
-      request: CaptureRequest,
+      request: ScopedSettingRequest,
     ): Promise<ScopedSettingsMutationResponse | ScopedSettingsRevertResponse> =>
       request.kind === 'change'
         ? changeScopedSetting(eventId, request.body)

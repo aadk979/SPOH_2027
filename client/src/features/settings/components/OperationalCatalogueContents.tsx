@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   GENERATED_SETTING_METADATA as metadata,
   type ScopedOperationalSetting,
   type ScopedOperationalSettingKey,
   type ScopedSettingsReadResponse,
   type ScopedSettingsTarget,
+  type ScopedSettingsHistoryRecord,
 } from '@spoh/shared';
 import { useEventTime } from '@/features/session';
 import { Button, Callout, Card, LoadingRows, Section } from '@/shared/ui';
@@ -12,9 +13,21 @@ import { useScopedCatalogue } from '../hooks/useScopedCatalogue';
 import { catalogueGroups, catalogueValue } from '../model/operationalCatalogue';
 import { captureSource } from '../model/captureControl';
 import { OperationalCatalogueHistory } from './OperationalCatalogueHistory';
+import { CatalogueRestoreReview } from './CatalogueRestoreReview';
 
-export function OperationalCatalogueContents({ target }: { target: ScopedSettingsTarget }) {
-  const { current, denied, deny } = useScopedCatalogue(target);
+export function OperationalCatalogueContents(input: {
+  target: ScopedSettingsTarget;
+  locked: boolean;
+  onLockChange: (locked: boolean) => void;
+}) {
+  const { current, denied, deny } = useScopedCatalogue(input.target);
+  useEffect(() => {
+    if (denied) input.onLockChange(false);
+  }, [denied, input.onLockChange]);
+  async function loadCurrent() {
+    const result = await current.refetch();
+    return result.isError ? null : (result.data ?? null);
+  }
   if (denied)
     return (
       <Callout tone="alert" role="alert">
@@ -24,7 +37,7 @@ export function OperationalCatalogueContents({ target }: { target: ScopedSetting
   const reload = (
     <Button
       variant="quiet"
-      disabled={current.isFetching}
+      disabled={current.isFetching || input.locked}
       onClick={() => {
         void current.refetch();
       }}
@@ -32,7 +45,7 @@ export function OperationalCatalogueContents({ target }: { target: ScopedSetting
       Reload catalogue
     </Button>
   );
-  if (current.isError)
+  if (current.isError && !current.data)
     return (
       <div className="flex flex-col gap-md">
         {reload}
@@ -45,7 +58,13 @@ export function OperationalCatalogueContents({ target }: { target: ScopedSetting
   return (
     <div className="flex flex-col gap-md">
       {reload}
-      <OperationalCatalogueValues current={current.data} onDenied={deny} />
+      <OperationalCatalogueValues
+        current={current.data}
+        onDenied={deny}
+        loadCurrent={loadCurrent}
+        readUnavailable={current.isError}
+        onLockChange={input.onLockChange}
+      />
     </div>
   );
 }
@@ -53,9 +72,21 @@ export function OperationalCatalogueContents({ target }: { target: ScopedSetting
 function OperationalCatalogueValues(input: {
   current: ScopedSettingsReadResponse;
   onDenied: () => void;
+  loadCurrent: () => Promise<ScopedSettingsReadResponse | null>;
+  readUnavailable: boolean;
+  onLockChange: (locked: boolean) => void;
 }) {
   const [selected, setSelected] = useState<ScopedOperationalSettingKey | null>(null);
+  const [restore, setRestore] = useState<ScopedSettingsHistoryRecord | null>(null);
   const clock = useEventTime();
+  if (restore)
+    return <CatalogueRestoreReview {...input} history={restore} onClose={() => setRestore(null)} />;
+  if (input.readUnavailable)
+    return (
+      <Callout tone="alert" role="alert">
+        Current catalogue values are unavailable.
+      </Callout>
+    );
   return (
     <>
       <p className="text-caption text-ink-muted">
@@ -74,6 +105,8 @@ function OperationalCatalogueValues(input: {
             target={input.current.target}
             settingKey={selected}
             onDenied={input.onDenied}
+            current={input.current}
+            onReview={setRestore}
           />
         </>
       ) : (
