@@ -90,6 +90,29 @@ pass redacted secret scans. All three preserved P08 pricing fingerprints and
 historical P05 pricing remain unchanged. Test fixtures use only the dedicated
 E2E and frozen visual databases; real local spoh2027 is not reset, seeded or migrated.
 
-The exact-image staging UI check remains pending the verified push and deployment.
+## Actual staging verification on 5 October 2026
+
+Source 5d1e018 and tracker image 00dbc2a9d263f741852c31f1a399f4e2d639fd72
+are pushed and verified. [CI 37269277650](https://github.com/aadk979/SPOH_2027/actions/runs/37269277650)
+and [staging deployment 37269760650](https://github.com/aadk979/SPOH_2027/actions/runs/37269760650)
+succeed. CloudFormation reports UPDATE_COMPLETE and that exact image; ECS has one
+completed deployment, one desired/running task and zero failed tasks on task
+definition revision 123. The browser evidence is observed at 16:39 Singapore. The browser
+probe independently checks those gates before opening a normal Cognito session.
+
+[Sanitised browser evidence](staging-scoped-capture-controls-ui-evidence-2026-10-05.json)
+records installed Chrome, phone event writes and laptop event/owned-station reads.
+The phone deliberately loses a successful pause response after commit. Fields,
+scope and collapse freeze, and the UI retries the identical UUID/body to the same
+history row. Reviewed override removal, saved pause restore and historical RESET
+restore then pass. Exactly four history rows remain; original inheritance and
+selected stored version zero are restored. An old pause intent returns its
+original receipt with the freshly restored current values. Compatibility/product
+settings and READY lifecycle remain unchanged. Hard reload, history, normal
+sign-out, no-store and zero application errors/CSP violations pass. The laptop
+station journey is read-only; writes at both scopes are covered locally.
+
+Immutable synthetic history/audit and identifier-only receipts remain. No count,
+visitor, lifecycle, schedule, announcement or delivery writes are requested.
 P10.8 remains open for complete generated controls, remaining catalogue consumers,
 operational scheduling and the broader phase criteria.

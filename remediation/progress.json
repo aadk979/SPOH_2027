@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T05:46:28.304Z",
+  "updatedAt": "2026-10-05T08:40:22.464Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -2429,7 +2429,8 @@
             "ccf3921971487b0fb447a122653d3b1f369f03d4",
             "3f4ac1861db793246dd84e5f4e954168158f9c0a",
             "9fac3c1d7e23e52ce76646e94cbf92d50c699700",
-            "5d1e018810531f9ccdc91b3658d7835b8d737ed9"
+            "5d1e018810531f9ccdc91b3658d7835b8d737ed9",
+            "00dbc2a9d263f741852c31f1a399f4e2d639fd72"
           ],
           "notes": [
             {
@@ -2515,6 +2516,10 @@
             {
               "at": "2026-10-05T05:46:27.928Z",
               "text": "Reviewed generated capture.open UI for event and owned station: current inheritance/stored-version review, SET/RESET/history/restore, explicit reason/confirmation, frozen uncertain retry, private event/person cache and immediate shared-authority denial hiding. All 460 client checks/56 files, eight real browser journeys including live scheduler (54.9s), 62 reviewed visuals, workspace types/lint/architecture 1061 modules/4719 dependencies, settings/hardcoding, 32-page export and actual static CSP pass. Maintained formatting and source/tests/P10/full-history secret scans pass; pricing bytes preserved. Staging UI verification awaits this exact image. P10.8 remains open."
+            },
+            {
+              "at": "2026-10-05T08:40:21.545Z",
+              "text": "Reviewed capture controls: exact CI/deploy green; actual staging task 123 and normal Cognito phone/laptop journey pass 5 Oct 16:39 SGT. Four legitimate event setting changes restore original inheritance; committed response loss retries one UUID to one change. Laptop station review read-only, both scopes written locally. P10.8 remains open."
             }
           ]
         },
@@ -3483,6 +3488,10 @@
     {
       "at": "2026-10-05T05:46:28.302Z",
       "text": "Locally verified capture control UI slice committed as 5d1e018. Restored normal preview API on Node24 at 4012, ready and bus connected; test databases remain dedicated. Next: exact-image CI/deployment and normal Cognito staging UI restore/retry proof, then continue remaining scoped schedule/consumer work. No phase or gate closed."
+    },
+    {
+      "at": "2026-10-05T08:40:22.462Z",
+      "text": "P10.8 capture UI staging evidence verified: 00dbc2a exact CF/ECS123, CI37269277650 and Deploy37269760650 green; Chrome154 phone lost-response/retry/reset/history restores/reload/sign-out and laptop owned-station reads pass, zero app/CSP. Continue bounded reviewed capture schedule producer/status; no broad closure."
     }
   ]
 }

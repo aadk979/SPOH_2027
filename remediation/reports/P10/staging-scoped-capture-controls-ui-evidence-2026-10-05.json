@@ -1,0 +1,49 @@
+{
+  "observedAt": "2026-10-05T08:39:26.419Z",
+  "deployedImageTag": "00dbc2a9d263f741852c31f1a399f4e2d639fd72",
+  "taskRevision": 123,
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97"
+  },
+  "authentication": "Normal Cognito Authorization Code + PKCE and current roster session",
+  "journeys": [
+    {
+      "viewport": "phone",
+      "width": 390,
+      "height": 844,
+      "scope": "event",
+      "reviewedPauseAndReset": true,
+      "committedLostResponse": true,
+      "frozenFieldsAndScope": true,
+      "exactUuidRetryOneChange": true,
+      "savedValueRestore": true,
+      "historicalResetRestore": true,
+      "resetHasNoInventedAfter": true,
+      "fourNewHistoryRows": true,
+      "originalInheritanceRestored": true,
+      "oldIntentRetryReturnsCurrentRestoredValues": true,
+      "compatibilityAndProductSettingsUnchanged": true,
+      "hardReloadHistoryStable": true,
+      "normalSignOut": true
+    },
+    {
+      "viewport": "laptop",
+      "width": 1440,
+      "height": 900,
+      "scope": "event and owned station",
+      "validatedInheritanceAndStoredVersion": true,
+      "privateOwnedStationHistory": true,
+      "noSettingWrite": true,
+      "normalSignOut": true
+    }
+  ],
+  "checks": {
+    "noStorePrivateSuccesses": true,
+    "eventRemainsReady": true,
+    "appPageErrors": [],
+    "cspViolations": []
+  },
+  "fixtureEffects": "Four successful event capture-setting mutations: reviewed pause, override removal, saved pause restore and historical RESET restore. Original inheritance and selected stored version zero restored. One deliberately lost response retries the exact UUID and appends no duplicate. Immutable history/audit and identifier-only receipts remain. No count, visitor, lifecycle, schedule, announcement or delivery writes requested. Laptop event/station review is read-only; normal sessions are opened and revoked.",
+  "limitation": "Both scopes are written/restored in local phone/laptop journeys. Actual staging writes are limited to event scope; the laptop owned-station UI is read-only. Other generated keys and operational schedule consumers remain open."
+}
