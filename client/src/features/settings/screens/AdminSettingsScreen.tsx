@@ -14,6 +14,7 @@ import { ThresholdsForm } from '../components/ThresholdsForm';
 import { SettingsApply } from '../components/SettingsApply';
 import { AttendanceSettingsForm } from '../components/AttendanceSettingsForm';
 import { CaptureControlsPanel } from '../components/CaptureControlsPanel';
+import { OperationalCataloguePanel } from '../components/OperationalCataloguePanel';
 export default function AdminSettingsScreen(): ReactNode {
   const session = useRequireSession();
   const { data: me } = useMe();
@@ -32,6 +33,7 @@ export default function AdminSettingsScreen(): ReactNode {
             <LifecyclePanel enabled={canEdit} />
             <ScheduleTimelinePanel enabled={canEdit} />
             <CaptureControlsPanel enabled={canEdit} />
+            <OperationalCataloguePanel enabled={canEdit} />
             <ShiftHoursForm enabled={session !== null} canEdit={canEdit} />
             <ProductRulesForm enabled={session !== null} canEdit={canEdit} />
             <AttendanceSettingsForm enabled={canEdit} />

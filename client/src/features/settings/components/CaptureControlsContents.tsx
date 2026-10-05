@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { ScopedSettingsReadResponse, ScopedSettingsTarget } from '@spoh/shared';
 import { Button, Callout, LoadingRows } from '@/shared/ui';
 import { ApiError } from '@/shared/lib/apiErrors';
-import { useScopedCaptureCurrent, useCaptureScheduleSettings } from '../queries';
+import { useScopedSettingsCurrent, useScopedSettingsCache } from '../queries';
 import { CaptureScheduleControls } from '@/features/schedule';
 import { captureRow, type CaptureAction } from '../model/captureControl';
 import { CaptureChangeReview } from './CaptureChangeReview';
@@ -17,7 +17,7 @@ export function CaptureControlsContents({
   onLockChange: (locked: boolean) => void;
 }) {
   const [denied, setDenied] = useState(false);
-  const current = useScopedCaptureCurrent(target, !denied);
+  const current = useScopedSettingsCurrent(target, !denied);
   const readDenied = current.error instanceof ApiError && [401, 403].includes(current.error.status);
   useEffect(() => {
     if (readDenied || denied) onLockChange(false);
@@ -66,7 +66,7 @@ function CaptureControlsValues(input: {
 }) {
   const [action, setAction] = useState<CaptureAction | null>(null);
   const [schedules, setSchedules] = useState(false);
-  const scheduleSettings = useCaptureScheduleSettings();
+  const scheduleSettings = useScopedSettingsCache();
   const row = captureRow(input.current);
   const archived = input.current.eventStatus === 'ARCHIVED';
   return (

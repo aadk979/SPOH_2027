@@ -1,4 +1,5 @@
 'use client';
+import { useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import type {
   ChangeAttendanceConfigRequest,
@@ -12,6 +13,7 @@ import type {
   ScopedSettingsMutationResponse,
   ScopedSettingsRevertResponse,
   ScopedSettingsReadResponse,
+  ScopedOperationalSettingKey,
 } from '@spoh/shared';
 import { useEventId } from '@/shared/lib/eventContext';
 import { useCurrentSession } from '@/features/session';
@@ -193,10 +195,14 @@ export const scopedSettingsKeys = {
       target.scope === 'station' ? target.stationId : 'event',
       'current',
     ] as const,
-  history: (eventId: string, personId: string | undefined, target: ScopedSettingsTarget) =>
-    [...scopedSettingsKeys.current(eventId, personId, target), 'capture.open', 'history'] as const,
+  history: (
+    eventId: string,
+    personId: string | undefined,
+    input: { target: ScopedSettingsTarget; key: ScopedOperationalSettingKey },
+  ) =>
+    [...scopedSettingsKeys.current(eventId, personId, input.target), input.key, 'history'] as const,
 };
-export function useScopedCaptureCurrent(target: ScopedSettingsTarget, enabled = true) {
+export function useScopedSettingsCurrent(target: ScopedSettingsTarget, enabled = true) {
   const eventId = useEventId();
   const session = useCurrentSession();
   return useQuery({
@@ -209,12 +215,17 @@ export function useScopedCaptureCurrent(target: ScopedSettingsTarget, enabled = 
   });
 }
 export function useScopedCaptureHistory(target: ScopedSettingsTarget) {
+  return useScopedSettingHistory({ target, key: 'capture.open' });
+}
+export function useScopedSettingHistory(input: {
+  target: ScopedSettingsTarget;
+  key: ScopedOperationalSettingKey;
+}) {
   const eventId = useEventId();
   const session = useCurrentSession();
   return useInfiniteQuery({
-    queryKey: scopedSettingsKeys.history(eventId, session?.volunteerId, target),
-    queryFn: ({ pageParam }) =>
-      getScopedSettingHistory(eventId, { target, key: 'capture.open', cursor: pageParam }),
+    queryKey: scopedSettingsKeys.history(eventId, session?.volunteerId, input),
+    queryFn: ({ pageParam }) => getScopedSettingHistory(eventId, { ...input, cursor: pageParam }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last) => last.meta.nextCursor ?? undefined,
     enabled: !!session,
@@ -251,13 +262,18 @@ export function useApplyCaptureChange() {
   });
 }
 
-export function useCaptureScheduleSettings() {
+export function useScopedSettingsCache() {
   const eventId = useEventId();
   const session = useCurrentSession();
   const client = useQueryClient();
   const owner = scopedSettingsKeys.owner(eventId, session?.volunteerId);
+  const personId = session?.volunteerId;
+  const clear = useCallback(
+    () => client.removeQueries({ queryKey: scopedSettingsKeys.owner(eventId, personId) }),
+    [client, eventId, personId],
+  );
   return {
-    clear: () => client.removeQueries({ queryKey: owner }),
+    clear,
     accept: (current: ScopedSettingsReadResponse) => {
       client.setQueryData(
         scopedSettingsKeys.current(eventId, session?.volunteerId, current.target),
