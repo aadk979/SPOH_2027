@@ -1,0 +1,41 @@
+{
+  "observedAt": "2026-10-05T03:02:10.462Z",
+  "deployedImageTag": "28ec1577fe01c3562b9fb00bc8d742426dcc2da5",
+  "taskRevision": 120,
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  "scope": "Normal Cognito Authorization Code + PKCE; bounded scoped operational API set/reset at event scope in the established synthetic staging event",
+  "checks": {
+    "normalSignIn": true,
+    "actualBrowserCorsPosts": true,
+    "reviewedInheritedVersionZero": true,
+    "setApplied": true,
+    "setReplayOneChange": true,
+    "staleVersionRefused": true,
+    "differentIntentUuidRefused": true,
+    "resetApplied": true,
+    "resetVersionAdvances": true,
+    "originalInheritanceRestored": true,
+    "originalSetReplayRebuildsCurrentValues": true,
+    "resetReplayOneChange": true,
+    "guardedProductKeyRejected": true,
+    "anonymousRejected": true,
+    "noStoreSuccessAndRejections": true,
+    "otherCatalogueValuesAndVersionsUnchanged": true,
+    "compatibilitySettingsUnchanged": true,
+    "guardedProductValuesAndVersionsUnchanged": true,
+    "eventRemainsReady": true,
+    "hardReloadStable": true,
+    "normalSignOut": true,
+    "appPageErrors": [],
+    "cspViolations": []
+  },
+  "fixtureEffects": "Two successful setting mutations: one synthetic capture pause and one reset restoring the original inherited value and selected stored version zero. Append-only setting history and audit/retry receipts remain. No count, visitor, lifecycle, schedule, announcement or delivery write requested. Normal session receipts are created/revoked.",
+  "limitation": "This is the authenticated API producer using real browser fetch/CORS through a normal session. Generated edit/history/revert UI, operational schedule producer and remaining legacy AppSetting consumers remain open."
+}

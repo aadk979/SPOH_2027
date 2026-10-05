@@ -80,9 +80,37 @@ reformatted. The final server build and 32-page static export pass. Installed
 headless Chrome verifies phone/laptop static load and reload under the actual
 server CSP with no evaluation violation or application error; malformed runtime
 configuration still refuses startup. No client UI or visual baseline is changed.
-Pipeline/staging checks are pending. The real local spoh2027 database has not been
-reset, seeded or migrated; database fixtures use spoh2027_test only. No schema or
-migration is added.
+The real local spoh2027 database has not been reset, seeded or migrated; database
+fixtures use spoh2027_test only. No schema or migration is added.
+
+## Exact-image pipeline and staging verification
+
+Source 39b9d72 and tracker image
+28ec1577fe01c3562b9fb00bc8d742426dcc2da5 are pushed under D-11. Exact-image
+[CI 37256627582](https://github.com/aadk979/SPOH_2027/actions/runs/37256627582)
+and [deployment 37257073164](https://github.com/aadk979/SPOH_2027/actions/runs/37257073164)
+succeed. CloudFormation is UPDATE_COMPLETE. ECS revision 120 runs the exact
+image with one desired/running task, one completed rollout and zero failed tasks.
+The pushed full-history scan passes across 628 commits.
+
+At 11:02 Singapore, installed Chrome 154 and normal Cognito Authorization Code
+with PKCE verify actual cross-origin browser POSTs to the operational producer.
+One inherited event capture value is paused, reviewed-version conflicts and
+different-intent UUID reuse are refused, and reset restores the original
+inheritance with selected stored version zero. Reset advances history. The
+original set retry then returns its original change metadata alongside current
+restored values; reset retry also returns its original change. Guarded product
+keys and anonymous requests are rejected, with no-store on successes and
+rejections. Other catalogue values/versions, compatibility settings, product
+values/versions and READY lifecycle state remain unchanged. Hard reload and
+normal sign-out pass, with zero application errors or CSP violations.
+
+The [sanitised evidence](staging-scoped-settings-mutation-evidence-2026-10-05.json)
+contains no credentials, actor/event/station IDs, UUIDs or raw values. Two
+successful setting mutations leave append-only history, audit and retry receipts.
+No count, visitor, lifecycle, schedule, announcement or delivery write is
+requested. This verifies the API through an actual normal browser session;
+generated editing/history/revert UI remains separate work.
 
 Generated edit/history/revert UI, the operational schedule producer, remaining
 legacy AppSetting consumers and broad P10 exit criteria remain open. This API

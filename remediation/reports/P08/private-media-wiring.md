@@ -97,7 +97,10 @@ the guard refusal, read-only investigation and explicitly isolated test config.
 Content publishing/proxying, event-aware media retention, measured storage cost
 and production routing remain separate work. This adds no compute, KMS key or
 network resource. Standard SSM and existing S3 are used, but staging object,
-request, version and access-log usage remain unmeasured. The preserved production
+request, version and access-log usage were unmeasured at that checkpoint. The
+subsequent [staging storage inventory](staging-storage-usage.md) measures live
+object/version bodies and access-log storage on 5 October; request totals,
+complete billing and monthly cost remain unverified. The preserved production
 S3 allowance does not cover staging, and the reconciled January forecast still
 exceeds the amended budget before those costs. No budget compliance is claimed.
 Production creation/cutover still requires the owner's 28 October go decision.

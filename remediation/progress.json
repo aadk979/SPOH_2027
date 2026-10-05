@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T02:45:08.677Z",
+  "updatedAt": "2026-10-05T03:04:06.465Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -2478,6 +2478,10 @@
             {
               "at": "2026-10-05T02:45:08.385Z",
               "text": "Verified scoped operational SET/RESET API foundation: strict generated 14 event/3 station keys, reviewed stored versions, post-lock current authority, archived new-write refusal, atomic history/audit/identifier-only receipt, current semantic retry and inherited-before audit safeguards. Seven shared and 33 DB cases; fresh focused 109, full serial 1501 passed/four existing skips in 100 files (492.26s), shared 112/server 587/client 426, all workspace types, final builds/static CSP/lint/architecture/settings/hardcoding/maintained formatting/scans passed. Docker stale sockets reversibly quarantined; original volume preserved. Pricing unchanged. Exact CI/deploy/staging producer verification pending. Generated UI/history/revert/schedules and legacy consumers remain open; P10.8 stays open."
+            },
+            {
+              "at": "2026-10-05T03:04:06.203Z",
+              "text": "Scoped operational SET/RESET API verified locally and in staging. Full DB1501/four existing skips/100 files, final focused109, shared112/server587/client426, quality/build/static CSP/scans pass. Source39b9d72/tracker image28ec157 pushed under D11; CI37256627582 and deploy37257073164 succeed, actual UPDATE_COMPLETE/ECS120 exact28ec157/one desired-running/completed/zero failures. Normal Cognito+Chrome154 real browser CORS POST verifies inherited event pause/reset, stable same-intent retries, current values after reset, stale/different-intent/guarded/anonymous refusal, no-store, original inheritance/restored storedVersion0, unchanged other catalogue/legacy/product values and versions/READY, hard reload and signout with zero app/CSP errors at11:02SGT. Two legitimate history/audit/retry effects remain. Generated UI/history/revert/schedules and legacy consumers stay open; no broad step closure."
             }
           ]
         },
@@ -3410,6 +3414,14 @@
     {
       "at": "2026-10-05T02:45:08.676Z",
       "text": "P10.8 scoped operational mutation source 39b9d72 locally verified. The interrupted overnight scheduler failures did not reproduce: fresh focused 109 and full 1501/four skips pass after original-volume Docker recovery. Source/tracker and the preceding CSP staging evidence are being pushed together under D-11; await exact-image CI/deploy and bounded normal Cognito set/reset restoration before claiming staging success."
+    },
+    {
+      "at": "2026-10-05T03:00:08.116Z",
+      "text": "Independent P08.7/P08.10 read-only storage inventory at 10:57-10:58 SGT: exact four owned staging buckets list one 68-byte media object, empty content/exports, and 131 access-log objects/608676 bytes; total132/608744 bytes, no noncurrent versions/delete markers/outstanding uploads. No configured request metrics or available daily CloudWatch samples; request totals/monthly cost/complete billing attribution remain unverified. No object bodies, IAM, bucket configuration, tags or backups changed; pricing preserved. Evidence in P08/staging-storage-usage.md and sanitized JSON. Full P08 criteria stay open."
+    },
+    {
+      "at": "2026-10-05T03:04:06.465Z",
+      "text": "P10.8 scoped mutation slice complete as a bounded API milestone: exact28ec157 CI/deploy and actual normal Cognito/Chrome browser producer passed at11:02SGT; original inherited capture restored and READY preserved. Sanitized report/evidence and independent read-only P08 storage measurement committed for batching with the next verified source push. Continue bounded operational history read from the ignored design; P10.8/P08 stay open, counts105/171 and9/17 unchanged."
     }
   ]
 }
