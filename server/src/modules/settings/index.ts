@@ -14,6 +14,10 @@ export { eventSettingRevertReplay, revertEventSettingHandler } from './http/reve
 export { getScopedSettingsHandler } from './http/scopedReadHandler.js';
 export { getScopedHistoryHandler } from './http/scopedHistoryHandler.js';
 export {
+  revertScopedSettingHandler,
+  scopedSettingRevertReplay,
+} from './http/scopedRevertHandler.js';
+export {
   mutateScopedSettingHandler,
   scopedSettingMutationReplay,
 } from './http/scopedMutationHandler.js';

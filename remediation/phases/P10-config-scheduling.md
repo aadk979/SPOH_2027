@@ -210,6 +210,12 @@ historical values. Reset records describe override removal without inventing
 an inherited after value. The reader writes no settings, audit or retry data;
 generated history/revert controls and full phase criteria remain open.
 
+[Scoped operational history restore](../reports/P10/scoped-settings-revert-api.md)
+adds reviewed owned-history restores through the same guarded set/reset writer,
+selected-history audit provenance and identifier-only current-value retries.
+Historical reset restores removal using current inheritance. The generated UI,
+operational schedules, legacy consumers and broad step criteria remain open.
+
 - **Do:**
   1. A settings screen generated from the registry: grouped, scoped (event or station tabs), with
      descriptions, validation, change history and revert.

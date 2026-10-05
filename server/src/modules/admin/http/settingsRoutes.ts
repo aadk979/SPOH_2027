@@ -5,6 +5,7 @@ import {
   ScopedSettingsReadQuery,
   ScopedSettingsMutationRequest,
   ScopedSettingsHistoryQuery,
+  ScopedSettingsRevertRequest,
   RevertEventSettingRequest,
   UpdateSettingsRequest,
 } from '@spoh/shared';
@@ -20,6 +21,8 @@ import {
   getEventSettingHistoryHandler,
   getScopedSettingsHandler,
   getScopedHistoryHandler,
+  revertScopedSettingHandler,
+  scopedSettingRevertReplay,
   mutateScopedSettingHandler,
   scopedSettingMutationReplay,
   revertEventSettingHandler,
@@ -77,6 +80,14 @@ function registerOperationalSettingsRoutes(router: Router): void {
     validate({ body: ScopedSettingsMutationRequest }),
     idempotent('setting.operational.change', { redacted: scopedSettingMutationReplay }),
     mutateScopedSettingHandler,
+  );
+  router.post(
+    '/settings/catalogue/revert',
+    adminRateLimit,
+    requireCapability('config.manage'),
+    validate({ body: ScopedSettingsRevertRequest }),
+    idempotent('setting.operational.revert', { redacted: scopedSettingRevertReplay }),
+    revertScopedSettingHandler,
   );
 }
 

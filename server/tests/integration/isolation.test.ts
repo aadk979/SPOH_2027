@@ -525,6 +525,9 @@ const CASES: Record<string, Case> = {
   'GET /admin/settings/catalogue/history': noId(
     'reads only the current manager’s exact path-event/scope/key history; foreign stations and event/key/scope cursors are covered by scopedSettingsHistory tests',
   ),
+  'POST /admin/settings/catalogue/revert': noId(
+    'restores only the current manager’s owned path-event/scope/key history; foreign selections and reviewed versions/replay identity are covered by scopedSettingsRevert tests',
+  ),
   'PATCH /admin/settings': noId('runtime settings are platform-wide until P10'),
   'GET /admin/event-settings': noId("reads the path event's settings"),
   'GET /admin/event-settings/history': noId(

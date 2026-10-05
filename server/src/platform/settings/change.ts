@@ -28,6 +28,8 @@ export interface ChangeSettingInput {
   reason?: string;
   source?: SettingChangeSource;
   scheduledActionId?: string;
+  /** Internal restore provenance, derived only from owned immutable history. */
+  revertedFrom?: { historyId: string; version: number };
 }
 
 function versionConflict(): ConflictError {
@@ -159,6 +161,7 @@ async function recordChange(
       value: auditAfter,
       version,
       source: input.source ?? 'USER',
+      ...(input.revertedFrom ? { revertedFrom: input.revertedFrom } : {}),
     } as JsonValue,
   });
 }
@@ -229,6 +232,17 @@ export async function revertSetting(
   return changeSetting({ ...input, value: history.after, source: 'REVERT' });
 }
 
+function resetAuditAfter(
+  selection: { scope: string; scopeId: string; version: number },
+  revertedFrom: ChangeSettingInput['revertedFrom'],
+) {
+  return {
+    ...selection,
+    reset: true,
+    ...(revertedFrom ? { source: 'RESET', revertedFrom } : {}),
+  };
+}
+
 /** Remove an override while preserving its next history version and audit row. */
 export async function resetSettingInTransaction(
   tx: PrismaTransactionClient,
@@ -271,7 +285,7 @@ export async function resetSettingInTransaction(
     action: 'setting.change',
     entityType: 'Setting',
     entityId: input.key,
-    after: { scope, scopeId, reset: true, version },
+    after: resetAuditAfter({ scope, scopeId, version }, input.revertedFrom),
   });
   await publishCacheEvent(tx, 'settings', { scope, scopeId, key: input.key, version });
   return version;

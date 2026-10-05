@@ -32,6 +32,16 @@ export function scopedHistoryCursor(
     select: { id: true, createdAt: true },
   });
 }
+export function scopedHistoryById(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  input: Selection & { historyId: string },
+) {
+  return tx.settingChange.findFirst({
+    where: { ...owned(scope, input), id: input.historyId },
+    select: HISTORY,
+  });
+}
 export function scopedHistoryRows(
   tx: PrismaTransactionClient,
   scope: EventScope,
