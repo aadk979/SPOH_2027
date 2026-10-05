@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T08:40:22.464Z",
+  "updatedAt": "2026-10-05T09:17:41.414Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -3492,6 +3492,10 @@
     {
       "at": "2026-10-05T08:40:22.462Z",
       "text": "P10.8 capture UI staging evidence verified: 00dbc2a exact CF/ECS123, CI37269277650 and Deploy37269760650 green; Chrome154 phone lost-response/retry/reset/history restores/reload/sign-out and laptop owned-station reads pass, zero app/CSP. Continue bounded reviewed capture schedule producer/status; no broad closure."
+    },
+    {
+      "at": "2026-10-05T09:17:41.413Z",
+      "text": "Independent read-only P08 backup observation 5 Oct 17:15 SGT: CF-owned staging RDS, 7d PITR window/latest age482s, seven available encrypted automated snapshots, exact-resource daily35d AWS Backup selection, six completed encrypted recovery points and six completed jobs in last7d. TLS parameter metadata 1/system, attachment in-sync; no SQL or mutation. Preserve completed P08.3; restore rehearsal, alarm delivery, network and cost evidence remain separate, P08 open."
     }
   ]
 }

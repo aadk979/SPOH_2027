@@ -50,6 +50,12 @@ code in P15.
 
 ### P08.3 — Network and database
 
+[Read-only staging backup metadata](../reports/P08/staging-backup-inventory.md)
+refreshes the deployed recovery window, encrypted snapshots, daily 35-day plan
+and owned completed jobs/recovery points. It leaves the original step completion
+record intact and does not claim a functional restore rehearsal or backup-age
+notification proof.
+
 - **Do:**
   1. A VPC with 2 AZs: public subnets for the Fargate tasks (public IPv4 for egress only;
      security groups allow inbound **only** from the VPC link) and isolated subnets for RDS. An S3

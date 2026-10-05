@@ -1,0 +1,84 @@
+{
+  "observedAt": "2026-10-05T09:15:56.841Z",
+  "method": "Read-only AWS CLI metadata with full pagination, CF-owned staging database/plan and exact-resource backup filters; no secret values or SQL connection.",
+  "stack": {
+    "state": "UPDATE_COMPLETE",
+    "deployedImageTag": "00dbc2a9d263f741852c31f1a399f4e2d639fd72"
+  },
+  "database": {
+    "status": "available",
+    "engine": "postgres",
+    "engineVersion": "17.9",
+    "instanceClass": "db.t4g.micro",
+    "multiAz": false,
+    "publiclyAccessible": false,
+    "storageEncrypted": true,
+    "deletionProtection": true,
+    "storageType": "gp3",
+    "allocatedStorageGiB": 20,
+    "maxAllocatedStorageGiB": 100,
+    "backupRetentionDays": 7,
+    "forceSsl": [
+      {
+        "value": "1",
+        "source": "system",
+        "applyMethod": "pending-reboot"
+      }
+    ],
+    "parameterApplyStates": ["in-sync"],
+    "earliestRestorableTime": "2026-09-29T07:12:46.982000+00:00",
+    "latestRestorableTime": "2026-10-05T09:07:55+00:00",
+    "latestRestorableAgeSeconds": 482,
+    "reportedAutomatedBackupInstances": 1,
+    "automatedBackupStates": {
+      "active": 1
+    }
+  },
+  "automatedSnapshots": {
+    "count": 7,
+    "states": {
+      "available": 7
+    },
+    "newestCreatedAt": "2026-10-04T17:10:15.523000+00:00",
+    "encryptedCount": 7
+  },
+  "backupPlan": {
+    "rules": [
+      {
+        "scheduleExpression": "cron(0 5 * * ? *)",
+        "scheduleTimezone": "Etc/UTC",
+        "startWindowMinutes": 480,
+        "completionWindowMinutes": 10080,
+        "retentionDays": 35,
+        "continuousBackup": null
+      }
+    ],
+    "selections": [
+      {
+        "explicitlyIncludesOwnedDatabase": true,
+        "explicitResources": 1,
+        "exclusions": 0,
+        "tagConditions": 0
+      }
+    ],
+    "vaultCount": 1
+  },
+  "recoveryPoints": {
+    "count": 6,
+    "states": {
+      "COMPLETED": 6
+    },
+    "encryptedCount": 6,
+    "newestCreatedAt": "2026-10-05T13:00:00+08:00",
+    "retentionDays": [35]
+  },
+  "backupJobsLastSevenDays": {
+    "count": 6,
+    "states": {
+      "COMPLETED": 6
+    },
+    "newestCompletedAt": "2026-10-05T15:37:49.738000+08:00"
+  },
+  "effects": "Metadata reads only. No database/backup creation, restoration, snapshot, export, SQL, seed, migration, deletion, policy or configuration change.",
+  "limitations": "Backup metadata and recovery windows do not prove a successful functional restore or a restore rehearsal. Backup-age alarm, notification delivery, deletion rehearsal, network reachability and costs remain separately unverified. Observations are non-atomic and time-dependent; no budget or broad P08 closure claimed."
+}
