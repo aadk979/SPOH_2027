@@ -71,6 +71,31 @@ remain unchanged. Application source is byte-unchanged in this slice, so existin
 local previews are restored after the runtime recovery. Exact execution of the
 new CI ratchet remains pending until its pushed run succeeds.
 
+### First CI execution and deterministic cache-bus coverage
+
+CI run 37314188045 on `75d19b3` executes all three coverage suites successfully:
+173 shared checks, 2,301 server checks/four existing skips and 505 client checks.
+The actual ratchet correctly fails server branches at 3,070/3,563 (86.1633%)
+against the unchanged 86.19% floor. The seven-day `application-coverage` artifact
+is retained even though the comparison fails. Every source file and all other
+counters match the accepted local measurement. The sole difference is the
+pending-reconnect branch in cache-bus stop: the two-instance integration
+teardown sometimes stops while its other listener is reconnecting.
+
+Seven deterministic transport tests now exercise stop during a pending retry,
+duplicate disconnect callbacks, bounded backoff, stop during connection or
+subscriber recovery, malformed notifications and subscriber isolation. Fake
+transport/timers assert that stop cancels the timer and never opens another
+connection. The focused checks and workspace types/lint pass. No floor is
+lowered and no application code changes. The fresh combined run passes 2,308
+checks/four existing skips in 159 files (606.83 seconds). It measures 5,455/5,720
+lines (95.36%) and 3,079/3,563 branches (86.41%), above the unchanged floors.
+The actual package ratchet and committed-base comparison pass. Formatting,
+architecture and test/report/full-history secret scans remain clear.
+The [CI evidence](coverage-ratchet-ci-evidence-2026-10-05.json) preserves the
+first failed comparison and retained measurements. Replacement exact-head CI
+execution remains pending.
+
 ## Remaining scope
 
 This bounded application ratchet does not close P08.9 or G5. Seeded browser CI,

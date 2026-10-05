@@ -1,0 +1,47 @@
+{
+  "observedAt": "2026-10-05T13:22:17Z",
+  "firstExecution": {
+    "head": "75d19b3d0be29973014313eb5e00aaf8837ea951",
+    "run": 37314188045,
+    "url": "https://github.com/aadk979/SPOH_2027/actions/runs/37314188045",
+    "conclusion": "failure",
+    "shared": { "passed": 173, "testFiles": 15, "sourceFiles": 44 },
+    "server": { "passed": 2301, "skipped": 4, "testFiles": 158, "sourceFiles": 587 },
+    "client": { "passed": 505, "testFiles": 59, "sourceFiles": 413 },
+    "ratchetUnitTestsPassed": 16,
+    "failedComparison": {
+      "package": "server",
+      "metric": "branches",
+      "covered": 3070,
+      "total": 3563,
+      "floor": 86.19,
+      "localCovered": 3071,
+      "onlyDifferingFile": "server/src/platform/events/cacheBus.ts",
+      "branchLine": 120,
+      "cause": "Integration teardown can stop before or after the other listener's reconnect timer completes."
+    },
+    "artifact": {
+      "id": 11347237246,
+      "name": "application-coverage",
+      "sizeBytes": 126272,
+      "createdAt": "2026-10-05T13:13:20Z",
+      "expiresAt": "2026-10-12T13:13:20Z",
+      "downloadedAndInspected": true,
+      "allThreeSummariesAndLcovPresent": true
+    }
+  },
+  "correction": {
+    "deterministicTransportTestsPassed": 7,
+    "applicationSourceChanged": false,
+    "floorLowered": false,
+    "freshCombinedMeasurement": {
+      "passed": 2308,
+      "skipped": 4,
+      "testFiles": 159,
+      "durationSeconds": 606.83,
+      "lines": { "covered": 5455, "total": 5720 },
+      "branches": { "covered": 3079, "total": 3563 }
+    },
+    "exactHeadCi": "pending"
+  }
+}
