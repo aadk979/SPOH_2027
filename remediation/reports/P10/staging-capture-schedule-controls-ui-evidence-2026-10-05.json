@@ -1,0 +1,36 @@
+{
+  "observedAt": "2026-10-05T12:44:38.539Z",
+  "deployedImageTag": "769dfc5e556226daf382a31f5d3f4392ffe77ff9",
+  "taskRevision": 126,
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97",
+    "phone": [390, 844],
+    "laptop": [1440, 900]
+  },
+  "authentication": "Normal Cognito Authorization Code + PKCE and current roster session",
+  "checks": {
+    "exactRunningImage": true,
+    "phoneEventPrivateList": true,
+    "eventClockPreview": true,
+    "realCommittedReceiptDeliberatelyLost": true,
+    "frozenReviewFieldsScopeAndCollapse": true,
+    "sameUuidAndBodyRetrySingleAction": true,
+    "creatorPendingEditVersionTwo": true,
+    "editedExecutionInstantsAgree": true,
+    "reviewedCancellationVersionThree": true,
+    "zeroWorkerAttempts": true,
+    "noSettingOrHistoryEffect": true,
+    "legacyProductsAndReadyUnchanged": true,
+    "cancelledActionVisibleAfterSettledHardReload": true,
+    "laptopStationReadOnlyPrivateList": true,
+    "stationValuesUnchanged": true,
+    "privateReadsNoStore": true,
+    "normalSignOut204": true,
+    "appPageErrors": [],
+    "cspViolations": [],
+    "backendFailures": []
+  },
+  "fixtureEffects": "One legitimate future synthetic event capture action, its creation/edit/cancellation audits and identifier-only receipts remain. It is CANCELLED at version three with zero attempts. No setting/history, lifecycle, count, visitor, announcement or delivery mutation was requested; original event/station values remain unchanged.",
+  "limitations": "Staging exercises one owned future event action and read-only station collection. Real worker execution, station writes, authority loss, archive and post-wait guards use existing local/API evidence. The separately observed intermittent immediate reload symptom is not claimed fixed. Broader P10 and programme criteria remain open."
+}

@@ -235,8 +235,9 @@ broader phase criteria remain open.
 [Reviewed capture scheduling controls](../reports/P10/capture-schedule-controls-ui.md)
 add event/station lists, event-clock future creation, creator edit and manager
 cancellation with separate reviewed versions and frozen retry intent. Client,
-real-worker browser and 70 reviewed visual checks pass; D-11 CI/deployment is being
-verified. Broader generated consumers and phase criteria remain open.
+real-worker browser, 70 reviewed visual checks, D-11 CI/deployment and the normal
+Cognito Chrome UI journey pass. Broader generated consumers and phase criteria
+remain open.
 
 - **Do:**
   1. A settings screen generated from the registry: grouped, scoped (event or station tabs), with

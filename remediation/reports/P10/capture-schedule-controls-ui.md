@@ -86,11 +86,37 @@ returns 429. Targeted acceptance followed by the fresh full run passes without
 altering production rate limits or other baselines.
 
 The four schedule states use typed read-only visual rows; real API writes and
-worker execution are proven by the separate browser suite. D-11 CI/deployment
-and normal Cognito UI verification remain pending until their checks complete.
+worker execution are proven by the separate browser suite.
 Existing backend evidence is reusable because backend/shared source is unchanged:
 1,714 integration passes with four existing skips, 173 shared checks and 587
 server units from the capture management slice.
+
+## Staging acceptance
+
+CI [37309550504](https://github.com/aadk979/SPOH_2027/actions/runs/37309550504)
+and deployment
+[37310396758](https://github.com/aadk979/SPOH_2027/actions/runs/37310396758)
+both succeed for pushed release 769dfc5e556226daf382a31f5d3f4392ffe77ff9
+(application source e6718c1). At 20:44 SGT, read-only AWS checks verify
+UPDATE_COMPLETE and the sole running task's exact image, definition revision 126
+and completed rollout before the browser starts.
+
+Normal Cognito sign-in in installed Chrome then exercises phone event list,
+event-clock preview, one future UI request whose committed receipt is deliberately
+lost, frozen fields/scope/collapse and an identical UUID/body retry returning the
+same action. Reviewed UI edit advances to version two with agreeing execution
+instants; cancellation advances to version three with zero worker attempts.
+The cancelled row remains visible after settled hard reload. A laptop station
+collection is read without writing. All private reads are no-store; event/station
+capture, capture history, legacy/products and READY lifecycle remain unchanged.
+Normal sign-out returns 204. Application errors, CSP violations and actual
+backend failures are zero. The synthetic 503 is only the lost-receipt harness.
+
+The [sanitised evidence](staging-capture-schedule-controls-ui-evidence-2026-10-05.json)
+records these checks. One legitimate owned CANCELLED action, its creation/edit/
+cancellation audits and identifier-only receipts remain; no setting/history or
+other product effect was requested. The successful probe is not rerun. Its
+restricted, ignored request inventory remains available for review.
 
 ## Remaining scope
 

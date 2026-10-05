@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T12:26:26.471Z",
+  "updatedAt": "2026-10-05T12:46:14.661Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -3553,6 +3553,10 @@
     {
       "at": "2026-10-05T12:26:26.469Z",
       "text": "P10.8 source e6718c1 adds reviewed event/station capture schedule list/create/edit/cancel with independent versions, event clock, frozen UUID retries, current response definitions and denied-cache privacy. All local consumer checks pass; D11 release verification pending. Continuing programme, no full step/gate closure."
+    },
+    {
+      "at": "2026-10-05T12:46:14.660Z",
+      "text": "P10.8 capture schedule UI source e6718c1/release769dfc5 accepted at20:44SGT: CI37309550504/deploy37310396758 success; exact image/ECS126; normal Cognito Chrome phone event UI list/create/lost-receipt identical UUID retry/edit/cancelv3 zero attempts, settled reload, laptop station readonly, private no-store, unchanged capture/history/legacy/products/READY and sign-out204; zero app/CSP/backend errors. One legitimate cancelled action/audits/receipts retained; no setting effect. Local505 client/10 browser/70 visual acceptance complete. Broader P10 remains open; continuing P08 measured coverage ratchet."
     }
   ]
 }
