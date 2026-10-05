@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T12:46:14.661Z",
+  "updatedAt": "2026-10-05T13:05:43.358Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -1839,11 +1839,18 @@
           "status": "in_progress",
           "startedAt": "2026-10-05T09:28:18.296Z",
           "completedAt": null,
-          "commits": ["cb506cf8ace20c07c9c4e26e1b1de53eda9f3589"],
+          "commits": [
+            "cb506cf8ace20c07c9c4e26e1b1de53eda9f3589",
+            "73d1849a09afefb40f741528c46dd80f5bc3dfcd"
+          ],
           "notes": [
             {
               "at": "2026-10-05T09:28:18.342Z",
               "text": "Bounded CI correction: execute existing shared units before server/client tests; exact command146 checks/14 files on Node24, workflow formatting/diff/secret checks pass. New step execution in actual CI follows next verified push; seeded E2E, coverage gate, rollback rehearsal, dependency automation and park/unpark criteria remain open."
+            },
+            {
+              "at": "2026-10-05T13:05:42.721Z",
+              "text": "Measured application coverage ratchet locally verified: full2301 server/four existing skips158 files629.22s includes all587 source files; client505/59 includes413 source and CSP startup; shared173/15 includes44 source. Floors server95.20L86.19B/client71.50L63.84B/shared51.66L80.92B;16 checker regressions; exact counters/all-source inventory/nondecreasing base floors/CI summaries. Tied audit test now selects exact update identity. Failed full/setup measurements excluded; reversible Docker socket quarantine preserved original volume/settings/earlier backups. Types/lint/architecture1099/4960/format/secrets/pricing unchanged. Actual new CI pending; broader step/G5 and client model90% line target remain open."
             }
           ]
         },
@@ -3557,6 +3564,10 @@
     {
       "at": "2026-10-05T12:46:14.660Z",
       "text": "P10.8 capture schedule UI source e6718c1/release769dfc5 accepted at20:44SGT: CI37309550504/deploy37310396758 success; exact image/ECS126; normal Cognito Chrome phone event UI list/create/lost-receipt identical UUID retry/edit/cancelv3 zero attempts, settled reload, laptop station readonly, private no-store, unchanged capture/history/legacy/products/READY and sign-out204; zero app/CSP/backend errors. One legitimate cancelled action/audits/receipts retained; no setting effect. Local505 client/10 browser/70 visual acceptance complete. Broader P10 remains open; continuing P08 measured coverage ratchet."
+    },
+    {
+      "at": "2026-10-05T13:05:43.357Z",
+      "text": "P08.9 source73d1849 implements measured application floors and complete-source CI coverage enforcement; all local checks pass, initial and expanded-red measurement failures excluded. Current programme pointer remains P10.8,105/171 and9/17 phases; awaiting actual new CI ratchet execution while continuing next bounded catalogue consumer analysis."
     }
   ]
 }
