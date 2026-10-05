@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T03:41:57.392Z",
+  "updatedAt": "2026-10-05T03:47:58.590Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -3435,6 +3435,10 @@
     {
       "at": "2026-10-05T03:41:57.391Z",
       "text": "Verified P10.8 scoped history read source b6a22c1; strict owned keyset pagination, registered historical JSON validation, private actor exclusion and RESET removal semantics. Batch pushing with prior verified set/reset staging and read-only P08 storage inventory evidence; no phase closure or budget compliance claimed."
+    },
+    {
+      "at": "2026-10-05T03:47:58.588Z",
+      "text": "Independent read-only P08.6 staging review on 5 October: exact CF-owned app/migration task and execution roles, zero inline environment entries, three identity policy documents validated through Access Analyzer with zero findings; migration task role has no identity policy. Four secret references inspected via metadata only with rotation fields unreported; regional analyzer inventory empty. No values/IAM/resource changes or external-access/rotation completeness claimed. P08.6 remains open."
     }
   ]
 }

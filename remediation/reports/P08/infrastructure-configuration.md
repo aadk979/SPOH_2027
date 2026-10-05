@@ -55,3 +55,9 @@ The subsequent running task revision 60 uses the same 14 SSM ARN references plus
 two Secrets Manager references, with **zero inline environment entries**. ECS reports one
 desired/running task and zero pending tasks while the next authorised release rolls out.
 No parameter values or secret contents were read or exported for this verification.
+
+The subsequent [staging task policy review](staging-task-policy-review.md) on
+5 October verifies current injected-reference counts and zero inline entries,
+validates the three current role identity policies with no returned findings,
+and records unreported rotation metadata. The regional analyzer inventory is
+empty, so external-access verification and the broader P08.6 criteria remain open.

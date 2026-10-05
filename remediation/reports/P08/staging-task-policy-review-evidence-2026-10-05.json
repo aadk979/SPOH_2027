@@ -1,0 +1,110 @@
+{
+  "observedAt": "2026-10-05T03:46:13.470Z",
+  "deployedImageTagAtInventory": "28ec1577fe01c3562b9fb00bc8d742426dcc2da5",
+  "scope": "Read-only IAM/Access Analyzer policy validation and secret metadata for the four exact CloudFormation-owned staging ECS task/execution roles",
+  "tasks": [
+    {
+      "task": "application",
+      "revision": 120,
+      "inlineEnvironmentEntries": 0,
+      "injectedReferenceNames": [
+        "NODE_ENV",
+        "PORT",
+        "LOG_LEVEL",
+        "DB_HOST",
+        "DB_NAME",
+        "AUTH_PROVIDER",
+        "COGNITO_REGION",
+        "COGNITO_USER_POOL_ID",
+        "COGNITO_CLIENT_ID",
+        "COGNITO_DOMAIN",
+        "APP_BASE_URL",
+        "CORS_ALLOWED_ORIGINS",
+        "CLIENT_BASE_URL",
+        "DEPLOYMENT_ENV",
+        "TRUST_PROXY_HOPS",
+        "AWS_REGION",
+        "S3_MEDIA_BUCKET",
+        "DB_APP_PASSWORD",
+        "SESSION_SIGNING_SECRET"
+      ]
+    },
+    {
+      "task": "migration",
+      "revision": 118,
+      "inlineEnvironmentEntries": 0,
+      "injectedReferenceNames": [
+        "DB_HOST",
+        "DB_NAME",
+        "DB_ADMIN_USER",
+        "DB_ADMIN_PASSWORD",
+        "DB_MIGRATOR_PASSWORD",
+        "DB_APP_PASSWORD"
+      ]
+    }
+  ],
+  "rolePolicies": [
+    {
+      "task": "application",
+      "role": "task",
+      "inlinePolicyDocuments": 1,
+      "totalPolicyDocuments": 1,
+      "ecsTaskServiceTrustOnly": true,
+      "findings": []
+    },
+    {
+      "task": "application",
+      "role": "execution",
+      "inlinePolicyDocuments": 1,
+      "totalPolicyDocuments": 1,
+      "ecsTaskServiceTrustOnly": true,
+      "findings": []
+    },
+    {
+      "task": "migration",
+      "role": "task",
+      "inlinePolicyDocuments": 0,
+      "totalPolicyDocuments": 0,
+      "ecsTaskServiceTrustOnly": true,
+      "findings": []
+    },
+    {
+      "task": "migration",
+      "role": "execution",
+      "inlinePolicyDocuments": 1,
+      "totalPolicyDocuments": 1,
+      "ecsTaskServiceTrustOnly": true,
+      "findings": []
+    }
+  ],
+  "distinctReferencedSecrets": 4,
+  "secretMetadata": [
+    {
+      "rotationEnabled": null,
+      "owningService": null,
+      "rotationRules": null
+    },
+    {
+      "rotationEnabled": null,
+      "owningService": null,
+      "rotationRules": null
+    },
+    {
+      "rotationEnabled": null,
+      "owningService": null,
+      "rotationRules": null
+    },
+    {
+      "rotationEnabled": null,
+      "owningService": null,
+      "rotationRules": null
+    }
+  ],
+  "regionalAnalyzers": [],
+  "fixtureEffects": "Only account, stack/task/role/policy, Access Analyzer validation/list and Secrets Manager metadata calls. No secret values, parameter values, IAM changes, analyzer creation, archive rules or resource changes requested.",
+  "limitations": [
+    "Policy validation checks policy grammar and best-practice findings; it does not prove absence of unintended external/resource access.",
+    "No regional analyzer is created by this inventory. Missing analyzer evidence and remaining rotation/attendance/push criteria keep P08.6 open.",
+    "Null rotation metadata means it was not reported, rather than proof that rotation is configured. No secret contents or credential use were tested."
+  ]
+}
