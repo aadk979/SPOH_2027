@@ -1,11 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import {
-  ChangeEventSettingRequest,
-  EventSettingHistoryQuery,
-  ScopedSettingsReadQuery,
-  ScopedSettingsMutationRequest,
-  RevertEventSettingRequest,
   ChangeAttendanceConfigRequest,
   CreateAssignmentRequest,
   CreateEventDayRequest,
@@ -19,7 +14,6 @@ import {
   UpdateEventDayRequest,
   UpdateGiftTypeRequest,
   UpdateShiftTemplateRequest,
-  UpdateSettingsRequest,
   UpdateStationRequest,
   UpdateVisitorFieldRequest,
   UpdateVolunteerRequest,
@@ -28,7 +22,6 @@ import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { adminRateLimit, defaultRateLimit } from '../../../platform/http/rateLimit.js';
 import { requireCapability } from '../../../platform/http/access.js';
 import { validate } from '../../../platform/http/validate.js';
-import { idempotent } from '../../../platform/http/idempotency.js';
 import {
   createStationHandler,
   listAllStationsHandler,
@@ -42,18 +35,7 @@ import {
   updateVolunteerHandler,
 } from '../../people/index.js';
 import { createAssignmentHandler, deleteAssignmentHandler } from '../../assignments/index.js';
-import {
-  changeEventSettingHandler,
-  getEventSettingsHandler,
-  getSettingsHandler,
-  updateSettingsHandler,
-  getEventSettingHistoryHandler,
-  getScopedSettingsHandler,
-  mutateScopedSettingHandler,
-  scopedSettingMutationReplay,
-  revertEventSettingHandler,
-  eventSettingRevertReplay,
-} from '../../settings/index.js';
+import { registerSettingsRoutes } from './settingsRoutes.js';
 import {
   changeAttendanceConfigHandler,
   getAttendanceConfigHandler,
@@ -257,84 +239,7 @@ adminRouter.patch(
   updateGiftTypeHandler,
 );
 
-// ─────────────────────────────────────────────────────────────
-// RUNTIME SETTINGS
-// ─────────────────────────────────────────────────────────────
-
-/**
- * Readable by anyone signed in.
- *
- * The client needs the poll intervals, the undo window and the outbox warning
- * thresholds to behave consistently with the server, and none of it is
- * sensitive — it is the tuning of an event, not a secret.
- */
-adminRouter.get('/settings', defaultRateLimit, requireCapability('own.read'), getSettingsHandler);
-
-adminRouter.get(
-  '/settings/catalogue',
-  defaultRateLimit,
-  requireCapability('config.manage'),
-  validate({ query: ScopedSettingsReadQuery }),
-  getScopedSettingsHandler,
-);
-
-adminRouter.patch(
-  '/settings',
-  adminRateLimit,
-  requireCapability('config.manage'),
-  validate({ body: UpdateSettingsRequest }),
-  updateSettingsHandler,
-);
-
-adminRouter.post(
-  '/settings/catalogue',
-  adminRateLimit,
-  requireCapability('config.manage'),
-  validate({ body: ScopedSettingsMutationRequest }),
-  idempotent('setting.operational.change', { redacted: scopedSettingMutationReplay }),
-  mutateScopedSettingHandler,
-);
-
-// ─────────────────────────────────────────────────────────────
-// EVENT SETTINGS (ADR-003): the event's product rules (ADR-002 §4)
-// ─────────────────────────────────────────────────────────────
-
-/** Readable by every member: the client shows counts the way the event chose. */
-adminRouter.get(
-  '/event-settings',
-  defaultRateLimit,
-  requireCapability('own.read'),
-  getEventSettingsHandler,
-);
-
-adminRouter.patch(
-  '/event-settings',
-  adminRateLimit,
-  requireCapability('config.manage'),
-  validate({ body: ChangeEventSettingRequest }),
-  changeEventSettingHandler,
-);
-
-adminRouter.get(
-  '/event-settings/history',
-  defaultRateLimit,
-  requireCapability('config.manage'),
-  validate({ query: EventSettingHistoryQuery }),
-  getEventSettingHistoryHandler,
-);
-
-adminRouter.use('/event-settings/revert', (_req, res, next) => {
-  res.setHeader('Cache-Control', 'no-store');
-  next();
-});
-adminRouter.post(
-  '/event-settings/revert',
-  adminRateLimit,
-  requireCapability('config.manage'),
-  validate({ body: RevertEventSettingRequest }),
-  idempotent('setting.product.revert', { redacted: eventSettingRevertReplay }),
-  revertEventSettingHandler,
-);
+registerSettingsRoutes(adminRouter);
 
 // The attendance root and trusted networks are event-scoped security settings.
 adminRouter.get(

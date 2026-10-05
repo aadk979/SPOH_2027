@@ -204,6 +204,12 @@ Replay rechecks current authority and rebuilds current values. Local and staging
 verification are recorded in its report; this producer does not complete the
 generated UI, history/revert, scheduling or consumer migration criteria.
 
+[Scoped operational history](../reports/P10/scoped-settings-history-api.md)
+adds exact event/station/key cursor isolation, current authority and validated
+historical values. Reset records describe override removal without inventing
+an inherited after value. The reader writes no settings, audit or retry data;
+generated history/revert controls and full phase criteria remain open.
+
 - **Do:**
   1. A settings screen generated from the registry: grouped, scoped (event or station tabs), with
      descriptions, validation, change history and revert.
