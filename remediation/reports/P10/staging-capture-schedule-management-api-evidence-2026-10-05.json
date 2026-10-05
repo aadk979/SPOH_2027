@@ -1,0 +1,40 @@
+{
+  "observedAt": "2026-10-05T11:08:22.718Z",
+  "deployedImageTag": "aa42013d6f7f255114cec8992219edcb03066542",
+  "taskRevision": 125,
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97",
+    "width": 390,
+    "height": 844
+  },
+  "authentication": "Normal Cognito Authorization Code + PKCE and current roster session",
+  "checks": {
+    "exactRunningImage": true,
+    "privateCaptureCollection": true,
+    "oneOwnedPendingRow": true,
+    "reviewedEditVersionTwo": true,
+    "bothExecutionInstantsUpdated": true,
+    "originalCreatorRetained": true,
+    "sameUuidSingleVersion": true,
+    "changedIntentRefused": true,
+    "staleEditAndCancelRefused": true,
+    "targetRewriteRefused": true,
+    "anonymousListEditCancelRefusedNoStore": true,
+    "reviewedCancellationVersionThree": true,
+    "noWorkerAttempt": true,
+    "sameCancelReplay": true,
+    "oldEditReplayReturnsCancelledCurrentState": true,
+    "originalCreationReplayBindsOriginalIntentAndReturnsLatestDefinition": true,
+    "oneOwnedCancelledRow": true,
+    "originalCaptureInheritanceUnchanged": true,
+    "legacyAndProductsUnchanged": true,
+    "readyLifecyclePreserved": true,
+    "settledHardReloadCaptureOpen": true,
+    "normalSignOut": true,
+    "appPageErrors": [],
+    "cspViolations": []
+  },
+  "fixtureEffects": "One legitimate synthetic event capture schedule, one creation audit, one reviewed edit audit and one reviewed cancellation audit plus identifier/version-only receipts remain. It is CANCELLED with zero worker attempts. No setting/history, count, visitor, lifecycle, announcement or delivery mutation was requested. Original capture inheritance and compatibility/product values remain unchanged.",
+  "limitations": "Creator-only edit, other-manager cancellation, station, archive, concurrency and post-wait guards are locally verified. This bounded staging probe exercises event management without executing another setting effect. Capture schedule UI and broader phase criteria remain open. The separately observed intermittent immediate-reload session symptom is not claimed fixed."
+}

@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T10:57:36.774Z",
+  "updatedAt": "2026-10-05T11:09:19.689Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -3540,6 +3540,10 @@
     {
       "at": "2026-10-05T10:57:36.773Z",
       "text": "P08.9 partial inventory: accepted explicit test-only Node24 server coverage2301 pass+4 existing skips/158files585.30s; configured scope lines95.58% branches86.53% exceeds recorded P07. Client460/56files29.76s lines69.73% branches61.37% exceeds P07. First server invocation omitted local-auth unit configuration, owned coverage process/worker stopped and incomplete results excluded. Real local/staging/cloud/browser state untouched by measurements. Full server router/composition scope, actual CI coverage ratchet/floors and broader pipeline criteria remain open; no closure."
+    },
+    {
+      "at": "2026-10-05T11:09:19.688Z",
+      "text": "P10.8 capture schedule management source 22a12eb / release aa42013 accepted at 19:08 SGT on exact ECS image/task 125: CI37298082070 and deploy37298820871 success; normal Cognito Chrome private list, reviewed edit/cancel, immutable retries/current definitions, stale/altered/anonymous guards, unchanged inheritance/products/READY, settled reload/sign-out and zero CSP/page errors. One owned schedule CANCELLED v3 with zero attempts. Two pre-write harness failures from wrongly requiring no-store on legacy reads excluded; own sessions revoked204. Scheduling UI/broader phase remain open; continuing."
     }
   ]
 }

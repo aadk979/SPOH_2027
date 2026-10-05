@@ -64,7 +64,28 @@ builds and the 32-page static export pass; the compiled export passes actual
 phone/laptop startup/reload under CSP and malformed runtime configuration still
 refuses startup. Normal preview is rebuilt/restored on Node 24.
 
-Exact-image CI/deployment and staging management verification remain pending.
+CI [37298082070](https://github.com/aadk979/SPOH_2027/actions/runs/37298082070)
+and staging deployment
+[37298820871](https://github.com/aadk979/SPOH_2027/actions/runs/37298820871)
+both succeed for release aa42013d6f7f255114cec8992219edcb03066542.
+At 19:08 SGT, read-only AWS gates confirm that CloudFormation is UPDATE_COMPLETE
+and the sole running ECS task uses that exact image and task revision 125.
+Normal Cognito sign-in in installed Chrome then verifies private event listing,
+one reviewed edit, UUID replay, altered/stale/anonymous refusals, reviewed
+cancellation and current-state replay of earlier successful requests. The
+single owned schedule is CANCELLED at version three with zero worker attempts.
+Original capture inheritance, compatibility/product settings and READY lifecycle
+remain unchanged. Settled hard reload, capture display and normal sign-out pass
+with zero application errors or CSP violations. See the
+[sanitised evidence](staging-capture-schedule-management-api-evidence-2026-10-05.json).
+
+Two earlier probe attempts stop before any schedule intent is saved or sent:
+the harness incorrectly requires no-store on legacy runtime/product reads.
+A read-only diagnostic confirms all scoped values are unchanged; each failed
+attempt revokes only its own current session with HTTP 204. The corrected probe
+requires no-store on the private catalogue/schedule boundary and passes.
+These harness failures are excluded from successful consumer evidence.
+
 No client source, layout, schema or worker behaviour changes in this slice;
 existing client/visual evidence is reusable. No real local database is reset or
 migrated. Existing capture producer staging fixtures are already restored and
