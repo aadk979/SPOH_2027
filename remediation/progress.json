@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T05:00:14.307Z",
+  "updatedAt": "2026-10-05T05:46:28.304Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -2428,7 +2428,8 @@
             "b6a22c15f2fdaf2d48477f0a3b1fbee3cac921fb",
             "ccf3921971487b0fb447a122653d3b1f369f03d4",
             "3f4ac1861db793246dd84e5f4e954168158f9c0a",
-            "9fac3c1d7e23e52ce76646e94cbf92d50c699700"
+            "9fac3c1d7e23e52ce76646e94cbf92d50c699700",
+            "5d1e018810531f9ccdc91b3658d7835b8d737ed9"
           ],
           "notes": [
             {
@@ -2510,6 +2511,10 @@
             {
               "at": "2026-10-05T05:00:14.067Z",
               "text": "Scoped operational restore exact-image CI 37264581444 and staging deploy 37264970940 pass; ECS122 exact 9fac, one completed rollout, zero failed tasks. Normal Cognito Chrome at 12:58 Singapore verifies two bounded restores, exact retry/no duplicate, stale and changed-intent refusal, original inheritance restored, no-store, guarded product rejection, reload/sign-out and zero app/CSP errors. Generated capture controls UI is the next bounded slice; P10.8 remains open."
+            },
+            {
+              "at": "2026-10-05T05:46:27.928Z",
+              "text": "Reviewed generated capture.open UI for event and owned station: current inheritance/stored-version review, SET/RESET/history/restore, explicit reason/confirmation, frozen uncertain retry, private event/person cache and immediate shared-authority denial hiding. All 460 client checks/56 files, eight real browser journeys including live scheduler (54.9s), 62 reviewed visuals, workspace types/lint/architecture 1061 modules/4719 dependencies, settings/hardcoding, 32-page export and actual static CSP pass. Maintained formatting and source/tests/P10/full-history secret scans pass; pricing bytes preserved. Staging UI verification awaits this exact image. P10.8 remains open."
             }
           ]
         },
@@ -3474,6 +3479,10 @@
     {
       "at": "2026-10-05T05:00:14.306Z",
       "text": "Completed scoped operational restore API local and staging evidence on 5 October. Beginning generated event/station capture control UI, reviewed SET/RESET/history/restore, private per-person cache and frozen uncertain retry intent. Broader catalogue consumers, scheduling and P10 criteria remain open."
+    },
+    {
+      "at": "2026-10-05T05:46:28.302Z",
+      "text": "Locally verified capture control UI slice committed as 5d1e018. Restored normal preview API on Node24 at 4012, ready and bus connected; test databases remain dedicated. Next: exact-image CI/deployment and normal Cognito staging UI restore/retry proof, then continue remaining scoped schedule/consumer work. No phase or gate closed."
     }
   ]
 }
