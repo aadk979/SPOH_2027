@@ -1,5 +1,9 @@
 import type { LongShiftWarning, StaffingGapsResponse } from '@spoh/shared';
-import { DEFAULT_SETTINGS, getSettings } from '../../../platform/settings/index.js';
+import { DEFAULT_SETTINGS } from '../../../platform/settings/index.js';
+import {
+  prepareThresholds,
+  type ThresholdSnapshot,
+} from '../../../platform/settings/thresholds.js';
 import { scheduledShifts } from '../../../platform/event/runningShifts.js';
 import { eventTodayStart } from '../../../platform/event/today.js';
 import {
@@ -46,8 +50,10 @@ export async function getStaffingGaps(
 export async function getLongShifts(
   scope: EventScope,
   now = new Date(),
+  options: { thresholds?: ThresholdSnapshot } = {},
 ): Promise<LongShiftWarning[]> {
-  const cutoff = new Date(now.getTime() - getSettings().longShiftMinutes * 60_000);
+  const thresholds = options.thresholds ?? (await prepareThresholds(scope));
+  const cutoff = new Date(now.getTime() - thresholds.longShiftMinutes() * 60_000);
   const since = await eventTodayStart(scope, now);
   return longShiftWarnings(await longRunningShifts(scope, { cutoff, since }), now);
 }

@@ -2,7 +2,7 @@ import { systemClock } from '../../../platform/time/index.js';
 import { toShiftRef } from '../../../platform/db/shiftRef.js';
 import type { StationDashboardResponse } from '@spoh/shared';
 import { NotFoundError } from '../../../platform/errors/index.js';
-import { getSettings } from '../../../platform/settings/index.js';
+import { prepareThresholds } from '../../../platform/settings/thresholds.js';
 import { eventToday, eventTodayStart } from '../../../platform/event/today.js';
 import { minutesBetween } from '../../../platform/time/index.js';
 import { findStationById } from '../../station/index.js';
@@ -64,7 +64,7 @@ async function registrationsPanel(
   stationId: string,
   window: Window,
 ): Promise<Panels['registrations']> {
-  const implausibleRate = getSettings().implausibleTapsPerMinute;
+  const implausibleRate = (await prepareThresholds(scope)).implausibleTapsPerMinute(stationId);
   const [devices, byCategory] = await Promise.all([
     registrationsByDevice(scope, stationId, window),
     stationRegistrationsByCategory(scope, stationId, window),

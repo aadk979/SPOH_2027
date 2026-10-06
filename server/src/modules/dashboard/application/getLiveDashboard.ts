@@ -1,6 +1,10 @@
 import { systemClock } from '../../../platform/time/index.js';
 import { headlineOf, type LiveDashboardResponse } from '@spoh/shared';
 import { eventSetting } from '../../../platform/settings/eventSettings.js';
+import {
+  prepareThresholds,
+  type ThresholdSnapshot,
+} from '../../../platform/settings/thresholds.js';
 import { scheduledShifts } from '../../../platform/event/runningShifts.js';
 import { eventToday, eventTodayStart } from '../../../platform/event/today.js';
 import { getLiveFootfall } from '../../footfall/index.js';
@@ -44,14 +48,17 @@ export async function getLiveDashboard(
     anyShiftRunning(scope, running),
   ]);
 
+  // One observation of the thresholds serves the direct footfall panel, the
+  // data-health panel and the welfare list, so they cannot disagree.
+  const thresholds = await prepareThresholds(scope);
   const [registrations, footfall, cards, gifts, safety, staffing, dataHealth] = await Promise.all([
     registrationsPanel(scope, { since, until: now }),
-    footfallPanel(scope, now),
+    footfallPanel(scope, now, thresholds),
     cardsPanel(scope, { since, now }),
     giftsPanel(scope),
     safetyPanel(scope),
-    staffingPanel(scope, { eventDayId: eventDay?.id ?? null, running }, now),
-    getDataHealth(scope, now),
+    staffingPanel(scope, { eventDayId: eventDay?.id ?? null, running, now, thresholds }),
+    getDataHealth(scope, now, { thresholds }),
   ]);
 
   const headline = headlineOf(await eventSetting(scope, 'product.countsMode'), {
@@ -103,8 +110,12 @@ async function registrationsPanel(
   return { unit: 'registrations', todayTotal, byCategory, lastHour };
 }
 
-async function footfallPanel(scope: ReportingScope, now: Date): Promise<Panels['footfall']> {
-  const footfall = await getLiveFootfall(scope, now);
+async function footfallPanel(
+  scope: ReportingScope,
+  now: Date,
+  thresholds: ThresholdSnapshot,
+): Promise<Panels['footfall']> {
+  const footfall = await getLiveFootfall(scope, now, { thresholds });
   return {
     unit: 'roomEntries',
     todayTotal: footfall.stations.reduce((sum, station) => sum + station.todayTotal, 0),
@@ -143,14 +154,20 @@ async function staffingPanel(
   {
     eventDayId,
     running,
-  }: { eventDayId: string | null; running: ReturnType<typeof scheduledShifts> },
-  now: Date,
+    now,
+    thresholds,
+  }: {
+    eventDayId: string | null;
+    running: ReturnType<typeof scheduledShifts>;
+    now: Date;
+    thresholds: ThresholdSnapshot;
+  },
 ): Promise<Panels['staffing']> {
   const [onShift, checkedIn, gaps, longShifts] = await Promise.all([
     onShiftCount(scope, running),
     eventDayId ? checkedInCount(scope, eventDayId) : 0,
     getStaffingGaps(scope, now),
-    getLongShifts(scope, now),
+    getLongShifts(scope, now, { thresholds }),
   ]);
   return { onShift, checkedIn, gaps: gaps.gaps, longShifts };
 }

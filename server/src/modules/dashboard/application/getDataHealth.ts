@@ -1,6 +1,9 @@
 import { systemClock } from '../../../platform/time/index.js';
 import type { DataHealthResponse } from '@spoh/shared';
-import { getSettings } from '../../../platform/settings/index.js';
+import {
+  prepareThresholds,
+  type ThresholdSnapshot,
+} from '../../../platform/settings/thresholds.js';
 import { scheduledShifts } from '../../../platform/event/runningShifts.js';
 import { eventToday, eventTodayStart } from '../../../platform/event/today.js';
 import { minutesBetween } from '../../../platform/time/index.js';
@@ -26,13 +29,15 @@ import type { ReportingScope } from '../../../platform/db/rehearsalFilter.js';
 export async function getDataHealth(
   scope: ReportingScope,
   now = systemClock.now(),
+  options: { thresholds?: ThresholdSnapshot } = {},
 ): Promise<DataHealthResponse> {
+  const thresholds = options.thresholds ?? (await prepareThresholds(scope));
   const since = await eventTodayStart(scope, now);
   const today = await eventToday(scope, now);
   const withinEventHours = await anyShiftRunning(scope, scheduledShifts(scope, now));
 
   const [footfall, fallbackWindowOpen, eventDay, flagged] = await Promise.all([
-    getLiveFootfall(scope, now),
+    getLiveFootfall(scope, now, { thresholds }),
     openFallbackWindowExists(scope, now),
     findEventDayOn(scope, today),
     flaggedRedemptions(scope, { since, until: now }),
@@ -51,20 +56,12 @@ export async function getDataHealth(
 
   const staleDevices =
     withinEventHours && eventDay
-      ? staleDevicesOf(
-          (
-            await checkedInWithLastCapture(scope, { eventDayId: eventDay.id, since, until: now })
-          ).map((row) => ({
-            volunteerId: row.volunteerId,
-            volunteerName: row.volunteerName,
-            stationName: row.stationName,
-            lastCaptureAt: row.lastCaptureAt?.toISOString() ?? null,
-            minutesSinceLastCapture: row.lastCaptureAt
-              ? minutesBetween(row.lastCaptureAt, now)
-              : null,
-          })),
-          getSettings().staleDeviceMinutes,
-        )
+      ? await staleDevicesFor(scope, {
+          eventDayId: eventDay.id,
+          since,
+          now,
+          staleAfterMinutes: thresholds.staleDeviceMinutes(),
+        })
       : [];
 
   return {
@@ -76,4 +73,27 @@ export async function getDataHealth(
     withinEventHours,
     flaggedRedemptions: flagged,
   };
+}
+
+async function staleDevicesFor(
+  scope: ReportingScope,
+  input: { eventDayId: string; since: Date; now: Date; staleAfterMinutes: number },
+): Promise<DataHealthResponse['staleDevices']> {
+  const rows = await checkedInWithLastCapture(scope, {
+    eventDayId: input.eventDayId,
+    since: input.since,
+    until: input.now,
+  });
+  return staleDevicesOf(
+    rows.map((row) => ({
+      volunteerId: row.volunteerId,
+      volunteerName: row.volunteerName,
+      stationName: row.stationName,
+      lastCaptureAt: row.lastCaptureAt?.toISOString() ?? null,
+      minutesSinceLastCapture: row.lastCaptureAt
+        ? minutesBetween(row.lastCaptureAt, input.now)
+        : null,
+    })),
+    input.staleAfterMinutes,
+  );
 }
