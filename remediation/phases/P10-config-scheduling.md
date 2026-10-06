@@ -260,8 +260,11 @@ adds typed event/station set and override-removal reviews from the existing regi
 All 20 affected browser journeys pass at unchanged rate limits after diagnosing
 the combined run's shared-subject read pressure. Twelve new reviewed editor images,
 four changed catalogue images, all 92 full visual checks and the current static/CSP
-export pass. Full application CI and exact-image staging acceptance gate publication;
-broader operational schedules, legacy consumers and full phase criteria remain open.
+export pass. After compatible transitive security patches, full CI passes on
+041c3ca; exact healthy staging revision 134 and the normal Cognito generated edit,
+identical retry, public removal, hard reload, station read and sign-out pass on
+6 October. Documentation evidence retains that application image. Broader
+operational schedules, legacy consumers and full phase criteria remain open.
 
 - **Do:**
   1. A settings screen generated from the registry: grouped, scoped (event or station tabs), with

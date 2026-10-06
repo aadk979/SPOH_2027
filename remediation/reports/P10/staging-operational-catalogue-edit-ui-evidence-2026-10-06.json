@@ -1,0 +1,39 @@
+{
+  "observedAt": "2026-10-06T02:27:45.765Z",
+  "deployedImageTag": "041c3caf9971a9c5b4ee09421845c6600e9e6d29",
+  "taskRevision": 134,
+  "imageDigest": "sha256:c2e359049c12f568847463588f93decb3036548a049e0646267f8680374e88a7",
+  "sourceCommit": "041c3caf9971a9c5b4ee09421845c6600e9e6d29",
+  "applicationCi": "https://github.com/aadk979/SPOH_2027/actions/runs/37401120384",
+  "deployment": "https://github.com/aadk979/SPOH_2027/actions/runs/37401795434",
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97",
+    "phone": [390, 844],
+    "laptop": [1440, 900]
+  },
+  "authentication": "Normal Cognito Authorization Code + PKCE and current roster session",
+  "checks": {
+    "exactHealthyRunningImage": true,
+    "phoneGeneratedNumericEditReview": true,
+    "requiredReasonAndConfirmation": true,
+    "realCommittedReceiptDeliberatelyLost": true,
+    "frozenFieldsScopeCollapseAndNavigation": true,
+    "sameUuidAndBodyRetry": true,
+    "oneAttributedSet": true,
+    "originalHistoryRecordsUnchanged": true,
+    "ownEffectRemovedByReviewedPublicUiReset": true,
+    "originalValuesAndVersionsRestored": true,
+    "restoredStateAndNewHistoryVisibleAfterSettledHardReload": true,
+    "laptopOwnedStationReadOnly": true,
+    "stationValuesUnchanged": true,
+    "privateReadsNoStore": true,
+    "legacyProductsAndReadyUnchanged": true,
+    "normalSignOut204": true,
+    "appPageErrors": [],
+    "cspViolations": [],
+    "backendFailures": []
+  },
+  "fixtureEffects": "The accepted probe leaves one legitimate numeric event SET and one provenance-checked reviewed UI RESET as attributed history/audit and identifier-only receipts. Two excluded earlier probes also completed and restored their owned SET/RESET pairs before a duplicate-value locator failure, then revoked their sessions. Across all three attempts six attributed history/audit records remain; the original inherited numeric setting and all catalogue/compatibility/product values and versions are restored. No schedule, lifecycle, count, visitor, announcement, delivery or station mutation is requested.",
+  "limitations": "Staging sets and removes one owned numeric event override and reads one station. Text/array/boolean/choice, station writes, archive, authority loss and malformed response cases use separate local/API evidence. Broader schedules and legacy migration and the known intermittent immediate reload/session symptom remain open."
+}

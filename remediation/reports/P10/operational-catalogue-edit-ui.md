@@ -132,7 +132,7 @@ membership rows and eight person last-seen markers. The new compiled export's
 phone/laptop startup/reload CSP check passes in 2.61 seconds, including malformed
 runtime configuration refusing startup. Final workspace types also pass. The
 isolated visual runtime is closed, and the normal preview remains available.
-Application CI and exact-image staging acceptance remain pending publication.
+Application CI and exact-image staging acceptance are recorded below.
 
 ### Dependency repair before release
 
@@ -162,10 +162,37 @@ normal Cognito staging acceptance still gate the repaired release.
 
 ## Staging acceptance
 
-This editor slice is not yet published or accepted on staging. Full application
-CI and one exact-image normal Cognito editor journey gate its milestone. Acceptance
-will record the tested source SHA and actual image; later documentation evidence
-uses ADR-010's lightweight path without another application deployment.
+The repaired release **041c3caf9971a9c5b4ee09421845c6600e9e6d29** passes
+[full CI 37401120384](https://github.com/aadk979/SPOH_2027/actions/runs/37401120384),
+including all five jobs and unchanged coverage floors. Its
+[staging deployment 37401795434](https://github.com/aadk979/SPOH_2027/actions/runs/37401795434)
+passes image build, migration, service movement and smoke. Normal Cognito browser
+acceptance at **10:27:45 Singapore on 6 October** verifies that exact healthy image
+on task revision **134**.
+
+The phone journey reviews a generated numeric edit with a reason and confirmation,
+deliberately loses the real committed receipt, retries the identical UUID/body and
+proves exactly one attributed SET. A provenance-checked reviewed public UI RESET
+restores the original catalogue values/versions, compatibility and product values.
+The original history remains unchanged, and the accepted probe adds exactly its
+two attributed records. Hard reload displays restored values and history. A laptop
+reads the owned station without changing it; READY stays unchanged, private reads
+are no-store, and normal UI sign-out revokes the session with 204. There are no
+app page errors, CSP violations or real 429/5xx responses.
+
+Two earlier staging attempts are excluded. Both completed their SET/retry/RESET
+and restored original data; both revoked their sessions after failure. The retained
+diagnostic trace identifies a strict-locator failure: two different setting rows
+share the value “15 minutes.” Scoping the assertion to the unique Silent station
+row fixes the probe without changing product code or weakening the assertion.
+Across all three attempts, six legitimate attributed SET/RESET history/audit
+records and identifier-only receipts remain; no setting override remains. This
+does not resolve the separately reported historical immediate-reload symptom.
+
+The [sanitized acceptance evidence](staging-operational-catalogue-edit-ui-evidence-2026-10-06.json)
+binds the observed acceptance to the application source and running image. The
+later evidence commit uses ADR-010's lightweight documentation path; it does not
+create another application deployment.
 
 ## Remaining scope
 

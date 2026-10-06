@@ -82,6 +82,12 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   hand volunteers admin powers. B can be added on the same Cedar model later.
 - **Answer:** **A** (owner, 2026-09-26). A fixed role catalogue, renameable per event. Admins edit which
   actions each role may perform, per event, and the guardrail policies are locked.
+  **Clarification (owner, 2026-10-06):** approved the lowest approved default role
+  as the immutable floor for each of the 45 Editable actions with defaults, as
+  inventoried in [the reviewed proposal](reports/P11/minimum-role-decision.md).
+  Existing defaults and all privacy, station and lifecycle guards remain enforced.
+  `VisitorRecord.Read` has no default grant; its eligibility decision is still
+  pending and no visitor grant or floor is implied by this approval.
 
 ### D-04 — Product invariants
 

@@ -107,6 +107,15 @@ declares a **minimum role** in the catalogue, and the permissions screen will no
 that (for example, no `People.*` for Volunteers). Guardrails make such a grant harmless anyway, but
 the floor prevents confusing grants.
 
+**Owner clarification, 6 October 2026:** for the 45 Editable actions with approved
+initial grants, the immutable minimum is the lowest role in those approved
+defaults. This does not change default grants or make higher ranks inherit them.
+The [reviewed inventory](../../remediation/reports/P11/minimum-role-decision.md)
+records the action-by-action boundaries. `VisitorRecord.Read` has no default
+grant, so its grant eligibility remains an explicit pending owner decision;
+no floor or default grant is inferred. Per-field reader restrictions and every
+locked privacy, station and lifecycle guard remain required independently.
+
 ### 5. From today's 26 capabilities
 
 Each capability maps to one primary action with the **same six cells**, and `tests/matrix.test.mjs`

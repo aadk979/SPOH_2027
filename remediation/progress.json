@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-06T01:32:28.553Z",
+  "updatedAt": "2026-10-06T02:29:07.099Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -90,8 +90,8 @@
       "owner": "you",
       "blocks": ["P05", "P11"],
       "status": "answered",
-      "answer": "A: fixed role catalogue (Volunteer, IC, Deputy, Chief, Lead, Admin), renameable per event; admins edit each role's permitted actions per event; guardrail policies locked (owner, 2026-09-26)",
-      "answeredAt": "2026-09-25T16:08:16.853Z"
+      "answer": "A: fixed role catalogue (Volunteer, IC, Deputy, Chief, Lead, Admin), renameable per event; platform admins edit permitted actions per event and guardrails stay locked (owner, 26 September 2026). On 6 October 2026 the owner approved immutable lowest-approved-default-role floors for the 45 Editable actions with defaults, retaining initial grants and all privacy, station and lifecycle safeguards. VisitorRecord.Read eligibility remains pending; no visitor grant or floor is inferred.",
+      "answeredAt": "2026-10-06T01:56:24.306Z"
     },
     {
       "id": "D-04",
@@ -3620,6 +3620,10 @@
     {
       "at": "2026-10-05T16:58:50.574Z",
       "text": "ADR-010 process rollout accepted: source75ceb60 full CI37342645280 all5 jobs and deploy37343472764 migration/smoke success; exact UPDATE_COMPLETE healthy ECS133/image75ceb60. Docs probe facd914 during fullCI passed CI37342816751 in27s and release37342876706 in13s, app/image/migration jobs skipped, sourceCI not cancelled. 24 safety tests; all18 inherited editor drafts byte-identical. G3-G5/P08/P10 remain open; next core follows TAKEOVER-2026-10-06 and finishes retained editor before next usable milestones."
+    },
+    {
+      "at": "2026-10-06T02:29:07.098Z",
+      "text": "P10.8 generated operational editor milestone accepted: 20 serial paced local browser journeys and 92 reviewed visuals; shared-subject read pressure diagnosed without limit changes. Initial source 97c76e5 failed audit; compatible proxy-addr/source-map-js patches 041c3ca passed full CI 37401120384 and staging deployment 37401795434. Exact image 041c3ca on task 134 passed normal Cognito phone SET, lost-receipt identical retry, public RESET, reload, laptop station read and sign-out 204 at 10:27 Singapore on 6 October. All three probes restored original values; six attributed history rows disclosed. P10.8, the wider phase and G3 remain open. Docs evidence must not redeploy. Owner approved lowest-default permission floors for 45 actions; visitor eligibility remains pending."
     }
   ]
 }
