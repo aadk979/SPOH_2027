@@ -78,7 +78,7 @@ afterEach(() => {
 it('refuses first go-live and all overrides while the real checklist is unavailable', async () => {
   const response = await post(requestBody());
   expect(response.status).toBe(409);
-  expect(response.body.error.details.blockers).toContain('go-live-checklist-unavailable');
+  expect(response.body.error.details.blockers).toContain('go-live:content:missing');
   expect(await state()).toMatchObject({ status: 'READY', hasBeenLive: false, lifecycleVersion: 0 });
 });
 

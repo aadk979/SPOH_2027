@@ -1,8 +1,9 @@
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { registrationStationTypeCount, type LifecycleEvent } from '../data/lifecycleRepo.js';
-import type { LifecycleSnapshot } from '../domain/lifecycle.js';
+import type { ObservedLifecycleSnapshot } from '../domain/lifecycle.js';
 import { archiveReadiness } from './archiveReadiness.js';
+import { readGoLiveReadiness } from './readGoLiveReadiness.js';
 
 function timezoneValid(timeZone: string): boolean {
   try {
@@ -18,8 +19,9 @@ export async function lifecycleSnapshot(
   tx: PrismaTransactionClient,
   scope: EventScope,
   input: { event: LifecycleEvent; now: Date },
-): Promise<LifecycleSnapshot> {
+): Promise<ObservedLifecycleSnapshot> {
   const { event } = input;
+  const readiness = await readGoLiveReadiness(tx, { scope, now: input.now });
   return {
     from: event.status,
     hasBeenLive: event.hasBeenLive,
@@ -32,7 +34,8 @@ export async function lifecycleSnapshot(
       categories: event._count.captureCategories,
       registrationStationTypes: await registrationStationTypeCount(tx, scope),
     },
-    goLiveChecks: [],
+    goLiveChecks: readiness.checks,
+    goLiveReadiness: readiness.items,
     archive: await archiveReadiness(tx, scope, input),
   };
 }

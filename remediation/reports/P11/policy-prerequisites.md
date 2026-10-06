@@ -191,3 +191,14 @@ P11.4 onward, the phase and G3 remain open. A test-only optimization retains all
 through the production helpers and keeping real CLI smoke checks. Its local
 measurement improves from 5.43 to 4.16 seconds; an actual subsequent CI result
 is required before P11.3 can close.
+
+## Observed P11.3 completion
+
+Source `ab9a67d2a7de81c06955d1f5336aef4534ffda28` passes complete
+[application CI](https://github.com/aadk979/SPOH_2027/actions/runs/37453602274).
+The actual Cedar schema/policy/generated-catalogue suite retains **80 checks**
+and all **156 matrix cells**, with zero failures, cancellations, skips or AWS
+access. Its Node test runner measures **9,126.94069 ms**, below the required
+ten seconds. This completes P11.3. Existing schema, policies, default grants,
+45 immutable floors and coverage floors are unchanged; D-15 remains pending.
+Runtime adapters/enforcement and the remainder of P11, P10, P13 and G3 stay open.

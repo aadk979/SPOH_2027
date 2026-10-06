@@ -211,7 +211,7 @@ it('refuses authority forged in the request and first go-live without server che
   await rawDb.event.update({ where: { id: eventId }, data: { status: 'READY' } });
   const ready = await post({ ...reopenBody(), expectedVersion: version + 1 });
   expect(ready.status).toBe(409);
-  expect(ready.body.error.details.blockers).toContain('go-live-checklist-unavailable');
+  expect(ready.body.error.details.blockers).toContain('go-live:content:missing');
 });
 
 it.each(['organisation role', 'event role', 'event standing'])(

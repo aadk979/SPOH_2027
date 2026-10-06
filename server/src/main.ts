@@ -7,6 +7,7 @@ import { JOBS } from './app/jobs.js';
 import { startJobs } from './platform/scheduler/index.js';
 import { startCacheBus } from './platform/events/cacheBus.js';
 import { registerShutdown } from './app/shutdown.js';
+import { applyHttpTimeouts } from './app/httpTimeouts.js';
 import { startScheduledJobs } from './app/startScheduledJobs.js';
 
 /**
@@ -31,9 +32,11 @@ async function main(): Promise<void> {
   const scheduler = await startScheduledJobs();
   const jobs = startJobs(JOBS);
 
-  const server = app.listen(env.PORT, () => {
-    logger.info({ port: env.PORT, env: env.NODE_ENV }, 'server listening');
-  });
+  const server = applyHttpTimeouts(
+    app.listen(env.PORT, () => {
+      logger.info({ port: env.PORT, env: env.NODE_ENV }, 'server listening');
+    }),
+  );
 
   registerShutdown({ server, jobs, scheduler });
 }

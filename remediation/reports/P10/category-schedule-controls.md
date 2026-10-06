@@ -138,8 +138,19 @@ All eleven affected laptop catalogue crops also receive independent before/after
 review with unchanged values, versions, history and controls. The final fresh
 **100-check visual comparison passes in 3.1 minutes**, with updates disabled.
 The retained nine membership rows and eight person markers match before and
-after. Complete application CI and exact-image normal Cognito staging acceptance
-remain pending.
+after. Source `ab9a67d2a7de81c06955d1f5336aef4534ffda28` passes the complete
+[application CI](https://github.com/aadk979/SPOH_2027/actions/runs/37453602274):
+2,567 server checks with four existing skips, 663 client checks, 241 shared
+checks, 80 policy checks and 69 infrastructure checks, with unchanged floors.
+Exact-image normal Cognito staging acceptance remains pending. Two attempts on
+that image were excluded. The first stopped in the UI after the owned edit; the
+second failed when axe sampled a choice mid colour transition (the harness now
+waits for running animations first). Both journalled actions were cancelled,
+original activity kept and every baseline re-verified through a separate
+read-only normal session. Each attempt and that review also met an API Gateway
+503 that never reached the application; a paced probe measured 3 in 1,200
+reads. The next release raises the server keep-alive (P08.10), and acceptance
+will run against that exact image.
 Staging keeps READY and exercises legitimate owned definitions and worker
 restoration through the public interface. No real local `spoh2027` reset, seed
 or migration, production creation or cutover is authorized by this milestone.

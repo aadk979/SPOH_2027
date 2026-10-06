@@ -98,7 +98,18 @@ it('never offers first go-live when server checklist evidence is unavailable', a
       to: 'LIVE',
       allowed: false,
       requiresReason: false,
-      blockers: ['go-live-checklist-unavailable'],
+      blockers: [
+        'go-live:shift-coverage',
+        'go-live:card-batch',
+        'go-live:gift-stock',
+        'go-live:content:missing',
+        'go-live:attendance',
+        'go-live:role-permissions:missing',
+        'go-live:notifications:missing',
+        'go-live:staging-smoke:missing',
+        'go-live:backups:missing',
+        'go-live:alarms:missing',
+      ],
     },
   ]);
 });

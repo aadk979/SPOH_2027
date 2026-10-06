@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
-import { LifecycleReadinessResponse } from '@spoh/shared';
+import { GoLiveCheckCode, LifecycleReadinessResponse } from '@spoh/shared';
 import { LifecyclePanel } from '@/features/events/components/LifecyclePanel';
 import { LifecycleReview } from '@/features/events/components/LifecycleReview';
 import { getLifecycleReadiness, transitionLifecycle } from '@/features/events/api';
@@ -30,6 +30,12 @@ function ready(): LifecycleReadinessResponse {
     lifecycle: { eventId: TEST_EVENT.id, status: 'READY', version: 4, hasBeenLive: false },
     evaluatedAt: '2027-01-01T00:00:00Z',
     reopenUntil: null,
+    goLiveReadiness: GoLiveCheckCode.options.map((code) => ({
+      code,
+      state: 'unavailable',
+      passed: false,
+      reasons: ['evidence-unavailable'],
+    })),
     transitions: [
       { to: 'DRAFT', allowed: true, requiresReason: false, blockers: [] },
       { to: 'REHEARSAL', allowed: true, requiresReason: false, blockers: [] },

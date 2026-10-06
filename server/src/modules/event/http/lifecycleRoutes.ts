@@ -27,6 +27,12 @@ eventLifecycleRouter.get(
 );
 eventLifecycleRouter.post(
   '/',
+  // First, so refusals (rate limit, capability, validation, readiness
+  // blockers) and replayed receipts are never cached either.
+  function noStore(_req, res, next) {
+    res.setHeader('Cache-Control', 'no-store');
+    next();
+  },
   sensitiveRateLimit,
   requireCapability('config.manage'),
   validate({ body: TransitionEventRequest }),

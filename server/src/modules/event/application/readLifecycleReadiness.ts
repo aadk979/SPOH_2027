@@ -9,6 +9,7 @@ import { lockReadinessEvent } from '../data/lifecycleRepo.js';
 import { readinessTransitions } from '../domain/readinessTransitions.js';
 import { REOPEN_HOURS } from '../domain/lifecycle.js';
 import { lifecycleSnapshot } from './lifecycleSnapshot.js';
+import { publicGoLiveReadiness } from './publicGoLiveReadiness.js';
 
 /** Current authority and guard evidence share Event-first locks; this read has no effects. */
 export async function readLifecycleReadiness(
@@ -36,6 +37,7 @@ export async function readLifecycleReadiness(
       return {
         ...toLifecycleResponse(event),
         evaluatedAt: now.toISOString(),
+        goLiveReadiness: publicGoLiveReadiness(snapshot.goLiveReadiness),
         reopenUntil:
           event.status === 'CLOSED' && event.closedAt
             ? hoursAfter(event.closedAt, REOPEN_HOURS).toISOString()

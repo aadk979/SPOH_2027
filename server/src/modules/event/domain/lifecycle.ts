@@ -1,5 +1,6 @@
 import type { EventStatus, GoLiveCheckCode, GoLiveOverride } from '@spoh/shared';
 import { goLiveCheckBlockers } from './goLiveChecks.js';
+import type { ReadinessItem } from './readiness/index.js';
 export { GO_LIVE_CHECKS } from './goLiveChecks.js';
 
 export type { GoLiveCheckCode } from '@spoh/shared';
@@ -33,6 +34,11 @@ export interface LifecycleSnapshot {
     captureGracePeriodComplete: boolean;
   };
 }
+
+/** Production observations add public checklist data without inventing facts in pure fixtures. */
+export type ObservedLifecycleSnapshot = LifecycleSnapshot & {
+  goLiveReadiness: readonly ReadinessItem[];
+};
 
 export type LifecycleAction =
   | 'Event.MarkReady'

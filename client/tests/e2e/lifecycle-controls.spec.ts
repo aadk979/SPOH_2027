@@ -128,7 +128,9 @@ for (const [name, width, height] of [
         ).not.toBeNull();
         await page.getByRole('button', { name: 'Review current state' }).click();
         await expect(page.getByText(/Reviewed state: Ready/)).toBeVisible();
-        await expect(page.getByText('The go-live checklist is not available yet.')).toBeVisible();
+        await expect(
+          page.getByText('A readiness requirement is not satisfied.').first(),
+        ).toBeVisible();
         await expect(page.getByRole('option', { name: 'Go live', exact: true })).toBeDisabled();
         await page.getByLabel('Next event state').selectOption('REHEARSAL');
         await page.getByLabel('I have reviewed this transition and its effects').check();

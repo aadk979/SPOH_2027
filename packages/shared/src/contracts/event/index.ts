@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { CommitteeRole, MembershipStatus } from '../../invariants/enums.js';
 import { Id, IdempotencyKey, IsoDateTime, ReasonText } from '../common/index.js';
+import { GoLiveCheckCode, GoLiveReadinessChecklist } from './goLiveReadiness.js';
+export * from './goLiveReadiness.js';
 
 /**
  * The event a caller works in, as the client needs it to show anything: its
@@ -11,21 +13,6 @@ import { Id, IdempotencyKey, IsoDateTime, ReasonText } from '../common/index.js'
 export const EventStatus = z.enum(['DRAFT', 'READY', 'REHEARSAL', 'LIVE', 'CLOSED', 'ARCHIVED']);
 export type EventStatus = z.infer<typeof EventStatus>;
 
-/** Server-owned go-live checks; a reason acknowledges one failing item only. */
-export const GoLiveCheckCode = z.enum([
-  'shift-coverage',
-  'categories',
-  'card-batch',
-  'gift-stock',
-  'content',
-  'attendance',
-  'role-permissions',
-  'notifications',
-  'staging-smoke',
-  'backups',
-  'alarms',
-]);
-export type GoLiveCheckCode = z.infer<typeof GoLiveCheckCode>;
 export const GoLiveOverride = z.object({ code: GoLiveCheckCode, reason: ReasonText }).strict();
 export type GoLiveOverride = z.infer<typeof GoLiveOverride>;
 const GoLiveOverrides = z
@@ -86,6 +73,7 @@ export const LifecycleReadinessResponse = z
     lifecycle: EventLifecycleState,
     evaluatedAt: IsoDateTime,
     reopenUntil: IsoDateTime.nullable(),
+    goLiveReadiness: GoLiveReadinessChecklist,
     transitions: z.array(LifecycleTransitionOption).max(EventStatus.options.length),
   })
   .strict()

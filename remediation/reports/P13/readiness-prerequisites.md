@@ -120,3 +120,30 @@ state; the source/image-bound evidence is in
 This verifies the prerequisite release and retained application behavior.
 It does not exercise a LIVE transition or establish runtime checklist wiring;
 P13.6 and its remaining integration criteria stay open.
+
+## Local readers and lifecycle wiring
+
+The reviewed reader and wiring drafts are now in source, transferred only after
+all 30 original and draft fingerprints matched. One bound, event-scoped SQL
+statement reads the five local domains (coverage, card and gift stock,
+attendance and structure facts) inside the caller's existing Event lock and
+membership check; no new transaction, lock or schema is introduced.
+`lifecycleSnapshot` calls that reader once with the caller's transaction, scope
+and injected instant. The GET advisory adds a strict `goLiveReadiness`
+checklist of exactly eleven items (code, state, passed, bounded reasons); the
+explicit projection drops every private field and fails closed on evaluator
+drift. The six external, content, grant-review and notification domains remain
+unavailable and nonwaivable, so first LIVE stays blocked for every override.
+The transition POST now sends `no-store` before any refusal, so blocker bodies
+and replayed receipts are never cached.
+
+Local verification: shared 252 tests; server unit 742; client lifecycle screens
+20; 18 new and affected real-database integration files on `spoh2027_test`
+(247 tests). The readers suite was rerun twice after its foreign-organisation
+fixture moved to the repository's idempotent upsert convention, since the reset
+helper keeps organisations. All ten lifecycle phone/laptop browser journeys pass
+against the dedicated E2E database; the two reopen journeys pass once the
+unchanged sensitive-action rate limit is not exhausted by the preceding specs in
+the same process. Full CI and exact-image staging readback remain to be
+recorded; P13.6, P10 lifecycle, G3 and the 28 October production decision stay
+open.

@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-06T11:00:44.740Z",
+  "updatedAt": "2026-10-06T13:22:48.119Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -1887,6 +1887,10 @@
             {
               "at": "2026-10-03T07:04:57.957Z",
               "text": "Pricing reconciliation verified: 6 CLI regressions, root lint, architecture, changed formatting and diff pass. Original P05 prices/report and handoff P08 draft snapshots preserved. Account-region usage recorded, tags inactive and October estimated/incomplete; isolated measured cost still unavailable. Conditional known totals 46.80/87.34/66.76/105.66/52.34; continuous staging November112.26/January141.95 exceed D-10. January approx130 exception applied; historical protection allowances raise conditional January to135.13 before unmeasured items. P08.10 remains open."
+            },
+            {
+              "at": "2026-10-06T13:22:47.875Z",
+              "text": "Staging API Gateway returned intermittent 33-byte 503s that never reached the app: three in two category acceptance attempts and one review, and 3/1200 (0.25%) in a paced read-only probe of ab9a67d on task revision 136. Server keep-alive raised from Node default 5 s to 120 s so the gateway private-integration pool is not raced by idle socket closes; shutdown still drops idle sockets. Same probe on the released image is required before claiming the fix."
             }
           ]
         },
@@ -2656,11 +2660,16 @@
         {
           "id": "P11.3",
           "title": "Policy test suite",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-06T01:15:06.075Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-10-06T11:12:48.452Z",
+          "commits": ["ab9a67d2a7de81c06955d1f5336aef4534ffda28"],
+          "notes": [
+            {
+              "at": "2026-10-06T11:12:48.493Z",
+              "text": "Actual complete application CI 37453602274 passed. The Cedar schema/policy/catalogue suite retained all 80 checks and 156 matrix cells, with zero failures/skips/AWS access; measured duration_ms 9126.94069 is below ten seconds. P11 runtime enforcement, D-15 visitor eligibility, P10/P13 and G3 remain open."
+            }
+          ]
         },
         {
           "id": "P11.4",
@@ -2879,7 +2888,12 @@
           "startedAt": "2026-10-06T01:15:06.381Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-06T13:22:47.560Z",
+              "text": "Local readiness readers and lifecycle wiring transferred from the reviewed drafts after all 30 fingerprints matched. GET advisory exposes exactly eleven strict checklist items; five local domains read in one event-scoped statement; six external/content/grant/notification domains stay unavailable and nonwaivable. First-LIVE refusals now carry no-store. Local verification: shared 252, server unit 742, client lifecycle screens 20, 18 affected/new real-DB integration files (247 tests, readers rerun twice after an organisation-fixture isolation repair) and all ten lifecycle phone/laptop browser journeys. Full CI, exact-image staging readback, P13 remainder, P10 lifecycle, G3 and the 28 October production decision remain open."
+            }
+          ]
         },
         {
           "id": "P13.7",

@@ -142,7 +142,7 @@ it('refuses illegal edges, stale versions, foreign body ids and an unavailable g
   expect((await post({ ...body('REHEARSAL', 1), eventId: 'another-event' })).status).toBe(400);
   const live = await post({ ...body('REHEARSAL', 1), to: 'LIVE' });
   expect(live.status).toBe(409);
-  expect(live.body.error.details.blockers).toContain('go-live-checklist-unavailable');
+  expect(live.body.error.details.blockers).toContain('go-live:content:missing');
   expect((await state()).status).toBe('READY');
 });
 
