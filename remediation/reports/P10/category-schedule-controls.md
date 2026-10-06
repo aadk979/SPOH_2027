@@ -149,8 +149,25 @@ waits for running animations first). Both journalled actions were cancelled,
 original activity kept and every baseline re-verified through a separate
 read-only normal session. Each attempt and that review also met an API Gateway
 503 that never reached the application; a paced probe measured 3 in 1,200
-reads. The next release raises the server keep-alive (P08.10), and acceptance
-will run against that exact image.
+reads. The next release raised the server keep-alive (P08.10).
+
+**Accepted on staging.** Source `7ed246bd8c195b814333af36db74b16591f4b8ea`
+passed [full CI](https://github.com/aadk979/SPOH_2027/actions/runs/37470438573)
+and [deployment](https://github.com/aadk979/SPOH_2027/actions/runs/37471646765).
+Normal Cognito acceptance passed at 22:01 Singapore against that exact image on
+healthy task revision 137 (digest
+`sha256:52246e6d6a2a18a1e20b0efed13fcb66be0bb47efad55bdcd27eaa63f982c6d8`):
+
+- phone reviewed create, a deliberately lost committed receipt and a byte-identical retry producing one action
+- creator edit to version 2 and cancellation at version 3
+- the real worker applying a phone-scheduled inactive change and a laptop restore from a fresh snapshot, both surviving a hard reload, with public capture categories following each
+- a completed-create replay returning the fresh restored state
+- WCAG 2 A/AA checks on eight states, no-store private responses, zero backend failures and sign-out 204
+
+All three owned actions are terminal, original activity is restored, and every
+unrelated baseline is unchanged; their immutable audits and receipts remain.
+[Source-bound evidence](staging-category-schedule-ui-evidence-2026-10-06.json).
+This accepts the category milestone; broader P10.7/P10.8 criteria remain open.
 Staging keeps READY and exercises legitimate owned definitions and worker
 restoration through the public interface. No real local `spoh2027` reset, seed
 or migration, production creation or cutover is authorized by this milestone.

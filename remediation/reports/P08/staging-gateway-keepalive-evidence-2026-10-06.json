@@ -1,0 +1,30 @@
+{
+  "observedAt": "2026-10-06T13:53:33.824Z",
+  "finding": "API Gateway HTTP API private integration returned 33-byte 503 responses that never reached the application (no app log line).",
+  "change": "Server keepAliveTimeout raised from the Node default 5000 ms to 120000 ms (server/src/app/httpTimeouts.ts).",
+  "method": "Normal Cognito session; 1200 private GETs paced at 500 ms across five admin/registration reads; own session revoked (HTTP 204).",
+  "before": {
+    "sourceCommit": "ab9a67d2a7de81c06955d1f5336aef4534ffda28",
+    "taskRevision": 136,
+    "imageDigest": "sha256:08c96ec27ae69632227f3346e741f0c4a91bc161080f9ca441af4c97557db355",
+    "startedAt": "2026-10-06T13:04:05.805Z",
+    "finishedAt": "2026-10-06T13:15:04.097Z",
+    "requests": 1200,
+    "statuses": {
+      "200": 1197,
+      "503": 3
+    }
+  },
+  "after": {
+    "sourceCommit": "7ed246bd8c195b814333af36db74b16591f4b8ea",
+    "taskRevision": 137,
+    "imageDigest": "sha256:52246e6d6a2a18a1e20b0efed13fcb66be0bb47efad55bdcd27eaa63f982c6d8",
+    "startedAt": "2026-10-06T13:42:34.216Z",
+    "finishedAt": "2026-10-06T13:53:33.824Z",
+    "requests": 1200,
+    "statuses": {
+      "200": 1200
+    }
+  },
+  "limitations": "Zero failures in 1200 requests is consistent with the fix but not conclusive on its own at the prior 0.25% rate; continued access-log observation is required. Access logs do not record integration error detail."
+}

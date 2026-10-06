@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-06T13:22:48.119Z",
+  "updatedAt": "2026-10-06T14:03:04.128Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -1874,7 +1874,10 @@
           "status": "in_progress",
           "startedAt": "2026-09-29T08:43:49.981Z",
           "completedAt": null,
-          "commits": ["d6fe080b11c4d9479357688a83c94aa9faf37bbd"],
+          "commits": [
+            "d6fe080b11c4d9479357688a83c94aa9faf37bbd",
+            "7ed246bd8c195b814333af36db74b16591f4b8ea"
+          ],
           "notes": [
             {
               "at": "2026-09-29T12:44:19.588Z",
@@ -1891,6 +1894,10 @@
             {
               "at": "2026-10-06T13:22:47.875Z",
               "text": "Staging API Gateway returned intermittent 33-byte 503s that never reached the app: three in two category acceptance attempts and one review, and 3/1200 (0.25%) in a paced read-only probe of ab9a67d on task revision 136. Server keep-alive raised from Node default 5 s to 120 s so the gateway private-integration pool is not raced by idle socket closes; shutdown still drops idle sockets. Same probe on the released image is required before claiming the fix."
+            },
+            {
+              "at": "2026-10-06T14:03:03.704Z",
+              "text": "Keep-alive fix released in 7ed246b (task 137). Same read-only probe: 3/1200 gateway 503s before, 0/1200 after; subsequent category acceptance had no backend failure. Consistent with the fix but not conclusive alone; keep observing access logs. Report: reports/P08/gateway-keepalive.md."
             }
           ]
         },
@@ -2348,7 +2355,8 @@
             "c074c07cbca2c090155c2b3b5fd05077f449d9db",
             "3b4e5cf10c2c9136a479c6bab22574ee6e1d867d",
             "bb00322e2604c6393fdd80142f8a11e0544f23c0",
-            "5ea2d31358cd21659331a70d040698a20861ea27"
+            "5ea2d31358cd21659331a70d040698a20861ea27",
+            "7ed246bd8c195b814333af36db74b16591f4b8ea"
           ],
           "notes": [
             {
@@ -2434,6 +2442,10 @@
             {
               "at": "2026-10-03T13:53:58.165Z",
               "text": "Verified private publication schedule list/edit/cancel: 37 new DB cases, 80 shared checks, 562 units, all workspace types/static/build/format/scans; full 1266 DB passes/4 existing skips in 90 files. Event-before-action locks, current ownership/capability, PENDING-only optimistic changes, both due instants, safe cancellation and atomic metadata audits verified. General timeline/UI and remaining catalogue/retention criteria remain open."
+            },
+            {
+              "at": "2026-10-06T14:03:02.934Z",
+              "text": "Category scheduling milestone accepted on exact image 7ed246b (task 137): normal Cognito phone lost-receipt retry, edit v2, cancel v3, real worker inactive and laptop fresh restore with public options following, hard reload, completed replay, eight WCAG 2 A/AA states, zero backend failures, sign-out 204, all owned actions terminal and unrelated baselines unchanged. Two earlier ab9a67d attempts excluded and fully cleaned. Evidence: reports/P10/staging-category-schedule-ui-evidence-2026-10-06.json. Broader P10.7/P10.8 criteria remain open."
             }
           ]
         },
@@ -2467,7 +2479,8 @@
             "e6718c1bd566a5310973abb6d1c37904ee757f73",
             "bcff7e15862d7be1e4c9cc8955d1bf613484fc93",
             "5859d8de214f06ec8fabbe102fbf4104a865a89d",
-            "5acc87829e063c77202c489852052aa7acecf098"
+            "5acc87829e063c77202c489852052aa7acecf098",
+            "7ed246bd8c195b814333af36db74b16591f4b8ea"
           ],
           "notes": [
             {
@@ -2887,11 +2900,15 @@
           "status": "in_progress",
           "startedAt": "2026-10-06T01:15:06.381Z",
           "completedAt": null,
-          "commits": [],
+          "commits": ["7ed246bd8c195b814333af36db74b16591f4b8ea"],
           "notes": [
             {
               "at": "2026-10-06T13:22:47.560Z",
               "text": "Local readiness readers and lifecycle wiring transferred from the reviewed drafts after all 30 fingerprints matched. GET advisory exposes exactly eleven strict checklist items; five local domains read in one event-scoped statement; six external/content/grant/notification domains stay unavailable and nonwaivable. First-LIVE refusals now carry no-store. Local verification: shared 252, server unit 742, client lifecycle screens 20, 18 affected/new real-DB integration files (247 tests, readers rerun twice after an organisation-fixture isolation repair) and all ten lifecycle phone/laptop browser journeys. Full CI, exact-image staging readback, P13 remainder, P10 lifecycle, G3 and the 28 October production decision remain open."
+            },
+            {
+              "at": "2026-10-06T14:03:03.352Z",
+              "text": "7ed246b passed full CI 37470438573 and deployment 37471646765. Read-only normal Cognito readback on task 137: strict eleven-item checklist with no-store; categories, card batch and gift stock passed; shift coverage and attendance failed with named reasons; six external domains unavailable. No transition requested. Remaining evidence domains, P10 lifecycle, G3 and the 28 October decision stay open."
             }
           ]
         },

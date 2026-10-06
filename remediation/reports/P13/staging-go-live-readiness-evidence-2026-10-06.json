@@ -1,0 +1,85 @@
+{
+  "observedAt": "2026-10-06T14:01:50.151Z",
+  "sourceCommit": "7ed246bd8c195b814333af36db74b16591f4b8ea",
+  "deployedImageTag": "7ed246bd8c195b814333af36db74b16591f4b8ea",
+  "imageDigest": "sha256:52246e6d6a2a18a1e20b0efed13fcb66be0bb47efad55bdcd27eaa63f982c6d8",
+  "taskRevision": 137,
+  "authentication": "Normal Cognito Authorization Code + PKCE; own session revoked (HTTP 204)",
+  "request": "GET lifecycle readiness advisory only; no lifecycle transition requested",
+  "checks": {
+    "status": 200,
+    "cacheControlNoStore": true,
+    "strictSharedSchemaParsed": true,
+    "elevenUniqueItems": true,
+    "unavailableItemsNeverPassed": true
+  },
+  "items": [
+    {
+      "code": "shift-coverage",
+      "state": "failed",
+      "passed": false,
+      "reasons": ["shift-station-unstaffed"]
+    },
+    {
+      "code": "categories",
+      "state": "passed",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "code": "card-batch",
+      "state": "passed",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "code": "gift-stock",
+      "state": "passed",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "code": "content",
+      "state": "unavailable",
+      "passed": false,
+      "reasons": ["evidence-unavailable"]
+    },
+    {
+      "code": "attendance",
+      "state": "failed",
+      "passed": false,
+      "reasons": ["attendance-networks-empty"]
+    },
+    {
+      "code": "role-permissions",
+      "state": "unavailable",
+      "passed": false,
+      "reasons": ["evidence-unavailable"]
+    },
+    {
+      "code": "notifications",
+      "state": "unavailable",
+      "passed": false,
+      "reasons": ["evidence-unavailable"]
+    },
+    {
+      "code": "staging-smoke",
+      "state": "unavailable",
+      "passed": false,
+      "reasons": ["evidence-unavailable"]
+    },
+    {
+      "code": "backups",
+      "state": "unavailable",
+      "passed": false,
+      "reasons": ["evidence-unavailable"]
+    },
+    {
+      "code": "alarms",
+      "state": "unavailable",
+      "passed": false,
+      "reasons": ["evidence-unavailable"]
+    }
+  ],
+  "limitations": "Staging remains READY; first LIVE stays blocked by named local failures and six unavailable external domains. P13.6, P10 lifecycle, G3 and the 28 October production decision remain open."
+}

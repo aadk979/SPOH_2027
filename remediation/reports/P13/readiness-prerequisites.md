@@ -144,6 +144,27 @@ fixture moved to the repository's idempotent upsert convention, since the reset
 helper keeps organisations. All ten lifecycle phone/laptop browser journeys pass
 against the dedicated E2E database; the two reopen journeys pass once the
 unchanged sensitive-action rate limit is not exhausted by the preceding specs in
-the same process. Full CI and exact-image staging readback remain to be
-recorded; P13.6, P10 lifecycle, G3 and the 28 October production decision stay
-open.
+the same process.
+
+Source `7ed246bd8c195b814333af36db74b16591f4b8ea` passed
+[full CI](https://github.com/aadk979/SPOH_2027/actions/runs/37470438573) with
+unchanged coverage floors and was
+[deployed to staging](https://github.com/aadk979/SPOH_2027/actions/runs/37471646765)
+on task revision 137. A read-only normal Cognito readback of the lifecycle
+readiness advisory on that exact image returned HTTP 200 with `no-store` and a
+strictly parsed eleven-item checklist. Local domains, evaluated from real staging
+data:
+
+| Item           | State  | Reason                      |
+| -------------- | ------ | --------------------------- |
+| categories     | passed |                             |
+| card batch     | passed |                             |
+| gift stock     | passed |                             |
+| shift coverage | failed | `shift-station-unstaffed`   |
+| attendance     | failed | `attendance-networks-empty` |
+
+Content, role permissions, notifications, staging smoke, backups and alarms are
+`unavailable` and never pass. No transition was requested and staging stays
+READY. [Evidence](staging-go-live-readiness-evidence-2026-10-06.json).
+P13.6 (remaining evidence domains), P10 lifecycle, G3 and the 28 October
+production decision stay open.

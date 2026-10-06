@@ -1,0 +1,53 @@
+{
+  "observedAt": "2026-10-06T14:01:03.886Z",
+  "sourceCommit": "7ed246bd8c195b814333af36db74b16591f4b8ea",
+  "deployedImageTag": "7ed246bd8c195b814333af36db74b16591f4b8ea",
+  "imageDigest": "sha256:52246e6d6a2a18a1e20b0efed13fcb66be0bb47efad55bdcd27eaa63f982c6d8",
+  "taskRevision": 137,
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97",
+    "phone": [390, 844],
+    "laptop": [1440, 900]
+  },
+  "authentication": "Normal Cognito Authorization Code + PKCE and current roster session",
+  "checks": {
+    "exactHealthyRunningSourceAndDigest": true,
+    "anonymousPrivateReadsDenied": true,
+    "foreignCategoryActionHidden": true,
+    "phoneReasonConfirmationAndEventClockReview": true,
+    "realCommittedReceiptDeliberatelyLost": true,
+    "frozenFieldsCategoryCollapseAndNavigation": true,
+    "byteIdenticalBodyAndUuidRetrySingleAction": true,
+    "creatorEditVersionTwo": true,
+    "cancellationVersionThreeZeroAttempts": true,
+    "settledCancelledHistoryAfterHardReload": true,
+    "phoneUiCreatedInactiveActionExecutedByRealWorker": true,
+    "inactiveOmittedFromPublicCaptureCategories": true,
+    "laptopFreshSnapshotUiCreatedRestoreExecutedByRealWorker": true,
+    "originalPublicCaptureCategoriesRestored": true,
+    "completedActionReplayReturnsFreshRestoredState": true,
+    "allOwnedActionsTerminal": true,
+    "unrelatedCategoryDefinitionsAndPublicSchedulesUnchanged": true,
+    "allCatalogueValuesAndHistoryUnchanged": true,
+    "stationsAndLegacyProductsUnchanged": true,
+    "currentMembershipAndReadyLifecycleUnchanged": true,
+    "privateResponsesNoStore": true,
+    "normalSignOut204": true,
+    "wcag2aAnd2aaCheckedStates": [
+      "phone-create-review",
+      "phone-edit-review",
+      "phone-cancel-review",
+      "phone-settled-history",
+      "phone-inactive-review",
+      "phone-inactive-completed",
+      "laptop-restore-review",
+      "laptop-restore-completed"
+    ],
+    "appPageErrors": [],
+    "cspViolations": [],
+    "backendFailures": []
+  },
+  "fixtureEffects": "Three legitimate owned category actions remain: one reviewed future action cancelled after edit, one successful inactive action and one successful active restore. Their immutable audits and identifier-only receipts remain. Original activity and public category options are restored; the category updatedAt legitimately advances to the owned restore completion instant. No lifecycle, registration, visitor, setting, station, notification or identity write was requested.",
+  "limitations": "Staging remains READY. Real open-booth visibility and capture admission are verified in the dedicated local REHEARSAL journeys; no staging capture write or lifecycle transition is requested. Audit and receipt invariants use local integration evidence. Device viewport checks use installed Chrome. P10, P11, P13 and G3 remain open until their full criteria pass."
+}
