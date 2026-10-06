@@ -141,6 +141,12 @@ The general event timeline/UI remains open.
 
 ### P10.8 — Admin UI: settings, schedule and lifecycle
 
+[Reviewed category scheduling](../reports/P10/category-schedule-controls.md)
+adds the private category producer and review UI for the existing absolute-state
+worker. Local producer, isolation and worker checks are verified; shared retry
+fencing, browser/visual, full CI and exact-image staging acceptance are required
+before this milestone is accepted. Broader criteria below remain open.
+
 [Private draft and publication controls](../reports/P10/announcement-draft-ui.md)
 add private reviewed-content editing, event-clock schedule creation, pending edit/cancel
 and live status to the inbox. Client units, phone/laptop real-worker journeys, affected
