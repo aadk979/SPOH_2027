@@ -134,6 +134,32 @@ runtime configuration refusing startup. Final workspace types also pass. The
 isolated visual runtime is closed, and the normal preview remains available.
 Application CI and exact-image staging acceptance remain pending publication.
 
+### Dependency repair before release
+
+Source `97c76e502c4c3ff2a5032489a1d3c8be90d0199e` passed CI's application
+tests (178 shared, 2,309 server with four existing skips, 595 client), unchanged
+coverage floors, architecture and lint/types/build. The full run
+[37399775441](https://github.com/aadk979/SPOH_2027/actions/runs/37399775441)
+failed its mandatory dependency audit and is excluded from release acceptance.
+Staging correctly skipped deployment. The new blocking advisories are
+[proxy-addr GHSA-jqcg-44mw-7w3h](https://github.com/jshttp/proxy-addr/security/advisories/GHSA-jqcg-44mw-7w3h)
+and [source-map-js CVE-2026-93749](https://github.com/7rulnik/source-map-js/releases/tag/v1.2.2).
+
+Only those two transitive lock resolutions change: proxy-addr 2.0.7 to 2.0.8
+and source-map-js 1.2.1 to 1.2.2, both within existing dependency ranges. The
+current numeric trusted-proxy configuration is not represented as a demonstrated
+exploit. No direct dependency range or audit exception changes. The existing
+bundled CDK exception keeps its exact path/advisories and 31 October expiry.
+Uncommitted Cedar workspace entries are preserved separately from this repair.
+
+Under explicit Node 24, the repaired audit passes. All 17 real attendance
+integration checks pass against the dedicated `spoh2027_test` database, including
+trusted-ingress peer checks. A fresh compiled static export passes the phone/laptop
+CSP startup/reload check; all 22 affected catalogue visual checks pass in 41.4
+seconds without baseline changes. Nine frozen memberships and eight person markers
+remain unchanged. The isolated visual runtime is closed. Full CI and exact-image
+normal Cognito staging acceptance still gate the repaired release.
+
 ## Staging acceptance
 
 This editor slice is not yet published or accepted on staging. Full application
