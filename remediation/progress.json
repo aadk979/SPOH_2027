@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-06T14:03:04.128Z",
+  "updatedAt": "2026-10-06T15:40:13.022Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -2480,7 +2480,9 @@
             "bcff7e15862d7be1e4c9cc8955d1bf613484fc93",
             "5859d8de214f06ec8fabbe102fbf4104a865a89d",
             "5acc87829e063c77202c489852052aa7acecf098",
-            "7ed246bd8c195b814333af36db74b16591f4b8ea"
+            "7ed246bd8c195b814333af36db74b16591f4b8ea",
+            "86d2ec49a927438c54c6a0165a27ff3ba8ad115c",
+            "a81f36bd54b5e6e2f25119117213e83fdfadadb4"
           ],
           "notes": [
             {
@@ -2610,6 +2612,10 @@
             {
               "at": "2026-10-06T01:32:28.552Z",
               "text": "Settings editor local milestone verified: 18 retained drafts preserved; 20 affected phone/laptop journeys pass in paced serial batches with unchanged limits and owned cleanup; 22 targeted/92 full reviewed visuals pass with frozen markers unchanged; fresh static export/CSP and workspace types pass. Reuse unchanged 595-client/2309-server+4 existing skips/178-shared coverage evidence under ADR-010; application CI/exact-image staging acceptance gate publication"
+            },
+            {
+              "at": "2026-10-06T15:40:12.641Z",
+              "text": "Four operational thresholds moved to the scoped store in two ordered releases. Compatibility 86d2ec4 (task 138): legacy PATCH refuses the four keys before any write, form points to the catalogue; refusal-only staging acceptance passed. Copy/readers 92ad10c released with the lockfile-only sharp/shell-quote audit repair as a81f36b (task 139) after A was the only running task: staging staleDeviceMinutes copied to catalogue v1 with MIGRATION history, other three unset, four consumers schema-valid, no backend failures. Report reports/P10/threshold-settings-migration.md. Ten other legacy keys, client/session readers, AppSetting removal and P10.8 remain open."
             }
           ]
         },

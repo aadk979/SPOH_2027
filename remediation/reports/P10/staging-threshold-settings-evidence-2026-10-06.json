@@ -1,0 +1,52 @@
+{
+  "observedAt": "2026-10-06T15:39:34.982Z",
+  "authentication": "Normal Cognito Authorization Code + PKCE; each run revoked its own session (HTTP 204)",
+  "compatibilityRelease": {
+    "sourceCommit": "86d2ec49a927438c54c6a0165a27ff3ba8ad115c",
+    "imageDigest": "sha256:e1f38b91cf71431c0bd1f455dc2155597e8991601f6e861b3acd6a25b40bc1e0",
+    "taskRevision": 138,
+    "observedAt": "2026-10-06T15:06:01.089Z",
+    "checks": {
+      "singleRetiredKeyRefused": {
+        "status": 400,
+        "code": "VALIDATION_FAILED"
+      },
+      "mixedBodyRefusedWhole": {
+        "status": 400,
+        "code": "VALIDATION_FAILED"
+      },
+      "legacyAndCatalogueUnchanged": true,
+      "formPointers": 4,
+      "backendFailures": []
+    },
+    "legacyOverriddenRetiredKeys": ["staleDeviceMinutes"],
+    "note": "Refusal-only: both PATCH bodies used current values and were refused before any write; legacy settings and event catalogue re-read unchanged (catalogue compared without its evaluatedAt instant). A first run failed only on that evaluatedAt comparison in the harness and is excluded."
+  },
+  "readerRelease": {
+    "sourceCommit": "a81f36bd54b5e6e2f25119117213e83fdfadadb4",
+    "imageDigest": "sha256:86a69bd91a572d0736625476a17343faeea1cafce3ac621953b587a2f9a0c68b",
+    "taskRevision": 139,
+    "observedAt": "2026-10-06T15:39:34.982Z",
+    "copied": [
+      {
+        "key": "staleDeviceMinutes",
+        "storedVersion": 1,
+        "valueMatchesLegacy": true,
+        "historySource": "MIGRATION"
+      }
+    ],
+    "checks": {
+      "onlyLegacyOverridesCopied": true,
+      "consumersParse": [
+        "dashboard/live",
+        "dashboard/data-health",
+        "footfall/live",
+        "dashboard/station"
+      ],
+      "backendFailures": []
+    },
+    "note": "Read-only. Includes the lockfile-only sharp 0.35.5 / shell-quote 1.12.0 audit repair. The first push of the reader source (92ad10c) failed only the dependency audit on newly published advisories and was never deployed."
+  },
+  "ordering": "The reader release was pushed only after the compatibility image was the single running task, so no instance wrote the four keys to the legacy store after the copy.",
+  "limitations": "Ten other legacy keys, the client runtimeSettings cache, session readers and dropping AppSetting remain. Platform-scope editing of station-capable thresholds has no endpoint. P10.8 and G3 remain open."
+}
