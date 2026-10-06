@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-06T02:36:13.712Z",
+  "updatedAt": "2026-10-06T09:02:21.676Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -191,6 +191,15 @@
       "status": "answered",
       "answer": "A: Postgres (design, ADR-003 §3-4): LISTEN/NOTIFY cache bus and an UNLOGGED rate-limit counter table; ElastiCache and DynamoDB rejected on cost and moving parts. Proposed until G1.",
       "answeredAt": "2026-09-25T16:24:05.627Z"
+    },
+    {
+      "id": "D-15",
+      "title": "Visitor-record permission eligibility",
+      "owner": "you",
+      "blocks": ["P11.5", "P11.7"],
+      "status": "open",
+      "answer": null,
+      "answeredAt": null
     }
   ],
   "phases": [
@@ -2619,20 +2628,30 @@
         {
           "id": "P11.1",
           "title": "`packages/access-policies`",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-06T01:15:05.443Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-10-06T03:00:33.152Z",
+          "commits": ["1063eeca4465eeb34fea02ad989efc9a0b5b5b5d"],
+          "notes": [
+            {
+              "at": "2026-10-06T03:00:33.196Z",
+              "text": "Strict Cedar schema and generated public catalogue build passed full CI 37405030559. Exact task135 immutable-image metadata and normal Cognito acceptance passed; current Capability retained until P11.5/.8. Evidence: P11/staging-policy-prerequisite-runtime-evidence-2026-10-06.json."
+            }
+          ]
         },
         {
           "id": "P11.2",
           "title": "Policies",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-06T01:15:05.785Z",
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-10-06T03:00:33.446Z",
+          "commits": ["1063eeca4465eeb34fea02ad989efc9a0b5b5b5d"],
+          "notes": [
+            {
+              "at": "2026-10-06T03:00:33.485Z",
+              "text": "Accepted P05 schema/policy/default/C1-C13 bytes retained; every policy guarantee header and strict validation passed source1063 fullCI. Current runtime guards unchanged; no policy store or enforcement claimed."
+            }
+          ]
         },
         {
           "id": "P11.3",
@@ -3628,6 +3647,14 @@
     {
       "at": "2026-10-06T02:36:13.711Z",
       "text": "Prepared combined P08.8 / P11.1-P11.3 / P13.6 prerequisite milestone under ADR-010. P08 scoped task-failure signal: pinned read-only staging diff adds five resources/one output only, zero existing regional account log policies, 8 final focused checks and 69 earlier infrastructure checks. Cedar schema/policies/defaults remain byte-identical; 80 pure policy checks include all 156 legacy matrix cells and explicit six-role C8. Generated metadata exports 65 actions and 45 approved immutable floors; visitor eligibility is explicitly unresolved. Readiness has 110 new pure checks with 141/141 lines and 138/138 branches, no runtime wiring or invented cloud evidence. Shared 193 and client 595 full checks pass; types/lint/generated/architecture and clean Node24 container build/deps install pass. Required full CI, exact-image acceptance and real bounded detector delivery remain pending; no step or gate forced complete."
+    },
+    {
+      "at": "2026-10-06T03:00:33.729Z",
+      "text": "1063 prerequisite release passed fullCI and exact-task135 Cognito/metadata acceptance. P11.3 remains open: actual80-check CI suite10.414sec exceeds required10sec; test-only optimization retains allcases and awaits nextCI. P13.6/P08.8/G3 remain open; legitimate failure-monitoring rehearsal still pending."
+    },
+    {
+      "at": "2026-10-06T09:02:21.674Z",
+      "text": "P08 actual failure detector acceptance on1063/task135 completed 6Oct16:58SGT: exact deployed resource preflight,7event-pattern/4filter probes; isolated no-secret standalone exit42 produced one bounded log/count, OK-to-ALARM16:51:50 and recoveryOK16:57:50. Exact original rule/targets restored, owned definition deregistered, app task/image/desired count unchanged; evidence retained. P08.8 broader detectors/notifications/cost and P13.6 runtime wiring remain open; no production work. P11.1/.2 accepted by actual fullCI/source-image Cognito+compiled metadata evidence; P11.3 actualCI10.414sec remains open for verified optimization. D15 visitor eligibility pending, no implied approval."
     }
   ]
 }

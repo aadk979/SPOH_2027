@@ -105,3 +105,18 @@ membership and lifecycle changes, production-free staging acceptance, and UI
 Overview items/deep links resolved through the existing navigation registry. READY
 retains ADR-004's structure checks; LIVE additionally needs this checklist. No item,
 phase, G3 criterion or owner-controlled approval is marked complete here.
+
+## Observed prerequisite release
+
+Source `1063eeca4465eeb34fea02ad989efc9a0b5b5b5d` passed
+[full application CI](https://github.com/aadk979/SPOH_2027/actions/runs/37405030559),
+including all 110 new readiness checks within 2,419 server passes and four
+existing skips, with unchanged coverage floors. The exact source was
+[deployed to staging](https://github.com/aadk979/SPOH_2027/actions/runs/37405740146)
+on healthy task revision 135. Normal Cognito phone/laptop catalogue, history,
+reload and sign-out acceptance passed with unchanged original values and READY
+state; the source/image-bound evidence is in
+[the coordinated prerequisite acceptance](../P11/staging-policy-prerequisite-runtime-evidence-2026-10-06.json).
+This verifies the prerequisite release and retained application behavior.
+It does not exercise a LIVE transition or establish runtime checklist wiring;
+P13.6 and its remaining integration criteria stay open.

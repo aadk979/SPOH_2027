@@ -1,0 +1,43 @@
+{
+  "observedAt": "2026-10-06T08:58:28.441Z",
+  "source": "1063eeca4465eeb34fea02ad989efc9a0b5b5b5d",
+  "scope": "Staging actual standalone ECS failure through existing detector; temporary probe group restored.",
+  "imageDigest": "sha256:4708a247394f54e60a0912664ea7b1e5f9af677e71f0e7f21ac7b31fd6da690d",
+  "account": "665146708212",
+  "region": "ap-southeast-1",
+  "originalRuleSha256": "075965424abf297ac1e8c328145c249f76789f281cf4cbbdbb0b4b0e4cc3d973",
+  "finalRuleSha256": "075965424abf297ac1e8c328145c249f76789f281cf4cbbdbb0b4b0e4cc3d973",
+  "readOnlySelectorAndMetricFilterProbes": {
+    "eventPatternProbeCount": 7,
+    "metricFilterPositiveCount": 1,
+    "metricFilterNegativeCount": 3
+  },
+  "checks": {
+    "exactHealthyOneTaskSourcePreflight": true,
+    "actualEssentialExit42": true,
+    "boundedEventBridgeLogMessage": true,
+    "failureMetricObserved": true,
+    "alarmTransition": true,
+    "alarmRecovery": true,
+    "exactRuleAndTargetsRestored": true,
+    "ownedTaskDefinitionDeregistered": true,
+    "originalServiceTaskImageDesiredCountUnchanged": true
+  },
+  "signal": {
+    "stopCode": "EssentialContainerExited",
+    "exitCode": 42,
+    "logMessageCount": 1,
+    "firstLogTimestamp": "2026-10-06T08:50:44.000Z",
+    "failureCountSum": 1,
+    "metricDatapointCount": 1,
+    "alarmTransitionAt": "2026-10-06T16:51:50.673000+08:00",
+    "alarmRecoveryAt": "2026-10-06T16:57:50.673000+08:00",
+    "actualTaskFailurePath": true,
+    "notificationDeliveryVerified": false
+  },
+  "fixtureIsolation": "Accepted ARM64 image by digest, node entrypoint, exit42; no task role, secrets, environment, ports, app logs, health check, application or database entrypoint.",
+  "limitations": [
+    "No notification actions exist; owner email delivery remains unverified.",
+    "This failure observation does not establish task availability, exact restarts or complete P08.8."
+  ]
+}

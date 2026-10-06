@@ -97,12 +97,38 @@ creation/replacement and any intervening account-policy changes. No available
 slot means deployment stays pending until an owner approves an appropriate
 resolution. Do not remove or widen unrelated policies to make room.
 
-The core agent must retain full application CI, verify the exact deployed
-rule/target/policy/filter/alarm and exercise legitimate bounded event delivery
-without interrupting the accepted app. AWS event-pattern/filter probes should
-prove both matching failures and rejection of foreign/intentional/one-off events.
-The real EventBridge-to-log-to-metric path, ALARM transition and owner email
-delivery remain unverified; no detector or notification claim follows from synth.
+## Exact staging acceptance — 6 October 2026
+
+Source `1063eeca4465eeb34fea02ad989efc9a0b5b5b5d` passed
+[full CI](https://github.com/aadk979/SPOH_2027/actions/runs/37405030559)
+and [staging deployment](https://github.com/aadk979/SPOH_2027/actions/runs/37405740146).
+All 69 infrastructure checks passed in CI. Read-only preflight verified the
+healthy application on task revision 135, its exact ARM64 image digest and the
+deployed rule, target, bounded log policy, metric filter and sparse alarm.
+Seven AWS event-pattern probes and four metric-filter probes passed, including
+foreign, intentional-stop and one-off-task exclusions.
+
+A unique, standalone fixture used the accepted image with a Node entrypoint
+that exited 42. It had no task role, secrets, environment, ports, health check,
+application entrypoint or database access. A temporary rule selector admitted
+only that owned probe group alongside the existing exact service group. The
+application service was neither stopped nor updated. An ignored durable attempt
+ledger recorded mutation intent, exact ownership and the original rule/targets
+before effects. EventBridge has no atomic compare-and-swap API: each bounded
+change used serial read/compare/write/verify and refused unexpected state.
+
+The actual `EssentialContainerExited` task event produced exactly one bounded
+log message and one failure Count datapoint. The alarm changed from OK to ALARM
+at **16:51:50 Singapore**, then recovered to OK at **16:57:50**. A final window
+recheck excluded a coincident foreign application failure before acceptance.
+Cleanup restored the exact original rule and targets, deregistered the owned
+fixture definition, and verified the original application task, image and
+desired/running count were unchanged. Original/final rule hashes match.
+The [sanitized evidence](staging-task-failure-monitoring-evidence-2026-10-06.json)
+records the source, digest, observations and cleanup checks.
+
+This verifies the actual failure delivery path and alarm recovery. No notification
+actions exist; owner email delivery remains unverified. P08.8 remains open.
 
 Scheduler-initiated unhealthy replacements, service placement/deployment failures,
 and service running tasks below desired remain separate required detectors.

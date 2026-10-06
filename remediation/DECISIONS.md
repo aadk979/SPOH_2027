@@ -292,3 +292,24 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
 - **Answer:** **A** (design, ADR-003, accepted at G1). Postgres: a `LISTEN`/`NOTIFY` cache bus,
   published inside the writing transaction, and an `UNLOGGED` rate-limit counter table. ElastiCache
   and DynamoDB were rejected on cost and moving parts.
+
+### D-15 — Visitor-record permission eligibility
+
+- **Owner:** you
+- **Blocks:** P11.5, P11.7
+- **Question:** Which fixed roles may receive an explicit `VisitorRecord.Read`
+  event grant when Cedar enforcement and the permission editor are introduced?
+- **Options:**
+  - **A.** All six roles are eligible; every read also requires the field's
+    reader-role permission. New-event default grants remain off.
+  - **B.** Deputy Coordinator and above are eligible, still subject to field
+    reader roles and with new-event defaults off.
+- **Recommendation:** **A.** ADR-002/P09 already permit all six roles in
+  field-reader allowlists. Preserve that model rather than silently narrowing it.
+- **Status:** Pending. The owner approved lowest-default floors for the other
+  45 Editable actions on 6 October; that approval supplies no visitor floor or
+  grant. The [reviewed proposal](reports/P11/minimum-role-decision.md) and pending
+  question expose this exception. Keep current field-scoped access protected
+  until its reviewed migration; unknown eligibility cannot enable a new toggle.
+  This blocks the visitor portion of P11.5/.7, not independent prerequisites or
+  the rest of the programme.

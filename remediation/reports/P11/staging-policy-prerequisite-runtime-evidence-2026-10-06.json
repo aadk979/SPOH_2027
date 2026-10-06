@@ -1,0 +1,91 @@
+{
+  "observedAt": "2026-10-06T02:57:28.563Z",
+  "deployedImageTag": "1063eeca4465eeb34fea02ad989efc9a0b5b5b5d",
+  "taskRevision": 135,
+  "browser": {
+    "channel": "chrome",
+    "version": "154.0.8037.97",
+    "phone": [390, 844],
+    "laptop": [1440, 900]
+  },
+  "authentication": "Normal Cognito Authorization Code + PKCE and current roster session",
+  "checks": {
+    "exactHealthyRunningImage": true,
+    "collapsedUntilRequested": true,
+    "phoneEventKeyCount": 14,
+    "eventPrivateHistory": true,
+    "eventHistory": {
+      "rows": 12,
+      "olderPage": false
+    },
+    "settledHardReloadValuesUnchanged": true,
+    "laptopOwnedStationKeyCount": 3,
+    "stationPrivateHistory": true,
+    "stationHistory": {
+      "rows": 0,
+      "olderPage": false
+    },
+    "privateReadsNoStore": true,
+    "eventAndStationValuesUnchanged": true,
+    "eventHistoryUnchanged": true,
+    "legacyProductsAndReadyUnchanged": true,
+    "adminWrites": [],
+    "normalSignOut204": true,
+    "appPageErrors": [],
+    "cspViolations": [],
+    "backendFailures": []
+  },
+  "fixtureEffects": "Only GETs to catalogue/history and existing settings/me endpoints. No setting, schedule, lifecycle, visitor, announcement or delivery write requested. Normal authentication establishes and revokes only this owned synthetic session.",
+  "limitations": "Staging verifies one synthetic event and one owned station using existing history. Archive, malformed values, access loss and additional history states use local/API evidence. Generated editing/revert has separate accepted editor evidence. This prerequisite image retains current authorization; the new pure Cedar metadata/readiness evaluators are not runtime enforcement or lifecycle wiring. Visitor eligibility, policy adapters/enforcement, legacy migration and broader phase criteria remain open. The separately observed intermittent immediate reload symptom is not claimed fixed.",
+  "deployedImageDigest": "sha256:4708a247394f54e60a0912664ea7b1e5f9af677e71f0e7f21ac7b31fd6da690d",
+  "taskDefinitionArn": "arn:aws:ecs:ap-southeast-1:665146708212:task-definition/SpohstagingPlatformAppAppTask09995C0A:135",
+  "compiledPublicMetadata": {
+    "actionCount": 65,
+    "uniqueActionIds": true,
+    "groupCount": 10,
+    "editableCount": 46,
+    "minimumRoleCounts": {
+      "approved": 45,
+      "locked": 19,
+      "unresolved": 1
+    },
+    "approvedFloorCounts": {
+      "DEPUTY_COORDINATOR": 8,
+      "IC": 12,
+      "CHIEF_COORDINATOR": 17,
+      "VOLUNTEER": 8
+    },
+    "visitorEligibility": "unresolved",
+    "publicSubpathImport": true,
+    "observedAt": "2026-10-06T02:57:36.003Z",
+    "isolation": "No network, credentials, database, exposed ports or application entrypoint."
+  },
+  "release": {
+    "sourceCi": "https://github.com/aadk979/SPOH_2027/actions/runs/37405030559",
+    "deployment": "https://github.com/aadk979/SPOH_2027/actions/runs/37405740146",
+    "infrastructureDiff": "https://github.com/aadk979/SPOH_2027/actions/runs/37405030437",
+    "fullApplicationCi": "success",
+    "deploymentConclusion": "success"
+  },
+  "verification": {
+    "server": {
+      "passed": 2419,
+      "existingSkips": 4
+    },
+    "client": {
+      "passed": 595
+    },
+    "shared": {
+      "passed": 193
+    },
+    "infrastructure": {
+      "passed": 69
+    },
+    "policy": {
+      "passed": 80,
+      "ciDurationMilliseconds": 10413.599067,
+      "underTenSecondCriterion": false
+    },
+    "coverageFloors": "unchanged"
+  }
+}

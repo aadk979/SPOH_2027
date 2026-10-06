@@ -159,5 +159,35 @@ shared/policy builds, full workspace types, full lint and application architectu
 checks pass. Full CI, observed under-ten-second policy tests and exact-image
 staging acceptance remain the release criteria before prerequisite step closure.
 
-No P11 step or phase is marked complete by this report yet, and no staging or
-production authorization behavior is claimed.
+## Observed release acceptance
+
+Source `1063eeca4465eeb34fea02ad989efc9a0b5b5b5d` passed the complete
+[application CI](https://github.com/aadk979/SPOH_2027/actions/runs/37405030559)
+and [staging deployment](https://github.com/aadk979/SPOH_2027/actions/runs/37405740146).
+All application gates and coverage floors were retained: 2,419 server checks
+with four existing skips, 595 client checks, 193 shared checks, 80 policy checks
+and 69 infrastructure checks passed. The policy suite's measured CI duration
+was **10,413.599067 ms**. That exceeds P11.3's under-ten-second criterion;
+P11.3 remains in progress despite the successful CI job.
+
+At 10:57 Singapore on 6 October, normal Cognito phone/laptop acceptance passed
+against the sole healthy task revision **135** running that exact image.
+Private event/station catalogue reads, history, settled reload and sign-out
+passed without admin writes, 429/5xx responses, application errors or CSP
+violations. Original values, history, legacy products and READY were unchanged.
+An isolated, network-disabled container imported the public generated actions
+subpath from the deployed immutable image digest
+`sha256:4708a247394f54e60a0912664ea7b1e5f9af677e71f0e7f21ac7b31fd6da690d`.
+It verified all 65 unique actions, ten groups, 46 Editable actions and the
+45 approved / 19 locked / one unresolved floor partition. No database,
+credentials or application entrypoint was available to that check.
+The [sanitized acceptance evidence](staging-policy-prerequisite-runtime-evidence-2026-10-06.json)
+binds these observations to the source, image, CI and deployment.
+
+These results complete P11.1's package/catalogue construction and P11.2's
+accepted policy definitions. Runtime authorization remains unchanged. P11.3,
+P11.4 onward, the phase and G3 remain open. A test-only optimization retains all
+80 checks and 156 matrix cells while exercising filesystem output boundaries
+through the production helpers and keeping real CLI smoke checks. Its local
+measurement improves from 5.43 to 4.16 seconds; an actual subsequent CI result
+is required before P11.3 can close.
