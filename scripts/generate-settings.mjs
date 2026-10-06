@@ -36,7 +36,7 @@ const schemaLines = schemas.map(([key, jsonSchema]) => {
   const source = `z.fromJSONSchema(${JSON.stringify(jsonSchema)})`;
   const normalised =
     definition.normalise === 'trim'
-      ? `${source}.transform((value) => (value as string).trim())`
+      ? `z.preprocess((value) => typeof value === 'string' ? value.trim() : value, ${source})`
       : source;
   return `  ${JSON.stringify(key)}: ${normalised} as z.ZodType<GeneratedSettingValues[${JSON.stringify(key)}]>,`;
 });

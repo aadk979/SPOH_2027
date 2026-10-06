@@ -22,6 +22,7 @@ export function useCatalogueRestore(input: {
   const draft = useScopedReviewDraft({
     ...input,
     schema: ScopedSettingsRevertRequest,
+    initialValues: { reason: '' },
     onReview: change.reset,
     onError: change.fail,
     unavailableMessage: 'Current catalogue values are unavailable. Reload before reviewing.',

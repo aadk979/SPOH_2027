@@ -850,16 +850,15 @@ export const GENERATED_SETTING_SCHEMAS: {
     type: 'array',
     items: { type: 'string', maxLength: 64 },
   }) as z.ZodType<GeneratedSettingValues['attendance.campusCidrs']>,
-  'attendance.campusNetworkLabel': z
-    .fromJSONSchema({
+  'attendance.campusNetworkLabel': z.preprocess(
+    (value) => (typeof value === 'string' ? value.trim() : value),
+    z.fromJSONSchema({
       $schema: 'https://json-schema.org/draft/2020-12/schema',
       type: 'string',
       minLength: 1,
       maxLength: 40,
-    })
-    .transform((value) => (value as string).trim()) as z.ZodType<
-    GeneratedSettingValues['attendance.campusNetworkLabel']
-  >,
+    }),
+  ) as z.ZodType<GeneratedSettingValues['attendance.campusNetworkLabel']>,
   'attendance.pinAllowedOffNetwork': z.fromJSONSchema({
     $schema: 'https://json-schema.org/draft/2020-12/schema',
     type: 'boolean',
@@ -902,16 +901,15 @@ export const GENERATED_SETTING_SCHEMAS: {
     minimum: 1,
     maximum: 3600,
   }) as z.ZodType<GeneratedSettingValues['dashboardPollSeconds']>,
-  eventName: z
-    .fromJSONSchema({
+  eventName: z.preprocess(
+    (value) => (typeof value === 'string' ? value.trim() : value),
+    z.fromJSONSchema({
       $schema: 'https://json-schema.org/draft/2020-12/schema',
       type: 'string',
       minLength: 1,
       maxLength: 80,
-    })
-    .transform((value) => (value as string).trim()) as z.ZodType<
-    GeneratedSettingValues['eventName']
-  >,
+    }),
+  ) as z.ZodType<GeneratedSettingValues['eventName']>,
   idempotencyRetentionDays: z.fromJSONSchema({
     $schema: 'https://json-schema.org/draft/2020-12/schema',
     type: 'integer',
@@ -1089,14 +1087,13 @@ export const GENERATED_SETTING_SCHEMAS: {
     minimum: 1,
     maximum: 1440,
   }) as z.ZodType<GeneratedSettingValues['staleDeviceMinutes']>,
-  'vocabulary.missionCard': z
-    .fromJSONSchema({
+  'vocabulary.missionCard': z.preprocess(
+    (value) => (typeof value === 'string' ? value.trim() : value),
+    z.fromJSONSchema({
       $schema: 'https://json-schema.org/draft/2020-12/schema',
       type: 'string',
       minLength: 1,
       maxLength: 40,
-    })
-    .transform((value) => (value as string).trim()) as z.ZodType<
-    GeneratedSettingValues['vocabulary.missionCard']
-  >,
+    }),
+  ) as z.ZodType<GeneratedSettingValues['vocabulary.missionCard']>,
 };

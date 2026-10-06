@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-05T16:58:50.575Z",
+  "updatedAt": "2026-10-06T01:32:28.553Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -2576,6 +2576,14 @@
             {
               "at": "2026-10-05T15:25:20.721Z",
               "text": "Partial: generated catalogue history restores accepted on exact healthy staging revision 131, release f52eade, CI 37329349688 and deployment 37330429904; normal Cognito Chrome lost-receipt same-intent retry and provenance-checked public RESET restore original values/versions. Generated editing, broader schedules, legacy migration and full criteria remain open."
+            },
+            {
+              "at": "2026-10-06T01:30:13.501Z",
+              "text": "Continue approved 6 October settings-editor milestone; retained drafts preserved, original 429 trace diagnosed as shared Chief read budget exhaustion; all 20 affected journeys pass in paced serial batches at unchanged limits; reviewed targeted visuals pass, full visuals and full CI/exact-image staging gate remain pending"
+            },
+            {
+              "at": "2026-10-06T01:32:28.552Z",
+              "text": "Settings editor local milestone verified: 18 retained drafts preserved; 20 affected phone/laptop journeys pass in paced serial batches with unchanged limits and owned cleanup; 22 targeted/92 full reviewed visuals pass with frozen markers unchanged; fresh static export/CSP and workspace types pass. Reuse unchanged 595-client/2309-server+4 existing skips/178-shared coverage evidence under ADR-010; application CI/exact-image staging acceptance gate publication"
             }
           ]
         },
@@ -2611,8 +2619,8 @@
         {
           "id": "P11.1",
           "title": "`packages/access-policies`",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-06T01:15:05.443Z",
           "completedAt": null,
           "commits": [],
           "notes": []
@@ -2620,8 +2628,8 @@
         {
           "id": "P11.2",
           "title": "Policies",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-06T01:15:05.785Z",
           "completedAt": null,
           "commits": [],
           "notes": []
@@ -2629,8 +2637,8 @@
         {
           "id": "P11.3",
           "title": "Policy test suite",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-06T01:15:06.075Z",
           "completedAt": null,
           "commits": [],
           "notes": []
@@ -2699,8 +2707,8 @@
           "notes": []
         }
       ],
-      "status": "not_started",
-      "startedAt": null,
+      "status": "in_progress",
+      "startedAt": "2026-10-06T01:15:05.444Z",
       "completedAt": null
     },
     {
@@ -2848,8 +2856,8 @@
         {
           "id": "P13.6",
           "title": "Go-live readiness",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-06T01:15:06.381Z",
           "completedAt": null,
           "commits": [],
           "notes": []
@@ -2891,8 +2899,8 @@
           "notes": []
         }
       ],
-      "status": "not_started",
-      "startedAt": null,
+      "status": "in_progress",
+      "startedAt": "2026-10-06T01:15:06.382Z",
       "completedAt": null
     },
     {

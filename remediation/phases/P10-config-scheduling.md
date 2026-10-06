@@ -255,6 +255,14 @@ staging revision 131 and the normal Cognito restore/identical retry/owned public
 cleanup journey pass. Generated editing, broader schedules, legacy consumers and
 the full step criteria remain open.
 
+[Reviewed generated catalogue editing](../reports/P10/operational-catalogue-edit-ui.md)
+adds typed event/station set and override-removal reviews from the existing registry.
+All 20 affected browser journeys pass at unchanged rate limits after diagnosing
+the combined run's shared-subject read pressure. Twelve new reviewed editor images,
+four changed catalogue images, all 92 full visual checks and the current static/CSP
+export pass. Full application CI and exact-image staging acceptance gate publication;
+broader operational schedules, legacy consumers and full phase criteria remain open.
+
 - **Do:**
   1. A settings screen generated from the registry: grouped, scoped (event or station tabs), with
      descriptions, validation, change history and revert.

@@ -12,6 +12,7 @@ export function useCaptureReviewDraft(input: {
   return useScopedReviewDraft({
     ...input,
     schema: captureReviewSchema(input.action),
+    initialValues: { reason: '' },
     unavailableMessage: 'Current capture settings are unavailable. Reload before reviewing.',
   });
 }

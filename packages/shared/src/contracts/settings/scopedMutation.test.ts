@@ -12,6 +12,22 @@ const request = {
   reason: 'Reviewed setting',
   idempotencyKey: '11111111-1111-4111-8111-111111111111',
 };
+it.each(['attendance.campusNetworkLabel', 'vocabulary.missionCard'])(
+  'rejects whitespace and validates trimmed bounds for %s',
+  (key) => {
+    expect(
+      ScopedSettingsMutationRequest.safeParse({ ...request, key, value: '  \t  ' }).success,
+    ).toBe(false);
+    expect(
+      ScopedSettingsMutationRequest.parse({ ...request, key, value: `  ${'x'.repeat(40)}  ` })
+        .value,
+    ).toBe('x'.repeat(40));
+    expect(
+      ScopedSettingsMutationRequest.safeParse({ ...request, key, value: `  ${'x'.repeat(41)}  ` })
+        .success,
+    ).toBe(false);
+  },
+);
 const current = (scope: 'event' | 'station' = 'event') => ({
   eventId: 'synthetic-event',
   target: scope === 'event' ? { scope } : { scope, stationId: 'station' },

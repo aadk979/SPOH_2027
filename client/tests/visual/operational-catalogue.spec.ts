@@ -1,5 +1,9 @@
 import { expect, test } from '@playwright/test';
-import { ScopedSettingsHistoryResponse, ScopedSettingsReadResponse } from '@spoh/shared';
+import {
+  GENERATED_SETTING_METADATA as metadata,
+  ScopedSettingsHistoryResponse,
+  ScopedSettingsReadResponse,
+} from '@spoh/shared';
 import { primeVisualAccounts } from './primeAccounts';
 
 test.beforeAll(async ({ request }) => primeVisualAccounts(request));
@@ -9,6 +13,12 @@ for (const state of [
   'history',
   'restore value',
   'restore removal',
+  'edit number',
+  'edit text',
+  'edit choices',
+  'edit array',
+  'edit boolean',
+  'edit removal',
 ] as const) {
   test(`operational catalogue ${state}`, async ({ page }) => {
     const errors: string[] = [],
@@ -36,7 +46,7 @@ for (const state of [
       );
     });
     // History-only GET fixtures show validated set/removal semantics without changing frozen rows.
-    if (state === 'restore removal')
+    if (state === 'restore removal' || state === 'edit removal')
       await page.route('**/admin/settings/catalogue?*', async (route) => {
         expect(route.request().method()).toBe('GET');
         const response = await route.fetch();
@@ -111,6 +121,40 @@ for (const state of [
       await expect(selector.locator('option')).not.toHaveCount(1);
       await selector.selectOption((await selector.locator('option').nth(1).getAttribute('value'))!);
       await expect(page.getByRole('button', { name: /^View history:/ })).toHaveCount(3);
+    } else if (state.startsWith('edit ')) {
+      const key =
+        state === 'edit text'
+          ? 'vocabulary.missionCard'
+          : state === 'edit choices'
+            ? 'report.curveBucketMinutes'
+            : state === 'edit array'
+              ? 'incident.pushSeverities'
+              : state === 'edit boolean'
+                ? 'capture.open'
+                : 'silentStationMinutes';
+      await page
+        .getByRole('button', {
+          name: `${state === 'edit removal' ? 'Remove override' : 'Edit catalogue'}: ${metadata[key].label}`,
+          exact: true,
+        })
+        .click();
+      const review = page.getByRole('group', { name: 'Review catalogue change' });
+      if (state === 'edit array') await review.getByLabel('LOW', { exact: true }).check();
+      else if (state === 'edit boolean')
+        await review.getByLabel('Proposed value', { exact: true }).uncheck();
+      else if (state === 'edit choices')
+        await review.getByLabel('Proposed value').selectOption('60');
+      else if (state !== 'edit removal')
+        await review
+          .getByLabel('Proposed value')
+          .fill(state === 'edit text' ? 'Reviewed event card' : '20');
+      await review
+        .getByLabel('Reason for catalogue change')
+        .fill('Reviewed generated operational setting');
+      await review.getByRole('checkbox', { name: /I have reviewed/ }).check();
+      await expect(
+        review.getByRole('button', { name: 'Apply catalogue change', exact: true }),
+      ).toBeEnabled();
     } else if (state === 'history' || state === 'restore value' || state === 'restore removal') {
       await page.getByRole('button', { name: 'View history: Silent station', exact: true }).click();
       await expect(

@@ -35,6 +35,29 @@ function hasBounds(schema: JsonSchema): boolean {
 }
 
 describe('settings registry and generated contracts (P10.1)', () => {
+  it('keeps generated trim normalisation and length validation identical to the authored registry', () => {
+    for (const [key, definition] of Object.entries(SETTINGS)) {
+      if (definition.normalise !== 'trim') continue;
+      const maximum = (z.toJSONSchema(definition.schema) as JsonSchema).maxLength as number;
+      for (const input of [
+        null,
+        42,
+        '',
+        ' ',
+        '\t\n',
+        'Label',
+        'x'.repeat(maximum),
+        `  ${'x'.repeat(maximum)}  `,
+        `  ${'x'.repeat(maximum + 1)}  `,
+      ]) {
+        const authored = definition.schema.safeParse(input);
+        const generated =
+          GENERATED_SETTING_SCHEMAS[key as keyof typeof GENERATED_SETTING_SCHEMAS].safeParse(input);
+        expect(generated.success, `${key}: ${JSON.stringify(input)}`).toBe(authored.success);
+        if (authored.success && generated.success) expect(generated.data).toEqual(authored.data);
+      }
+    }
+  });
   it('gives every key copy, scope, action, a valid default and finite validation', () => {
     for (const [key, definition] of Object.entries(SETTINGS)) {
       expect(definition.key).toBe(key);

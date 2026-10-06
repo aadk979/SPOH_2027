@@ -14,6 +14,8 @@ import { catalogueGroups, catalogueValue } from '../model/operationalCatalogue';
 import { captureSource } from '../model/captureControl';
 import { OperationalCatalogueHistory } from './OperationalCatalogueHistory';
 import { CatalogueRestoreReview } from './CatalogueRestoreReview';
+import { CatalogueEditReview } from './CatalogueEditReview';
+import { catalogueField, type CatalogueEditAction } from '../model/catalogueEdit';
 
 export function OperationalCatalogueContents(input: {
   target: ScopedSettingsTarget;
@@ -78,9 +80,11 @@ function OperationalCatalogueValues(input: {
 }) {
   const [selected, setSelected] = useState<ScopedOperationalSettingKey | null>(null);
   const [restore, setRestore] = useState<ScopedSettingsHistoryRecord | null>(null);
+  const [edit, setEdit] = useState<CatalogueEditAction | null>(null);
   const clock = useEventTime();
   if (restore)
     return <CatalogueRestoreReview {...input} history={restore} onClose={() => setRestore(null)} />;
+  if (edit) return <CatalogueEditReview {...input} action={edit} onClose={() => setEdit(null)} />;
   if (input.readUnavailable)
     return (
       <Callout tone="alert" role="alert">
@@ -119,6 +123,8 @@ function OperationalCatalogueValues(input: {
                   row={row}
                   scope={input.current.target.scope}
                   onHistory={() => setSelected(row.key)}
+                  archived={input.current.eventStatus === 'ARCHIVED'}
+                  onEdit={(operation) => setEdit({ key: row.key, operation })}
                 />
               ))}
             </ul>
@@ -132,6 +138,8 @@ function CatalogueValueRow(input: {
   row: ScopedOperationalSetting;
   scope: 'event' | 'station';
   onHistory: () => void;
+  archived: boolean;
+  onEdit: (operation: CatalogueEditAction['operation']) => void;
 }) {
   const { row } = input;
   return (
@@ -151,6 +159,18 @@ function CatalogueValueRow(input: {
         ) : null}
         <Button variant="secondary" onClick={input.onHistory}>
           View history: {metadata[row.key].label}
+        </Button>
+        {catalogueField(row.key) ? (
+          <Button variant="secondary" disabled={input.archived} onClick={() => input.onEdit('set')}>
+            Edit catalogue: {metadata[row.key].label}
+          </Button>
+        ) : null}
+        <Button
+          variant="quiet"
+          disabled={input.archived || row.storedVersion === 0}
+          onClick={() => input.onEdit('reset')}
+        >
+          Remove override: {metadata[row.key].label}
         </Button>
       </Card>
     </li>
