@@ -66,6 +66,7 @@ interface EventB {
   template: string;
   assignment: string;
   registration: string;
+  category: string;
   tick: string;
   incident: string;
   alert: string;
@@ -244,6 +245,7 @@ async function seedEventB(): Promise<EventB> {
     day: day.id,
     assignment: assignment.id,
     registration: registration.id,
+    category: category.id,
     tick: tick.id,
     incident: incident.id,
     alert: alert.id,
@@ -516,6 +518,43 @@ const CASES: Record<string, Case> = {
     body: () => ({ name: 'X' }),
   },
   'GET /admin/settings': noId('runtime settings are platform-wide until P10'),
+  'GET /admin/capture-categories': LIST,
+  'GET /admin/capture-categories/:categoryId': {
+    params: (b) => ({ categoryId: b.category }),
+  },
+  'GET /admin/capture-categories/:categoryId/schedules': {
+    params: (b) => ({ categoryId: b.category }),
+  },
+  'GET /admin/capture-categories/:categoryId/schedules/:id': {
+    params: (b) => ({ categoryId: b.category, id: b.announcementSchedule }),
+  },
+  'POST /admin/capture-categories/:categoryId/schedules': {
+    params: (b) => ({ categoryId: b.category }),
+    body: () => ({
+      ...capture(),
+      active: false,
+      expectedActive: true,
+      expectedUpdatedAt: FROZEN_NOW.toISOString(),
+      reason: 'isolation check',
+      runAt: new Date(FROZEN_NOW.getTime() + 60_000).toISOString(),
+    }),
+  },
+  'PATCH /admin/capture-categories/:categoryId/schedules/:id': {
+    params: (b) => ({ categoryId: b.category, id: b.announcementSchedule }),
+    body: () => ({
+      ...capture(),
+      active: false,
+      expectedActive: true,
+      expectedScheduleVersion: 1,
+      expectedUpdatedAt: FROZEN_NOW.toISOString(),
+      reason: 'isolation check',
+      runAt: new Date(FROZEN_NOW.getTime() + 60_000).toISOString(),
+    }),
+  },
+  'POST /admin/capture-categories/:categoryId/schedules/:id/cancel': {
+    params: (b) => ({ categoryId: b.category, id: b.announcementSchedule }),
+    body: () => ({ ...capture(), expectedScheduleVersion: 1, reason: 'isolation check' }),
+  },
   'GET /admin/settings/catalogue': noId(
     'reads the current manager’s scoped operational settings; foreign station, event and organisation layers are covered by scopedSettingsRead tests',
   ),

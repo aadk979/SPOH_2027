@@ -37,7 +37,7 @@
     "db:migrate": "npm run db:migrate --workspace server",
     "db:seed": "npm run db:seed --workspace server",
     "db:reset": "npm run db:reset --workspace server",
-    "audit:ci": "npm audit --audit-level=high",
+    "audit:ci": "node scripts/audit.mjs",
     "build:shared": "npm run build --workspace packages/shared",
     "settings:generate": "node --import tsx scripts/generate-settings.mjs",
     "settings:check": "node --import tsx scripts/generate-settings.mjs --check",

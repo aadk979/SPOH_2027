@@ -13,9 +13,11 @@ import {
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { actionOutputOptions, applyActionOutputs } from '../tools/actionOutput.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const LOCAL = join(ROOT, '.local');
+const GENERATED = readFileSync(join(ROOT, 'src', 'generated', 'actions.ts'), 'utf8');
 
 /** Each fake repository stays within this package's ignored fixtures, never the real shared tree. */
 function fixture(testContext) {
@@ -48,6 +50,11 @@ function fixture(testContext) {
     decision: join(packageRoot, 'minimum-roles.json'),
     package: join(packageRoot, 'src', 'generated', 'actions.ts'),
     shared: join(directory, 'packages', 'shared', 'src', 'generated', 'actions', 'index.ts'),
+    // File-boundary tests exercise the production output functions without repeating the
+    // unrelated Cedar parse/Prettier startup. Default/shared/check and bad floor cases below
+    // still invoke the real CLI, including its rendering and authored-input validation.
+    write: (...arguments_) =>
+      applyActionOutputs(GENERATED, actionOutputOptions(packageRoot, arguments_)),
     run: (...arguments_) =>
       spawnSync(
         process.execPath,
@@ -77,32 +84,26 @@ test('explicit shared generation creates both identical standalone outputs', (t)
 
 test('checking a missing opted-in shared output fails without creating directories', (t) => {
   const files = fixture(t);
-  assert.equal(files.run().status, 0);
-  const result = files.run('--shared-output', '--check');
-  assert.equal(result.status, 1);
-  assert.match(result.stderr, /ENOENT/);
+  files.write();
+  assert.throws(() => files.write('--shared-output', '--check'), { code: 'ENOENT' });
   assert.ok(!existsSync(dirname(files.shared)));
 });
 
 test('opted-in checks detect stale shared output and preserve its existing content', (t) => {
   const files = fixture(t);
-  assert.equal(files.run('--shared-output').status, 0);
+  files.write('--shared-output');
   writeFileSync(files.shared, '// retained shared draft\n');
-  assert.equal(files.run('--check').status, 0);
-  const result = files.run('--check', '--shared-output');
-  assert.equal(result.status, 1);
-  assert.match(result.stderr, /out of date/);
+  files.write('--check');
+  assert.throws(() => files.write('--check', '--shared-output'), /out of date/);
   assert.equal(readFileSync(files.shared, 'utf8'), '// retained shared draft\n');
 });
 
 test('opted-in checks also detect package output drift and repair neither artifact', (t) => {
   const files = fixture(t);
-  assert.equal(files.run('--shared-output').status, 0);
+  files.write('--shared-output');
   const savedShared = readFileSync(files.shared, 'utf8');
   writeFileSync(files.package, '// retained package draft\n');
-  const result = files.run('--shared-output', '--check');
-  assert.equal(result.status, 1);
-  assert.match(result.stderr, /out of date/);
+  assert.throws(() => files.write('--shared-output', '--check'), /out of date/);
   assert.equal(readFileSync(files.package, 'utf8'), '// retained package draft\n');
   assert.equal(readFileSync(files.shared, 'utf8'), savedShared);
 });
@@ -110,9 +111,7 @@ test('opted-in checks also detect package output drift and repair neither artifa
 test('unknown or path-bearing options fail before writing either artifact', (t) => {
   const files = fixture(t);
   for (const argument of ['--shared', '--shared-output=elsewhere.ts']) {
-    const result = files.run(argument);
-    assert.equal(result.status, 1);
-    assert.match(result.stderr, /Unknown action generation option/);
+    assert.throws(() => files.write(argument), /Unknown action generation option/);
   }
   assert.ok(!existsSync(files.package));
   assert.ok(!existsSync(files.shared));

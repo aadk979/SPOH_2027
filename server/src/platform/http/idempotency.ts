@@ -3,11 +3,14 @@ import { ERROR_CODES } from '@spoh/shared';
 import { AppError, IdempotencyKeyReuseError, ValidationError } from '../errors/index.js';
 import {
   IN_PROGRESS,
+  bindReservationAttempt,
   isAbandoned,
   release,
   reserve,
   settle,
   takeOver,
+  withReservationAttempt,
+  withReservationTakeoverAttempt,
   type Reservation,
 } from '../idempotency/index.js';
 import { logger } from '../logger/index.js';
@@ -55,6 +58,7 @@ interface KeyContext {
   key: string;
   endpointName: string;
   options: IdempotentOptions;
+  next: NextFunction;
 }
 
 /**
@@ -73,14 +77,14 @@ async function takeOverAbandoned(ctx: KeyContext, existing: Reservation): Promis
 
 /**
  * Someone already holds this key. Returns the error to answer with, `'replayed'`
- * once the stored response has been sent, or null when this request took over
- * an abandoned reservation and should run the handler.
+ * once the stored response has been sent, or `'takeover'` when this request may
+ * claim the abandoned row with a fresh ownership token.
  */
 async function resolveExisting(
   ctx: KeyContext,
   existing: Reservation,
   actor: Pick<ReturnType<typeof getAuth>, 'sub' | 'eventId'>,
-): Promise<AppError | 'replayed' | null> {
+): Promise<AppError | 'replayed' | 'takeover'> {
   if (
     existing.endpoint !== ctx.endpointName ||
     existing.actorSub !== actor.sub ||
@@ -93,8 +97,30 @@ async function resolveExisting(
     ctx.res.status(existing.statusCode).json(await replayBody(ctx.req, existing, ctx.options));
     return 'replayed';
   }
-  if (isAbandoned(existing) && (await takeOverAbandoned(ctx, existing))) return null;
+  if (isAbandoned(existing)) return 'takeover';
   return inProgress();
+}
+
+function runOwnedHandler(ctx: KeyContext): void {
+  captureResponse(ctx.req, ctx.res, { key: ctx.key, redacted: ctx.options.redacted });
+  ctx.next();
+}
+
+async function runAbandoned(ctx: KeyContext, existing: Reservation): Promise<void> {
+  const auth = getAuth(ctx.req);
+  const owner = {
+    key: ctx.key,
+    endpoint: ctx.endpointName,
+    actorSub: auth.sub,
+    eventId: auth.eventId,
+  };
+  await withReservationTakeoverAttempt(
+    { owner, observedCreatedAt: existing.createdAt.getTime() },
+    async () => {
+      if (await takeOverAbandoned(ctx, existing)) runOwnedHandler(ctx);
+      else ctx.next(inProgress());
+    },
+  );
 }
 
 function idempotencyMiddleware(endpointName: string, options: IdempotentOptions): RequestHandler {
@@ -108,21 +134,22 @@ function idempotencyMiddleware(endpointName: string, options: IdempotentOptions)
           return;
         }
 
-        const existing = await reserve(key, {
-          endpoint: endpointName,
-          actorSub: auth.sub,
-          eventId: auth.eventId,
+        const owner = { endpoint: endpointName, actorSub: auth.sub, eventId: auth.eventId };
+        await withReservationAttempt({ key, ...owner }, async () => {
+          const existing = await reserve(key, owner);
+          const ctx: KeyContext = { req, res, key, endpointName, options, next };
+          const outcome = existing ? await resolveExisting(ctx, existing, auth) : null;
+          if (outcome === 'replayed') return;
+          if (outcome === 'takeover' && existing) {
+            await runAbandoned(ctx, existing);
+            return;
+          }
+          if (outcome) {
+            next(outcome);
+            return;
+          }
+          runOwnedHandler(ctx);
         });
-        const ctx: KeyContext = { req, res, key, endpointName, options };
-        const outcome = existing ? await resolveExisting(ctx, existing, auth) : null;
-        if (outcome === 'replayed') return;
-        if (outcome) {
-          next(outcome);
-          return;
-        }
-
-        captureResponse(req, res, { key, redacted: options.redacted });
-        next();
       } catch (error) {
         next(error);
       }
@@ -150,7 +177,7 @@ async function replayBody(
 /**
  * Wrap `res.json` so the outcome is written back to the reservation before the
  * body reaches the client. Successful responses are stored for replay; failures
- * release the key so a genuine retry is not blocked by a failed attempt.
+ * release only their own unfinished attempt, so a retry's receipt is preserved.
  *
  * The override returns `res` synchronously to satisfy Express's signature, and
  * defers the actual send until the settle resolves or times out. The handler has
@@ -162,14 +189,16 @@ function captureResponse(
   { key, redacted }: { key: string; redacted: RedactedReplay | undefined },
 ): void {
   const originalJson = res.json.bind(res);
+  const complete = bindReservationAttempt((statusCode: number, body: unknown) =>
+    statusCode >= 200 && statusCode < 300
+      ? settle(key, statusCode, redacted ? redacted.store(body) : (body as object))
+      : release(key),
+  );
 
   res.json = (body: unknown): Response => {
     const statusCode = res.statusCode;
 
-    const outcome =
-      statusCode >= 200 && statusCode < 300
-        ? settle(key, statusCode, redacted ? redacted.store(body) : (body as object))
-        : release(key);
+    const outcome = complete(statusCode, body);
 
     const send = (): void => {
       // The client may have hung up while we were settling.
@@ -177,7 +206,8 @@ function captureResponse(
     };
 
     // Bounded wait. A slow settle must not hold the tap open; the abandoned
-    // reservation takeover covers the case where it never lands at all.
+    // reservation takeover can recover it; owned conditional updates fence a
+    // delayed settle from any newer attempt or already committed receipt.
     const timeout = new Promise<void>((resolve) => {
       setTimeout(resolve, SETTLE_TIMEOUT_MS).unref();
     });

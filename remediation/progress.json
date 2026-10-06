@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-06T09:35:10.650Z",
+  "updatedAt": "2026-10-06T11:00:44.740Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -3659,6 +3659,14 @@
     {
       "at": "2026-10-06T09:35:10.649Z",
       "text": "Owner requested documented handoff and next-agent prompt on6Oct. Editor041 accepted; prerequisite1063/task135 fullCI and actual P08 detector ALARM/recovery/cleanup accepted; docs6c3bb6c lightweightCI/release passed without deployment. Category producer/UI and coreattempt fencing drafts preserved: client663/shared241/fullserverunits712/newDB16 pass; final509affected rerun incomplete after runtime loss, browsers/visual/fullCI/stage pending. New brace-expansion bundledCDK high audit failure requires repair; no exception. HANDOFF-2026-10-06-MILESTONES and TAKEOVER prompt record exact unfinished checkpoint and approvals; no category/phase/gate completion claimed."
+    },
+    {
+      "at": "2026-10-06T10:38:29.951Z",
+      "text": "Category continuation: original Docker volume recovered without database reset/seed/migration; affected integration 513 and full server coverage 2567 plus four existing skips pass; shared 241 and client 663 pass with unchanged floors. All four phone/laptop category browser journeys now pass after restoring native list semantics. Eight new category visuals reviewed; fresh full 100-check comparison, full source CI and exact-image staging acceptance are pending. P10.7/P10.8 remain open."
+    },
+    {
+      "at": "2026-10-06T11:00:44.739Z",
+      "text": "Category local acceptance complete: four phone/laptop retry/edit/cancel and real-worker journeys pass; fresh full visual 100/100 passes in 3.1 minutes with updates disabled. Independent review covers eight new states, two settings routes and all affected laptop capture/catalogue crops. Frozen nine memberships/eight person markers unchanged; no real local spoh2027 reset/seed/migration. Required local checks and unchanged floors pass; full source CI and exact-image normal Cognito staging acceptance next. P10/P13/G3 remain open."
     }
   ]
 }

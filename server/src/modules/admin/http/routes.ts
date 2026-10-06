@@ -36,6 +36,7 @@ import {
 } from '../../people/index.js';
 import { createAssignmentHandler, deleteAssignmentHandler } from '../../assignments/index.js';
 import { registerSettingsRoutes } from './settingsRoutes.js';
+import { registerCategoryScheduleRoutes } from './categoryScheduleRoutes.js';
 import {
   changeAttendanceConfigHandler,
   getAttendanceConfigHandler,
@@ -69,6 +70,10 @@ export const adminRouter: Router = Router();
 const IdParams = z.object({ id: Id }).strict();
 
 adminRouter.use('/settings/catalogue', (_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+});
+adminRouter.use('/capture-categories', (_req, res, next) => {
   res.setHeader('Cache-Control', 'no-store');
   next();
 });
@@ -240,6 +245,7 @@ adminRouter.patch(
 );
 
 registerSettingsRoutes(adminRouter);
+registerCategoryScheduleRoutes(adminRouter);
 
 // The attendance root and trusted networks are event-scoped security settings.
 adminRouter.get(

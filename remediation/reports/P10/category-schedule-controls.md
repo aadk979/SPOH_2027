@@ -77,14 +77,69 @@ rebuild those changed server/client inputs before browser acceptance.
 The final complete workspace type check passes after repairing two test-only
 raw/extended Prisma type mismatches; its log is
 `.local/handoff-category-types-20261006.log`.
-The current required dependency audit fails on the newly reported bundled CDK
-`brace-expansion` advisories. It requires a verified repair; no new exception
-or weakened audit has been applied. See the latest handoff for exact evidence
-and the unfinished runtime/rerun checkpoint.
+The interrupted local audit command differed from the existing required CI
+gate. [Audit command alignment](../P08/dependency-audit-alignment.md) makes
+`audit:ci` use the identical existing path/advisory/expiry gate. It passes;
+the upstream bundled CDK vulnerability remains explicitly recorded under its
+unchanged previously approved exception. No dependency, exception or audit
+rule was changed.
 
-Browser, visual, complete application CI and exact-image normal Cognito staging
-acceptance remain pending. New local journeys must prove lost-receipt retry,
-edit/cancel and actual worker inactive/active effects on an already-open booth.
+## Runtime recovery and repeated acceptance gates
+
+The takeover verified main/origin/main at `7a7aa42` before any edit and retained
+all inherited drafts. Docker startup failures identified dead inference and
+secrets-engine IPC sockets. With no Docker process active, only their runtime
+directories were moved to new recoverable paths. The original
+`spoh2027-postgres` container recovered healthy on localhost:5435 with the
+original `v1_spoh-pgdata` mount. No database reset, seed or migration was used.
+
+The fresh affected integration run passes **513 checks in 16 files**, including
+the final takeover-context repair, real category races and existing reviewed
+producer retries. Full client coverage passes **663 checks**, shared coverage
+passes **241**, and lint, architecture, generated consistency, hardcoding and
+24 delivery safety tests pass. Shared/server/static client rebuilt successfully;
+the real static export startup/CSP check passes. Complete server coverage passes
+**2,567 checks with four existing skips across 169 files**, covering 5,863/6,130
+maintained lines (95.64%) and 3,385/3,880 branches (87.24%). Complete workspace
+types and all unchanged package floors pass.
+
+Independent browser-harness review repaired a capture-category pagination race
+and tightened local restoration provenance: current activity and timestamp
+must match a successful owned action and unchanged category definition before
+public restoration. Mutation responses also require no-store. The prepared
+staging harness passes all 13 pure guards; no staging attempt is claimed here.
+
+The first four browser journeys reached their retry/edit/cancel and real worker
+effects, but each failed accessibility acceptance because `role="group"` on
+`li` replaced its native list-item semantics. All owned cleanup completed;
+the excluded traces remain in ignored `.local/category-browser-a11y-first-20261006`.
+The row now retains a native list item around its named group. Fresh complete
+client coverage remains **663 passed**, and affected types/lint pass. The repaired
+static build and startup/CSP checks pass after the correction. All four fresh
+phone/laptop browser journeys pass: two identical-request lost-receipt retry,
+edit and cancellation checks (11.6 seconds), plus two real worker inactive and
+active changes with already-open booth admission and owned public restoration
+(12.0 minutes). Database and browser execution remained serial.
+
+Eight new category panel states and the two affected settings route images pass
+targeted baseline establishment. Independent image review finds no clipping,
+overlap or horizontal overflow at either width. A visual cancellation selector
+initially matched both Active and Inactive groups; an exact accessible-name
+match repairs the fixture without changing the application. Baseline iteration
+is excluded from final acceptance. The added settings section also shifts the
+six existing laptop capture panel crops by fractional pixels. Independent
+before/after review confirms identical content, controls and disabled states;
+only vertical pixel shifts and font antialiasing differ. Their targeted updates
+pass. A full-run credential primer initially exhausted the frozen sensitive
+rate window after 60 passing checks. The helper now verifies all fixture
+identities once per worker, with each test retaining its own application session;
+the limit and clock remain unchanged. Failed runs are excluded.
+All eleven affected laptop catalogue crops also receive independent before/after
+review with unchanged values, versions, history and controls. The final fresh
+**100-check visual comparison passes in 3.1 minutes**, with updates disabled.
+The retained nine membership rows and eight person markers match before and
+after. Complete application CI and exact-image normal Cognito staging acceptance
+remain pending.
 Staging keeps READY and exercises legitimate owned definitions and worker
 restoration through the public interface. No real local `spoh2027` reset, seed
 or migration, production creation or cutover is authorized by this milestone.

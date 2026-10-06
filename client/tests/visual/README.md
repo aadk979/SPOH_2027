@@ -1,6 +1,19 @@
 # P07 visual safety net
 
-`npm run test:visual --workspace client` compares all 29 current app routes at 390×844 and 1440×900, plus two capture-panel states at both widths (62 checks). Panel snapshots retain the viewport width and extend its height when needed to include every control; CSS property assignments hide surrounding sticky navigation for that crop, with zero CSP violations asserted. The functional phone/laptop journeys retain the original viewport heights. Baselines were generated with the installed Playwright Chromium on Windows. Use the same browser/platform to avoid font-rendering differences. Screenshots are assertions, not automatically updated during refactors.
+`npm run test:visual --workspace client` compares all 29 current app routes at 390×844 and 1440×900, plus capture, category scheduling and operational catalogue panel states at both widths (100 checks). Panel snapshots retain the viewport width and extend the height when needed to include every control; CSS property assignments hide surrounding sticky navigation for that crop, with zero CSP violations asserted. Functional phone/laptop journeys retain the original viewport heights. Baselines use the installed Playwright Chromium on Windows. Use the same browser/platform to avoid font-rendering differences. Screenshots are assertions, not automatically updated during refactors.
+
+The 6 October continuation preserves the existing frozen database, its nine
+membership rows and eight person markers. Its owned same-origin static preview
+uses API/client port 4013 with `VISUAL_BASE_URL` and `VISUAL_API_URL` both set to
+`http://localhost:4013`. The E2E API on 4014 must finish its owned cleanup and close
+first. Restart the frozen API between baseline iteration and full acceptance,
+and compare markers with the retained snapshot before and after. Do not reseed
+this retained fixture while reviewing changes; the preparation commands below
+describe initial disposable-fixture creation.
+The account primer verifies all seeded identities once per Playwright worker.
+Repeated files reuse that completed verification so the frozen clock does not
+exhaust the unchanged sensitive credential-minting limit. Each test still opens
+its own normal application session and rejects 429/5xx responses.
 
 The fixture stack uses a dedicated `spoh2027_visual_test` database, API port 4012 and client port 3001. The seed, API and browser dates are fixed at 2026-09-28T02:00:00Z; timers still run normally. `freeze-clock.mjs` refuses production and any database whose name does not end in `_test`. The API runs local auth, silent logging and REHEARSAL fixtures. Assigned stations remain available outside shift hours in that phase. No live credentials are needed.
 

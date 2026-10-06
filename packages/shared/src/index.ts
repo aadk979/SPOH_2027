@@ -49,6 +49,7 @@ export * from './contracts/settings/scopedHistory.js';
 export * from './contracts/settings/scopedRevert.js';
 export * from './contracts/settings/captureSchedule.js';
 export * from './contracts/settings/captureScheduleManagement.js';
+export * from './contracts/taxonomy/index.js';
 export * from './contracts/eventSettings/index.js';
 export * from './contracts/visitor/index.js';
 export * from './generated/settings/index.js';

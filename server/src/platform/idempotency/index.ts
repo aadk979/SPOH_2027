@@ -1,9 +1,16 @@
-import { prisma, type PrismaTransactionClient } from '../db/client.js';
-import type { EventScope } from '../db/eventScope.js';
+import { prisma } from '../db/client.js';
 import { DEFAULT_SETTINGS } from '../settings/index.js';
 import { SYSTEM_AUDIT_CONTEXT } from '../http/auditContext.js';
 import { systemClock } from '../time/index.js';
 import { pruneReplayInTransaction } from './prune.js';
+import { ownedReservationWhere, reservationAttempt, reservationUnavailable } from './attempt.js';
+
+export {
+  bindReservationAttempt,
+  withReservationAttempt,
+  withReservationTakeoverAttempt,
+} from './attempt.js';
+export { lockReserved, settleReserved } from './transaction.js';
 
 /**
  * Idempotency for every create endpoint (BUILD_PLAN §7.4).
@@ -35,24 +42,27 @@ import { pruneReplayInTransaction } from './prune.js';
  *
  * The wait is bounded: if the settle has not completed within
  * `SETTLE_TIMEOUT_MS` the response goes out anyway, because a slow bookkeeping
- * write must never hold a booth tap open. The abandoned-reservation takeover
- * below is what makes that safe.
+ * write must never hold a booth tap open. Response bookkeeping is conditional
+ * on the same unfinished attempt, so it cannot replace a transaction's receipt
+ * or a later attempt's outcome.
  *
  * ── Abandoned reservations ──────────────────────────────────────────────────
  *
  * No amount of awaiting helps if the process dies between reserving the key and
  * settling it. So an IN_PROGRESS reservation older than `STALE_RESERVATION_MS`
- * is treated as abandoned and taken over by the retry. The window is comfortably
- * longer than any real request, so a genuine in-flight duplicate still gets a
- * 409 rather than racing.
+ * is eligible for takeover by a retry. Age is not proof that the original
+ * process died: its database response or handler may merely be slow. The retry
+ * replaces the attempt timestamp, and transactional mutations check that fence
+ * before effects and completion. A delayed original then receives a 409; its
+ * response bookkeeping cannot change or delete the new attempt's receipt.
  */
 
 /** Sentinel status for a reservation whose handler has not finished yet. */
 export const IN_PROGRESS = 0;
 
 /**
- * How long before an unsettled reservation is assumed to belong to a process
- * that died. Longer than the API's slowest write by a wide margin.
+ * How long before an unsettled reservation may be reclaimed. Ownership checks,
+ * rather than an assumed request-duration ceiling, fence the old attempt.
  */
 const STALE_RESERVATION_MS = 60_000;
 
@@ -73,9 +83,18 @@ export async function reserve(
   key: string,
   owner: { endpoint: string; actorSub: string; eventId: string },
 ): Promise<Reservation | null> {
+  const attempt = reservationAttempt(key, { eventId: owner.eventId });
+  if (attempt && (attempt.endpoint !== owner.endpoint || attempt.actorSub !== owner.actorSub))
+    throw reservationUnavailable();
   try {
     await prisma.idempotencyRecord.create({
-      data: { key, ...owner, statusCode: IN_PROGRESS, responseBody: {} },
+      data: {
+        key,
+        ...owner,
+        statusCode: IN_PROGRESS,
+        responseBody: {},
+        createdAt: attempt ? new Date(attempt.createdAt) : systemClock.now(),
+      },
     });
     return null;
   } catch {
@@ -98,46 +117,43 @@ export function isAbandoned(reservation: Reservation, now: number = Date.now()):
  * each of them used to run the handler (F03-011).
  */
 export async function takeOver(key: string, reservation: Reservation): Promise<boolean> {
+  const attempt = reservationAttempt(key);
+  if (
+    attempt &&
+    (attempt.eventId !== reservation.eventId ||
+      attempt.endpoint !== reservation.endpoint ||
+      attempt.actorSub !== reservation.actorSub)
+  )
+    throw reservationUnavailable();
+  const createdAt =
+    attempt?.createdAt ??
+    Math.max(systemClock.now().getTime(), reservation.createdAt.getTime() + 1);
+  if (createdAt <= reservation.createdAt.getTime()) throw reservationUnavailable();
   const { count } = await prisma.idempotencyRecord.updateMany({
-    where: { key, statusCode: IN_PROGRESS, createdAt: reservation.createdAt },
-    data: { createdAt: new Date() },
+    where: {
+      key,
+      statusCode: IN_PROGRESS,
+      createdAt: reservation.createdAt,
+      eventId: reservation.eventId,
+      endpoint: reservation.endpoint,
+      actorSub: reservation.actorSub,
+    },
+    data: { createdAt: new Date(createdAt) },
   });
   return count === 1;
 }
 
 /** Store a successful response for replay. */
 export async function settle(key: string, statusCode: number, body: object): Promise<void> {
-  await prisma.idempotencyRecord.update({
-    where: { key },
+  await prisma.idempotencyRecord.updateMany({
+    where: ownedReservationWhere(key),
     data: { statusCode, responseBody: body },
-  });
-}
-
-/** Mutations without a per-row retry key must commit their replay with their effects. */
-export async function lockReserved(
-  tx: Pick<PrismaTransactionClient, '$queryRaw'>,
-  scope: EventScope,
-  key: string,
-): Promise<void> {
-  await tx.$queryRaw`SELECT key FROM "IdempotencyRecord"
-    WHERE key = ${key} AND "eventId" = ${scope.eventId} FOR UPDATE`;
-}
-
-/** Complete the already locked reservation inside its effect transaction. */
-export async function settleReserved(
-  tx: PrismaTransactionClient,
-  scope: EventScope,
-  result: { key: string; statusCode: number; body: object },
-): Promise<void> {
-  await tx.idempotencyRecord.update({
-    where: { key: result.key, eventId: scope.eventId },
-    data: { statusCode: result.statusCode, responseBody: result.body },
   });
 }
 
 /** Release the key, so a genuine retry of a failed attempt is not blocked. */
 export async function release(key: string): Promise<void> {
-  await prisma.idempotencyRecord.delete({ where: { key } });
+  await prisma.idempotencyRecord.deleteMany({ where: ownedReservationWhere(key) });
 }
 
 /** Records older than this are pruned by the daily job (BUILD_PLAN §7.4). */
