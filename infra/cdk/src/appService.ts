@@ -32,6 +32,7 @@ import { AppInfrastructureConfig } from './appInfrastructureConfig.js';
 import { SchedulerMonitoring } from './schedulerMonitoring.js';
 import { HttpMonitoring } from './httpMonitoring.js';
 import { CacheBusMonitoring } from './cacheBusMonitoring.js';
+import { TaskFailureMonitoring } from './taskFailureMonitoring.js';
 import type { Bucket } from 'aws-cdk-lib/aws-s3';
 import { grantPhotoObjects } from './mediaAccess.js';
 
@@ -116,6 +117,10 @@ export class AppService extends Construct {
       maxHealthyPercent: 200,
       healthCheckGracePeriod: Duration.seconds(60),
       cloudMapOptions: { name: 'app', dnsRecordType: DnsRecordType.SRV, containerPort: PORT },
+    });
+    new TaskFailureMonitoring(this, 'TaskFailureMonitoring', {
+      stage: stage.name,
+      service: this.service,
     });
     this.route(props, this.service);
     new CfnOutput(Stack.of(this), 'ServiceImageTag', { value: props.serviceImageTag });

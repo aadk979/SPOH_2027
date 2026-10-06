@@ -11,6 +11,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./generated/actions": {
+      "types": "./dist/generated/actions/index.d.ts",
+      "default": "./dist/generated/actions/index.js"
     }
   },
   "files": [

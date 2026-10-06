@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-06T02:29:07.099Z",
+  "updatedAt": "2026-10-06T02:36:13.712Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -3624,6 +3624,10 @@
     {
       "at": "2026-10-06T02:29:07.098Z",
       "text": "P10.8 generated operational editor milestone accepted: 20 serial paced local browser journeys and 92 reviewed visuals; shared-subject read pressure diagnosed without limit changes. Initial source 97c76e5 failed audit; compatible proxy-addr/source-map-js patches 041c3ca passed full CI 37401120384 and staging deployment 37401795434. Exact image 041c3ca on task 134 passed normal Cognito phone SET, lost-receipt identical retry, public RESET, reload, laptop station read and sign-out 204 at 10:27 Singapore on 6 October. All three probes restored original values; six attributed history rows disclosed. P10.8, the wider phase and G3 remain open. Docs evidence must not redeploy. Owner approved lowest-default permission floors for 45 actions; visitor eligibility remains pending."
+    },
+    {
+      "at": "2026-10-06T02:36:13.711Z",
+      "text": "Prepared combined P08.8 / P11.1-P11.3 / P13.6 prerequisite milestone under ADR-010. P08 scoped task-failure signal: pinned read-only staging diff adds five resources/one output only, zero existing regional account log policies, 8 final focused checks and 69 earlier infrastructure checks. Cedar schema/policies/defaults remain byte-identical; 80 pure policy checks include all 156 legacy matrix cells and explicit six-role C8. Generated metadata exports 65 actions and 45 approved immutable floors; visitor eligibility is explicitly unresolved. Readiness has 110 new pure checks with 141/141 lines and 138/138 branches, no runtime wiring or invented cloud evidence. Shared 193 and client 595 full checks pass; types/lint/generated/architecture and clean Node24 container build/deps install pass. Required full CI, exact-image acceptance and real bounded detector delivery remain pending; no step or gate forced complete."
     }
   ]
 }

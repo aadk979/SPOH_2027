@@ -8,6 +8,7 @@ FROM node:24-bookworm-slim AS manifests
 WORKDIR /app
 COPY package.json package-lock.json ./
 COPY packages/shared/package.json packages/shared/
+COPY packages/access-policies/package.json packages/access-policies/
 COPY server/package.json server/
 COPY client/package.json client/
 COPY infra/cdk/package.json infra/cdk/

@@ -35,15 +35,30 @@ decision and every UI affordance comes from the same policies.
 
 ## Steps
 
+ADR-010 authorizes P11.1–P11.3's construction/testing prerequisites before all P10
+exit criteria close. The [prerequisite report](../reports/P11/policy-prerequisites.md)
+records the preserved approved P05 assets, generated shared catalogue, 45
+owner-approved floors and explicitly unresolved visitor eligibility. Full CI and
+exact-image acceptance still gate completion. P11, G3 and downstream enforcement
+remain open.
+
+ADR-005's accepted static grants supersede the historical template design below:
+there is no application policy-store writer. The replacement Action catalogue is
+built/exported in P11.1; server Capability consumers migrate in P11.5, then client
+matrix consumers and obsolete API deletion in P11.8. Existing guards remain active
+during that migration. ADR-005/C11 also retain server-admitted CLOSED late sync,
+LIVE relabelling through Structure.Edit, frozen Structure.Change and archived
+read-only behavior; the old broader phase shorthand does not replace those rules.
+
 ### P11.1 — `packages/access-policies`
 
 - **Do:** Create a new workspace package:
   - `schema.cedarschema`: entities `Person`, `Role`, `Event`, `EventDay`, `Station`, plus resource
     types per domain; actions and action groups (Capture, Correct, Safety, Manage, Configure,
     Report, Platform)
-  - `policies/` and `templates/`
+  - static `policies/` and authored default grants (ADR-005 §2)
   - a generated TypeScript action catalogue exported to `@spoh/shared/generated/actions`, which
-    replaces the `Capability` type
+    provides the replacement for the `Capability` type during P11.5/.8 migration
 - **Done when:** the schema validates with Cedar WASM, and the action catalogue builds.
 
 ### P11.2 — Policies

@@ -141,6 +141,17 @@ group without per-instance metric dimensions or extra permissions. Owner deliver
 worker availability remain pending. See the
 [cache-bus evidence and cost](../../remediation/reports/P08/cache-bus-monitoring.md).
 
+The task-failure detector selects stopped app service tasks with
+`EssentialContainerExited` or `TaskFailedToStart`, scoped to the actual cluster,
+service, account and region. A native EventBridge target stores only the event
+time, task identifier and bounded stop code in a retained 30-day log group.
+Its log policy restricts delivery to that stage's rule/account, and its one-minute
+alarm detects any matching event. It creates no Lambda or task grants and keeps
+Container Insights disabled. Intentional stops, one-off tasks and scheduler-driven
+health-check replacements are outside this bounded signal; running-task availability,
+the wider restart catalogue and SNS delivery remain open. See the
+[definition verification and rollout requirements](../../remediation/reports/P08/task-failure-monitoring.md).
+
 ## Staging HTTPS proxy (P08.5)
 
 `-c stagingEdge=true` adds the separate `Spoh-staging-Edge` stack. Provision only that stack,

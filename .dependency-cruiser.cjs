@@ -157,6 +157,13 @@ module.exports = {
       from: { path: '^packages/shared/src/' },
       to: { path: ['^server/', '^client/'] },
     },
+    {
+      name: 'policy-catalogue-stays-independent',
+      comment: 'The policy catalogue cannot depend on a deployable or its generated shared copy.',
+      severity: 'error',
+      from: { path: '^packages/access-policies/src/' },
+      to: { path: ['^server/', '^client/', '^packages/shared/'] },
+    },
 
     // ── Hygiene ────────────────────────────────────────────────────────────
     {

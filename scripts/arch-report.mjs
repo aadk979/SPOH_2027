@@ -22,7 +22,12 @@ const GUARD_RULES = [
   'max-depth',
   'max-params',
 ];
-const CRUISE_ROOTS = ['server/src', 'client/src', 'packages/shared/src'];
+const CRUISE_ROOTS = [
+  'server/src',
+  'client/src',
+  'packages/shared/src',
+  'packages/access-policies/src',
+];
 
 function countBy(items, key) {
   const counts = {};

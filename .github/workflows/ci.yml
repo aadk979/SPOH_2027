@@ -66,6 +66,8 @@ jobs:
       # so it has to exist before anything else compiles.
       - run: npm run build:shared
       - run: npm run settings:check
+      - run: npm run actions:check
+      - run: npm run build --workspace packages/access-policies
       - run: npm run check:pricing
       - run: npm run check:firebase
 
@@ -141,6 +143,12 @@ jobs:
 
       - name: Shared contract tests
         run: npm run test:coverage --workspace packages/shared
+
+      - name: Cedar schema, policies and generated catalogue
+        run: npm run test --workspace packages/access-policies
+
+      - name: Infrastructure definition tests
+        run: npm run test --workspace infra/cdk
 
       # One instrumented run includes both projects; the integration project
       # still serialises files against this job's dedicated PostgreSQL database.

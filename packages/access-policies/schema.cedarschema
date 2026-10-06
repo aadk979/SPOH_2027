@@ -1,0 +1,229 @@
+// SPOH access-control schema, draft for ADR-005 (P05.6).
+//
+// P11.1 moves this file to packages/access-policies/schema.cedarschema, where it becomes the
+// source for the AVP policy store (validation STRICT) and the generated action catalogue.
+//
+// Conventions
+// - Event actions take a `Membership` principal: who you are *in this event*. Platform actions
+//   take a `Person`. A platform admin acting inside an event they are not a member of is a
+//   `Person` principal and is covered by the platform-admin policy only.
+// - Every event resource is `in` its Event (and Station where it belongs to one), so
+//   `resource in ?event` style scoping works and the ADR-001 isolation holds in policy as well.
+// - Action groups: Capture, Correct, Safety, Self, Report, Manage, Configure, Platform, plus two
+//   cross-cutting groups: `Editable` (per-event role grants may toggle it, D-03 A) and `Write`
+//   (changes state; forbidden when the event is ARCHIVED).
+
+namespace SPOH {
+  type RequestContext = {
+    // ADR-004 lifecycle: DRAFT | READY | REHEARSAL | LIVE | CLOSED | ARCHIVED
+    eventPhase: String,
+    // true only for a queued capture recorded before the close, inside capture.lateSyncHours
+    lateSyncAllowed: Bool,
+    // the request comes from one of the event's trusted networks (attendance)
+    onTrustedNetwork: Bool,
+    // People.AssignRole and People.Invite: the rank of the role being granted
+    grantedRank?: Long,
+  };
+
+  entity Organisation;
+  entity Event in [Organisation];
+  entity EventDay in [Event];
+
+  entity Person = {
+    active: Bool,
+    platformAdmin: Bool,
+  };
+
+  // One Role entity per catalogue role per event: Role::"<eventId>/CHIEF_COORDINATOR".
+  // `grants` holds the Editable action ids this event gives the role (RolePermission rows).
+  entity Role in [Event] = {
+    catalogueRole: String,
+    rank: Long,
+    grants: Set<String>,
+    anyStation: Bool,
+  };
+
+  entity Station in [Event];
+
+  entity Membership in [Event] = {
+    event: Event,
+    person: Person,
+    role: Role,
+    rank: Long,
+    active: Bool,
+    assignedStations: Set<Station>,
+    onShiftStations: Set<Station>,
+    workingDays: Set<EventDay>,
+    attendanceVerifiedToday: Bool,
+    isAttendanceRoot: Bool,
+  };
+
+  entity Registration, FootfallTick, GiftRedemption in [Station, Event] = {
+    recordedBy: Membership,
+  };
+  entity MissionCard in [Event];
+  entity GiftType in [Event];
+  entity Incident in [Event] = {
+    reportedBy: Membership,
+  };
+  entity LostPersonAlert in [Event];
+  entity LostFoundItem in [Event];
+  entity Announcement in [Event] = {
+    targetRole?: String,
+    targetStation?: Station,
+    targetDay?: EventDay,
+  };
+  entity ShiftAssignment in [Station, Event] = {
+    membership: Membership,
+    // the assignment's shift is running now, in the event's timezone (ADR-002 Shift rows)
+    shiftRunning: Bool,
+  };
+  entity SwapRequest in [Event] = {
+    requester: Membership,
+    station: Station,
+  };
+  entity BriefingSlot in [Event] = {
+    briefer?: Membership,
+  };
+  entity FallbackWindow in [Event];
+  entity Setting in [Event] = {
+    // ADR-003 class: operational | security | privacy
+    class: String,
+  };
+  entity ScheduledAction in [Event];
+  entity VisitorRecord in [Event];
+
+  // ---------------------------------------------------------------- groups
+  action Capture, Correct, Safety, Self, Report, Manage, Configure, Platform, Editable, Write;
+
+  // ---------------------------------------------------------------- Capture (station-scoped)
+  action "Registration.Create", "Footfall.Create", "Card.Stamp", "Gift.Redeem"
+    in [Capture, Editable, Write]
+    appliesTo { principal: [Membership], resource: [Station], context: RequestContext };
+
+  action "LostFound.Log"
+    in [Safety, Editable, Write]
+    appliesTo { principal: [Membership], resource: [Event], context: RequestContext };
+
+  // ---------------------------------------------------------------- Correct
+  action "Record.Void"
+    in [Correct, Editable, Write]
+    appliesTo {
+      principal: [Membership],
+      resource: [Registration, FootfallTick, GiftRedemption],
+      context: RequestContext
+    };
+  action "Count.Adjust"
+    in [Correct, Editable, Write]
+    appliesTo { principal: [Membership], resource: [Station, GiftType], context: RequestContext };
+  action "Card.Reissue", "Card.Void"
+    in [Correct, Editable, Write]
+    appliesTo { principal: [Membership], resource: [MissionCard], context: RequestContext };
+
+  // ---------------------------------------------------------------- Safety
+  action "Incident.Report", "LostPerson.Raise"
+    in [Safety, Editable, Write]
+    appliesTo { principal: [Membership], resource: [Event], context: RequestContext };
+  action "Incident.Read"
+    in [Safety, Editable]
+    appliesTo { principal: [Membership], resource: [Event, Incident], context: RequestContext };
+  action "Incident.Update"
+    in [Safety, Editable, Write]
+    appliesTo { principal: [Membership], resource: [Incident], context: RequestContext };
+  action "LostPerson.Resolve"
+    in [Safety, Editable, Write]
+    appliesTo { principal: [Membership], resource: [LostPersonAlert], context: RequestContext };
+  action "LostFound.Claim"
+    in [Safety, Editable, Write]
+    appliesTo { principal: [Membership], resource: [LostFoundItem], context: RequestContext };
+  action "LostFound.CloseOut"
+    in [Safety, Editable, Write]
+    appliesTo { principal: [Membership], resource: [Event], context: RequestContext };
+
+  // ---------------------------------------------------------------- Self (every active member)
+  action "Self.Read"
+    in [Self]
+    appliesTo { principal: [Membership], resource: [Membership], context: RequestContext };
+  action "Shift.CheckIn", "Swap.Request"
+    in [Self, Write]
+    appliesTo { principal: [Membership], resource: [ShiftAssignment], context: RequestContext };
+  action "Briefing.Complete"
+    in [Self, Write]
+    appliesTo { principal: [Membership], resource: [BriefingSlot], context: RequestContext };
+  action "Announcement.Ack"
+    in [Self, Write]
+    appliesTo { principal: [Membership], resource: [Announcement], context: RequestContext };
+  action "Alert.Ack"
+    in [Self, Write]
+    appliesTo { principal: [Membership], resource: [LostPersonAlert], context: RequestContext };
+  action "Attendance.Submit"
+    in [Self, Write]
+    appliesTo { principal: [Membership], resource: [EventDay], context: RequestContext };
+  action "Attendance.IssueCode"
+    in [Self, Write]
+    appliesTo { principal: [Membership], resource: [EventDay], context: RequestContext };
+  action "Attendance.MarkRoot"
+    in [Manage, Write]
+    appliesTo { principal: [Membership], resource: [Membership], context: RequestContext };
+
+  // ---------------------------------------------------------------- Report
+  action "Dashboard.ReadStation", "Roster.ReadStation"
+    in [Report, Editable]
+    appliesTo { principal: [Membership], resource: [Station], context: RequestContext };
+  action "Dashboard.ReadEvent", "Report.Generate", "Report.Export", "Audit.Read", "People.Read", "Structure.Read"
+    in [Report, Editable]
+    appliesTo { principal: [Membership], resource: [Event], context: RequestContext };
+  action "VisitorRecord.Read"
+    in [Report, Editable]
+    appliesTo { principal: [Membership], resource: [VisitorRecord, Event], context: RequestContext };
+
+  // ---------------------------------------------------------------- Manage
+  action "Swap.Decide"
+    in [Manage, Editable, Write]
+    appliesTo { principal: [Membership], resource: [SwapRequest], context: RequestContext };
+  action "Roster.Edit"
+    in [Manage, Editable, Write]
+    appliesTo { principal: [Membership], resource: [Event, ShiftAssignment], context: RequestContext };
+  action "Announcement.SendStation"
+    in [Manage, Editable, Write]
+    appliesTo { principal: [Membership], resource: [Station], context: RequestContext };
+  action "Announcement.SendEvent", "Fallback.Declare", "Fallback.Import"
+    in [Manage, Editable, Write]
+    appliesTo { principal: [Membership], resource: [Event], context: RequestContext };
+  // Person principals: a platform admin may invite and assign any role, Admin included, which
+  // the grant-below-own-rank guardrail forbids to every event member.
+  action "People.Invite"
+    in [Manage, Editable, Write]
+    appliesTo { principal: [Membership, Person], resource: [Event], context: RequestContext };
+  action "People.AssignRole"
+    in [Manage, Editable, Write]
+    appliesTo { principal: [Membership, Person], resource: [Membership], context: RequestContext };
+  action "People.Update", "People.Deactivate"
+    in [Manage, Editable, Write]
+    appliesTo { principal: [Membership], resource: [Membership], context: RequestContext };
+
+  // ---------------------------------------------------------------- Configure
+  action "Structure.Edit", "Structure.Change", "Card.GenerateBatch", "Content.Edit", "Content.Publish",
+         "Schedule.Manage", "Event.MarkReady", "Event.Rehearse", "Event.GoLive", "Event.Close"
+    in [Configure, Editable, Write]
+    appliesTo { principal: [Membership], resource: [Event], context: RequestContext };
+  action "Settings.ManageEvent"
+    in [Configure, Editable, Write]
+    appliesTo { principal: [Membership], resource: [Setting], context: RequestContext };
+
+  // Locked: not Editable. Only the platform-admin policy permits these.
+  action "Settings.ManageSecurity", "Settings.ManagePrivacy"
+    in [Configure, Write]
+    appliesTo { principal: [Membership, Person], resource: [Setting], context: RequestContext };
+  action "Permissions.Edit", "Event.Reopen", "Event.Archive"
+    in [Configure, Write]
+    appliesTo { principal: [Membership, Person], resource: [Event], context: RequestContext };
+
+  // ---------------------------------------------------------------- Platform
+  action "Platform.CreateEvent", "Platform.CloneEvent", "Platform.ManageOrganisation", "Platform.ManageAdmins"
+    in [Platform, Write]
+    appliesTo { principal: [Person], resource: [Organisation], context: RequestContext };
+  action "Platform.AdministerEvent"
+    in [Platform]
+    appliesTo { principal: [Person], resource: [Event], context: RequestContext };
+}

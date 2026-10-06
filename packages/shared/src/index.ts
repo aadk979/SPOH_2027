@@ -14,6 +14,8 @@
 export * from './invariants/enums.js';
 /** The compiled capability matrix, re-exported until P11 replaces it with Cedar actions. */
 export * from './access/capabilities.js';
+/** Schema-derived identifiers; Cedar enforcement is migrated separately. */
+export * from './generated/actions/index.js';
 export * from './errors/errorCodes.js';
 export * from './contracts/missionCard/cardCode.js';
 
