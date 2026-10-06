@@ -94,6 +94,42 @@ afterEach(() => {
   for (const client of clients.splice(0)) client.clear();
 });
 
+describe('thresholds moved to the settings catalogue', () => {
+  const moved = ['Silent station', 'Stale device', 'Implausible tap rate', 'Long shift'] as const;
+
+  it.each(moved)(
+    'shows %s as a pointer, not an editable field with a live value',
+    async (label) => {
+      show();
+      await loaded();
+      expect(screen.queryByLabelText(label)).toBeNull();
+      expect(screen.getByText(label)).toBeTruthy();
+      expect(screen.getAllByText(/Settings catalogue above/).length).toBe(moved.length);
+      expect(screen.getAllByText(/or station scope/).length).toBe(2);
+    },
+  );
+
+  it('never sends a moved key, even when the server value changed under the draft', async () => {
+    const { client } = show();
+    await loaded();
+    response = {
+      ...response,
+      settings: {
+        ...response.settings,
+        silentStationMinutes: response.settings.silentStationMinutes + 1,
+        longShiftMinutes: response.settings.longShiftMinutes + 1,
+      },
+    };
+    await act(async () => {
+      client.setQueryData(settingsKeys.current(TEST_EVENT.id), response);
+    });
+    fireEvent.change(screen.getByLabelText('Event name'), { target: { value: 'Reviewed event' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
+    await waitFor(() => expect(writes()).toHaveLength(1));
+    expect(writes()[0]?.[1]?.body).toEqual({ eventName: 'Reviewed event' });
+  });
+});
+
 describe('settings form changed-key writes', () => {
   it('sends nothing while loading or when the loaded form is unchanged', async () => {
     show();
@@ -137,9 +173,9 @@ describe('settings form changed-key writes', () => {
     fireEvent.change(screen.getByLabelText('Event name'), {
       target: { value: ` ${response.settings.eventName} ` },
     });
-    const threshold = screen.getByLabelText('Implausible tap rate');
+    const threshold = screen.getByLabelText('Lost-person retention');
     fireEvent.change(threshold, {
-      target: { value: `${response.settings.implausibleTapsPerMinute}.0` },
+      target: { value: `${response.settings.lostPersonPurgeHours}.0` },
     });
     act(() => latestForm.onSave());
     expect(writes()).toEqual([]);
@@ -151,15 +187,15 @@ describe('settings form changed-key writes', () => {
   it('validates the full form before sending a changed numeric key', async () => {
     show();
     await loaded();
-    const threshold = screen.getByLabelText('Implausible tap rate');
+    const threshold = screen.getByLabelText('Lost-person retention');
     fireEvent.change(threshold, { target: { value: '-1' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
     expect(writes()).toEqual([]);
     expect(threshold.getAttribute('aria-invalid')).toBe('true');
-    fireEvent.change(threshold, { target: { value: '25.5' } });
+    fireEvent.change(threshold, { target: { value: '30' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
     await waitFor(() => expect(writes()).toHaveLength(1));
-    expect(writes()[0]?.[1]?.body).toEqual({ implausibleTapsPerMinute: 25.5 });
+    expect(writes()[0]?.[1]?.body).toEqual({ lostPersonPurgeHours: 30 });
   });
 
   it('keeps an edited draft across a refresh and does not rewrite another changed key', async () => {
@@ -170,7 +206,7 @@ describe('settings form changed-key writes', () => {
       ...response,
       settings: {
         ...response.settings,
-        staleDeviceMinutes: response.settings.staleDeviceMinutes + 1,
+        lostPersonPurgeHours: response.settings.lostPersonPurgeHours + 1,
       },
     };
     await act(async () => {
@@ -181,8 +217,8 @@ describe('settings form changed-key writes', () => {
     await waitFor(() => expect(writes()).toHaveLength(1));
     expect(writes()[0]?.[1]?.body).toEqual({ eventName: 'Reviewed event' });
     await loaded();
-    expect((screen.getByLabelText('Stale device') as HTMLInputElement).value).toBe(
-      String(response.settings.staleDeviceMinutes),
+    expect((screen.getByLabelText('Lost-person retention') as HTMLInputElement).value).toBe(
+      String(response.settings.lostPersonPurgeHours),
     );
   });
 
@@ -201,7 +237,7 @@ describe('settings form changed-key writes', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
     await waitFor(() => expect(writes()).toHaveLength(1));
     expect(screen.getByLabelText('Event name').hasAttribute('disabled')).toBe(true);
-    expect(screen.getByLabelText('Stale device').hasAttribute('disabled')).toBe(true);
+    expect(screen.getByLabelText('Lost-person retention').hasAttribute('disabled')).toBe(true);
     act(() => latestForm.onSave());
     expect(writes()).toHaveLength(1);
     await act(async () => {

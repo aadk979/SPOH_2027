@@ -46,8 +46,8 @@ for (const [name, width, height] of [
       const initialRead = await page.request.get(endpoint, { headers: headers() });
       expect(initialRead.status()).toBe(200);
       const initial = SettingsResponse.parse(await initialRead.json());
-      const original = initial.settings.staleDeviceMinutes;
-      const alternate = original < 1440 ? original + 1 : original - 1;
+      const original = initial.settings.lostPersonPurgeHours;
+      const alternate = original < 720 ? original + 1 : original - 1;
       let restored = false;
       const requests: unknown[] = [];
       page.on('request', (request) => {
@@ -57,7 +57,7 @@ for (const [name, width, height] of [
       try {
         await page.goto(page.url().replace(/\/home$/, '/admin/settings'));
         const save = page.getByRole('button', { name: 'Save settings', exact: true });
-        const field = page.getByLabel('Stale device', { exact: true });
+        const field = page.getByLabel('Lost-person retention', { exact: true });
         await expect(field).toHaveValue(String(original));
         await expect(save).toBeDisabled();
         await page
@@ -90,11 +90,11 @@ for (const [name, width, height] of [
         const changedRead = await changing;
         expect(changedRead.status()).toBe(200);
         const changed = SettingsResponse.parse(await changedRead.json());
-        expect(requests).toEqual([{ staleDeviceMinutes: alternate }]);
-        expect(changed.settings).toEqual({ ...initial.settings, staleDeviceMinutes: alternate });
-        expect(changed.overriddenKeys.filter((key) => key !== 'staleDeviceMinutes').sort()).toEqual(
-          initial.overriddenKeys.filter((key) => key !== 'staleDeviceMinutes').sort(),
-        );
+        expect(requests).toEqual([{ lostPersonPurgeHours: alternate }]);
+        expect(changed.settings).toEqual({ ...initial.settings, lostPersonPurgeHours: alternate });
+        expect(
+          changed.overriddenKeys.filter((key) => key !== 'lostPersonPurgeHours').sort(),
+        ).toEqual(initial.overriddenKeys.filter((key) => key !== 'lostPersonPurgeHours').sort());
         await expect(save).toBeDisabled();
         await page.reload();
         await expect(field).toHaveValue(String(alternate));
@@ -112,8 +112,8 @@ for (const [name, width, height] of [
         restored = true;
         await expect(save).toBeDisabled();
         expect(requests).toEqual([
-          { staleDeviceMinutes: alternate },
-          { staleDeviceMinutes: original },
+          { lostPersonPurgeHours: alternate },
+          { lostPersonPurgeHours: original },
         ]);
         expect(errors).toEqual([]);
       } finally {
@@ -122,7 +122,7 @@ for (const [name, width, height] of [
             (
               await page.request.patch(endpoint, {
                 headers: headers(),
-                data: { staleDeviceMinutes: original },
+                data: { lostPersonPurgeHours: original },
               })
             ).status(),
           ).toBe(200);

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { RuntimeSettings, UpdateSettingsRequest } from '@spoh/shared';
 import { NUMERIC_FIELDS } from '@/features/settings/model/numericFields';
+import { RETIRED_LEGACY_KEYS } from '@/features/settings/model/retiredLegacyKeys';
 import {
   toSettingsRequest,
   toSettingsValues,
@@ -58,11 +59,30 @@ describe('settings request', () => {
     const parsed = RuntimeSettings.parse({
       ...original,
       eventName: 'Reviewed',
-      implausibleTapsPerMinute: 3.5,
+      lostPersonPurgeHours: 30,
     });
     const patch = toSettingsPatch(parsed, original);
-    expect(patch).toEqual({ eventName: 'Reviewed', implausibleTapsPerMinute: 3.5 });
+    expect(patch).toEqual({ eventName: 'Reviewed', lostPersonPurgeHours: 30 });
     expect(UpdateSettingsRequest.parse(patch)).toEqual(patch);
+  });
+
+  it('never selects a key whose writes moved to the settings catalogue', () => {
+    const original = RuntimeSettings.parse(toSettingsRequest(validValues()));
+    const parsed = RuntimeSettings.parse({
+      ...original,
+      silentStationMinutes: original.silentStationMinutes + 1,
+      staleDeviceMinutes: original.staleDeviceMinutes + 1,
+      implausibleTapsPerMinute: 3.5,
+      longShiftMinutes: original.longShiftMinutes + 1,
+      eventName: 'Reviewed',
+    });
+    expect(toSettingsPatch(parsed, original)).toEqual({ eventName: 'Reviewed' });
+    expect([...RETIRED_LEGACY_KEYS].sort()).toEqual([
+      'implausibleTapsPerMinute',
+      'longShiftMinutes',
+      'silentStationMinutes',
+      'staleDeviceMinutes',
+    ]);
   });
 
   it('normalises whitespace and numeric formatting before checking for changes', () => {

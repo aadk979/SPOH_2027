@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
 import type { SettingsForm } from '../hooks/useSettingsForm';
 import { Card, Field, Input, Section } from '@/shared/ui';
-import { NUMERIC_FIELDS } from '../model/numericFields';
+import { NUMERIC_FIELDS, type FieldSpec } from '../model/numericFields';
+import { isRetiredLegacyKey } from '../model/retiredLegacyKeys';
 export function ThresholdsForm({
   form,
   canEdit,
@@ -19,6 +20,8 @@ export function ThresholdsForm({
       >
         <div className="flex flex-col gap-sm">
           {NUMERIC_FIELDS.map((field) => {
+            if (isRetiredLegacyKey(field.key))
+              return <CataloguePointer key={field.key} field={field} />;
             const isChanged = overridden.has(field.key);
             return (
               <Card
@@ -62,5 +65,19 @@ export function ThresholdsForm({
         </div>
       </Section>
     </>
+  );
+}
+
+/** A threshold now written only in the settings catalogue; the legacy value is not shown as live. */
+function CataloguePointer({ field }: { field: FieldSpec }): ReactNode {
+  return (
+    <Card variant="flat">
+      <p className="font-semibold">{field.label}</p>
+      <p className="text-caption text-text-muted">{field.hint}</p>
+      <p className="text-caption text-text-muted">
+        Changed in the Settings catalogue above, at event
+        {field.stationScope ? ' or station' : ''} scope.
+      </p>
+    </Card>
   );
 }

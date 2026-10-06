@@ -1,5 +1,6 @@
 import type { RuntimeSettings } from '@spoh/shared';
 import { NUMERIC_FIELDS } from './numericFields';
+import { isRetiredLegacyKey } from './retiredLegacyKeys';
 
 /** What the settings screen edits: text as typed, numbers as their input strings. */
 export type SettingsValues = Record<string, string> & { eventName: string };
@@ -42,7 +43,8 @@ export function toSettingsPatch(
 ): Partial<RuntimeSettings> {
   return Object.fromEntries(
     Object.entries(settings).filter(
-      ([key, value]) => value !== baseline[key as keyof RuntimeSettings],
+      ([key, value]) =>
+        !isRetiredLegacyKey(key) && value !== baseline[key as keyof RuntimeSettings],
     ),
   );
 }

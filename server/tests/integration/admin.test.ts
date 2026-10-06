@@ -2,7 +2,7 @@ import request from 'supertest';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app/createApp.js';
 import { prisma } from '../../src/platform/db/client.js';
-import { getSettings, loadSettings } from '../../src/platform/settings/index.js';
+import { DEFAULT_SETTINGS, getSettings, loadSettings } from '../../src/platform/settings/index.js';
 import { resetDatabase, rawDb } from '../helpers/db.js';
 import {
   bearer,
@@ -343,7 +343,7 @@ describe('runtime settings', () => {
     const response = await request(app)
       .patch('/api/v1/admin/settings')
       .set('Authorization', bearer(ic))
-      .send({ silentStationMinutes: 5 });
+      .send({ lostPersonPurgeHours: 5 });
 
     expect(response.status).toBe(403);
   });
@@ -352,12 +352,63 @@ describe('runtime settings', () => {
     const response = await request(app)
       .patch('/api/v1/admin/settings')
       .set('Authorization', bearer(chief))
-      .send({ silentStationMinutes: 5 });
+      .send({ lostPersonPurgeHours: 5 });
 
     expect(response.status).toBe(200);
-    expect(response.body.settings.silentStationMinutes).toBe(5);
-    expect(response.body.overriddenKeys).toContain('silentStationMinutes');
-    expect(getSettings().silentStationMinutes).toBe(5);
+    expect(response.body.settings.lostPersonPurgeHours).toBe(5);
+    expect(response.body.overriddenKeys).toContain('lostPersonPurgeHours');
+    expect(getSettings().lostPersonPurgeHours).toBe(5);
+  });
+
+  it.each([
+    ['silentStationMinutes', 5],
+    ['staleDeviceMinutes', 5],
+    ['implausibleTapsPerMinute', 5],
+    ['longShiftMinutes', 5],
+  ])('refuses %s here, because the scoped catalogue now owns it', async (key, value) => {
+    const response = await request(app)
+      .patch('/api/v1/admin/settings')
+      .set('Authorization', bearer(chief))
+      .send({ [key]: value });
+
+    expect(response.status).toBe(400);
+    expect(response.body.error.code).toBe('VALIDATION_FAILED');
+    expect(response.body.error.details).toEqual({
+      keys: [key],
+      replacement: '/admin/settings/catalogue',
+    });
+    expect(await rawDb.appSetting.count()).toBe(0);
+    expect(await rawDb.auditLog.count({ where: { action: 'settings.update' } })).toBe(0);
+    expect(getSettings()[key as keyof ReturnType<typeof getSettings>]).toBe(
+      DEFAULT_SETTINGS[key as keyof ReturnType<typeof getSettings>],
+    );
+  });
+
+  it('rejects a mixed body as a whole, leaving the permitted key unwritten', async () => {
+    const response = await request(app)
+      .patch('/api/v1/admin/settings')
+      .set('Authorization', bearer(chief))
+      .send({ lostPersonPurgeHours: 7, longShiftMinutes: 90, silentStationMinutes: 4 });
+
+    expect(response.status).toBe(400);
+    expect(response.body.error.details.keys).toEqual(['silentStationMinutes', 'longShiftMinutes']);
+    expect(await rawDb.appSetting.count()).toBe(0);
+    expect(getSettings().lostPersonPurgeHours).toBe(DEFAULT_SETTINGS.lostPersonPurgeHours);
+  });
+
+  it('leaves an existing retired-key row untouched while another key is written', async () => {
+    await rawDb.appSetting.create({ data: { key: 'longShiftMinutes', value: 150 } });
+    await loadSettings();
+    await request(app)
+      .patch('/api/v1/admin/settings')
+      .set('Authorization', bearer(chief))
+      .send({ alertPollSeconds: 12 })
+      .expect(200);
+
+    expect(
+      (await rawDb.appSetting.findUniqueOrThrow({ where: { key: 'longShiftMinutes' } })).value,
+    ).toBe(150);
+    expect(await rawDb.appSetting.count()).toBe(2);
   });
 
   /**
@@ -436,12 +487,12 @@ describe('runtime settings', () => {
     await request(app)
       .patch('/api/v1/admin/settings')
       .set('Authorization', bearer(chief))
-      .send({ longShiftMinutes: 120 })
+      .send({ lostPersonPurgeHours: 12 })
       .expect(200);
 
     const entry = await prisma.auditLog.findFirst({ where: { action: 'settings.update' } });
-    expect(entry?.before).toMatchObject({ longShiftMinutes: 180 });
-    expect(entry?.after).toMatchObject({ longShiftMinutes: 120 });
+    expect(entry?.before).toMatchObject({ lostPersonPurgeHours: 24 });
+    expect(entry?.after).toMatchObject({ lostPersonPurgeHours: 12 });
   });
 });
 

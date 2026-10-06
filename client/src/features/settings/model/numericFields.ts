@@ -7,6 +7,8 @@ export interface FieldSpec {
   unit: string;
   min: number;
   max: number;
+  /** Whether the catalogue also accepts a per-station value for this key. */
+  stationScope: boolean;
 }
 
 /** Display order only. Copy and bounds come from the server registry (P10.1). */
@@ -39,6 +41,7 @@ function numericField(key: (typeof ORDER)[number]): FieldSpec {
     unit: metadata.unit ?? '',
     min: bounds.minimum,
     max: bounds.maximum,
+    stationScope: (metadata.scopes as readonly string[]).includes('station'),
   };
 }
 
