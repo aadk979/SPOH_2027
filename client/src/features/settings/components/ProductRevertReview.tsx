@@ -23,7 +23,7 @@ export function ProductRevertReview(input: {
       </Callout>
     );
   if (!target.values.available) return null;
-  const warning = productRevertWarning(target);
+  const warning = productRevertWarning(target, review.reviewed.settings);
   return (
     <div className="flex flex-col gap-md" role="group" aria-label="Review setting restore">
       <p className="text-section">Restore {productSettingLabels[target.key].toLowerCase()}</p>

@@ -313,3 +313,19 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   until its reviewed migration; unknown eligibility cannot enable a new toggle.
   This blocks the visitor portion of P11.5/.7, not independent prerequisites or
   the rest of the programme.
+
+### D-16 — Lost-person retention range
+
+- **Owner:** you
+- **Blocks:** —
+- **Question:** When `lostPersonPurgeHours` moves from the legacy global settings to
+  the event's guarded settings, what may an event set? ADR-003 promises families
+  that "a description is removed 24 hours after the case is resolved", and the
+  archive snapshot schedule assumes it; the legacy screen allowed 1–720 hours.
+- **Options:**
+  - **A.** Shorten only: 1–24 hours per event, with history and a confirmation.
+  - **B.** Fixed at 24 hours; not editable.
+  - **C.** Keep 1–720 hours, with a warning above 24.
+- **Recommendation:** **A.** Events may remove descriptions sooner; none can keep
+  them longer than the promise.
+- **Answer:** **A** (owner, 7 October 2026). Longer retention needs a code change.

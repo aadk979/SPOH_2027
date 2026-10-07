@@ -116,8 +116,12 @@ beforeEach(() => {
   session.eventId = TEST_EVENT.id;
   failure = null;
   current = {
-    settings: { 'product.countsMode': { mode: 'separate' }, 'product.visitorDataMode': 'none' },
-    versions: { 'product.countsMode': 2, 'product.visitorDataMode': 0 },
+    settings: {
+      'product.countsMode': { mode: 'separate' },
+      'product.visitorDataMode': 'none',
+      lostPersonPurgeHours: 24,
+    },
+    versions: { 'product.countsMode': 2, 'product.visitorDataMode': 0, lostPersonPurgeHours: 0 },
   };
   mockedApi.mockReset();
   mockedApi.mockImplementation(async (path, options) => {

@@ -13,6 +13,7 @@ import { ValidationError } from '../../src/platform/errors/index.js';
 import { SETTINGS } from '../../src/platform/settings/registry.js';
 import {
   assertNoRetiredLegacyKeys,
+  GUARDED_LEGACY_SETTING_KEYS,
   RETIRED_LEGACY_SETTING_KEYS,
 } from '../../src/modules/settings/domain/retiredLegacySettings.js';
 import { updateSettingsView } from '../../src/modules/settings/application/settingsView.js';
@@ -81,11 +82,29 @@ describe('retired legacy setting keys', () => {
     });
   });
 
+  it('sends lost-person retention to the guarded event settings, which cap it (D-16)', () => {
+    expect([...GUARDED_LEGACY_SETTING_KEYS]).toEqual(['lostPersonPurgeHours']);
+    expect(SETTINGS.lostPersonPurgeHours.scopes).toEqual(['event']);
+    expect(SETTINGS.lostPersonPurgeHours.schema.safeParse(24).success).toBe(true);
+    expect(SETTINGS.lostPersonPurgeHours.schema.safeParse(25).success).toBe(false);
+    let caught: unknown;
+    try {
+      assertNoRetiredLegacyKeys({ lostPersonPurgeHours: 12, alertPollSeconds: 9 });
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).toMatchObject({
+      statusCode: 400,
+      code: ERROR_CODES.VALIDATION_FAILED,
+      details: { keys: ['lostPersonPurgeHours'], replacement: '/admin/event-settings' },
+    });
+  });
+
   it('allows every other legacy key', () => {
     expect(() =>
       assertNoRetiredLegacyKeys({
         eventName: 'Event',
-        lostPersonPurgeHours: 12,
+        dashboardPollSeconds: 12,
         alertPollSeconds: 9,
       }),
     ).not.toThrow();
@@ -93,14 +112,14 @@ describe('retired legacy setting keys', () => {
 
   it('rejects before any write or cache refresh, whole body at once', async () => {
     await expect(
-      updateSettingsView({ lostPersonPurgeHours: 12, silentStationMinutes: 4 }, actor),
+      updateSettingsView({ alertPollSeconds: 12, silentStationMinutes: 4 }, actor),
     ).rejects.toBeInstanceOf(ValidationError);
     expect(store.updateSettings).not.toHaveBeenCalled();
   });
 
   it('passes a permitted body through unchanged', async () => {
-    store.updateSettings.mockResolvedValue({ lostPersonPurgeHours: 12 });
-    await updateSettingsView({ lostPersonPurgeHours: 12 }, actor);
-    expect(store.updateSettings).toHaveBeenCalledWith({ lostPersonPurgeHours: 12 }, 'person-1', {});
+    store.updateSettings.mockResolvedValue({ alertPollSeconds: 12 });
+    await updateSettingsView({ alertPollSeconds: 12 }, actor);
+    expect(store.updateSettings).toHaveBeenCalledWith({ alertPollSeconds: 12 }, 'person-1', {});
   });
 });

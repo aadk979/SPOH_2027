@@ -144,12 +144,13 @@ export const SETTINGS = {
     'Welfare',
     { unit: 'minutes' },
   ),
+  // Never longer than the 24 hours promised to families (ADR-003 §8, D-16).
   lostPersonPurgeHours: setting(
     'lostPersonPurgeHours',
-    z.number().int().min(1).max(720),
+    z.number().int().min(1).max(24),
     24,
     'Lost-person retention',
-    'How long a resolved lost-person alert keeps its descriptive fields.',
+    'How long a resolved lost-person alert keeps its descriptive fields. Never longer than the 24 hours promised to families.',
     'Safety',
     { class: 'privacy', unit: 'hours' },
   ),
@@ -433,6 +434,7 @@ export const SETTINGS = {
 export const EVENT_SETTINGS = {
   'product.countsMode': SETTINGS['product.countsMode'],
   'product.visitorDataMode': SETTINGS['product.visitorDataMode'],
+  lostPersonPurgeHours: SETTINGS.lostPersonPurgeHours,
 };
 
 export type SettingKey = keyof typeof SETTINGS;

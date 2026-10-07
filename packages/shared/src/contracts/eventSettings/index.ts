@@ -7,14 +7,15 @@ export { CountsMode, HeadlineSource, VisitorDataMode } from './modes.js';
 
 /**
  * Event settings (ADR-003): per event, versioned, changed one key at a time
- * with the version the caller read. Two product rules live here (ADR-002 §4);
- * the registry grows into every setting at P10.
+ * with the version the caller read. Two product rules (ADR-002 §4) and the
+ * lost-person retention, capped at the 24 hours promised to families (D-16).
  */
 
 export const EventSettings = z
   .object({
     'product.countsMode': settings['product.countsMode'],
     'product.visitorDataMode': settings['product.visitorDataMode'],
+    lostPersonPurgeHours: settings.lostPersonPurgeHours,
   })
   .strict();
 export type EventSettings = z.infer<typeof EventSettings>;
@@ -29,7 +30,11 @@ export const EventSettingsResponse = z
   .object({
     settings: EventSettings,
     versions: z
-      .object({ 'product.countsMode': Version, 'product.visitorDataMode': Version })
+      .object({
+        'product.countsMode': Version,
+        'product.visitorDataMode': Version,
+        lostPersonPurgeHours: Version,
+      })
       .strict(),
   })
   .strict();
@@ -50,6 +55,7 @@ const change = <Key extends EventSettingKey, Value extends z.ZodType>(key: Key, 
 export const ChangeEventSettingRequest = z.discriminatedUnion('key', [
   change('product.countsMode', CountsMode),
   change('product.visitorDataMode', VisitorDataMode),
+  change('lostPersonPurgeHours', settings.lostPersonPurgeHours),
 ]);
 export type ChangeEventSettingRequest = z.infer<typeof ChangeEventSettingRequest>;
 
@@ -81,6 +87,7 @@ function historyRecord<Key extends EventSettingKey, Value extends z.ZodType>(
 export const EventSettingHistoryRecord = z.discriminatedUnion('key', [
   historyRecord('product.countsMode', CountsMode),
   historyRecord('product.visitorDataMode', VisitorDataMode),
+  historyRecord('lostPersonPurgeHours', settings.lostPersonPurgeHours),
 ]);
 export type EventSettingHistoryRecord = z.infer<typeof EventSettingHistoryRecord>;
 export const EventSettingHistoryResponse = collection(EventSettingHistoryRecord)

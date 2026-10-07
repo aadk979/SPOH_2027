@@ -4,6 +4,7 @@ import { ApiError } from '@/shared/lib/apiErrors';
 export const productSettingLabels = {
   'product.countsMode': 'Counts',
   'product.visitorDataMode': 'Visitor personal data',
+  lostPersonPurgeHours: 'Lost-person retention',
 } as const;
 export const settingSourceLabels: Record<SettingChangeSource, string> = {
   USER: 'Changed by a person',
@@ -17,6 +18,13 @@ export function productValueLabel(
   value: EventSettings[keyof EventSettings] | null,
   stations: ReadonlyArray<{ id: string; name: string }> = [],
 ): string {
+  if (typeof value === 'number') return `${value} hours after resolution`;
+  return productRuleLabel(value, stations);
+}
+function productRuleLabel(
+  value: Exclude<EventSettings[keyof EventSettings], number> | null,
+  stations: ReadonlyArray<{ id: string; name: string }> = [],
+): string {
   if (value === null) return 'Previous value unavailable';
   if (value === 'none') return 'No visitor personal data';
   if (value === 'allowlist') return 'Only declared visitor fields';
@@ -27,8 +35,13 @@ export function productValueLabel(
   const name = stations.find(({ id }) => id === stationId)?.name;
   return name ? `Headline from entries at ${name}` : 'Headline from an unavailable station';
 }
-export function productRevertWarning(row: EventSettingHistoryRecord) {
-  if (row.key !== 'product.visitorDataMode' || !row.values.available) return null;
+export function productRevertWarning(row: EventSettingHistoryRecord, current: EventSettings) {
+  if (!row.values.available) return null;
+  if (row.key === 'lostPersonPurgeHours')
+    return row.values.after < current.lostPersonPurgeHours
+      ? `Restoring ${row.values.after} hours removes descriptions of alerts resolved longer ago than that at the next purge. They cannot be recovered.`
+      : null;
+  if (row.key !== 'product.visitorDataMode') return null;
   return row.values.after === 'none'
     ? 'Restoring none permanently deletes any visitor personal records. Registration counts stay. Deleted records cannot be recovered by another revert.'
     : 'Restoring declared fields enables visitor personal data collection. This is allowed only before the event goes live.';

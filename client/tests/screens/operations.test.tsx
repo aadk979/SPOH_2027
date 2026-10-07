@@ -154,8 +154,13 @@ describe('operations screen safety net', () => {
           settings: {
             'product.countsMode': { mode: 'separate' },
             'product.visitorDataMode': 'none',
+            lostPersonPurgeHours: 24,
           },
-          versions: { 'product.countsMode': 0, 'product.visitorDataMode': 0 },
+          versions: {
+            'product.countsMode': 0,
+            'product.visitorDataMode': 0,
+            lostPersonPurgeHours: 0,
+          },
         };
       }
       if (path.endsWith('/admin/attendance-settings')) {

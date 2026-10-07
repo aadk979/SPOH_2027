@@ -343,7 +343,7 @@ describe('runtime settings', () => {
     const response = await request(app)
       .patch('/api/v1/admin/settings')
       .set('Authorization', bearer(ic))
-      .send({ lostPersonPurgeHours: 5 });
+      .send({ alertPollSeconds: 5 });
 
     expect(response.status).toBe(403);
   });
@@ -352,12 +352,12 @@ describe('runtime settings', () => {
     const response = await request(app)
       .patch('/api/v1/admin/settings')
       .set('Authorization', bearer(chief))
-      .send({ lostPersonPurgeHours: 5 });
+      .send({ alertPollSeconds: 5 });
 
     expect(response.status).toBe(200);
-    expect(response.body.settings.lostPersonPurgeHours).toBe(5);
-    expect(response.body.overriddenKeys).toContain('lostPersonPurgeHours');
-    expect(getSettings().lostPersonPurgeHours).toBe(5);
+    expect(response.body.settings.alertPollSeconds).toBe(5);
+    expect(response.body.overriddenKeys).toContain('alertPollSeconds');
+    expect(getSettings().alertPollSeconds).toBe(5);
   });
 
   it.each([
@@ -388,16 +388,30 @@ describe('runtime settings', () => {
     );
   });
 
+  it('refuses lost-person retention here, because the event settings own it (D-16)', async () => {
+    const response = await request(app)
+      .patch('/api/v1/admin/settings')
+      .set('Authorization', bearer(chief))
+      .send({ lostPersonPurgeHours: 12 });
+
+    expect(response.status).toBe(400);
+    expect(response.body.error.details).toEqual({
+      keys: ['lostPersonPurgeHours'],
+      replacement: '/admin/event-settings',
+    });
+    expect(await rawDb.appSetting.count()).toBe(0);
+  });
+
   it('rejects a mixed body as a whole, leaving the permitted key unwritten', async () => {
     const response = await request(app)
       .patch('/api/v1/admin/settings')
       .set('Authorization', bearer(chief))
-      .send({ lostPersonPurgeHours: 7, longShiftMinutes: 90, silentStationMinutes: 4 });
+      .send({ alertPollSeconds: 7, longShiftMinutes: 90, silentStationMinutes: 4 });
 
     expect(response.status).toBe(400);
     expect(response.body.error.details.keys).toEqual(['silentStationMinutes', 'longShiftMinutes']);
     expect(await rawDb.appSetting.count()).toBe(0);
-    expect(getSettings().lostPersonPurgeHours).toBe(DEFAULT_SETTINGS.lostPersonPurgeHours);
+    expect(getSettings().alertPollSeconds).toBe(DEFAULT_SETTINGS.alertPollSeconds);
   });
 
   it('leaves an existing retired-key row untouched while another key is written', async () => {
@@ -491,12 +505,12 @@ describe('runtime settings', () => {
     await request(app)
       .patch('/api/v1/admin/settings')
       .set('Authorization', bearer(chief))
-      .send({ lostPersonPurgeHours: 12 })
+      .send({ alertPollSeconds: 12 })
       .expect(200);
 
     const entry = await prisma.auditLog.findFirst({ where: { action: 'settings.update' } });
-    expect(entry?.before).toMatchObject({ lostPersonPurgeHours: 24 });
-    expect(entry?.after).toMatchObject({ lostPersonPurgeHours: 12 });
+    expect(entry?.before).toMatchObject({ alertPollSeconds: 10 });
+    expect(entry?.after).toMatchObject({ alertPollSeconds: 12 });
   });
 });
 

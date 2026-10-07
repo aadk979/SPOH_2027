@@ -2,6 +2,8 @@ import type { Express } from 'express';
 import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app/createApp.js';
+import { lostPersonRetentionHours } from '../../src/modules/lostPerson/application/retentionPolicy.js';
+import { prisma } from '../../src/platform/db/client.js';
 import { rawDb, resetDatabase } from '../helpers/db.js';
 import {
   bearer,
@@ -45,8 +47,12 @@ describe('event settings (ADR-003, P09.14)', () => {
     const response = await read(volunteer);
     expect(response.status).toBe(200);
     expect(response.body).toEqual({
-      settings: { 'product.countsMode': { mode: 'separate' }, 'product.visitorDataMode': 'none' },
-      versions: { 'product.countsMode': 0, 'product.visitorDataMode': 0 },
+      settings: {
+        'product.countsMode': { mode: 'separate' },
+        'product.visitorDataMode': 'none',
+        lostPersonPurgeHours: 24,
+      },
+      versions: { 'product.countsMode': 0, 'product.visitorDataMode': 0, lostPersonPurgeHours: 0 },
     });
   });
 
@@ -132,5 +138,47 @@ describe('event settings (ADR-003, P09.14)', () => {
       expectedVersion: 0,
     });
     expect(denied.status).toBe(403);
+  });
+});
+
+describe('lost-person retention (ADR-003 §8, D-16)', () => {
+  const retention = (who: TestVolunteer, value: unknown, expectedVersion = 0) =>
+    change(who, { key: 'lostPersonPurgeHours', value, expectedVersion, reason: 'sooner' });
+  const purgeHours = async () => {
+    const { eventId } = await testEvent();
+    const { organisationId } = await rawDb.event.findUniqueOrThrow({ where: { id: eventId } });
+    return prisma.$transaction((tx) => lostPersonRetentionHours(tx, { eventId, organisationId }));
+  };
+
+  it('shortens per event as a new version, with history and audit', async () => {
+    const response = await retention(chief, 6);
+    expect(response.status).toBe(200);
+    expect(response.body.settings.lostPersonPurgeHours).toBe(6);
+    expect(response.body.versions.lostPersonPurgeHours).toBe(1);
+    expect(
+      await rawDb.settingChange.findMany({ where: { key: 'lostPersonPurgeHours' } }),
+    ).toMatchObject([{ version: 1, before: 24, after: 6, source: 'USER', reason: 'sooner' }]);
+    const audit = await rawDb.auditLog.findFirst({ where: { action: 'setting.change' } });
+    expect(audit?.entityId).toBe('lostPersonPurgeHours');
+    expect(await purgeHours()).toBe(6);
+  });
+
+  it('never keeps a description longer than the 24 hours promised to families', async () => {
+    for (const value of [25, 720, 0, 1.5, '12']) {
+      const refused = await retention(chief, value);
+      expect(refused.status).toBe(400);
+    }
+    expect(await rawDb.setting.count({ where: { key: 'lostPersonPurgeHours' } })).toBe(0);
+    expect((await retention(chief, 24)).status).toBe(200);
+  });
+
+  it('is changed only with config.manage', async () => {
+    expect((await retention(ic, 6)).status).toBe(403);
+    expect((await retention(volunteer, 6)).status).toBe(403);
+  });
+
+  it('caps a longer legacy value at 24 hours until its copy', async () => {
+    await rawDb.appSetting.create({ data: { key: 'lostPersonPurgeHours', value: 30 } });
+    expect(await purgeHours()).toBe(24);
   });
 });

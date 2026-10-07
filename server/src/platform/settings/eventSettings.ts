@@ -39,10 +39,12 @@ export async function eventSettings(
         'product.visitorDataMode',
         byKey.get('product.visitorDataMode'),
       ),
+      lostPersonPurgeHours: resolved('lostPersonPurgeHours', byKey.get('lostPersonPurgeHours')),
     },
     versions: {
       'product.countsMode': byKey.get('product.countsMode')?.version ?? 0,
       'product.visitorDataMode': byKey.get('product.visitorDataMode')?.version ?? 0,
+      lostPersonPurgeHours: byKey.get('lostPersonPurgeHours')?.version ?? 0,
     },
   };
 }

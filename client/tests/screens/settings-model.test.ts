@@ -59,10 +59,10 @@ describe('settings request', () => {
     const parsed = RuntimeSettings.parse({
       ...original,
       eventName: 'Reviewed',
-      lostPersonPurgeHours: 30,
+      alertPollSeconds: 30,
     });
     const patch = toSettingsPatch(parsed, original);
-    expect(patch).toEqual({ eventName: 'Reviewed', lostPersonPurgeHours: 30 });
+    expect(patch).toEqual({ eventName: 'Reviewed', alertPollSeconds: 30 });
     expect(UpdateSettingsRequest.parse(patch)).toEqual(patch);
   });
 
@@ -77,6 +77,7 @@ describe('settings request', () => {
       captureUndoWindowSeconds: original.captureUndoWindowSeconds + 1,
       captureSendGraceSeconds: original.captureSendGraceSeconds + 1,
       outboxWarningCount: original.outboxWarningCount + 1,
+      lostPersonPurgeHours: original.lostPersonPurgeHours - 1,
       outboxWarningAgeMinutes: original.outboxWarningAgeMinutes + 1,
       eventName: 'Reviewed',
     });
@@ -86,6 +87,7 @@ describe('settings request', () => {
       'captureUndoWindowSeconds',
       'implausibleTapsPerMinute',
       'longShiftMinutes',
+      'lostPersonPurgeHours',
       'outboxWarningAgeMinutes',
       'outboxWarningCount',
       'silentStationMinutes',

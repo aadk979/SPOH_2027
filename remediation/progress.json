@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-07T03:18:46.211Z",
+  "updatedAt": "2026-10-07T03:45:22.445Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -200,6 +200,15 @@
       "status": "open",
       "answer": null,
       "answeredAt": null
+    },
+    {
+      "id": "D-16",
+      "title": "Lost-person retention range",
+      "owner": "you",
+      "blocks": [],
+      "status": "answered",
+      "answer": "A: shorten only, 1-24 hours per event through the guarded event-settings editor with history and confirmation (owner, 7 October 2026)",
+      "answeredAt": "2026-10-07T03:45:22.444Z"
     }
   ],
   "phases": [

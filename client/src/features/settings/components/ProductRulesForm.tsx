@@ -3,6 +3,7 @@ import { Card, LoadingRows, Section } from '@/shared/ui';
 import { useEventSettings } from '../queries';
 import { VisitorFieldEditor } from '@/features/visitor';
 import { CountsModeField } from './CountsModeField';
+import { LostPersonRetentionField } from './LostPersonRetentionField';
 import { VisitorDataField } from './VisitorDataField';
 import { ProductHistoryPanel } from './ProductHistoryPanel';
 
@@ -19,7 +20,7 @@ export function ProductRulesForm({
   return (
     <Section
       title="Counts and visitor data"
-      description="How this event shows its three counts, and whether it keeps anything about the visitors themselves."
+      description="How this event shows its three counts, whether it keeps anything about the visitors themselves, and how soon a lost-person description is removed."
     >
       <Card className="flex flex-col gap-lg">
         {!data ? (
@@ -40,6 +41,12 @@ export function ProductRulesForm({
             />
             <VisitorFieldEditor
               enabled={enabled && data.settings['product.visitorDataMode'] === 'allowlist'}
+              canEdit={canEdit}
+            />
+            <LostPersonRetentionField
+              key={`retention:${data.versions.lostPersonPurgeHours}`}
+              current={data.settings.lostPersonPurgeHours}
+              version={data.versions.lostPersonPurgeHours}
               canEdit={canEdit}
             />
             <ProductHistoryPanel enabled={enabled && canEdit} />

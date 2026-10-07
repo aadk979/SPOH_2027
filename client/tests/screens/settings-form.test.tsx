@@ -118,6 +118,15 @@ describe('settings moved to the settings catalogue', () => {
     },
   );
 
+  it('shows lost-person retention as a pointer to the event’s visitor data settings', async () => {
+    show();
+    await loaded();
+    expect(screen.queryByLabelText('Lost-person retention')).toBeNull();
+    expect(
+      screen.getAllByText('Changed under Counts and visitor data above, for this event.'),
+    ).toHaveLength(1);
+  });
+
   it('never sends a moved key, even when the server value changed under the draft', async () => {
     const { client } = show();
     await loaded();
@@ -184,9 +193,9 @@ describe('settings form changed-key writes', () => {
     fireEvent.change(screen.getByLabelText('Event name'), {
       target: { value: ` ${response.settings.eventName} ` },
     });
-    const threshold = screen.getByLabelText('Lost-person retention');
+    const threshold = screen.getByLabelText('Alert refresh');
     fireEvent.change(threshold, {
-      target: { value: `${response.settings.lostPersonPurgeHours}.0` },
+      target: { value: `${response.settings.alertPollSeconds}.0` },
     });
     act(() => latestForm.onSave());
     expect(writes()).toEqual([]);
@@ -198,7 +207,7 @@ describe('settings form changed-key writes', () => {
   it('validates the full form before sending a changed numeric key', async () => {
     show();
     await loaded();
-    const threshold = screen.getByLabelText('Lost-person retention');
+    const threshold = screen.getByLabelText('Alert refresh');
     fireEvent.change(threshold, { target: { value: '-1' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
     expect(writes()).toEqual([]);
@@ -206,7 +215,7 @@ describe('settings form changed-key writes', () => {
     fireEvent.change(threshold, { target: { value: '30' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
     await waitFor(() => expect(writes()).toHaveLength(1));
-    expect(writes()[0]?.[1]?.body).toEqual({ lostPersonPurgeHours: 30 });
+    expect(writes()[0]?.[1]?.body).toEqual({ alertPollSeconds: 30 });
   });
 
   it('keeps an edited draft across a refresh and does not rewrite another changed key', async () => {
@@ -217,7 +226,7 @@ describe('settings form changed-key writes', () => {
       ...response,
       settings: {
         ...response.settings,
-        lostPersonPurgeHours: response.settings.lostPersonPurgeHours + 1,
+        alertPollSeconds: response.settings.alertPollSeconds + 1,
       },
     };
     await act(async () => {
@@ -228,8 +237,8 @@ describe('settings form changed-key writes', () => {
     await waitFor(() => expect(writes()).toHaveLength(1));
     expect(writes()[0]?.[1]?.body).toEqual({ eventName: 'Reviewed event' });
     await loaded();
-    expect((screen.getByLabelText('Lost-person retention') as HTMLInputElement).value).toBe(
-      String(response.settings.lostPersonPurgeHours),
+    expect((screen.getByLabelText('Alert refresh') as HTMLInputElement).value).toBe(
+      String(response.settings.alertPollSeconds),
     );
   });
 
@@ -248,7 +257,7 @@ describe('settings form changed-key writes', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
     await waitFor(() => expect(writes()).toHaveLength(1));
     expect(screen.getByLabelText('Event name').hasAttribute('disabled')).toBe(true);
-    expect(screen.getByLabelText('Lost-person retention').hasAttribute('disabled')).toBe(true);
+    expect(screen.getByLabelText('Alert refresh').hasAttribute('disabled')).toBe(true);
     act(() => latestForm.onSave());
     expect(writes()).toHaveLength(1);
     await act(async () => {

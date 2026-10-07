@@ -43,8 +43,12 @@ it('returns a strict new REVERT version and the current guarded settings', () =>
       },
     },
     current: {
-      settings: { 'product.countsMode': { mode: 'separate' }, 'product.visitorDataMode': 'none' },
-      versions: { 'product.countsMode': 3, 'product.visitorDataMode': 0 },
+      settings: {
+        'product.countsMode': { mode: 'separate' },
+        'product.visitorDataMode': 'none',
+        lostPersonPurgeHours: 24,
+      },
+      versions: { 'product.countsMode': 3, 'product.visitorDataMode': 0, lostPersonPurgeHours: 0 },
     },
     reviewedVersion: 2,
     revertedFrom: { historyId: request.historyId, version: 1 },

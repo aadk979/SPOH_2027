@@ -396,7 +396,8 @@ export const GENERATED_SETTING_METADATA = {
     scopes: ['event'],
     default: 24,
     label: 'Lost-person retention',
-    description: 'How long a resolved lost-person alert keeps its descriptive fields.',
+    description:
+      'How long a resolved lost-person alert keeps its descriptive fields. Never longer than the 24 hours promised to families.',
     group: 'Safety',
     unit: 'hours',
     schedulable: false,
@@ -408,7 +409,7 @@ export const GENERATED_SETTING_METADATA = {
       $schema: 'https://json-schema.org/draft/2020-12/schema',
       type: 'integer',
       minimum: 1,
-      maximum: 720,
+      maximum: 24,
     },
   },
   'media.maxUploadBytes': {
@@ -938,7 +939,7 @@ export const GENERATED_SETTING_SCHEMAS: {
     $schema: 'https://json-schema.org/draft/2020-12/schema',
     type: 'integer',
     minimum: 1,
-    maximum: 720,
+    maximum: 24,
   }) as z.ZodType<GeneratedSettingValues['lostPersonPurgeHours']>,
   'media.maxUploadBytes': z.fromJSONSchema({
     $schema: 'https://json-schema.org/draft/2020-12/schema',
