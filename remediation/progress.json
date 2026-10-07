@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-07T10:18:43.604Z",
+  "updatedAt": "2026-10-07T12:29:15.165Z",
   "current": {
-    "phase": "P10",
-    "step": "P10.8"
+    "phase": "P11",
+    "step": "P11.4"
   },
   "gates": [
     {
@@ -2740,11 +2740,20 @@
         {
           "id": "P11.4",
           "title": "Authorizer abstraction",
-          "status": "not_started",
-          "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "status": "done",
+          "startedAt": "2026-10-07T11:18:40.362Z",
+          "completedAt": "2026-10-07T12:29:15.139Z",
+          "commits": ["f1f0222f9b9687b5895d5dc33100a96ecc010026"],
+          "notes": [
+            {
+              "at": "2026-10-07T11:18:40.363Z",
+              "text": "Owner chose P11.4 as the next milestone on 7 October 2026. ADR-010 prerequisite work: P11.1-P11.3 policy package and suite done; P10 settings/cache bus/lifecycle contracts reviewed. Adapters are not wired into routes; P10, P11 enforcement, G3 and the 28 October decision remain open. No RolePermission model exists yet, so grants come through an injected source."
+            },
+            {
+              "at": "2026-10-07T12:29:15.165Z",
+              "text": "Authorizer interface, LocalCedarAuthorizer, AvpAuthorizer (cedarJson, 200 ms, one retry, 503 when unavailable), full-input DecisionCache cleared by access/membership, circuit breaker, ResilientAuthorizer with ADR-005 degraded groups, EntityBuilder over every resource type (event-scoped lookups). Contract test replays all 343 policy-suite requests through both engines (AVP via a stand-in). Not wired into routes; grants from approved defaults until RolePermission (P11.5/.7). Full CI 37618823689, deploy 37619980354, staging task 148: role, 26 capabilities and probe statuses identical to the 58906e5 baseline. Report reports/P11/authorizer-abstraction.md."
+            }
+          ]
         },
         {
           "id": "P11.5",

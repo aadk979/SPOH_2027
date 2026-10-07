@@ -1,0 +1,139 @@
+{
+  "milestone": "P11.4 authorizer abstraction",
+  "note": "Signed in through normal Cognito with the staging smoke identity (credentials not recorded). Reads only; the legacy PATCH is refused 404. GET /roster/volunteers is not a route (404 on both releases) and adds nothing to the comparison.",
+  "baseline": {
+    "sha": "58906e5eb9f97b2d2c85d21b06049f18527b08f1",
+    "mode": "baseline",
+    "observedAt": "2026-10-07T11:49:32.734Z",
+    "release": {
+      "sourceCommit": "58906e5eb9f97b2d2c85d21b06049f18527b08f1",
+      "deployedImageTag": "58906e5eb9f97b2d2c85d21b06049f18527b08f1",
+      "imageDigest": "sha256:26eedb73db8e984f074877eddf0dba9ca9303c4a25a72a60641ebf93a106f9bf",
+      "taskRevision": 147
+    },
+    "access": {
+      "role": "ADMIN",
+      "capabilities": [
+        "announcement.event.send",
+        "announcement.station.send",
+        "audit.read",
+        "card.reissue",
+        "card.stamp",
+        "config.manage",
+        "count.adjust",
+        "dashboard.event.read",
+        "dashboard.station.read",
+        "fallback.declare",
+        "fallback.import",
+        "footfall.create",
+        "gift.redeem",
+        "incident.report",
+        "incident.resolve",
+        "lostFound.log",
+        "lostPerson.raise",
+        "lostPerson.resolve",
+        "own.read",
+        "record.void",
+        "registration.create",
+        "report.generate",
+        "roster.edit",
+        "swap.approve",
+        "user.provision",
+        "user.read"
+      ]
+    },
+    "statuses": {
+      "GET /admin/settings/client": 200,
+      "GET /admin/event-settings": 200,
+      "GET /admin/organisation-settings": 200,
+      "GET /schedules": 200,
+      "GET /roster/me": 200,
+      "GET /roster/volunteers": 404,
+      "GET /dashboard/live": 200,
+      "GET /lifecycle/readiness": 200,
+      "GET /admin/settings": 404,
+      "PATCH /admin/settings": 404
+    },
+    "checks": {
+      "settingsScreen": true,
+      "backendFailures": []
+    },
+    "signOutStatus": 204,
+    "passed": true,
+    "failures": []
+  },
+  "release": {
+    "sha": "f1f0222f9b9687b5895d5dc33100a96ecc010026",
+    "mode": "compare",
+    "observedAt": "2026-10-07T12:28:39.413Z",
+    "release": {
+      "sourceCommit": "f1f0222f9b9687b5895d5dc33100a96ecc010026",
+      "deployedImageTag": "f1f0222f9b9687b5895d5dc33100a96ecc010026",
+      "imageDigest": "sha256:b9dbbc2d9ee5b165f6b9496f1ea4ff0d4104315218cc79e12d5bc71a5ae2a624",
+      "taskRevision": 148
+    },
+    "access": {
+      "role": "ADMIN",
+      "capabilities": [
+        "announcement.event.send",
+        "announcement.station.send",
+        "audit.read",
+        "card.reissue",
+        "card.stamp",
+        "config.manage",
+        "count.adjust",
+        "dashboard.event.read",
+        "dashboard.station.read",
+        "fallback.declare",
+        "fallback.import",
+        "footfall.create",
+        "gift.redeem",
+        "incident.report",
+        "incident.resolve",
+        "lostFound.log",
+        "lostPerson.raise",
+        "lostPerson.resolve",
+        "own.read",
+        "record.void",
+        "registration.create",
+        "report.generate",
+        "roster.edit",
+        "swap.approve",
+        "user.provision",
+        "user.read"
+      ]
+    },
+    "statuses": {
+      "GET /admin/settings/client": 200,
+      "GET /admin/event-settings": 200,
+      "GET /admin/organisation-settings": 200,
+      "GET /schedules": 200,
+      "GET /roster/me": 200,
+      "GET /roster/volunteers": 404,
+      "GET /dashboard/live": 200,
+      "GET /lifecycle/readiness": 200,
+      "GET /admin/settings": 404,
+      "PATCH /admin/settings": 404
+    },
+    "checks": {
+      "noPendingMigrationLines": 1,
+      "sameRole": true,
+      "sameCapabilities": true,
+      "sameStatuses": true,
+      "baselineSha": "58906e5eb9f97b2d2c85d21b06049f18527b08f1",
+      "settingsScreen": true,
+      "backendFailures": []
+    },
+    "signOutStatus": 204,
+    "passed": true,
+    "failures": []
+  },
+  "ci": {
+    "run": 37618823689,
+    "conclusion": "success"
+  },
+  "deploy": {
+    "run": 37619980354,
+    "conclusion": "success"
+  }
+}
