@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-07T03:45:22.445Z",
+  "updatedAt": "2026-10-07T04:51:29.329Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -2637,6 +2637,10 @@
             {
               "at": "2026-10-07T03:18:46.210Z",
               "text": "Capture/outbox settings moved to the scoped store in two ordered releases. Compatibility ec6fc8e (task 140): legacy PATCH refuses the four keys before any write, form shows eight catalogue pointers; refusal-only staging acceptance passed. Copy/readers 5b5422f released as 2bfae89 (task 141) after A was the single running task: migration applied (no staging legacy overrides to copy), devices read /events/:id/admin/settings/client with no-store, values match the event catalogue, no legacy reads, anonymous 401 private. lostPersonPurgeHours needs a guarded privacy writer first. Correction: the visual run recorded for 86d2ec4 predated that commit; admin-settings baselines refreshed and 100/100 re-verified on fresh static exports of A and B."
+            },
+            {
+              "at": "2026-10-07T04:51:29.328Z",
+              "text": "Lost-person retention moved per owner decision D-16 (shorten only, 1-24h per event). Compatibility 56287ee (task 142): guarded event-settings editor with confirmation before shortening, history/restore, legacy PATCH refused naming /admin/event-settings; refusal-only staging acceptance passed. Copy/reader 879336a (task 143) after A was the single running task: migration applied (no staging legacy override), purge reads only the event value or 24h default."
             }
           ]
         },

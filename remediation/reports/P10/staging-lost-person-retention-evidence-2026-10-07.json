@@ -1,0 +1,39 @@
+{
+  "observedAt": "2026-10-07T05:05:00.000Z",
+  "authentication": "Normal Cognito Authorization Code + PKCE; each run revoked its own session (HTTP 204)",
+  "decision": "D-16 (owner, 7 October 2026): an event may only shorten the 24 hours promised to families; 1-24 hours per event.",
+  "compatibilityRelease": {
+    "sourceCommit": "56287ee3045d7091140a6bb533b78efa9542dce0",
+    "imageDigest": "sha256:cf358957146443f435fd75451776835aca090a7ca593e15640f9d318cae7a869",
+    "taskRevision": 142,
+    "observedAt": "2026-10-07T04:30:16.286Z",
+    "checks": {
+      "legacyPatchRefused": {
+        "status": 400,
+        "code": "VALIDATION_FAILED",
+        "replacement": "/admin/event-settings"
+      },
+      "eventSettingAbove24Refused": { "status": 400, "code": "VALIDATION_FAILED" },
+      "legacyAndEventSettingsUnchanged": true,
+      "formShowsRetentionField": "24",
+      "legacyFormPointers": 1,
+      "backendFailures": []
+    },
+    "legacyRetention": { "value": 24, "overridden": false },
+    "note": "Refusal-only: the legacy body used the current value and the event-settings body named 25 hours; both were refused before any write. Retention was not shortened on staging, which could purge staging alert descriptions."
+  },
+  "readerRelease": {
+    "sourceCommit": "879336a76a872a0d638968330b4ccc26fec0a20f",
+    "imageDigest": "sha256:87cbb92e55ca4689e1aa2c3e4f72b1a1b9a09ca3ec5ffc5d5ee70fcbbd786544",
+    "taskRevision": 143,
+    "checks": {
+      "migrationApplied": "20261007110000_copy_lost_person_retention (migrate task log)",
+      "copied": "none: staging had no legacy override; the event value stays the 24-hour default at version 0 with no history",
+      "legacyPatchStillRefused": true,
+      "appErrorLogsInTheHourAfterRelease": 0,
+      "backendFailures": []
+    }
+  },
+  "ordering": "The reader release was pushed only after the compatibility image was the single running task, so no instance wrote the key to the legacy store after the copy.",
+  "limitations": "eventName and the four platform-only keys remain legacy; AppSetting is not dropped. P10.8 and G3 remain open."
+}
