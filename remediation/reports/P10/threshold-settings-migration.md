@@ -43,7 +43,10 @@ windows, injected clocks and response schemas are unchanged.
     its one legacy override, plus the category journeys on the same-origin
     runtime.
   - The full 100-check visual suite with updates disabled and unchanged frozen
-    markers.
+    markers. **Correction (7 October):** that run predated `86d2ec4` and used an
+    older static build, so it never saw the pointer cards; the `admin-settings`
+    baselines were refreshed in `ec6fc8e`. See
+    [the capture settings report](capture-settings-migration.md).
   - Two E2E failures traced to fixture overrides left by rate-limited, interrupted
     runs. They were reset through the public catalogue API at their current
     versions before the specs passed.

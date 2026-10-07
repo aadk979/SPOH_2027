@@ -46,3 +46,20 @@ logs. The default access-log format records no integration error message, so a
 recurrence would still not say why; adding `$context.integrationErrorMessage`
 is a candidate observability change for P08.8.
 [Sanitized evidence](staging-gateway-keepalive-evidence-2026-10-06.json).
+
+## Follow-up — 7 October 2026
+
+**Access-log format (P08.8).** The stage now writes one JSON line per request with
+the integration status, latency and error message, response latency, path and the
+gateway's error type and message (`infra/cdk/src/appService.ts`). A gateway-made
+failure shows `integrationStatus` `-` and says why. The first version (`ac84907`,
+live on task 140) left the error message unquoted. Without an error the gateway
+writes it as a bare `-`, so no line parsed as JSON. `2bfae89` quotes it. All 37
+lines from the task 141 acceptance parse, and the test now models absent values
+the way the gateway writes them.
+
+**503 watch.** From 09:00 UTC on 6 October to 03:20 UTC on 7 October the access
+logs hold eight 503s, all between 11:24 and 13:13 UTC on 6 October, on task 136
+with the 5-second default. Task 137 (`7ed246b`) was registered at 13:38 UTC. No
+503 has been logged since, through five releases and their acceptance runs. This
+is still light traffic; keep watching, now with the integration error in each line.

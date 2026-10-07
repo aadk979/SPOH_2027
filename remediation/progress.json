@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-06T15:40:13.022Z",
+  "updatedAt": "2026-10-07T03:18:46.211Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -1839,6 +1839,10 @@
             {
               "at": "2026-10-03T17:19:32.967Z",
               "text": "Exact 458903e CI/Infra/deploy and revision 102 image verified. Deployed cache-bus alarm is OK; four one-minute Maximum=0 Count observations prove healthy log-to-metric reporting. Full observability, notification and budget criteria remain open."
+            },
+            {
+              "at": "2026-10-07T03:18:45.857Z",
+              "text": "API access logs are one JSON line per request with integration status/latency/error, response latency, path and gateway error type/message (ac84907; quoting fix 2bfae89 after staging showed the unquoted messageString wrote a bare -). Task 141 acceptance: 37/37 lines parse. 503 watch: 8 503s on task 136 between 11:24-13:13 UTC 6 Oct, none since task 137 (13:38 UTC) through 03:20 UTC 7 Oct. Notification, dashboard and budget criteria remain open (P08 dashboard awaits owner cost decision)."
             }
           ]
         },
@@ -1865,6 +1869,10 @@
             {
               "at": "2026-10-05T13:29:51.413Z",
               "text": "The first exact CI executes 173 shared, 2301 server plus four existing skips and 505 client checks but correctly fails server branches at 3070/3563 versus unchanged 86.19 floor. Retained artifact identifies the single timing-dependent cache-bus stop branch. Seven deterministic transport tests now verify reconnect cancellation/backoff/recovery/subscriber isolation; full fresh server coverage passes 2308 plus four skips, 95.36 lines/86.41 branches, and the unchanged three-package ratchet passes. Types/lint/architecture/formatting/scans pass. Replacement exact CI remains pending; P08.9 stays open."
+            },
+            {
+              "at": "2026-10-07T03:18:45.468Z",
+              "text": "Tracker flag parsing fixed (ff184d7): --force is a switch and no longer swallows the following --note, value flags refuse to consume another flag, unknown flags are errors; four parser tests run in the dependency-free CI safety step. Released with ec6fc8e after full CI."
             }
           ]
         },
@@ -2616,6 +2624,10 @@
             {
               "at": "2026-10-06T15:40:12.641Z",
               "text": "Four operational thresholds moved to the scoped store in two ordered releases. Compatibility 86d2ec4 (task 138): legacy PATCH refuses the four keys before any write, form points to the catalogue; refusal-only staging acceptance passed. Copy/readers 92ad10c released with the lockfile-only sharp/shell-quote audit repair as a81f36b (task 139) after A was the only running task: staging staleDeviceMinutes copied to catalogue v1 with MIGRATION history, other three unset, four consumers schema-valid, no backend failures. Report reports/P10/threshold-settings-migration.md. Ten other legacy keys, client/session readers, AppSetting removal and P10.8 remain open."
+            },
+            {
+              "at": "2026-10-07T03:18:46.210Z",
+              "text": "Capture/outbox settings moved to the scoped store in two ordered releases. Compatibility ec6fc8e (task 140): legacy PATCH refuses the four keys before any write, form shows eight catalogue pointers; refusal-only staging acceptance passed. Copy/readers 5b5422f released as 2bfae89 (task 141) after A was the single running task: migration applied (no staging legacy overrides to copy), devices read /events/:id/admin/settings/client with no-store, values match the event catalogue, no legacy reads, anonymous 401 private. lostPersonPurgeHours needs a guarded privacy writer first. Correction: the visual run recorded for 86d2ec4 predated that commit; admin-settings baselines refreshed and 100/100 re-verified on fresh static exports of A and B."
             }
           ]
         },

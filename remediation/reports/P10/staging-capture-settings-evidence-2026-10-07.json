@@ -1,0 +1,52 @@
+{
+  "observedAt": "2026-10-07T03:17:17.565Z",
+  "authentication": "Normal Cognito Authorization Code + PKCE; each run revoked its own session (HTTP 204)",
+  "compatibilityRelease": {
+    "sourceCommit": "ec6fc8eae61f579bd8859ae60d6c935d191eef52",
+    "imageDigest": "sha256:217782ccf1ea8b6e3bd999f821e0338eb5b683834365c3e73dc0adcde6b798f9",
+    "taskRevision": 140,
+    "observedAt": "2026-10-07T02:54:06.031Z",
+    "checks": {
+      "singleRetiredKeysRefused": {
+        "captureUndoWindowSeconds": { "status": 400, "code": "VALIDATION_FAILED" },
+        "captureSendGraceSeconds": { "status": 400, "code": "VALIDATION_FAILED" },
+        "outboxWarningCount": { "status": 400, "code": "VALIDATION_FAILED" },
+        "outboxWarningAgeMinutes": { "status": 400, "code": "VALIDATION_FAILED" }
+      },
+      "mixedBodyRefusedWhole": { "status": 400, "code": "VALIDATION_FAILED" },
+      "legacyAndCatalogueUnchanged": true,
+      "formPointers": 8,
+      "backendFailures": []
+    },
+    "legacyOverriddenRetiredKeys": [],
+    "note": "Refusal-only: every PATCH body used current values and was refused before any write; legacy settings and the event catalogue re-read unchanged. A first invocation with a malformed SHA argument stopped in preflight before signing in."
+  },
+  "readerRelease": {
+    "sourceCommit": "2bfae89de5641a6c6a056e5085e19f62ebb1cb68",
+    "imageDigest": "sha256:00df52959a777e2dd6bb345b2fc096bb87662613e859040f5b7f4939fb967d01",
+    "taskRevision": 141,
+    "observedAt": "2026-10-07T03:17:17.565Z",
+    "copied": [],
+    "checks": {
+      "migrationApplied": "20261007090000_copy_capture_settings (migrate task log)",
+      "noOverrideInvented": "all four keys remain default-sourced at stored version 0, as staging had no legacy override for them",
+      "deviceFetch": {
+        "path": "/api/v1/events/:eventId/admin/settings/client",
+        "status": 200,
+        "cacheControl": "no-store",
+        "matchesEventCatalogue": true,
+        "pollIntervalsMatchLegacy": true
+      },
+      "appLegacySettingsReads": 0,
+      "anonymous": { "status": 401, "cacheControl": "no-store" },
+      "backendFailures": []
+    },
+    "note": "Read-only. Also carries the access-log format fix (2bfae89)."
+  },
+  "accessLogFormat": {
+    "firstFormat": "ac84907, released with ec6fc8e: every line without an error ended in \"errorMessage\":- and did not parse as JSON (58 of 58 sampled lines).",
+    "fixed": "2bfae89: all 37 lines written during the reader acceptance parse as JSON; the device read logged status 200 with integrationStatus 200."
+  },
+  "ordering": "The reader release was pushed only after the compatibility image was the single running task, so no instance wrote the four keys to the legacy store after the copy.",
+  "limitations": "lostPersonPurgeHours needs a guarded privacy writer; eventName and the four platform-only keys remain legacy. A catalogue change reaches a device on its next page load. AppSetting is not dropped. P10.8 and G3 remain open."
+}
