@@ -1,4 +1,5 @@
 import { CfnOutput, Duration, RemovalPolicy, Stack, Validations } from 'aws-cdk-lib';
+import { AccessLogFormat } from 'aws-cdk-lib/aws-apigateway';
 import {
   type CfnStage,
   HttpApi,
@@ -235,6 +236,31 @@ export class AppService extends Construct {
   }
 }
 
+/**
+ * One JSON line per request (P08.8). Beyond the default Common Log Format it
+ * records the integration status, latency and error message, so a 503 that the
+ * gateway produced without reaching the app (integrationStatus "-") says why.
+ * Values are strings because absent numbers are logged as "-"; the error
+ * message uses AWS's pre-quoted variant so a quote in it cannot break the line.
+ */
+export const API_ACCESS_LOG_FORMAT = `{${[
+  '"requestId":"$context.requestId"',
+  '"requestTime":"$context.requestTimeEpoch"',
+  '"ip":"$context.identity.sourceIp"',
+  '"method":"$context.httpMethod"',
+  '"path":"$context.path"',
+  '"routeKey":"$context.routeKey"',
+  '"protocol":"$context.protocol"',
+  '"status":"$context.status"',
+  '"responseLength":"$context.responseLength"',
+  '"responseLatency":"$context.responseLatency"',
+  '"integrationStatus":"$context.integration.status"',
+  '"integrationLatency":"$context.integration.latency"',
+  '"integrationError":"$context.integrationErrorMessage"',
+  '"errorType":"$context.error.responseType"',
+  '"errorMessage":$context.error.messageString',
+].join(',')}}`;
+
 /** The HTTP API and its throttled, logged stage, created before the service. */
 export function createHttpApi(scope: Construct, stage: StageConfig): HttpApi {
   const api = new HttpApi(scope, 'HttpApi', {
@@ -250,7 +276,10 @@ export function createHttpApi(scope: Construct, stage: StageConfig): HttpApi {
     stageName: '$default',
     autoDeploy: true,
     throttle: { rateLimit: 50, burstLimit: 100 },
-    accessLogSettings: { destination: new LogGroupLogDestination(accessLogs) },
+    accessLogSettings: {
+      destination: new LogGroupLogDestination(accessLogs),
+      format: AccessLogFormat.custom(API_ACCESS_LOG_FORMAT),
+    },
   });
   Validations.of(api).acknowledge({
     id: 'AwsSolutions-APIG4',

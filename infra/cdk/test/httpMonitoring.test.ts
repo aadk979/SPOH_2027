@@ -2,6 +2,7 @@ import { App } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
 import { MetricFilter } from 'aws-cdk-lib/aws-logs';
 import { describe, expect, it } from 'vitest';
+import { API_ACCESS_LOG_FORMAT } from '../src/appService.js';
 import { buildApp } from '../src/app.js';
 import { PlatformStack } from '../src/platformStack.js';
 import type { StageName } from '../src/config.js';
@@ -118,6 +119,39 @@ describe('native HTTP API monitoring (P08.8)', () => {
           Properties: { AlarmName: name },
         });
       }
+    },
+  );
+
+  it.each(['staging', 'prod'] as const)(
+    'writes %s access logs as JSON that explains gateway-generated errors',
+    (stage) => {
+      const stages = Object.values(templateFor(stage).findResources('AWS::ApiGatewayV2::Stage'));
+      expect(stages).toHaveLength(1);
+      expect(stages[0]!.Properties.AccessLogSettings.Format).toBe(API_ACCESS_LOG_FORMAT);
+
+      // What the gateway writes for a 503 it produced itself: absent values are
+      // "-", and messageString arrives already quoted (and escaped).
+      const line = API_ACCESS_LOG_FORMAT.replace(
+        '$context.error.messageString',
+        JSON.stringify('Service "Unavailable"'),
+      ).replace(/\$context\.[A-Za-z.]+/g, (variable) =>
+        variable === '$context.status' ? '503' : '-',
+      );
+      expect(JSON.parse(line)).toMatchObject({
+        requestId: '-',
+        status: '503',
+        integrationStatus: '-',
+        integrationError: '-',
+        errorMessage: 'Service "Unavailable"',
+      });
+      for (const variable of [
+        '$context.requestId',
+        '$context.integration.status',
+        '$context.integration.latency',
+        '$context.integrationErrorMessage',
+        '$context.responseLatency',
+      ])
+        expect(API_ACCESS_LOG_FORMAT).toContain(variable);
     },
   );
 });
