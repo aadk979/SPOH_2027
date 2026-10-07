@@ -2,7 +2,6 @@ import { writeAudit, type AuditContext } from '../../../platform/audit/index.js'
 import { prisma } from '../../../platform/db/client.js';
 import { generateRefreshToken, hashRefreshToken } from '../../../platform/identity/index.js';
 import { logger } from '../../../platform/logger/index.js';
-import { getSettings } from '../../../platform/settings/index.js';
 import { systemClock } from '../../../platform/time/index.js';
 import {
   createRefreshSession,
@@ -17,6 +16,7 @@ import {
   rotationCheck,
   sessionEnded,
 } from '../domain/sessionRules.js';
+import { refreshSessionDays } from './sessionLifetime.js';
 import {
   issueSession,
   loadVolunteer,
@@ -52,7 +52,7 @@ export async function rotateSession(
 
   const nextToken = generateRefreshToken();
   const now = systemClock.now();
-  const expiresAt = refreshExpiry(now, getSettings().refreshSessionDays);
+  const expiresAt = refreshExpiry(now, await refreshSessionDays(volunteer.scope));
 
   const session = await prisma.$transaction(async (tx) => {
     // Revoke first, inside the same transaction as the replacement, so the two

@@ -7,7 +7,7 @@ import { claimDueActions } from '../../src/platform/scheduler/claimDueActions.js
 import * as executionRepo from '../../src/platform/scheduler/executionRepo.js';
 import { HandlerRegistry } from '../../src/platform/scheduler/registry.js';
 import { runClaimedAction } from '../../src/platform/scheduler/runClaimedAction.js';
-import { getSettings, loadSettings } from '../../src/platform/settings/index.js';
+import { loadSettings } from '../../src/platform/settings/index.js';
 import { fixedClock } from '../../src/platform/time/index.js';
 import { rawDb, resetDatabase } from '../helpers/db.js';
 import { createVolunteer, testEvent } from '../helpers/fixtures.js';
@@ -33,12 +33,27 @@ const create = (data = {}) =>
   rawDb.scheduledAction.create({
     data: { type: 'idempotency.prune', payload: {}, runAt: due, ...data },
   });
-const policy = (value: number) =>
-  rawDb.appSetting.upsert({
-    where: { key: 'idempotencyRetentionDays' },
-    create: { key: 'idempotencyRetentionDays', value },
-    update: { value },
+/** The organisation's own retention (platform scope, D-17). */
+const policy = async (value: number, organisationId?: string) => {
+  const owner =
+    organisationId ??
+    (await rawDb.event.findUniqueOrThrow({ where: { id: (await testEvent()).eventId } }))
+      .organisationId;
+  return rawDb.setting.upsert({
+    where: {
+      scope_scopeId_key: { scope: 'PLATFORM', scopeId: owner, key: 'idempotencyRetentionDays' },
+    },
+    create: {
+      scope: 'PLATFORM',
+      scopeId: owner,
+      eventId: null,
+      key: 'idempotencyRetentionDays',
+      value,
+      version: 1,
+    },
+    update: { value, version: { increment: 1 } },
   });
+};
 const keys = async () =>
   (await rawDb.idempotencyRecord.findMany({ orderBy: { key: 'asc' } })).map((row) => row.key);
 const run = async (instant = due) => {
@@ -95,7 +110,8 @@ it('boots both daily handlers and prunes event and platform replays at the stric
     ).toBe(true);
     expect(receipts.find((row) => row.action === 'idempotency.prune')?.after).toEqual({
       removed: 2,
-      retentionDays: 7,
+      platform: { retentionDays: 7, removed: 1 },
+      organisations: [{ retentionDays: 7, removed: 1 }],
     });
     expect(JSON.stringify(receipts)).not.toMatch(
       /old-event|old-platform|privateBody|private-actor|private-replay/,
@@ -111,15 +127,14 @@ it('boots both daily handlers and prunes event and platform replays at the stric
   }
 });
 
-it('uses policy changed after enqueue even while the compatibility cache is stale', async () => {
+it("uses the organisation's policy as it is when the prune runs", async () => {
+  const { eventId } = await testEvent();
   await policy(1);
-  await loadSettings();
   const action = await create();
-  await replay('retained', -2 * DAY);
-  await replay('equality', -3 * DAY);
-  await replay('expired', -3 * DAY - 1);
+  await replay('retained', -2 * DAY, eventId);
+  await replay('equality', -3 * DAY, eventId);
+  await replay('expired', -3 * DAY - 1, eventId);
   await policy(3);
-  expect(getSettings().idempotencyRetentionDays).toBe(1);
   expect(await run()).toBe('SUCCEEDED');
   expect(await keys()).toEqual(['equality', 'retained']);
   expect(
@@ -128,19 +143,65 @@ it('uses policy changed after enqueue even while the compatibility cache is stal
         where: { scheduledActionId: action.id, action: 'idempotency.prune' },
       })
     ).after,
-  ).toEqual({ removed: 1, retentionDays: 3 });
+  ).toEqual({
+    removed: 1,
+    platform: { retentionDays: 7, removed: 0 },
+    organisations: [{ retentionDays: 3, removed: 1 }],
+  });
+});
+
+it("never applies one organisation's policy, or the legacy row, to other records", async () => {
+  const { eventId } = await testEvent();
+  const other = await rawDb.organisation.create({
+    data: {
+      slug: `replay-other-${Date.now()}`,
+      name: 'Other',
+      appName: 'Other',
+      defaultTimezone: 'Asia/Singapore',
+    },
+  });
+  try {
+    const otherEvent = await rawDb.event.create({
+      data: {
+        organisationId: other.id,
+        slug: `replay-${other.id}`,
+        name: 'Other',
+        timezone: 'UTC',
+      },
+    });
+    await policy(1);
+    await policy(30, other.id);
+    await rawDb.appSetting.create({ data: { key: 'idempotencyRetentionDays', value: 1 } });
+    await create();
+    await replay('ours-expired', -DAY - 1, eventId);
+    await replay('theirs-kept', -20 * DAY, otherEvent.id);
+    await replay('platform-kept', -6 * DAY);
+    await replay('platform-expired', -7 * DAY - 1);
+    expect(await run()).toBe('SUCCEEDED');
+    expect(await keys()).toEqual(['platform-kept', 'theirs-kept']);
+    await rawDb.idempotencyRecord.deleteMany({ where: { eventId: otherEvent.id } });
+    await rawDb.event.delete({ where: { id: otherEvent.id } });
+  } finally {
+    await rawDb.setting.deleteMany({ where: { scopeId: other.id } });
+    await rawDb.organisation.delete({ where: { id: other.id } });
+  }
 });
 
 it.each([0, 91, 1.5])('falls back to seven days for invalid stored retention %s', async (value) => {
+  const { eventId } = await testEvent();
   await policy(value);
   await create();
-  await replay('expired', -7 * DAY - 1);
-  await replay('retained', -2 * DAY);
+  await replay('expired', -7 * DAY - 1, eventId);
+  await replay('retained', -2 * DAY, eventId);
   expect(await run()).toBe('SUCCEEDED');
   expect(await keys()).toEqual(['retained']);
   expect(
     (await rawDb.auditLog.findFirstOrThrow({ where: { action: 'idempotency.prune' } })).after,
-  ).toEqual({ removed: 1, retentionDays: 7 });
+  ).toEqual({
+    removed: 1,
+    platform: { retentionDays: 7, removed: 0 },
+    organisations: [{ retentionDays: 7, removed: 1 }],
+  });
 });
 
 it.each(['prune audit', 'completion'])(

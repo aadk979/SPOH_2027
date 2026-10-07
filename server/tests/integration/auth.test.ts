@@ -96,6 +96,41 @@ describe('opening a session', () => {
     expect((firstClaims.exp ?? 0) - (firstClaims.iat ?? 0)).toBe(120);
   });
 
+  it("gives new and rotated sessions the organisation's session lifetime, not the legacy row", async () => {
+    const DAY = 86_400_000;
+    const { eventId } = await testEvent();
+    const { organisationId } = await rawDb.event.findUniqueOrThrow({
+      where: { id: eventId },
+      select: { organisationId: true },
+    });
+    await rawDb.appSetting.create({ data: { key: 'refreshSessionDays', value: 90 } });
+    await rawDb.setting.create({
+      data: {
+        scope: 'PLATFORM',
+        scopeId: organisationId,
+        key: 'refreshSessionDays',
+        value: 2,
+        version: 1,
+      },
+    });
+    const first = await openSession('ic@spoh.test');
+    expect(first.status).toBe(201);
+    const opened = await prisma.refreshSession.findFirstOrThrow({ where: { revokedAt: null } });
+    expect(opened.expiresAt.getTime() - Date.now()).toBe(2 * DAY);
+
+    await rawDb.setting.updateMany({
+      where: { scope: 'PLATFORM', scopeId: organisationId, key: 'refreshSessionDays' },
+      data: { value: 5, version: 2 },
+    });
+    const refreshed = await request(app)
+      .post('/api/v1/auth/refresh')
+      .set('Cookie', `${COOKIE}=${cookieValue(first, COOKIE) as string}`);
+    expect(refreshed.status).toBe(200);
+    const rotated = await prisma.refreshSession.findFirstOrThrow({ where: { revokedAt: null } });
+    expect(rotated.id).not.toBe(opened.id);
+    expect(rotated.expiresAt.getTime() - Date.now()).toBe(5 * DAY);
+  });
+
   it('makes the refresh cookie unreadable by page script and scopes it to the auth path', async () => {
     const response = await openSession('ic@spoh.test');
     const attributes = cookieAttributes(response, COOKIE);

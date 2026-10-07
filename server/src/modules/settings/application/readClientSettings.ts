@@ -3,12 +3,16 @@ import { requireCurrentCapability } from '../../../platform/access/currentCapabi
 import { prisma } from '../../../platform/db/client.js';
 import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
-import { getSettings } from '../../../platform/settings/index.js';
 import { prepareNumericSettings } from '../../../platform/settings/numericSnapshot.js';
 import type { SettingKey } from '../../../platform/settings/registry.js';
 
-/** Copied to the event scope and written only through the catalogue (P10.2). */
+/**
+ * The capture and outbox keys (event scope, written through the catalogue) and
+ * the two poll intervals (organisation scope, written by platform admins, D-17).
+ */
 const SCOPED_KEYS = [
+  'dashboardPollSeconds',
+  'alertPollSeconds',
   'captureUndoWindowSeconds',
   'captureSendGraceSeconds',
   'outboxWarningCount',
@@ -16,10 +20,9 @@ const SCOPED_KEYS = [
 ] as const satisfies readonly SettingKey[];
 
 /**
- * A device's tuning for the caller's own event. The capture and outbox keys
- * resolve from the scoped store (event, then the compiled default). The two
- * platform-only poll intervals still come from the legacy store, which remains
- * their only writer until their own migration.
+ * A device's tuning for the caller's own event, all from the scoped store in one
+ * query: the capture and outbox keys from the event, the poll intervals from its
+ * organisation, each falling back to the compiled default.
  *
  * The event row is held and the membership rechecked under its lock, so a
  * suspended or removed member cannot read through a stale session. Reads have
@@ -36,11 +39,10 @@ export function readClientSettings(actor: ActorContext): Promise<ClientSettingsR
         capability: 'own.read',
       });
       const resolve = await prepareNumericSettings(actor.scope, SCOPED_KEYS, tx);
-      const legacy = getSettings();
       return {
         settings: {
-          dashboardPollSeconds: legacy.dashboardPollSeconds,
-          alertPollSeconds: legacy.alertPollSeconds,
+          dashboardPollSeconds: resolve('dashboardPollSeconds'),
+          alertPollSeconds: resolve('alertPollSeconds'),
           captureUndoWindowSeconds: resolve('captureUndoWindowSeconds'),
           captureSendGraceSeconds: resolve('captureSendGraceSeconds'),
           outboxWarningCount: resolve('outboxWarningCount'),

@@ -79,7 +79,7 @@ describe('device settings for the caller’s event', () => {
     expect(ClientSettingsResponse.parse(response.body)).toEqual({ settings: DEFAULTS });
   });
 
-  it('resolves the capture and outbox keys from the event scope, not the legacy store', async () => {
+  it('resolves every key from the scoped store, never the legacy store', async () => {
     const restore = overrideSettingsForTest({
       captureUndoWindowSeconds: 99,
       captureSendGraceSeconds: 99,
@@ -91,14 +91,14 @@ describe('device settings for the caller’s event', () => {
     try {
       await store('EVENT', 'captureUndoWindowSeconds', 25);
       await store('EVENT', 'outboxWarningCount', 40);
+      // The poll intervals are the organisation's (D-17).
+      await store('PLATFORM', 'alertPollSeconds', 20);
       const { body } = await read().expect(200);
       expect(body.settings).toEqual({
-        // Still platform-wide in the legacy store until their own migration.
-        dashboardPollSeconds: 7,
-        alertPollSeconds: 12,
+        dashboardPollSeconds: 3,
+        alertPollSeconds: 20,
         captureUndoWindowSeconds: 25,
         outboxWarningCount: 40,
-        // No event override: the compiled default, not the legacy value.
         captureSendGraceSeconds: 2,
         outboxWarningAgeMinutes: 5,
       });
