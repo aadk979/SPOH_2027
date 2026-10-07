@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-07T06:05:40.222Z",
+  "updatedAt": "2026-10-07T07:56:50.103Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -218,6 +218,15 @@
       "status": "answered",
       "answer": "A: organisation platform admins (PLATFORM_ADMIN) change the four organisation-wide settings; event Chiefs/Admins read them. Privacy settings stay config.manage until P11 (owner, 7 October 2026)",
       "answeredAt": "2026-10-07T05:01:46.148Z"
+    },
+    {
+      "id": "D-18",
+      "title": "The settings screen's event name",
+      "owner": "you",
+      "blocks": ["P10.8"],
+      "status": "answered",
+      "answer": "A: the settings screen's event name renames Event.name (from the name read, audited), by the event's Chief and Admin (config.manage); then the legacy AppSetting store goes (owner, 7 October 2026)",
+      "answeredAt": "2026-10-07T07:56:44.735Z"
     }
   ],
   "phases": [

@@ -39,6 +39,11 @@ export const ORGANISATION_LEGACY_SETTING_KEYS = [
   'idempotencyRetentionDays',
 ] as const satisfies readonly (keyof UpdateSettingsRequest)[];
 
+/** The event's name is the event's own (`Event.name`), renamed at PATCH /admin/event-name. */
+export const EVENT_LEGACY_SETTING_KEYS = [
+  'eventName',
+] as const satisfies readonly (keyof UpdateSettingsRequest)[];
+
 function refuse(
   patch: UpdateSettingsRequest,
   moved: { keys: readonly (keyof UpdateSettingsRequest)[]; replacement: string; message: string },
@@ -66,5 +71,10 @@ export function assertNoRetiredLegacyKeys(patch: UpdateSettingsRequest): void {
     replacement: '/admin/organisation-settings',
     message:
       "These settings are changed in the organisation's settings by a platform admin, not on this endpoint.",
+  });
+  refuse(patch, {
+    keys: EVENT_LEGACY_SETTING_KEYS,
+    replacement: '/admin/event-name',
+    message: "The event's name is changed on the event itself, not on this endpoint.",
   });
 }

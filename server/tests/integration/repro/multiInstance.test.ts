@@ -20,6 +20,8 @@ interface Instance {
   purgeResolvedAlerts: () => Promise<number>;
   disconnect: () => Promise<void>;
   clearCaches: () => Promise<void>;
+  /** The legacy store's own writer; no endpoint writes it any more. */
+  writeLegacySetting: (patch: { eventName: string }) => Promise<unknown>;
   busStatus: () => 'unstarted' | 'connected' | 'degraded';
   busGauge: () => number;
 }
@@ -43,7 +45,8 @@ async function startInstance(): Promise<Instance> {
   };
   const { invalidateVolunteerCache } = await import('../../../src/platform/identity/index.js');
   const { invalidateEventCache } = await import('../../../src/platform/event/events.js');
-  const { loadSettings } = await import('../../../src/platform/settings/index.js');
+  const { loadSettings, updateSettings } = await import('../../../src/platform/settings/index.js');
+  const { SYSTEM_AUDIT_CONTEXT } = await import('../../../src/platform/http/auditContext.js');
   expect(busGauge()).toBe(1);
   await startCacheBus();
   return {
@@ -51,6 +54,7 @@ async function startInstance(): Promise<Instance> {
     purgeResolvedAlerts,
     busStatus: cacheBusStatus,
     busGauge,
+    writeLegacySetting: (patch) => updateSettings(patch, null, SYSTEM_AUDIT_CONTEXT),
     clearCaches: async () => {
       invalidateVolunteerCache();
       invalidateEventCache();
@@ -165,11 +169,7 @@ describe('two instances, one database (P03.5 repros)', () => {
 
   // F03-030
   it('shows a settings change on the other instance within two seconds', async () => {
-    const patch = await request(a.app)
-      .patch('/api/v1/admin/settings')
-      .set('Authorization', bearer(chief))
-      .send({ eventName: 'Dry Run 2' });
-    expect(patch.status, JSON.stringify(patch.body)).toBe(200);
+    await a.writeLegacySetting({ eventName: 'Dry Run 2' });
 
     await expect
       .poll(

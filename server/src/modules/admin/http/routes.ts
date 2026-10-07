@@ -8,6 +8,7 @@ import {
   CreateStationRequest,
   CreateVisitorFieldRequest,
   DeactivateVolunteerRequest,
+  RenameEventRequest,
   Id,
   ListVolunteersQuery,
   TestAttendanceNetworkRequest,
@@ -35,6 +36,7 @@ import {
   updateVolunteerHandler,
 } from '../../people/index.js';
 import { createAssignmentHandler, deleteAssignmentHandler } from '../../assignments/index.js';
+import { renameEventHandler } from '../../event/index.js';
 import { registerSettingsRoutes } from './settingsRoutes.js';
 import { registerCategoryScheduleRoutes } from './categoryScheduleRoutes.js';
 import {
@@ -74,6 +76,10 @@ adminRouter.use('/settings/catalogue', (_req, res, next) => {
   next();
 });
 adminRouter.use('/organisation-settings', (_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+});
+adminRouter.use('/event-name', (_req, res, next) => {
   res.setHeader('Cache-Control', 'no-store');
   next();
 });
@@ -182,6 +188,18 @@ adminRouter.patch(
   requireCapability('config.manage'),
   validate({ params: IdParams, body: UpdateStationRequest }),
   updateStationHandler,
+);
+
+// ─────────────────────────────────────────────────────────────
+// EVENT NAME: what every screen, report and export calls the event
+// ─────────────────────────────────────────────────────────────
+
+adminRouter.patch(
+  '/event-name',
+  adminRateLimit,
+  requireCapability('config.manage'),
+  validate({ body: RenameEventRequest }),
+  renameEventHandler,
 );
 
 // ─────────────────────────────────────────────────────────────

@@ -1,14 +1,12 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { GENERATED_SETTING_DEFAULTS, RuntimeSettings, type SettingsResponse } from '@spoh/shared';
+import type { RenameEventResponse } from '@spoh/shared';
 import { api } from '@/shared/lib/api';
-import { useSettingsForm, type SettingsForm } from '@/features/settings/hooks/useSettingsForm';
+import { ApiError } from '@/shared/lib/apiErrors';
+import { sessionKeys } from '@/features/session';
 import { EventNameField } from '@/features/settings/components/EventNameField';
 import { ThresholdsForm } from '@/features/settings/components/ThresholdsForm';
-import { SettingsApply } from '@/features/settings/components/SettingsApply';
-import { SettingsFeedback } from '@/features/settings/components/SettingsFeedback';
-import { settingsKeys } from '@/features/settings/queries';
 import { TEST_EVENT } from '../helpers/event';
 
 const event = vi.hoisted(() => ({ id: 'evt_test' }));
@@ -16,77 +14,64 @@ vi.mock('@/shared/lib/eventContext', async (original) => ({
   ...(await original<typeof import('@/shared/lib/eventContext')>()),
   useEventId: () => event.id,
 }));
+vi.mock('@/features/session/useSession', async (original) => ({
+  ...(await original<typeof import('@/features/session/useSession')>()),
+  useCurrentSession: () => ({ accessToken: 'test' }),
+}));
 vi.mock('@/shared/lib/api', async (original) => ({
   ...(await original<typeof import('@/shared/lib/api')>()),
   api: vi.fn(),
 }));
 const mockedApi = vi.mocked(api);
 const clients: QueryClient[] = [];
-let response: SettingsResponse;
-let latestForm: SettingsForm;
-function Harness({ enabled = true }: { enabled?: boolean }) {
-  const form = useSettingsForm(enabled);
-  latestForm = form;
-  return (
-    <>
-      <SettingsFeedback form={form} canEdit />
-      <EventNameField form={form} canEdit />
-      <ThresholdsForm form={form} canEdit />
-      <SettingsApply form={form} canEdit />
-    </>
-  );
+/** The event's name as the server has it, per event. */
+let names: Record<string, string>;
+
+function me(eventId: string) {
+  return {
+    volunteer: { id: 'chief', displayName: 'Chief', role: 'CHIEF_COORDINATOR' },
+    event: { id: eventId, name: names[eventId], timezone: 'Asia/Singapore', locale: 'en-SG' },
+    capabilities: ['config.manage'],
+  };
 }
-function show() {
+function eventOf(path: string): string {
+  return /^\/events\/([^/]+)\//.exec(path)?.[1] ?? '';
+}
+function writes() {
+  return mockedApi.mock.calls.filter(([, options]) => options?.method === 'PATCH');
+}
+function show(canEdit = true) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
   clients.push(client);
   return {
     client,
-    ...render(<Harness />, {
+    ...render(<EventNameField canEdit={canEdit} />, {
       wrapper: ({ children }) => (
         <QueryClientProvider client={client}>{children}</QueryClientProvider>
       ),
     }),
   };
 }
-function writes() {
-  return mockedApi.mock.calls.filter(([, options]) => options?.method === 'PATCH');
+const field = () => screen.getByLabelText('Event name') as HTMLInputElement;
+const renameButton = () => screen.queryByRole('button', { name: 'Rename event' });
+async function loaded(name = names[event.id]) {
+  await waitFor(() => expect(field().value).toBe(name));
 }
-async function loaded() {
-  await waitFor(() =>
-    expect((screen.getByLabelText('Event name') as HTMLInputElement).value).toBe(
-      response.settings.eventName,
-    ),
-  );
-}
+
 beforeEach(() => {
   event.id = TEST_EVENT.id;
-  response = {
-    settings: RuntimeSettings.parse(
-      Object.fromEntries(
-        Object.keys(RuntimeSettings.shape).map((key) => [
-          key,
-          GENERATED_SETTING_DEFAULTS[key as keyof RuntimeSettings],
-        ]),
-      ),
-    ),
-    overriddenKeys: [],
-    updatedAt: null,
-    updatedById: null,
-    updatedByName: null,
-  };
+  names = { [TEST_EVENT.id]: 'Test Event' };
   mockedApi.mockReset();
-  mockedApi.mockImplementation(async (_path, options) => {
-    if (options?.method === 'PATCH')
-      response = {
-        ...response,
-        settings: { ...response.settings, ...(options.body as object) },
-        overriddenKeys: [
-          ...new Set([...response.overriddenKeys, ...Object.keys(options.body as object)]),
-        ],
-      };
-    return response;
+  mockedApi.mockImplementation(async (path, options) => {
+    const eventId = eventOf(path);
+    if (options?.method === 'PATCH') {
+      const body = options.body as { name: string };
+      names[eventId] = body.name;
+      return { event: me(eventId).event } as unknown as RenameEventResponse;
+    }
+    return me(eventId);
   });
 });
 afterEach(() => {
@@ -94,257 +79,168 @@ afterEach(() => {
   for (const client of clients.splice(0)) client.clear();
 });
 
-describe('settings moved to the settings catalogue', () => {
-  const moved = [
-    'Silent station',
-    'Stale device',
-    'Implausible tap rate',
-    'Long shift',
-    'Undo window',
-    'Send grace',
-    'Unsent capture warning',
-    'Oldest unsent warning',
-  ] as const;
+describe('event name', () => {
+  it("shows the event's own name, and offers a rename only for a real change", async () => {
+    show();
+    await loaded('Test Event');
+    expect(renameButton()).toBeNull();
+    fireEvent.change(field(), { target: { value: '  Test Event ' } });
+    expect(renameButton()).toBeNull();
+    fireEvent.change(field(), { target: { value: 'SPOH 2027' } });
+    expect(renameButton()).toBeTruthy();
+    expect(writes()).toEqual([]);
+  });
 
-  it.each(moved)(
-    'shows %s as a pointer, not an editable field with a live value',
-    async (label) => {
-      show();
-      await loaded();
-      expect(screen.queryByLabelText(label)).toBeNull();
-      expect(screen.getByText(label)).toBeTruthy();
-      expect(screen.getAllByText(/Settings catalogue above/).length).toBe(moved.length);
-      expect(screen.getAllByText(/or station scope/).length).toBe(2);
-    },
-  );
+  it('renames from the name read, then shows the new name everywhere it is read', async () => {
+    const { client } = show();
+    await loaded();
+    const invalidate = vi.spyOn(client, 'invalidateQueries');
+    fireEvent.change(field(), { target: { value: ' SPOH 2027 ' } });
+    fireEvent.click(renameButton()!);
+    await screen.findByText('Renamed. Every screen shows the new name.');
+    expect(writes()).toEqual([
+      [
+        `/events/${TEST_EVENT.id}/admin/event-name`,
+        { method: 'PATCH', body: { name: 'SPOH 2027', expectedName: 'Test Event' } },
+      ],
+    ]);
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: sessionKeys.me(TEST_EVENT.id) });
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['events'] });
+    await loaded('SPOH 2027');
+    expect(renameButton()).toBeNull();
+    // The next rename starts from the new name.
+    fireEvent.change(field(), { target: { value: 'SPOH 2028' } });
+    fireEvent.click(renameButton()!);
+    await waitFor(() => expect(writes()).toHaveLength(2));
+    expect(writes()[1]?.[1]?.body).toEqual({ name: 'SPOH 2028', expectedName: 'SPOH 2027' });
+  });
 
-  it('shows the four organisation-wide settings as pointers to their platform-admin editor', async () => {
+  it.each(['', '   ', 'x', 'x'.repeat(121)])('refuses %j before sending anything', async (name) => {
     show();
     await loaded();
-    for (const label of [
-      'Dashboard refresh',
-      'Alert refresh',
-      'Session lifetime',
-      'Replay retention',
-    ])
-      expect(screen.queryByLabelText(label)).toBeNull();
+    fireEvent.change(field(), { target: { value: name } });
+    expect(field().getAttribute('aria-invalid')).toBe('true');
+    expect(screen.getByText('Use 2 to 120 characters.')).toBeTruthy();
+    expect(renameButton()).toBeNull();
+    expect(writes()).toEqual([]);
+  });
+
+  it('follows a refresh while untouched, but keeps an edited draft and its read name', async () => {
+    const { client } = show();
+    await loaded();
+    names[TEST_EVENT.id] = 'Renamed elsewhere';
+    await act(() => client.invalidateQueries({ queryKey: sessionKeys.me(TEST_EVENT.id) }));
+    await loaded('Renamed elsewhere');
+
+    fireEvent.change(field(), { target: { value: 'My draft' } });
+    names[TEST_EVENT.id] = 'Renamed again';
+    await act(() => client.invalidateQueries({ queryKey: sessionKeys.me(TEST_EVENT.id) }));
+    expect(field().value).toBe('My draft');
+    mockedApi.mockImplementation(async (path, options) => {
+      if (options?.method === 'PATCH')
+        throw new ApiError(409, {
+          code: 'CONFLICT',
+          message:
+            'Someone renamed this event since you opened it. Reload to see the current name.',
+          requestId: 'req',
+        });
+      return me(eventOf(path));
+    });
+    fireEvent.click(renameButton()!);
+    await screen.findByText(/Someone renamed this event since you opened it/);
+    expect(writes()[0]?.[1]?.body).toEqual({ name: 'My draft', expectedName: 'Renamed elsewhere' });
+    expect(field().value).toBe('My draft');
+  });
+
+  it('blocks editing and a second rename while one is in flight', async () => {
+    let finish!: (value: unknown) => void;
+    mockedApi.mockImplementation(async (path, options) =>
+      options?.method === 'PATCH'
+        ? new Promise((resolve) => {
+            finish = resolve;
+          })
+        : me(eventOf(path)),
+    );
+    show();
+    await loaded();
+    fireEvent.change(field(), { target: { value: 'SPOH 2027' } });
+    fireEvent.click(renameButton()!);
+    await waitFor(() => expect(writes()).toHaveLength(1));
+    expect(field().hasAttribute('disabled')).toBe(true);
+    expect(screen.getByRole('button', { name: 'Renaming…' }).hasAttribute('disabled')).toBe(true);
+    fireEvent.click(screen.getByRole('button', { name: 'Renaming…' }));
+    expect(writes()).toHaveLength(1);
+    await act(async () => {
+      names[TEST_EVENT.id] = 'SPOH 2027';
+      finish({ event: me(TEST_EVENT.id).event });
+    });
+    await screen.findByText('Renamed. Every screen shows the new name.');
+  });
+
+  it('keeps a failed rename retryable', async () => {
+    let fails = true;
+    mockedApi.mockImplementation(async (path, options) => {
+      if (options?.method !== 'PATCH') return me(eventOf(path));
+      if (fails) throw new Error('offline');
+      names[TEST_EVENT.id] = 'SPOH 2027';
+      return { event: me(TEST_EVENT.id).event };
+    });
+    show();
+    await loaded();
+    fireEvent.change(field(), { target: { value: 'SPOH 2027' } });
+    fireEvent.click(renameButton()!);
+    await screen.findByText('Not saved');
+    expect(field().value).toBe('SPOH 2027');
+    fails = false;
+    fireEvent.click(renameButton()!);
+    await screen.findByText('Renamed. Every screen shows the new name.');
+    expect(writes().map(([, options]) => options?.body)).toEqual([
+      { name: 'SPOH 2027', expectedName: 'Test Event' },
+      { name: 'SPOH 2027', expectedName: 'Test Event' },
+    ]);
+  });
+
+  it('starts the next event from its own name, not the previous draft', async () => {
+    const { rerender } = show();
+    await loaded();
+    fireEvent.change(field(), { target: { value: 'First event draft' } });
+    names['next-event'] = 'Next event';
+    event.id = 'next-event';
+    rerender(<EventNameField canEdit />);
+    await loaded('Next event');
+    expect(renameButton()).toBeNull();
+    fireEvent.change(field(), { target: { value: 'Next event renamed' } });
+    fireEvent.click(renameButton()!);
+    await waitFor(() => expect(writes()).toHaveLength(1));
+    expect(writes()[0]).toEqual([
+      '/events/next-event/admin/event-name',
+      { method: 'PATCH', body: { name: 'Next event renamed', expectedName: 'Next event' } },
+    ]);
+  });
+
+  it('shows a reader the name without a way to change it', async () => {
+    show(false);
+    await loaded();
+    expect(field().hasAttribute('disabled')).toBe(true);
+    fireEvent.change(field(), { target: { value: 'SPOH 2027' } });
+    expect(renameButton()).toBeNull();
+  });
+});
+
+describe('former legacy settings', () => {
+  it('shows each as a pointer to where it is changed now, never as an editable value', () => {
+    render(<ThresholdsForm />);
+    expect(screen.queryAllByRole('textbox')).toEqual([]);
+    expect(screen.queryAllByRole('spinbutton')).toEqual([]);
+    expect(screen.getAllByText(/Settings catalogue above/)).toHaveLength(8);
+    expect(screen.getAllByText(/or station scope/)).toHaveLength(2);
     expect(
       screen.getAllByText(
         'Changed under Organisation settings above, by a platform admin, for every event.',
       ),
     ).toHaveLength(4);
-  });
-
-  it('shows lost-person retention as a pointer to the event’s visitor data settings', async () => {
-    show();
-    await loaded();
-    expect(screen.queryByLabelText('Lost-person retention')).toBeNull();
     expect(
       screen.getAllByText('Changed under Counts and visitor data above, for this event.'),
     ).toHaveLength(1);
-  });
-
-  it('never sends a moved key, even when the server value changed under the draft', async () => {
-    const { client } = show();
-    await loaded();
-    response = {
-      ...response,
-      settings: {
-        ...response.settings,
-        silentStationMinutes: response.settings.silentStationMinutes + 1,
-        longShiftMinutes: response.settings.longShiftMinutes + 1,
-        captureUndoWindowSeconds: response.settings.captureUndoWindowSeconds + 1,
-        outboxWarningCount: response.settings.outboxWarningCount + 1,
-      },
-    };
-    await act(async () => {
-      client.setQueryData(settingsKeys.current(TEST_EVENT.id), response);
-    });
-    fireEvent.change(screen.getByLabelText('Event name'), { target: { value: 'Reviewed event' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
-    await waitFor(() => expect(writes()).toHaveLength(1));
-    expect(writes()[0]?.[1]?.body).toEqual({ eventName: 'Reviewed event' });
-  });
-});
-
-describe('settings form changed-key writes', () => {
-  it('sends nothing while loading or when the loaded form is unchanged', async () => {
-    show();
-    expect(screen.getByRole('button', { name: 'Save settings' }).hasAttribute('disabled')).toBe(
-      true,
-    );
-    act(() => latestForm.onSave());
-    await loaded();
-    act(() => latestForm.onSave());
-    expect(writes()).toEqual([]);
-    expect(screen.getByRole('button', { name: 'Save settings' }).hasAttribute('disabled')).toBe(
-      true,
-    );
-  });
-
-  it('writes only the edited name and leaves untouched defaults unoverridden', async () => {
-    show();
-    await loaded();
-    fireEvent.change(screen.getByLabelText('Event name'), {
-      target: { value: ' Reviewed event ' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
-    await waitFor(() => expect(writes()).toHaveLength(1));
-    expect(writes()[0]).toEqual([
-      `/events/${TEST_EVENT.id}/admin/settings`,
-      { method: 'PATCH', body: { eventName: 'Reviewed event' } },
-    ]);
-    await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'Save settings' }).hasAttribute('disabled')).toBe(
-        true,
-      ),
-    );
-    expect(response.overriddenKeys).toEqual(['eventName']);
-    act(() => latestForm.onSave());
-    expect(writes()).toHaveLength(1);
-  });
-
-  it('treats a trimmed name as unchanged', async () => {
-    show();
-    await loaded();
-    fireEvent.change(screen.getByLabelText('Event name'), {
-      target: { value: ` ${response.settings.eventName} ` },
-    });
-    act(() => latestForm.onSave());
-    expect(writes()).toEqual([]);
-    expect(screen.getByRole('button', { name: 'Save settings' }).hasAttribute('disabled')).toBe(
-      true,
-    );
-  });
-
-  it('validates the form before sending a changed name', async () => {
-    show();
-    await loaded();
-    const name = screen.getByLabelText('Event name');
-    fireEvent.change(name, { target: { value: '   ' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
-    expect(writes()).toEqual([]);
-    expect(name.getAttribute('aria-invalid')).toBe('true');
-    fireEvent.change(name, { target: { value: 'Reviewed event' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
-    await waitFor(() => expect(writes()).toHaveLength(1));
-    expect(writes()[0]?.[1]?.body).toEqual({ eventName: 'Reviewed event' });
-  });
-
-  it('keeps an edited draft across a refresh and does not rewrite another changed key', async () => {
-    const { client } = show();
-    await loaded();
-    fireEvent.change(screen.getByLabelText('Event name'), { target: { value: 'Reviewed event' } });
-    response = {
-      ...response,
-      settings: {
-        ...response.settings,
-        alertPollSeconds: response.settings.alertPollSeconds + 1,
-      },
-    };
-    await act(async () => {
-      client.setQueryData(settingsKeys.current(TEST_EVENT.id), response);
-    });
-    expect((screen.getByLabelText('Event name') as HTMLInputElement).value).toBe('Reviewed event');
-    fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
-    await waitFor(() => expect(writes()).toHaveLength(1));
-    expect(writes()[0]?.[1]?.body).toEqual({ eventName: 'Reviewed event' });
-  });
-
-  it('blocks duplicate saves and editing during an in-flight request', async () => {
-    let finish!: (value: SettingsResponse) => void;
-    mockedApi.mockImplementation(async (_path, options) =>
-      options?.method === 'PATCH'
-        ? new Promise<SettingsResponse>((resolve) => {
-            finish = resolve;
-          })
-        : response,
-    );
-    show();
-    await loaded();
-    fireEvent.change(screen.getByLabelText('Event name'), { target: { value: 'Reviewed event' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
-    await waitFor(() => expect(writes()).toHaveLength(1));
-    expect(screen.getByLabelText('Event name').hasAttribute('disabled')).toBe(true);
-    act(() => latestForm.onSave());
-    expect(writes()).toHaveLength(1);
-    await act(async () => {
-      response = { ...response, settings: { ...response.settings, eventName: 'Reviewed event' } };
-      finish(response);
-    });
-    await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'Save settings' }).hasAttribute('disabled')).toBe(
-        true,
-      ),
-    );
-  });
-
-  it('keeps a failed save retryable with the same changed keys', async () => {
-    let fails = true;
-    mockedApi.mockImplementation(async (_path, options) => {
-      if (options?.method === 'PATCH' && fails) throw new Error('offline');
-      if (options?.method === 'PATCH')
-        response = { ...response, settings: { ...response.settings, eventName: 'Reviewed event' } };
-      return response;
-    });
-    show();
-    await loaded();
-    fireEvent.change(screen.getByLabelText('Event name'), { target: { value: 'Reviewed event' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
-    await screen.findByText('Not saved');
-    expect((screen.getByLabelText('Event name') as HTMLInputElement).value).toBe('Reviewed event');
-    fails = false;
-    fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
-    await waitFor(() => expect(writes()).toHaveLength(2));
-    expect(writes().map(([, options]) => options?.body)).toEqual([
-      { eventName: 'Reviewed event' },
-      { eventName: 'Reviewed event' },
-    ]);
-  });
-
-  it('seeds the next event independently, including a prepopulated query', async () => {
-    const { client, rerender } = show();
-    await loaded();
-    fireEvent.change(screen.getByLabelText('Event name'), {
-      target: { value: 'First event draft' },
-    });
-    response = { ...response, settings: { ...response.settings, eventName: 'Next event' } };
-    client.setQueryData(settingsKeys.current('next-event'), response);
-    event.id = 'next-event';
-    rerender(<Harness />);
-    await loaded();
-    expect(screen.getByRole('button', { name: 'Save settings' }).hasAttribute('disabled')).toBe(
-      true,
-    );
-    act(() => latestForm.onSave());
-    expect(writes()).toEqual([]);
-    fireEvent.change(screen.getByLabelText('Event name'), {
-      target: { value: 'Next event reviewed' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
-    await waitFor(() => expect(writes()).toHaveLength(1));
-    expect(writes()[0]).toEqual([
-      '/events/next-event/admin/settings',
-      { method: 'PATCH', body: { eventName: 'Next event reviewed' } },
-    ]);
-  });
-
-  it('blocks a draft when its current read fails or the session is disabled', async () => {
-    const { client, rerender } = show();
-    await loaded();
-    fireEvent.change(screen.getByLabelText('Event name'), { target: { value: 'Reviewed event' } });
-    mockedApi.mockRejectedValue(new Error('read denied'));
-    await act(async () => {
-      await client.refetchQueries({ queryKey: settingsKeys.current(TEST_EVENT.id) });
-    });
-    await screen.findByText('Settings unavailable');
-    expect(screen.getByRole('button', { name: 'Save settings' }).hasAttribute('disabled')).toBe(
-      true,
-    );
-    act(() => latestForm.onSave());
-    expect(writes()).toEqual([]);
-    rerender(<Harness enabled={false} />);
-    act(() => latestForm.onSave());
-    expect(writes()).toEqual([]);
   });
 });

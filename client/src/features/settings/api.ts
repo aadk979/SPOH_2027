@@ -5,8 +5,8 @@ import type {
   ChangeAttendanceConfigRequest,
   ChangeEventSettingRequest,
   EventSettingsResponse,
-  RuntimeSettings,
-  SettingsResponse,
+  RenameEventRequest,
+  RenameEventResponse,
   ShiftTemplateRecord,
   TestAttendanceNetworkRequest,
   TestAttendanceNetworkResponse,
@@ -31,14 +31,12 @@ import {
   type ScopedSettingsTarget,
   type ScopedOperationalSettingKey,
 } from '@spoh/shared';
-export function getSettings(eventId: string): Promise<SettingsResponse> {
-  return eventApi<SettingsResponse>(eventId, '/admin/settings');
-}
-export function saveSettings(
+/** Rename the event, from the name the caller read. */
+export function renameEvent(
   eventId: string,
-  body: Partial<RuntimeSettings>,
-): Promise<SettingsResponse> {
-  return eventApi<SettingsResponse>(eventId, '/admin/settings', { method: 'PATCH', body });
+  body: RenameEventRequest,
+): Promise<RenameEventResponse> {
+  return eventApi<RenameEventResponse>(eventId, '/admin/event-name', { method: 'PATCH', body });
 }
 
 /** The event's shift templates: the hours capture and check-in obey (ADR-002). */

@@ -521,6 +521,9 @@ const CASES: Record<string, Case> = {
   'GET /admin/organisation-settings': noId(
     "reads the path event's organisation settings; other organisations are covered by organisationSettings tests",
   ),
+  'PATCH /admin/event-name': noId(
+    'renames the path event itself; authority, stale reads and archived events are covered by renameEvent tests',
+  ),
   'PATCH /admin/organisation-settings': noId(
     "changes the path event's organisation settings; platform-admin authority is covered by organisationSettings tests",
   ),

@@ -5,7 +5,7 @@ import type {
   ChangeAttendanceConfigRequest,
   ChangeEventSettingRequest,
   ChangeOrganisationSettingRequest,
-  RuntimeSettings,
+  RenameEventRequest,
   TestAttendanceNetworkRequest,
   UpdateShiftTemplateRequest,
   EventSettingKey,
@@ -17,7 +17,8 @@ import type {
   ScopedOperationalSettingKey,
 } from '@spoh/shared';
 import { useEventId } from '@/shared/lib/eventContext';
-import { useCurrentSession } from '@/features/session';
+import { sessionKeys, useCurrentSession } from '@/features/session';
+import { eventListKey } from '@/features/events';
 import { ms } from '@/shared/lib/runtimeSettings';
 import { ApiError } from '@/shared/lib/apiErrors';
 import {
@@ -27,9 +28,8 @@ import {
   getAttendanceConfig,
   getOrganisationSettings,
   getEventSettings,
-  getSettings,
   listShiftTemplates,
-  saveSettings,
+  renameEvent,
   saveShiftTemplate,
   testAttendanceNetwork,
   getEventSettingHistory,
@@ -42,28 +42,20 @@ import {
 } from './api';
 import type { ScopedSettingRequest } from './model/scopedSettingChange';
 export const settingsKeys = {
-  current: (eventId: string) => [eventId, 'admin', 'settings'] as const,
   shiftTemplates: (eventId: string) => [eventId, 'admin', 'shift-templates'] as const,
   event: (eventId: string) => [eventId, 'event-settings'] as const,
   attendance: (eventId: string) => [eventId, 'admin', 'attendance-settings'] as const,
   organisation: (eventId: string) => [eventId, 'admin', 'organisation-settings'] as const,
 };
-export function useSettings(enabled: boolean) {
-  const eventId = useEventId();
-  return useQuery({
-    queryKey: settingsKeys.current(eventId),
-    queryFn: () => getSettings(eventId),
-    enabled,
-    staleTime: 30_000,
-  });
-}
-export function useSaveSettings() {
+/** Every screen shows the event's name from `/me` and the event list, so both refresh. */
+export function useRenameEvent() {
   const client = useQueryClient();
   const eventId = useEventId();
   return useMutation({
-    mutationFn: (body: Partial<RuntimeSettings>) => saveSettings(eventId, body),
-    onSuccess: () => {
-      void client.invalidateQueries({ queryKey: settingsKeys.current(eventId) });
+    mutationFn: (body: RenameEventRequest) => renameEvent(eventId, body),
+    onSuccess: async () => {
+      await client.invalidateQueries({ queryKey: sessionKeys.me(eventId) });
+      await client.invalidateQueries({ queryKey: eventListKey });
     },
   });
 }

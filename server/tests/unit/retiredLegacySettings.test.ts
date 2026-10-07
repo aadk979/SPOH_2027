@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ERROR_CODES, SCOPED_OPERATIONAL_KEYS, scopedOperationalKeys } from '@spoh/shared';
+import {
+  ERROR_CODES,
+  SCOPED_OPERATIONAL_KEYS,
+  scopedOperationalKeys,
+  RuntimeSettings,
+} from '@spoh/shared';
 
 const store = vi.hoisted(() => ({
   updateSettings: vi.fn(),
@@ -13,6 +18,7 @@ import { ValidationError } from '../../src/platform/errors/index.js';
 import { SETTINGS } from '../../src/platform/settings/registry.js';
 import {
   assertNoRetiredLegacyKeys,
+  EVENT_LEGACY_SETTING_KEYS,
   GUARDED_LEGACY_SETTING_KEYS,
   ORGANISATION_LEGACY_SETTING_KEYS,
   RETIRED_LEGACY_SETTING_KEYS,
@@ -117,8 +123,23 @@ describe('retired legacy setting keys', () => {
     );
   });
 
-  it('leaves only the event name on the legacy endpoint', () => {
-    expect(() => assertNoRetiredLegacyKeys({ eventName: 'Event' })).not.toThrow();
+  it("sends the event name to the event's own rename", () => {
+    expect([...EVENT_LEGACY_SETTING_KEYS]).toEqual(['eventName']);
+    expect(() => assertNoRetiredLegacyKeys({ eventName: 'Event' })).toThrow(
+      expect.objectContaining({
+        details: { keys: ['eventName'], replacement: '/admin/event-name' },
+      }),
+    );
+  });
+
+  it('leaves no key the legacy endpoint can still write', () => {
+    const refused = [
+      ...RETIRED_LEGACY_SETTING_KEYS,
+      ...GUARDED_LEGACY_SETTING_KEYS,
+      ...ORGANISATION_LEGACY_SETTING_KEYS,
+      ...EVENT_LEGACY_SETTING_KEYS,
+    ].sort();
+    expect(refused).toEqual(Object.keys(RuntimeSettings.shape).sort());
   });
 
   it('rejects before any write or cache refresh, whole body at once', async () => {
@@ -126,11 +147,5 @@ describe('retired legacy setting keys', () => {
       updateSettingsView({ alertPollSeconds: 12, silentStationMinutes: 4 }, actor),
     ).rejects.toBeInstanceOf(ValidationError);
     expect(store.updateSettings).not.toHaveBeenCalled();
-  });
-
-  it('passes a permitted body through unchanged', async () => {
-    store.updateSettings.mockResolvedValue({ eventName: 'Dry run' });
-    await updateSettingsView({ eventName: 'Dry run' }, actor);
-    expect(store.updateSettings).toHaveBeenCalledWith({ eventName: 'Dry run' }, 'person-1', {});
   });
 });

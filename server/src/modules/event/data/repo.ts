@@ -62,6 +62,24 @@ export async function findEvent(id: string, db: PrismaTransactionClient = prisma
   return db.event.findUnique({ where: { id } });
 }
 
+/** The event's name and phase, held until the caller's rename commits. */
+export async function lockEventName(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+): Promise<{ name: string; status: EventStatus } | undefined> {
+  const rows = await tx.$queryRaw<Array<{ name: string; status: EventStatus }>>`
+    SELECT name, status FROM "Event" WHERE id = ${scope.eventId} FOR UPDATE`;
+  return rows[0];
+}
+
+export async function writeEventName(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  name: string,
+): Promise<void> {
+  await tx.event.update({ where: { id: scope.eventId }, data: { name } });
+}
+
 export async function findEventSummary(id: string) {
   return prisma.event.findUniqueOrThrow({
     where: { id },

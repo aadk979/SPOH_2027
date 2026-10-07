@@ -86,6 +86,7 @@ export type AuditAction =
   | 'auth.stationScopeBypass'
   | 'event.clone'
   | 'event.transition'
+  | 'event.rename'
   | 'report.snapshot'
   | 'schedule.execute'
   | 'schedule.create'

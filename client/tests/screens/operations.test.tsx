@@ -2,7 +2,6 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
-import { GENERATED_SETTING_DEFAULTS, RuntimeSettings } from '@spoh/shared';
 import { api } from '@/shared/lib/api';
 import ImportsPage from '@/app/e/[event]/chief/imports/page';
 import ReportsPage from '@/app/e/[event]/reports/page';
@@ -35,6 +34,7 @@ vi.mock('@/features/session', async (original) => ({
   useMe: () => ({
     data: {
       volunteer: { id: 'viewer', role: 'CHIEF_COORDINATOR' },
+      event: { id: 'evt_test', name: 'Test Event', timezone: 'Asia/Singapore', locale: 'en-SG' },
       capabilities: state.capabilities,
       currentAssignment: {
         station: { id: 'station-1', name: 'Room', issuesStamp: true, type: { issuesStamp: true } },
@@ -128,27 +128,13 @@ describe('operations screen safety net', () => {
     show(<SettingsPage />);
     const name = await screen.findByLabelText('Event name');
     expect(name.hasAttribute('disabled')).toBe(true);
-    expect(screen.queryByRole('button', { name: 'Save settings' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Rename event' })).toBeNull();
   });
 
-  it('rejects an empty event name with the server schema message before submitting', async () => {
+  it('rejects an empty event name before submitting, and never calls the legacy settings', async () => {
     state.capabilities = ['config.manage'];
     // The product rules load beside the settings (P09.14).
     mockedApi.mockImplementation(async (path: string) => {
-      if (path.endsWith('/admin/settings')) {
-        return {
-          settings: Object.fromEntries(
-            Object.keys(RuntimeSettings.shape).map((key) => [
-              key,
-              GENERATED_SETTING_DEFAULTS[key as keyof RuntimeSettings],
-            ]),
-          ),
-          overriddenKeys: [],
-          updatedAt: null,
-          updatedById: null,
-          updatedByName: null,
-        };
-      }
       if (path.endsWith('/admin/event-settings')) {
         return {
           settings: {
@@ -194,18 +180,20 @@ describe('operations screen safety net', () => {
     });
     show(<SettingsPage />);
     const name = await screen.findByLabelText('Event name');
-    await waitFor(() =>
-      expect((name as HTMLInputElement).value).toBe(GENERATED_SETTING_DEFAULTS.eventName),
-    );
+    await waitFor(() => expect((name as HTMLInputElement).value).toBe('Test Event'));
     fireEvent.change(name, { target: { value: '' } });
-    fireEvent.click(await screen.findByRole('button', { name: 'Save settings' }));
-    const expected = RuntimeSettings.shape.eventName.safeParse('').error?.issues[0]?.message;
     expect(name.getAttribute('aria-invalid')).toBe('true');
-    expect(document.getElementById('event-name-error')?.textContent).toBe(expected);
-    expect(screen.getByText(/Nothing was saved/)).toBeTruthy();
-    expect(mockedApi.mock.calls.every(([, options]) => !options?.method)).toBe(true);
+    expect(document.getElementById('event-name-error')?.textContent).toBe(
+      'Use 2 to 120 characters.',
+    );
+    expect(screen.queryByRole('button', { name: 'Rename event' })).toBeNull();
     fireEvent.change(name, { target: { value: 'Rehearsal' } });
     expect(name.getAttribute('aria-invalid')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Rename event' })).toBeTruthy();
+    expect(mockedApi.mock.calls.every(([, options]) => !options?.method)).toBe(true);
+    expect(mockedApi.mock.calls.some(([path]) => String(path).endsWith('/admin/settings'))).toBe(
+      false,
+    );
   });
 
   it('requires a full PIN and sends it as attendance proof', async () => {

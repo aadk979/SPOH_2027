@@ -121,6 +121,23 @@ export const EventSlug = z
   .regex(/^[a-z0-9][a-z0-9-]{1,47}$/, 'Use lower-case letters, digits and hyphens');
 export type EventSlug = z.infer<typeof EventSlug>;
 
+/** An event's name, as every screen, report and export shows it. */
+export const EventName = z.string().trim().min(2).max(120);
+export type EventName = z.infer<typeof EventName>;
+
+/**
+ * Rename the caller's event. `expectedName` is the name the caller read: if
+ * someone renamed it since, the change is refused rather than overwriting theirs.
+ */
+export const RenameEventRequest = z
+  .object({ name: EventName, expectedName: z.string().max(200) })
+  .strict();
+export type RenameEventRequest = z.infer<typeof RenameEventRequest>;
+
+/** `PATCH /admin/event-name`: the event as it now reads. */
+export const RenameEventResponse = z.object({ event: EventSummary }).strict();
+export type RenameEventResponse = z.infer<typeof RenameEventResponse>;
+
 /**
  * Clone an event's structure into a new event in DRAFT (ADR-001 §6): its days
  * moved by `dayOffsetDays`, and its people invited again only when asked.
@@ -128,7 +145,7 @@ export type EventSlug = z.infer<typeof EventSlug>;
 export const CloneEventRequest = z
   .object({
     slug: EventSlug,
-    name: z.string().trim().min(2).max(120),
+    name: EventName,
     dayOffsetDays: z.number().int().min(-3660).max(3660),
     inviteSamePeople: z.boolean().default(false),
   })

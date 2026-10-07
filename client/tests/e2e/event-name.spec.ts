@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { SettingsResponse } from '@spoh/shared';
+import { MeResponse, RenameEventResponse } from '@spoh/shared';
 import { expect, test } from '@playwright/test';
 
 const axe = readFileSync('../node_modules/axe-core/axe.min.js', 'utf8');
@@ -13,7 +13,7 @@ for (const [name, width, height] of [
       isMobile: name === 'phone',
       hasTouch: name === 'phone',
     });
-    test('saves only a changed event name, leaves untouched overrides alone and restores the fixture', async ({
+    test("renames the event from the settings screen, everywhere it is read, and restores the fixture's name", async ({
       page,
     }) => {
       test.setTimeout(90_000);
@@ -42,14 +42,14 @@ for (const [name, width, height] of [
           authorization = request.headers().authorization!;
       });
       const headers = () => ({ Authorization: authorization });
-      const endpoint = `${base}/admin/settings`;
-      const initialRead = await page.request.get(endpoint, { headers: headers() });
-      expect(initialRead.status()).toBe(200);
-      const initial = SettingsResponse.parse(await initialRead.json());
-      // The event name is the one key the legacy form still writes.
-      const original = initial.settings.eventName;
-      const alternate = `${original.slice(0, 60)} reviewed`;
-      let restored = false;
+      const readName = async () =>
+        MeResponse.parse(
+          await (await page.request.get(`${base}/me`, { headers: headers() })).json(),
+        ).event.name;
+      const endpoint = `${base}/admin/event-name`;
+      const original = await readName();
+      const alternate = `${original.slice(0, 100)} reviewed`;
+      let current = original;
       const requests: unknown[] = [];
       page.on('request', (request) => {
         if (request.url() === endpoint && request.method() === 'PATCH')
@@ -57,15 +57,14 @@ for (const [name, width, height] of [
       });
       try {
         await page.goto(page.url().replace(/\/home$/, '/admin/settings'));
-        const save = page.getByRole('button', { name: 'Save settings', exact: true });
         const field = page.getByLabel('Event name', { exact: true });
+        const rename = page.getByRole('button', { name: 'Rename event', exact: true });
         await expect(field).toHaveValue(original);
-        await expect(save).toBeDisabled();
+        await expect(rename).toHaveCount(0);
         await field.fill(` ${original} `);
-        await expect(save).toBeDisabled();
-        expect(requests).toEqual([]);
+        await expect(rename).toHaveCount(0);
         await field.fill(alternate);
-        await save.hover();
+        await rename.hover();
         await page.evaluate(axe);
         const violations = await page.evaluate(async () =>
           (
@@ -82,43 +81,53 @@ for (const [name, width, height] of [
           ).violations.map(({ id }) => id),
         );
         expect(violations).toEqual([]);
-        const changing = page.waitForResponse(
+        const renaming = page.waitForResponse(
           (response) => response.url() === endpoint && response.request().method() === 'PATCH',
         );
-        await save.click();
-        const changedRead = await changing;
-        expect(changedRead.status()).toBe(200);
-        const changed = SettingsResponse.parse(await changedRead.json());
-        expect(requests).toEqual([{ eventName: alternate }]);
-        expect(changed.settings).toEqual({ ...initial.settings, eventName: alternate });
-        expect(changed.overriddenKeys.filter((key) => key !== 'eventName').sort()).toEqual(
-          initial.overriddenKeys.filter((key) => key !== 'eventName').sort(),
-        );
-        await expect(save).toBeDisabled();
+        await rename.click();
+        const renamed = await renaming;
+        expect(renamed.status()).toBe(200);
+        expect(RenameEventResponse.parse(await renamed.json()).event.name).toBe(alternate);
+        current = alternate;
+        expect(requests).toEqual([{ name: alternate, expectedName: original }]);
+        await expect(page.getByText('Renamed. Every screen shows the new name.')).toBeVisible();
+        expect(await readName()).toBe(alternate);
+
+        // The legacy endpoint no longer takes the name, and says where it went.
+        const legacy = await page.request.patch(`${base}/admin/settings`, {
+          headers: headers(),
+          data: { eventName: 'Legacy name' },
+        });
+        expect(legacy.status()).toBe(400);
+        expect((await legacy.json()).error.details).toEqual({
+          keys: ['eventName'],
+          replacement: '/admin/event-name',
+        });
+
         await page.reload();
         await expect(field).toHaveValue(alternate);
-        await expect(save).toBeDisabled();
+        await expect(rename).toHaveCount(0);
         await field.fill(original);
         const restoring = page.waitForResponse(
           (response) => response.url() === endpoint && response.request().method() === 'PATCH',
         );
-        await save.click();
-        const restoredRead = await restoring;
-        expect(restoredRead.status()).toBe(200);
-        expect(SettingsResponse.parse(await restoredRead.json()).settings).toEqual(
-          initial.settings,
-        );
-        restored = true;
-        await expect(save).toBeDisabled();
-        expect(requests).toEqual([{ eventName: alternate }, { eventName: original }]);
+        await rename.click();
+        expect((await restoring).status()).toBe(200);
+        current = original;
+        await expect(field).toHaveValue(original);
+        expect(requests).toEqual([
+          { name: alternate, expectedName: original },
+          { name: original, expectedName: alternate },
+        ]);
+        expect(await readName()).toBe(original);
         expect(errors).toEqual([]);
       } finally {
-        if (!restored)
+        if (current !== original)
           expect(
             (
               await page.request.patch(endpoint, {
                 headers: headers(),
-                data: { eventName: original },
+                data: { name: original, expectedName: current },
               })
             ).status(),
           ).toBe(200);

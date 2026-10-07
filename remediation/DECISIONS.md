@@ -348,3 +348,18 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
 - **Answer:** **A** (owner, 7 October 2026). Lost-person retention and visitor data
   stay with event Chiefs and Admins (`config.manage`) until P11 enforces
   `Settings.ManagePrivacy`.
+
+### D-18 — The settings screen's event name
+
+- **Owner:** you
+- **Blocks:** P10.8
+- **Question:** The "Event name" field writes `AppSetting.eventName`, which nothing
+  reads: every screen, report and export shows `Event.name`, which nothing could
+  change after an event was created or cloned. Should the field rename the event,
+  or go?
+- **Options:**
+  - **A.** Rename the event (`Event.name`), from the name the editor read, audited.
+  - **B.** Remove the field; names stay as created or cloned.
+- **Recommendation:** **A.** Otherwise a misspelt name can never be corrected.
+- **Answer:** **A** (owner, 7 October 2026), by the event's Chief and Admin
+  (`config.manage`), like its other settings.

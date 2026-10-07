@@ -348,16 +348,23 @@ describe('runtime settings', () => {
     expect(response.status).toBe(403);
   });
 
-  it('stores an override and reports which keys are no longer defaults', async () => {
+  it("refuses the event name here, because it is the event's own name", async () => {
+    const { eventId } = await testEvent();
     const response = await request(app)
       .patch('/api/v1/admin/settings')
       .set('Authorization', bearer(chief))
       .send({ eventName: 'Dry run' });
 
-    expect(response.status).toBe(200);
-    expect(response.body.settings.eventName).toBe('Dry run');
-    expect(response.body.overriddenKeys).toContain('eventName');
-    expect(getSettings().eventName).toBe('Dry run');
+    expect(response.status).toBe(400);
+    expect(response.body.error.details).toEqual({
+      keys: ['eventName'],
+      replacement: '/admin/event-name',
+    });
+    expect(await rawDb.appSetting.count()).toBe(0);
+    expect(await rawDb.auditLog.count({ where: { action: 'settings.update' } })).toBe(0);
+    expect((await rawDb.event.findUniqueOrThrow({ where: { id: eventId } })).name).toBe(
+      'Test Event',
+    );
   });
 
   it.each([
@@ -433,21 +440,6 @@ describe('runtime settings', () => {
     expect(getSettings().eventName).toBe(DEFAULT_SETTINGS.eventName);
   });
 
-  it('leaves an existing retired-key row untouched while another key is written', async () => {
-    await rawDb.appSetting.create({ data: { key: 'longShiftMinutes', value: 150 } });
-    await loadSettings();
-    await request(app)
-      .patch('/api/v1/admin/settings')
-      .set('Authorization', bearer(chief))
-      .send({ eventName: 'Dry run' })
-      .expect(200);
-
-    expect(
-      (await rawDb.appSetting.findUniqueOrThrow({ where: { key: 'longShiftMinutes' } })).value,
-    ).toBe(150);
-    expect(await rawDb.appSetting.count()).toBe(2);
-  });
-
   /**
    * The shift hours decide whether a capture screen works at all, because
    * station scoping requires a shift to be running. They are the templates'
@@ -518,18 +510,6 @@ describe('runtime settings', () => {
       .send({ notASetting: 1 });
 
     expect(response.status).toBe(400);
-  });
-
-  it('audits the change with the previous value', async () => {
-    await request(app)
-      .patch('/api/v1/admin/settings')
-      .set('Authorization', bearer(chief))
-      .send({ eventName: 'Dry run' })
-      .expect(200);
-
-    const entry = await prisma.auditLog.findFirst({ where: { action: 'settings.update' } });
-    expect(entry?.before).toMatchObject({ eventName: 'Event' });
-    expect(entry?.after).toMatchObject({ eventName: 'Dry run' });
   });
 });
 
