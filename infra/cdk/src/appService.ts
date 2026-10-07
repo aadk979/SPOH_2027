@@ -240,8 +240,10 @@ export class AppService extends Construct {
  * One JSON line per request (P08.8). Beyond the default Common Log Format it
  * records the integration status, latency and error message, so a 503 that the
  * gateway produced without reaching the app (integrationStatus "-") says why.
- * Values are strings because absent numbers are logged as "-"; the error
- * message uses AWS's pre-quoted variant so a quote in it cannot break the line.
+ * The gateway writes an absent value as a bare -, so every variable sits inside
+ * quotes, including the error message: the pre-quoted messageString variant is
+ * also a bare - when there is no error, which made every successful request's
+ * line invalid JSON. Gateway error messages are fixed phrases without quotes.
  */
 export const API_ACCESS_LOG_FORMAT = `{${[
   '"requestId":"$context.requestId"',
@@ -258,7 +260,7 @@ export const API_ACCESS_LOG_FORMAT = `{${[
   '"integrationLatency":"$context.integration.latency"',
   '"integrationError":"$context.integrationErrorMessage"',
   '"errorType":"$context.error.responseType"',
-  '"errorMessage":$context.error.messageString',
+  '"errorMessage":"$context.error.message"',
 ].join(',')}}`;
 
 /** The HTTP API and its throttled, logged stage, created before the service. */

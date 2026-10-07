@@ -129,20 +129,27 @@ describe('native HTTP API monitoring (P08.8)', () => {
       expect(stages).toHaveLength(1);
       expect(stages[0]!.Properties.AccessLogSettings.Format).toBe(API_ACCESS_LOG_FORMAT);
 
-      // What the gateway writes for a 503 it produced itself: absent values are
-      // "-", and messageString arrives already quoted (and escaped).
-      const line = API_ACCESS_LOG_FORMAT.replace(
-        '$context.error.messageString',
-        JSON.stringify('Service "Unavailable"'),
-      ).replace(/\$context\.[A-Za-z.]+/g, (variable) =>
-        variable === '$context.status' ? '503' : '-',
-      );
-      expect(JSON.parse(line)).toMatchObject({
+      // The gateway writes every absent value as a bare -, quoted or not.
+      const line = (values: Record<string, string>) =>
+        API_ACCESS_LOG_FORMAT.replace(
+          /\$context\.[A-Za-z.]+/g,
+          (variable) => values[variable] ?? '-',
+        );
+      // A normal request: no error, so the error fields are absent.
+      expect(
+        JSON.parse(line({ '$context.status': '200', '$context.integration.status': '200' })),
+      ).toMatchObject({ status: '200', integrationStatus: '200', errorMessage: '-' });
+      // A 503 the gateway produced itself, without reaching the app.
+      expect(
+        JSON.parse(
+          line({ '$context.status': '503', '$context.error.message': 'Service Unavailable' }),
+        ),
+      ).toMatchObject({
         requestId: '-',
         status: '503',
         integrationStatus: '-',
         integrationError: '-',
-        errorMessage: 'Service "Unavailable"',
+        errorMessage: 'Service Unavailable',
       });
       for (const variable of [
         '$context.requestId',
