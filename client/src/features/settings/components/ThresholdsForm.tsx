@@ -74,11 +74,16 @@ function CataloguePointer({ field }: { field: FieldSpec }): ReactNode {
     <Card variant="flat">
       <p className="font-semibold">{field.label}</p>
       <p className="text-caption text-text-muted">{field.hint}</p>
-      <p className="text-caption text-text-muted">
-        {retiredLegacyHome(field.key) === 'visitorData'
-          ? 'Changed under Counts and visitor data above, for this event.'
-          : `Changed in the Settings catalogue above, at event${field.stationScope ? ' or station' : ''} scope.`}
-      </p>
+      <p className="text-caption text-text-muted">{pointerText(field)}</p>
     </Card>
   );
+}
+
+function pointerText(field: FieldSpec): string {
+  const home = retiredLegacyHome(field.key);
+  if (home === 'visitorData') return 'Changed under Counts and visitor data above, for this event.';
+  if (home === 'organisation')
+    return 'Changed under Organisation settings above, by a platform admin, for every event.';
+  const scopes = field.stationScope ? 'event or station' : 'event';
+  return `Changed in the Settings catalogue above, at ${scopes} scope.`;
 }

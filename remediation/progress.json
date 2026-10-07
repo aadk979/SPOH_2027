@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-07T04:51:29.329Z",
+  "updatedAt": "2026-10-07T05:01:46.150Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -209,6 +209,15 @@
       "status": "answered",
       "answer": "A: shorten only, 1-24 hours per event through the guarded event-settings editor with history and confirmation (owner, 7 October 2026)",
       "answeredAt": "2026-10-07T03:45:22.444Z"
+    },
+    {
+      "id": "D-17",
+      "title": "Who changes organisation-wide settings",
+      "owner": "you",
+      "blocks": [],
+      "status": "answered",
+      "answer": "A: organisation platform admins (PLATFORM_ADMIN) change the four organisation-wide settings; event Chiefs/Admins read them. Privacy settings stay config.manage until P11 (owner, 7 October 2026)",
+      "answeredAt": "2026-10-07T05:01:46.148Z"
     }
   ],
   "phases": [

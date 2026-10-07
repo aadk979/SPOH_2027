@@ -16,11 +16,23 @@ export const RETIRED_LEGACY_KEYS = [
   'outboxWarningCount',
   'outboxWarningAgeMinutes',
   'lostPersonPurgeHours',
+  'dashboardPollSeconds',
+  'alertPollSeconds',
+  'refreshSessionDays',
+  'idempotencyRetentionDays',
 ] as const satisfies readonly (keyof RuntimeSettings)[];
 
+const ORGANISATION_KEYS: readonly string[] = [
+  'dashboardPollSeconds',
+  'alertPollSeconds',
+  'refreshSessionDays',
+  'idempotencyRetentionDays',
+];
+
 /** Where a retired key is changed now. */
-export function retiredLegacyHome(key: string): 'catalogue' | 'visitorData' {
-  return key === 'lostPersonPurgeHours' ? 'visitorData' : 'catalogue';
+export function retiredLegacyHome(key: string): 'catalogue' | 'visitorData' | 'organisation' {
+  if (key === 'lostPersonPurgeHours') return 'visitorData';
+  return ORGANISATION_KEYS.includes(key) ? 'organisation' : 'catalogue';
 }
 
 export function isRetiredLegacyKey(key: string): boolean {

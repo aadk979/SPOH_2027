@@ -16,6 +16,7 @@ import { SettingsApply } from '../components/SettingsApply';
 import { AttendanceSettingsForm } from '../components/AttendanceSettingsForm';
 import { CaptureControlsPanel } from '../components/CaptureControlsPanel';
 import { OperationalCataloguePanel } from '../components/OperationalCataloguePanel';
+import { OrganisationSettingsForm } from '../components/OrganisationSettingsForm';
 export default function AdminSettingsScreen(): ReactNode {
   const session = useRequireSession();
   const { data: me } = useMe();
@@ -39,6 +40,7 @@ export default function AdminSettingsScreen(): ReactNode {
             <ShiftHoursForm enabled={session !== null} canEdit={canEdit} />
             <ProductRulesForm enabled={session !== null} canEdit={canEdit} />
             <AttendanceSettingsForm enabled={canEdit} />
+            <OrganisationSettingsForm enabled={canEdit} />
             <ThresholdsForm form={form} canEdit={canEdit} />
             <SettingsApply form={form} canEdit={canEdit} />
           </>

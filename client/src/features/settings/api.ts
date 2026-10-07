@@ -1,4 +1,6 @@
 import type {
+  ChangeOrganisationSettingRequest,
+  OrganisationSettingsResponse,
   AttendanceConfig,
   ChangeAttendanceConfigRequest,
   ChangeEventSettingRequest,
@@ -228,4 +230,19 @@ export async function revertScopedSetting(eventId: string, input: ScopedSettings
   )
     throw new Error('Setting restore does not match this review');
   return response;
+}
+
+/** The event's organisation-wide settings, and whether the caller may change them (D-17). */
+export function getOrganisationSettings(eventId: string): Promise<OrganisationSettingsResponse> {
+  return eventApi<OrganisationSettingsResponse>(eventId, '/admin/organisation-settings');
+}
+
+export function changeOrganisationSetting(
+  eventId: string,
+  body: ChangeOrganisationSettingRequest,
+): Promise<OrganisationSettingsResponse> {
+  return eventApi<OrganisationSettingsResponse>(eventId, '/admin/organisation-settings', {
+    method: 'PATCH',
+    body,
+  });
 }

@@ -343,7 +343,7 @@ describe('runtime settings', () => {
     const response = await request(app)
       .patch('/api/v1/admin/settings')
       .set('Authorization', bearer(ic))
-      .send({ alertPollSeconds: 5 });
+      .send({ eventName: 'Dry run' });
 
     expect(response.status).toBe(403);
   });
@@ -352,12 +352,12 @@ describe('runtime settings', () => {
     const response = await request(app)
       .patch('/api/v1/admin/settings')
       .set('Authorization', bearer(chief))
-      .send({ alertPollSeconds: 5 });
+      .send({ eventName: 'Dry run' });
 
     expect(response.status).toBe(200);
-    expect(response.body.settings.alertPollSeconds).toBe(5);
-    expect(response.body.overriddenKeys).toContain('alertPollSeconds');
-    expect(getSettings().alertPollSeconds).toBe(5);
+    expect(response.body.settings.eventName).toBe('Dry run');
+    expect(response.body.overriddenKeys).toContain('eventName');
+    expect(getSettings().eventName).toBe('Dry run');
   });
 
   it.each([
@@ -402,16 +402,35 @@ describe('runtime settings', () => {
     expect(await rawDb.appSetting.count()).toBe(0);
   });
 
+  it.each([
+    ['dashboardPollSeconds', 5],
+    ['alertPollSeconds', 12],
+    ['refreshSessionDays', 7],
+    ['idempotencyRetentionDays', 3],
+  ])('refuses %s here, because platform admins own it (D-17)', async (key, value) => {
+    const response = await request(app)
+      .patch('/api/v1/admin/settings')
+      .set('Authorization', bearer(admin))
+      .send({ [key]: value });
+
+    expect(response.status).toBe(400);
+    expect(response.body.error.details).toEqual({
+      keys: [key],
+      replacement: '/admin/organisation-settings',
+    });
+    expect(await rawDb.appSetting.count()).toBe(0);
+  });
+
   it('rejects a mixed body as a whole, leaving the permitted key unwritten', async () => {
     const response = await request(app)
       .patch('/api/v1/admin/settings')
       .set('Authorization', bearer(chief))
-      .send({ alertPollSeconds: 7, longShiftMinutes: 90, silentStationMinutes: 4 });
+      .send({ eventName: 'Dry run', longShiftMinutes: 90, silentStationMinutes: 4 });
 
     expect(response.status).toBe(400);
     expect(response.body.error.details.keys).toEqual(['silentStationMinutes', 'longShiftMinutes']);
     expect(await rawDb.appSetting.count()).toBe(0);
-    expect(getSettings().alertPollSeconds).toBe(DEFAULT_SETTINGS.alertPollSeconds);
+    expect(getSettings().eventName).toBe(DEFAULT_SETTINGS.eventName);
   });
 
   it('leaves an existing retired-key row untouched while another key is written', async () => {
@@ -420,7 +439,7 @@ describe('runtime settings', () => {
     await request(app)
       .patch('/api/v1/admin/settings')
       .set('Authorization', bearer(chief))
-      .send({ alertPollSeconds: 12 })
+      .send({ eventName: 'Dry run' })
       .expect(200);
 
     expect(
@@ -505,12 +524,12 @@ describe('runtime settings', () => {
     await request(app)
       .patch('/api/v1/admin/settings')
       .set('Authorization', bearer(chief))
-      .send({ alertPollSeconds: 12 })
+      .send({ eventName: 'Dry run' })
       .expect(200);
 
     const entry = await prisma.auditLog.findFirst({ where: { action: 'settings.update' } });
-    expect(entry?.before).toMatchObject({ alertPollSeconds: 10 });
-    expect(entry?.after).toMatchObject({ alertPollSeconds: 12 });
+    expect(entry?.before).toMatchObject({ eventName: 'Event' });
+    expect(entry?.after).toMatchObject({ eventName: 'Dry run' });
   });
 });
 

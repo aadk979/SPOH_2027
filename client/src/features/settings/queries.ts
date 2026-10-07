@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tansta
 import type {
   ChangeAttendanceConfigRequest,
   ChangeEventSettingRequest,
+  ChangeOrganisationSettingRequest,
   RuntimeSettings,
   TestAttendanceNetworkRequest,
   UpdateShiftTemplateRequest,
@@ -22,7 +23,9 @@ import { ApiError } from '@/shared/lib/apiErrors';
 import {
   changeAttendanceConfig,
   changeEventSetting,
+  changeOrganisationSetting,
   getAttendanceConfig,
+  getOrganisationSettings,
   getEventSettings,
   getSettings,
   listShiftTemplates,
@@ -43,6 +46,7 @@ export const settingsKeys = {
   shiftTemplates: (eventId: string) => [eventId, 'admin', 'shift-templates'] as const,
   event: (eventId: string) => [eventId, 'event-settings'] as const,
   attendance: (eventId: string) => [eventId, 'admin', 'attendance-settings'] as const,
+  organisation: (eventId: string) => [eventId, 'admin', 'organisation-settings'] as const,
 };
 export function useSettings(enabled: boolean) {
   const eventId = useEventId();
@@ -282,4 +286,24 @@ export function useScopedSettingsCache() {
       void client.invalidateQueries({ queryKey: owner });
     },
   };
+}
+
+export function useOrganisationSettings(enabled: boolean) {
+  const eventId = useEventId();
+  return useQuery({
+    queryKey: settingsKeys.organisation(eventId),
+    queryFn: () => getOrganisationSettings(eventId),
+    enabled,
+    staleTime: 60_000,
+  });
+}
+
+export function useChangeOrganisationSetting() {
+  const client = useQueryClient();
+  const eventId = useEventId();
+  return useMutation({
+    mutationFn: (body: ChangeOrganisationSettingRequest) =>
+      changeOrganisationSetting(eventId, body),
+    onSuccess: (response) => client.setQueryData(settingsKeys.organisation(eventId), response),
+  });
 }

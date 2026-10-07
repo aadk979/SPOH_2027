@@ -13,7 +13,7 @@ for (const [name, width, height] of [
       isMobile: name === 'phone',
       hasTouch: name === 'phone',
     });
-    test('saves only a changed threshold, leaves untouched overrides alone and restores the fixture', async ({
+    test('saves only a changed event name, leaves untouched overrides alone and restores the fixture', async ({
       page,
     }) => {
       test.setTimeout(90_000);
@@ -46,8 +46,9 @@ for (const [name, width, height] of [
       const initialRead = await page.request.get(endpoint, { headers: headers() });
       expect(initialRead.status()).toBe(200);
       const initial = SettingsResponse.parse(await initialRead.json());
-      const original = initial.settings.alertPollSeconds;
-      const alternate = original < 30 ? original + 1 : original - 1;
+      // The event name is the one key the legacy form still writes.
+      const original = initial.settings.eventName;
+      const alternate = `${original.slice(0, 60)} reviewed`;
       let restored = false;
       const requests: unknown[] = [];
       page.on('request', (request) => {
@@ -57,15 +58,13 @@ for (const [name, width, height] of [
       try {
         await page.goto(page.url().replace(/\/home$/, '/admin/settings'));
         const save = page.getByRole('button', { name: 'Save settings', exact: true });
-        const field = page.getByLabel('Alert refresh', { exact: true });
-        await expect(field).toHaveValue(String(original));
+        const field = page.getByLabel('Event name', { exact: true });
+        await expect(field).toHaveValue(original);
         await expect(save).toBeDisabled();
-        await page
-          .getByLabel('Event name', { exact: true })
-          .fill(` ${initial.settings.eventName} `);
+        await field.fill(` ${original} `);
         await expect(save).toBeDisabled();
         expect(requests).toEqual([]);
-        await field.fill(String(alternate));
+        await field.fill(alternate);
         await save.hover();
         await page.evaluate(axe);
         const violations = await page.evaluate(async () =>
@@ -90,16 +89,16 @@ for (const [name, width, height] of [
         const changedRead = await changing;
         expect(changedRead.status()).toBe(200);
         const changed = SettingsResponse.parse(await changedRead.json());
-        expect(requests).toEqual([{ alertPollSeconds: alternate }]);
-        expect(changed.settings).toEqual({ ...initial.settings, alertPollSeconds: alternate });
-        expect(changed.overriddenKeys.filter((key) => key !== 'alertPollSeconds').sort()).toEqual(
-          initial.overriddenKeys.filter((key) => key !== 'alertPollSeconds').sort(),
+        expect(requests).toEqual([{ eventName: alternate }]);
+        expect(changed.settings).toEqual({ ...initial.settings, eventName: alternate });
+        expect(changed.overriddenKeys.filter((key) => key !== 'eventName').sort()).toEqual(
+          initial.overriddenKeys.filter((key) => key !== 'eventName').sort(),
         );
         await expect(save).toBeDisabled();
         await page.reload();
-        await expect(field).toHaveValue(String(alternate));
+        await expect(field).toHaveValue(alternate);
         await expect(save).toBeDisabled();
-        await field.fill(String(original));
+        await field.fill(original);
         const restoring = page.waitForResponse(
           (response) => response.url() === endpoint && response.request().method() === 'PATCH',
         );
@@ -111,7 +110,7 @@ for (const [name, width, height] of [
         );
         restored = true;
         await expect(save).toBeDisabled();
-        expect(requests).toEqual([{ alertPollSeconds: alternate }, { alertPollSeconds: original }]);
+        expect(requests).toEqual([{ eventName: alternate }, { eventName: original }]);
         expect(errors).toEqual([]);
       } finally {
         if (!restored)
@@ -119,7 +118,7 @@ for (const [name, width, height] of [
             (
               await page.request.patch(endpoint, {
                 headers: headers(),
-                data: { alertPollSeconds: original },
+                data: { eventName: original },
               })
             ).status(),
           ).toBe(200);

@@ -54,15 +54,11 @@ describe('settings request', () => {
     expect(toSettingsPatch(original, original)).toEqual({});
   });
 
-  it('selects only changed parsed keys, including decimal numeric settings', () => {
+  it('selects only the changed event name, the one key still written here', () => {
     const original = RuntimeSettings.parse(toSettingsRequest(validValues()));
-    const parsed = RuntimeSettings.parse({
-      ...original,
-      eventName: 'Reviewed',
-      alertPollSeconds: 30,
-    });
+    const parsed = RuntimeSettings.parse({ ...original, eventName: 'Reviewed' });
     const patch = toSettingsPatch(parsed, original);
-    expect(patch).toEqual({ eventName: 'Reviewed', alertPollSeconds: 30 });
+    expect(patch).toEqual({ eventName: 'Reviewed' });
     expect(UpdateSettingsRequest.parse(patch)).toEqual(patch);
   });
 
@@ -79,17 +75,25 @@ describe('settings request', () => {
       outboxWarningCount: original.outboxWarningCount + 1,
       lostPersonPurgeHours: original.lostPersonPurgeHours - 1,
       outboxWarningAgeMinutes: original.outboxWarningAgeMinutes + 1,
+      dashboardPollSeconds: original.dashboardPollSeconds + 1,
+      alertPollSeconds: original.alertPollSeconds + 1,
+      refreshSessionDays: original.refreshSessionDays - 1,
+      idempotencyRetentionDays: original.idempotencyRetentionDays + 1,
       eventName: 'Reviewed',
     });
     expect(toSettingsPatch(parsed, original)).toEqual({ eventName: 'Reviewed' });
     expect([...RETIRED_LEGACY_KEYS].sort()).toEqual([
+      'alertPollSeconds',
       'captureSendGraceSeconds',
       'captureUndoWindowSeconds',
+      'dashboardPollSeconds',
+      'idempotencyRetentionDays',
       'implausibleTapsPerMinute',
       'longShiftMinutes',
       'lostPersonPurgeHours',
       'outboxWarningAgeMinutes',
       'outboxWarningCount',
+      'refreshSessionDays',
       'silentStationMinutes',
       'staleDeviceMinutes',
     ]);

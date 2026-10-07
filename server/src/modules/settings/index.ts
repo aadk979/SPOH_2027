@@ -25,6 +25,10 @@ export {
 export { eventSettingRevertReplay, revertEventSettingHandler } from './http/revertHandlers.js';
 export { getScopedSettingsHandler } from './http/scopedReadHandler.js';
 export { getClientSettingsHandler } from './http/clientSettingsHandler.js';
+export {
+  changeOrganisationSettingHandler,
+  getOrganisationSettingsHandler,
+} from './http/organisationSettingsHandlers.js';
 export { getScopedHistoryHandler } from './http/scopedHistoryHandler.js';
 export {
   revertScopedSettingHandler,

@@ -14,6 +14,7 @@ import { SETTINGS } from '../../src/platform/settings/registry.js';
 import {
   assertNoRetiredLegacyKeys,
   GUARDED_LEGACY_SETTING_KEYS,
+  ORGANISATION_LEGACY_SETTING_KEYS,
   RETIRED_LEGACY_SETTING_KEYS,
 } from '../../src/modules/settings/domain/retiredLegacySettings.js';
 import { updateSettingsView } from '../../src/modules/settings/application/settingsView.js';
@@ -100,14 +101,24 @@ describe('retired legacy setting keys', () => {
     });
   });
 
-  it('allows every other legacy key', () => {
-    expect(() =>
-      assertNoRetiredLegacyKeys({
-        eventName: 'Event',
-        dashboardPollSeconds: 12,
-        alertPollSeconds: 9,
+  it('sends the organisation-wide keys to their platform-admin editor (D-17)', () => {
+    expect([...ORGANISATION_LEGACY_SETTING_KEYS].sort()).toEqual([
+      'alertPollSeconds',
+      'dashboardPollSeconds',
+      'idempotencyRetentionDays',
+      'refreshSessionDays',
+    ]);
+    for (const key of ORGANISATION_LEGACY_SETTING_KEYS)
+      expect(SETTINGS[key].scopes).toEqual(['platform']);
+    expect(() => assertNoRetiredLegacyKeys({ refreshSessionDays: 7 })).toThrow(
+      expect.objectContaining({
+        details: { keys: ['refreshSessionDays'], replacement: '/admin/organisation-settings' },
       }),
-    ).not.toThrow();
+    );
+  });
+
+  it('leaves only the event name on the legacy endpoint', () => {
+    expect(() => assertNoRetiredLegacyKeys({ eventName: 'Event' })).not.toThrow();
   });
 
   it('rejects before any write or cache refresh, whole body at once', async () => {
@@ -118,8 +129,8 @@ describe('retired legacy setting keys', () => {
   });
 
   it('passes a permitted body through unchanged', async () => {
-    store.updateSettings.mockResolvedValue({ alertPollSeconds: 12 });
-    await updateSettingsView({ alertPollSeconds: 12 }, actor);
-    expect(store.updateSettings).toHaveBeenCalledWith({ alertPollSeconds: 12 }, 'person-1', {});
+    store.updateSettings.mockResolvedValue({ eventName: 'Dry run' });
+    await updateSettingsView({ eventName: 'Dry run' }, actor);
+    expect(store.updateSettings).toHaveBeenCalledWith({ eventName: 'Dry run' }, 'person-1', {});
   });
 });

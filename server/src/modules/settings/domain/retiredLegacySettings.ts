@@ -28,6 +28,17 @@ export const GUARDED_LEGACY_SETTING_KEYS = [
   'lostPersonPurgeHours',
 ] as const satisfies readonly (keyof UpdateSettingsRequest)[];
 
+/**
+ * Organisation-wide settings whose writes moved to PATCH /admin/organisation-settings,
+ * where only the organisation's platform admins may change them (D-17).
+ */
+export const ORGANISATION_LEGACY_SETTING_KEYS = [
+  'dashboardPollSeconds',
+  'alertPollSeconds',
+  'refreshSessionDays',
+  'idempotencyRetentionDays',
+] as const satisfies readonly (keyof UpdateSettingsRequest)[];
+
 function refuse(
   patch: UpdateSettingsRequest,
   moved: { keys: readonly (keyof UpdateSettingsRequest)[]; replacement: string; message: string },
@@ -49,5 +60,11 @@ export function assertNoRetiredLegacyKeys(patch: UpdateSettingsRequest): void {
     replacement: '/admin/event-settings',
     message:
       "This setting is changed in the event's counts and visitor data settings, not on this endpoint.",
+  });
+  refuse(patch, {
+    keys: ORGANISATION_LEGACY_SETTING_KEYS,
+    replacement: '/admin/organisation-settings',
+    message:
+      "These settings are changed in the organisation's settings by a platform admin, not on this endpoint.",
   });
 }

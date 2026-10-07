@@ -163,6 +163,24 @@ describe('operations screen safety net', () => {
           },
         };
       }
+      if (path.endsWith('/admin/organisation-settings')) {
+        return {
+          organisationId: 'org',
+          settings: {
+            dashboardPollSeconds: 3,
+            alertPollSeconds: 10,
+            refreshSessionDays: 30,
+            idempotencyRetentionDays: 7,
+          },
+          versions: {
+            dashboardPollSeconds: 0,
+            alertPollSeconds: 0,
+            refreshSessionDays: 0,
+            idempotencyRetentionDays: 0,
+          },
+          canChange: false,
+        };
+      }
       if (path.endsWith('/admin/attendance-settings')) {
         return {
           rootMembershipId: null,

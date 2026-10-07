@@ -118,6 +118,23 @@ describe('settings moved to the settings catalogue', () => {
     },
   );
 
+  it('shows the four organisation-wide settings as pointers to their platform-admin editor', async () => {
+    show();
+    await loaded();
+    for (const label of [
+      'Dashboard refresh',
+      'Alert refresh',
+      'Session lifetime',
+      'Replay retention',
+    ])
+      expect(screen.queryByLabelText(label)).toBeNull();
+    expect(
+      screen.getAllByText(
+        'Changed under Organisation settings above, by a platform admin, for every event.',
+      ),
+    ).toHaveLength(4);
+  });
+
   it('shows lost-person retention as a pointer to the event’s visitor data settings', async () => {
     show();
     await loaded();
@@ -187,15 +204,11 @@ describe('settings form changed-key writes', () => {
     expect(writes()).toHaveLength(1);
   });
 
-  it('treats trimmed names and equivalent numeric input as unchanged', async () => {
+  it('treats a trimmed name as unchanged', async () => {
     show();
     await loaded();
     fireEvent.change(screen.getByLabelText('Event name'), {
       target: { value: ` ${response.settings.eventName} ` },
-    });
-    const threshold = screen.getByLabelText('Alert refresh');
-    fireEvent.change(threshold, {
-      target: { value: `${response.settings.alertPollSeconds}.0` },
     });
     act(() => latestForm.onSave());
     expect(writes()).toEqual([]);
@@ -204,18 +217,18 @@ describe('settings form changed-key writes', () => {
     );
   });
 
-  it('validates the full form before sending a changed numeric key', async () => {
+  it('validates the form before sending a changed name', async () => {
     show();
     await loaded();
-    const threshold = screen.getByLabelText('Alert refresh');
-    fireEvent.change(threshold, { target: { value: '-1' } });
+    const name = screen.getByLabelText('Event name');
+    fireEvent.change(name, { target: { value: '   ' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
     expect(writes()).toEqual([]);
-    expect(threshold.getAttribute('aria-invalid')).toBe('true');
-    fireEvent.change(threshold, { target: { value: '30' } });
+    expect(name.getAttribute('aria-invalid')).toBe('true');
+    fireEvent.change(name, { target: { value: 'Reviewed event' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
     await waitFor(() => expect(writes()).toHaveLength(1));
-    expect(writes()[0]?.[1]?.body).toEqual({ alertPollSeconds: 30 });
+    expect(writes()[0]?.[1]?.body).toEqual({ eventName: 'Reviewed event' });
   });
 
   it('keeps an edited draft across a refresh and does not rewrite another changed key', async () => {
@@ -236,10 +249,6 @@ describe('settings form changed-key writes', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
     await waitFor(() => expect(writes()).toHaveLength(1));
     expect(writes()[0]?.[1]?.body).toEqual({ eventName: 'Reviewed event' });
-    await loaded();
-    expect((screen.getByLabelText('Alert refresh') as HTMLInputElement).value).toBe(
-      String(response.settings.alertPollSeconds),
-    );
   });
 
   it('blocks duplicate saves and editing during an in-flight request', async () => {
@@ -257,7 +266,6 @@ describe('settings form changed-key writes', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
     await waitFor(() => expect(writes()).toHaveLength(1));
     expect(screen.getByLabelText('Event name').hasAttribute('disabled')).toBe(true);
-    expect(screen.getByLabelText('Alert refresh').hasAttribute('disabled')).toBe(true);
     act(() => latestForm.onSave());
     expect(writes()).toHaveLength(1);
     await act(async () => {

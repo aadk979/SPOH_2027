@@ -2,6 +2,7 @@ import type { Router } from 'express';
 import { z } from 'zod';
 import {
   ChangeEventSettingRequest,
+  ChangeOrganisationSettingRequest,
   EventSettingHistoryQuery,
   ScopedSettingsReadQuery,
   ScopedSettingsMutationRequest,
@@ -22,7 +23,9 @@ import { idempotent } from '../../../platform/http/idempotency.js';
 import {
   changeEventSettingHandler,
   getEventSettingsHandler,
+  changeOrganisationSettingHandler,
   getClientSettingsHandler,
+  getOrganisationSettingsHandler,
   getSettingsHandler,
   updateSettingsHandler,
   getEventSettingHistoryHandler,
@@ -47,6 +50,7 @@ import {
 /** Register directly on the authenticated admin router, keeping the isolation inventory flat. */
 export function registerSettingsRoutes(router: Router): void {
   registerOperationalSettingsRoutes(router);
+  registerOrganisationSettingsRoutes(router);
   registerCaptureScheduleRoutes(router);
   registerCaptureScheduleManagementRoutes(router);
   registerProductSettingsRoutes(router);
@@ -208,5 +212,26 @@ function registerProductSettingsRoutes(router: Router): void {
     validate({ body: RevertEventSettingRequest }),
     idempotent('setting.product.revert', { redacted: eventSettingRevertReplay }),
     revertEventSettingHandler,
+  );
+}
+
+/**
+ * Organisation-wide settings (platform scope). Event Chiefs and Admins read
+ * them; only the organisation's platform admins change them, checked against
+ * the current organisation membership inside the write (D-17).
+ */
+function registerOrganisationSettingsRoutes(router: Router): void {
+  router.get(
+    '/organisation-settings',
+    defaultRateLimit,
+    requireCapability('own.read'),
+    getOrganisationSettingsHandler,
+  );
+  router.patch(
+    '/organisation-settings',
+    adminRateLimit,
+    requireCapability('own.read'),
+    validate({ body: ChangeOrganisationSettingRequest }),
+    changeOrganisationSettingHandler,
   );
 }

@@ -329,3 +329,22 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
 - **Recommendation:** **A.** Events may remove descriptions sooner; none can keep
   them longer than the promise.
 - **Answer:** **A** (owner, 7 October 2026). Longer retention needs a code change.
+
+### D-17 — Who changes organisation-wide settings
+
+- **Owner:** you
+- **Blocks:** —
+- **Question:** `dashboardPollSeconds`, `alertPollSeconds`, `refreshSessionDays` and
+  `idempotencyRetentionDays` are platform scope: they affect every event of the
+  organisation. The legacy screen let any event's Chief or Admin change them. Who
+  may change them once they move off it?
+- **Options:**
+  - **A.** The organisation's platform admins (`PLATFORM_ADMIN`), as for reopening
+    and archiving events; event Chiefs and Admins can read them.
+  - **B.** Any event Admin of the organisation.
+  - **C.** Nobody until P11; fixed at their current values.
+- **Recommendation:** **A.** It matches the approved P11 design for security
+  settings.
+- **Answer:** **A** (owner, 7 October 2026). Lost-person retention and visitor data
+  stay with event Chiefs and Admins (`config.manage`) until P11 enforces
+  `Settings.ManagePrivacy`.

@@ -73,6 +73,10 @@ adminRouter.use('/settings/catalogue', (_req, res, next) => {
   res.setHeader('Cache-Control', 'no-store');
   next();
 });
+adminRouter.use('/organisation-settings', (_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+});
 adminRouter.use('/settings/client', (_req, res, next) => {
   res.setHeader('Cache-Control', 'no-store');
   next();

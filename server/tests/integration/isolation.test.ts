@@ -518,6 +518,12 @@ const CASES: Record<string, Case> = {
     body: () => ({ name: 'X' }),
   },
   'GET /admin/settings': noId('runtime settings are platform-wide until P10'),
+  'GET /admin/organisation-settings': noId(
+    "reads the path event's organisation settings; other organisations are covered by organisationSettings tests",
+  ),
+  'PATCH /admin/organisation-settings': noId(
+    "changes the path event's organisation settings; platform-admin authority is covered by organisationSettings tests",
+  ),
   'GET /admin/settings/client': noId(
     "resolves the path event's device tuning; foreign event layers are covered by clientSettings tests",
   ),
