@@ -1,0 +1,47 @@
+{
+  "observedAt": "2026-10-07T07:25:00.000Z",
+  "authentication": "Normal Cognito Authorization Code + PKCE; each run revoked its own session (HTTP 204)",
+  "decision": "D-17 (owner, 7 October 2026): only the organisation's platform admins change the four organisation-wide settings; event Chiefs and Admins read them.",
+  "editorRelease": {
+    "sourceCommit": "3e946b588f69d053775b7a2f72308700322cc876",
+    "imageDigest": "sha256:27bf42c4044483c88021fb7a7c1e09752e9c09976ee5048db1942c6ccdd19fa5",
+    "taskRevision": 144,
+    "checks": {
+      "legacyPatchRefused": {
+        "status": 400,
+        "code": "VALIDATION_FAILED",
+        "replacement": "/admin/organisation-settings"
+      },
+      "outOfRangeRefused": { "status": 400, "code": "VALIDATION_FAILED" },
+      "organisationReadNoStore": true,
+      "legacyAndOrganisationUnchanged": true,
+      "formEditableMatchesAuthority": true,
+      "legacyFormPointers": 4,
+      "backendFailures": []
+    },
+    "legacyOverriddenKeys": [],
+    "note": "Refusal-only. The staging smoke identity is a platform admin (canChange true), so no non-admin refusal was exercised on staging; that path is covered by integration tests. No organisation setting was changed on staging."
+  },
+  "readerRelease": {
+    "sourceCommit": "8f1c9d64b412b303d5ae0fae1eb41494a999d052",
+    "imageDigest": "sha256:ac17d41eaeed7623cf5fd82495a649acd360191a8b0571c9612603e77b42df91",
+    "taskRevision": 145,
+    "checks": {
+      "migrationApplied": "20261007130000_copy_organisation_settings (migrate task log)",
+      "copied": "none: staging had no legacy override; all four keys stay defaults at version 0",
+      "devicePollIntervalsMatchOrganisation": true,
+      "refreshCookieDays": 30,
+      "refreshCookieMatchesOrganisationSessionLifetime": true,
+      "anonymousDeviceRead": { "status": 401, "cacheControl": "no-store" },
+      "accessLogLinesParsed": "34 of 34",
+      "appErrorLogsInTheHourAfterRelease": 0,
+      "backendFailures": []
+    },
+    "harnessNotes": [
+      "The first run looked for the refresh cookie at the API root; the cookie is scoped to /api/v1/auth. The lookup was corrected and the run repeated.",
+      "The second run's access-log check waited 20 seconds and saw the device preflight (204) and the anonymous read (401) but not yet the device GET; a later query found it with status 200 and integrationStatus 200. Log delivery latency, not a product failure."
+    ]
+  },
+  "ordering": "The reader release was pushed only after the editor image was the single running task.",
+  "limitations": "Only eventName is still written to the legacy store, and nothing else reads it. AppSetting is not dropped. P10.8 and G3 remain open."
+}

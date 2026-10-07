@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-07T05:01:46.150Z",
+  "updatedAt": "2026-10-07T06:05:40.222Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -2650,6 +2650,10 @@
             {
               "at": "2026-10-07T04:51:29.328Z",
               "text": "Lost-person retention moved per owner decision D-16 (shorten only, 1-24h per event). Compatibility 56287ee (task 142): guarded event-settings editor with confirmation before shortening, history/restore, legacy PATCH refused naming /admin/event-settings; refusal-only staging acceptance passed. Copy/reader 879336a (task 143) after A was the single running task: migration applied (no staging legacy override), purge reads only the event value or 24h default."
+            },
+            {
+              "at": "2026-10-07T06:05:40.221Z",
+              "text": "Organisation-wide settings moved per owner decision D-17 (platform admins only). Editor 3e946b5 (task 144): /admin/organisation-settings with current-organisation-role check, legacy PATCH refused; refusal-only staging acceptance passed. Copy/readers 8f1c9d6 (task 145): devices, refresh sessions (cookie 30.00 days = organisation value) and per-organisation replay prune read the platform scope; no staging legacy overrides to copy. Only eventName remains in AppSetting and nothing reads it."
             }
           ]
         },
