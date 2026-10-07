@@ -1,0 +1,60 @@
+{
+  "observedAt": "2026-10-07T10:18:13.246Z",
+  "authentication": "Normal Cognito Authorization Code + PKCE; each run revoked its own session (HTTP 204)",
+  "decision": "D-18 (owner, 7 October 2026): the settings screen's event name renames Event.name, by the event's Chief and Admin (config.manage); then the legacy AppSetting store goes.",
+  "renameRelease": {
+    "sourceCommit": "021f794785dc824bbd611679cf1e77c8d89451cc",
+    "imageDigest": "sha256:5b75edb53ffa6f711c7a3017ff24315cc6270f2a2c116cd23177c6306d4373e6",
+    "taskRevision": 146,
+    "event": {
+      "id": "evt_spoh2027",
+      "status": "READY",
+      "nameLength": 9
+    },
+    "checks": {
+      "legacyPatchRefused": {
+        "status": 400,
+        "keys": ["eventName"],
+        "replacement": "/admin/event-name"
+      },
+      "invalidNameRefused": {
+        "status": 400,
+        "code": "VALIDATION_FAILED",
+        "cacheControl": "no-store"
+      },
+      "staleReadRefused": {
+        "status": 409,
+        "code": "CONFLICT",
+        "namesCurrentName": true
+      },
+      "sameNameIsNoop": true,
+      "nameAndLegacyUnchanged": true,
+      "formShowsEventName": true,
+      "formEditableMatchesAuthority": true,
+      "legacySaveButtonGone": true,
+      "backendFailures": []
+    },
+    "legacyEventName": {
+      "overridden": false
+    },
+    "note": "No write could succeed: the stale rename named a name nobody had read, and the same-name rename is a no-op without an audit entry. Staging stored no legacy eventName, so dropping AppSetting loses nothing there. The event was not renamed on staging; a real rename is covered by integration and E2E tests."
+  },
+  "contractRelease": {
+    "sourceCommit": "58906e5eb9f97b2d2c85d21b06049f18527b08f1",
+    "imageDigest": "sha256:26eedb73db8e984f074877eddf0dba9ca9303c4a25a72a60641ebf93a106f9bf",
+    "taskRevision": 147,
+    "checks": {
+      "migrationApplied": "20261007170000_drop_app_setting (2 lines in the migrate task's stream)",
+      "legacyEndpointGone": {
+        "get": 404,
+        "patch": 404
+      },
+      "deviceSettingsRead": true,
+      "nameUnchanged": true,
+      "formShowsEventName": true,
+      "legacySectionGone": true,
+      "backendFailures": []
+    },
+    "note": "Read-only apart from the refused legacy PATCH, which named the default value. Nothing was lost: release A observed no stored legacy eventName, and the earlier copy migrations had already moved every other key."
+  }
+}

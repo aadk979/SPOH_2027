@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-07T07:56:50.103Z",
+  "updatedAt": "2026-10-07T10:18:43.604Z",
   "current": {
     "phase": "P10",
     "step": "P10.8"
@@ -3751,6 +3751,10 @@
     {
       "at": "2026-10-06T11:00:44.739Z",
       "text": "Category local acceptance complete: four phone/laptop retry/edit/cancel and real-worker journeys pass; fresh full visual 100/100 passes in 3.1 minutes with updates disabled. Independent review covers eight new states, two settings routes and all affected laptop capture/catalogue crops. Frozen nine memberships/eight person markers unchanged; no real local spoh2027 reset/seed/migration. Required local checks and unchanged floors pass; full source CI and exact-image normal Cognito staging acceptance next. P10/P13/G3 remain open."
+    },
+    {
+      "at": "2026-10-07T10:18:43.603Z",
+      "text": "P10.8: D-18 delivered. 021f794 renames Event.name from the settings screen (Chief/Admin, stale-read refusal, audit); 58906e5 drops AppSetting, the legacy endpoint, cache and contracts. Both accepted on staging (tasks 146, 147). Report P10/event-name.md."
     }
   ]
 }
