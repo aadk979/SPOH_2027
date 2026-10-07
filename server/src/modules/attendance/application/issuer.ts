@@ -6,7 +6,7 @@ import {
   isRoot,
   type Person,
 } from '../domain/attendanceRules.js';
-import { rootMembershipId } from './config.js';
+import { rootMembershipId } from '../../../platform/event/attendanceAuthority.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /** The verifier, if they may issue codes today; a 403 otherwise. */

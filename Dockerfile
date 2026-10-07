@@ -18,16 +18,18 @@ ENV NEXT_TELEMETRY_DISABLED=1 CI=1
 RUN npm ci --no-audit --no-fund
 COPY tsconfig.base.json ./
 COPY packages/shared packages/shared
+COPY packages/access-policies packages/access-policies
 COPY server server
 COPY client client
-RUN npm run build --workspace packages/shared \
+RUN npm run build:shared \
  && DATABASE_URL=postgresql://build:build@localhost:5432/build npm run build --workspace server  && npm run build:seed --workspace server \
  && SPOH_STATIC_EXPORT=1 npm run build --workspace client
 
-# Runtime dependencies of the server and the shared package, the Prisma CLI
+# Runtime dependencies of the server and the shared packages, the Prisma CLI
 # (which the migrate task runs) among them. No client or dev dependencies.
 FROM manifests AS deps
-RUN npm ci --omit=dev --no-audit --no-fund --workspace server --workspace packages/shared
+RUN npm ci --omit=dev --no-audit --no-fund \
+  --workspace server --workspace packages/shared --workspace packages/access-policies
 
 FROM node:24-bookworm-slim AS runtime
 WORKDIR /app
@@ -37,6 +39,10 @@ COPY --from=deps --chown=node:node /app/node_modules node_modules
 COPY --from=build --chown=node:node /app/package.json ./
 COPY --from=build --chown=node:node /app/packages/shared/package.json packages/shared/
 COPY --from=build --chown=node:node /app/packages/shared/dist packages/shared/dist
+# The Cedar policy set the server's local engine evaluates and CDK deploys (ADR-005 §6).
+COPY --from=build --chown=node:node /app/packages/access-policies/package.json /app/packages/access-policies/schema.cedarschema /app/packages/access-policies/default-grants.json packages/access-policies/
+COPY --from=build --chown=node:node /app/packages/access-policies/dist packages/access-policies/dist
+COPY --from=build --chown=node:node /app/packages/access-policies/policies packages/access-policies/policies
 COPY --from=build --chown=node:node /app/server/package.json /app/server/prisma.config.ts server/
 COPY --from=build --chown=node:node /app/server/dist server/dist
 COPY --from=build --chown=node:node /app/server/prisma server/prisma

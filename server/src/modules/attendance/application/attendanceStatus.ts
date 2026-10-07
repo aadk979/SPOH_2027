@@ -7,7 +7,11 @@ import { toAttendanceRecord } from '../data/mappers.js';
 import { findAttendance, findEventDayOn } from '../data/repo.js';
 import { requireVolunteer } from './requireVolunteer.js';
 import { assertActiveAccount, isRoot } from '../domain/attendanceRules.js';
-import { campusCidrs, onCampus, rootMembershipId } from './config.js';
+import {
+  campusCidrs,
+  onCampus,
+  rootMembershipId,
+} from '../../../platform/event/attendanceAuthority.js';
 import { assertIssuer } from './issuer.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 

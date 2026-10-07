@@ -8,7 +8,7 @@ import { eventToday } from '../../../platform/event/today.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { findEventDayOn, lockPerson, replaceChallenge } from '../data/repo.js';
 import { ATTENDANCE_TTL_MS, assertEventToday } from '../domain/attendanceRules.js';
-import { campusCidrs, onCampus } from './config.js';
+import { campusCidrs, onCampus } from '../../../platform/event/attendanceAuthority.js';
 import { assertIssuer } from './issuer.js';
 import { hashPin, signAttendanceToken } from './tokens.js';
 

@@ -12,6 +12,10 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./policy-set": {
+      "types": "./dist/policySet.d.ts",
+      "default": "./dist/policySet.js"
+    },
     "./schema.cedarschema": "./schema.cedarschema",
     "./policies/*": "./policies/*",
     "./default-grants.json": "./default-grants.json"
@@ -28,6 +32,7 @@
     "@cedar-policy/cedar-wasm": "4.13.0"
   },
   "devDependencies": {
+    "@types/node": "^24.13.3",
     "prettier": "^3.9.6",
     "typescript": "6.0.3"
   }

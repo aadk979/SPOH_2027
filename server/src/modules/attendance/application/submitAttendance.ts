@@ -23,7 +23,11 @@ import {
   codeInvalid,
   type Person,
 } from '../domain/attendanceRules.js';
-import { campusCidrs, onCampus, rootMembershipId } from './config.js';
+import {
+  campusCidrs,
+  onCampus,
+  rootMembershipId,
+} from '../../../platform/event/attendanceAuthority.js';
 import { assertIssuer } from './issuer.js';
 import { markPresent } from './markPresent.js';
 import { hashPin, verifyAttendanceToken } from './tokens.js';

@@ -3,7 +3,7 @@
  * the LocalCedarAuthorizer uses (ADR-005 §6). It loads every policies/*.cedar file, keys each
  * policy by its @id annotation, and builds entities for a two-event world.
  */
-import { readFileSync, readdirSync } from 'node:fs';
+import { appendFileSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as cedar from '@cedar-policy/cedar-wasm/nodejs';
@@ -34,6 +34,25 @@ export function loadPolicies() {
     }
   }
   return policies;
+}
+
+/**
+ * The authorizer contract test (P11.4) replays every request the suite evaluates through
+ * both server engines. It names a file here; each evaluation is appended as one JSON line.
+ */
+const RECORD = process.env.SPOH_POLICY_SUITE_RECORD;
+
+function record(request, answer) {
+  if (!RECORD) return;
+  const outcome =
+    answer.type === 'success'
+      ? {
+          decision: answer.response.decision,
+          reasons: answer.response.diagnostics.reason,
+          errors: answer.response.diagnostics.errors.length,
+        }
+      : { failure: true };
+  appendFileSync(RECORD, `${JSON.stringify({ request, outcome })}\n`);
 }
 
 const ref = (type, id) => ({ __entity: { type: `SPOH::${type}`, id } });
@@ -110,16 +129,20 @@ export function world({ grants = DEFAULT_GRANTS } = {}) {
     },
     /** Evaluate one request. Returns { decision, reasons, errors }. */
     can(principal, action, resource, context = {}) {
-      const answer = cedar.isAuthorized({
+      const request = {
         principal: principal.__entity,
         action: { type: 'SPOH::Action', id: action },
         resource: resource.__entity,
         context: { eventPhase: 'LIVE', lateSyncAllowed: false, onTrustedNetwork: true, ...context },
+        entities: [...entities.values()],
+      };
+      const answer = cedar.isAuthorized({
+        ...request,
         schema: schemaText(),
         validateRequest: true,
         policies: { staticPolicies: POLICIES },
-        entities: [...entities.values()],
       });
+      record(request, answer);
       if (answer.type !== 'success') throw new Error(JSON.stringify(answer.errors));
       const { decision, diagnostics } = answer.response;
       if (diagnostics.errors.length > 0) throw new Error(JSON.stringify(diagnostics.errors));

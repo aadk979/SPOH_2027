@@ -2,7 +2,7 @@
   "name": "@spoh/server",
   "version": "0.1.0",
   "private": true,
-  "description": "SPOH 2027 operations API \u2014 Express + Prisma + Postgres.",
+  "description": "SPOH 2027 operations API — Express + Prisma + Postgres.",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
@@ -34,10 +34,13 @@
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.1123.0",
     "@aws-sdk/client-s3": "^3.1123.0",
+    "@aws-sdk/client-verifiedpermissions": "^3.1123.0",
     "@aws-sdk/s3-presigned-post": "^3.1123.0",
     "@aws-sdk/s3-request-presigner": "^3.1123.0",
+    "@cedar-policy/cedar-wasm": "4.13.0",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "7.10.0",
+    "@spoh/access-policies": "*",
     "@spoh/shared": "*",
     "aws-jwt-verify": "^5.2.1",
     "cookie-parser": "^1.4.7",

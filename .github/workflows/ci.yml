@@ -62,12 +62,12 @@ jobs:
       # `npm ci` and not `npm install`: the lockfile is the build input.
       - run: npm ci
 
-      # The client and server both import @spoh/shared from its built output,
-      # so it has to exist before anything else compiles.
+      # The client and server import @spoh/shared, and the server
+      # @spoh/access-policies, from their built output, so both have to exist
+      # before anything else compiles.
       - run: npm run build:shared
       - run: npm run settings:check
       - run: npm run actions:check
-      - run: npm run build --workspace packages/access-policies
       - run: npm run check:pricing
       - run: npm run check:firebase
 

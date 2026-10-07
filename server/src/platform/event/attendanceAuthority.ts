@@ -1,8 +1,8 @@
-import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
-import type { EventScope } from '../../../platform/db/eventScope.js';
-import { isCampusIp } from '../../../platform/http/campusNetwork.js';
-import { resolveSetting, type SettingLayer } from '../../../platform/settings/resolve.js';
-import { storedSetting } from '../../../platform/settings/scopedStore.js';
+import { prisma, type PrismaTransactionClient } from '../db/client.js';
+import type { EventScope } from '../db/eventScope.js';
+import { isCampusIp } from '../http/campusNetwork.js';
+import { resolveSetting, type SettingLayer } from '../settings/resolve.js';
+import { storedSetting } from '../settings/scopedStore.js';
 
 /** Read an event-only setting; malformed stored values fall back to the registry default. */
 async function eventValue(

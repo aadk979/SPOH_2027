@@ -8,7 +8,7 @@ import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { findEventDayOn, lockPerson } from '../data/repo.js';
 import { requireVolunteer } from './requireVolunteer.js';
 import { assertEventToday, isRoot } from '../domain/attendanceRules.js';
-import { rootMembershipId } from './config.js';
+import { rootMembershipId } from '../../../platform/event/attendanceAuthority.js';
 import { markPresent } from './markPresent.js';
 
 /** The root admin marks themself present, which opens the day's verification chain. */
