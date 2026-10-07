@@ -74,12 +74,20 @@ describe('settings request', () => {
       staleDeviceMinutes: original.staleDeviceMinutes + 1,
       implausibleTapsPerMinute: 3.5,
       longShiftMinutes: original.longShiftMinutes + 1,
+      captureUndoWindowSeconds: original.captureUndoWindowSeconds + 1,
+      captureSendGraceSeconds: original.captureSendGraceSeconds + 1,
+      outboxWarningCount: original.outboxWarningCount + 1,
+      outboxWarningAgeMinutes: original.outboxWarningAgeMinutes + 1,
       eventName: 'Reviewed',
     });
     expect(toSettingsPatch(parsed, original)).toEqual({ eventName: 'Reviewed' });
     expect([...RETIRED_LEGACY_KEYS].sort()).toEqual([
+      'captureSendGraceSeconds',
+      'captureUndoWindowSeconds',
       'implausibleTapsPerMinute',
       'longShiftMinutes',
+      'outboxWarningAgeMinutes',
+      'outboxWarningCount',
       'silentStationMinutes',
       'staleDeviceMinutes',
     ]);

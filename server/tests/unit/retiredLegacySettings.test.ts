@@ -34,10 +34,14 @@ beforeEach(() => {
 });
 
 describe('retired legacy setting keys', () => {
-  it('are exactly the four consumers that now resolve from the scoped store', () => {
+  it('are exactly the thresholds and the capture and outbox keys', () => {
     expect([...RETIRED_LEGACY_SETTING_KEYS].sort()).toEqual([
+      'captureSendGraceSeconds',
+      'captureUndoWindowSeconds',
       'implausibleTapsPerMinute',
       'longShiftMinutes',
+      'outboxWarningAgeMinutes',
+      'outboxWarningCount',
       'silentStationMinutes',
       'staleDeviceMinutes',
     ]);
@@ -58,6 +62,7 @@ describe('retired legacy setting keys', () => {
     let caught: unknown;
     try {
       assertNoRetiredLegacyKeys({
+        outboxWarningCount: 30,
         longShiftMinutes: 90,
         alertPollSeconds: 12,
         staleDeviceMinutes: 5,
@@ -70,7 +75,7 @@ describe('retired legacy setting keys', () => {
       statusCode: 400,
       code: ERROR_CODES.VALIDATION_FAILED,
       details: {
-        keys: ['staleDeviceMinutes', 'longShiftMinutes'],
+        keys: ['staleDeviceMinutes', 'longShiftMinutes', 'outboxWarningCount'],
         replacement: '/admin/settings/catalogue',
       },
     });

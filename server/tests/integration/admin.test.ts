@@ -365,6 +365,10 @@ describe('runtime settings', () => {
     ['staleDeviceMinutes', 5],
     ['implausibleTapsPerMinute', 5],
     ['longShiftMinutes', 5],
+    ['captureUndoWindowSeconds', 5],
+    ['captureSendGraceSeconds', 5],
+    ['outboxWarningCount', 5],
+    ['outboxWarningAgeMinutes', 5],
   ])('refuses %s here, because the scoped catalogue now owns it', async (key, value) => {
     const response = await request(app)
       .patch('/api/v1/admin/settings')

@@ -94,8 +94,17 @@ afterEach(() => {
   for (const client of clients.splice(0)) client.clear();
 });
 
-describe('thresholds moved to the settings catalogue', () => {
-  const moved = ['Silent station', 'Stale device', 'Implausible tap rate', 'Long shift'] as const;
+describe('settings moved to the settings catalogue', () => {
+  const moved = [
+    'Silent station',
+    'Stale device',
+    'Implausible tap rate',
+    'Long shift',
+    'Undo window',
+    'Send grace',
+    'Unsent capture warning',
+    'Oldest unsent warning',
+  ] as const;
 
   it.each(moved)(
     'shows %s as a pointer, not an editable field with a live value',
@@ -118,6 +127,8 @@ describe('thresholds moved to the settings catalogue', () => {
         ...response.settings,
         silentStationMinutes: response.settings.silentStationMinutes + 1,
         longShiftMinutes: response.settings.longShiftMinutes + 1,
+        captureUndoWindowSeconds: response.settings.captureUndoWindowSeconds + 1,
+        outboxWarningCount: response.settings.outboxWarningCount + 1,
       },
     };
     await act(async () => {
