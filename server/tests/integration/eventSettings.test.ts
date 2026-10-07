@@ -177,8 +177,8 @@ describe('lost-person retention (ADR-003 §8, D-16)', () => {
     expect((await retention(volunteer, 6)).status).toBe(403);
   });
 
-  it('caps a longer legacy value at 24 hours until its copy', async () => {
-    await rawDb.appSetting.create({ data: { key: 'lostPersonPurgeHours', value: 30 } });
+  it('no longer reads the legacy row, which was copied to the event', async () => {
+    await rawDb.appSetting.create({ data: { key: 'lostPersonPurgeHours', value: 2 } });
     expect(await purgeHours()).toBe(24);
   });
 });

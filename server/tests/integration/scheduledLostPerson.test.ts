@@ -299,12 +299,15 @@ it('reads changed retention after waiting for its event lock', async () => {
   expect(await rawDb.auditLog.count({ where: { action: 'lostPerson.purge' } })).toBe(0);
 });
 
-it('uses the current legacy policy when no event override exists', async () => {
+it('ignores the copied legacy row and keeps the promised 24 hours without an event value', async () => {
   await rawDb.appSetting.create({ data: { key: 'lostPersonPurgeHours', value: 1 } });
-  await alert('old', { resolvedAt: at(-2 * HOUR) });
+  await alert('recent', { resolvedAt: at(-2 * HOUR) });
   await create();
   expect(await run()).toBe('SUCCEEDED');
-  expect(await rawDb.lostPersonSummary.count()).toBe(1);
+  expect(await rawDb.lostPersonSummary.count()).toBe(0);
+  expect(
+    (await rawDb.lostPersonAlert.findUniqueOrThrow({ where: { id: 'recent' } })).purgedAt,
+  ).toBeNull();
 });
 
 it('uses the registry default for invalid event and legacy policies and still prunes archived data', async () => {

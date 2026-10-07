@@ -5,18 +5,15 @@ import {
   type SettingContext,
 } from '../../../platform/settings/scopedStore.js';
 
-/** An event's current override wins; the legacy global policy is preserved until its migration. */
+/**
+ * The event's own retention, or the 24 hours promised to families (D-16). The
+ * legacy global row was copied to the event scope and is no longer read; an
+ * invalid stored value falls through to the default.
+ */
 export async function lostPersonRetentionHours(
   tx: PrismaTransactionClient,
   context: SettingContext,
 ): Promise<number> {
-  const definition = SETTINGS.lostPersonPurgeHours;
   const resolved = await loadResolvedSetting('lostPersonPurgeHours', context, tx);
-  if (resolved.source !== 'default') return definition.schema.parse(resolved.value);
-  const legacy = await tx.appSetting.findUnique({
-    where: { key: 'lostPersonPurgeHours' },
-    select: { value: true },
-  });
-  const parsed = definition.schema.safeParse(legacy?.value ?? definition.default);
-  return parsed.success ? parsed.data : definition.default;
+  return SETTINGS.lostPersonPurgeHours.schema.parse(resolved.value);
 }
