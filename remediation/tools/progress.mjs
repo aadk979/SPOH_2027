@@ -25,7 +25,7 @@
  */
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
-import { dirname, join, relative } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -243,12 +243,28 @@ function gateComplete(state, gate) {
 // ---------------------------------------------------------------------------
 // Commands
 
-function parseFlags(args) {
+const SWITCH_FLAGS = new Set(['force']);
+const VALUE_FLAGS = new Set(['answer', 'commit', 'note', 'replace-commit']);
+
+/**
+ * Switches take no value, so `--force --note "…"` and `--note "…" --force` mean
+ * the same. A value flag never swallows the next flag, and an unknown flag is an
+ * error: a silently dropped note or commit is lost evidence.
+ */
+export function parseFlags(args) {
   const flags = {};
   for (let i = 0; i < args.length; i += 1) {
-    if (args[i].startsWith('--')) {
-      flags[args[i].slice(2)] = args[i + 1] ?? true;
+    if (!args[i].startsWith('--')) continue;
+    const name = args[i].slice(2);
+    if (SWITCH_FLAGS.has(name)) {
+      flags[name] = true;
+    } else if (VALUE_FLAGS.has(name)) {
+      const value = args[i + 1];
+      if (value === undefined || value.startsWith('--')) throw new Error(`--${name} needs a value`);
+      flags[name] = value;
       i += 1;
+    } else {
+      throw new Error(`unknown flag --${name}`);
     }
   }
   return flags;
@@ -435,7 +451,9 @@ const COMMANDS = {
 
 function main() {
   const [command = 'status', target, ...rest] = process.argv.slice(2);
-  const flags = parseFlags(target?.startsWith('--') ? [target, ...rest] : rest);
+  // A log entry is free text, which may itself mention flags.
+  const flagArgs = target?.startsWith('--') ? [target, ...rest] : rest;
+  const flags = command === 'log' ? {} : parseFlags(flagArgs);
   const run = COMMANDS[command];
   if (!run) {
     const self = relative(REPO, fileURLToPath(import.meta.url));
@@ -446,9 +464,12 @@ function main() {
   run(load(), target, flags, rest);
 }
 
-try {
-  main();
-} catch (error) {
-  console.error(`✗ ${error instanceof Error ? error.message : String(error)}`);
-  process.exitCode = 1;
+// Imported by its tests; only a direct invocation runs a command.
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  try {
+    main();
+  } catch (error) {
+    console.error(`✗ ${error instanceof Error ? error.message : String(error)}`);
+    process.exitCode = 1;
+  }
 }

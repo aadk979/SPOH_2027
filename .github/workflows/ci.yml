@@ -32,7 +32,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
       # Dependency-free safety tests run even on the lightweight docs path.
-      - run: node --test scripts/delivery-changes.test.mjs scripts/staging-release.test.mjs
+      - run: node --test scripts/delivery-changes.test.mjs scripts/staging-release.test.mjs remediation/tools/progress.test.mjs
       - id: classify
         name: Classify the entire push or PR range
         run: node scripts/delivery-changes.mjs
