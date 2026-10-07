@@ -70,3 +70,24 @@ export const SettingsResponse = z
   })
   .strict();
 export type SettingsResponse = z.infer<typeof SettingsResponse>;
+
+/**
+ * What a signed-in device needs to behave like the server: its poll intervals,
+ * the undo window, the send grace period and the outbox warning thresholds, for
+ * the caller's own event. Client-visible tuning only; no actor, history or
+ * override metadata. GET /admin/settings/client.
+ */
+export const ClientSettings = z
+  .object({
+    dashboardPollSeconds: settings.dashboardPollSeconds,
+    alertPollSeconds: settings.alertPollSeconds,
+    captureUndoWindowSeconds: settings.captureUndoWindowSeconds,
+    captureSendGraceSeconds: settings.captureSendGraceSeconds,
+    outboxWarningCount: settings.outboxWarningCount,
+    outboxWarningAgeMinutes: settings.outboxWarningAgeMinutes,
+  })
+  .strict();
+export type ClientSettings = z.infer<typeof ClientSettings>;
+
+export const ClientSettingsResponse = z.object({ settings: ClientSettings }).strict();
+export type ClientSettingsResponse = z.infer<typeof ClientSettingsResponse>;

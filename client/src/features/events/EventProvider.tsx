@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, type ReactNode } from 'react';
 import { EventContext } from '@/shared/lib/eventContext';
+import { selectClientSettingsEvent } from '@/shared/lib/runtimeSettings';
 import { useEventSlug } from '@/shared/lib/eventPath';
 import { rememberLastUsedEvent } from './model/homeEvent';
 import { useMyEvents, useEventPhase } from './queries';
@@ -26,6 +27,12 @@ export function EventProvider({
   useEffect(() => {
     if (event) rememberLastUsedEvent(event.slug);
   }, [event]);
+
+  // Device tuning (poll intervals, undo window, outbox warnings) is this event's.
+  const eventId = event?.id;
+  useEffect(() => {
+    if (eventId) selectClientSettingsEvent(eventId);
+  }, [eventId]);
 
   if (event) return <EventContext.Provider value={event}>{children}</EventContext.Provider>;
   return fallback(events || isError ? 'unknown' : 'loading');

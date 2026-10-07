@@ -82,12 +82,14 @@ describe('client session and settings (P03 repros)', () => {
       Promise.resolve(url.endsWith('/auth/refresh') ? json(401, UNAUTHENTICATED) : json(404, {})),
     );
     const { bootstrapSession } = await import('@/shared/lib/session');
-    const { loadClientSettings } = await import('@/shared/lib/runtimeSettings');
+    const { loadClientSettings, selectClientSettingsEvent } =
+      await import('@/shared/lib/runtimeSettings');
 
+    selectClientSettingsEvent('evt-1');
     await bootstrapSession().then(() => loadClientSettings());
 
     const urls = fetchMock.mock.calls.map(([input]) => String(input));
-    expect(urls.some((url) => url.endsWith('/admin/settings'))).toBe(false);
+    expect(urls.some((url) => url.includes('/admin/settings'))).toBe(false);
   });
 
   // F03-032
@@ -95,28 +97,39 @@ describe('client session and settings (P03 repros)', () => {
     const fetchMock = stubServer((url) => {
       if (url.endsWith('/auth/refresh')) return Promise.resolve(json(401, UNAUTHENTICATED));
       if (url.endsWith('/auth/session')) return Promise.resolve(json(201, SESSION));
-      if (url.endsWith('/admin/settings')) {
+      if (url.endsWith('/events/evt-1/admin/settings/client')) {
         const signedIn = fetchMock.mock.calls.some(([input]) =>
           String(input).endsWith('/auth/session'),
         );
         return Promise.resolve(
           signedIn
-            ? json(200, { settings: { eventName: 'Dry Run 1', captureUndoWindowSeconds: 20 } })
+            ? json(200, {
+                settings: {
+                  dashboardPollSeconds: 3,
+                  alertPollSeconds: 10,
+                  captureUndoWindowSeconds: 20,
+                  captureSendGraceSeconds: 2,
+                  outboxWarningCount: 20,
+                  outboxWarningAgeMinutes: 5,
+                },
+              })
             : json(401, UNAUTHENTICATED),
         );
       }
       return Promise.resolve(json(404, {}));
     });
     const { bootstrapSession, openSession } = await import('@/shared/lib/session');
-    const { getClientSettings, loadClientSettings } = await import('@/shared/lib/runtimeSettings');
+    const { getClientSettings, loadClientSettings, selectClientSettingsEvent } =
+      await import('@/shared/lib/runtimeSettings');
 
-    // What the providers do on a signed-out page load (the sign-in screen).
+    // What the providers do on a signed-out page load, with an event page open.
+    selectClientSettingsEvent('evt-1');
     await bootstrapSession().then(() => loadClientSettings());
 
     // The volunteer signs in; the app navigates client-side, nothing reloads.
     await openSession({ email: 'sam@spoh.test' });
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    expect(getClientSettings().eventName).toBe('Dry Run 1');
+    expect(getClientSettings().captureUndoWindowSeconds).toBe(20);
   });
 });

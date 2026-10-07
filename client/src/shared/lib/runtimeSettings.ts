@@ -2,13 +2,12 @@
 
 import { useSyncExternalStore } from 'react';
 import {
+  ClientSettings,
   GENERATED_SETTING_DEFAULTS,
-  type GeneratedSettingValues,
-  type RuntimeSettings,
-  type SettingsResponse,
+  type ClientSettingsResponse,
 } from '@spoh/shared';
-import { api } from '@/shared/lib/api';
-import { getSession, subscribeToSession } from '@/shared/lib/session';
+import { eventApi } from '@/shared/lib/eventApi';
+import { currentVolunteerId, getSession, subscribeToSession } from '@/shared/lib/session';
 
 /**
  * The client's copy of the runtime settings.
@@ -19,31 +18,20 @@ import { getSession, subscribeToSession } from '@/shared/lib/session';
  * silently disagree: a server that considers a station silent after ten minutes
  * and a client that says fifteen are describing different events.
  *
- * They are fetched once at boot and cached in memory. Every reader has a
- * compiled default, so nothing waits on the request and a server that cannot be
- * reached simply behaves the way it always did.
+ * They are an event's settings now (P10.2), so the copy belongs to one person
+ * working in one event: the signed-in volunteer and the event page they have
+ * open. It is fetched once for that pair and cached in memory. Every reader has
+ * a compiled default, so nothing waits on the request and a server that cannot
+ * be reached simply behaves the way it always did.
  */
 
-/**
- * Compiled defaults. These are the values the client shipped with, and they
- * come from the server registry's generated contracts.
- */
-const CLIENT_KEYS = [
-  'dashboardPollSeconds',
-  'alertPollSeconds',
-  'captureUndoWindowSeconds',
-  'captureSendGraceSeconds',
-  'outboxWarningCount',
-  'outboxWarningAgeMinutes',
-  'silentStationMinutes',
-  'staleDeviceMinutes',
-  'eventName',
-] as const satisfies readonly (keyof GeneratedSettingValues)[];
-export type ClientSettings = Pick<GeneratedSettingValues, (typeof CLIENT_KEYS)[number]>;
-
+/** Compiled defaults: the values the client shipped with, from the registry's generated contracts. */
 export const DEFAULT_CLIENT_SETTINGS: Readonly<ClientSettings> = Object.freeze(
   Object.fromEntries(
-    CLIENT_KEYS.map((key) => [key, GENERATED_SETTING_DEFAULTS[key]]),
+    Object.keys(ClientSettings.shape).map((key) => [
+      key,
+      GENERATED_SETTING_DEFAULTS[key as keyof ClientSettings],
+    ]),
   ) as ClientSettings,
 );
 
@@ -78,59 +66,75 @@ export const ms = {
   outboxWarningAge: (): number => cache.outboxWarningAgeMinutes * 60_000,
 };
 
-let loaded = false;
-let stopWaiting: (() => void) | null = null;
+function publish(next: Readonly<ClientSettings>): void {
+  if (next === cache) return;
+  cache = next;
+  for (const listener of listeners) listener();
+}
 
-/**
- * A signed-out page load has nothing to read with. The sign-in that follows is
- * client-side navigation, so nothing reloads: the settings load when the
- * session appears instead (F03-032).
- */
-function loadOnceSignedIn(): void {
-  stopWaiting ??= subscribeToSession(() => {
-    if (!getSession()) return;
-    stopWaiting?.();
-    stopWaiting = null;
-    void loadClientSettings();
-  });
+/** The event page open on this device, or null before one has been. */
+let selectedEventId: string | null = null;
+/** Whose settings the cache holds or is fetching: `person` + `event`, or null. */
+let owner: string | null = null;
+let state: 'idle' | 'loading' | 'ready' = 'idle';
+let watching = false;
+
+function ownerKey(): string | null {
+  const person = currentVolunteerId();
+  return person && selectedEventId ? `${person}\u0000${selectedEventId}` : null;
 }
 
 /**
- * Fetch once per page load, as soon as there is a session to fetch with.
+ * Bring the cache in line with who is signed in and which event is open.
  *
- * Deliberately total: any failure leaves the defaults in place. A volunteer
- * whose settings request failed should get an app that behaves normally, not
- * one that refuses to start because it could not read a poll interval.
+ * A different person or event drops the previous copy at once: one volunteer's
+ * event must never tune another's device. A signed-out page load has nothing to
+ * read with (F02-010); an expired token keeps the person (F04-003), so it keeps
+ * their copy and fetches once a token is back.
  */
-export async function loadClientSettings(): Promise<void> {
-  // Every role may read the settings, but only signed in: a signed-out request
-  // is a guaranteed 401 in the server log (F02-010).
-  if (loaded) return;
-  if (!getSession()) {
-    loadOnceSignedIn();
-    return;
+function sync(): void {
+  const next = ownerKey();
+  if (next !== owner) {
+    owner = next;
+    state = 'idle';
+    publish(DEFAULT_CLIENT_SETTINGS);
   }
-  loaded = true;
+  if (!next || state !== 'idle' || !getSession()) return;
+  state = 'loading';
+  void fetchFor(next, selectedEventId!);
+}
 
+/**
+ * Deliberately total: any failure leaves the defaults in place and a later
+ * session change retries. A volunteer whose settings request failed should get
+ * an app that behaves normally, not one that refuses to start because it could
+ * not read a poll interval. An answer for an owner who has since changed is
+ * discarded, however late it arrives.
+ */
+async function fetchFor(requestedFor: string, eventId: string): Promise<void> {
   try {
-    const response = await api<SettingsResponse>('/admin/settings');
-    const settings: RuntimeSettings = response.settings;
-
-    cache = Object.freeze({
-      dashboardPollSeconds: settings.dashboardPollSeconds,
-      alertPollSeconds: settings.alertPollSeconds,
-      captureUndoWindowSeconds: settings.captureUndoWindowSeconds,
-      captureSendGraceSeconds: settings.captureSendGraceSeconds,
-      outboxWarningCount: settings.outboxWarningCount,
-      outboxWarningAgeMinutes: settings.outboxWarningAgeMinutes,
-      silentStationMinutes: settings.silentStationMinutes,
-      staleDeviceMinutes: settings.staleDeviceMinutes,
-      eventName: settings.eventName,
-    });
-
-    for (const listener of listeners) listener();
+    const response = await eventApi<ClientSettingsResponse>(eventId, '/admin/settings/client');
+    const settings = ClientSettings.parse(response.settings);
+    if (owner !== requestedFor) return;
+    state = 'ready';
+    publish(Object.freeze(settings));
   } catch {
     // Defaults stand. Nothing to tell the volunteer — they cannot act on it.
-    loaded = false;
+    if (owner === requestedFor) state = 'idle';
   }
+}
+
+/** Start following the session; called once the runtime configuration is accepted. */
+export function loadClientSettings(): void {
+  if (!watching) {
+    watching = true;
+    subscribeToSession(sync);
+  }
+  sync();
+}
+
+/** The event page now open; its settings replace any other event's. */
+export function selectClientSettingsEvent(eventId: string): void {
+  selectedEventId = eventId;
+  sync();
 }

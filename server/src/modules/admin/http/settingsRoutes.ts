@@ -22,6 +22,7 @@ import { idempotent } from '../../../platform/http/idempotency.js';
 import {
   changeEventSettingHandler,
   getEventSettingsHandler,
+  getClientSettingsHandler,
   getSettingsHandler,
   updateSettingsHandler,
   getEventSettingHistoryHandler,
@@ -116,6 +117,14 @@ function registerOperationalSettingsRoutes(router: Router): void {
    * sensitive — it is the tuning of an event, not a secret.
    */
   router.get('/settings', defaultRateLimit, requireCapability('own.read'), getSettingsHandler);
+
+  /** The same device tuning, resolved for the caller's own event (P10.2). */
+  router.get(
+    '/settings/client',
+    defaultRateLimit,
+    requireCapability('own.read'),
+    getClientSettingsHandler,
+  );
 
   router.get(
     '/settings/catalogue',
