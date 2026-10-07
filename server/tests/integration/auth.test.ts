@@ -96,14 +96,13 @@ describe('opening a session', () => {
     expect((firstClaims.exp ?? 0) - (firstClaims.iat ?? 0)).toBe(120);
   });
 
-  it("gives new and rotated sessions the organisation's session lifetime, not the legacy row", async () => {
+  it("gives new and rotated sessions the organisation's session lifetime", async () => {
     const DAY = 86_400_000;
     const { eventId } = await testEvent();
     const { organisationId } = await rawDb.event.findUniqueOrThrow({
       where: { id: eventId },
       select: { organisationId: true },
     });
-    await rawDb.appSetting.create({ data: { key: 'refreshSessionDays', value: 90 } });
     await rawDb.setting.create({
       data: {
         scope: 'PLATFORM',

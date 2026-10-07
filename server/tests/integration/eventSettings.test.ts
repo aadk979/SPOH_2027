@@ -176,9 +176,4 @@ describe('lost-person retention (ADR-003 §8, D-16)', () => {
     expect((await retention(ic, 6)).status).toBe(403);
     expect((await retention(volunteer, 6)).status).toBe(403);
   });
-
-  it('no longer reads the legacy row, which was copied to the event', async () => {
-    await rawDb.appSetting.create({ data: { key: 'lostPersonPurgeHours', value: 2 } });
-    expect(await purgeHours()).toBe(24);
-  });
 });

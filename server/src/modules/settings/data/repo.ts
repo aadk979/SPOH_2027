@@ -1,13 +1,7 @@
 import type { EventSettingKey, EventStatus } from '@spoh/shared';
 import type { Prisma } from '../../../generated/prisma/client.js';
-import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
+import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
-
-/** The display name of whoever last changed the settings. */
-export async function findVolunteerName(id: string): Promise<string | null> {
-  const row = await prisma.person.findUnique({ where: { id }, select: { displayName: true } });
-  return row?.displayName ?? null;
-}
 
 export async function eventStatusOf(
   tx: PrismaTransactionClient,

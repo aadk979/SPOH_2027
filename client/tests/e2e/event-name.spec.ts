@@ -93,16 +93,13 @@ for (const [name, width, height] of [
         await expect(page.getByText('Renamed. Every screen shows the new name.')).toBeVisible();
         expect(await readName()).toBe(alternate);
 
-        // The legacy endpoint no longer takes the name, and says where it went.
+        // The legacy settings endpoint is gone; nothing else stores a name.
         const legacy = await page.request.patch(`${base}/admin/settings`, {
           headers: headers(),
           data: { eventName: 'Legacy name' },
         });
-        expect(legacy.status()).toBe(400);
-        expect((await legacy.json()).error.details).toEqual({
-          keys: ['eventName'],
-          replacement: '/admin/event-name',
-        });
+        expect(legacy.status()).toBe(404);
+        expect(await readName()).toBe(alternate);
 
         await page.reload();
         await expect(field).toHaveValue(alternate);

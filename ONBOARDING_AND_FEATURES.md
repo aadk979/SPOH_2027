@@ -245,7 +245,7 @@ Split deliberately by capability rather than by page (`admin/router.ts`):
 - **Stations** — list (including inactive)/create/update (`config.manage`); toggling `issuesStamp` changes what "complete" means for every card in flight, so it's audited.
 - **Event Days** — list (`user.read`, since roster import needs it), create/update (`config.manage`).
 - **Gift Types** — create/update (`config.manage`).
-- **Runtime Settings** (`AppSetting` table) — shift-block times, silence thresholds, implausible-tap-rate, retention windows. Readable by anyone signed in (`own.read` — "the tuning of a school open house, not a secret"), writable only by `config.manage`. Lets a coordinator retune the system during a dry run without a redeploy; unset keys fall back to compiled defaults.
+- **Settings** (`Setting` and `SettingChange` tables, ADR-003) — thresholds, capture and outbox tuning, retention windows and poll intervals, each at its registered platform, event or station scope with history and audit. Event Chiefs and Admins (`config.manage`) change event settings and rename the event (`Event.name`); the organisation's platform admins change organisation-wide ones (D-17). Unset keys fall back to the registry defaults. The legacy global `AppSetting` table was dropped once every key had moved (D-18).
   Client: `client/src/app/admin/users/`, `client/src/app/admin/settings/`.
 
 ### 4.17 Client architecture notes (PWA / offline)

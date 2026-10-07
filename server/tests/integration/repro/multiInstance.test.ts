@@ -20,8 +20,6 @@ interface Instance {
   purgeResolvedAlerts: () => Promise<number>;
   disconnect: () => Promise<void>;
   clearCaches: () => Promise<void>;
-  /** The legacy store's own writer; no endpoint writes it any more. */
-  writeLegacySetting: (patch: { eventName: string }) => Promise<unknown>;
   busStatus: () => 'unstarted' | 'connected' | 'degraded';
   busGauge: () => number;
 }
@@ -45,8 +43,6 @@ async function startInstance(): Promise<Instance> {
   };
   const { invalidateVolunteerCache } = await import('../../../src/platform/identity/index.js');
   const { invalidateEventCache } = await import('../../../src/platform/event/events.js');
-  const { loadSettings, updateSettings } = await import('../../../src/platform/settings/index.js');
-  const { SYSTEM_AUDIT_CONTEXT } = await import('../../../src/platform/http/auditContext.js');
   expect(busGauge()).toBe(1);
   await startCacheBus();
   return {
@@ -54,11 +50,9 @@ async function startInstance(): Promise<Instance> {
     purgeResolvedAlerts,
     busStatus: cacheBusStatus,
     busGauge,
-    writeLegacySetting: (patch) => updateSettings(patch, null, SYSTEM_AUDIT_CONTEXT),
     clearCaches: async () => {
       invalidateVolunteerCache();
       invalidateEventCache();
-      await loadSettings();
     },
     disconnect: async () => {
       await stopCacheBus();
@@ -169,19 +163,28 @@ describe('two instances, one database (P03.5 repros)', () => {
 
   // F03-030
   it('shows a settings change on the other instance within two seconds', async () => {
-    await a.writeLegacySetting({ eventName: 'Dry Run 2' });
+    const { eventId } = await testEvent();
+    const { organisationId } = await rawDb.event.findUniqueOrThrow({ where: { id: eventId } });
+    await rawDb.organisationMembership.create({
+      data: { organisationId, personId: chief.id, role: 'PLATFORM_ADMIN' },
+    });
+    const patch = await request(a.app)
+      .patch('/api/v1/admin/organisation-settings')
+      .set('Authorization', bearer(chief))
+      .send({ key: 'alertPollSeconds', value: 12, expectedVersion: 0 });
+    expect(patch.status, JSON.stringify(patch.body)).toBe(200);
 
     await expect
       .poll(
         async () => {
           const read = await request(b.app)
-            .get('/api/v1/admin/settings')
-            .set('Authorization', bearer(chief));
-          return read.body.settings.eventName;
+            .get('/api/v1/admin/settings/client')
+            .set('Authorization', bearer(volunteer));
+          return read.body.settings.alertPollSeconds;
         },
         { timeout: 2_000, interval: 50 },
       )
-      .toBe('Dry Run 2');
+      .toBe(12);
   });
 
   it('bypasses identity caches while disconnected and refreshes after reconnecting', async () => {
@@ -189,11 +192,7 @@ describe('two instances, one database (P03.5 repros)', () => {
     expect(b.busGauge()).toBe(0);
     const { eventId } = await testEvent();
     const me = () => request(b.app).get('/api/v1/me').set('Authorization', bearer(volunteer));
-    const settings = () =>
-      request(b.app).get('/api/v1/admin/settings').set('Authorization', bearer(chief));
     expect((await me()).status).toBe(200);
-    expect((await settings()).body.settings.eventName).toBe('Event');
-    await rawDb.appSetting.create({ data: { key: 'eventName', value: 'Recovered event' } });
 
     await rawDb.$executeRaw`
       SELECT pg_terminate_backend(pid) FROM pg_stat_activity
@@ -213,12 +212,6 @@ describe('two instances, one database (P03.5 repros)', () => {
     });
     await expect.poll(b.busStatus, { timeout: 5_000, interval: 50 }).toBe('connected');
     expect(b.busGauge()).toBe(0);
-    await expect
-      .poll(async () => (await settings()).body.settings.eventName, {
-        timeout: 2_000,
-        interval: 50,
-      })
-      .toBe('Recovered event');
     expect((await me()).status).toBe(200);
   });
 

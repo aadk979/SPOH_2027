@@ -1,5 +1,5 @@
 import type { LongShiftWarning, StaffingGapsResponse } from '@spoh/shared';
-import { DEFAULT_SETTINGS } from '../../../platform/settings/index.js';
+import { SETTINGS } from '../../../platform/settings/registry.js';
 import {
   prepareThresholds,
   type ThresholdSnapshot,
@@ -21,7 +21,7 @@ import type { EventScope } from '../../../platform/db/eventScope.js';
  * value is a runtime setting, because how long is too long is exactly the sort
  * of thing a dry run tells you.
  */
-export const LONG_SHIFT_MINUTES = DEFAULT_SETTINGS.longShiftMinutes;
+export const LONG_SHIFT_MINUTES = SETTINGS.longShiftMinutes.default;
 
 /** Which stations are understaffed right now. */
 export async function getStaffingGaps(

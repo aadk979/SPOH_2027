@@ -99,7 +99,6 @@ beforeEach(async () => {
 
 it('atomically scrubs live/practice descriptions and same-event or legacy replays at a strict event cutoff', async () => {
   await policy(2);
-  await rawDb.appSetting.create({ data: { key: 'lostPersonPurgeHours', value: 1 } });
   const old = await alert('old', { raisedAt: at(-3 * HOUR - 420_000), resolvedAt: at(-3 * HOUR) });
   await alert('practice', { rehearsal: true });
   await alert('equality', { resolvedAt: at(-2 * HOUR) });
@@ -299,8 +298,7 @@ it('reads changed retention after waiting for its event lock', async () => {
   expect(await rawDb.auditLog.count({ where: { action: 'lostPerson.purge' } })).toBe(0);
 });
 
-it('ignores the copied legacy row and keeps the promised 24 hours without an event value', async () => {
-  await rawDb.appSetting.create({ data: { key: 'lostPersonPurgeHours', value: 1 } });
+it('keeps the promised 24 hours without an event value', async () => {
   await alert('recent', { resolvedAt: at(-2 * HOUR) });
   await create();
   expect(await run()).toBe('SUCCEEDED');
@@ -310,9 +308,8 @@ it('ignores the copied legacy row and keeps the promised 24 hours without an eve
   ).toBeNull();
 });
 
-it('uses the registry default for invalid event and legacy policies and still prunes archived data', async () => {
+it('uses the registry default for an invalid event policy and still prunes archived data', async () => {
   await policy(0);
-  await rawDb.appSetting.create({ data: { key: 'lostPersonPurgeHours', value: 0 } });
   await rawDb.event.update({ where: { id: eventId }, data: { status: 'ARCHIVED' } });
   await alert('old');
   await alert('recent', { resolvedAt: at(-2 * HOUR) });

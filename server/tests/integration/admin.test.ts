@@ -2,7 +2,6 @@ import request from 'supertest';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app/createApp.js';
 import { prisma } from '../../src/platform/db/client.js';
-import { DEFAULT_SETTINGS, getSettings, loadSettings } from '../../src/platform/settings/index.js';
 import { resetDatabase, rawDb } from '../helpers/db.js';
 import {
   bearer,
@@ -32,7 +31,6 @@ let ic: TestVolunteer;
 
 beforeEach(async () => {
   await resetDatabase();
-  await loadSettings();
 
   chief = await createVolunteer({ email: 'chief@spoh.test', role: 'CHIEF_COORDINATOR' });
   admin = await createVolunteer({ email: 'admin@spoh.test', role: 'ADMIN' });
@@ -328,118 +326,7 @@ describe('withdrawing access', () => {
   });
 });
 
-describe('runtime settings', () => {
-  it('is readable by anyone signed in, because the client needs the poll cadence', async () => {
-    const response = await request(app)
-      .get('/api/v1/admin/settings')
-      .set('Authorization', bearer(volunteer));
-
-    expect(response.status).toBe(200);
-    expect(response.body.settings.dashboardPollSeconds).toBe(3);
-    expect(response.body.overriddenKeys).toEqual([]);
-  });
-
-  it('is only writable by config.manage', async () => {
-    const response = await request(app)
-      .patch('/api/v1/admin/settings')
-      .set('Authorization', bearer(ic))
-      .send({ eventName: 'Dry run' });
-
-    expect(response.status).toBe(403);
-  });
-
-  it("refuses the event name here, because it is the event's own name", async () => {
-    const { eventId } = await testEvent();
-    const response = await request(app)
-      .patch('/api/v1/admin/settings')
-      .set('Authorization', bearer(chief))
-      .send({ eventName: 'Dry run' });
-
-    expect(response.status).toBe(400);
-    expect(response.body.error.details).toEqual({
-      keys: ['eventName'],
-      replacement: '/admin/event-name',
-    });
-    expect(await rawDb.appSetting.count()).toBe(0);
-    expect(await rawDb.auditLog.count({ where: { action: 'settings.update' } })).toBe(0);
-    expect((await rawDb.event.findUniqueOrThrow({ where: { id: eventId } })).name).toBe(
-      'Test Event',
-    );
-  });
-
-  it.each([
-    ['silentStationMinutes', 5],
-    ['staleDeviceMinutes', 5],
-    ['implausibleTapsPerMinute', 5],
-    ['longShiftMinutes', 5],
-    ['captureUndoWindowSeconds', 5],
-    ['captureSendGraceSeconds', 5],
-    ['outboxWarningCount', 5],
-    ['outboxWarningAgeMinutes', 5],
-  ])('refuses %s here, because the scoped catalogue now owns it', async (key, value) => {
-    const response = await request(app)
-      .patch('/api/v1/admin/settings')
-      .set('Authorization', bearer(chief))
-      .send({ [key]: value });
-
-    expect(response.status).toBe(400);
-    expect(response.body.error.code).toBe('VALIDATION_FAILED');
-    expect(response.body.error.details).toEqual({
-      keys: [key],
-      replacement: '/admin/settings/catalogue',
-    });
-    expect(await rawDb.appSetting.count()).toBe(0);
-    expect(await rawDb.auditLog.count({ where: { action: 'settings.update' } })).toBe(0);
-    expect(getSettings()[key as keyof ReturnType<typeof getSettings>]).toBe(
-      DEFAULT_SETTINGS[key as keyof ReturnType<typeof getSettings>],
-    );
-  });
-
-  it('refuses lost-person retention here, because the event settings own it (D-16)', async () => {
-    const response = await request(app)
-      .patch('/api/v1/admin/settings')
-      .set('Authorization', bearer(chief))
-      .send({ lostPersonPurgeHours: 12 });
-
-    expect(response.status).toBe(400);
-    expect(response.body.error.details).toEqual({
-      keys: ['lostPersonPurgeHours'],
-      replacement: '/admin/event-settings',
-    });
-    expect(await rawDb.appSetting.count()).toBe(0);
-  });
-
-  it.each([
-    ['dashboardPollSeconds', 5],
-    ['alertPollSeconds', 12],
-    ['refreshSessionDays', 7],
-    ['idempotencyRetentionDays', 3],
-  ])('refuses %s here, because platform admins own it (D-17)', async (key, value) => {
-    const response = await request(app)
-      .patch('/api/v1/admin/settings')
-      .set('Authorization', bearer(admin))
-      .send({ [key]: value });
-
-    expect(response.status).toBe(400);
-    expect(response.body.error.details).toEqual({
-      keys: [key],
-      replacement: '/admin/organisation-settings',
-    });
-    expect(await rawDb.appSetting.count()).toBe(0);
-  });
-
-  it('rejects a mixed body as a whole, leaving the permitted key unwritten', async () => {
-    const response = await request(app)
-      .patch('/api/v1/admin/settings')
-      .set('Authorization', bearer(chief))
-      .send({ eventName: 'Dry run', longShiftMinutes: 90, silentStationMinutes: 4 });
-
-    expect(response.status).toBe(400);
-    expect(response.body.error.details.keys).toEqual(['silentStationMinutes', 'longShiftMinutes']);
-    expect(await rawDb.appSetting.count()).toBe(0);
-    expect(getSettings().eventName).toBe(DEFAULT_SETTINGS.eventName);
-  });
-
+describe('shift templates and event days', () => {
   /**
    * The shift hours decide whether a capture screen works at all, because
    * station scoping requires a shift to be running. They are the templates'
@@ -501,15 +388,6 @@ describe('runtime settings', () => {
       'MORNING',
       'AFTERNOON',
     ]);
-  });
-
-  it('rejects an unknown setting rather than ignoring it', async () => {
-    const response = await request(app)
-      .patch('/api/v1/admin/settings')
-      .set('Authorization', bearer(chief))
-      .send({ notASetting: 1 });
-
-    expect(response.status).toBe(400);
   });
 });
 

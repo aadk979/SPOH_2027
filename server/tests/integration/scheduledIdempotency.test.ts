@@ -7,7 +7,6 @@ import { claimDueActions } from '../../src/platform/scheduler/claimDueActions.js
 import * as executionRepo from '../../src/platform/scheduler/executionRepo.js';
 import { HandlerRegistry } from '../../src/platform/scheduler/registry.js';
 import { runClaimedAction } from '../../src/platform/scheduler/runClaimedAction.js';
-import { loadSettings } from '../../src/platform/settings/index.js';
 import { fixedClock } from '../../src/platform/time/index.js';
 import { rawDb, resetDatabase } from '../helpers/db.js';
 import { createVolunteer, testEvent } from '../helpers/fixtures.js';
@@ -67,7 +66,6 @@ const run = async (instant = due) => {
 
 beforeEach(async () => {
   await resetDatabase();
-  await loadSettings();
 });
 
 it('boots both daily handlers and prunes event and platform replays at the strict cutoff', async () => {
@@ -150,7 +148,7 @@ it("uses the organisation's policy as it is when the prune runs", async () => {
   });
 });
 
-it("never applies one organisation's policy, or the legacy row, to other records", async () => {
+it("never applies one organisation's policy to other records", async () => {
   const { eventId } = await testEvent();
   const other = await rawDb.organisation.create({
     data: {
@@ -171,7 +169,6 @@ it("never applies one organisation's policy, or the legacy row, to other records
     });
     await policy(1);
     await policy(30, other.id);
-    await rawDb.appSetting.create({ data: { key: 'idempotencyRetentionDays', value: 1 } });
     await create();
     await replay('ours-expired', -DAY - 1, eventId);
     await replay('theirs-kept', -20 * DAY, otherEvent.id);

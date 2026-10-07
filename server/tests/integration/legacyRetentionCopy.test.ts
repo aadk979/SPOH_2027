@@ -6,6 +6,12 @@ import { env } from '../../src/config/env.js';
 import { lostPersonRetentionHours } from '../../src/modules/lostPerson/application/retentionPolicy.js';
 import { prisma } from '../../src/platform/db/client.js';
 import { rawDb, resetDatabase } from '../helpers/db.js';
+import {
+  createLegacySettingsTable,
+  dropLegacySettingsTable,
+  insertLegacySetting,
+  legacySettings,
+} from '../helpers/legacySettings.js';
 import { createVolunteer, testEvent } from '../helpers/fixtures.js';
 
 /**
@@ -61,15 +67,7 @@ async function eventOne() {
   });
 }
 
-const legacy = (key: string, value: unknown, updatedById: string | null = null) =>
-  rawDb.appSetting.create({
-    data: {
-      key,
-      value: value as never,
-      updatedById,
-      updatedAt: new Date('2026-09-01T01:02:03.000Z'),
-    },
-  });
+const legacy = insertLegacySetting;
 const rows = () =>
   rawDb.setting.findMany({ where: { scopeId: EVENT_ONE }, orderBy: { key: 'asc' } });
 const history = () =>
@@ -84,10 +82,12 @@ const eventOneHours = async () => {
 beforeEach(async () => {
   assertDisposableDatabase();
   await resetDatabase();
+  await createLegacySettingsTable();
 });
 afterAll(async () => {
   await rawDb.$executeRawUnsafe('DROP TRIGGER IF EXISTS fail_retention_copy ON "SettingChange"');
   await rawDb.$executeRawUnsafe('DROP FUNCTION IF EXISTS fail_retention_copy()');
+  await dropLegacySettingsTable();
 });
 
 describe('legacy lost-person retention copy migration', () => {
@@ -106,7 +106,7 @@ describe('legacy lost-person retention copy migration', () => {
     await expect(runMigration()).rejects.toThrow(/evt_spoh2027 does not exist/);
     expect(await rawDb.setting.count()).toBe(0);
     expect(await rawDb.settingChange.count()).toBe(0);
-    expect(await rawDb.appSetting.count()).toBe(1);
+    expect((await legacySettings()).length).toBe(1);
   });
 
   it('copies only this key at event scope with MIGRATION provenance', async () => {
@@ -115,7 +115,7 @@ describe('legacy lost-person retention copy migration', () => {
     await legacy(KEY, 12, person.id);
     await legacy('alertPollSeconds', 12);
     await legacy('outboxWarningCount', 30);
-    const legacyBefore = await rawDb.appSetting.findMany({ orderBy: { key: 'asc' } });
+    const legacyBefore = await legacySettings();
 
     await runMigration();
 
@@ -144,7 +144,7 @@ describe('legacy lost-person retention copy migration', () => {
       },
     ]);
     expect(await rawDb.setting.count()).toBe(1);
-    expect(await rawDb.appSetting.findMany({ orderBy: { key: 'asc' } })).toEqual(legacyBefore);
+    expect(await legacySettings()).toEqual(legacyBefore);
     expect(await eventOneHours()).toBe(12);
   });
 

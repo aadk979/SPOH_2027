@@ -11,7 +11,7 @@ type OperationalKey = {
   [
     Key in GeneratedSettingKey
   ]: (typeof metadata)[Key]['requiredAction'] extends 'event.settings.manage'
-    ? Exclude<Key, 'eventName' | 'product.countsMode'>
+    ? Exclude<Key, 'product.countsMode'>
     : never;
 }[GeneratedSettingKey];
 
@@ -20,7 +20,6 @@ export const SCOPED_OPERATIONAL_KEYS = (Object.keys(metadata) as GeneratedSettin
   (key) =>
     metadata[key].class === 'operational' &&
     metadata[key].requiredAction === 'event.settings.manage' &&
-    key !== 'eventName' &&
     key !== 'product.countsMode',
 ) as OperationalKey[];
 export const ScopedOperationalSettingKey = z.enum(

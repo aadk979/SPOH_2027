@@ -4,6 +4,12 @@ import pg from 'pg';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { env } from '../../src/config/env.js';
 import { rawDb, resetDatabase } from '../helpers/db.js';
+import {
+  createLegacySettingsTable,
+  dropLegacySettingsTable,
+  insertLegacySetting,
+  legacySettings,
+} from '../helpers/legacySettings.js';
 import { createVolunteer, testEvent } from '../helpers/fixtures.js';
 
 /**
@@ -66,15 +72,7 @@ async function eventOne(): Promise<string> {
   return organisation.id;
 }
 
-const legacy = (key: string, value: unknown, updatedById: string | null = null) =>
-  rawDb.appSetting.create({
-    data: {
-      key,
-      value: value as never,
-      updatedById,
-      updatedAt: new Date('2026-09-01T01:02:03.000Z'),
-    },
-  });
+const legacy = insertLegacySetting;
 const platformRows = () =>
   rawDb.setting.findMany({ where: { scope: 'PLATFORM' }, orderBy: { key: 'asc' } });
 const platformHistory = () =>
@@ -83,10 +81,12 @@ const platformHistory = () =>
 beforeEach(async () => {
   assertDisposableDatabase();
   await resetDatabase();
+  await createLegacySettingsTable();
 });
 afterAll(async () => {
   await rawDb.$executeRawUnsafe('DROP TRIGGER IF EXISTS fail_org_copy ON "SettingChange"');
   await rawDb.$executeRawUnsafe('DROP FUNCTION IF EXISTS fail_org_copy()');
+  await dropLegacySettingsTable();
 });
 
 describe('legacy organisation settings copy migration', () => {
@@ -105,7 +105,7 @@ describe('legacy organisation settings copy migration', () => {
     await expect(runMigration()).rejects.toThrow(/evt_spoh2027 does not exist/);
     expect(await rawDb.setting.count()).toBe(0);
     expect(await rawDb.settingChange.count()).toBe(0);
-    expect(await rawDb.appSetting.count()).toBe(1);
+    expect((await legacySettings()).length).toBe(1);
   });
 
   it("copies exactly the four keys to Event #1's organisation with MIGRATION provenance", async () => {
@@ -117,7 +117,7 @@ describe('legacy organisation settings copy migration', () => {
     await legacy('idempotencyRetentionDays', 3);
     await legacy('eventName', 'Renamed');
     await legacy('lostPersonPurgeHours', 12);
-    const legacyBefore = await rawDb.appSetting.findMany({ orderBy: { key: 'asc' } });
+    const legacyBefore = await legacySettings();
 
     await runMigration();
 
@@ -153,7 +153,7 @@ describe('legacy organisation settings copy migration', () => {
       });
     // Nothing at event or station scope, and the source is untouched.
     expect(await rawDb.setting.count()).toBe(4);
-    expect(await rawDb.appSetting.findMany({ orderBy: { key: 'asc' } })).toEqual(legacyBefore);
+    expect(await legacySettings()).toEqual(legacyBefore);
   });
 
   it('is idempotent: a rerun adds no row and no history', async () => {

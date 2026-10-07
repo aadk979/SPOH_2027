@@ -4,7 +4,6 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app/createApp.js';
 import { readClientSettings } from '../../src/modules/settings/application/readClientSettings.js';
 import { ForbiddenError } from '../../src/platform/errors/index.js';
-import { loadSettings, overrideSettingsForTest } from '../../src/platform/settings/index.js';
 import { rawDb, resetDatabase } from '../helpers/db.js';
 import {
   bearer,
@@ -55,7 +54,6 @@ const read = (path = '/api/v1/admin/settings/client', who: TestVolunteer | null 
 
 beforeEach(async () => {
   await resetDatabase();
-  await loadSettings();
   eventId = (await testEvent()).eventId;
   organisationId = (await rawDb.event.findUniqueOrThrow({ where: { id: eventId } })).organisationId;
   otherEventId = (
@@ -79,32 +77,20 @@ describe('device settings for the caller’s event', () => {
     expect(ClientSettingsResponse.parse(response.body)).toEqual({ settings: DEFAULTS });
   });
 
-  it('resolves every key from the scoped store, never the legacy store', async () => {
-    const restore = overrideSettingsForTest({
-      captureUndoWindowSeconds: 99,
-      captureSendGraceSeconds: 99,
-      outboxWarningCount: 99,
-      outboxWarningAgeMinutes: 99,
-      dashboardPollSeconds: 7,
-      alertPollSeconds: 12,
+  it('resolves every key from the scoped store', async () => {
+    await store('EVENT', 'captureUndoWindowSeconds', 25);
+    await store('EVENT', 'outboxWarningCount', 40);
+    // The poll intervals are the organisation's (D-17).
+    await store('PLATFORM', 'alertPollSeconds', 20);
+    const { body } = await read().expect(200);
+    expect(body.settings).toEqual({
+      dashboardPollSeconds: 3,
+      alertPollSeconds: 20,
+      captureUndoWindowSeconds: 25,
+      outboxWarningCount: 40,
+      captureSendGraceSeconds: 2,
+      outboxWarningAgeMinutes: 5,
     });
-    try {
-      await store('EVENT', 'captureUndoWindowSeconds', 25);
-      await store('EVENT', 'outboxWarningCount', 40);
-      // The poll intervals are the organisation's (D-17).
-      await store('PLATFORM', 'alertPollSeconds', 20);
-      const { body } = await read().expect(200);
-      expect(body.settings).toEqual({
-        dashboardPollSeconds: 3,
-        alertPollSeconds: 20,
-        captureUndoWindowSeconds: 25,
-        outboxWarningCount: 40,
-        captureSendGraceSeconds: 2,
-        outboxWarningAgeMinutes: 5,
-      });
-    } finally {
-      restore();
-    }
   });
 
   it('never reads another event’s override or a platform row the registry disallows', async () => {

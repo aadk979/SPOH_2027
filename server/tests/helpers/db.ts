@@ -104,12 +104,9 @@ export async function resetDatabase(): Promise<void> {
   await wipe('FallbackWindow');
   await wipe('ImportBatch');
 
-  // Session and device state. RefreshSession and PushSubscription cascade from
-  // Volunteer, but AppSetting does not — and a settings override left behind by
-  // one test would silently retune every test that ran after it.
+  // Session and device state.
   await wipe('RefreshSession');
   await wipe('PushSubscription');
-  await wipe('AppSetting');
 
   await wipe('StationTagging');
   await wipe('Station');

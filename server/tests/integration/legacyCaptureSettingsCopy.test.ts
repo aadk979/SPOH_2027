@@ -6,6 +6,12 @@ import { env } from '../../src/config/env.js';
 import { changeSetting, resetSetting } from '../../src/platform/settings/change.js';
 import { prepareNumericSettings } from '../../src/platform/settings/numericSnapshot.js';
 import { rawDb, resetDatabase } from '../helpers/db.js';
+import {
+  createLegacySettingsTable,
+  dropLegacySettingsTable,
+  insertLegacySetting,
+  legacySettings,
+} from '../helpers/legacySettings.js';
 import { createVolunteer, testEvent } from '../helpers/fixtures.js';
 
 /**
@@ -73,15 +79,7 @@ async function eventOne() {
   });
 }
 
-const legacy = (key: string, value: unknown, updatedById: string | null = null) =>
-  rawDb.appSetting.create({
-    data: {
-      key,
-      value: value as never,
-      updatedById,
-      updatedAt: new Date('2026-09-01T01:02:03.000Z'),
-    },
-  });
+const legacy = insertLegacySetting;
 
 const copiedRows = () =>
   rawDb.setting.findMany({ where: { scopeId: EVENT_ONE }, orderBy: { key: 'asc' } });
@@ -91,10 +89,12 @@ const copiedHistory = () =>
 beforeEach(async () => {
   assertDisposableDatabase();
   await resetDatabase();
+  await createLegacySettingsTable();
 });
 afterAll(async () => {
   await rawDb.$executeRawUnsafe('DROP TRIGGER IF EXISTS fail_capture_copy ON "SettingChange"');
   await rawDb.$executeRawUnsafe('DROP FUNCTION IF EXISTS fail_capture_copy()');
+  await dropLegacySettingsTable();
 });
 
 describe('legacy capture settings copy migration', () => {
@@ -114,7 +114,7 @@ describe('legacy capture settings copy migration', () => {
     await expect(runMigration()).rejects.toThrow(/evt_spoh2027 does not exist/);
     expect(await rawDb.setting.count()).toBe(0);
     expect(await rawDb.settingChange.count()).toBe(0);
-    expect(await rawDb.appSetting.count()).toBe(1);
+    expect((await legacySettings()).length).toBe(1);
   });
 
   it('copies exactly the four keys at event scope with MIGRATION provenance', async () => {
@@ -129,7 +129,7 @@ describe('legacy capture settings copy migration', () => {
     await legacy('dashboardPollSeconds', 9);
     await legacy('eventName', 'Renamed legacy');
     await legacy('somethingUnknown', { a: 1 });
-    const legacyBefore = await rawDb.appSetting.findMany({ orderBy: { key: 'asc' } });
+    const legacyBefore = await legacySettings();
     const [{ now: started }] = await rawDb.$queryRaw<[{ now: Date }]>`SELECT now() AS now`;
 
     await runMigration();
@@ -179,7 +179,7 @@ describe('legacy capture settings copy migration', () => {
     expect(await rawDb.setting.count({ where: { scope: { in: ['PLATFORM', 'STATION'] } } })).toBe(
       0,
     );
-    expect(await rawDb.appSetting.findMany({ orderBy: { key: 'asc' } })).toEqual(legacyBefore);
+    expect(await legacySettings()).toEqual(legacyBefore);
     expect((await rawDb.event.findUniqueOrThrow({ where: { id: event.id } })).name).toBe(
       'SPOH 2027',
     );

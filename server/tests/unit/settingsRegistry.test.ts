@@ -4,9 +4,7 @@ import {
   GENERATED_SETTING_DEFAULTS,
   GENERATED_SETTING_METADATA,
   GENERATED_SETTING_SCHEMAS,
-  RuntimeSettings,
 } from '@spoh/shared';
-import { DEFAULT_SETTINGS } from '../../src/platform/settings/index.js';
 import { SETTINGS } from '../../src/platform/settings/registry.js';
 
 type JsonSchema = Record<string, unknown>;
@@ -88,8 +86,6 @@ describe('settings registry and generated contracts (P10.1)', () => {
         key,
       ).toBe(true);
     }
-    expect(DEFAULT_SETTINGS).toEqual(RuntimeSettings.parse(DEFAULT_SETTINGS));
-    expect(DEFAULT_SETTINGS.alertPollSeconds).toBe(GENERATED_SETTING_DEFAULTS.alertPollSeconds);
-    expect(RuntimeSettings.shape.alertPollSeconds.safeParse(31).success).toBe(false);
+    expect(GENERATED_SETTING_SCHEMAS.alertPollSeconds.safeParse(31).success).toBe(false);
   });
 });

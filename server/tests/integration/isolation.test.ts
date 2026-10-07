@@ -517,7 +517,6 @@ const CASES: Record<string, Case> = {
     params: (b) => ({ id: b.giftType }),
     body: () => ({ name: 'X' }),
   },
-  'GET /admin/settings': noId('runtime settings are platform-wide until P10'),
   'GET /admin/organisation-settings': noId(
     "reads the path event's organisation settings; other organisations are covered by organisationSettings tests",
   ),
@@ -607,7 +606,6 @@ const CASES: Record<string, Case> = {
       idempotencyKey: idempotencyKey(),
     }),
   },
-  'PATCH /admin/settings': noId('runtime settings are platform-wide until P10'),
   'GET /admin/event-settings': noId("reads the path event's settings"),
   'GET /admin/event-settings/history': noId(
     'reads only the current manager’s path-event/key history; explicit foreign event/key/scope cursors are covered by eventSettingHistory tests',

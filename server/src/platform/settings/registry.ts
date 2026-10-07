@@ -98,16 +98,6 @@ export const SETTINGS = {
     { ...visible, class: 'privacy', lockedIn: ['CLOSED', 'ARCHIVED'], typeName: 'VisitorDataMode' },
   ),
 
-  // Legacy AppSetting rows remain readable until P10.2 migrates them.
-  eventName: setting(
-    'eventName',
-    z.string().trim().min(1).max(80),
-    'Event',
-    'Event name (legacy)',
-    'Legacy display name; Event.name replaces this key during storage migration.',
-    'Event',
-    { ...visible, normalise: 'trim' },
-  ),
   silentStationMinutes: setting(
     'silentStationMinutes',
     minutes(),

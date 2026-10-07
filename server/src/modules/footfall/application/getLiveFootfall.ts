@@ -1,5 +1,5 @@
 import type { FootfallLiveResponse } from '@spoh/shared';
-import { DEFAULT_SETTINGS } from '../../../platform/settings/index.js';
+import { SETTINGS } from '../../../platform/settings/registry.js';
 import {
   prepareThresholds,
   type ThresholdSnapshot,
@@ -18,7 +18,7 @@ import { systemClock } from '../../../platform/time/index.js';
  * named constant because it documents the configuration and gives tests a
  * stable reference.
  */
-export const SILENT_STATION_MINUTES = DEFAULT_SETTINGS.silentStationMinutes;
+export const SILENT_STATION_MINUTES = SETTINGS.silentStationMinutes.default;
 
 /**
  * Live counts with a silence flag per station. Every counted room appears, even

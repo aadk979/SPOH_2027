@@ -4,7 +4,7 @@ import {
   GENERATED_SETTING_METADATA as metadata,
 } from '../../generated/settings/index.js';
 
-it.each(['eventName', 'attendance.campusNetworkLabel', 'vocabulary.missionCard'] as const)(
+it.each(['attendance.campusNetworkLabel', 'vocabulary.missionCard'] as const)(
   'validates normalised text and preserves strict value types for %s',
   (key) => {
     const schema = schemas[key],

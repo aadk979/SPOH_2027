@@ -14,7 +14,6 @@ export interface GeneratedSettingValues {
   captureSendGraceSeconds: number;
   captureUndoWindowSeconds: number;
   dashboardPollSeconds: number;
-  eventName: string;
   idempotencyRetentionDays: number;
   implausibleTapsPerMinute: number;
   'incident.pushSeverities': Array<'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'>;
@@ -53,7 +52,6 @@ export const GENERATED_SETTING_DEFAULTS = {
   captureSendGraceSeconds: 2,
   captureUndoWindowSeconds: 10,
   dashboardPollSeconds: 3,
-  eventName: 'Event',
   idempotencyRetentionDays: 7,
   implausibleTapsPerMinute: 20,
   'incident.pushSeverities': ['HIGH', 'CRITICAL'],
@@ -289,26 +287,6 @@ export const GENERATED_SETTING_METADATA = {
       type: 'integer',
       minimum: 1,
       maximum: 3600,
-    },
-  },
-  eventName: {
-    key: 'eventName',
-    scopes: ['event'],
-    default: 'Event',
-    label: 'Event name (legacy)',
-    description: 'Legacy display name; Event.name replaces this key during storage migration.',
-    group: 'Event',
-    unit: null,
-    schedulable: false,
-    class: 'operational',
-    lockedIn: [],
-    clientVisible: true,
-    requiredAction: 'event.settings.manage',
-    jsonSchema: {
-      $schema: 'https://json-schema.org/draft/2020-12/schema',
-      type: 'string',
-      minLength: 1,
-      maxLength: 80,
     },
   },
   idempotencyRetentionDays: {
@@ -902,15 +880,6 @@ export const GENERATED_SETTING_SCHEMAS: {
     minimum: 1,
     maximum: 3600,
   }) as z.ZodType<GeneratedSettingValues['dashboardPollSeconds']>,
-  eventName: z.preprocess(
-    (value) => (typeof value === 'string' ? value.trim() : value),
-    z.fromJSONSchema({
-      $schema: 'https://json-schema.org/draft/2020-12/schema',
-      type: 'string',
-      minLength: 1,
-      maxLength: 80,
-    }),
-  ) as z.ZodType<GeneratedSettingValues['eventName']>,
   idempotencyRetentionDays: z.fromJSONSchema({
     $schema: 'https://json-schema.org/draft/2020-12/schema',
     type: 'integer',

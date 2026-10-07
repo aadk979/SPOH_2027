@@ -9,7 +9,6 @@ import {
   ScopedSettingsHistoryQuery,
   ScopedSettingsRevertRequest,
   RevertEventSettingRequest,
-  UpdateSettingsRequest,
   CreateCaptureScheduleRequest,
   CaptureScheduleListQuery,
   UpdateCaptureScheduleRequest,
@@ -26,8 +25,6 @@ import {
   changeOrganisationSettingHandler,
   getClientSettingsHandler,
   getOrganisationSettingsHandler,
-  getSettingsHandler,
-  updateSettingsHandler,
   getEventSettingHistoryHandler,
   getScopedSettingsHandler,
   getScopedHistoryHandler,
@@ -114,15 +111,10 @@ function registerOperationalSettingsRoutes(router: Router): void {
   // ─────────────────────────────────────────────────────────────
 
   /**
-   * Readable by anyone signed in.
-   *
-   * The client needs the poll intervals, the undo window and the outbox warning
-   * thresholds to behave consistently with the server, and none of it is
-   * sensitive — it is the tuning of an event, not a secret.
+   * The device tuning, resolved for the caller's own event (P10.2): the client
+   * needs the poll intervals, the undo window and the outbox warning thresholds
+   * to behave consistently with the server, and none of it is sensitive.
    */
-  router.get('/settings', defaultRateLimit, requireCapability('own.read'), getSettingsHandler);
-
-  /** The same device tuning, resolved for the caller's own event (P10.2). */
   router.get(
     '/settings/client',
     defaultRateLimit,
@@ -144,14 +136,6 @@ function registerOperationalSettingsRoutes(router: Router): void {
     requireCapability('config.manage'),
     validate({ query: ScopedSettingsHistoryQuery }),
     getScopedHistoryHandler,
-  );
-
-  router.patch(
-    '/settings',
-    adminRateLimit,
-    requireCapability('config.manage'),
-    validate({ body: UpdateSettingsRequest }),
-    updateSettingsHandler,
   );
 
   router.post(

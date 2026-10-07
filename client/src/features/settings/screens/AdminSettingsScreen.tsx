@@ -10,7 +10,6 @@ import { SettingsFeedback } from '../components/SettingsFeedback';
 import { EventNameField } from '../components/EventNameField';
 import { ProductRulesForm } from '../components/ProductRulesForm';
 import { ShiftHoursForm } from '../components/ShiftHoursForm';
-import { ThresholdsForm } from '../components/ThresholdsForm';
 import { AttendanceSettingsForm } from '../components/AttendanceSettingsForm';
 import { CaptureControlsPanel } from '../components/CaptureControlsPanel';
 import { OperationalCataloguePanel } from '../components/OperationalCataloguePanel';
@@ -34,7 +33,6 @@ export default function AdminSettingsScreen(): ReactNode {
         <ProductRulesForm enabled={session !== null} canEdit={canEdit} />
         <AttendanceSettingsForm enabled={canEdit} />
         <OrganisationSettingsForm enabled={canEdit} />
-        <ThresholdsForm />
       </Stack>
     </AppShell>
   );

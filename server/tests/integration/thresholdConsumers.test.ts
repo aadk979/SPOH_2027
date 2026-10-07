@@ -10,7 +10,6 @@ import { getLiveDashboard } from '../../src/modules/dashboard/application/getLiv
 import { getStationDashboard } from '../../src/modules/dashboard/application/getStationDashboard.js';
 import { getLiveFootfall } from '../../src/modules/footfall/index.js';
 import { getLongShifts } from '../../src/modules/shift/index.js';
-import { overrideSettingsForTest } from '../../src/platform/settings/index.js';
 import { prepareThresholds } from '../../src/platform/settings/thresholds.js';
 import { rawDb, resetDatabase } from '../helpers/db.js';
 import {
@@ -139,15 +138,6 @@ describe('live footfall silence', () => {
     expect(await silentNames()).toEqual(['Room A', 'Room B']);
   });
 
-  it('is not governed by the legacy global cache', async () => {
-    const restore = overrideSettingsForTest({ silentStationMinutes: 60 });
-    try {
-      expect(await silentNames()).toEqual(['Room A', 'Room B']);
-    } finally {
-      restore();
-    }
-  });
-
   it('keeps the response schema and flags a station exactly at the threshold', async () => {
     await store('EVENT', 'silentStationMinutes', 20);
     const response = await getLiveFootfall({ eventId }, FROZEN_NOW);
@@ -187,15 +177,9 @@ describe('data health stale device', () => {
     expect(await stale()).toEqual([counter.id]);
   });
 
-  it('falls an invalid event value through to the default and ignores the legacy cache', async () => {
+  it('falls an invalid event value through to the default', async () => {
     await store('EVENT', 'staleDeviceMinutes', 'soon');
     expect(await stale()).toEqual([counter.id]);
-    const restore = overrideSettingsForTest({ staleDeviceMinutes: 90 });
-    try {
-      expect(await stale()).toEqual([counter.id]);
-    } finally {
-      restore();
-    }
     expect(DataHealthResponse.safeParse(await getDataHealth({ eventId }, FROZEN_NOW)).success).toBe(
       true,
     );
@@ -229,15 +213,9 @@ describe('long shifts', () => {
     expect(await warned()).toEqual([]);
   });
 
-  it('falls an invalid value through and ignores the legacy cache', async () => {
+  it('falls an invalid value through to the default', async () => {
     await store('EVENT', 'longShiftMinutes', -5);
     expect(await warned()).toEqual([counter.id]);
-    const restore = overrideSettingsForTest({ longShiftMinutes: 999 });
-    try {
-      expect(await warned()).toEqual([counter.id]);
-    } finally {
-      restore();
-    }
   });
 });
 
@@ -275,17 +253,11 @@ describe('station dashboard implausible taps', () => {
     expect(await anomaly()).toEqual([false]);
   });
 
-  it('falls an invalid station value through, and ignores another station and the legacy cache', async () => {
+  it('falls an invalid station value through, and ignores another station', async () => {
     await store('EVENT', 'implausibleTapsPerMinute', 40);
     await store('STATION', 'implausibleTapsPerMinute', 'x', booth);
     await store('STATION', 'implausibleTapsPerMinute', 1, roomA);
     expect(await anomaly()).toEqual([false]);
-    const restore = overrideSettingsForTest({ implausibleTapsPerMinute: 1 });
-    try {
-      expect(await anomaly()).toEqual([false]);
-    } finally {
-      restore();
-    }
   });
 
   it('answers 404 for a station of another event without consulting its settings', async () => {

@@ -2,7 +2,6 @@ import { createApp } from './app/createApp.js';
 import { env } from './config/env.js';
 import { logger } from './platform/logger/index.js';
 import { pingDatabase } from './platform/db/client.js';
-import { loadSettings } from './platform/settings/index.js';
 import { JOBS } from './app/jobs.js';
 import { startJobs } from './platform/scheduler/index.js';
 import { startCacheBus } from './platform/events/cacheBus.js';
@@ -11,7 +10,7 @@ import { applyHttpTimeouts } from './app/httpTimeouts.js';
 import { startScheduledJobs } from './app/startScheduledJobs.js';
 
 /**
- * The server's start-up, top to bottom: database, settings, app, jobs, listen,
+ * The server's start-up, top to bottom: database, cache bus, app, jobs, listen,
  * and a graceful shutdown.
  *
  * Fails fast on a database it cannot reach: a server that accepts a booth tap
@@ -21,11 +20,6 @@ import { startScheduledJobs } from './app/startScheduledJobs.js';
 async function main(): Promise<void> {
   await pingDatabase();
 
-  // Runtime settings before the first request, so no capture is ever scoped
-  // against the compiled shift boundaries when a configured one exists. Total
-  // by design: a failure here logs and leaves the defaults in place rather than
-  // stopping the server.
-  await loadSettings();
   await startCacheBus();
 
   const app = createApp();

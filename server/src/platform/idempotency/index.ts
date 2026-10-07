@@ -1,5 +1,5 @@
 import { prisma } from '../db/client.js';
-import { DEFAULT_SETTINGS } from '../settings/index.js';
+import { SETTINGS } from '../settings/registry.js';
 import { SYSTEM_AUDIT_CONTEXT } from '../http/auditContext.js';
 import { systemClock } from '../time/index.js';
 import { pruneReplayInTransaction } from './prune.js';
@@ -157,7 +157,7 @@ export async function release(key: string): Promise<void> {
 }
 
 /** Records older than this are pruned by the daily job (BUILD_PLAN §7.4). */
-export const IDEMPOTENCY_RETENTION_DAYS = DEFAULT_SETTINGS.idempotencyRetentionDays;
+export const IDEMPOTENCY_RETENTION_DAYS = SETTINGS.idempotencyRetentionDays.default;
 
 export async function pruneIdempotencyRecords(now: Date = systemClock.now()): Promise<number> {
   return prisma.$transaction((tx) =>

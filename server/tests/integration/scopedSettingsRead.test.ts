@@ -51,7 +51,6 @@ beforeEach(async () => {
 });
 
 it('returns complete default event values, strict metadata and no side effects', async () => {
-  const before = await rawDb.appSetting.findMany();
   const response = await get();
   expect(response.status).toBe(200);
   expect(response.headers['cache-control']).toBe('no-store');
@@ -83,7 +82,6 @@ it('returns complete default event values, strict metadata and no side effects',
     'auth.accessTokenTtlSeconds',
   ])
     expect(response.text).not.toContain(privateField);
-  expect(await rawDb.appSetting.findMany()).toEqual(before);
   for (const count of [
     await rawDb.setting.count(),
     await rawDb.settingChange.count(),

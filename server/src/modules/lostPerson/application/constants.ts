@@ -1,4 +1,4 @@
-import { DEFAULT_SETTINGS } from '../../../platform/settings/index.js';
+import { SETTINGS } from '../../../platform/settings/registry.js';
 
 /**
  * How long a resolved alert keeps its descriptive fields (BUILD_PLAN §5.9). The
@@ -6,7 +6,7 @@ import { DEFAULT_SETTINGS } from '../../../platform/settings/index.js';
  * safer direction — the only cost is that a report run the morning after has
  * to lean on the unpurged count.
  */
-export const PURGE_AFTER_HOURS = DEFAULT_SETTINGS.lostPersonPurgeHours;
+export const PURGE_AFTER_HOURS = SETTINGS.lostPersonPurgeHours.default;
 
 /** The idempotency endpoint name of `POST /lost-person`. */
 export const RAISE_ENDPOINT = 'POST /lost-person';

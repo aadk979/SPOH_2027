@@ -71,7 +71,6 @@ export type AuditAction =
   | 'shiftTemplate.update'
   | 'giftType.create'
   | 'giftType.update'
-  | 'settings.update'
   | 'setting.change'
   | 'visitorField.create'
   | 'visitorField.update'
@@ -139,7 +138,7 @@ const MEMBERSHIP_CHANGES = new Set<AuditAction>([
 ]);
 
 async function publishInvalidation(tx: PrismaTransactionClient, entry: AuditEntry): Promise<void> {
-  if (entry.action === 'settings.update' || entry.action === 'setting.change') {
+  if (entry.action === 'setting.change') {
     await publishCacheEvent(tx, 'settings', { eventId: entry.eventId, key: entry.entityId });
   }
   if (MEMBERSHIP_CHANGES.has(entry.action)) {

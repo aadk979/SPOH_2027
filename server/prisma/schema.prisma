@@ -586,7 +586,6 @@ model Person {
   announcementAcks           AnnouncementAck[]
   fallbackWindows            FallbackWindow[]
   importBatches              ImportBatch[]
-  settingsChanged            AppSetting[]
   settingsUpdated            Setting[]                  @relation("SettingUpdatedBy")
   settingChanges             SettingChange[]            @relation("SettingChangedBy")
   pushSubscriptions          PushSubscription[]
@@ -1843,25 +1842,6 @@ model SettingChange {
 
   @@index([scope, scopeId, key, version])
   @@index([eventId])
-}
-
-/// Runtime configuration (see server/src/platform/settings/index.ts).
-///
-/// Shift block times, silence thresholds, the implausible-tap rate and the
-/// retention windows were constants compiled into the server. Every one of them
-/// is a number somebody wants to change during a dry run without a redeploy, so
-/// they live here instead: a typed key, a JSON value, and the volunteer who
-/// last changed it. Unknown or unset keys fall back to the compiled defaults,
-/// so an empty table is a working system.
-model AppSetting {
-  /// @class operational
-  key         String   @id
-  /// @class operational
-  value       Json
-  updatedById String?
-  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
-
-  updatedBy Person? @relation(fields: [updatedById], references: [id], onDelete: SetNull)
 }
 
 /// A browser push endpoint (RFC 8030 / Web Push).

@@ -6,7 +6,6 @@ import { api } from '@/shared/lib/api';
 import { ApiError } from '@/shared/lib/apiErrors';
 import { sessionKeys } from '@/features/session';
 import { EventNameField } from '@/features/settings/components/EventNameField';
-import { ThresholdsForm } from '@/features/settings/components/ThresholdsForm';
 import { TEST_EVENT } from '../helpers/event';
 
 const event = vi.hoisted(() => ({ id: 'evt_test' }));
@@ -224,23 +223,5 @@ describe('event name', () => {
     expect(field().hasAttribute('disabled')).toBe(true);
     fireEvent.change(field(), { target: { value: 'SPOH 2027' } });
     expect(renameButton()).toBeNull();
-  });
-});
-
-describe('former legacy settings', () => {
-  it('shows each as a pointer to where it is changed now, never as an editable value', () => {
-    render(<ThresholdsForm />);
-    expect(screen.queryAllByRole('textbox')).toEqual([]);
-    expect(screen.queryAllByRole('spinbutton')).toEqual([]);
-    expect(screen.getAllByText(/Settings catalogue above/)).toHaveLength(8);
-    expect(screen.getAllByText(/or station scope/)).toHaveLength(2);
-    expect(
-      screen.getAllByText(
-        'Changed under Organisation settings above, by a platform admin, for every event.',
-      ),
-    ).toHaveLength(4);
-    expect(
-      screen.getAllByText('Changed under Counts and visitor data above, for this event.'),
-    ).toHaveLength(1);
   });
 });

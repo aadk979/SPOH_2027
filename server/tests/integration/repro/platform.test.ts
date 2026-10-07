@@ -2,8 +2,6 @@ import type { Express } from 'express';
 import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../../src/app/createApp.js';
-import { SYSTEM_AUDIT_CONTEXT } from '../../../src/platform/http/auditContext.js';
-import { clearSettings } from '../../../src/platform/settings/index.js';
 import { resetDatabase, rawDb } from '../../helpers/db.js';
 import {
   assignToStation,
@@ -206,18 +204,6 @@ describe('cross-cutting rules (P03 repros)', () => {
 
     const row = await rawDb.auditLog.findFirstOrThrow({ where: { entityId: shift.id } });
     expect(row.before).toMatchObject({ stationId });
-  });
-
-  // F03-021
-  it('keeps a setting when resetting it cannot be audited', async () => {
-    await rawDb.appSetting.create({ data: { key: 'eventName', value: 'Dry Run 1' } });
-
-    // An actor id that is not a volunteer makes the audit insert fail.
-    await expect(
-      clearSettings(['eventName'], { ...SYSTEM_AUDIT_CONTEXT, actorId: 'no-such-volunteer' }),
-    ).rejects.toThrow();
-
-    expect(await rawDb.appSetting.count({ where: { key: 'eventName' } })).toBe(1);
   });
 
   // F03-024
