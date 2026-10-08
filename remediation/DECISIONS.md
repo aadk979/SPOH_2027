@@ -394,3 +394,25 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   line, not a refused volunteer.
 - **Answer:** **A** (owner, 8 October 2026), and every organisation has at least one
   platform admin.
+
+### D-21 — Questions from the P11.5 shadow release
+
+- **Owner:** you
+- **Blocks:** P11.5 (release 2, enforce)
+- **Question:** The shadow release found four places where enforcement would refuse
+  what works today or widen a read ([report](reports/P11/enforcement-shadow.md)).
+  1. An archived event's configuration is read with `Write` actions, which the
+     archived guardrail refuses. How should configuration be read?
+  2. The approved guardrail freezes structure once LIVE; today a Chief can still
+     create stations, days, gift types and visitor fields. Keep it?
+  3. Card lookup and the gift-type list become `Self.Read`, so Leads gain them. Fine?
+  4. Records without a recorder cannot be voided under the schema. How to treat them?
+- **Recommendation:** add a read action; keep the freeze; let Leads read; verify on
+  staging.
+- **Answer** (owner, 8 October 2026):
+  1. Add `Settings.Read` (Editable, not a write), granted to Chiefs and Admins by
+     default, with the lowest default role (Chief) as its floor.
+  2. Keep the freeze.
+  3. Leads may look up cards and list gift types.
+  4. Enforce only once staging's shadow summary shows no evaluation errors; test
+     fixtures always record who captured a record.

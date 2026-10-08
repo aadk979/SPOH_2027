@@ -64,7 +64,7 @@ function registerCaptureScheduleManagementRoutes(router: Router): void {
   router.get(
     '/settings/catalogue/schedules',
     defaultRateLimit,
-    authorize('Schedule.Manage', theEvent),
+    authorize('Settings.Read', theEvent, { changes: ['C14'] }),
     requireCapability('config.manage'),
     validate({ query: CaptureScheduleListQuery }),
     listCaptureSchedulesHandler,
@@ -110,7 +110,7 @@ function registerCaptureScheduleRoutes(router: Router): void {
   router.get(
     '/settings/catalogue/schedules/:id',
     defaultRateLimit,
-    authorize('Schedule.Manage', theEvent),
+    authorize('Settings.Read', theEvent, { changes: ['C14'] }),
     requireCapability('config.manage'),
     validate({ params: z.object({ id: Id }).strict(), query: z.object({}).strict() }),
     getCaptureScheduleHandler,
@@ -138,7 +138,7 @@ function registerOperationalSettingsRoutes(router: Router): void {
   router.get(
     '/settings/catalogue',
     defaultRateLimit,
-    authorize('Structure.Edit', theEvent),
+    authorize('Settings.Read', theEvent, { changes: ['C14'] }),
     requireCapability('config.manage'),
     validate({ query: ScopedSettingsReadQuery }),
     getScopedSettingsHandler,
@@ -147,7 +147,7 @@ function registerOperationalSettingsRoutes(router: Router): void {
   router.get(
     '/settings/catalogue/history',
     defaultRateLimit,
-    authorize('Structure.Edit', theEvent),
+    authorize('Settings.Read', theEvent, { changes: ['C14'] }),
     requireCapability('config.manage'),
     validate({ query: ScopedSettingsHistoryQuery }),
     getScopedHistoryHandler,
@@ -199,7 +199,7 @@ function registerProductSettingsRoutes(router: Router): void {
   router.get(
     '/event-settings/history',
     defaultRateLimit,
-    authorize('Structure.Edit', theEvent),
+    authorize('Settings.Read', theEvent, { changes: ['C14'] }),
     requireCapability('config.manage'),
     validate({ query: EventSettingHistoryQuery }),
     getEventSettingHistoryHandler,

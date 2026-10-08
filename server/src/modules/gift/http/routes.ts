@@ -34,7 +34,7 @@ giftRouter.use(requireAuth);
 giftRouter.get(
   '/',
   defaultRateLimit,
-  authorize('Self.Read', self),
+  authorize('Self.Read', self, { changes: ['C16'] }),
   requireCapability('gift.redeem'),
   listGiftsHandler,
 );

@@ -13,7 +13,7 @@ const defaults = readJson('default-grants.json');
 const decision = readJson('minimum-roles.json');
 const catalogue = actions();
 
-test('the approved 45 floors are complete fixed metadata with the six unchanged role ranks', () => {
+test('the approved 46 floors are complete fixed metadata with the six unchanged role ranks', () => {
   assert.deepEqual(ROLE_RANKS, {
     VOLUNTEER: 10,
     IC: 20,
@@ -26,7 +26,7 @@ test('the approved 45 floors are complete fixed metadata with the six unchanged 
   const approved = Object.entries(ACTION_CATALOGUE).filter(
     ([, metadata]) => metadata.minimumRole.status === 'approved',
   );
-  assert.equal(approved.length, 45);
+  assert.equal(approved.length, 46);
   const counts = Object.fromEntries(ROLE_IDS.map((role) => [role, 0]));
   for (const [action, metadata] of approved) {
     const role = ROLE_IDS.find((candidate) => defaults[candidate].grants.includes(action));
@@ -37,7 +37,7 @@ test('the approved 45 floors are complete fixed metadata with the six unchanged 
     VOLUNTEER: 8,
     IC: 12,
     DEPUTY_COORDINATOR: 8,
-    CHIEF_COORDINATOR: 17,
+    CHIEF_COORDINATOR: 18,
     LEAD: 0,
     ADMIN: 0,
   });

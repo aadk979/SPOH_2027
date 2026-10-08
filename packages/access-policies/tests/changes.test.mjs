@@ -145,6 +145,38 @@ describe('CHANGES.md', () => {
   });
 });
 
+describe('changes approved on 8 October (D-21)', () => {
+  test('C14 Chiefs and Admins read configuration, in an archived event too', () => {
+    const w = world();
+    const allowed = ROLES.filter((role) =>
+      allow(w.can(w.member(`m-${role}`, role), 'Settings.Read', EVENT, { eventPhase: 'ARCHIVED' })),
+    );
+    assert.deepEqual(allowed.sort(), ['ADMIN', 'CHIEF_COORDINATOR']);
+    // The actions that change configuration stay refused once archived.
+    const chief = w.member('cc', 'CHIEF_COORDINATOR');
+    assert.ok(!allow(w.can(chief, 'Schedule.Manage', EVENT, { eventPhase: 'ARCHIVED' })));
+  });
+
+  test('C15 nobody creates structure in a live, closed or archived event', () => {
+    const w = world();
+    for (const role of ['CHIEF_COORDINATOR', 'ADMIN']) {
+      const member = w.member(`m-${role}`, role);
+      for (const eventPhase of ['LIVE', 'CLOSED', 'ARCHIVED']) {
+        assert.ok(!allow(w.can(member, 'Structure.Change', EVENT, { eventPhase })), eventPhase);
+      }
+      assert.ok(allow(w.can(member, 'Structure.Change', EVENT, { eventPhase: 'REHEARSAL' })));
+    }
+  });
+
+  test('C16 every active member, a Lead included, reads their own membership', () => {
+    const w = world();
+    for (const role of ROLES) {
+      const member = w.member(`m-${role}`, role);
+      assert.ok(allow(w.can(member, 'Self.Read', member)), role);
+    }
+  });
+});
+
 describe('guardrails', () => {
   test('a membership never reaches another event', () => {
     const w = world();

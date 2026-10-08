@@ -22,7 +22,7 @@ function foreignResource(w, type) {
   return w.put(type, `foreign-${type}`, attrs[type] ?? {}, [uid('Event', 'E2')]);
 }
 
-test('all 46 editable actions reject a foreign resource even with every action granted', () => {
+test('all 47 editable actions reject a foreign resource even with every action granted', () => {
   const grants = structuredClone(DEFAULT_GRANTS);
   grants.ADMIN.grants = [...EDITABLE_ACTION_IDS];
   const w = world({ grants });

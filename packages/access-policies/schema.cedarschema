@@ -210,6 +210,11 @@ namespace SPOH {
   action "Settings.ManageEvent"
     in [Configure, Editable, Write]
     appliesTo { principal: [Membership], resource: [Setting], context: RequestContext };
+  // Reading the event's configuration (settings, categories, schedules, lifecycle). Not a
+  // Write, so an archived event stays readable (D-21).
+  action "Settings.Read"
+    in [Configure, Editable]
+    appliesTo { principal: [Membership], resource: [Event], context: RequestContext };
 
   // Locked: not Editable. Only the platform-admin policy permits these.
   action "Settings.ManageSecurity", "Settings.ManagePrivacy"

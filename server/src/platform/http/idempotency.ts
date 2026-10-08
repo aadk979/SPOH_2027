@@ -94,6 +94,8 @@ async function resolveExisting(
   }
   if (existing.statusCode !== IN_PROGRESS) {
     logger.debug({ requestId: ctx.req.id, endpoint: ctx.endpointName }, 'idempotent replay');
+    // The caller's own earlier answer, authorized when it was made (P11.5 shadow skips it).
+    ctx.res.locals.idempotentReplay = true;
     ctx.res.status(existing.statusCode).json(await replayBody(ctx.req, existing, ctx.options));
     return 'replayed';
   }

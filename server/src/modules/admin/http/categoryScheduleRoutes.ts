@@ -39,7 +39,7 @@ function registerCategoryReads(router: Router): void {
   router.get(
     '/capture-categories',
     defaultRateLimit,
-    authorize('Structure.Edit', theEvent),
+    authorize('Settings.Read', theEvent, { changes: ['C14'] }),
     requireCapability('config.manage'),
     validate({ query: CategoryActivityListQuery }),
     listCategoryActivityHandler,
@@ -47,7 +47,7 @@ function registerCategoryReads(router: Router): void {
   router.get(
     '/capture-categories/:categoryId',
     defaultRateLimit,
-    authorize('Structure.Edit', theEvent),
+    authorize('Settings.Read', theEvent, { changes: ['C14'] }),
     requireCapability('config.manage'),
     validate({ params: CategoryActivityParams, query: z.object({}).strict() }),
     getCategoryActivityHandler,
@@ -58,7 +58,7 @@ function registerCategoryScheduleReads(router: Router): void {
   router.get(
     '/capture-categories/:categoryId/schedules',
     defaultRateLimit,
-    authorize('Schedule.Manage', theEvent),
+    authorize('Settings.Read', theEvent, { changes: ['C14'] }),
     requireCapability('config.manage'),
     validate({ params: CategoryActivityParams, query: CategoryScheduleListQuery }),
     listCategorySchedulesHandler,
@@ -66,7 +66,7 @@ function registerCategoryScheduleReads(router: Router): void {
   router.get(
     '/capture-categories/:categoryId/schedules/:id',
     defaultRateLimit,
-    authorize('Schedule.Manage', theEvent),
+    authorize('Settings.Read', theEvent, { changes: ['C14'] }),
     requireCapability('config.manage'),
     validate({ params: CategoryScheduleParams, query: z.object({}).strict() }),
     getCategoryScheduleHandler,

@@ -25,7 +25,20 @@ import { getAuth } from './requireAuth.js';
 
 /** A row of `packages/access-policies/CHANGES.md`: a deliberate difference from today. */
 export type ChangeId =
-  'C1' | 'C2' | 'C3' | 'C4' | 'C5' | 'C6' | 'C7' | 'C9' | 'C11' | 'C12' | 'C13';
+  | 'C1'
+  | 'C2'
+  | 'C3'
+  | 'C4'
+  | 'C5'
+  | 'C6'
+  | 'C7'
+  | 'C9'
+  | 'C11'
+  | 'C12'
+  | 'C13'
+  | 'C14'
+  | 'C15'
+  | 'C16';
 
 /** One question; a platform action is asked as the person rather than the membership. */
 export interface Check extends Question {
@@ -200,10 +213,16 @@ interface Finding {
 export interface Answer {
   readonly status: number;
   readonly legacyGuardRefused: boolean;
+  /** The caller's own stored answer, decided when the original request was. */
+  readonly replayed?: boolean;
 }
 
 function answerOf(res: Response): Answer {
-  return { status: res.statusCode, legacyGuardRefused: res.locals.legacyGuardRefused === true };
+  return {
+    status: res.statusCode,
+    legacyGuardRefused: res.locals.legacyGuardRefused === true,
+    replayed: res.locals.idempotentReplay === true,
+  };
 }
 
 /**
@@ -218,7 +237,7 @@ export function compare(
   options: AuthorizeOptions,
 ): Finding | null {
   const { status } = answer;
-  if (outcome.kind === 'unaskable') return null;
+  if (outcome.kind === 'unaskable' || answer.replayed) return null;
   if (outcome.kind === 'failed') {
     // The route's own validation, lookup or refusal answered the caller the same way.
     if ([400, 403, 404].includes(status)) return null;

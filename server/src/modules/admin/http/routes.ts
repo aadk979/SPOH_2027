@@ -194,7 +194,7 @@ adminRouter.get(
 adminRouter.post(
   '/stations',
   adminRateLimit,
-  authorize('Structure.Change', theEvent),
+  authorize('Structure.Change', theEvent, { changes: ['C15'] }),
   requireCapability('config.manage'),
   validate({ body: CreateStationRequest }),
   createStationHandler,
@@ -239,7 +239,7 @@ adminRouter.get(
 adminRouter.post(
   '/event-days',
   adminRateLimit,
-  authorize('Structure.Change', theEvent),
+  authorize('Structure.Change', theEvent, { changes: ['C15'] }),
   requireCapability('config.manage'),
   validate({ body: CreateEventDayRequest }),
   createEventDayHandler,
@@ -282,7 +282,7 @@ adminRouter.patch(
 adminRouter.post(
   '/gift-types',
   adminRateLimit,
-  authorize('Structure.Change', theEvent),
+  authorize('Structure.Change', theEvent, { changes: ['C15'] }),
   requireCapability('config.manage'),
   validate({ body: CreateGiftTypeRequest }),
   createGiftTypeHandler,
@@ -304,7 +304,7 @@ registerCategoryScheduleRoutes(adminRouter);
 adminRouter.get(
   '/attendance-settings',
   defaultRateLimit,
-  authorize('Structure.Edit', theEvent),
+  authorize('Settings.Read', theEvent, { changes: ['C14'] }),
   requireCapability('config.manage'),
   getAttendanceConfigHandler,
 );
@@ -341,7 +341,7 @@ adminRouter.get(
 adminRouter.post(
   '/visitor-fields',
   adminRateLimit,
-  authorize('Structure.Change', theEvent),
+  authorize('Structure.Change', theEvent, { changes: ['C15'] }),
   requireCapability('config.manage'),
   validate({ body: CreateVisitorFieldRequest }),
   createVisitorFieldHandler,

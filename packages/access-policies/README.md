@@ -14,7 +14,7 @@ npm run typecheck --workspace packages/access-policies
 npm run build --workspace packages/access-policies
 ```
 
-`schema.cedarschema` owns the 65 concrete action identifiers, ten action groups,
+`schema.cedarschema` owns the 66 concrete action identifiers, ten action groups,
 principal types and resource types. `tools/generate-actions.mjs` produces the
 standalone TypeScript catalogue in `src/generated/actions.ts`. That catalogue
 contains metadata and types only; importing it does not evaluate authorization
@@ -36,7 +36,7 @@ path-bearing options fail before any output write. Tests exercise this behavior
 inside isolated mock repositories under this package's ignored `.local` folder.
 
 On 6 October the human owner approved fixed floors equal to the lowest approved
-default role for the 45 Editable actions with initial grants. `minimum-roles.json`
+default role for the 46 Editable actions with initial grants. `minimum-roles.json`
 records those explicit action-to-role restrictions separately from the unchanged
 Cedar schema and defaults. Generation validates exact Editable coverage, all six
 fixed ranks and each approved floor before writing any selected output; it does
@@ -52,7 +52,7 @@ Existing Lead default exclusions, per-field visitor reader restrictions and all
 policy guardrails remain intact. The exact approval and remaining question are in
 the [minimum-role decision record](../../remediation/reports/P11/minimum-role-decision.md).
 
-`tools/generate-grants.mjs` produces one static permit for each of the 46
+`tools/generate-grants.mjs` produces one static permit for each of the 47
 Editable actions. Per-event role grants remain entity data. There are no
 runtime policy templates or policy-store writes: ADR-005 §2 replaces the earlier
 template design with audited `RolePermission` rows. Those rows, grant versions,

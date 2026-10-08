@@ -1,5 +1,5 @@
 {
-  "$comment": "Fixed permission-editor floors approved by the human owner on 6 October 2026: the lowest approved default role for each of the 45 granted Editable actions. These are authored restrictions, never runtime-derived grants. VisitorRecord.Read eligibility is still awaiting a separate owner decision; it has no floor or default grant.",
+  "$comment": "Fixed permission-editor floors approved by the human owner on 6 October 2026: the lowest approved default role for each of the 45 granted Editable actions; Settings.Read (D-21, 8 October 2026) follows the same rule. These are authored restrictions, never runtime-derived grants. VisitorRecord.Read eligibility is still awaiting a separate owner decision; it has no floor or default grant.",
   "approval": {
     "date": "2026-10-06",
     "decision": "lowest-approved-default-role"
@@ -46,6 +46,7 @@
     "Roster.ReadStation": "IC",
     "Schedule.Manage": "CHIEF_COORDINATOR",
     "Settings.ManageEvent": "CHIEF_COORDINATOR",
+    "Settings.Read": "CHIEF_COORDINATOR",
     "Structure.Change": "CHIEF_COORDINATOR",
     "Structure.Edit": "CHIEF_COORDINATOR",
     "Structure.Read": "IC",

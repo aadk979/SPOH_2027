@@ -100,6 +100,7 @@ export const ACTION_IDS = [
   'Settings.ManageEvent',
   'Settings.ManagePrivacy',
   'Settings.ManageSecurity',
+  'Settings.Read',
   'Shift.CheckIn',
   'Structure.Change',
   'Structure.Edit',
@@ -153,6 +154,7 @@ export const EDITABLE_ACTION_IDS = [
   'Roster.ReadStation',
   'Schedule.Manage',
   'Settings.ManageEvent',
+  'Settings.Read',
   'Structure.Change',
   'Structure.Edit',
   'Structure.Read',
@@ -761,6 +763,16 @@ export const ACTION_CATALOGUE = {
     resourceTypes: ['Setting'],
     minimumRole: {
       status: 'locked',
+    },
+  },
+  'Settings.Read': {
+    groups: ['Configure', 'Editable'],
+    principalTypes: ['Membership'],
+    resourceTypes: ['Event'],
+    minimumRole: {
+      status: 'approved',
+      role: 'CHIEF_COORDINATOR',
+      rank: 40,
     },
   },
   'Shift.CheckIn': {

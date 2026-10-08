@@ -33,6 +33,16 @@ const REPEAT = readFileSync(
   'utf8',
 );
 
+const SETTINGS_READ = readFileSync(
+  fileURLToPath(
+    new URL(
+      '../../prisma/migrations/20261008150000_grant_settings_read/migration.sql',
+      import.meta.url,
+    ),
+  ),
+  'utf8',
+);
+
 const SYSTEM: AuditContext = {
   actorId: null,
   actorSub: null,
@@ -47,6 +57,12 @@ const SYSTEM: AuditContext = {
 const DEFAULTS = Object.entries(readDefaultGrants())
   .flatMap(([role, { grants }]) => grants.map((action) => `${role} ${action}`))
   .sort();
+
+/** D-21 added these to the defaults after the seed migrations were written. */
+const SETTINGS_READ_GRANTS = ['ADMIN Settings.Read', 'CHIEF_COORDINATOR Settings.Read'];
+
+/** What the two seed migrations write: the 156 defaults of 8 October, before D-21. */
+const SEEDED = DEFAULTS.filter((line) => !SETTINGS_READ_GRANTS.includes(line));
 
 async function grantsOf(eventId: string): Promise<string[]> {
   const rows = await rawDb.rolePermission.findMany({ where: { eventId } });
@@ -93,8 +109,9 @@ beforeEach(async () => {
 });
 
 describe('the approved defaults', () => {
-  it('hold 156 grants and never grant VisitorRecord.Read', () => {
-    expect(DEFAULTS).toHaveLength(156);
+  it('hold 158 grants, Settings.Read for Chiefs and Admins included, and never VisitorRecord.Read', () => {
+    expect(DEFAULTS).toHaveLength(158);
+    expect(SEEDED).toHaveLength(156);
     expect(DEFAULTS.some((line) => line.endsWith(' VisitorRecord.Read'))).toBe(false);
   });
 });
@@ -110,7 +127,7 @@ describe('the seed migration', () => {
     const second = await secondEvent();
     await rawDb.rolePermission.deleteMany({ where: { eventId: second } });
     expect(await runSeed(REPEAT)).toContain('role grants seed: 156 row(s) for 1 event(s)');
-    expect(await grantsOf(second)).toEqual(DEFAULTS);
+    expect(await grantsOf(second)).toEqual(SEEDED);
     expect(await grantsOf(eventId)).toEqual(DEFAULTS);
   });
 
@@ -119,8 +136,8 @@ describe('the seed migration', () => {
     const second = await secondEvent();
     await rawDb.rolePermission.deleteMany({});
     const notices = await runSeed();
-    expect(await grantsOf(eventId)).toEqual(DEFAULTS);
-    expect(await grantsOf(second)).toEqual(DEFAULTS);
+    expect(await grantsOf(eventId)).toEqual(SEEDED);
+    expect(await grantsOf(second)).toEqual(SEEDED);
     expect(notices).toContain('role grants seed: 312 row(s) for 2 event(s)');
   });
 
@@ -134,9 +151,36 @@ describe('the seed migration', () => {
     const edited = await grantsOf(eventId);
     await runSeed();
     expect(await grantsOf(eventId)).toEqual(edited);
-    expect(await grantsOf(second)).toEqual(DEFAULTS);
+    expect(await grantsOf(second)).toEqual(SEEDED);
     expect(await runSeed()).toContain('role grants seed: every event already has grants');
-    expect(await rawDb.rolePermission.count()).toBe(edited.length + DEFAULTS.length);
+    expect(await rawDb.rolePermission.count()).toBe(edited.length + SEEDED.length);
+  });
+});
+
+describe('the Settings.Read migration (D-21)', () => {
+  it('brings every seeded event to the current defaults, and is re-runnable', async () => {
+    const { eventId } = await testEvent();
+    const second = await secondEvent();
+    await rawDb.rolePermission.deleteMany({});
+    await runSeed();
+    await runSeed(SETTINGS_READ);
+    expect(await grantsOf(eventId)).toEqual(DEFAULTS);
+    expect(await grantsOf(second)).toEqual(DEFAULTS);
+    await runSeed(SETTINGS_READ);
+    expect(await rawDb.rolePermission.count()).toBe(2 * DEFAULTS.length);
+  });
+
+  it('changes nothing else in an edited event, and leaves an event without grants bare', async () => {
+    const { eventId } = await testEvent();
+    const second = await secondEvent();
+    await rawDb.rolePermission.deleteMany({ where: { eventId: second } });
+    await rawDb.rolePermission.deleteMany({
+      where: { eventId, OR: [{ action: 'Settings.Read' }, { action: 'Footfall.Create' }] },
+    });
+    const edited = await grantsOf(eventId);
+    await runSeed(SETTINGS_READ);
+    expect(await grantsOf(eventId)).toEqual([...edited, ...SETTINGS_READ_GRANTS].sort());
+    expect(await grantsOf(second)).toEqual([]);
   });
 });
 

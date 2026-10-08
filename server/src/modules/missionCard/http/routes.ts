@@ -70,7 +70,7 @@ missionCardRouter.get(
 missionCardRouter.get(
   '/qr/:payload',
   captureRateLimit,
-  authorize('Self.Read', self),
+  authorize('Self.Read', self, { changes: ['C16'] }),
   requireCapability('card.stamp'),
   validate({ params: CardQrParams }),
   getCardByQrHandler,
@@ -80,7 +80,7 @@ missionCardRouter.get(
 missionCardRouter.get(
   '/:shortCode',
   captureRateLimit,
-  authorize('Self.Read', self),
+  authorize('Self.Read', self, { changes: ['C16'] }),
   requireCapability('card.stamp'),
   validate({ params: CardLookupParams }),
   getCardHandler,

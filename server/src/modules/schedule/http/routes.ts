@@ -14,7 +14,7 @@ scheduleRouter.use(requireAuth);
 scheduleRouter.get(
   '/',
   defaultRateLimit,
-  authorize('Schedule.Manage', theEvent),
+  authorize('Settings.Read', theEvent, { changes: ['C14'] }),
   requireCapability('config.manage'),
   validate({ query: ScheduleTimelineQuery }),
   async (req, res) => {

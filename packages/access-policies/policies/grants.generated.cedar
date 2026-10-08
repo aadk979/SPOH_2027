@@ -330,6 +330,14 @@ permit (
 )
 when { principal.role.grants.contains("Settings.ManageEvent") };
 
+@id("grant.Settings.Read")
+permit (
+  principal is SPOH::Membership,
+  action == SPOH::Action::"Settings.Read",
+  resource
+)
+when { principal.role.grants.contains("Settings.Read") };
+
 @id("grant.Structure.Change")
 permit (
   principal is SPOH::Membership,

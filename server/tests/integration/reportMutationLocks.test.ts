@@ -73,13 +73,20 @@ beforeEach(async () => {
         stationId,
         categoryId,
         recordedById: admin.id,
+        recordedByMembershipId: member.id,
         idempotencyKey: idempotencyKey(),
       },
     })
   ).id;
   tickId = (
     await rawDb.footfallTick.create({
-      data: { eventId, stationId, recordedById: admin.id, idempotencyKey: idempotencyKey() },
+      data: {
+        eventId,
+        stationId,
+        recordedById: admin.id,
+        recordedByMembershipId: member.id,
+        idempotencyKey: idempotencyKey(),
+      },
     })
   ).id;
   await rawDb.missionCard.create({

@@ -16,9 +16,9 @@ import {
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const BENCH = join(ROOT, '..', '..', 'remediation', 'reports', 'P05', 'cedar');
 
-test('generated action catalogue names all 65 actions and ten groups from the Cedar schema', () => {
-  assert.equal(ACTION_IDS.length, 65);
-  assert.equal(new Set(ACTION_IDS).size, 65);
+test('generated action catalogue names all 66 actions and ten groups from the Cedar schema', () => {
+  assert.equal(ACTION_IDS.length, 66);
+  assert.equal(new Set(ACTION_IDS).size, 66);
   assert.deepEqual(
     ACTION_IDS,
     actions()
@@ -50,7 +50,7 @@ test('every generated action preserves its principal, resource and action groups
 });
 
 test('editable and write catalogue entries derive exactly from their schema groups', () => {
-  assert.equal(EDITABLE_ACTION_IDS.length, 46);
+  assert.equal(EDITABLE_ACTION_IDS.length, 47);
   for (const [group, generated] of [
     ['Editable', EDITABLE_ACTION_IDS],
     ['Write', WRITE_ACTION_IDS],
@@ -77,7 +77,7 @@ test('generated standalone TypeScript metadata is current and has no runtime imp
   assert.doesNotMatch(text, /^import\s/m);
 });
 
-test('accepted schema, policies, role defaults and C1-C13 changes remain byte-identical to P05', () => {
+test('accepted schema, policies, role defaults and C1-C16 changes remain byte-identical to the P05 bench, as amended by D-21', () => {
   const policyFiles = readdirSync(join(ROOT, 'policies')).filter((file) => file.endsWith('.cedar'));
   for (const file of [
     'schema.cedarschema',

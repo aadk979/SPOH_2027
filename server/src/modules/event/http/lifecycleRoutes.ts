@@ -18,14 +18,14 @@ eventLifecycleRouter.use(requireAuth);
 eventLifecycleRouter.get(
   '/',
   defaultRateLimit,
-  authorize('Event.MarkReady', theEvent),
+  authorize('Settings.Read', theEvent, { changes: ['C14'] }),
   requireCapability('config.manage'),
   readLifecycleHandler,
 );
 eventLifecycleRouter.get(
   '/readiness',
   defaultRateLimit,
-  authorize('Event.MarkReady', theEvent),
+  authorize('Settings.Read', theEvent, { changes: ['C14'] }),
   requireCapability('config.manage'),
   readLifecycleReadinessHandler,
 );

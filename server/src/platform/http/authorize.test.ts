@@ -48,6 +48,10 @@ describe('a shadow decision against what the app answered', () => {
     expect(compare(failed, at(200), {})).toMatchObject({ message: 'authorization shadow error' });
   });
 
+  it('does not compare a replay of the caller’s own earlier answer', () => {
+    expect(compare(decided(false), { ...at(200), replayed: true }, {})).toBeNull();
+  });
+
   it('has nothing to compare when there was nothing to ask', () => {
     expect(compare({ kind: 'unaskable' }, at(200), {})).toBeNull();
   });
