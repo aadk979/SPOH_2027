@@ -83,7 +83,10 @@ node remediation/tools/progress.mjs start P11.1 --force --note "ADR-010 prerequi
 ```
 
 Use the corresponding step ID and verified prerequisite note for P11.2, P11.3 or
-P13.6. This is permission to start bounded dependency work, not permission to force
+P13.6. The owner extended the list to P11.4 and P11.5 on 8 October 2026 (D-19): the
+authorizer may be built and deployed unenforced, and the role grants stored and read,
+before P10 closes. P11.5's enforcement still ships only after the owner approves its
+release plan, because it changes who may do what. This is permission to start bounded dependency work, not permission to force
 completion or bypass an open owner decision. Unavailable readiness evidence fails
 closed; LIVE/archive guards and current authorization remain enforced.
 

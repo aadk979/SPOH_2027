@@ -22,9 +22,7 @@ reviewed enforcement step, which the owner sees before it ships.
 - The policy package gains a Cedar-free reader of `default-grants.json`, so
   creating an event reads a file rather than loading Cedar into the server.
 
-## Release B — the repeat and the reader
-
-Prepared, not yet released; see below.
+## Release B — the repeat and the reader (`def8402`)
 
 - `20261008110000_repeat_seed_role_permissions` repeats the seed, byte for byte,
   for any event the previous code created while A rolled out.
@@ -68,9 +66,33 @@ Release A on staging:
   before reaching staging: I passed a malformed SHA and the preflight refused it.
 - [Evidence](staging-role-grants-a-evidence-2026-10-08.json).
 
-Release B's local gate so far: types, lint, architecture, hardcoding, server unit
-767 and the 26 affected database cases pass (including: removing a grant row
-removes it from the role and the local engine denies; an event without rows
-denies; the repeat migration's body equals the seed's and catches a bare event).
-Its full server integration and coverage run was stopped by the host for low
-memory, not by a failure, and has to be repeated before B is pushed.
+Release B, locally on Node 24.19.0:
+
+- Four new database cases: removing a grant row removes it from the role and the
+  local engine denies; an event without rows grants nothing and denies; the repeat
+  migration's body equals the seed's byte for byte; it catches an event created
+  without grants (156 rows for one event) and leaves the others alone.
+- Server coverage run: 2758 passed with the 4 existing skips; coverage 96.05 %
+  lines / 87.63 % branches (floors 95.2 / 86.19). Client and shared reports were
+  reused (their inputs did not change): the ratchet passes for all three. The
+  first attempt was stopped by the host for low memory, not by a failure; the
+  repeat ran with two workers.
+- Server unit 767; types, lint, architecture, hardcoding and formatting pass. The
+  schema and the migrated test database differ by nothing. The E2E database has
+  the repeat migration (two events, 312 rows, nothing written). No route calls the
+  authorizer, so no browser journey reaches the reader.
+
+Release B on staging:
+
+- Full CI 37768779295 and deployment 37769966602 passed. Task revision 150, image
+  `def8402` (digest
+  `sha256:0761c9cd9481133af2e6fe101f3451cc2d9ee892ce4a849299ca54c9520d1c7f`).
+- The migrate task applied the repeat migration. It fails unless every event it
+  seeds ends with the full set, so its success is the evidence for the rows.
+- A normal Cognito session found the smoke identity's role (ADMIN), its 26
+  capabilities and all ten probe statuses identical to the `58906e5` baseline; no
+  request failed with 429 or 5xx; sign-out 204.
+- [Evidence](staging-role-grants-b-evidence-2026-10-08.json).
+
+Enforcement is next, and changes who may do what: its
+[release plan](enforcement-release-plan.md) waits for the owner's approval.

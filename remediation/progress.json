@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-08T03:06:56.219Z",
+  "updatedAt": "2026-10-08T11:36:30.229Z",
   "current": {
     "phase": "P11",
     "step": "P11.5"
@@ -227,6 +227,15 @@
       "status": "answered",
       "answer": "A: the settings screen's event name renames Event.name (from the name read, audited), by the event's Chief and Admin (config.manage); then the legacy AppSetting store goes (owner, 7 October 2026)",
       "answeredAt": "2026-10-07T07:56:44.735Z"
+    },
+    {
+      "id": "D-19",
+      "title": "The ADR-010 prerequisite override for P11.4 and P11.5",
+      "owner": "you",
+      "blocks": [],
+      "status": "answered",
+      "answer": "A: ADR-010's prerequisite override is extended to P11.4 and P11.5; P11.5 enforcement is planned first and ships only after the owner approves its release plan (owner, 8 October 2026)",
+      "answeredAt": "2026-10-08T11:36:29.550Z"
     }
   ],
   "phases": [
@@ -2761,11 +2770,18 @@
           "status": "in_progress",
           "startedAt": "2026-10-08T03:06:56.210Z",
           "completedAt": null,
-          "commits": [],
+          "commits": [
+            "eddbc88214a52fb2c3d5f322bdad97d434e0c4a1",
+            "def8402f82d4d1fe245633edb4e7da8216425768"
+          ],
           "notes": [
             {
               "at": "2026-10-08T03:06:56.218Z",
               "text": "Owner instruction 8 October: proceed with the next stages. Started with prerequisite storage only: RolePermission (release A eddbc88, task 149, staging accepted: role, capabilities and probe statuses identical to baseline; seed migration applied). No enforcement or access change; requireCapability still decides. Enforcement, CHANGES.md cells and the ManagePrivacy narrowing go to the owner before release. ADR-010 names only P11.1-P11.3 and P13.6 for the start override; recorded for the owner."
+            },
+            {
+              "at": "2026-10-08T11:36:30.228Z",
+              "text": "Role grants release B (def8402): repeat seed for events created during A's rollout; the entity builder reads each event's RolePermission rows (an event without rows denies). Server coverage run 2758 passed, 4 skipped, 96.05 % lines / 87.63 % branches; coverage ratchet passes. Full CI 37768779295, deploy 37769966602, staging task 150: repeat migration applied; role, 26 capabilities and probe statuses identical to the 58906e5 baseline. Still not wired into routes. Owner answered D-19 (ADR-010 amended); enforcement release plan reports/P11/enforcement-release-plan.md awaits approval."
             }
           ]
         },

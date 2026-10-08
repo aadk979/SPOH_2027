@@ -363,3 +363,18 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
 - **Recommendation:** **A.** Otherwise a misspelt name can never be corrected.
 - **Answer:** **A** (owner, 7 October 2026), by the event's Chief and Admin
   (`config.manage`), like its other settings.
+
+### D-19 — The ADR-010 prerequisite override for P11.4 and P11.5
+
+- **Owner:** you
+- **Blocks:** —
+- **Question:** ADR-010 allows the tracker override that starts a step before its
+  phase dependencies close only for P11.1–P11.3 and P13.6. It was used for P11.4
+  (the owner's choice of milestone, 7 October) and for P11.5's role-grant storage
+  (8 October). Amend the ADR, or keep approving each use?
+- **Options:**
+  - **A.** Amend ADR-010 to name P11.4 and P11.5.
+  - **B.** Leave the ADR; record each use as a one-off approval.
+- **Recommendation:** **A.** The record then matches what was done.
+- **Answer:** **A** (owner, 8 October 2026). P11.5's enforcement is planned first and
+  ships only after the owner approves its release plan.
