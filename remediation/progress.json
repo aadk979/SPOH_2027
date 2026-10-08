@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-08T14:47:47.123Z",
+  "updatedAt": "2026-10-08T14:49:21.351Z",
   "current": {
     "phase": "P11",
     "step": "P11.5"
@@ -250,7 +250,7 @@
       "id": "D-21",
       "title": "Questions from the P11.5 shadow release",
       "owner": "you",
-      "blocks": ["P11.5 (release 2", "enforce)"],
+      "blocks": ["P11.5"],
       "status": "answered",
       "answer": "Add Settings.Read (Chief, Admin; floor Chief); keep the LIVE structure freeze; Leads may look up cards and list gift types; enforce once staging shows no shadow evaluation errors (owner, 8 October 2026)",
       "answeredAt": "2026-10-08T14:47:47.122Z"

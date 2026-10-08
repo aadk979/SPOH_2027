@@ -398,7 +398,7 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
 ### D-21 — Questions from the P11.5 shadow release
 
 - **Owner:** you
-- **Blocks:** P11.5 (release 2, enforce)
+- **Blocks:** P11.5
 - **Question:** The shadow release found four places where enforcement would refuse
   what works today or widen a read ([report](reports/P11/enforcement-shadow.md)).
   1. An archived event's configuration is read with `Write` actions, which the
