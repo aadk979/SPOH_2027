@@ -11,6 +11,7 @@ import { prisma, type PrismaTransactionClient } from '../db/client.js';
 import { logger } from '../logger/index.js';
 import { systemClock } from '../time/index.js';
 import { named } from './named.js';
+import { countFinding, countOutcome, startShadowSummary } from './shadowTally.js';
 import { getAuth } from './requireAuth.js';
 
 /**
@@ -112,11 +113,21 @@ async function shadow(req: Request, res: Response, point: EnforcementPoint): Pro
     }),
   );
   res.locals.authorization = outcome;
+  tallyOutcome(outcome);
   res.once('finish', () => {
     const finding = compare(outcome, answerOf(res), point.options);
-    if (finding)
-      sink({ route: routeOf(req), role: req.auth?.role, ...finding.detail }, finding.message);
+    if (!finding) return;
+    countFinding();
+    sink({ route: routeOf(req), role: req.auth?.role, ...finding.detail }, finding.message);
   });
+}
+
+function tallyOutcome(outcome: ShadowOutcome): void {
+  startShadowSummary((tally) =>
+    logger.info({ authorization: tally }, 'authorization shadow summary'),
+  );
+  if (outcome.kind === 'decided') countOutcome(outcome.allowed ? 'allowed' : 'denied');
+  else countOutcome(outcome.kind);
 }
 
 /**
