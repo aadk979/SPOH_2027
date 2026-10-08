@@ -23,6 +23,7 @@ export { LocalCedarAuthorizer } from './localCedarAuthorizer.js';
 export { degradesToLocal, ResilientAuthorizer } from './resilientAuthorizer.js';
 export {
   approvedDefaultGrants,
+  databaseRoleGrants,
   defaultRoleGrantRows,
   type RoleGrantRow,
   type RoleGrants,

@@ -23,6 +23,16 @@ const SEED = readFileSync(
   'utf8',
 );
 
+const REPEAT = readFileSync(
+  fileURLToPath(
+    new URL(
+      '../../prisma/migrations/20261008110000_repeat_seed_role_permissions/migration.sql',
+      import.meta.url,
+    ),
+  ),
+  'utf8',
+);
+
 const SYSTEM: AuditContext = {
   actorId: null,
   actorSub: null,
@@ -43,7 +53,7 @@ async function grantsOf(eventId: string): Promise<string[]> {
   return rows.map(({ role, action }) => `${role} ${action}`).sort();
 }
 
-async function runSeed(): Promise<string[]> {
+async function runSeed(sql = SEED): Promise<string[]> {
   if (new URL(env.DATABASE_URL).pathname !== '/spoh2027_test')
     throw new Error('the migration harness runs only against spoh2027_test');
   const client = new pg.Client({ connectionString: env.DATABASE_URL });
@@ -52,7 +62,7 @@ async function runSeed(): Promise<string[]> {
   await client.connect();
   try {
     await client.query('BEGIN');
-    await client.query(SEED);
+    await client.query(sql);
     await client.query('COMMIT');
     return notices;
   } catch (error) {
@@ -90,6 +100,20 @@ describe('the approved defaults', () => {
 });
 
 describe('the seed migration', () => {
+  it('runs again in release B, byte for byte', () => {
+    const body = (sql: string) => sql.slice(sql.indexOf('DO $$'));
+    expect(body(REPEAT)).toBe(body(SEED));
+  });
+
+  it('catches an event the previous code created without grants', async () => {
+    const { eventId } = await testEvent();
+    const second = await secondEvent();
+    await rawDb.rolePermission.deleteMany({ where: { eventId: second } });
+    expect(await runSeed(REPEAT)).toContain('role grants seed: 156 row(s) for 1 event(s)');
+    expect(await grantsOf(second)).toEqual(DEFAULTS);
+    expect(await grantsOf(eventId)).toEqual(DEFAULTS);
+  });
+
   it('gives every event without grants exactly the defaults', async () => {
     const { eventId } = await testEvent();
     const second = await secondEvent();

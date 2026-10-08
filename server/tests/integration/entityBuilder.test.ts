@@ -203,6 +203,39 @@ describe('a member of the event', () => {
     expect(entity(root, 'Membership', admin.membershipId).attrs.isAttendanceRoot).toBe(true);
   });
 
+  it('reads the role’s grants from the event’s rows', async () => {
+    const question = {
+      action: 'Registration.Create' as const,
+      resource: { type: 'Station' as const, id: stationId },
+    };
+    const granted = await builder().forMembership(volunteer.membershipId, question);
+    expect(entity(granted, 'Role', `${eventId}/VOLUNTEER`).attrs.grants).toContain(
+      'Registration.Create',
+    );
+    await prisma.rolePermission.deleteMany({
+      where: { eventId, role: 'VOLUNTEER', action: 'Registration.Create' },
+    });
+    const revoked = await builder().forMembership(volunteer.membershipId, question);
+    expect(entity(revoked, 'Role', `${eventId}/VOLUNTEER`).attrs.grants).not.toContain(
+      'Registration.Create',
+    );
+    expect(local.evaluate(revoked)).toMatchObject({ allowed: false, errors: [] });
+    expect(decisionKey(revoked)).not.toBe(decisionKey(granted));
+  });
+
+  it('grants nothing in an event without rows, so it denies', async () => {
+    await prisma.rolePermission.deleteMany({ where: { eventId } });
+    const request = await builder().forMembership(volunteer.membershipId, {
+      action: 'Registration.Create',
+      resource: { type: 'Station', id: stationId },
+    });
+    expect(entity(request, 'Role', `${eventId}/VOLUNTEER`).attrs).toMatchObject({
+      grants: [],
+      anyStation: false,
+    });
+    expect(local.evaluate(request).allowed).toBe(false);
+  });
+
   it('reports a deactivated membership as inactive, and the guardrail refuses it', async () => {
     await setMembership(volunteer.personId, { status: 'DEACTIVATED', deactivatedAt: FROZEN_NOW });
     const request = await builder().forMembership(volunteer.membershipId, {

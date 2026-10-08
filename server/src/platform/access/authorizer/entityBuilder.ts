@@ -5,7 +5,7 @@ import { NotFoundError } from '../../errors/index.js';
 import { campusCidrs, onCampus, rootMembershipId } from '../../event/attendanceAuthority.js';
 import { eventDayAnchorOf } from '../../time/index.js';
 import { resourceEntity, type ResourceRef } from './resourceEntities.js';
-import { approvedDefaultGrants, type RoleGrantSource } from './roleGrants.js';
+import { databaseRoleGrants, type RoleGrantSource } from './roleGrants.js';
 import { ref, uid, type AuthorizationRequest } from './types.js';
 
 export type { ResourceRef, ResourceType } from './resourceEntities.js';
@@ -59,7 +59,7 @@ export class EntityBuilder {
     private readonly tx: PrismaTransactionClient,
     private readonly options: EntityBuilderOptions,
   ) {
-    this.grants = options.grants ?? approvedDefaultGrants;
+    this.grants = options.grants ?? databaseRoleGrants;
     this.shiftAt = options.shiftAt ?? options.now;
   }
 
