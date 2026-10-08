@@ -1,7 +1,8 @@
 # P11.5 enforcement — release plan for the owner (8 October 2026)
 
-**Status: proposed, waiting for the owner's approval (D-19).** Nothing here is
-built. The role grants are stored and read (releases A `eddbc88` and B
+**Status: approved by the owner on 8 October 2026 (D-20).** Release 1 (shadow) is
+[built and released](enforcement-shadow.md); release 2 waits for the answers to its
+four questions. When this plan was written nothing was built. The role grants are stored and read (releases A `eddbc88` and B
 `def8402`), and the authorizer exists, but `requireCapability` and
 `requireStationScope` still decide every request.
 
@@ -34,8 +35,10 @@ Admins until P11"). The visitor-data part still waits on D-15.
    Cedar engine and logs a structured `authorization shadow mismatch` line when
    the answers differ. Each mismatch is tagged with the `CHANGES.md` row that
    explains it, or `unexplained`. The old guards still decide. Staging runs it
-   for a smoke pass plus a scripted walk of every role. Acceptance: no
-   `unexplained` mismatches.
+   for a smoke pass and a read-only walk as the smoke identity; the full server
+   suite, run with shadow recording, walks every role. Acceptance: no response
+   changes, no evaluation errors on staging, and every unexplained finding
+   brought to the owner before release 2.
 2. **Enforce.** `authorize(action, resolveResource)` replaces the old guards on
    every route in one reviewed step, as P11.5 specifies. Denials go to the security
    audit with the deciding policy ids. A test over the route inventory fails if a

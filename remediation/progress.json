@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-08T11:36:30.229Z",
+  "updatedAt": "2026-10-08T13:32:45.631Z",
   "current": {
     "phase": "P11",
     "step": "P11.5"
@@ -236,6 +236,15 @@
       "status": "answered",
       "answer": "A: ADR-010's prerequisite override is extended to P11.4 and P11.5; P11.5 enforcement is planned first and ships only after the owner approves its release plan (owner, 8 October 2026)",
       "answeredAt": "2026-10-08T11:36:29.550Z"
+    },
+    {
+      "id": "D-20",
+      "title": "The P11.5 enforcement release plan",
+      "owner": "you",
+      "blocks": ["P11.5"],
+      "status": "answered",
+      "answer": "A: shadow, enforce, delete; every organisation has at least one platform admin (owner, 8 October 2026)",
+      "answeredAt": "2026-10-08T12:36:36.324Z"
     }
   ],
   "phases": [
@@ -2772,7 +2781,9 @@
           "completedAt": null,
           "commits": [
             "eddbc88214a52fb2c3d5f322bdad97d434e0c4a1",
-            "def8402f82d4d1fe245633edb4e7da8216425768"
+            "def8402f82d4d1fe245633edb4e7da8216425768",
+            "98c816aec777731049e252c0325ffdb6b3ba66a5",
+            "0754f8d09c2e7c3c1d2fa294225a1f4a5458aaa4"
           ],
           "notes": [
             {
@@ -2782,6 +2793,10 @@
             {
               "at": "2026-10-08T11:36:30.228Z",
               "text": "Role grants release B (def8402): repeat seed for events created during A's rollout; the entity builder reads each event's RolePermission rows (an event without rows denies). Server coverage run 2758 passed, 4 skipped, 96.05 % lines / 87.63 % branches; coverage ratchet passes. Full CI 37768779295, deploy 37769966602, staging task 150: repeat migration applied; role, 26 capabilities and probe statuses identical to the 58906e5 baseline. Still not wired into routes. Owner answered D-19 (ADR-010 amended); enforcement release plan reports/P11/enforcement-release-plan.md awaits approval."
+            },
+            {
+              "at": "2026-10-08T13:32:45.630Z",
+              "text": "Owner approved the enforcement release plan and confirmed platform admins (D-20). Release 1, shadow: 139 authorize enforcement points ahead of the legacy guards, local Cedar in its own transaction, findings logged with CHANGES.md tags and which layer refused, five-minute summary. Server coverage run 2773 passed, 4 skipped, 96.13 % lines / 87.83 % branches; 70 local findings, none overruling a legacy guard. Staging task 152 (CI 37781500957, deploy 37782998021): baseline identical, 25-route walk, summary 173 allowed, 0 errors, 0 findings. Release 2 waits for four owner questions in reports/P11/enforcement-shadow.md."
             }
           ]
         },

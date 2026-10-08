@@ -378,3 +378,19 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
 - **Recommendation:** **A.** The record then matches what was done.
 - **Answer:** **A** (owner, 8 October 2026). P11.5's enforcement is planned first and
   ships only after the owner approves its release plan.
+
+### D-20 — The P11.5 enforcement release plan
+
+- **Owner:** you
+- **Blocks:** P11.5
+- **Question:** Enforcement changes who may do what (`CHANGES.md`, including C9:
+  security and privacy settings become platform admins' only). Approve the three
+  releases (shadow, enforce, delete), or enforce without a shadow release? Does
+  every organisation have a platform admin to own those settings?
+- **Options:**
+  - **A.** Shadow, enforce, delete.
+  - **B.** Enforce, then delete, without shadow.
+- **Recommendation:** **A.** The first sign of an unexpected denial is then a log
+  line, not a refused volunteer.
+- **Answer:** **A** (owner, 8 October 2026), and every organisation has at least one
+  platform admin.

@@ -1,0 +1,155 @@
+{
+  "milestone": "P11.5 enforcement release 1: shadow",
+  "note": "Normal Cognito session with the staging smoke identity (credentials not recorded). Reads only. Baseline probes compared with 58906e5; a wider read-only walk of 25 routes; the shadow lines of the session read from /spoh/staging/app. 98c816a passed but logged no shadow lines, which cannot tell agreement from not evaluating; 0754f8d adds a five-minute summary, whose counts are the evidence that the policies were asked. The history probe without its required key answers 400. GET /roster/volunteers is not a route (404 on every release).",
+  "baselineSha": "58906e5eb9f97b2d2c85d21b06049f18527b08f1",
+  "first": {
+    "sha": "98c816aec777731049e252c0325ffdb6b3ba66a5",
+    "release": {
+      "sourceCommit": "98c816aec777731049e252c0325ffdb6b3ba66a5",
+      "deployedImageTag": "98c816aec777731049e252c0325ffdb6b3ba66a5",
+      "imageDigest": "sha256:ae95aa240214356ac6ea3b1a8e013335e93e4361b1db585cc1c28d898dbf26e5",
+      "taskRevision": 151
+    },
+    "checks": {
+      "sameRole": true,
+      "sameCapabilities": true,
+      "sameStatuses": true,
+      "baselineSha": "58906e5eb9f97b2d2c85d21b06049f18527b08f1",
+      "settingsScreen": true,
+      "backendFailures": [],
+      "shadowErrors": 0,
+      "unexplained": 0
+    },
+    "passed": true,
+    "ci": {
+      "run": 37777990848,
+      "conclusion": "success"
+    },
+    "deploy": {
+      "run": 37779523630,
+      "conclusion": "success"
+    }
+  },
+  "release": {
+    "sha": "0754f8d09c2e7c3c1d2fa294225a1f4a5458aaa4",
+    "mode": "shadow",
+    "checks": {
+      "sameRole": true,
+      "sameCapabilities": true,
+      "sameStatuses": true,
+      "baselineSha": "58906e5eb9f97b2d2c85d21b06049f18527b08f1",
+      "settingsScreen": true,
+      "backendFailures": [],
+      "summaries": [
+        {
+          "msg": "authorization shadow summary",
+          "allowed": 173,
+          "denied": 0,
+          "unaskable": 1,
+          "failed": 0,
+          "findings": 0
+        }
+      ],
+      "shadowErrors": 0,
+      "unexplained": 0
+    },
+    "failures": [],
+    "access": {
+      "role": "ADMIN",
+      "capabilities": [
+        "announcement.event.send",
+        "announcement.station.send",
+        "audit.read",
+        "card.reissue",
+        "card.stamp",
+        "config.manage",
+        "count.adjust",
+        "dashboard.event.read",
+        "dashboard.station.read",
+        "fallback.declare",
+        "fallback.import",
+        "footfall.create",
+        "gift.redeem",
+        "incident.report",
+        "incident.resolve",
+        "lostFound.log",
+        "lostPerson.raise",
+        "lostPerson.resolve",
+        "own.read",
+        "record.void",
+        "registration.create",
+        "report.generate",
+        "roster.edit",
+        "swap.approve",
+        "user.provision",
+        "user.read"
+      ]
+    },
+    "statuses": {
+      "GET /admin/settings/client": 200,
+      "GET /admin/event-settings": 200,
+      "GET /admin/organisation-settings": 200,
+      "GET /schedules": 200,
+      "GET /roster/me": 200,
+      "GET /roster/volunteers": 404,
+      "GET /dashboard/live": 200,
+      "GET /lifecycle/readiness": 200,
+      "GET /admin/settings": 404,
+      "PATCH /admin/settings": 404
+    },
+    "walk": {
+      "/admin/volunteers": 200,
+      "/admin/stations": 200,
+      "/admin/event-days": 200,
+      "/admin/shift-templates": 200,
+      "/admin/capture-categories": 200,
+      "/admin/attendance-settings": 200,
+      "/admin/visitor-fields": 200,
+      "/admin/event-settings/history?key=countsMode": 400,
+      "/announcements": 200,
+      "/announcements/drafts": 200,
+      "/audit": 200,
+      "/dashboard/data-health": 200,
+      "/fallback/windows": 200,
+      "/footfall/summary": 200,
+      "/gifts": 200,
+      "/gifts/summary": 200,
+      "/incidents": 200,
+      "/lost-found": 200,
+      "/lost-person/active": 200,
+      "/roster/swaps": 200,
+      "/roster/swaps/pending": 200,
+      "/roster/briefing-slots": 200,
+      "/roster/gaps": 200,
+      "/cards/funnel": 200,
+      "/lifecycle": 200
+    },
+    "shadow": [
+      {
+        "msg": "authorization shadow summary",
+        "allowed": 173,
+        "denied": 0,
+        "unaskable": 1,
+        "failed": 0,
+        "findings": 0
+      }
+    ],
+    "passed": true,
+    "signOutStatus": 204,
+    "release": {
+      "sourceCommit": "0754f8d09c2e7c3c1d2fa294225a1f4a5458aaa4",
+      "deployedImageTag": "0754f8d09c2e7c3c1d2fa294225a1f4a5458aaa4",
+      "imageDigest": "sha256:4b444c406737fcf4cfb4a7062244a34d776f5e0989dd0288adb2f46b5c4c6f5d",
+      "taskRevision": 152
+    },
+    "observedAt": "2026-10-08T13:32:13.388Z"
+  },
+  "ci": {
+    "run": 37781500957,
+    "conclusion": "success"
+  },
+  "deploy": {
+    "run": 37782998021,
+    "conclusion": "success"
+  }
+}
