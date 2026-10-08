@@ -16,6 +16,10 @@
       "types": "./dist/policySet.d.ts",
       "default": "./dist/policySet.js"
     },
+    "./default-grants": {
+      "types": "./dist/defaultGrants.d.ts",
+      "default": "./dist/defaultGrants.js"
+    },
     "./schema.cedarschema": "./schema.cedarschema",
     "./policies/*": "./policies/*",
     "./default-grants.json": "./default-grants.json"

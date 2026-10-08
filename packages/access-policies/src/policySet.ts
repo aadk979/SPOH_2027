@@ -1,7 +1,10 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import * as cedar from '@cedar-policy/cedar-wasm/nodejs';
-import { ROLE_IDS, type Role } from './generated/actions.js';
+import type { Role } from './generated/actions.js';
+import { readDefaultGrants, type RoleDefaults } from './defaultGrants.js';
+
+export type { RoleDefaults } from './defaultGrants.js';
 
 /**
  * The deployable policy set: the files CDK deploys to the AVP store (P11.6) and the
@@ -11,12 +14,6 @@ import { ROLE_IDS, type Role } from './generated/actions.js';
 
 /** The schema's namespace; every entity and action type is qualified by it. */
 export const CEDAR_NAMESPACE = 'SPOH';
-
-export interface RoleDefaults {
-  readonly rank: number;
-  readonly anyStation: boolean;
-  readonly grants: readonly string[];
-}
 
 export interface PolicySet {
   readonly schema: string;
@@ -50,17 +47,6 @@ function policiesById(): Record<string, string> {
   return policies;
 }
 
-function defaultGrants(): Record<Role, RoleDefaults> {
-  const raw = JSON.parse(read('default-grants.json')) as Record<string, RoleDefaults>;
-  const grants = {} as Record<Role, RoleDefaults>;
-  for (const role of ROLE_IDS) {
-    const entry = raw[role];
-    if (!entry) throw new Error(`default-grants.json has no ${role}`);
-    grants[role] = { rank: entry.rank, anyStation: entry.anyStation, grants: [...entry.grants] };
-  }
-  return grants;
-}
-
 let loaded: PolicySet | null = null;
 
 /** The policy set, read once per process; the files are immutable in a deployed image. */
@@ -68,7 +54,7 @@ export function readPolicySet(): PolicySet {
   loaded ??= Object.freeze({
     schema: read('schema.cedarschema'),
     policies: Object.freeze(policiesById()),
-    defaultGrants: Object.freeze(defaultGrants()),
+    defaultGrants: readDefaultGrants(),
   });
   return loaded;
 }

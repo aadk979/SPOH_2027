@@ -1,11 +1,18 @@
 import { ERROR_CODES } from '@spoh/shared';
+import { defaultRoleGrantRows } from '../../../platform/access/authorizer/roleGrants.js';
 import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { ConflictError, NotFoundError } from '../../../platform/errors/index.js';
 import { invalidateEventCache } from '../../../platform/event/events.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
-import { findEvent, insertEvent, type Event } from '../data/repo.js';
+import {
+  findEvent,
+  insertEvent,
+  insertRoleGrants,
+  readRoleGrants,
+  type Event,
+} from '../data/repo.js';
 import {
   copyDaysAndShifts,
   copyGiftTypes,
@@ -23,8 +30,8 @@ import type { ClonePlan } from './planClone.js';
  * Create the planned clone in one transaction (ADR-001 §6): a DRAFT event
  * with the source's structure — categories, station types, tags, stations,
  * shift templates, days moved by the offset with their shifts, gift types
- * with stock reset — and, only when asked, the same people INVITED. No
- * operational row comes along. One `event.clone` audit row records it.
+ * with stock reset, the source's role grants — and, only when asked, the same
+ * people INVITED. No operational row comes along. One `event.clone` audit row records it.
  */
 export async function applyClone(
   plan: ClonePlan,
@@ -89,6 +96,9 @@ async function copyStructure(
   const days = movedDays(structure.days, offsetDays);
   const shifts = movedShifts(structure.shifts, { offsetDays, timezone: event.timezone });
   await copyDaysAndShifts(tx, target, { days, shifts });
+  // Cloning is copying rows (ADR-005 §2); a source without any starts the clone from the defaults.
+  const grants = await readRoleGrants(tx, source);
+  await insertRoleGrants(tx, target, grants.length > 0 ? grants : defaultRoleGrantRows());
   if (plan.request.inviteSamePeople) {
     const memberships = await readMemberships(tx, source);
     await copyMemberships(tx, target, { memberships, invitedAt: now });

@@ -21,7 +21,13 @@ export {
 } from './entityBuilder.js';
 export { LocalCedarAuthorizer } from './localCedarAuthorizer.js';
 export { degradesToLocal, ResilientAuthorizer } from './resilientAuthorizer.js';
-export { approvedDefaultGrants, type RoleGrants, type RoleGrantSource } from './roleGrants.js';
+export {
+  approvedDefaultGrants,
+  defaultRoleGrantRows,
+  type RoleGrantRow,
+  type RoleGrants,
+  type RoleGrantSource,
+} from './roleGrants.js';
 export {
   AuthorizerUnavailableError,
   type AuthorizationDecision,

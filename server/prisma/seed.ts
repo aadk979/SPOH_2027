@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { readDefaultGrants } from '@spoh/access-policies/default-grants';
 import { wallTimeToInstant, zonedDate } from '@spoh/shared';
 import { PrismaClient } from '../src/generated/prisma/client.js';
 import type { CommitteeRole } from '../src/generated/prisma/enums.js';
@@ -389,6 +390,7 @@ async function seedSecondEvent(first: Scope, today: string): Promise<void> {
     update: {},
   });
   const scope = { eventId: event.id };
+  await seedRoleGrants(scope);
   const type = await prisma.stationType.upsert({
     where: { eventId_code: { eventId: event.id, code: 'SIGNUP_BOOTH' } },
     create: { ...scope, code: 'SIGNUP_BOOTH', label: 'Sign-up booth', registersVisitors: true },
@@ -457,10 +459,21 @@ async function seedMultiInFirstEvent(first: Scope, personId: string): Promise<vo
   }
 }
 
+/** The approved default role grants (ADR-005 §2), as every new event starts with them. */
+async function seedRoleGrants(scope: Scope): Promise<void> {
+  await prisma.rolePermission.createMany({
+    data: Object.entries(readDefaultGrants()).flatMap(([role, { grants }]) =>
+      grants.map((action) => ({ eventId: scope.eventId, role: role as CommitteeRole, action })),
+    ),
+    skipDuplicates: true,
+  });
+}
+
 // ── Run ────────────────────────────────────────────────────────────────────
 
 async function seedFixture(): Promise<void> {
   const { today, ...event } = await seedEvent();
+  await seedRoleGrants(event);
   const stations = await seedStations(event);
   await seedGiftTypes(event);
   const days = await seedDays(event, today);

@@ -1,5 +1,5 @@
 import type { Event, Prisma } from '../../../generated/prisma/client.js';
-import type { EventStatus } from '../../../generated/prisma/enums.js';
+import type { CommitteeRole, EventStatus } from '../../../generated/prisma/enums.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 
@@ -55,6 +55,33 @@ export async function insertTaxonomy(
       ...template,
       sortOrder: index + 1,
     })),
+  });
+}
+
+export interface RoleGrantRow {
+  role: CommitteeRole;
+  action: string;
+}
+
+/** An event's role grants (ADR-005 §2): the rows its Cedar `Role` entities are read from. */
+export async function insertRoleGrants(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  grants: readonly RoleGrantRow[],
+): Promise<void> {
+  await tx.rolePermission.createMany({
+    data: grants.map(({ role, action }) => ({ eventId: scope.eventId, role, action })),
+  });
+}
+
+export async function readRoleGrants(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+): Promise<RoleGrantRow[]> {
+  return tx.rolePermission.findMany({
+    where: { eventId: scope.eventId },
+    select: { role: true, action: true },
+    orderBy: [{ role: 'asc' }, { action: 'asc' }],
   });
 }
 

@@ -284,6 +284,7 @@ model Event {
   memberships                EventMembership[]
   settings                   Setting[]
   visitorFields              VisitorField[]
+  rolePermissions            RolePermission[]
   visitorRecords             VisitorRecord[]
   settingChanges             SettingChange[]
   captureCategories          CaptureCategory[]
@@ -1716,6 +1717,27 @@ model IdempotencyRecord {
 
   @@index([createdAt])
   @@index([eventId])
+}
+
+/// What a role may do in an event (ADR-005 §2): one row per Editable action the
+/// event grants the role. The rows become the Cedar `Role` entity's `grants`; they
+/// are an input to a static permit, so no grant can lift a guardrail. A new event
+/// starts from the approved `default-grants.json`; a clone copies its source's.
+/// @eventOwned
+model RolePermission {
+  id        String        @id @default(cuid())
+  /// The event this row belongs to (ADR-001 §2).
+  eventId   String
+  role      CommitteeRole
+  /// An Editable action id of `@spoh/access-policies`, such as `Registration.Create`.
+  /// @class operational
+  action    String
+  createdAt DateTime      @default(now()) @db.Timestamptz(3)
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Restrict)
+
+  @@unique([eventId, role, action])
+  @@unique([eventId, id])
 }
 
 /// A visitor field an event declares in allowlist mode (ADR-002 §4): what may

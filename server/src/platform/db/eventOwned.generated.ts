@@ -31,6 +31,7 @@ export const EVENT_OWNED_MODELS = [
   'MissionCard',
   'Registration',
   'ReportSnapshot',
+  'RolePermission',
   'Shift',
   'ShiftAssignment',
   'ShiftSwapRequest',

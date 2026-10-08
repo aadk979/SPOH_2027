@@ -1,5 +1,5 @@
 import type { Role } from '@spoh/access-policies';
-import { readPolicySet } from '@spoh/access-policies/policy-set';
+import { readDefaultGrants } from '@spoh/access-policies/default-grants';
 import type { PrismaTransactionClient } from '../../db/client.js';
 
 export interface RoleGrants {
@@ -22,5 +22,17 @@ export interface RoleGrantSource {
 
 /** `default-grants.json`: the approved initial grants (G1), unchanged by any event. */
 export const approvedDefaultGrants: RoleGrantSource = {
-  grantsFor: () => Promise.resolve(readPolicySet().defaultGrants),
+  grantsFor: () => Promise.resolve(readDefaultGrants()),
 };
+
+export interface RoleGrantRow {
+  readonly role: Role;
+  readonly action: string;
+}
+
+/** The approved defaults as `RolePermission` rows: what every new event starts with. */
+export function defaultRoleGrantRows(): RoleGrantRow[] {
+  return Object.entries(readDefaultGrants()).flatMap(([role, { grants }]) =>
+    grants.map((action) => ({ role: role as Role, action })),
+  );
+}
