@@ -1,0 +1,81 @@
+{
+  "milestone": "P11.5 prerequisite: role grants storage, release A",
+  "note": "Normal Cognito session with the staging smoke identity (credentials not recorded). Reads only; the legacy PATCH is refused 404. The seed migration fails unless every event it seeds ends with the 156 default grants, so its success is the evidence for the rows. GET /roster/volunteers is not a route (404 on both releases).",
+  "baselineSha": "58906e5eb9f97b2d2c85d21b06049f18527b08f1",
+  "release": {
+    "sha": "eddbc88214a52fb2c3d5f322bdad97d434e0c4a1",
+    "observedAt": "2026-10-08T03:06:12.164Z",
+    "release": {
+      "sourceCommit": "eddbc88214a52fb2c3d5f322bdad97d434e0c4a1",
+      "deployedImageTag": "eddbc88214a52fb2c3d5f322bdad97d434e0c4a1",
+      "imageDigest": "sha256:84cd450fcbd3dbd3369b11c8f9dfc46c7ce490edc018d8f80a876314ae39d627",
+      "taskRevision": 149
+    },
+    "access": {
+      "role": "ADMIN",
+      "capabilities": [
+        "announcement.event.send",
+        "announcement.station.send",
+        "audit.read",
+        "card.reissue",
+        "card.stamp",
+        "config.manage",
+        "count.adjust",
+        "dashboard.event.read",
+        "dashboard.station.read",
+        "fallback.declare",
+        "fallback.import",
+        "footfall.create",
+        "gift.redeem",
+        "incident.report",
+        "incident.resolve",
+        "lostFound.log",
+        "lostPerson.raise",
+        "lostPerson.resolve",
+        "own.read",
+        "record.void",
+        "registration.create",
+        "report.generate",
+        "roster.edit",
+        "swap.approve",
+        "user.provision",
+        "user.read"
+      ]
+    },
+    "statuses": {
+      "GET /admin/settings/client": 200,
+      "GET /admin/event-settings": 200,
+      "GET /admin/organisation-settings": 200,
+      "GET /schedules": 200,
+      "GET /roster/me": 200,
+      "GET /roster/volunteers": 404,
+      "GET /dashboard/live": 200,
+      "GET /lifecycle/readiness": 200,
+      "GET /admin/settings": 404,
+      "PATCH /admin/settings": 404
+    },
+    "checks": {
+      "migrations": {
+        "20261008090000_role_permission": 1,
+        "20261008090100_seed_role_permissions": 1
+      },
+      "sameRole": true,
+      "sameCapabilities": true,
+      "sameStatuses": true,
+      "baselineSha": "58906e5eb9f97b2d2c85d21b06049f18527b08f1",
+      "settingsScreen": true,
+      "backendFailures": []
+    },
+    "signOutStatus": 204,
+    "passed": true,
+    "failures": []
+  },
+  "ci": {
+    "run": 37719372122,
+    "conclusion": "success"
+  },
+  "deploy": {
+    "run": 37720156495,
+    "conclusion": "success"
+  }
+}

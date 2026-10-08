@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-07T12:29:15.165Z",
+  "updatedAt": "2026-10-08T03:06:56.219Z",
   "current": {
     "phase": "P11",
-    "step": "P11.4"
+    "step": "P11.5"
   },
   "gates": [
     {
@@ -2758,11 +2758,16 @@
         {
           "id": "P11.5",
           "title": "Policy enforcement points",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-08T03:06:56.210Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-08T03:06:56.218Z",
+              "text": "Owner instruction 8 October: proceed with the next stages. Started with prerequisite storage only: RolePermission (release A eddbc88, task 149, staging accepted: role, capabilities and probe statuses identical to baseline; seed migration applied). No enforcement or access change; requireCapability still decides. Enforcement, CHANGES.md cells and the ManagePrivacy narrowing go to the owner before release. ADR-010 names only P11.1-P11.3 and P13.6 for the start override; recorded for the owner."
+            }
+          ]
         },
         {
           "id": "P11.6",
