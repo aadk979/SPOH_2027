@@ -11,10 +11,11 @@ import { getAuth } from './requireAuth.js';
 export function requireCapability(capability: Capability): RequestHandler {
   return named(
     `requireCapability(${capability})`,
-    (req: Request, _res: Response, next: NextFunction): void => {
+    (req: Request, res: Response, next: NextFunction): void => {
       const auth = getAuth(req);
 
       if (!roleHasCapability(auth.role, capability)) {
+        res.locals.legacyGuardRefused = true;
         next(
           new ForbiddenError('You do not have permission to perform this action', {
             required: capability,
@@ -75,7 +76,7 @@ export const stationIdFromParams =
 export function requireStationScope(
   extract: StationIdExtractor = stationIdFromBody,
 ): RequestHandler {
-  return named('requireStationScope', (req: Request, _res: Response, next: NextFunction): void => {
+  return named('requireStationScope', (req: Request, res: Response, next: NextFunction): void => {
     void (async () => {
       try {
         const auth = getAuth(req);
@@ -104,6 +105,7 @@ export function requireStationScope(
         }
 
         if (!(await isOnShiftAt(scope, who))) {
+          res.locals.legacyGuardRefused = true;
           next(new StationScopeError());
           return;
         }

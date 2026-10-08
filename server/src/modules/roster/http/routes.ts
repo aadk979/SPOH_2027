@@ -1,3 +1,5 @@
+import { authorize, authorizeAll } from '../../../platform/http/authorize.js';
+import { theEvent, self, fromParam, invite } from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import { z } from 'zod';
 import { Id, ProvisionVolunteerRequest, RosterImportRequest } from '@spoh/shared';
@@ -17,11 +19,18 @@ const StationRosterQuery = z.object({ eventDayId: Id.optional() }).strict();
 rosterRouter.use(requireAuth);
 
 /** My own shifts. Same payload as `/me`, reachable from the shift screen. */
-rosterRouter.get('/me', defaultRateLimit, requireCapability('own.read'), myShiftsHandler);
+rosterRouter.get(
+  '/me',
+  defaultRateLimit,
+  authorize('Self.Read', self),
+  requireCapability('own.read'),
+  myShiftsHandler,
+);
 
 rosterRouter.get(
   '/station/:stationId',
   defaultRateLimit,
+  authorize('Roster.ReadStation', fromParam('Station', 'stationId'), { changes: ['C3'] }),
   requireCapability('dashboard.station.read'),
   validate({ params: StationIdParams, query: StationRosterQuery }),
   stationRosterHandler,
@@ -35,6 +44,7 @@ rosterRouter.get(
 rosterRouter.post(
   '/volunteers',
   sensitiveRateLimit,
+  authorizeAll('People.Invite', invite, { changes: ['C5'] }),
   requireCapability('user.provision'),
   validate({ body: ProvisionVolunteerRequest }),
   provisionVolunteerHandler,
@@ -49,6 +59,7 @@ rosterRouter.post(
 rosterRouter.post(
   '/import',
   sensitiveRateLimit,
+  authorize('Roster.Edit', theEvent, { changes: ['C5'] }),
   requireCapability('roster.edit'),
   validate({ body: RosterImportRequest }),
   importRosterHandler,

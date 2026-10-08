@@ -1,3 +1,11 @@
+import { authorize, authorizeAll } from '../../../platform/http/authorize.js';
+import {
+  theEvent,
+  self,
+  stationFromBody,
+  cardFromShortCode,
+  anyStation,
+} from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import {
   CardLookupParams,
@@ -42,6 +50,7 @@ missionCardRouter.use(requireAuth);
 missionCardRouter.post(
   '/batch',
   sensitiveRateLimit,
+  authorize('Card.GenerateBatch', theEvent),
   requireCapability('user.provision'),
   validate({ body: GenerateCardBatchRequest }),
   idempotent('POST /cards/batch'),
@@ -51,6 +60,7 @@ missionCardRouter.post(
 missionCardRouter.get(
   '/funnel',
   defaultRateLimit,
+  authorizeAll('Dashboard.ReadStation', anyStation('Dashboard.ReadStation'), { any: true }),
   requireCapability('dashboard.station.read'),
   validate({ query: CardFunnelQuery }),
   funnelHandler,
@@ -60,6 +70,7 @@ missionCardRouter.get(
 missionCardRouter.get(
   '/qr/:payload',
   captureRateLimit,
+  authorize('Self.Read', self),
   requireCapability('card.stamp'),
   validate({ params: CardQrParams }),
   getCardByQrHandler,
@@ -69,6 +80,7 @@ missionCardRouter.get(
 missionCardRouter.get(
   '/:shortCode',
   captureRateLimit,
+  authorize('Self.Read', self),
   requireCapability('card.stamp'),
   validate({ params: CardLookupParams }),
   getCardHandler,
@@ -77,6 +89,10 @@ missionCardRouter.get(
 missionCardRouter.post(
   '/:shortCode/issue',
   captureRateLimit,
+  authorizeAll('Registration.Create', anyStation('Registration.Create'), {
+    changes: ['C11'],
+    any: true,
+  }),
   requireCapability('registration.create'),
   validate({ params: CardLookupParams, body: IssueCardRequest }),
   idempotent('POST /cards/:shortCode/issue'),
@@ -86,6 +102,7 @@ missionCardRouter.post(
 missionCardRouter.post(
   '/:shortCode/stamps',
   captureRateLimit,
+  authorize('Card.Stamp', stationFromBody),
   requireCapability('card.stamp'),
   validate({ params: CardLookupParams, body: StampCardRequest }),
   requireStationScope(),
@@ -96,6 +113,7 @@ missionCardRouter.post(
 missionCardRouter.post(
   '/:shortCode/void',
   defaultRateLimit,
+  authorize('Card.Void', cardFromShortCode),
   requireCapability('card.reissue'),
   validate({ params: CardLookupParams, body: VoidCardRequest }),
   voidCardHandler,
@@ -104,6 +122,7 @@ missionCardRouter.post(
 missionCardRouter.post(
   '/:shortCode/reissue',
   defaultRateLimit,
+  authorize('Card.Reissue', cardFromShortCode),
   requireCapability('card.reissue'),
   validate({ params: CardLookupParams, body: ReissueCardRequest }),
   reissueCardHandler,

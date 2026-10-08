@@ -1,3 +1,5 @@
+import { authorize } from '../../../platform/http/authorize.js';
+import { self } from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { defaultRateLimit } from '../../../platform/http/rateLimit.js';
@@ -12,4 +14,4 @@ export const stationRouter: Router = Router();
 
 stationRouter.use(requireAuth);
 
-stationRouter.get('/', defaultRateLimit, listStationsHandler);
+stationRouter.get('/', defaultRateLimit, authorize('Self.Read', self), listStationsHandler);

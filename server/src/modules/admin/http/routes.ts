@@ -1,3 +1,12 @@
+import { authorize, authorizeAll } from '../../../platform/http/authorize.js';
+import {
+  theEvent,
+  self,
+  fromParam,
+  memberFromPersonParam,
+  settingFromBody,
+  memberEdit,
+} from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import { z } from 'zod';
 import {
@@ -100,6 +109,7 @@ adminRouter.use(requireAuth);
 adminRouter.get(
   '/volunteers',
   defaultRateLimit,
+  authorize('People.Read', theEvent),
   requireCapability('user.read'),
   validate({ query: ListVolunteersQuery }),
   listVolunteersHandler,
@@ -108,6 +118,7 @@ adminRouter.get(
 adminRouter.get(
   '/volunteers/:id',
   defaultRateLimit,
+  authorize('People.Read', theEvent),
   requireCapability('user.read'),
   validate({ params: IdParams }),
   getVolunteerHandler,
@@ -122,6 +133,7 @@ adminRouter.get(
 adminRouter.patch(
   '/volunteers/:id',
   adminRateLimit,
+  authorizeAll('People.Update', memberEdit(memberFromPersonParam()), { changes: ['C5'] }),
   requireCapability('user.provision'),
   validate({ params: IdParams, body: UpdateVolunteerRequest }),
   updateVolunteerHandler,
@@ -130,6 +142,7 @@ adminRouter.patch(
 adminRouter.post(
   '/volunteers/:id/deactivate',
   adminRateLimit,
+  authorize('People.Deactivate', memberFromPersonParam()),
   requireCapability('user.provision'),
   validate({ params: IdParams, body: DeactivateVolunteerRequest }),
   deactivateVolunteerHandler,
@@ -138,6 +151,7 @@ adminRouter.post(
 adminRouter.post(
   '/volunteers/:id/reactivate',
   adminRateLimit,
+  authorize('People.Deactivate', memberFromPersonParam()),
   requireCapability('user.provision'),
   validate({ params: IdParams }),
   reactivateVolunteerHandler,
@@ -150,6 +164,7 @@ adminRouter.post(
 adminRouter.post(
   '/assignments',
   defaultRateLimit,
+  authorize('Roster.Edit', theEvent),
   requireCapability('roster.edit'),
   validate({ body: CreateAssignmentRequest }),
   createAssignmentHandler,
@@ -158,6 +173,7 @@ adminRouter.post(
 adminRouter.delete(
   '/assignments/:id',
   defaultRateLimit,
+  authorize('Roster.Edit', fromParam('ShiftAssignment')),
   requireCapability('roster.edit'),
   validate({ params: IdParams }),
   deleteAssignmentHandler,
@@ -170,6 +186,7 @@ adminRouter.delete(
 adminRouter.get(
   '/stations',
   defaultRateLimit,
+  authorize('Structure.Read', theEvent, { changes: ['C7'] }),
   requireCapability('config.manage'),
   listAllStationsHandler,
 );
@@ -177,6 +194,7 @@ adminRouter.get(
 adminRouter.post(
   '/stations',
   adminRateLimit,
+  authorize('Structure.Change', theEvent),
   requireCapability('config.manage'),
   validate({ body: CreateStationRequest }),
   createStationHandler,
@@ -185,6 +203,7 @@ adminRouter.post(
 adminRouter.patch(
   '/stations/:id',
   adminRateLimit,
+  authorize('Structure.Edit', theEvent),
   requireCapability('config.manage'),
   validate({ params: IdParams, body: UpdateStationRequest }),
   updateStationHandler,
@@ -197,6 +216,7 @@ adminRouter.patch(
 adminRouter.patch(
   '/event-name',
   adminRateLimit,
+  authorize('Structure.Edit', theEvent),
   requireCapability('config.manage'),
   validate({ body: RenameEventRequest }),
   renameEventHandler,
@@ -209,6 +229,7 @@ adminRouter.patch(
 adminRouter.get(
   '/event-days',
   defaultRateLimit,
+  authorize('Structure.Read', theEvent, { changes: ['C7'] }),
   // Wider than config.manage: the roster import and the briefing screens both
   // need to know which days exist, and a day is not a secret.
   requireCapability('user.read'),
@@ -218,6 +239,7 @@ adminRouter.get(
 adminRouter.post(
   '/event-days',
   adminRateLimit,
+  authorize('Structure.Change', theEvent),
   requireCapability('config.manage'),
   validate({ body: CreateEventDayRequest }),
   createEventDayHandler,
@@ -226,6 +248,7 @@ adminRouter.post(
 adminRouter.patch(
   '/event-days/:id',
   adminRateLimit,
+  authorize('Structure.Edit', theEvent),
   requireCapability('config.manage'),
   validate({ params: IdParams, body: UpdateEventDayRequest }),
   updateEventDayHandler,
@@ -238,6 +261,7 @@ adminRouter.patch(
 adminRouter.get(
   '/shift-templates',
   defaultRateLimit,
+  authorize('Structure.Read', theEvent, { changes: ['C7'] }),
   requireCapability('user.read'),
   listShiftTemplatesHandler,
 );
@@ -245,6 +269,7 @@ adminRouter.get(
 adminRouter.patch(
   '/shift-templates/:id',
   adminRateLimit,
+  authorize('Structure.Edit', theEvent),
   requireCapability('config.manage'),
   validate({ params: IdParams, body: UpdateShiftTemplateRequest }),
   updateShiftTemplateHandler,
@@ -257,6 +282,7 @@ adminRouter.patch(
 adminRouter.post(
   '/gift-types',
   adminRateLimit,
+  authorize('Structure.Change', theEvent),
   requireCapability('config.manage'),
   validate({ body: CreateGiftTypeRequest }),
   createGiftTypeHandler,
@@ -265,6 +291,7 @@ adminRouter.post(
 adminRouter.patch(
   '/gift-types/:id',
   adminRateLimit,
+  authorize('Structure.Edit', theEvent),
   requireCapability('config.manage'),
   validate({ params: IdParams, body: UpdateGiftTypeRequest }),
   updateGiftTypeHandler,
@@ -277,12 +304,14 @@ registerCategoryScheduleRoutes(adminRouter);
 adminRouter.get(
   '/attendance-settings',
   defaultRateLimit,
+  authorize('Structure.Edit', theEvent),
   requireCapability('config.manage'),
   getAttendanceConfigHandler,
 );
 adminRouter.patch(
   '/attendance-settings',
   adminRateLimit,
+  authorizeAll('Settings', settingFromBody, { changes: ['C9'] }),
   requireCapability('config.manage'),
   validate({ body: ChangeAttendanceConfigRequest }),
   changeAttendanceConfigHandler,
@@ -290,6 +319,7 @@ adminRouter.patch(
 adminRouter.post(
   '/attendance-settings/test-network',
   adminRateLimit,
+  authorize('Structure.Edit', theEvent),
   requireCapability('config.manage'),
   validate({ body: TestAttendanceNetworkRequest }),
   testAttendanceNetworkHandler,
@@ -303,6 +333,7 @@ adminRouter.post(
 adminRouter.get(
   '/visitor-fields',
   defaultRateLimit,
+  authorize('Self.Read', self),
   requireCapability('own.read'),
   listVisitorFieldsHandler,
 );
@@ -310,6 +341,7 @@ adminRouter.get(
 adminRouter.post(
   '/visitor-fields',
   adminRateLimit,
+  authorize('Structure.Change', theEvent),
   requireCapability('config.manage'),
   validate({ body: CreateVisitorFieldRequest }),
   createVisitorFieldHandler,
@@ -318,6 +350,7 @@ adminRouter.post(
 adminRouter.patch(
   '/visitor-fields/:id',
   adminRateLimit,
+  authorize('Structure.Edit', theEvent),
   requireCapability('config.manage'),
   validate({ params: IdParams, body: UpdateVisitorFieldRequest }),
   updateVisitorFieldHandler,

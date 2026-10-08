@@ -1,3 +1,5 @@
+import { authorize } from '../../../platform/http/authorize.js';
+import { self } from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import { CreateSessionRequest } from '@spoh/shared';
 import { z } from 'zod';
@@ -29,11 +31,18 @@ authRouter.get('/login', signInRateLimit, loginHandler);
 authRouter.get('/callback', signInRateLimit, callbackHandler);
 authRouter.post('/refresh', defaultRateLimit, refreshHandler);
 authRouter.delete('/session', defaultRateLimit, signOutHandler);
-authRouter.get('/sessions', requireAuth, defaultRateLimit, listSessionsHandler);
+authRouter.get(
+  '/sessions',
+  requireAuth,
+  defaultRateLimit,
+  authorize('Self.Read', self),
+  listSessionsHandler,
+);
 authRouter.delete(
   '/sessions/:id',
   requireAuth,
   defaultRateLimit,
+  authorize('Self.Read', self),
   validate({ params: SessionIdParams }),
   revokeSessionHandler,
 );

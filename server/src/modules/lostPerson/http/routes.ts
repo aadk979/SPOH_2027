@@ -1,3 +1,5 @@
+import { authorize } from '../../../platform/http/authorize.js';
+import { theEvent, self, fromParam } from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import { z } from 'zod';
 import { Id, RaiseLostPersonRequest, ResolveLostPersonRequest } from '@spoh/shared';
@@ -26,6 +28,7 @@ lostPersonRouter.use(requireAuth);
 lostPersonRouter.post(
   '/',
   defaultRateLimit,
+  authorize('LostPerson.Raise', theEvent),
   requireCapability('lostPerson.raise'),
   validate({ body: RaiseLostPersonRequest }),
   idempotent(RAISE_ENDPOINT, { redacted: raiseReplay }),
@@ -39,6 +42,7 @@ lostPersonRouter.post(
 lostPersonRouter.get(
   '/active',
   captureRateLimit,
+  authorize('Self.Read', self),
   requireCapability('own.read'),
   activeAlertsHandler,
 );
@@ -46,6 +50,7 @@ lostPersonRouter.get(
 lostPersonRouter.post(
   '/:id/ack',
   captureRateLimit,
+  authorize('Alert.Ack', fromParam('LostPersonAlert')),
   requireCapability('own.read'),
   validate({ params: IdParams }),
   acknowledgeHandler,
@@ -54,6 +59,7 @@ lostPersonRouter.post(
 lostPersonRouter.post(
   '/:id/resolve',
   defaultRateLimit,
+  authorize('LostPerson.Resolve', fromParam('LostPersonAlert')),
   requireCapability('lostPerson.resolve'),
   validate({ params: IdParams, body: ResolveLostPersonRequest }),
   resolveHandler,

@@ -1,3 +1,5 @@
+import { authorize, authorizeAll } from '../../../platform/http/authorize.js';
+import { theEvent, lifecycleTransition } from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import { TransitionEventRequest } from '@spoh/shared';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
@@ -16,12 +18,14 @@ eventLifecycleRouter.use(requireAuth);
 eventLifecycleRouter.get(
   '/',
   defaultRateLimit,
+  authorize('Event.MarkReady', theEvent),
   requireCapability('config.manage'),
   readLifecycleHandler,
 );
 eventLifecycleRouter.get(
   '/readiness',
   defaultRateLimit,
+  authorize('Event.MarkReady', theEvent),
   requireCapability('config.manage'),
   readLifecycleReadinessHandler,
 );
@@ -34,6 +38,7 @@ eventLifecycleRouter.post(
     next();
   },
   sensitiveRateLimit,
+  authorizeAll('Event.Transition', lifecycleTransition, { changes: ['C13'] }),
   requireCapability('config.manage'),
   validate({ body: TransitionEventRequest }),
   idempotent('POST /lifecycle'),

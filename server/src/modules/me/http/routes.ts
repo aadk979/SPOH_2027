@@ -1,3 +1,5 @@
+import { authorize } from '../../../platform/http/authorize.js';
+import { self, fromBody } from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import { CheckInRequest } from '@spoh/shared';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
@@ -11,11 +13,18 @@ export const meRouter: Router = Router();
 
 meRouter.use(requireAuth);
 
-meRouter.get('/', defaultRateLimit, requireCapability('own.read'), getMeHandler);
+meRouter.get(
+  '/',
+  defaultRateLimit,
+  authorize('Self.Read', self),
+  requireCapability('own.read'),
+  getMeHandler,
+);
 
 meRouter.post(
   '/check-in',
   defaultRateLimit,
+  authorize('Shift.CheckIn', fromBody('ShiftAssignment', 'assignmentId'), { changes: ['C12'] }),
   requireCapability('own.read'),
   validate({ body: CheckInRequest }),
   checkInHandler,
@@ -24,6 +33,8 @@ meRouter.post(
 meRouter.post(
   '/check-out',
   defaultRateLimit,
+  // Leaving a shift needs no attendance or running shift; the use case checks it is yours.
+  authorize('Self.Read', self, { changes: ['C12'] }),
   requireCapability('own.read'),
   validate({ body: CheckInRequest }),
   checkOutHandler,

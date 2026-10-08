@@ -1,3 +1,5 @@
+import { authorize, authorizeAll } from '../../../platform/http/authorize.js';
+import { theEvent, anyStation } from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import { z } from 'zod';
 import {
@@ -35,6 +37,7 @@ fallbackRouter.use(requireAuth);
 fallbackRouter.post(
   '/windows',
   defaultRateLimit,
+  authorize('Fallback.Declare', theEvent),
   requireCapability('fallback.declare'),
   validate({ body: DeclareFallbackRequest }),
   declareWindowHandler,
@@ -43,6 +46,7 @@ fallbackRouter.post(
 fallbackRouter.post(
   '/windows/:id/close',
   defaultRateLimit,
+  authorize('Fallback.Declare', theEvent),
   requireCapability('fallback.declare'),
   validate({ params: IdParams, body: CloseFallbackRequest }),
   closeWindowHandler,
@@ -52,6 +56,7 @@ fallbackRouter.post(
 fallbackRouter.get(
   '/windows',
   defaultRateLimit,
+  authorizeAll('Dashboard.ReadStation', anyStation('Dashboard.ReadStation'), { any: true }),
   requireCapability('dashboard.station.read'),
   validate({ query: TimeRangeQuery }),
   listWindowsHandler,
@@ -65,6 +70,7 @@ fallbackRouter.get(
 fallbackRouter.post(
   '/imports/registrations',
   sensitiveRateLimit,
+  authorize('Fallback.Import', theEvent),
   requireCapability('fallback.import'),
   validate({ body: ImportRegistrationsRequest }),
   importRegistrationsHandler,
@@ -73,6 +79,7 @@ fallbackRouter.post(
 fallbackRouter.post(
   '/imports/footfall',
   sensitiveRateLimit,
+  authorize('Fallback.Import', theEvent),
   requireCapability('fallback.import'),
   validate({ body: ImportFootfallRequest }),
   importFootfallHandler,

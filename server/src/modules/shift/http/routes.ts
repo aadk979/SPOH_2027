@@ -1,3 +1,11 @@
+import { authorize, authorizeAll } from '../../../platform/http/authorize.js';
+import {
+  theEvent,
+  self,
+  fromParam,
+  fromBody,
+  anyPendingSwap,
+} from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import { z } from 'zod';
 import {
@@ -37,18 +45,26 @@ shiftRouter.use(requireAuth);
 shiftRouter.post(
   '/swaps',
   defaultRateLimit,
+  authorize('Swap.Request', fromBody('ShiftAssignment', 'assignmentId'), { changes: ['C12'] }),
   requireCapability('own.read'),
   validate({ body: CreateSwapRequest }),
   requestSwapHandler,
 );
 
 /** My own swaps, in either direction. */
-shiftRouter.get('/swaps', defaultRateLimit, requireCapability('own.read'), mySwapsHandler);
+shiftRouter.get(
+  '/swaps',
+  defaultRateLimit,
+  authorize('Self.Read', self),
+  requireCapability('own.read'),
+  mySwapsHandler,
+);
 
 /** Everything awaiting a decision — the IC's queue. */
 shiftRouter.get(
   '/swaps/pending',
   defaultRateLimit,
+  authorizeAll('Swap.Decide', anyPendingSwap, { any: true }),
   requireCapability('swap.approve'),
   pendingSwapsHandler,
 );
@@ -56,6 +72,7 @@ shiftRouter.get(
 shiftRouter.post(
   '/swaps/:id/decide',
   defaultRateLimit,
+  authorize('Swap.Decide', fromParam('SwapRequest')),
   requireCapability('swap.approve'),
   validate({ params: IdParams, body: DecideSwapRequest }),
   decideSwapHandler,
@@ -68,6 +85,7 @@ shiftRouter.post(
 shiftRouter.get(
   '/briefing-slots',
   defaultRateLimit,
+  authorize('Self.Read', self),
   requireCapability('own.read'),
   validate({ query: ListBriefingSlotsQuery }),
   briefingSlotsHandler,
@@ -76,6 +94,7 @@ shiftRouter.get(
 shiftRouter.post(
   '/briefing-slots/:id/complete',
   defaultRateLimit,
+  authorize('Briefing.Complete', fromParam('BriefingSlot'), { changes: ['C1'] }),
   requireCapability('own.read'),
   validate({ params: IdParams, body: CompleteBriefingSlotRequest }),
   completeSlotHandler,
@@ -85,6 +104,7 @@ shiftRouter.post(
 shiftRouter.get(
   '/gaps',
   defaultRateLimit,
+  authorize('Dashboard.ReadEvent', theEvent),
   requireCapability('dashboard.event.read'),
   staffingGapsHandler,
 );

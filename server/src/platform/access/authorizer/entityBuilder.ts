@@ -33,6 +33,11 @@ export interface EntityBuilderOptions {
   readonly now: Date;
   /** When the shift on duty is judged; a late-synced capture's recorded time. */
   readonly shiftAt?: Date;
+  /**
+   * A queued capture's recorded time. In CLOSED the shift on duty is judged at it, as
+   * `runningShifts` does; the capture transaction still checks the grace period.
+   */
+  readonly clientRecordedAt?: Date;
   readonly grants?: RoleGrantSource;
 }
 
@@ -52,7 +57,6 @@ interface EventFacts {
 export class EntityBuilder {
   private readonly entities = new Map<string, EntityJson>();
   private readonly grants: RoleGrantSource;
-  private readonly shiftAt: Date;
   private facts: Promise<EventFacts> | null = null;
 
   constructor(
@@ -60,7 +64,13 @@ export class EntityBuilder {
     private readonly options: EntityBuilderOptions,
   ) {
     this.grants = options.grants ?? databaseRoleGrants;
-    this.shiftAt = options.shiftAt ?? options.now;
+  }
+
+  private async shiftAt(): Promise<Date> {
+    const { shiftAt, clientRecordedAt, now } = this.options;
+    if (shiftAt) return shiftAt;
+    if (clientRecordedAt && (await this.event()).status === 'CLOSED') return clientRecordedAt;
+    return now;
   }
 
   /** An event action by a member of this event. */
@@ -225,7 +235,7 @@ export class EntityBuilder {
         shift: { select: { startsAt: true, endsAt: true } },
       },
     });
-    const at = this.shiftAt.getTime();
+    const at = (await this.shiftAt()).getTime();
     const onShift = assignments.filter(
       ({ shift }) => shift.startsAt.getTime() <= at && at < shift.endsAt.getTime(),
     );
@@ -249,7 +259,9 @@ export class EntityBuilder {
   private async verifiedToday(personId: string): Promise<boolean> {
     const event = await this.event();
     const { eventId } = this.options;
-    const date = eventDayAnchorOf(this.options.now, event);
+    const date = eventDay(this.options.now, event);
+    // An event whose timezone does not resolve has no today: nobody is verified.
+    if (!date) return false;
     const day = await this.tx.eventDay.findUnique({
       where: { eventId_date: { eventId, date } },
       select: { id: true },
@@ -265,6 +277,15 @@ export class EntityBuilder {
       select: { id: true },
     });
     return presence !== null;
+  }
+}
+
+function eventDay(instant: Date, event: EventFacts): Date | null {
+  try {
+    return eventDayAnchorOf(instant, event);
+  } catch (error) {
+    if (error instanceof RangeError) return null;
+    throw error;
   }
 }
 

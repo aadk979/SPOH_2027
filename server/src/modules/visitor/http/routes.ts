@@ -1,3 +1,5 @@
+import { authorize } from '../../../platform/http/authorize.js';
+import { self } from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import { VisitorRecordsQuery } from '@spoh/shared';
 import { requireCapability } from '../../../platform/http/access.js';
@@ -17,6 +19,7 @@ visitorRouter.use(requireAuth);
 visitorRouter.get(
   '/',
   sensitiveRateLimit,
+  authorize('Self.Read', self),
   requireCapability('own.read'),
   validate({ query: VisitorRecordsQuery }),
   readVisitorRecordsHandler,

@@ -1,3 +1,5 @@
+import { authorize } from '../../../platform/http/authorize.js';
+import { self } from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import { z } from 'zod';
 import { PushSubscriptionRequest } from '@spoh/shared';
@@ -30,6 +32,7 @@ notificationRouter.use(requireAuth);
 notificationRouter.get(
   '/config',
   defaultRateLimit,
+  authorize('Self.Read', self),
   requireCapability('own.read'),
   pushConfigHandler,
 );
@@ -44,6 +47,7 @@ notificationRouter.get(
 notificationRouter.post(
   '/subscriptions',
   captureRateLimit,
+  authorize('Self.Read', self),
   requireCapability('own.read'),
   validate({ body: PushSubscriptionRequest }),
   subscribeHandler,
@@ -52,6 +56,7 @@ notificationRouter.post(
 notificationRouter.delete(
   '/subscriptions',
   defaultRateLimit,
+  authorize('Self.Read', self),
   requireCapability('own.read'),
   validate({ body: UnsubscribeRequest }),
   unsubscribeHandler,

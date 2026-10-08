@@ -1,3 +1,10 @@
+import { authorize, authorizeAll } from '../../../platform/http/authorize.js';
+import {
+  self,
+  fromParam,
+  announcementTarget,
+  anyStation,
+} from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import { z } from 'zod';
 import {
@@ -48,6 +55,10 @@ announcementRouter.use('/drafts', (_req, res, next) => {
 announcementRouter.post(
   '/drafts',
   defaultRateLimit,
+  authorizeAll('Announcement.SendStation', anyStation('Announcement.SendStation'), {
+    changes: ['C4'],
+    any: true,
+  }),
   requireCapability('announcement.station.send'),
   validate({ body: CreateAnnouncementDraftRequest }),
   idempotent('announcement.draft.create', { redacted: draftReplay }),
@@ -56,6 +67,10 @@ announcementRouter.post(
 announcementRouter.get(
   '/drafts',
   defaultRateLimit,
+  authorizeAll('Announcement.SendStation', anyStation('Announcement.SendStation'), {
+    changes: ['C4'],
+    any: true,
+  }),
   requireCapability('announcement.station.send'),
   validate({ query: PaginationQuery.strict() }),
   listDraftsHandler,
@@ -63,6 +78,10 @@ announcementRouter.get(
 announcementRouter.get(
   '/drafts/:id',
   defaultRateLimit,
+  authorizeAll('Announcement.SendStation', anyStation('Announcement.SendStation'), {
+    changes: ['C4'],
+    any: true,
+  }),
   requireCapability('announcement.station.send'),
   validate({ params: IdParams }),
   readDraftHandler,
@@ -70,6 +89,10 @@ announcementRouter.get(
 announcementRouter.put(
   '/drafts/:id',
   defaultRateLimit,
+  authorizeAll('Announcement.SendStation', anyStation('Announcement.SendStation'), {
+    changes: ['C4'],
+    any: true,
+  }),
   requireCapability('announcement.station.send'),
   validate({ params: IdParams, body: UpdateAnnouncementDraftRequest }),
   updateDraftHandler,
@@ -77,6 +100,10 @@ announcementRouter.put(
 announcementRouter.post(
   '/drafts/:id/schedules',
   defaultRateLimit,
+  authorizeAll('Announcement.SendStation', anyStation('Announcement.SendStation'), {
+    changes: ['C4'],
+    any: true,
+  }),
   requireCapability('announcement.station.send'),
   validate({ params: IdParams, body: ScheduleAnnouncementDraftRequest }),
   idempotent('announcement.schedule.create', { redacted: publicationScheduleReplay }),
@@ -85,6 +112,10 @@ announcementRouter.post(
 announcementRouter.get(
   '/drafts/:id/schedules/:scheduleId',
   defaultRateLimit,
+  authorizeAll('Announcement.SendStation', anyStation('Announcement.SendStation'), {
+    changes: ['C4'],
+    any: true,
+  }),
   requireCapability('announcement.station.send'),
   validate({ params: ScheduleParams }),
   readPublicationScheduleHandler,
@@ -92,6 +123,10 @@ announcementRouter.get(
 announcementRouter.get(
   '/drafts/:id/schedules',
   defaultRateLimit,
+  authorizeAll('Announcement.SendStation', anyStation('Announcement.SendStation'), {
+    changes: ['C4'],
+    any: true,
+  }),
   requireCapability('announcement.station.send'),
   validate({ params: IdParams, query: PaginationQuery.strict() }),
   listPublicationSchedulesHandler,
@@ -99,6 +134,10 @@ announcementRouter.get(
 announcementRouter.put(
   '/drafts/:id/schedules/:scheduleId',
   defaultRateLimit,
+  authorizeAll('Announcement.SendStation', anyStation('Announcement.SendStation'), {
+    changes: ['C4'],
+    any: true,
+  }),
   requireCapability('announcement.station.send'),
   validate({ params: ScheduleParams, body: UpdateAnnouncementPublicationScheduleRequest }),
   updatePublicationScheduleHandler,
@@ -106,6 +145,10 @@ announcementRouter.put(
 announcementRouter.post(
   '/drafts/:id/schedules/:scheduleId/cancel',
   defaultRateLimit,
+  authorizeAll('Announcement.SendStation', anyStation('Announcement.SendStation'), {
+    changes: ['C4'],
+    any: true,
+  }),
   requireCapability('announcement.station.send'),
   validate({ params: ScheduleParams, body: CancelAnnouncementPublicationScheduleRequest }),
   cancelPublicationScheduleHandler,
@@ -119,6 +162,7 @@ announcementRouter.post(
 announcementRouter.post(
   '/',
   defaultRateLimit,
+  authorizeAll('Announcement.Send', announcementTarget, { changes: ['C4'] }),
   requireCapability('announcement.station.send'),
   validate({ body: CreateAnnouncementRequest }),
   sendAnnouncementHandler,
@@ -128,6 +172,7 @@ announcementRouter.post(
 announcementRouter.get(
   '/',
   defaultRateLimit,
+  authorize('Self.Read', self),
   requireCapability('own.read'),
   validate({ query: ListAnnouncementsQuery }),
   listInboxHandler,
@@ -136,6 +181,7 @@ announcementRouter.get(
 announcementRouter.post(
   '/:id/ack',
   defaultRateLimit,
+  authorize('Announcement.Ack', fromParam('Announcement'), { changes: ['C2'] }),
   requireCapability('own.read'),
   validate({ params: IdParams }),
   acknowledgeHandler,

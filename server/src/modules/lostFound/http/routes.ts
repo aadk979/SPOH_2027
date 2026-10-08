@@ -1,3 +1,5 @@
+import { authorize } from '../../../platform/http/authorize.js';
+import { theEvent, self, fromParam } from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import { z } from 'zod';
 import {
@@ -23,6 +25,7 @@ lostFoundRouter.use(requireAuth);
 lostFoundRouter.post(
   '/',
   defaultRateLimit,
+  authorize('LostFound.Log', theEvent),
   requireCapability('lostFound.log'),
   validate({ body: CreateLostFoundRequest }),
   logItemHandler,
@@ -35,6 +38,7 @@ lostFoundRouter.post(
 lostFoundRouter.get(
   '/',
   defaultRateLimit,
+  authorize('Self.Read', self),
   requireCapability('own.read'),
   validate({ query: ListLostFoundQuery }),
   listItemsHandler,
@@ -43,6 +47,7 @@ lostFoundRouter.get(
 lostFoundRouter.post(
   '/:id/claim',
   defaultRateLimit,
+  authorize('LostFound.Claim', fromParam('LostFoundItem')),
   requireCapability('lostFound.log'),
   validate({ params: IdParams, body: ClaimLostFoundRequest }),
   claimItemHandler,
@@ -52,6 +57,7 @@ lostFoundRouter.post(
 lostFoundRouter.post(
   '/close-out',
   defaultRateLimit,
+  authorize('LostFound.CloseOut', theEvent, { changes: ['C6'] }),
   requireCapability('report.generate'),
   closeOutHandler,
 );

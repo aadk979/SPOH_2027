@@ -1,3 +1,5 @@
+import { authorize } from '../../../platform/http/authorize.js';
+import { theEvent, fromParam } from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import { z } from 'zod';
 import {
@@ -30,6 +32,7 @@ incidentRouter.use(requireAuth);
 incidentRouter.post(
   '/',
   defaultRateLimit,
+  authorize('Incident.Report', theEvent),
   requireCapability('incident.report'),
   validate({ body: CreateIncidentRequest }),
   idempotent('POST /incidents'),
@@ -39,6 +42,7 @@ incidentRouter.post(
 incidentRouter.get(
   '/',
   defaultRateLimit,
+  authorize('Incident.Read', theEvent),
   requireCapability('dashboard.station.read'),
   validate({ query: ListIncidentsQuery }),
   listIncidentsHandler,
@@ -47,6 +51,7 @@ incidentRouter.get(
 incidentRouter.post(
   '/:id/follow-ups',
   defaultRateLimit,
+  authorize('Incident.Update', fromParam('Incident')),
   requireCapability('incident.resolve'),
   validate({ params: IdParams, body: CreateIncidentFollowUpRequest }),
   appendFollowUpHandler,
@@ -55,6 +60,7 @@ incidentRouter.post(
 incidentRouter.post(
   '/:id/status',
   defaultRateLimit,
+  authorize('Incident.Update', fromParam('Incident')),
   requireCapability('incident.resolve'),
   validate({ params: IdParams, body: UpdateIncidentStatusRequest }),
   changeIncidentStatusHandler,

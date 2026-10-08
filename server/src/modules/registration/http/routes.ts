@@ -1,3 +1,10 @@
+import { authorize, authorizeAll } from '../../../platform/http/authorize.js';
+import {
+  self,
+  fromParam,
+  stationFromBody,
+  anyStation,
+} from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import { z } from 'zod';
 import {
@@ -36,6 +43,7 @@ registrationRouter.use(requireAuth);
 registrationRouter.post(
   '/',
   captureRateLimit,
+  authorize('Registration.Create', stationFromBody),
   requireCapability('registration.create'),
   validate({ body: CreateRegistrationRequest }),
   requireStationScope(),
@@ -47,6 +55,7 @@ registrationRouter.post(
 registrationRouter.post(
   '/group',
   captureRateLimit,
+  authorize('Registration.Create', stationFromBody),
   requireCapability('registration.create'),
   validate({ body: CreateGroupRegistrationRequest }),
   requireStationScope(),
@@ -55,11 +64,17 @@ registrationRouter.post(
 );
 
 /** The booth's buttons: the event's categories. Any member may read them, like the stations. */
-registrationRouter.get('/categories', defaultRateLimit, listCategoriesHandler);
+registrationRouter.get(
+  '/categories',
+  defaultRateLimit,
+  authorize('Self.Read', self),
+  listCategoriesHandler,
+);
 
 registrationRouter.post(
   '/:id/void',
   defaultRateLimit,
+  authorize('Record.Void', fromParam('Registration')),
   requireCapability('record.void'),
   validate({ params: IdParams, body: VoidRegistrationRequest }),
   voidRegistrationHandler,
@@ -68,6 +83,7 @@ registrationRouter.post(
 registrationRouter.get(
   '/summary',
   defaultRateLimit,
+  authorizeAll('Dashboard.ReadStation', anyStation('Dashboard.ReadStation'), { any: true }),
   requireCapability('dashboard.station.read'),
   validate({ query: RegistrationSummaryQuery }),
   summariseRegistrationsHandler,

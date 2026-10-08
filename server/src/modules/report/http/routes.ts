@@ -1,3 +1,5 @@
+import { authorize } from '../../../platform/http/authorize.js';
+import { theEvent } from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import {
   ReportExportQuery,
@@ -26,6 +28,7 @@ reportRouter.use(requireAuth);
 reportRouter.get(
   '/snapshots',
   sensitiveRateLimit,
+  authorize('Report.Generate', theEvent),
   requireCapability('report.generate'),
   validate({ query: ReportSnapshotsQuery }),
   listSnapshotsHandler,
@@ -33,6 +36,7 @@ reportRouter.get(
 reportRouter.get(
   '/snapshots/:id',
   sensitiveRateLimit,
+  authorize('Report.Generate', theEvent),
   requireCapability('report.generate'),
   validate({ params: ReportSnapshotParams, query: ReportSnapshotReadQuery }),
   readSnapshotHandler,
@@ -40,6 +44,7 @@ reportRouter.get(
 reportRouter.get(
   '/snapshots/:id/export',
   sensitiveRateLimit,
+  authorize('Report.Export', theEvent),
   requireCapability('report.generate'),
   validate({ params: ReportSnapshotParams, query: ReportSnapshotExportQuery }),
   exportSnapshotHandler,
@@ -53,6 +58,7 @@ reportRouter.get(
 reportRouter.get(
   '/summary',
   sensitiveRateLimit,
+  authorize('Report.Generate', theEvent),
   requireCapability('report.generate'),
   validate({ query: ReportQuery }),
   reportSummaryHandler,
@@ -65,6 +71,7 @@ reportRouter.get(
 reportRouter.get(
   '/export',
   sensitiveRateLimit,
+  authorize('Report.Export', theEvent),
   requireCapability('report.generate'),
   validate({ query: ReportExportQuery }),
   exportReportHandler,

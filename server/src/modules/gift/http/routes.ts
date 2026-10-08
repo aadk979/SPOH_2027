@@ -1,3 +1,10 @@
+import { authorize, authorizeAll } from '../../../platform/http/authorize.js';
+import {
+  self,
+  fromParam,
+  stationFromBody,
+  anyStation,
+} from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import { z } from 'zod';
 import { AdjustGiftStockRequest, GiftSummaryQuery, Id, RedeemGiftRequest } from '@spoh/shared';
@@ -24,11 +31,18 @@ giftRouter.use(requireAuth);
  * Stock levels. Readable by anyone who can redeem, because the redemption
  * screen has to show an out-of-stock state rather than failing at the tap.
  */
-giftRouter.get('/', defaultRateLimit, requireCapability('gift.redeem'), listGiftsHandler);
+giftRouter.get(
+  '/',
+  defaultRateLimit,
+  authorize('Self.Read', self),
+  requireCapability('gift.redeem'),
+  listGiftsHandler,
+);
 
 giftRouter.post(
   '/redemptions',
   captureRateLimit,
+  authorize('Gift.Redeem', stationFromBody),
   requireCapability('gift.redeem'),
   validate({ body: RedeemGiftRequest }),
   requireStationScope(),
@@ -39,6 +53,7 @@ giftRouter.post(
 giftRouter.post(
   '/:id/adjust',
   defaultRateLimit,
+  authorize('Count.Adjust', fromParam('GiftType')),
   requireCapability('count.adjust'),
   validate({ params: IdParams, body: AdjustGiftStockRequest }),
   adjustStockHandler,
@@ -47,6 +62,7 @@ giftRouter.post(
 giftRouter.get(
   '/summary',
   defaultRateLimit,
+  authorizeAll('Dashboard.ReadStation', anyStation('Dashboard.ReadStation'), { any: true }),
   requireCapability('dashboard.station.read'),
   validate({ query: GiftSummaryQuery }),
   summariseGiftsHandler,

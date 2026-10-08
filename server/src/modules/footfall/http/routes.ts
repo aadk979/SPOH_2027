@@ -1,3 +1,9 @@
+import { authorize, authorizeAll } from '../../../platform/http/authorize.js';
+import {
+  fromParam,
+  stationFromBody,
+  anyStation,
+} from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import { z } from 'zod';
 import {
@@ -31,6 +37,7 @@ footfallRouter.use(requireAuth);
 footfallRouter.post(
   '/ticks',
   captureRateLimit,
+  authorize('Footfall.Create', stationFromBody),
   requireCapability('footfall.create'),
   validate({ body: CreateFootfallTickRequest }),
   requireStationScope(),
@@ -46,6 +53,7 @@ footfallRouter.post(
 footfallRouter.post(
   '/bulk',
   defaultRateLimit,
+  authorize('Count.Adjust', stationFromBody),
   requireCapability('count.adjust'),
   validate({ body: CreateFootfallBulkRequest }),
   requireStationScope(),
@@ -56,6 +64,7 @@ footfallRouter.post(
 footfallRouter.post(
   '/ticks/:id/void',
   defaultRateLimit,
+  authorize('Record.Void', fromParam('FootfallTick')),
   requireCapability('record.void'),
   validate({ params: IdParams, body: VoidFootfallTickRequest }),
   voidTickHandler,
@@ -64,6 +73,7 @@ footfallRouter.post(
 footfallRouter.get(
   '/summary',
   defaultRateLimit,
+  authorizeAll('Dashboard.ReadStation', anyStation('Dashboard.ReadStation'), { any: true }),
   requireCapability('dashboard.station.read'),
   validate({ query: FootfallSummaryQuery }),
   summariseFootfallHandler,
@@ -72,6 +82,7 @@ footfallRouter.get(
 footfallRouter.get(
   '/live',
   defaultRateLimit,
+  authorizeAll('Dashboard.ReadStation', anyStation('Dashboard.ReadStation'), { any: true }),
   requireCapability('dashboard.station.read'),
   validate({ query: RehearsalInclusionQuery }),
   liveFootfallHandler,

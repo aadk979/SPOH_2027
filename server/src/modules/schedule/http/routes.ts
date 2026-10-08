@@ -1,3 +1,5 @@
+import { authorize } from '../../../platform/http/authorize.js';
+import { theEvent } from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import { ScheduleTimelineQuery } from '@spoh/shared';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
@@ -12,6 +14,7 @@ scheduleRouter.use(requireAuth);
 scheduleRouter.get(
   '/',
   defaultRateLimit,
+  authorize('Schedule.Manage', theEvent),
   requireCapability('config.manage'),
   validate({ query: ScheduleTimelineQuery }),
   async (req, res) => {

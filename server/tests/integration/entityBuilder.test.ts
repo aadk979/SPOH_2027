@@ -236,6 +236,39 @@ describe('a member of the event', () => {
     expect(local.evaluate(request).allowed).toBe(false);
   });
 
+  it('judges a closed event’s queued capture at the time it was recorded', async () => {
+    const question = {
+      action: 'Registration.Create' as const,
+      resource: { type: 'Station' as const, id: stationId },
+    };
+    const later = new Date(FROZEN_NOW.getTime() + 12 * HOUR);
+    const onShift = (request: AuthorizationRequest) =>
+      entity(request, 'Membership', volunteer.membershipId).attrs.onShiftStations;
+    const queued = { eventId, now: later, clientRecordedAt: FROZEN_NOW };
+    expect(
+      onShift(
+        await new EntityBuilder(prisma, queued).forMembership(volunteer.membershipId, question),
+      ),
+    ).toEqual([]);
+    await prisma.event.update({ where: { id: eventId }, data: { status: 'CLOSED' } });
+    expect(
+      onShift(
+        await new EntityBuilder(prisma, queued).forMembership(volunteer.membershipId, question),
+      ),
+    ).toEqual([station(stationId)]);
+  });
+
+  it('verifies nobody today in an event whose timezone does not resolve', async () => {
+    await prisma.event.update({ where: { id: eventId }, data: { timezone: 'Invalid/Zone' } });
+    const request = await builder().forMembership(chief.membershipId, {
+      action: 'Attendance.IssueCode',
+      resource: { type: 'EventDay', id: dayId },
+    });
+    expect(entity(request, 'Membership', chief.membershipId).attrs.attendanceVerifiedToday).toBe(
+      false,
+    );
+  });
+
   it('reports a deactivated membership as inactive, and the guardrail refuses it', async () => {
     await setMembership(volunteer.personId, { status: 'DEACTIVATED', deactivatedAt: FROZEN_NOW });
     const request = await builder().forMembership(volunteer.membershipId, {

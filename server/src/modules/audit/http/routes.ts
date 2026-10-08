@@ -1,3 +1,5 @@
+import { authorize } from '../../../platform/http/authorize.js';
+import { theEvent } from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { defaultRateLimit } from '../../../platform/http/rateLimit.js';
@@ -21,6 +23,7 @@ auditRouter.use(requireAuth);
 auditRouter.get(
   '/',
   defaultRateLimit,
+  authorize('Audit.Read', theEvent),
   requireCapability('audit.read'),
   validate({ query: AuditQuery }),
   listAuditLogHandler,

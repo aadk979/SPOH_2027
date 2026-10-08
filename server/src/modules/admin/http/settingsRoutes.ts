@@ -1,3 +1,10 @@
+import { authorize, authorizeAll } from '../../../platform/http/authorize.js';
+import {
+  theEvent,
+  self,
+  settingFromBody,
+  organisationAdmin,
+} from '../../../platform/http/authorizeResources.js';
 import type { Router } from 'express';
 import { z } from 'zod';
 import {
@@ -57,6 +64,7 @@ function registerCaptureScheduleManagementRoutes(router: Router): void {
   router.get(
     '/settings/catalogue/schedules',
     defaultRateLimit,
+    authorize('Schedule.Manage', theEvent),
     requireCapability('config.manage'),
     validate({ query: CaptureScheduleListQuery }),
     listCaptureSchedulesHandler,
@@ -64,6 +72,7 @@ function registerCaptureScheduleManagementRoutes(router: Router): void {
   router.patch(
     '/settings/catalogue/schedules/:id',
     adminRateLimit,
+    authorize('Schedule.Manage', theEvent),
     requireCapability('config.manage'),
     validate({
       params: z.object({ id: Id }).strict(),
@@ -76,6 +85,7 @@ function registerCaptureScheduleManagementRoutes(router: Router): void {
   router.post(
     '/settings/catalogue/schedules/:id/cancel',
     adminRateLimit,
+    authorize('Schedule.Manage', theEvent),
     requireCapability('config.manage'),
     validate({
       params: z.object({ id: Id }).strict(),
@@ -91,6 +101,7 @@ function registerCaptureScheduleRoutes(router: Router): void {
   router.post(
     '/settings/catalogue/schedules',
     adminRateLimit,
+    authorize('Schedule.Manage', theEvent),
     requireCapability('config.manage'),
     validate({ body: CreateCaptureScheduleRequest }),
     idempotent('setting.capture.schedule', { redacted: captureScheduleReplay }),
@@ -99,6 +110,7 @@ function registerCaptureScheduleRoutes(router: Router): void {
   router.get(
     '/settings/catalogue/schedules/:id',
     defaultRateLimit,
+    authorize('Schedule.Manage', theEvent),
     requireCapability('config.manage'),
     validate({ params: z.object({ id: Id }).strict(), query: z.object({}).strict() }),
     getCaptureScheduleHandler,
@@ -118,6 +130,7 @@ function registerOperationalSettingsRoutes(router: Router): void {
   router.get(
     '/settings/client',
     defaultRateLimit,
+    authorize('Self.Read', self),
     requireCapability('own.read'),
     getClientSettingsHandler,
   );
@@ -125,6 +138,7 @@ function registerOperationalSettingsRoutes(router: Router): void {
   router.get(
     '/settings/catalogue',
     defaultRateLimit,
+    authorize('Structure.Edit', theEvent),
     requireCapability('config.manage'),
     validate({ query: ScopedSettingsReadQuery }),
     getScopedSettingsHandler,
@@ -133,6 +147,7 @@ function registerOperationalSettingsRoutes(router: Router): void {
   router.get(
     '/settings/catalogue/history',
     defaultRateLimit,
+    authorize('Structure.Edit', theEvent),
     requireCapability('config.manage'),
     validate({ query: ScopedSettingsHistoryQuery }),
     getScopedHistoryHandler,
@@ -141,6 +156,7 @@ function registerOperationalSettingsRoutes(router: Router): void {
   router.post(
     '/settings/catalogue',
     adminRateLimit,
+    authorizeAll('Settings', settingFromBody, { changes: ['C9'] }),
     requireCapability('config.manage'),
     validate({ body: ScopedSettingsMutationRequest }),
     idempotent('setting.operational.change', { redacted: scopedSettingMutationReplay }),
@@ -149,6 +165,7 @@ function registerOperationalSettingsRoutes(router: Router): void {
   router.post(
     '/settings/catalogue/revert',
     adminRateLimit,
+    authorizeAll('Settings', settingFromBody, { changes: ['C9'] }),
     requireCapability('config.manage'),
     validate({ body: ScopedSettingsRevertRequest }),
     idempotent('setting.operational.revert', { redacted: scopedSettingRevertReplay }),
@@ -165,6 +182,7 @@ function registerProductSettingsRoutes(router: Router): void {
   router.get(
     '/event-settings',
     defaultRateLimit,
+    authorize('Self.Read', self),
     requireCapability('own.read'),
     getEventSettingsHandler,
   );
@@ -172,6 +190,7 @@ function registerProductSettingsRoutes(router: Router): void {
   router.patch(
     '/event-settings',
     adminRateLimit,
+    authorizeAll('Settings', settingFromBody, { changes: ['C9'] }),
     requireCapability('config.manage'),
     validate({ body: ChangeEventSettingRequest }),
     changeEventSettingHandler,
@@ -180,6 +199,7 @@ function registerProductSettingsRoutes(router: Router): void {
   router.get(
     '/event-settings/history',
     defaultRateLimit,
+    authorize('Structure.Edit', theEvent),
     requireCapability('config.manage'),
     validate({ query: EventSettingHistoryQuery }),
     getEventSettingHistoryHandler,
@@ -192,6 +212,7 @@ function registerProductSettingsRoutes(router: Router): void {
   router.post(
     '/event-settings/revert',
     adminRateLimit,
+    authorizeAll('Settings', settingFromBody, { changes: ['C9'] }),
     requireCapability('config.manage'),
     validate({ body: RevertEventSettingRequest }),
     idempotent('setting.product.revert', { redacted: eventSettingRevertReplay }),
@@ -208,12 +229,14 @@ function registerOrganisationSettingsRoutes(router: Router): void {
   router.get(
     '/organisation-settings',
     defaultRateLimit,
+    authorize('Self.Read', self),
     requireCapability('own.read'),
     getOrganisationSettingsHandler,
   );
   router.patch(
     '/organisation-settings',
     adminRateLimit,
+    authorizeAll('Platform.ManageOrganisation', organisationAdmin),
     requireCapability('own.read'),
     validate({ body: ChangeOrganisationSettingRequest }),
     changeOrganisationSettingHandler,

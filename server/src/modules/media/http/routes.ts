@@ -1,3 +1,5 @@
+import { authorize } from '../../../platform/http/authorize.js';
+import { theEvent, self } from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import { CreateUploadRequest, MediaUrlQuery } from '@spoh/shared';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
@@ -24,7 +26,13 @@ mediaRouter.use(['/url', '/uploads'], (_req, res, next) => {
 mediaRouter.use(requireAuth);
 
 /** Lets the client hide the camera button rather than offer one that 503s. */
-mediaRouter.get('/config', defaultRateLimit, requireCapability('own.read'), mediaConfigHandler);
+mediaRouter.get(
+  '/config',
+  defaultRateLimit,
+  authorize('Self.Read', self),
+  requireCapability('own.read'),
+  mediaConfigHandler,
+);
 
 /**
  * The sensitive limit: each call signs a credential, and a client looping here
@@ -33,6 +41,7 @@ mediaRouter.get('/config', defaultRateLimit, requireCapability('own.read'), medi
 mediaRouter.post(
   '/uploads',
   sensitiveRateLimit,
+  authorize('LostFound.Log', theEvent),
   requireCapability('lostFound.log'),
   validate({ body: CreateUploadRequest }),
   idempotent('media.upload', { redacted: mediaUploadReplay }),
@@ -42,6 +51,7 @@ mediaRouter.post(
 mediaRouter.get(
   '/url',
   defaultRateLimit,
+  authorize('Self.Read', self),
   requireCapability('own.read'),
   validate({ query: MediaUrlQuery }),
   readUrlHandler,
