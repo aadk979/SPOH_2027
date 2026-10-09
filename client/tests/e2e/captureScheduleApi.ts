@@ -1,4 +1,4 @@
-import { expect, request, type APIRequestContext } from '@playwright/test';
+import { expect, request, type APIRequestContext, type APIResponse } from '@playwright/test';
 import { SessionResponse } from '@spoh/shared';
 
 /** A separate cookie family avoids racing the UI's short-lived fixture session. */
@@ -25,11 +25,28 @@ export async function localCaptureScheduleApi(origin: string) {
     }
     return { Authorization: `Bearer ${session.accessToken}` };
   }
+  /**
+   * The fixture API shares the admin's rate limit with the screen under test. A 429 waits out
+   * the window it names and retries, so a busy minute cannot leave a fixture half cleaned up
+   * (capture paused for every test after it).
+   */
+  async function patiently(send: () => Promise<APIResponse>): Promise<APIResponse> {
+    for (let attempt = 0; ; attempt++) {
+      const response = await send();
+      if (response.status() !== 429 || attempt === 2) return response;
+      const seconds = Number(response.headers()['retry-after'] ?? 30);
+      await new Promise((resolve) => setTimeout(resolve, Math.min(seconds, 65) * 1000 + 250));
+    }
+  }
   return {
     get: async (path: string, options?: Parameters<APIRequestContext['get']>[1]) =>
-      context.get(path, { ...options, headers: { ...options?.headers, ...(await headers()) } }),
+      patiently(async () =>
+        context.get(path, { ...options, headers: { ...options?.headers, ...(await headers()) } }),
+      ),
     post: async (path: string, options?: Parameters<APIRequestContext['post']>[1]) =>
-      context.post(path, { ...options, headers: { ...options?.headers, ...(await headers()) } }),
+      patiently(async () =>
+        context.post(path, { ...options, headers: { ...options?.headers, ...(await headers()) } }),
+      ),
     dispose: async () => {
       try {
         expect((await context.delete('/api/v1/auth/session')).status()).toBe(204);

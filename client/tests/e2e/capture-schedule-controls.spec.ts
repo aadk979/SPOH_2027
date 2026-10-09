@@ -322,7 +322,8 @@ for (const [name, scope, width, height] of [
   ['laptop', 'station', 1440, 900],
 ] as const) {
   test(`UI producer and real worker pause captures (${name}, ${scope})`, async ({ page }) => {
-    test.setTimeout(150_000);
+    // Cleanup may wait out the shared admin rate-limit window (captureScheduleApi).
+    test.setTimeout(240_000);
     await page.setViewportSize({ width, height });
     const input = await fixture(page, scope);
     try {
