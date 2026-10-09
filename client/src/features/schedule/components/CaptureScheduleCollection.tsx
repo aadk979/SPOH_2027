@@ -42,7 +42,7 @@ export function CaptureScheduleCollection(input: CollectionInput) {
       {more ? (
         <Button
           variant="quiet"
-          disabled={query.isFetching}
+          disabled={query.isFetchingNextPage}
           onClick={() => void query.fetchNextPage()}
         >
           Load more capture schedules

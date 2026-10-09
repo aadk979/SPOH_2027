@@ -95,9 +95,21 @@ async function allPages(page: Page) {
   await expect(reload).toBeEnabled();
   const more = page.getByRole('button', { name: 'Load more capture schedules' });
   for (let count = 0; count < 50 && (await more.count()); count++) {
+    // The page this click asks for says whether another follows, so the next step waits for
+    // the button to settle on that answer rather than racing the render that removes it.
+    const requested = page.waitForRequest(
+      (request) =>
+        request.method() === 'GET' &&
+        request.url().includes('/schedules?') &&
+        new URL(request.url()).searchParams.has('cursor'),
+    );
     await more.click();
-    await expect(reload).toBeEnabled();
+    const response = await (await requested).response();
+    const { meta } = (await response!.json()) as { meta: { nextCursor: string | null } };
+    if (meta.nextCursor) await expect(more).toBeEnabled();
+    else await expect(more).toHaveCount(0);
   }
+  await expect(reload).toBeEnabled();
   await expect(more).toHaveCount(0);
 }
 async function review(page: Page, timezone: string, input: { reason: string; runAt?: Date }) {

@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tansta
 import type { CreateAnnouncementRequest } from '@spoh/shared';
 import { useCurrentSession } from '@/features/session';
 import { useEventId } from '@/shared/lib/eventContext';
+import { pagedPoll } from '@/shared/lib/runtimeSettings';
 import {
   listAnnouncements,
   acknowledgeAnnouncement,
@@ -63,7 +64,7 @@ export function useAnnouncementDrafts() {
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last) => last.meta.nextCursor ?? undefined,
     enabled: !!session,
-    refetchInterval: 5_000,
+    refetchInterval: pagedPoll(() => 5_000),
     gcTime: 0,
   });
 }
@@ -76,7 +77,7 @@ export function useAnnouncementSchedules(draftId: string) {
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last) => last.meta.nextCursor ?? undefined,
     enabled: !!session && !!draftId,
-    refetchInterval: 5_000,
+    refetchInterval: pagedPoll(() => 5_000),
     gcTime: 0,
   });
 }

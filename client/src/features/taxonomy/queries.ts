@@ -4,7 +4,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tansta
 import type { CategoryActivityResponse, ScheduledActionStatus } from '@spoh/shared';
 import { useCurrentSession } from '@/features/session';
 import { useEventId } from '@/shared/lib/eventContext';
-import { ms } from '@/shared/lib/runtimeSettings';
+import { ms, pagedPoll } from '@/shared/lib/runtimeSettings';
 import { ApiError } from '@/shared/lib/apiErrors';
 import {
   listCategoryActivity,
@@ -30,7 +30,7 @@ export function useCategoryActivityList(accessAvailable = true) {
     getNextPageParam: (last) => last.meta.nextCursor ?? undefined,
     enabled: !!session && accessAvailable,
     gcTime: 0,
-    refetchInterval: ms.dashboardPoll(),
+    refetchInterval: pagedPoll(ms.dashboardPoll),
     refetchIntervalInBackground: false,
   });
 }
@@ -66,7 +66,7 @@ export function useCategorySchedules(
     getNextPageParam: (last) => last.meta.nextCursor ?? undefined,
     enabled: !!session && accessAvailable,
     gcTime: 0,
-    refetchInterval: ms.dashboardPoll(),
+    refetchInterval: pagedPoll(ms.dashboardPoll),
     refetchIntervalInBackground: false,
   });
 }

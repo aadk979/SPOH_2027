@@ -91,7 +91,7 @@ function CaptureHistoryContents(input: HistoryInput) {
         <Button
           variant="secondary"
           className="hover:bg-surface"
-          disabled={history.isFetching}
+          disabled={history.isFetchingNextPage}
           onClick={() => {
             void history.fetchNextPage();
           }}

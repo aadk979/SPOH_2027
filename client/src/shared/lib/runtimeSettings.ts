@@ -66,6 +66,16 @@ export const ms = {
   outboxWarningAge: (): number => cache.outboxWarningAgeMinutes * 60_000,
 };
 
+/**
+ * A paged list's poll. Each refresh re-fetches every loaded page, so the interval grows with
+ * them: a list costs about one request per interval however far it is paged, rather than
+ * enough to reach a person's rate limit with the screen alone.
+ */
+export function pagedPoll(interval: () => number) {
+  return (query: { state: { data?: { pages: readonly unknown[] } } }): number =>
+    interval() * Math.max(1, query.state.data?.pages.length ?? 1);
+}
+
 function publish(next: Readonly<ClientSettings>): void {
   if (next === cache) return;
   cache = next;

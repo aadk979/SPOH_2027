@@ -168,3 +168,14 @@ describe('device settings ownership', () => {
     expect(getClientSettings().captureUndoWindowSeconds).toBe(10);
   });
 });
+
+describe('a paged list’s poll', () => {
+  it('waits one interval per loaded page, so paging further does not multiply requests', async () => {
+    const { pagedPoll } = await import('@/shared/lib/runtimeSettings');
+    const every = pagedPoll(() => 3_000);
+    expect(every({ state: {} })).toBe(3_000);
+    expect(every({ state: { data: { pages: [] } } })).toBe(3_000);
+    expect(every({ state: { data: { pages: [1] } } })).toBe(3_000);
+    expect(every({ state: { data: { pages: [1, 2, 3, 4] } } })).toBe(12_000);
+  });
+});

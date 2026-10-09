@@ -30,7 +30,7 @@ export function ScheduleTimelineContents({ status }: { status?: ScheduledActionS
       {timeline.hasNextPage && !timeline.isError ? (
         <Button
           variant="quiet"
-          disabled={timeline.isFetching}
+          disabled={timeline.isFetchingNextPage}
           onClick={() => {
             void timeline.fetchNextPage();
           }}

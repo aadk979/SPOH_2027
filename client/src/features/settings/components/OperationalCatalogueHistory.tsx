@@ -77,7 +77,7 @@ export function OperationalCatalogueHistory(input: {
       {history.hasNextPage ? (
         <Button
           variant="secondary"
-          disabled={history.isFetching}
+          disabled={history.isFetchingNextPage}
           onClick={() => {
             void history.fetchNextPage();
           }}

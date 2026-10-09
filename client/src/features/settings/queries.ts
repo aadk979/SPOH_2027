@@ -19,7 +19,7 @@ import type {
 import { useEventId } from '@/shared/lib/eventContext';
 import { sessionKeys, useCurrentSession } from '@/features/session';
 import { eventListKey } from '@/features/events';
-import { ms } from '@/shared/lib/runtimeSettings';
+import { ms, pagedPoll } from '@/shared/lib/runtimeSettings';
 import { ApiError } from '@/shared/lib/apiErrors';
 import {
   changeAttendanceConfig,
@@ -152,7 +152,7 @@ export function useProductHistory(key: EventSettingKey) {
     getNextPageParam: (last) => last.meta.nextCursor ?? undefined,
     enabled: !!session,
     gcTime: 0,
-    refetchInterval: ms.dashboardPoll(),
+    refetchInterval: pagedPoll(ms.dashboardPoll),
     refetchIntervalInBackground: false,
   });
 }
@@ -226,7 +226,7 @@ export function useScopedSettingHistory(input: {
     getNextPageParam: (last) => last.meta.nextCursor ?? undefined,
     enabled: !!session,
     gcTime: 0,
-    refetchInterval: ms.dashboardPoll(),
+    refetchInterval: pagedPoll(ms.dashboardPoll),
     refetchIntervalInBackground: false,
   });
 }

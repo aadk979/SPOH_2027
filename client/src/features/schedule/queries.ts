@@ -7,7 +7,7 @@ import type {
 } from '@spoh/shared';
 import { useCurrentSession } from '@/features/session';
 import { useEventId } from '@/shared/lib/eventContext';
-import { ms } from '@/shared/lib/runtimeSettings';
+import { ms, pagedPoll } from '@/shared/lib/runtimeSettings';
 import {
   listScheduleTimeline,
   listCaptureSchedules,
@@ -33,7 +33,7 @@ export function useScheduleTimeline(enabled: boolean, status?: ScheduledActionSt
     getNextPageParam: (last) => last.meta.nextCursor ?? undefined,
     enabled: enabled && !!session,
     gcTime: 0,
-    refetchInterval: ms.dashboardPoll(),
+    refetchInterval: pagedPoll(ms.dashboardPoll),
     refetchIntervalInBackground: false,
   });
 }
@@ -65,7 +65,7 @@ export function useCaptureSchedules(target: ScopedSettingsTarget, status?: Sched
     getNextPageParam: (last) => last.meta.nextCursor ?? undefined,
     enabled: !!session,
     gcTime: 0,
-    refetchInterval: ms.dashboardPoll(),
+    refetchInterval: pagedPoll(ms.dashboardPoll),
     refetchIntervalInBackground: false,
   });
 }
