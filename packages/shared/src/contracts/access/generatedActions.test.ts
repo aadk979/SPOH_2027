@@ -25,10 +25,10 @@ describe('generated actions on the shared public surface', () => {
     const names = [...schema.matchAll(/^\s*action\s+((?:"[^"]+"(?:\s*,\s*)?)+)/gm)].flatMap(
       ([, declaration]) => [...declaration!.matchAll(/"([^"]+)"/g)].map((match) => match[1]!),
     );
-    expect(names).toHaveLength(65);
-    expect(new Set(names).size).toBe(65);
-    expect(ACTION_IDS).toHaveLength(65);
-    expect(new Set(ACTION_IDS).size).toBe(65);
+    expect(names).toHaveLength(66);
+    expect(new Set(names).size).toBe(66);
+    expect(ACTION_IDS).toHaveLength(66);
+    expect(new Set(ACTION_IDS).size).toBe(66);
     expect([...ACTION_IDS].sort()).toEqual(names.sort());
     expect(Object.keys(ACTION_CATALOGUE).sort()).toEqual([...ACTION_IDS].sort());
   });
@@ -47,7 +47,7 @@ describe('generated actions on the shared public surface', () => {
       'Write',
     ]);
     expect(new Set(ACTION_GROUPS).size).toBe(ACTION_GROUPS.length);
-    expect(EDITABLE_ACTION_IDS).toHaveLength(46);
+    expect(EDITABLE_ACTION_IDS).toHaveLength(47);
     for (const [group, exported] of [
       ['Editable', EDITABLE_ACTION_IDS],
       ['Write', WRITE_ACTION_IDS],
