@@ -68,6 +68,10 @@ evaluation error** in the shadow summaries, including at least one first screen 
 quiet spell (sign in, open the coordinator dashboard and the safety screen). Staging has
 little traffic of its own, so the soak counts only with that use in it.
 
+The count is the CloudWatch metric `SPOH/staging AuthorizationFailed` (summed from the
+five-minute shadow summaries, alarm `spoh-staging-authorization-failed` on any), beside
+`AuthorizationAllowed`, which shows the policies were asked at all.
+
 ## Capacity: an open risk for the production sizing (P11.9, 28 October)
 
 The bursts are CPU, not connections: about 30–40 ms of CPU per request, and a first

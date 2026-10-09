@@ -32,6 +32,7 @@ import type { CognitoSettings } from './stagingIdentity.js';
 import { AppInfrastructureConfig } from './appInfrastructureConfig.js';
 import { SchedulerMonitoring } from './schedulerMonitoring.js';
 import { HttpMonitoring } from './httpMonitoring.js';
+import { AuthorizationMonitoring } from './authorizationMonitoring.js';
 import { CacheBusMonitoring } from './cacheBusMonitoring.js';
 import { TaskFailureMonitoring } from './taskFailureMonitoring.js';
 import type { Bucket } from 'aws-cdk-lib/aws-s3';
@@ -84,6 +85,10 @@ export class AppService extends Construct {
     });
     new SchedulerMonitoring(this, 'SchedulerMonitoring', { stage: stage.name, logGroup: logs });
     new CacheBusMonitoring(this, 'CacheBusMonitoring', { stage: stage.name, logGroup: logs });
+    new AuthorizationMonitoring(this, 'AuthorizationMonitoring', {
+      stage: stage.name,
+      logGroup: logs,
+    });
     const imageOf = (tag: string) => ContainerImage.fromEcrRepository(props.repository, tag);
     this.configuration = new AppInfrastructureConfig(this, 'Configuration', {
       stage,
