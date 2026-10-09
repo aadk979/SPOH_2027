@@ -13,20 +13,10 @@ export const meRouter: Router = Router();
 
 meRouter.use(requireAuth);
 
-meRouter.get(
-  '/',
-  defaultRateLimit,
-  authorize('Self.Read', self),
-  getMeHandler,
-);
+meRouter.get('/', defaultRateLimit, authorize('Self.Read', self), getMeHandler);
 
 /** What the caller may do here, for the screens (P11.8): the local engine answers. */
-meRouter.get(
-  '/permissions',
-  defaultRateLimit,
-  authorize('Self.Read', self),
-  myPermissionsHandler,
-);
+meRouter.get('/permissions', defaultRateLimit, authorize('Self.Read', self), myPermissionsHandler);
 
 meRouter.post(
   '/check-in',

@@ -18,12 +18,7 @@ const StationRosterQuery = z.object({ eventDayId: Id.optional() }).strict();
 rosterRouter.use(requireAuth);
 
 /** My own shifts. Same payload as `/me`, reachable from the shift screen. */
-rosterRouter.get(
-  '/me',
-  defaultRateLimit,
-  authorize('Self.Read', self),
-  myShiftsHandler,
-);
+rosterRouter.get('/me', defaultRateLimit, authorize('Self.Read', self), myShiftsHandler);
 
 rosterRouter.get(
   '/station/:stationId',

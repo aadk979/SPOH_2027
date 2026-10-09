@@ -25,12 +25,7 @@ mediaRouter.use(['/url', '/uploads'], (_req, res, next) => {
 mediaRouter.use(requireAuth);
 
 /** Lets the client hide the camera button rather than offer one that 503s. */
-mediaRouter.get(
-  '/config',
-  defaultRateLimit,
-  authorize('Self.Read', self),
-  mediaConfigHandler,
-);
+mediaRouter.get('/config', defaultRateLimit, authorize('Self.Read', self), mediaConfigHandler);
 
 /**
  * The sensitive limit: each call signs a credential, and a client looping here

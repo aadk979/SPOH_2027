@@ -50,12 +50,7 @@ shiftRouter.post(
 );
 
 /** My own swaps, in either direction. */
-shiftRouter.get(
-  '/swaps',
-  defaultRateLimit,
-  authorize('Self.Read', self),
-  mySwapsHandler,
-);
+shiftRouter.get('/swaps', defaultRateLimit, authorize('Self.Read', self), mySwapsHandler);
 
 /** Everything awaiting a decision — the IC's queue. */
 shiftRouter.get(
