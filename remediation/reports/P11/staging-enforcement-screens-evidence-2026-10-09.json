@@ -1,0 +1,188 @@
+{
+  "milestone": "P11.5 release 2a: D-21 and screens that offer only what the policies allow",
+  "note": "Normal Cognito session with the staging smoke identity (credentials not recorded). Reads only. Role, capabilities and probe statuses compared with the 0754f8d shadow release (itself identical to 58906e5); the same 25-route walk plus GET /me/permissions; the D-21 migration 20261008150000_grant_settings_read confirmed applied; the session shadow lines read from /spoh/staging/app. The acceptance script fails on any shadow evaluation error, so passed is false: both errors are Prisma transaction-start timeouts (not policy errors) on two polled reads at the same instant, 08:51:30Z; none in the preceding six hours.",
+  "baselineSha": "0754f8d09c2e7c3c1d2fa294225a1f4a5458aaa4",
+  "release": {
+    "sha": "1375a3710adfa0f5286e75ec80988c1156a91ccb",
+    "mode": "shadow",
+    "checks": {
+      "migrations": {
+        "20261008150000_grant_settings_read": 1
+      },
+      "sameRole": true,
+      "sameCapabilities": true,
+      "sameStatuses": true,
+      "baselineSha": "0754f8d09c2e7c3c1d2fa294225a1f4a5458aaa4",
+      "settingsScreen": true,
+      "backendFailures": [],
+      "summaries": [
+        {
+          "msg": "authorization shadow summary",
+          "allowed": 173,
+          "denied": 0,
+          "unaskable": 1,
+          "failed": 2,
+          "findings": 2
+        }
+      ],
+      "shadowErrors": 2,
+      "unexplained": 0
+    },
+    "failures": ["SHADOW_EVALUATION_ERROR"],
+    "access": {
+      "role": "ADMIN",
+      "capabilities": [
+        "announcement.event.send",
+        "announcement.station.send",
+        "audit.read",
+        "card.reissue",
+        "card.stamp",
+        "config.manage",
+        "count.adjust",
+        "dashboard.event.read",
+        "dashboard.station.read",
+        "fallback.declare",
+        "fallback.import",
+        "footfall.create",
+        "gift.redeem",
+        "incident.report",
+        "incident.resolve",
+        "lostFound.log",
+        "lostPerson.raise",
+        "lostPerson.resolve",
+        "own.read",
+        "record.void",
+        "registration.create",
+        "report.generate",
+        "roster.edit",
+        "swap.approve",
+        "user.provision",
+        "user.read"
+      ]
+    },
+    "statuses": {
+      "GET /admin/settings/client": 200,
+      "GET /admin/event-settings": 200,
+      "GET /admin/organisation-settings": 200,
+      "GET /schedules": 200,
+      "GET /roster/me": 200,
+      "GET /roster/volunteers": 404,
+      "GET /dashboard/live": 200,
+      "GET /lifecycle/readiness": 200,
+      "GET /admin/settings": 404,
+      "PATCH /admin/settings": 404
+    },
+    "walk": {
+      "/admin/volunteers": 200,
+      "/admin/stations": 200,
+      "/admin/event-days": 200,
+      "/admin/shift-templates": 200,
+      "/admin/capture-categories": 200,
+      "/admin/attendance-settings": 200,
+      "/admin/visitor-fields": 200,
+      "/admin/event-settings/history?key=countsMode": 400,
+      "/announcements": 200,
+      "/announcements/drafts": 200,
+      "/audit": 200,
+      "/dashboard/data-health": 200,
+      "/fallback/windows": 200,
+      "/footfall/summary": 200,
+      "/gifts": 200,
+      "/gifts/summary": 200,
+      "/incidents": 200,
+      "/lost-found": 200,
+      "/lost-person/active": 200,
+      "/roster/swaps": 200,
+      "/roster/swaps/pending": 200,
+      "/roster/briefing-slots": 200,
+      "/roster/gaps": 200,
+      "/cards/funnel": 200,
+      "/lifecycle": 200
+    },
+    "permissions": {
+      "status": 200,
+      "settings": {
+        "operational": true,
+        "security": true,
+        "privacy": true
+      },
+      "allowedActions": [
+        "Announcement.SendEvent",
+        "Audit.Read",
+        "Card.GenerateBatch",
+        "Content.Edit",
+        "Content.Publish",
+        "Dashboard.ReadEvent",
+        "Event.Archive",
+        "Event.Close",
+        "Event.GoLive",
+        "Event.MarkReady",
+        "Event.Rehearse",
+        "Event.Reopen",
+        "Fallback.Declare",
+        "Fallback.Import",
+        "Incident.Read",
+        "Incident.Report",
+        "LostFound.CloseOut",
+        "LostFound.Log",
+        "LostPerson.Raise",
+        "People.Read",
+        "Permissions.Edit",
+        "Report.Export",
+        "Report.Generate",
+        "Roster.Edit",
+        "Schedule.Manage",
+        "Settings.Read",
+        "Structure.Change",
+        "Structure.Edit",
+        "Structure.Read"
+      ]
+    },
+    "shadow": [
+      {
+        "msg": "authorization shadow error",
+        "route": "GET /api/v1/events/:eventId/lost-person/active",
+        "role": "ADMIN",
+        "status": 200,
+        "error": "PrismaClientKnownRequestError: Transaction API error: Unable to start a transaction in the given time."
+      },
+      {
+        "msg": "authorization shadow error",
+        "route": "GET /api/v1/events/:eventId/registrations/categories",
+        "role": "ADMIN",
+        "status": 200,
+        "error": "PrismaClientKnownRequestError: Transaction API error: Unable to start a transaction in the given time."
+      },
+      {
+        "msg": "authorization shadow summary",
+        "allowed": 173,
+        "denied": 0,
+        "unaskable": 1,
+        "failed": 2,
+        "findings": 2
+      }
+    ],
+    "signOutStatus": 204,
+    "release": {
+      "sourceCommit": "1375a3710adfa0f5286e75ec80988c1156a91ccb",
+      "deployedImageTag": "1375a3710adfa0f5286e75ec80988c1156a91ccb",
+      "imageDigest": "sha256:381011fd2122a4dfe62b59ee419484e0c2af2cd9d70445d01266ab4b053303d6",
+      "taskRevision": 153
+    },
+    "observedAt": "2026-10-09T08:56:50.354Z"
+  },
+  "ci": {
+    "run": 37905215431,
+    "conclusion": "success"
+  },
+  "deploy": {
+    "run": 37906461404,
+    "conclusion": "success"
+  },
+  "earlierCi": {
+    "run": 37904805492,
+    "sha": "f227354",
+    "conclusion": "failure",
+    "cause": "shared contract test still counted 65 actions; fixed in 1375a37"
+  }
+}

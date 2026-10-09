@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-08T14:49:21.351Z",
+  "updatedAt": "2026-10-09T08:58:40.870Z",
   "current": {
     "phase": "P11",
     "step": "P11.5"
@@ -3809,6 +3809,10 @@
     {
       "at": "2026-10-07T10:18:43.603Z",
       "text": "P10.8: D-18 delivered. 021f794 renames Event.name from the settings screen (Chief/Admin, stale-read refusal, audit); 58906e5 drops AppSetting, the legacy endpoint, cache and contracts. Both accepted on staging (tasks 146, 147). Report P10/event-name.md."
+    },
+    {
+      "at": "2026-10-09T08:58:40.870Z",
+      "text": "P11.5 release 2a (f227354, 1375a37) on staging revision 153 with D-21. Two shadow transaction-start timeouts; release 2b waits for the owner's answer in reports/P11/enforcement-screens.md."
     }
   ]
 }
