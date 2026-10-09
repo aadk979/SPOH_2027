@@ -5,7 +5,6 @@ import { z } from 'zod';
 import { PushSubscriptionRequest } from '@spoh/shared';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { captureRateLimit, defaultRateLimit } from '../../../platform/http/rateLimit.js';
-import { requireCapability } from '../../../platform/http/access.js';
 import { validate } from '../../../platform/http/validate.js';
 import { pushConfigHandler, subscribeHandler, unsubscribeHandler } from './handlers.js';
 
@@ -33,7 +32,6 @@ notificationRouter.get(
   '/config',
   defaultRateLimit,
   authorize('Self.Read', self),
-  requireCapability('own.read'),
   pushConfigHandler,
 );
 
@@ -48,7 +46,6 @@ notificationRouter.post(
   '/subscriptions',
   captureRateLimit,
   authorize('Self.Read', self),
-  requireCapability('own.read'),
   validate({ body: PushSubscriptionRequest }),
   subscribeHandler,
 );
@@ -57,7 +54,6 @@ notificationRouter.delete(
   '/subscriptions',
   defaultRateLimit,
   authorize('Self.Read', self),
-  requireCapability('own.read'),
   validate({ body: UnsubscribeRequest }),
   unsubscribeHandler,
 );

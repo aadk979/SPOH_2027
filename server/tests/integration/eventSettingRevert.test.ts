@@ -16,7 +16,13 @@ import { SYSTEM_AUDIT_CONTEXT } from '../../src/platform/http/auditContext.js';
 import { invalidateRateLimitPolicy } from '../../src/platform/http/rateLimitPolicy.js';
 import { reserve } from '../../src/platform/idempotency/index.js';
 import { rawDb, resetDatabase } from '../helpers/db.js';
-import { bearer, createStation, createVolunteer, testEvent } from '../helpers/fixtures.js';
+import {
+  bearer,
+  createStation,
+  createVolunteer,
+  testEvent,
+  makePlatformAdmin,
+} from '../helpers/fixtures.js';
 import {
   scheduledLifecycleFixture,
   type ScheduledLifecycleFixture,
@@ -89,6 +95,8 @@ async function privateRecord() {
 beforeEach(async () => {
   await resetDatabase();
   f = await scheduledLifecycleFixture();
+  // Restoring visitor collection is a privacy setting (C9).
+  await makePlatformAdmin(f.creator.id);
   // The frozen clock keeps this file's synthetic requests in one admin window.
   await rawDb.setting.create({
     data: {

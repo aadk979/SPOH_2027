@@ -100,6 +100,19 @@ export const settingFromBody: ChecksOf = (req) => [
   settingCheck(text(bodyField(req, ['key']), 'key')),
 ];
 
+/**
+ * A change through the settings catalogue, which takes operational settings only. A key of
+ * another class is malformed there, and the route's validation answers it (400): asking its
+ * class's action first would refuse it as a permission instead.
+ */
+export const operationalSettingFromBody: ChecksOf = (req) => {
+  const key = text(bodyField(req, ['key']), 'key');
+  const check = settingCheck(key);
+  return [
+    check.action === 'Settings.ManageEvent' ? check : { ...check, action: 'Settings.ManageEvent' },
+  ];
+};
+
 /** An announcement to one station is a station send; with none, it goes to the whole event. */
 export const announcementTarget: ChecksOf = (req) => {
   const stationId = bodyField(req, ['target', 'stationId']);

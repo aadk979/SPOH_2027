@@ -20,7 +20,6 @@ import {
 } from '@spoh/shared';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { defaultRateLimit } from '../../../platform/http/rateLimit.js';
-import { requireCapability } from '../../../platform/http/access.js';
 import { validate } from '../../../platform/http/validate.js';
 import { idempotent } from '../../../platform/http/idempotency.js';
 import {
@@ -59,7 +58,6 @@ announcementRouter.post(
     changes: ['C4'],
     any: true,
   }),
-  requireCapability('announcement.station.send'),
   validate({ body: CreateAnnouncementDraftRequest }),
   idempotent('announcement.draft.create', { redacted: draftReplay }),
   createDraftHandler,
@@ -71,7 +69,6 @@ announcementRouter.get(
     changes: ['C4'],
     any: true,
   }),
-  requireCapability('announcement.station.send'),
   validate({ query: PaginationQuery.strict() }),
   listDraftsHandler,
 );
@@ -82,7 +79,6 @@ announcementRouter.get(
     changes: ['C4'],
     any: true,
   }),
-  requireCapability('announcement.station.send'),
   validate({ params: IdParams }),
   readDraftHandler,
 );
@@ -93,7 +89,6 @@ announcementRouter.put(
     changes: ['C4'],
     any: true,
   }),
-  requireCapability('announcement.station.send'),
   validate({ params: IdParams, body: UpdateAnnouncementDraftRequest }),
   updateDraftHandler,
 );
@@ -104,7 +99,6 @@ announcementRouter.post(
     changes: ['C4'],
     any: true,
   }),
-  requireCapability('announcement.station.send'),
   validate({ params: IdParams, body: ScheduleAnnouncementDraftRequest }),
   idempotent('announcement.schedule.create', { redacted: publicationScheduleReplay }),
   createPublicationScheduleHandler,
@@ -116,7 +110,6 @@ announcementRouter.get(
     changes: ['C4'],
     any: true,
   }),
-  requireCapability('announcement.station.send'),
   validate({ params: ScheduleParams }),
   readPublicationScheduleHandler,
 );
@@ -127,7 +120,6 @@ announcementRouter.get(
     changes: ['C4'],
     any: true,
   }),
-  requireCapability('announcement.station.send'),
   validate({ params: IdParams, query: PaginationQuery.strict() }),
   listPublicationSchedulesHandler,
 );
@@ -138,7 +130,6 @@ announcementRouter.put(
     changes: ['C4'],
     any: true,
   }),
-  requireCapability('announcement.station.send'),
   validate({ params: ScheduleParams, body: UpdateAnnouncementPublicationScheduleRequest }),
   updatePublicationScheduleHandler,
 );
@@ -149,7 +140,6 @@ announcementRouter.post(
     changes: ['C4'],
     any: true,
   }),
-  requireCapability('announcement.station.send'),
   validate({ params: ScheduleParams, body: CancelAnnouncementPublicationScheduleRequest }),
   cancelPublicationScheduleHandler,
 );
@@ -163,7 +153,6 @@ announcementRouter.post(
   '/',
   defaultRateLimit,
   authorizeAll('Announcement.Send', announcementTarget, { changes: ['C4'] }),
-  requireCapability('announcement.station.send'),
   validate({ body: CreateAnnouncementRequest }),
   sendAnnouncementHandler,
 );
@@ -173,7 +162,6 @@ announcementRouter.get(
   '/',
   defaultRateLimit,
   authorize('Self.Read', self),
-  requireCapability('own.read'),
   validate({ query: ListAnnouncementsQuery }),
   listInboxHandler,
 );
@@ -182,7 +170,6 @@ announcementRouter.post(
   '/:id/ack',
   defaultRateLimit,
   authorize('Announcement.Ack', fromParam('Announcement'), { changes: ['C2'] }),
-  requireCapability('own.read'),
   validate({ params: IdParams }),
   acknowledgeHandler,
 );

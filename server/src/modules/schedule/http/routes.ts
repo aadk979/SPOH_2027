@@ -3,7 +3,6 @@ import { theEvent } from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import { ScheduleTimelineQuery } from '@spoh/shared';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
-import { requireCapability } from '../../../platform/http/access.js';
 import { actorContextFrom } from '../../../platform/http/auditContext.js';
 import { defaultRateLimit } from '../../../platform/http/rateLimit.js';
 import { validate, validatedQuery } from '../../../platform/http/validate.js';
@@ -15,7 +14,6 @@ scheduleRouter.get(
   '/',
   defaultRateLimit,
   authorize('Settings.Read', theEvent, { changes: ['C14'] }),
-  requireCapability('config.manage'),
   validate({ query: ScheduleTimelineQuery }),
   async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');

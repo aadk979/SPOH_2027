@@ -3,7 +3,6 @@ import { theEvent } from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { defaultRateLimit } from '../../../platform/http/rateLimit.js';
-import { requireCapability } from '../../../platform/http/access.js';
 import { validate } from '../../../platform/http/validate.js';
 import { listAuditLogHandler } from './handlers.js';
 import { AuditQuery } from './schemas.js';
@@ -24,7 +23,6 @@ auditRouter.get(
   '/',
   defaultRateLimit,
   authorize('Audit.Read', theEvent),
-  requireCapability('audit.read'),
   validate({ query: AuditQuery }),
   listAuditLogHandler,
 );

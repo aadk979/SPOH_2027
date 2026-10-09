@@ -106,6 +106,22 @@ export async function reserve(
   }
 }
 
+/** Whether this caller already holds a settled answer under `key` in this event. */
+export async function hasSettledAnswer(
+  key: string,
+  owner: { actorSub: string; eventId: string },
+): Promise<boolean> {
+  const record = await prisma.idempotencyRecord.findUnique({
+    where: { key },
+    select: { actorSub: true, eventId: true, statusCode: true },
+  });
+  return (
+    record?.actorSub === owner.actorSub &&
+    record.eventId === owner.eventId &&
+    record.statusCode !== IN_PROGRESS
+  );
+}
+
 /** An unsettled reservation old enough that its process must have died. */
 export function isAbandoned(reservation: Reservation, now: number = Date.now()): boolean {
   return now - reservation.createdAt.getTime() > STALE_RESERVATION_MS;

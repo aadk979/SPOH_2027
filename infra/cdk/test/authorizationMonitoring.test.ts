@@ -10,7 +10,7 @@ const app = buildApp(
 
 describe('authorization evaluation monitoring (P11.5, D-22)', () => {
   it.each(['staging', 'prod'] as const)(
-    'counts %s failed and allowed evaluations from the shadow summary, and alarms on any failure',
+    'counts %s failed, allowed and denied evaluations from the summary, and alarms on any failure',
     (stage) => {
       const stack = app.node.findChild(`Spoh-${stage}-Platform`);
       if (!(stack instanceof PlatformStack)) throw new Error('Expected platform stack');
@@ -18,13 +18,14 @@ describe('authorization evaluation monitoring (P11.5, D-22)', () => {
       for (const [name, field] of [
         ['AuthorizationFailed', 'failed'],
         ['AuthorizationAllowed', 'allowed'],
+        ['AuthorizationDenied', 'denied'],
       ]) {
         const filters = Object.values(template.findResources('AWS::Logs::MetricFilter')).filter(
           (row) => row.Properties.MetricTransformations[0].MetricName === name,
         );
         expect(filters).toHaveLength(1);
         expect(filters[0]!.Properties).toMatchObject({
-          FilterPattern: `{ ($.msg = "authorization shadow summary") && ($.authorization.${field} >= 0) }`,
+          FilterPattern: `{ (($.msg = "authorization shadow summary") || ($.msg = "authorization summary")) && ($.authorization.${field} >= 0) }`,
           MetricTransformations: [
             {
               MetricNamespace: `SPOH/${stage}`,

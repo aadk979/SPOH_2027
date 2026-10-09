@@ -23,8 +23,10 @@ test('the approved 46 floors are complete fixed metadata with the six unchanged 
     ADMIN: 60,
   });
   assert.deepEqual(ROLE_IDS, Object.keys(ROLE_RANKS));
+  // The derived floors; VisitorRecord.Read's is the owner's own (D-15), tested below.
   const approved = Object.entries(ACTION_CATALOGUE).filter(
-    ([, metadata]) => metadata.minimumRole.status === 'approved',
+    ([action, metadata]) =>
+      metadata.minimumRole.status === 'approved' && action !== 'VisitorRecord.Read',
   );
   assert.equal(approved.length, 46);
   const counts = Object.fromEntries(ROLE_IDS.map((role) => [role, 0]));
@@ -47,19 +49,47 @@ test('the approved 46 floors are complete fixed metadata with the six unchanged 
   );
 });
 
-test('VisitorRecord.Read has no approved floor and remains explicitly unresolved at every rank', () => {
+test('VisitorRecord.Read takes the owner-decided floor of D-15 and still has no default grant', () => {
   assert.deepEqual(ACTION_CATALOGUE['VisitorRecord.Read'].minimumRole, {
-    status: 'unresolved',
-    reason: 'owner-decision-pending',
+    status: 'approved',
+    role: 'VOLUNTEER',
+    rank: 10,
   });
-  assert.deepEqual(decision.unresolved, ['VisitorRecord.Read']);
+  assert.deepEqual(decision.unresolved, []);
+  assert.deepEqual(decision.ownerFloors, {
+    'VisitorRecord.Read': { role: 'VOLUNTEER', decision: 'D-15 = A', date: '2026-10-09' },
+  });
   assert.ok(!Object.hasOwn(decision.floors, 'VisitorRecord.Read'));
   for (const role of ROLE_IDS) assert.ok(!defaults[role].grants.includes('VisitorRecord.Read'));
+  // Without the owner's decision it can only be unresolved, never a derived floor.
   for (const role of ROLE_IDS) {
     const altered = structuredClone(decision);
-    altered.unresolved = [];
+    altered.ownerFloors = {};
     altered.floors['VisitorRecord.Read'] = role;
     assert.throws(() => minimumRoles(catalogue, defaults, altered), /lowest approved default role/);
+  }
+});
+
+test('an owner-decided floor is only for an action no role holds by default', () => {
+  const altered = structuredClone(decision);
+  delete altered.floors['People.Read'];
+  altered.ownerFloors['People.Read'] = {
+    role: 'VOLUNTEER',
+    decision: 'D-99 = A',
+    date: '2026-10-09',
+  };
+  assert.throws(
+    () => minimumRoles(catalogue, defaults, altered),
+    /only for an action without defaults/,
+  );
+  for (const malformed of [
+    { role: 'EVENT_OWNER', decision: 'D-15 = A', date: '2026-10-09' },
+    { role: 'VOLUNTEER', decision: 'the owner said so', date: '2026-10-09' },
+    { role: 'VOLUNTEER', decision: 'D-15 = A' },
+  ]) {
+    const bad = structuredClone(decision);
+    bad.ownerFloors['VisitorRecord.Read'] = malformed;
+    assert.throws(() => minimumRoles(catalogue, defaults, bad));
   }
 });
 
@@ -99,6 +129,7 @@ test('generation refuses incomplete, overlapping, unknown and malformed floor de
     (value) => value.unresolved.push('People.Read'),
     (value) => value.unresolved.push('VisitorRecord.Read'),
     (value) => (value.unresolved = 'VisitorRecord.Read'),
+    (value) => delete value.ownerFloors,
     (value) => (value.floors = []),
     (value) => (value.derivedFloors = true),
   ];
@@ -128,7 +159,10 @@ test('generation refuses changed approval provenance, rank ordering or default m
   );
   const visitorGrant = structuredClone(defaults);
   visitorGrant.ADMIN.grants.push('VisitorRecord.Read');
-  assert.throws(() => minimumRoles(catalogue, visitorGrant, decision), /no approved default grant/);
+  assert.throws(
+    () => minimumRoles(catalogue, visitorGrant, decision),
+    /only for an action without defaults/,
+  );
 });
 
 test('floors do not turn nonmonotonic default exclusions into grants', () => {

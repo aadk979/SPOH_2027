@@ -3,7 +3,6 @@ import { theEvent, lifecycleTransition } from '../../../platform/http/authorizeR
 import { Router } from 'express';
 import { TransitionEventRequest } from '@spoh/shared';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
-import { requireCapability } from '../../../platform/http/access.js';
 import { defaultRateLimit, sensitiveRateLimit } from '../../../platform/http/rateLimit.js';
 import { validate } from '../../../platform/http/validate.js';
 import { idempotent } from '../../../platform/http/idempotency.js';
@@ -19,14 +18,12 @@ eventLifecycleRouter.get(
   '/',
   defaultRateLimit,
   authorize('Settings.Read', theEvent, { changes: ['C14'] }),
-  requireCapability('config.manage'),
   readLifecycleHandler,
 );
 eventLifecycleRouter.get(
   '/readiness',
   defaultRateLimit,
   authorize('Settings.Read', theEvent, { changes: ['C14'] }),
-  requireCapability('config.manage'),
   readLifecycleReadinessHandler,
 );
 eventLifecycleRouter.post(
@@ -39,7 +36,6 @@ eventLifecycleRouter.post(
   },
   sensitiveRateLimit,
   authorizeAll('Event.Transition', lifecycleTransition, { changes: ['C13'] }),
-  requireCapability('config.manage'),
   validate({ body: TransitionEventRequest }),
   idempotent('POST /lifecycle'),
   transitionEventHandler,

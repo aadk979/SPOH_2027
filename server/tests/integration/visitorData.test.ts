@@ -14,6 +14,7 @@ import {
   idempotencyKey,
   testEvent,
   type TestVolunteer,
+  makePlatformAdmin,
 } from '../helpers/fixtures.js';
 
 let app: Express;
@@ -35,6 +36,8 @@ beforeEach(async () => {
   stationId = (await createStation({ code: 'BOOTH' })).id;
   booth = await createVolunteer({ email: 'booth@visitor.test', role: 'VOLUNTEER' });
   chief = await createVolunteer({ email: 'chief@visitor.test', role: 'CHIEF_COORDINATOR' });
+  // Switching visitor data on is a privacy setting (C9).
+  await makePlatformAdmin(chief.id);
   ic = await createVolunteer({ email: 'ic@visitor.test', role: 'IC' });
   lead = await createVolunteer({ email: 'lead@visitor.test', role: 'LEAD' });
   await assignToStationAllBlocks({ volunteerId: booth.id, stationId, eventDayId: day.id });

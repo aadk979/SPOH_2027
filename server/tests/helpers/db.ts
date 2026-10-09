@@ -5,6 +5,7 @@ import { prisma } from '../../src/platform/db/client.js';
 import { invalidateEventCache } from '../../src/platform/event/events.js';
 import { invalidateVolunteerCache } from '../../src/platform/identity/index.js';
 import { invalidateRateLimitPolicy } from '../../src/platform/http/rateLimitPolicy.js';
+import { settleDenials } from '../../src/platform/http/authorizationDenials.js';
 
 /**
  * Test database helpers.
@@ -62,6 +63,8 @@ async function wipe(table: string): Promise<void> {
  */
 export async function resetDatabase(): Promise<void> {
   assertTestDatabase();
+  // A denial's audit row is written after its response; let it land before the wipe.
+  await settleDenials();
 
   await wipe('AuditLog');
   await wipe('AnnouncementPublication');

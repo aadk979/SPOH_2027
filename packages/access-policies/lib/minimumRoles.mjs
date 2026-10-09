@@ -24,7 +24,11 @@ function keys(value, expected, description) {
 
 /** No fallback floors: incomplete, contradictory or unapproved input aborts generation. */
 export function minimumRoles(actions, defaults, decision) {
-  keys(decision, ['$comment', 'approval', 'floors', 'unresolved'], 'Minimum-role decision');
+  keys(
+    decision,
+    ['$comment', 'approval', 'floors', 'ownerFloors', 'unresolved'],
+    'Minimum-role decision',
+  );
   keys(decision.approval, ['date', 'decision'], 'Minimum-role approval');
   if (
     decision.approval.date !== '2026-10-06' ||
@@ -39,6 +43,13 @@ export function minimumRoles(actions, defaults, decision) {
     }
   }
   object(decision.floors, 'Minimum-role floors');
+  object(decision.ownerFloors, 'Owner-decided floors');
+  for (const [id, floor] of Object.entries(decision.ownerFloors)) {
+    keys(floor, ['role', 'decision', 'date'], `Owner-decided floor for ${id}`);
+    if (!/^D-\d+ = [A-Z]$/.test(floor.decision) || !/^\d{4}-\d{2}-\d{2}$/.test(floor.date)) {
+      throw new Error(`Owner-decided floor for ${id} must name its decision and date`);
+    }
+  }
   if (
     !Array.isArray(decision.unresolved) ||
     !decision.unresolved.every((action) => typeof action === 'string') ||
@@ -48,7 +59,11 @@ export function minimumRoles(actions, defaults, decision) {
   }
 
   const editable = actions.filter(({ groups }) => groups.includes('Editable')).map(({ id }) => id);
-  const supplied = [...Object.keys(decision.floors), ...decision.unresolved];
+  const supplied = [
+    ...Object.keys(decision.floors),
+    ...Object.keys(decision.ownerFloors),
+    ...decision.unresolved,
+  ];
   if (
     new Set(supplied).size !== supplied.length ||
     JSON.stringify([...supplied].sort()) !== JSON.stringify([...editable].sort())
@@ -69,6 +84,16 @@ export function minimumRoles(actions, defaults, decision) {
           throw new Error(`Unresolved action ${id} must have no approved default grant`);
         }
         return [id, { status: 'unresolved', reason: 'owner-decision-pending' }];
+      }
+      // A floor the owner decided for an action no role holds by default, so there is no
+      // lowest default role to derive it from (D-15).
+      if (Object.hasOwn(decision.ownerFloors, id)) {
+        const { role } = decision.ownerFloors[id];
+        if (!Object.hasOwn(ROLE_RANKS, role)) throw new Error(`Unknown minimum role for ${id}`);
+        if (defaultRoles.length !== 0) {
+          throw new Error(`Owner-decided floor for ${id} is only for an action without defaults`);
+        }
+        return [id, { status: 'approved', role, rank: ROLE_RANKS[role] }];
       }
       const role = decision.floors[id];
       if (!Object.hasOwn(ROLE_RANKS, role)) throw new Error(`Unknown minimum role for ${id}`);

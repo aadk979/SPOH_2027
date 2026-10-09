@@ -4,7 +4,6 @@ import { Router } from 'express';
 import { CreateUploadRequest, MediaUrlQuery } from '@spoh/shared';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { defaultRateLimit, sensitiveRateLimit } from '../../../platform/http/rateLimit.js';
-import { requireCapability } from '../../../platform/http/access.js';
 import { validate } from '../../../platform/http/validate.js';
 import { idempotent } from '../../../platform/http/idempotency.js';
 import { createUploadHandler, mediaConfigHandler, readUrlHandler } from './handlers.js';
@@ -30,7 +29,6 @@ mediaRouter.get(
   '/config',
   defaultRateLimit,
   authorize('Self.Read', self),
-  requireCapability('own.read'),
   mediaConfigHandler,
 );
 
@@ -42,7 +40,6 @@ mediaRouter.post(
   '/uploads',
   sensitiveRateLimit,
   authorize('LostFound.Log', theEvent),
-  requireCapability('lostFound.log'),
   validate({ body: CreateUploadRequest }),
   idempotent('media.upload', { redacted: mediaUploadReplay }),
   createUploadHandler,
@@ -52,7 +49,6 @@ mediaRouter.get(
   '/url',
   defaultRateLimit,
   authorize('Self.Read', self),
-  requireCapability('own.read'),
   validate({ query: MediaUrlQuery }),
   readUrlHandler,
 );

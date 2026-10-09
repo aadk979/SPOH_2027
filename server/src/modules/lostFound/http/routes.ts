@@ -9,7 +9,6 @@ import {
   ListLostFoundQuery,
 } from '@spoh/shared';
 import { defaultRateLimit } from '../../../platform/http/rateLimit.js';
-import { requireCapability } from '../../../platform/http/access.js';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { validate } from '../../../platform/http/validate.js';
 import { claimItemHandler, closeOutHandler, listItemsHandler, logItemHandler } from './handlers.js';
@@ -26,7 +25,6 @@ lostFoundRouter.post(
   '/',
   defaultRateLimit,
   authorize('LostFound.Log', theEvent),
-  requireCapability('lostFound.log'),
   validate({ body: CreateLostFoundRequest }),
   logItemHandler,
 );
@@ -39,7 +37,6 @@ lostFoundRouter.get(
   '/',
   defaultRateLimit,
   authorize('Self.Read', self),
-  requireCapability('own.read'),
   validate({ query: ListLostFoundQuery }),
   listItemsHandler,
 );
@@ -48,7 +45,6 @@ lostFoundRouter.post(
   '/:id/claim',
   defaultRateLimit,
   authorize('LostFound.Claim', fromParam('LostFoundItem')),
-  requireCapability('lostFound.log'),
   validate({ params: IdParams, body: ClaimLostFoundRequest }),
   claimItemHandler,
 );
@@ -58,6 +54,5 @@ lostFoundRouter.post(
   '/close-out',
   defaultRateLimit,
   authorize('LostFound.CloseOut', theEvent, { changes: ['C6'] }),
-  requireCapability('report.generate'),
   closeOutHandler,
 );

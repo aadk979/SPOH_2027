@@ -11,6 +11,7 @@ import {
   createVolunteer,
   testEvent,
   type TestVolunteer,
+  makePlatformAdmin,
 } from '../helpers/fixtures.js';
 
 /**
@@ -31,6 +32,8 @@ beforeAll(() => {
 beforeEach(async () => {
   await resetDatabase();
   chief = await createVolunteer({ email: 'chief@settings.test', role: 'CHIEF_COORDINATOR' });
+  // Visitor data and lost-person retention are privacy settings (C9).
+  await makePlatformAdmin(chief.id);
   ic = await createVolunteer({ email: 'ic@settings.test', role: 'IC' });
   volunteer = await createVolunteer({ email: 'v@settings.test', role: 'VOLUNTEER' });
 });
@@ -142,6 +145,21 @@ describe('event settings (ADR-003, P09.14)', () => {
 });
 
 describe('lost-person retention (ADR-003 §8, D-16)', () => {
+  it('is changed only by a platform admin, not an event Chief (C9)', async () => {
+    const eventChief = await createVolunteer({
+      email: 'event-chief@settings.test',
+      role: 'CHIEF_COORDINATOR',
+    });
+    const refused = await change(eventChief, {
+      key: 'lostPersonPurgeHours',
+      value: 12,
+      expectedVersion: 0,
+    });
+    expect(refused.status).toBe(403);
+    expect(refused.body.error.code).toBe('FORBIDDEN');
+    expect(await rawDb.setting.count({ where: { key: 'lostPersonPurgeHours' } })).toBe(0);
+  });
+
   const retention = (who: TestVolunteer, value: unknown, expectedVersion = 0) =>
     change(who, { key: 'lostPersonPurgeHours', value, expectedVersion, reason: 'sooner' });
   const purgeHours = async () => {

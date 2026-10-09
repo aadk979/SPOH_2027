@@ -83,6 +83,7 @@ export type AuditAction =
   | 'notification.dispatch'
   | 'media.upload'
   | 'auth.stationScopeBypass'
+  | 'authorization.denied'
   | 'event.clone'
   | 'event.transition'
   | 'event.rename'
@@ -118,6 +119,10 @@ export interface AuditEntry extends AuditContext {
   before?: JsonValue;
   /** State after the change. Omit for deletes. */
   after?: JsonValue;
+  /** Transport detail, for a security event: what was asked and how it was answered. */
+  method?: string;
+  path?: string;
+  statusCode?: number;
 }
 
 /** Stored practice mode and the bounded close exception belong in the mutation's audit. */
@@ -150,6 +155,15 @@ async function publishInvalidation(tx: PrismaTransactionClient, entry: AuditEntr
   }
 }
 
+/** A security event's transport detail; a change event has none. */
+function transportOf({ method, path, statusCode }: AuditEntry) {
+  return {
+    ...(method !== undefined ? { method } : {}),
+    ...(path !== undefined ? { path } : {}),
+    ...(statusCode !== undefined ? { statusCode } : {}),
+  };
+}
+
 /**
  * Write one audit row. Must be called with an open transaction client so it
  * shares the fate of the mutation.
@@ -168,6 +182,7 @@ export async function writeAudit(tx: PrismaTransactionClient, entry: AuditEntry)
       entityId: entry.entityId,
       ...(entry.before !== undefined ? { before: entry.before } : {}),
       ...(entry.after !== undefined ? { after: entry.after } : {}),
+      ...transportOf(entry),
       ip: entry.ip,
       userAgent: entry.userAgent,
       requestId: entry.requestId,

@@ -16,7 +16,6 @@ import {
   ListBriefingSlotsQuery,
 } from '@spoh/shared';
 import { defaultRateLimit } from '../../../platform/http/rateLimit.js';
-import { requireCapability } from '../../../platform/http/access.js';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { validate } from '../../../platform/http/validate.js';
 import {
@@ -46,7 +45,6 @@ shiftRouter.post(
   '/swaps',
   defaultRateLimit,
   authorize('Swap.Request', fromBody('ShiftAssignment', 'assignmentId'), { changes: ['C12'] }),
-  requireCapability('own.read'),
   validate({ body: CreateSwapRequest }),
   requestSwapHandler,
 );
@@ -56,7 +54,6 @@ shiftRouter.get(
   '/swaps',
   defaultRateLimit,
   authorize('Self.Read', self),
-  requireCapability('own.read'),
   mySwapsHandler,
 );
 
@@ -65,7 +62,6 @@ shiftRouter.get(
   '/swaps/pending',
   defaultRateLimit,
   authorizeAll('Swap.Decide', anyPendingSwap, { any: true }),
-  requireCapability('swap.approve'),
   pendingSwapsHandler,
 );
 
@@ -73,7 +69,6 @@ shiftRouter.post(
   '/swaps/:id/decide',
   defaultRateLimit,
   authorize('Swap.Decide', fromParam('SwapRequest')),
-  requireCapability('swap.approve'),
   validate({ params: IdParams, body: DecideSwapRequest }),
   decideSwapHandler,
 );
@@ -86,7 +81,6 @@ shiftRouter.get(
   '/briefing-slots',
   defaultRateLimit,
   authorize('Self.Read', self),
-  requireCapability('own.read'),
   validate({ query: ListBriefingSlotsQuery }),
   briefingSlotsHandler,
 );
@@ -95,7 +89,6 @@ shiftRouter.post(
   '/briefing-slots/:id/complete',
   defaultRateLimit,
   authorize('Briefing.Complete', fromParam('BriefingSlot'), { changes: ['C1'] }),
-  requireCapability('own.read'),
   validate({ params: IdParams, body: CompleteBriefingSlotRequest }),
   completeSlotHandler,
 );
@@ -105,6 +98,5 @@ shiftRouter.get(
   '/gaps',
   defaultRateLimit,
   authorize('Dashboard.ReadEvent', theEvent),
-  requireCapability('dashboard.event.read'),
   staffingGapsHandler,
 );

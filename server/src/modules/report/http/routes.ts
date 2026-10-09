@@ -11,7 +11,6 @@ import {
 } from '@spoh/shared';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { sensitiveRateLimit } from '../../../platform/http/rateLimit.js';
-import { requireCapability } from '../../../platform/http/access.js';
 import { validate } from '../../../platform/http/validate.js';
 import { exportReportHandler, reportSummaryHandler } from './handlers.js';
 import {
@@ -29,7 +28,6 @@ reportRouter.get(
   '/snapshots',
   sensitiveRateLimit,
   authorize('Report.Generate', theEvent),
-  requireCapability('report.generate'),
   validate({ query: ReportSnapshotsQuery }),
   listSnapshotsHandler,
 );
@@ -37,7 +35,6 @@ reportRouter.get(
   '/snapshots/:id',
   sensitiveRateLimit,
   authorize('Report.Generate', theEvent),
-  requireCapability('report.generate'),
   validate({ params: ReportSnapshotParams, query: ReportSnapshotReadQuery }),
   readSnapshotHandler,
 );
@@ -45,7 +42,6 @@ reportRouter.get(
   '/snapshots/:id/export',
   sensitiveRateLimit,
   authorize('Report.Export', theEvent),
-  requireCapability('report.generate'),
   validate({ params: ReportSnapshotParams, query: ReportSnapshotExportQuery }),
   exportSnapshotHandler,
 );
@@ -59,7 +55,6 @@ reportRouter.get(
   '/summary',
   sensitiveRateLimit,
   authorize('Report.Generate', theEvent),
-  requireCapability('report.generate'),
   validate({ query: ReportQuery }),
   reportSummaryHandler,
 );
@@ -72,7 +67,6 @@ reportRouter.get(
   '/export',
   sensitiveRateLimit,
   authorize('Report.Export', theEvent),
-  requireCapability('report.generate'),
   validate({ query: ReportExportQuery }),
   exportReportHandler,
 );

@@ -12,7 +12,6 @@ import {
 } from '@spoh/shared';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { defaultRateLimit, sensitiveRateLimit } from '../../../platform/http/rateLimit.js';
-import { requireCapability } from '../../../platform/http/access.js';
 import { validate } from '../../../platform/http/validate.js';
 import {
   closeWindowHandler,
@@ -38,7 +37,6 @@ fallbackRouter.post(
   '/windows',
   defaultRateLimit,
   authorize('Fallback.Declare', theEvent),
-  requireCapability('fallback.declare'),
   validate({ body: DeclareFallbackRequest }),
   declareWindowHandler,
 );
@@ -47,7 +45,6 @@ fallbackRouter.post(
   '/windows/:id/close',
   defaultRateLimit,
   authorize('Fallback.Declare', theEvent),
-  requireCapability('fallback.declare'),
   validate({ params: IdParams, body: CloseFallbackRequest }),
   closeWindowHandler,
 );
@@ -57,7 +54,6 @@ fallbackRouter.get(
   '/windows',
   defaultRateLimit,
   authorizeAll('Dashboard.ReadStation', anyStation('Dashboard.ReadStation'), { any: true }),
-  requireCapability('dashboard.station.read'),
   validate({ query: TimeRangeQuery }),
   listWindowsHandler,
 );
@@ -71,7 +67,6 @@ fallbackRouter.post(
   '/imports/registrations',
   sensitiveRateLimit,
   authorize('Fallback.Import', theEvent),
-  requireCapability('fallback.import'),
   validate({ body: ImportRegistrationsRequest }),
   importRegistrationsHandler,
 );
@@ -80,7 +75,6 @@ fallbackRouter.post(
   '/imports/footfall',
   sensitiveRateLimit,
   authorize('Fallback.Import', theEvent),
-  requireCapability('fallback.import'),
   validate({ body: ImportFootfallRequest }),
   importFootfallHandler,
 );

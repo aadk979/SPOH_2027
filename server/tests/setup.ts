@@ -1,7 +1,5 @@
-import { appendFileSync } from 'node:fs';
-import { afterAll, beforeAll, expect, vi } from 'vitest';
+import { afterAll, beforeAll, vi } from 'vitest';
 import { disconnectPrisma, pingDatabase } from '../src/platform/db/client.js';
-import { useShadowSink } from '../src/platform/http/authorize.js';
 
 /**
  * Integration test setup.
@@ -22,22 +20,6 @@ import { useShadowSink } from '../src/platform/http/authorize.js';
 
 /** 2027-01-07 11:30 Singapore — Open House Day 1, mid-morning block. */
 export const FROZEN_NOW = new Date('2027-01-07T03:30:00.000Z');
-
-/**
- * `SPOH_SHADOW_REPORT=<file>` records every Cedar shadow finding (P11.5) the suite
- * produces, one JSON line each with the test that caused it.
- */
-const shadowReport = process.env.SPOH_SHADOW_REPORT;
-if (shadowReport) {
-  useShadowSink((detail, message) => {
-    const { testPath, currentTestName } = expect.getState();
-    appendFileSync(
-      shadowReport,
-      `${JSON.stringify({ message, test: `${testPath ?? ''} > ${currentTestName ?? ''}`, ...detail })}
-`,
-    );
-  });
-}
 
 beforeAll(async () => {
   vi.useFakeTimers({ toFake: ['Date'] });

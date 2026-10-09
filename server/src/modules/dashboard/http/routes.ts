@@ -5,7 +5,6 @@ import { z } from 'zod';
 import { Id, RehearsalInclusionQuery } from '@spoh/shared';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { defaultRateLimit } from '../../../platform/http/rateLimit.js';
-import { requireCapability } from '../../../platform/http/access.js';
 import { validate } from '../../../platform/http/validate.js';
 import { dataHealthHandler, liveDashboardHandler, stationDashboardHandler } from './handlers.js';
 
@@ -25,7 +24,6 @@ dashboardRouter.get(
   '/live',
   defaultRateLimit,
   authorize('Dashboard.ReadEvent', theEvent),
-  requireCapability('dashboard.event.read'),
   validate({ query: RehearsalInclusionQuery }),
   liveDashboardHandler,
 );
@@ -34,7 +32,6 @@ dashboardRouter.get(
   '/data-health',
   defaultRateLimit,
   authorize('Dashboard.ReadEvent', theEvent),
-  requireCapability('dashboard.event.read'),
   validate({ query: RehearsalInclusionQuery }),
   dataHealthHandler,
 );
@@ -43,7 +40,6 @@ dashboardRouter.get(
   '/station/:id',
   defaultRateLimit,
   authorize('Dashboard.ReadStation', fromParam('Station')),
-  requireCapability('dashboard.station.read'),
   validate({ params: StationIdParams, query: RehearsalInclusionQuery }),
   stationDashboardHandler,
 );

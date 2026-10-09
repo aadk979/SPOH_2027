@@ -1,5 +1,5 @@
 {
-  "$comment": "Fixed permission-editor floors approved by the human owner on 6 October 2026: the lowest approved default role for each of the 45 granted Editable actions; Settings.Read (D-21, 8 October 2026) follows the same rule. These are authored restrictions, never runtime-derived grants. VisitorRecord.Read eligibility is still awaiting a separate owner decision; it has no floor or default grant.",
+  "$comment": "Fixed permission-editor floors approved by the human owner on 6 October 2026: the lowest approved default role for each of the 45 granted Editable actions; Settings.Read (D-21, 8 October 2026) follows the same rule. These are authored restrictions, never runtime-derived grants. VisitorRecord.Read has no default grant, so its floor is the owner's own decision (D-15 = A, 9 October 2026): every role is eligible for an explicit grant, and each read still needs the field's reader role.",
   "approval": {
     "date": "2026-10-06",
     "decision": "lowest-approved-default-role"
@@ -52,5 +52,12 @@
     "Structure.Read": "IC",
     "Swap.Decide": "IC"
   },
-  "unresolved": ["VisitorRecord.Read"]
+  "ownerFloors": {
+    "VisitorRecord.Read": {
+      "role": "VOLUNTEER",
+      "decision": "D-15 = A",
+      "date": "2026-10-09"
+    }
+  },
+  "unresolved": []
 }

@@ -11,7 +11,6 @@ import {
   UpdateCategoryScheduleRequest,
   CancelCategoryScheduleRequest,
 } from '@spoh/shared';
-import { requireCapability } from '../../../platform/http/access.js';
 import { idempotent } from '../../../platform/http/idempotency.js';
 import { adminRateLimit, defaultRateLimit } from '../../../platform/http/rateLimit.js';
 import { validate } from '../../../platform/http/validate.js';
@@ -40,7 +39,6 @@ function registerCategoryReads(router: Router): void {
     '/capture-categories',
     defaultRateLimit,
     authorize('Settings.Read', theEvent, { changes: ['C14'] }),
-    requireCapability('config.manage'),
     validate({ query: CategoryActivityListQuery }),
     listCategoryActivityHandler,
   );
@@ -48,7 +46,6 @@ function registerCategoryReads(router: Router): void {
     '/capture-categories/:categoryId',
     defaultRateLimit,
     authorize('Settings.Read', theEvent, { changes: ['C14'] }),
-    requireCapability('config.manage'),
     validate({ params: CategoryActivityParams, query: z.object({}).strict() }),
     getCategoryActivityHandler,
   );
@@ -59,7 +56,6 @@ function registerCategoryScheduleReads(router: Router): void {
     '/capture-categories/:categoryId/schedules',
     defaultRateLimit,
     authorize('Settings.Read', theEvent, { changes: ['C14'] }),
-    requireCapability('config.manage'),
     validate({ params: CategoryActivityParams, query: CategoryScheduleListQuery }),
     listCategorySchedulesHandler,
   );
@@ -67,7 +63,6 @@ function registerCategoryScheduleReads(router: Router): void {
     '/capture-categories/:categoryId/schedules/:id',
     defaultRateLimit,
     authorize('Settings.Read', theEvent, { changes: ['C14'] }),
-    requireCapability('config.manage'),
     validate({ params: CategoryScheduleParams, query: z.object({}).strict() }),
     getCategoryScheduleHandler,
   );
@@ -78,7 +73,6 @@ function registerCategoryScheduleWrites(router: Router): void {
     '/capture-categories/:categoryId/schedules',
     adminRateLimit,
     authorize('Schedule.Manage', theEvent),
-    requireCapability('config.manage'),
     validate({
       params: CategoryActivityParams,
       body: CreateCategoryScheduleRequest,
@@ -91,7 +85,6 @@ function registerCategoryScheduleWrites(router: Router): void {
     '/capture-categories/:categoryId/schedules/:id',
     adminRateLimit,
     authorize('Schedule.Manage', theEvent),
-    requireCapability('config.manage'),
     validate({
       params: CategoryScheduleParams,
       body: UpdateCategoryScheduleRequest,
@@ -104,7 +97,6 @@ function registerCategoryScheduleWrites(router: Router): void {
     '/capture-categories/:categoryId/schedules/:id/cancel',
     adminRateLimit,
     authorize('Schedule.Manage', theEvent),
-    requireCapability('config.manage'),
     validate({
       params: CategoryScheduleParams,
       body: CancelCategoryScheduleRequest,

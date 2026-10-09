@@ -14,7 +14,6 @@ import {
   RegistrationSummaryQuery,
   VoidRegistrationRequest,
 } from '@spoh/shared';
-import { requireCapability, requireStationScope } from '../../../platform/http/access.js';
 import { captureRateLimit, defaultRateLimit } from '../../../platform/http/rateLimit.js';
 import { validate } from '../../../platform/http/validate.js';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
@@ -44,9 +43,7 @@ registrationRouter.post(
   '/',
   captureRateLimit,
   authorize('Registration.Create', stationFromBody),
-  requireCapability('registration.create'),
   validate({ body: CreateRegistrationRequest }),
-  requireStationScope(),
   idempotent('POST /registrations'),
   recordRegistrationHandler,
 );
@@ -56,9 +53,7 @@ registrationRouter.post(
   '/group',
   captureRateLimit,
   authorize('Registration.Create', stationFromBody),
-  requireCapability('registration.create'),
   validate({ body: CreateGroupRegistrationRequest }),
-  requireStationScope(),
   idempotent('POST /registrations/group'),
   recordGroupRegistrationHandler,
 );
@@ -75,7 +70,6 @@ registrationRouter.post(
   '/:id/void',
   defaultRateLimit,
   authorize('Record.Void', fromParam('Registration')),
-  requireCapability('record.void'),
   validate({ params: IdParams, body: VoidRegistrationRequest }),
   voidRegistrationHandler,
 );
@@ -84,7 +78,6 @@ registrationRouter.get(
   '/summary',
   defaultRateLimit,
   authorizeAll('Dashboard.ReadStation', anyStation('Dashboard.ReadStation'), { any: true }),
-  requireCapability('dashboard.station.read'),
   validate({ query: RegistrationSummaryQuery }),
   summariseRegistrationsHandler,
 );

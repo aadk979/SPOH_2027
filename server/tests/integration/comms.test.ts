@@ -11,6 +11,7 @@ import {
   createVolunteer,
   type TestVolunteer,
   testEvent,
+  membershipOf,
 } from '../helpers/fixtures.js';
 
 /**
@@ -82,12 +83,13 @@ describe('who may send what', () => {
   });
 
   it('denies an IC an event-wide announcement', async () => {
-    // The distinction lives in the payload, not the path, so the check has to
-    // be in the service where the target is visible.
+    // The distinction lives in the payload, not the path: with no station the request asks
+    // Announcement.SendEvent, which an IC is not granted (C4).
     const response = await send(ic, { body: 'Everyone please gather.', target: {} });
 
     expect(response.status).toBe(403);
-    expect(response.body.error.message).toContain('event-wide');
+    expect(response.body.error.code).toBe('FORBIDDEN');
+    expect(await rawDb.announcement.count({ where: { body: 'Everyone please gather.' } })).toBe(0);
   });
 
   it('lets the Chief address the whole event', async () => {
@@ -331,6 +333,7 @@ describe('briefing waves', () => {
         eventDayId,
         startsAt: new Date(Date.now() + 20 * 60_000),
         briefierId: chief.id,
+        briefierMembershipId: (await membershipOf(chief.id)).id,
         waveSize: 20,
       },
     });
@@ -352,6 +355,7 @@ describe('briefing waves', () => {
         eventDayId,
         startsAt: new Date(),
         briefierId: chief.id,
+        briefierMembershipId: (await membershipOf(chief.id)).id,
         waveSize: 20,
       },
     });
@@ -372,6 +376,7 @@ describe('briefing waves', () => {
         eventDayId,
         startsAt: new Date(),
         briefierId: chief.id,
+        briefierMembershipId: (await membershipOf(chief.id)).id,
         waveSize: 20,
       },
     });

@@ -2,7 +2,13 @@ import request from 'supertest';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app/createApp.js';
 import { rawDb, resetDatabase } from '../helpers/db.js';
-import { bearer, createVolunteer, testEvent, type TestVolunteer } from '../helpers/fixtures.js';
+import {
+  bearer,
+  createVolunteer,
+  testEvent,
+  type TestVolunteer,
+  makePlatformAdmin,
+} from '../helpers/fixtures.js';
 
 const app = createApp();
 let admin: TestVolunteer;
@@ -11,6 +17,8 @@ let volunteer: TestVolunteer;
 beforeEach(async () => {
   await resetDatabase();
   admin = await createVolunteer({ email: 'admin@attendance-config.test', role: 'ADMIN' });
+  // Trusted networks and the attendance root are security settings (C9).
+  await makePlatformAdmin(admin.id);
   volunteer = await createVolunteer({
     email: 'volunteer@attendance-config.test',
     role: 'VOLUNTEER',

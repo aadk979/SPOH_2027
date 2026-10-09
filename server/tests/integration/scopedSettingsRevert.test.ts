@@ -59,7 +59,10 @@ const effects = () =>
   Promise.all([
     rawDb.setting.findMany({ where: { eventId: f.eventId }, orderBy: { id: 'asc' } }),
     rawDb.settingChange.count({ where: { eventId: f.eventId } }),
-    rawDb.auditLog.count({ where: { eventId: f.eventId } }),
+    // A refusal is recorded in the security audit; it changes nothing (P11.5).
+    rawDb.auditLog.count({
+      where: { eventId: f.eventId, action: { not: 'authorization.denied' } },
+    }),
     rawDb.idempotencyRecord.count({ where: { eventId: f.eventId } }),
     f.state(),
   ]);

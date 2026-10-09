@@ -836,8 +836,9 @@ export const ACTION_CATALOGUE = {
     principalTypes: ['Membership'],
     resourceTypes: ['Event', 'VisitorRecord'],
     minimumRole: {
-      status: 'unresolved',
-      reason: 'owner-decision-pending',
+      status: 'approved',
+      role: 'VOLUNTEER',
+      rank: 10,
     },
   },
 } as const satisfies Record<

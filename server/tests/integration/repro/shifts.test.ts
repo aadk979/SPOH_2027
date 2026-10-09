@@ -14,6 +14,7 @@ import {
   createVolunteer,
   testEvent,
   type TestVolunteer,
+  membershipOf,
 } from '../../helpers/fixtures.js';
 
 /**
@@ -166,14 +167,15 @@ describe('shifts and swaps (P03 repros)', () => {
     expect(response.status).toBe(403);
   });
 
-  // F03-016
-  it('lets an IC complete a wave assigned to someone else, as the error message promises', async () => {
+  // F03-016, decided by C1: only the assigned briefer completes their wave, an IC included.
+  it('refuses an IC completing a wave assigned to someone else (C1)', async () => {
     const slot = await rawDb.briefingSlot.create({
       data: {
         eventId: (await testEvent()).eventId,
         eventDayId: dayId,
         startsAt: new Date(FROZEN_NOW.getTime() - 60 * 60_000),
         briefierId: first.id,
+        briefierMembershipId: (await membershipOf(first.id)).id,
       },
     });
 
@@ -182,7 +184,10 @@ describe('shifts and swaps (P03 repros)', () => {
       .set('Authorization', bearer(ic))
       .send({});
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(403);
+    expect(
+      (await rawDb.briefingSlot.findUniqueOrThrow({ where: { id: slot.id } })).completedAt,
+    ).toBeNull();
   });
 
   // F03-023

@@ -1,61 +1,6 @@
 import type { Request } from 'express';
 import { describe, expect, it } from 'vitest';
-import { compare, type ShadowOutcome } from './authorize.js';
 import { announcementTarget, grantedRank, settingCheck } from './authorizeResources.js';
-
-const at = (status: number, legacyGuardRefused = false) => ({ status, legacyGuardRefused });
-
-const decided = (allowed: boolean): ShadowOutcome => ({
-  kind: 'decided',
-  allowed,
-  checks: [{ action: 'Structure.Read', allowed, policies: [], errors: [] }],
-});
-
-describe('a shadow decision against what the app answered', () => {
-  it('agrees when both allow or both refuse', () => {
-    expect(compare(decided(true), at(200), {})).toBeNull();
-    expect(compare(decided(false), at(403), {})).toBeNull();
-  });
-
-  it('reports a request the policies would refuse but the app served', () => {
-    expect(compare(decided(false), at(201), {})).toMatchObject({
-      message: 'authorization shadow mismatch',
-      detail: { cedar: 'deny', status: 201, explainedBy: 'unexplained' },
-    });
-  });
-
-  it('reports a request the policies would allow but the app refused, with its change', () => {
-    expect(compare(decided(true), at(403, true), { changes: ['C7'] })).toMatchObject({
-      detail: { cedar: 'allow', refusedBy: 'guard', explainedBy: ['C7'] },
-    });
-    expect(compare(decided(true), at(403), {})).toMatchObject({
-      detail: { refusedBy: 'use case' },
-    });
-  });
-
-  it('does not compare an answer that says nothing about permission', () => {
-    for (const status of [400, 404, 409, 422, 429, 500]) {
-      expect(compare(decided(false), at(status), {})).toBeNull();
-      expect(compare(decided(true), at(status), {})).toBeNull();
-    }
-  });
-
-  it('reports an evaluation error unless the route refused the request as well', () => {
-    const failed: ShadowOutcome = { kind: 'failed', error: 'NotFoundError: Station not found' };
-    expect(compare(failed, at(404), {})).toBeNull();
-    expect(compare(failed, at(400), {})).toBeNull();
-    expect(compare(failed, at(403), {})).toBeNull();
-    expect(compare(failed, at(200), {})).toMatchObject({ message: 'authorization shadow error' });
-  });
-
-  it('does not compare a replay of the caller’s own earlier answer', () => {
-    expect(compare(decided(false), { ...at(200), replayed: true }, {})).toBeNull();
-  });
-
-  it('has nothing to compare when there was nothing to ask', () => {
-    expect(compare({ kind: 'unaskable' }, at(200), {})).toBeNull();
-  });
-});
 
 const request = (body: unknown): Request =>
   ({ body, auth: { eventId: 'E1' } }) as unknown as Request;

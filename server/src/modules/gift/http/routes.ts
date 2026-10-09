@@ -11,7 +11,6 @@ import { AdjustGiftStockRequest, GiftSummaryQuery, Id, RedeemGiftRequest } from 
 import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { idempotent } from '../../../platform/http/idempotency.js';
 import { captureRateLimit, defaultRateLimit } from '../../../platform/http/rateLimit.js';
-import { requireCapability, requireStationScope } from '../../../platform/http/access.js';
 import { validate } from '../../../platform/http/validate.js';
 import {
   adjustStockHandler,
@@ -35,7 +34,6 @@ giftRouter.get(
   '/',
   defaultRateLimit,
   authorize('Self.Read', self, { changes: ['C16'] }),
-  requireCapability('gift.redeem'),
   listGiftsHandler,
 );
 
@@ -43,9 +41,7 @@ giftRouter.post(
   '/redemptions',
   captureRateLimit,
   authorize('Gift.Redeem', stationFromBody),
-  requireCapability('gift.redeem'),
   validate({ body: RedeemGiftRequest }),
-  requireStationScope(),
   idempotent('POST /gifts/redemptions'),
   redeemGiftHandler,
 );
@@ -54,7 +50,6 @@ giftRouter.post(
   '/:id/adjust',
   defaultRateLimit,
   authorize('Count.Adjust', fromParam('GiftType')),
-  requireCapability('count.adjust'),
   validate({ params: IdParams, body: AdjustGiftStockRequest }),
   adjustStockHandler,
 );
@@ -63,7 +58,6 @@ giftRouter.get(
   '/summary',
   defaultRateLimit,
   authorizeAll('Dashboard.ReadStation', anyStation('Dashboard.ReadStation'), { any: true }),
-  requireCapability('dashboard.station.read'),
   validate({ query: GiftSummaryQuery }),
   summariseGiftsHandler,
 );

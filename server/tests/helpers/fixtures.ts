@@ -312,3 +312,21 @@ export async function membershipOf(personId: string) {
     include: { reportsTo: { select: { personId: true } } },
   });
 }
+
+/**
+ * Make someone a platform admin of the test event's organisation: since C9 only platform
+ * admins change security and privacy settings (lost-person retention, visitor data, trusted
+ * networks).
+ */
+export async function makePlatformAdmin(personId: string): Promise<void> {
+  const { eventId } = await testEvent();
+  const { organisationId } = await prisma.event.findUniqueOrThrow({
+    where: { id: eventId },
+    select: { organisationId: true },
+  });
+  await prisma.organisationMembership.upsert({
+    where: { organisationId_personId: { organisationId, personId } },
+    create: { organisationId, personId, role: 'PLATFORM_ADMIN' },
+    update: { role: 'PLATFORM_ADMIN' },
+  });
+}

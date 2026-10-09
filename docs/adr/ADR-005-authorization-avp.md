@@ -210,6 +210,21 @@ UI affordances: GET /events/:id/me/permissions ─▶ LocalCedarAuthorizer only 
 
   ADR-008 carries the figure, and P16.2 replaces the estimate with a measurement.
 
+- **What a refusal looks like** (amended in P11.5 release 2b, 9 October 2026,
+  [report](../../remediation/reports/P11/enforcement-release-2b.md)). A denial is a 403,
+  recorded in the security audit (`authorization.denied`, the actions and deciding policies,
+  one row per caller and route a minute). It keeps the reason the screens already explain
+  where a policy names it: `SELF_MUTATION_DENIED`, `ROLE_ESCALATION_DENIED`,
+  `STATION_SCOPE_DENIED`, 409 for structure frozen once LIVE, the reopen blocker, and 404 for
+  an announcement not addressed to you. A request refused **only** by the capture window,
+  the archived event or check-in's attendance and running shift goes on to its use case,
+  which enforces the same rule again under the phase lock with its own reason (the closing
+  grace for a queued capture, `SETTING_LOCKED`, `NOT_ON_SHIFT`); the middleware's version
+  can race go-live and is coarser. A write a use case lets through in that case is logged as
+  an error. A replay of the caller's settled answer is refused for who they are, never for
+  the phase. A collection read with nothing to ask (an empty swap queue) answers with the
+  role's grant in that event.
+
 ### 7. Editing, explaining, testing
 
 - **Admins edit** (P11.7) per event: the roles list in plain language, grouped by action group,

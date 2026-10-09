@@ -4,7 +4,6 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { Id, ProvisionVolunteerRequest, RosterImportRequest } from '@spoh/shared';
 import { defaultRateLimit, sensitiveRateLimit } from '../../../platform/http/rateLimit.js';
-import { requireCapability } from '../../../platform/http/access.js';
 import { stationRosterHandler } from '../../assignments/index.js';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { validate } from '../../../platform/http/validate.js';
@@ -23,7 +22,6 @@ rosterRouter.get(
   '/me',
   defaultRateLimit,
   authorize('Self.Read', self),
-  requireCapability('own.read'),
   myShiftsHandler,
 );
 
@@ -31,7 +29,6 @@ rosterRouter.get(
   '/station/:stationId',
   defaultRateLimit,
   authorize('Roster.ReadStation', fromParam('Station', 'stationId'), { changes: ['C3'] }),
-  requireCapability('dashboard.station.read'),
   validate({ params: StationIdParams, query: StationRosterQuery }),
   stationRosterHandler,
 );
@@ -45,7 +42,6 @@ rosterRouter.post(
   '/volunteers',
   sensitiveRateLimit,
   authorizeAll('People.Invite', invite, { changes: ['C5'] }),
-  requireCapability('user.provision'),
   validate({ body: ProvisionVolunteerRequest }),
   provisionVolunteerHandler,
 );
@@ -60,7 +56,6 @@ rosterRouter.post(
   '/import',
   sensitiveRateLimit,
   authorize('Roster.Edit', theEvent, { changes: ['C5'] }),
-  requireCapability('roster.edit'),
   validate({ body: RosterImportRequest }),
   importRosterHandler,
 );

@@ -1,6 +1,13 @@
-import type { Action } from '@spoh/access-policies';
+import {
+  ACTION_CATALOGUE,
+  ACTION_IDS,
+  EDITABLE_ACTION_IDS,
+  type Action,
+  type Role,
+} from '@spoh/access-policies';
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import {
+  databaseRoleGrants,
   EntityBuilder,
   LocalCedarAuthorizer,
   type Authorizer,
@@ -8,19 +15,29 @@ import {
   type ResourceRef,
 } from '../access/authorizer/index.js';
 import { prisma, type PrismaTransactionClient } from '../db/client.js';
+import { ERROR_CODES } from '@spoh/shared';
+import {
+  AppError,
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+  ServiceUnavailableError,
+  StationScopeError,
+} from '../errors/index.js';
+import { hasSettledAnswer } from '../idempotency/index.js';
 import { logger } from '../logger/index.js';
 import { systemClock } from '../time/index.js';
+import { recordDenial } from './authorizationDenials.js';
+import { countOutcome, startDecisionSummary } from './decisionTally.js';
 import { named } from './named.js';
-import { countFinding, countOutcome, startShadowSummary } from './shadowTally.js';
 import { getAuth } from './requireAuth.js';
 
 /**
- * Cedar enforcement points (ADR-005, P11.5), in shadow: every guarded route asks the
- * policies as well as its old guard, and only the old guard and the use case decide.
- * When the request finishes, a decision that disagrees with what the app answered is
- * logged, tagged with the `CHANGES.md` rows that explain it on that route, or as
- * unexplained. Shadow never changes a response: an evaluation error is logged and the
- * request continues.
+ * Cedar enforcement points (ADR-005, P11.5): every route that runs inside a membership asks
+ * the policies, and their answer decides. A denial is a 403, recorded in the security audit
+ * with the policies that decided it. A resource the request names but that does not exist
+ * answers as the route always did (404, 400); an evaluation that cannot finish fails closed
+ * with a 503, never a 403, because the caller may well be allowed.
  */
 
 /** A row of `packages/access-policies/CHANGES.md`: a deliberate difference from today. */
@@ -49,11 +66,11 @@ export type ResourceOf = (req: Request) => ResourceRef | Promise<ResourceRef>;
 export type ChecksOf = (req: Request) => readonly Check[] | Promise<readonly Check[]>;
 
 export interface AuthorizeOptions {
-  /** The `CHANGES.md` rows under which this route's answer may differ from today's. */
+  /** The `CHANGES.md` rows that changed this route's answer from the capability matrix's. */
   readonly changes?: readonly ChangeId[];
   /**
    * Allowed when any one question is (a collection read, asked of candidate resources)
-   * rather than all of them. With no candidate there is nothing to ask, and nothing to show.
+   * rather than all of them.
    */
   readonly any?: boolean;
 }
@@ -65,10 +82,10 @@ export interface CheckResult {
   readonly errors: readonly string[];
 }
 
-export type ShadowOutcome =
+export type Outcome =
   | { readonly kind: 'decided'; readonly allowed: boolean; readonly checks: readonly CheckResult[] }
   | { readonly kind: 'unaskable' }
-  | { readonly kind: 'failed'; readonly error: string };
+  | { readonly kind: 'failed'; readonly cause: unknown };
 
 let engine: Authorizer | null = null;
 
@@ -76,15 +93,6 @@ let engine: Authorizer | null = null;
 function authorizer(): Authorizer {
   engine ??= new LocalCedarAuthorizer();
   return engine;
-}
-
-type Sink = (detail: Record<string, unknown>, message: string) => void;
-
-let sink: Sink = (detail, message) => logger.warn({ authorization: detail }, message);
-
-/** For tests: where shadow findings go instead of the log. */
-export function useShadowSink(next: Sink | null): void {
-  sink = next ?? ((detail, message) => logger.warn({ authorization: detail }, message));
 }
 
 /** For tests: the engine the enforcement points ask. */
@@ -113,57 +121,224 @@ export function authorize(
   return authorizeAll(action, async (req) => [{ action, resource: await resource(req) }], options);
 }
 
-/** Several questions, all of which must be allowed: a request that touches several resources. */
+/**
+ * Several questions, all of which must be allowed: a request that touches several resources.
+ * `name` is the action when the questions all ask one; a request with nothing to ask falls
+ * back to it (see `nothingToAsk`).
+ */
 export function authorizeAll(
   name: string,
   checks: ChecksOf,
   options: AuthorizeOptions = {},
 ): RequestHandler {
-  const point: EnforcementPoint = { checks, options };
+  const point: EnforcementPoint = { name, checks, options };
   return named(`authorize(${name})`, (req: Request, res: Response, next: NextFunction): void => {
-    void shadow(req, res, point).then(() => next());
+    enforce(req, res, point).then(() => next(), next);
   });
 }
 
 interface EnforcementPoint {
+  readonly name: string;
   readonly checks: ChecksOf;
   readonly options: AuthorizeOptions;
 }
 
-async function shadow(req: Request, res: Response, point: EnforcementPoint): Promise<void> {
+async function enforce(req: Request, res: Response, point: EnforcementPoint): Promise<void> {
   const outcome = await decide(req, point.checks, point.options.any ?? false).catch(
-    (error: unknown): ShadowOutcome => ({
-      kind: 'failed',
-      error: error instanceof Error ? `${error.name}: ${error.message}` : String(error),
-    }),
+    (cause: unknown): Outcome => ({ kind: 'failed', cause }),
   );
   res.locals.authorization = outcome;
-  tallyOutcome(outcome);
-  res.once('finish', () => {
-    const finding = compare(outcome, answerOf(res), point.options);
-    if (!finding) return;
-    countFinding();
-    sink({ route: routeOf(req), role: req.auth?.role, ...finding.detail }, finding.message);
-  });
+  startDecisionSummary((tally) => logger.info({ authorization: tally }, 'authorization summary'));
+  if (outcome.kind === 'failed') {
+    countOutcome('failed');
+    throw failure(req, outcome.cause);
+  }
+  if (outcome.kind === 'unaskable') {
+    countOutcome('unaskable');
+    if (await nothingToAsk(req, point.name)) return;
+    throw refuse(req, { actions: [point.name], policies: [] }, forbidden());
+  }
+  if (outcome.allowed) {
+    countOutcome('allowed');
+    return;
+  }
+  const refused = outcome.checks.filter((check) => !check.allowed);
+  const policies = [...new Set(refused.flatMap((check) => check.policies))];
+  if (await passesToUseCase(req, refused)) {
+    countOutcome('allowed');
+    watchPhaseHandover(req, res, policies);
+    return;
+  }
+  countOutcome('denied');
+  throw refuse(
+    req,
+    { actions: refused.map((check) => check.action), policies },
+    refusalFor(refused, policies),
+  );
 }
 
-function tallyOutcome(outcome: ShadowOutcome): void {
-  startShadowSummary((tally) =>
-    logger.info({ authorization: tally }, 'authorization shadow summary'),
+function refuse(
+  req: Request,
+  denial: { readonly actions: readonly string[]; readonly policies: readonly string[] },
+  error: AppError,
+): AppError {
+  recordDenial(req, { route: routeOf(req), path: patternOf(req), ...denial });
+  return error;
+}
+
+const forbidden = () => new ForbiddenError('You do not have permission to perform this action');
+
+/**
+ * Policies about the state of the event or of the caller's own record, which every use case
+ * enforces again under its own lock and with the reason the screens show: the capture window
+ * and the archived event (`SETTING_LOCKED`, the closing grace for a queued capture, the reopen
+ * blockers), and check-in's attendance and running shift (a conflict, not a permission
+ * denial). The middleware's answer can race go-live, and its capture window is coarser than
+ * the admission's. A request they alone refuse goes on to its use case, which refuses it with
+ * that reason. Structure frozen once LIVE has no such check, so the policy's answer stands
+ * (C15).
+ */
+const USE_CASE_PHASE_GUARDRAILS = new Set([
+  'guardrail.capture-window',
+  'guardrail.archived-read-only',
+  'self.check-in-conditions',
+]);
+const STRUCTURE_FROZEN = 'guardrail.structure-frozen-when-live';
+
+const refusedOnlyBy = (refused: readonly CheckResult[], guardrails: ReadonlySet<string>) =>
+  refused.length > 0 &&
+  refused.every(
+    (check) =>
+      check.policies.length > 0 && check.policies.every((policy) => guardrails.has(policy)),
   );
-  if (outcome.kind === 'decided') countOutcome(outcome.allowed ? 'allowed' : 'denied');
-  else countOutcome(outcome.kind);
+
+async function passesToUseCase(req: Request, refused: readonly CheckResult[]): Promise<boolean> {
+  if (refusedOnlyBy(refused, USE_CASE_PHASE_GUARDRAILS)) return true;
+  // The caller's retry of a structure change already answered before go-live: the
+  // idempotency middleware replays the stored answer, which was decided when it was made.
+  const phase = new Set([...USE_CASE_PHASE_GUARDRAILS, STRUCTURE_FROZEN]);
+  return refusedOnlyBy(refused, phase) && (await isSettledReplay(req));
+}
+
+async function isSettledReplay(req: Request): Promise<boolean> {
+  const key: unknown = (req.body as { idempotencyKey?: unknown } | undefined)?.idempotencyKey;
+  if (typeof key !== 'string' || key.length === 0) return false;
+  const { sub, eventId } = getAuth(req);
+  return hasSettledAnswer(key, { actorSub: sub, eventId });
 }
 
 /**
- * The policies' reads are plain queries, apart from the request's own, which shadow must
- * not change. Not an interactive transaction: under READ COMMITTED each statement has
+ * A use case is the second check on the event's phase; if one ever lets through a write the
+ * phase guardrail refused, that is a missing check, and the log says so (an error, so the
+ * environment's alarms see it).
+ */
+function watchPhaseHandover(req: Request, res: Response, policies: readonly string[]): void {
+  res.once('finish', () => {
+    if (res.statusCode >= 400 || res.locals.idempotentReplay === true) return;
+    if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) return;
+    logger.error(
+      { authorization: { route: routeOf(req), status: res.statusCode, policies } },
+      'phase guardrail not enforced by the use case',
+    );
+  });
+}
+
+/**
+ * The refusal the screens can explain, from the policies that decided it: yourself, a rank at
+ * or above your own, a station you are not on shift at, or an event whose structure is frozen.
+ * Anything else is the generic refusal.
+ */
+function refusalFor(refused: readonly CheckResult[], policies: readonly string[]): AppError {
+  if (policies.includes('guardrail.not-on-yourself')) {
+    return new AppError(
+      403,
+      ERROR_CODES.SELF_MUTATION_DENIED,
+      'You cannot change your own account. Ask another administrator.',
+    );
+  }
+  if (policies.includes('guardrail.outrank-target')) {
+    return new AppError(
+      403,
+      ERROR_CODES.ROLE_ESCALATION_DENIED,
+      'You cannot change an account at or above your own level.',
+    );
+  }
+  if (policies.includes('guardrail.grant-below-own-rank')) {
+    return new AppError(
+      403,
+      ERROR_CODES.ROLE_ESCALATION_DENIED,
+      'You cannot grant a role at or above your own.',
+    );
+  }
+  // Reopening is the platform admins' (C13); the transition's own answer names it as the
+  // blocker, which the lifecycle screen explains.
+  if (
+    refused.every((check) => check.action === 'Event.Reopen') &&
+    refusedOnlyBy(refused, new Set(['guardrail.locked-actions']))
+  ) {
+    return new ConflictError(ERROR_CODES.CONFLICT, 'The event cannot make this transition.', {
+      blockers: ['platform-admin-required'],
+    });
+  }
+  if (refusedOnlyBy(refused, new Set([STRUCTURE_FROZEN]))) {
+    return new ConflictError(
+      ERROR_CODES.CONFLICT,
+      'The event is live: stations, event days, gift types and visitor fields can no longer be added.',
+    );
+  }
+  if (policies.includes('station-scope.capture')) return new StationScopeError();
+  // The inbox shows only what is addressed to you; anything else does not exist for you.
+  if (refused.every((check) => check.action === 'Announcement.Ack')) {
+    return new NotFoundError('Announcement');
+  }
+  return forbidden();
+}
+
+async function grantedToCaller(req: Request): Promise<readonly string[]> {
+  const { eventId, membershipId } = getAuth(req);
+  const member = await prisma.eventMembership.findFirst({
+    where: { eventId, id: membershipId },
+    select: { role: true },
+  });
+  if (!member) return [];
+  const grants = await databaseRoleGrants.grantsFor(prisma, eventId);
+  return grants[member.role as Role].grants;
+}
+
+/**
+ * A collection read with no candidate to ask about (an empty swap queue, a day that is not an
+ * event day, an event without stations) answers with the role's standing permission: an
+ * Editable action when this event grants it to the caller's role, a self-service action to
+ * every member. The use case then finds nothing to show, or says why.
+ */
+async function nothingToAsk(req: Request, name: string): Promise<boolean> {
+  if (!(ACTION_IDS as readonly string[]).includes(name)) return false;
+  const action = name as Action;
+  if ((ACTION_CATALOGUE[action].groups as readonly string[]).includes('Self')) return true;
+  if (!(EDITABLE_ACTION_IDS as readonly string[]).includes(action)) return false;
+  return (await grantedToCaller(req)).includes(action);
+}
+
+/**
+ * The resource the request names does not exist, or the request does not name one: the
+ * route's own answer (404, 400). Anything else stopped the policies from answering, which
+ * says nothing about the caller, so it fails closed without blaming them (ADR-005 §6).
+ */
+function failure(req: Request, cause: unknown): AppError {
+  if (cause instanceof AppError && cause.statusCode < 500) return cause;
+  logger.error({ err: cause, route: routeOf(req) }, 'authorization evaluation failed');
+  return new ServiceUnavailableError('Permissions could not be checked. Try again shortly.', cause);
+}
+
+/**
+ * The policies' reads are plain queries, apart from the request's own. Not an interactive
+ * transaction: under READ COMMITTED each statement has
  * its own snapshot anyway, so one bought no consistency, while it held a connection
  * through the Cedar evaluation and gave up after Prisma's 2 s wait for one. A cold pool
  * on staging took about 3 s to open connections, and the shadow check was the only
  * thing on those requests to fail (P11.5 release 2a, 9 October 2026).
  */
-async function decide(req: Request, checks: ChecksOf, any: boolean): Promise<ShadowOutcome> {
+async function decide(req: Request, checks: ChecksOf, any: boolean): Promise<Outcome> {
   const db: PrismaTransactionClient = prisma;
   const auth = getAuth(req);
   const recordedAt = clientRecordedAt(req);
@@ -207,70 +382,11 @@ function clientRecordedAt(req: Request): Date | undefined {
 
 /** The route's pattern, with the event a path names written as `:eventId`. */
 function routeOf(req: Request): string {
+  return `${req.method} ${patternOf(req)}`;
+}
+
+function patternOf(req: Request): string {
   const base = req.baseUrl.replace(/\/events\/[^/]+/, '/events/:eventId');
-  return `${req.method} ${base}${(req.route as { path?: string } | undefined)?.path ?? ''}`;
-}
-
-interface Finding {
-  readonly message: string;
-  readonly detail: Record<string, unknown>;
-}
-
-/** What the app answered, and whether a legacy guard (which enforcement removes) refused. */
-export interface Answer {
-  readonly status: number;
-  readonly legacyGuardRefused: boolean;
-  /** The caller's own stored answer, decided when the original request was. */
-  readonly replayed?: boolean;
-}
-
-function answerOf(res: Response): Answer {
-  return {
-    status: res.statusCode,
-    legacyGuardRefused: res.locals.legacyGuardRefused === true,
-    replayed: res.locals.idempotentReplay === true,
-  };
-}
-
-/**
- * The app refused permission (403), or it served the request (below 400). Anything else
- * (not found, conflict, invalid) says nothing about permission, so it is not compared.
- * A refusal by the use case stays after enforcement; one by a legacy guard does not, so
- * the finding says which it was.
- */
-export function compare(
-  outcome: ShadowOutcome,
-  answer: Answer,
-  options: AuthorizeOptions,
-): Finding | null {
-  const { status } = answer;
-  if (outcome.kind === 'unaskable' || answer.replayed) return null;
-  if (outcome.kind === 'failed') {
-    // The route's own validation, lookup or refusal answered the caller the same way.
-    if ([400, 403, 404].includes(status)) return null;
-    return {
-      message: 'authorization shadow error',
-      detail: { status, error: outcome.error },
-    };
-  }
-  const disagrees = outcome.allowed ? status === 403 : status < 400;
-  return disagrees ? mismatch(outcome, answer, options.changes ?? []) : null;
-}
-
-function mismatch(
-  outcome: Extract<ShadowOutcome, { kind: 'decided' }>,
-  answer: Answer,
-  changes: readonly ChangeId[],
-): Finding {
-  const { status } = answer;
-  return {
-    message: 'authorization shadow mismatch',
-    detail: {
-      status,
-      cedar: outcome.allowed ? 'allow' : 'deny',
-      ...(outcome.allowed ? { refusedBy: answer.legacyGuardRefused ? 'guard' : 'use case' } : {}),
-      checks: outcome.checks,
-      explainedBy: changes.length > 0 ? changes : 'unexplained',
-    },
-  };
+  const sub = (req.route as { path?: string } | undefined)?.path ?? '';
+  return sub === '/' ? base : `${base}${sub}`;
 }

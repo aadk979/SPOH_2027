@@ -4,6 +4,7 @@ import {
   self,
   settingFromBody,
   organisationAdmin,
+  operationalSettingFromBody,
 } from '../../../platform/http/authorizeResources.js';
 import type { Router } from 'express';
 import { z } from 'zod';
@@ -23,7 +24,6 @@ import {
   Id,
 } from '@spoh/shared';
 import { adminRateLimit, defaultRateLimit } from '../../../platform/http/rateLimit.js';
-import { requireCapability } from '../../../platform/http/access.js';
 import { validate } from '../../../platform/http/validate.js';
 import { idempotent } from '../../../platform/http/idempotency.js';
 import {
@@ -65,7 +65,6 @@ function registerCaptureScheduleManagementRoutes(router: Router): void {
     '/settings/catalogue/schedules',
     defaultRateLimit,
     authorize('Settings.Read', theEvent, { changes: ['C14'] }),
-    requireCapability('config.manage'),
     validate({ query: CaptureScheduleListQuery }),
     listCaptureSchedulesHandler,
   );
@@ -73,7 +72,6 @@ function registerCaptureScheduleManagementRoutes(router: Router): void {
     '/settings/catalogue/schedules/:id',
     adminRateLimit,
     authorize('Schedule.Manage', theEvent),
-    requireCapability('config.manage'),
     validate({
       params: z.object({ id: Id }).strict(),
       body: UpdateCaptureScheduleRequest,
@@ -86,7 +84,6 @@ function registerCaptureScheduleManagementRoutes(router: Router): void {
     '/settings/catalogue/schedules/:id/cancel',
     adminRateLimit,
     authorize('Schedule.Manage', theEvent),
-    requireCapability('config.manage'),
     validate({
       params: z.object({ id: Id }).strict(),
       body: CancelCaptureScheduleRequest,
@@ -102,7 +99,6 @@ function registerCaptureScheduleRoutes(router: Router): void {
     '/settings/catalogue/schedules',
     adminRateLimit,
     authorize('Schedule.Manage', theEvent),
-    requireCapability('config.manage'),
     validate({ body: CreateCaptureScheduleRequest }),
     idempotent('setting.capture.schedule', { redacted: captureScheduleReplay }),
     createCaptureScheduleHandler,
@@ -111,7 +107,6 @@ function registerCaptureScheduleRoutes(router: Router): void {
     '/settings/catalogue/schedules/:id',
     defaultRateLimit,
     authorize('Settings.Read', theEvent, { changes: ['C14'] }),
-    requireCapability('config.manage'),
     validate({ params: z.object({ id: Id }).strict(), query: z.object({}).strict() }),
     getCaptureScheduleHandler,
   );
@@ -131,7 +126,6 @@ function registerOperationalSettingsRoutes(router: Router): void {
     '/settings/client',
     defaultRateLimit,
     authorize('Self.Read', self),
-    requireCapability('own.read'),
     getClientSettingsHandler,
   );
 
@@ -139,7 +133,6 @@ function registerOperationalSettingsRoutes(router: Router): void {
     '/settings/catalogue',
     defaultRateLimit,
     authorize('Settings.Read', theEvent, { changes: ['C14'] }),
-    requireCapability('config.manage'),
     validate({ query: ScopedSettingsReadQuery }),
     getScopedSettingsHandler,
   );
@@ -148,7 +141,6 @@ function registerOperationalSettingsRoutes(router: Router): void {
     '/settings/catalogue/history',
     defaultRateLimit,
     authorize('Settings.Read', theEvent, { changes: ['C14'] }),
-    requireCapability('config.manage'),
     validate({ query: ScopedSettingsHistoryQuery }),
     getScopedHistoryHandler,
   );
@@ -156,8 +148,7 @@ function registerOperationalSettingsRoutes(router: Router): void {
   router.post(
     '/settings/catalogue',
     adminRateLimit,
-    authorizeAll('Settings', settingFromBody, { changes: ['C9'] }),
-    requireCapability('config.manage'),
+    authorizeAll('Settings.ManageEvent', operationalSettingFromBody),
     validate({ body: ScopedSettingsMutationRequest }),
     idempotent('setting.operational.change', { redacted: scopedSettingMutationReplay }),
     mutateScopedSettingHandler,
@@ -165,8 +156,7 @@ function registerOperationalSettingsRoutes(router: Router): void {
   router.post(
     '/settings/catalogue/revert',
     adminRateLimit,
-    authorizeAll('Settings', settingFromBody, { changes: ['C9'] }),
-    requireCapability('config.manage'),
+    authorizeAll('Settings.ManageEvent', operationalSettingFromBody),
     validate({ body: ScopedSettingsRevertRequest }),
     idempotent('setting.operational.revert', { redacted: scopedSettingRevertReplay }),
     revertScopedSettingHandler,
@@ -183,7 +173,6 @@ function registerProductSettingsRoutes(router: Router): void {
     '/event-settings',
     defaultRateLimit,
     authorize('Self.Read', self),
-    requireCapability('own.read'),
     getEventSettingsHandler,
   );
 
@@ -191,7 +180,6 @@ function registerProductSettingsRoutes(router: Router): void {
     '/event-settings',
     adminRateLimit,
     authorizeAll('Settings', settingFromBody, { changes: ['C9'] }),
-    requireCapability('config.manage'),
     validate({ body: ChangeEventSettingRequest }),
     changeEventSettingHandler,
   );
@@ -200,7 +188,6 @@ function registerProductSettingsRoutes(router: Router): void {
     '/event-settings/history',
     defaultRateLimit,
     authorize('Settings.Read', theEvent, { changes: ['C14'] }),
-    requireCapability('config.manage'),
     validate({ query: EventSettingHistoryQuery }),
     getEventSettingHistoryHandler,
   );
@@ -213,7 +200,6 @@ function registerProductSettingsRoutes(router: Router): void {
     '/event-settings/revert',
     adminRateLimit,
     authorizeAll('Settings', settingFromBody, { changes: ['C9'] }),
-    requireCapability('config.manage'),
     validate({ body: RevertEventSettingRequest }),
     idempotent('setting.product.revert', { redacted: eventSettingRevertReplay }),
     revertEventSettingHandler,
@@ -230,14 +216,12 @@ function registerOrganisationSettingsRoutes(router: Router): void {
     '/organisation-settings',
     defaultRateLimit,
     authorize('Self.Read', self),
-    requireCapability('own.read'),
     getOrganisationSettingsHandler,
   );
   router.patch(
     '/organisation-settings',
     adminRateLimit,
     authorizeAll('Platform.ManageOrganisation', organisationAdmin),
-    requireCapability('own.read'),
     validate({ body: ChangeOrganisationSettingRequest }),
     changeOrganisationSettingHandler,
   );

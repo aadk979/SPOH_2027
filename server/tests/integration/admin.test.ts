@@ -9,6 +9,7 @@ import {
   createEventDayToday,
   createStation,
   createVolunteer,
+  membershipOf,
   shiftOn,
   testEvent,
 } from '../helpers/fixtures.js';
@@ -392,13 +393,27 @@ describe('shift templates and event days', () => {
 });
 
 describe('stations, days and gifts', () => {
-  // The event's own station structure (ADR-002): a type and a tag.
+  // The event's own station structure (ADR-002): a type and a tag. Structure is built before
+  // go-live: once LIVE it is frozen (C15).
   beforeEach(async () => {
     const { eventId } = await testEvent();
+    await rawDb.event.update({ where: { id: eventId }, data: { status: 'REHEARSAL' } });
     await rawDb.stationType.create({
       data: { eventId, code: 'COURSE_ROOM', label: 'Course room', countsEntry: true },
     });
     await rawDb.stationTag.create({ data: { eventId, code: 'DCS', label: 'DCS' } });
+  });
+
+  it('freezes the structure once the event is live (C15)', async () => {
+    const { eventId } = await testEvent();
+    await rawDb.event.update({ where: { id: eventId }, data: { status: 'LIVE' } });
+    const refused = await request(app)
+      .post('/api/v1/admin/stations')
+      .set('Authorization', bearer(chief))
+      .send({ code: 'LATE_LAB', name: 'Late Lab', typeCode: 'COURSE_ROOM', tagCodes: [] });
+    expect(refused.status).toBe(409);
+    expect(refused.body.error.code).toBe('CONFLICT');
+    expect(await rawDb.station.count({ where: { eventId, code: 'LATE_LAB' } })).toBe(0);
   });
 
   it("creates a station of the event's type and tags, and refuses a duplicate code", async () => {
@@ -513,6 +528,8 @@ describe('stations, days and gifts', () => {
         shiftId: await shiftOn(day.id),
         roleLabel: 'Usher',
         checkedInAt: new Date(),
+        // Whose shift it is, as every assignment the app writes records it (P09.4).
+        membershipId: (await membershipOf(volunteer.id)).id,
       },
       select: { id: true },
     });

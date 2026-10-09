@@ -1,8 +1,9 @@
 import type { Express } from 'express';
 import request from 'supertest';
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app/createApp.js';
-import * as access from '../../src/platform/access/index.js';
+import { LocalCedarAuthorizer } from '../../src/platform/access/authorizer/index.js';
+import { useAuthorizer } from '../../src/platform/http/authorize.js';
 import { resetDatabase, rawDb } from '../helpers/db.js';
 import {
   assignToStation,
@@ -137,22 +138,16 @@ describe('rehearsal shift access (P10.5)', () => {
     }
   });
 
-  it('rechecks a legacy request if go-live occurs after its middleware check', async () => {
+  it('rechecks a request if go-live occurs after its enforcement point allowed it', async () => {
     const { eventId } = await testEvent();
-    const original = access.isOnShiftAt;
-    const check = vi.spyOn(access, 'isOnShiftAt').mockImplementationOnce(async (...args) => {
-      const allowed = await original(...args);
-      expect(allowed).toBe(true);
-      await rawDb.event.update({ where: { id: eventId }, data: { status: 'LIVE' } });
-      return allowed;
-    });
+    goLiveAfterTheDecision(eventId);
     try {
       const refused = await tap();
       expect(refused.status).toBe(403);
       expect(refused.body.error.code).toBe('STATION_SCOPE_DENIED');
       expect(await rawDb.registration.count({ where: { eventId } })).toBe(0);
     } finally {
-      check.mockRestore();
+      useAuthorizer(null);
     }
   });
 
@@ -160,13 +155,7 @@ describe('rehearsal shift access (P10.5)', () => {
     const { eventId } = await testEvent();
     const ic = await createVolunteer({ email: 'ic@shifts.test', role: 'IC' });
     await assignToStation({ volunteerId: ic.id, stationId, eventDayId, shift: 'MORNING' });
-    const original = access.isOnShiftAt;
-    const check = vi.spyOn(access, 'isOnShiftAt').mockImplementationOnce(async (...args) => {
-      const allowed = await original(...args);
-      expect(allowed).toBe(true);
-      await rawDb.event.update({ where: { id: eventId }, data: { status: 'LIVE' } });
-      return allowed;
-    });
+    goLiveAfterTheDecision(eventId);
     try {
       const recorded = await request(app)
         .post('/api/v1/registrations')
@@ -185,7 +174,29 @@ describe('rehearsal shift access (P10.5)', () => {
         }),
       ).toBe(1);
     } finally {
-      check.mockRestore();
+      useAuthorizer(null);
     }
   });
 });
+
+/**
+ * The event goes live between the enforcement point's decision and the use case: the policies
+ * allowed the request in REHEARSAL, and the use case's admission, under the phase lock, sees
+ * LIVE. Once, then the local engine as usual.
+ */
+function goLiveAfterTheDecision(eventId: string): void {
+  const engine = new LocalCedarAuthorizer();
+  let pending = true;
+  useAuthorizer({
+    isAuthorized: async (question) => {
+      const decision = await engine.isAuthorized(question);
+      if (pending) {
+        pending = false;
+        expect(decision.allowed).toBe(true);
+        await rawDb.event.update({ where: { id: eventId }, data: { status: 'LIVE' } });
+      }
+      return decision;
+    },
+    batch: (questions) => engine.batch(questions),
+  });
+}
