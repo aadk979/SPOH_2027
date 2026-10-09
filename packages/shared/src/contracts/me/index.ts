@@ -74,3 +74,20 @@ export type CheckInRequest = z.infer<typeof CheckInRequest>;
 
 export const CheckInResponse = z.object({ assignment: MyAssignment }).strict();
 export type CheckInResponse = z.infer<typeof CheckInResponse>;
+
+/**
+ * What the caller may do in this event (P11.8, ADR-005 §6), for the screens to show: every
+ * event-wide action, and each class of setting. The local Cedar engine answers from the same
+ * policies the server enforces; the server still decides every request.
+ */
+export const MyPermissionsResponse = z
+  .object({
+    /** Actions on the event itself, by Cedar action id. */
+    actions: z.record(z.string(), z.boolean()),
+    /** Whether the caller may change settings of each class (CHANGES.md C9). */
+    settings: z
+      .object({ operational: z.boolean(), security: z.boolean(), privacy: z.boolean() })
+      .strict(),
+  })
+  .strict();
+export type MyPermissionsResponse = z.infer<typeof MyPermissionsResponse>;

@@ -1,4 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
+import pg from 'pg';
+import { promoteToPlatformAdmin } from './platformAdmin';
 
 /**
  * Roster administration, and the session surviving a reload.
@@ -17,6 +19,16 @@ import { expect, test, type Page } from '@playwright/test';
 
 const CHIEF = 'chief@spoh2027.test';
 const BOOTH = 'booth@spoh2027.test';
+
+function checkedDatabase(): string {
+  const database = new URL(process.env.E2E_DATABASE_URL ?? 'about:blank');
+  if (
+    database.hostname !== 'localhost' ||
+    database.pathname !== '/spoh2027_rehearsal_shift_e2e_test'
+  )
+    throw new Error('Dedicated local browser database required');
+  return database.toString();
+}
 
 async function signIn(page: Page, email: string): Promise<void> {
   await page.goto('/sign-in');
@@ -145,34 +157,48 @@ test.describe('roster administration', () => {
     await expect(page.getByLabel('Afternoon ends')).toHaveValue('18:00');
     await expect(page.getByRole('heading', { name: 'Attendance setup' })).toBeVisible();
     await expect(page.getByLabel('Attendance root')).toContainText('admin@spoh2027.test');
+
+    // Attendance security is a platform admin's (C9); the fixture's Chief is not one.
+    await expect(page.getByText('Only a platform admin can change these.')).toBeVisible();
+    await expect(page.getByLabel('Attendance root')).toBeDisabled();
+    await expect(page.getByLabel('Trusted networks')).toBeDisabled();
   });
 
-  test('a Chief tests draft trusted networks and saves the list', async ({ page }) => {
-    await signIn(page, CHIEF);
-    await page.goto('/e/spoh2027/admin/settings');
-    const networks = page.getByLabel('Trusted networks');
-    await expect(networks).toBeVisible();
-    const initial = await networks.inputValue();
-    const draft = '127.0.0.1/32\n::1/128\n192.0.2.0/24';
+  test('a platform admin tests draft trusted networks and saves the list', async ({ page }) => {
+    const db = new pg.Client({ connectionString: checkedDatabase() });
+    await db.connect();
+    // Attendance security is a platform admin's (C9): promote the Chief for this test.
+    const restoreRole = await promoteToPlatformAdmin(db, CHIEF);
     try {
-      await networks.fill(draft);
-      await page.getByRole('button', { name: 'Test from my current IP' }).click();
-      await expect(page.getByText('Your current IP is trusted.')).toBeVisible();
-      await page.getByRole('button', { name: 'Save trusted networks' }).click();
-      await expect(page.getByRole('button', { name: 'Save trusted networks' })).toHaveCount(0);
-      await page.reload();
-      await expect(page.getByLabel('Trusted networks')).toHaveValue(draft);
-    } finally {
-      const current = page.getByLabel('Trusted networks');
-      if (await current.isVisible()) {
-        await current.fill(initial);
-        const restore = page.getByRole('button', { name: 'Save trusted networks' });
-        if (await restore.isVisible()) {
-          await restore.click();
-          await expect(restore).toHaveCount(0);
-          await expect(current).toHaveValue(initial);
+      await signIn(page, CHIEF);
+      await page.goto('/e/spoh2027/admin/settings');
+      const networks = page.getByLabel('Trusted networks');
+      await expect(networks).toBeEnabled();
+      const initial = await networks.inputValue();
+      const draft = '127.0.0.1/32\n::1/128\n192.0.2.0/24';
+      try {
+        await networks.fill(draft);
+        await page.getByRole('button', { name: 'Test from my current IP' }).click();
+        await expect(page.getByText('Your current IP is trusted.')).toBeVisible();
+        await page.getByRole('button', { name: 'Save trusted networks' }).click();
+        await expect(page.getByRole('button', { name: 'Save trusted networks' })).toHaveCount(0);
+        await page.reload();
+        await expect(page.getByLabel('Trusted networks')).toHaveValue(draft);
+      } finally {
+        const current = page.getByLabel('Trusted networks');
+        if (await current.isVisible()) {
+          await current.fill(initial);
+          const restore = page.getByRole('button', { name: 'Save trusted networks' });
+          if (await restore.isVisible()) {
+            await restore.click();
+            await expect(restore).toHaveCount(0);
+            await expect(current).toHaveValue(initial);
+          }
         }
       }
+    } finally {
+      await restoreRole();
+      await db.end();
     }
   });
 });

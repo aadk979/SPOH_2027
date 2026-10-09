@@ -295,6 +295,7 @@ const CASES: Record<string, Case> = {
     'transitions only the event named in the path; no body event id is accepted',
   ),
   'GET /me': ACTOR,
+  'GET /me/permissions': ACTOR,
   'POST /me/check-in': { body: (b) => ({ assignmentId: b.assignment }) },
   'POST /me/check-out': { body: (b) => ({ assignmentId: b.assignment }) },
 

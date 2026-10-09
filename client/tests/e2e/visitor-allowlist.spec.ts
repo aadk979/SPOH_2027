@@ -1,5 +1,6 @@
 import pg from 'pg';
 import { expect, test, type Page } from '@playwright/test';
+import { promoteToPlatformAdmin } from './platformAdmin';
 
 const EVENT_ID = 'evt_spoh2027'; // The disposable development fixture only.
 const DB_URL =
@@ -30,6 +31,8 @@ test('an event declares a visitor field, captures it, and purges it on switch-of
   const original = await db.query<{ status: string }>('SELECT status FROM "Event" WHERE id = $1', [
     EVENT_ID,
   ]);
+  // Visitor data is a privacy setting: a platform admin's (C9).
+  const restoreRole = await promoteToPlatformAdmin(db, 'chief@spoh2027.test');
   const code = `contact_${Date.now().toString(36)}`;
   const label = `Contact ${code}`;
   try {
@@ -96,6 +99,7 @@ test('an event declares a visitor field, captures it, and purges it on switch-of
       original.rows[0]?.status,
       EVENT_ID,
     ]);
+    await restoreRole();
     await db.end();
   }
 });

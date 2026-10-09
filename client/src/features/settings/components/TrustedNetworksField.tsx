@@ -6,7 +6,13 @@ import { useChangeAttendanceConfig, useTestAttendanceNetwork } from '../queries'
 import { SettingSaveError } from './SettingSaveError';
 
 /** One IPv4 or IPv6 CIDR per line; test the unsaved list before applying it. */
-export function TrustedNetworksField({ config }: { config: AttendanceConfig }): ReactNode {
+export function TrustedNetworksField({
+  config,
+  canEdit,
+}: {
+  config: AttendanceConfig;
+  canEdit: boolean;
+}): ReactNode {
   const [draft, setDraft] = useState(config.campusCidrs.join('\n'));
   const save = useChangeAttendanceConfig();
   const test = useTestAttendanceNetwork();
@@ -27,7 +33,7 @@ export function TrustedNetworksField({ config }: { config: AttendanceConfig }): 
             {...props}
             rows={4}
             value={draft}
-            disabled={save.isPending}
+            disabled={!canEdit || save.isPending}
             placeholder="192.0.2.0/24"
             onChange={(event) => {
               setDraft(event.target.value);
@@ -44,7 +50,7 @@ export function TrustedNetworksField({ config }: { config: AttendanceConfig }): 
         >
           Test from my current IP
         </Button>
-        {changed ? (
+        {canEdit && changed ? (
           <Button
             variant="secondary"
             disabled={save.isPending}

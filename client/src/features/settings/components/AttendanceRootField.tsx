@@ -5,7 +5,13 @@ import { useChangeAttendanceConfig } from '../queries';
 import { SettingSaveError } from './SettingSaveError';
 
 /** Select the one active event admin permitted to issue verifier credentials. */
-export function AttendanceRootField({ config }: { config: AttendanceConfig }): ReactNode {
+export function AttendanceRootField({
+  config,
+  canEdit,
+}: {
+  config: AttendanceConfig;
+  canEdit: boolean;
+}): ReactNode {
   const [draft, setDraft] = useState(config.rootMembershipId ?? '');
   const save = useChangeAttendanceConfig();
   const changed = draft !== (config.rootMembershipId ?? '');
@@ -20,7 +26,7 @@ export function AttendanceRootField({ config }: { config: AttendanceConfig }): R
           <Select
             {...props}
             value={draft}
-            disabled={save.isPending}
+            disabled={!canEdit || save.isPending}
             onChange={(event) => setDraft(event.target.value)}
           >
             <option value="">No root selected</option>
@@ -41,7 +47,7 @@ export function AttendanceRootField({ config }: { config: AttendanceConfig }): R
           paused until you choose an active admin.
         </Callout>
       ) : null}
-      {changed ? (
+      {canEdit && changed ? (
         <div>
           <Button
             variant="secondary"

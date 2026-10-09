@@ -7,6 +7,7 @@ import { requireCapability } from '../../../platform/http/access.js';
 import { defaultRateLimit } from '../../../platform/http/rateLimit.js';
 import { validate } from '../../../platform/http/validate.js';
 import { checkInHandler, checkOutHandler, getMeHandler } from './handlers.js';
+import { myPermissionsHandler } from './permissionsHandler.js';
 
 /** Caller profile and shift attendance (BUILD_PLAN §7.2). */
 export const meRouter: Router = Router();
@@ -19,6 +20,15 @@ meRouter.get(
   authorize('Self.Read', self),
   requireCapability('own.read'),
   getMeHandler,
+);
+
+/** What the caller may do here, for the screens (P11.8): the local engine answers. */
+meRouter.get(
+  '/permissions',
+  defaultRateLimit,
+  authorize('Self.Read', self),
+  requireCapability('own.read'),
+  myPermissionsHandler,
 );
 
 meRouter.post(

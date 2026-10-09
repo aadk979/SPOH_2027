@@ -58,7 +58,7 @@ export interface AuthorizeOptions {
   readonly any?: boolean;
 }
 
-interface CheckResult {
+export interface CheckResult {
   readonly action: Action;
   readonly allowed: boolean;
   readonly policies: readonly string[];
@@ -90,6 +90,18 @@ export function useShadowSink(next: Sink | null): void {
 /** For tests: the engine the enforcement points ask. */
 export function useAuthorizer(next: Authorizer | null): void {
   engine = next;
+}
+
+/**
+ * UI affordances (ADR-005 §6, P11.8): each question answered on its own by the local engine,
+ * from the same policies the enforcement points use. The server still decides every action.
+ */
+export async function askEach(
+  req: Request,
+  checks: readonly Check[],
+): Promise<readonly CheckResult[]> {
+  const outcome = await decide(req, () => checks, false);
+  return outcome.kind === 'decided' ? outcome.checks : [];
 }
 
 /** May the caller take `action` on the resource the request names? */

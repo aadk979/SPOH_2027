@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useMyPermissions } from '@/features/session';
 import { Card, LoadingRows, Section } from '@/shared/ui';
 import { useEventSettings } from '../queries';
 import { VisitorFieldEditor } from '@/features/visitor';
@@ -16,11 +17,18 @@ export function ProductRulesForm({
   canEdit: boolean;
 }): ReactNode {
   const settings = useEventSettings(enabled);
+  const permissions = useMyPermissions(enabled);
   const data = settings.data;
+  // Visitor data and retention are privacy settings: platform admins only (CHANGES.md C9).
+  const canEditPrivacy = canEdit && permissions.data?.settings.privacy === true;
   return (
     <Section
       title="Counts and visitor data"
-      description="How this event shows its three counts, whether it keeps anything about the visitors themselves, and how soon a lost-person description is removed."
+      description={
+        canEdit && permissions.data && !canEditPrivacy
+          ? 'How this event shows its three counts, whether it keeps anything about the visitors themselves, and how soon a lost-person description is removed. Only a platform admin can change visitor data and retention.'
+          : 'How this event shows its three counts, whether it keeps anything about the visitors themselves, and how soon a lost-person description is removed.'
+      }
     >
       <Card className="flex flex-col gap-lg">
         {!data ? (
@@ -37,7 +45,7 @@ export function ProductRulesForm({
               key={`visitors:${data.versions['product.visitorDataMode']}`}
               current={data.settings['product.visitorDataMode']}
               version={data.versions['product.visitorDataMode']}
-              canEdit={canEdit}
+              canEdit={canEditPrivacy}
             />
             <VisitorFieldEditor
               enabled={enabled && data.settings['product.visitorDataMode'] === 'allowlist'}
@@ -47,7 +55,7 @@ export function ProductRulesForm({
               key={`retention:${data.versions.lostPersonPurgeHours}`}
               current={data.settings.lostPersonPurgeHours}
               version={data.versions.lostPersonPurgeHours}
-              canEdit={canEdit}
+              canEdit={canEditPrivacy}
             />
             <ProductHistoryPanel enabled={enabled && canEdit} />
           </>

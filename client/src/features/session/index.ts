@@ -6,6 +6,6 @@ export {
   useSessionStatus,
   useCan,
 } from './useSession';
-export { useMe, sessionKeys } from './queries';
+export { useMe, useMyPermissions, sessionKeys } from './queries';
 export { useEventTime, type EventTimeFormat } from './useEventTime';
 export { getHostedSignInUrl } from './api';
