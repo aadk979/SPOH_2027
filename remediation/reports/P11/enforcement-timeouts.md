@@ -61,6 +61,24 @@ anyway. It also held a connection through the Cedar evaluation.
   than RDS across the VPC, so this does not reproduce staging's 3 s. It shows the change
   costs nothing and fails nowhere. The staging soak below is the check in place.
 
+## Staging
+
+- `a1e01a7`: CI 37929094659 and deployment 37930149140 passed, task revision 154,
+  rolled out at 12:36Z. The smoke checks pass. RDS `DatabaseConnections` rose from 2 to 6
+  at start-up and has held at 6 since: the floor of five and the cache bus listener.
+- `a022793` adds the evaluation-failure metrics and alarm below. Its first CI run
+  (37933655373) failed one server test, `scheduledEventDiscovery` › "retries failed
+  discovery on the next tick": after the retry tick the occurrence was still `PENDING`.
+  The commit changes no server code, the same code passed CI on `a1e01a7`, the file
+  passes 12 of 12 times locally, and the test has not failed in the previous 39 runs.
+  `PENDING` after a claim is what a handler failure queued for retry looks like, and the
+  worker's real 5 s poll can interleave with the test's ticks. The failed job was re-run;
+  the flake is recorded as open.
+- After the re-run (CI attempt 2 passed), deployment 37937623999 passed: task revision
+  155 runs `a022793`. Alarm `spoh-staging-authorization-failed` is `OK`, both metric
+  filters are on `/spoh/staging/app`, the smoke checks pass, and the pool held at six
+  connections across the deploy. **The soak starts at 13:33Z on 9 October.**
+
 ## Release 2b gate (D-22)
 
 Release 2b enforces once staging, on this change, shows **24 hours with no shadow

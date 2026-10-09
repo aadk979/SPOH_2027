@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-09T10:22:18.518Z",
+  "updatedAt": "2026-10-09T13:42:20.903Z",
   "current": {
     "phase": "P11",
     "step": "P11.5"
@@ -3822,6 +3822,10 @@
     {
       "at": "2026-10-09T08:58:40.870Z",
       "text": "P11.5 release 2a (f227354, 1375a37) on staging revision 153 with D-21. Two shadow transaction-start timeouts; release 2b waits for the owner's answer in reports/P11/enforcement-screens.md."
+    },
+    {
+      "at": "2026-10-09T13:42:20.902Z",
+      "text": "P11.5 before 2b: D-15=A, D-22=A+C (owner delegated). Policy reads without an interactive transaction, transaction wait = pool wait, warm pool floor (a1e01a7, rev 154); evaluation-failure metrics and alarm (a022793, rev 155). Paged-list polling bounded; capture-schedule-controls fixed. Soak from 13:33Z 9 Oct; 2b after 24 h with AuthorizationFailed = 0 and AuthorizationAllowed > 0."
     }
   ]
 }
