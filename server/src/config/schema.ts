@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { attendanceFields } from './schemas/attendance.js';
 import { authFields, authProviderRule, sessionRule } from './schemas/auth.js';
-import { databaseFields, databaseSslRule } from './schemas/database.js';
+import { databaseFields, databasePoolRule, databaseSslRule } from './schemas/database.js';
 import { pushFields, vapidRule } from './schemas/push.js';
 import { corsWildcardRule, serverFields } from './schemas/server.js';
 import { storageFields } from './schemas/storage.js';
@@ -26,6 +26,7 @@ const EnvSchema = z
     for (const rule of [
       authProviderRule,
       databaseSslRule,
+      databasePoolRule,
       sessionRule,
       vapidRule,
       corsWildcardRule,

@@ -34,13 +34,21 @@ describe('configuration', () => {
     expect(message.indexOf('AUTH_PROVIDER')).toBeLessThan(message.indexOf('sslmode=require'));
   });
 
+  it('keeps a pool floor, no larger than the pool', () => {
+    expect(parseEnv(DEV)).toMatchObject({ DATABASE_POOL_MIN: 5, DATABASE_POOL_MAX: 25 });
+    const message = messageOf(() =>
+      parseEnv({ ...DEV, DATABASE_POOL_MIN: '6', DATABASE_POOL_MAX: '5' }),
+    );
+    expect(message).toContain('DATABASE_POOL_MIN cannot exceed DATABASE_POOL_MAX');
+  });
+
   it('refuses half a VAPID pair', () => {
     const message = messageOf(() => parseEnv({ ...DEV, VAPID_PUBLIC_KEY: 'key' }));
     expect(message).toContain('VAPID_PUBLIC_KEY');
   });
 
   it('knows every key it reads', () => {
-    expect(ENV_KEYS).toHaveLength(26);
+    expect(ENV_KEYS).toHaveLength(27);
     expect(new Set(ENV_KEYS).size).toBe(ENV_KEYS.length);
   });
 

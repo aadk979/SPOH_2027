@@ -447,14 +447,23 @@ describe('fallback reads (F03-029)', () => {
       vi.spyOn(prisma.person, 'findUnique'),
       vi.spyOn(prisma.person, 'findMany'),
     ];
-    const response = await as(ic).get('/fallback/windows');
+    try {
+      const response = await as(ic).get('/fallback/windows');
 
-    expect(response.status).toBe(200);
-    expect(response.body.data).toHaveLength(3);
-    expect(response.body.data[0].stationName).toBe('Wing W1');
-    const calls = lookups.reduce((sum, spy) => sum + spy.mock.calls.length, 0);
-    expect(calls).toBeLessThanOrEqual(2);
-    lookups.forEach((spy) => spy.mockRestore());
+      expect(response.status).toBe(200);
+      expect(response.body.data).toHaveLength(3);
+      expect(response.body.data[0].stationName).toBe('Wing W1');
+      // The policies read the caller's own person once a request (ADR-005 §1); not the list's.
+      const isCaller = (args: unknown): boolean =>
+        (args as { where?: { id?: unknown } } | undefined)?.where?.id === ic.id;
+      const calls = lookups.reduce(
+        (sum, spy) => sum + spy.mock.calls.filter(([args]) => !isCaller(args)).length,
+        0,
+      );
+      expect(calls).toBeLessThanOrEqual(2);
+    } finally {
+      lookups.forEach((spy) => spy.mockRestore());
+    }
   });
 });
 
@@ -470,16 +479,19 @@ describe('inbox reads (F03-029)', () => {
       vi.spyOn(prisma.station, 'findUnique'),
       vi.spyOn(prisma.station, 'findMany'),
     ];
-    const response = await as(volunteer).get('/announcements');
+    try {
+      const response = await as(volunteer).get('/announcements');
 
-    expect(response.status).toBe(200);
-    expect(response.body.data).toHaveLength(3);
-    expect(
-      response.body.data.every((a: { targetStationName: string | null }) => a.targetStationName),
-    ).toBe(true);
-    const calls = stationLookups.reduce((sum, spy) => sum + spy.mock.calls.length, 0);
-    expect(calls).toBe(0);
-    stationLookups.forEach((spy) => spy.mockRestore());
+      expect(response.status).toBe(200);
+      expect(response.body.data).toHaveLength(3);
+      expect(
+        response.body.data.every((a: { targetStationName: string | null }) => a.targetStationName),
+      ).toBe(true);
+      const calls = stationLookups.reduce((sum, spy) => sum + spy.mock.calls.length, 0);
+      expect(calls).toBe(0);
+    } finally {
+      stationLookups.forEach((spy) => spy.mockRestore());
+    }
   });
 });
 

@@ -1,8 +1,9 @@
 import { MyPermissionsResponse } from '@spoh/shared';
 import type { Express } from 'express';
 import request from 'supertest';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../../src/app/createApp.js';
+import { prisma } from '../../src/platform/db/client.js';
 import { rawDb, resetDatabase } from '../helpers/db.js';
 import { bearer, createVolunteer, testEvent, type TestVolunteer } from '../helpers/fixtures.js';
 
@@ -26,6 +27,10 @@ beforeEach(async () => {
   await resetDatabase();
   app = createApp();
   ({ eventId } = await testEvent());
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
 });
 
 describe('my permissions', () => {
@@ -72,5 +77,17 @@ describe('my permissions', () => {
       where: { eventId, role: 'ADMIN', action: 'Settings.Read' },
     });
     expect((await permissions(admin)).actions['Settings.Read']).toBe(false);
+  });
+
+  it('answers without a transaction of its own, which a pool still opening connections refused', async () => {
+    const admin = await createVolunteer({ email: 't@perm.test', role: 'ADMIN' });
+    const transaction = vi
+      .spyOn(prisma, '$transaction')
+      .mockRejectedValue(
+        new Error('Transaction API error: Unable to start a transaction in the given time.'),
+      );
+    const mine = await permissions(admin);
+    expect(transaction).not.toHaveBeenCalled();
+    expect(mine.actions).toMatchObject({ 'Structure.Edit': true, 'Settings.Read': true });
   });
 });

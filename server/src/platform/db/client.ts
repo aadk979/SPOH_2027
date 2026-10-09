@@ -5,6 +5,15 @@ import { logger } from '../logger/index.js';
 import { assertEventScoped, isScopeEnforced } from './eventScope.js';
 
 /**
+ * A capture that waits five seconds for a connection has already failed the
+ * volunteer; better to error and let the outbox retry than to hold the tap.
+ * Queries and interactive transactions share this one wait: Prisma's own
+ * default for a transaction is 2 s, which made a transaction the first thing
+ * to fail while the pool was still opening connections.
+ */
+const CONNECTION_WAIT_MS = 5_000;
+
+/**
  * The single Prisma client for the process.
  *
  * Prisma 7 takes a driver adapter rather than a connection string, so the pool
@@ -15,10 +24,12 @@ import { assertEventScoped, isScopeEnforced } from './eventScope.js';
 const adapter = new PrismaPg({
   connectionString: env.DATABASE_URL,
   max: env.DATABASE_POOL_MAX,
+  // Connections opened beyond the floor close after 30 s idle; the floor stays
+  // open, so the first burst after a quiet spell (a screen's first load, a
+  // fresh task after a deploy) does not wait for TLS handshakes to RDS.
+  min: env.DATABASE_POOL_MIN,
   idleTimeoutMillis: 30_000,
-  // A capture that waits five seconds for a connection has already failed the
-  // volunteer; better to error and let the outbox retry than to hold the tap.
-  connectionTimeoutMillis: 5_000,
+  connectionTimeoutMillis: CONNECTION_WAIT_MS,
   // The driver adapter writes and reads instants as UTC wall times, so a
   // session in any other zone would shift every timestamp it touches. Pinned
   // here rather than trusted to the server's default (F01 time audit, case 12);
@@ -28,6 +39,7 @@ const adapter = new PrismaPg({
 
 const base = new PrismaClient({
   adapter,
+  transactionOptions: { maxWait: CONNECTION_WAIT_MS },
   log: isTest
     ? []
     : [
@@ -61,6 +73,19 @@ export const prisma = base.$extends({
 /** Readiness probe support: cheapest possible round trip to Postgres. */
 export async function pingDatabase(): Promise<void> {
   await prisma.$queryRaw`SELECT 1`;
+}
+
+/**
+ * Opens the pool's floor at start-up: as many round trips at once as the floor
+ * keeps, so each takes a connection of its own and the pool keeps them.
+ */
+export async function warmPool(): Promise<void> {
+  await Promise.all(
+    Array.from(
+      { length: env.DATABASE_POOL_MIN },
+      () => prisma.$queryRaw`SELECT 1 FROM pg_sleep(0.05)`,
+    ),
+  );
 }
 
 export async function disconnectPrisma(): Promise<void> {

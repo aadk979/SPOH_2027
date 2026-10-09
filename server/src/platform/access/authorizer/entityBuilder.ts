@@ -49,8 +49,9 @@ interface EventFacts {
 }
 
 /**
- * The entities and context for one request, read from the database inside the
- * caller's transaction (ADR-005 §1). Nothing comes from the token except who is
+ * The entities and context for one request, read from the database through the
+ * client the caller gives it: the root client at an enforcement point, or a use
+ * case's own transaction (ADR-005 §1). Nothing comes from the token except who is
  * asking. Every lookup names the event (ADR-001 §2), so a row of another event is
  * not found. One builder serves one request: every entity is read once.
  */

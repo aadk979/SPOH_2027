@@ -156,23 +156,18 @@ function tallyOutcome(outcome: ShadowOutcome): void {
 }
 
 /**
- * The policies' reads run in a transaction of their own (ADR-005 §1): one unit of work,
- * apart from the request's own queries, which shadow must not change.
+ * The policies' reads are plain queries, apart from the request's own, which shadow must
+ * not change. Not an interactive transaction: under READ COMMITTED each statement has
+ * its own snapshot anyway, so one bought no consistency, while it held a connection
+ * through the Cedar evaluation and gave up after Prisma's 2 s wait for one. A cold pool
+ * on staging took about 3 s to open connections, and the shadow check was the only
+ * thing on those requests to fail (P11.5 release 2a, 9 October 2026).
  */
-function decide(req: Request, checks: ChecksOf, any: boolean): Promise<ShadowOutcome> {
-  return prisma.$transaction((tx) => decideIn(tx, req, checks, any));
-}
-
-// eslint-disable-next-line max-params -- the transaction, and the three things decide reads
-async function decideIn(
-  tx: PrismaTransactionClient,
-  req: Request,
-  checks: ChecksOf,
-  any: boolean,
-): Promise<ShadowOutcome> {
+async function decide(req: Request, checks: ChecksOf, any: boolean): Promise<ShadowOutcome> {
+  const db: PrismaTransactionClient = prisma;
   const auth = getAuth(req);
   const recordedAt = clientRecordedAt(req);
-  const builder = new EntityBuilder(tx, {
+  const builder = new EntityBuilder(db, {
     eventId: auth.eventId,
     now: systemClock.now(),
     ...(recordedAt ? { clientRecordedAt: recordedAt } : {}),

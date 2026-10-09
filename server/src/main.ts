@@ -1,7 +1,7 @@
 import { createApp } from './app/createApp.js';
 import { env } from './config/env.js';
 import { logger } from './platform/logger/index.js';
-import { pingDatabase } from './platform/db/client.js';
+import { pingDatabase, warmPool } from './platform/db/client.js';
 import { JOBS } from './app/jobs.js';
 import { startJobs } from './platform/scheduler/index.js';
 import { startCacheBus } from './platform/events/cacheBus.js';
@@ -15,10 +15,12 @@ import { startScheduledJobs } from './app/startScheduledJobs.js';
  *
  * Fails fast on a database it cannot reach: a server that accepts a booth tap
  * and then cannot store it is worse than one that never started, because the
- * volunteer believes the visitor was counted.
+ * volunteer believes the visitor was counted. Then opens the pool's floor, so the
+ * first requests after a deploy do not each wait for a new connection.
  */
 async function main(): Promise<void> {
   await pingDatabase();
+  await warmPool();
 
   await startCacheBus();
 
