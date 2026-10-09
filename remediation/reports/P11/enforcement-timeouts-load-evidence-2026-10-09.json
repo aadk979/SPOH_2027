@@ -1,0 +1,162 @@
+{
+  "milestone": "P11.5 release 2b prerequisite (D-22): policy reads without an interactive transaction",
+  "date": "2026-10-09",
+  "environment": {
+    "app": "the production Dockerfile image, NODE_ENV=development for local sign-in (pino-pretty added), DATABASE_POOL_MAX=25, a fresh container per run",
+    "database": "postgres:17-alpine, 1 vCPU, 1 GiB, TLS on, SCRAM-SHA-256, migrated and seeded (spoh2027_load_test)",
+    "script": "server/scripts/poll-load-test.mjs: idle 45 s (longer than the pool idle timeout), a simultaneous first-screen burst, polling at the screens' intervals, idle again, a second burst"
+  },
+  "runs": [
+    {
+      "run": "A-old",
+      "code": "e06388d (release 2a)",
+      "vcpu": 0.25,
+      "memory": "512 MiB",
+      "coordinators": 2,
+      "volunteers": 4,
+      "results": [
+        {
+          "phase": "cold burst",
+          "requests": 50,
+          "failures": 0,
+          "p50Ms": 4644,
+          "p95Ms": 6752,
+          "maxMs": 7340
+        },
+        {
+          "phase": "polling",
+          "requests": 271,
+          "failures": 0,
+          "p50Ms": 18,
+          "p95Ms": 371,
+          "maxMs": 1395
+        },
+        {
+          "phase": "second cold burst",
+          "requests": 50,
+          "failures": 0,
+          "p50Ms": 3941,
+          "p95Ms": 5445,
+          "maxMs": 5557
+        }
+      ],
+      "shadowEvaluationErrors": 0,
+      "transactionTimeouts": 0
+    },
+    {
+      "run": "A-new",
+      "code": "working tree",
+      "vcpu": 0.25,
+      "memory": "512 MiB",
+      "coordinators": 2,
+      "volunteers": 4,
+      "results": [
+        {
+          "phase": "cold burst",
+          "requests": 50,
+          "failures": 0,
+          "p50Ms": 5868,
+          "p95Ms": 8172,
+          "maxMs": 8375
+        },
+        {
+          "phase": "polling",
+          "requests": 272,
+          "failures": 0,
+          "p50Ms": 16,
+          "p95Ms": 204,
+          "maxMs": 522
+        },
+        {
+          "phase": "second cold burst",
+          "requests": 50,
+          "failures": 0,
+          "p50Ms": 3771,
+          "p95Ms": 6071,
+          "maxMs": 6265
+        }
+      ],
+      "shadowEvaluationErrors": 0,
+      "transactionTimeouts": 0
+    },
+    {
+      "run": "B-old",
+      "code": "e06388d (release 2a)",
+      "vcpu": 0.5,
+      "memory": "1 GiB",
+      "coordinators": 15,
+      "volunteers": 45,
+      "results": [
+        {
+          "phase": "cold burst",
+          "requests": 495,
+          "failures": 0,
+          "p50Ms": 13921,
+          "p95Ms": 20123,
+          "maxMs": 20605
+        },
+        {
+          "phase": "polling",
+          "requests": 3662,
+          "failures": 0,
+          "p50Ms": 43,
+          "p95Ms": 478,
+          "maxMs": 1243
+        },
+        {
+          "phase": "second cold burst",
+          "requests": 495,
+          "failures": 0,
+          "p50Ms": 10590,
+          "p95Ms": 17778,
+          "maxMs": 18295
+        }
+      ],
+      "shadowEvaluationErrors": 0,
+      "transactionTimeouts": 0
+    },
+    {
+      "run": "B-new",
+      "code": "working tree",
+      "vcpu": 0.5,
+      "memory": "1 GiB",
+      "coordinators": 15,
+      "volunteers": 45,
+      "results": [
+        {
+          "phase": "cold burst",
+          "requests": 495,
+          "failures": 0,
+          "p50Ms": 10981,
+          "p95Ms": 18848,
+          "maxMs": 18859
+        },
+        {
+          "phase": "polling",
+          "requests": 3645,
+          "failures": 0,
+          "p50Ms": 54,
+          "p95Ms": 495,
+          "maxMs": 1301
+        },
+        {
+          "phase": "second cold burst",
+          "requests": 495,
+          "failures": 0,
+          "p50Ms": 9257,
+          "p95Ms": 17071,
+          "maxMs": 18168
+        }
+      ],
+      "shadowEvaluationErrors": 0,
+      "transactionTimeouts": 0
+    }
+  ],
+  "stagingIncident": {
+    "at": "2026-10-09T08:51:30Z",
+    "databaseConnections": "2 \u2192 22 in that minute",
+    "appCpuMaxPercent": 45.6,
+    "firstApiResponsesMs": [2941, 3011, 3088, 3243],
+    "note": "the first screen after a quiet spell; a cold pool opened ~20 TLS connections to RDS on a 0.25 vCPU task"
+  }
+}

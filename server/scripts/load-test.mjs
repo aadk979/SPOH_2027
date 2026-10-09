@@ -120,8 +120,8 @@ async function provisionClients(chiefToken) {
     role: 'VOLUNTEER',
     stationCode: STATION_CODE,
     eventDate: today,
-    // Both blocks, so the run is not sensitive to the hour it starts at.
-    block: 'MORNING',
+    // Both shifts, so the run is not sensitive to the hour it starts at.
+    shift: 'MORNING',
     roleLabel: 'Load test',
   }));
 
@@ -133,7 +133,7 @@ async function provisionClients(chiefToken) {
   const afternoon = await api(chiefToken, '/roster/import', {
     method: 'POST',
     body: JSON.stringify({
-      rows: rows.map((row) => ({ ...row, block: 'AFTERNOON' })),
+      rows: rows.map((row) => ({ ...row, shift: 'AFTERNOON' })),
       commit: true,
     }),
   });

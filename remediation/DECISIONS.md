@@ -306,13 +306,12 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
     reader roles and with new-event defaults off.
 - **Recommendation:** **A.** ADR-002/P09 already permit all six roles in
   field-reader allowlists. Preserve that model rather than silently narrowing it.
-- **Status:** Pending. The owner approved lowest-default floors for the other
-  45 Editable actions on 6 October; that approval supplies no visitor floor or
-  grant. The [reviewed proposal](reports/P11/minimum-role-decision.md) and pending
-  question expose this exception. Keep current field-scoped access protected
-  until its reviewed migration; unknown eligibility cannot enable a new toggle.
-  This blocks the visitor portion of P11.5/.7, not independent prerequisites or
-  the rest of the programme.
+- **Answer:** **A** (owner, 9 October 2026, by delegating the open questions to
+  the written recommendations). All six roles are eligible for an explicit
+  `VisitorRecord.Read` grant; every read still needs the field's reader-role
+  permission; new events start with no grant, so its floor is Volunteer and its
+  default is off. Current field-scoped access stays protected until the reviewed
+  migration in the visitor part of P11.5/.7.
 
 ### D-16 — Lost-person retention range
 
@@ -416,3 +415,21 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   3. Leads may look up cards and list gift types.
   4. Enforce only once staging's shadow summary shows no evaluation errors; test
      fixtures always record who captured a record.
+
+### D-22 — Shadow evaluation errors before enforcing (P11.5 release 2b)
+
+- **Owner:** you
+- **Blocks:** P11.5
+- **Question:** Staging logged two shadow evaluation errors after release 2a,
+  both "Unable to start a transaction in the given time"
+  ([report](reports/P11/enforcement-screens.md)). Enforced, such an error refuses
+  the request. What before release 2b?
+- **Options:**
+  - **A.** Read the policies' entities without an interactive transaction, then
+    run staging with no shadow errors before enforcing.
+  - **B.** Enforce as planned and watch for the errors.
+  - **C.** Load-test the polled screens on staging first.
+- **Recommendation:** **A**, with C as its evidence.
+- **Answer:** **A, with C** (owner, 9 October 2026, by delegating to the
+  recommendation). Release 2b waits for 24 hours of staging with no shadow
+  evaluation error, and a cold-start burst and a polling load test that show none.

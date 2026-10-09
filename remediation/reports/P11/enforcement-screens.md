@@ -1,8 +1,9 @@
 # P11.5 release 2a — D-21 and the screens (9 October 2026)
 
 **Status: on staging, task revision 153 (`1375a37`).** The old guards still decide
-every request; nothing anyone may do has changed. Release 2b (enforce) waits for the
-transaction-timeout question below.
+every request; nothing anyone may do has changed. The transaction-timeout question below
+is answered (D-22) and fixed; release 2b waits for the soak in
+[enforcement-timeouts.md](enforcement-timeouts.md).
 
 ## What shipped
 
@@ -28,7 +29,7 @@ transaction-timeout question below.
 - `capture-schedule-controls` fails in `allPages` as it did on 6 October, before
   this work: the schedules list polls every 3 s, which re-renders "Load more" and
   restarts paging, so the click never finds a stable button. 2a does not touch that
-  list or its queries. Open.
+  list or its queries. Fixed since: see [enforcement-timeouts.md](enforcement-timeouts.md).
 - Visual: the visual database took its nine pending migrations. 98 of 100 matched;
   the two `/admin/settings` differences are the new line and the disabled fields,
   reviewed at both widths and re-recorded. The full run then passed 100 of 100.

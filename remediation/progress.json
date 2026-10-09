@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-09T08:58:40.870Z",
+  "updatedAt": "2026-10-09T10:22:18.518Z",
   "current": {
     "phase": "P11",
     "step": "P11.5"
@@ -197,9 +197,9 @@
       "title": "Visitor-record permission eligibility",
       "owner": "you",
       "blocks": ["P11.5", "P11.7"],
-      "status": "open",
-      "answer": null,
-      "answeredAt": null
+      "status": "answered",
+      "answer": "A: all six roles eligible for an explicit VisitorRecord.Read grant, each read still needs the field's reader role, new-event default off (owner, 9 October 2026, delegated to the recommendation)",
+      "answeredAt": "2026-10-09T10:22:18.103Z"
     },
     {
       "id": "D-16",
@@ -254,6 +254,15 @@
       "status": "answered",
       "answer": "Add Settings.Read (Chief, Admin; floor Chief); keep the LIVE structure freeze; Leads may look up cards and list gift types; enforce once staging shows no shadow evaluation errors (owner, 8 October 2026)",
       "answeredAt": "2026-10-08T14:47:47.122Z"
+    },
+    {
+      "id": "D-22",
+      "title": "Shadow evaluation errors before enforcing (P11.5 release 2b)",
+      "owner": "you",
+      "blocks": ["P11.5"],
+      "status": "answered",
+      "answer": "A with C: policy reads without an interactive transaction; release 2b after 24 h of staging with no shadow evaluation error and a cold-start and polling load test with none (owner, 9 October 2026, delegated to the recommendation)",
+      "answeredAt": "2026-10-09T10:22:18.517Z"
     }
   ],
   "phases": [
