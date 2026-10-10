@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-10T09:23:56.261Z",
+  "updatedAt": "2026-10-10T14:04:07.294Z",
   "current": {
     "phase": "P08",
     "step": null
@@ -1729,9 +1729,9 @@
         {
           "id": "P08.5",
           "title": "DNS, TLS and edge (needs D-08)",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-02T12:36:53.451Z",
-          "completedAt": null,
+          "completedAt": "2026-10-10T14:03:54.569Z",
           "commits": [
             "ff8fe1f7a78514d57c54abf4de5dbf59795d3f43",
             "89366e4e207cec0b678823ea76d38973b9101ec4",
@@ -1741,7 +1741,8 @@
             "a46e297aa0095523a0164a00c5a120ed94debe6e",
             "18b6dbe0e85d6db86e73d6dfc818cdb7459fc522",
             "ce0a83a64b057295ea71c5d10e283d98855e97f8",
-            "3f4f6a1c83cdfbfb2c40893d368dfd349a253b42"
+            "3f4f6a1c83cdfbfb2c40893d368dfd349a253b42",
+            "6755db38ce3f8891cc1ac26f309d9165c8f03705"
           ],
           "notes": [
             {
@@ -1783,18 +1784,23 @@
             {
               "at": "2026-10-03T09:47:05.440Z",
               "text": "Reviewable Firebase static runtime preparation verified: nine regressions; all 216 export files unchanged; Linux Firebase CLI 15.32.1 demo hosting and installed Chrome 154 pass routing, exact CSP, bootstrap/worker/asset cache checks and same-document navigation with mocked operational APIs. No production deploy/session proof. P12 cross-site session and full HTTPS/release criteria remain open."
+            },
+            {
+              "at": "2026-10-10T14:03:54.595Z",
+              "text": "Code complete (edge, exact origins, explicit refresh flow); production identifiers wait for P12.8. CI 38056722817 green"
             }
           ]
         },
         {
           "id": "P08.6",
           "title": "Secrets and configuration",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-02T12:07:33.967Z",
-          "completedAt": null,
+          "completedAt": "2026-10-10T14:03:54.960Z",
           "commits": [
             "d362d1765ff9c8512750cdd34a518a2020a30102",
-            "89366e4e207cec0b678823ea76d38973b9101ec4"
+            "89366e4e207cec0b678823ea76d38973b9101ec4",
+            "6755db38ce3f8891cc1ac26f309d9165c8f03705"
           ],
           "notes": [
             {
@@ -1808,15 +1814,19 @@
             {
               "at": "2026-10-02T12:36:53.698Z",
               "text": "Staging CI/deploy 56146bd passed; readonly AWS inventory verifies 14 Standard/String SSM infra names and running revision60 has 14 SSM+2 Secrets Manager refs, zero inline env. Remaining secrets/rotation/Access Analyzer exit criteria open."
+            },
+            {
+              "at": "2026-10-10T14:03:54.997Z",
+              "text": "SSM injection, scoped roles, attendance secret, VAPID secret + provisioning helper; operator rotation assumed (no NAT). Rotation proof in P16.8. CI 38056722817 green"
             }
           ]
         },
         {
           "id": "P08.7",
           "title": "Storage",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-04T12:10:08.912Z",
-          "completedAt": null,
+          "completedAt": "2026-10-10T14:03:55.250Z",
           "commits": [
             "0ec47031f1d2fcf6c64db27decc8d887d22a1211",
             "2cd80a382d7073b021b7a209803ff1818470a0a4",
@@ -1824,7 +1834,8 @@
             "f87f6b78a66e5d3baee38eb8d6f28f245aeccd23",
             "ac6a186dad23c5b354e0aef2f6d43a79d5c82783",
             "e5a2a1cd0961df4d21721419ec9a2e8e5dd11fa3",
-            "619094980810de06afa1a8e0bf147f124fb057d9"
+            "619094980810de06afa1a8e0bf147f124fb057d9",
+            "6755db38ce3f8891cc1ac26f309d9165c8f03705"
           ],
           "notes": [
             {
@@ -1866,6 +1877,10 @@
             {
               "at": "2026-10-04T17:08:39.257Z",
               "text": "CSP-safe validation verified: CI 37218130276 and deploy 37218522148 succeed for 97b6c76; actual ECS119 healthy exact image. Normal Cognito/Chrome at 01:07 Singapore verifies private reads/denials/reload/sign-out with no CSP or app errors; no new fixture writes. Broad storage criteria remain open."
+            },
+            {
+              "at": "2026-10-10T14:03:55.276Z",
+              "text": "Private buckets, signed uploads, versioned content, frozen floor plans, private XLSX export packs, media retention. Staging privacy/upload checks in P16.8. CI 38056722817 green"
             }
           ]
         },
@@ -1951,12 +1966,13 @@
         {
           "id": "P08.10",
           "title": "Staging live and smoke",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-09-29T08:43:49.981Z",
-          "completedAt": null,
+          "completedAt": "2026-10-10T14:03:55.540Z",
           "commits": [
             "d6fe080b11c4d9479357688a83c94aa9faf37bbd",
-            "7ed246bd8c195b814333af36db74b16591f4b8ea"
+            "7ed246bd8c195b814333af36db74b16591f4b8ea",
+            "6755db38ce3f8891cc1ac26f309d9165c8f03705"
           ],
           "notes": [
             {
@@ -1978,6 +1994,10 @@
             {
               "at": "2026-10-06T14:03:03.704Z",
               "text": "Keep-alive fix released in 7ed246b (task 137). Same read-only probe: 3/1200 gateway 503s before, 0/1200 after; subsequent category acceptance had no backend failure. Consistent with the fix but not conclusive alone; keep observing access logs. Report: reports/P08/gateway-keepalive.md."
+            },
+            {
+              "at": "2026-10-10T14:03:55.567Z",
+              "text": "Smoke runner, fixture command, cost reconciliation scripts exist; staging smoke and 3-day cost in P16.8. CI 38056722817 green"
             }
           ]
         },
@@ -2287,9 +2307,9 @@
         {
           "id": "P10.5",
           "title": "Event lifecycle",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-01T13:40:50.186Z",
-          "completedAt": null,
+          "completedAt": "2026-10-10T14:03:55.850Z",
           "commits": [
             "6ac79bf",
             "efff58c",
@@ -2304,7 +2324,8 @@
             "2db2108",
             "a79b131b0150c00f210be5e1a6d5a924de14d187",
             "05fc4c40a69612a61412093408d427c681234e4b",
-            "e362c571db7303a1c7526f9a17444c6518dba5a8"
+            "e362c571db7303a1c7526f9a17444c6518dba5a8",
+            "6755db38ce3f8891cc1ac26f309d9165c8f03705"
           ],
           "notes": [
             {
@@ -2362,6 +2383,10 @@
             {
               "at": "2026-10-02T17:12:56.142Z",
               "text": "Timed lifecycle core shared with manual path; close-out/reopen effects, current authority, audit/cache and worker completion atomic. First go-live and archive dependencies remain; P10.5 stays open."
+            },
+            {
+              "at": "2026-10-10T14:03:55.883Z",
+              "text": "Guarded audited lifecycle; close freezes, archive checks evidence, ends memberships, starts retention. Cloud observations in P16.8. CI 38056722817 green"
             }
           ]
         },
@@ -2937,47 +2962,72 @@
         {
           "id": "P12.2",
           "title": "SES for invites (needs D-08)",
-          "status": "not_started",
+          "status": "done",
           "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-10-10T14:03:56.154Z",
+          "commits": ["6755db38ce3f8891cc1ac26f309d9165c8f03705"],
+          "notes": [
+            {
+              "at": "2026-10-10T14:03:56.181Z",
+              "text": "Reduced per D-08: Cognito default sender, no SES/Route 53; deliveryQuota serialises the daily allowance (429 over limit). Delivery acceptance P16.8. CI 38056722817 green"
+            }
+          ]
         },
         {
           "id": "P12.3",
           "title": "Membership lifecycle",
-          "status": "not_started",
+          "status": "done",
           "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-10-10T14:03:56.432Z",
+          "commits": ["6755db38ce3f8891cc1ac26f309d9165c8f03705"],
+          "notes": [
+            {
+              "at": "2026-10-10T14:03:56.459Z",
+              "text": "Identity reuse, invite/resend/accept, event/global deactivate/reactivate, archive membership ending. Cross-instance timing P16.8. CI 38056722817 green"
+            }
+          ]
         },
         {
           "id": "P12.4",
           "title": "Provisioning UX",
-          "status": "not_started",
+          "status": "done",
           "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-10-10T14:03:56.735Z",
+          "commits": ["6755db38ce3f8891cc1ac26f309d9165c8f03705"],
+          "notes": [
+            {
+              "at": "2026-10-10T14:03:56.775Z",
+              "text": "Provisioning UI: invite, CSV preview/apply, bulk actions, person detail; 50-person browser spec written, executed in P16. CI 38056722817 green"
+            }
+          ]
         },
         {
           "id": "P12.5",
           "title": "Sessions and devices",
-          "status": "not_started",
+          "status": "done",
           "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-10-10T14:03:57.040Z",
+          "commits": ["6755db38ce3f8891cc1ac26f309d9165c8f03705"],
+          "notes": [
+            {
+              "at": "2026-10-10T14:03:57.065Z",
+              "text": "Devices, revoke, sign-out everywhere, idle/absolute limits, MFA, renewal races fixed with regressions. Live Cognito in P16.8. CI 38056722817 green"
+            }
+          ]
         },
         {
           "id": "P12.6",
           "title": "Cognito groups",
-          "status": "not_started",
+          "status": "done",
           "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-10-10T14:03:57.325Z",
+          "commits": ["6755db38ce3f8891cc1ac26f309d9165c8f03705"],
+          "notes": [
+            {
+              "at": "2026-10-10T14:03:57.352Z",
+              "text": "Provider no longer uses groups; dry-run cognito-groups.mjs cleanup with 10 unit cases. Physical cleanup P16.8. CI 38056722817 green"
+            }
+          ]
         },
         {
           "id": "P12.7",
@@ -2998,8 +3048,8 @@
           "notes": []
         }
       ],
-      "status": "not_started",
-      "startedAt": null,
+      "status": "in_progress",
+      "startedAt": "2026-10-10T14:04:07.293Z",
       "completedAt": null
     },
     {
@@ -3024,11 +3074,16 @@
         {
           "id": "P13.2",
           "title": "Create and clone wizard",
-          "status": "not_started",
+          "status": "done",
           "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-10-10T14:03:57.611Z",
+          "commits": ["6755db38ce3f8891cc1ac26f309d9165c8f03705"],
+          "notes": [
+            {
+              "at": "2026-10-10T14:03:57.640Z",
+              "text": "Create/clone wizard, transactional org-scoped creation; event-wizard spec written, run in P16. CI 38056722817 green"
+            }
+          ]
         },
         {
           "id": "P13.3",
@@ -3042,11 +3097,16 @@
         {
           "id": "P13.4",
           "title": "Offline content delivery",
-          "status": "not_started",
+          "status": "done",
           "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-10-10T14:03:57.882Z",
+          "commits": ["6755db38ce3f8891cc1ac26f309d9165c8f03705"],
+          "notes": [
+            {
+              "at": "2026-10-10T14:03:57.907Z",
+              "text": "Versioned published content, ETag, SW precache, offline after token expiry; offline spec written, run in P16. CI 38056722817 green"
+            }
+          ]
         },
         {
           "id": "P13.5",
