@@ -125,6 +125,8 @@ read-only behavior; the old broader phase shorthand does not replace those rules
      `RolePermission` rows, so drift is "store ≠ repo" with no exclusions. The app's IAM role
      has `IsAuthorized` only, never `CreatePolicy`.
 - **Done when:** staging's store matches the repo, and the drift check is green.
+- **ADR-011:** the staging, soak, load or sign-off part of _Done when_ runs in P16.8. The step
+  closes when its code and tests are green in CI and the pipeline has deployed it.
 
 ### P11.7 — Admin permissions UI
 
@@ -159,6 +161,8 @@ read-only behavior; the old broader phase shorthand does not replace those rules
      says so, with an alarm; admin and config actions fail closed.
   3. Add alarms for AVP 5xx, throttles and latency.
 - **Done when:** the numbers are recorded, and both failure behaviours are demonstrated on staging.
+- **ADR-011:** the staging, soak, load or sign-off part of _Done when_ runs in P16.8. The step
+  closes when its code and tests are green in CI and the pipeline has deployed it.
 
 ### P11.10 — Verify and report
 

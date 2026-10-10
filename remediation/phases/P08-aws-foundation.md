@@ -116,6 +116,8 @@ staging client is `secure-channel.duckdns.org` and staging API is
   end in Chrome (owner amendment, 2026-10-03, waives actual iOS Safari evidence);
   production Firebase configuration is reviewable and its cross-site
   session dependency is addressed in P12 before production deployment.
+- **ADR-011:** the staging, soak, load or sign-off part of _Done when_ runs in P16.8. The step
+  closes when its code and tests are green in CI and the pipeline has deployed it.
 
 ### P08.6 — Secrets and configuration
 
@@ -167,6 +169,8 @@ evidence, content and event-aware retention still govern completion.
      presigned uploads, TLS-only bucket policy. The app serves `/content/*` from S3 (ADR-003 §7).
   2. Import (reference) the backups bucket.
 - **Done when:** a presigned upload from staging works, and direct public access fails.
+- **ADR-011:** the staging, soak, load or sign-off part of _Done when_ runs in P16.8. The step
+  closes when its code and tests are green in CI and the pipeline has deployed it.
 
 ### P08.8 — Observability
 
@@ -192,6 +196,8 @@ verify detection, notification delivery, the full catalogue or budget compliance
   5. An AWS Budget with alerts at 80 % and 100 % of US$100 to the owner.
   6. A CloudWatch dashboard.
 - **Done when:** a test alarm reaches the owner's email.
+- **ADR-011:** the staging, soak, load or sign-off part of _Done when_ runs in P16.8. The step
+  closes when its code and tests are green in CI and the pipeline has deployed it.
 
 ### P08.9 — CI/CD
 
@@ -233,6 +239,8 @@ The client model/library line target and other pipeline criteria remain open.
   3. Produce a cost report: Cost Explorer after 3 days, against `reports/P05/pricing/cost.md`.
      Re-run `fetch-prices.mjs` and `cost-model.mjs` with the measured usage.
 - **Done when:** smoke is green in the pipeline, and cost is within D-10.
+- **ADR-011:** the staging, soak, load or sign-off part of _Done when_ runs in P16.8. The step
+  closes when its code and tests are green in CI and the pipeline has deployed it.
 
 ### P08.11 — Report
 

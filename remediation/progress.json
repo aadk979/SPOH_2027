@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-10T05:47:53.804Z",
+  "updatedAt": "2026-10-10T07:04:49.647Z",
   "current": {
     "phase": "P11",
     "step": "P11.5"
@@ -263,6 +263,15 @@
       "status": "answered",
       "answer": "A with C: policy reads without an interactive transaction; release 2b after 24 h of staging with no shadow evaluation error and a cold-start and polling load test with none (owner, 9 October 2026, delegated to the recommendation)",
       "answeredAt": "2026-10-09T10:22:18.517Z"
+    },
+    {
+      "id": "D-23",
+      "title": "Build every feature first, verify after",
+      "owner": "you",
+      "blocks": [],
+      "status": "answered",
+      "answer": "B: build every feature first, full CI and automatic staging deploy on every push; verification campaign in P16 (ADR-011)",
+      "answeredAt": "2026-10-10T07:04:49.386Z"
     }
   ],
   "phases": [
@@ -3307,6 +3316,33 @@
           "notes": []
         },
         {
+          "id": "P16.10",
+          "title": "Granular API suite (run first)",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P16.8",
+          "title": "Deferred staging acceptance",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
+          "id": "P16.9",
+          "title": "Soak",
+          "status": "not_started",
+          "startedAt": null,
+          "completedAt": null,
+          "commits": [],
+          "notes": []
+        },
+        {
           "id": "P16.2",
           "title": "Load test",
           "status": "not_started",
@@ -3834,6 +3870,10 @@
     {
       "at": "2026-10-09T13:42:20.902Z",
       "text": "P11.5 before 2b: D-15=A, D-22=A+C (owner delegated). Policy reads without an interactive transaction, transaction wait = pool wait, warm pool floor (a1e01a7, rev 154); evaluation-failure metrics and alarm (a022793, rev 155). Paged-list polling bounded; capture-schedule-controls fixed. Soak from 13:33Z 9 Oct; 2b after 24 h with AuthorizationFailed = 0 and AuthorizationAllowed > 0."
+    },
+    {
+      "at": "2026-10-10T07:04:49.646Z",
+      "text": "D-23 / ADR-011: build every remaining feature first, verify on staging once in P16 (P16.8 deferred acceptance, P16.9 soak, P16.10 granular API suite). Full CI before every code push stays. Handoff: reports/HANDOFF-2026-10-10.md."
     }
   ]
 }

@@ -34,6 +34,8 @@ a screen.
   3. Breadcrumbs, and a section nav from the navigation registry.
   4. Test the IA with the owner as a clickable walkthrough before building the details.
 - **Done when:** the owner approves the IA walkthrough.
+- **ADR-011:** the staging, soak, load or sign-off part of _Done when_ runs in P16.8. The step
+  closes when its code and tests are green in CI and the pipeline has deployed it.
 
 ### P13.2 — Create and clone wizard
 
@@ -130,6 +132,8 @@ a screen.
   The Journey 1 time-to-set-up is measured again for comparison.
 - **Done when:** all the journeys pass on staging, and Journey 1 needs zero API, SQL, seed or env
   steps.
+- **ADR-011:** the staging, soak, load or sign-off part of _Done when_ runs in P16.8. The step
+  closes when its code and tests are green in CI and the pipeline has deployed it.
 
 ### P13.10 — Report
 

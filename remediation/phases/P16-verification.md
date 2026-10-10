@@ -17,6 +17,13 @@ documentation that lets someone else run it next year. Close the programme.
 
 - Hard dates: training 4 Nov 2026, Dry Run #1 18 Nov 2026, Dry Run #2 4 Jan 2027, event 6–9 Jan 2027.
 - Go/no-go criteria are in ADR-009 (from D-01).
+- **ADR-011 (D-23, 10 October 2026): this phase is the verification campaign for the whole build.**
+  It starts when every feature step in P08 and P10–P15 is closed. Earlier phases deferred their
+  staging acceptance, soaks, load numbers, browser and visual runs and UX sign-offs to here
+  (P16.8 lists them). First deploy to staging sized like production (ADR-008), then run, in this
+  order: **P16.10** granular API suite → **P16.1** full regression → **P16.8** deferred
+  acceptance → **P16.9** soak → **P16.2** load → **P16.3** drills → **P16.4** restore. Fix what
+  each finds (a failing test first), and re-run what the fix touched.
 
 ## Steps
 
@@ -25,6 +32,53 @@ documentation that lets someone else run it next year. Close the programme.
 - **Do:** Run all suites in CI, plus the e2e role journeys (P13.9) against staging, plus a
   read-only smoke against prod.
 - **Done when:** everything is green, with results recorded.
+
+### P16.10 — Granular API suite (run first)
+
+- **Do:**
+  1. Generate the case list from the route inventory (`remediation/tools/route-inventory.mjs`)
+     and the committed route × role matrix (`server/tests/integration/route-role-matrix.json`): every route, every role,
+     every station scope, and a member of another event.
+  2. For each route cover: success; validation failures for every field (missing, wrong type,
+     out of range, too long, unknown keys); auth missing, expired and refreshed; policy refusals
+     with their reasons (self-mutation, role escalation, station scope, structure frozen once LIVE,
+     archived event, capture window); not found and cross-event ids; conflicts and idempotent
+     replays; pagination ends and bad cursors; rate limits; every lifecycle state (DRAFT,
+     REHEARSAL, LIVE, CLOSED, ARCHIVED) where the route depends on it.
+  3. Run it against staging, and in CI against a `_test` database, so a later regression fails
+     the build.
+- **Done when:** every inventoried route has its cases, the suite is green on staging and in CI,
+  and each defect it found has a fix with a test.
+
+### P16.8 — Deferred staging acceptance
+
+- **Do:** Run the staging acceptance that earlier steps recorded here under ADR-011 §4, and the
+  owner reviews they deferred. Each step adds its line when it closes. Known at 10 October 2026:
+  - P08.5: the staging DuckDNS client signs in against the API's DuckDNS HTTPS address end to end.
+  - P08.7: a presigned upload from staging works, and direct public access fails.
+  - P08.8: a test alarm reaches the owner's email.
+  - P08.10: smoke is green in the pipeline, and cost is within D-10.
+  - P11.6: staging's policy store matches the repo, and the drift check is green.
+  - P11.9: decision latency recorded; AVP-unreachable and evaluation-failure behaviour
+    demonstrated on staging.
+  - P12.1: the pool settings are applied on staging, and `cdk diff` on identity is empty.
+  - P12.2: a staging invite arrives as configured.
+  - P13.1: the owner reviews the information-architecture walkthrough.
+  - P13.9: every role journey passes on staging; Journey 1 needs no API, SQL, seed or env edit.
+  - P14.8: the owner reviews the copy.
+  - P15.5: the nightly authorization job is green, and its alarms are wired.
+  - P15.8: the runbook is walked once.
+- **Done when:** every listed item passes or has a fix merged and re-checked, with results
+  recorded.
+
+### P16.9 — Soak
+
+- **Do:** With the whole build on staging sized like production, run a 24-hour soak: the
+  cold-start probe (sign in, first screens) every 30 minutes, steady polling at the configured
+  intervals, and scheduled actions firing. Watch `AuthorizationFailed`, 5xx, p95, task restarts,
+  database connections and the scheduler's lag and dead actions.
+- **Done when:** 24 hours with no evaluation failure, no 5xx and no restarts, or each one found
+  has a fix and the soak is repeated.
 
 ### P16.2 — Load test
 

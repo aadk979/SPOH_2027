@@ -175,6 +175,10 @@ client/src/
   cadence: affected checks during iteration, required acceptance at coherent feature
   milestones, no application deployment for allowlisted documentation, and bounded
   prerequisite work across phase boundaries. All completion and coverage rules remain.
+- [ADR-011](../../docs/adr/ADR-011-build-first-verify-after.md) (10 October 2026) amends it:
+  build every feature first, with full CI on every code push and the automatic staging deploy;
+  soaks, per-feature staging acceptance, full browser and visual runs and UX sign-offs move to
+  the P16 verification campaign (P16.8).
 - Small commits, each green, each carrying a `Remediation-Step: P06.3` trailer.
 - One logical change per commit. Moves and edits go in separate commits so reviews can diff moves as renames.
 - Update `progress.json` through `tools/progress.mjs` after every step, and push to `main`. There are
@@ -204,3 +208,5 @@ client/src/
 3. No new size, complexity or boundary violations, and metrics are no worse.
 4. Docs and comments are updated where behaviour or structure changed.
 5. The commit is pushed and `progress.json` is updated.
+6. Under ADR-011, staging acceptance, soak, load and sign-off criteria are recorded in P16.8
+   rather than met here; code, tests and a green CI run never are.

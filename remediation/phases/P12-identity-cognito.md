@@ -36,6 +36,8 @@ immediate effect everywhere.
   - token lifetimes aligned with server sessions
   - managed login branding, and callback/logout URLs per environment
 - **Done when:** `cdk diff` on identity is empty after import, and the settings are applied on staging.
+- **ADR-011:** the staging, soak, load or sign-off part of _Done when_ runs in P16.8. The step
+  closes when its code and tests are green in CI and the pipeline has deployed it.
 
 ### P12.2 — SES for invites (needs D-08)
 
@@ -47,6 +49,8 @@ immediate effect everywhere.
      through SES (ADR-006 §4).
   4. Leave the SES sandbox for production.
 - **Done when:** a staging invite arrives, branded, passing DKIM.
+- **ADR-011:** the staging, soak, load or sign-off part of _Done when_ runs in P16.8. The step
+  closes when its code and tests are green in CI and the pipeline has deployed it.
 
 ### P12.3 — Membership lifecycle
 

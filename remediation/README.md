@@ -117,6 +117,11 @@ Dry Run #2 on **4 Jan 2027** and the event on **6–9 Jan 2027**.
 | 18 Nov     | Dry Run #1                                                                                   |
 | Nov–Dec    | P13–P16 (go), or the programme continues toward the next event (no-go)                       |
 
+**ADR-011 (10 October 2026):** features are built first and verified together in P16, so several
+28 October criteria (load, restore, AVP degraded mode on staging) are measured only if the build
+finishes well before then. The owner still decides on 28 October; a no-go runs training and
+January on `release/january`.
+
 ADR-009 §1 reads this schedule honestly: a go on 28 Oct is possible but not likely, so the no-go
 path is prepared from the start.
 
@@ -161,11 +166,25 @@ the baseline, and it only ever receives P06.12 cherry-picks. What each fix chang
 
 ## Resuming (read this first in a fresh session)
 
-The owner approved the faster delivery process on **6 October 2026**. Read
-[the latest handoff](reports/HANDOFF-2026-10-06-PROCESS.md) and
-[ADR-010](../docs/adr/ADR-010-delivery-process.md) first. They supersede historical
-whole-phase start ordering, no-subagent instructions and documentation deployment
-cycles. Read older handoffs only for the relevant feature's detailed constraints;
+**Since 10 October 2026 the programme builds every feature first and verifies after**
+([ADR-011](../docs/adr/ADR-011-build-first-verify-after.md), D-23). Read
+[the latest handoff](reports/HANDOFF-2026-10-10.md), ADR-011 and
+[ADR-010](../docs/adr/ADR-010-delivery-process.md) first. In short:
+
+- Build the remaining features of P08 and P10–P15 in batches, each with its tests, and push each
+  batch to `main`. Full CI runs on every code push (run its steps locally first, under Node 24),
+  and the pipeline deploys staging automatically.
+- No shadow releases, soaks, per-feature staging acceptance, full browser or visual runs, or
+  release-plan approvals between features. A step closes when its code and tests are green in CI
+  and deployed; any staging, soak, load or sign-off part of its _Done when_ goes to **P16.8**.
+- Ask the owner only about cost, production, unrecoverable data and product rules the ADRs leave
+  open. Otherwise take the recommendation and record it as **assumed**.
+- When every feature step is closed, P16 is the verification campaign: staging sized like
+  production, the granular API suite (P16.10), full regression, deferred acceptance, a 24-hour
+  soak, load, drills and restore.
+
+ADR-010 superseded historical whole-phase start ordering, no-subagent instructions and
+documentation deployment cycles. Read older handoffs only for the relevant feature's detailed constraints;
 do not restart completed work or reread every historical handoff on each takeover.
 
 1. **Get oriented**
@@ -178,9 +197,9 @@ do not restart completed work or reread every historical handoff on each takeove
    `standards/engineering-standards.md` → the current phase file (its **Context for a fresh
    session** section first, then the current step).
 3. **Bootstrap the environment** if `node_modules` is missing. See [Environment bootstrap](#environment-bootstrap).
-4. **Work a coherent feature milestone:** use focused checks during iteration,
+4. **Work a batch of features (ADR-011):** use focused checks during iteration,
    retain logical green commits and prepare source/tracker notes before one push.
-   Full application CI still gates release; reuse unchanged evidence and do not
+   Full application CI still gates every code push; reuse unchanged evidence and do not
    redeploy documentation to make its SHA match the image. For example:
    ```bash
    node remediation/tools/progress.mjs start P06.3

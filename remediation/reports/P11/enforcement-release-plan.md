@@ -3,7 +3,7 @@
 **Status: approved by the owner on 8 October 2026 (D-20).** Release 1 (shadow) is
 [built and released](enforcement-shadow.md), and release 2a (D-21 and the screens) is
 [on staging](enforcement-screens.md); D-21 answered release 2's four questions, and
-release 2b (enforce) waits for the D-22 soak in [enforcement-timeouts.md](enforcement-timeouts.md). When this plan was written nothing was built. The role grants are stored and read (releases A `eddbc88` and B
+release 2b (enforce) is [on staging](enforcement-release-2b.md) since 10 October (revision 156). Release 3 (delete) ships when built, with full CI and no soak or approval ([ADR-011](../../../docs/adr/ADR-011-build-first-verify-after.md), D-23). When this plan was written nothing was built. The role grants are stored and read (releases A `eddbc88` and B
 `def8402`), and the authorizer exists, but `requireCapability` and
 `requireStationScope` still decide every request.
 

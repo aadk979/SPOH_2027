@@ -57,6 +57,8 @@ stand up production from the same CDK code, and move off the Lightsail box witho
      for staging (nightly).
   2. Denial-spike and policy-change alarms, since policy changes are audited and notified to admins.
 - **Done when:** the nightly job is green, and the alarms are wired.
+- **ADR-011:** the staging, soak, load or sign-off part of _Done when_ runs in P16.8. The step
+  closes when its code and tests are green in CI and the pipeline has deployed it.
 
 ### P15.6 — Secrets and credentials
 
@@ -87,6 +89,8 @@ stand up production from the same CDK code, and move off the Lightsail box witho
   3. Write the production runbook: deploy, roll back, scale for event days, restore.
 - **Done when:** nothing of the old deployment is running, and the runbook is walked once with the
   owner.
+- **ADR-011:** the staging, soak, load or sign-off part of _Done when_ runs in P16.8. The step
+  closes when its code and tests are green in CI and the pipeline has deployed it.
 - **If the 28 Oct decision was no-go:** this step instead stands production up and cuts over, per
   ADR-009 §5, in a window the owner chooses before the next event.
 

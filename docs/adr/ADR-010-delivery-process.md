@@ -2,7 +2,7 @@
 
 | Field      | Value                                                                                                                                                       |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Status     | Accepted by the owner's 6 October 2026 instruction to fix and implement the faster process                                                                  |
+| Status     | Accepted 6 October 2026; implementation cadence and per-milestone acceptance amended by [ADR-011](ADR-011-build-first-verify-after.md) (10 October 2026)    |
 | Applies to | Remaining remediation delivery, CI and staging; product scope and production approvals remain                                                               |
 | Supersedes | Whole-phase start ordering and repeated deployment of documentation in the resume protocol; historical no-subagent restriction for bounded independent work |
 
@@ -54,6 +54,11 @@ not a reason to hold all policy/checklist implementation until P10 closes.
   release merely to make a documentation SHA match staging.
 
 ### Implementation cadence
+
+> **Amended by [ADR-011](ADR-011-build-first-verify-after.md) (10 October 2026).** Full CI before
+> every code push stays. Per-milestone staging acceptance, browser and visual runs before release,
+> soaks, shadow releases and release-plan approvals move to the P16 verification campaign, after
+> every feature is built.
 
 - Choose a usable feature milestone with explicit acceptance criteria. Keep logical
   commits green, prepare related changes and tracker notes together, and push a

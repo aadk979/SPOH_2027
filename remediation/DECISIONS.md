@@ -392,7 +392,8 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
 - **Recommendation:** **A.** The first sign of an unexpected denial is then a log
   line, not a refused volunteer.
 - **Answer:** **A** (owner, 8 October 2026), and every organisation has at least one
-  platform admin.
+  platform admin. _Shadow and enforce shipped; release 3 (delete) ships without a soak or
+  approval under D-23._
 
 ### D-21 — Questions from the P11.5 shadow release
 
@@ -433,3 +434,25 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
 - **Answer:** **A, with C** (owner, 9 October 2026, by delegating to the
   recommendation). Release 2b waits for 24 hours of staging with no shadow
   evaluation error, and a cold-start burst and a polling load test that show none.
+  _Superseded for later work by D-23 (10 October 2026): the owner released 2b after about 16 of
+  the 24 hours, with 0 failed and 160 allowed evaluations._
+
+### D-23 — Build every feature first, verify after
+
+- **Owner:** you
+- **Blocks:** —
+- **Question:** Each feature has gone out as a staged rollout with staging acceptance, soaks and
+  owner checkpoints, which puts the end of the programme at the event itself. Keep that, or build
+  everything first and verify on staging once?
+- **Options:**
+  - **A.** Keep per-feature acceptance (ADR-010).
+  - **B.** Build every feature first, with full CI and the automatic staging deploy on every push;
+    then one verification campaign on staging sized like production: soaks, granular API tests
+    with every edge case, browser and visual suites, load, drills and restore.
+- **Recommendation:** **B**, keeping CI and the tests written with each feature.
+- **Answer:** **B** (owner, 10 October 2026). Recorded as
+  [ADR-011](../docs/adr/ADR-011-build-first-verify-after.md). It supersedes D-20's staged
+  releases and D-22's soak for the remaining P11 work; release 3 and later ship without a soak or
+  approval. Owner decisions are asked only for cost, production, unrecoverable data and open
+  product rules; otherwise the recommendation is taken and marked **assumed**. The 28 October
+  go/no-go (D-01) stands; ADR-011 § Consequences explains why a go is now less likely.
