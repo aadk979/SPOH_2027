@@ -41,7 +41,7 @@ jobs:
       eligible: ${{ steps.select.outputs.eligible }}
       sha: ${{ steps.select.outputs.sha }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.sha || github.event.workflow_run.head_sha || github.sha }}
           fetch-depth: 0
@@ -84,7 +84,7 @@ jobs:
         env:
           RELEASE_SHA: ${{ needs.release.outputs.sha }}
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ steps.sha.outputs.sha }}
 
@@ -125,7 +125,7 @@ jobs:
     env:
       SHA: ${{ needs.image.outputs.sha }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ env.SHA }}
           fetch-depth: 0
