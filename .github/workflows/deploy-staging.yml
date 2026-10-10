@@ -6,11 +6,10 @@ name: Deploy staging
 # build the ARM64 image, define the migrate task for it, run migrations, then
 # move the service (ADR-008 §1, P08.4). Rollback is redeploying an earlier
 # commit's image: run this workflow by hand with that commit's SHA.
+# AWS was torn down on 10 October 2026 at the owner's instruction: features are written first
+# (ADR-011). Staging is recreated for the P16 verification campaign; until then this runs only
+# when dispatched by hand, never after CI.
 on:
-  workflow_run:
-    workflows: [CI]
-    types: [completed]
-    branches: [main]
   workflow_dispatch:
     inputs:
       sha:

@@ -3,10 +3,8 @@ name: Infra
 # Proves the CI path into AWS (P08.2): GitHub's OIDC token, the spoh-github-deploy
 # role, and the CDK bootstrap roles, with no static keys anywhere. P08.9 grows
 # this into the staging deploy.
+# Manual only while AWS is torn down (10 October 2026, ADR-011); see deploy-staging.yml.
 on:
-  push:
-    branches: [main]
-    paths: ['infra/**', '.github/workflows/infra.yml']
   workflow_dispatch:
 
 concurrency:
