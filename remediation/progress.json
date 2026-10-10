@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-10T08:11:05.755Z",
+  "updatedAt": "2026-10-10T09:12:30.992Z",
   "current": {
-    "phase": "P11",
-    "step": "P11.5"
+    "phase": "P08",
+    "step": null
   },
   "gates": [
     {
@@ -2843,52 +2843,77 @@
         {
           "id": "P11.6",
           "title": "AVP via CDK",
-          "status": "not_started",
+          "status": "done",
           "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-10-10T09:12:29.706Z",
+          "commits": ["1119a6d35f19eb4713b3b6331440195eb0764e72"],
+          "notes": [
+            {
+              "at": "2026-10-10T09:12:29.731Z",
+              "text": "CDK STRICT policy store per stage from avp/policy-store.json (generated, CI-checked), app IsAuthorized only, store id + policy names to the task, server uses AVP when AVP_POLICY_STORE_ID is set; drift check bin/avp-drift.ts in the manual infra workflow. Staging match + drift green: P16.8."
+            }
+          ]
         },
         {
           "id": "P11.7",
           "title": "Admin permissions UI",
-          "status": "not_started",
+          "status": "done",
           "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-10-10T09:12:29.960Z",
+          "commits": ["1119a6d35f19eb4713b3b6331440195eb0764e72"],
+          "notes": [
+            {
+              "at": "2026-10-10T09:12:29.983Z",
+              "text": "/permissions: roles, grants, floors, guardrails; platform-admin toggle (audited, access bus, next request); simulator with plain-language explanation; what-can-they-do. /admin/permissions screen. Integration 11 cases; screen tests 4; e2e spec written for P16.8."
+            }
+          ]
         },
         {
           "id": "P11.8",
           "title": "Client affordances from policy",
-          "status": "not_started",
+          "status": "done",
           "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-10-10T09:12:30.215Z",
+          "commits": ["1119a6d35f19eb4713b3b6331440195eb0764e72"],
+          "notes": [
+            {
+              "at": "2026-10-10T09:12:30.239Z",
+              "text": "/me/permissions covers every member action; useAllows in every screen; CAPABILITY_MATRIX deleted from shared/server/client (frozen fixture for the port test); refusals name the action."
+            }
+          ]
         },
         {
           "id": "P11.9",
           "title": "Performance and failure behaviour",
-          "status": "not_started",
+          "status": "done",
           "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-10-10T09:12:30.483Z",
+          "commits": ["1119a6d35f19eb4713b3b6331440195eb0764e72"],
+          "notes": [
+            {
+              "at": "2026-10-10T09:12:30.510Z",
+              "text": "Degraded mode per ADR-005 §6 (existing); avp summary -> AvpFailed/AvpThrottled/AvpLatencyP95 alarms, AuthorizationDegraded alarm. Load numbers and failure demos on staging: P16.2/P16.8."
+            }
+          ]
         },
         {
           "id": "P11.10",
           "title": "Verify and report",
-          "status": "not_started",
+          "status": "done",
           "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-10-10T09:12:30.740Z",
+          "commits": ["1119a6d35f19eb4713b3b6331440195eb0764e72"],
+          "notes": [
+            {
+              "at": "2026-10-10T09:12:30.764Z",
+              "text": "Phase report in the phase file. Full local CI green (server 2659, client 651, CDK 81, policies 84, shared 249; floors hold)."
+            }
+          ]
         }
       ],
-      "status": "in_progress",
+      "status": "done",
       "startedAt": "2026-10-06T01:15:05.444Z",
-      "completedAt": null
+      "completedAt": "2026-10-10T09:12:30.991Z"
     },
     {
       "id": "P12",
