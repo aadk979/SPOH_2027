@@ -1,10 +1,24 @@
 # P11.5 release 2b — the policies decide (9 October 2026)
 
-**Status: built and verified locally on branch `p11.5-enforce`; not pushed, so not on staging.**
-It is pushed to `main` (which deploys staging) only when the D-22 soak has passed: 24 hours of
-staging from 13:33Z on 9 October with `AuthorizationFailed` = 0 and `AuthorizationAllowed` > 0
-([enforcement-timeouts.md](enforcement-timeouts.md)). Production still waits for the 28 October go
-decision.
+**Status: on staging since 05:43Z on 10 October (task revision 156, `ffc377e`).** Production
+still waits for the 28 October go decision.
+
+The D-22 gate asked for 24 hours of staging from 13:33Z on 9 October with `AuthorizationFailed` = 0
+and `AuthorizationAllowed` > 0 ([enforcement-timeouts.md](enforcement-timeouts.md)). At 05:21Z on
+10 October, about 16 of the 24 hours, the count stood at 0 failed and 160 allowed with the alarm
+`OK` throughout, and the owner chose to release then rather than wait out the last eight hours.
+
+## On staging
+
+- A full local CI run under Node 24 before the push found `check:hardcoding` failing on the
+  `spoh.` prefix of the pending-denials `Symbol.for` key; `ffc377e` renames it after the package.
+  Every other step passed.
+- CI 38027306299, Infra 38027306286 and deployment 38027974427 passed; the deploy's smoke checks
+  pass. Revision 156 runs image `ffc377e`, rollout `COMPLETED` at 05:43Z.
+- The first signed-in first screen after the rollout (nine requests) took 5.75 s at the slowest,
+  all 200: the new task's first burst. The next three rounds took 1.18 s, 0.62 s and 0.85 s.
+- Logs since the rollout: no error lines, no 403, no denial rows. The 401s are signed-out
+  `/me` and refresh requests.
 
 ## What changes
 

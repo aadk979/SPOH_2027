@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-09T13:42:20.903Z",
+  "updatedAt": "2026-10-10T05:47:53.804Z",
   "current": {
     "phase": "P11",
     "step": "P11.5"
@@ -2801,7 +2801,11 @@
             "eddbc88214a52fb2c3d5f322bdad97d434e0c4a1",
             "def8402f82d4d1fe245633edb4e7da8216425768",
             "98c816aec777731049e252c0325ffdb6b3ba66a5",
-            "0754f8d09c2e7c3c1d2fa294225a1f4a5458aaa4"
+            "0754f8d09c2e7c3c1d2fa294225a1f4a5458aaa4",
+            "dfe8d16705e8909337eeef401dc4ee856b40b38c",
+            "3ea675452814eac7f221670ef4c986d8fbf239dd",
+            "c23d4d5148780b4b62d1e6719a354bb0e95850aa",
+            "ffc377e2a9be9f61d1328113bb99ff7318829b59"
           ],
           "notes": [
             {
@@ -2815,6 +2819,10 @@
             {
               "at": "2026-10-08T13:32:45.630Z",
               "text": "Owner approved the enforcement release plan and confirmed platform admins (D-20). Release 1, shadow: 139 authorize enforcement points ahead of the legacy guards, local Cedar in its own transaction, findings logged with CHANGES.md tags and which layer refused, five-minute summary. Server coverage run 2773 passed, 4 skipped, 96.13 % lines / 87.83 % branches; 70 local findings, none overruling a legacy guard. Staging task 152 (CI 37781500957, deploy 37782998021): baseline identical, 25-route walk, summary 173 allowed, 0 errors, 0 findings. Release 2 waits for four owner questions in reports/P11/enforcement-shadow.md."
+            },
+            {
+              "at": "2026-10-10T05:47:53.803Z",
+              "text": "Release 2b (dfe8d16, 3ea6754, c23d4d5, ffc377e) on staging revision 156 at 05:43Z 10 Oct: the policies decide every route in a membership. Owner released after about 16 of the D-22 soak's 24 hours (0 failed, 160 allowed, alarm OK). CI 38027306299, deploy 38027974427, smoke passes; first screen after rollout 5.75 s, then 0.6-1.2 s; no 403 or error lines. Release 3 next."
             }
           ]
         },
