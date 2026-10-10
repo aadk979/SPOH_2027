@@ -13,6 +13,7 @@ import { useAttendance } from '@/features/attendance';
 import { useAllows, useEventTime } from '@/features/session';
 import { useCheckIn, useCheckOut } from '../queries';
 import { readableRole } from '@/shared/lib/format';
+export { PublishedFiveThings as FiveThings } from '@/features/content';
 
 export function ShiftCard({ me }: { me: MeResponse }): ReactNode {
   const assignment = me.currentAssignment;
@@ -130,33 +131,6 @@ export function EscalationChain({ me }: { me: MeResponse }): ReactNode {
           </li>
         ))}
       </ul>
-    </Card>
-  );
-}
-
-/** Slide 57. Short enough to actually be read before a shift starts. */
-export function FiveThings(): ReactNode {
-  const things = [
-    'Know where you are: your station, and the two nearest exits.',
-    'Know who your IC is, and how to reach them in one tap.',
-    'Know the visitor journey — the six steps from arrival to Mission Complete.',
-    'If you do not know an answer: "I don\'t know, let me get someone who does."',
-    'Anything unsafe goes to your IC and into an incident report, immediately.',
-  ];
-
-  return (
-    <Card variant="flat" as="details">
-      <summary className="cursor-pointer list-none font-semibold marker:content-none transition-colors hover:text-primary">
-        <span aria-hidden="true" className="mr-xs inline-block text-primary">
-          ▸
-        </span>
-        The five things
-      </summary>
-      <ol className="mt-sm flex list-decimal flex-col gap-xs pl-lg text-reading text-text-muted">
-        {things.map((thing) => (
-          <li key={thing}>{thing}</li>
-        ))}
-      </ol>
     </Card>
   );
 }

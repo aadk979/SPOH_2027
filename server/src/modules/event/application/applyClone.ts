@@ -1,4 +1,4 @@
-import { ERROR_CODES } from '@spoh/shared';
+import { ERROR_CODES, type CloneEventParts } from '@spoh/shared';
 import { defaultRoleGrantRows } from '../../../platform/access/authorizer/roleGrants.js';
 import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
@@ -22,9 +22,12 @@ import {
   readMemberships,
   readStructure,
   type CloneTarget,
+  type Structure,
 } from '../data/cloneRepo.js';
 import { movedDays, movedShifts } from '../domain/movedStructure.js';
 import type { ClonePlan } from './planClone.js';
+import { copyEventSettings } from '../data/cloneSettingsRepo.js';
+import { cloneContentInto } from '../../content/index.js';
 
 /**
  * Create the planned clone in one transaction (ADR-001 §6): a DRAFT event
@@ -42,26 +45,47 @@ export async function applyClone(
   }
   const now = (context.clock ?? systemClock).now();
   const created = await prisma.$transaction(
-    async (tx) => {
-      const source = await findEvent(plan.source.eventId, tx);
-      if (!source) throw new NotFoundError('Event');
-      const event = await createClonedEvent(tx, { plan, source });
-      await copyStructure(tx, { source: { eventId: source.id }, event, plan, now });
-      await writeAudit(tx, {
-        ...context.audit,
-        eventId: event.id,
-        membershipId: null,
-        action: 'event.clone',
-        entityType: 'Event',
-        entityId: event.id,
-        after: { clonedFromEventId: source.id, ...plan.request, counts: plan.counts },
-      });
-      return event;
-    },
+    (tx) => applyCloneInTransaction(tx, plan, { audit: context.audit, now }),
     { timeout: 30_000 },
   );
   invalidateEventCache();
   return created;
+}
+
+/** HTTP callers keep authority, clone, receipt and optional joining in one transaction. */
+export async function applyCloneInTransaction(
+  tx: PrismaTransactionClient,
+  plan: ClonePlan,
+  context: { audit: AuditContext; now: Date },
+): Promise<Event> {
+  const source = await findEvent(plan.source.eventId, tx);
+  if (!source) throw new NotFoundError('Event');
+  const event = await createClonedEvent(tx, { plan, source });
+  const target = await copyStructure(tx, {
+    source: { eventId: source.id },
+    event,
+    plan,
+    now: context.now,
+  });
+  if (plan.request.copy?.settings !== false) await copyEventSettings(tx, target, source.id);
+  if (plan.request.copy?.content !== false && context.audit.actorId)
+    await cloneContentInto(tx, {
+      sourceEventId: source.id,
+      eventId: event.id,
+      personId: context.audit.actorId,
+      now: context.now,
+      stationIds: target.ids,
+    });
+  await writeAudit(tx, {
+    ...context.audit,
+    eventId: event.id,
+    membershipId: null,
+    action: 'event.clone',
+    entityType: 'Event',
+    entityId: event.id,
+    after: { clonedFromEventId: source.id, ...plan.request, counts: plan.counts },
+  });
+  return event;
 }
 
 function createClonedEvent(
@@ -85,22 +109,42 @@ function createClonedEvent(
 async function copyStructure(
   tx: PrismaTransactionClient,
   input: { source: EventScope; event: Event; plan: ClonePlan; now: Date },
-): Promise<void> {
+): Promise<CloneTarget> {
   const { source, event, plan, now } = input;
   const target: CloneTarget = { eventId: event.id, ids: new Map() };
   const offsetDays = plan.request.dayOffsetDays;
   const structure = await readStructure(tx, source);
-  await copyTaxonomy(tx, target, structure);
-  await copyStations(tx, target, structure);
-  await copyGiftTypes(tx, target, structure.giftTypes);
+  const selected = {
+    categories: true,
+    stations: true,
+    daysAndShifts: true,
+    gifts: true,
+    settings: true,
+    content: true,
+    permissions: true,
+    ...plan.request.copy,
+  };
+  await copyTaxonomy(tx, target, selectedTaxonomy(structure, selected));
+  if (selected.stations) await copyStations(tx, target, structure);
+  if (selected.gifts) await copyGiftTypes(tx, target, structure.giftTypes);
   const days = movedDays(structure.days, offsetDays);
   const shifts = movedShifts(structure.shifts, { offsetDays, timezone: event.timezone });
-  await copyDaysAndShifts(tx, target, { days, shifts });
+  if (selected.daysAndShifts) await copyDaysAndShifts(tx, target, { days, shifts });
   // Cloning is copying rows (ADR-005 §2); a source without any starts the clone from the defaults.
-  const grants = await readRoleGrants(tx, source);
+  const grants = selected.permissions ? await readRoleGrants(tx, source) : [];
   await insertRoleGrants(tx, target, grants.length > 0 ? grants : defaultRoleGrantRows());
   if (plan.request.inviteSamePeople) {
     const memberships = await readMemberships(tx, source);
     await copyMemberships(tx, target, { memberships, invitedAt: now });
   }
+  return target;
+}
+
+function selectedTaxonomy(structure: Structure, selected: CloneEventParts) {
+  return {
+    categories: selected.categories ? structure.categories : [],
+    stationTypes: selected.stations ? structure.stationTypes : [],
+    tags: selected.stations ? structure.tags : [],
+    templates: selected.daysAndShifts ? structure.templates : [],
+  };
 }

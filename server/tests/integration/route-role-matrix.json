@@ -3,10 +3,6 @@
     "asks": "Roster.Edit",
     "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
   },
-  "DELETE /auth/sessions/:id": {
-    "asks": "Self.Read",
-    "who": "every member"
-  },
   "DELETE /notifications/subscriptions": {
     "asks": "Self.Read",
     "who": "every member"
@@ -115,10 +111,6 @@
     "asks": "Audit.Read",
     "who": ["CHIEF_COORDINATOR", "LEAD", "ADMIN"]
   },
-  "GET /auth/sessions": {
-    "asks": "Self.Read",
-    "who": "every member"
-  },
   "GET /cards/:shortCode": {
     "asks": "Self.Read",
     "who": "every member"
@@ -130,6 +122,22 @@
   "GET /cards/qr/:payload": {
     "asks": "Self.Read",
     "who": "every member"
+  },
+  "GET /content": {
+    "asks": "Self.Read",
+    "who": "every member"
+  },
+  "GET /content/assets/:versionId/:image": {
+    "asks": "Self.Read",
+    "who": "every member"
+  },
+  "GET /content/draft": {
+    "asks": "Settings.Read",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+  },
+  "GET /content/versions": {
+    "asks": "Settings.Read",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
   },
   "GET /dashboard/data-health": {
     "asks": "Dashboard.ReadEvent",
@@ -218,6 +226,14 @@
   "GET /registrations/summary": {
     "asks": "Dashboard.ReadStation",
     "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+  },
+  "GET /reports/archive-export/:id": {
+    "asks": "Report.Export",
+    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+  },
+  "GET /reports/archive-exports": {
+    "asks": "Report.Export",
+    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
   },
   "GET /reports/export": {
     "asks": "Report.Export",
@@ -383,6 +399,18 @@
     "asks": "People.Deactivate",
     "who": ["CHIEF_COORDINATOR", "ADMIN"]
   },
+  "POST /admin/volunteers/:id/resend-invite": {
+    "asks": "People.Update",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+  },
+  "POST /admin/volunteers/:id/sign-out": {
+    "asks": "People.Deactivate",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+  },
+  "POST /admin/volunteers/bulk": {
+    "asks": "People.Read",
+    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+  },
   "POST /announcements": {
     "asks": "Announcement.Send",
     "who": "decided per request"
@@ -433,6 +461,22 @@
   },
   "POST /cards/batch": {
     "asks": "Card.GenerateBatch",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+  },
+  "POST /content/images/upload": {
+    "asks": "Content.Edit",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+  },
+  "POST /content/publish": {
+    "asks": "Content.Publish",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+  },
+  "POST /content/review": {
+    "asks": "Content.Publish",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+  },
+  "POST /content/schedules": {
+    "asks": "Schedule.Manage",
     "who": ["CHIEF_COORDINATOR", "ADMIN"]
   },
   "POST /fallback/imports/footfall": {
@@ -527,6 +571,10 @@
     "asks": "Self.Read",
     "who": "every member"
   },
+  "POST /permissions/review": {
+    "asks": "Permissions.Edit",
+    "who": "platform admins"
+  },
   "POST /permissions/simulate": {
     "asks": "Settings.Read",
     "who": ["CHIEF_COORDINATOR", "ADMIN"]
@@ -542,6 +590,10 @@
   "POST /registrations/group": {
     "asks": "Registration.Create",
     "who": ["VOLUNTEER", "IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+  },
+  "POST /reports/archive-export": {
+    "asks": "Report.Export",
+    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
   },
   "POST /roster/briefing-slots/:id/complete": {
     "asks": "Briefing.Complete",
@@ -570,6 +622,10 @@
   "PUT /announcements/drafts/:id/schedules/:scheduleId": {
     "asks": "Announcement.SendStation",
     "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+  },
+  "PUT /content/draft": {
+    "asks": "Content.Edit",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
   },
   "PUT /permissions": {
     "asks": "Permissions.Edit",

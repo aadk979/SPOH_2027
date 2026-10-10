@@ -36,6 +36,9 @@ function snapshot(from: LifecycleSnapshot['from']): LifecycleSnapshot {
       lostPersonPurgeComplete: true,
       finalReportExists: true,
       captureGracePeriodComplete: true,
+      lostFoundClosed: true,
+      fallbackWindowsClosed: true,
+      exportPackExists: true,
     },
   };
 }
@@ -164,6 +167,9 @@ describe('event lifecycle (ADR-004)', () => {
       lostPersonPurgeComplete: false,
       finalReportExists: false,
       captureGracePeriodComplete: false,
+      lostFoundClosed: true,
+      fallbackWindowsClosed: true,
+      exportPackExists: true,
     };
     expect(evaluateTransition(closed, 'ARCHIVED', context).blockers).toEqual([
       'lost-person-purge',
@@ -171,4 +177,17 @@ describe('event lifecycle (ADR-004)', () => {
       'capture-grace-period',
     ]);
   });
+  it.each(['lostFoundClosed', 'fallbackWindowsClosed', 'exportPackExists'] as const)(
+    'requires archive close-out evidence %s',
+    (missing) => {
+      const closed = snapshot('CLOSED');
+      closed.archive[missing] = false;
+      const codes = {
+        lostFoundClosed: 'lost-found-closeout',
+        fallbackWindowsClosed: 'fallback-windows',
+        exportPackExists: 'final-export',
+      };
+      expect(evaluateTransition(closed, 'ARCHIVED', context).blockers).toEqual([codes[missing]]);
+    },
+  );
 });

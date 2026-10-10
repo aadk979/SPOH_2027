@@ -34,6 +34,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   clients.splice(0).forEach((client) => client.clear());
+  vi.restoreAllMocks();
 });
 
 it('does not query a station dashboard until a station is selected', async () => {
@@ -117,6 +118,13 @@ it('preserves roster filter encoding and separate list cache entries', async () 
 });
 
 it('invalidates all roster filters only after successful mutations', async () => {
+  const updateKey = '70000000-0000-4000-8000-000000000001';
+  const deactivateKey = '70000000-0000-4000-8000-000000000002';
+  const reactivateKey = '70000000-0000-4000-8000-000000000003';
+  vi.spyOn(crypto, 'randomUUID')
+    .mockReturnValueOnce(updateKey)
+    .mockReturnValueOnce(deactivateKey)
+    .mockReturnValueOnce(reactivateKey);
   const { client, wrapper } = setup();
   const invalidate = vi.spyOn(client, 'invalidateQueries');
   const { result } = renderHook(
@@ -142,21 +150,24 @@ it('invalidates all roster filters only after successful mutations', async () =>
     });
     await result.current.reactivate.mutateAsync('person-42');
   });
-  expect(api).toHaveBeenCalledWith(`/events/${TEST_EVENT.id}/admin/volunteers/person-42`, {
-    method: 'PATCH',
-    body: { role: 'IC' },
-  });
+  for (const attempt of [1, 2])
+    expect(api).toHaveBeenNthCalledWith(
+      attempt,
+      `/events/${TEST_EVENT.id}/admin/volunteers/person-42`,
+      { method: 'PATCH', body: { role: 'IC', idempotencyKey: updateKey } },
+    );
   expect(api).toHaveBeenCalledWith(
     `/events/${TEST_EVENT.id}/admin/volunteers/person-42/deactivate`,
     {
       method: 'POST',
-      body: { reason: 'Left the roster', disableIdentity: false },
+      body: { reason: 'Left the roster', disableIdentity: false, idempotencyKey: deactivateKey },
     },
   );
   expect(api).toHaveBeenLastCalledWith(
     `/events/${TEST_EVENT.id}/admin/volunteers/person-42/reactivate`,
     {
       method: 'POST',
+      body: { idempotencyKey: reactivateKey },
     },
   );
   expect(invalidate).toHaveBeenCalledTimes(3);

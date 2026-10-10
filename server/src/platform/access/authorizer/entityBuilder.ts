@@ -6,6 +6,7 @@ import { campusCidrs, onCampus, rootMembershipId } from '../../event/attendanceA
 import { eventDayAnchorOf } from '../../time/index.js';
 import { resourceEntity, type ResourceRef } from './resourceEntities.js';
 import { databaseRoleGrants, type RoleGrantSource } from './roleGrants.js';
+import { archiveReader } from '../archiveStanding.js';
 import { ref, uid, type AuthorizationRequest } from './types.js';
 
 export type { ResourceRef, ResourceType } from './resourceEntities.js';
@@ -153,17 +154,13 @@ export class EntityBuilder {
     return entity;
   }
 
-  /**
-   * People have no deactivation of their own yet; a membership's status carries it
-   * (P12 adds the person lifecycle). Platform authority is the person's role in the
-   * organisation of this event.
-   */
+  /** Global standing and authority are read in the organisation of this event. */
   private async person(personId: string): Promise<TypeAndId> {
     const entity = uid('Person', personId);
     if (this.has(entity)) return entity;
     const person = await this.tx.person.findUnique({
       where: { id: personId },
-      select: { id: true },
+      select: { id: true, deactivatedAt: true },
     });
     if (!person) throw new NotFoundError('Person');
     const { organisationId } = await this.event();
@@ -173,7 +170,7 @@ export class EntityBuilder {
     });
     this.put({
       uid: entity,
-      attrs: { active: true, platformAdmin: member?.role === 'PLATFORM_ADMIN' },
+      attrs: { active: person.deactivatedAt === null, platformAdmin: member?.role === 'PLATFORM_ADMIN' },
       parents: [],
     });
     return entity;
@@ -216,7 +213,9 @@ export class EntityBuilder {
         person: { __entity: person },
         role: { __entity: role },
         rank: ROLE_RANKS[member.role],
-        active: member.status === 'ACTIVE',
+        active: member.status === 'ACTIVE' || await archiveReader(this.tx, {
+          personId: member.personId, status: member.status, eventId,
+        }),
         ...(await this.rostered(membershipId)),
         attendanceVerifiedToday: await this.verifiedToday(member.personId),
         isAttendanceRoot: (await rootMembershipId({ eventId }, this.tx)) === membershipId,

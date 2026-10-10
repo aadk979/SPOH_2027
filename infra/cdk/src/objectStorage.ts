@@ -72,6 +72,7 @@ export class ObjectStorage extends Construct {
       versioned: true,
       serverAccessLogsBucket: logs,
       serverAccessLogsPrefix: 'content/',
+      cors: mediaCors(stage.publicOrigins?.client),
       lifecycleRules: [ABORT_INCOMPLETE],
     });
     this.exports = new Bucket(this, 'Exports', {

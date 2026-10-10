@@ -2,6 +2,7 @@ import type { LifecycleReadinessResponse } from '@spoh/shared';
 import { useEventTime } from '@/features/session';
 import { Callout } from '@/shared/ui';
 import { PHASE_LABELS, lifecycleBlocker, transitionLabel } from '../model/lifecycleCopy';
+import { GoLiveChecklist } from './GoLiveChecklist';
 
 export function LifecycleReadinessSummary({
   readiness,
@@ -45,6 +46,7 @@ export function LifecycleReadinessSummary({
       {!readiness.transitions.length ? (
         <Callout>This event has no available lifecycle transitions.</Callout>
       ) : null}
+      <GoLiveChecklist items={readiness.goLiveReadiness} />
     </>
   );
 }

@@ -21,6 +21,7 @@
  */
 const VERSION = new URLSearchParams(self.location.search || '').get('v') || 'dev';
 const CACHE = `spoh2027-shell-${VERSION}`;
+const CONTENT_CACHE = `spoh2027-published-${VERSION}`;
 
 /**
  * Event screens live at `/e/<slug>/…`, and every slug is served from the one
@@ -89,7 +90,11 @@ self.addEventListener('activate', (event) => {
     caches
       .keys()
       .then((keys) =>
-        Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key))),
+        Promise.all(
+          keys
+            .filter((key) => key !== CACHE && key !== CONTENT_CACHE)
+            .map((key) => caches.delete(key)),
+        ),
       )
       .then(() => self.clients.claim()),
   );
@@ -100,6 +105,13 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
 
   const url = new URL(request.url);
+
+  // The only API cache exception is immutable published guide content. Store the URL,
+  // never the Authorization-bearing Request. Latest and draft reads stay network-only.
+  if (isPublishedContent(request, url)) {
+    event.respondWith(publishedContent(request));
+    return;
+  }
 
   // Never cache the API. See the note above — this is the load-bearing rule.
   if (url.pathname.startsWith('/api/') || url.origin !== self.location.origin) return;
@@ -127,6 +139,40 @@ self.addEventListener('fetch', (event) => {
       ),
   );
 });
+
+function isPublishedContent(request, url) {
+  if (!request.headers?.get('Authorization')) return false;
+  const root = /^\/api\/v1\/events\/[^/]+\/content$/;
+  const image = /^\/api\/v1\/events\/[^/]+\/content\/assets\/[^/]+\/map-\d+$/;
+  if (root.test(url.pathname))
+    return (
+      [...url.searchParams.keys()].length === 1 &&
+      /^[a-zA-Z0-9_-]+$/.test(url.searchParams.get('v') || '')
+    );
+  return image.test(url.pathname) && !url.search;
+}
+
+function publishedContent(request) {
+  return fetch(request)
+    .then(async (response) => {
+      if (response.ok && response.headers.get('cache-control')?.includes('immutable')) {
+        try {
+          const cache = await caches.open(CONTENT_CACHE);
+          await cache.put(request.url, response.clone());
+        } catch {
+          // Cache storage can be unavailable or full; keep the successful online response.
+        }
+      }
+      // A denial or a server error is authoritative; never replace it with a cached 200.
+      return response;
+    })
+    .catch(async (error) => {
+      const cache = await caches.open(CONTENT_CACHE);
+      const saved = await cache.match(request.url);
+      if (saved) return saved;
+      throw error;
+    });
+}
 
 function fromCacheFirst(request) {
   return caches.match(request).then(

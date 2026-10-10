@@ -72,6 +72,64 @@ documentation that lets someone else run it next year. Close the programme.
   - P14.8: the owner reviews the copy.
   - P15.5: the nightly authorization job is green, and its alarms are wired.
   - P15.8: the runbook is walked once.
+
+  Additional acceptance for the 10 October build is listed below. The code is present but its
+  batch CI is still pending; these entries are not tracker completion claims. Missing setup,
+  scheduling, identity-branding or security implementation remains in its build step.
+
+  - P08.5 / P12.5: in Chrome with third-party cookies blocked, exercise the first-party recovery
+    handoff, reload, explicit active-tab renewal and sign-out. Renewal must preserve forms until
+    deliberately started; an expired thin token must still be usable only to revoke its own
+    session family, never to obtain authenticated data or a new session.
+  - P08.6: exercise the documented operator DB credential rotation/rollback path and scoped task
+    access, provision VAPID privately and prove push receipt. Do not infer rotation from generated
+    secrets or create a paid rotation/network service without the owner's cost decision.
+  - P08.7 / P13.4: prove exact-origin/type/size signed uploads, refused direct public access,
+    reviewed immutable publication, frozen historical floor plans and private versioned assets.
+    After one online load, turn the network off and read the published guide/map after thin-access
+    expiry. Drafts and operational API data must not come from the content cache; a real HTTP
+    refusal must not fall back to an older cached guide.
+  - P08.7 / P13.8: generate/download the current final XLSX pack from private exports, verify its
+    counting notes and exclusion of visitor values/transient lost-person descriptions, and show
+    archive refuses a missing/stale pack. Prove event-relative photo deletion and export lifecycle
+    behaviour; this does not defer the missing printable-card PDF/ZIP feature.
+  - P08.8: trigger/recover the new storage/connection/observer signals, verify desired-versus-running
+    task observations while parked, backup metadata freshness and confirmed SNS email delivery.
+    Reconcile the existing account budget before enabling its managed definition. Paid SMS stays
+    behind the owner's cost approval; a retained audit log group does not prove audit shipping.
+  - P08.9 / P08.10: execute manual park/unpark, readiness smoke and the three-day cost comparison
+    including added alarms, dashboards, metrics and observer invocations. Keep deploy/infra
+    workflows dispatch-only until the authorised campaign.
+  - P10.5: exercise READY/LIVE with current server-selected smoke/backup/alarm evidence, refusal
+    of unavailable evidence, CLOSED capture/close-out/final-report effects and guarded ARCHIVED
+    membership/retention effects. Missing feature screens are still build work.
+  - P10.7 / P10.8: schedule/review/edit/cancel supported event/station operational keys, category
+    activity, announcement/content publication and report snapshots; prove exact targets, current
+    execution-time authority, reviewed-version conflicts, cancellation fencing and immutable
+    report/publication provenance. Unregistered reminders are not included as completed code.
+  - P12.1 / P12.2: observe the recreated synthetic pool's configured policy/lifetimes and actual
+    default-sender invite/resend receipt with thirty-day temporary-password validity. Confirm the
+    pool-wide application delivery allowance and actionable quota refusal; no SES/DKIM criterion
+    remains under amended D-08. Managed-login branding still needs implementation in P12.1.
+  - P12.3: prove invite acceptance, role-change session revocation, event deactivation without
+    disabling other active-event access, global disable/reactivate and under-two-second effects
+    across instances. Verify archive ends event memberships and refuses subsequent writes.
+  - P12.4 / P12.5 / P12.7: exercise provider-backed single/CSV/bulk provisioning, resend,
+    platform membership detail, device revoke, forced sign-out and admin MFA enrolment/promotion.
+    Run the implemented `server/scripts/verify-cognito.mjs` configuration checks and its explicit
+    short-lived synthetic provider-token exchange path. It has not contacted AWS; its two unit
+    checks and mocked UI specifications do not prove real Cognito/MFA/browser behaviour.
+  - P12.6: run group cleanup in dry-run mode against recreated synthetic staging, inspect its
+    plan and then exercise the approved cleanup path; verify permissions continue to come from
+    memberships and Cedar rather than Cognito groups.
+  - P13.2: create a fresh event and clone selected source structure/published content into an
+    unreviewed target-owned draft, land on Setup and verify source/target isolation. The missing
+    Audit section and other setup features remain P13 build work.
+  - P15.7: observe implemented retention maintenance on synthetic archived/closed data and
+    authorised person export/erasure, preserving operational counts/audit identifiers and refusing
+    erasure while any membership remains active. Verify the separately stated provider/backup
+    retention limitations. Audit shipping remains implementation work, not acceptance deferred here.
+
 - **Done when:** every listed item passes or has a fix merged and re-checked, with results
   recorded.
 

@@ -3,6 +3,10 @@ import {
   LifecycleReadinessResponse,
   TransitionEventRequest,
   type MyEventsResponse,
+  EventAdministrationResponse,
+  EventCreatedResponse,
+  CreateEventRequest,
+  CloneEventWizardRequest,
 } from '@spoh/shared';
 import { api } from '@/shared/lib/api';
 import { eventApi } from '@/shared/lib/eventApi';
@@ -10,6 +14,22 @@ import { eventApi } from '@/shared/lib/eventApi';
 /** The caller's events: a platform route, outside any one event (ADR-001 §4). */
 export function listMyEvents(): Promise<MyEventsResponse> {
   return api<MyEventsResponse>('/events');
+}
+
+export async function getEventAdministration(): Promise<EventAdministrationResponse> {
+  return EventAdministrationResponse.parse(await api('/events/administration'));
+}
+
+export async function createEvent(input: CreateEventRequest): Promise<EventCreatedResponse> {
+  return EventCreatedResponse.parse(
+    await api('/events', { method: 'POST', body: CreateEventRequest.parse(input) }),
+  );
+}
+
+export async function cloneEvent(input: CloneEventWizardRequest): Promise<EventCreatedResponse> {
+  return EventCreatedResponse.parse(
+    await api('/events/clone', { method: 'POST', body: CloneEventWizardRequest.parse(input) }),
+  );
 }
 
 export async function getLifecycleReadiness(eventId: string): Promise<LifecycleReadinessResponse> {

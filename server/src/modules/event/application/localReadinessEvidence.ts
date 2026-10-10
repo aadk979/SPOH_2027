@@ -2,6 +2,7 @@ import { CommitteeRole, MembershipStatus } from '@spoh/shared';
 import { z } from 'zod';
 import { resolveSetting } from '../../../platform/settings/resolve.js';
 import type { ReadinessEvidence } from '../domain/readiness/index.js';
+import { notificationReadinessFacts } from './notificationReadinessFacts.js';
 
 const LocalSnapshot = z
   .object({
@@ -11,6 +12,8 @@ const LocalSnapshot = z
     cardBatch: z.unknown(),
     giftStock: z.unknown(),
     attendance: z.unknown(),
+    rolePermissions: z.unknown().optional(),
+    notifications: z.unknown().optional(),
   })
   .strict();
 const AttendanceSnapshot = z
@@ -52,5 +55,11 @@ export function localReadinessEvidence(value: unknown, eventId: string): Readine
     'card-batch': envelope(snapshot.cardBatch),
     'gift-stock': envelope(snapshot.giftStock),
     ...(attendance === undefined ? {} : { attendance: envelope(attendance) }),
+    ...(snapshot.rolePermissions === undefined
+      ? {}
+      : { 'role-permissions': envelope(snapshot.rolePermissions) }),
+    ...(snapshot.notifications === undefined
+      ? {}
+      : { notifications: envelope(notificationReadinessFacts(snapshot.notifications)) }),
   };
 }

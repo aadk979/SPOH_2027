@@ -50,6 +50,14 @@ export const RolePermissionsResponse = z
         guardrails: z.array(RolePermissionGuardrail),
         /** Whether the caller may change grants (`Permissions.Edit`, platform admins). */
         canEdit: z.boolean(),
+        review: z
+          .object({
+            version: z.number().int().nonnegative(),
+            reviewedVersion: z.number().int().nonnegative().nullable(),
+            reviewedAt: z.iso.datetime().nullable(),
+          })
+          .strict()
+          .optional(),
       })
       .strict(),
   })
@@ -65,6 +73,15 @@ export const ChangeRolePermissionRequest = z
   })
   .strict();
 export type ChangeRolePermissionRequest = z.infer<typeof ChangeRolePermissionRequest>;
+
+export const ReviewRolePermissionsRequest = z
+  .object({
+    expectedVersion: z.number().int().nonnegative(),
+    reason: z.string().trim().min(3).max(500),
+    idempotencyKey: IdempotencyKey,
+  })
+  .strict();
+export type ReviewRolePermissionsRequest = z.infer<typeof ReviewRolePermissionsRequest>;
 
 /** A resource to ask about; the event when absent. */
 export const SimulatedResource = z

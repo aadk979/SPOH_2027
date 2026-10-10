@@ -38,16 +38,20 @@ function objectPolicies(template: Template, role: unknown) {
     .filter((statement) => JSON.stringify(statement.Action).includes('s3:'));
 }
 
-it('grants the staging app only photo-prefix GetObject and PutObject', () => {
+it('grants the staging app photo-prefix reads, uploads and privacy deletion', () => {
   const template = templateFor('staging');
   const mediaId = Object.keys(template.findResources('AWS::S3::Bucket')).find((id) =>
     id.startsWith('StorageMedia'),
   );
   expect(mediaId).toBeDefined();
-  expect(objectPolicies(template, taskFor(template, 'app').TaskRoleArn)).toEqual([
+  expect(
+    objectPolicies(template, taskFor(template, 'app').TaskRoleArn).filter((statement) =>
+      JSON.stringify(statement.Resource).includes('/lost-found/'),
+    ),
+  ).toEqual([
     {
       Effect: 'Allow',
-      Action: ['s3:GetObject', 's3:PutObject'],
+      Action: ['s3:GetObject', 's3:PutObject', 's3:DeleteObject'],
       Resource: { 'Fn::Join': ['', [{ 'Fn::GetAtt': [mediaId, 'Arn'] }, '/lost-found/*']] },
     },
   ]);
@@ -88,7 +92,11 @@ it('keeps migration roles and configuration free of storage access', () => {
 it('keeps production media disabled until its approved exact public origin exists', () => {
   const template = templateFor('prod');
   const task = taskFor(template, 'app');
-  expect(objectPolicies(template, task.TaskRoleArn)).toEqual([]);
+  expect(
+    objectPolicies(template, task.TaskRoleArn).filter((statement) =>
+      JSON.stringify(statement.Resource).includes('/lost-found/'),
+    ),
+  ).toEqual([]);
   expect(JSON.stringify(task.ContainerDefinitions)).not.toContain('S3_MEDIA_BUCKET');
   for (const row of Object.values(template.findResources('AWS::SSM::Parameter')))
     expect(row.Properties.Name).not.toContain('S3_MEDIA_BUCKET');

@@ -11,6 +11,7 @@ import type {
   DeactivateVolunteerRequest,
   UpdateVolunteerRequest,
   VolunteerMutationResponse,
+  BulkPeopleRequest,
 } from '@spoh/shared';
 import {
   listVolunteers,
@@ -19,9 +20,13 @@ import {
   reactivateVolunteer,
   type VolunteerFilters,
   type VolunteerListResponse,
+  bulkPeople,
+  resendInvite,
+  signOutPerson,
 } from './api';
 import { useCurrentSession } from '@/features/session';
 import { useEventId } from '@/shared/lib/eventContext';
+import { useRetryKey } from '@/shared/hooks/useRetryKey';
 
 /**
  * Roster administration.
@@ -59,18 +64,33 @@ function useInvalidate(): () => void {
   };
 }
 
+function useReceipt() {
+  const receipt = useRetryKey();
+  const invalidate = useInvalidate();
+  return {
+    forInput: receipt.forInput,
+    done: () => {
+      receipt.clear();
+      invalidate();
+    },
+  };
+}
+
 export function useUpdateVolunteer(): UseMutationResult<
   VolunteerMutationResponse,
   Error,
   { id: string; patch: UpdateVolunteerRequest }
 > {
-  const invalidate = useInvalidate();
+  const receipt = useReceipt();
   const eventId = useEventId();
 
   return useMutation({
     mutationFn: (input: { id: string; patch: UpdateVolunteerRequest }) =>
-      updateVolunteer(eventId, input),
-    onSuccess: invalidate,
+      updateVolunteer(eventId, {
+        id: input.id,
+        patch: { ...input.patch, idempotencyKey: receipt.forInput(input) },
+      }),
+    onSuccess: receipt.done,
   });
 }
 
@@ -79,13 +99,16 @@ export function useDeactivateVolunteer(): UseMutationResult<
   Error,
   { id: string; body: DeactivateVolunteerRequest }
 > {
-  const invalidate = useInvalidate();
+  const receipt = useReceipt();
   const eventId = useEventId();
 
   return useMutation({
     mutationFn: (input: { id: string; body: DeactivateVolunteerRequest }) =>
-      deactivateVolunteer(eventId, input),
-    onSuccess: invalidate,
+      deactivateVolunteer(eventId, {
+        id: input.id,
+        body: { ...input.body, idempotencyKey: receipt.forInput(input) },
+      }),
+    onSuccess: receipt.done,
   });
 }
 
@@ -94,11 +117,41 @@ export function useReactivateVolunteer(): UseMutationResult<
   Error,
   string
 > {
-  const invalidate = useInvalidate();
+  const receipt = useReceipt();
   const eventId = useEventId();
 
   return useMutation({
-    mutationFn: (id: string) => reactivateVolunteer(eventId, id),
-    onSuccess: invalidate,
+    mutationFn: (id: string) =>
+      reactivateVolunteer(eventId, { id, idempotencyKey: receipt.forInput(id) }),
+    onSuccess: receipt.done,
+  });
+}
+
+export function useBulkPeople() {
+  const eventId = useEventId();
+  const receipt = useReceipt();
+  return useMutation({
+    mutationFn: (body: BulkPeopleRequest) =>
+      bulkPeople(eventId, { ...body, idempotencyKey: receipt.forInput(body) }),
+    onSuccess: receipt.done,
+  });
+}
+
+export function useResendInvite() {
+  const eventId = useEventId();
+  const receipt = useReceipt();
+  return useMutation({
+    mutationFn: (id: string) => resendInvite(eventId, { id, idempotencyKey: receipt.forInput(id) }),
+    onSuccess: receipt.done,
+  });
+}
+
+export function useSignOutPerson() {
+  const eventId = useEventId();
+  const receipt = useReceipt();
+  return useMutation({
+    mutationFn: (id: string) =>
+      signOutPerson(eventId, { id, idempotencyKey: receipt.forInput(id) }),
+    onSuccess: receipt.done,
   });
 }

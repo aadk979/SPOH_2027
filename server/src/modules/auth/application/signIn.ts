@@ -12,7 +12,14 @@ export async function signIn(
   context: SessionContext,
   audit: AuditContext,
 ): Promise<OpenedSession> {
-  return openSession(await subjectOf(body), context, audit);
+  return openSession(
+    await subjectOf(body),
+    {
+      ...context,
+      ...(body.providerAccessToken ? { providerAccessToken: body.providerAccessToken } : {}),
+    },
+    audit,
+  );
 }
 
 async function subjectOf(body: CreateSessionRequest): Promise<string> {

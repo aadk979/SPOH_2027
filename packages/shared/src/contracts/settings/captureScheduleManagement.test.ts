@@ -92,7 +92,7 @@ it.each([
   { expectedScheduleVersion: 0 },
   { expectedScheduleVersion: 1.5 },
   { expectedVersion: -1 },
-  { value: 'false' },
+  { value: null },
   { runAt: '2027-01-07T12:00' },
   { reason: ' x ' },
   { reason: 'x'.repeat(501) },

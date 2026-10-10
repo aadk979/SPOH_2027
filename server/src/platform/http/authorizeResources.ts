@@ -118,6 +118,7 @@ const TRANSITIONS: Record<string, Action> = {
   REHEARSAL: 'Event.Rehearse',
   LIVE: 'Event.GoLive',
   CLOSED: 'Event.Close',
+  ARCHIVED: 'Event.Archive',
 };
 
 /** A lifecycle transition is the action for its target; LIVE from CLOSED reopens (C13). */

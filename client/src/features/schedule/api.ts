@@ -8,6 +8,7 @@ import {
   UpdateCaptureScheduleRequest,
   CancelCaptureScheduleRequest,
   type ScopedSettingsTarget,
+  type ScopedOperationalSettingKey,
 } from '@spoh/shared';
 import { eventApi } from '@/shared/lib/eventApi';
 import { assertCaptureTarget } from './model/captureScheduleResponse';
@@ -28,12 +29,14 @@ export async function listCaptureSchedules(
   eventId: string,
   input: {
     target: ScopedSettingsTarget;
+    key?: ScopedOperationalSettingKey;
     status?: ScheduledActionStatus;
     cursor?: string;
   },
 ) {
   const query = CaptureScheduleListQuery.parse({
     ...input.target,
+    key: input.key,
     status: input.status,
     cursor: input.cursor,
     limit: 20,
@@ -50,6 +53,7 @@ export async function listCaptureSchedules(
     await eventApi(eventId, `/admin/settings/catalogue/schedules?${params}`, { cache: 'no-store' }),
   );
   assertCaptureTarget(eventId, input.target, page);
+  if (page.key !== query.key) throw new Error('Setting schedule key mismatch');
   return page;
 }
 function captureResponse(

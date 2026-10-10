@@ -19,6 +19,30 @@ const WITHOUT_MEMBERSHIP = new Set([
   'GET /client-config',
   'POST /dev-auth/sign-in',
   'GET /events',
+  'GET /auth/recover', // First-party refresh cookie plus PKCE-bound handoff; no event principal.
+  'POST /auth/handoff', // One-use PKCE code, exact trusted origin; no event principal.
+  'POST /auth/mfa/setup', // Restricted signed session; session-owned provider token only.
+  'POST /auth/mfa/verify', // Restricted signed session and provider TOTP verification.
+  'GET /auth/sessions', // requirePerson, own sessions only; valid with no Event-1 membership.
+  'DELETE /auth/sessions/:id', // requirePerson plus loaded session's personId ownership.
+]);
+
+/** These cross-event platform use cases ask current Cedar authority in their transactions. */
+const PLATFORM_USE_CASE_AUTHORITY = new Map([
+  ['GET /people/:id', 'permittedPerson: Platform.ManageAdmins for every target organisation'],
+  ['GET /people/:id/data', 'permittedPerson: Platform.ManageAdmins for every target organisation'],
+  ['POST /people/:id/erase', 'permittedPerson: Platform.ManageAdmins under the person lock'],
+  ['POST /people/:id/deactivate', 'permittedPerson: Platform.ManageAdmins under the person lock'],
+  ['POST /people/:id/reactivate', 'permittedPerson: Platform.ManageAdmins under the person lock'],
+  [
+    'GET /events/administration',
+    'organisationAuthority: current create/clone policy filters output',
+  ],
+  ['POST /events', 'requireOrganisationAuthority: Platform.CreateEvent under organisation lock'],
+  [
+    'POST /events/clone',
+    'requireOrganisationAuthority: Platform.CloneEvent under organisation lock',
+  ],
 ]);
 
 const LEGACY_GUARD = /^(requireCapability|requireStationScope)/;
@@ -30,9 +54,10 @@ describe('authorization coverage', () => {
     expect(routes.length).toBeGreaterThan(140);
   });
 
-  it('has an authorize enforcement point on every route that has a member', () => {
+  it('has a route enforcement point or documented current platform use-case authority', () => {
     const missing = routes
       .filter(({ route }) => !WITHOUT_MEMBERSHIP.has(route))
+      .filter(({ route }) => !PLATFORM_USE_CASE_AUTHORITY.has(route))
       .filter(({ chain }) => !chain.some((name) => name.startsWith('authorize(')))
       .map(({ route }) => route);
     expect(missing).toEqual([]);
@@ -48,5 +73,11 @@ describe('authorization coverage', () => {
   it('lists only routes that exist as running without a membership', () => {
     const names = new Set(routes.map(({ route }) => route));
     expect([...WITHOUT_MEMBERSHIP].filter((route) => !names.has(route))).toEqual([]);
+    expect([...PLATFORM_USE_CASE_AUTHORITY.keys()].filter((route) => !names.has(route))).toEqual(
+      [],
+    );
+    expect([...PLATFORM_USE_CASE_AUTHORITY.values()].every((reason) => reason.length > 30)).toBe(
+      true,
+    );
   });
 });

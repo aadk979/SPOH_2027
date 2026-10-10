@@ -211,9 +211,8 @@ describe('roster import and provisioning (P03 repros)', () => {
       true,
     );
 
-    expect(response.status).toBe(200);
-    expect(response.body.volunteersCreated).toBe(0);
-    expect(response.body.issues[0]?.field).toBe('email');
+    expect(response.status).toBe(400);
+    expect(response.body.error.details.issues[0]?.field).toBe('email');
     expect(await prisma.person.count({ where: { email: 'stranger@roster.test' } })).toBe(0);
   });
 });

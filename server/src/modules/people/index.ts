@@ -11,3 +11,13 @@ export {
   updateVolunteerHandler,
 } from './http/handlers.js';
 export { outranks } from './domain/escalation.js';
+export {
+  bulkPeopleHandler,
+  resendInviteHandler,
+  signOutPersonHandler,
+} from './http/lifecycleHandlers.js';
+export { personRouter } from './http/personRoutes.js';
+export { volunteerMutationReplay } from './http/replay.js';
+export { getVolunteer } from './application/queries.js';
+export { scheduleArchivedRetention } from './application/staffRetention.js';
+export { peopleScheduledHandlers, peopleRecurringActions } from './jobs.js';

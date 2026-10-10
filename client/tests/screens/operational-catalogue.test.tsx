@@ -179,7 +179,8 @@ describe('operational settings catalogue reader', () => {
       rowFor('Incident push severities').getByText('Scoped value: HIGH, CRITICAL'),
     ).toBeTruthy();
     expect(rowFor('Card name').getByText('Scoped value: Mission Card')).toBeTruthy();
-    expect(screen.queryByRole('button', { name: /Apply|Restore|Schedule/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Apply|Restore/ })).toBeNull();
+    expect(screen.getAllByRole('button', { name: /^Schedules:/ })).toHaveLength(scopedOperationalKeys('event').filter((key) => GENERATED_SETTING_METADATA[key].schedulable).length);
     expect(
       screen.getByText('Checked event-clock:2027-01-01T03:00:00Z on the event clock.'),
     ).toBeTruthy();

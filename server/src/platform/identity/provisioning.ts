@@ -35,4 +35,10 @@ export interface IdentityProvider {
    * orphan every capture they had already recorded.
    */
   enableUser(email: string): Promise<void>;
+
+  /** Cognito resends only an unaccepted temporary-password invite. */
+  resendInvite(email: string): Promise<boolean>;
+  hasMfa(email: string): Promise<boolean>;
+  beginMfa(accessToken: string): Promise<string>;
+  verifyMfa(input: { accessToken: string; code: string }): Promise<void>;
 }

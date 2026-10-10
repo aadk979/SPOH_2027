@@ -138,7 +138,8 @@ it('rechecks the current organisation role after an Event wait', async () => {
     });
   });
   expect(await running).toBe('FAILED');
-  expect((await f.action(row.id)).lastError).toBe('GUARD_FAILED');
+  expect((await f.action(row.id)).lastError).toBe('AUTHORITY_CHANGED');
+  expect((await f.state()).status).toBe('CLOSED');
 });
 
 it('refuses user recurrence before lifecycle effects', async () => {

@@ -73,10 +73,25 @@ export type AuditAction =
   | 'giftType.update'
   | 'setting.change'
   | 'permissions.change'
+  | 'permissions.review'
+  | 'content.draft.save'
+  | 'content.draft.review'
+  | 'content.publish'
+  | 'content.schedule'
+  | 'content.image.issue'
   | 'visitorField.create'
   | 'visitorField.update'
   | 'visitor.purge'
+  | 'staff.purge'
+  | 'media.purge'
+  | 'audit.prune'
+  | 'person.erase'
+  | 'person.export'
+  | 'identity.prune'
   | 'session.create'
+  | 'session.mfaEnrolled'
+  | 'user.resendInvite'
+  | 'user.acceptInvite'
   | 'session.revoke'
   | 'session.reuseDetected'
   | 'session.prune'
@@ -86,9 +101,11 @@ export type AuditAction =
   | 'auth.stationScopeBypass'
   | 'authorization.denied'
   | 'event.clone'
+  | 'event.create'
   | 'event.transition'
   | 'event.rename'
   | 'report.snapshot'
+  | 'report.archiveExport'
   | 'schedule.execute'
   | 'schedule.create'
   | 'schedule.update'
@@ -141,6 +158,9 @@ const MEMBERSHIP_CHANGES = new Set<AuditAction>([
   'user.update',
   'user.deactivate',
   'user.reactivate',
+  'user.acceptInvite',
+  'staff.purge',
+  'person.erase',
 ]);
 
 async function publishInvalidation(tx: PrismaTransactionClient, entry: AuditEntry): Promise<void> {

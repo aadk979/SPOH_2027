@@ -1,7 +1,14 @@
 import { Router } from 'express';
-import { defaultRateLimit } from '../../../platform/http/rateLimit.js';
+import { CreateEventRequest, CloneEventWizardRequest } from '@spoh/shared';
+import { adminRateLimit, defaultRateLimit } from '../../../platform/http/rateLimit.js';
+import { validate } from '../../../platform/http/validate.js';
 import { requirePerson } from '../../../platform/http/requireAuth.js';
-import { listMyEventsHandler } from './handlers.js';
+import {
+  listMyEventsHandler,
+  eventAdministrationHandler,
+  createEventHandler,
+  cloneEventHandler,
+} from './handlers.js';
 
 /**
  * `/events` itself: the caller's events (ADR-001 §4). A platform route about
@@ -11,3 +18,18 @@ import { listMyEventsHandler } from './handlers.js';
 export const eventListRouter: Router = Router();
 
 eventListRouter.get('/', requirePerson, defaultRateLimit, listMyEventsHandler);
+eventListRouter.get('/administration', requirePerson, defaultRateLimit, eventAdministrationHandler);
+eventListRouter.post(
+  '/',
+  requirePerson,
+  adminRateLimit,
+  validate({ body: CreateEventRequest }),
+  createEventHandler,
+);
+eventListRouter.post(
+  '/clone',
+  requirePerson,
+  adminRateLimit,
+  validate({ body: CloneEventWizardRequest }),
+  cloneEventHandler,
+);

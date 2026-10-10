@@ -12,8 +12,10 @@ import {
   idempotencyKey,
   testEvent,
   type TestVolunteer,
+  renewFixtureToken,
 } from '../helpers/fixtures.js';
 import { FROZEN_NOW } from '../setup.js';
+import { insertArchiveExportFixture } from '../helpers/content.js';
 
 const app = createApp();
 const transactionDb = rawDb.$extends({ query: {} });
@@ -28,7 +30,10 @@ async function readiness(now = AFTER_GRACE, id = eventId) {
     const scope = { eventId: id };
     const event = await lockLifecycleEvent(tx, scope);
     const snapshot = await lifecycleSnapshot(tx, scope, { event, now });
-    return { facts: snapshot.archive, decision: evaluateTransition(snapshot, 'ARCHIVED', { now }) };
+    return {
+      facts: snapshot.archive,
+      decision: evaluateTransition(snapshot, 'ARCHIVED', { now, platformAdmin: true }),
+    };
   });
 }
 
@@ -51,6 +56,7 @@ beforeEach(async () => {
       idempotencyKey: idempotencyKey(),
     });
   expect(closed.status).toBe(200);
+  await insertArchiveExportFixture({ db: rawDb, eventId, now: FROZEN_NOW });
 });
 
 const resolvedData = (rehearsal = false) => ({
@@ -71,8 +77,12 @@ it('accepts a valid current final report after grace with no outstanding resolve
     },
     decision: { allowed: true, blockers: [] },
   });
-  // Guard evidence alone does not enable archive before its write/access effects are ready.
+  vi.setSystemTime(AFTER_GRACE);
+  await renewFixtureToken(admin);
   const event = await rawDb.event.findUniqueOrThrow({ where: { id: eventId } });
+  await rawDb.organisationMembership.create({
+    data: { organisationId, personId: admin.id, role: 'PLATFORM_ADMIN' },
+  });
   const response = await request(app)
     .post(`/api/v1/events/${eventId}/lifecycle`)
     .set('Authorization', bearer(admin))
@@ -81,10 +91,8 @@ it('accepts a valid current final report after grace with no outstanding resolve
       expectedVersion: event.lifecycleVersion,
       idempotencyKey: idempotencyKey(),
     });
-  expect(response.status).toBe(400);
-  expect(
-    await rawDb.eventMembership.count({ where: { eventId, status: 'ACTIVE' } }),
-  ).toBeGreaterThan(0);
+  expect(response.status).toBe(200);
+  expect(await rawDb.eventMembership.count({ where: { eventId, status: 'ACTIVE' } })).toBe(0);
 });
 
 it.each([-1, 0, 1])('requires expiry strictly after the grace boundary (%i ms)', async (offset) => {
@@ -231,6 +239,7 @@ it('does not use another event’s final report or purge/grace setting', async (
     'lost-person-purge',
     'final-report',
     'capture-grace-period',
+    'final-export',
   ]);
 });
 
@@ -267,7 +276,10 @@ it.each([
       ...(kind === 'superseded' ? { supersededAt: AFTER_GRACE } : {}),
     },
   });
-  expect((await readiness(AFTER_GRACE, other.id)).decision.blockers).toEqual(['final-report']);
+  expect((await readiness(AFTER_GRACE, other.id)).decision.blockers).toEqual([
+    'final-report',
+    'final-export',
+  ]);
 });
 
 it('requires a fresh close-out snapshot after reopen and reclose', async () => {
@@ -276,10 +288,13 @@ it('requires a fresh close-out snapshot after reopen and reclose', async () => {
     lostPersonPurgeComplete: false,
     finalReportExists: false,
     captureGracePeriodComplete: false,
+    lostFoundClosed: false,
+    fallbackWindowsClosed: false,
+    exportPackExists: false,
   });
   await rawDb.event.update({
     where: { id: eventId },
     data: { status: 'CLOSED', closedAt: FROZEN_NOW },
   });
-  expect((await readiness()).decision.blockers).toEqual(['final-report']);
+  expect((await readiness()).decision.blockers).toEqual(['final-report', 'final-export']);
 });

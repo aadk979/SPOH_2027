@@ -1,4 +1,4 @@
-import { CaptureScheduleIntent, type UpdateCaptureScheduleRequest } from '@spoh/shared';
+import type { UpdateCaptureScheduleRequest } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
@@ -9,6 +9,8 @@ import { captureScheduleResponse } from './captureScheduleResponse.js';
 import { lockPendingCaptureSchedule } from './lockPendingCaptureSchedule.js';
 import type { CaptureScheduleActor } from './prepareCaptureSchedule.js';
 import { reviewCaptureScheduleIntent } from './reviewCaptureScheduleIntent.js';
+import { lockEventSettingAuthority } from './lockEventSettingAuthority.js';
+import { parseUpdatedScheduleIntent } from './parseUpdatedScheduleIntent.js';
 
 /** Keeping the creator preserves the worker's current-authority attribution after edits. */
 export function updateCaptureSchedule(
@@ -26,11 +28,12 @@ export function updateCaptureSchedule(
         throw new NotFoundError('Capture schedule');
       const { idempotencyKey, ...request } = input.request;
       const { expectedScheduleVersion: _review, ...definition } = request;
-      const intent = CaptureScheduleIntent.parse({
+      const intent = parseUpdatedScheduleIntent({
         ...definition,
         target: prepared.intent.target,
         key: prepared.intent.key,
       });
+      await lockEventSettingAuthority(tx, actor, intent.key);
       await reviewCaptureScheduleIntent(tx, { scope: actor.scope, intent, now: prepared.now });
       const row = await editCaptureSchedule(tx, actor.scope, {
         id: input.id,

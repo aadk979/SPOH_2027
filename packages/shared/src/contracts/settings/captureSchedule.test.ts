@@ -63,7 +63,7 @@ describe('reviewed capture schedule contract', () => {
   });
   it.each([
     { key: 'product.visitorDataMode' },
-    { key: 'silentStationMinutes' },
+    { key: 'lostPersonPurgeHours' },
     { target: { scope: 'platform' } },
     { target: { scope: 'event', stationId: 'foreign' } },
     { value: 'false' },
@@ -92,6 +92,25 @@ describe('reviewed capture schedule contract', () => {
         schedule: { ...data.schedule, idempotencyKey: request.idempotencyKey },
       }).success,
     ).toBe(false);
+  });
+  it.each([
+    ['silentStationMinutes', 12, { scope: 'station', stationId: 'owned' }],
+    ['captureUndoWindowSeconds', 6, { scope: 'event' }],
+    ['vocabulary.missionCard', 'Journey Card', { scope: 'event' }],
+    ['incident.pushSeverities', ['CRITICAL'], { scope: 'event' }],
+  ])('validates generated operational %s schedules', (key, value, target) => {
+    expect(CreateCaptureScheduleRequest.safeParse({ ...request, key, value, target }).success).toBe(
+      true,
+    );
+  });
+  it.each([
+    { key: 'staleDeviceMinutes', value: 12, target: { scope: 'station', stationId: 'owned' } },
+    { key: 'silentStationMinutes', value: 0 },
+    { key: 'incident.pushSeverities', value: ['INVALID'] },
+    { key: 'dashboardPollSeconds', value: 12 },
+    { key: 'product.countsMode', value: { mode: 'separate' } },
+  ])('rejects a wrong generated scope or value %j', (patch) => {
+    expect(CreateCaptureScheduleRequest.safeParse({ ...request, ...patch }).success).toBe(false);
   });
   it('refuses a response whose current event or target differs from the action', () => {
     const data = response();

@@ -82,6 +82,27 @@ beforeEach(async () => {
     },
   });
 });
+it.each([
+  { key: 'silentStationMinutes', value: 12 },
+  { key: 'vocabulary.missionCard', value: 'Journey Card' },
+  { key: 'incident.pushSeverities', value: ['CRITICAL'] },
+])('creates, reads and executes a generated operational $key schedule', async (patch) => {
+  const response = await post(input(patch));
+  expect(response.status).toBe(201);
+  const parsed = CaptureScheduleResponse.parse(response.body);
+  expect(parsed.schedule).toMatchObject(patch);
+  expect(await run()).toBe('SUCCEEDED');
+  expect(
+    await rawDb.setting.findFirst({ where: { eventId: f.eventId, key: patch.key } }),
+  ).toMatchObject({ value: patch.value, version: 1 });
+  const list = await request(app)
+    .get(`${endpoint()}?scope=event&key=${patch.key}`)
+    .set('Authorization', bearer(f.creator));
+  expect(list.status).toBe(200);
+  expect(list.body.data).toEqual([
+    expect.objectContaining({ id: parsed.schedule.id, key: patch.key, status: 'SUCCEEDED' }),
+  ]);
+});
 it('creates a reviewed future capture schedule without changing capture now', async () => {
   const response = await post(input());
   expect(response.status).toBe(201);

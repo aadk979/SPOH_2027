@@ -112,7 +112,7 @@ it('a lifecycle writer waits for input SHARE and reevaluates committed evidence'
       platformAdmin: true,
       goLiveOverrides: [{ code: 'gift-stock', reason: 'Reviewed stock' }],
     }),
-  ).toContain('go-live:content:missing');
+  ).toContain('go-live:staging-smoke:missing');
 });
 
 it('never combines pre/post states of a coordinated commit in one evidence observation', async () => {

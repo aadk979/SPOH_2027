@@ -1,5 +1,4 @@
 import { CognitoJwtVerifier } from 'aws-jwt-verify';
-import type { CommitteeRole } from '@spoh/shared';
 import { UnauthenticatedError } from '../errors/index.js';
 import { logger } from '../logger/index.js';
 import type { AuthProvider, VerifiedToken } from './types.js';
@@ -37,7 +36,7 @@ export function createCognitoAuthProvider(config: {
         const payload = await verifier.verify(token);
         return {
           sub: payload.sub,
-          groups: extractGroups(payload['cognito:groups']),
+          groups: [],
         };
       } catch (error) {
         // The detail is genuinely useful for debugging a misconfigured pool,
@@ -47,32 +46,4 @@ export function createCognitoAuthProvider(config: {
       }
     },
   };
-}
-
-/**
- * Cognito group names are PascalCase (BUILD_PLAN §3.1); `CommitteeRole` values
- * are SCREAMING_SNAKE (§13). This is the only place the two vocabularies meet.
- */
-const COGNITO_GROUP_TO_ROLE: Readonly<Record<string, CommitteeRole>> = Object.freeze({
-  Admin: 'ADMIN',
-  Lead: 'LEAD',
-  ChiefCoordinator: 'CHIEF_COORDINATOR',
-  DeputyCoordinator: 'DEPUTY_COORDINATOR',
-  IC: 'IC',
-  Volunteer: 'VOLUNTEER',
-});
-
-/**
- * `cognito:groups` is an untyped claim. Unknown group names are dropped rather
- * than rejected, so adding an unrelated Cognito group cannot lock anyone out.
- */
-function extractGroups(claim: unknown): CommitteeRole[] {
-  if (!Array.isArray(claim)) return [];
-
-  const roles = claim
-    .filter((value): value is string => typeof value === 'string')
-    .map((name) => COGNITO_GROUP_TO_ROLE[name])
-    .filter((role): role is CommitteeRole => role !== undefined);
-
-  return [...new Set(roles)];
 }

@@ -4,6 +4,7 @@ import type {
   ChangeRolePermissionRequest,
   MemberPermissionsResponse,
   RolePermissionsResponse,
+  ReviewRolePermissionsRequest,
   SimulatePermissionRequest,
 } from '@spoh/shared';
 import { useCurrentSession, sessionKeys } from '@/features/session';
@@ -13,6 +14,7 @@ import {
   getMemberPermissions,
   getRolePermissions,
   simulatePermission,
+  reviewRolePermissions,
 } from './api';
 
 export const permissionKeys = {
@@ -44,6 +46,18 @@ export function useChangeRolePermission() {
       client.setQueryData(permissionKeys.roles(eventId), response);
       await client.invalidateQueries({ queryKey: [eventId, 'permissions', 'member'] });
       await client.invalidateQueries({ queryKey: sessionKeys.permissions(eventId) });
+    },
+  });
+}
+
+export function useReviewRolePermissions() {
+  const client = useQueryClient();
+  const eventId = useEventId();
+  return useMutation({
+    mutationFn: (body: ReviewRolePermissionsRequest) => reviewRolePermissions(eventId, body),
+    onSuccess: async (response) => {
+      client.setQueryData(permissionKeys.roles(eventId), response);
+      await client.invalidateQueries({ queryKey: [eventId, 'lifecycle-readiness'] });
     },
   });
 }

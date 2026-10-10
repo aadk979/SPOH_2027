@@ -6,6 +6,7 @@ import { Callout, LoadingRows, Stack } from '@/shared/ui';
 import { GuardrailsPanel, RolePermissionsPanel } from '../components/RolePermissionsPanel';
 import { PermissionSimulator } from '../components/PermissionSimulator';
 import { useRolePermissions } from '../queries';
+import { PermissionReviewPanel } from '../components/PermissionReviewPanel';
 
 /** The event's role permissions, the rules that always hold, and the simulator (P11.7). */
 export default function PermissionsScreen(): ReactNode {
@@ -25,6 +26,7 @@ export default function PermissionsScreen(): ReactNode {
       ) : (
         <Stack>
           <RolePermissionsPanel table={table} />
+          <PermissionReviewPanel key={table.review?.version} table={table} />
           <PermissionSimulator table={table} />
           <GuardrailsPanel table={table} />
         </Stack>

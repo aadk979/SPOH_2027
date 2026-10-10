@@ -1,6 +1,11 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { ChangeRolePermissionRequest, Id, SimulatePermissionRequest } from '@spoh/shared';
+import {
+  ChangeRolePermissionRequest,
+  ReviewRolePermissionsRequest,
+  Id,
+  SimulatePermissionRequest,
+} from '@spoh/shared';
 import { authorize } from '../../../platform/http/authorize.js';
 import { theEvent } from '../../../platform/http/authorizeResources.js';
 import { idempotent } from '../../../platform/http/idempotency.js';
@@ -11,6 +16,8 @@ import {
   changeRolePermissionHandler,
   readMemberPermissionsHandler,
   readRolePermissionsHandler,
+  reviewRolePermissionsHandler,
+  permissionReviewReplay,
   simulatePermissionHandler,
 } from './handlers.js';
 
@@ -35,6 +42,15 @@ permissionsRouter.put(
   validate({ body: ChangeRolePermissionRequest }),
   idempotent('PUT /permissions'),
   changeRolePermissionHandler,
+);
+
+permissionsRouter.post(
+  '/review',
+  adminRateLimit,
+  authorize('Permissions.Edit', theEvent),
+  validate({ body: ReviewRolePermissionsRequest }),
+  idempotent('POST /permissions/review', { redacted: permissionReviewReplay }),
+  reviewRolePermissionsHandler,
 );
 
 permissionsRouter.post(

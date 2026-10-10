@@ -125,6 +125,7 @@ describe('navigation registry', () => {
 
   it('keeps the inbox on the global bar with a short label for narrow phones', () => {
     expect(globalEntries().map((entry) => [entry.path, entry.label, entry.shortLabel])).toEqual([
+      ['/devices', 'Your devices', 'Devices'],
       ['/inbox', 'Announcements', 'Inbox'],
     ]);
   });

@@ -11,6 +11,7 @@ import { prisma, type PrismaTransactionClient } from '../../../platform/db/clien
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { minimumRoleOf } from '../domain/permissionRules.js';
 import { GUARDRAILS } from '../domain/policyExplanations.js';
+import { permissionReview } from '../data/repo.js';
 
 /** Actions a member can hold; the person-only platform actions are not listed per role. */
 const LISTED = ACTION_IDS.filter((action) =>
@@ -21,10 +22,18 @@ const LISTED = ACTION_IDS.filter((action) =>
 export async function readRolePermissions(
   scope: EventScope,
   input: { canEdit: boolean },
-  db: PrismaTransactionClient = prisma,
+  db?: PrismaTransactionClient,
 ): Promise<RolePermissionsResponse['data']> {
+  if (!db) return prisma.$transaction((tx) => readRolePermissions(scope, input, tx));
+  await db.$queryRaw`SELECT id FROM "Event" WHERE id = ${scope.eventId} FOR SHARE`;
   const grants = await databaseRoleGrants.grantsFor(db, scope.eventId);
+  const review = await permissionReview(db, scope);
   return {
+    review: {
+      version: review.permissionsVersion,
+      reviewedVersion: review.permissionsReviewedVersion,
+      reviewedAt: review.permissionsReviewedAt?.toISOString() ?? null,
+    },
     roles: ROLE_IDS.map((role) => ({
       role,
       rank: ROLE_RANKS[role],

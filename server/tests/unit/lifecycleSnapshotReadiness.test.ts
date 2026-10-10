@@ -32,6 +32,9 @@ const archive = {
   lostPersonPurgeComplete: false,
   finalReportExists: false,
   captureGracePeriodComplete: false,
+  lostFoundClosed: false,
+  fallbackWindowsClosed: false,
+  exportPackExists: false,
 };
 beforeEach(() => {
   vi.clearAllMocks();

@@ -82,7 +82,7 @@ describe('scheduler gauge alarms (P08.8/P10.6)', () => {
       expect(schedulerAlarms).toHaveLength(2);
       for (const alarm of schedulerAlarms) {
         expect(alarm.Properties.Dimensions).toBeUndefined();
-        expect(alarm.Properties.AlarmActions).toBeUndefined();
+        expect(alarm.Properties.AlarmActions).toHaveLength(1);
       }
     },
   );

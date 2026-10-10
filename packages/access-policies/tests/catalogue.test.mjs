@@ -77,7 +77,15 @@ test('generated standalone TypeScript metadata is current and has no runtime imp
   assert.doesNotMatch(text, /^import\s/m);
 });
 
-test('accepted schema, policies, role defaults and C1-C16 changes remain byte-identical to the P05 bench, as amended by D-21', () => {
+const ARCHIVED_READER = `// Archive close-out ends memberships. Historical access remains read-only and scoped.
+@id("platform.archived-reader")
+permit (principal is SPOH::Membership, action, resource)
+when { context.eventPhase == "ARCHIVED" && principal.person.platformAdmin }
+unless { action in SPOH::Action::"Write" };
+
+`;
+
+test('accepted P05/D-21 sources stay identical apart from the pinned archive-reader extension', () => {
   const policyFiles = readdirSync(join(ROOT, 'policies')).filter((file) => file.endsWith('.cedar'));
   for (const file of [
     'schema.cedarschema',
@@ -85,7 +93,12 @@ test('accepted schema, policies, role defaults and C1-C16 changes remain byte-id
     'CHANGES.md',
     ...policyFiles.map((file) => join('policies', file)),
   ]) {
-    assert.deepEqual(readFileSync(join(ROOT, file)), readFileSync(join(BENCH, file)), file);
+    const current = readFileSync(join(ROOT, file), 'utf8').replaceAll('\r\n', '\n');
+    const baseline = readFileSync(join(BENCH, file), 'utf8').replaceAll('\r\n', '\n');
+    if (file === join('policies', 'platform-admin.cedar')) {
+      assert.ok(current.includes(ARCHIVED_READER), 'The exact read-only extension is present');
+      assert.equal(current.replace(ARCHIVED_READER, ''), baseline, file);
+    } else assert.equal(current, baseline, file);
   }
 });
 

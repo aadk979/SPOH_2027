@@ -4,6 +4,8 @@ import type {
   UpdateVolunteerRequest,
   VolunteerAdminRecord,
   VolunteerMutationResponse,
+  BulkPeopleRequest,
+  BulkPeopleResponse,
 } from '@spoh/shared';
 import { eventApi } from '@/shared/lib/eventApi';
 export interface VolunteerFilters {
@@ -63,9 +65,34 @@ export function deactivateVolunteer(
 
 export function reactivateVolunteer(
   eventId: string,
-  id: string,
+  input: { id: string; idempotencyKey: string },
 ): Promise<VolunteerMutationResponse> {
-  return eventApi<VolunteerMutationResponse>(eventId, `/admin/volunteers/${id}/reactivate`, {
+  return eventApi<VolunteerMutationResponse>(eventId, `/admin/volunteers/${input.id}/reactivate`, {
     method: 'POST',
+    body: { idempotencyKey: input.idempotencyKey },
+  });
+}
+
+export function bulkPeople(eventId: string, body: BulkPeopleRequest): Promise<BulkPeopleResponse> {
+  return eventApi(eventId, '/admin/volunteers/bulk', { method: 'POST', body });
+}
+
+export function resendInvite(
+  eventId: string,
+  input: { id: string; idempotencyKey: string },
+): Promise<{ sent: boolean }> {
+  return eventApi(eventId, `/admin/volunteers/${encodeURIComponent(input.id)}/resend-invite`, {
+    method: 'POST',
+    body: { idempotencyKey: input.idempotencyKey },
+  });
+}
+
+export function signOutPerson(
+  eventId: string,
+  input: { id: string; idempotencyKey: string },
+): Promise<{ sessionsRevoked: number }> {
+  return eventApi(eventId, `/admin/volunteers/${encodeURIComponent(input.id)}/sign-out`, {
+    method: 'POST',
+    body: { idempotencyKey: input.idempotencyKey },
   });
 }

@@ -15,6 +15,7 @@ export interface GeneratedSettingValues {
   captureUndoWindowSeconds: number;
   dashboardPollSeconds: number;
   idempotencyRetentionDays: number;
+  'identity.inviteDailyLimit': number;
   implausibleTapsPerMinute: number;
   'incident.pushSeverities': Array<'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'>;
   longShiftMinutes: number;
@@ -23,6 +24,8 @@ export interface GeneratedSettingValues {
   'media.uploadTtlSeconds': number;
   outboxWarningAgeMinutes: number;
   outboxWarningCount: number;
+  'privacy.mediaRetentionDays': number;
+  'privacy.staffRetentionDays': number;
   'product.countsMode': CountsMode;
   'product.visitorDataMode': VisitorDataMode;
   'push.ttlSeconds.announcement': number;
@@ -35,6 +38,8 @@ export interface GeneratedSettingValues {
   'rateLimit.windowSeconds': number;
   refreshSessionDays: number;
   'report.curveBucketMinutes': 15 | 30 | 60;
+  'security.adminIdleMinutes': number;
+  'security.adminSessionHours': number;
   silentStationMinutes: number;
   staleDeviceMinutes: number;
   'vocabulary.missionCard': string;
@@ -53,6 +58,7 @@ export const GENERATED_SETTING_DEFAULTS = {
   captureUndoWindowSeconds: 10,
   dashboardPollSeconds: 3,
   idempotencyRetentionDays: 7,
+  'identity.inviteDailyLimit': 50,
   implausibleTapsPerMinute: 20,
   'incident.pushSeverities': ['HIGH', 'CRITICAL'],
   longShiftMinutes: 180,
@@ -61,6 +67,8 @@ export const GENERATED_SETTING_DEFAULTS = {
   'media.uploadTtlSeconds': 300,
   outboxWarningAgeMinutes: 5,
   outboxWarningCount: 20,
+  'privacy.mediaRetentionDays': 30,
+  'privacy.staffRetentionDays': 365,
   'product.countsMode': { mode: 'separate' },
   'product.visitorDataMode': 'none',
   'push.ttlSeconds.announcement': 1800,
@@ -73,6 +81,8 @@ export const GENERATED_SETTING_DEFAULTS = {
   'rateLimit.windowSeconds': 60,
   refreshSessionDays: 30,
   'report.curveBucketMinutes': 30,
+  'security.adminIdleMinutes': 30,
+  'security.adminSessionHours': 12,
   silentStationMinutes: 15,
   staleDeviceMinutes: 15,
   'vocabulary.missionCard': 'Mission Card',
@@ -127,7 +137,7 @@ export const GENERATED_SETTING_METADATA = {
     description: 'What volunteers call the venue network when QR attendance is refused.',
     group: 'Attendance',
     unit: null,
-    schedulable: false,
+    schedulable: true,
     class: 'operational',
     lockedIn: [],
     clientVisible: false,
@@ -201,7 +211,7 @@ export const GENERATED_SETTING_METADATA = {
       'How long offline captures recorded before close may arrive after the event closes.',
     group: 'Capture',
     unit: 'hours',
-    schedulable: false,
+    schedulable: true,
     class: 'operational',
     lockedIn: [],
     clientVisible: false,
@@ -236,7 +246,7 @@ export const GENERATED_SETTING_METADATA = {
     description: 'How long a tap waits before its first send so undo can cancel it outright.',
     group: 'Capture',
     unit: 'seconds',
-    schedulable: false,
+    schedulable: true,
     class: 'operational',
     lockedIn: [],
     clientVisible: true,
@@ -256,7 +266,7 @@ export const GENERATED_SETTING_METADATA = {
     description: 'How long a volunteer can undo a tap before an IC must correct it.',
     group: 'Capture',
     unit: 'seconds',
-    schedulable: false,
+    schedulable: true,
     class: 'operational',
     lockedIn: [],
     clientVisible: true,
@@ -309,6 +319,27 @@ export const GENERATED_SETTING_METADATA = {
       maximum: 90,
     },
   },
+  'identity.inviteDailyLimit': {
+    key: 'identity.inviteDailyLimit',
+    scopes: ['platform'],
+    default: 50,
+    label: 'Daily identity email limit',
+    description:
+      'Shared daily delivery allowance for the configured Cognito pool. Counts attempted invites and resends; raise only after its sender quota is confirmed.',
+    group: 'Identity',
+    unit: 'emails/day',
+    schedulable: false,
+    class: 'security',
+    lockedIn: [],
+    clientVisible: false,
+    requiredAction: 'platform.settings.manage',
+    jsonSchema: {
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      type: 'integer',
+      minimum: 1,
+      maximum: 100000,
+    },
+  },
   implausibleTapsPerMinute: {
     key: 'implausibleTapsPerMinute',
     scopes: ['platform', 'event', 'station'],
@@ -317,7 +348,7 @@ export const GENERATED_SETTING_METADATA = {
     description: 'Registrations per minute above which the IC console flags a device.',
     group: 'Alerts',
     unit: 'taps/minute',
-    schedulable: false,
+    schedulable: true,
     class: 'operational',
     lockedIn: [],
     clientVisible: false,
@@ -337,7 +368,7 @@ export const GENERATED_SETTING_METADATA = {
     description: 'Incident severities that also send a push alert to ICs.',
     group: 'Safety',
     unit: null,
-    schedulable: false,
+    schedulable: true,
     class: 'operational',
     lockedIn: [],
     clientVisible: false,
@@ -357,7 +388,7 @@ export const GENERATED_SETTING_METADATA = {
     description: 'Time on station without a break before someone appears on the welfare list.',
     group: 'Welfare',
     unit: 'minutes',
-    schedulable: false,
+    schedulable: true,
     class: 'operational',
     lockedIn: [],
     clientVisible: false,
@@ -438,7 +469,7 @@ export const GENERATED_SETTING_METADATA = {
     description: 'Age of the oldest unsent capture that triggers the same warning.',
     group: 'Capture',
     unit: 'minutes',
-    schedulable: false,
+    schedulable: true,
     class: 'operational',
     lockedIn: [],
     clientVisible: true,
@@ -458,7 +489,7 @@ export const GENERATED_SETTING_METADATA = {
     description: 'Unsent captures on one device before the volunteer is told to find an IC.',
     group: 'Capture',
     unit: 'captures',
-    schedulable: false,
+    schedulable: true,
     class: 'operational',
     lockedIn: [],
     clientVisible: true,
@@ -468,6 +499,47 @@ export const GENERATED_SETTING_METADATA = {
       type: 'integer',
       minimum: 1,
       maximum: 1000,
+    },
+  },
+  'privacy.mediaRetentionDays': {
+    key: 'privacy.mediaRetentionDays',
+    scopes: ['event'],
+    default: 30,
+    label: 'Photo retention',
+    description: 'Days after event close before lost-and-found photos are removed.',
+    group: 'Privacy',
+    unit: 'days',
+    schedulable: false,
+    class: 'privacy',
+    lockedIn: ['CLOSED', 'ARCHIVED'],
+    clientVisible: false,
+    requiredAction: 'platform.settings.manage',
+    jsonSchema: {
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      type: 'integer',
+      minimum: 1,
+      maximum: 365,
+    },
+  },
+  'privacy.staffRetentionDays': {
+    key: 'privacy.staffRetentionDays',
+    scopes: ['event'],
+    default: 365,
+    label: 'Archived staff retention',
+    description:
+      'Days after archive before event staff notes are cleared. People with no remaining event are anonymised.',
+    group: 'Privacy',
+    unit: 'days',
+    schedulable: false,
+    class: 'privacy',
+    lockedIn: ['ARCHIVED'],
+    clientVisible: false,
+    requiredAction: 'platform.settings.manage',
+    jsonSchema: {
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      type: 'integer',
+      minimum: 1,
+      maximum: 3650,
     },
   },
   'product.countsMode': {
@@ -737,7 +809,7 @@ export const GENERATED_SETTING_METADATA = {
     description: 'Bucket size of the footfall curve and peak-period report.',
     group: 'Reports',
     unit: 'minutes',
-    schedulable: false,
+    schedulable: true,
     class: 'operational',
     lockedIn: [],
     clientVisible: false,
@@ -751,6 +823,47 @@ export const GENERATED_SETTING_METADATA = {
       ],
     },
   },
+  'security.adminIdleMinutes': {
+    key: 'security.adminIdleMinutes',
+    scopes: ['platform'],
+    default: 30,
+    label: 'Administrator idle timeout',
+    description:
+      'Minutes without an authenticated request before an administrator must sign in again.',
+    group: 'Identity',
+    unit: 'minutes',
+    schedulable: false,
+    class: 'security',
+    lockedIn: [],
+    clientVisible: false,
+    requiredAction: 'platform.settings.manage',
+    jsonSchema: {
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      type: 'integer',
+      minimum: 5,
+      maximum: 120,
+    },
+  },
+  'security.adminSessionHours': {
+    key: 'security.adminSessionHours',
+    scopes: ['platform'],
+    default: 12,
+    label: 'Administrator session limit',
+    description: 'Absolute session lifetime for administrator tiers, even while active.',
+    group: 'Identity',
+    unit: 'hours',
+    schedulable: false,
+    class: 'security',
+    lockedIn: [],
+    clientVisible: false,
+    requiredAction: 'platform.settings.manage',
+    jsonSchema: {
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      type: 'integer',
+      minimum: 1,
+      maximum: 24,
+    },
+  },
   silentStationMinutes: {
     key: 'silentStationMinutes',
     scopes: ['platform', 'event', 'station'],
@@ -760,7 +873,7 @@ export const GENERATED_SETTING_METADATA = {
       'A counted room with no entries for this long during shift hours is flagged on the dashboard.',
     group: 'Alerts',
     unit: 'minutes',
-    schedulable: false,
+    schedulable: true,
     class: 'operational',
     lockedIn: [],
     clientVisible: true,
@@ -780,7 +893,7 @@ export const GENERATED_SETTING_METADATA = {
     description: 'A checked-in device with no captures for this long is flagged in the IC console.',
     group: 'Alerts',
     unit: 'minutes',
-    schedulable: false,
+    schedulable: true,
     class: 'operational',
     lockedIn: [],
     clientVisible: true,
@@ -800,7 +913,7 @@ export const GENERATED_SETTING_METADATA = {
     description: 'The event-facing name used for the visitor journey card.',
     group: 'Vocabulary',
     unit: null,
-    schedulable: false,
+    schedulable: true,
     class: 'operational',
     lockedIn: [],
     clientVisible: true,
@@ -886,6 +999,12 @@ export const GENERATED_SETTING_SCHEMAS: {
     minimum: 1,
     maximum: 90,
   }) as z.ZodType<GeneratedSettingValues['idempotencyRetentionDays']>,
+  'identity.inviteDailyLimit': z.fromJSONSchema({
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
+    type: 'integer',
+    minimum: 1,
+    maximum: 100000,
+  }) as z.ZodType<GeneratedSettingValues['identity.inviteDailyLimit']>,
   implausibleTapsPerMinute: z.fromJSONSchema({
     $schema: 'https://json-schema.org/draft/2020-12/schema',
     type: 'number',
@@ -934,6 +1053,18 @@ export const GENERATED_SETTING_SCHEMAS: {
     minimum: 1,
     maximum: 1000,
   }) as z.ZodType<GeneratedSettingValues['outboxWarningCount']>,
+  'privacy.mediaRetentionDays': z.fromJSONSchema({
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
+    type: 'integer',
+    minimum: 1,
+    maximum: 365,
+  }) as z.ZodType<GeneratedSettingValues['privacy.mediaRetentionDays']>,
+  'privacy.staffRetentionDays': z.fromJSONSchema({
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
+    type: 'integer',
+    minimum: 1,
+    maximum: 3650,
+  }) as z.ZodType<GeneratedSettingValues['privacy.staffRetentionDays']>,
   'product.countsMode': z.fromJSONSchema({
     $schema: 'https://json-schema.org/draft/2020-12/schema',
     oneOf: [
@@ -1045,6 +1176,18 @@ export const GENERATED_SETTING_SCHEMAS: {
       { type: 'number', const: 60 },
     ],
   }) as z.ZodType<GeneratedSettingValues['report.curveBucketMinutes']>,
+  'security.adminIdleMinutes': z.fromJSONSchema({
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
+    type: 'integer',
+    minimum: 5,
+    maximum: 120,
+  }) as z.ZodType<GeneratedSettingValues['security.adminIdleMinutes']>,
+  'security.adminSessionHours': z.fromJSONSchema({
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
+    type: 'integer',
+    minimum: 1,
+    maximum: 24,
+  }) as z.ZodType<GeneratedSettingValues['security.adminSessionHours']>,
   silentStationMinutes: z.fromJSONSchema({
     $schema: 'https://json-schema.org/draft/2020-12/schema',
     type: 'integer',

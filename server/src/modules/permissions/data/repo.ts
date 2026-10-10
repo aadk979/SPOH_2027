@@ -5,6 +5,29 @@ import type { EventScope } from '../../../platform/db/eventScope.js';
 /** Serialises grant changes for one event, so two editors cannot interleave a toggle. */
 export async function lockPermissionEvent(tx: PrismaTransactionClient, scope: EventScope) {
   await tx.$queryRaw`SELECT id FROM "Event" WHERE id = ${scope.eventId} FOR UPDATE`;
+  return tx.event.findUniqueOrThrow({ where: { id: scope.eventId }, select: { status: true } });
+}
+
+export async function permissionReview(db: PrismaTransactionClient, scope: EventScope) {
+  return db.event.findUniqueOrThrow({
+    where: { id: scope.eventId },
+    select: {
+      permissionsVersion: true,
+      permissionsReviewedVersion: true,
+      permissionsReviewedAt: true,
+    },
+  });
+}
+
+export async function recordPermissionReview(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  input: { version: number; now: Date },
+) {
+  return tx.event.updateMany({
+    where: { id: scope.eventId, permissionsVersion: input.version },
+    data: { permissionsReviewedVersion: input.version, permissionsReviewedAt: input.now },
+  });
 }
 
 export async function hasGrant(

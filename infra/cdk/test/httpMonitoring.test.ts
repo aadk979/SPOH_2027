@@ -104,8 +104,8 @@ describe('native HTTP API monitoring (P08.8)', () => {
           expect(route.DetailedMetricsEnabled).not.toBe(true);
       }
       for (const alarm of httpAlarms) {
-        expect(alarm.Properties.AlarmActions).toBeUndefined();
-        expect(alarm.Properties.OKActions).toBeUndefined();
+        expect(alarm.Properties.AlarmActions).toHaveLength(1);
+        expect(alarm.Properties.OKActions).toHaveLength(1);
         expect(alarm.Properties.InsufficientDataActions).toBeUndefined();
       }
       const { Outputs, Resources } = template.toJSON();

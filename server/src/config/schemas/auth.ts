@@ -40,6 +40,8 @@ export const authFields = {
    * and every restart simply invalidates its own sessions.
    */
   SESSION_SIGNING_SECRET: z.string().min(32).optional(),
+  /** Explicit overlap key, removed after existing access tokens and MFA handoffs expire. */
+  SESSION_SIGNING_SECRET_PREVIOUS: z.string().min(32).optional(),
   /**
    * Domain for the refresh cookie. Leave unset for a host-only cookie, which
    * is correct when the API and client share an origin or a parent domain is

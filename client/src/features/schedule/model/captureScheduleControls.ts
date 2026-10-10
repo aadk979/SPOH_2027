@@ -1,7 +1,12 @@
-import type { CaptureScheduleRecord, ScopedSettingsReadResponse } from '@spoh/shared';
+import type {
+  CaptureScheduleRecord,
+  ScopedSettingsReadResponse,
+  ScopedOperationalSettingKey,
+} from '@spoh/shared';
 import type { CaptureScheduleAction } from './captureScheduleReview';
 
 export type CaptureScheduleControlsInput = {
+  settingKey?: ScopedOperationalSettingKey;
   current: ScopedSettingsReadResponse;
   readUnavailable: boolean;
   loadCurrent: () => Promise<ScopedSettingsReadResponse | null>;

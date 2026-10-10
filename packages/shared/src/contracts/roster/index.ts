@@ -18,6 +18,7 @@ export const VolunteerPhone = z.string().trim().min(6).max(32);
 
 export const ProvisionVolunteerRequest = z
   .object({
+    idempotencyKey: z.uuid().optional(),
     displayName: z.string().trim().min(1).max(120),
     email: VolunteerEmail,
     phone: VolunteerPhone.optional(),
@@ -76,6 +77,7 @@ export type RosterImportRow = z.infer<typeof RosterImportRow>;
 
 export const RosterImportRequest = z
   .object({
+    idempotencyKey: z.uuid().optional(),
     rows: z.array(RosterImportRow).min(1).max(1000),
     commit: z.boolean().default(false),
   })

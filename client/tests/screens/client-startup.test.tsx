@@ -12,7 +12,10 @@ const state = vi.hoisted(() => ({
   stop: vi.fn(),
 }));
 vi.mock('@/shared/lib/env', () => ({ loadClientConfiguration: state.load }));
-vi.mock('@/shared/lib/session', () => ({ bootstrapSession: state.bootstrap }));
+vi.mock('@/shared/lib/session', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/shared/lib/session')>()),
+  bootstrapSession: state.bootstrap,
+}));
 vi.mock('@/shared/lib/runtimeSettings', () => ({ loadClientSettings: state.settings }));
 vi.mock('@/shared/lib/outbox', () => ({ startOutboxFlushLoop: state.outbox }));
 vi.mock('@/features/notification', () => ({ usePushSubscriptionSync: state.push }));

@@ -6,7 +6,7 @@ import {
   type LifecycleSnapshot,
 } from './lifecycle.js';
 
-/** Use the mutation's guard table, while keeping unimplemented public archive effects closed. */
+/** Advisory and mutation share the same current evidence and authority guard table. */
 export function readinessTransitions(
   snapshot: LifecycleSnapshot,
   context: LifecycleContext,
@@ -16,7 +16,6 @@ export function readinessTransitions(
     const decision = evaluateTransition(snapshot, to, context);
     const requiresReason = decision.action === 'Event.Reopen';
     const blockers = decision.blockers.filter((code) => code !== 'reason-required');
-    if (to === 'ARCHIVED') blockers.push('archive-unavailable');
     return { to, requiresReason, blockers, allowed: blockers.length === 0 };
   });
 }

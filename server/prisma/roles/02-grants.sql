@@ -10,5 +10,6 @@ ALTER DEFAULT PRIVILEGES FOR ROLE spoh_migrator IN SCHEMA public
 -- The audit trail is append-only for the app: no update, no delete, no truncate.
 -- Retention is changed by a migration, which runs as spoh_migrator.
 REVOKE UPDATE, DELETE, TRUNCATE ON "AuditLog" FROM spoh_app;
+GRANT EXECUTE ON FUNCTION public.prune_expired_audit() TO spoh_app;
 -- Prisma's own bookkeeping is the migrator's business alone.
 REVOKE ALL ON "_prisma_migrations" FROM spoh_app;

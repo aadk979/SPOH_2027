@@ -3,13 +3,14 @@
 import { type ReactNode } from 'react';
 
 import { AppShell } from '@/shared/shell/AppShell';
-import { Callout, Stack } from '@/shared/ui';
+import { ButtonLink, Callout, Stack } from '@/shared/ui';
 
 import { useAllows, useMe, useRequireSession } from '@/features/session';
 
 import { useVolunteerRoster } from '../hooks/useVolunteerRoster';
 import { VolunteerFiltersPanel } from '../components/VolunteerFiltersPanel';
 import { VolunteerRosterList } from '../components/VolunteerRosterList';
+import { BulkPeoplePanel } from '../components/BulkPeoplePanel';
 /**
  * Roster administration (Chief and Admin).
  *
@@ -30,14 +31,18 @@ export default function AdminUsersScreen(): ReactNode {
   const { data: me } = useMe();
 
   const roster = useVolunteerRoster();
-  if (!session) return null;
-
   const allows = useAllows();
+  if (!session) return null;
   const canManage = !!me && allows('People.Update');
 
   return (
     <AppShell title="Volunteers" back={{ href: '/chief', label: 'Ops' }} width="wide">
       <Stack>
+        {allows('People.Invite') || allows('Roster.Edit') ? (
+          <div>
+            <ButtonLink href="/admin/users/invite">Invite or import people</ButtonLink>
+          </div>
+        ) : null}
         {!canManage ? (
           <Callout tone="info">
             You can see the roster but not change it. Editing a role or withdrawing access is Chief
@@ -46,6 +51,9 @@ export default function AdminUsersScreen(): ReactNode {
         ) : null}
 
         <VolunteerFiltersPanel roster={roster} />
+        {canManage && roster.volunteers.data ? (
+          <BulkPeoplePanel rows={roster.volunteers.data.data} />
+        ) : null}
         <VolunteerRosterList roster={roster} me={me} canManage={canManage} />
       </Stack>
     </AppShell>

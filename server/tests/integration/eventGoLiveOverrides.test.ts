@@ -75,10 +75,11 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-it('refuses first go-live and all overrides while the real checklist is unavailable', async () => {
+it('refuses first go-live while real server checks fail or remain unavailable', async () => {
   const response = await post(requestBody());
   expect(response.status).toBe(409);
-  expect(response.body.error.details.blockers).toContain('go-live:content:missing');
+  expect(response.body.error.details.blockers).toContain('go-live:content');
+  expect(response.body.error.details.blockers).toContain('go-live:staging-smoke:missing');
   expect(await state()).toMatchObject({ status: 'READY', hasBeenLive: false, lifecycleVersion: 0 });
 });
 

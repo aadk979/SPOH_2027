@@ -21,7 +21,7 @@ beforeEach(async () => {
 const item = async (code: string) =>
   (await readLocalReadiness(f)).items.find((row) => row.code === code);
 
-it('reads five local domains without writing and leaves every missing domain nonwaivable', async () => {
+it('reads eight local domains without writing and leaves every missing domain nonwaivable', async () => {
   const before = await readinessEffectState(f);
   const result = await readLocalReadiness(f);
   expect(result.items.filter((row) => row.state === 'passed').map((row) => row.code)).toEqual([
@@ -29,9 +29,12 @@ it('reads five local domains without writing and leaves every missing domain non
     'categories',
     'card-batch',
     'gift-stock',
+    'content',
     'attendance',
+    'role-permissions',
+    'notifications',
   ]);
-  expect(result.items.filter((row) => row.state === 'unavailable')).toHaveLength(6);
+  expect(result.items.filter((row) => row.state === 'unavailable')).toHaveLength(3);
   for (const absent of result.items.filter((row) => row.state === 'unavailable')) {
     expect(
       goLiveCheckBlockers(result.checks, {

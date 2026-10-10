@@ -14,7 +14,7 @@ export async function readinessSnapshot(
   scope: EventScope,
 ): Promise<unknown> {
   const rows = await tx.$queryRaw<Array<{ snapshot: unknown }>>(Prisma.sql`
-    WITH selected_event AS (SELECT id FROM "Event" WHERE id = ${scope.eventId}),
+    WITH selected_event AS (SELECT id, "organisationId", "permissionsVersion", "permissionsReviewedVersion", "permissionsReviewedAt" FROM "Event" WHERE id = ${scope.eventId}),
       ${readinessCoverageRows}, ${readinessStockRows}, ${readinessAttendanceRows}
     SELECT jsonb_build_object(
       'eventId', e.id,
@@ -24,7 +24,20 @@ export async function readinessSnapshot(
       )),
       'cardBatch', ${readinessCardFacts},
       'giftStock', ${readinessGiftFacts},
-      'attendance', ${readinessAttendanceFacts}
+      'attendance', ${readinessAttendanceFacts},
+      'rolePermissions', jsonb_build_object(
+        'grantsVersion', e."permissionsVersion",
+        'reviewedGrantsVersion', e."permissionsReviewedVersion",
+        'reviewedAtMs', floor(extract(epoch FROM e."permissionsReviewedAt") * 1000)
+      ),
+      'notifications', coalesce((
+        SELECT jsonb_agg(jsonb_build_object('key', s.key, 'value', s.value))
+        FROM "Setting" s WHERE
+          (s.scope = 'PLATFORM' AND s."scopeId" = e."organisationId" AND s."eventId" IS NULL AND s.key IN (
+            'alertPollSeconds', 'push.ttlSeconds.lostPerson', 'push.ttlSeconds.incident', 'push.ttlSeconds.announcement'
+          )) OR
+          (s.scope = 'EVENT' AND s."scopeId" = e.id AND s."eventId" = e.id AND s.key = 'incident.pushSeverities')
+      ), '[]'::jsonb)
     ) AS snapshot FROM selected_event e
   `);
   return rows[0]?.snapshot ?? null;

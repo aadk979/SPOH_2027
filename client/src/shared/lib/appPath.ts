@@ -12,7 +12,7 @@ import { eventHref, pathInEvent } from './eventPath';
  * addresses already inside an event are left as they are.
  */
 
-const PLATFORM = /^\/(?:$|[?#]|sign-in(?:[/?#]|$)|events(?:[/?#]|$)|e\/)/;
+const PLATFORM = /^\/(?:$|[?#]|mfa(?:[/?#]|$)|sign-in(?:[/?#]|$)|events(?:[/?#]|$)|e\/)/;
 
 export function isPlatformPath(path: string): boolean {
   return PLATFORM.test(path);

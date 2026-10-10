@@ -46,6 +46,9 @@ import {
 import { createAssignmentHandler, deleteAssignmentHandler } from '../../assignments/index.js';
 import { renameEventHandler } from '../../event/index.js';
 import { registerSettingsRoutes } from './settingsRoutes.js';
+import { registerPeopleLifecycleRoutes } from './peopleLifecycleRoutes.js';
+import { optionalIdempotent } from '../../../platform/http/optionalIdempotency.js';
+import { volunteerMutationReplay } from '../../people/index.js';
 import { registerCategoryScheduleRoutes } from './categoryScheduleRoutes.js';
 import {
   changeAttendanceConfigHandler,
@@ -100,6 +103,7 @@ adminRouter.use('/capture-categories', (_req, res, next) => {
   next();
 });
 adminRouter.use(requireAuth);
+registerPeopleLifecycleRoutes(adminRouter);
 
 // ─────────────────────────────────────────────────────────────
 // VOLUNTEERS
@@ -132,6 +136,7 @@ adminRouter.patch(
   adminRateLimit,
   authorizeAll('People.Update', memberEdit(memberFromPersonParam()), { changes: ['C5'] }),
   validate({ params: IdParams, body: UpdateVolunteerRequest }),
+  optionalIdempotent('people.update', volunteerMutationReplay),
   updateVolunteerHandler,
 );
 
@@ -140,6 +145,7 @@ adminRouter.post(
   adminRateLimit,
   authorize('People.Deactivate', memberFromPersonParam()),
   validate({ params: IdParams, body: DeactivateVolunteerRequest }),
+  optionalIdempotent('people.deactivate', volunteerMutationReplay),
   deactivateVolunteerHandler,
 );
 
@@ -148,6 +154,7 @@ adminRouter.post(
   adminRateLimit,
   authorize('People.Deactivate', memberFromPersonParam()),
   validate({ params: IdParams }),
+  optionalIdempotent('people.reactivate', volunteerMutationReplay),
   reactivateVolunteerHandler,
 );
 

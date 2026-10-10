@@ -2288,6 +2288,10 @@
       "statement": "@id(\"platform.admin\")\npermit (principal is SPOH::Person, action in SPOH::Action::\"Platform\", resource)\nwhen { principal.platformAdmin };"
     },
     {
+      "id": "platform.archived-reader",
+      "statement": "@id(\"platform.archived-reader\")\npermit (principal is SPOH::Membership, action, resource)\nwhen { context.eventPhase == \"ARCHIVED\" && principal.person.platformAdmin }\nunless { action in SPOH::Action::\"Write\" };"
+    },
+    {
       "id": "platform.assign-any-role",
       "statement": "@id(\"platform.assign-any-role\")\npermit (\n  principal is SPOH::Person,\n  action in [SPOH::Action::\"People.Invite\", SPOH::Action::\"People.AssignRole\"],\n  resource\n)\nwhen { principal.platformAdmin };"
     },

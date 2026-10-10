@@ -24,6 +24,8 @@ export function adminSelect(scope: EventScope) {
         role: true,
         portfolio: true,
         status: true,
+        invitedAt: true,
+        acceptedAt: true,
         deactivatedAt: true,
         deactivatedReason: true,
         lastSeenAt: true,
@@ -114,8 +116,12 @@ export async function listVolunteerRows(
   return rows.map((row) => row.person);
 }
 
-export async function findVolunteerRow(scope: EventScope, id: string): Promise<AdminRow | null> {
-  return prisma.person.findFirst({
+export async function findVolunteerRow(
+  scope: EventScope,
+  id: string,
+  tx: PrismaTransactionClient = prisma,
+): Promise<AdminRow | null> {
+  return tx.person.findFirst({
     where: { id, eventMemberships: { some: { eventId: scope.eventId } } },
     select: adminSelect(scope),
   });
@@ -189,4 +195,25 @@ export async function deletePushSubscriptions(
   volunteerId: string,
 ): Promise<void> {
   await tx.pushSubscription.deleteMany({ where: { volunteerId } });
+}
+
+export async function hasOtherActiveMembership(
+  tx: PrismaTransactionClient,
+  input: { personId: string; eventId: string },
+) {
+  const person = await tx.person.findUniqueOrThrow({
+    where: { id: input.personId },
+    select: {
+      eventMemberships: {
+        where: {
+          eventId: { not: input.eventId },
+          status: 'ACTIVE',
+          event: { status: { not: 'ARCHIVED' } },
+        },
+        select: { id: true },
+        take: 1,
+      },
+    },
+  });
+  return person.eventMemberships.length > 0;
 }

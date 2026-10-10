@@ -239,6 +239,7 @@ describe('rotation', () => {
 
     await request(app).post('/api/v1/auth/refresh').set('Cookie', `${COOKIE}=${first}`).expect(200);
 
+    await prisma.refreshSession.updateMany({ where: { revokedReason: 'rotated' }, data: { revokedAt: new Date(Date.now() - 11_000) } });
     const replay = await request(app)
       .post('/api/v1/auth/refresh')
       .set('Cookie', `${COOKIE}=${first}`);
@@ -260,7 +261,7 @@ describe('rotation', () => {
       .post('/api/v1/auth/refresh')
       .set('Cookie', `${COOKIE}=${first}`);
     const second = cookieValue(refreshed, COOKIE) as string;
-
+    await prisma.refreshSession.updateMany({ where: { revokedReason: 'rotated' }, data: { revokedAt: new Date(Date.now() - 11_000) } });
     await request(app).post('/api/v1/auth/refresh').set('Cookie', `${COOKIE}=${first}`).expect(401);
 
     // The token the honest client is holding is now dead too.

@@ -178,6 +178,28 @@ describe('changes approved on 8 October (D-21)', () => {
 });
 
 describe('guardrails', () => {
+  test('archive readers keep event scope and active identity, and gain no write authority', () => {
+    const w = world();
+    const reader = w.member('archive-reader', 'VOLUNTEER', { platformAdmin: true });
+    const context = { eventPhase: 'ARCHIVED' };
+    const decision = w.can(reader, 'Structure.Read', EVENT, context);
+    assert.ok(allow(decision));
+    assert.ok(decision.reasons.includes('platform.archived-reader'));
+    assert.ok(!allow(w.can(reader, 'Structure.Read', E('Event', 'E2'), context)));
+    for (const action of ['Structure.Edit', 'Structure.Change', 'Event.Reopen'])
+      assert.ok(!allow(w.can(reader, action, EVENT, context)), action);
+    for (const options of [{ active: false }, { personActive: false }]) {
+      const inactive = w.member(`inactive-${Object.keys(options)[0]}`, 'VOLUNTEER', {
+        platformAdmin: true,
+        ...options,
+      });
+      assert.ok(!allow(w.can(inactive, 'Structure.Read', EVENT, context)));
+    }
+    const ordinary = w.member('ordinary', 'VOLUNTEER');
+    assert.ok(!allow(w.can(ordinary, 'Structure.Read', EVENT, context)));
+    assert.ok(!allow(w.can(reader, 'Structure.Read', EVENT, { eventPhase: 'LIVE' })));
+  });
+
   test('a membership never reaches another event', () => {
     const w = world();
     // Even on shift at a foreign station, with the grant: refused by guardrail.same-event.

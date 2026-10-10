@@ -55,7 +55,9 @@ describe('app task failure monitoring (partial P08.8)', () => {
         DeletionPolicy: 'Retain',
         UpdateReplacePolicy: 'Retain',
       });
-      const rules = Object.values(template.findResources('AWS::Events::Rule'));
+      const rules = Object.values(template.findResources('AWS::Events::Rule')).filter(
+        (rule) => rule.Properties.EventPattern,
+      );
       expect(rules).toHaveLength(1);
       const target = rules[0]!.Properties.Targets[0];
       expect(target.Arn).toEqual({
@@ -91,7 +93,7 @@ describe('app task failure monitoring (partial P08.8)', () => {
         taskArn: 'arn:aws:ecs:ap-southeast-1:665146708212:task/example/123',
         stopCode: 'EssentialContainerExited',
       });
-      expect(template.findResources('AWS::Lambda::Function')).toEqual({});
+      expect(Object.keys(template.findResources('AWS::Lambda::Function'))).toHaveLength(1);
       const policies = Object.values(template.findResources('AWS::Logs::ResourcePolicy'));
       expect(policies).toHaveLength(1);
       const logArn = `arn:aws:logs:ap-southeast-1:665146708212:log-group:/spoh/${stage}/task-failures:*`;
@@ -159,8 +161,8 @@ describe('app task failure monitoring (partial P08.8)', () => {
         DatapointsToAlarm: 1,
         TreatMissingData: 'notBreaching',
         Dimensions: Match.absent(),
-        AlarmActions: Match.absent(),
-        OKActions: Match.absent(),
+        AlarmActions: Match.arrayWith([{ Ref: Match.anyValue() }]),
+        OKActions: Match.arrayWith([{ Ref: Match.anyValue() }]),
         InsufficientDataActions: Match.absent(),
       });
       const alarm = Object.entries(template.findResources('AWS::CloudWatch::Alarm')).find(

@@ -35,7 +35,7 @@ export async function applyLifecycleEffects(
     ? await reopenEvent(tx, actor.scope, now)
     : undefined;
   const archive = decision.effects.includes('archive.start')
-    ? await archiveEvent(tx, actor.scope, now)
+    ? await archiveEvent(tx, { scope: actor.scope, now, audit: actor.audit })
     : undefined;
   return {
     row,

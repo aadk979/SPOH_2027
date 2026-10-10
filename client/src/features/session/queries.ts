@@ -1,8 +1,16 @@
 'use client';
 import { useCallback } from 'react';
-import { useQuery, type UseQueryResult } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery, type UseQueryResult } from '@tanstack/react-query';
 import type { Action, MeResponse, MyPermissionsResponse } from '@spoh/shared';
-import { getMe, getMyPermissions } from './api';
+import {
+  getMe,
+  getMyPermissions,
+  listDevices,
+  revokeDevice,
+  startMfaEnrollment,
+  verifyMfaEnrollment,
+} from './api';
+import { clearSession } from '@/shared/lib/session';
 import { useEventId } from '@/shared/lib/eventContext';
 import { useCurrentSession } from './useSession';
 export const sessionKeys = {
@@ -49,4 +57,37 @@ export function useMyPermissions(enabled = true): UseQueryResult<MyPermissionsRe
 export function useAllows(enabled = true): (action: Action) => boolean {
   const { data } = useMyPermissions(enabled);
   return useCallback((action: Action) => data?.actions?.[action] === true, [data]);
+}
+
+export function useDevices() {
+  const eventId = useEventId();
+  const session = useCurrentSession();
+  return useQuery({
+    queryKey: [eventId, 'session', 'devices'],
+    queryFn: listDevices,
+    enabled: session !== null,
+    staleTime: 0,
+  });
+}
+
+export function useRevokeDevice() {
+  const eventId = useEventId();
+  const queries = useQueryClient();
+  return useMutation({
+    mutationFn: (device: { id: string; current: boolean }) => revokeDevice(device.id),
+    onSuccess: (_result, device) => {
+      if (device.current) {
+        clearSession();
+        queries.clear();
+      } else void queries.invalidateQueries({ queryKey: [eventId, 'session', 'devices'] });
+    },
+  });
+}
+
+export function useStartMfa() {
+  return useMutation({ mutationFn: startMfaEnrollment });
+}
+
+export function useVerifyMfa() {
+  return useMutation({ mutationFn: verifyMfaEnrollment });
 }

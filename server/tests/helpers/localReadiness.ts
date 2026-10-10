@@ -11,6 +11,7 @@ import { readGoLiveReadiness } from '../../src/modules/event/application/readGoL
 import { rawDb } from './db.js';
 import { createVolunteer } from './fixtures.js';
 import { lifecycleNow, scheduledLifecycleFixture } from './scheduledLifecycle.js';
+import { insertContentPublicationFixture } from './content.js';
 
 export async function localReadinessFixture() {
   const f = await scheduledLifecycleFixture();
@@ -71,6 +72,23 @@ export async function localReadinessFixture() {
   });
   const gift = await rawDb.giftType.create({
     data: { ...scope, name: 'Gift', initialStock: 10, rehearsalInitialStock: 100 },
+  });
+  const event = await rawDb.event.findUniqueOrThrow({
+    where: { id: f.eventId },
+    select: { permissionsVersion: true },
+  });
+  await rawDb.event.update({
+    where: { id: f.eventId },
+    data: {
+      permissionsReviewedVersion: event.permissionsVersion,
+      permissionsReviewedAt: lifecycleNow,
+    },
+  });
+  await insertContentPublicationFixture({
+    db: rawDb,
+    eventId: f.eventId,
+    personId: f.creator.id,
+    now: lifecycleNow,
   });
   return {
     ...f,

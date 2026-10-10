@@ -60,6 +60,25 @@ it('reviews an inherited station zero independently from its parent version', ()
     captureScheduleReviewStale({ action: { kind: 'create' }, reviewed: current, current: changed }),
   ).toBe(true);
 });
+it('schedules a typed catalogue value with the selected key and its independent version', () => {
+  const current = captureCurrent({ scope: 'station', stationId: 'station' });
+  const row = current.data.find((item) => item.key === 'silentStationMinutes')!;
+  row.storedVersion = 4;
+  const action = { kind: 'create' as const, key: 'silentStationMinutes' as const };
+  expect(
+    captureScheduleBody({
+      action,
+      current,
+      timezone: 'Asia/Singapore',
+      fields: { value: '12', wallTime: '2027-01-01T12:00', reason: 'Reviewed threshold' },
+    }),
+  ).toMatchObject({ key: 'silentStationMinutes', value: 12, expectedVersion: 4 });
+  const changed = structuredClone(current);
+  changed.data.find((item) => item.key === 'capture.open')!.storedVersion = 2;
+  expect(captureScheduleReviewStale({ action, reviewed: current, current: changed })).toBe(false);
+  changed.data.find((item) => item.key === 'silentStationMinutes')!.storedVersion = 5;
+  expect(captureScheduleReviewStale({ action, reviewed: current, current: changed })).toBe(true);
+});
 it('cancellation ignores capture changes but refuses another schedule version or state', () => {
   const reviewed = captureCurrent();
   const action = { kind: 'cancel' as const, schedule: captureSchedule(reviewed) };

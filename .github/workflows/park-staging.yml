@@ -1,0 +1,23 @@
+name: Park staging
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+jobs:
+  park:
+    environment: staging
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::665146708212:role/spoh-github-deploy
+          aws-region: ap-southeast-1
+      - run: node infra/scripts/staging-power.mjs park

@@ -2,3 +2,4 @@
 export { mediaRouter } from './http/routes.js';
 export { requireIssuedMediaKey } from './application/requireIssuedMediaKey.js';
 export { requireAttachableMediaKey } from './application/requireAttachableMediaKey.js';
+export { mediaScheduledHandlers, mediaRecurringActions } from './jobs.js';

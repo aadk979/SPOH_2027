@@ -9,14 +9,13 @@ import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { invalidateVolunteerCache } from '../../../platform/identity/index.js';
-import { logger } from '../../../platform/logger/index.js';
 import { revokeAllForVolunteer } from '../../auth/index.js';
-import { identityProvider } from '../../../platform/identity/index.js';
 import { toAdminRecord } from '../data/mappers.js';
 import { findManager, findManagerOf, updateVolunteerRow } from '../data/repo.js';
 import { assertMayGrant, assertNoReportingCycle } from '../domain/escalation.js';
 import type { ManagerContext } from './context.js';
 import { loadTarget } from './queries.js';
+import { currentManagement } from './currentManagement.js';
 
 async function assertValidManager(
   scope: EventScope,
@@ -47,26 +46,11 @@ function toChange(id: string, patch: UpdateVolunteerRequest) {
 
 /**
  * A role change is a change to what this person may do, so their existing
- * sessions must not outlive it: the capability list is baked into the client
- * at sign-in. The identity provider's groups are kept in step too; the roster
- * is authoritative, so a failure there is a reconciliation problem, not a
- * failed edit.
+ * sessions must not outlive it. Permissions remain database-derived; a new
+ * sign-in also makes the person review the changed event access.
  */
 async function afterRoleChange(updated: VolunteerAdminRecord): Promise<number> {
-  const sessionsRevoked = await revokeAllForVolunteer(updated.id, 'role-changed');
-  try {
-    await identityProvider.ensureUser({
-      email: updated.email,
-      displayName: updated.displayName,
-      role: updated.role,
-    });
-  } catch (error) {
-    logger.error(
-      { err: error, volunteerId: updated.id },
-      'role changed on the roster but the identity provider group could not be updated',
-    );
-  }
-  return sessionsRevoked;
+  return revokeAllForVolunteer(updated.id, 'role-changed');
 }
 
 export async function updateVolunteer(
@@ -81,6 +65,9 @@ export async function updateVolunteer(
 
   const updated = await prisma.$transaction(async (tx) => {
     await holdCaptureEvent(tx, actor.scope);
+    await currentManagement(tx, actor, { id, action: 'People.Update' });
+    if (patch.role)
+      await currentManagement(tx, actor, { id, action: 'People.AssignRole', role: patch.role });
     const row = await updateVolunteerRow(tx, actor.scope, toChange(id, patch));
     await writeAudit(tx, {
       ...actor.audit,
@@ -88,12 +75,13 @@ export async function updateVolunteer(
       entityType: 'Volunteer',
       entityId: id,
       before: {
-        displayName: target.displayName,
         role: target.role,
         portfolio: target.portfolio,
         reportsToId: target.reportsToId,
       },
-      after: { ...patch },
+      after: { changedFields: Object.keys(patch).filter((key) => key !== 'idempotencyKey'),
+        ...(patch.role ? { role: patch.role } : {}),
+        ...(patch.reportsToId !== undefined ? { reportsToId: patch.reportsToId } : {}) },
     });
     return row;
   });
@@ -101,5 +89,5 @@ export async function updateVolunteer(
   const volunteer = toAdminRecord(updated);
   const sessionsRevoked = roleChanged ? await afterRoleChange(volunteer) : 0;
   invalidateVolunteerCache();
-  return { volunteer, sessionsRevoked, identityChanged: roleChanged };
+  return { volunteer, sessionsRevoked, identityChanged: false };
 }

@@ -140,7 +140,10 @@ describe('private object storage foundation (P08.7)', () => {
         },
       ],
     });
-    for (const name of ['Content', 'Exports', 'AccessLogs'])
+    expect(bucketFor(template, 'Content').Properties.CorsConfiguration).toEqual(
+      bucketFor(template, 'Media').Properties.CorsConfiguration,
+    );
+    for (const name of ['Exports', 'AccessLogs'])
       expect(bucketFor(template, name).Properties.CorsConfiguration).toBeUndefined();
     expect(bucketFor(templateFor('prod'), 'Media').Properties.CorsConfiguration).toBeUndefined();
   });
@@ -200,7 +203,7 @@ describe('private object storage foundation (P08.7)', () => {
         );
       for (const resource of Object.values(template.findResources('AWS::ECS::TaskDefinition')))
         expect(JSON.stringify(resource.Properties.ContainerDefinitions)).not.toMatch(
-          /CONTENT_BUCKET|EXPORTS_BUCKET|AWS_ACCESS_KEY/,
+          /BACKUPS_BUCKET|AWS_ACCESS_KEY/,
         );
     },
   );

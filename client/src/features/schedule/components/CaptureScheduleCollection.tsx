@@ -5,6 +5,7 @@ import type { CaptureScheduleAction } from '../model/captureScheduleReview';
 import { scheduleStatusLabels } from '../model/copy';
 import type { CaptureScheduleControlsInput } from '../model/captureScheduleControls';
 import { CaptureScheduleRows } from './CaptureScheduleRows';
+import { settingScheduleCopy } from '../model/settingScheduleCopy';
 
 type CollectionInput = CaptureScheduleControlsInput & {
   query: ReturnType<typeof useCaptureSchedules>;
@@ -15,15 +16,17 @@ type CollectionInput = CaptureScheduleControlsInput & {
 };
 export function CaptureScheduleCollection(input: CollectionInput) {
   const { query } = input;
+  const settingKey = input.settingKey ?? 'capture.open';
+  const copy = settingScheduleCopy(settingKey);
   const disabled = input.readUnavailable || input.current.eventStatus === 'ARCHIVED';
   const canCreate = captureScheduleCreationAllowed(input);
   const showRows = query.isSuccess && !query.isError;
   const more = query.hasNextPage && !query.isError;
   return (
     <div className="flex flex-col gap-md">
-      <h3 className="text-section">Capture schedules</h3>
+      <h3 className="text-section">{copy.title}</h3>
       <p className="text-caption">
-        Each action checks its reviewed capture version when it runs. An earlier change can prevent
+        Each action checks its reviewed setting version when it runs. An earlier change can prevent
         a later action from applying.
       </p>
       <CaptureScheduleFilter status={input.status} onChange={input.setStatus} />
@@ -48,8 +51,13 @@ export function CaptureScheduleCollection(input: CollectionInput) {
           Load more capture schedules
         </Button>
       ) : null}
-      <Button disabled={!canCreate} onClick={() => input.onReview({ kind: 'create' })}>
-        Review future capture change
+      <Button
+        disabled={!canCreate}
+        onClick={() => input.onReview({ kind: 'create', key: settingKey })}
+      >
+        {settingKey === 'capture.open'
+          ? 'Review future capture change'
+          : `Review future change: ${copy.label}`}
       </Button>
       <p className="text-caption">
         Review all statuses and remaining pages before adding a schedule.

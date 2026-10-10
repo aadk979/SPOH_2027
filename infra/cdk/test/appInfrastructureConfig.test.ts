@@ -22,12 +22,14 @@ const INFRA_NAMES = [
   'LOG_LEVEL',
   'NODE_ENV',
   'PORT',
+  'S3_EXPORTS_BUCKET',
   'TRUST_PROXY_HOPS',
 ];
 const STAGING_INFRA_NAMES = [
   ...INFRA_NAMES,
   'CLIENT_BASE_URL',
   'DEPLOYMENT_ENV',
+  'S3_CONTENT_BUCKET',
   'S3_MEDIA_BUCKET',
 ].sort();
 interface Container {
@@ -163,7 +165,7 @@ describe('infrastructure injection (P08.6)', () => {
       const infra = name === 'app' ? STAGING_INFRA_NAMES : ['DB_HOST', 'DB_NAME'];
       const credentials =
         name === 'app'
-          ? ['DB_APP_PASSWORD', 'SESSION_SIGNING_SECRET']
+          ? ['DB_APP_PASSWORD', 'SESSION_SIGNING_SECRET', 'ATTENDANCE_SIGNING_SECRET']
           : ['DB_ADMIN_USER', 'DB_ADMIN_PASSWORD', 'DB_MIGRATOR_PASSWORD', 'DB_APP_PASSWORD'];
       expect(container.Secrets.map((secret) => secret.Name).sort()).toEqual(
         [...infra, ...credentials].sort(),

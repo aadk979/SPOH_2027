@@ -5,6 +5,85 @@ ap-southeast-1, configured in [`src/config.ts`](src/config.ts). Every resource i
 `env`, `owner` and `cost-centre`, and the AwsSolutions `cdk-nag` pack runs at synth: an
 unsuppressed finding fails it, and a suppression must say why.
 
+**10 October 2026 update (ADR-011): AWS is torn down.** Deploy and infra workflows are
+dispatch-only. Historical deployed descriptions below describe the earlier checkpoints;
+the current code is built and tested before any P16 staging recreation. Production creation,
+cutover and rebuilding the deleted live site require the owner. The former production Cognito
+pool and backups bucket were deleted; their historical reference identifiers must be replaced
+through P12.8's approved plan before deploying production.
+
+## Current build and operator boundaries
+
+```mermaid
+flowchart LR
+  Browser --> Edge[DuckDNS Caddy edge]
+  Edge --> Gateway[HTTP API and VPC link]
+  Gateway --> Service[ARM Fargate service]
+  Service --> Database[Isolated PostgreSQL 17]
+  Service --> Storage[Private media, content and exports]
+  Service --> Identity[Cognito and Verified Permissions]
+  Observer[Minute observer] --> ECS[ECS metadata]
+  Observer --> Backup[AWS Backup metadata]
+  Observer --> CloudWatch[Alarms and dashboard]
+  CloudWatch --> SNS[Owner email and approved event SMS]
+```
+
+`OperationsMonitoring` completes the ADR-008 alarm catalogue. It adds native RDS free-storage
+and connection alarms, and a minute observer of actual ECS desired/running tasks and the newest
+completed AWS Backup recovery point. Missing observations breach rather than claim health.
+Every alarm sends its alarm/recovery transition to the stage SNS topic. `AlarmEmail` and
+`EventWeekPhone` are private NoEcho CloudFormation parameters; empty values disable the
+subscription. Confirm the owner email subscription during P16.8; enable paid SMS only for the
+owner-approved event period. The retained `/spoh/<stage>/audit` group has 400-day retention;
+P15.4 wires the durable audit shipper.
+
+The existing account budget was retained during teardown. `-c manageAccountBudget=true` on
+Spoh-DeployAccess adds the code for one US$100 monthly budget with 80%/100% actual alerts and
+a required private `BudgetEmail`. Review the existing account budget and import/reconcile it
+before enabling management; default synth does not create a duplicate. Re-price dashboards,
+additional metrics and the observer before rebuilding AWS.
+
+Manual `park-staging` and `unpark-staging` workflows share the release deployment lock and use
+OIDC. Park sets the staging service to zero then stops RDS; unpark waits for RDS before restoring
+one task and running smoke. The script validates every resource name before any mutation and
+the deploy role grants those power operations only on staging resources. RDS restarts a stopped
+instance automatically after seven days; prolonged off-season retirement to a final snapshot
+is an explicit owner-approved data operation rather than a power workflow.
+
+Generate VAPID once into a private local file, then create/update its JSON Secrets Manager secret
+through the approved operator path. Never print or commit its contents:
+
+```bash
+node infra/scripts/provision-vapid.mjs mailto:<operator-address> .local/vapid.json
+# Store the private JSON with fields publicKey, privateKey and subject in Secrets Manager.
+# Supply -c vapidSecretArn=<complete-secret-arn> at the platform release.
+```
+
+The app alone receives its three VAPID fields and an independent attendance signing secret.
+Migration tasks receive neither. Existing browsers must subscribe again if the VAPID pair changes.
+
+### Rotation under the lean network topology
+
+**Assumed recommendation:** operator rotation through a one-off ECS migration task, preserving
+the no-NAT/no-interface-endpoint topology, rather than an unreachable RDS rotation Lambda.
+Automatic rotation is not enabled. Before rotation, verify a current backup and retain the previous
+secret version in Secrets Manager. Put a new credential in its stage secret, then run the migrate
+task: the entrypoint changes the DB role password before releasing new tasks. Old database
+connections continue until replaced; new app tasks read the new secret at startup. Check smoke
+and fresh task connections. A failure rolls back the secret version, reruns the credential task,
+and restores the previous image; never reset or recreate the database to rotate a password.
+
+Rotate session/attendance secrets in a controlled maintenance window and restart every app task
+together: active session tokens and attendance challenges issued with the old keys expire early.
+Revoke existing refresh sessions for a suspected session-key leak; a routine rotation still requires
+P16 proof that users can sign in again. Retain prior key versions only for bounded rollback.
+VAPID changes require renewed device subscriptions. Access Analyzer, real key rotations and
+notification delivery are P16.8 acceptance evidence, not synthesis evidence.
+
+Dependabot checks npm workspaces, GitHub Actions and the Dockerfile weekly. Keep Prisma client
+and CLI versions aligned, Node images on 24, CDK CLI/lib compatible, and Cedar WASM/schema
+generation together; upgrades pass unchanged coverage floors and one full batch CI before push.
+
 ```bash
 npm run infra:synth              # both stages, nag checks included
 npm run infra:diff               # against the deployed stacks (needs credentials)

@@ -1,8 +1,8 @@
 import { randomBytes, randomUUID, createHash } from 'node:crypto';
-import { SignJWT, jwtVerify } from 'jose';
-import { env, isProduction } from '../../config/env.js';
+import { SignJWT, jwtVerify, compactVerify } from 'jose';
 import { UnauthenticatedError } from '../errors/index.js';
-import { logger } from '../logger/index.js';
+import { currentSigningKey, sessionSigningKeys } from './sessionKeys.js';
+import { verificationKeys } from './signingKeys.js';
 
 /**
  * The API's own access token.
@@ -38,23 +38,6 @@ const AUDIENCE = 'spoh2027-api';
  * tokens behind a load balancer. Outside production one is generated at boot so
  * a developer machine needs no extra configuration.
  */
-const secret: Uint8Array = (() => {
-  if (env.SESSION_SIGNING_SECRET) {
-    return new TextEncoder().encode(env.SESSION_SIGNING_SECRET);
-  }
-
-  if (isProduction) {
-    // env validation already refuses this combination; belt and braces, because
-    // a silently ephemeral production key is a very quiet outage.
-    throw new Error('SESSION_SIGNING_SECRET is required in production');
-  }
-
-  logger.warn(
-    'SESSION_SIGNING_SECRET is unset: signing sessions with an ephemeral key. Restarting the server invalidates every session.',
-  );
-  return new Uint8Array(randomBytes(32));
-})();
-
 export interface SessionClaims {
   /** Identity-provider subject. The rest of the pipeline resolves the roster row from this. */
   sub: string;
@@ -71,13 +54,13 @@ export async function issueAccessToken(
   expiresIn: number;
 }> {
   const token = await new SignJWT({ sid: claims.sid })
-    .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+    .setProtectedHeader({ alg: 'HS256', typ: 'JWT', kid: currentSigningKey.id })
     .setSubject(claims.sub)
     .setIssuer(ISSUER)
     .setAudience(AUDIENCE)
     .setIssuedAt()
     .setExpirationTime(`${expiresIn}s`)
-    .sign(secret);
+    .sign(currentSigningKey.bytes);
 
   return { token, expiresIn };
 }
@@ -90,6 +73,14 @@ export async function issueAccessToken(
  * ours but is expired or tampered with is a genuine failure and throws.
  */
 export async function verifyAccessToken(token: string): Promise<SessionClaims | null> {
+  for (const key of verificationKeys(token, sessionSigningKeys)) {
+    const claims = await verifyWithKey(token, key.bytes);
+    if (claims) return claims;
+  }
+  return null;
+}
+
+async function verifyWithKey(token: string, secret: Uint8Array): Promise<SessionClaims | null> {
   try {
     const { payload } = await jwtVerify(token, secret, {
       issuer: ISSUER,
@@ -107,6 +98,27 @@ export async function verifyAccessToken(token: string): Promise<SessionClaims | 
     // decides; distinguishing them here would leak which verifier rejected it.
     return null;
   }
+}
+
+/** Expiry is ignored ONLY for revocation: this proof grants no authentication or read access. */
+export async function verifyRevocationProof(token: string): Promise<SessionClaims | null> {
+  for (const key of verificationKeys(token, sessionSigningKeys)) {
+    try {
+      const verified = await compactVerify(token, key.bytes, { algorithms: ['HS256'] });
+      const payload: unknown = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(verified.payload));
+      const claims = revocationClaims(payload);
+      if (claims) return claims;
+    } catch { /* A legacy proof may use the explicit previous signing key. */ }
+  }
+  return null;
+}
+
+function revocationClaims(payload: unknown): SessionClaims | null {
+  if (typeof payload !== 'object' || payload === null) return null;
+  const claims = payload as Record<string, unknown>;
+  if (claims.iss !== ISSUER || claims.aud !== AUDIENCE) return null;
+  if (typeof claims.sub !== 'string' || typeof claims.sid !== 'string') return null;
+  return { sub: claims.sub, sid: claims.sid };
 }
 
 /**

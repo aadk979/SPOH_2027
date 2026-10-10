@@ -12,6 +12,8 @@ interface InfrastructureProps {
   cognito: CognitoSettings;
   port: number;
   mediaBucketName?: string;
+  contentBucketName?: string;
+  exportsBucketName?: string;
 }
 
 /** Infrastructure only: operational choices belong to the live settings registry (P10.4). */
@@ -40,6 +42,8 @@ function infrastructureValues(props: InfrastructureProps) {
     TRUST_PROXY_HOPS: '1',
     AWS_REGION: stage.region,
     ...(props.mediaBucketName ? { S3_MEDIA_BUCKET: props.mediaBucketName } : {}),
+    ...(props.contentBucketName ? { S3_CONTENT_BUCKET: props.contentBucketName } : {}),
+    ...(props.exportsBucketName ? { S3_EXPORTS_BUCKET: props.exportsBucketName } : {}),
   };
 }
 

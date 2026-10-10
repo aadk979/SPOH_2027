@@ -23,6 +23,7 @@ import {
   type TestVolunteer,
 } from '../helpers/fixtures.js';
 import { FROZEN_NOW } from '../setup.js';
+import { insertArchiveExportFixture } from '../helpers/content.js';
 
 const app = createApp();
 const transactionDb = rawDb.$extends({ query: {} });
@@ -38,7 +39,7 @@ const reminderRows = () =>
   rawDb.scheduledAction.findMany({ where: { eventId }, orderBy: { id: 'asc' } });
 const finalRows = () => rawDb.reportSnapshot.findMany({ where: { eventId } });
 
-/** Exercise the private effects under real locks/guards; HTTP ARCHIVED stays unsupported. */
+/** Exercise the effects under real locks/guards and assert transaction rollback. */
 async function archive(now = AFTER_GRACE) {
   return transactionDb.$transaction(
     async (tx) => {
@@ -51,7 +52,7 @@ async function archive(now = AFTER_GRACE) {
         action: 'Event.MarkReady',
       });
       const snapshot = await lifecycleSnapshot(tx, scope, { event, now });
-      const decision = evaluateTransition(snapshot, 'ARCHIVED', { now });
+      const decision = evaluateTransition(snapshot, 'ARCHIVED', { now, platformAdmin: true });
       if (!decision.allowed) throw new ConflictError('CONFLICT', 'Archive guards failed');
       const audit = {
         ...SYSTEM_AUDIT_CONTEXT,
@@ -107,6 +108,7 @@ beforeEach(async () => {
         })
     ).status,
   ).toBe(200);
+  await insertArchiveExportFixture({ db: rawDb, eventId, now: FROZEN_NOW });
 });
 
 it('atomically timestamps archive, ends all standing and cancels reminders without altering final evidence', async () => {
@@ -274,7 +276,7 @@ it('leaves another event and unrelated or terminal scheduled actions unchanged',
   expect(await reminderRows()).toEqual(expect.arrayContaining([unrelated, terminal]));
 });
 
-it('does not start effects before grace or permit the public archive request yet', async () => {
+it('does not start effects before grace or without current platform authority', async () => {
   await expect(archive(new Date(AFTER_GRACE.getTime() - 1))).rejects.toThrow(
     'Archive guards failed',
   );
@@ -288,7 +290,8 @@ it('does not start effects before grace or permit the public archive request yet
       expectedVersion: event.lifecycleVersion,
       idempotencyKey: idempotencyKey(),
     });
-  expect(response.status).toBe(400);
+  expect(response.status).toBe(403);
+  expect(response.body.error.code).toBe('FORBIDDEN');
   expect((await memberRows())[0]?.status).toBe('ACTIVE');
   expect((await state()).archivedAt).toBeNull();
 });

@@ -10,18 +10,20 @@
 
 ## Purpose
 
-Make the Cognito pool production-grade and managed as code. Send branded invites through SES. Turn
+Make the Cognito pool production-grade and managed as code. Pace invites through Cognito's default
+sender under the owner's amended D-08 (no SES). Turn
 people management into a clear lifecycle: invite → active → deactivated → archived, per event, with
 immediate effect everywhere.
 
 ## Context for a fresh session
 
 - Design: ADR-006. Person and EventMembership exist from P09.3.
-- The pool `ap-southeast-1_9bwl2nGF7` is live and holds real identities. **Never replace it.** Any
-  CDK change to it is reviewed with `cdk diff` and confirmed with the owner. It becomes
-  **production's** pool. Staging has its own CDK-created pool with synthetic users (ADR-006 §1).
-- Importing needs the pool's current settings (Q-C1…Q-C9), or the owner's approval of one
-  read-only describe (Q-P8).
+- **10 October teardown supersedes the former live-pool status:** the owner deleted both pools,
+  including `ap-southeast-1_9bwl2nGF7`. See [the teardown record](../reports/P08/aws-teardown-2026-10-10.md).
+  Staging's synthetic pool is recreated only for P16. Production identity recreation/configuration
+  remains behind P12.8; a reference to the deleted pool does not complete P12.1.
+- Pool settings are source targets until P16 observes recreated staging. The deleted pool cannot
+  be imported or described as though it still exists; production differences remain under P12.8.
 - The audit branch brought roster CSV import (`packages/shared/src/rosterCsv.ts`) and a provisioning UI.
 
 ## Steps
@@ -37,20 +39,19 @@ immediate effect everywhere.
   - managed login branding, and callback/logout URLs per environment
 - **Done when:** `cdk diff` on identity is empty after import, and the settings are applied on staging.
 - **ADR-011:** the staging, soak, load or sign-off part of _Done when_ runs in P16.8. The step
-  closes when its code and tests are green in CI and the pipeline has deployed it.
+  closes when its code and tests are green in CI; AWS remains torn down until P16.
 
-### P12.2 — SES for invites (needs D-08)
+### P12.2 — Default-sender invites (reduced by D-08)
 
-- **Do:**
-  1. SES domain identity with DKIM, and a configuration set with bounce and complaint handling.
-  2. Cognito sends through SES.
-  3. Cognito's invite and reset templates carry the organisation's name (one template per pool).
-     The app sends the event-specific membership email ("you're on the SPOH 2028 team") itself
-     through SES (ADR-006 §4).
-  4. Leave the SES sandbox for production.
-- **Done when:** a staging invite arrives, branded, passing DKIM.
+- **Owner amendment:** D-08, 30 September 2026, explicitly requires Cognito's default sender,
+  no SES, no Route 53 and no paid mailing service. The original SES/DKIM/sandbox and app-sent
+  event-membership email requirements are removed, not deferred as unfinished SES features.
+- **Do:** Configure the default-sender invitation template and thirty-day temporary passwords;
+  pace invite/resend batches within the application allowance shared across the pool.
+- **Done when:** code and quota/template tests are green in CI; a synthetic staging invite/resend
+  arrives through the default sender in P16.8. No DKIM or SES claim is required under D-08.
 - **ADR-011:** the staging, soak, load or sign-off part of _Done when_ runs in P16.8. The step
-  closes when its code and tests are green in CI and the pipeline has deployed it.
+  closes when its code and tests are green in CI; AWS remains torn down until P16.
 
 ### P12.3 — Membership lifecycle
 
@@ -120,9 +121,11 @@ immediate effect everywhere.
 
 ## Exit criteria
 
-- The pool is managed as code without replacement, and invites come from SES.
+- The pool configuration is managed as code; recreating production retains P12.8's approvals.
+  Invites use Cognito's default sender within D-08's allowance; SES is explicitly excluded.
 - Admin tiers require MFA, and the membership lifecycle is complete, audited and immediate.
 
 ## Phase report
 
-_Fill in on completion._
+[Identity build report, 10 October 2026](../reports/P12/identity-build-2026-10-10.md).
+Implementation and batch CI are still pending completion; P12.1 and P12.8 remain open.

@@ -13,7 +13,7 @@ export function CaptureScheduleContents(
 ) {
   const [status, setStatus] = useState<ScheduledActionStatus | undefined>();
   const [action, setAction] = useState<CaptureScheduleAction | null>(null);
-  const query = useCaptureSchedules(input.current.target, status);
+  const query = useCaptureSchedules(input.current.target, status, input.settingKey);
   const clear = useClearCaptureSchedules();
   const denied = query.error instanceof ApiError && [401, 403].includes(query.error.status);
   useEffect(() => {

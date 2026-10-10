@@ -6,6 +6,7 @@ import { VolunteerEditorFeedback } from './VolunteerEditorFeedback';
 import { VolunteerEditorFields } from './VolunteerEditorFields';
 import { VolunteerEditorActions } from './VolunteerEditorActions';
 import { WithdrawVolunteerAccess } from './WithdrawVolunteerAccess';
+import { PersonSessionActions } from './PersonSessionActions';
 export function VolunteerEditor({ volunteer }: { volunteer: VolunteerAdminRecord }): ReactNode {
   const form = useVolunteerEditor(volunteer);
   return (
@@ -14,6 +15,7 @@ export function VolunteerEditor({ volunteer }: { volunteer: VolunteerAdminRecord
       <VolunteerEditorFields volunteer={volunteer} form={form} />
       <VolunteerEditorActions volunteer={volunteer} form={form} />
       <WithdrawVolunteerAccess volunteer={volunteer} form={form} />
+      <PersonSessionActions volunteer={volunteer} />
     </div>
   );
 }

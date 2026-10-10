@@ -264,4 +264,7 @@ The client model/library line target and other pipeline criteria remain open.
 
 ## Phase report
 
-_Fill in on completion._
+[Build sweep, 10 October 2026](../reports/P08/build-sweep-2026-10-10.md).
+Full batch CI remains pending; retained log groups do not prove audit shipping. AWS is deleted,
+and the [teardown record](../reports/P08/aws-teardown-2026-10-10.md) supersedes the former live-pool
+status. Deploy/infra workflows remain dispatch-only until the authorised P16 campaign.

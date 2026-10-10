@@ -1,5 +1,5 @@
 import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
-import { prisma } from '../../../platform/db/client.js';
+import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import { invalidateSessionCache } from '../../../platform/identity/index.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { revokeLiveSessions } from '../data/repo.js';
@@ -33,6 +33,17 @@ export async function revokeAllForVolunteer(
   return count;
 }
 
+export async function revokeAllInTransaction(
+  tx: PrismaTransactionClient,
+  input: { personId: string; reason: string; at: Date },
+) {
+  return revokeLiveSessions(
+    { volunteerId: input.personId },
+    { at: input.at, reason: input.reason },
+    tx,
+  );
+}
+
 /**
  * Requests check a session's liveness through a short cache, so a revoke must
  * drop what it revoked or the access token keeps working for up to a minute
@@ -55,16 +66,14 @@ export async function revokeOwnSession(
   sessionId: string,
   audit: AuditContext,
 ): Promise<boolean> {
-  const count = await revokeLiveSessions(
-    { id: sessionId, volunteerId },
-    { at: systemClock.now(), reason: 'signed-out-remotely' },
-  );
-
-  if (count === 0) return false;
-  forgetRevoked(sessionId);
-
   const recorded = await inHomeEvent(audit, volunteerId);
-  await prisma.$transaction(async (tx) => {
+  const count = await prisma.$transaction(async (tx) => {
+    const changed = await revokeLiveSessions(
+      { id: sessionId, volunteerId },
+      { at: systemClock.now(), reason: 'signed-out-remotely' },
+      tx,
+    );
+    if (!changed) return 0;
     await writeAudit(tx, {
       ...recorded,
       action: 'session.revoke',
@@ -72,7 +81,8 @@ export async function revokeOwnSession(
       entityId: sessionId,
       after: { reason: 'signed-out-remotely' },
     });
+    return changed;
   });
-
-  return true;
+  if (count) forgetRevoked(sessionId);
+  return count > 0;
 }

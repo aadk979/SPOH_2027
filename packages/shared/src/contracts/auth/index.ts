@@ -65,6 +65,8 @@ export const SessionResponse = z
      * session silently.
      */
     refreshAvailable: z.boolean(),
+    /** A restricted session that can only enrol TOTP before opening the app. */
+    mfaRequired: z.boolean().optional(),
   })
   .strict();
 export type SessionResponse = z.infer<typeof SessionResponse>;
@@ -82,3 +84,15 @@ export const SessionSummary = z
   })
   .strict();
 export type SessionSummary = z.infer<typeof SessionSummary>;
+
+export const RedeemHandoffRequest = z
+  .object({
+    code: z.string().regex(/^[A-Za-z0-9_-]{43}$/),
+    verifier: z.string().regex(/^[A-Za-z0-9_-]{43,128}$/),
+  })
+  .strict();
+export type RedeemHandoffRequest = z.infer<typeof RedeemHandoffRequest>;
+export const VerifyMfaRequest = z.object({ code: z.string().regex(/^\d{6}$/) }).strict();
+export type VerifyMfaRequest = z.infer<typeof VerifyMfaRequest>;
+export const MfaSetupResponse = z.object({ secretCode: z.string().min(1) }).strict();
+export type MfaSetupResponse = z.infer<typeof MfaSetupResponse>;

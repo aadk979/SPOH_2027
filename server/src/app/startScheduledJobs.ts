@@ -5,6 +5,7 @@ import {
   deliverAnnouncementBatch,
 } from '../modules/announcement/index.js';
 import { settingsScheduledHandlers } from '../modules/settings/index.js';
+import { contentScheduledHandlers } from '../modules/content/index.js';
 import { eventScheduledHandlers } from '../modules/event/index.js';
 import { reportScheduledHandlers } from '../modules/report/index.js';
 import { registrationScheduledHandlers } from '../modules/registration/index.js';
@@ -23,6 +24,10 @@ import { startSchedulerWorker } from '../platform/scheduler/startWorker.js';
 import type { Clock } from '../platform/time/index.js';
 import { createEventRecurringSync } from './syncEventRecurring.js';
 import { recordCacheBusMetrics } from '../platform/events/cacheBusMetrics.js';
+import { peopleRecurringActions, peopleScheduledHandlers } from '../modules/people/index.js';
+import { mediaRecurringActions, mediaScheduledHandlers } from '../modules/media/index.js';
+import { auditRecurringActions, auditRetentionHandlers } from '../platform/audit/retention.js';
+import { identityRecurringActions, identityRetentionHandlers } from '../platform/identity/retention.js';
 
 /** Module catalogue and recurring declarations are composed once per API instance. */
 export async function startScheduledJobs(clock?: Clock) {
@@ -37,13 +42,18 @@ export async function startScheduledJobs(clock?: Clock) {
     ...reportScheduledHandlers,
     ...registrationScheduledHandlers,
     ...announcementScheduledHandlers,
+    ...contentScheduledHandlers,
+    ...peopleScheduledHandlers,
+    ...mediaScheduledHandlers,
+    ...auditRetentionHandlers,
+    ...identityRetentionHandlers,
   ]);
-  for (const action of [...authRecurringActions, ...idempotencyRecurringActions]) {
+  for (const action of [...authRecurringActions, ...idempotencyRecurringActions, ...auditRecurringActions, ...identityRecurringActions]) {
     await ensureRecurring({ ...action, registry, clock });
   }
   const syncEvents = createEventRecurringSync({
     registry,
-    actions: [...lostPersonRecurringActions, ...visitorRecurringActions],
+    actions: [...lostPersonRecurringActions, ...visitorRecurringActions, ...peopleRecurringActions, ...mediaRecurringActions],
     clock,
   });
   await syncEvents();

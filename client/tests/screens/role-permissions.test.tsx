@@ -11,6 +11,7 @@ import {
   groupedRows,
 } from '@/features/permissions/model/permissionTable';
 import { api } from '@/shared/lib/api';
+import { NetworkError } from '@/shared/lib/apiErrors';
 
 /** The role permissions screen (P11.7): the table by role, the toggles, and the simulator. */
 vi.mock('@/shared/shell/AppShell', () => ({
@@ -66,6 +67,7 @@ function table(canEdit: boolean): RolePermissionsResponse['data'] {
       { id: 'guardrail.not-on-yourself', explanation: 'Nobody changes their own role.' },
     ],
     canEdit,
+    review: { version: 3, reviewedVersion: null, reviewedAt: null },
   };
 }
 
@@ -111,6 +113,42 @@ describe('the permission table model', () => {
 });
 
 describe('the role permissions screen', () => {
+  it('records only a confirmed review of the current version and keeps an uncertain retry identical', async () => {
+    const attempts: unknown[] = [];
+    mockedApi.mockImplementation(async (path, options) => {
+      if (String(path).endsWith('/permissions/review')) {
+        attempts.push(options?.body);
+        if (attempts.length === 1) throw new NetworkError('Synthetic unavailable response');
+        return {
+          data: {
+            ...table(true),
+            review: { version: 3, reviewedVersion: 3, reviewedAt: '2027-01-01T03:00:00Z' },
+          },
+        };
+      }
+      if (String(path).endsWith('/permissions')) return { data: table(true) };
+      return { data: [], meta: { count: 0, nextCursor: null } };
+    });
+    show();
+    const submit = await screen.findByRole('button', { name: 'Mark current permissions reviewed' });
+    expect(submit).toHaveProperty('disabled', true);
+    fireEvent.change(screen.getByLabelText('Review reason'), {
+      target: { value: '  Reviewed event role permissions  ' },
+    });
+    fireEvent.click(
+      screen.getByLabelText('I have reviewed the current role permissions and guardrails'),
+    );
+    fireEvent.click(submit);
+    fireEvent.click(await screen.findByRole('button', { name: 'Retry same permissions review' }));
+    await screen.findByText(/Current permissions are reviewed/);
+    expect(attempts).toHaveLength(2);
+    expect(attempts[1]).toEqual(attempts[0]);
+    expect(attempts[0]).toMatchObject({
+      expectedVersion: 3,
+      reason: 'Reviewed event role permissions',
+      idempotencyKey: expect.any(String),
+    });
+  });
   it('lets a platform admin revoke a grant, sending the role and action', async () => {
     mockedApi.mockImplementation(async (path, options) => {
       if (String(path).endsWith('/permissions') && !options?.method) return { data: table(true) };

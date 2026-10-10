@@ -30,7 +30,7 @@ export const rawDb = new PrismaClient({
  * localhost": a developer's own dev database is on localhost too, and wiping
  * their seeded roster mid-afternoon is exactly the accident this prevents.
  */
-const TEST_DATABASE_NAME = /_test$/i;
+const TEST_DATABASE_NAME = /^spoh2027_test$/;
 
 function assertTestDatabase(): void {
   if (env.NODE_ENV === 'production') {
@@ -42,7 +42,7 @@ function assertTestDatabase(): void {
   if (!TEST_DATABASE_NAME.test(name)) {
     throw new Error(
       `refusing to truncate database "${name}": the integration suite deletes every row, ` +
-        'so its database name must end in "_test". Run `npm run db:test:setup`.',
+        'so its database name must be "spoh2027_test".',
     );
   }
 }
@@ -69,9 +69,13 @@ export async function resetDatabase(): Promise<void> {
   await wipe('AuditLog');
   await wipe('AnnouncementPublication');
   await wipe('SettingChange');
+  await wipe('ArchiveExport');
   await wipe('ReportSnapshot');
   await wipe('ScheduledAction');
   await wipe('IdempotencyRecord');
+  await wipe('ContentUploadReceipt');
+  await wipe('ContentDocument');
+  await wipe('ContentVersion');
 
   await wipe('AnnouncementAck');
   await wipe('AnnouncementPushDelivery');
@@ -108,6 +112,8 @@ export async function resetDatabase(): Promise<void> {
   await wipe('ImportBatch');
 
   // Session and device state.
+  await wipe('AuthHandoff');
+  await wipe('IdentityDeliveryQuota');
   await wipe('RefreshSession');
   await wipe('PushSubscription');
 
@@ -130,6 +136,7 @@ export async function resetDatabase(): Promise<void> {
   await wipe('EventMembership');
   await wipe('OrganisationMembership');
   await wipe('Event');
+  await wipe('Organisation');
 
   // People last: almost everything references them.
   await wipe('Person');

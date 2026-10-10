@@ -83,8 +83,8 @@ function allowOrigins(app: Express): void {
       // wildcard in production.
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id'],
-      exposedHeaders: ['X-Request-Id'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id', 'If-None-Match'],
+      exposedHeaders: ['X-Request-Id', 'ETag', 'Cache-Control'],
       maxAge: 600,
     }),
   );

@@ -8,6 +8,8 @@ import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { holdScopedMutationStation } from '../data/scopedMutationRepo.js';
 import { lockEventSettingAuthority } from './lockEventSettingAuthority.js';
 import { reviewCaptureScheduleIntent } from './reviewCaptureScheduleIntent.js';
+import { requireCurrentPermission } from '../../../platform/access/currentPermission.js';
+import { settingQuestion } from '../../../platform/access/settingQuestion.js';
 
 export type CaptureScheduleActor = ActorContext & { clock?: Clock };
 export async function prepareCaptureSchedule(
@@ -16,6 +18,12 @@ export async function prepareCaptureSchedule(
 ) {
   const { actor, intent } = input;
   await lockEventSettingAuthority(tx, actor);
+  await requireCurrentPermission(tx, {
+    scope: actor.scope,
+    membershipId: actor.membershipId,
+    personId: actor.volunteerId,
+    ...settingQuestion(intent.key),
+  });
   const event = await holdCaptureEvent(tx, actor.scope);
   if (event.status === 'ARCHIVED')
     throw new ConflictError(ERROR_CODES.SETTING_LOCKED, 'Archived event settings are read-only.');

@@ -14,6 +14,7 @@ import {
   WebIdentityPrincipal,
 } from 'aws-cdk-lib/aws-iam';
 import type { Construct } from 'constructs';
+import { accountBudget } from './operationsMonitoring.js';
 
 export interface DeployAccessStackProps extends StackProps {
   /** The only repository allowed to deploy, as the OIDC `sub` claim writes it (`owner@id/name@id`). */
@@ -118,6 +119,22 @@ export class DeployAccessStack extends Stack {
     );
     this.role.addToPolicy(
       new PolicyStatement({
+        actions: ['ecs:UpdateService'],
+        resources: [
+          `arn:aws:ecs:${this.region}:${this.account}:service/Spoh-staging-Platform-AppCluster*/Spoh-staging-Platform-AppService*`,
+        ],
+      }),
+    );
+    this.role.addToPolicy(
+      new PolicyStatement({
+        actions: ['rds:StartDBInstance', 'rds:StopDBInstance', 'rds:DescribeDBInstances'],
+        resources: [
+          `arn:aws:rds:${this.region}:${this.account}:db:spoh-staging-platform-datapostgres*`,
+        ],
+      }),
+    );
+    this.role.addToPolicy(
+      new PolicyStatement({
         actions: ['iam:PassRole'],
         resources: [`arn:aws:iam::${this.account}:role/Spoh-*-Platform-AppMigrateTask*`],
         conditions: { StringEquals: { 'iam:PassedToService': 'ecs-tasks.amazonaws.com' } },
@@ -144,6 +161,14 @@ export class DeployAccessStack extends Stack {
         `AwsSolutions-IAM5[Resource::arn:aws:verifiedpermissions::${this.account}:policy-store/*]`,
         'The AVP drift check reads each stage store, whose id CDK generates in another stack; List/Get only.',
       ],
+      [
+        `AwsSolutions-IAM5[Resource::arn:aws:ecs:${this.region}:${this.account}:service/Spoh-staging-Platform-AppCluster*/Spoh-staging-Platform-AppService*]`,
+        'Manual park/unpark can change desired count of the staging service only; production and one-off tasks are excluded.',
+      ],
+      [
+        `AwsSolutions-IAM5[Resource::arn:aws:rds:${this.region}:${this.account}:db:spoh-staging-platform-datapostgres*]`,
+        'Manual park/unpark may start, stop and read the staging database only; it cannot delete, modify or restore it.',
+      ],
     ]) {
       Validations.of(this.role).acknowledge({ id: finding!, reason: reason! });
     }
@@ -155,5 +180,6 @@ export class DeployAccessStack extends Stack {
 
     new CfnOutput(this, 'DeployRoleArn', { value: this.role.roleArn });
     new CfnOutput(this, 'ImageRepositoryUri', { value: this.repository.repositoryUri });
+    accountBudget(this);
   }
 }

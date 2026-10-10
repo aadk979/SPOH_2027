@@ -5,6 +5,7 @@ import { startOutboxFlushLoop } from '@/shared/lib/outbox';
 import { loadClientSettings } from '@/shared/lib/runtimeSettings';
 import { bootstrapSession } from '@/shared/lib/session';
 import { usePushSubscriptionSync } from '@/features/notification';
+import { SessionRenewalNotice } from '@/shared/shell/SessionRenewalNotice';
 
 /** Mounted only after ClientStartup accepts the runtime configuration. */
 export function RuntimeEffects({ children }: { children: ReactNode }): ReactNode {
@@ -13,5 +14,10 @@ export function RuntimeEffects({ children }: { children: ReactNode }): ReactNode
   }, []);
   useEffect(() => startOutboxFlushLoop(), []);
   usePushSubscriptionSync();
-  return children;
+  return (
+    <>
+      <SessionRenewalNotice />
+      {children}
+    </>
+  );
 }

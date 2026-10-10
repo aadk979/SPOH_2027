@@ -1,5 +1,6 @@
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
+import { contentReadiness } from '../../content/index.js';
 import { readinessSnapshot } from '../data/readinessSnapshotRepo.js';
 import {
   evaluateGoLiveReadiness,
@@ -22,6 +23,11 @@ export async function readGoLiveReadiness(
     freshness: null,
   };
   const raw = await readinessSnapshot(tx, input.scope);
-  const items = evaluateGoLiveReadiness(context, localReadinessEvidence(raw, input.scope.eventId));
+  const evidence = localReadinessEvidence(raw, input.scope.eventId);
+  evidence.content = {
+    eventId: input.scope.eventId,
+    facts: await contentReadiness(tx, input.scope),
+  };
+  const items = evaluateGoLiveReadiness(context, evidence);
   return { items, checks: toGoLiveChecks(items) };
 }

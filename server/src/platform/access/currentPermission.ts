@@ -8,6 +8,7 @@ import {
   EntityBuilder,
   type Question,
   type ResourceRef,
+  type RequestFacts,
 } from './authorizer/index.js';
 import { currentAuthorizer, USE_CASE_PHASE_GUARDRAILS } from './engine.js';
 
@@ -22,6 +23,7 @@ export interface CurrentPermission {
    */
   readonly resource?: ResourceRef | readonly ResourceRef[];
   readonly clock?: Clock;
+  readonly facts?: RequestFacts;
 }
 
 /**
@@ -55,7 +57,14 @@ export async function requireCurrentPermission(
     now: (input.clock ?? systemClock).now(),
   });
   for (const resource of resources) {
-    if (await allows(builder, membershipId, { action, resource })) return;
+    if (
+      await allows(builder, membershipId, {
+        action,
+        resource,
+        ...(input.facts ? { facts: input.facts } : {}),
+      })
+    )
+      return;
   }
   throw changed(action);
 }

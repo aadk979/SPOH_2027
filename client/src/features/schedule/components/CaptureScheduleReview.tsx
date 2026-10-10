@@ -6,6 +6,9 @@ import type { CaptureScheduleReviewInput } from '../model/captureScheduleControl
 import { CaptureScheduleReviewFields } from './CaptureScheduleReviewFields';
 import { scheduleStatusLabels } from '../model/copy';
 import { useEventTime } from '@/features/session';
+import { captureScheduleKey } from '../model/captureScheduleReview';
+import { GENERATED_SETTING_METADATA as metadata } from '@spoh/shared';
+import { scheduledSettingValue, settingScheduleCopy } from '../model/settingScheduleCopy';
 
 export function CaptureScheduleReview(
   input: CaptureScheduleReviewInput & {
@@ -21,19 +24,28 @@ export function CaptureScheduleReview(
   useEffect(() => {
     if (review.denied) input.onDenied();
   }, [input.onDenied, review.denied]);
-  const row = scopedSettingRow(review.reviewed, 'capture.open');
+  const settingKey = captureScheduleKey(review.action);
+  const copy = settingScheduleCopy(settingKey);
+  const row = scopedSettingRow(review.reviewed, settingKey);
   return (
-    <div role="group" aria-label="Review capture schedule" className="flex flex-col gap-md">
+    <div role="group" aria-label={`Review ${copy.noun} schedule`} className="flex flex-col gap-md">
       <h4 className="text-section">
         {review.action.kind === 'create'
-          ? 'Schedule a capture change'
+          ? settingKey === 'capture.open'
+            ? 'Schedule a capture change'
+            : `Schedule ${metadata[settingKey].label}`
           : review.action.kind === 'edit'
-            ? 'Edit capture schedule'
-            : 'Cancel capture schedule'}
+            ? `Edit ${copy.noun} schedule`
+            : `Cancel ${copy.noun} schedule`}
       </h4>
       <p>
-        Reviewed capture: {row.value === true ? 'Open' : 'Paused'} · Selected scope version{' '}
-        {row.storedVersion}
+        Reviewed {settingKey === 'capture.open' ? 'capture' : metadata[settingKey].label}:{' '}
+        {settingKey === 'capture.open'
+          ? row.value === true
+            ? 'Open'
+            : 'Paused'
+          : JSON.stringify(row.value)}{' '}
+        · Selected scope version {row.storedVersion}
       </p>
       {review.action.kind !== 'create' ? (
         <p>
@@ -44,7 +56,7 @@ export function CaptureScheduleReview(
       <Callout>
         {review.action.kind === 'cancel'
           ? 'Cancellation stops this pending action. It does not change capture settings.'
-          : 'Scheduling saves a future override. Capture changes only if the reviewed value, creator permission and event lifecycle still allow it when the action runs. Safety reports remain available.'}
+          : `Scheduling saves a future override. The setting changes only if the reviewed version, creator permission and event lifecycle still allow it when the action runs.`}
       </Callout>
       <CaptureScheduleReviewFeedback review={review} />
       <CaptureScheduleReviewFields review={review} timezone={review.timezone} />
@@ -69,8 +81,12 @@ function CaptureScheduleReviewFeedback({
           {review.mutation.data.schedule.version}.
         </p>
         <p>
-          Current scheduled capture: {review.mutation.data.schedule.value ? 'Open' : 'Paused'} ·{' '}
-          {clock.dateTime(review.mutation.data.schedule.scheduledFor)}
+          Current scheduled {settingScheduleCopy(review.mutation.data.schedule.key).noun}:{' '}
+          {scheduledSettingValue(
+            review.mutation.data.schedule.key,
+            review.mutation.data.schedule.value,
+          )}{' '}
+          · {clock.dateTime(review.mutation.data.schedule.scheduledFor)}
         </p>
       </Callout>
     );

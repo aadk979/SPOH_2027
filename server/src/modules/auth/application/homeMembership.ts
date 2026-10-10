@@ -1,4 +1,4 @@
-import { findLiveMemberships } from '../data/repo.js';
+import { findLiveMemberships, findArchivedAdminMembership } from '../data/repo.js';
 
 /**
  * The membership a session opens in, until the client names its event
@@ -8,5 +8,11 @@ import { findLiveMemberships } from '../data/repo.js';
  */
 export async function homeMembership(personId: string) {
   const memberships = await findLiveMemberships(personId);
-  return memberships.find((membership) => membership.status === 'ACTIVE') ?? memberships[0] ?? null;
+  return (
+    memberships.find((membership) => membership.status === 'ACTIVE') ??
+    memberships.find((membership) => membership.status === 'INVITED') ??
+    await findArchivedAdminMembership(personId) ??
+    memberships[0] ??
+    null
+  );
 }

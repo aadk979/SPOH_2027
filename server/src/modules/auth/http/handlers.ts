@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import { ERROR_CODES, type CreateSessionRequest, type SessionResponse } from '@spoh/shared';
 import { AppError, NotFoundError } from '../../../platform/errors/index.js';
 import { auditContextFrom } from '../../../platform/http/auditContext.js';
-import { getAuth } from '../../../platform/http/requireAuth.js';
+import { getPerson } from '../../../platform/http/requireAuth.js';
 import { validatedBody, validatedParams } from '../../../platform/http/validate.js';
 import { beginLogin } from '../application/beginLogin.js';
 import { completeCallback } from '../application/completeCallback.js';
@@ -23,6 +23,7 @@ import {
   setRefreshCookie,
 } from './cookies.js';
 import { assertTrustedOrigin } from './origin.js';
+import { signOutAccessSession } from '../application/signOutAccessSession.js';
 
 function sessionContext(req: Request): SessionContext {
   return {
@@ -102,6 +103,8 @@ export async function refreshHandler(req: Request, res: Response): Promise<void>
 export async function signOutHandler(req: Request, res: Response): Promise<void> {
   assertTrustedOrigin(req);
   await endSession(readRefreshCookie(req), auditContextFrom(req));
+  const bearer = req.get('authorization')?.match(/^Bearer (.+)$/i)?.[1];
+  await signOutAccessSession(bearer, auditContextFrom(req));
   clearRefreshCookie(res);
   res.status(204).end();
 }
@@ -113,20 +116,20 @@ export async function signOutHandler(req: Request, res: Response): Promise<void>
  * "sign that one out" should not require an administrator.
  */
 export async function listSessionsHandler(req: Request, res: Response): Promise<void> {
-  const auth = getAuth(req);
-  const sessions = await listSessions(auth.volunteerId, auth.sessionId ?? null);
+  const auth = getPerson(req);
+  const sessions = await listSessions(auth.personId, auth.sessionId ?? null);
   res.status(200).json({ data: sessions, meta: { count: sessions.length, nextCursor: null } });
 }
 
 export async function revokeSessionHandler(req: Request, res: Response): Promise<void> {
   assertTrustedOrigin(req);
 
-  const auth = getAuth(req);
+  const auth = getPerson(req);
   const { id } = validatedParams<{ id: string }>(req);
 
   // Scoped to the caller's own sessions inside the query, so one volunteer
   // cannot sign another one out by guessing an id (IDOR).
-  const revoked = await revokeOwnSession(auth.volunteerId, id, auditContextFrom(req));
+  const revoked = await revokeOwnSession(auth.personId, id, auditContextFrom(req));
   if (!revoked) throw new NotFoundError('Session');
 
   if (id === auth.sessionId) clearRefreshCookie(res);

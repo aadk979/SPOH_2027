@@ -1,4 +1,4 @@
-import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { ERROR_CODES } from '@spoh/shared';
@@ -89,4 +89,9 @@ export async function presignRead(key: string, ttlSeconds: number): Promise<stri
     }),
     { expiresIn: ttlSeconds },
   );
+}
+
+/** Keys come only from this event's immutable issuance receipts and item references. */
+export async function deleteMediaObject(key: string): Promise<void> {
+  await requireClient().send(new DeleteObjectCommand({ Bucket: env.S3_MEDIA_BUCKET, Key: key }));
 }

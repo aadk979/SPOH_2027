@@ -1,76 +1,70 @@
 'use client';
-
 import type { ReactNode } from 'react';
+import type { EventContent } from '@spoh/shared';
 import { AppShell } from '@/shared/shell/AppShell';
-import { Card, CardTitle, Section, Stack } from '@/shared/ui';
-import { COURSES, ESCALATION_SCRIPT, FIVE_THINGS } from '@/content/brief';
+import { Card, CardTitle, Section } from '@/shared/ui';
 import { useRequireSession } from '@/features/session';
-
-/**
- * "What do I say" (PRODUCT_BRIEF §1.1).
- *
- * Course one-liners short enough to actually be repeated, the questions
- * visitors keep asking, and the escalation script — which exists so that not
- * knowing stops feeling like a failure and starts being the correct answer.
- *
- * The escalation script leads, because it is the one thing on the screen a
- * volunteer needs while a visitor is standing in front of them.
- */
+import { PublishedGuideState } from '@/features/content';
+import { useStations } from '@/features/stations';
 export default function BriefScreen(): ReactNode {
   const session = useRequireSession();
   if (!session) return null;
-
   return (
     <AppShell title="What do I say" back={{ href: '/home', label: 'Home' }}>
-      <Stack>
-        <Card tone="info">
-          <CardTitle>If you do not know</CardTitle>
-          {/* Read aloud to a visitor, so it keeps design.md's reading pace. */}
-          <p className="mt-xs text-reading">{ESCALATION_SCRIPT}</p>
-        </Card>
-
-        <Section title="The courses, in one line each">
-          <div className="flex flex-col gap-xs">
-            {COURSES.map((course) => (
-              <Card as="details" variant="flat" key={course.code}>
-                <summary className="flex cursor-pointer list-none items-baseline gap-xs marker:content-none transition-colors hover:text-primary">
-                  <span aria-hidden="true" className="text-primary">
-                    ▸
-                  </span>
-                  <span className="font-semibold">{course.code}</span>
-                  <span className="min-w-0 text-caption text-text-muted">{course.name}</span>
-                </summary>
-
-                <p className="mt-sm text-reading">{course.oneLiner}</p>
-
-                <dl className="mt-sm flex flex-col gap-xs">
-                  {course.askedOften.map((item) => (
-                    <div key={item.question}>
-                      <dt className="font-semibold">{item.question}</dt>
-                      <dd className="text-reading text-text-muted">{item.answer}</dd>
-                    </div>
-                  ))}
-                </dl>
+      <PublishedGuideState>
+        {(record) => (
+          <>
+            <Card tone="info">
+              <CardTitle>If you do not know</CardTitle>
+              <p className="mt-xs text-reading">{record.body.brief.escalationScript}</p>
+            </Card>
+            <ProgrammeBrief programmes={record.body.brief.programmes} />
+            <Section title="The essential points">
+              <Card>
+                <ol className="flex list-decimal flex-col gap-xs pl-lg text-reading">
+                  {record.body.brief.fiveThings
+                    .filter((thing) => !thing.roles || thing.roles.includes(session.role))
+                    .map((thing, i) => (
+                      <li key={i}>{thing.text}</li>
+                    ))}
+                </ol>
               </Card>
-            ))}
-          </div>
-        </Section>
-
-        <Section title="The five things">
-          <Card>
-            <ol className="flex list-decimal flex-col gap-xs pl-lg text-reading">
-              {FIVE_THINGS.map((thing) => (
-                <li key={thing}>{thing}</li>
-              ))}
-            </ol>
-          </Card>
-        </Section>
-
-        <p className="text-caption text-text-muted">
-          Draft content, pending sign-off by the Chief Coordinator and the course leads before the 4
-          November training.
-        </p>
-      </Stack>
+            </Section>
+          </>
+        )}
+      </PublishedGuideState>
     </AppShell>
+  );
+}
+function ProgrammeBrief({
+  programmes,
+}: {
+  programmes: EventContent['brief']['programmes'];
+}): ReactNode {
+  const { data: stations } = useStations();
+  const tags = new Map(
+    stations?.flatMap((station) => station.tags).map((tag) => [tag.id, tag.label]),
+  );
+  return (
+    <Section title="The programmes, in one line each">
+      <div className="flex flex-col gap-xs">
+        {programmes.map((programme, i) => (
+          <Card as="details" variant="flat" key={programme.stationTagId}>
+            <summary className="cursor-pointer font-semibold">
+              {tags.get(programme.stationTagId) ?? `Programme ${i + 1}`}
+            </summary>
+            <p className="mt-sm text-reading">{programme.oneLiner}</p>
+            <dl className="mt-sm flex flex-col gap-xs">
+              {programme.faqs.map((item, n) => (
+                <div key={n}>
+                  <dt className="font-semibold">{item.question}</dt>
+                  <dd className="text-reading text-text-muted">{item.answer}</dd>
+                </div>
+              ))}
+            </dl>
+          </Card>
+        ))}
+      </div>
+    </Section>
   );
 }

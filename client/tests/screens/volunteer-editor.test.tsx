@@ -50,7 +50,7 @@ describe('volunteer editor actions', () => {
     await waitFor(() =>
       expect(mockedApi).toHaveBeenCalledWith(`${API}/admin/volunteers/person-1`, {
         method: 'PATCH',
-        body: { role: 'VOLUNTEER', phone: '12345678', portfolio: null },
+        body: { role: 'VOLUNTEER', phone: '12345678', portfolio: null, idempotencyKey: expect.any(String) },
       }),
     );
     await screen.findByText(
@@ -67,7 +67,7 @@ describe('volunteer editor actions', () => {
     await waitFor(() =>
       expect(mockedApi).toHaveBeenCalledWith(`${API}/admin/volunteers/person-1/deactivate`, {
         method: 'POST',
-        body: { reason: 'Left committee', disableIdentity: true },
+        body: { reason: 'Left committee', disableIdentity: false, idempotencyKey: expect.any(String) },
       }),
     );
   });
@@ -79,6 +79,7 @@ describe('volunteer editor actions', () => {
     await screen.findByText('Try again in a moment.');
     expect(mockedApi).toHaveBeenCalledWith(`${API}/admin/volunteers/person-1/reactivate`, {
       method: 'POST',
+      body: { idempotencyKey: expect.any(String) },
     });
   });
 });

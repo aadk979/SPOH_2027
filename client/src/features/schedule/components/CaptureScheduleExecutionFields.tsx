@@ -1,6 +1,9 @@
 import { ChoiceGroup, Field, Input } from '@/shared/ui';
 import type { useCaptureScheduleReview } from '../hooks/useCaptureScheduleReview';
 import { CaptureScheduleTimePreview } from './CaptureScheduleTimePreview';
+import { captureScheduleKey } from '../model/captureScheduleReview';
+import { catalogueField } from '@/shared/lib/settingField';
+import { CatalogueProposedField } from '@/shared/forms/SettingProposedField';
 
 export function CaptureScheduleExecutionFields({
   review,
@@ -9,24 +12,40 @@ export function CaptureScheduleExecutionFields({
   review: ReturnType<typeof useCaptureScheduleReview>;
   timezone: string;
 }) {
+  const key = captureScheduleKey(review.action);
+  const field = catalogueField(key);
+  const changeValue = (value: typeof review.form.values.value) => {
+    review.form.setField('value', value);
+    review.setConfirmed(false);
+  };
   return (
     <>
-      <ChoiceGroup
-        name="scheduled-capture-value"
-        legend="Future capture value"
-        value={review.form.values.value}
-        options={[
-          { value: 'open', label: 'Open' },
-          { value: 'paused', label: 'Paused' },
-        ]}
-        onChange={(value) => {
-          review.form.setField('value', value);
-          review.setConfirmed(false);
-        }}
-      />
+      {key === 'capture.open' ? (
+        <ChoiceGroup
+          name="scheduled-capture-value"
+          legend="Future capture value"
+          value={typeof review.form.values.value === 'string' ? review.form.values.value : 'paused'}
+          options={[
+            { value: 'open', label: 'Open' },
+            { value: 'paused', label: 'Paused' },
+          ]}
+          onChange={(value) => {
+            review.form.setField('value', value);
+            review.setConfirmed(false);
+          }}
+        />
+      ) : field ? (
+        <CatalogueProposedField
+          field={field}
+          value={review.form.values.value}
+          error={review.form.errors.value}
+          disabled={review.disabled || review.uncertain}
+          onChange={changeValue}
+        />
+      ) : null}
       <Field
         id="scheduled-capture-time"
-        label={`Change capture at (${timezone})`}
+        label={`Change ${key === 'capture.open' ? 'capture' : 'setting'} at (${timezone})`}
         error={review.form.errors.wallTime}
       >
         {(props) => (

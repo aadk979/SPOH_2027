@@ -102,10 +102,9 @@ it('never offers first go-live when server checklist evidence is unavailable', a
         'go-live:shift-coverage',
         'go-live:card-batch',
         'go-live:gift-stock',
-        'go-live:content:missing',
+        'go-live:content',
         'go-live:attendance',
-        'go-live:role-permissions:missing',
-        'go-live:notifications:missing',
+        'go-live:role-permissions',
         'go-live:staging-smoke:missing',
         'go-live:backups:missing',
         'go-live:alarms:missing',
@@ -130,7 +129,7 @@ it('shows sticky live history and practice/close edges without fabricating unava
   ]);
 });
 
-it('keeps public archive unavailable even when close-out guards pass', async () => {
+it('requires the completed export and current platform authority before archive', async () => {
   await rawDb.event.update({ where: { id: f.eventId }, data: { status: 'LIVE' } });
   expect((await post('CLOSED', (await f.state()).lifecycleVersion)).status).toBe(200);
   const readiness = await readLifecycleReadiness({
@@ -141,7 +140,7 @@ it('keeps public archive unavailable even when close-out guards pass', async () 
     to: 'ARCHIVED',
     allowed: false,
     requiresReason: false,
-    blockers: ['archive-unavailable'],
+    blockers: ['final-export', 'platform-admin-required'],
   });
 });
 

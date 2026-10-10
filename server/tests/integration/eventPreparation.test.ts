@@ -133,7 +133,7 @@ it.each(['timezone', 'event-days', 'shift-templates', 'station-types', 'categori
   },
 );
 
-it('refuses illegal edges, stale versions, foreign body ids and an unavailable go-live checklist', async () => {
+it('refuses illegal edges, stale versions, foreign body ids and failed or unavailable go-live checks', async () => {
   expect((await post(body('REHEARSAL', 0))).body.error.details.blockers).toEqual([
     'illegal-transition',
   ]);
@@ -142,7 +142,8 @@ it('refuses illegal edges, stale versions, foreign body ids and an unavailable g
   expect((await post({ ...body('REHEARSAL', 1), eventId: 'another-event' })).status).toBe(400);
   const live = await post({ ...body('REHEARSAL', 1), to: 'LIVE' });
   expect(live.status).toBe(409);
-  expect(live.body.error.details.blockers).toContain('go-live:content:missing');
+  expect(live.body.error.details.blockers).toContain('go-live:content');
+  expect(live.body.error.details.blockers).toContain('go-live:staging-smoke:missing');
   expect((await state()).status).toBe('READY');
 });
 

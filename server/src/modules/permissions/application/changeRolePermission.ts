@@ -2,6 +2,7 @@ import type { ChangeRolePermissionRequest, RolePermissionsResponse } from '@spoh
 import { requireCurrentPermission } from '../../../platform/access/currentPermission.js';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
+import { assertWritableEvent } from '../../../platform/db/writableEvent.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { addGrant, hasGrant, lockPermissionEvent, removeGrant } from '../data/repo.js';
 import { assertTogglable } from '../domain/permissionRules.js';
@@ -21,13 +22,14 @@ export async function changeRolePermission(
   assertTogglable(role, action);
   return prisma.$transaction(
     async (tx) => {
-      await lockPermissionEvent(tx, actor.scope);
+      const event = await lockPermissionEvent(tx, actor.scope);
       await requireCurrentPermission(tx, {
         scope: actor.scope,
         membershipId: actor.membershipId,
         personId: actor.volunteerId,
         action: 'Permissions.Edit',
       });
+      assertWritableEvent(event);
       const before = await hasGrant(tx, actor.scope, { role, action });
       if (before !== granted) {
         const row = granted

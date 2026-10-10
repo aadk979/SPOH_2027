@@ -55,7 +55,7 @@ describe('cache bus degradation monitoring (P08.8)', () => {
         ComparisonOperator: 'GreaterThanThreshold',
         TreatMissingData: 'missing',
       });
-      for (const field of ['Dimensions', 'AlarmActions', 'OKActions', 'InsufficientDataActions']) {
+      for (const field of ['Dimensions', 'InsufficientDataActions']) {
         expect(alarms[0]![1].Properties[field]).toBeUndefined();
       }
       expect(template.toJSON().Outputs.CacheBusDegradedAlarmName.Value).toEqual({

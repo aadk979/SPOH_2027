@@ -2,27 +2,18 @@
 
 import type { CommitteeRole, SessionResponse } from '@spoh/shared';
 import { ClientConfigurationError, loadClientConfiguration } from '@/shared/lib/env';
+import { needsSessionHandoff, recoverThroughHandoff } from './sessionHandoff';
+import {
+  allowSessionRecovery,
+  expectedSessionPerson,
+  pinRecoveredPerson,
+  rememberSessionPerson,
+  rememberSignOut,
+  wasSignedOut,
+} from './sessionIntent';
 
-/**
- * Access-token storage and session recovery.
- *
- * The token lives in a module-scoped variable — in memory, never in
- * `localStorage` (BUILD_PLAN §6.4). A volunteer's phone is shared, borrowed and
- * occasionally lost, and a token in local storage survives all three plus any
- * XSS that reaches the page.
- *
- * That used to mean a hard refresh signed you out. It no longer does. The API
- * issues a short-lived access token alongside an httpOnly refresh cookie that
- * page script cannot read, so a reload recovers the session by asking the
- * server — without the long-lived credential ever being reachable from
- * JavaScript. The security property is unchanged; only the papercut is gone.
- *
- * Three things happen here:
- *
- *   bootstrap        once on load: try to recover a session from the cookie
- *   silent refresh   a timer, so a token never expires mid-shift
- *   401 recovery     one retry after a refresh, driven from `api.ts`
- */
+/** Tokens stay in memory. Recovery uses the httpOnly API cookie; a cross-site
+ * handoff during an active session waits for an explicit renewal to protect forms. */
 
 export interface Session {
   accessToken: string;
@@ -33,6 +24,7 @@ export interface Session {
   expiresAt: number;
   /** False when the server could not set a refresh cookie; a reload will sign out. */
   refreshAvailable: boolean;
+  mfaRequired?: boolean;
 }
 
 /**
@@ -46,11 +38,13 @@ export type SessionStatus = 'unknown' | 'ready';
 
 let session: Session | null = null;
 let status: SessionStatus = 'unknown';
+let renewalRequired = false;
+let sessionGeneration = 0;
 
 /**
  * Who is signed in on this device, kept when the access token merely expires.
  *
- * `getSession()` drops an expired token, but the person holding the phone has
+ * `getSession()` withholds an expired token, but the person holding the phone has
  * not changed: a tap made offline after expiry is still theirs. Only an
  * explicit sign-in or sign-out changes it (F04-003).
  */
@@ -70,21 +64,32 @@ const listeners = new Set<Listener>();
  * `useSyncExternalStore` compares by identity and re-renders forever if the
  * getter allocates. The reference changes only when something really changed.
  */
-let snapshot: { status: SessionStatus; session: Session | null } = { status, session };
+interface SessionSnapshot {
+  status: SessionStatus;
+  session: Session | null;
+  renewalRequired: boolean;
+}
+let snapshot: SessionSnapshot = { status, session, renewalRequired };
 
 function publish(): void {
-  snapshot = { status, session };
+  snapshot = { status, session, renewalRequired };
   for (const listener of listeners) listener();
 }
 
-export function getSessionSnapshot(): { status: SessionStatus; session: Session | null } {
+export function getSessionSnapshot(): SessionSnapshot {
   return snapshot;
 }
 
+/** Identifies the local session intent so old requests cannot act as a new sign-in. */
+export function getSessionGeneration(): number {
+  return sessionGeneration;
+}
+
 /** Server-render and first hydration: nothing is known yet. */
-export const EMPTY_SNAPSHOT: { status: SessionStatus; session: Session | null } = Object.freeze({
+export const EMPTY_SNAPSHOT: SessionSnapshot = Object.freeze({
   status: 'unknown' as const,
   session: null,
+  renewalRequired: false,
 });
 
 export function subscribeToSession(listener: Listener): () => void {
@@ -93,17 +98,23 @@ export function subscribeToSession(listener: Listener): () => void {
 }
 
 export function getSession(): Session | null {
-  if (session && session.expiresAt <= Date.now()) {
-    // An expired token is dropped rather than sent: a 401 mid-capture is a
-    // worse experience than a refresh the volunteer never sees.
-    session = null;
-    publish();
-  }
-  return session;
+  // Retain the identity for offline guides, unsent captures and unsaved forms.
+  // Live requests still receive no expired credential.
+  return hasExpiredSession() ? null : session;
+}
+
+export function hasExpiredSession(): boolean {
+  return session !== null && session.expiresAt <= Date.now();
 }
 
 export function getAccessToken(): string | null {
   return getSession()?.accessToken ?? null;
+}
+
+/** Cache admission only. The worker still respects every HTTP denial from the API. */
+export function getOfflineContentToken(): string | null {
+  // Connectivity indicators can stay "online" when the API cannot be reached.
+  return session?.accessToken ?? null;
 }
 
 let refreshTimer: ReturnType<typeof setTimeout> | null = null;
@@ -123,8 +134,9 @@ function scheduleSilentRefresh(expiresAt: number): void {
   }, delay);
 }
 
-export function setSession(next: Session | null): void {
+function applySession(next: Session | null): void {
   session = next;
+  renewalRequired = false;
   volunteerId = next?.volunteerId ?? null;
   status = 'ready';
 
@@ -135,6 +147,16 @@ export function setSession(next: Session | null): void {
   }
 
   publish();
+}
+
+/** Explicit sign-in/out starts a new intent, even for the same person. */
+export function setSession(next: Session | null): void {
+  sessionGeneration++;
+  if (next) {
+    rememberSessionPerson(next.volunteerId);
+    allowSessionRecovery();
+  }
+  applySession(next);
 }
 
 /** Local sign-out. `signOut()` below is the one that also clears the cookie. */
@@ -150,15 +172,11 @@ export function sessionFromResponse(response: SessionResponse): Session {
     role: response.volunteer.role,
     expiresAt: Date.now() + response.expiresIn * 1000,
     refreshAvailable: response.refreshAvailable,
+    ...('mfaRequired' in response ? { mfaRequired: response.mfaRequired as boolean } : {}),
   };
 }
 
-/**
- * Raw fetch rather than the `api` wrapper.
- *
- * `api` calls back into this module on a 401, so routing the refresh through it
- * would be a cycle: a failed refresh would trigger a refresh.
- */
+/** Raw auth fetch avoids the API wrapper's 401 recovery cycle. */
 async function postAuth(path: string, body?: unknown): Promise<Response> {
   const clientEnv = await loadClientConfiguration();
   return fetch(`${clientEnv.apiBaseUrl}/api/v1/auth${path}`, {
@@ -171,64 +189,108 @@ async function postAuth(path: string, body?: unknown): Promise<Response> {
   });
 }
 
-/**
- * One refresh at a time.
- *
- * Several queries can 401 together when a token expires; without this they
- * would each rotate the refresh token, and rotation is single-use — the second
- * would present an already-rotated token, which the server correctly reads as a
- * leak and revokes the whole family. Sharing one in-flight promise is what
- * keeps a burst of 401s from signing the volunteer out.
- */
-let inFlight: Promise<Session | null> | null = null;
+interface RefreshFlight {
+  generation: number;
+  promise: Promise<Session | null>;
+}
+/** One flight per session intent prevents rotation races without borrowing another person's flight. */
+let inFlight: RefreshFlight | null = null;
 
-export function refreshSession(): Promise<Session | null> {
-  inFlight ??= (async () => {
-    try {
-      const response = await postAuth('/refresh');
-
-      if (!response.ok) {
-        setSession(null);
-        return null;
-      }
-
-      const payload = (await response.json()) as SessionResponse;
-      const next = sessionFromResponse(payload);
-      setSession(next);
-      return next;
-    } catch (cause) {
-      if (cause instanceof ClientConfigurationError) throw cause;
-      // Offline. Keep whatever session we have — the outbox will hold captures
-      // and the next attempt happens when the network returns.
-      if (!session) {
-        status = 'ready';
-        publish();
-      }
-      return session;
-    } finally {
-      inFlight = null;
-    }
-  })();
-
-  return inFlight;
+function refuseIdentityChange(): null {
+  // A late Set-Cookie can replace the browser cookie even when its old JSON was
+  // discarded. Keep the current person and require an explicit recovery action.
+  sessionGeneration++;
+  renewalRequired = true;
+  status = 'ready';
+  if (refreshTimer) clearTimeout(refreshTimer);
+  refreshTimer = null;
+  publish();
+  return null;
 }
 
-/**
- * Recover a session on page load. Safe to call more than once: only the first
- * call does any work, and every caller waits for that same recovery. React
- * StrictMode runs the providers' effect twice, and a second call that returned
- * at once let the settings request leave before the session existed (F02-010).
- */
+function acceptRecovery(payload: SessionResponse | null, generation: number): Session | null {
+  if (generation !== sessionGeneration) return null;
+  const expectedPerson = volunteerId ?? expectedSessionPerson();
+  if (payload && expectedPerson && payload.volunteer.id !== expectedPerson)
+    return refuseIdentityChange();
+  const next = payload ? sessionFromResponse(payload) : null;
+  // Proven same-person credential rotation keeps pending captures in their
+  // original intent. Only establishing or ending a session invalidates them.
+  if (!next || !session) sessionGeneration++;
+  if (next) pinRecoveredPerson(next.volunteerId);
+  applySession(next);
+  return next;
+}
+
+async function refreshThroughHandoff(allow: boolean, generation: number): Promise<Session | null> {
+  if (session && !allow) {
+    renewalRequired = true;
+    publish();
+    return getSession();
+  }
+  const payload = await recoverThroughHandoff();
+  if (generation !== sessionGeneration) return null;
+  return payload === 'redirecting' ? session : acceptRecovery(payload, generation);
+}
+
+async function refreshThroughCookie(generation: number): Promise<Session | null> {
+  const response = await postAuth('/refresh');
+  if (generation !== sessionGeneration) return null;
+  const payload = response.ok ? ((await response.json()) as SessionResponse) : null;
+  return acceptRecovery(payload, generation);
+}
+
+async function recoverSession(allowHandoff: boolean, generation: number): Promise<Session | null> {
+  try {
+    const handoff = await needsSessionHandoff();
+    if (generation !== sessionGeneration) return null;
+    return await (handoff
+      ? refreshThroughHandoff(allowHandoff, generation)
+      : refreshThroughCookie(generation));
+  } catch (cause) {
+    if (generation !== sessionGeneration) return null;
+    if (cause instanceof ClientConfigurationError) throw cause;
+    // Offline. Keep whatever session we have — the outbox will hold captures
+    // and the next attempt happens when the network returns.
+    if (!session) {
+      status = 'ready';
+      publish();
+    }
+    return getSession();
+  }
+}
+
+export function refreshSession(allowHandoff = false): Promise<Session | null> {
+  const generation = sessionGeneration;
+  if (inFlight?.generation === generation) return inFlight.promise;
+  const flight: RefreshFlight = { generation, promise: recoverSession(allowHandoff, generation) };
+  inFlight = flight;
+  flight.promise = flight.promise.finally(() => {
+    if (inFlight === flight) inFlight = null;
+  });
+  return flight.promise;
+}
+
+/** Bootstrap callers share recovery, including React StrictMode's second effect (F02-010). */
 let bootstrapping: Promise<void> | null = null;
 
 export function bootstrapSession(): Promise<void> {
-  bootstrapping ??= refreshSession()
+  if (wasSignedOut()) {
+    clearSession();
+    return Promise.resolve();
+  }
+  bootstrapping ??= refreshSession(true)
     .then(() => undefined)
     .catch((cause: unknown) => {
       bootstrapping = null;
       throw cause;
     });
   return bootstrapping;
+}
+
+/** A first-party handoff reloads the page, so an active user starts it explicitly. */
+export function renewSession(): Promise<Session | null> {
+  return refreshSession(true);
 }
 
 /** Sign in. Returns the session so the caller can route immediately. */
@@ -255,13 +317,10 @@ export async function openSession(credentials: {
   return next;
 }
 
-/**
- * Sign out everywhere it matters: the in-memory token, the refresh cookie, and
- * the server-side session row. A local-only sign-out would leave a cookie that
- * silently restores the session on the next load — on a phone that has just
- * been handed to somebody else.
- */
+/** Forget local access immediately, then revoke the cookie family using its last signed proof. */
 export async function signOut(): Promise<void> {
+  const accessToken = session?.accessToken;
+  rememberSignOut();
   // Locally first, synchronously, so the UI is already signed out while the
   // network call is in flight and nothing renders with a stale identity.
   clearSession();
@@ -275,7 +334,10 @@ export async function signOut(): Promise<void> {
     await fetch(`${clientEnv.apiBaseUrl}/api/v1/auth/session`, {
       method: 'DELETE',
       credentials: 'include',
-      headers: { Accept: 'application/json' },
+      headers: {
+        Accept: 'application/json',
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      },
     });
   } catch {
     // Offline. The in-memory token is already gone and the session row still

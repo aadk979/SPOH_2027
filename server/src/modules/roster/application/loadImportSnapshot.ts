@@ -55,12 +55,22 @@ export async function loadImportSnapshot(
       findVolunteersByEmails(actor.scope, [...new Set(managerEmails)]),
     ]);
   return {
-    existing: accounts,
+    existing: new Map(
+      [...accounts].map(([email, account]) => [
+        email,
+        { ...account, active: account.active || account.membershipStatus === 'INVITED' },
+      ]),
+    ),
     accounts,
     stationIdByCode,
     eventDayIdByDate,
     shiftIdByDayAndCode,
     heldSlots,
-    rosterManagers,
+    rosterManagers: new Map(
+      [...rosterManagers].map(([email, account]) => [
+        email,
+        { ...account, active: account.active || account.membershipStatus === 'INVITED' },
+      ]),
+    ),
   };
 }

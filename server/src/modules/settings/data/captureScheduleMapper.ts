@@ -1,8 +1,14 @@
 import { z } from 'zod';
-import { CaptureScheduleIntent, CaptureScheduleRecord, Id, ScheduleError } from '@spoh/shared';
+import {
+  CaptureScheduleDefinition,
+  CaptureScheduleIntent,
+  CaptureScheduleRecord,
+  Id,
+  ScheduleError,
+} from '@spoh/shared';
 import type { CaptureScheduleRow } from './captureScheduleRepo.js';
 
-const Payload = CaptureScheduleIntent.omit({ target: true, runAt: true })
+const Payload = CaptureScheduleDefinition.omit({ target: true, runAt: true })
   .extend({
     scope: z.enum(['event', 'station']),
     scopeId: Id,
@@ -33,6 +39,7 @@ export function supportedCaptureIntent(row: CaptureScheduleRow, original: unknow
   if (
     !intent ||
     !creation.success ||
+    intent.key !== creation.data.key ||
     JSON.stringify(intent.target) !== JSON.stringify(creation.data.target)
   )
     return null;

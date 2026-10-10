@@ -4,11 +4,41 @@ import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tan
 import type { MyEvent, TransitionEventRequest } from '@spoh/shared';
 import { useCurrentSession } from '@/features/session';
 import { getLifecycleReadiness, listMyEvents, transitionLifecycle } from './api';
+import { getEventAdministration, createEvent, cloneEvent } from './api';
 import { ms } from '@/shared/lib/runtimeSettings';
 import { useEventId } from '@/shared/lib/eventContext';
 
 /** The one key outside an event: every other key starts with an event id (ADR-001 §5). */
 export const eventListKey = ['events'] as const;
+export const eventAdministrationKey = ['events', 'administration'] as const;
+
+export function useEventAdministration() {
+  const session = useCurrentSession();
+  return useQuery({
+    queryKey: eventAdministrationKey,
+    queryFn: getEventAdministration,
+    enabled: !!session,
+    gcTime: 0,
+  });
+}
+
+export function useCreateEvent() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: createEvent,
+    gcTime: 0,
+    onSuccess: () => client.invalidateQueries({ queryKey: eventListKey }),
+  });
+}
+
+export function useCloneEvent() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: cloneEvent,
+    gcTime: 0,
+    onSuccess: () => client.invalidateQueries({ queryKey: eventListKey }),
+  });
+}
 export const lifecycleKeys = {
   readiness: (eventId: string, personId: string | undefined) =>
     [eventId, 'lifecycle-readiness', personId ?? 'signed-out'] as const,

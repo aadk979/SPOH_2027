@@ -32,6 +32,9 @@ export interface LifecycleSnapshot {
     lostPersonPurgeComplete: boolean;
     finalReportExists: boolean;
     captureGracePeriodComplete: boolean;
+    lostFoundClosed: boolean;
+    fallbackWindowsClosed: boolean;
+    exportPackExists: boolean;
   };
 }
 
@@ -120,11 +123,15 @@ function reopenBlockers(snapshot: LifecycleSnapshot, context: VerifiedLifecycleC
   return blockers;
 }
 
-function archiveBlockers(snapshot: LifecycleSnapshot): string[] {
+function archiveBlockers(snapshot: LifecycleSnapshot, context: VerifiedLifecycleContext): string[] {
   const blockers: string[] = [];
   if (!snapshot.archive.lostPersonPurgeComplete) blockers.push('lost-person-purge');
   if (!snapshot.archive.finalReportExists) blockers.push('final-report');
   if (!snapshot.archive.captureGracePeriodComplete) blockers.push('capture-grace-period');
+  if (!snapshot.archive.lostFoundClosed) blockers.push('lost-found-closeout');
+  if (!snapshot.archive.fallbackWindowsClosed) blockers.push('fallback-windows');
+  if (!snapshot.archive.exportPackExists) blockers.push('final-export');
+  if (!context.platformAdmin) blockers.push('platform-admin-required');
   return blockers;
 }
 

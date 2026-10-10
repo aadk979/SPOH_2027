@@ -7,7 +7,7 @@ import type { ReactNode } from 'react';
 import { GlobalNav } from '@/shared/shell/GlobalNav';
 import { SectionNav } from '@/shared/shell/SectionNav';
 import { LostPersonBanner } from '@/features/lostPerson/components/LostPersonBanner';
-import { RehearsalBanner } from '@/features/events';
+import { RehearsalBanner, EventWorkspaceNav } from '@/features/events';
 import { SyncWarningBanner } from '@/shared/shell/SyncIndicator';
 import { cx } from '@/shared/ui/cx';
 
@@ -116,6 +116,7 @@ export function AppShell({
       <div className="workspace-body">
         <SectionNav />
         <main id="main" tabIndex={-1} className={cx(container, 'workspace-main flex-1 py-lg')}>
+          <EventWorkspaceNav />
           {children}
         </main>
       </div>

@@ -234,7 +234,46 @@ it.each(['no reason', 'no organisation role', 'other organisation', 'demoted org
       ...(kind === 'no reason' ? {} : { reason: 'Reviewed reopen' }),
     });
     expect(await f.run()).toBe('FAILED');
-    expect((await f.action(row.id)).lastError).toBe('GUARD_FAILED');
+    expect((await f.action(row.id)).lastError).toBe(
+      kind === 'no reason' ? 'GUARD_FAILED' : 'AUTHORITY_CHANGED',
+    );
+    expect((await f.state()).status).toBe('CLOSED');
+    expect((await snapshots())[0]?.supersededAt).toBeNull();
+    expect((await reminders())[0]?.status).toBe('PENDING');
+  },
+);
+
+it('uses current platform authority for timed reopen independently of the event role', async () => {
+  await close();
+  await platformAdmin();
+  await rawDb.eventMembership.update({ where: { id: f.membershipId }, data: { role: 'VOLUNTEER' } });
+  const row = await f.create({ to: 'LIVE', reason: 'Correct a mistaken close' });
+  expect(await f.run()).toBe('SUCCEEDED');
+  expect((await f.action(row.id)).lastError).toBeNull();
+  expect((await f.state()).status).toBe('LIVE');
+  expect((await snapshots())[0]?.supersededAt).toEqual(lifecycleNow);
+  expect((await reminders())[0]?.status).toBe('CANCELLED');
+});
+
+it.each(['DEACTIVATED', 'ENDED', 'person deactivated'] as const)(
+  'refuses timed reopen for %s standing even with owning-organisation platform authority',
+  async (standing) => {
+    await close();
+    await platformAdmin();
+    if (standing === 'person deactivated') {
+      await rawDb.person.update({
+        where: { id: f.creator.id },
+        data: { deactivatedAt: lifecycleNow },
+      });
+    } else {
+      await rawDb.eventMembership.update({
+        where: { id: f.membershipId },
+        data: { status: standing },
+      });
+    }
+    const row = await f.create({ to: 'LIVE', reason: 'Reviewed reopen' });
+    expect(await f.run()).toBe('FAILED');
+    expect((await f.action(row.id)).lastError).toBe('AUTHORITY_CHANGED');
     expect((await f.state()).status).toBe('CLOSED');
     expect((await snapshots())[0]?.supersededAt).toBeNull();
     expect((await reminders())[0]?.status).toBe('PENDING');

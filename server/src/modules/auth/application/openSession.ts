@@ -1,5 +1,5 @@
 import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
-import { prisma } from '../../../platform/db/client.js';
+import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import {
   generateRefreshToken,
   hashRefreshToken,
@@ -16,6 +16,8 @@ import {
   type SessionContext,
 } from './issueSession.js';
 import { inHomeEvent } from './sessionAudit.js';
+import { sessionSecurity } from './sessionSecurity.js';
+import { acceptMembership } from '../data/securityRepo.js';
 
 /**
  * Open a session for an already-authenticated subject.
@@ -33,7 +35,9 @@ export async function openSession(
 
   const refreshToken = generateRefreshToken();
   const now = systemClock.now();
-  const expiresAt = refreshExpiry(now, await refreshSessionDays(volunteer.scope));
+  const security = await sessionSecurity(volunteer, context);
+  const expiresAt =
+    security.absoluteExpiresAt ?? refreshExpiry(now, await refreshSessionDays(volunteer.scope));
 
   const recorded = await inHomeEvent(audit, volunteer.id);
   const session = await prisma.$transaction(async (tx) => {
@@ -44,9 +48,11 @@ export async function openSession(
       userAgent: context.userAgent,
       ip: context.ip,
       expiresAt,
+      ...security,
     });
 
     await touchVolunteer(tx, volunteer.scope, { id: volunteer.id, at: now });
+    await recordInvitationAcceptance(tx, { recorded, volunteer, sub, now });
 
     await writeAudit(tx, {
       ...recorded,
@@ -61,5 +67,38 @@ export async function openSession(
     return row;
   });
 
-  return issueSession(volunteer, { sub, sessionId: session.id, refreshToken, expiresAt });
+  return issueSession(volunteer, {
+    sub,
+    sessionId: session.id,
+    refreshToken,
+    expiresAt,
+    mfaPending: security.mfaPending,
+  });
+}
+
+async function recordInvitationAcceptance(
+  tx: PrismaTransactionClient,
+  input: {
+    recorded: AuditContext;
+    volunteer: Awaited<ReturnType<typeof loadVolunteer>>;
+    sub: string;
+    now: Date;
+  },
+) {
+  if (
+    !(await acceptMembership(tx, input.volunteer.scope, {
+      personId: input.volunteer.id,
+      at: input.now,
+    }))
+  )
+    return;
+  await writeAudit(tx, {
+    ...input.recorded,
+    actorId: input.volunteer.id,
+    actorSub: input.sub,
+    action: 'user.acceptInvite',
+    entityType: 'EventMembership',
+    entityId: input.recorded.membershipId,
+    after: { status: 'ACTIVE' },
+  });
 }

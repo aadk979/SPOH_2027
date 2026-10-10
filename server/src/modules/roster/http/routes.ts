@@ -8,6 +8,8 @@ import { stationRosterHandler } from '../../assignments/index.js';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { validate } from '../../../platform/http/validate.js';
 import { importRosterHandler, myShiftsHandler, provisionVolunteerHandler } from './handlers.js';
+import { optionalIdempotent } from '../../../platform/http/optionalIdempotency.js';
+import { provisionReplay } from './replay.js';
 
 /** Roster, provisioning and shift views (BUILD_PLAN §7.2). */
 export const rosterRouter: Router = Router();
@@ -38,6 +40,7 @@ rosterRouter.post(
   sensitiveRateLimit,
   authorizeAll('People.Invite', invite, { changes: ['C5'] }),
   validate({ body: ProvisionVolunteerRequest }),
+  optionalIdempotent('roster.provision', provisionReplay),
   provisionVolunteerHandler,
 );
 
@@ -52,5 +55,6 @@ rosterRouter.post(
   sensitiveRateLimit,
   authorize('Roster.Edit', theEvent, { changes: ['C5'] }),
   validate({ body: RosterImportRequest }),
+  optionalIdempotent('roster.import'),
   importRosterHandler,
 );

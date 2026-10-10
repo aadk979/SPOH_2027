@@ -25,8 +25,8 @@ function readBearerToken(req: Request): string {
 export async function requireAuth(req: Request, _res: Response, next: NextFunction): Promise<void> {
   try {
     const token = readBearerToken(req);
-    // Platform routes (`/auth/sessions`) name no event; they work in Event #1
-    // like an alias path until P12 gives the person a scope of their own.
+    // Legacy event routes name no event and retain the Event #1 alias.
+    // Person routes use requirePerson instead, without any event membership.
     const event = req.requestedEvent ?? { eventId: (await aliasEvent()).eventId, fromPath: false };
     req.auth = await authenticate(token, { event, requestId: requestIdOf(req) });
     next();
@@ -53,7 +53,7 @@ export async function requirePerson(
 }
 
 /** The person behind a `requirePerson` request. */
-export function getPerson(req: Request): { sub: string; personId: string } {
+export function getPerson(req: Request): { sub: string; personId: string; sessionId?: string } {
   if (!req.person) throw new UnauthenticatedError();
   return req.person;
 }

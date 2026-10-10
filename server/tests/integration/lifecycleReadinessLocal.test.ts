@@ -53,7 +53,7 @@ beforeEach(async () => {
   await rawDb.event.update({ where: { id: f.eventId }, data: { status: 'READY' } });
 });
 
-it('returns five passed and six unavailable strict public decisions without disclosing private facts or writing', async () => {
+it('returns eight passed and three unavailable strict public decisions without disclosing private facts or writing', async () => {
   const before = await readinessEffectState(f);
   const result = await get();
   expect(result.status).toBe(200);
@@ -123,7 +123,7 @@ it('manual core uses the same local snapshot and missing evidence guard under it
   expect(await readinessEffectState(f)).toEqual(before);
 });
 
-it('a current local failure and its legitimate platform reason cannot waive the six missing domains', async () => {
+it('a current local failure and its legitimate platform reason cannot waive the missing domains', async () => {
   await rawDb.giftType.update({
     where: { id: f.gift.id, eventId: f.eventId },
     data: { initialStock: 0 },

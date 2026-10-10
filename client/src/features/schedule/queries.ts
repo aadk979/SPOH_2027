@@ -4,6 +4,7 @@ import type {
   ScheduledActionStatus,
   ScopedSettingsTarget,
   ScopedSettingsReadResponse,
+  ScopedOperationalSettingKey,
 } from '@spoh/shared';
 import { useCurrentSession } from '@/features/session';
 import { useEventId } from '@/shared/lib/eventContext';
@@ -44,23 +45,31 @@ export const captureScheduleKeys = {
   list: (
     eventId: string,
     personId: string | undefined,
-    input: { target: ScopedSettingsTarget; status?: ScheduledActionStatus },
+    input: {
+      target: ScopedSettingsTarget;
+      status?: ScheduledActionStatus;
+      key?: ScopedOperationalSettingKey;
+    },
   ) =>
     [
       ...captureScheduleKeys.owner(eventId, personId),
       input.target.scope,
       input.target.scope === 'station' ? input.target.stationId : 'event',
-      'capture.open',
+      input.key ?? 'capture.open',
       input.status ?? 'ALL',
     ] as const,
 };
-export function useCaptureSchedules(target: ScopedSettingsTarget, status?: ScheduledActionStatus) {
+export function useCaptureSchedules(
+  target: ScopedSettingsTarget,
+  status?: ScheduledActionStatus,
+  key: ScopedOperationalSettingKey = 'capture.open',
+) {
   const eventId = useEventId();
   const session = useCurrentSession();
   return useInfiniteQuery({
-    queryKey: captureScheduleKeys.list(eventId, session?.volunteerId, { target, status }),
+    queryKey: captureScheduleKeys.list(eventId, session?.volunteerId, { target, status, key }),
     queryFn: ({ pageParam }) =>
-      listCaptureSchedules(eventId, { target, status, cursor: pageParam }),
+      listCaptureSchedules(eventId, { target, status, key, cursor: pageParam }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last) => last.meta.nextCursor ?? undefined,
     enabled: !!session,

@@ -47,7 +47,7 @@ declare global {
        */
       requestedEvent?: { eventId: string; fromPath: boolean };
       /** Present only after `requirePerson`, on platform routes about the person (ADR-001 §4). */
-      person?: { sub: string; personId: string };
+      person?: { sub: string; personId: string; sessionId?: string };
     }
   }
 }

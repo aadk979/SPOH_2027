@@ -59,7 +59,7 @@ describe('deploy access (P08.2)', () => {
     // Assume the CDK roles, push images, read stack outputs, run the migrate task and read the
     // AVP store for the drift check (P11.6): nothing else.
     const allowed =
-      /^(sts:(AssumeRole|TagSession)|ecr:.+|ecs:(RunTask|DescribeTasks)|iam:PassRole|cloudformation:DescribeStacks|verifiedpermissions:(ListPolicies|GetPolicy|GetSchema))$/;
+      /^(sts:(AssumeRole|TagSession)|ecr:.+|ecs:(RunTask|DescribeTasks|UpdateService)|rds:(StartDBInstance|StopDBInstance|DescribeDBInstances)|iam:PassRole|cloudformation:DescribeStacks|verifiedpermissions:(ListPolicies|GetPolicy|GetSchema))$/;
     expect(actions.filter((action) => !allowed.test(action))).toEqual([]);
   });
 });

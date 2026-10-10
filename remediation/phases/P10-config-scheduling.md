@@ -302,4 +302,5 @@ The full step remains open for the other phase dependencies and verification cri
 
 ## Phase report
 
-_Fill in on completion._
+[Build sweep, 10 October 2026](../reports/P10/build-sweep-2026-10-10.md).
+Batch CI is pending; P10.7/.8 retain the concrete implementation gaps listed there.

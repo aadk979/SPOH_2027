@@ -1,4 +1,4 @@
-import { Stack, type StackProps } from 'aws-cdk-lib';
+import { CfnOutput, Stack, type StackProps } from 'aws-cdk-lib';
 import type { Construct } from 'constructs';
 import type { StageConfig } from './config.js';
 import { NetworkDatabase } from './networkDatabase.js';
@@ -10,6 +10,7 @@ import { StagingIdentity, type CognitoSettings } from './stagingIdentity.js';
 import { DatabaseCpuMonitoring } from './databaseCpuMonitoring.js';
 import { ObjectStorage } from './objectStorage.js';
 import { AuthorizationStore } from './authorizationStore.js';
+import { OperationsMonitoring } from './operationsMonitoring.js';
 
 export interface PlatformStackProps extends StackProps {
   stage: StageConfig;
@@ -29,6 +30,7 @@ export class PlatformStack extends Stack {
     this.stage = props.stage;
     const storage = new ObjectStorage(this, 'Storage', props.stage);
     this.network = new NetworkDatabase(this, 'Data', props.stage);
+    new CfnOutput(this, 'DatabaseIdentifier', { value: this.network.database.instanceIdentifier });
     new DatabaseCpuMonitoring(this, 'DatabaseMonitoring', {
       stage: props.stage.name,
       database: this.network.database,
@@ -44,8 +46,9 @@ export class PlatformStack extends Stack {
     // `-c serviceImageTag=<commit>` moves the service once migrations have run.
     const imageTag = this.node.tryGetContext('imageTag') as string | undefined;
     const serviceImageTag = this.node.tryGetContext('serviceImageTag') as string | undefined;
+    let app: AppService | undefined;
     if (imageTag) {
-      new AppService(this, 'App', {
+      app = new AppService(this, 'App', {
         stage: props.stage,
         data: this.network,
         secrets,
@@ -55,9 +58,18 @@ export class PlatformStack extends Stack {
         api,
         cognito,
         authorization,
-        ...(props.stage.publicOrigins ? { mediaBucket: storage.media } : {}),
+        exportsBucket: storage.exports,
+        ...(props.stage.publicOrigins
+          ? { mediaBucket: storage.media, contentBucket: storage.content }
+          : {}),
       });
     }
+    new OperationsMonitoring(this, 'Operations', {
+      stage: props.stage.name,
+      database: this.network.database,
+      ...(app?.service ? { service: app.service } : {}),
+    });
+    if (app?.service) new CfnOutput(this, 'ServiceName', { value: app.service.serviceName });
   }
 
   /** Staging gets its own pool; production references the existing one by id. */

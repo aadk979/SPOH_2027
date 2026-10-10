@@ -158,23 +158,25 @@ model OrganisationMembership {
 /// (ADR-001 §1). Unique per (event, person).
 /// @eventOwned
 model EventMembership {
-  id                String           @id @default(cuid())
-  eventId           String
-  personId          String
-  role              CommitteeRole    @default(VOLUNTEER)
+  id                    String            @id @default(cuid())
+  eventId               String
+  personId              String
+  role                  CommitteeRole     @default(VOLUNTEER)
   /// @class operational
-  portfolio         String?
+  portfolio             String?
   /// Another membership of the same event.
-  reportsToId       String?
-  status            MembershipStatus @default(ACTIVE)
-  invitedAt         DateTime?        @db.Timestamptz(3)
-  acceptedAt        DateTime?        @db.Timestamptz(3)
-  deactivatedAt     DateTime?        @db.Timestamptz(3)
+  reportsToId           String?
+  status                MembershipStatus  @default(ACTIVE)
+  /// Standing before global person suspension; event-only suspensions stay suspended.
+  personSuspendedStatus MembershipStatus?
+  invitedAt             DateTime?         @db.Timestamptz(3)
+  acceptedAt            DateTime?         @db.Timestamptz(3)
+  deactivatedAt         DateTime?         @db.Timestamptz(3)
   /// @class staff-personal
-  deactivatedReason String?
-  lastSeenAt        DateTime?        @db.Timestamptz(3)
-  createdAt         DateTime         @default(now()) @db.Timestamptz(3)
-  updatedAt         DateTime         @updatedAt @db.Timestamptz(3)
+  deactivatedReason     String?
+  lastSeenAt            DateTime?         @db.Timestamptz(3)
+  createdAt             DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt             DateTime          @updatedAt @db.Timestamptz(3)
 
   event         Event             @relation(fields: [eventId], references: [id], onDelete: Restrict)
   person        Person            @relation(fields: [personId], references: [id], onDelete: Restrict)
@@ -249,34 +251,38 @@ enum EventStatus {
 /// One event (ADR-001 §1). Its dates are its EventDay rows, never stored here,
 /// so they cannot disagree.
 model Event {
-  id                 String      @id @default(cuid())
-  organisationId     String
+  id                         String      @id @default(cuid())
+  organisationId             String
   /// @class operational
-  slug               String
+  slug                       String
   /// @class operational
-  name               String
+  name                       String
   /// @class operational
-  venue              String?
+  venue                      String?
   /// IANA timezone every wall-clock time of the event is read in (ADR-007 §7).
   /// @class operational
-  timezone           String
+  timezone                   String
   /// @class operational
-  locale             String      @default("en-SG")
-  status             EventStatus @default(DRAFT)
+  locale                     String      @default("en-SG")
+  status                     EventStatus @default(DRAFT)
   /// Monotonic preparation history, maintained for older writers too.
-  hasBeenLive        Boolean     @default(false)
-  lifecycleVersion   Int         @default(0)
+  hasBeenLive                Boolean     @default(false)
+  lifecycleVersion           Int         @default(0)
+  /// Reviewed permission evidence is invalidated by every grant mutation in PostgreSQL.
+  permissionsVersion         Int         @default(0)
+  permissionsReviewedVersion Int?
+  permissionsReviewedAt      DateTime?   @db.Timestamptz(3)
   /// Minutes after local midnight at which "today" starts (ADR-004 §3).
-  dayBoundaryMinutes Int         @default(0)
+  dayBoundaryMinutes         Int         @default(0)
   /// @class operational
-  branding           Json?
-  clonedFromEventId  String?
+  branding                   Json?
+  clonedFromEventId          String?
   /// When the event closed: visitor data retention counts from it (ADR-002 §4).
   /// Set by the lifecycle (ADR-004).
-  closedAt           DateTime?   @db.Timestamptz(3)
-  archivedAt         DateTime?   @db.Timestamptz(3)
-  createdAt          DateTime    @default(now()) @db.Timestamptz(3)
-  updatedAt          DateTime    @updatedAt @db.Timestamptz(3)
+  closedAt                   DateTime?   @db.Timestamptz(3)
+  archivedAt                 DateTime?   @db.Timestamptz(3)
+  createdAt                  DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt                  DateTime    @updatedAt @db.Timestamptz(3)
 
   organisation               Organisation               @relation(fields: [organisationId], references: [id], onDelete: Restrict)
   clonedFrom                 Event?                     @relation("EventClone", fields: [clonedFromEventId], references: [id], onDelete: Restrict)
@@ -325,6 +331,10 @@ model Event {
   auditLogs                  AuditLog[]
   idempotencyRecords         IdempotencyRecord[]
   reportSnapshots            ReportSnapshot[]
+  archiveExports             ArchiveExport[]
+  contentDocument            ContentDocument?
+  contentVersions            ContentVersion[]
+  contentUploads             ContentUploadReceipt[]
   scheduledActions           ScheduledAction[]
 
   @@unique([organisationId, slug])
@@ -544,20 +554,24 @@ model Station {
 // ─────────────────────────────────────────────
 
 model Person {
-  id          String    @id @default(cuid())
+  id            String    @id @default(cuid())
   /// @class staff-personal
-  cognitoSub  String    @unique
+  cognitoSub    String    @unique
   /// @class staff-personal
-  displayName String
+  displayName   String
   /// @class staff-personal
-  email       String    @unique
+  email         String    @unique
   /// @class staff-personal
-  phone       String?
+  phone         String?
   /// Last authenticated request. Lets an admin see who has actually signed in
   /// before the event, rather than discovering it at 09:25 on the day.
-  lastSeenAt  DateTime? @db.Timestamptz(3)
-  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
-  updatedAt   DateTime  @updatedAt @db.Timestamptz(3)
+  lastSeenAt    DateTime? @db.Timestamptz(3)
+  /// Global identity suspension; event suspensions remain on memberships.
+  deactivatedAt DateTime? @db.Timestamptz(3)
+  /// Local staff PII anonymisation marker; the subject is retained for audit continuity.
+  piiErasedAt   DateTime? @db.Timestamptz(3)
+  createdAt     DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime  @updatedAt @db.Timestamptz(3)
 
   attendance           Attendance[]          @relation("Attendee")
   verifiedAttendance   Attendance[]          @relation("AttendanceVerifier")
@@ -594,6 +608,10 @@ model Person {
   refreshSessions            RefreshSession[]
   reportSnapshots            ReportSnapshot[]
   scheduledActions           ScheduledAction[]
+  contentDocumentsUpdated    ContentDocument[]      @relation("ContentDocumentUpdater")
+  contentDocumentsReviewed   ContentDocument[]      @relation("ContentDocumentReviewer")
+  contentVersionsPublished   ContentVersion[]       @relation("ContentVersionPublisher")
+  contentUploadReceipts       ContentUploadReceipt[] @relation("ContentUploadIssuer")
 
   eventMemberships        EventMembership[]
   organisationMemberships OrganisationMembership[]
@@ -1583,10 +1601,27 @@ model ReportSnapshot {
 
   event     Event   @relation(fields: [eventId], references: [id], onDelete: Restrict)
   createdBy Person? @relation(fields: [createdByPersonId], references: [id], onDelete: Restrict)
+  archiveExports ArchiveExport[]
 
   @@unique([eventId, id])
   @@unique([eventId, dedupeKey])
   @@index([eventId, kind, supersededAt])
+}
+
+/// A completed final report workbook in private S3 exports; no visitor-value sheet.
+/// @eventOwned
+model ArchiveExport {
+  id String @id
+  eventId String
+  snapshotId String
+  lifecycleVersion Int
+  /// @class operational
+  objectKey String @unique
+  createdAt DateTime @db.Timestamptz(3)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  snapshot ReportSnapshot @relation(fields: [eventId, snapshotId], references: [eventId, id], onDelete: Restrict)
+  @@unique([eventId, id])
+  @@index([eventId, lifecycleVersion])
 }
 
 enum ScheduledActionStatus {
@@ -1906,27 +1941,123 @@ model PushSubscription {
 /// family and revokes the old one, so presenting an already-rotated token means
 /// the cookie leaked and the entire family is revoked at once.
 model RefreshSession {
-  id            String    @id @default(cuid())
-  volunteerId   String
+  id                     String    @id @default(cuid())
+  volunteerId            String
   /// SHA-256 hex of the opaque token. Never the token itself.
   /// @class credential
-  tokenHash     String    @unique
-  familyId      String
+  tokenHash              String    @unique
+  familyId               String
   /// @class staff-personal
-  userAgent     String?
+  userAgent              String?
   /// @class staff-personal
-  ip            String?
-  issuedAt      DateTime  @default(now()) @db.Timestamptz(3)
-  expiresAt     DateTime  @db.Timestamptz(3)
-  lastUsedAt    DateTime? @db.Timestamptz(3)
-  revokedAt     DateTime? @db.Timestamptz(3)
+  ip                     String?
+  issuedAt               DateTime  @default(now()) @db.Timestamptz(3)
+  expiresAt              DateTime  @db.Timestamptz(3)
+  lastUsedAt             DateTime? @db.Timestamptz(3)
+  revokedAt              DateTime? @db.Timestamptz(3)
   /// Why it was revoked: "rotated", "signed-out", "reuse-detected", "deactivated".
   /// @class operational
-  revokedReason String?
+  revokedReason          String?
+  replacedById           String?
+  absoluteExpiresAt      DateTime? @db.Timestamptz(3)
+  mfaPending             Boolean   @default(false)
+  /// Encrypted Cognito access token, retained only during five-minute enrolment.
+  /// @class credential
+  providerTokenEncrypted String?
+  providerTokenExpiresAt DateTime? @db.Timestamptz(3)
 
-  volunteer Person @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+  volunteer Person        @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+  handoffs  AuthHandoff[]
 
   @@index([volunteerId, revokedAt])
   @@index([familyId])
+  @@index([expiresAt])
+}
+
+/// One-use, PKCE-bound access handoff for clients with third-party cookies blocked.
+model AuthHandoff {
+  id         String    @id
+  sessionId  String
+  /// @class credential
+  challenge  String
+  expiresAt  DateTime  @db.Timestamptz(3)
+  consumedAt DateTime? @db.Timestamptz(3)
+  session    RefreshSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+  @@index([sessionId])
+}
+
+/// The editable event guide; draft changes never replace a published document.
+/// @eventOwned
+model ContentDocument {
+  id                 String    @id @default(cuid())
+  eventId            String    @unique
+  /// @class operational
+  body               Json
+  version            Int       @default(1)
+  reviewedVersion    Int?
+  reviewedAt         DateTime? @db.Timestamptz(3)
+  reviewedByPersonId String?
+  publishedVersionId String?
+  updatedByPersonId  String
+  updatedAt          DateTime  @db.Timestamptz(3)
+  event              Event     @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  updatedBy          Person    @relation("ContentDocumentUpdater", fields: [updatedByPersonId], references: [id], onDelete: Restrict)
+  reviewedBy         Person?   @relation("ContentDocumentReviewer", fields: [reviewedByPersonId], references: [id], onDelete: Restrict)
+  publishedVersion   ContentVersion? @relation("PublishedContentDocumentVersion", fields: [eventId, publishedVersionId], references: [eventId, id], onDelete: Restrict)
+
+  @@unique([eventId, id])
+}
+
+/// Frozen publication plus its exact private S3 object; database guards refuse edits.
+/// @eventOwned
+model ContentVersion {
+  id                  String   @id
+  eventId             String
+  version             Int
+  draftVersion        Int
+  /// @class operational
+  body                Json
+  /// @class operational
+  objectKey           String   @unique
+  /// @class operational
+  etag                String
+  publishedByPersonId String
+  publishedAt         DateTime @db.Timestamptz(3)
+  event               Event    @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  publishedBy         Person   @relation("ContentVersionPublisher", fields: [publishedByPersonId], references: [id], onDelete: Restrict)
+  publishedDocuments  ContentDocument[] @relation("PublishedContentDocumentVersion")
+
+  @@unique([eventId, id])
+  @@unique([eventId, version])
+  @@index([eventId, publishedAt])
+}
+
+/// A server-issued image key; arbitrary keys and other events cannot enter content.
+/// @eventOwned
+model ContentUploadReceipt {
+  id               String   @id
+  eventId          String
+  /// @class operational
+  key              String   @unique
+  /// @class operational
+  contentType      String
+  contentLength    Int
+  issuedByPersonId String
+  createdAt        DateTime @db.Timestamptz(3)
+  event            Event    @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  issuedBy         Person   @relation("ContentUploadIssuer", fields: [issuedByPersonId], references: [id], onDelete: Restrict)
+
+  @@unique([eventId, id])
+  @@index([eventId, key])
+}
+
+/// Shared Cognito sender quota; no addresses or message content are stored.
+model IdentityDeliveryQuota {
+  id        String @id
+  used      Int @default(0)
+  expiresAt DateTime @db.Timestamptz(3)
+
   @@index([expiresAt])
 }

@@ -12,6 +12,7 @@ import { FallbackWindowRecord } from '../fallback/index.js';
 import { ReportRange, ReportSnapshotMetadata } from './snapshots.js';
 
 export * from './snapshots.js';
+export * from './archive.js';
 
 /**
  * Post-event reporting (PRODUCT_BRIEF §10).

@@ -6,6 +6,7 @@ import { isDevAuth } from '@/shared/lib/env';
 import { getHostedSignInUrl } from '@/features/session';
 import { useSignInForm } from '../hooks/useSignInForm';
 import { Button, ButtonLink, Card, Field, Input, Skeleton } from '@/shared/ui';
+import { beginAccountChange } from '@/shared/lib/sessionIntent';
 
 /**
  * Sign-in.
@@ -33,7 +34,7 @@ function SignInForm(): ReactNode {
           Sign in with the email address on your volunteer roster entry. Your account was created
           for you — there is no sign-up.
         </p>
-        <ButtonLink href={getHostedSignInUrl()} size="lg" block>
+        <ButtonLink href={getHostedSignInUrl()} onClick={beginAccountChange} size="lg" block>
           Continue to sign in
         </ButtonLink>
       </Card>

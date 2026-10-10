@@ -1,21 +1,10 @@
 import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
-import { generateRefreshToken, hashRefreshToken } from '../../../platform/identity/index.js';
+import { hashRefreshToken } from '../../../platform/identity/index.js';
 import { logger } from '../../../platform/logger/index.js';
 import { systemClock } from '../../../platform/time/index.js';
-import {
-  createRefreshSession,
-  findSessionByTokenHash,
-  revokeSession,
-  touchVolunteer,
-  type PresentedSession,
-} from '../data/repo.js';
-import {
-  refreshExpiry,
-  reuseDetected,
-  rotationCheck,
-  sessionEnded,
-} from '../domain/sessionRules.js';
+import { findSessionByTokenHash, touchVolunteer, type PresentedSession } from '../data/repo.js';
+import { refreshExpiry, reuseDetected, sessionEnded } from '../domain/sessionRules.js';
 import { refreshSessionDays } from './sessionLifetime.js';
 import {
   issueSession,
@@ -25,6 +14,9 @@ import {
 } from './issueSession.js';
 import { revokeFamily } from './revokeSessions.js';
 import { inHomeEvent } from './sessionAudit.js';
+import { rotateLocked, graceSuccessor } from './rotateLocked.js';
+import { personNeedsMfa } from '../data/securityRepo.js';
+import { adminSetting } from './sessionSecurity.js';
 
 /**
  * Rotate a refresh token: look it up, detect reuse, revoke and replace it, and
@@ -43,42 +35,54 @@ export async function rotateSession(
   const existing = await findSessionByTokenHash(hashRefreshToken(presentedToken));
   if (!existing) throw sessionEnded();
 
-  if (rotationCheck(existing, systemClock.now()) === 'reused') {
+  const now = systemClock.now();
+  const volunteer = await loadVolunteer(existing.volunteer.cognitoSub);
+  await assertSessionLimits(existing, { volunteer, now });
+  if (existing.revokedAt) {
+    const grace = await prisma.$transaction((tx) =>
+      graceSuccessor(tx, existing.id, { now, ...context }),
+    );
+    if (grace)
+      return issueSession(volunteer, {
+        sub: existing.volunteer.cognitoSub,
+        sessionId: grace.id,
+        ...grace,
+      });
     await revokeReusedFamily(existing, audit);
     throw reuseDetected();
   }
-
-  const volunteer = await loadVolunteer(existing.volunteer.cognitoSub);
-
-  const nextToken = generateRefreshToken();
-  const now = systemClock.now();
-  const expiresAt = refreshExpiry(now, await refreshSessionDays(volunteer.scope));
-
+  const expiresAt =
+    existing.absoluteExpiresAt ?? refreshExpiry(now, await refreshSessionDays(volunteer.scope));
   const session = await prisma.$transaction(async (tx) => {
-    // Revoke first, inside the same transaction as the replacement, so the two
-    // can never both be live.
-    await revokeSession(tx, existing.id, { at: now, reason: 'rotated', lastUsedAt: now });
-
-    const row = await createRefreshSession(tx, {
-      volunteerId: volunteer.id,
-      tokenHash: hashRefreshToken(nextToken),
-      familyId: existing.familyId,
-      userAgent: context.userAgent,
-      ip: context.ip,
-      expiresAt,
-    });
-
+    const row = await rotateLocked(tx, existing.id, { now, expiresAt, ...context });
     await touchVolunteer(tx, volunteer.scope, { id: volunteer.id, at: now });
-
     return row;
   });
-
+  if (!session) {
+    await revokeReusedFamily(existing, audit);
+    throw reuseDetected();
+  }
   return issueSession(volunteer, {
     sub: existing.volunteer.cognitoSub,
     sessionId: session.id,
-    refreshToken: nextToken,
-    expiresAt,
+    refreshToken: session.refreshToken,
+    expiresAt: session.expiresAt,
   });
+}
+
+async function assertSessionLimits(
+  existing: PresentedSession,
+  input: { volunteer: Awaited<ReturnType<typeof loadVolunteer>>; now: Date },
+) {
+  const { volunteer, now } = input;
+  if (existing.mfaPending || existing.expiresAt <= now) throw sessionEnded();
+  if (!(await personNeedsMfa(volunteer.id))) return;
+  const idleMs = (await adminSetting(volunteer.scope, 'security.adminIdleMinutes')) * 60_000;
+  if (
+    (existing.absoluteExpiresAt && existing.absoluteExpiresAt <= now) ||
+    now.getTime() - (existing.lastUsedAt ?? existing.issuedAt).getTime() >= idleMs
+  )
+    throw sessionEnded();
 }
 
 /**

@@ -6,7 +6,7 @@ import type { EventScope } from '../../../platform/db/eventScope.js';
 export async function findVolunteerBySub(sub: string) {
   return prisma.person.findUnique({
     where: { cognitoSub: sub },
-    select: { id: true, displayName: true },
+    select: { id: true, displayName: true, email: true, deactivatedAt: true },
   });
 }
 
@@ -37,18 +37,30 @@ export async function findLiveMemberships(personId: string) {
   return person?.eventMemberships ?? [];
 }
 
+export async function findArchivedAdminMembership(personId: string) {
+  const person = await prisma.person.findUnique({ where: { id: personId },
+    select: { organisationMemberships: { where: { role: 'PLATFORM_ADMIN' }, select: { organisationId: true } } } });
+  if (!person?.organisationMemberships.length) return null;
+  const row = await prisma.person.findUnique({ where: { id: personId },
+    select: { eventMemberships: { where: { status: 'ENDED', event: { status: 'ARCHIVED',
+      organisationId: { in: person.organisationMemberships.map((member) => member.organisationId) } } },
+      select: { id: true, eventId: true, role: true, status: true },
+      orderBy: { event: { createdAt: 'desc' } }, take: 1 } } });
+  return row?.eventMemberships[0] ?? null;
+}
+
 /**
  * The development sign-in's lookup: an email is enough, outside Cognito. The
  * role is the person's in their home event (the first running one), for the
  * token's groups; authorization reads the membership on every request anyway.
  */
 export async function findVolunteerByEmail(email: string) {
-  const person = await prisma.person.findUnique({
-    where: { email },
+  const person = await prisma.person.findFirst({
+    where: { email: { equals: email, mode: 'insensitive' } },
     select: {
       cognitoSub: true,
       eventMemberships: {
-        where: { status: 'ACTIVE', event: { status: { not: 'ARCHIVED' } } },
+        where: { status: { in: ['ACTIVE', 'INVITED'] }, event: { status: { not: 'ARCHIVED' } } },
         orderBy: [{ event: { createdAt: 'asc' } }, { event: { id: 'asc' } }],
         take: 1,
         select: { role: true },
@@ -68,6 +80,10 @@ export async function createRefreshSession(
     userAgent: string | null;
     ip: string | null;
     expiresAt: Date;
+    absoluteExpiresAt?: Date | null;
+    mfaPending?: boolean;
+    providerTokenEncrypted?: string | null;
+    providerTokenExpiresAt?: Date | null;
   },
 ): Promise<{ id: string }> {
   return tx.refreshSession.create({ data, select: { id: true } });
@@ -96,6 +112,11 @@ export async function findSessionByTokenHash(tokenHash: string) {
       expiresAt: true,
       revokedAt: true,
       revokedReason: true,
+      replacedById: true,
+      absoluteExpiresAt: true,
+      issuedAt: true,
+      lastUsedAt: true,
+      mfaPending: true,
       volunteer: { select: { cognitoSub: true } },
     },
   });
@@ -122,11 +143,13 @@ export async function revokeSession(
 export async function revokeLiveSessions(
   where: { familyId: string } | { volunteerId: string } | { id: string; volunteerId: string },
   revocation: { at: Date; reason: string },
+  tx: PrismaTransactionClient = prisma,
 ): Promise<number> {
-  const { count } = await prisma.refreshSession.updateMany({
+  const { count } = await tx.refreshSession.updateMany({
     where: { ...where, revokedAt: null },
     data: { revokedAt: revocation.at, revokedReason: revocation.reason },
   });
+  await tx.$executeRaw`SELECT pg_notify('session', ${JSON.stringify({ reason: revocation.reason })})`;
   return count;
 }
 
@@ -150,6 +173,14 @@ export async function deleteStaleSessions(
   cutoff: { now: Date; revokedBefore: Date },
 ): Promise<number> {
   const { now, revokedBefore } = cutoff;
+  await tx.authHandoff.deleteMany({ where: { expiresAt: { lt: now } } });
+  await tx.refreshSession.updateMany({
+    where: { providerTokenExpiresAt: { lt: now } },
+    data: {
+      providerTokenEncrypted: null,
+      providerTokenExpiresAt: null,
+    },
+  });
   const { count } = await tx.refreshSession.deleteMany({
     where: {
       OR: [{ expiresAt: { lt: now } }, { revokedAt: { lt: revokedBefore } }],

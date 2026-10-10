@@ -2,6 +2,7 @@ import type {
   ChangeRolePermissionRequest,
   MemberPermissionsResponse,
   RolePermissionsResponse,
+  ReviewRolePermissionsRequest,
   SimulatePermissionRequest,
   SimulatePermissionResponse,
 } from '@spoh/shared';
@@ -9,6 +10,16 @@ import { eventApi } from '@/shared/lib/eventApi';
 
 export function getRolePermissions(eventId: string): Promise<RolePermissionsResponse> {
   return eventApi<RolePermissionsResponse>(eventId, '/permissions');
+}
+
+export function reviewRolePermissions(
+  eventId: string,
+  body: ReviewRolePermissionsRequest,
+): Promise<RolePermissionsResponse> {
+  return eventApi<RolePermissionsResponse>(eventId, '/permissions/review', {
+    method: 'POST',
+    body,
+  });
 }
 
 export function changeRolePermission(

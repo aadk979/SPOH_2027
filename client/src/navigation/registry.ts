@@ -1,4 +1,12 @@
-import type { Action, MeResponse } from '@spoh/shared';
+import type { NavContext, NavEntry, OperationsGroup } from './types';
+export type {
+  NavContext,
+  NavEntry,
+  NavStation,
+  NavSurface,
+  OperationsGroup,
+  SectionPath,
+} from './types';
 
 /**
  * The navigation registry (ADR-007 §1): the one source for every nav surface.
@@ -9,45 +17,6 @@ import type { Action, MeResponse } from '@spoh/shared';
  * is by action (`requires`) plus an optional predicate on the viewer's station.
  */
 
-/** The root path of a main section; the section nav highlights one of these. */
-export type SectionPath =
-  '/home' | '/shift' | '/guide' | '/safety' | '/operations' | '/inbox' | '/capture';
-
-/** Where an entry is offered as a link. An entry with none is a destination only. */
-export type NavSurface = 'section' | 'global' | 'operations' | 'station' | 'hub';
-
-export type OperationsGroup = 'Monitor' | 'Manage' | 'Recover & report';
-
-export type NavStation = NonNullable<MeResponse['currentAssignment']>['station'];
-
-export interface NavContext {
-  /** May the viewer take this action here at all (`useAllows`). */
-  allows: (action: Action) => boolean;
-  station?: NavStation | null;
-}
-
-export interface NavEntry {
-  path: string;
-  label: string;
-  /** The label where the full one does not fit (the 320px global bar). */
-  shortLabel?: string;
-  hint?: string;
-  section: SectionPath;
-  surfaces?: readonly NavSurface[];
-  /** SVG path data for the section nav icon. */
-  icon?: string;
-  /** A section whose own page lists its screens, so those screens name it as their parent. */
-  hub?: boolean;
-  group?: OperationsGroup;
-  emphasis?: 'primary';
-  /** The action the viewer must be allowed. */
-  requires?: Action;
-  /** Further visibility, e.g. what the viewer's station actually does. */
-  visible?(context: NavContext): boolean;
-  /** A hint that depends on the viewer's station. */
-  stationHint?(station: NavStation): string;
-}
-
 const MONITOR: OperationsGroup = 'Monitor';
 const MANAGE: OperationsGroup = 'Manage';
 const RECOVER: OperationsGroup = 'Recover & report';
@@ -55,7 +24,30 @@ const RECOVER: OperationsGroup = 'Recover & report';
 export const NAV_REGISTRY: readonly NavEntry[] = [
   { path: '/', label: 'Start', section: '/home' },
   { path: '/sign-in', label: 'Sign in', section: '/home' },
+  { path: '/mfa', label: 'Protect your sign-in', section: '/home' },
+  {
+    path: '/admin/users/person',
+    label: 'Person',
+    section: '/operations',
+    requires: 'Platform.ManageAdmins',
+  },
   { path: '/events', label: 'Your events', section: '/home' },
+  {
+    path: '/overview',
+    label: 'Overview',
+    section: '/operations',
+    surfaces: ['workspace'],
+    workspaceOrder: 1,
+    requires: 'Settings.Read',
+  },
+  {
+    path: '/setup',
+    label: 'Setup',
+    section: '/operations',
+    surfaces: ['workspace'],
+    workspaceOrder: 2,
+    requires: 'Settings.Read',
+  },
   {
     path: '/home',
     label: 'Home',
@@ -71,6 +63,14 @@ export const NAV_REGISTRY: readonly NavEntry[] = [
     icon: 'M5 5h14v16H5ZM8 2v6m8-6v6M5 11h14',
   },
   { path: '/attendance', label: 'Attendance', section: '/shift' },
+  {
+    path: '/devices',
+    label: 'Your devices',
+    shortLabel: 'Devices',
+    section: '/home',
+    surfaces: ['global'],
+    requires: 'Self.Read',
+  },
   {
     path: '/guide',
     label: 'Guide',
@@ -135,7 +135,8 @@ export const NAV_REGISTRY: readonly NavEntry[] = [
     path: '/operations',
     label: 'Operations',
     section: '/operations',
-    surfaces: ['section'],
+    surfaces: ['section', 'workspace'],
+    workspaceOrder: 4,
     hub: true,
     icon: 'M4 21V11h4v10m2 0V3h4v18m2 0V7h4v14',
     visible: (context) => canOpenOperations(context),
@@ -161,27 +162,39 @@ export const NAV_REGISTRY: readonly NavEntry[] = [
   {
     path: '/admin/users',
     label: 'Volunteers',
+    workspaceLabel: 'People',
+    workspaceOrder: 3,
     hint: 'Manage the roster, roles and access.',
     section: '/operations',
-    surfaces: ['operations'],
+    surfaces: ['operations', 'workspace', 'setup'],
     group: MANAGE,
     requires: 'People.Read',
   },
   {
     path: '/admin/permissions',
     label: 'Role permissions',
+    workspaceLabel: 'Permissions',
+    workspaceOrder: 8,
     hint: 'What each role can do, and why a request is refused.',
     section: '/operations',
-    surfaces: ['operations'],
+    surfaces: ['operations', 'workspace', 'setup'],
     group: MANAGE,
     requires: 'Settings.Read',
   },
   {
+    path: '/admin/users/invite',
+    label: 'Invite people',
+    section: '/operations',
+    requires: 'People.Invite',
+  },
+  {
     path: '/admin/settings',
     label: 'Event settings',
+    workspaceLabel: 'Settings',
+    workspaceOrder: 6,
     hint: 'Configure shift times and event thresholds.',
     section: '/operations',
-    surfaces: ['operations'],
+    surfaces: ['operations', 'workspace', 'setup'],
     group: MANAGE,
     requires: 'Settings.Read',
   },
@@ -208,11 +221,28 @@ export const NAV_REGISTRY: readonly NavEntry[] = [
     label: 'Reports',
     hint: 'Prepare the post-event dataset.',
     section: '/operations',
-    surfaces: ['operations'],
+    surfaces: ['operations', 'workspace'],
+    workspaceOrder: 5,
     group: RECOVER,
     requires: 'Report.Generate',
   },
   { path: '/tv', label: 'Ops-room display', section: '/operations' },
+  {
+    path: '/admin/content',
+    label: 'Content',
+    hint: 'Prepare and publish the guide, visitor journey and floor plans.',
+    section: '/operations',
+    surfaces: ['setup'],
+    requires: 'Settings.Read',
+  },
+  {
+    path: '/admin/schedule',
+    label: 'Schedule',
+    section: '/operations',
+    surfaces: ['workspace'],
+    workspaceOrder: 7,
+    requires: 'Schedule.Manage',
+  },
   {
     path: '/inbox',
     label: 'Announcements',

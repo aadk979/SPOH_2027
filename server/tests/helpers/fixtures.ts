@@ -34,6 +34,11 @@ export interface TestVolunteer {
   token: string;
 }
 
+/** A clock-jump fixture needs a fresh credential; production still enforces expiration. */
+export async function renewFixtureToken(volunteer: TestVolunteer): Promise<void> {
+  volunteer.token = await issuer.issue({ sub: volunteer.sub, groups: [volunteer.role] });
+}
+
 const TEST_EVENT_SLUG = 'test-event';
 /** The test event's timezone: a fixture, where a zone name belongs. */
 export const TEST_EVENT_TIMEZONE = 'Asia/Singapore';

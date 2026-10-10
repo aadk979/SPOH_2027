@@ -10,6 +10,12 @@
 permit (principal is SPOH::Person, action in SPOH::Action::"Platform", resource)
 when { principal.platformAdmin };
 
+// Archive close-out ends memberships. Historical access remains read-only and scoped.
+@id("platform.archived-reader")
+permit (principal is SPOH::Membership, action, resource)
+when { context.eventPhase == "ARCHIVED" && principal.person.platformAdmin }
+unless { action in SPOH::Action::"Write" };
+
 @id("platform.locked-actions")
 permit (
   principal is SPOH::Person,

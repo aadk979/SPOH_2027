@@ -60,7 +60,11 @@ function setting<Schema extends z.ZodType>(
     description,
     group,
     unit: options.unit ?? null,
-    schedulable: options.schedulable ?? false,
+    schedulable:
+      options.schedulable ??
+      (classification === 'operational' &&
+        scopes.includes('event') &&
+        key !== 'product.countsMode'),
     class: classification,
     lockedIn: options.lockedIn ?? [],
     clientVisible: options.clientVisible ?? false,
@@ -152,6 +156,21 @@ export const SETTINGS = {
     'How long a settled request is remembered so a retried tap is not counted twice.',
     'Capture',
     { ...platform, unit: 'days' },
+  ),
+  'privacy.mediaRetentionDays': setting(
+    'privacy.mediaRetentionDays', z.number().int().min(1).max(365), 30,
+    'Photo retention', 'Days after event close before lost-and-found photos are removed.',
+    'Privacy', { class: 'privacy', unit: 'days', lockedIn: ['CLOSED', 'ARCHIVED'] },
+  ),
+  'privacy.staffRetentionDays': setting(
+    'privacy.staffRetentionDays', z.number().int().min(1).max(3650), 365,
+    'Archived staff retention', 'Days after archive before event staff notes are cleared. People with no remaining event are anonymised.',
+    'Privacy', { class: 'privacy', unit: 'days', lockedIn: ['ARCHIVED'] },
+  ),
+  'identity.inviteDailyLimit': setting(
+    'identity.inviteDailyLimit', z.number().int().min(1).max(100000), 50,
+    'Daily identity email limit', 'Shared daily delivery allowance for the configured Cognito pool. Counts attempted invites and resends; raise only after its sender quota is confirmed.',
+    'Identity', { ...platform, class: 'security', unit: 'emails/day' },
   ),
   refreshSessionDays: setting(
     'refreshSessionDays',
@@ -278,6 +297,24 @@ export const SETTINGS = {
     'How long an API access token lives before the app renews it.',
     'Identity',
     { ...platform, class: 'security', unit: 'seconds' },
+  ),
+  'security.adminIdleMinutes': setting(
+    'security.adminIdleMinutes',
+    z.number().int().min(5).max(120),
+    30,
+    'Administrator idle timeout',
+    'Minutes without an authenticated request before an administrator must sign in again.',
+    'Identity',
+    { ...platform, class: 'security', unit: 'minutes' },
+  ),
+  'security.adminSessionHours': setting(
+    'security.adminSessionHours',
+    z.number().int().min(1).max(24),
+    12,
+    'Administrator session limit',
+    'Absolute session lifetime for administrator tiers, even while active.',
+    'Identity',
+    { ...platform, class: 'security', unit: 'hours' },
   ),
   'rateLimit.windowSeconds': setting(
     'rateLimit.windowSeconds',

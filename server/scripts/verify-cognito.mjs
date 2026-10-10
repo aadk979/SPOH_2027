@@ -1,241 +1,178 @@
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import {
-  AdminInitiateAuthCommand,
   CognitoIdentityProviderClient,
   DescribeUserPoolClientCommand,
   DescribeUserPoolCommand,
-  ListGroupsCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
+import { SessionResponse } from '@spoh/shared';
 
-/**
- * Verify a deployed environment's Cognito setup and auth path.
- *
- * Run this against staging before each dry run, and against production before
- * 6 January. It checks the configuration that is easy to get wrong in a console
- * and then proves a real token actually works end to end — configuration that
- * looks right and an auth path that works are different claims.
- *
- *   AWS_PROFILE=... node scripts/verify-cognito.mjs
- *   node scripts/verify-cognito.mjs --api https://staging-api.example
- *
- * The live-token checks need a test account and its password. Without
- * `VERIFY_EMAIL` and `VERIFY_PASSWORD` the script still runs every
- * configuration check and skips the rest.
- */
+/** Read-only configuration checks. Optional live probes exchange a short-lived synthetic
+ * provider token; they never enable password grants, create accounts or inspect groups.
+ * Run in P16 after AWS recreation. VERIFY_PROVIDER_ACCESS_TOKEN is secret input only. */
+export function configurationChecks(pool, client) {
+  const password = pool?.Policies?.PasswordPolicy ?? {};
+  const unit = client?.TokenValidityUnits ?? {};
+  return [
+    ['self sign-up disabled', pool?.AdminCreateUserConfig?.AllowAdminCreateUserOnly === true],
+    ['email sign-in', (pool?.UsernameAttributes ?? []).includes('email')],
+    [
+      'password minimum 12 with all character classes',
+      password.MinimumLength >= 12 &&
+        password.RequireLowercase &&
+        password.RequireUppercase &&
+        password.RequireNumbers &&
+        password.RequireSymbols,
+    ],
+    ['temporary passwords expire within 30 days', password.TemporaryPasswordValidityDays <= 30],
+    [
+      'optional TOTP without SMS',
+      pool?.MfaConfiguration === 'OPTIONAL' &&
+        (pool?.EnabledMfas ?? []).includes('SOFTWARE_TOKEN_MFA') &&
+        !(pool?.EnabledMfas ?? []).includes('SMS_MFA'),
+    ],
+    [
+      'Cognito default sender per D-08',
+      !pool?.EmailConfiguration?.EmailSendingAccount ||
+        pool.EmailConfiguration.EmailSendingAccount === 'COGNITO_DEFAULT',
+    ],
+    ['public app client without secret', Boolean(client) && !client.ClientSecret],
+    [
+      '5-minute provider access token',
+      client?.AccessTokenValidity === 5 && unit.AccessToken === 'minutes',
+    ],
+    ['5-minute provider ID token', client?.IdTokenValidity === 5 && unit.IdToken === 'minutes'],
+    [
+      '60-minute provider refresh token',
+      client?.RefreshTokenValidity === 60 && unit.RefreshToken === 'minutes',
+    ],
+    [
+      'only OAuth code grant',
+      client?.AllowedOAuthFlowsUserPoolClient === true &&
+        client?.AllowedOAuthFlows?.join(',') === 'code',
+    ],
+    [
+      'no password auth grant',
+      !(client?.ExplicitAuthFlows ?? []).some((flow) => flow.includes('PASSWORD')),
+    ],
+    [
+      'revocation and existence protection',
+      client?.EnableTokenRevocation === true && client?.PreventUserExistenceErrors === 'ENABLED',
+    ],
+    [
+      'MFA enrollment scope',
+      (client?.AllowedOAuthScopes ?? []).includes('aws.cognito.signin.user.admin'),
+    ],
+  ];
+}
 
 function arg(name) {
   const index = process.argv.indexOf(`--${name}`);
   return index === -1 ? undefined : process.argv[index + 1];
 }
 
-function loadEnv() {
-  try {
-    process.loadEnvFile(fileURLToPath(new URL('../.env', import.meta.url)));
-  } catch {
-    // Falling back to the ambient environment.
-  }
-}
-
-loadEnv();
-
-const POOL_ID = arg('pool') ?? process.env.COGNITO_USER_POOL_ID;
-const CLIENT_ID = arg('client') ?? process.env.COGNITO_CLIENT_ID;
-const REGION = arg('region') ?? process.env.COGNITO_REGION ?? 'ap-southeast-1';
-const API = arg('api') ?? process.env.VERIFY_API ?? 'http://localhost:4010';
-
-const TEST_EMAIL = process.env.VERIFY_EMAIL;
-const TEST_PASSWORD = process.env.VERIFY_PASSWORD;
-
-if (!POOL_ID || !CLIENT_ID) {
-  throw new Error('COGNITO_USER_POOL_ID and COGNITO_CLIENT_ID must be set (or passed as flags).');
-}
-
-const cognito = new CognitoIdentityProviderClient({ region: REGION });
-
-const results = [];
-
-function check(name, passed, detail) {
-  results.push({ name, passed, detail });
-  console.log(`${passed ? '  PASS' : '  FAIL'}  ${name}${detail ? ` — ${detail}` : ''}`);
-}
-
-/** BUILD_PLAN §6.1 and docs/DEPLOYMENT.md §3. */
-async function checkPoolConfiguration() {
-  console.log(`\nuser pool ${POOL_ID} (${REGION})`);
-
-  const { UserPool: pool } = await cognito.send(
-    new DescribeUserPoolCommand({ UserPoolId: POOL_ID }),
-  );
-
-  // The single most important setting. Self sign-up would let anyone outside
-  // the roster create an account against the event.
-  check(
-    'self sign-up is disabled',
-    pool?.AdminCreateUserConfig?.AllowAdminCreateUserOnly === true,
-    pool?.AdminCreateUserConfig?.AllowAdminCreateUserOnly ? undefined : 'ANYONE CAN SIGN UP',
-  );
-
-  check(
-    'password policy is at least 12 characters',
-    (pool?.Policies?.PasswordPolicy?.MinimumLength ?? 0) >= 12,
-    `min ${pool?.Policies?.PasswordPolicy?.MinimumLength ?? '?'}`,
-  );
-
-  check(
-    'sign-in is by email',
-    (pool?.UsernameAttributes ?? []).includes('email'),
-    (pool?.UsernameAttributes ?? []).join(', ') || 'none',
-  );
-}
-
-async function checkGroups() {
-  console.log('\ngroups');
-
-  const { Groups: groups } = await cognito.send(new ListGroupsCommand({ UserPoolId: POOL_ID }));
-  const byName = new Map((groups ?? []).map((group) => [group.GroupName, group.Precedence]));
-
-  const expected = [
-    ['Admin', 0],
-    ['Lead', 10],
-    ['ChiefCoordinator', 20],
-    ['DeputyCoordinator', 30],
-    ['IC', 40],
-    ['Volunteer', 50],
-  ];
-
-  for (const [name, precedence] of expected) {
+async function checkLiveAuth(api, token, check) {
+  const config = await fetch(`${api}/api/v1/client-config`);
+  const data = await config.json().catch(() => null);
+  check('API uses Cognito', config.ok && data?.data?.authProvider === 'cognito');
+  for (const bearer of [undefined, 'synthetic-invalid-proof', token]) {
+    const response = await fetch(`${api}/api/v1/events`, {
+      headers: bearer ? { Authorization: `Bearer ${bearer}` } : {},
+    });
     check(
-      `${name} exists at precedence ${precedence}`,
-      byName.get(name) === precedence,
-      byName.has(name) ? `found ${byName.get(name)}` : 'missing',
+      bearer === token
+        ? 'provider bearer cannot bypass app sessions'
+        : 'anonymous/forged access refused',
+      response.status === 401,
     );
   }
-}
-
-async function checkClient() {
-  console.log(`\napp client ${CLIENT_ID}`);
-
-  const { UserPoolClient: client } = await cognito.send(
-    new DescribeUserPoolClientCommand({ UserPoolId: POOL_ID, ClientId: CLIENT_ID }),
-  );
-
-  // A public SPA cannot keep a secret. One here means the client was created
-  // with the wrong template and the browser flow will not work.
-  check(
-    'no client secret',
-    !client?.ClientSecret,
-    client?.ClientSecret ? 'SECRET PRESENT' : undefined,
-  );
-
-  check(
-    'access token expires in 60 minutes',
-    client?.AccessTokenValidity === 60 && client?.TokenValidityUnits?.AccessToken === 'minutes',
-    `${client?.AccessTokenValidity} ${client?.TokenValidityUnits?.AccessToken}`,
-  );
-
-  // A shift is 4.5 hours; 12 covers a full day and expires overnight, so a
-  // phone lost on the 7th stops working on the 8th.
-  check(
-    'refresh token expires in 12 hours',
-    client?.RefreshTokenValidity === 12 && client?.TokenValidityUnits?.RefreshToken === 'hours',
-    `${client?.RefreshTokenValidity} ${client?.TokenValidityUnits?.RefreshToken}`,
-  );
-}
-
-/**
- * Configuration that looks right and an auth path that works are different
- * claims. This proves the second one.
- */
-async function checkLiveAuth() {
-  if (!TEST_EMAIL || !TEST_PASSWORD) {
-    console.log('\nlive auth — skipped (set VERIFY_EMAIL and VERIFY_PASSWORD)');
-    return;
-  }
-
-  console.log(`\nlive auth against ${API}`);
-
-  /**
-   * Establish which auth provider the API is running before anything else,
-   * because it explains every failure that follows.
-   *
-   * Pointing this at a local development server is the likeliest mistake, and
-   * "the token was rejected" is a confusing way to discover it at 8am before a
-   * dry run.
-   */
-  const devAuthProbe = await fetch(`${API}/api/v1/dev-auth/sign-in`, {
+  const response = await fetch(`${api}/api/v1/auth/session`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: TEST_EMAIL }),
+    body: JSON.stringify({ providerAccessToken: token }),
   });
-
-  const apiRunsCognito = devAuthProbe.status === 404;
-
+  const parsed = SessionResponse.safeParse(await response.json().catch(() => null));
   check(
-    'the development sign-in route is not mounted',
-    apiRunsCognito,
-    apiRunsCognito
-      ? undefined
-      : `got ${devAuthProbe.status} — this API is running AUTH_PROVIDER=local`,
+    'synthetic provider credential opens a thin app session',
+    response.status === 201 && parsed.success,
   );
-
-  if (!apiRunsCognito) {
-    console.log('');
-    console.log(`  ${API} is running the development auth provider, so it cannot`);
-    console.log('  verify a Cognito token. The pool configuration above is still valid.');
-    console.log('  Set AUTH_PROVIDER=cognito on that server, or pass --api pointing at a');
-    console.log('  deployed environment.');
-    return;
+  if (!parsed.success) return;
+  const session = parsed.data;
+  const cookie = response.headers.get('set-cookie') ?? '';
+  check(
+    'refresh cookie is secure, httpOnly and auth-scoped',
+    /HttpOnly/i.test(cookie) &&
+      /Secure/i.test(cookie) &&
+      /Path=\/api\/v1\/auth(?:;|$)/i.test(cookie),
+  );
+  const headers = { Authorization: `Bearer ${session.accessToken}` };
+  try {
+    const devices = await fetch(`${api}/api/v1/auth/sessions`, { headers });
+    check(
+      session.mfaRequired
+        ? 'MFA-restricted session cannot read devices'
+        : 'thin session resolves owned devices',
+      session.mfaRequired ? devices.status === 401 : devices.status === 200,
+    );
+    if (session.mfaRequired)
+      console.log('  DEFERRED full TOTP and browser handoff exercise: P16.8');
+  } finally {
+    const logout = await fetch(`${api}/api/v1/auth/session`, { method: 'DELETE', headers });
+    check('synthetic session revoked after probe', logout.ok);
   }
-
-  const auth = await cognito.send(
-    new AdminInitiateAuthCommand({
-      UserPoolId: POOL_ID,
-      ClientId: CLIENT_ID,
-      AuthFlow: 'ADMIN_USER_PASSWORD_AUTH',
-      AuthParameters: { USERNAME: TEST_EMAIL, PASSWORD: TEST_PASSWORD },
-    }),
-  );
-
-  const token = auth.AuthenticationResult?.AccessToken;
-  check('a real token can be obtained', Boolean(token));
-  if (!token) return;
-
-  const me = await fetch(`${API}/api/v1/me`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  const body = await me.json().catch(() => null);
-
-  check(
-    'the API accepts the token and resolves the roster row',
-    me.status === 200,
-    me.status === 200
-      ? `${body?.volunteer?.displayName} (${body?.volunteer?.role})`
-      : `${me.status} ${body?.error?.code ?? ''}`,
-  );
-
-  const forged = await fetch(`${API}/api/v1/me`, {
-    headers: { Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmYWtlIn0.x' },
-  });
-  check('a forged token is rejected', forged.status === 401, `got ${forged.status}`);
-
-  const anonymous = await fetch(`${API}/api/v1/me`);
-  check(
-    'an unauthenticated request is rejected',
-    anonymous.status === 401,
-    `got ${anonymous.status}`,
-  );
 }
 
-await checkPoolConfiguration();
-await checkGroups();
-await checkClient();
-await checkLiveAuth();
+export async function main() {
+  if (process.env.SPOH_SKIP_DOTENV !== '1') {
+    try {
+      process.loadEnvFile(fileURLToPath(new URL('../.env', import.meta.url)));
+    } catch {
+      /* Ambient config. */
+    }
+  }
+  const poolId = arg('pool') ?? process.env.COGNITO_USER_POOL_ID;
+  const clientId = arg('client') ?? process.env.COGNITO_CLIENT_ID;
+  if (!poolId || !clientId)
+    throw new Error('Pass --pool and --client or their COGNITO environment values.');
+  const cognito = new CognitoIdentityProviderClient({
+    region: arg('region') ?? process.env.COGNITO_REGION ?? 'ap-southeast-1',
+  });
+  const [pool, client] = await Promise.all([
+    cognito.send(new DescribeUserPoolCommand({ UserPoolId: poolId })),
+    cognito.send(new DescribeUserPoolClientCommand({ UserPoolId: poolId, ClientId: clientId })),
+  ]);
+  const results = [];
+  const check = (name, passed) => {
+    results.push(Boolean(passed));
+    console.log(`  ${passed ? 'PASS' : 'FAIL'} ${name}`);
+  };
+  configurationChecks(pool.UserPool, client.UserPoolClient).forEach(([name, passed]) =>
+    check(name, passed),
+  );
+  const token = process.env.VERIFY_PROVIDER_ACCESS_TOKEN;
+  if (token)
+    await checkLiveAuth(
+      (arg('api') ?? process.env.VERIFY_API ?? 'http://localhost:4010').replace(/\/$/, ''),
+      token,
+      check,
+    );
+  else
+    console.log(
+      '  DEFERRED live auth: supply a synthetic short-lived VERIFY_PROVIDER_ACCESS_TOKEN during P16.8',
+    );
+  console.log(`${results.filter(Boolean).length}/${results.length} executed checks passed`);
+  return results.every(Boolean) ? 0 : 1;
+}
 
-const failed = results.filter((result) => !result.passed);
-
-console.log('');
-console.log(`${results.length - failed.length}/${results.length} checks passed`);
-console.log(failed.length === 0 ? 'PASS' : 'FAIL');
-
-process.exitCode = failed.length === 0 ? 0 : 1;
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().then(
+    (code) => {
+      process.exitCode = code;
+    },
+    () => {
+      console.error(
+        'Cognito verification could not complete. Check private configuration and connectivity.',
+      );
+      process.exitCode = 1;
+    },
+  );
+}

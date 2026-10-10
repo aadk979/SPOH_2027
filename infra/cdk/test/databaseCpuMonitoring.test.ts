@@ -45,8 +45,8 @@ describe('native database CPU monitoring (P08.8)', () => {
         TreatMissingData: 'missing',
       });
       const properties = cpu[0]![1].Properties;
-      expect(properties.AlarmActions).toBeUndefined();
-      expect(properties.OKActions).toBeUndefined();
+      expect(properties.AlarmActions).toHaveLength(1);
+      expect(properties.OKActions).toHaveLength(1);
       expect(properties.InsufficientDataActions).toBeUndefined();
       expect(properties.Metrics).toBeUndefined();
       expect(databases[databaseId]!.Properties).toMatchObject({

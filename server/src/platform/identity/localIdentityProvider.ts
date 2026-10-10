@@ -19,14 +19,18 @@ export function createLocalIdentityProvider(): IdentityProvider {
       return Promise.resolve({ sub, created: true });
     },
 
-    disableUser(email) {
-      logger.info({ email }, 'local identity provider: disable is a no-op');
+    disableUser() {
+      logger.info('local identity provider: disable is a no-op');
       return Promise.resolve();
     },
 
-    enableUser(email) {
-      logger.info({ email }, 'local identity provider: enable is a no-op');
+    enableUser() {
+      logger.info('local identity provider: enable is a no-op');
       return Promise.resolve();
     },
+    resendInvite: () => Promise.resolve(false),
+    hasMfa: () => Promise.resolve(true),
+    beginMfa: () => Promise.resolve('LOCALTESTSECRET'),
+    verifyMfa: () => Promise.resolve(),
   };
 }

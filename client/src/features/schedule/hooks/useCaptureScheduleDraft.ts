@@ -15,7 +15,7 @@ export function useCaptureScheduleDraft(
   const [confirmed, setConfirmed] = useState(false);
   const form = useZodForm(
     captureScheduleSchema(action),
-    captureScheduleFields(action, input.timezone),
+    captureScheduleFields(action, input.timezone, input.current),
     { runAt: 'wallTime' },
   );
   const reload = useReloadCaptureScheduleReview(
@@ -24,7 +24,7 @@ export function useCaptureScheduleDraft(
       setReviewed(result.current);
       setAction(result.action);
       setTimezone(input.timezone);
-      form.reset(captureScheduleFields(result.action, input.timezone));
+      form.reset(captureScheduleFields(result.action, input.timezone, result.current));
       setConfirmed(false);
     },
     change,

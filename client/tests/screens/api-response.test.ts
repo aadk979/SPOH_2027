@@ -1,11 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { api, ApiError, NetworkError } from '@/shared/lib/api';
 import { clearSession, refreshSession } from '@/shared/lib/session';
+import type { Session } from '@/shared/lib/session';
+const state = vi.hoisted(() => ({ session: null as Session | null }));
 vi.mock('@/shared/lib/env', () => ({
   loadClientConfiguration: async () => ({ apiBaseUrl: 'http://fixture' }),
 }));
 vi.mock('@/shared/lib/session', () => ({
-  getAccessToken: () => 'old-token',
+  getAccessToken: () => state.session?.accessToken ?? 'old-token',
+  getOfflineContentToken: () => 'old-token',
+  getSessionGeneration: () => 0,
+  hasExpiredSession: () => false,
   refreshSession: vi.fn(),
   clearSession: vi.fn(),
 }));
@@ -15,6 +20,7 @@ beforeEach(() => {
   fetchMock.mockReset();
   vi.mocked(refreshSession).mockReset();
   vi.mocked(clearSession).mockReset();
+  state.session = null;
 });
 afterEach(() => vi.unstubAllGlobals());
 describe('API response and refresh contract', () => {
@@ -23,10 +29,14 @@ describe('API response and refresh contract', () => {
     expect(await api('/fixture')).toBeUndefined();
   });
   it('refreshes once then clears the session when the retry is unauthorized', async () => {
-    vi.mocked(refreshSession).mockResolvedValue({
+    const renewed = {
       accessToken: 'new-token',
       expiresAt: Date.now() + 60000,
-    } as Awaited<ReturnType<typeof refreshSession>>);
+    } as Session;
+    vi.mocked(refreshSession).mockImplementation(async () => {
+      state.session = renewed;
+      return renewed;
+    });
     fetchMock.mockImplementation(
       async () =>
         new Response(
@@ -59,10 +69,14 @@ describe('API response and refresh contract', () => {
     expect(clearSession).not.toHaveBeenCalled();
   });
   it('keeps a reviewed read out of the HTTP cache through a transparent session refresh', async () => {
-    vi.mocked(refreshSession).mockResolvedValue({
+    const renewed = {
       accessToken: 'new-token',
       expiresAt: Date.now() + 60000,
-    } as Awaited<ReturnType<typeof refreshSession>>);
+    } as Session;
+    vi.mocked(refreshSession).mockImplementation(async () => {
+      state.session = renewed;
+      return renewed;
+    });
     fetchMock
       .mockResolvedValueOnce(
         new Response(

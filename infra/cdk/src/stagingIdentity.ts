@@ -1,6 +1,7 @@
-import { RemovalPolicy, Stack, Validations } from 'aws-cdk-lib';
+import { Duration, RemovalPolicy, Stack, Validations } from 'aws-cdk-lib';
 import {
   AccountRecovery,
+  FeaturePlan,
   Mfa,
   OAuthScope,
   UserPool,
@@ -43,9 +44,15 @@ export class StagingIdentity extends Construct {
         requireDigits: true,
         requireUppercase: true,
         requireLowercase: true,
+        tempPasswordValidity: Duration.days(30),
       },
       mfa: Mfa.OPTIONAL,
       mfaSecondFactor: { otp: true, sms: false },
+      featurePlan: FeaturePlan.ESSENTIALS,
+      userInvitation: {
+        emailSubject: 'Your event operations account',
+        emailBody: 'You have been invited to the event operations team. Your username is {username} and your temporary password is {####}. Sign in to set your password before training.',
+      },
       removalPolicy: RemovalPolicy.DESTROY,
     });
     const account = Stack.of(this).account;
@@ -58,11 +65,15 @@ export class StagingIdentity extends Construct {
       authFlows: {},
       oAuth: {
         flows: { authorizationCodeGrant: true },
-        scopes: [OAuthScope.OPENID, OAuthScope.EMAIL, OAuthScope.PROFILE],
+        scopes: [OAuthScope.OPENID, OAuthScope.EMAIL, OAuthScope.PROFILE, OAuthScope.COGNITO_ADMIN],
         callbackUrls: [`${props.appOrigin}/api/v1/auth/callback`],
         logoutUrls: [`${props.clientOrigin}/sign-in`],
       },
       preventUserExistenceErrors: true,
+      enableTokenRevocation: true,
+      accessTokenValidity: Duration.minutes(5),
+      idTokenValidity: Duration.minutes(5),
+      refreshTokenValidity: Duration.minutes(60),
     });
     this.pool = pool;
     this.settings = {

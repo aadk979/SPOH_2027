@@ -3,67 +3,54 @@ import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { invalidateVolunteerCache } from '../../../platform/identity/index.js';
-import { logger } from '../../../platform/logger/index.js';
-import { revokeAllForVolunteer } from '../../auth/index.js';
-import { identityProvider } from '../../../platform/identity/index.js';
+import { revokeAllInTransaction } from '../../auth/index.js';
 import { toAdminRecord } from '../data/mappers.js';
-import { deletePushSubscriptions, updateVolunteerRow } from '../data/repo.js';
-import { assertActive } from '../domain/escalation.js';
+import {
+  deletePushSubscriptions,
+  hasOtherActiveMembership,
+  updateVolunteerRow,
+} from '../data/repo.js';
 import type { ManagerContext } from './context.js';
 import { loadTarget } from './queries.js';
+import { currentManagement } from './currentManagement.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
 
-/**
- * The roster flag already blocks every request, so access is withdrawn either
- * way; a provider failure means somebody needs to know it is out of step.
- */
-async function disableIdentity(target: { id: string; email: string }): Promise<boolean> {
-  try {
-    await identityProvider.disableUser(target.email);
-    return true;
-  } catch (error) {
-    logger.error(
-      { err: error, volunteerId: target.id },
-      'volunteer deactivated on the roster but the identity provider account could not be disabled',
-    );
-    return false;
-  }
-}
-
-/**
- * Withdraw access. Three things happen together or the account is only half
- * locked out: the roster row is flagged, every refresh session is revoked, and
- * the identity provider account is disabled.
- */
+/** Event suspension never disables a person's identity in their other events (ADR-006 §5). */
 export async function deactivateVolunteer(
   id: string,
   request: DeactivateVolunteerRequest,
   actor: ManagerContext & { clock?: Clock },
 ): Promise<VolunteerMutationResponse> {
-  const target = await loadTarget(id, actor, 'deactivate');
-  assertActive(target, true);
+  await loadTarget(id, actor, 'deactivate');
   const now = (actor.clock ?? systemClock).now();
-
-  const updated = await prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     await holdCaptureEvent(tx, actor.scope);
+    await currentManagement(tx, actor, { id, action: 'People.Deactivate' });
     const row = await updateVolunteerRow(tx, actor.scope, {
       id,
       membership: { status: 'DEACTIVATED', deactivatedAt: now, deactivatedReason: request.reason },
     });
-    await deletePushSubscriptions(tx, id);
+    const otherActive = await hasOtherActiveMembership(tx, {
+      personId: id,
+      eventId: actor.scope.eventId,
+    });
+    const sessionsRevoked = otherActive
+      ? 0
+      : await revokeAllInTransaction(tx, { personId: id, reason: 'deactivated', at: now });
+    if (!otherActive) await deletePushSubscriptions(tx, id);
     await writeAudit(tx, {
       ...actor.audit,
       action: 'user.deactivate',
       entityType: 'Volunteer',
       entityId: id,
-      before: { active: true },
-      after: { active: false, reason: request.reason, disableIdentity: request.disableIdentity },
+      after: { status: 'DEACTIVATED', reasonRecorded: true, sessionsRevoked },
     });
-    return row;
+    return { row, sessionsRevoked };
   });
-
-  const sessionsRevoked = await revokeAllForVolunteer(id, 'deactivated');
-  const identityChanged = request.disableIdentity ? await disableIdentity(target) : false;
   invalidateVolunteerCache();
-  return { volunteer: toAdminRecord(updated), sessionsRevoked, identityChanged };
+  return {
+    volunteer: toAdminRecord(result.row),
+    sessionsRevoked: result.sessionsRevoked,
+    identityChanged: false,
+  };
 }

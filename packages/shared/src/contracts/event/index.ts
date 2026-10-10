@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { CommitteeRole, MembershipStatus } from '../../invariants/enums.js';
-import { Id, IdempotencyKey, IsoDateTime, ReasonText } from '../common/index.js';
+import { Id, IdempotencyKey, IsoDate, IsoDateTime, ReasonText } from '../common/index.js';
 import { GoLiveCheckCode, GoLiveReadinessChecklist } from './goLiveReadiness.js';
 export * from './goLiveReadiness.js';
 
@@ -26,7 +26,7 @@ const GoLiveOverrides = z
 /** Shared manual/scheduled input; evidence and event identity always come from the server. */
 export const LifecycleTransitionInput = z
   .object({
-    to: z.enum(['DRAFT', 'READY', 'REHEARSAL', 'LIVE', 'CLOSED']),
+    to: z.enum(['DRAFT', 'READY', 'REHEARSAL', 'LIVE', 'CLOSED', 'ARCHIVED']),
     expectedVersion: z.number().int().nonnegative(),
     reason: ReasonText.optional(),
     goLiveOverrides: GoLiveOverrides.optional(),
@@ -138,6 +138,12 @@ export type RenameEventRequest = z.infer<typeof RenameEventRequest>;
 export const RenameEventResponse = z.object({ event: EventSummary }).strict();
 export type RenameEventResponse = z.infer<typeof RenameEventResponse>;
 
+export const CloneEventParts = z.object({
+  categories: z.boolean(), stations: z.boolean(), daysAndShifts: z.boolean(),
+  gifts: z.boolean(), settings: z.boolean(), content: z.boolean(), permissions: z.boolean(),
+}).strict();
+export type CloneEventParts = z.infer<typeof CloneEventParts>;
+
 /**
  * Clone an event's structure into a new event in DRAFT (ADR-001 §6): its days
  * moved by `dayOffsetDays`, and its people invited again only when asked.
@@ -148,6 +154,33 @@ export const CloneEventRequest = z
     name: EventName,
     dayOffsetDays: z.number().int().min(-3660).max(3660),
     inviteSamePeople: z.boolean().default(false),
+    copy: CloneEventParts.optional(),
   })
   .strict();
 export type CloneEventRequest = z.infer<typeof CloneEventRequest>;
+
+const EventTimezone = z.string().min(1).max(80).refine((value) => {
+  try { new Intl.DateTimeFormat('en', { timeZone: value }); return true; }
+  catch { return false; }
+}, 'Choose a valid IANA timezone');
+export const CreateEventRequest = z.object({
+  organisationId: Id, name: EventName, slug: EventSlug,
+  venue: z.string().trim().max(200), timezone: EventTimezone,
+  startDate: IsoDate, endDate: IsoDate, joinAsAdmin: z.boolean(), idempotencyKey: IdempotencyKey,
+}).strict().superRefine((value, ctx) => {
+  const days = (Date.parse(value.endDate) - Date.parse(value.startDate)) / 86_400_000;
+  if (days < 0 || days > 365) ctx.addIssue({ code: 'custom', path: ['endDate'], message: 'Choose an end date within 366 days of the start' });
+});
+export type CreateEventRequest = z.infer<typeof CreateEventRequest>;
+export const CloneEventWizardRequest = z.object({
+  organisationId: Id, sourceEventId: Id, clone: CloneEventRequest,
+  joinAsAdmin: z.boolean(), idempotencyKey: IdempotencyKey,
+}).strict();
+export type CloneEventWizardRequest = z.infer<typeof CloneEventWizardRequest>;
+export const EventAdministrationResponse = z.object({
+  organisations: z.array(z.object({ id: Id, name: z.string(), timezone: z.string(), locale: z.string(), canCreate: z.boolean(), canClone: z.boolean() }).strict()),
+  events: z.array(EventSummary.extend({ organisationId: Id, slug: EventSlug, venue: z.string().nullable() })),
+}).strict();
+export type EventAdministrationResponse = z.infer<typeof EventAdministrationResponse>;
+export const EventCreatedResponse = z.object({ event: EventSummary.extend({ slug: EventSlug }), joined: z.boolean() }).strict();
+export type EventCreatedResponse = z.infer<typeof EventCreatedResponse>;

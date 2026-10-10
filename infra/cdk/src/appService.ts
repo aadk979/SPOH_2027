@@ -36,7 +36,9 @@ import { AuthorizationMonitoring } from './authorizationMonitoring.js';
 import { CacheBusMonitoring } from './cacheBusMonitoring.js';
 import { TaskFailureMonitoring } from './taskFailureMonitoring.js';
 import type { Bucket } from 'aws-cdk-lib/aws-s3';
+import { grantExportObjects } from './exportAccess.js';
 import { grantPhotoObjects } from './mediaAccess.js';
+import { grantContentObjects } from './contentAccess.js';
 import type { AuthorizationStore } from './authorizationStore.js';
 
 const PORT = 4000;
@@ -55,6 +57,8 @@ export interface AppServiceProps {
   cognito: CognitoSettings;
   /** Enabled only after the stage has an approved exact client origin for S3 CORS. */
   mediaBucket?: Bucket;
+  contentBucket?: Bucket;
+  exportsBucket?: Bucket;
   /** The stage's AVP policy store (P11.6); the app asks it, behind the cache and breaker. */
   authorization: AuthorizationStore;
 }
@@ -100,6 +104,8 @@ export class AppService extends Construct {
       cognito: props.cognito,
       port: PORT,
       ...(props.mediaBucket ? { mediaBucketName: props.mediaBucket.bucketName } : {}),
+      ...(props.contentBucket ? { contentBucketName: props.contentBucket.bucketName } : {}),
+      ...(props.exportsBucket ? { exportsBucketName: props.exportsBucket.bucketName } : {}),
     });
 
     this.migrateTask = this.migrationTask(props, imageOf(props.imageTag), logs);
@@ -170,6 +176,14 @@ export class AppService extends Construct {
         ...this.configuration.appInjections,
         DB_APP_PASSWORD: EcsSecret.fromSecretsManager(secrets.appDbPassword),
         SESSION_SIGNING_SECRET: EcsSecret.fromSecretsManager(secrets.sessionSigningSecret),
+        ATTENDANCE_SIGNING_SECRET: EcsSecret.fromSecretsManager(secrets.attendanceSigningSecret),
+        ...(secrets.vapid
+          ? {
+              VAPID_PUBLIC_KEY: EcsSecret.fromSecretsManager(secrets.vapid, 'publicKey'),
+              VAPID_PRIVATE_KEY: EcsSecret.fromSecretsManager(secrets.vapid, 'privateKey'),
+              VAPID_SUBJECT: EcsSecret.fromSecretsManager(secrets.vapid, 'subject'),
+            }
+          : {}),
       },
       healthCheck: {
         command: [
@@ -185,6 +199,8 @@ export class AppService extends Construct {
       },
     });
     if (props.mediaBucket) grantPhotoObjects(task, props.mediaBucket);
+    if (props.contentBucket) grantContentObjects(task, props.contentBucket);
+    if (props.exportsBucket) grantExportObjects(task, props.exportsBucket);
     props.authorization.grantIsAuthorized(task.taskRole);
     acknowledgeTask(task);
     Validations.of(task).acknowledge({

@@ -11,6 +11,7 @@ import {
 import { currentAuthorizer } from './engine.js';
 import { settingQuestion } from './settingQuestion.js';
 import { stationCandidates } from './stationCandidates.js';
+import { personPermissions } from './personPermissions.js';
 
 /** Every action a member may be asked about (the person-only platform actions are not). */
 const MEMBER_ACTIONS = ACTION_IDS.filter((action) =>
@@ -66,6 +67,7 @@ export async function memberPermissions(
   const builder = new EntityBuilder(db, { eventId: scope.eventId, now: systemClock.now() });
   const stations = await stationCandidates(db, scope, membershipId);
   const granted = (await databaseRoleGrants.grantsFor(db, scope.eventId))[input.role].grants;
+  const event = await db.event.findUniqueOrThrow({ where: { id: scope.eventId }, select: { status: true } });
   const allows = async (question: Question) => {
     const request = await builder.forMembership(membershipId, {
       ...question,
@@ -79,7 +81,7 @@ export async function memberPermissions(
   for (const action of MEMBER_ACTIONS) {
     const resources = resourcesFor(action, { eventId: scope.eventId, membershipId, stations });
     if (resources.length === 0) {
-      actions[action] = isSelfService(action) || granted.includes(action);
+      actions[action] = fallbackGrant(action, { archived: event.status === 'ARCHIVED', granted });
       continue;
     }
     actions[action] = false;
@@ -92,11 +94,19 @@ export async function memberPermissions(
   }
   const setting = (key: string) => allows(settingQuestion(key));
   return {
-    actions,
+    actions: {
+      ...actions,
+      ...(await personPermissions(db, { eventId: scope.eventId, membershipId })),
+    },
     settings: {
       operational: await setting(SETTING_CLASSES.operational),
       security: await setting(SETTING_CLASSES.security),
       privacy: await setting(SETTING_CLASSES.privacy),
     },
   };
+}
+
+function fallbackGrant(action: Action, context: { archived: boolean; granted: readonly string[] }) {
+  if (context.archived && (ACTION_CATALOGUE[action].groups as readonly string[]).includes('Write')) return false;
+  return isSelfService(action) || context.granted.includes(action);
 }

@@ -2,6 +2,8 @@ import { authorize } from '../../../platform/http/authorize.js';
 import { theEvent } from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import {
+  ArchiveExportParams,
+  CreateArchiveExportRequest,
   ReportExportQuery,
   ReportQuery,
   ReportSnapshotExportQuery,
@@ -10,6 +12,12 @@ import {
   ReportSnapshotsQuery,
 } from '@spoh/shared';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
+import { idempotent } from '../../../platform/http/idempotency.js';
+import {
+  createArchiveExportHandler,
+  listArchiveExportsHandler,
+  readArchiveExportHandler,
+} from './archiveHandlers.js';
 import { sensitiveRateLimit } from '../../../platform/http/rateLimit.js';
 import { validate } from '../../../platform/http/validate.js';
 import { exportReportHandler, reportSummaryHandler } from './handlers.js';
@@ -23,6 +31,27 @@ import {
 export const reportRouter: Router = Router();
 
 reportRouter.use(requireAuth);
+reportRouter.get(
+  '/archive-exports',
+  sensitiveRateLimit,
+  authorize('Report.Export', theEvent),
+  listArchiveExportsHandler,
+);
+reportRouter.post(
+  '/archive-export',
+  sensitiveRateLimit,
+  authorize('Report.Export', theEvent),
+  validate({ body: CreateArchiveExportRequest }),
+  idempotent('POST /reports/archive-export'),
+  createArchiveExportHandler,
+);
+reportRouter.get(
+  '/archive-export/:id',
+  sensitiveRateLimit,
+  authorize('Report.Export', theEvent),
+  validate({ params: ArchiveExportParams }),
+  readArchiveExportHandler,
+);
 
 reportRouter.get(
   '/snapshots',

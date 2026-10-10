@@ -82,10 +82,18 @@ it('boots both daily handlers and prunes event and platform replays at the stric
       where: { eventId: null },
       orderBy: { type: 'asc' },
     });
-    expect(boot.map((row) => row.type)).toEqual(['idempotency.prune', 'session.prune']);
+    expect(boot.map((row) => row.type)).toEqual([
+      'idempotency.prune',
+      'retention.audit',
+      'retention.identity',
+      'session.prune',
+    ]);
     expect(
       boot.every(
-        (row) => row.eventId === null && row.createdByPersonId === null && row.recurrence === 86400,
+        (row) =>
+          row.eventId === null &&
+          row.createdByPersonId === null &&
+          row.recurrence === (row.type === 'retention.identity' ? 60 : 86400),
       ),
     ).toBe(true);
     const action = boot[0]!;

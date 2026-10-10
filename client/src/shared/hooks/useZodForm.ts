@@ -11,6 +11,11 @@ export type FormErrors = Record<string, string | undefined>;
  */
 export type ErrorFields<Values> = Readonly<Record<string, keyof Values & string>>;
 
+function clearFieldErrors(errors: FormErrors, key: string): FormErrors {
+  return Object.fromEntries(Object.entries(errors).filter(([path]) =>
+    path !== key && path !== '_form' && !path.startsWith(`${key}.`)));
+}
+
 function fieldFor(path: string, errorFields: Record<string, string>): string {
   for (let prefix = path; prefix; prefix = prefix.slice(0, Math.max(prefix.lastIndexOf('.'), 0))) {
     const field = errorFields[prefix];
@@ -48,7 +53,7 @@ export function useZodForm<Schema extends z.ZodType, Values extends object>(
 
   function setField<Key extends keyof Values>(key: Key, value: Values[Key]): void {
     setValues((current) => ({ ...current, [key]: value }));
-    setErrors((current) => ({ ...current, [key]: undefined, _form: undefined }));
+    setErrors((current) => clearFieldErrors(current, String(key)));
   }
 
   /** For values changed by repeated taps: applies to the latest value, not this render's. */
@@ -57,7 +62,7 @@ export function useZodForm<Schema extends z.ZodType, Values extends object>(
     update: (current: Values[Key]) => Values[Key],
   ): void {
     setValues((current) => ({ ...current, [key]: update(current[key]) }));
-    setErrors((current) => ({ ...current, [key]: undefined, _form: undefined }));
+    setErrors((current) => clearFieldErrors(current, String(key)));
   }
 
   function setter<Key extends keyof Values>(key: Key): (value: Values[Key]) => void {

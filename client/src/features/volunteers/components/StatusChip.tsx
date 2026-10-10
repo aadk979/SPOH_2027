@@ -4,8 +4,8 @@ import { type VolunteerAdminRecord } from '@spoh/shared';
 export function StatusChip({ volunteer }: { volunteer: VolunteerAdminRecord }): ReactNode {
   const [label, className] = !volunteer.active
     ? ['Deactivated', 'bg-warn-surface text-warn']
-    : !volunteer.hasSignedIn
-      ? ['Never signed in', 'bg-alert-surface text-alert']
+    : volunteer.status === 'INVITED' || !volunteer.hasSignedIn
+      ? ['Invite pending', 'bg-alert-surface text-alert']
       : [
           `${volunteer.assignmentCount} ${volunteer.assignmentCount === 1 ? 'shift' : 'shifts'}`,
           'bg-surface-alt text-text-muted',

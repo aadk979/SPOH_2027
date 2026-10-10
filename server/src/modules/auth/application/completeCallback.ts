@@ -46,7 +46,7 @@ export async function completeCallback(
   }
 
   try {
-    const session = await openSession(sub, context, audit);
+    const session = await openSession(sub, { ...context, providerAccessToken: accessToken }, audit);
     return { redirectTo: `${clientSignInOrigin()}/`, session };
   } catch (cause) {
     return failed(cause instanceof AppError ? cause.code : ERROR_CODES.INTERNAL_ERROR);

@@ -203,6 +203,17 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
     at 17:20 SGT. This changes the staging browser criterion only. Production Firebase sessions
     must still work without third-party refresh cookies; production and live-site approvals remain.
 
+  **Implementation record, 10 October 2026:** P12.2 is reduced to Cognito's default sender;
+  SES/DKIM/sandbox work and the SES event-membership email are excluded by the owner's amendment,
+  rather than deferred. The application paces pool-wide daily invite/resend work, defaulting to
+  fifty deliveries; this does not claim a measured provider quota or delivery receipt.
+
+  **Assumed technical implementation** under D-23, following D-08's blocked-third-party-cookie
+  requirement and ADR-006's memory-only thin tokens: use a first-party one-use code/PKCE handoff
+  for browser recovery. An active tab asks the user to save changes and explicitly renew before
+  the page reloads; a timer does not navigate away from an unfinished form. No access/refresh
+  token is persisted in browser storage. Acceptance is P16.8; production creation remains P12.8.
+
 ### D-09 — Scheduler engine
 
 - **Owner:** design (P05)
@@ -456,3 +467,9 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   approval. Owner decisions are asked only for cost, production, unrecoverable data and open
   product rules; otherwise the recommendation is taken and marked **assumed**. The 28 October
   go/no-go (D-01) stands; ADR-011 § Consequences explains why a go is now less likely.
+
+  **Assumed operational recommendation, 10 October 2026:** retain ADR-008's no-NAT/no-interface-
+  endpoint topology and use the documented one-off ECS credential task for operator DB rotation
+  (`infra/cdk/README.md`, "Rotation under the lean network topology"). Automatic Secrets Manager
+  rotation is not claimed. Real rotation/rollback evidence is P16.8; no new billable network or
+  rotation service is authorised by this implementation choice.

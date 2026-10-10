@@ -1,9 +1,7 @@
-import { authorize } from '../../../platform/http/authorize.js';
-import { self } from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
-import { CreateSessionRequest } from '@spoh/shared';
+import { CreateSessionRequest, RedeemHandoffRequest, VerifyMfaRequest } from '@spoh/shared';
 import { z } from 'zod';
-import { requireAuth } from '../../../platform/http/requireAuth.js';
+import { requirePerson } from '../../../platform/http/requireAuth.js';
 import { defaultRateLimit, signInRateLimit } from '../../../platform/http/rateLimit.js';
 import { validate } from '../../../platform/http/validate.js';
 import {
@@ -15,9 +13,16 @@ import {
   revokeSessionHandler,
   signOutHandler,
 } from './handlers.js';
+import {
+  recoverHandler,
+  handoffHandler,
+  mfaSetupHandler,
+  mfaVerifyHandler,
+} from './securityHandlers.js';
 
 /** Session endpoints: sign-in, hosted sign-in, renewal, sign-out and devices. */
 export const authRouter: Router = Router();
+authRouter.use((_req, res, next) => { res.setHeader('Cache-Control', 'no-store'); next(); });
 
 const SessionIdParams = z.object({ id: z.string().min(1).max(64) }).strict();
 
@@ -29,20 +34,32 @@ authRouter.post(
 );
 authRouter.get('/login', signInRateLimit, loginHandler);
 authRouter.get('/callback', signInRateLimit, callbackHandler);
+authRouter.get('/recover', defaultRateLimit, recoverHandler);
+authRouter.post(
+  '/handoff',
+  defaultRateLimit,
+  validate({ body: RedeemHandoffRequest }),
+  handoffHandler,
+);
+authRouter.post('/mfa/setup', signInRateLimit, mfaSetupHandler);
+authRouter.post(
+  '/mfa/verify',
+  signInRateLimit,
+  validate({ body: VerifyMfaRequest }),
+  mfaVerifyHandler,
+);
 authRouter.post('/refresh', defaultRateLimit, refreshHandler);
 authRouter.delete('/session', defaultRateLimit, signOutHandler);
 authRouter.get(
   '/sessions',
-  requireAuth,
+  requirePerson,
   defaultRateLimit,
-  authorize('Self.Read', self),
   listSessionsHandler,
 );
 authRouter.delete(
   '/sessions/:id',
-  requireAuth,
+  requirePerson,
   defaultRateLimit,
-  authorize('Self.Read', self),
   validate({ params: SessionIdParams }),
   revokeSessionHandler,
 );

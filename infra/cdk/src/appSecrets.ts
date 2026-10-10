@@ -1,5 +1,5 @@
 import { Validations } from 'aws-cdk-lib';
-import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
+import { Secret, type ISecret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 
 /**
@@ -11,6 +11,8 @@ export class AppSecrets extends Construct {
   readonly appDbPassword: Secret;
   readonly migratorDbPassword: Secret;
   readonly sessionSigningSecret: Secret;
+  readonly attendanceSigningSecret: Secret;
+  readonly vapid?: ISecret;
 
   constructor(scope: Construct, id: string, prefix: string) {
     super(scope, id);
@@ -35,7 +37,19 @@ export class AppSecrets extends Construct {
       'Signs the API access tokens (SESSION_SIGNING_SECRET)',
       64,
     );
-    for (const secret of [this.appDbPassword, this.migratorDbPassword, this.sessionSigningSecret]) {
+    this.attendanceSigningSecret = generated(
+      'attendance-signing-secret',
+      'Signs attendance tokens independently of API sessions',
+      64,
+    );
+    const vapidArn = this.node.tryGetContext('vapidSecretArn') as string | undefined;
+    if (vapidArn) this.vapid = Secret.fromSecretCompleteArn(this, 'Vapid', vapidArn);
+    for (const secret of [
+      this.appDbPassword,
+      this.migratorDbPassword,
+      this.sessionSigningSecret,
+      this.attendanceSigningSecret,
+    ]) {
       Validations.of(secret).acknowledge({
         id: 'AwsSolutions-SMG4',
         reason:

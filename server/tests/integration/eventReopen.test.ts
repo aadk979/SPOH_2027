@@ -211,10 +211,17 @@ it('refuses authority forged in the request and first go-live without server che
   await rawDb.event.update({ where: { id: eventId }, data: { status: 'READY' } });
   const ready = await post({ ...reopenBody(), expectedVersion: version + 1 });
   expect(ready.status).toBe(409);
-  expect(ready.body.error.details.blockers).toContain('go-live:content:missing');
+  expect(ready.body.error.details.blockers).toContain('go-live:content');
+  expect(ready.body.error.details.blockers).toContain('go-live:staging-smoke:missing');
 });
 
-it.each(['organisation role', 'event role', 'event standing'])(
+it.each([
+  'organisation role',
+  'organisation membership',
+  'event standing',
+  'ended membership',
+  'person standing',
+])(
   'rechecks current %s after middleware and before reopening',
   async (kind) => {
     const original = lifecycleRepo.lockLifecycleEvent;
@@ -227,16 +234,27 @@ it.each(['organisation role', 'event role', 'event standing'])(
             where: { organisationId, personId: admin.id },
             data: { role: 'MEMBER' },
           });
+        } else if (kind === 'organisation membership') {
+          await rawDb.organisationMembership.deleteMany({
+            where: { organisationId, personId: admin.id },
+          });
+        } else if (kind === 'person standing') {
+          await rawDb.person.update({
+            where: { id: admin.id },
+            data: { deactivatedAt: FROZEN_NOW },
+          });
         } else {
           await rawDb.eventMembership.updateMany({
             where: { eventId, personId: admin.id },
-            data: kind === 'event role' ? { role: 'VOLUNTEER' } : { status: 'DEACTIVATED' },
+            data: { status: kind === 'ended membership' ? 'ENDED' : 'DEACTIVATED' },
           });
         }
         return event;
       });
     try {
-      expect((await post(reopenBody())).status).toBe(kind === 'organisation role' ? 409 : 403);
+      const result = await post(reopenBody());
+      expect(result.status).toBe(403);
+      expect(result.body.error.code).toBe('FORBIDDEN');
     } finally {
       spy.mockRestore();
     }
@@ -245,6 +263,28 @@ it.each(['organisation role', 'event role', 'event standing'])(
     expect((await reminders())[0]?.status).toBe('PENDING');
   },
 );
+
+it('retains locked reopen authority when the platform admin has a lower current event role', async () => {
+  const original = lifecycleRepo.lockLifecycleEvent;
+  const spy = vi
+    .spyOn(lifecycleRepo, 'lockLifecycleEvent')
+    .mockImplementationOnce(async (...args) => {
+      const event = await original(...args);
+      await rawDb.eventMembership.updateMany({
+        where: { eventId, personId: admin.id },
+        data: { role: 'VOLUNTEER' },
+      });
+      return event;
+    });
+  try {
+    expect((await post(reopenBody())).status).toBe(200);
+  } finally {
+    spy.mockRestore();
+  }
+  expect(await state()).toMatchObject({ status: 'LIVE', lifecycleVersion: version + 1 });
+  expect((await snapshots())[0]?.supersededAt).toEqual(FROZEN_NOW);
+  expect((await reminders())[0]?.status).toBe('CANCELLED');
+});
 
 it('holds organisation authority stable until the transition transaction commits', async () => {
   const original = authorityRepo.currentOrganisationRole;

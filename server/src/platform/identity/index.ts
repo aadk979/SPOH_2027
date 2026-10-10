@@ -1,4 +1,3 @@
-import { highestRole } from '@spoh/shared';
 import { env } from '../../config/env.js';
 import {
   AccountInactiveError,
@@ -21,6 +20,9 @@ import { createLocalIdentityProvider } from './localIdentityProvider.js';
 import type { IdentityProvider } from './provisioning.js';
 import { createLocalAuthProvider } from './localProvider.js';
 import type { AuthProvider } from './types.js';
+import { liveSession } from './sessionSecurity.js';
+import { acceptSelectedMembership } from './membershipAcceptance.js';
+import { archiveReader } from '../access/archiveStanding.js';
 
 export type { AuthProvider, VerifiedToken } from './types.js';
 export type { IdentityProvider } from './provisioning.js';
@@ -95,7 +97,7 @@ const VOLUNTEER_CACHE_TTL_MS = 60_000;
  * Revocation notifications evict it promptly; a periodic refresh backs up
  * missed notifications. While disconnected, every request checks the database.
  */
-const SESSION_CACHE_TTL_MS = 60_000;
+const SESSION_CACHE_TTL_MS = 1_000;
 
 interface CachedVolunteer {
   volunteerId: string;
@@ -160,7 +162,7 @@ async function resolveVolunteer(sub: string, event: RequestedEvent): Promise<Cac
 
   const volunteer = await prisma.person.findUnique({
     where: { cognitoSub: sub },
-    select: { id: true, displayName: true },
+    select: { id: true, displayName: true, deactivatedAt: true },
   });
   if (!volunteer) throw new NotProvisionedError();
 
@@ -169,6 +171,9 @@ async function resolveVolunteer(sub: string, event: RequestedEvent): Promise<Cac
     select: { id: true, role: true, status: true },
   });
   if (!membership) throw event.fromPath ? new NotFoundError('Event') : new NotProvisionedError();
+  const accepted =
+    membership.status === 'INVITED' &&
+    (await acceptSelectedMembership({ eventId, personId: volunteer.id, sub }));
 
   const entry: CachedVolunteer = {
     volunteerId: volunteer.id,
@@ -176,12 +181,19 @@ async function resolveVolunteer(sub: string, event: RequestedEvent): Promise<Cac
     eventId,
     membershipId: membership.id,
     role: membership.role,
-    active: membership.status === 'ACTIVE',
+    active: await standingInEvent(volunteer, { ...membership, accepted, eventId }),
     expiresAt: Date.now() + VOLUNTEER_CACHE_TTL_MS,
   };
 
   volunteerCache.set(cacheKey(sub, eventId), entry);
   return entry;
+}
+
+async function standingInEvent(person: { id: string; deactivatedAt: Date | null },
+  member: { status: string; accepted: boolean; eventId: string }) {
+  if (person.deactivatedAt) return false;
+  if (member.status === 'ACTIVE' || member.accepted) return true;
+  return archiveReader(prisma, { personId: person.id, status: member.status, eventId: member.eventId });
 }
 
 /**
@@ -201,7 +213,7 @@ async function sessionIsLive(sessionId: string, sub: string): Promise<boolean> {
     select: { revokedAt: true, expiresAt: true, volunteer: { select: { cognitoSub: true } } },
   });
 
-  const live = session !== null && session.revokedAt === null && session.expiresAt > new Date();
+  const live = session !== null && (await liveSession(sessionId, sub));
   const owner = session?.volunteer.cognitoSub ?? null;
 
   sessionCache.set(sessionId, { live, sub: owner, expiresAt: Date.now() + SESSION_CACHE_TTL_MS });
@@ -234,8 +246,11 @@ async function subjectOf(token: string): Promise<Subject> {
     }
     return { sub: session.sub, groups: [], sessionId: session.sid };
   }
-  const verified = await authProvider.verify(token);
-  return { sub: verified.sub, groups: verified.groups };
+  // Local fixture tokens exist only in development/test. A deployed Cognito
+  // access token can open a session but can never bypass revocation or MFA.
+  if (!localAuthIssuer) throw new UnauthenticatedError();
+  const verified = await localAuthIssuer.verify(token);
+  return { sub: verified.sub, groups: [] };
 }
 
 /**
@@ -244,14 +259,15 @@ async function subjectOf(token: string): Promise<Subject> {
  */
 export async function authenticatePerson(
   token: string,
-): Promise<{ sub: string; personId: string }> {
-  const { sub } = await subjectOf(token);
+): Promise<{ sub: string; personId: string; sessionId?: string }> {
+  const { sub, sessionId } = await subjectOf(token);
   const person = await prisma.person.findUnique({
     where: { cognitoSub: sub },
-    select: { id: true },
+    select: { id: true, deactivatedAt: true },
   });
   if (!person) throw new NotProvisionedError();
-  return { sub, personId: person.id };
+  if (person.deactivatedAt) throw new AccountInactiveError();
+  return { sub, personId: person.id, ...(sessionId ? { sessionId } : {}) };
 }
 
 /**
@@ -274,13 +290,6 @@ export async function authenticate(
    * matching roster change must not silently grant capabilities.
    */
   const role = volunteer.role;
-  const tokenRole = highestRole(groups);
-  if (tokenRole !== undefined && tokenRole !== role) {
-    logger.warn(
-      { requestId: request.requestId, sub, tokenRole, rosterRole: role },
-      'identity provider groups disagree with the roster; roster wins',
-    );
-  }
 
   return {
     sub,

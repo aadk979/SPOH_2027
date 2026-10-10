@@ -16,7 +16,8 @@ function actorOf(
   req: Request,
 ): Pick<AuditContext, 'actorId' | 'actorSub' | 'eventId' | 'membershipId'> {
   const auth = req.auth;
-  if (!auth) return { actorId: null, actorSub: null, eventId: null, membershipId: null };
+  if (!auth) return { actorId: req.person?.personId ?? null, actorSub: req.person?.sub ?? null,
+    eventId: null, membershipId: null };
   return {
     actorId: auth.volunteerId,
     actorSub: auth.sub,

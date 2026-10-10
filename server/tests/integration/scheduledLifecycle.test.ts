@@ -115,7 +115,7 @@ it.each(['timezone', 'event-days', 'shift-templates', 'station-types', 'categori
 );
 
 it.each([
-  { to: 'ARCHIVED' },
+  { to: 'ARCHIVED', platformAdmin: true },
   { to: 'READY', eventId: 'foreign-event' },
   { to: 'READY', readiness: { passed: true } },
   { to: 'READY', idempotencyKey: 'client-reservation' },
@@ -168,16 +168,19 @@ it('does not waive an unavailable first-go-live checklist with platform override
   expect((await f.state()).status).toBe('READY');
 });
 
-it('rejects illegal edges and returning a formerly live event to draft', async () => {
-  const illegal = await f.create({ to: 'REHEARSAL' });
-  expect(await f.run()).toBe('FAILED');
-  expect((await f.action(illegal.id)).lastError).toBe('GUARD_FAILED');
-  await rawDb.event.update({ where: { id: f.eventId }, data: { status: 'LIVE' } });
-  await rawDb.event.update({ where: { id: f.eventId }, data: { status: 'READY' } });
-  await f.create({ to: 'DRAFT' });
-  expect(await f.run()).toBe('FAILED');
-  expect((await f.state()).hasBeenLive).toBe(true);
-});
+it.each(['REHEARSAL', 'ARCHIVED'])(
+  'rejects the illegal DRAFT → %s edge and returning a formerly live event to draft',
+  async (to) => {
+    const illegal = await f.create({ to });
+    expect(await f.run()).toBe('FAILED');
+    expect((await f.action(illegal.id)).lastError).toBe('GUARD_FAILED');
+    await rawDb.event.update({ where: { id: f.eventId }, data: { status: 'LIVE' } });
+    await rawDb.event.update({ where: { id: f.eventId }, data: { status: 'READY' } });
+    await f.create({ to: 'DRAFT' });
+    expect(await f.run()).toBe('FAILED');
+    expect((await f.state()).hasBeenLive).toBe(true);
+  },
+);
 
 it('the real API worker composition executes the registered lifecycle handler', async () => {
   const row = await f.create({ to: 'READY' });

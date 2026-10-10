@@ -1,6 +1,8 @@
 import { Button, Checkbox, Field, Textarea } from '@/shared/ui';
 import type { useCaptureScheduleReview } from '../hooks/useCaptureScheduleReview';
 import { CaptureScheduleExecutionFields } from './CaptureScheduleExecutionFields';
+import { captureScheduleKey } from '../model/captureScheduleReview';
+import { settingScheduleCopy } from '../model/settingScheduleCopy';
 
 export function CaptureScheduleReviewFields({
   review,
@@ -10,6 +12,7 @@ export function CaptureScheduleReviewFields({
   timezone: string;
 }) {
   const frozen = review.disabled || review.uncertain;
+  const copy = settingScheduleCopy(captureScheduleKey(review.action));
   function change<Key extends keyof typeof review.form.values>(
     key: Key,
     value: (typeof review.form.values)[Key],
@@ -25,7 +28,7 @@ export function CaptureScheduleReviewFields({
         ) : null}
         <Field
           id="scheduled-capture-reason"
-          label="Reason for capture schedule"
+          label={`Reason for ${copy.noun} schedule`}
           error={review.form.errors.reason}
         >
           {(props) => (
@@ -39,7 +42,7 @@ export function CaptureScheduleReviewFields({
         </Field>
         <Checkbox
           checked={review.confirmed}
-          label="I have reviewed the current capture value, schedule and effects"
+          label={`I have reviewed the current ${copy.noun} value, schedule and effects`}
           onChange={(event) => review.setConfirmed(event.target.checked)}
         />
       </fieldset>
@@ -54,7 +57,7 @@ export function CaptureScheduleReviewFields({
           ? 'Saving schedule…'
           : review.uncertain
             ? 'Retry same schedule request'
-            : 'Confirm capture schedule'}
+            : `Confirm ${copy.noun} schedule`}
       </Button>
     </>
   );

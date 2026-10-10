@@ -18,8 +18,8 @@ export function WithdrawVolunteerAccess({
         <div className="flex flex-col gap-sm border-t border-line pt-sm">
           <CardTitle as="h4">Withdraw access</CardTitle>
           <p className="text-caption text-text-muted">
-            Signs out every device they are signed in on, stops alerts reaching their phone, and
-            disables the account at sign-in. Their captured records are kept.
+            Removes access and alerts for this event. Their captured records are kept. A platform
+            admin can withdraw their account across all events from their person page.
           </p>
 
           <Field

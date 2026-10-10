@@ -24,6 +24,7 @@ export type Volunteer = Person & {
   portfolio: string | null;
   reportsToId: string | null;
   active: boolean;
+  membershipStatus: string | null;
 };
 
 function withMembership(scope: EventScope) {
@@ -52,12 +53,22 @@ type PersonWithMembership = Person & {
 function asVolunteer(row: PersonWithMembership): Volunteer {
   const { eventMemberships, ...person } = row;
   const [membership] = eventMemberships;
+  if (!membership)
+    return {
+      ...person,
+      role: 'VOLUNTEER',
+      portfolio: null,
+      reportsToId: null,
+      active: true,
+      membershipStatus: null,
+    };
   return {
     ...person,
-    role: membership?.role ?? 'VOLUNTEER',
-    portfolio: membership?.portfolio ?? null,
-    reportsToId: membership?.reportsTo?.personId ?? null,
-    active: membership ? membership.status === 'ACTIVE' : true,
+    role: membership.role,
+    portfolio: membership.portfolio,
+    reportsToId: membership.reportsTo?.personId ?? null,
+    active: membership.status === 'ACTIVE',
+    membershipStatus: membership.status,
   };
 }
 
@@ -66,7 +77,10 @@ export async function findVolunteerByEmail(
   email: string,
   tx: PrismaTransactionClient = prisma,
 ): Promise<Volunteer | null> {
-  const row = await tx.person.findUnique({ where: { email }, include: withMembership(scope) });
+  const row = await tx.person.findFirst({
+    where: { email: { equals: email, mode: 'insensitive' } },
+    include: withMembership(scope),
+  });
   return row ? asVolunteer(row) : null;
 }
 
@@ -94,7 +108,13 @@ async function upsertMembership(
   };
   await tx.eventMembership.upsert({
     where: { eventId_personId: { eventId, personId: member.personId } },
-    create: { eventId, personId: member.personId, ...named },
+    create: {
+      eventId,
+      personId: member.personId,
+      status: 'INVITED',
+      invitedAt: new Date(),
+      ...named,
+    },
     update: named,
   });
 }
@@ -112,7 +132,9 @@ export async function upsertVolunteer(
     reportsToId?: string | null;
   },
 ): Promise<{ volunteer: Volunteer; created: boolean }> {
-  const existing = await tx.person.findUnique({ where: { email: data.email } });
+  const existing = await tx.person.findFirst({
+    where: { email: { equals: data.email, mode: 'insensitive' } },
+  });
   const person = existing
     ? await tx.person.update({
         where: { id: existing.id },

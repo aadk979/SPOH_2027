@@ -1,4 +1,4 @@
-import { Id } from '@spoh/shared';
+import { Id, ScheduledOperationalSettingKey, ScheduledOperationalValue } from '@spoh/shared';
 import { z } from 'zod';
 import { requireCurrentPermission } from '../../platform/access/currentPermission.js';
 import { settingQuestion } from '../../platform/access/settingQuestion.js';
@@ -8,17 +8,23 @@ import { defineScheduledHandler, type ScheduleContext } from '../../platform/sch
 import { changeSettingInTransaction } from '../../platform/settings/change.js';
 import { SETTINGS } from '../../platform/settings/registry.js';
 
-/** Further setting keys/scopes stay unavailable until their consumers and authority are wired. */
+/** Only registry-supported operational values/scopes can execute; security remains immediate. */
 export const captureSettingPayload = z
   .object({
     scope: z.enum(['event', 'station']),
     scopeId: Id,
-    key: z.literal('capture.open'),
-    value: SETTINGS['capture.open'].schema,
+    key: ScheduledOperationalSettingKey,
+    value: ScheduledOperationalValue,
     expectedVersion: z.number().int().min(0),
     reason: z.string().trim().min(3).max(500).optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((input, ctx) => {
+    if (!SETTINGS[input.key].scopes.includes(input.scope))
+      ctx.addIssue({ code: 'custom', path: ['scope'], message: 'Unsupported setting scope' });
+    if (!SETTINGS[input.key].schema.safeParse(input.value).success)
+      ctx.addIssue({ code: 'custom', path: ['value'], message: 'Invalid setting value' });
+  });
 type CaptureSettingPayload = z.infer<typeof captureSettingPayload>;
 
 function captureSettingTarget(context: ScheduleContext, payload: CaptureSettingPayload) {

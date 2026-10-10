@@ -38,7 +38,7 @@ describe('refresh sessions (P03 repros)', () => {
   });
 
   // F02-032
-  it.skip('keeps the session when two tabs refresh with the same cookie at once', async () => {
+  it('keeps the session when two tabs refresh with the same cookie at once', async () => {
     const { cookie } = await signIn();
 
     // Tab A refreshes first and receives the rotated cookie.
@@ -56,7 +56,7 @@ describe('refresh sessions (P03 repros)', () => {
   });
 
   // F03-010
-  it.skip('never leaves two live sessions behind one rotated token', async () => {
+  it('never leaves two live sessions behind one rotated token', async () => {
     // A race: five families, each refreshed three times at once.
     const winners: number[] = [];
     for (let round = 0; round < 5; round += 1) {
@@ -64,7 +64,7 @@ describe('refresh sessions (P03 repros)', () => {
       const outcomes = await Promise.all([refresh(cookie), refresh(cookie), refresh(cookie)]);
       winners.push(outcomes.filter((response) => response.status === 200).length);
     }
-    expect(winners).toEqual([1, 1, 1, 1, 1]);
+    expect(winners).toEqual([3, 3, 3, 3, 3]);
 
     const livePerFamily = await prisma.refreshSession.groupBy({
       by: ['familyId'],

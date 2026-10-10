@@ -16,6 +16,7 @@ import { OperationalCatalogueHistory } from './OperationalCatalogueHistory';
 import { CatalogueRestoreReview } from './CatalogueRestoreReview';
 import { CatalogueEditReview } from './CatalogueEditReview';
 import { catalogueField, type CatalogueEditAction } from '../model/catalogueEdit';
+import { CaptureScheduleControls } from '@/features/schedule';
 
 export function OperationalCatalogueContents(input: {
   target: ScopedSettingsTarget;
@@ -81,10 +82,22 @@ function OperationalCatalogueValues(input: {
   const [selected, setSelected] = useState<ScopedOperationalSettingKey | null>(null);
   const [restore, setRestore] = useState<ScopedSettingsHistoryRecord | null>(null);
   const [edit, setEdit] = useState<CatalogueEditAction | null>(null);
+  const [schedule, setSchedule] = useState<ScopedOperationalSettingKey | null>(null);
   const clock = useEventTime();
   if (restore)
     return <CatalogueRestoreReview {...input} history={restore} onClose={() => setRestore(null)} />;
   if (edit) return <CatalogueEditReview {...input} action={edit} onClose={() => setEdit(null)} />;
+  if (schedule)
+    return (
+      <CaptureScheduleControls
+        {...input}
+        settingKey={schedule}
+        onApplied={() => {
+          void input.loadCurrent();
+        }}
+        onClose={() => setSchedule(null)}
+      />
+    );
   if (input.readUnavailable)
     return (
       <Callout tone="alert" role="alert">
@@ -125,6 +138,7 @@ function OperationalCatalogueValues(input: {
                   onHistory={() => setSelected(row.key)}
                   archived={input.current.eventStatus === 'ARCHIVED'}
                   onEdit={(operation) => setEdit({ key: row.key, operation })}
+                  onSchedule={() => setSchedule(row.key)}
                 />
               ))}
             </ul>
@@ -140,6 +154,7 @@ function CatalogueValueRow(input: {
   onHistory: () => void;
   archived: boolean;
   onEdit: (operation: CatalogueEditAction['operation']) => void;
+  onSchedule: () => void;
 }) {
   const { row } = input;
   return (
@@ -172,6 +187,11 @@ function CatalogueValueRow(input: {
         >
           Remove override: {metadata[row.key].label}
         </Button>
+        {metadata[row.key].schedulable ? (
+          <Button variant="secondary" disabled={input.archived} onClick={input.onSchedule}>
+            Schedules: {metadata[row.key].label}
+          </Button>
+        ) : null}
       </Card>
     </li>
   );

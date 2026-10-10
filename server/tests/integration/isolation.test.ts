@@ -18,6 +18,7 @@ import {
   type TestVolunteer,
 } from '../helpers/fixtures.js';
 import { FROZEN_NOW } from '../setup.js';
+import { guideContent, insertContentPublicationFixture } from '../helpers/content.js';
 
 /**
  * Cross-event isolation (P09.7, ADR-001 "How it is tested" 1).
@@ -81,6 +82,8 @@ interface EventB {
   window: string;
   visitorField: string;
   reportSnapshot: string;
+  contentVersion: string;
+  archiveExport: string;
 }
 
 async function createEventB(): Promise<EventScope> {
@@ -236,6 +239,22 @@ async function seedEventB(): Promise<EventB> {
       report: { range: { from: null, to: null } },
     },
   });
+  const contentVersion = await insertContentPublicationFixture({
+    db: rawDb,
+    eventId,
+    personId: person,
+    now: FROZEN_NOW,
+  });
+  const archiveExport = await rawDb.archiveExport.create({
+    data: {
+      id: 'other-archive-export',
+      eventId,
+      snapshotId: reportSnapshot.id,
+      lifecycleVersion: 0,
+      objectKey: `archive/${eventId}/foreign.xlsx`,
+      createdAt: FROZEN_NOW,
+    },
+  });
   return {
     scope,
     shift: (afternoon as { id: string }).id,
@@ -260,6 +279,8 @@ async function seedEventB(): Promise<EventB> {
     window: window.id,
     visitorField: visitorField.id,
     reportSnapshot: reportSnapshot.id,
+    contentVersion: contentVersion.id,
+    archiveExport: archiveExport.id,
   };
 }
 
@@ -288,6 +309,26 @@ const LIST = noId('lists the path event only');
 const ACTOR = noId("acts on the caller's own records in the path event");
 
 const CASES: Record<string, Case> = {
+  'GET /content': { query: (b) => ({ v: b.contentVersion }) },
+  'GET /content/draft': LIST,
+  'GET /content/versions': LIST,
+  'PUT /content/draft': {
+    body: (b) => ({
+      idempotencyKey: idempotencyKey(),
+      expectedVersion: 0,
+      body: {
+        ...guideContent(),
+        journey: { steps: [{ title: 'Visit', detail: 'Visit the desk', stationIds: [b.station] }] },
+      },
+    }),
+  },
+  'POST /content/review': noId('reviews the current draft version in the path event'),
+  'POST /content/publish': noId('publishes the current reviewed draft version in the path event'),
+  'POST /content/schedules': noId('schedules publication of the path event current draft version'),
+  'POST /content/images/upload': noId('creates a generated image receipt within the path event'),
+  'GET /content/assets/:versionId/:image': {
+    params: (b) => ({ versionId: b.contentVersion, image: 'map-0' }),
+  },
   'GET /lifecycle': LIST,
   'GET /lifecycle/readiness': LIST,
   'GET /schedules': LIST,
@@ -297,6 +338,9 @@ const CASES: Record<string, Case> = {
   'GET /me': ACTOR,
   'GET /me/permissions': ACTOR,
   'GET /permissions': LIST,
+  'POST /permissions/review': noId(
+    'reviews the current grants in the path event; the body names only its reviewed version',
+  ),
   'PUT /permissions': noId(
     "changes a role's grant in the path event; the body names a role and an action, not a row",
   ),
@@ -485,6 +529,11 @@ const CASES: Record<string, Case> = {
 
   'GET /reports/summary': LIST,
   'GET /reports/export': LIST,
+  'GET /reports/archive-exports': LIST,
+  'POST /reports/archive-export': noId(
+    'creates a private export from the path event current frozen final report',
+  ),
+  'GET /reports/archive-export/:id': { params: (b) => ({ id: b.archiveExport }) },
   'GET /reports/snapshots': { query: (b) => ({ cursor: b.reportSnapshot }) },
   'GET /reports/snapshots/:id': { params: (b) => ({ id: b.reportSnapshot }) },
   'GET /reports/snapshots/:id/export': { params: (b) => ({ id: b.reportSnapshot }) },
@@ -502,6 +551,12 @@ const CASES: Record<string, Case> = {
     body: () => ({ reason: 'isolation check', disableIdentity: false }),
   },
   'POST /admin/volunteers/:id/reactivate': { params: (b) => ({ id: b.person }), body: () => ({}) },
+  'POST /admin/volunteers/bulk': { body: (b) => ({ ids: [b.person], action: 'resend' }) },
+  'POST /admin/volunteers/:id/resend-invite': {
+    params: (b) => ({ id: b.person }),
+    body: () => ({}),
+  },
+  'POST /admin/volunteers/:id/sign-out': { params: (b) => ({ id: b.person }), body: () => ({}) },
   'POST /admin/assignments': {
     body: (b) => ({
       volunteerId: b.person,

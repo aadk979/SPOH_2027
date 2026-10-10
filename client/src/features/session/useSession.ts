@@ -45,7 +45,11 @@ export function useRequireSession(): Session | null {
     router.replace(`/sign-in?returnTo=${encodeURIComponent(returnTo)}`);
   }, [status, session, router]);
 
-  return session;
+  useEffect(() => {
+    if (session?.mfaRequired) router.replace('/mfa');
+  }, [session, router]);
+
+  return session?.mfaRequired ? null : session;
 }
 
 /**

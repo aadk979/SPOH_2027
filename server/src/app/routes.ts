@@ -28,6 +28,8 @@ import { eventFromAlias, eventFromPath } from '../platform/http/eventContext.js'
 import { clientConfigRouter } from '../modules/clientConfig/index.js';
 import { scheduleRouter } from '../modules/schedule/index.js';
 import { permissionsRouter } from '../modules/permissions/index.js';
+import { contentRouter } from '../modules/content/index.js';
+import { personRouter } from '../modules/people/index.js';
 
 /** A module's routes and where they are mounted under /api/v1. */
 export interface ModuleRoutes {
@@ -44,6 +46,7 @@ export interface ModuleRoutes {
 export const PLATFORM_ROUTES: readonly ModuleRoutes[] = [
   { path: '/client-config', router: clientConfigRouter },
   { path: '/auth', router: authRouter },
+  { path: '/people', router: personRouter },
   // The caller's events, for the client's picker and switcher.
   { path: '/events', router: eventListRouter },
   // Development sign-in. The factory returns an empty router outside
@@ -61,6 +64,7 @@ export const PLATFORM_ROUTES: readonly ModuleRoutes[] = [
  * path's event.
  */
 export const EVENT_ROUTES: readonly ModuleRoutes[] = [
+  { path: '/content', router: contentRouter },
   { path: '/lifecycle', router: eventLifecycleRouter },
   { path: '/schedules', router: scheduleRouter },
   { path: '/permissions', router: permissionsRouter },
