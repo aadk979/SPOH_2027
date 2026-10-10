@@ -4,7 +4,7 @@
 # client as a static export the API serves, and the migrate entrypoint. ARM64
 # on Fargate; CI builds it on GitHub's ARM runners, so nothing is emulated.
 
-FROM node:24-bookworm-slim AS manifests
+FROM node:25-bookworm-slim AS manifests
 WORKDIR /app
 COPY package.json package-lock.json ./
 COPY packages/shared/package.json packages/shared/
@@ -31,7 +31,7 @@ FROM manifests AS deps
 RUN npm ci --omit=dev --no-audit --no-fund \
   --workspace server --workspace packages/shared --workspace packages/access-policies
 
-FROM node:24-bookworm-slim AS runtime
+FROM node:25-bookworm-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production PORT=4000 CLIENT_DIR=/app/client/out
 
