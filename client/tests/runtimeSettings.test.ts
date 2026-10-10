@@ -19,7 +19,6 @@ function session(id: string) {
     tokenType: 'Bearer',
     expiresIn: 900,
     volunteer: { id, displayName: id, role: 'VOLUNTEER' },
-    capabilities: ['own.read'],
     refreshAvailable: false,
   };
 }

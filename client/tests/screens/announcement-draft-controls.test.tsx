@@ -11,6 +11,7 @@ import { privateAnnouncementKeys } from '@/features/announcements/queries';
 import { api } from '@/shared/lib/api';
 import { ApiError, NetworkError } from '@/shared/lib/apiErrors';
 import { DRAFT_ME, PRIVATE_DRAFT, PRIVATE_SCHEDULE } from '../helpers/announcement';
+import { permissionsFor } from '../helpers/permissions';
 import { TEST_EVENT } from '../helpers/event';
 
 const state = vi.hoisted(() => ({
@@ -21,6 +22,9 @@ const state = vi.hoisted(() => ({
 }));
 vi.mock('@/features/session', async (original) => ({
   ...(await original<typeof import('@/features/session')>()),
+  ...(await import('../helpers/permissions')).permissionHooks(() =>
+    permissionsFor(['Announcement.SendStation', 'Announcement.SendEvent']),
+  ),
   useCurrentSession: () => ({ volunteerId: state.personId }),
   useEventTime: () => ({ dateTime: (value: string) => value }),
 }));

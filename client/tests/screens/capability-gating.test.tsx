@@ -6,7 +6,7 @@ import RegistrationCaptureScreen from '@/features/registration/screens/Registrat
 import IcConsoleScreen from '@/features/dashboard/screens/IcConsoleScreen';
 import { api } from '@/shared/lib/api';
 
-const state = vi.hoisted(() => ({ capabilities: [] as string[] }));
+const state = vi.hoisted(() => ({ actions: [] as string[] }));
 vi.mock('@/shared/shell/AppShell', () => ({
   AppShell: ({ children }: { children: ReactNode }) => <main>{children}</main>,
 }));
@@ -21,23 +21,26 @@ vi.mock('@/features/capture', () => ({
     undo: vi.fn(),
   }),
 }));
-vi.mock('@/features/session', () => ({
-  useRequireSession: () => ({ accessToken: 'fixture' }),
-  useCurrentSession: () => ({ accessToken: 'fixture' }),
-  useMe: () => ({
-    data: {
-      capabilities: state.capabilities,
-      currentAssignment: {
-        station: {
-          id: 'booth',
-          name: 'Booth',
-          type: { registersVisitors: true },
+vi.mock('@/features/session', async () => {
+  const { permissionHooks, permissionsFor } = await import('../helpers/permissions');
+  return {
+    ...permissionHooks(() => permissionsFor(state.actions)),
+    useRequireSession: () => ({ accessToken: 'fixture' }),
+    useCurrentSession: () => ({ accessToken: 'fixture' }),
+    useMe: () => ({
+      data: {
+        currentAssignment: {
+          station: {
+            id: 'booth',
+            name: 'Booth',
+            type: { registersVisitors: true },
+          },
         },
+        upcomingAssignments: [],
       },
-      upcomingAssignments: [],
-    },
-  }),
-}));
+    }),
+  };
+});
 vi.mock('@/shared/lib/api', async (original) => ({
   ...(await original<typeof import('@/shared/lib/api')>()),
   api: vi.fn(),
@@ -64,7 +67,7 @@ afterEach(() => {
 
 describe('screens call only what the role may use (F02-020)', () => {
   it('does not ask for the booth total without station dashboard access', async () => {
-    state.capabilities = ['registration.create'];
+    state.actions = ['Registration.Create'];
     show(<RegistrationCaptureScreen />);
     await screen.findByRole('main');
     await new Promise((resolve) => setTimeout(resolve, 20));
@@ -72,20 +75,20 @@ describe('screens call only what the role may use (F02-020)', () => {
   });
 
   it('asks for the booth total when the role may read it', async () => {
-    state.capabilities = ['registration.create', 'dashboard.station.read'];
+    state.actions = ['Registration.Create', 'Dashboard.ReadStation'];
     show(<RegistrationCaptureScreen />);
     await waitFor(() => expect(requested('/registrations/summary')).toBe(true));
   });
 
   it('shows the swap queue only to a role that decides swaps', async () => {
-    state.capabilities = ['dashboard.station.read'];
+    state.actions = ['Dashboard.ReadStation'];
     show(<IcConsoleScreen />);
     await waitFor(() => expect(requested('/dashboard/station/booth')).toBe(true));
     expect(requested('/swaps/pending')).toBe(false);
 
     cleanup();
     mockedApi.mockClear();
-    state.capabilities = ['dashboard.station.read', 'swap.approve'];
+    state.actions = ['Dashboard.ReadStation', 'Swap.Decide'];
     show(<IcConsoleScreen />);
     await waitFor(() => expect(requested('/swaps/pending')).toBe(true));
   });

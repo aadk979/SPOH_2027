@@ -4,8 +4,7 @@ export {
   useCurrentSession,
   useRequireSession,
   useSessionStatus,
-  useCan,
 } from './useSession';
-export { useMe, useMyPermissions, sessionKeys } from './queries';
+export { useAllows, useMe, useMyPermissions, sessionKeys } from './queries';
 export { useEventTime, type EventTimeFormat } from './useEventTime';
 export { getHostedSignInUrl } from './api';

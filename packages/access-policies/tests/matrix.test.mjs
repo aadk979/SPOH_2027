@@ -1,5 +1,6 @@
 // The 26 × 6 port (ADR-005 §5): with the default grants, each of today's capabilities, mapped
-// to its primary Cedar action, allows exactly the roles packages/shared/src/access/capabilities.ts
+// to its primary Cedar action, allows exactly the roles the retired capability matrix did
+// (tests/fixtures/legacy-capability-matrix.ts.txt, frozen when P11.8 deleted it from shared)
 // allows. The matrix is read from that file, so this test fails if either side drifts. Cells
 // that change on purpose are tested in changes.test.mjs, never here.
 import { strict as assert } from 'node:assert';
@@ -21,7 +22,7 @@ const LETTER = {
 
 function currentMatrix() {
   const text = readFileSync(
-    join(REPO, 'packages', 'shared', 'src', 'access', 'capabilities.ts'),
+    join(REPO, 'packages', 'access-policies', 'tests', 'fixtures', 'legacy-capability-matrix.ts.txt'),
     'utf8',
   );
   const matrix = {};
@@ -69,7 +70,7 @@ const MAPPING = {
 
 const matrix = currentMatrix();
 
-test('the mapping covers all 26 capabilities in capabilities.ts', () => {
+test('the mapping covers all 26 capabilities of the retired matrix', () => {
   assert.equal(Object.keys(matrix).length, 26);
   assert.deepEqual(Object.keys(MAPPING).sort(), Object.keys(matrix).sort());
 });

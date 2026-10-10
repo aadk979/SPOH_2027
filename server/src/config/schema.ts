@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { attendanceFields } from './schemas/attendance.js';
+import { authorizationFields } from './schemas/authorization.js';
 import { authFields, authProviderRule, sessionRule } from './schemas/auth.js';
 import { databaseFields, databasePoolRule, databaseSslRule } from './schemas/database.js';
 import { pushFields, vapidRule } from './schemas/push.js';
@@ -18,6 +19,7 @@ const EnvSchema = z
     ...serverFields,
     ...databaseFields,
     ...authFields,
+    ...authorizationFields,
     ...attendanceFields,
     ...storageFields,
     ...pushFields,

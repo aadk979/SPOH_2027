@@ -1,6 +1,6 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
-import { useCurrentSession, useMe } from '@/features/session';
+import { useCurrentSession, useMe, useMyPermissions } from '@/features/session';
 import { useEventId } from '@/shared/lib/eventContext';
 import { LoadingRows } from '@/shared/ui';
 import { useClearCategorySchedules } from '../queries';
@@ -24,13 +24,9 @@ export function CategorySchedulesPanel({
   const [open, setOpen] = useState(false);
   const [locked, setLocked] = useState(false);
   const [denied, setDenied] = useState(false);
-  const me = useMe();
-  const session = useCurrentSession();
-  const personId = session?.volunteerId;
-  const eventId = useEventId();
+  const { me, loading, personId, eventId, authorised, refused } = useCategoryAccess(enabled);
   const clear = useClearCategorySchedules();
-  const authorised = enabled && categorySchedulingIdentity(me.data, personId, eventId);
-  const accessLost = denied || categoryAccessDenied(me.error);
+  const accessLost = denied || refused;
   const timezone = categoryClock(me.data);
   const unavailable = categoryAccessUnavailable({ authorised, accessLost, timezone });
   const lock = useCallback(
@@ -55,7 +51,7 @@ export function CategorySchedulesPanel({
     }
   }, [unavailable, open, clear, onLockChange]);
   if (!enabled) return null;
-  if (!me.data && !me.isError) return <LoadingRows label="Loading category scheduling access" />;
+  if (loading) return <LoadingRows label="Loading category scheduling access" />;
   if (unavailable) return <CategoryScheduleAccessNotice />;
   // Retaining this matched owner keeps an uncertain write's retry intent through a /me outage.
   return (
@@ -70,4 +66,22 @@ export function CategorySchedulesPanel({
       onDenied={loseAccess}
     />
   );
+}
+
+/** Who the caller is (`/me`) and whether the policies let them schedule (`/me/permissions`). */
+function useCategoryAccess(enabled: boolean) {
+  const me = useMe();
+  const permissions = useMyPermissions(enabled);
+  const personId = useCurrentSession()?.volunteerId;
+  const eventId = useEventId();
+  const mayManage = permissions.data?.actions['Schedule.Manage'] === true;
+  return {
+    me,
+    personId,
+    eventId,
+    loading: (!me.data && !me.isError) || (!permissions.data && !permissions.isError),
+    authorised:
+      enabled && categorySchedulingIdentity({ me: me.data, personId, eventId, mayManage }),
+    refused: categoryAccessDenied(me.error) || categoryAccessDenied(permissions.error),
+  };
 }

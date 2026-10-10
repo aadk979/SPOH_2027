@@ -72,6 +72,7 @@ export type AuditAction =
   | 'giftType.create'
   | 'giftType.update'
   | 'setting.change'
+  | 'permissions.change'
   | 'visitorField.create'
   | 'visitorField.update'
   | 'visitor.purge'
@@ -145,6 +146,10 @@ const MEMBERSHIP_CHANGES = new Set<AuditAction>([
 async function publishInvalidation(tx: PrismaTransactionClient, entry: AuditEntry): Promise<void> {
   if (entry.action === 'setting.change') {
     await publishCacheEvent(tx, 'settings', { eventId: entry.eventId, key: entry.entityId });
+  }
+  // A role's grants changed: every instance's decision cache drops the event's answers (P11.7).
+  if (entry.action === 'permissions.change') {
+    await publishCacheEvent(tx, 'access', { eventId: entry.eventId });
   }
   if (MEMBERSHIP_CHANGES.has(entry.action)) {
     await publishCacheEvent(tx, 'membership', { eventId: entry.eventId });

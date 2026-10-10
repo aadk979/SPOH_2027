@@ -1,4 +1,4 @@
-import type { Capability, MeResponse } from '@spoh/shared';
+import type { Action, MeResponse } from '@spoh/shared';
 
 /**
  * The navigation registry (ADR-007 §1): the one source for every nav surface.
@@ -21,7 +21,8 @@ export type OperationsGroup = 'Monitor' | 'Manage' | 'Recover & report';
 export type NavStation = NonNullable<MeResponse['currentAssignment']>['station'];
 
 export interface NavContext {
-  capabilities: readonly Capability[];
+  /** May the viewer take this action here at all (`useAllows`). */
+  allows: (action: Action) => boolean;
   station?: NavStation | null;
 }
 
@@ -40,7 +41,7 @@ export interface NavEntry {
   group?: OperationsGroup;
   emphasis?: 'primary';
   /** The action the viewer must be allowed. */
-  requires?: Capability;
+  requires?: Action;
   /** Further visibility, e.g. what the viewer's station actually does. */
   visible?(context: NavContext): boolean;
   /** A hint that depends on the viewer's station. */
@@ -146,7 +147,7 @@ export const NAV_REGISTRY: readonly NavEntry[] = [
     section: '/operations',
     surfaces: ['operations'],
     group: MONITOR,
-    requires: 'dashboard.event.read',
+    requires: 'Dashboard.ReadEvent',
   },
   {
     path: '/ic',
@@ -155,7 +156,7 @@ export const NAV_REGISTRY: readonly NavEntry[] = [
     section: '/operations',
     surfaces: ['operations'],
     group: MONITOR,
-    requires: 'dashboard.station.read',
+    requires: 'Dashboard.ReadStation',
   },
   {
     path: '/admin/users',
@@ -164,7 +165,16 @@ export const NAV_REGISTRY: readonly NavEntry[] = [
     section: '/operations',
     surfaces: ['operations'],
     group: MANAGE,
-    requires: 'user.read',
+    requires: 'People.Read',
+  },
+  {
+    path: '/admin/permissions',
+    label: 'Role permissions',
+    hint: 'What each role can do, and why a request is refused.',
+    section: '/operations',
+    surfaces: ['operations'],
+    group: MANAGE,
+    requires: 'Settings.Read',
   },
   {
     path: '/admin/settings',
@@ -173,7 +183,7 @@ export const NAV_REGISTRY: readonly NavEntry[] = [
     section: '/operations',
     surfaces: ['operations'],
     group: MANAGE,
-    requires: 'config.manage',
+    requires: 'Settings.Read',
   },
   {
     path: '/chief/fallback',
@@ -182,7 +192,7 @@ export const NAV_REGISTRY: readonly NavEntry[] = [
     section: '/operations',
     surfaces: ['operations'],
     group: RECOVER,
-    requires: 'fallback.declare',
+    requires: 'Fallback.Declare',
   },
   {
     path: '/chief/imports',
@@ -191,7 +201,7 @@ export const NAV_REGISTRY: readonly NavEntry[] = [
     section: '/operations',
     surfaces: ['operations'],
     group: RECOVER,
-    requires: 'fallback.import',
+    requires: 'Fallback.Import',
   },
   {
     path: '/reports',
@@ -200,7 +210,7 @@ export const NAV_REGISTRY: readonly NavEntry[] = [
     section: '/operations',
     surfaces: ['operations'],
     group: RECOVER,
-    requires: 'report.generate',
+    requires: 'Report.Generate',
   },
   { path: '/tv', label: 'Ops-room display', section: '/operations' },
   {
@@ -216,7 +226,7 @@ export const NAV_REGISTRY: readonly NavEntry[] = [
     hint: 'One tap per person',
     section: '/capture',
     surfaces: ['station'],
-    requires: 'registration.create',
+    requires: 'Registration.Create',
     visible: ({ station }) => station?.type.registersVisitors === true,
   },
   { path: '/capture/registration/group', label: 'Register a group', section: '/capture' },
@@ -225,7 +235,7 @@ export const NAV_REGISTRY: readonly NavEntry[] = [
     label: 'Count entries',
     section: '/capture',
     surfaces: ['station'],
-    requires: 'footfall.create',
+    requires: 'Footfall.Create',
     visible: ({ station }) => station?.type.countsEntry === true,
     stationHint: (station) => station.name,
   },
@@ -235,7 +245,7 @@ export const NAV_REGISTRY: readonly NavEntry[] = [
     hint: 'Scan after stamping by hand',
     section: '/capture',
     surfaces: ['station'],
-    requires: 'card.stamp',
+    requires: 'Card.Stamp',
     visible: ({ station }) => station?.type.issuesStamp === true,
   },
   {
@@ -244,14 +254,14 @@ export const NAV_REGISTRY: readonly NavEntry[] = [
     hint: 'Check the physical stamps first',
     section: '/capture',
     surfaces: ['station'],
-    requires: 'gift.redeem',
+    requires: 'Gift.Redeem',
     visible: ({ station }) => station?.type.redeemsGifts === true,
   },
 ];
 
 /** Whether an entry is offered to this viewer. */
 export function isVisible(entry: NavEntry, context: NavContext): boolean {
-  if (entry.requires && !context.capabilities.includes(entry.requires)) return false;
+  if (entry.requires && !context.allows(entry.requires)) return false;
   return entry.visible ? entry.visible(context) : true;
 }
 

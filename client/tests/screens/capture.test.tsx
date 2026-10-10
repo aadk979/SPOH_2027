@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import RegistrationPage from '@/app/e/[event]/capture/registration/page';
 import FootfallPage from '@/app/e/[event]/capture/footfall/page';
+import { permissionsFor } from '../helpers/permissions';
 import { TEST_CATEGORIES } from '../helpers/event';
 vi.mock('@/features/registration/queries', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/features/registration/queries')>()),
@@ -31,11 +32,11 @@ vi.mock('@/shared/shell/AppShell', () => ({
   ),
 }));
 vi.mock('@/shared/shell/SyncIndicator', () => ({ SyncIndicator: () => null }));
-vi.mock('@/features/session', () => ({
+vi.mock('@/features/session', async () => ({
+  ...(await import('../helpers/permissions')).permissionHooks(() => permissionsFor([])),
   useRequireSession: () => (state.signedIn ? { accessToken: 'test' } : null),
   useMe: () => ({
     data: {
-      capabilities: [],
       currentAssignment: state.station ? { station: state.station } : null,
     },
   }),

@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useSyncExternalStore } from 'react';
-import type { Capability, MeResponse } from '@spoh/shared';
 import {
   EMPTY_SNAPSHOT,
   getSessionSnapshot,
@@ -58,15 +57,4 @@ export function useRequireSession(): Session | null {
  */
 export function useSessionStatus(): SessionStatus {
   return useSessionState().status;
-}
-
-/**
- * Capability check for UI affordance only.
- *
- * Hiding a tile the volunteer cannot use saves them a tap and keeps the home
- * screen honest. It is never the authorization — the server re-checks every
- * call against the same matrix (ADR-005).
- */
-export function useCan(me: MeResponse | undefined, capability: Capability): boolean {
-  return me?.capabilities.includes(capability) ?? false;
 }

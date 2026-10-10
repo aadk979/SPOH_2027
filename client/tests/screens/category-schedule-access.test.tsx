@@ -13,6 +13,7 @@ import { sessionKeys } from '@/features/session';
 import { api } from '@/shared/lib/api';
 import { ApiError } from '@/shared/lib/apiErrors';
 import { setSession } from '@/shared/lib/session';
+import { permissionsFor } from '../helpers/permissions';
 import { TEST_EVENT } from '../helpers/event';
 
 vi.mock('@/shared/lib/api', async (original) => ({
@@ -37,7 +38,6 @@ const me: MeResponse = {
     timezone: TEST_EVENT.timezone,
     locale: TEST_EVENT.locale,
   },
-  capabilities: ['config.manage'],
   currentAssignment: null,
   upcomingAssignments: [],
   escalationChain: [],
@@ -111,7 +111,6 @@ beforeEach(() => {
     volunteerId: 'manager',
     displayName: 'Fixture manager',
     role: 'CHIEF_COORDINATOR',
-    capabilities: ['config.manage'],
     expiresAt: Date.now() + 3_600_000,
     refreshAvailable: false,
   });
@@ -124,6 +123,7 @@ beforeEach(() => {
       if (meError) throw meError;
       return me;
     }
+    if (path.endsWith('/me/permissions')) return permissionsFor(['Schedule.Manage']);
     if (options?.method === 'POST') {
       const body = CreateCategoryScheduleRequest.parse(options.body);
       saved ??= {

@@ -187,4 +187,37 @@ read-only behavior; the old broader phase shorthand does not replace those rules
 
 ## Phase report
 
-_Fill in on completion._
+**Status: code complete (10 October 2026), under ADR-011.** Every step's code and tests are in;
+their staging criteria (store matches the repo, the AVP drift check green, decision latency and
+the two failure behaviours, the editor's browser journey) are in P16.8, because AWS is torn down
+until the verification campaign.
+
+What the phase delivered:
+
+- **Cedar decides everything** (P11.1–P11.5). 139 enforcement points ask the policies with the
+  event's own grants; denials are 403s in the security audit naming the action; evaluation
+  failures are 503s. Use cases recheck under their own locks with `requireCurrentPermission`
+  (release 3, `6da1a31`). `requireCapability`, `requireStationScope`, the server's and the
+  client's capability matrix are deleted; the matrix survives only as the frozen fixture the
+  port test compares the default grants with.
+- **AVP via CDK** (P11.6). `packages/access-policies/avp/policy-store.json` (generated, checked in
+  CI) is the STRICT store's schema and its 72 static policies; each stage's platform stack
+  creates the store, gives the app `IsAuthorized` only and passes the store id and policy-name
+  map; the server switches to AVP behind the decision cache and breaker when
+  `AVP_POLICY_STORE_ID` is set. `infra/cdk/bin/avp-drift.ts` compares a deployed store with the
+  file (manual infra workflow).
+- **Permissions editor** (P11.7). `/permissions` lists roles, grants, floors and guardrails;
+  a platform admin toggles an Editable action at or above its floor (audited, published on the
+  `access` channel, effective on the next request); the simulator answers "can ⟨person⟩ do
+  ⟨action⟩" with the deciding policies in plain language, and "what can ⟨person⟩ do". Screen:
+  `/admin/permissions`.
+- **Client affordances from policy** (P11.8). `/me/permissions` answers every member action
+  (event, any of their stations, their own record, or the role's grant); screens use
+  `useAllows`; refusals name the action ("You cannot see reports in this event.").
+- **Failure behaviour** (P11.9). Capture, self-service, safety reports and reads degrade to the
+  local engine when AVP cannot answer; everything else fails closed. An `avp summary` every five
+  minutes feeds the `AvpFailed`, `AvpThrottled` and `AvpLatencyP95` alarms, with
+  `AuthorizationDegraded` on each degraded decision.
+
+Exit criteria: the first two hold in code; "AVP in deployed environments" and the p95 target are
+verified in P16 (P16.2, P16.8).

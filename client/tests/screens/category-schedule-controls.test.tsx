@@ -11,6 +11,7 @@ import type {
 import { CategorySchedulesPanel } from '@/features/taxonomy';
 import { categoryKeys } from '@/features/taxonomy/queries';
 import { api } from '@/shared/lib/api';
+import { permissionsFor } from '../helpers/permissions';
 import { ApiError } from '@/shared/lib/apiErrors';
 
 const identity = vi.hoisted(() => ({
@@ -28,6 +29,9 @@ vi.mock('@/shared/lib/eventContext', async (original) => ({
 }));
 vi.mock('@/features/session', async (original) => ({
   ...(await original<typeof import('@/features/session')>()),
+  ...(await import('../helpers/permissions')).permissionHooks(() =>
+    permissionsFor(identity.allowed ? ['Schedule.Manage'] : []),
+  ),
   useCurrentSession: () => ({ volunteerId: identity.personId }),
   useMe: () => ({
     error: identity.meError,
@@ -35,7 +39,6 @@ vi.mock('@/features/session', async (original) => ({
     data: {
       volunteer: { id: identity.mePersonId },
       event: { id: identity.meEventId, timezone: identity.timezone },
-      capabilities: identity.allowed ? ['config.manage'] : [],
     },
   }),
   useEventTime: () => ({ dateTime: (value: string) => `event-clock:${value}` }),

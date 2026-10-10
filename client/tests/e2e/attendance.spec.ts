@@ -88,7 +88,6 @@ async function attendanceSession(page: Page, root = false) {
               accessToken: 'preview',
               expiresIn: 3600,
               volunteer,
-              capabilities: ['own.read'],
               refreshAvailable: true,
             }
           : path.endsWith('/attendance')
@@ -97,7 +96,6 @@ async function attendanceSession(page: Page, root = false) {
               ? {
                   volunteer,
                   event: MOCK_EVENT,
-                  capabilities: ['own.read'],
                   currentAssignment: null,
                   upcomingAssignments: [],
                   escalationChain: [],

@@ -10,7 +10,7 @@ import { NavTile } from '@/shared/ui/NavTile';
 import { Callout, ButtonLink, Card, CardGrid, CardTitle, Section } from '@/shared/ui';
 
 import { useAttendance } from '@/features/attendance';
-import { useEventTime } from '@/features/session';
+import { useAllows, useEventTime } from '@/features/session';
 import { useCheckIn, useCheckOut } from '../queries';
 import { readableRole } from '@/shared/lib/format';
 
@@ -73,14 +73,15 @@ export function ShiftCard({ me }: { me: MeResponse }): ReactNode {
 }
 
 /**
- * Capture tiles, filtered by capability AND by what this station actually does.
+ * Capture tiles, filtered by what the policies allow AND by what this station actually does.
  * A counter tile at the sign-up booth would be a tap that always fails.
  */
 export function RoleTiles({ me }: { me: MeResponse }): ReactNode {
+  const allows = useAllows();
   const assignment = me.currentAssignment;
   if (!assignment) return null;
 
-  const tiles = stationLinks({ capabilities: me.capabilities, station: assignment.station });
+  const tiles = stationLinks({ allows, station: assignment.station });
 
   if (tiles.length === 0) return null;
 

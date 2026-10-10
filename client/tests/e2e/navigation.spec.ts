@@ -5,7 +5,12 @@ import { MOCK_EVENT, fulfillClientConfiguration } from './mockEvent';
 const axe = readFileSync('../node_modules/axe-core/axe.min.js', 'utf8');
 
 async function mockSession(page: Page, leader = false, failMe = false) {
-  const capabilities = leader ? ['dashboard.event.read', 'user.read'] : ['registration.create'];
+  // What the policies allow this viewer (P11.8): `/me/permissions`, not capabilities on `/me`.
+  const allowed = leader ? ['Dashboard.ReadEvent', 'People.Read'] : ['Registration.Create'];
+  const permissions = {
+    actions: Object.fromEntries(allowed.map((action) => [action, true])),
+    settings: { operational: false, security: false, privacy: false },
+  };
   const volunteer = {
     id: 'test-volunteer',
     displayName: 'Alex Tan',
@@ -27,21 +32,21 @@ async function mockSession(page: Page, leader = false, failMe = false) {
               accessToken: 'preview',
               expiresIn: 3600,
               volunteer,
-              capabilities,
               refreshAvailable: true,
             }
-          : path.endsWith('/me')
-            ? {
-                volunteer,
-                event: MOCK_EVENT,
-                capabilities,
-                currentAssignment: null,
-                upcomingAssignments: [],
-                escalationChain: [],
-              }
-            : path.endsWith('/lost-person/active')
-              ? { alerts: [] }
-              : {};
+          : path.endsWith('/me/permissions')
+            ? permissions
+            : path.endsWith('/me')
+              ? {
+                  volunteer,
+                  event: MOCK_EVENT,
+                  currentAssignment: null,
+                  upcomingAssignments: [],
+                  escalationChain: [],
+                }
+              : path.endsWith('/lost-person/active')
+                ? { alerts: [] }
+                : {};
     await route.fulfill({ json });
   });
 }

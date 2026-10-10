@@ -14,7 +14,7 @@ import {
 } from '../access/authorizer/index.js';
 import { currentAuthorizer, USE_CASE_PHASE_GUARDRAILS } from '../access/engine.js';
 import { prisma, type PrismaTransactionClient } from '../db/client.js';
-import { ERROR_CODES } from '@spoh/shared';
+import { ACTION_LABELS, ERROR_CODES } from '@spoh/shared';
 import {
   AppError,
   ConflictError,
@@ -271,7 +271,16 @@ function refusalFor(refused: readonly CheckResult[], policies: readonly string[]
   if (refused.every((check) => check.action === 'Announcement.Ack')) {
     return new NotFoundError('Announcement');
   }
-  return forbidden();
+  return notGranted(refused);
+}
+
+/** No grant for the action: say which, so the screen can explain the refusal (P11.8). */
+function notGranted(refused: readonly CheckResult[]): AppError {
+  const action = refused[0]?.action;
+  if (!action) return forbidden();
+  return new ForbiddenError(`You cannot ${ACTION_LABELS[action]} in this event.`, {
+    actions: refused.map((check) => check.action),
+  });
 }
 
 async function grantedToCaller(req: Request): Promise<readonly string[]> {

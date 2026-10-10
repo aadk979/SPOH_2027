@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { Capability } from '../../access/capabilities.js';
 import { CommitteeRole } from '../../invariants/enums.js';
 import { Id, IsoDate, IsoDateTime } from '../common/index.js';
 import { EventSummary } from '../event/index.js';
@@ -52,8 +51,6 @@ export const MeResponse = z
       .strict(),
     /** The event this answer is about; its timezone and locale format every time shown. */
     event: EventSummary,
-    /** Server-computed from the capability matrix. The client never derives it. */
-    capabilities: z.array(Capability),
     /** Today's assignment, if the caller is on shift. */
     currentAssignment: MyAssignment.nullable(),
     /** Every assignment for the caller across the event, for the shift screen. */
@@ -82,7 +79,10 @@ export type CheckInResponse = z.infer<typeof CheckInResponse>;
  */
 export const MyPermissionsResponse = z
   .object({
-    /** Actions on the event itself, by Cedar action id. */
+    /**
+     * Every member action by Cedar action id: may the caller do it here at all (on the event,
+     * at one of their stations, on their own record, or by their role's grant for one record).
+     */
     actions: z.record(z.string(), z.boolean()),
     /** Whether the caller may change settings of each class (CHANGES.md C9). */
     settings: z

@@ -1,9 +1,4 @@
-import {
-  capabilitiesForRole,
-  type CommitteeRole,
-  type SessionResponse,
-  type SessionSummary,
-} from '@spoh/shared';
+import { type CommitteeRole, type SessionResponse, type SessionSummary } from '@spoh/shared';
 
 export function toSessionResponse(
   volunteer: { id: string; displayName: string; role: CommitteeRole },
@@ -18,7 +13,6 @@ export function toSessionResponse(
       displayName: volunteer.displayName,
       role: volunteer.role,
     },
-    capabilities: capabilitiesForRole(volunteer.role),
     // Overwritten by the router if the cookie could not actually be set.
     refreshAvailable: true,
   };

@@ -21,7 +21,6 @@ const SESSION = {
   tokenType: 'Bearer',
   expiresIn: 900,
   volunteer: { id: 'v1', displayName: 'Sam', role: 'IC' },
-  capabilities: ['own.read'],
   refreshAvailable: true,
 };
 

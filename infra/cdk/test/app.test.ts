@@ -56,9 +56,10 @@ describe('deploy access (P08.2)', () => {
         policy as { Properties: { PolicyDocument: { Statement: Array<{ Action: string[] }> } } }
       ).Properties.PolicyDocument.Statement.flatMap((statement) => statement.Action),
     );
-    // Assume the CDK roles, push images, read stack outputs and run the migrate task: nothing else.
+    // Assume the CDK roles, push images, read stack outputs, run the migrate task and read the
+    // AVP store for the drift check (P11.6): nothing else.
     const allowed =
-      /^(sts:(AssumeRole|TagSession)|ecr:.+|ecs:(RunTask|DescribeTasks)|iam:PassRole|cloudformation:DescribeStacks)$/;
+      /^(sts:(AssumeRole|TagSession)|ecr:.+|ecs:(RunTask|DescribeTasks)|iam:PassRole|cloudformation:DescribeStacks|verifiedpermissions:(ListPolicies|GetPolicy|GetSchema))$/;
     expect(actions.filter((action) => !allowed.test(action))).toEqual([]);
   });
 });

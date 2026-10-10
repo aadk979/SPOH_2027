@@ -8,7 +8,7 @@ import { type ReactNode } from 'react';
 
 import { AppShell } from '@/shared/shell/AppShell';
 import { Button, Card, EmptyState, LoadingRows, Section, Stack } from '@/shared/ui';
-import { useMe, useRequireSession, useEventTime } from '@/features/session';
+import { useAllows, useMe, useRequireSession, useEventTime } from '@/features/session';
 import { useAnnouncements, useAcknowledgeAnnouncement } from '@/features/announcements';
 
 /**
@@ -29,7 +29,8 @@ export default function InboxScreen(): ReactNode {
 
   if (!session) return null;
 
-  const canSend = me?.capabilities.includes('announcement.station.send') ?? false;
+  const allows = useAllows();
+  const canSend = allows('Announcement.SendStation');
   const announcements = inbox.data ?? [];
 
   return (

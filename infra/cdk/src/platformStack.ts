@@ -9,6 +9,7 @@ import { IMAGE_REPOSITORY } from './deployAccessStack.js';
 import { StagingIdentity, type CognitoSettings } from './stagingIdentity.js';
 import { DatabaseCpuMonitoring } from './databaseCpuMonitoring.js';
 import { ObjectStorage } from './objectStorage.js';
+import { AuthorizationStore } from './authorizationStore.js';
 
 export interface PlatformStackProps extends StackProps {
   stage: StageConfig;
@@ -33,6 +34,9 @@ export class PlatformStack extends Stack {
       database: this.network.database,
     });
     const secrets = new AppSecrets(this, 'Secrets', `spoh/${props.stage.name}`);
+    const authorization = new AuthorizationStore(this, 'Authorization', {
+      stage: props.stage.name,
+    });
     const api = createHttpApi(this, props.stage);
     const cognito = this.cognito(props.stage, api.apiEndpoint);
 
@@ -50,6 +54,7 @@ export class PlatformStack extends Stack {
         ...(serviceImageTag ? { serviceImageTag } : {}),
         api,
         cognito,
+        authorization,
         ...(props.stage.publicOrigins ? { mediaBucket: storage.media } : {}),
       });
     }

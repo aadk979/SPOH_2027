@@ -81,7 +81,6 @@ describe('outbox ownership on a shared phone (P04 repro)', () => {
       volunteerId,
       displayName,
       role: 'VOLUNTEER',
-      capabilities: [],
       expiresAt: Date.now() + 3_600_000,
       refreshAvailable: false,
     };

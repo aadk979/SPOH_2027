@@ -25,8 +25,8 @@
     "./default-grants.json": "./default-grants.json"
   },
   "scripts": {
-    "generate": "node tools/generate-grants.mjs && node tools/generate-actions.mjs",
-    "check:generated": "node tools/generate-grants.mjs --check && node tools/generate-actions.mjs --check",
+    "generate": "node tools/generate-grants.mjs && node tools/generate-actions.mjs && node tools/generate-avp.mjs",
+    "check:generated": "node tools/generate-grants.mjs --check && node tools/generate-actions.mjs --check && node tools/generate-avp.mjs --check",
     "build": "npm run check:generated && tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "node --test \"tests/*.test.mjs\"",

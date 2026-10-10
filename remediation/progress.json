@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-10T07:57:55.493Z",
+  "updatedAt": "2026-10-10T08:11:05.755Z",
   "current": {
     "phase": "P11",
     "step": "P11.5"
@@ -2803,9 +2803,9 @@
         {
           "id": "P11.5",
           "title": "Policy enforcement points",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-08T03:06:56.210Z",
-          "completedAt": null,
+          "completedAt": "2026-10-10T08:11:05.731Z",
           "commits": [
             "eddbc88214a52fb2c3d5f322bdad97d434e0c4a1",
             "def8402f82d4d1fe245633edb4e7da8216425768",
@@ -2814,7 +2814,8 @@
             "dfe8d16705e8909337eeef401dc4ee856b40b38c",
             "3ea675452814eac7f221670ef4c986d8fbf239dd",
             "c23d4d5148780b4b62d1e6719a354bb0e95850aa",
-            "ffc377e2a9be9f61d1328113bb99ff7318829b59"
+            "ffc377e2a9be9f61d1328113bb99ff7318829b59",
+            "6da1a31377721abd304da3ce8bbe306e78a25896"
           ],
           "notes": [
             {
@@ -2832,6 +2833,10 @@
             {
               "at": "2026-10-10T05:47:53.803Z",
               "text": "Release 2b (dfe8d16, 3ea6754, c23d4d5, ffc377e) on staging revision 156 at 05:43Z 10 Oct: the policies decide every route in a membership. Owner released after about 16 of the D-22 soak's 24 hours (0 failed, 160 allowed, alarm OK). CI 38027306299, deploy 38027974427, smoke passes; first screen after rollout 5.75 s, then 0.6-1.2 s; no 403 or error lines. Release 3 next."
+            },
+            {
+              "at": "2026-10-10T08:11:05.755Z",
+              "text": "Release 3 (6da1a31, CI 38036401587 green): use cases and scheduled handlers recheck with requireCurrentPermission (Cedar, the event's grants) instead of the capability matrix; requireCapability/requireStationScope/requireMinimumRole deleted; roster provisioning asks People.Invite; capture bypass follows anyStation. Full local CI: server 2805 passed. Staging acceptance of releases 2b/3 is P16.8 (AWS torn down)."
             }
           ]
         },

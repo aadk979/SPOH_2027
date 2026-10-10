@@ -11,6 +11,7 @@ import {
   type AuthorizationRequest,
   type Authorizer,
 } from './types.js';
+import { recordAvpAttempt, type AvpOutcome } from './avpTally.js';
 
 /** The one AVP call the app makes; its IAM role holds `IsAuthorized` only (ADR-005 §2). */
 export interface AvpClient {
@@ -69,6 +70,13 @@ function classify(error: unknown): Failure {
   return transient(failure) ? 'retry' : 'unavailable';
 }
 
+/** For the AVP summary: a throttle is told apart from the other failures. */
+function outcomeOf(error: unknown): AvpOutcome {
+  const failure: SdkFailure = typeof error === 'object' && error !== null ? error : {};
+  if (failure.name === 'ValidationException') return 'ok';
+  return failure.name === 'ThrottlingException' ? 'throttled' : 'failed';
+}
+
 class AttemptTimeout extends Error {
   override readonly name = 'TimeoutError';
 }
@@ -91,10 +99,14 @@ export class AvpAuthorizer implements Authorizer {
     const input = this.input(request);
     let lastError: unknown;
     for (let attempt = 0; attempt <= this.retries; attempt += 1) {
+      const started = performance.now();
       try {
-        return this.decision(await this.attempt(input));
+        const output = await this.attempt(input);
+        recordAvpAttempt('ok', performance.now() - started);
+        return this.decision(output);
       } catch (error) {
         lastError = error;
+        recordAvpAttempt(outcomeOf(error), performance.now() - started);
         const failure = classify(error);
         if (failure === 'invalid') return this.invalid(error);
         if (failure === 'unavailable') break;

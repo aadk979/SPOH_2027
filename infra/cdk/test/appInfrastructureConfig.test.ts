@@ -156,7 +156,10 @@ describe('infrastructure injection (P08.6)', () => {
     'injects the %s task at startup, keeping credentials in Secrets Manager',
     (name) => {
       const container = taskFor(staging, name).ContainerDefinitions[0]!;
-      expect(container.Environment ?? []).toEqual([]);
+      // Only the AVP store's generated ids are plain (P11.6): non-secret, and too large for SSM.
+      expect((container.Environment ?? []).map((entry) => entry.Name)).toEqual(
+        name === 'app' ? ['AVP_POLICY_STORE_ID', 'AVP_POLICY_NAMES'] : [],
+      );
       const infra = name === 'app' ? STAGING_INFRA_NAMES : ['DB_HOST', 'DB_NAME'];
       const credentials =
         name === 'app'

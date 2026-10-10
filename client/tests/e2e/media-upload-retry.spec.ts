@@ -28,7 +28,6 @@ for (const [name, width, height] of [
         displayName: 'Synthetic Desk',
         role: 'VOLUNTEER',
       };
-      const capabilities = ['own.read', 'lostFound.log', 'lostFound.read'];
       // A permitted local cross-origin adapter isolates retry behavior; real S3/CSP is separate.
       await page.route('http://localhost:4012/synthetic-object-upload', async (route) => {
         const request = route.request();
@@ -71,14 +70,12 @@ for (const [name, width, height] of [
                 accessToken: 'synthetic-browser-session',
                 expiresIn: 3600,
                 volunteer,
-                capabilities,
                 refreshAvailable: true,
               }
             : path.endsWith('/me')
               ? {
                   volunteer,
                   event: MOCK_EVENT,
-                  capabilities,
                   currentAssignment: { station: { id: 'synthetic-station', name: 'Desk' } },
                   upcomingAssignments: [],
                   escalationChain: [],

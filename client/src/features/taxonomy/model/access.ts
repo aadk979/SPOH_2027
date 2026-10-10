@@ -1,17 +1,16 @@
 import type { MeResponse } from '@spoh/shared';
 import { ApiError } from '@/shared/lib/apiErrors';
 
-export function categorySchedulingIdentity(
-  me: MeResponse | undefined,
-  personId: string | undefined,
-  eventId: string,
-) {
+/** `mayManage`: the policies allow `Schedule.Manage` (from `/me/permissions`). */
+export function categorySchedulingIdentity(input: {
+  me: MeResponse | undefined;
+  personId: string | undefined;
+  eventId: string;
+  mayManage: boolean;
+}) {
+  const { me, personId, eventId, mayManage } = input;
   return (
-    !!me &&
-    !!personId &&
-    me.event?.id === eventId &&
-    me.volunteer?.id === personId &&
-    !!me.capabilities?.includes('config.manage')
+    !!me && !!personId && me.event?.id === eventId && me.volunteer?.id === personId && mayManage
   );
 }
 export function categoryAccessDenied(error: unknown) {

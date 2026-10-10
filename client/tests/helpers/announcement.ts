@@ -36,6 +36,5 @@ export const PRIVATE_SCHEDULE: AnnouncementPublicationScheduleRecord = {
 };
 export const DRAFT_ME = {
   event: TEST_EVENT,
-  capabilities: ['announcement.station.send', 'announcement.event.send'],
   currentAssignment: { station: { id: 'draft-station-fixture', name: 'Fixture station' } },
 } as unknown as MeResponse;

@@ -8,18 +8,19 @@
  *
  * Layout (engineering-standards §5): `contracts/<domain>/` mirrors the server
  * module of the same name; `errors/` holds the error codes; `invariants/` the
- * enums that are product invariants; `access/` the capability matrix until P11;
+ * enums that are product invariants;
  * `generated/` what tools write. This index is the only public entry point.
  */
 export * from './invariants/enums.js';
 /** The compiled capability matrix, re-exported until P11 replaces it with Cedar actions. */
-export * from './access/capabilities.js';
 /** Schema-derived identifiers; Cedar enforcement is migrated separately. */
 export * from './generated/actions/index.js';
 export * from './errors/errorCodes.js';
 export * from './contracts/missionCard/cardCode.js';
 
+export * from './contracts/access/actionLabels.js';
 export * from './contracts/common/index.js';
+export * from './contracts/permissions/index.js';
 export * from './contracts/event/index.js';
 export * from './contracts/schedule/index.js';
 export * from './contracts/station/index.js';

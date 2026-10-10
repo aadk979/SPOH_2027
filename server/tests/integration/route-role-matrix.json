@@ -203,6 +203,14 @@
     "asks": "Self.Read",
     "who": "every member"
   },
+  "GET /permissions": {
+    "asks": "Settings.Read",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+  },
+  "GET /permissions/people/:personId": {
+    "asks": "Settings.Read",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+  },
   "GET /registrations/categories": {
     "asks": "Self.Read",
     "who": "every member"
@@ -519,6 +527,10 @@
     "asks": "Self.Read",
     "who": "every member"
   },
+  "POST /permissions/simulate": {
+    "asks": "Settings.Read",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+  },
   "POST /registrations": {
     "asks": "Registration.Create",
     "who": ["VOLUNTEER", "IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
@@ -558,5 +570,9 @@
   "PUT /announcements/drafts/:id/schedules/:scheduleId": {
     "asks": "Announcement.SendStation",
     "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+  },
+  "PUT /permissions": {
+    "asks": "Permissions.Edit",
+    "who": "platform admins"
   }
 }

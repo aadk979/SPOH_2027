@@ -3,18 +3,19 @@
 import { AppLink as Link } from '@/shared/lib/AppLink';
 import { useAppPathname } from '@/shared/lib/appPath';
 import { useOptionalEvent } from '@/shared/lib/eventContext';
-import { useCurrentSession } from '@/features/session';
+import { useAllows, useCurrentSession } from '@/features/session';
 import { sectionEntries, sectionForPath } from '@/navigation';
 
 export function SectionNav() {
   const session = useCurrentSession();
+  const allows = useAllows(session !== null);
   const active = sectionForPath(useAppPathname());
   const event = useOptionalEvent();
   return (
     <nav aria-label="Main sections" className="section-nav">
       <p className="section-nav-caption">Your workspace</p>
       <div className="section-nav-links">
-        {sectionEntries({ capabilities: session?.capabilities ?? [] }).map((item) => (
+        {sectionEntries({ allows }).map((item) => (
           <Link
             key={item.path}
             href={item.path}

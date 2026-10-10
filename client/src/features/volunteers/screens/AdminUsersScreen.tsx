@@ -5,7 +5,7 @@ import { type ReactNode } from 'react';
 import { AppShell } from '@/shared/shell/AppShell';
 import { Callout, Stack } from '@/shared/ui';
 
-import { useMe, useRequireSession } from '@/features/session';
+import { useAllows, useMe, useRequireSession } from '@/features/session';
 
 import { useVolunteerRoster } from '../hooks/useVolunteerRoster';
 import { VolunteerFiltersPanel } from '../components/VolunteerFiltersPanel';
@@ -32,7 +32,8 @@ export default function AdminUsersScreen(): ReactNode {
   const roster = useVolunteerRoster();
   if (!session) return null;
 
-  const canManage = me?.capabilities.includes('user.provision') ?? false;
+  const allows = useAllows();
+  const canManage = !!me && allows('People.Update');
 
   return (
     <AppShell title="Volunteers" back={{ href: '/chief', label: 'Ops' }} width="wide">

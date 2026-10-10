@@ -38,7 +38,7 @@ vi.mock('@/shared/shell/AppShell', () => ({
 vi.mock('@/features/session', () => ({
   useRequireSession: () => ({ accessToken: 'fixture' }),
   useCurrentSession: () => ({ accessToken: 'fixture' }),
-  useMe: () => ({ data: { capabilities: [], currentAssignment: { station: STATION } } }),
+  useMe: () => ({ data: { currentAssignment: { station: STATION } } }),
 }));
 vi.mock('@/features/capture', () => ({ useCardScanner: () => ({ state: 'denied' }) }));
 vi.mock('@/features/media', () => ({ usePhotoUpload: () => ({ available: false, key: null }) }));

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useStations } from '@/features/stations';
 import { useStationDashboard } from '@/features/dashboard';
-import { useMe, useRequireSession } from '@/features/session';
+import { useAllows, useMe, useRequireSession } from '@/features/session';
 import { usePendingSwaps } from '@/features/roster';
 import { defaultStationId } from '../model/defaultStation';
 
@@ -15,7 +15,8 @@ export function useIcConsole() {
   const selected = stationId ?? defaultStationId(me);
   const dashboard = useStationDashboard(selected, includeRehearsal);
   // Only a role that decides swaps sees the queue, or asks for it (F02-020).
-  const canDecideSwaps = me?.capabilities.includes('swap.approve') ?? false;
+  const allows = useAllows();
+  const canDecideSwaps = allows('Swap.Decide');
   const swaps = usePendingSwaps(session !== null && canDecideSwaps);
   return {
     session,

@@ -11,6 +11,7 @@ import { api } from '@/shared/lib/api';
 import { enqueue } from '@/shared/lib/outbox';
 import { openSession } from '@/shared/lib/session';
 import { TEST_EVENT, TEST_CATEGORIES } from '../helpers/event';
+import { permissionsFor } from '../helpers/permissions';
 import * as eventContext from '@/shared/lib/eventContext';
 vi.mock('@/features/registration/queries', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/features/registration/queries')>()),
@@ -30,6 +31,9 @@ vi.mock('@/shared/shell/AppShell', () => ({
 }));
 vi.mock('@/features/session', async (original) => ({
   ...(await original<typeof import('@/features/session')>()),
+  ...(await import('../helpers/permissions')).permissionHooks(() =>
+    permissionsFor(['Announcement.SendEvent']),
+  ),
   useRequireSession: () => ({ accessToken: 'fixture' }),
   useMe: () => ({ data: { currentAssignment: { station: { id: 'own-station' } } } }),
   getHostedSignInUrl: () => '/hosted',
@@ -88,7 +92,6 @@ afterEach(() => {
 
 describe('announcement composer', () => {
   const me = {
-    capabilities: ['announcement.event.send'],
     currentAssignment: { station: { id: 'own-station', name: 'Booth' } },
   } as unknown as Parameters<typeof Composer>[0]['me'];
 

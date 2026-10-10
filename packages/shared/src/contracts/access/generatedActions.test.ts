@@ -4,14 +4,8 @@ import {
   ACTION_CATALOGUE,
   ACTION_GROUPS,
   ACTION_IDS,
-  CAPABILITY_MATRIX,
-  Capability,
   EDITABLE_ACTION_IDS,
-  STATION_SCOPED_CAPABILITIES,
   WRITE_ACTION_IDS,
-  capabilitiesForRole,
-  isStationScoped,
-  roleHasCapability,
   type ActionGroup,
 } from '../../index.js';
 
@@ -95,62 +89,4 @@ describe('generated actions on the shared public surface', () => {
       );
     },
   );
-});
-
-describe('existing capabilities alongside additive action exports', () => {
-  it('retains the capability names and capture default role distinctions', () => {
-    expect(Capability.options).toHaveLength(26);
-    expect(Object.keys(CAPABILITY_MATRIX).sort()).toEqual([...Capability.options].sort());
-    expect(Capability.safeParse('registration.create').success).toBe(true);
-    expect(Capability.safeParse('Registration.Create').success).toBe(false);
-    expect(CAPABILITY_MATRIX['registration.create']).toEqual([
-      'VOLUNTEER',
-      'IC',
-      'DEPUTY_COORDINATOR',
-      'CHIEF_COORDINATOR',
-      'ADMIN',
-    ]);
-    expect(roleHasCapability('VOLUNTEER', 'registration.create')).toBe(true);
-    expect(roleHasCapability('LEAD', 'registration.create')).toBe(false);
-    expect(roleHasCapability('LEAD', 'report.generate')).toBe(true);
-    expect(roleHasCapability('DEPUTY_COORDINATOR', 'fallback.import')).toBe(false);
-    expect(roleHasCapability('CHIEF_COORDINATOR', 'fallback.import')).toBe(true);
-  });
-
-  it('retains the public role capability lists rather than replacing grants with action names', () => {
-    expect(capabilitiesForRole('VOLUNTEER')).toEqual([
-      'registration.create',
-      'footfall.create',
-      'card.stamp',
-      'gift.redeem',
-      'incident.report',
-      'lostPerson.raise',
-      'lostFound.log',
-      'own.read',
-    ]);
-    expect(capabilitiesForRole('LEAD')).toEqual([
-      'incident.report',
-      'lostPerson.raise',
-      'own.read',
-      'dashboard.station.read',
-      'dashboard.event.read',
-      'report.generate',
-      'user.read',
-      'audit.read',
-    ]);
-    expect(capabilitiesForRole('ADMIN')).toEqual(Capability.options);
-  });
-
-  it('retains station scope for the four capture capabilities', () => {
-    expect(STATION_SCOPED_CAPABILITIES).toEqual([
-      'registration.create',
-      'footfall.create',
-      'card.stamp',
-      'gift.redeem',
-    ]);
-    expect(isStationScoped('registration.create')).toBe(true);
-    expect(isStationScoped('card.stamp')).toBe(true);
-    expect(isStationScoped('card.reissue')).toBe(false);
-    expect(isStationScoped('incident.report')).toBe(false);
-  });
 });

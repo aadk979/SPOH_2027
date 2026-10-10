@@ -12,6 +12,7 @@ import { CaptureControlsPanel } from '@/features/settings/components/CaptureCont
 import { api } from '@/shared/lib/api';
 import { ApiError } from '@/shared/lib/apiErrors';
 import { captureCurrent, captureSchedule } from '../helpers/captureSchedule';
+import { permissionsFor } from '../helpers/permissions';
 import { TEST_EVENT } from '../helpers/event';
 
 const identity = vi.hoisted(() => ({
@@ -26,12 +27,14 @@ vi.mock('@/shared/lib/eventContext', async (original) => ({
 }));
 vi.mock('@/features/session', async (original) => ({
   ...(await original<typeof import('@/features/session')>()),
+  ...(await import('../helpers/permissions')).permissionHooks(() =>
+    permissionsFor(identity.allowed ? ['Schedule.Manage'] : []),
+  ),
   useCurrentSession: () => ({ volunteerId: identity.personId }),
   useMe: () => ({
     data: {
       volunteer: { id: identity.personId },
       event: { id: identity.eventId, timezone: identity.timezone },
-      capabilities: identity.allowed ? ['config.manage'] : [],
     },
   }),
   useEventTime: () => ({ dateTime: (value: string) => `event-clock:${value}` }),

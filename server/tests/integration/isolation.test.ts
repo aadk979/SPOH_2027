@@ -296,6 +296,14 @@ const CASES: Record<string, Case> = {
   ),
   'GET /me': ACTOR,
   'GET /me/permissions': ACTOR,
+  'GET /permissions': LIST,
+  'PUT /permissions': noId(
+    "changes a role's grant in the path event; the body names a role and an action, not a row",
+  ),
+  'POST /permissions/simulate': {
+    body: (b) => ({ personId: b.person, action: 'Self.Read' }),
+  },
+  'GET /permissions/people/:personId': { params: (b) => ({ personId: b.person }) },
   'POST /me/check-in': { body: (b) => ({ assignmentId: b.assignment }) },
   'POST /me/check-out': { body: (b) => ({ assignmentId: b.assignment }) },
 

@@ -1,5 +1,6 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { permissionsFor } from '../helpers/permissions';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import { api } from '@/shared/lib/api';
@@ -17,7 +18,7 @@ import { TEST_EVENT } from '../helpers/event';
 /** The test event's API paths and screen addresses (tests/setup.ts). */
 const API = `/events/${TEST_EVENT.id}`;
 
-const state = vi.hoisted(() => ({ capabilities: [] as string[] }));
+const state = vi.hoisted(() => ({ actions: [] as string[], operational: false }));
 vi.mock('@/shared/shell/AppShell', () => ({
   AppShell: ({ title, children }: { title: string; children: ReactNode }) => (
     <main>
@@ -29,13 +30,15 @@ vi.mock('@/shared/shell/AppShell', () => ({
 vi.mock('@/shared/shell/SyncIndicator', () => ({ SyncIndicator: () => null }));
 vi.mock('@/features/session', async (original) => ({
   ...(await original<typeof import('@/features/session')>()),
+  ...(await import('../helpers/permissions')).permissionHooks(() =>
+    permissionsFor(state.actions, { operational: state.operational }),
+  ),
   useRequireSession: () => ({ accessToken: 'test' }),
   useCurrentSession: () => ({ accessToken: 'test' }),
   useMe: () => ({
     data: {
       volunteer: { id: 'viewer', role: 'CHIEF_COORDINATOR' },
       event: { id: 'evt_test', name: 'Test Event', timezone: 'Asia/Singapore', locale: 'en-SG' },
-      capabilities: state.capabilities,
       currentAssignment: {
         station: { id: 'station-1', name: 'Room', issuesStamp: true, type: { issuesStamp: true } },
       },
@@ -63,7 +66,8 @@ function show(node: ReactNode) {
   return render(<QueryClientProvider client={client}>{node}</QueryClientProvider>);
 }
 beforeEach(() => {
-  state.capabilities = [];
+  state.actions = [];
+  state.operational = false;
   mockedApi.mockReset();
   mockedApi.mockResolvedValue({ data: [], meta: { count: 0, nextCursor: null } });
 });
@@ -132,7 +136,8 @@ describe('operations screen safety net', () => {
   });
 
   it('rejects an empty event name before submitting, and never calls the legacy settings', async () => {
-    state.capabilities = ['config.manage'];
+    state.actions = ['Settings.Read', 'Schedule.Manage'];
+    state.operational = true;
     // The product rules load beside the settings (P09.14).
     mockedApi.mockImplementation(async (path: string) => {
       if (path.endsWith('/admin/event-settings')) {

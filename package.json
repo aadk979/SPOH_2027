@@ -2,7 +2,7 @@
   "name": "spoh2027",
   "private": true,
   "version": "0.1.0",
-  "description": "SPOH 2027 Event Operations System \u2014 Singapore Polytechnic School of Computing Open House",
+  "description": "SPOH 2027 Event Operations System — Singapore Polytechnic School of Computing Open House",
   "license": "UNLICENSED",
   "engines": {
     "node": ">=22 <27"
@@ -42,7 +42,7 @@
     "settings:generate": "node --import tsx scripts/generate-settings.mjs",
     "settings:check": "node --import tsx scripts/generate-settings.mjs --check",
     "actions:generate": "node packages/access-policies/tools/generate-actions.mjs --shared-output",
-    "actions:check": "node packages/access-policies/tools/generate-grants.mjs --check && node packages/access-policies/tools/generate-actions.mjs --shared-output --check",
+    "actions:check": "node packages/access-policies/tools/generate-grants.mjs --check && node packages/access-policies/tools/generate-actions.mjs --shared-output --check && node packages/access-policies/tools/generate-avp.mjs --check",
     "check:pricing": "node --test remediation/reports/P08/pricing/cost-model.test.mjs",
     "check:firebase": "node --test infra/firebase/hosting.test.mjs",
     "dev:shared": "npm run dev --workspace packages/shared",

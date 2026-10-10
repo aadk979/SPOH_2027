@@ -42,3 +42,10 @@ jobs:
       - name: cdk diff
         working-directory: infra/cdk
         run: npx cdk diff Spoh-staging-Platform Spoh-DeployAccess
+
+      # P11.6: the deployed policy store holds exactly avp/policy-store.json.
+      - name: AVP drift (staging)
+        working-directory: infra/cdk
+        run: |
+          id=$(aws cloudformation describe-stacks --stack-name Spoh-staging-Platform             --query "Stacks[0].Outputs[?starts_with(OutputKey,'Authorization')].OutputValue" --output text)
+          npx tsx bin/avp-drift.ts "$id" "$AWS_REGION"

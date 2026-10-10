@@ -30,7 +30,6 @@ function me(eventId: string) {
   return {
     volunteer: { id: 'chief', displayName: 'Chief', role: 'CHIEF_COORDINATOR' },
     event: { id: eventId, name: names[eventId], timezone: 'Asia/Singapore', locale: 'en-SG' },
-    capabilities: ['config.manage'],
   };
 }
 function eventOf(path: string): string {

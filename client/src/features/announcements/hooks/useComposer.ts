@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { CreateAnnouncementRequest, type MeResponse } from '@spoh/shared';
 import { useZodForm } from '@/shared/hooks/useZodForm';
+import { useAllows } from '@/features/session';
 import { useStations } from '@/features/stations';
 import { useSendAnnouncement } from '@/features/announcements';
 import {
@@ -13,7 +14,8 @@ export function useComposer(me: MeResponse | undefined) {
   const setBody = form.setter('body');
   const [error, setError] = useState<string | null>(null);
   const stations = useStations();
-  const canSendEventWide = me?.capabilities.includes('announcement.event.send') ?? false;
+  const allows = useAllows();
+  const canSendEventWide = !!me && allows('Announcement.SendEvent');
 
   const send = useSendAnnouncement({
     onSuccess: () => {

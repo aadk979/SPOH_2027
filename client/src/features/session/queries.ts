@@ -1,6 +1,7 @@
 'use client';
+import { useCallback } from 'react';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import type { MeResponse, MyPermissionsResponse } from '@spoh/shared';
+import type { Action, MeResponse, MyPermissionsResponse } from '@spoh/shared';
 import { getMe, getMyPermissions } from './api';
 import { useEventId } from '@/shared/lib/eventContext';
 import { useCurrentSession } from './useSession';
@@ -9,7 +10,7 @@ export const sessionKeys = {
   permissions: (eventId: string) => [eventId, 'me', 'permissions'] as const,
 };
 /**
- * The boot call. One request returns identity, capabilities, today's posting
+ * The boot call. One request returns identity, today's posting
  * and the escalation chain, so the home screen renders without a waterfall.
  */
 export function useMe(): UseQueryResult<MeResponse> {
@@ -38,4 +39,14 @@ export function useMyPermissions(enabled = true): UseQueryResult<MyPermissionsRe
     enabled: enabled && session !== null,
     staleTime: 30_000,
   });
+}
+
+/**
+ * May the caller take this action here at all? Hiding what they cannot use saves a tap and
+ * keeps screens honest; it is never the authorization, which the server decides on every
+ * request from the same policies (ADR-005 §6). False until the answer arrives.
+ */
+export function useAllows(enabled = true): (action: Action) => boolean {
+  const { data } = useMyPermissions(enabled);
+  return useCallback((action: Action) => data?.actions?.[action] === true, [data]);
 }

@@ -71,34 +71,43 @@ afterEach(() => {
 it.each([
   {
     missing: 'event',
-    value: { volunteer: { id: 'manager' }, capabilities: ['config.manage'] },
+    value: { volunteer: { id: 'manager' } },
+    mayManage: true,
     clock: '',
   },
   {
     missing: 'volunteer',
-    value: { event: { id: 'event', timezone: 'Asia/Singapore' }, capabilities: ['config.manage'] },
+    value: { event: { id: 'event', timezone: 'Asia/Singapore' } },
+    mayManage: true,
     clock: 'Asia/Singapore',
   },
   {
-    missing: 'capabilities',
+    missing: 'the Schedule.Manage permission',
     value: { event: { id: 'event', timezone: 'Asia/Singapore' }, volunteer: { id: 'manager' } },
+    mayManage: false,
     clock: 'Asia/Singapore',
   },
-])('fails closed when compatibility /me data lacks $missing metadata', ({ value, clock }) => {
+])('fails closed when compatibility /me data lacks $missing', ({ value, mayManage, clock }) => {
   // A response from an older API can omit metadata despite the current DTO type.
   const response = value as unknown as MeResponse;
-  expect(categorySchedulingIdentity(response, 'manager', 'event')).toBe(false);
+  expect(
+    categorySchedulingIdentity({ me: response, personId: 'manager', eventId: 'event', mayManage }),
+  ).toBe(false);
   expect(categoryClock(response)).toBe(clock);
 });
 it('fails closed when otherwise matched compatibility /me data lacks its event clock', () => {
   const response = {
     event: { id: 'event' },
     volunteer: { id: 'manager' },
-    capabilities: ['config.manage'],
   } as unknown as MeResponse;
   expect(
     categoryAccessUnavailable({
-      authorised: categorySchedulingIdentity(response, 'manager', 'event'),
+      authorised: categorySchedulingIdentity({
+        me: response,
+        personId: 'manager',
+        eventId: 'event',
+        mayManage: true,
+      }),
       accessLost: false,
       timezone: categoryClock(response),
     }),

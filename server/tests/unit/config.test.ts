@@ -47,8 +47,23 @@ describe('configuration', () => {
     expect(message).toContain('VAPID_PUBLIC_KEY');
   });
 
+  it('reads the AVP store and its policy names, absent by default (P11.6)', () => {
+    expect(parseEnv(DEV)).not.toHaveProperty('AVP_POLICY_STORE_ID');
+    expect(parseEnv(DEV)).not.toHaveProperty('AVP_POLICY_NAMES');
+    const env = parseEnv({
+      ...DEV,
+      AVP_POLICY_STORE_ID: 'store-1',
+      AVP_POLICY_NAMES: '{"p-1":"grant.Report.Generate"}',
+    });
+    expect(env.AVP_POLICY_STORE_ID).toBe('store-1');
+    expect(env.AVP_POLICY_NAMES).toEqual({ 'p-1': 'grant.Report.Generate' });
+    expect(messageOf(() => parseEnv({ ...DEV, AVP_POLICY_NAMES: '[1]' }))).toContain(
+      'AVP_POLICY_NAMES',
+    );
+  });
+
   it('knows every key it reads', () => {
-    expect(ENV_KEYS).toHaveLength(27);
+    expect(ENV_KEYS).toHaveLength(29);
     expect(new Set(ENV_KEYS).size).toBe(ENV_KEYS.length);
   });
 

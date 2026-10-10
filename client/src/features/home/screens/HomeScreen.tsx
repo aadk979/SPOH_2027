@@ -6,13 +6,14 @@ import { SyncIndicator } from '@/shared/shell/SyncIndicator';
 import { WorkspaceIntro } from '@/shared/ui/WorkspaceIntro';
 import { NavTile } from '@/shared/ui/NavTile';
 import { Button, ButtonLink, Callout, Card, LoadingCards, Stack } from '@/shared/ui';
-import { useMe, useRequireSession } from '@/features/session';
+import { useAllows, useMe, useRequireSession } from '@/features/session';
 import { canOpenOperations } from '@/navigation';
 import { useEvent } from '@/shared/lib/eventContext';
 
 export default function HomeScreen() {
   const session = useRequireSession();
   const { data: me, isPending, isError, refetch } = useMe();
+  const allows = useAllows();
   const event = useEvent();
   if (!session) return null;
 
@@ -71,7 +72,7 @@ export default function HomeScreen() {
             label="Plan your shift"
             hint="View your assignments, alerts and sync status."
           />
-          {canOpenOperations({ capabilities: session.capabilities }) ? (
+          {canOpenOperations({ allows }) ? (
             <NavTile
               href="/operations"
               label="Open operations"

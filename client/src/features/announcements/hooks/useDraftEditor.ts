@@ -7,6 +7,7 @@ import {
 import { useEventId } from '@/shared/lib/eventContext';
 import { useZodForm } from '@/shared/hooks/useZodForm';
 import { useStations } from '@/features/stations';
+import { useAllows } from '@/features/session';
 import { saveAnnouncementDraft, replaceAnnouncementDraft } from '../api';
 import { usePrivateAnnouncementMutation } from '../queries';
 import { initialDraftValues, draftContentRequest } from '../model/draftForm';
@@ -18,6 +19,7 @@ export function useDraftEditor(input: {
   me: MeResponse;
   onSaved: (draft: AnnouncementDraftRecord) => void;
 }) {
+  const allows = useAllows();
   const form = useZodForm(
     CreateAnnouncementRequest,
     initialDraftValues(input.draft, input.me.event.timezone),
@@ -49,7 +51,7 @@ export function useDraftEditor(input: {
     save,
     submit,
     stations,
-    canSendEventWide: input.me.capabilities.includes('announcement.event.send'),
+    canSendEventWide: allows('Announcement.SendEvent'),
     ...draftSetters(form.setter),
   };
 }

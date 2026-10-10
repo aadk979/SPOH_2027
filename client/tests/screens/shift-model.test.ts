@@ -3,17 +3,21 @@ import type { MeResponse, StationSummary } from '@spoh/shared';
 import { stationLinks } from '@/navigation';
 
 /** The station tiles as RoleTiles builds them from the registry. */
-function stationTiles(me: MeResponse) {
-  return stationLinks({ capabilities: me.capabilities, station: me.currentAssignment?.station });
+function stationTiles(me: MeResponse & { actions: readonly string[] }) {
+  return stationLinks({
+    allows: (action) => me.actions.includes(action),
+    station: me.currentAssignment?.station,
+  });
 }
 /** A station type's code, as the fixture event names them. */
 type Kind = 'SIGNUP_BOOTH' | 'WELCOME_LOUNGE' | 'COURSE_STATION' | 'MISSION_COMPLETE' | 'OTHER';
 function fixture(
   kind: Kind,
-  capabilities: MeResponse['capabilities'],
+  actions: string[],
   flags = { countsEntry: false, issuesStamp: false },
-): MeResponse {
+): MeResponse & { actions: string[] } {
   return {
+    actions,
     volunteer: {
       id: 'v',
       displayName: 'Volunteer',
@@ -22,7 +26,6 @@ function fixture(
       active: true,
     },
     event: { id: 'e', name: 'Event', timezone: 'Asia/Singapore', locale: 'en-SG', status: 'LIVE' },
-    capabilities,
     currentAssignment: {
       id: 'a',
       eventDayId: 'day',
@@ -65,14 +68,14 @@ describe('station capture tiles', () => {
   it('requires both an assignment and a matching capability', () => {
     const me = fixture('SIGNUP_BOOTH', []);
     expect(stationTiles(me)).toEqual([]);
-    me.capabilities = ['registration.create'];
+    me.actions = ['Registration.Create'];
     me.currentAssignment = null;
     expect(stationTiles(me)).toEqual([]);
   });
   it('keeps tile order and station hints when several capabilities apply', () => {
     const me = fixture(
       'SIGNUP_BOOTH',
-      ['registration.create', 'footfall.create', 'card.stamp', 'gift.redeem'],
+      ['Registration.Create', 'Footfall.Create', 'Card.Stamp', 'Gift.Redeem'],
       { countsEntry: true, issuesStamp: true },
     );
     expect(stationTiles(me)).toEqual([
@@ -83,10 +86,10 @@ describe('station capture tiles', () => {
   });
   it('restricts gifts to Mission Complete and honors station flags', () => {
     const me = fixture('MISSION_COMPLETE', [
-      'registration.create',
-      'footfall.create',
-      'card.stamp',
-      'gift.redeem',
+      'Registration.Create',
+      'Footfall.Create',
+      'Card.Stamp',
+      'Gift.Redeem',
     ]);
     expect(stationTiles(me).map((tile) => tile.href)).toEqual(['/capture/redeem']);
   });

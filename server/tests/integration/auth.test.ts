@@ -53,7 +53,8 @@ describe('opening a session', () => {
     expect(response.status).toBe(201);
     expect(response.body.accessToken).toEqual(expect.any(String));
     expect(response.body.volunteer.displayName).toBe('Sam IC');
-    expect(response.body.capabilities).toContain('record.void');
+    // What the volunteer may do comes from /me/permissions now (P11.8), not the session.
+    expect(response.body).not.toHaveProperty('capabilities');
     expect(cookieValue(response, COOKIE)).toEqual(expect.any(String));
   });
 

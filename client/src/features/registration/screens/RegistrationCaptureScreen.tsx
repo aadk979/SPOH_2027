@@ -8,7 +8,7 @@ import { SyncIndicator } from '@/shared/shell/SyncIndicator';
 import { Button, ButtonLink, Callout, EmptyState } from '@/shared/ui';
 import { useCapture } from '@/features/capture';
 import { useWakeLock } from '@/shared/hooks/useWakeLock';
-import { useMe, useRequireSession } from '@/features/session';
+import { useAllows, useMe, useRequireSession } from '@/features/session';
 import { useRegistrationSummary } from '@/features/registration';
 import { formatCount } from '@/shared/lib/format';
 
@@ -24,6 +24,7 @@ import { formatCount } from '@/shared/lib/format';
 export default function RegistrationCaptureScreen(): ReactNode {
   const session = useRequireSession();
   const { data: me } = useMe();
+  const allows = useAllows();
   const { sessionCount, undoable, error, capture, undo } = useCapture();
 
   useWakeLock(session !== null);
@@ -35,10 +36,7 @@ export default function RegistrationCaptureScreen(): ReactNode {
    * their own contribution alongside the booth's, which is how a discrepancy
    * becomes visible before it becomes a reconciliation problem (§2.4).
    */
-  const boothTotal = useRegistrationSummary(
-    stationId,
-    me?.capabilities.includes('dashboard.station.read') ?? false,
-  );
+  const boothTotal = useRegistrationSummary(stationId, !!me && allows('Dashboard.ReadStation'));
 
   if (!session) return null;
 

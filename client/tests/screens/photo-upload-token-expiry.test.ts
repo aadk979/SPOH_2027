@@ -13,7 +13,6 @@ const session: Session = {
   volunteerId: 'synthetic-person',
   displayName: 'Desk',
   role: 'VOLUNTEER',
-  capabilities: ['own.read', 'lostFound.log'],
   expiresAt: Date.now() + 60_000,
   refreshAvailable: false,
 };

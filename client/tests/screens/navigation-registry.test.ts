@@ -1,7 +1,7 @@
 import { readdirSync, statSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import type { Capability } from '@spoh/shared';
+import type { Action } from '@spoh/shared';
 import {
   NAV_REGISTRY,
   canOpenOperations,
@@ -30,14 +30,14 @@ function appRoutes(dir = APP): string[] {
   });
 }
 
-const OPERATIONS_TOOLS: Capability[] = [
-  'dashboard.event.read',
-  'dashboard.station.read',
-  'user.read',
-  'config.manage',
-  'fallback.declare',
-  'fallback.import',
-  'report.generate',
+const OPERATIONS_TOOLS: Action[] = [
+  'Dashboard.ReadEvent',
+  'Dashboard.ReadStation',
+  'People.Read',
+  'Settings.Read',
+  'Fallback.Declare',
+  'Fallback.Import',
+  'Report.Generate',
 ];
 
 describe('navigation registry', () => {
@@ -78,25 +78,33 @@ describe('navigation registry', () => {
   });
 
   it('offers Operations exactly when at least one tool is allowed', () => {
-    const sections = (capabilities: Capability[]) =>
-      sectionEntries({ capabilities }).map((entry) => entry.path);
+    const allows = (actions: readonly Action[]) => (action: Action) => actions.includes(action);
+    const sections = (actions: Action[]) =>
+      sectionEntries({ allows: allows(actions) }).map((entry) => entry.path);
     expect(sections([])).toEqual(['/home', '/shift', '/guide', '/safety']);
     for (const tool of OPERATIONS_TOOLS) {
-      expect(canOpenOperations({ capabilities: [tool] })).toBe(true);
+      expect(canOpenOperations({ allows: allows([tool]) })).toBe(true);
       expect(sections([tool])).toContain('/operations');
       expect(
-        operationGroups({ capabilities: [tool] }).flatMap((group) => group.links),
-      ).toHaveLength(1);
+        operationGroups({ allows: allows([tool]) }).flatMap((group) => group.links),
+      ).toHaveLength(
+        NAV_REGISTRY.filter(
+          (entry) => entry.requires === tool && entry.surfaces?.includes('operations'),
+        ).length,
+      );
     }
   });
 
   it('groups operations tools in their fixed order', () => {
-    const groups = operationGroups({ capabilities: OPERATIONS_TOOLS });
+    const groups = operationGroups({
+      allows: (action: Action) => OPERATIONS_TOOLS.includes(action),
+    });
     expect(groups.map((group) => group.group)).toEqual(['Monitor', 'Manage', 'Recover & report']);
     expect(groups.flatMap((group) => group.links.map((link) => link.href))).toEqual([
       '/chief',
       '/ic',
       '/admin/users',
+      '/admin/permissions',
       '/admin/settings',
       '/chief/fallback',
       '/chief/imports',

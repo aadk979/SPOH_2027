@@ -414,7 +414,11 @@ describe('degraded mode', () => {
 });
 
 describe('createAuthorizer', () => {
-  const setup = { region: 'ap-southeast-1', log: { warn: vi.fn() }, subscribe: vi.fn() };
+  const setup = {
+    region: 'ap-southeast-1',
+    log: { warn: vi.fn(), info: vi.fn() },
+    subscribe: vi.fn(),
+  };
 
   it('is the local engine where no policy store is configured', () => {
     expect(createAuthorizer({ ...setup, policyStoreId: null })).toBeInstanceOf(

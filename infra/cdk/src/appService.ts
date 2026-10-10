@@ -37,6 +37,7 @@ import { CacheBusMonitoring } from './cacheBusMonitoring.js';
 import { TaskFailureMonitoring } from './taskFailureMonitoring.js';
 import type { Bucket } from 'aws-cdk-lib/aws-s3';
 import { grantPhotoObjects } from './mediaAccess.js';
+import type { AuthorizationStore } from './authorizationStore.js';
 
 const PORT = 4000;
 
@@ -54,6 +55,8 @@ export interface AppServiceProps {
   cognito: CognitoSettings;
   /** Enabled only after the stage has an approved exact client origin for S3 CORS. */
   mediaBucket?: Bucket;
+  /** The stage's AVP policy store (P11.6); the app asks it, behind the cache and breaker. */
+  authorization: AuthorizationStore;
 }
 
 /**
@@ -158,6 +161,11 @@ export class AppService extends Construct {
       command: ['serve'],
       logging: LogDrivers.awsLogs({ logGroup: logs, streamPrefix: 'app' }),
       portMappings: [{ containerPort: PORT, name: 'http' }],
+      // Plain environment: the policy-name map outgrows a standard SSM parameter's 4 KB.
+      environment: {
+        AVP_POLICY_STORE_ID: props.authorization.policyStoreId,
+        AVP_POLICY_NAMES: props.authorization.policyNamesJson,
+      },
       secrets: {
         ...this.configuration.appInjections,
         DB_APP_PASSWORD: EcsSecret.fromSecretsManager(secrets.appDbPassword),
@@ -177,7 +185,13 @@ export class AppService extends Construct {
       },
     });
     if (props.mediaBucket) grantPhotoObjects(task, props.mediaBucket);
+    props.authorization.grantIsAuthorized(task.taskRole);
     acknowledgeTask(task);
+    Validations.of(task).acknowledge({
+      id: 'AwsSolutions-ECS2',
+      reason:
+        'AVP_POLICY_STORE_ID and AVP_POLICY_NAMES are non-secret ids CloudFormation generates in this stack; they change only with a deployment of the store itself, and the name map exceeds a standard SSM parameter.',
+    });
     return task;
   }
 

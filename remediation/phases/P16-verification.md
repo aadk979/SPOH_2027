@@ -62,6 +62,9 @@ documentation that lets someone else run it next year. Close the programme.
   - P11.6: staging's policy store matches the repo, and the drift check is green.
   - P11.9: decision latency recorded; AVP-unreachable and evaluation-failure behaviour
     demonstrated on staging.
+  - P11.6: `infra.yml`'s AVP drift step green against staging's store.
+  - P11.7: `client/tests/e2e/role-permissions.spec.ts` green (an edit takes effect; the simulator).
+  - P11.8: the browser journeys green with `/me/permissions` driving every affordance.
   - P12.1: the pool settings are applied on staging, and `cdk diff` on identity is empty.
   - P12.2: a staging invite arrives as configured.
   - P13.1: the owner reviews the information-architecture walkthrough.

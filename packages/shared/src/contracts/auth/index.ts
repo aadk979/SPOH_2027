@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { CommitteeRole } from '../../invariants/enums.js';
-import { Capability } from '../../access/capabilities.js';
 import { Id, IsoDateTime } from '../common/index.js';
 
 /**
@@ -59,7 +58,6 @@ export const SessionResponse = z
         role: CommitteeRole,
       })
       .strict(),
-    capabilities: z.array(Capability),
     /**
      * False when the refresh cookie could not be set — a cross-site context
      * without secure transport, typically. The client then knows a hard refresh

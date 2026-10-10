@@ -1,6 +1,6 @@
 'use client';
 
-import type { Capability, CommitteeRole, SessionResponse } from '@spoh/shared';
+import type { CommitteeRole, SessionResponse } from '@spoh/shared';
 import { ClientConfigurationError, loadClientConfiguration } from '@/shared/lib/env';
 
 /**
@@ -30,7 +30,6 @@ export interface Session {
   volunteerId: string;
   displayName: string;
   role: CommitteeRole;
-  capabilities: Capability[];
   expiresAt: number;
   /** False when the server could not set a refresh cookie; a reload will sign out. */
   refreshAvailable: boolean;
@@ -149,7 +148,6 @@ export function sessionFromResponse(response: SessionResponse): Session {
     volunteerId: response.volunteer.id,
     displayName: response.volunteer.displayName,
     role: response.volunteer.role,
-    capabilities: response.capabilities,
     expiresAt: Date.now() + response.expiresIn * 1000,
     refreshAvailable: response.refreshAvailable,
   };

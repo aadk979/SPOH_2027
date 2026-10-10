@@ -4,13 +4,14 @@ import { AppShell } from '@/shared/shell/AppShell';
 import { NavTile } from '@/shared/ui/NavTile';
 import { WorkspaceIntro } from '@/shared/ui/WorkspaceIntro';
 import { Callout, CardGrid, Section, Stack } from '@/shared/ui';
-import { useRequireSession } from '@/features/session';
+import { useAllows, useRequireSession } from '@/features/session';
 import { operationGroups } from '@/navigation';
 
 export default function OperationsScreen() {
   const session = useRequireSession();
   if (!session) return null;
-  const groups = operationGroups({ capabilities: session.capabilities });
+  const allows = useAllows();
+  const groups = operationGroups({ allows });
   return (
     <AppShell title="Operations" width="wide">
       <Stack>

@@ -1,4 +1,4 @@
-import { capabilitiesForRole, type MeResponse } from '@spoh/shared';
+import type { MeResponse } from '@spoh/shared';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { toMyAssignment } from '../data/mappers.js';
@@ -45,7 +45,6 @@ export async function getMe(
       active: volunteer.active,
     },
     event,
-    capabilities: capabilitiesForRole(volunteer.role),
     currentAssignment: currentAssignment ? toMyAssignment(currentAssignment) : null,
     upcomingAssignments: assignments.map(toMyAssignment),
     escalationChain: escalationChain.map((person) => ({

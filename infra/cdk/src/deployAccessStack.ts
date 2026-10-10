@@ -92,6 +92,17 @@ export class DeployAccessStack extends Stack {
         resources: [`arn:aws:cloudformation:${this.region}:${this.account}:stack/Spoh-*/*`],
       }),
     );
+    // The AVP drift check (P11.6) reads the store; it never changes a policy.
+    this.role.addToPolicy(
+      new PolicyStatement({
+        actions: [
+          'verifiedpermissions:ListPolicies',
+          'verifiedpermissions:GetPolicy',
+          'verifiedpermissions:GetSchema',
+        ],
+        resources: [`arn:aws:verifiedpermissions::${this.account}:policy-store/*`],
+      }),
+    );
     // A release runs the migrate task before moving the service (P08.4).
     this.role.addToPolicy(
       new PolicyStatement({
@@ -128,6 +139,10 @@ export class DeployAccessStack extends Stack {
       [
         `AwsSolutions-IAM5[Resource::arn:aws:iam::${this.account}:role/Spoh-*-Platform-AppMigrateTask*]`,
         'The migrate task roles CDK names per stage, passable to ECS tasks only.',
+      ],
+      [
+        `AwsSolutions-IAM5[Resource::arn:aws:verifiedpermissions::${this.account}:policy-store/*]`,
+        'The AVP drift check reads each stage store, whose id CDK generates in another stack; List/Get only.',
       ],
     ]) {
       Validations.of(this.role).acknowledge({ id: finding!, reason: reason! });

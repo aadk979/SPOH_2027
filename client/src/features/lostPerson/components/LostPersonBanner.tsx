@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { useAcknowledgeAlert, useActiveAlerts, useResolveAlert } from '@/features/lostPerson';
-import { useMe } from '@/features/session';
+import { useAllows, useMe } from '@/features/session';
 import { LostPersonAlert } from './LostPersonAlert';
 
 /**
@@ -24,7 +24,8 @@ export function LostPersonBanner(): ReactNode {
 
   // IC and above. A volunteer who found the child tells their IC; the person
   // who clears the floor is the person coordinating the search.
-  const canResolve = me?.capabilities.includes('lostPerson.resolve') ?? false;
+  const allows = useAllows();
+  const canResolve = !!me && allows('LostPerson.Resolve');
 
   const alerts = data?.alerts ?? [];
   if (alerts.length === 0) return null;
