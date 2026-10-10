@@ -31,7 +31,7 @@ const windows = new Map<string, Window>();
  * Audit writes not yet settled, so a test can wait for them before it resets the database.
  * One set per process, even when a test loads the app twice (`vi.resetModules`).
  */
-const PENDING = Symbol.for('spoh.authorizationDenials.pending');
+const PENDING = Symbol.for('@spoh/server/authorizationDenials.pending');
 const pending: Set<Promise<void>> = ((globalThis as Record<symbol, unknown>)[PENDING] ??= new Set<
   Promise<void>
 >()) as Set<Promise<void>>;
