@@ -168,7 +168,7 @@ the baseline, and it only ever receives P06.12 cherry-picks. What each fix chang
 
 **Since 10 October 2026 the programme builds every feature first and verifies after**
 ([ADR-011](../docs/adr/ADR-011-build-first-verify-after.md), D-23). Read
-[the latest handoff](reports/HANDOFF-2026-10-10.md), ADR-011 and
+[the latest handoff](reports/HANDOFF-2026-10-10-EVENING.md), ADR-011 and
 [ADR-010](../docs/adr/ADR-010-delivery-process.md) first. In short:
 
 - Build the remaining features of P08 and P10–P15 in batches, each with its tests, and push each

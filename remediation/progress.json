@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-10T09:12:30.992Z",
+  "updatedAt": "2026-10-10T09:23:56.261Z",
   "current": {
     "phase": "P08",
     "step": null
@@ -3908,6 +3908,10 @@
     {
       "at": "2026-10-10T07:57:55.492Z",
       "text": "AWS torn down at the owner's instruction (all regions): staging and plumbing stacks, live Lightsail spoh-app, both Cognito pools, buckets, ECR, logs, backups. Kept: RDS snapshot spoh-staging-final-20261010. Local copies in .local/. Record: reports/P08/aws-teardown-2026-10-10.md."
+    },
+    {
+      "at": "2026-10-10T09:23:56.261Z",
+      "text": "Handoff: reports/HANDOFF-2026-10-10-EVENING.md (P11 done, CI 38040576698 green on de59c82; AWS torn down; batch cycle). Next: sweep P08/P10/P13.6, then P12."
     }
   ]
 }
