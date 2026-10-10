@@ -176,7 +176,7 @@ client/src/
   milestones, no application deployment for allowlisted documentation, and bounded
   prerequisite work across phase boundaries. All completion and coverage rules remain.
 - [ADR-011](../../docs/adr/ADR-011-build-first-verify-after.md) (10 October 2026) amends it:
-  build every feature first, with full CI on every code push and the automatic staging deploy;
+  build every feature first, with full CI on every code push (AWS is torn down until P16);
   soaks, per-feature staging acceptance, full browser and visual runs and UX sign-offs move to
   the P16 verification campaign (P16.8).
 - Small commits, each green, each carrying a `Remediation-Step: P06.3` trailer.

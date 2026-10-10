@@ -20,7 +20,8 @@ documentation that lets someone else run it next year. Close the programme.
 - **ADR-011 (D-23, 10 October 2026): this phase is the verification campaign for the whole build.**
   It starts when every feature step in P08 and P10–P15 is closed. Earlier phases deferred their
   staging acceptance, soaks, load numbers, browser and visual runs and UX sign-offs to here
-  (P16.8 lists them). First deploy to staging sized like production (ADR-008), then run, in this
+  (P16.8 lists them). First recreate AWS, torn down on 10 October 2026
+  ([record](../reports/P08/aws-teardown-2026-10-10.md)), and deploy staging sized like production (ADR-008), then run, in this
   order: **P16.10** granular API suite → **P16.1** full regression → **P16.8** deferred
   acceptance → **P16.9** soak → **P16.2** load → **P16.3** drills → **P16.4** restore. Fix what
   each finds (a failing test first), and re-run what the fix touched.

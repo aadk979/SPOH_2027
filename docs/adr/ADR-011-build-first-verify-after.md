@@ -1,11 +1,11 @@
 # ADR-011 — Build every feature first, verify on staging after
 
-| Field      | Value                                                                                                      |
-| ---------- | ---------------------------------------------------------------------------------------------------------- |
-| Status     | Accepted by the owner's instruction of 10 October 2026 (D-23)                                              |
-| Applies to | All remaining remediation work: P08 and P10–P16                                                            |
-| Amends     | ADR-010 (implementation cadence and per-milestone acceptance); D-20 and D-22 for the remaining P11 work    |
-| Keeps      | ADR-010's CI classification and automatic staging deployment; production, cutover and real-data boundaries |
+| Field      | Value                                                                                                                                           |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Status     | Accepted by the owner's instruction of 10 October 2026 (D-23)                                                                                   |
+| Applies to | All remaining remediation work: P08 and P10–P16                                                                                                 |
+| Amends     | ADR-010 (implementation cadence and per-milestone acceptance); D-20 and D-22 for the remaining P11 work                                         |
+| Keeps      | ADR-010's CI classification; production, cutover and real-data boundaries. **AWS is torn down (10 October 2026), so nothing deploys until P16** |
 
 ## Context
 
@@ -36,8 +36,9 @@ staged rollout, shadow release or soak between features.
 - **New code lands with its tests**: unit, integration, route contract and policy tests as
   engineering standards §9 require. A bug fix lands with a test that fails without it. Coverage
   floors never drop.
-- **The automatic staging deploy** stays on. Its smoke step must pass; a failed deploy is fixed
-  before the next batch.
+- **No deploy.** The owner had all AWS torn down on 10 October 2026
+  ([teardown record](../../remediation/reports/P08/aws-teardown-2026-10-10.md)); the deploy and
+  infra workflows run only when dispatched. CI on every push is the gate.
 - **Data safety:** migrations follow ADR-009 §7. Never migrate, reset or seed the real local
   `spoh2027` database; tests use `_test` databases only.
 
@@ -58,8 +59,7 @@ single affected spec only when it is cheap and the change is risky.
 
 ### 4. Completing a step
 
-A step is **done** when its code is built, its tests are written and green in CI, and the pipeline
-has deployed it to staging. Where its "Done when" asks for staging acceptance, a soak, a load
+A step is **done** when its code is built and its tests are written and green in CI. Where its "Done when" asks for staging acceptance, a soak, a load
 number or an owner sign-off, record that part in **P16.8** and close the step. Do not close a step
 whose code or tests are missing.
 
@@ -72,7 +72,7 @@ going. Release plans for the remaining P11 work (release 3 and later) do not nee
 
 ### 6. The verification campaign
 
-When every feature step is closed: deploy to staging sized like production (the real
+When every feature step is closed: recreate AWS (bootstrap, the GitHub deploy role, then the stacks) and deploy staging sized like production (the real
 infrastructure, ADR-008), then run P16 in this order: P16.10 granular API suite, P16.1 full
 regression including browser and visual suites, P16.8 deferred acceptance, P16.9 soak, P16.2 load,
 P16.3 drills, P16.4 restore. Fix what they find, with a test per fix, and re-run what the fix

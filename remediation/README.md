@@ -173,10 +173,10 @@ the baseline, and it only ever receives P06.12 cherry-picks. What each fix chang
 
 - Build the remaining features of P08 and P10–P15 in batches, each with its tests, and push each
   batch to `main`. Full CI runs on every code push (run its steps locally first, under Node 24),
-  and the pipeline deploys staging automatically.
+  and nothing deploys: AWS is torn down until P16 ([teardown record](reports/P08/aws-teardown-2026-10-10.md)).
 - No shadow releases, soaks, per-feature staging acceptance, full browser or visual runs, or
-  release-plan approvals between features. A step closes when its code and tests are green in CI
-  and deployed; any staging, soak, load or sign-off part of its _Done when_ goes to **P16.8**.
+  release-plan approvals between features. A step closes when its code and tests are green in CI;
+  any staging, soak, load or sign-off part of its _Done when_ goes to **P16.8**.
 - Ask the owner only about cost, production, unrecoverable data and product rules the ADRs leave
   open. Otherwise take the recommendation and record it as **assumed**.
 - When every feature step is closed, P16 is the verification campaign: staging sized like

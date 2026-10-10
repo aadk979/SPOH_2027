@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-10T07:04:49.647Z",
+  "updatedAt": "2026-10-10T07:57:55.493Z",
   "current": {
     "phase": "P11",
     "step": "P11.5"
@@ -3874,6 +3874,10 @@
     {
       "at": "2026-10-10T07:04:49.646Z",
       "text": "D-23 / ADR-011: build every remaining feature first, verify on staging once in P16 (P16.8 deferred acceptance, P16.9 soak, P16.10 granular API suite). Full CI before every code push stays. Handoff: reports/HANDOFF-2026-10-10.md."
+    },
+    {
+      "at": "2026-10-10T07:57:55.492Z",
+      "text": "AWS torn down at the owner's instruction (all regions): staging and plumbing stacks, live Lightsail spoh-app, both Cognito pools, buckets, ECR, logs, backups. Kept: RDS snapshot spoh-staging-final-20261010. Local copies in .local/. Record: reports/P08/aws-teardown-2026-10-10.md."
     }
   ]
 }
