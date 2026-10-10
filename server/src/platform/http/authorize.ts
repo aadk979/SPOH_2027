@@ -9,11 +9,10 @@ import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import {
   databaseRoleGrants,
   EntityBuilder,
-  LocalCedarAuthorizer,
-  type Authorizer,
   type Question,
   type ResourceRef,
 } from '../access/authorizer/index.js';
+import { currentAuthorizer, USE_CASE_PHASE_GUARDRAILS } from '../access/engine.js';
 import { prisma, type PrismaTransactionClient } from '../db/client.js';
 import { ERROR_CODES } from '@spoh/shared';
 import {
@@ -87,18 +86,8 @@ export type Outcome =
   | { readonly kind: 'unaskable' }
   | { readonly kind: 'failed'; readonly cause: unknown };
 
-let engine: Authorizer | null = null;
-
-/** The local engine until P11.6 gives an environment its policy store. */
-function authorizer(): Authorizer {
-  engine ??= new LocalCedarAuthorizer();
-  return engine;
-}
-
 /** For tests: the engine the enforcement points ask. */
-export function useAuthorizer(next: Authorizer | null): void {
-  engine = next;
-}
+export { useAuthorizer } from '../access/engine.js';
 
 /**
  * UI affordances (ADR-005 §6, P11.8): each question answered on its own by the local engine,
@@ -189,20 +178,11 @@ function refuse(
 const forbidden = () => new ForbiddenError('You do not have permission to perform this action');
 
 /**
- * Policies about the state of the event or of the caller's own record, which every use case
- * enforces again under its own lock and with the reason the screens show: the capture window
- * and the archived event (`SETTING_LOCKED`, the closing grace for a queued capture, the reopen
- * blockers), and check-in's attendance and running shift (a conflict, not a permission
- * denial). The middleware's answer can race go-live, and its capture window is coarser than
- * the admission's. A request they alone refuse goes on to its use case, which refuses it with
- * that reason. Structure frozen once LIVE has no such check, so the policy's answer stands
- * (C15).
+ * A request refused only by `USE_CASE_PHASE_GUARDRAILS` goes on to its use case, which refuses
+ * it with the reason the screens show: the middleware's answer can race go-live, and its
+ * capture window is coarser than the admission's. Structure frozen once LIVE has no such
+ * check, so the policy's answer stands (C15).
  */
-const USE_CASE_PHASE_GUARDRAILS = new Set([
-  'guardrail.capture-window',
-  'guardrail.archived-read-only',
-  'self.check-in-conditions',
-]);
 const STRUCTURE_FROZEN = 'guardrail.structure-frozen-when-live';
 
 const refusedOnlyBy = (refused: readonly CheckResult[], guardrails: ReadonlySet<string>) =>
@@ -358,7 +338,7 @@ async function decide(req: Request, checks: ChecksOf, any: boolean): Promise<Out
     const request = check.asPerson
       ? await builder.forPerson(auth.volunteerId, question)
       : await builder.forMembership(auth.membershipId, question);
-    const decision = await authorizer().isAuthorized(request);
+    const decision = await currentAuthorizer().isAuthorized(request);
     results.push({
       action: check.action,
       allowed: decision.allowed && decision.errors.length === 0,

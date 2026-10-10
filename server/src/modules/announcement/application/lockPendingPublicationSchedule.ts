@@ -1,5 +1,6 @@
 import { ERROR_CODES, PublishAnnouncementPayload } from '@spoh/shared';
-import { requireCurrentCapability } from '../../../platform/access/currentCapability.js';
+import { requireCurrentPermission } from '../../../platform/access/currentPermission.js';
+import { stationCandidates } from '../../../platform/access/stationCandidates.js';
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import { ConflictError, NotFoundError } from '../../../platform/errors/index.js';
 import { findOwnDraft, lockDraftEvent } from '../data/draftRepo.js';
@@ -15,11 +16,12 @@ export async function lockPendingPublicationSchedule(
   const { scope } = actor;
   if ((await lockDraftEvent(scope, tx)).status === 'ARCHIVED')
     throw new ConflictError(ERROR_CODES.CONFLICT, 'Archived schedules are read-only.');
-  await requireCurrentCapability(tx, {
+  await requireCurrentPermission(tx, {
     scope,
     personId: actor.volunteerId,
     membershipId: actor.membershipId,
-    capability: 'announcement.station.send',
+    action: 'Announcement.SendStation',
+    resource: await stationCandidates(tx, scope, actor.membershipId),
   });
   if (!(await findOwnDraft(scope, { id: input.id, authorId: actor.volunteerId }, tx)))
     throw new NotFoundError('Announcement draft');

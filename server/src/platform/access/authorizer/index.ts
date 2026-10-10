@@ -6,8 +6,8 @@ import { ResilientAuthorizer } from './resilientAuthorizer.js';
 import type { Authorizer } from './types.js';
 
 /**
- * Cedar authorization (ADR-005, P11.4). Not yet called by any route: P11.5 replaces
- * `requireCapability` and `requireStationScope` with it. Until then those guards decide.
+ * Cedar authorization (ADR-005): the enforcement points (`platform/http/authorize.ts`) and
+ * use cases' own rechecks (`../currentPermission.ts`) ask it; nothing else decides access.
  */
 export { AvpAuthorizer, sdkAvpClient, type AvpClient } from './avpAuthorizer.js';
 export { CircuitBreaker } from './circuitBreaker.js';

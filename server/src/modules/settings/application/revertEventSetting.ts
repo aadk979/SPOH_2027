@@ -14,7 +14,7 @@ import { productRevertResponse } from './productRevertResponse.js';
 export function revertEventSetting(request: RevertEventSettingRequest, actor: ActorContext) {
   return prisma.$transaction(
     async (tx) => {
-      await lockEventSettingAuthority(tx, actor);
+      await lockEventSettingAuthority(tx, actor, request.key);
       await lockReserved(tx, actor.scope, request.idempotencyKey);
       const target = await eventSettingHistoryById(tx, actor.scope, {
         key: request.key,

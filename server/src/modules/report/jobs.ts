@@ -1,6 +1,6 @@
 import { Id } from '@spoh/shared';
 import { z } from 'zod';
-import { requireCurrentCapability } from '../../platform/access/currentCapability.js';
+import { requireCurrentPermission } from '../../platform/access/currentPermission.js';
 import type { ActorContext } from '../../platform/http/auditContext.js';
 import { ScheduleRefusal } from '../../platform/scheduler/failure.js';
 import { defineScheduledHandler, type ScheduleContext } from '../../platform/scheduler/handler.js';
@@ -35,11 +35,11 @@ export const reportScheduledHandlers = [
     schema: dailySnapshotPayload,
     authorize: async (context) => {
       const actor = snapshotActor(context);
-      await requireCurrentCapability(context.tx, {
+      await requireCurrentPermission(context.tx, {
         scope: actor.scope,
         personId: actor.volunteerId,
         membershipId: actor.membershipId,
-        capability: 'report.generate',
+        action: 'Report.Generate',
       });
     },
     run: async (context, payload) => {

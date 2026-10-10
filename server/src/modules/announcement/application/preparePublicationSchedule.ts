@@ -3,7 +3,8 @@ import {
   PublishAnnouncementPayload,
   type ScheduleAnnouncementDraftRequest,
 } from '@spoh/shared';
-import { requireCurrentCapability } from '../../../platform/access/currentCapability.js';
+import { requireCurrentPermission } from '../../../platform/access/currentPermission.js';
+import { stationCandidates } from '../../../platform/access/stationCandidates.js';
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import { ConflictError, NotFoundError } from '../../../platform/errors/index.js';
 import { findOwnDraft, lockDraftEvent } from '../data/draftRepo.js';
@@ -42,11 +43,12 @@ export async function preparePublicationSchedule(
 ) {
   const { actor, request } = input;
   await lockDraftEvent(actor.scope, tx);
-  await requireCurrentCapability(tx, {
+  await requireCurrentPermission(tx, {
     scope: actor.scope,
     personId: actor.volunteerId,
     membershipId: actor.membershipId,
-    capability: 'announcement.station.send',
+    action: 'Announcement.SendStation',
+    resource: await stationCandidates(tx, actor.scope, actor.membershipId),
   });
   const draft = await findOwnDraft(actor.scope, { id: input.id, authorId: actor.volunteerId }, tx);
   if (!draft) throw new NotFoundError('Announcement draft');

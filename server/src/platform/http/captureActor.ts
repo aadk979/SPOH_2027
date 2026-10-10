@@ -16,12 +16,6 @@ export interface CaptureActor {
   volunteerId: string;
   /** Their EventMembership in the request's event: who the capture is recorded by. */
   membershipId: string;
-  /**
-   * Present when an IC-or-above wrote to a station they are not rostered on.
-   * The capture services pass this to `auditStationScopeBypass` so the write is
-   * distinguishable during reconciliation.
-   */
-  stationScopeBypass?: { stationId: string };
 }
 
 /** What a capture use case needs besides its input: who, the audit trail, and now. */
@@ -47,6 +41,5 @@ export function captureActorFrom(req: Request): CaptureActor {
   return {
     volunteerId: auth.volunteerId,
     membershipId: auth.membershipId,
-    ...(auth.stationScopeBypass ? { stationScopeBypass: auth.stationScopeBypass } : {}),
   };
 }

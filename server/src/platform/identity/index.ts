@@ -1,4 +1,4 @@
-import { capabilitiesForRole, highestRole } from '@spoh/shared';
+import { highestRole } from '@spoh/shared';
 import { env } from '../../config/env.js';
 import {
   AccountInactiveError,
@@ -290,7 +290,6 @@ export async function authenticate(
     eventId: volunteer.eventId,
     membershipId: volunteer.membershipId,
     displayName: volunteer.displayName,
-    capabilities: capabilitiesForRole(role),
     ...(sessionId ? { sessionId } : {}),
   };
 }

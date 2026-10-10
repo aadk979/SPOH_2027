@@ -1,7 +1,7 @@
 import { assertCardProvenance } from '../domain/cardRules.js';
 import { admitCountCapture } from '../../../platform/db/countCaptureAdmission.js';
 import type { IssueCardRequest, MissionCardRecord } from '@spoh/shared';
-import { auditStationScopeBypass, writeAudit } from '../../../platform/audit/index.js';
+import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import type { CaptureContext } from '../../../platform/http/captureActor.js';
@@ -26,7 +26,7 @@ import { getCard } from './getCard.js';
 export async function issueCard(
   shortCodeInput: string,
   request: IssueCardRequest,
-  { actor, scope, audit, clock = systemClock }: CaptureContext,
+  { scope, audit, clock = systemClock }: CaptureContext,
 ): Promise<MissionCardRecord> {
   const shortCode = normaliseShortCode(shortCodeInput);
 
@@ -61,7 +61,6 @@ export async function issueCard(
       await attachGroupRegistrations(tx, scope, { groupId: request.groupId, cardId: existing.id });
     }
 
-    await auditStationScopeBypass(tx, actor.stationScopeBypass, audit);
     return existing.id;
   });
 

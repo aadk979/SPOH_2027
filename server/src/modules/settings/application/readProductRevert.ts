@@ -1,4 +1,4 @@
-import { requireCurrentCapability } from '../../../platform/access/currentCapability.js';
+import { requireCurrentPermission } from '../../../platform/access/currentPermission.js';
 import { prisma } from '../../../platform/db/client.js';
 import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
@@ -9,11 +9,11 @@ export function readProductRevert(receipt: EventSettingRevertReceipt, actor: Act
   return prisma.$transaction(
     async (tx) => {
       await holdCaptureEvent(tx, actor.scope);
-      await requireCurrentCapability(tx, {
+      await requireCurrentPermission(tx, {
         scope: actor.scope,
         membershipId: actor.membershipId,
         personId: actor.volunteerId,
-        capability: 'config.manage',
+        action: 'Settings.Read',
       });
       return productRevertResponse(tx, { actor, receipt });
     },

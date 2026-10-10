@@ -1,9 +1,10 @@
 import { ROLE_IDS, ROLE_RANKS, type Action, type Role } from '@spoh/access-policies';
 import type { Request } from 'express';
 import type { ResourceRef, ResourceType } from '../access/authorizer/index.js';
+import { settingQuestion } from '../access/settingQuestion.js';
+import { stationCandidates } from '../access/stationCandidates.js';
 import { prisma } from '../db/client.js';
 import { NotFoundError, ValidationError } from '../errors/index.js';
-import { SETTINGS } from '../settings/registry.js';
 import { eventDayAnchorOf, systemClock } from '../time/index.js';
 import type { Check, ChecksOf, ResourceOf } from './authorize.js';
 import { getAuth } from './requireAuth.js';
@@ -80,19 +81,9 @@ export const cardFromShortCode: ResourceOf = async (req) => {
   return { type: 'MissionCard', id: card.id };
 };
 
-const SETTING_ACTIONS: Record<string, Action> = {
-  operational: 'Settings.ManageEvent',
-  security: 'Settings.ManageSecurity',
-  privacy: 'Settings.ManagePrivacy',
-};
-
 /** The action that changes a setting follows its class (ADR-003, `CHANGES.md` C9). */
 export function settingCheck(key: string): Check {
-  const definition = (SETTINGS as Record<string, { class: string } | undefined>)[key];
-  if (!definition) throw new ValidationError(`Unknown setting ${key}`);
-  const action = SETTING_ACTIONS[definition.class];
-  if (!action) throw new ValidationError(`Unknown setting class ${definition.class}`);
-  return { action, resource: { type: 'Setting', id: key } };
+  return settingQuestion(key);
 }
 
 /** A change to the setting the body names by `key`. */
@@ -174,22 +165,8 @@ export function memberEdit(resource: ResourceOf): ChecksOf {
 export function anyStation(action: Action): ChecksOf {
   return async (req) => {
     const { eventId, membershipId } = getAuth(req);
-    const assigned = await prisma.shiftAssignment.findMany({
-      where: { eventId, membershipId },
-      select: { stationId: true },
-      distinct: ['stationId'],
-      orderBy: { stationId: 'asc' },
-    });
-    const ids = assigned.map((row) => row.stationId);
-    if (ids.length === 0) {
-      const first = await prisma.station.findFirst({
-        where: { eventId },
-        select: { id: true },
-        orderBy: { id: 'asc' },
-      });
-      if (first) ids.push(first.id);
-    }
-    return ids.map((id) => ({ action, resource: { type: 'Station', id } }));
+    const stations = await stationCandidates(prisma, { eventId }, membershipId);
+    return stations.map((resource) => ({ action, resource }));
   };
 }
 

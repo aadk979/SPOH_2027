@@ -1,5 +1,5 @@
 import type { ClientSettingsResponse } from '@spoh/shared';
-import { requireCurrentCapability } from '../../../platform/access/currentCapability.js';
+import { requireCurrentPermission } from '../../../platform/access/currentPermission.js';
 import { prisma } from '../../../platform/db/client.js';
 import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
@@ -32,11 +32,12 @@ export function readClientSettings(actor: ActorContext): Promise<ClientSettingsR
   return prisma.$transaction(
     async (tx) => {
       await holdCaptureEvent(tx, actor.scope);
-      await requireCurrentCapability(tx, {
+      await requireCurrentPermission(tx, {
         scope: actor.scope,
         membershipId: actor.membershipId,
         personId: actor.volunteerId,
-        capability: 'own.read',
+        action: 'Self.Read',
+        resource: { type: 'Membership', id: actor.membershipId },
       });
       const resolve = await prepareNumericSettings(actor.scope, SCOPED_KEYS, tx);
       return {

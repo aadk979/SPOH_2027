@@ -1,7 +1,7 @@
 import type { CreateLostFoundRequest } from '@spoh/shared';
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
-import { requireCurrentCapability } from '../../../platform/access/currentCapability.js';
+import { requireCurrentPermission } from '../../../platform/access/currentPermission.js';
 import { admitCapture } from '../../../platform/db/captureAdmission.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import type { Clock } from '../../../platform/time/index.js';
@@ -19,11 +19,11 @@ export async function admitFoundItem(
   const { request, actor, clock } = input;
   const { scope, membershipId, volunteerId } = actor;
   await holdCaptureEvent(tx, scope);
-  await requireCurrentCapability(tx, {
+  await requireCurrentPermission(tx, {
     scope,
     membershipId,
     personId: volunteerId,
-    capability: 'lostFound.log',
+    action: 'LostFound.Log',
   });
   const { rehearsal } = await admitCapture(tx, scope, { request, clock });
   if (request.photoKey !== undefined)

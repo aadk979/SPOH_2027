@@ -1,5 +1,6 @@
 import { ERROR_CODES, type CreateAnnouncementRequest } from '@spoh/shared';
-import { requireCurrentCapability } from '../../../platform/access/currentCapability.js';
+import { requireCurrentPermission } from '../../../platform/access/currentPermission.js';
+import { stationCandidates } from '../../../platform/access/stationCandidates.js';
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import { ConflictError, NotFoundError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
@@ -25,11 +26,12 @@ export async function prepareDraftMutation(
   if (event.status === 'ARCHIVED') {
     throw new ConflictError(ERROR_CODES.CONFLICT, 'Archived announcement drafts are read-only.');
   }
-  await requireCurrentCapability(tx, {
+  await requireCurrentPermission(tx, {
     scope,
     personId: actor.volunteerId,
     membershipId: actor.membershipId,
-    capability: 'announcement.station.send',
+    action: 'Announcement.SendStation',
+    resource: await stationCandidates(tx, scope, actor.membershipId),
   });
   const author = await currentDraftAuthor(scope, {
     tx,

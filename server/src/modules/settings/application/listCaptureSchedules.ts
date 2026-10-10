@@ -3,7 +3,7 @@ import {
   ScopedSettingsTarget,
   type CaptureScheduleListQuery,
 } from '@spoh/shared';
-import { requireCurrentCapability } from '../../../platform/access/currentCapability.js';
+import { requireCurrentPermission } from '../../../platform/access/currentPermission.js';
 import { prisma } from '../../../platform/db/client.js';
 import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { toPage } from '../../../platform/db/pagination.js';
@@ -22,11 +22,11 @@ export function listCaptureSchedules(query: CaptureScheduleListQuery, actor: Cap
   return prisma.$transaction(
     async (tx) => {
       await holdCaptureEvent(tx, actor.scope);
-      await requireCurrentCapability(tx, {
+      await requireCurrentPermission(tx, {
         scope: actor.scope,
         membershipId: actor.membershipId,
         personId: actor.volunteerId,
-        capability: 'config.manage',
+        action: 'Settings.Read',
       });
       const target = ScopedSettingsTarget.parse(
         query.scope === 'event'

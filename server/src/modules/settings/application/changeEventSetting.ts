@@ -143,7 +143,7 @@ export async function changeEventSetting(
   const { scope } = actor;
   await prisma.$transaction(
     async (tx) => {
-      await lockEventSettingAuthority(tx, actor);
+      await lockEventSettingAuthority(tx, actor, change.key);
       await applyEventSettingChange(tx, { change, actor, source: 'USER' });
     },
     { isolationLevel: 'ReadCommitted', timeout: 30_000 },

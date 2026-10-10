@@ -1,5 +1,6 @@
 import { ERROR_CODES } from '@spoh/shared';
-import { requireCurrentCapability } from '../../../platform/access/currentCapability.js';
+import type { Action } from '@spoh/access-policies';
+import { requireCurrentPermission } from '../../../platform/access/currentPermission.js';
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { ConflictError, ForbiddenError, NotFoundError } from '../../../platform/errors/index.js';
@@ -9,12 +10,16 @@ import { lockCategoryEvent } from '../data/categoryReadRepo.js';
 
 export type CategoryScheduleActor = ActorContext & { clock?: Clock };
 
-async function categoryCapability(tx: PrismaTransactionClient, actor: CategoryScheduleActor) {
-  await requireCurrentCapability(tx, {
+async function categoryPermission(
+  tx: PrismaTransactionClient,
+  actor: CategoryScheduleActor,
+  action: Action,
+) {
+  await requireCurrentPermission(tx, {
     scope: actor.scope,
     membershipId: actor.membershipId,
     personId: actor.volunteerId,
-    capability: 'config.manage',
+    action,
   });
 }
 export async function readCategoryAuthority(
@@ -22,7 +27,7 @@ export async function readCategoryAuthority(
   actor: CategoryScheduleActor,
 ) {
   const event = await holdCaptureEvent(tx, actor.scope);
-  await categoryCapability(tx, actor);
+  await categoryPermission(tx, actor, 'Settings.Read');
   return event;
 }
 
@@ -44,7 +49,7 @@ export async function lockCategoryAuthority(
 ) {
   const event = await lockCategoryEvent(actor.scope, tx);
   if (!event) throw new NotFoundError('Event');
-  await categoryCapability(tx, actor);
+  await categoryPermission(tx, actor, 'Schedule.Manage');
   requireCategoryAttribution(actor);
   if (event.status === 'ARCHIVED')
     throw new ConflictError(ERROR_CODES.CONFLICT, 'Archived category schedules are read-only.');

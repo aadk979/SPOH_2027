@@ -1,5 +1,5 @@
 import type { LifecycleReadinessResponse } from '@spoh/shared';
-import { requireCurrentCapability } from '../../../platform/access/currentCapability.js';
+import { requireCurrentPermission } from '../../../platform/access/currentPermission.js';
 import { prisma } from '../../../platform/db/client.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { hoursAfter, systemClock, type Clock } from '../../../platform/time/index.js';
@@ -19,11 +19,11 @@ export async function readLifecycleReadiness(
     async (tx) => {
       const { scope } = actor;
       const event = await lockReadinessEvent(tx, scope);
-      await requireCurrentCapability(tx, {
+      await requireCurrentPermission(tx, {
         scope,
         membershipId: actor.membershipId,
         personId: actor.volunteerId,
-        capability: 'config.manage',
+        action: 'Settings.Read',
       });
       const now = (actor.clock ?? systemClock).now();
       const snapshot = await lifecycleSnapshot(tx, scope, { event, now });

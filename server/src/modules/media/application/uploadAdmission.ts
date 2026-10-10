@@ -1,7 +1,7 @@
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import { admittedCaptureTime } from '../../../platform/db/captureAdmission.js';
 import { holdCaptureEvent, type CaptureEvent } from '../../../platform/db/captureProvenance.js';
-import { requireCurrentCapability } from '../../../platform/access/currentCapability.js';
+import { requireCurrentPermission } from '../../../platform/access/currentPermission.js';
 import { ValidationError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import type { Clock } from '../../../platform/time/index.js';
@@ -10,11 +10,11 @@ import { mediaLimits } from './limits.js';
 /** Both fresh issuance and replay hold event state and the exact current member. */
 export async function holdUploadAuthority(tx: PrismaTransactionClient, actor: ActorContext) {
   const event = await holdCaptureEvent(tx, actor.scope);
-  await requireCurrentCapability(tx, {
+  await requireCurrentPermission(tx, {
     scope: actor.scope,
     membershipId: actor.membershipId,
     personId: actor.volunteerId,
-    capability: 'lostFound.log',
+    action: 'LostFound.Log',
   });
   return event;
 }

@@ -46,7 +46,7 @@ export function mutateScopedSetting(
 ) {
   return prisma.$transaction(
     async (tx) => {
-      await lockEventSettingAuthority(tx, actor);
+      await lockEventSettingAuthority(tx, actor, request.key);
       const event = await holdCaptureEvent(tx, actor.scope);
       if (event.status === 'ARCHIVED')
         throw new ConflictError(

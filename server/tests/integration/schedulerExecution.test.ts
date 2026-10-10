@@ -1,6 +1,6 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 import { z } from 'zod';
-import { requireCurrentCapability } from '../../src/platform/access/currentCapability.js';
+import { requireCurrentPermission } from '../../src/platform/access/currentPermission.js';
 import { jsonNull } from '../../src/platform/db/client.js';
 import { fixedClock } from '../../src/platform/time/index.js';
 import { claimDueActions } from '../../src/platform/scheduler/claimDueActions.js';
@@ -55,11 +55,11 @@ async function authorize(context: ScheduleContext) {
   if (action.createdByPersonId === null || audit.membershipId === null || action.eventId === null) {
     throw new ScheduleRefusal('AUTHORITY_CHANGED');
   }
-  await requireCurrentCapability(tx, {
+  await requireCurrentPermission(tx, {
     scope: { eventId: action.eventId },
     membershipId: audit.membershipId,
     personId: action.createdByPersonId,
-    capability: 'config.manage',
+    action: 'Schedule.Manage',
   });
 }
 

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { PrismaTransactionClient } from '../../src/platform/db/client.js';
 import { prisma } from '../../src/platform/db/client.js';
-import { requireCurrentCapability } from '../../src/platform/access/currentCapability.js';
+import { requireCurrentPermission } from '../../src/platform/access/currentPermission.js';
 import { eventDayAnchor, fixedClock, type Clock } from '../../src/platform/time/index.js';
 import { createEvent } from '../../src/modules/event/index.js';
 import { addShiftsForDay } from '../../src/modules/eventDays/index.js';
@@ -181,11 +181,11 @@ export function withReadinessObservation<T>(
     async (tx) => {
       const scope = { eventId: f.eventId };
       await lockReadinessEvent(tx, scope);
-      await requireCurrentCapability(tx, {
+      await requireCurrentPermission(tx, {
         scope,
         personId: f.creator.id,
         membershipId: f.membershipId,
-        capability: 'config.manage',
+        action: 'Settings.Read',
       });
       return observe(tx, clock.now());
     },

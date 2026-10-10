@@ -10,7 +10,7 @@ import * as memberships from '../../src/modules/event/data/archiveMembershipRepo
 import * as reminders from '../../src/modules/event/data/archiveReminderRepo.js';
 import { lockLifecycleEvent } from '../../src/modules/event/data/lifecycleRepo.js';
 import { evaluateTransition } from '../../src/modules/event/domain/lifecycle.js';
-import { requireCurrentCapability } from '../../src/platform/access/currentCapability.js';
+import { requireCurrentPermission } from '../../src/platform/access/currentPermission.js';
 import * as cacheBus from '../../src/platform/events/cacheBus.js';
 import { ConflictError } from '../../src/platform/errors/index.js';
 import { SYSTEM_AUDIT_CONTEXT } from '../../src/platform/http/auditContext.js';
@@ -44,11 +44,11 @@ async function archive(now = AFTER_GRACE) {
     async (tx) => {
       const scope = { eventId };
       const event = await lockLifecycleEvent(tx, scope);
-      await requireCurrentCapability(tx, {
+      await requireCurrentPermission(tx, {
         scope,
         membershipId,
         personId: admin.id,
-        capability: 'config.manage',
+        action: 'Event.MarkReady',
       });
       const snapshot = await lifecycleSnapshot(tx, scope, { event, now });
       const decision = evaluateTransition(snapshot, 'ARCHIVED', { now });

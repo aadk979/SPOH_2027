@@ -1,5 +1,5 @@
 import { ERROR_CODES, type EventSummary, type RenameEventRequest } from '@spoh/shared';
-import { requireCurrentCapability } from '../../../platform/access/currentCapability.js';
+import { requireCurrentPermission } from '../../../platform/access/currentPermission.js';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import { ConflictError, NotFoundError } from '../../../platform/errors/index.js';
@@ -22,11 +22,11 @@ export async function renameEvent(
     async (tx) => {
       const event = await lockEventName(tx, scope);
       if (!event) throw new NotFoundError('Event');
-      await requireCurrentCapability(tx, {
+      await requireCurrentPermission(tx, {
         scope,
         membershipId: actor.membershipId,
         personId: actor.volunteerId,
-        capability: 'config.manage',
+        action: 'Structure.Edit',
       });
       if (event.status === 'ARCHIVED')
         throw new ConflictError(ERROR_CODES.SETTING_LOCKED, 'An archived event cannot be renamed.');

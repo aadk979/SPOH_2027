@@ -1,5 +1,5 @@
 import { ScheduleTimelineResponse, type ScheduleTimelineQuery } from '@spoh/shared';
-import { requireCurrentCapability } from '../../../platform/access/currentCapability.js';
+import { requireCurrentPermission } from '../../../platform/access/currentPermission.js';
 import { prisma } from '../../../platform/db/client.js';
 import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { toPage } from '../../../platform/db/pagination.js';
@@ -17,11 +17,11 @@ export function readTimeline(
   return prisma.$transaction(
     async (tx) => {
       await holdCaptureEvent(tx, actor.scope);
-      await requireCurrentCapability(tx, {
+      await requireCurrentPermission(tx, {
         scope: actor.scope,
         membershipId: actor.membershipId,
         personId: actor.volunteerId,
-        capability: 'config.manage',
+        action: 'Settings.Read',
       });
       const now = (actor.clock ?? systemClock).now();
       const cursor = query.cursor ? await timelineCursor(tx, actor.scope, query.cursor) : null;

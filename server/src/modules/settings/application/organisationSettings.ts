@@ -4,7 +4,7 @@ import {
   type ChangeOrganisationSettingRequest,
   type OrganisationSettingsResponse,
 } from '@spoh/shared';
-import { requireCurrentCapability } from '../../../platform/access/currentCapability.js';
+import { requireCurrentPermission } from '../../../platform/access/currentPermission.js';
 import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import { ForbiddenError } from '../../../platform/errors/index.js';
@@ -38,11 +38,13 @@ async function isPlatformAdmin(
 async function authority(tx: PrismaTransactionClient, actor: ActorContext) {
   const { organisationId } = await holdCaptureEvent(tx, actor.scope);
   const canChange = await isPlatformAdmin(tx, { organisationId, personId: actor.volunteerId });
-  await requireCurrentCapability(tx, {
+  await requireCurrentPermission(tx, {
     scope: actor.scope,
     membershipId: actor.membershipId,
     personId: actor.volunteerId,
-    capability: canChange ? 'own.read' : 'config.manage',
+    ...(canChange
+      ? { action: 'Self.Read', resource: { type: 'Membership', id: actor.membershipId } }
+      : { action: 'Settings.Read' }),
   });
   return { organisationId, canChange };
 }

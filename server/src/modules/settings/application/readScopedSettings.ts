@@ -1,5 +1,5 @@
 import type { ScopedSettingsReadQuery } from '@spoh/shared';
-import { requireCurrentCapability } from '../../../platform/access/currentCapability.js';
+import { requireCurrentPermission } from '../../../platform/access/currentPermission.js';
 import { prisma } from '../../../platform/db/client.js';
 import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
@@ -13,11 +13,11 @@ export function readScopedSettings(
   return prisma.$transaction(
     async (tx) => {
       const event = await holdCaptureEvent(tx, actor.scope);
-      await requireCurrentCapability(tx, {
+      await requireCurrentPermission(tx, {
         scope: actor.scope,
         membershipId: actor.membershipId,
         personId: actor.volunteerId,
-        capability: 'config.manage',
+        action: 'Settings.Read',
       });
       return scopedReadResponse(tx, { query, actor, event });
     },

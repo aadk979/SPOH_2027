@@ -1,6 +1,7 @@
 import { Id } from '@spoh/shared';
 import { z } from 'zod';
-import { requireCurrentCapability } from '../../platform/access/currentCapability.js';
+import { requireCurrentPermission } from '../../platform/access/currentPermission.js';
+import { settingQuestion } from '../../platform/access/settingQuestion.js';
 import { holdCaptureEvent } from '../../platform/db/captureProvenance.js';
 import { ScheduleRefusal } from '../../platform/scheduler/failure.js';
 import { defineScheduledHandler, type ScheduleContext } from '../../platform/scheduler/handler.js';
@@ -35,11 +36,11 @@ async function authorizeCaptureSetting(context: ScheduleContext, payload: Captur
   const membershipId = context.audit.membershipId;
   if (personId === null || membershipId === null) throw new ScheduleRefusal('AUTHORITY_CHANGED');
   const target = captureSettingTarget(context, payload);
-  await requireCurrentCapability(context.tx, {
+  await requireCurrentPermission(context.tx, {
     scope: target,
     membershipId,
     personId,
-    capability: 'config.manage',
+    ...settingQuestion(payload.key),
   });
   if ((await holdCaptureEvent(context.tx, target)).status === 'ARCHIVED') {
     throw new ScheduleRefusal('GUARD_FAILED');

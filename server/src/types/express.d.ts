@@ -1,4 +1,4 @@
-import type { Capability, CommitteeRole } from '@spoh/shared';
+import type { CommitteeRole } from '@spoh/shared';
 
 /**
  * Request augmentation.
@@ -12,7 +12,7 @@ export interface RequestAuth {
   sub: string;
   /** All committee roles the token's group claims map to. */
   groups: CommitteeRole[];
-  /** Highest-precedence role among `groups`. Drives the capability lookup. */
+  /** Highest-precedence role among `groups`: the membership's role in this event. */
   role: CommitteeRole;
   /** `Volunteer.id`, resolved from `sub`. */
   volunteerId: string;
@@ -21,20 +21,12 @@ export interface RequestAuth {
   /** The caller's EventMembership in that event, where role and standing live. */
   membershipId: string;
   displayName: string;
-  /** Capabilities granted by `role`, computed from the shared matrix. */
-  capabilities: Capability[];
   /**
    * The RefreshSession backing this request, when the caller presented an
    * access token this API issued. Absent for an identity-provider token, which
    * has no session row and therefore cannot be revoked before it expires.
    */
   sessionId?: string;
-  /**
-   * Set when an IC-or-above wrote to a station they are not rostered on.
-   * The write is allowed, but the service records it in the audit log inside
-   * the same transaction as the mutation (BUILD_PLAN §6.3).
-   */
-  stationScopeBypass?: { stationId: string };
 }
 
 declare global {

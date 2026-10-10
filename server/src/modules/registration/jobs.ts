@@ -1,6 +1,6 @@
 import { Id } from '@spoh/shared';
 import { z } from 'zod';
-import { requireCurrentCapability } from '../../platform/access/currentCapability.js';
+import { requireCurrentPermission } from '../../platform/access/currentPermission.js';
 import { ScheduleRefusal } from '../../platform/scheduler/failure.js';
 import { defineScheduledHandler, type ScheduleContext } from '../../platform/scheduler/handler.js';
 import { setCategoryActive } from './application/setCategoryActive.js';
@@ -24,9 +24,9 @@ export const registrationScheduledHandlers = [
     type: 'taxonomy.setActive',
     schema: categoryActivityPayload,
     authorize: async (context) => {
-      await requireCurrentCapability(context.tx, {
+      await requireCurrentPermission(context.tx, {
         ...categoryActor(context),
-        capability: 'config.manage',
+        action: 'Schedule.Manage',
       });
     },
     run: async (context, payload) => {

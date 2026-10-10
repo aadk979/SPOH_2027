@@ -3,7 +3,7 @@ import {
   ScopedSettingsTarget,
   type ScopedSettingsHistoryQuery,
 } from '@spoh/shared';
-import { requireCurrentCapability } from '../../../platform/access/currentCapability.js';
+import { requireCurrentPermission } from '../../../platform/access/currentPermission.js';
 import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { prisma } from '../../../platform/db/client.js';
 import { toPage } from '../../../platform/db/pagination.js';
@@ -21,11 +21,11 @@ export function readScopedHistory(
   return prisma.$transaction(
     async (tx) => {
       const event = await holdCaptureEvent(tx, actor.scope);
-      await requireCurrentCapability(tx, {
+      await requireCurrentPermission(tx, {
         scope: actor.scope,
         membershipId: actor.membershipId,
         personId: actor.volunteerId,
-        capability: 'config.manage',
+        action: 'Settings.Read',
       });
       const target = ScopedSettingsTarget.parse({
         scope: query.scope,
