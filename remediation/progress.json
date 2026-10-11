@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-10T14:04:07.294Z",
+  "updatedAt": "2026-10-10T17:04:42.236Z",
   "current": {
-    "phase": "P08",
-    "step": null
+    "phase": "P13",
+    "step": "P13.10"
   },
   "gates": [
     {
@@ -272,6 +272,15 @@
       "status": "answered",
       "answer": "B: build every feature first, full CI and automatic staging deploy on every push; verification campaign in P16 (ADR-011)",
       "answeredAt": "2026-10-10T07:04:49.386Z"
+    },
+    {
+      "id": "D-24",
+      "title": "Production identity after the teardown",
+      "owner": "you",
+      "blocks": [],
+      "status": "answered",
+      "answer": "A, assumed (11 October 2026, ADR-011 §6): production's CDK stack owns a retained, deletion-protected pool; re-provisioning at cutover (P15.8); creation waits for P12.8",
+      "answeredAt": "2026-10-10T14:41:24.836Z"
     }
   ],
   "phases": [
@@ -2961,7 +2970,7 @@
         },
         {
           "id": "P12.2",
-          "title": "SES for invites (needs D-08)",
+          "title": "Default-sender invites (reduced by D-08)",
           "status": "done",
           "startedAt": null,
           "completedAt": "2026-10-10T14:03:56.154Z",
@@ -3065,11 +3074,16 @@
         {
           "id": "P13.1",
           "title": "Information architecture",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-10T17:04:40.297Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-10T17:04:40.299Z",
+              "text": "Owner ordered P13 build after identity contracts; dependency code is built in this batch. P12.8 production approval remains held. ADR-011 validation pending."
+            }
+          ]
         },
         {
           "id": "P13.2",
@@ -3088,11 +3102,16 @@
         {
           "id": "P13.3",
           "title": "Setup sections",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-10T17:04:40.687Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-10T17:04:40.688Z",
+              "text": "Owner ordered P13 build after identity contracts; dependency code is built in this batch. P12.8 production approval remains held. ADR-011 validation pending."
+            }
+          ]
         },
         {
           "id": "P13.4",
@@ -3111,11 +3130,16 @@
         {
           "id": "P13.5",
           "title": "People and assignments",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-10T17:04:41.022Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-10T17:04:41.023Z",
+              "text": "Owner ordered P13 build after identity contracts; dependency code is built in this batch. P12.8 production approval remains held. ADR-011 validation pending."
+            }
+          ]
         },
         {
           "id": "P13.6",
@@ -3138,38 +3162,58 @@
         {
           "id": "P13.7",
           "title": "Screens for every API-only feature",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-10T17:04:41.355Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-10T17:04:41.356Z",
+              "text": "Owner ordered P13 build after identity contracts; dependency code is built in this batch. P12.8 production approval remains held. ADR-011 validation pending."
+            }
+          ]
         },
         {
           "id": "P13.8",
           "title": "After the event",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-10T17:04:41.650Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-10T17:04:41.651Z",
+              "text": "Owner ordered P13 build after identity contracts; dependency code is built in this batch. P12.8 production approval remains held. ADR-011 validation pending."
+            }
+          ]
         },
         {
           "id": "P13.9",
           "title": "End-to-end journeys",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-10T17:04:41.938Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-10T17:04:41.939Z",
+              "text": "Owner ordered P13 build after identity contracts; dependency code is built in this batch. P12.8 production approval remains held. ADR-011 validation pending."
+            }
+          ]
         },
         {
           "id": "P13.10",
           "title": "Report",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-10T17:04:42.235Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-10T17:04:42.236Z",
+              "text": "Owner ordered P13 build after identity contracts; dependency code is built in this batch. P12.8 production approval remains held. ADR-011 validation pending."
+            }
+          ]
         }
       ],
       "status": "in_progress",

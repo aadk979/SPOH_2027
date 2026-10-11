@@ -1,7 +1,35 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { useCurrentSession } from '@/features/session';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { useEventId } from '@/shared/lib/eventContext';
+import { useAllows, useCurrentSession } from '@/features/session';
+import { getPhotoUrl } from './api';
+export function usePhotoRead(key: string) {
+  const eventId = useEventId();
+  const session = useCurrentSession();
+  const signedIn = session !== null;
+  const allowed = useAllows()('Self.Read');
+  const scope = `${eventId}:${session?.volunteerId}:${session?.role}:${key}`;
+  const current = useRef<{ scope: string } | null>(null);
+  useEffect(() => {
+    current.current = signedIn && allowed ? { scope } : null;
+    return () => {
+      current.current = null;
+    };
+  }, [scope, allowed, signedIn]);
+  return useMutation({
+    mutationKey: [eventId, 'photo-read', session?.volunteerId, session?.role, key],
+    mutationFn: async () => {
+      const intent = current.current;
+      if (intent?.scope !== scope) throw new Error('Photo access is unavailable.');
+      const photo = await getPhotoUrl(eventId, key);
+      if (current.current !== intent) throw new Error('This photo view is no longer open.');
+      return photo;
+    },
+    gcTime: 0,
+  });
+}
 import { useEvent } from '@/shared/lib/eventContext';
 import { currentVolunteerId } from '@/shared/lib/session';
 import { useMediaAvailability } from './hooks/useMediaAvailability';

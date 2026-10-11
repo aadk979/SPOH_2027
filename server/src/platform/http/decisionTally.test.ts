@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { countOutcome, drainTally, startDecisionSummary } from './decisionTally.js';
+import { countOutcome, drainTally, logDecisionSummary } from './decisionTally.js';
 
 describe('the decision tally', () => {
   afterEach(() => {
@@ -16,17 +16,11 @@ describe('the decision tally', () => {
   });
 
   it('logs a period only when something was asked', () => {
-    vi.useFakeTimers();
-    try {
-      const log = vi.fn();
-      startDecisionSummary(log, 1000);
-      vi.advanceTimersByTime(1000);
-      expect(log).not.toHaveBeenCalled();
-      countOutcome('failed');
-      vi.advanceTimersByTime(1000);
-      expect(log).toHaveBeenCalledWith({ allowed: 0, denied: 0, unaskable: 0, failed: 1 });
-    } finally {
-      vi.useRealTimers();
-    }
+    const log = vi.fn();
+    logDecisionSummary(log);
+    expect(log).not.toHaveBeenCalled();
+    countOutcome('failed');
+    logDecisionSummary(log);
+    expect(log).toHaveBeenCalledWith({ allowed: 0, denied: 0, unaskable: 0, failed: 1 });
   });
 });

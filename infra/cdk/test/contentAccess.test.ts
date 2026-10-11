@@ -61,7 +61,10 @@ it('limits final exports to private archive objects and keeps migration roles fr
     {
       Effect: 'Allow',
       Action: ['s3:GetObject', 's3:PutObject'],
-      Resource: { 'Fn::Join': ['', [{ 'Fn::GetAtt': [id, 'Arn'] }, '/archive/*']] },
+      Resource: [
+        { 'Fn::Join': ['', [{ 'Fn::GetAtt': [id, 'Arn'] }, '/archive/*']] },
+        { 'Fn::Join': ['', [{ 'Fn::GetAtt': [id, 'Arn'] }, '/card-print/*']] },
+      ],
     },
   ]);
   expect(objectStatements('migrate')).toEqual([]);

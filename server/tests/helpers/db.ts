@@ -67,9 +67,11 @@ export async function resetDatabase(): Promise<void> {
   await settleDenials();
 
   await wipe('AuditLog');
+  await wipe('AuditShipment');
   await wipe('AnnouncementPublication');
   await wipe('SettingChange');
   await wipe('ArchiveExport');
+  await wipe('CardPrintExport');
   await wipe('ReportSnapshot');
   await wipe('ScheduledAction');
   await wipe('IdempotencyRecord');

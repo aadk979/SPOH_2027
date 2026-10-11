@@ -16,7 +16,6 @@ type Kind = 'allowed' | 'denied' | 'unaskable' | 'failed';
 const EMPTY: DecisionTally = { allowed: 0, denied: 0, unaskable: 0, failed: 0 };
 
 let tally: DecisionTally = EMPTY;
-let timer: NodeJS.Timeout | null = null;
 
 export function countOutcome(kind: Kind): void {
   tally = { ...tally, [kind]: tally[kind] + 1 };
@@ -29,12 +28,8 @@ export function drainTally(): DecisionTally {
   return drained;
 }
 
-/** Log the period's counts, when there were any, every `everyMs`; started once. */
-export function startDecisionSummary(log: (tally: DecisionTally) => void, everyMs = 300_000): void {
-  if (timer) return;
-  timer = setInterval(() => {
-    const drained = drainTally();
-    if (Object.values(drained).some((count) => count > 0)) log(drained);
-  }, everyMs);
-  timer.unref();
+/** Log the period's counts, when there were any. A local tick in `app/jobs.ts` calls it. */
+export function logDecisionSummary(log: (tally: DecisionTally) => void): void {
+  const drained = drainTally();
+  if (Object.values(drained).some((count) => count > 0)) log(drained);
 }

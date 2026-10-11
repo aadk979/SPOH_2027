@@ -8,7 +8,7 @@ export function grantExportObjects(task: FargateTaskDefinition, bucket: Bucket) 
   task.taskRole.addToPrincipalPolicy(
     new PolicyStatement({
       actions: ['s3:GetObject', 's3:PutObject'],
-      resources: [bucket.arnForObjects('archive/*')],
+      resources: [bucket.arnForObjects('archive/*'), bucket.arnForObjects('card-print/*')],
     }),
   );
   const bucketId = Stack.of(bucket).getLogicalId(bucket.node.defaultChild as CfnResource);
@@ -16,5 +16,9 @@ export function grantExportObjects(task: FargateTaskDefinition, bucket: Bucket) 
     id: `AwsSolutions-IAM5[Resource::<${bucketId}.Arn>/archive/*]`,
     reason:
       'Server-generated event and UUID archive workbook paths in the exact private exports bucket; no listing, deletion or ACL access.',
+  });
+  Validations.of(task.taskRole).acknowledge({
+    id: `AwsSolutions-IAM5[Resource::<${bucketId}.Arn>/card-print/*]`,
+    reason: 'Server-generated event and UUID printable-card paths in the exact private exports bucket; no listing, deletion or ACL access.',
   });
 }

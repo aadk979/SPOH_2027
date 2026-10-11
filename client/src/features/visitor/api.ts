@@ -6,6 +6,10 @@ import type {
   VisitorFieldRecord,
 } from '@spoh/shared';
 import { eventApi } from '@/shared/lib/eventApi';
+import { VisitorRecordsResponse } from '@spoh/shared';
+export async function readVisitorRecords(eventId: string) {
+  return VisitorRecordsResponse.parse(await eventApi(eventId, '/visitors', { cache: 'no-store' }));
+}
 
 export async function listVisitorFields(eventId: string): Promise<VisitorFieldRecord[]> {
   return (await eventApi<{ data: VisitorFieldRecord[] }>(eventId, '/admin/visitor-fields')).data;

@@ -473,3 +473,30 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   (`infra/cdk/README.md`, "Rotation under the lean network topology"). Automatic Secrets Manager
   rotation is not claimed. Real rotation/rollback evidence is P16.8; no new billable network or
   rotation service is authorised by this implementation choice.
+
+  **Assumed print-export recommendation, 11 October 2026:** use the existing non-Write
+  `Report.Export` permission for private mission-card history, details and downloads, as the P13 batch map
+  recommends a read/export action that survives archive. This permits the current
+  Deputy, Chief, Lead and Admin export audience; generating cards/print exports keeps
+  `Card.GenerateBatch` (Chief/Admin). Existing archived-membership standing still applies.
+  Persist exact historical selected codes and rendering labels in the immutable export
+  metadata. Private upload objects whose database transaction rolls back remain
+  inaccessible and expire under the exports bucket's existing ninety-day lifecycle.
+
+### D-24 — Production identity after the teardown
+
+- **Owner:** you
+- **Blocks:** —
+- **Question:** The teardown deleted the production Cognito pool `ap-southeast-1_9bwl2nGF7`
+  together with its identities; a deleted pool cannot be restored. What does production
+  authenticate against?
+- **Options:**
+  - **A.** Production's CDK stack owns a new pool: retained, deletion-protected, Essentials by
+    default and Plus (threat protection) for the owner-approved event month. People are
+    re-provisioned into it at cutover; passwords cannot be exported, so each sets a new one.
+  - **B.** Create a pool by hand outside CDK and reference it by id, as before.
+- **Recommendation:** **A**: the settings are reviewed in code. Retention and deletion
+  protection protect production removal; identity replacement diffs still need owner review.
+- **Answer:** **A, assumed** (11 October 2026, ADR-011 §6). Built in P12.1
+  (`infra/cdk/src/identity.ts`). Nothing is created until the owner's go (P12.8); the
+  re-provisioning tool for a restored database is P15.8 build work.

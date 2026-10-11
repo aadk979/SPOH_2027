@@ -3,6 +3,7 @@ import { LoadingRows } from '@/shared/ui';
 import { useVisitorFields } from '../queries';
 import { CreateVisitorFieldForm } from './CreateVisitorFieldForm';
 import { VisitorFieldRow } from './VisitorFieldRow';
+import { VisitorRecordsPanel } from './VisitorRecordsPanel';
 
 /** The allowlist and each field's retention and reader roles (ADR-002 §4). */
 export function VisitorFieldEditor({
@@ -27,6 +28,7 @@ export function VisitorFieldEditor({
         <VisitorFieldRow key={field.id} field={field} canEdit={canEdit} />
       ))}
       {canEdit ? <CreateVisitorFieldForm /> : null}
+      <VisitorRecordsPanel />
     </section>
   );
 }

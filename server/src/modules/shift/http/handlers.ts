@@ -1,9 +1,11 @@
 import type { Request, Response } from 'express';
 import type {
   CompleteBriefingSlotRequest,
+  CreateBriefingSlotRequest,
   CreateSwapRequest,
   DecideSwapRequest,
   ListBriefingSlotsQuery,
+  WithdrawSwapRequest,
 } from '@spoh/shared';
 import { actorContextFrom } from '../../../platform/http/auditContext.js';
 import { validatedBody, validatedParams, validatedQuery } from '../../../platform/http/validate.js';
@@ -13,6 +15,9 @@ import { decideSwap } from '../application/decideSwap.js';
 import { listMySwaps, listPendingSwaps } from '../application/listSwaps.js';
 import { requestSwap } from '../application/requestSwap.js';
 import { getStaffingGaps } from '../application/staffing.js';
+import { scheduleBriefing } from '../application/scheduleBriefing.js';
+import { listSwapTargets } from '../application/swapTargets.js';
+import { withdrawSwap } from '../application/withdrawSwap.js';
 
 const idOf = (req: Request): string => validatedParams<{ id: string }>(req).id;
 
@@ -51,4 +56,28 @@ export async function completeSlotHandler(req: Request, res: Response): Promise<
 
 export async function staffingGapsHandler(req: Request, res: Response): Promise<void> {
   res.status(200).json(await getStaffingGaps(scopeOf(req)));
+}
+
+export async function scheduleBriefingHandler(req: Request, res: Response): Promise<void> {
+  res.status(201).json({
+    data: await scheduleBriefing(
+      validatedBody<CreateBriefingSlotRequest>(req),
+      actorContextFrom(req),
+    ),
+  });
+}
+
+export async function swapTargetsHandler(req: Request, res: Response): Promise<void> {
+  asList(res, await listSwapTargets(scopeOf(req), getAuth(req).volunteerId));
+}
+
+export async function withdrawSwapHandler(req: Request, res: Response): Promise<void> {
+  res
+    .status(200)
+    .json(
+      await withdrawSwap(
+        { id: idOf(req), body: validatedBody<WithdrawSwapRequest>(req) },
+        actorContextFrom(req),
+      ),
+    );
 }

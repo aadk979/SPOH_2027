@@ -4,27 +4,27 @@ import { NAV_REGISTRY } from '@/navigation';
 const ITEMS: Record<GoLiveCheckCode, { label: string; path: string; help: string }> = {
   'shift-coverage': {
     label: 'Every shift and station staffed',
-    path: '/admin/users',
+    path: '/admin/staffing',
     help: 'Assign active event members to every shift and active station.',
   },
   categories: {
     label: 'Visitor categories defined',
-    path: '/admin/settings',
+    path: '/admin/categories',
     help: 'Keep at least one active visitor category.',
   },
   'card-batch': {
     label: 'Live card batch generated',
-    path: '/admin/settings',
+    path: '/admin/cards',
     help: 'Generate a labelled batch with unused live cards.',
   },
   'gift-stock': {
     label: 'Gifts stocked',
-    path: '/admin/settings',
+    path: '/admin/gifts',
     help: 'Each active gift type needs positive live stock.',
   },
   content: {
     label: 'Content published',
-    path: '/guide',
+    path: '/admin/content',
     help: 'Publish the required guide and map content.',
   },
   attendance: {

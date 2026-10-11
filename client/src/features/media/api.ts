@@ -1,4 +1,10 @@
 import type { CreateUploadRequest, CreateUploadResponse } from '@spoh/shared';
+import { MediaUrlResponse } from '@spoh/shared';
+export async function getPhotoUrl(eventId: string, key: string) {
+  return MediaUrlResponse.parse(
+    await eventApi(eventId, `/media/url?key=${encodeURIComponent(key)}`),
+  );
+}
 import { eventApi } from '@/shared/lib/eventApi';
 export function getMediaConfig(eventId: string): Promise<{ enabled: boolean }> {
   return eventApi<{ enabled: boolean }>(eventId, '/media/config');

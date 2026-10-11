@@ -1,4 +1,33 @@
 import type { FullReport } from '@spoh/shared';
+import { ReportSnapshotsResponse, FullReport as FullReportSchema } from '@spoh/shared';
+export async function listReportSnapshots(eventId: string, cursor?: string, signal?: AbortSignal) {
+  return ReportSnapshotsResponse.parse(
+    await eventApi(
+      eventId,
+      `/reports/snapshots?limit=20${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`,
+      { signal, cache: 'no-store' },
+    ),
+  );
+}
+export async function readReportSnapshot(eventId: string, id: string, signal?: AbortSignal) {
+  return FullReportSchema.parse(
+    await eventApi(eventId, `/reports/snapshots/${encodeURIComponent(id)}`, {
+      signal,
+      cache: 'no-store',
+    }),
+  );
+}
+export function downloadReportSnapshot(
+  eventId: string,
+  input: { id: string; format: 'csv' | 'xlsx' },
+) {
+  return apiBlob(
+    eventApiPath(
+      eventId,
+      `/reports/snapshots/${encodeURIComponent(input.id)}/export?format=${input.format}`,
+    ),
+  );
+}
 import { ArchiveExportRecord, ArchiveExportResponse } from '@spoh/shared';
 import { apiBlob } from '@/shared/lib/api';
 import { eventApi, eventApiPath } from '@/shared/lib/eventApi';

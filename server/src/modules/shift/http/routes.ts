@@ -10,10 +10,12 @@ import { Router } from 'express';
 import { z } from 'zod';
 import {
   CompleteBriefingSlotRequest,
+  CreateBriefingSlotRequest,
   CreateSwapRequest,
   DecideSwapRequest,
   Id,
   ListBriefingSlotsQuery,
+  WithdrawSwapRequest,
 } from '@spoh/shared';
 import { defaultRateLimit } from '../../../platform/http/rateLimit.js';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
@@ -26,7 +28,13 @@ import {
   pendingSwapsHandler,
   requestSwapHandler,
   staffingGapsHandler,
+  scheduleBriefingHandler,
+  swapTargetsHandler,
+  withdrawSwapHandler,
 } from './handlers.js';
+import { idempotent } from '../../../platform/http/idempotency.js';
+import { optionalIdempotent } from '../../../platform/http/optionalIdempotency.js';
+import { briefingMutationReplay, swapMutationReplay } from './replay.js';
 
 /**
  * Swaps, briefing waves and staffing gaps.
@@ -46,11 +54,26 @@ shiftRouter.post(
   defaultRateLimit,
   authorize('Swap.Request', fromBody('ShiftAssignment', 'assignmentId'), { changes: ['C12'] }),
   validate({ body: CreateSwapRequest }),
+  optionalIdempotent('swap.request', swapMutationReplay),
   requestSwapHandler,
 );
 
 /** My own swaps, in either direction. */
 shiftRouter.get('/swaps', defaultRateLimit, authorize('Self.Read', self), mySwapsHandler);
+shiftRouter.post(
+  '/swaps/:id/withdraw',
+  defaultRateLimit,
+  authorize('Self.Read', self),
+  validate({ params: IdParams, body: WithdrawSwapRequest }),
+  idempotent('swap.withdraw'),
+  withdrawSwapHandler,
+);
+shiftRouter.get(
+  '/swap-targets',
+  defaultRateLimit,
+  authorize('Self.Read', self),
+  swapTargetsHandler,
+);
 
 /** Everything awaiting a decision — the IC's queue. */
 shiftRouter.get(
@@ -65,6 +88,7 @@ shiftRouter.post(
   defaultRateLimit,
   authorize('Swap.Decide', fromParam('SwapRequest')),
   validate({ params: IdParams, body: DecideSwapRequest }),
+  optionalIdempotent('swap.decide', swapMutationReplay),
   decideSwapHandler,
 );
 
@@ -81,10 +105,20 @@ shiftRouter.get(
 );
 
 shiftRouter.post(
+  '/briefing-slots',
+  defaultRateLimit,
+  authorize('Roster.Edit', theEvent),
+  validate({ body: CreateBriefingSlotRequest }),
+  idempotent('briefing.schedule'),
+  scheduleBriefingHandler,
+);
+
+shiftRouter.post(
   '/briefing-slots/:id/complete',
   defaultRateLimit,
   authorize('Briefing.Complete', fromParam('BriefingSlot'), { changes: ['C1'] }),
   validate({ params: IdParams, body: CompleteBriefingSlotRequest }),
+  optionalIdempotent('briefing.complete', briefingMutationReplay),
   completeSlotHandler,
 );
 

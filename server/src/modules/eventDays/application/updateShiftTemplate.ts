@@ -1,7 +1,7 @@
 import type { ShiftTemplateRecord, UpdateShiftTemplateRequest } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
-import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
+import { requireStructureChange, requireStructureEdit } from '../../structure/index.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { eventTimezone } from '../../../platform/event/events.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
@@ -16,6 +16,7 @@ import {
 } from '../data/repo.js';
 import { shiftWindow } from '../domain/shiftWindow.js';
 import { assertTemplateHours } from '../domain/templateHours.js';
+import { lockReserved, settleReserved } from '../../../platform/idempotency/index.js';
 
 /** Every shift that still follows the template moves to its new hours. */
 async function moveFollowingShifts(
@@ -38,14 +39,22 @@ async function moveFollowingShifts(
 export async function updateShiftTemplate(
   id: string,
   patch: UpdateShiftTemplateRequest,
-  { scope, audit }: ActorContext,
+  actor: ActorContext,
 ): Promise<ShiftTemplateRecord> {
+  const { scope, audit } = actor;
   const row = await prisma.$transaction(async (tx) => {
-    await holdCaptureEvent(tx, scope);
+    await requireStructureEdit(actor, tx);
+    if (patch.idempotencyKey) await lockReserved(tx, scope, patch.idempotencyKey);
     const existing = await findTemplateRow(tx, scope, id);
     if (!existing) throw new NotFoundError('Shift template');
+    if (
+      (patch.startLocal !== undefined && patch.startLocal !== existing.startLocal) ||
+      (patch.endLocal !== undefined && patch.endLocal !== existing.endLocal)
+    )
+      await requireStructureChange(actor, tx);
     assertTemplateHours({ ...existing, ...patch });
-    const updated = await updateTemplateRow(tx, scope, { id, data: patch });
+    const { idempotencyKey: _key, ...data } = patch;
+    const updated = await updateTemplateRow(tx, scope, { id, data });
     if (patch.startLocal !== undefined || patch.endLocal !== undefined) {
       await moveFollowingShifts(tx, scope, updated);
     }
@@ -59,8 +68,14 @@ export async function updateShiftTemplate(
         startLocal: existing.startLocal,
         endLocal: existing.endLocal,
       },
-      after: { ...patch },
+      after: data,
     });
+    if (patch.idempotencyKey)
+      await settleReserved(tx, scope, {
+        key: patch.idempotencyKey,
+        statusCode: 200,
+        body: { template: toShiftTemplateRecord(updated) },
+      });
     return updated;
   });
   return toShiftTemplateRecord(row);

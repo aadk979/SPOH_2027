@@ -86,7 +86,14 @@ beforeEach(async () => {
     .templateId!;
   swapId = (
     await rawDb.shiftSwapRequest.create({
-      data: { eventId, assignmentId, requesterId: volunteer.id, targetId: target.id },
+      data: {
+        eventId,
+        assignmentId,
+        requesterId: volunteer.id,
+        requesterMembershipId: volunteerActor.membershipId,
+        targetId: target.id,
+        targetMembershipId: (await actorFor(target)).membershipId,
+      },
     })
   ).id;
   await rawDb.setting.create({
@@ -162,6 +169,7 @@ interface MutationCase {
 const cases: MutationCase[] = [
   {
     name: 'station create',
+    prepare: () => rawDb.event.update({ where: { id: eventId }, data: { status: 'DRAFT' } }),
     run: () =>
       createStationUseCase(
         { code: 'NEW', name: 'New station', typeCode: 'OTHER', tagCodes: [], sortOrder: 0 },
@@ -174,6 +182,7 @@ const cases: MutationCase[] = [
   },
   {
     name: 'day create',
+    prepare: () => rawDb.event.update({ where: { id: eventId }, data: { status: 'DRAFT' } }),
     run: () =>
       createEventDay(
         { date: '2027-01-08', label: 'New day', isPublicDay: true, isTourDay: false },

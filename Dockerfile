@@ -22,7 +22,7 @@ COPY packages/access-policies packages/access-policies
 COPY server server
 COPY client client
 RUN npm run build:shared \
- && DATABASE_URL=postgresql://build:build@localhost:5432/build npm run build --workspace server  && npm run build:seed --workspace server \
+ && DATABASE_URL=postgresql://build:build@localhost:5432/build_test SPOH_SKIP_DOTENV=1 npm run build --workspace server  && npm run build:seed --workspace server \
  && SPOH_STATIC_EXPORT=1 npm run build --workspace client
 
 # Runtime dependencies of the server and the shared packages, the Prisma CLI
@@ -45,6 +45,7 @@ COPY --from=build --chown=node:node /app/packages/access-policies/dist packages/
 COPY --from=build --chown=node:node /app/packages/access-policies/policies packages/access-policies/policies
 COPY --from=build --chown=node:node /app/server/package.json /app/server/prisma.config.ts server/
 COPY --from=build --chown=node:node /app/server/dist server/dist
+COPY --from=build --chown=node:node /app/server/assets/fonts server/assets/fonts
 COPY --from=build --chown=node:node /app/server/prisma server/prisma
 COPY --from=build --chown=node:node /app/server/scripts server/scripts
 COPY --from=build --chown=node:node /app/client/out client/out

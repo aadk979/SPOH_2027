@@ -14,6 +14,7 @@ export const EVENT_OWNED_MODELS = [
   'AttendanceChallenge',
   'BriefingSlot',
   'CaptureCategory',
+  'CardPrintExport',
   'CardStampEvent',
   'ContentDocument',
   'ContentUploadReceipt',

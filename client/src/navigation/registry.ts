@@ -1,3 +1,4 @@
+import { ADMIN_ENTRIES } from './adminEntries';
 import type { NavContext, NavEntry, OperationsGroup } from './types';
 export type {
   NavContext,
@@ -132,6 +133,15 @@ export const NAV_REGISTRY: readonly NavEntry[] = [
   },
   { path: '/safety/lost-found/new', label: 'Log a found item', section: '/safety' },
   {
+    path: '/safety/incidents',
+    label: 'Manage incidents',
+    section: '/safety',
+    surfaces: ['hub', 'operations'],
+    requires: 'Incident.Read',
+    group: RECOVER,
+    hint: 'Review incidents, add follow-ups and update their status.',
+  },
+  {
     path: '/operations',
     label: 'Operations',
     section: '/operations',
@@ -235,6 +245,7 @@ export const NAV_REGISTRY: readonly NavEntry[] = [
     surfaces: ['setup'],
     requires: 'Settings.Read',
   },
+  ...ADMIN_ENTRIES,
   {
     path: '/admin/schedule',
     label: 'Schedule',

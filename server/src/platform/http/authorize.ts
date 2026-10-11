@@ -27,7 +27,7 @@ import { hasSettledAnswer } from '../idempotency/index.js';
 import { logger } from '../logger/index.js';
 import { systemClock } from '../time/index.js';
 import { recordDenial } from './authorizationDenials.js';
-import { countOutcome, startDecisionSummary } from './decisionTally.js';
+import { countOutcome } from './decisionTally.js';
 import { named } from './named.js';
 import { getAuth } from './requireAuth.js';
 
@@ -137,7 +137,6 @@ async function enforce(req: Request, res: Response, point: EnforcementPoint): Pr
     (cause: unknown): Outcome => ({ kind: 'failed', cause }),
   );
   res.locals.authorization = outcome;
-  startDecisionSummary((tally) => logger.info({ authorization: tally }, 'authorization summary'));
   if (outcome.kind === 'failed') {
     countOutcome('failed');
     throw failure(req, outcome.cause);

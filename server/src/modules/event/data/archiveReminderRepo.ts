@@ -43,3 +43,20 @@ export async function cancelArchiveReminders(
   });
   return rows.map((row) => row.id);
 }
+
+/** The closed event a reminder is about, and the active platform admins who may archive it. */
+export async function findArchiveReminderTarget(tx: PrismaTransactionClient, scope: EventScope) {
+  const event = await tx.event.findUniqueOrThrow({
+    where: { id: scope.eventId },
+    select: { name: true, status: true, lifecycleVersion: true, organisationId: true },
+  });
+  const admins = await tx.organisationMembership.findMany({
+    where: {
+      organisationId: event.organisationId,
+      role: 'PLATFORM_ADMIN',
+      person: { deactivatedAt: null },
+    },
+    select: { personId: true },
+  });
+  return { event, adminIds: admins.map((admin) => admin.personId) };
+}

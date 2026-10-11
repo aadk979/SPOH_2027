@@ -17,3 +17,11 @@ export async function listGifts(
     toGiftTypeRecord(gift, totals.get(gift.id) ?? { redeemed: 0, adjustment: 0, rehearsal }),
   );
 }
+/** Setup retains retired types so an organiser can reactivate them. */
+export async function listGiftCatalogue(scope: EventScope): Promise<GiftTypeRecord[]> {
+  const provenance = await captureProvenance(prisma, scope);
+  const gifts = await listGiftTypes(scope, true);
+  const totals = await giftTotals({ ...scope, ...provenance }, prisma);
+  return gifts.map((gift) => toGiftTypeRecord(gift,
+    totals.get(gift.id) ?? { redeemed: 0, adjustment: 0, ...provenance }));
+}

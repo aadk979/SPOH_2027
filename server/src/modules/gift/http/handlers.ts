@@ -13,13 +13,17 @@ import { getAuth, scopeOf } from '../../../platform/http/requireAuth.js';
 import { adjustStock } from '../application/adjustStock.js';
 import { createGiftType } from '../application/createGiftType.js';
 import { updateGiftType } from '../application/updateGiftType.js';
-import { listGifts } from '../application/listGifts.js';
+import { listGifts, listGiftCatalogue } from '../application/listGifts.js';
 import { redeemGift } from '../application/redeemGift.js';
 import { summariseGifts } from '../application/summariseGifts.js';
 
 export async function listGiftsHandler(req: Request, res: Response): Promise<void> {
   const gifts = await listGifts(scopeOf(req));
   res.status(200).json({ data: gifts, meta: { count: gifts.length } });
+}
+export async function giftCatalogueHandler(req: Request, res: Response): Promise<void> {
+  const gifts = await listGiftCatalogue(scopeOf(req));
+  res.json({ data: gifts, meta: { count: gifts.length } });
 }
 
 export async function redeemGiftHandler(req: Request, res: Response): Promise<void> {

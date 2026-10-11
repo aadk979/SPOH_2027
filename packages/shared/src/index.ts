@@ -32,6 +32,7 @@ export * from './contracts/lostPerson/index.js';
 export * from './contracts/roster/index.js';
 export * from './contracts/roster/csv.js';
 export * from './contracts/missionCard/index.js';
+export * from './contracts/missionCard/printing.js';
 export * from './contracts/gift/index.js';
 export * from './contracts/announcement/index.js';
 export * from './contracts/shift/index.js';
@@ -63,3 +64,6 @@ export * from './contracts/attendance/index.js';
 
 // Wall-clock time in an event's timezone (ADR-007 §7).
 export * from './time/index.js';
+export * from './contracts/structure/index.js';
+export * from './contracts/audit/index.js';
+export * from './contracts/corrections/index.js';

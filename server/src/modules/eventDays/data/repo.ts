@@ -27,13 +27,21 @@ export async function findEventDayByDate(scope: EventScope, date: Date) {
   return prisma.eventDay.findFirst({ where: { eventId: scope.eventId, date } });
 }
 
-export async function findEventDayRow(scope: EventScope, id: string) {
-  return prisma.eventDay.findFirst({ where: { eventId: scope.eventId, id } });
+export async function findEventDayRow(
+  scope: EventScope,
+  id: string,
+  tx: PrismaTransactionClient = prisma,
+) {
+  return tx.eventDay.findFirst({ where: { eventId: scope.eventId, id } });
 }
 
 /** A day as the API returns it: with its assignment count and shifts. */
-export async function findEventDayRecordRow(scope: EventScope, id: string) {
-  return prisma.eventDay.findFirst({
+export async function findEventDayRecordRow(
+  scope: EventScope,
+  id: string,
+  tx: PrismaTransactionClient = prisma,
+) {
+  return tx.eventDay.findFirst({
     where: { eventId: scope.eventId, id },
     include: withAssignmentCount,
   });
@@ -64,14 +72,15 @@ export async function updateEventDayRow(
 
 /** The event's timezone and shift templates: what a new day's shifts are made from. */
 export async function findShiftPlan(tx: PrismaTransactionClient, scope: EventScope) {
-  const [event, templates] = await Promise.all([
-    tx.event.findUniqueOrThrow({ where: { id: scope.eventId }, select: { timezone: true } }),
-    tx.shiftTemplate.findMany({
-      where: { eventId: scope.eventId, active: true },
-      orderBy: { sortOrder: 'asc' },
-      select: { id: true, startLocal: true, endLocal: true, endsNextDay: true },
-    }),
-  ]);
+  const event = await tx.event.findUniqueOrThrow({
+    where: { id: scope.eventId },
+    select: { timezone: true },
+  });
+  const templates = await tx.shiftTemplate.findMany({
+    where: { eventId: scope.eventId, active: true },
+    orderBy: { sortOrder: 'asc' },
+    select: { id: true, startLocal: true, endLocal: true, endsNextDay: true },
+  });
   return { timezone: event.timezone, templates };
 }
 

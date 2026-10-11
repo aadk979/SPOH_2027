@@ -17,7 +17,6 @@ export type AvpOutcome = 'ok' | 'failed' | 'throttled';
 let durations: number[] = [];
 let failed = 0;
 let throttled = 0;
-let timer: NodeJS.Timeout | null = null;
 
 export function recordAvpAttempt(outcome: AvpOutcome, ms: number): void {
   durations.push(ms);
@@ -42,12 +41,8 @@ export function drainAvpTally(): AvpTally {
   return drained;
 }
 
-/** Log the period's figures, when there were calls, every `everyMs`; started once. */
-export function startAvpSummary(log: (tally: AvpTally) => void, everyMs = 300_000): void {
-  if (timer) return;
-  timer = setInterval(() => {
-    const drained = drainAvpTally();
-    if (drained.calls > 0) log(drained);
-  }, everyMs);
-  timer.unref();
+/** Log the period's figures, when there were calls. A local tick in `app/jobs.ts` calls it. */
+export function logAvpSummary(log: (tally: AvpTally) => void): void {
+  const drained = drainAvpTally();
+  if (drained.calls > 0) log(drained);
 }

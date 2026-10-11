@@ -3,6 +3,7 @@ import type {
   CreateFootfallBulkRequest,
   CreateFootfallTickRequest,
   FootfallSummaryQuery,
+  RecentCorrectionRecordsQuery,
   RehearsalInclusionQuery,
   VoidFootfallTickRequest,
 } from '@spoh/shared';
@@ -10,6 +11,7 @@ import { actorContextFrom } from '../../../platform/http/auditContext.js';
 import { captureContextFrom } from '../../../platform/http/captureActor.js';
 import { validatedBody, validatedParams, validatedQuery } from '../../../platform/http/validate.js';
 import { getLiveFootfall } from '../application/getLiveFootfall.js';
+import { listRecentFootfall } from '../application/listRecentFootfall.js';
 import { recordBulk } from '../application/recordBulk.js';
 import { recordTick } from '../application/recordTick.js';
 import { summariseFootfall } from '../application/summariseFootfall.js';
@@ -43,5 +45,13 @@ export async function liveFootfallHandler(req: Request, res: Response): Promise<
     .status(200)
     .json(
       await getLiveFootfall({ ...scopeOf(req), ...validatedQuery<RehearsalInclusionQuery>(req) }),
+    );
+}
+
+export async function listRecentFootfallHandler(req: Request, res: Response): Promise<void> {
+  res
+    .status(200)
+    .json(
+      await listRecentFootfall(scopeOf(req), validatedQuery<RecentCorrectionRecordsQuery>(req)),
     );
 }

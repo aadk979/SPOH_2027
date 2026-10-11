@@ -147,4 +147,5 @@ a screen.
 
 ## Phase report
 
-_Fill in on completion._
+[Admin build report, 11 October 2026](../reports/P13/admin-build-2026-10-11.md).
+Batch validation is pending; staging/browser journeys and the IA review are deferred to P16.8.

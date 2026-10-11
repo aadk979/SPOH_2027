@@ -455,6 +455,15 @@ export const SETTINGS = {
     'Capture',
     { unit: 'hours' },
   ),
+  'fallback.reminderMinutes': setting(
+    'fallback.reminderMinutes',
+    minutes(),
+    30,
+    'Open fallback reminder',
+    'While a fallback window stays open, whoever declared it and the coordinators are reminded this often to close it and import the paper records.',
+    'Alerts',
+    { unit: 'minutes' },
+  ),
 } as const;
 
 /** Product settings already stored per event since P09.14; all metadata comes from SETTINGS. */

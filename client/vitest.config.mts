@@ -14,6 +14,7 @@ export default defineConfig({
     // The package's measured floor is enforced by the root coverage check.
     coverage: {
       provider: 'v8',
+      reportOnFailure: true,
       include: ['src/**/*.{ts,tsx}'],
       reporter: ['text-summary', 'lcov', 'json-summary'],
     },

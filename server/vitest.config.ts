@@ -51,6 +51,7 @@ export default defineConfig({
     ],
     coverage: {
       provider: 'v8',
+      reportOnFailure: true,
       // Routers, configuration and process composition are part of the application.
       include: ['src/**/*.ts'],
       exclude: ['src/generated/**', '**/*.test.ts', '**/*.d.ts'],

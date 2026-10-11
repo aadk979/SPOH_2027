@@ -50,6 +50,7 @@ import { registerPeopleLifecycleRoutes } from './peopleLifecycleRoutes.js';
 import { optionalIdempotent } from '../../../platform/http/optionalIdempotency.js';
 import { volunteerMutationReplay } from '../../people/index.js';
 import { registerCategoryScheduleRoutes } from './categoryScheduleRoutes.js';
+import { registerStructureRoutes } from '../../structure/index.js';
 import {
   changeAttendanceConfigHandler,
   getAttendanceConfigHandler,
@@ -194,6 +195,7 @@ adminRouter.post(
   adminRateLimit,
   authorize('Structure.Change', theEvent, { changes: ['C15'] }),
   validate({ body: CreateStationRequest }),
+  optionalIdempotent('station.create'),
   createStationHandler,
 );
 
@@ -202,6 +204,7 @@ adminRouter.patch(
   adminRateLimit,
   authorize('Structure.Edit', theEvent),
   validate({ params: IdParams, body: UpdateStationRequest }),
+  optionalIdempotent('station.update'),
   updateStationHandler,
 );
 
@@ -235,6 +238,7 @@ adminRouter.post(
   adminRateLimit,
   authorize('Structure.Change', theEvent, { changes: ['C15'] }),
   validate({ body: CreateEventDayRequest }),
+  optionalIdempotent('eventDay.create'),
   createEventDayHandler,
 );
 
@@ -243,6 +247,7 @@ adminRouter.patch(
   adminRateLimit,
   authorize('Structure.Edit', theEvent),
   validate({ params: IdParams, body: UpdateEventDayRequest }),
+  optionalIdempotent('eventDay.update'),
   updateEventDayHandler,
 );
 
@@ -262,6 +267,7 @@ adminRouter.patch(
   adminRateLimit,
   authorize('Structure.Edit', theEvent),
   validate({ params: IdParams, body: UpdateShiftTemplateRequest }),
+  optionalIdempotent('shiftTemplate.update'),
   updateShiftTemplateHandler,
 );
 
@@ -274,6 +280,7 @@ adminRouter.post(
   adminRateLimit,
   authorize('Structure.Change', theEvent, { changes: ['C15'] }),
   validate({ body: CreateGiftTypeRequest }),
+  optionalIdempotent('giftType.create'),
   createGiftTypeHandler,
 );
 
@@ -282,11 +289,13 @@ adminRouter.patch(
   adminRateLimit,
   authorize('Structure.Edit', theEvent),
   validate({ params: IdParams, body: UpdateGiftTypeRequest }),
+  optionalIdempotent('giftType.update'),
   updateGiftTypeHandler,
 );
 
 registerSettingsRoutes(adminRouter);
 registerCategoryScheduleRoutes(adminRouter);
+registerStructureRoutes(adminRouter);
 
 // The attendance root and trusted networks are event-scoped security settings.
 adminRouter.get(

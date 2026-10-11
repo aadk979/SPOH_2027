@@ -12,6 +12,7 @@ import {
   FootfallSummaryQuery,
   Id,
   RehearsalInclusionQuery,
+  RecentCorrectionRecordsQuery,
   VoidFootfallTickRequest,
 } from '@spoh/shared';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
@@ -20,6 +21,7 @@ import { captureRateLimit, defaultRateLimit } from '../../../platform/http/rateL
 import { validate } from '../../../platform/http/validate.js';
 import {
   liveFootfallHandler,
+  listRecentFootfallHandler,
   recordBulkHandler,
   recordTickHandler,
   summariseFootfallHandler,
@@ -32,6 +34,17 @@ export const footfallRouter: Router = Router();
 const IdParams = z.object({ id: Id }).strict();
 
 footfallRouter.use(requireAuth);
+
+footfallRouter.get(
+  '/recent',
+  defaultRateLimit,
+  validate({ query: RecentCorrectionRecordsQuery }),
+  authorize('Dashboard.ReadStation', (req) => ({
+    type: 'Station',
+    id: String(req.query.stationId),
+  })),
+  listRecentFootfallHandler,
+);
 
 footfallRouter.post(
   '/ticks',

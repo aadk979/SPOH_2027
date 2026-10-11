@@ -20,9 +20,9 @@ describe('CDK app (P08.1)', () => {
     expect(() => app.synth()).not.toThrow();
   });
 
-  it('keeps the production Cognito pool referenced, never owned', () => {
-    expect(STAGES.prod.existingUserPoolId).toBe('ap-southeast-1_9bwl2nGF7');
-    expect(STAGES.staging.existingUserPoolId).toBeUndefined();
+  it('retains production identities and lets staging pools go with their stack', () => {
+    expect(STAGES.prod.identity).toEqual({ plan: 'essentials', retain: true });
+    expect(STAGES.staging.identity).toEqual({ plan: 'essentials', retain: false });
   });
 });
 

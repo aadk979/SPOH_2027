@@ -1,19 +1,21 @@
 import { ERROR_CODES, type CreateEventDayRequest, type EventDayRecord } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
-import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
+import { requireStructureChange } from '../../structure/index.js';
 import { ConflictError, NotFoundError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { eventDayAnchor } from '../../../platform/time/index.js';
 import { toEventDayRecord } from '../data/mappers.js';
 import { createEventDayRow, findEventDayByDate, findEventDayRecordRow } from '../data/repo.js';
 import { addShiftsForDay } from './addShiftsForDay.js';
+import { lockReserved, settleReserved } from '../../../platform/idempotency/index.js';
 
 /** A new day of the event, with a shift per template (P09.5). */
 export async function createEventDay(
   request: CreateEventDayRequest,
-  { scope, audit }: ActorContext,
+  actor: ActorContext,
 ): Promise<EventDayRecord> {
+  const { scope, audit } = actor;
   const date = eventDayAnchor(request.date);
   const existing = await findEventDayByDate(scope, date);
   if (existing) {
@@ -24,7 +26,8 @@ export async function createEventDay(
   }
 
   const row = await prisma.$transaction(async (tx) => {
-    await holdCaptureEvent(tx, scope);
+    await requireStructureChange(actor, tx);
+    if (request.idempotencyKey) await lockReserved(tx, scope, request.idempotencyKey);
     const created = await createEventDayRow(tx, scope, {
       date,
       label: request.label,
@@ -39,11 +42,16 @@ export async function createEventDay(
       entityId: created.id,
       after: { date: request.date, label: request.label },
     });
-    return created;
+    const result = await findEventDayRecordRow(scope, created.id, tx);
+    if (!result) throw new NotFoundError('Event day');
+    if (request.idempotencyKey)
+      await settleReserved(tx, scope, {
+        key: request.idempotencyKey,
+        statusCode: 201,
+        body: { eventDay: toEventDayRecord(result) },
+      });
+    return result;
   });
 
-  // Read after commit, so the record carries the shifts just made.
-  const created = await findEventDayRecordRow(scope, row.id);
-  if (!created) throw new NotFoundError('Event day');
-  return toEventDayRecord(created);
+  return toEventDayRecord(row);
 }

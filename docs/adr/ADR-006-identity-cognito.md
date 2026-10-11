@@ -23,7 +23,9 @@
   - Invites use Cognito's default sender: about 50 emails a day, with temporary passwords valid 7
     days (F04-023). Training on 4 Nov needs 200+ invites.
 - **The pool `ap-southeast-1_9bwl2nGF7` holds real identities.** Every `Volunteer.cognitoSub`
-  points into it, and it must never be replaced.
+  points into it, and it must never be replaced. _Amended 11 October 2026: the owner had all
+  AWS deleted on 10 October, this pool included. Each stage now owns its pool in CDK, and
+  production's is retained and deletion-protected (P12.1, D-24 assumed)._
 - **Prices** (AWS Price List, `AmazonCognito` ap-southeast-1, version `20260911124417`, fetched
   2026-09-26): Essentials US$0.015 per MAU, with a global free tier of 10,000 MAU; Plus US$0.02
   per MAU, with no free tier. Plus is the tier that includes threat protection.

@@ -1,0 +1,130 @@
+name: Browser suites
+
+# P08.9 (PF-17): the Playwright journeys against a seeded database, the way the image
+# serves them: the API on one origin with the static client export beside it.
+# The fixture follows client/tests/visual/README.md: a disposable `_test` database seeded
+# in REHEARSAL, the API on port 4012 (the specs refuse any other), local sign-in only.
+# ADR-011 runs the full browser campaign in P16.1, so this workflow is dispatched by
+# hand until then. P16.1 reconciles the specs that still expect their own ports or
+# databases and adds the push trigger once the suite is green on main.
+on:
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: Which Playwright configuration to run
+        type: choice
+        options: [journeys, visual]
+        default: journeys
+      grep:
+        description: Optional title filter (Playwright --grep)
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: browser-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '24'
+  NEXT_TELEMETRY_DISABLED: '1'
+  # A dedicated database: the browser fixtures reset rows the integration suite also owns.
+  E2E_DATABASE_URL: postgresql://spoh:spoh@localhost:5432/spoh2027_test
+  E2E_BASE_URL: http://localhost:4012
+  E2E_API_ORIGIN: http://localhost:4012
+  VISUAL_BASE_URL: http://localhost:4012
+  VISUAL_API_URL: http://localhost:4012
+
+jobs:
+  browser:
+    name: Playwright (${{ inputs.suite }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: spoh
+          POSTGRES_PASSWORD: spoh
+          POSTGRES_DB: spoh2027_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U spoh -d spoh2027_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://spoh:spoh@localhost:5432/spoh2027_test
+      TEST_DATABASE_URL: postgresql://spoh:spoh@localhost:5432/spoh2027_test
+      SPOH_SKIP_DOTENV: '1'
+      AUTH_PROVIDER: local
+      LOCAL_AUTH_SECRET: ci-only-secret-at-least-thirty-two-characters
+      SESSION_SIGNING_SECRET: ci-only-session-secret-at-least-thirty-two-characters
+      ATTENDANCE_SIGNING_SECRET: ci-only-attendance-secret-at-least-thirty-two-chars-long-enough
+      NODE_ENV: development
+      DEPLOYMENT_ENV: development
+      PORT: '4012'
+      LOG_LEVEL: warn
+      APP_BASE_URL: http://localhost:4012
+      CLIENT_BASE_URL: http://localhost:4012
+      CORS_ALLOWED_ORIGINS: http://localhost:4012
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build:shared
+
+      - name: Migrate and seed the browser database
+        run: |
+          (cd server && npx prisma generate)
+          node server/scripts/setup-test-db.mjs
+          node --import tsx server/prisma/seed.ts
+          node --import tsx server/scripts/prepare-visual-rate-limits.mjs
+
+      - name: Build the server and the static client export
+        run: |
+          npm run build --workspace server
+          SPOH_STATIC_EXPORT=1 npm run build --workspace client
+
+      - name: Start the API with the export beside it
+        run: |
+          CLIENT_DIR="$GITHUB_WORKSPACE/client/out" nohup node server/dist/index.js > server.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            curl -fsS http://localhost:4012/readyz > /dev/null && exit 0
+            sleep 2
+          done
+          cat server.log
+          exit 1
+
+      - name: Install Chromium
+        working-directory: client
+        run: npx playwright install --with-deps chromium
+
+      - name: Run the ${{ inputs.suite }} suite
+        working-directory: client
+        env:
+          CI: '1'
+          GREP: ${{ inputs.grep }}
+          CONFIG: ${{ inputs.suite == 'visual' && 'playwright.visual.config.ts' || 'playwright.config.ts' }}
+        run: npx playwright test --config "$CONFIG" ${GREP:+--grep "$GREP"}
+
+      - name: Keep the report and the server log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-${{ inputs.suite }}-${{ github.run_id }}
+          path: |
+            client/playwright-report
+            client/test-results
+            server.log
+          retention-days: 14

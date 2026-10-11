@@ -1,6 +1,9 @@
 'use client';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type {
+  CancelScheduleRequest,
+  CreateLifecycleScheduleRequest,
+  CreateReportScheduleRequest,
   ScheduledActionStatus,
   ScopedSettingsTarget,
   ScopedSettingsReadResponse,
@@ -15,11 +18,15 @@ import {
   createCaptureSchedule,
   updateCaptureSchedule,
   cancelCaptureSchedule,
+  createLifecycleSchedule,
+  createReportSchedule,
+  cancelSchedule,
 } from './api';
 import { ApiError } from '@/shared/lib/apiErrors';
 import type { CaptureScheduleAttempt } from './model/captureScheduleReview';
 
 export const scheduleTimelineKeys = {
+  all: (eventId: string) => [eventId, 'schedule-timeline'] as const,
   list: (eventId: string, personId: string | undefined, status?: ScheduledActionStatus) =>
     [eventId, 'schedule-timeline', personId ?? 'signed-out', status ?? 'ALL'] as const,
 };
@@ -111,5 +118,26 @@ export function useCaptureScheduleMutation(
           queryKey: captureScheduleKeys.owner(eventId, session?.volunteerId),
         });
     },
+  });
+}
+
+export type ScheduleProduction =
+  | { kind: 'lifecycle'; body: CreateLifecycleScheduleRequest }
+  | { kind: 'report'; body: CreateReportScheduleRequest }
+  | { kind: 'cancel'; id: string; body: CancelScheduleRequest };
+
+/** Lifecycle and report producers and the shared cancel; each refreshes the timeline. */
+export function useScheduleProducer() {
+  const client = useQueryClient();
+  const eventId = useEventId();
+  return useMutation({
+    mutationFn: (request: ScheduleProduction) =>
+      request.kind === 'lifecycle'
+        ? createLifecycleSchedule(eventId, request.body)
+        : request.kind === 'report'
+          ? createReportSchedule(eventId, request.body)
+          : cancelSchedule(eventId, request),
+    gcTime: 0,
+    onSettled: () => client.invalidateQueries({ queryKey: scheduleTimelineKeys.all(eventId) }),
   });
 }

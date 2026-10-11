@@ -4,3 +4,4 @@ export { listFallbackWindows } from './application/listFallbackWindows.js';
 export { rangeOverlapsFallbackWindow } from './data/repo.js';
 export { closeRehearsalWindows } from './application/closeRehearsalWindows.js';
 export { closeOpenWindows } from './application/closeOpenWindows.js';
+export { fallbackScheduledHandlers } from './jobs.js';

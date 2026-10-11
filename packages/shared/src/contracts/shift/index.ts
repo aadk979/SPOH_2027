@@ -29,6 +29,7 @@ export type ShiftRef = z.infer<typeof ShiftRef>;
  */
 export const CreateSwapRequest = z
   .object({
+    idempotencyKey: z.uuid().optional(),
     assignmentId: Id,
     /** Who is being asked to take the shift. */
     targetVolunteerId: Id,
@@ -39,11 +40,15 @@ export type CreateSwapRequest = z.infer<typeof CreateSwapRequest>;
 
 export const DecideSwapRequest = z
   .object({
+    idempotencyKey: z.uuid().optional(),
     decision: z.enum(['APPROVED', 'REJECTED']),
     note: z.string().trim().max(500).optional(),
   })
   .strict();
 export type DecideSwapRequest = z.infer<typeof DecideSwapRequest>;
+
+export const WithdrawSwapRequest = z.object({ idempotencyKey: z.uuid() }).strict();
+export type WithdrawSwapRequest = z.infer<typeof WithdrawSwapRequest>;
 
 export const SwapRequestRecord = z
   .object({
@@ -97,9 +102,25 @@ export const ListBriefingSlotsQuery = z
 export type ListBriefingSlotsQuery = z.infer<typeof ListBriefingSlotsQuery>;
 
 export const CompleteBriefingSlotRequest = z
-  .object({ notes: z.string().trim().max(500).optional() })
+  .object({ idempotencyKey: z.uuid().optional(), notes: z.string().trim().max(500).optional() })
   .strict();
 export type CompleteBriefingSlotRequest = z.infer<typeof CompleteBriefingSlotRequest>;
+
+export const CreateBriefingSlotRequest = z
+  .object({
+    idempotencyKey: z.uuid(),
+    eventDayId: Id,
+    startsAt: IsoDateTime,
+    briefierId: Id.nullable(),
+    waveSize: z.number().int().positive().max(1000),
+    notes: z.string().trim().max(500).optional(),
+  })
+  .strict();
+export type CreateBriefingSlotRequest = z.infer<typeof CreateBriefingSlotRequest>;
+
+/** Names only: a swap chooser does not expose the private administrative roster. */
+export const SwapTargetRecord = z.object({ id: Id, displayName: z.string() }).strict();
+export type SwapTargetRecord = z.infer<typeof SwapTargetRecord>;
 
 /**
  * The four mandatory brief points, shown during the slot so a briefer working

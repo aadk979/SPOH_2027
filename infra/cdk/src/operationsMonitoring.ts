@@ -29,6 +29,7 @@ import { CfnSubscription, Topic } from 'aws-cdk-lib/aws-sns';
 import { Construct } from 'constructs';
 import { fileURLToPath } from 'node:url';
 import type { StageName } from './config.js';
+import { auditLogGroupName } from './auditAccess.js';
 
 /** Missing native metrics and operational delivery, kept independent from application roles. */
 export class OperationsMonitoring extends Construct {
@@ -39,7 +40,7 @@ export class OperationsMonitoring extends Construct {
   ) {
     super(scope, id);
     new LogGroup(this, 'AuditLogs', {
-      logGroupName: `/spoh/${input.stage}/audit`,
+      logGroupName: auditLogGroupName(input.stage),
       retention: RetentionDays.THIRTEEN_MONTHS,
       removalPolicy: RemovalPolicy.RETAIN,
     });

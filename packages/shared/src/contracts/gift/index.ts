@@ -1,6 +1,13 @@
 import { z } from 'zod';
 import { DataSource, RedemptionFlag } from '../../invariants/enums.js';
-import { CaptureEnvelope, Id, IsoDateTime, ReasonText, TimeRangeQuery } from '../common/index.js';
+import {
+  CaptureEnvelope,
+  Id,
+  IdempotencyKey,
+  IsoDateTime,
+  ReasonText,
+  TimeRangeQuery,
+} from '../common/index.js';
 import { CardShortCode } from '../missionCard/index.js';
 
 /**
@@ -94,6 +101,10 @@ export const AdjustGiftStockRequest = z
   })
   .strict();
 export type AdjustGiftStockRequest = z.infer<typeof AdjustGiftStockRequest>;
+export const AdjustGiftStockWithReceiptRequest = AdjustGiftStockRequest.extend({
+  idempotencyKey: IdempotencyKey,
+}).strict();
+export type AdjustGiftStockWithReceiptRequest = z.infer<typeof AdjustGiftStockWithReceiptRequest>;
 
 export const GiftSummaryQuery = TimeRangeQuery.extend({
   eventDayId: Id.optional(),
@@ -125,6 +136,7 @@ export type GiftSummaryResponse = z.infer<typeof GiftSummaryResponse>;
 
 export const CreateGiftTypeRequest = z
   .object({
+    idempotencyKey: IdempotencyKey.optional(),
     name: z.string().trim().min(1).max(120),
     initialStock: z.number().int().min(0).max(1_000_000),
     lowStockThreshold: z.number().int().min(0).max(1_000_000).default(50),
@@ -140,12 +152,13 @@ export type CreateGiftTypeRequest = z.infer<typeof CreateGiftTypeRequest>;
  */
 export const UpdateGiftTypeRequest = z
   .object({
+    idempotencyKey: IdempotencyKey.optional(),
     name: z.string().trim().min(1).max(120).optional(),
     lowStockThreshold: z.number().int().min(0).max(1_000_000).optional(),
     active: z.boolean().optional(),
   })
   .strict()
-  .refine((patch) => Object.keys(patch).length > 0, {
+  .refine((patch) => Object.keys(patch).some((key) => key !== 'idempotencyKey'), {
     message: 'supply at least one field to change',
   });
 export type UpdateGiftTypeRequest = z.infer<typeof UpdateGiftTypeRequest>;

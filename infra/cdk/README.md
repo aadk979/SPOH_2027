@@ -93,8 +93,11 @@ npm run test --workspace infra/cdk
 `Spoh-staging-Platform` is deployed and released from CI; the production stack is created at the
 go decision. Bootstrapping, the GitHub OIDC role and releases are described below.
 
-- The production Cognito pool `ap-southeast-1_9bwl2nGF7` is referenced by id, never owned: every
-  `Volunteer.cognitoSub` points into it.
+- Each stage owns its Cognito pool (`src/identity.ts`, P12.1). Production's is retained and
+  deletion-protected, so no stack change can replace it; `-c cognitoPlan=plus` moves it to Plus
+  (threat protection) for the owner-approved event month. The pool referenced before
+  10 October 2026 was deleted in the teardown: a restored database's `cognitoSub` values need
+  re-provisioning into the new pool at cutover (P15.8).
 - Production routing still has unused placeholders: D-08 now requires Firebase Hosting for
   the client and a DuckDNS HTTPS API. Its concrete identifiers and deployment remain subject
   to the owner boundaries; no Route 53 domain is required.

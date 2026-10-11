@@ -73,9 +73,8 @@ documentation that lets someone else run it next year. Close the programme.
   - P15.5: the nightly authorization job is green, and its alarms are wired.
   - P15.8: the runbook is walked once.
 
-  Additional acceptance for the 10 October build is listed below. The code is present but its
-  batch CI is still pending; these entries are not tracker completion claims. Missing setup,
-  scheduling, identity-branding or security implementation remains in its build step.
+  Additional acceptance for the 10 October build is listed below (its batch passed CI
+  38056722817 at `6755db3`). Missing setup or security implementation remains in its build step.
 
   - P08.5 / P12.5: in Chrome with third-party cookies blocked, exercise the first-party recovery
     handoff, reload, explicit active-tab renewal and sign-out. Renewal must preserve forms until
@@ -106,11 +105,16 @@ documentation that lets someone else run it next year. Close the programme.
   - P10.7 / P10.8: schedule/review/edit/cancel supported event/station operational keys, category
     activity, announcement/content publication and report snapshots; prove exact targets, current
     execution-time authority, reviewed-version conflicts, cancellation fencing and immutable
-    report/publication provenance. Unregistered reminders are not included as completed code.
+    report/publication provenance. From the Schedule screen, schedule a lifecycle change and a
+    report snapshot, watch each run and cancel a third (`schedule-producers.spec.ts`).
+  - P10.7: a declared fallback window reminds its declarer and the coordinators on a real device
+    at `fallback.reminderMinutes` until it is closed; the archive reminder reaches the platform
+    admins once the late-sync grace has passed, and a reopen silences it.
   - P12.1 / P12.2: observe the recreated synthetic pool's configured policy/lifetimes and actual
     default-sender invite/resend receipt with thirty-day temporary-password validity. Confirm the
     pool-wide application delivery allowance and actionable quota refusal; no SES/DKIM criterion
-    remains under amended D-08. Managed-login branding still needs implementation in P12.1.
+    remains under amended D-08. Managed login (version 2) renders with its branding style; at
+    production creation, deletion protection and the retained pool are observed (D-24).
   - P12.3: prove invite acceptance, role-change session revocation, event deactivation without
     disabling other active-event access, global disable/reactivate and under-two-second effects
     across instances. Verify archive ends event memberships and refuses subsequent writes.
@@ -128,7 +132,23 @@ documentation that lets someone else run it next year. Close the programme.
   - P15.7: observe implemented retention maintenance on synthetic archived/closed data and
     authorised person export/erasure, preserving operational counts/audit identifiers and refusing
     erasure while any membership remains active. Verify the separately stated provider/backup
-    retention limitations. Audit shipping remains implementation work, not acceptance deferred here.
+    retention limitations.
+  - P08.8 / P15.7: audit rows written on staging reach `/spoh/staging/audit` within ten minutes,
+    the `AuditShipment` cursor advances, and the task role cannot read, delete or re-tension the
+    group. Include CloudWatch ingestion in the cost reconciliation.
+  - P08.9: dispatch `browser.yml` once the browser fixtures are reconciled (P16.1).
+  - P13.3: exercise station/type/tag/category/day/template setup and the exceptions grid,
+    including retirement/reactivation and refused changes after go-live. Generate/download
+    private A4 card PDF and ZIP exports, scan the printed QR codes and refuse unauthenticated
+    or foreign-event downloads. Reopen saved exports after navigation and archive;
+    verify their selected codes and Unicode event/batch/station labels remain frozen
+    after structure edits, and that generation permission is not needed for authorised
+    historical reads. Exercise gifts, derived stock and correction receipts.
+  - P13.5 / P13.7: staff an empty day through the assignment board to zero gaps, preview/apply
+    CSV changes, edit escalation, request/withdraw/decide swaps, schedule/complete briefings,
+    select and void recent counts, record a paper total, work incidents and explore the audit.
+  - P13.8: walk CLOSED through lost-and-found/fallback closure, final report, private export,
+    ARCHIVED and the authorised clone wizard. Recheck stale or missing export refusal.
 
 - **Done when:** every listed item passes or has a fix merged and re-checked, with results
   recorded.

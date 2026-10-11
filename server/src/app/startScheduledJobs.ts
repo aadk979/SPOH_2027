@@ -7,6 +7,7 @@ import {
 import { settingsScheduledHandlers } from '../modules/settings/index.js';
 import { contentScheduledHandlers } from '../modules/content/index.js';
 import { eventScheduledHandlers } from '../modules/event/index.js';
+import { fallbackScheduledHandlers } from '../modules/fallback/index.js';
 import { reportScheduledHandlers } from '../modules/report/index.js';
 import { registrationScheduledHandlers } from '../modules/registration/index.js';
 import { visitorRecurringActions, visitorScheduledHandlers } from '../modules/visitor/index.js';
@@ -27,6 +28,10 @@ import { recordCacheBusMetrics } from '../platform/events/cacheBusMetrics.js';
 import { peopleRecurringActions, peopleScheduledHandlers } from '../modules/people/index.js';
 import { mediaRecurringActions, mediaScheduledHandlers } from '../modules/media/index.js';
 import { auditRecurringActions, auditRetentionHandlers } from '../platform/audit/retention.js';
+import {
+  auditShippingHandlers,
+  auditShippingRecurringActions,
+} from '../platform/audit/shipping.js';
 import { identityRecurringActions, identityRetentionHandlers } from '../platform/identity/retention.js';
 
 /** Module catalogue and recurring declarations are composed once per API instance. */
@@ -39,6 +44,7 @@ export async function startScheduledJobs(clock?: Clock) {
     ...visitorScheduledHandlers,
     ...settingsScheduledHandlers,
     ...eventScheduledHandlers,
+    ...fallbackScheduledHandlers,
     ...reportScheduledHandlers,
     ...registrationScheduledHandlers,
     ...announcementScheduledHandlers,
@@ -46,9 +52,10 @@ export async function startScheduledJobs(clock?: Clock) {
     ...peopleScheduledHandlers,
     ...mediaScheduledHandlers,
     ...auditRetentionHandlers,
+    ...auditShippingHandlers,
     ...identityRetentionHandlers,
   ]);
-  for (const action of [...authRecurringActions, ...idempotencyRecurringActions, ...auditRecurringActions, ...identityRecurringActions]) {
+  for (const action of [...authRecurringActions, ...idempotencyRecurringActions, ...auditRecurringActions, ...auditShippingRecurringActions, ...identityRecurringActions]) {
     await ensureRecurring({ ...action, registry, clock });
   }
   const syncEvents = createEventRecurringSync({

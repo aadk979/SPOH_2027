@@ -16,6 +16,9 @@ import {
   ReissueCardRequest,
   StampCardRequest,
   VoidCardRequest,
+  PrintCardBatchRequest,
+  CardPrintExportParams,
+  CardPrintExportListQuery,
 } from '@spoh/shared';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { idempotent } from '../../../platform/http/idempotency.js';
@@ -35,11 +38,46 @@ import {
   stampCardHandler,
   voidCardHandler,
 } from './handlers.js';
+import {
+  printBatchHandler,
+  downloadPrintHandler,
+  printHistoryHandler,
+  printDetailHandler,
+} from './printHandlers.js';
 
 /** COUNT 3 — Mission Cards (BUILD_PLAN §7.2). */
 export const missionCardRouter: Router = Router();
 
 missionCardRouter.use(requireAuth);
+missionCardRouter.get(
+  '/print',
+  defaultRateLimit,
+  authorize('Report.Export', theEvent),
+  validate({ query: CardPrintExportListQuery }),
+  printHistoryHandler,
+);
+missionCardRouter.get(
+  '/print/:id/details',
+  defaultRateLimit,
+  authorize('Report.Export', theEvent),
+  validate({ params: CardPrintExportParams }),
+  printDetailHandler,
+);
+missionCardRouter.post(
+  '/print',
+  sensitiveRateLimit,
+  authorize('Card.GenerateBatch', theEvent),
+  validate({ body: PrintCardBatchRequest }),
+  idempotent('POST /cards/print'),
+  printBatchHandler,
+);
+missionCardRouter.get(
+  '/print/:id',
+  defaultRateLimit,
+  authorize('Report.Export', theEvent),
+  validate({ params: CardPrintExportParams }),
+  downloadPrintHandler,
+);
 
 /**
  * Batch generation, mounted before `/:shortCode` so "batch" is not parsed as a

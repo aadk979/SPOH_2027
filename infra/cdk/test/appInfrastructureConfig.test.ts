@@ -126,10 +126,10 @@ describe('infrastructure injection (P08.6)', () => {
     });
     const poolId = Object.keys(staging.findResources('AWS::Cognito::UserPool'))[0];
     expect(values.COGNITO_USER_POOL_ID).toEqual({ Ref: poolId });
-    prod.resourceCountIs('AWS::Cognito::UserPool', 0);
+    prod.resourceCountIs('AWS::Cognito::UserPool', 1);
   });
 
-  it('sets only staging API callback and client logout URLs without replacing its pool or client', () => {
+  it('sets each stage its own callback and logout URLs, one pool and one client each', () => {
     staging.hasResourceProperties('AWS::Cognito::UserPoolClient', {
       CallbackURLs: ['https://api.secure-channel.duckdns.org/api/v1/auth/callback'],
       LogoutURLs: ['https://secure-channel.duckdns.org/sign-in'],
@@ -139,7 +139,7 @@ describe('infrastructure injection (P08.6)', () => {
     expect(Object.keys(staging.findResources('AWS::Cognito::UserPoolClient'))).toEqual([
       'IdentityClient148304DC',
     ]);
-    prod.resourceCountIs('AWS::Cognito::UserPoolClient', 0);
+    prod.resourceCountIs('AWS::Cognito::UserPoolClient', 1);
     const values = Object.fromEntries(
       Object.values(prod.findResources('AWS::SSM::Parameter')).map((row) => [
         row.Properties.Name.split('/').at(-1),
@@ -151,7 +151,8 @@ describe('infrastructure injection (P08.6)', () => {
     expect(values.CORS_ALLOWED_ORIGINS).toEqual(values.APP_BASE_URL);
     expect(values.CLIENT_BASE_URL).toBeUndefined();
     expect(values.DEPLOYMENT_ENV).toBeUndefined();
-    expect(values.COGNITO_USER_POOL_ID).toBe('ap-southeast-1_9bwl2nGF7');
+    const prodPool = Object.keys(prod.findResources('AWS::Cognito::UserPool'))[0];
+    expect(values.COGNITO_USER_POOL_ID).toEqual({ Ref: prodPool });
   });
 
   it.each(['app', 'migrate'])(
@@ -160,7 +161,7 @@ describe('infrastructure injection (P08.6)', () => {
       const container = taskFor(staging, name).ContainerDefinitions[0]!;
       // Only the AVP store's generated ids are plain (P11.6): non-secret, and too large for SSM.
       expect((container.Environment ?? []).map((entry) => entry.Name)).toEqual(
-        name === 'app' ? ['AVP_POLICY_STORE_ID', 'AVP_POLICY_NAMES'] : [],
+        name === 'app' ? ['AVP_POLICY_STORE_ID', 'AVP_POLICY_NAMES', 'AUDIT_LOG_GROUP'] : [],
       );
       const infra = name === 'app' ? STAGING_INFRA_NAMES : ['DB_HOST', 'DB_NAME'];
       const credentials =

@@ -104,11 +104,11 @@ token verification differs. `config/env.ts` refuses to boot with
 `AUTH_PROVIDER=local` when `NODE_ENV=production`, and `createLocalAuthProvider`
 throws if constructed there anyway.
 
-**A staging pool exists and the Cognito path is proven.** Pool
-`ap-southeast-1_9bwl2nGF7`, client `23uft7mvtnrno1uunsc5lp0h2v`, in
-`ap-southeast-1`. To switch: set `AUTH_PROVIDER=cognito` in `server/.env` (the
-ids are already there) and fill in `NEXT_PUBLIC_COGNITO_*` in the client. The
-dev sign-in route stops being mounted at all.
+**Each stage's CDK stack creates its own Cognito pool** (P12.1); production's is retained
+and deletion-protected. The pool this README named before 10 October 2026 was deleted with
+the rest of AWS. To switch a local server to Cognito: set `AUTH_PROVIDER=cognito` and the
+`COGNITO_*` ids from a deployed stack's outputs in `server/.env`. The dev sign-in route
+stops being mounted at all.
 
 ```bash
 cd server

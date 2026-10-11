@@ -82,7 +82,7 @@ it('creates a reviewed event override with its history, audit and identifier-onl
   const response = await post(body);
   expect(response.status).toBe(200);
   expect(response.headers['cache-control']).toBe('no-store');
-  expect(ScopedSettingsMutationResponse.parse(response.body).current.data).toHaveLength(14);
+  expect(ScopedSettingsMutationResponse.parse(response.body).current.data).toHaveLength(15);
   expect(response.body.change).toMatchObject({
     key: body.key,
     operation: 'set',

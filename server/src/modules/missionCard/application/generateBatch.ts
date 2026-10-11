@@ -48,8 +48,8 @@ export async function generateBatch(
   // The cards and their audit row commit together, and the batch is its own
   // action: it was audited as card.issue, after the insert (F03-018).
   return prisma.$transaction(async (tx) => {
-    await lockReserved(tx, scope, request.idempotencyKey);
     await holdCaptureEvent(tx, scope);
+    await lockReserved(tx, scope, request.idempotencyKey);
     const inserted = await insertFreshCards(tx, scope, request);
     await writeAudit(tx, {
       ...audit,

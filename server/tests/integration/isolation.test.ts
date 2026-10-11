@@ -84,6 +84,9 @@ interface EventB {
   reportSnapshot: string;
   contentVersion: string;
   archiveExport: string;
+  cardPrintExport: string;
+  stationType: string;
+  stationTag: string;
 }
 
 async function createEventB(): Promise<EventScope> {
@@ -124,6 +127,20 @@ async function seedEventB(): Promise<EventB> {
   const type = await rawDb.stationType.findFirstOrThrow({ where: { eventId } });
   const station = await rawDb.station.create({
     data: { eventId, typeId: type.id, code: 'B-DESK', name: 'B desk' },
+  });
+  const stationTag = await rawDb.stationTag.create({
+    data: { eventId, code: 'B-TAG', label: 'B tag' },
+  });
+  const cardPrintExport = await rawDb.cardPrintExport.create({
+    data: {
+      id: 'b-card-print-export',
+      eventId,
+      objectKey: `card-print/${eventId}/foreign.pdf`,
+      format: 'pdf',
+      count: 1,
+      rehearsal: false,
+      createdAt: FROZEN_NOW,
+    },
   });
   // Days are unique by date until P09.10: B's is the day after A's.
   const day = await rawDb.eventDay.create({
@@ -281,6 +298,9 @@ async function seedEventB(): Promise<EventB> {
     reportSnapshot: reportSnapshot.id,
     contentVersion: contentVersion.id,
     archiveExport: archiveExport.id,
+    cardPrintExport: cardPrintExport.id,
+    stationType: type.id,
+    stationTag: stationTag.id,
   };
 }
 
@@ -309,6 +329,60 @@ const LIST = noId('lists the path event only');
 const ACTOR = noId("acts on the caller's own records in the path event");
 
 const CASES: Record<string, Case> = {
+  'GET /admin/structure': LIST,
+  'GET /gifts/catalogue': LIST,
+  'POST /admin/structure/types': noId('creates a station type in the path event'),
+  'POST /admin/structure/tags': noId('creates a station tag in the path event'),
+  'POST /admin/structure/categories': noId('creates a category in the path event'),
+  'POST /admin/structure/templates': noId('creates a template in the path event'),
+  'PATCH /admin/structure/types/:id': {
+    params: (b) => ({ id: b.stationType }),
+    body: () => ({ idempotencyKey: idempotencyKey(), label: 'Foreign type' }),
+  },
+  'PATCH /admin/structure/tags/:id': {
+    params: (b) => ({ id: b.stationTag }),
+    body: () => ({ idempotencyKey: idempotencyKey(), label: 'Foreign tag' }),
+  },
+  'PATCH /admin/structure/categories/:id': {
+    params: (b) => ({ id: b.category }),
+    body: () => ({ idempotencyKey: idempotencyKey(), label: 'Foreign category' }),
+  },
+  'PATCH /admin/structure/templates/:id': {
+    params: (b) => ({ id: b.template }),
+    body: () => ({ idempotencyKey: idempotencyKey(), label: 'Foreign template' }),
+  },
+  'PATCH /admin/structure/shifts/:id': {
+    params: (b) => ({ id: b.shift }),
+    body: () => ({ idempotencyKey: idempotencyKey(), operation: 'restore' }),
+  },
+  'DELETE /admin/structure/days/:id': {
+    params: (b) => ({ id: b.day }),
+    body: () => ({ idempotencyKey: idempotencyKey() }),
+  },
+  'POST /cards/print': {
+    body: (b) => ({
+      idempotencyKey: idempotencyKey(),
+      shortCodes: [b.card.shortCode],
+      format: 'pdf',
+    }),
+  },
+  'GET /cards/print': { query: (b) => ({ cursor: b.cardPrintExport }) },
+  'GET /cards/print/:id': { params: (b) => ({ id: b.cardPrintExport }) },
+  'GET /cards/print/:id/details': { params: (b) => ({ id: b.cardPrintExport }) },
+  'POST /gifts/:id/stock': {
+    params: (b) => ({ id: b.giftType }),
+    body: () => ({ delta: 1, reason: 'Isolation test', idempotencyKey: idempotencyKey() }),
+  },
+  'GET /roster/swap-targets': LIST,
+  'POST /roster/briefing-slots': {
+    body: (b) => ({
+      eventDayId: b.day,
+      briefierId: b.person,
+      startsAt: FROZEN_NOW.toISOString(),
+      waveSize: 20,
+      idempotencyKey: idempotencyKey(),
+    }),
+  },
   'GET /content': { query: (b) => ({ v: b.contentVersion }) },
   'GET /content/draft': LIST,
   'GET /content/versions': LIST,
@@ -332,6 +406,20 @@ const CASES: Record<string, Case> = {
   'GET /lifecycle': LIST,
   'GET /lifecycle/readiness': LIST,
   'GET /schedules': LIST,
+  'POST /schedules/lifecycle': noId(
+    'schedules a transition of the path event only, reviewed against its own lifecycle version',
+  ),
+  'POST /schedules/reports': {
+    body: (b) => ({
+      eventDayId: b.day,
+      runAt: '2027-01-07T05:00:00Z',
+      idempotencyKey: idempotencyKey(),
+    }),
+  },
+  'POST /schedules/:id/cancel': {
+    params: (b) => ({ id: b.announcementSchedule }),
+    body: () => ({ expectedVersion: 1, idempotencyKey: idempotencyKey() }),
+  },
   'POST /lifecycle': noId(
     'transitions only the event named in the path; no body event id is accepted',
   ),
@@ -376,6 +464,7 @@ const CASES: Record<string, Case> = {
   },
   'GET /registrations/summary': { query: (b) => ({ stationId: b.station }) },
   'GET /registrations/categories': LIST,
+  'GET /registrations/recent': { query: (b) => ({ stationId: b.station }) },
 
   'POST /footfall/ticks': { body: (b) => ({ ...capture(), stationId: b.station }) },
   'POST /footfall/bulk': {
@@ -394,6 +483,7 @@ const CASES: Record<string, Case> = {
   },
   'GET /footfall/summary': { query: (b) => ({ stationId: b.station }) },
   'GET /footfall/live': LIST,
+  'GET /footfall/recent': { query: (b) => ({ stationId: b.station }) },
 
   'POST /incidents': {
     body: (b) => ({
@@ -438,6 +528,10 @@ const CASES: Record<string, Case> = {
   },
   'GET /roster/swaps': ACTOR,
   'GET /roster/swaps/pending': LIST,
+  'POST /roster/swaps/:id/withdraw': {
+    params: (b) => ({ id: b.swap }),
+    body: () => ({ idempotencyKey: idempotencyKey() }),
+  },
   'POST /roster/swaps/:id/decide': {
     params: (b) => ({ id: b.swap }),
     body: () => ({ decision: 'APPROVED' }),
@@ -796,6 +890,9 @@ describe('cross-event isolation (P09.7)', () => {
     const leaks: string[] = [];
     for (const [route, testCase] of Object.entries(CASES)) {
       if ('noId' in testCase) continue;
+      // Day removal is deliberately unavailable in LIVE; exercise its id lookup in preparation.
+      if (route === 'DELETE /admin/structure/days/:id')
+        await rawDb.event.update({ where: { id: eventA.eventId }, data: { status: 'DRAFT' } });
       const call = (ids: EventB) => {
         const [method = 'GET', template = ''] = route.split(' ');
         const path = fill(template, testCase.params?.(ids) ?? {});
@@ -804,6 +901,8 @@ describe('cross-event isolation (P09.7)', () => {
         return send(method, url, testCase.body?.(ids));
       };
       const response = await call(b);
+      if (route === 'DELETE /admin/structure/days/:id')
+        await rawDb.event.update({ where: { id: eventA.eventId }, data: { status: 'LIVE' } });
       if (testCase.query) {
         const missing = await call(ghost);
         if (response.status !== missing.status || !sameBody(response.body, missing.body)) {

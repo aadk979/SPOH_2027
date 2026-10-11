@@ -29,8 +29,10 @@ export function useImportPeople() {
       importPeople(eventId, { ...body, idempotencyKey: receipt.forInput(body) }),
     onSuccess: (response) => {
       receipt.clear();
-      if (response.committed)
+      if (response.committed) {
         void queryClient.invalidateQueries({ queryKey: volunteerKeys.all(eventId) });
+        void queryClient.invalidateQueries({ queryKey: [eventId, 'staffing'] });
+      }
     },
   });
 }

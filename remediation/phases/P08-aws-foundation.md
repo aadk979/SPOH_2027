@@ -250,14 +250,16 @@ The client model/library line target and other pipeline criteria remain open.
 
 ## Exit criteria
 
-- Staging is fully defined in CDK, deployed by CI through OIDC, and fronted by WAF.
+- Staging is fully defined in CDK with OIDC delivery and HTTP API/application throttling
+  under ADR-008. WAF is the optional owner-approved January production addition (D-10),
+  not a baseline staging requirement. Cloud delivery acceptance is recorded in P16.8.
 - Secrets are in Secrets Manager, alarms are wired, the smoke test is green, and cost is within budget.
 
 ## Risks
 
-- **Touching the Cognito pool through CDK could replace it.** Mitigation: reference by id only
-  (`UserPool.fromUserPoolId`) until P12 decides whether to import it properly, and run
-  `cdk diff` review on every change to identity.
+- **Changing the owned Cognito pool's logical identity could replace it.** Each stage now
+  owns its pool under D-24; production uses retention and deletion protection. Review
+  identity diffs before an authorised deployment; the deleted former pool cannot be imported.
 - **NAT gateway cost.** Avoided: public task IPs, with inbound closed (ADR-008 §1).
 - **The static-export spike fails.** Then the budget breaks in January. Mitigation: spike first
   (P08.4 step 1), and tell the owner the same day.

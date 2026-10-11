@@ -332,6 +332,7 @@ model Event {
   idempotencyRecords         IdempotencyRecord[]
   reportSnapshots            ReportSnapshot[]
   archiveExports             ArchiveExport[]
+  cardPrintExports           CardPrintExport[]
   contentDocument            ContentDocument?
   contentVersions            ContentVersion[]
   contentUploads             ContentUploadReceipt[]
@@ -1624,6 +1625,29 @@ model ArchiveExport {
   @@index([eventId, lifecycleVersion])
 }
 
+/// Immutable printable card objects, reachable only through this event's authenticated API.
+/// @eventOwned
+model CardPrintExport {
+  id String @id
+  eventId String
+  /// @class operational
+  objectKey String @unique
+  /// @class operational
+  format String
+  count Int
+  /// Immutable historical values from the selected event-owned cards, not live card references.
+  /// @class operational
+  shortCodes String[] @default([])
+  /// Frozen event, station and batch labels used to render this export.
+  /// @class operational
+  printContext Json @default("{}")
+  rehearsal Boolean
+  createdAt DateTime @db.Timestamptz(3)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  @@unique([eventId, id])
+  @@index([eventId, createdAt, id])
+}
+
 enum ScheduledActionStatus {
   PENDING
   RUNNING
@@ -1675,6 +1699,17 @@ model ScheduledAction {
   @@index([eventId, runAt, id])
 }
 
+/// How far the CloudWatch copy of the audit trail has reached (P08.8, P15.7): the
+/// last shipped row in (createdAt, id) order, one row per destination log group.
+model AuditShipment {
+  /// @class operational
+  logGroup      String   @id
+  lastCreatedAt DateTime @db.Timestamptz(3)
+  lastId        String
+  shipped       Int      @default(0)
+  updatedAt     DateTime @updatedAt @db.Timestamptz(3)
+}
+
 model AuditLog {
   id                String        @id @default(cuid())
   /// The event, when the row was written inside one; null for platform actions (ADR-001 §3).
@@ -1719,6 +1754,8 @@ model AuditLog {
 
   @@index([entityType, entityId])
   @@index([createdAt])
+  // Shipping order for the CloudWatch copy (AuditShipment).
+  @@index([createdAt, id])
   @@index([actorId, createdAt])
   @@index([action, createdAt])
   // The security screen's default view: everything that was refused, newest
@@ -2002,7 +2039,7 @@ model ContentDocument {
   publishedVersionId String?
   updatedByPersonId  String
   updatedAt          DateTime  @db.Timestamptz(3)
-  event              Event     @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  event              Event     @relation(fields: [eventId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   updatedBy          Person    @relation("ContentDocumentUpdater", fields: [updatedByPersonId], references: [id], onDelete: Restrict)
   reviewedBy         Person?   @relation("ContentDocumentReviewer", fields: [reviewedByPersonId], references: [id], onDelete: Restrict)
   publishedVersion   ContentVersion? @relation("PublishedContentDocumentVersion", fields: [eventId, publishedVersionId], references: [eventId, id], onDelete: Restrict)
@@ -2025,7 +2062,7 @@ model ContentVersion {
   etag                String
   publishedByPersonId String
   publishedAt         DateTime @db.Timestamptz(3)
-  event               Event    @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  event               Event    @relation(fields: [eventId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   publishedBy         Person   @relation("ContentVersionPublisher", fields: [publishedByPersonId], references: [id], onDelete: Restrict)
   publishedDocuments  ContentDocument[] @relation("PublishedContentDocumentVersion")
 
@@ -2046,7 +2083,7 @@ model ContentUploadReceipt {
   contentLength    Int
   issuedByPersonId String
   createdAt        DateTime @db.Timestamptz(3)
-  event            Event    @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  event            Event    @relation(fields: [eventId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   issuedBy         Person   @relation("ContentUploadIssuer", fields: [issuedByPersonId], references: [id], onDelete: Restrict)
 
   @@unique([eventId, id])

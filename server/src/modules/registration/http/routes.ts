@@ -12,6 +12,7 @@ import {
   CreateRegistrationRequest,
   Id,
   RegistrationSummaryQuery,
+  RecentCorrectionRecordsQuery,
   VoidRegistrationRequest,
 } from '@spoh/shared';
 import { captureRateLimit, defaultRateLimit } from '../../../platform/http/rateLimit.js';
@@ -20,6 +21,7 @@ import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { idempotent } from '../../../platform/http/idempotency.js';
 import {
   listCategoriesHandler,
+  listRecentRegistrationsHandler,
   recordGroupRegistrationHandler,
   recordRegistrationHandler,
   summariseRegistrationsHandler,
@@ -32,6 +34,17 @@ export const registrationRouter: Router = Router();
 const IdParams = z.object({ id: Id }).strict();
 
 registrationRouter.use(requireAuth);
+
+registrationRouter.get(
+  '/recent',
+  defaultRateLimit,
+  validate({ query: RecentCorrectionRecordsQuery }),
+  authorize('Dashboard.ReadStation', (req) => ({
+    type: 'Station',
+    id: String(req.query.stationId),
+  })),
+  listRecentRegistrationsHandler,
+);
 
 /**
  * One tap, one registration. The middleware order is load-bearing:

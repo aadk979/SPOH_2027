@@ -22,3 +22,7 @@ export async function listLostFound(
 export function claimLostFound(eventId: string, id: string): Promise<unknown> {
   return eventApi(eventId, `/lost-found/${id}/claim`, { method: 'POST', body: {} });
 }
+
+export function closeOutLostFound(eventId: string): Promise<{ markedUnclaimed: number }> {
+  return eventApi(eventId, '/lost-found/close-out', { method: 'POST', body: {} });
+}

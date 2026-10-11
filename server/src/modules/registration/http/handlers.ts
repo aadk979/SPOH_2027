@@ -5,6 +5,7 @@ import type {
   CreateRegistrationRequest,
   Id,
   RegistrationSummaryQuery,
+  RecentCorrectionRecordsQuery,
   VoidRegistrationRequest,
 } from '@spoh/shared';
 import { actorContextFrom } from '../../../platform/http/auditContext.js';
@@ -12,6 +13,7 @@ import { scopeOf } from '../../../platform/http/requireAuth.js';
 import { captureContextFrom } from '../../../platform/http/captureActor.js';
 import { validatedBody, validatedParams, validatedQuery } from '../../../platform/http/validate.js';
 import { listCaptureCategories } from '../application/listCaptureCategories.js';
+import { listRecentRegistrations } from '../application/listRecentRegistrations.js';
 import { recordGroupRegistration } from '../application/recordGroupRegistration.js';
 import { recordRegistration } from '../application/recordRegistration.js';
 import { summariseRegistrations } from '../application/summariseRegistrations.js';
@@ -41,4 +43,15 @@ export async function summariseRegistrationsHandler(req: Request, res: Response)
 
 export async function listCategoriesHandler(req: Request, res: Response): Promise<void> {
   res.status(200).json(await listCaptureCategories(scopeOf(req)));
+}
+
+export async function listRecentRegistrationsHandler(req: Request, res: Response): Promise<void> {
+  res
+    .status(200)
+    .json(
+      await listRecentRegistrations(
+        scopeOf(req),
+        validatedQuery<RecentCorrectionRecordsQuery>(req),
+      ),
+    );
 }

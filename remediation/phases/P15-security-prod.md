@@ -38,8 +38,9 @@ stand up production from the same CDK code, and move off the Lightsail box witho
 ### P15.3 — Headers, CSP, CORS and cookies
 
 - **Do:**
-  1. A strict CSP (nonces for Next), HSTS preload readiness, and a CORS allowlist from infra
-     config.
+  1. A strict CSP with hashes of the actual Next static-export bootstrap scripts (ADR-008),
+     HSTS preload readiness, and a CORS allowlist from infra config. Static HTML has no
+     request-time nonce. The build verifies page hashes and host header mappings.
   2. Cookie domain and SameSite for the production domain.
   3. Verify with an automated header test against staging.
 - **Done when:** the header test is green, and securityheaders-style checks show A.
@@ -81,12 +82,16 @@ stand up production from the same CDK code, and move off the Lightsail box witho
 
 ### P15.8 — Production hardening and decommissioning
 
-- **Do:** Production was created at the 28 Oct go (P12.8, ADR-009 §5). Here:
+- **Do:** Build the runbook and recovery tool now. Production creation still requires the
+  28 October go (P12.8, ADR-009 §5); execution and owner acceptance remain deferred. Here:
   1. Re-check production against ADR-008 (sizing, alarms, budget, backups) after training and Dry
      Run #1.
   2. With the owner's approval: decommission the Lightsail box (final snapshot kept), its IAM user
      (PF-12, F04-010), the DuckDNS record and updater (F04-012), and the old Cognito app client.
   3. Write the production runbook: deploy, roll back, scale for event days, restore.
+  4. _Added 11 October 2026 (D-24):_ the re-provisioning tool for a restored database. The old
+     pool is deleted, so each active person gets an account in production's new pool by email and
+     their `cognitoSub` is rebound in one audited, resumable operator run (dry run first).
 - **Done when:** nothing of the old deployment is running, and the runbook is walked once with the
   owner.
 - **ADR-011:** the staging, soak, load or sign-off part of _Done when_ runs in P16.8. The step

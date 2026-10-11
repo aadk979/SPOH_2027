@@ -200,7 +200,9 @@ async function eventLockWaiters() {
 
 it.each(corrections)(
   '%s waits for the lifecycle lock before changing a report input',
-  async (_name, correct, action) => {
+  async (name, correct, action) => {
+    if (name === 'gift creation')
+      await rawDb.event.update({ where: { id: eventId }, data: { status: 'DRAFT' } });
     let unlock!: () => void;
     let entered!: () => void;
     const ready = new Promise<void>((resolve) => {

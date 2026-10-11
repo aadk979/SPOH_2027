@@ -57,6 +57,10 @@ export const ScheduleTimelineRecord = z
   .strict();
 export type ScheduleTimelineRecord = z.infer<typeof ScheduleTimelineRecord>;
 
+/** A producer's answer: the same metadata the timeline shows, never the payload. */
+export const ScheduleMutationResponse = z.object({ schedule: ScheduleTimelineRecord }).strict();
+export type ScheduleMutationResponse = z.infer<typeof ScheduleMutationResponse>;
+
 export const ScheduleTimelineResponse = collection(ScheduleTimelineRecord)
   .extend({
     eventId: Id,
@@ -71,3 +75,4 @@ export const ScheduleTimelineResponse = collection(ScheduleTimelineRecord)
       new Set(response.data.map(({ id }) => id)).size === response.data.length,
   );
 export type ScheduleTimelineResponse = z.infer<typeof ScheduleTimelineResponse>;
+export * from './producers.js';

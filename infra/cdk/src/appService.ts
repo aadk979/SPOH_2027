@@ -28,7 +28,7 @@ import { Construct } from 'constructs';
 import type { AppSecrets } from './appSecrets.js';
 import type { StageConfig } from './config.js';
 import type { NetworkDatabase } from './networkDatabase.js';
-import type { CognitoSettings } from './stagingIdentity.js';
+import type { CognitoSettings } from './identity.js';
 import { AppInfrastructureConfig } from './appInfrastructureConfig.js';
 import { SchedulerMonitoring } from './schedulerMonitoring.js';
 import { HttpMonitoring } from './httpMonitoring.js';
@@ -37,6 +37,7 @@ import { CacheBusMonitoring } from './cacheBusMonitoring.js';
 import { TaskFailureMonitoring } from './taskFailureMonitoring.js';
 import type { Bucket } from 'aws-cdk-lib/aws-s3';
 import { grantExportObjects } from './exportAccess.js';
+import { auditLogGroupName, grantAuditShipping } from './auditAccess.js';
 import { grantPhotoObjects } from './mediaAccess.js';
 import { grantContentObjects } from './contentAccess.js';
 import type { AuthorizationStore } from './authorizationStore.js';
@@ -171,6 +172,7 @@ export class AppService extends Construct {
       environment: {
         AVP_POLICY_STORE_ID: props.authorization.policyStoreId,
         AVP_POLICY_NAMES: props.authorization.policyNamesJson,
+        AUDIT_LOG_GROUP: auditLogGroupName(stage.name),
       },
       secrets: {
         ...this.configuration.appInjections,
@@ -202,6 +204,7 @@ export class AppService extends Construct {
     if (props.contentBucket) grantContentObjects(task, props.contentBucket);
     if (props.exportsBucket) grantExportObjects(task, props.exportsBucket);
     props.authorization.grantIsAuthorized(task.taskRole);
+    grantAuditShipping(task, stage.name);
     acknowledgeTask(task);
     Validations.of(task).acknowledge({
       id: 'AwsSolutions-ECS2',

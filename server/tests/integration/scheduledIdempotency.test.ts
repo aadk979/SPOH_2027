@@ -83,6 +83,7 @@ it('boots both daily handlers and prunes event and platform replays at the stric
       orderBy: { type: 'asc' },
     });
     expect(boot.map((row) => row.type)).toEqual([
+      'audit.ship',
       'idempotency.prune',
       'retention.audit',
       'retention.identity',
@@ -93,13 +94,15 @@ it('boots both daily handlers and prunes event and platform replays at the stric
         (row) =>
           row.eventId === null &&
           row.createdByPersonId === null &&
-          row.recurrence === (row.type === 'retention.identity' ? 60 : 86400),
+          row.recurrence ===
+            ({ 'retention.identity': 60, 'audit.ship': 300 }[row.type] ?? 86400),
       ),
     ).toBe(true);
-    const action = boot[0]!;
+    const action = boot.find((row) => row.type === 'idempotency.prune')!;
     expect(action.runAt).toEqual(due);
     instant = due;
-    await worker.tick();
+    // A tick claims at most five due actions; drain them so the prune's turn comes.
+    for (let tick = 0; tick < 3; tick += 1) await worker.tick();
     expect(await keys()).toEqual(['equality', 'recent']);
     expect(
       (await rawDb.scheduledAction.findUniqueOrThrow({ where: { id: action.id } })).status,

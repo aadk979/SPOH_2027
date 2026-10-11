@@ -3,6 +3,7 @@ import type { LostFoundRecord } from '@spoh/shared';
 import { Button, Card, StatusText, type Tone } from '@/shared/ui';
 import type { useClaimLostFound } from '@/features/lostFound';
 import { useEventTime } from '@/features/session';
+import { PhotoRead } from '@/features/media';
 export function FoundItemCard({
   item,
   claim,
@@ -30,12 +31,7 @@ export function FoundItemCard({
         </p>
       ) : null}
 
-      {item.photoKey ? (
-        <p className="mt-xs text-caption text-text-muted">
-          <span aria-hidden="true">📷 </span>
-          Photo on file
-        </p>
-      ) : null}
+      {item.photoKey ? <PhotoRead objectKey={item.photoKey} label={item.itemLabel} /> : null}
 
       {/* Status is a word, never carried by colour alone. */}
       <StatusText tone={statusTone(item.status)} className="mt-sm block">

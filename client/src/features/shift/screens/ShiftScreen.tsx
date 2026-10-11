@@ -26,6 +26,10 @@ export default function ShiftScreen(): ReactNode {
   return (
     <AppShell title="My shift" back={{ href: '/home', label: 'Home' }}>
       <Stack>
+        <Section title="Shift planning">
+          <ButtonLink href="/swaps">Request or review a shift swap</ButtonLink>
+          <ButtonLink href="/briefings">Briefing schedule and completion</ButtonLink>
+        </Section>
         <Section title="Attendance" description="Verify your presence with your admin or exco.">
           <ButtonLink href="/attendance">Submit attendance / verify team</ButtonLink>
         </Section>

@@ -9,6 +9,7 @@ import { createWindow, findOpenWindow } from '../data/repo.js';
 import { assertNoOpenWindow } from '../domain/windowRules.js';
 import { windowRecord } from './windowRecord.js';
 import { admitCapture } from '../../../platform/db/captureAdmission.js';
+import { scheduleFallbackReminder } from './fallbackReminder.js';
 
 /** Declare degraded operation, event-wide or for one station. */
 export async function declareFallback(
@@ -39,6 +40,7 @@ export async function declareFallback(
       entityId: row.id,
       after: { tier: row.tier, stationId, reason: row.reason },
     });
+    await scheduleFallbackReminder(tx, scope, { windowId: row.id, sequence: 1, now: clock.now() });
 
     return row;
   });

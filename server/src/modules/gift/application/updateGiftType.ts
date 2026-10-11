@@ -1,6 +1,7 @@
 import type { GiftTypeRecord, UpdateGiftTypeRequest } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
-import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
+import { lockReserved, settleReserved } from '../../../platform/idempotency/index.js';
+import { requireGiftAuthority } from './giftAuthority.js';
 import { prisma } from '../../../platform/db/client.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { toGiftTypeRecord } from '../data/mappers.js';
@@ -10,13 +11,17 @@ import type { ActorContext } from '../../../platform/http/auditContext.js';
 export async function updateGiftType(
   id: string,
   patch: UpdateGiftTypeRequest,
-  { scope, audit }: ActorContext,
+  actor: ActorContext,
 ): Promise<GiftTypeRecord> {
-  const existing = await findGiftType(scope, id);
-  if (!existing) throw new NotFoundError('Gift type');
+  const { scope, audit } = actor;
 
   const gift = await prisma.$transaction(async (tx) => {
-    await holdCaptureEvent(tx, scope);
+    await requireGiftAuthority(tx, actor, 'Structure.Edit');
+    if (patch.idempotencyKey) await lockReserved(tx, scope, patch.idempotencyKey);
+    const existing = await findGiftType(scope, id, tx);
+    if (!existing) throw new NotFoundError('Gift type');
+    if (patch.active === true && !existing.active)
+      await requireGiftAuthority(tx, actor, 'Structure.Change');
     const row = await updateGiftTypeRow(tx, scope, {
       id,
       data: {
@@ -37,10 +42,17 @@ export async function updateGiftType(
         lowStockThreshold: existing.lowStockThreshold,
         active: existing.active,
       },
-      after: { ...patch },
+      after: { name: row.name, lowStockThreshold: row.lowStockThreshold, active: row.active },
     });
-    return row;
+    const record = toGiftTypeRecord(row, await totalsForGiftType(tx, scope, id));
+    if (patch.idempotencyKey)
+      await settleReserved(tx, scope, {
+        key: patch.idempotencyKey,
+        statusCode: 200,
+        body: { giftType: record },
+      });
+    return record;
   });
 
-  return toGiftTypeRecord(gift, await totalsForGiftType(prisma, scope, id));
+  return gift;
 }

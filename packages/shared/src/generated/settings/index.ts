@@ -14,6 +14,7 @@ export interface GeneratedSettingValues {
   captureSendGraceSeconds: number;
   captureUndoWindowSeconds: number;
   dashboardPollSeconds: number;
+  'fallback.reminderMinutes': number;
   idempotencyRetentionDays: number;
   'identity.inviteDailyLimit': number;
   implausibleTapsPerMinute: number;
@@ -57,6 +58,7 @@ export const GENERATED_SETTING_DEFAULTS = {
   captureSendGraceSeconds: 2,
   captureUndoWindowSeconds: 10,
   dashboardPollSeconds: 3,
+  'fallback.reminderMinutes': 30,
   idempotencyRetentionDays: 7,
   'identity.inviteDailyLimit': 50,
   implausibleTapsPerMinute: 20,
@@ -297,6 +299,27 @@ export const GENERATED_SETTING_METADATA = {
       type: 'integer',
       minimum: 1,
       maximum: 3600,
+    },
+  },
+  'fallback.reminderMinutes': {
+    key: 'fallback.reminderMinutes',
+    scopes: ['event'],
+    default: 30,
+    label: 'Open fallback reminder',
+    description:
+      'While a fallback window stays open, whoever declared it and the coordinators are reminded this often to close it and import the paper records.',
+    group: 'Alerts',
+    unit: 'minutes',
+    schedulable: true,
+    class: 'operational',
+    lockedIn: [],
+    clientVisible: false,
+    requiredAction: 'event.settings.manage',
+    jsonSchema: {
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      type: 'integer',
+      minimum: 1,
+      maximum: 1440,
     },
   },
   idempotencyRetentionDays: {
@@ -993,6 +1016,12 @@ export const GENERATED_SETTING_SCHEMAS: {
     minimum: 1,
     maximum: 3600,
   }) as z.ZodType<GeneratedSettingValues['dashboardPollSeconds']>,
+  'fallback.reminderMinutes': z.fromJSONSchema({
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
+    type: 'integer',
+    minimum: 1,
+    maximum: 1440,
+  }) as z.ZodType<GeneratedSettingValues['fallback.reminderMinutes']>,
   idempotencyRetentionDays: z.fromJSONSchema({
     $schema: 'https://json-schema.org/draft/2020-12/schema',
     type: 'integer',

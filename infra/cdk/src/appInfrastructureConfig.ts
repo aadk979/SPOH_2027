@@ -3,7 +3,7 @@ import { Secret as EcsSecret } from 'aws-cdk-lib/aws-ecs';
 import { ParameterTier, StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import type { StageConfig } from './config.js';
-import type { CognitoSettings } from './stagingIdentity.js';
+import type { CognitoSettings } from './identity.js';
 
 interface InfrastructureProps {
   stage: StageConfig;

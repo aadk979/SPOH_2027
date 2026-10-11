@@ -336,6 +336,7 @@ describe('shift templates and event days', () => {
   it("moves a template's hours, and the day's shifts with it", async () => {
     const day = await createEventDayToday();
     const { eventId } = await testEvent();
+    await rawDb.event.update({ where: { id: eventId }, data: { status: 'DRAFT' } });
     const template = await rawDb.shiftTemplate.findFirstOrThrow({
       where: { eventId, code: 'MORNING' },
     });
@@ -364,6 +365,7 @@ describe('shift templates and event days', () => {
   it('rejects a shift that ends before it starts, and leaves the shifts alone', async () => {
     const day = await createEventDayToday();
     const { eventId } = await testEvent();
+    await rawDb.event.update({ where: { id: eventId }, data: { status: 'DRAFT' } });
     const template = await rawDb.shiftTemplate.findFirstOrThrow({
       where: { eventId, code: 'MORNING' },
     });

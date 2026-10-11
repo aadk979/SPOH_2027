@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Id, IsoDate, IsoDateTime } from '../common/index.js';
+import { Id, IdempotencyKey, IsoDate, IsoDateTime } from '../common/index.js';
 import { WallClockTime } from '../settings/index.js';
 import { ShiftRef } from '../shift/index.js';
 
@@ -29,14 +29,16 @@ export const CreateEventDayRequest = z
     label: z.string().trim().min(1).max(120),
     isPublicDay: z.boolean().default(true),
     isTourDay: z.boolean().default(false),
+    idempotencyKey: IdempotencyKey.optional(),
   })
   .strict();
 export type CreateEventDayRequest = z.infer<typeof CreateEventDayRequest>;
 
 export const UpdateEventDayRequest = CreateEventDayRequest.omit({ date: true })
   .partial()
+  .extend({ isPublicDay: z.boolean().optional(), isTourDay: z.boolean().optional() })
   .strict()
-  .refine((patch) => Object.keys(patch).length > 0, {
+  .refine((patch) => Object.keys(patch).some((key) => key !== 'idempotencyKey'), {
     message: 'supply at least one field to change',
   });
 export type UpdateEventDayRequest = z.infer<typeof UpdateEventDayRequest>;
@@ -64,10 +66,11 @@ export const UpdateShiftTemplateRequest = z
     label: z.string().trim().min(1).max(80),
     startLocal: WallClockTime,
     endLocal: WallClockTime,
+    idempotencyKey: IdempotencyKey.optional(),
   })
   .partial()
   .strict()
-  .refine((patch) => Object.keys(patch).length > 0, {
+  .refine((patch) => Object.keys(patch).some((key) => key !== 'idempotencyKey'), {
     message: 'supply at least one field to change',
   });
 export type UpdateShiftTemplateRequest = z.infer<typeof UpdateShiftTemplateRequest>;

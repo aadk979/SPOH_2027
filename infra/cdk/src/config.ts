@@ -23,10 +23,11 @@ export interface StageConfig {
   database: { instanceClass: string; allocatedStorageGiB: number; maxStorageGiB: number };
   /** Existing owner backups: reference only, without lifecycle, policy or task grants. */
   existingBackupsBucket: string;
-  /** An existing Cognito pool this stage must reference and never own (P08 risk). */
-  existingUserPoolId?: string;
-  /** How the app reaches that existing pool; the domain is confirmed at cutover (P12). */
-  existingCognito?: { userPoolId: string; clientId: string; domain: string };
+  /**
+   * The stage's own Cognito pool (P12.1). `retain` keeps real identities through any stack
+   * change; `plus` is the owner-approved event-month plan (threat protection, ADR-008 §6).
+   */
+  identity: { plan: 'essentials' | 'plus'; retain: boolean };
 }
 
 const ACCOUNT = '665146708212';
@@ -74,6 +75,8 @@ export const STAGES: Record<StageName, StageConfig> = {
     app: { cpu: 512, memoryMiB: 1024, desiredCount: 1 },
     database: { instanceClass: 't4g.micro', allocatedStorageGiB: 20, maxStorageGiB: 100 },
     existingBackupsBucket: EXISTING_BACKUPS_BUCKET,
+    // Synthetic accounts only: the pool goes with the stack.
+    identity: { plan: 'essentials', retain: false },
   },
   prod: {
     name: 'prod',
@@ -84,13 +87,8 @@ export const STAGES: Record<StageName, StageConfig> = {
     app: { cpu: 256, memoryMiB: 512, desiredCount: 1 },
     database: { instanceClass: 't4g.micro', allocatedStorageGiB: 20, maxStorageGiB: 100 },
     existingBackupsBucket: EXISTING_BACKUPS_BUCKET,
-    // Every Volunteer.cognitoSub points into this pool: referenced, never replaced.
-    existingUserPoolId: 'ap-southeast-1_9bwl2nGF7',
-    existingCognito: {
-      userPoolId: 'ap-southeast-1_9bwl2nGF7',
-      clientId: '23uft7mvtnrno1uunsc5lp0h2v',
-      // Placeholder until the owner confirms the production Hosted UI domain (P12.2).
-      domain: 'https://auth.spoh.example.invalid',
-    },
+    // The previous pool was deleted on 10 October 2026; production owns a retained one,
+    // created only at the owner's go (P12.8). Plus is switched on for the event month.
+    identity: { plan: 'essentials', retain: true },
   },
 };

@@ -19,6 +19,7 @@ import { VolunteerSection } from '../components/VolunteerSection';
 import { RehearsalReportControl } from '../components/RehearsalReportControl';
 import { CurrentReportControl } from '../components/CurrentReportControl';
 import { ArchiveExportPanel } from '../components/ArchiveExportPanel';
+import { SnapshotHistory } from '../components/SnapshotHistory';
 
 /**
  * The post-event report (PRODUCT_BRIEF §10).
@@ -49,6 +50,7 @@ export default function ReportsScreen(): ReactNode {
       <RehearsalReportControl included={includeRehearsal} onChange={setIncludeRehearsal} />
       <CurrentReportControl current={current} onChange={setCurrent} />
       <ArchiveExportPanel />
+      <SnapshotHistory />
       {report.isLoading ? (
         <LoadingCards count={3} label="Generating the report" />
       ) : !data ? (

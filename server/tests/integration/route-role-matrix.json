@@ -3,6 +3,10 @@
     "asks": "Roster.Edit",
     "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
   },
+  "DELETE /admin/structure/days/:id": {
+    "asks": "Structure.Change",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+  },
   "DELETE /notifications/subscriptions": {
     "asks": "Self.Read",
     "who": "every member"
@@ -71,6 +75,10 @@
     "asks": "Structure.Read",
     "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
   },
+  "GET /admin/structure": {
+    "asks": "Structure.Read",
+    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+  },
   "GET /admin/visitor-fields": {
     "asks": "Self.Read",
     "who": "every member"
@@ -119,6 +127,18 @@
     "asks": "Dashboard.ReadStation",
     "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
   },
+  "GET /cards/print": {
+    "asks": "Report.Export",
+    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+  },
+  "GET /cards/print/:id/details": {
+    "asks": "Report.Export",
+    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+  },
+  "GET /cards/print/:id": {
+    "asks": "Report.Export",
+    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+  },
   "GET /cards/qr/:payload": {
     "asks": "Self.Read",
     "who": "every member"
@@ -159,6 +179,10 @@
     "asks": "Dashboard.ReadStation",
     "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
   },
+  "GET /footfall/recent": {
+    "asks": "Dashboard.ReadStation",
+    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+  },
   "GET /footfall/summary": {
     "asks": "Dashboard.ReadStation",
     "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
@@ -166,6 +190,10 @@
   "GET /gifts": {
     "asks": "Self.Read",
     "who": "every member"
+  },
+  "GET /gifts/catalogue": {
+    "asks": "Settings.Read",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
   },
   "GET /gifts/summary": {
     "asks": "Dashboard.ReadStation",
@@ -223,6 +251,10 @@
     "asks": "Self.Read",
     "who": "every member"
   },
+  "GET /registrations/recent": {
+    "asks": "Dashboard.ReadStation",
+    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+  },
   "GET /registrations/summary": {
     "asks": "Dashboard.ReadStation",
     "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
@@ -270,6 +302,10 @@
   "GET /roster/station/:stationId": {
     "asks": "Roster.ReadStation",
     "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+  },
+  "GET /roster/swap-targets": {
+    "asks": "Self.Read",
+    "who": "every member"
   },
   "GET /roster/swaps": {
     "asks": "Self.Read",
@@ -331,6 +367,26 @@
     "asks": "Structure.Edit",
     "who": ["CHIEF_COORDINATOR", "ADMIN"]
   },
+  "PATCH /admin/structure/categories/:id": {
+    "asks": "Structure.Edit",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+  },
+  "PATCH /admin/structure/shifts/:id": {
+    "asks": "Structure.Edit",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+  },
+  "PATCH /admin/structure/tags/:id": {
+    "asks": "Structure.Edit",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+  },
+  "PATCH /admin/structure/templates/:id": {
+    "asks": "Structure.Edit",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+  },
+  "PATCH /admin/structure/types/:id": {
+    "asks": "Structure.Edit",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+  },
   "PATCH /admin/visitor-fields/:id": {
     "asks": "Structure.Edit",
     "who": ["CHIEF_COORDINATOR", "ADMIN"]
@@ -384,6 +440,22 @@
     "who": ["CHIEF_COORDINATOR", "ADMIN"]
   },
   "POST /admin/stations": {
+    "asks": "Structure.Change",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+  },
+  "POST /admin/structure/categories": {
+    "asks": "Structure.Change",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+  },
+  "POST /admin/structure/tags": {
+    "asks": "Structure.Change",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+  },
+  "POST /admin/structure/templates": {
+    "asks": "Structure.Change",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+  },
+  "POST /admin/structure/types": {
     "asks": "Structure.Change",
     "who": ["CHIEF_COORDINATOR", "ADMIN"]
   },
@@ -463,6 +535,10 @@
     "asks": "Card.GenerateBatch",
     "who": ["CHIEF_COORDINATOR", "ADMIN"]
   },
+  "POST /cards/print": {
+    "asks": "Card.GenerateBatch",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+  },
   "POST /content/images/upload": {
     "asks": "Content.Edit",
     "who": ["CHIEF_COORDINATOR", "ADMIN"]
@@ -508,6 +584,10 @@
     "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
   },
   "POST /gifts/:id/adjust": {
+    "asks": "Count.Adjust",
+    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+  },
+  "POST /gifts/:id/stock": {
     "asks": "Count.Adjust",
     "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
   },
@@ -595,6 +675,10 @@
     "asks": "Report.Export",
     "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
   },
+  "POST /roster/briefing-slots": {
+    "asks": "Roster.Edit",
+    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+  },
   "POST /roster/briefing-slots/:id/complete": {
     "asks": "Briefing.Complete",
     "who": "every member"
@@ -611,8 +695,24 @@
     "asks": "Swap.Decide",
     "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
   },
+  "POST /roster/swaps/:id/withdraw": {
+    "asks": "Self.Read",
+    "who": "every member"
+  },
   "POST /roster/volunteers": {
     "asks": "People.Invite",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+  },
+  "POST /schedules/:id/cancel": {
+    "asks": "Schedule.Manage",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+  },
+  "POST /schedules/lifecycle": {
+    "asks": "Schedule.Manage",
+    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+  },
+  "POST /schedules/reports": {
+    "asks": "Schedule.Manage",
     "who": ["CHIEF_COORDINATOR", "ADMIN"]
   },
   "PUT /announcements/drafts/:id": {

@@ -27,7 +27,8 @@ const response = (scope: 'event' | 'station' = 'event') => ({
   })),
 });
 it('selects only registered event and station operational keys, excluding guarded values', () => {
-  expect(SCOPED_OPERATIONAL_KEYS).toHaveLength(14);
+  expect(SCOPED_OPERATIONAL_KEYS).toHaveLength(15);
+  expect(SCOPED_OPERATIONAL_KEYS).toContain('fallback.reminderMinutes');
   expect(scopedOperationalKeys('station')).toEqual([
     'capture.open',
     'implausibleTapsPerMinute',

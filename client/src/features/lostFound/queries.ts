@@ -2,7 +2,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { CreateLostFoundRequest } from '@spoh/shared';
 import { useEvent, useEventId } from '@/shared/lib/eventContext';
-import { createLostFound, listLostFound, claimLostFound, type LostFoundFilters } from './api';
+import {
+  createLostFound,
+  listLostFound,
+  claimLostFound,
+  closeOutLostFound,
+  type LostFoundFilters,
+} from './api';
 export function useCreateLostFound() {
   const { id: eventId, status } = useEvent();
   return useMutation({
@@ -31,5 +37,14 @@ export function useClaimLostFound() {
     onSuccess: () => {
       void client.invalidateQueries({ queryKey: lostFoundKeys.all(eventId) });
     },
+  });
+}
+
+export function useCloseOutLostFound() {
+  const client = useQueryClient();
+  const eventId = useEventId();
+  return useMutation({
+    mutationFn: () => closeOutLostFound(eventId),
+    onSuccess: () => client.invalidateQueries({ queryKey: [eventId] }),
   });
 }

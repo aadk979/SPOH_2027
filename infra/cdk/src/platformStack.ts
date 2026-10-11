@@ -6,7 +6,7 @@ import { Repository } from 'aws-cdk-lib/aws-ecr';
 import { AppSecrets } from './appSecrets.js';
 import { AppService, createHttpApi } from './appService.js';
 import { IMAGE_REPOSITORY } from './deployAccessStack.js';
-import { StagingIdentity, type CognitoSettings } from './stagingIdentity.js';
+import { PlatformIdentity, type CognitoSettings } from './identity.js';
 import { DatabaseCpuMonitoring } from './databaseCpuMonitoring.js';
 import { ObjectStorage } from './objectStorage.js';
 import { AuthorizationStore } from './authorizationStore.js';
@@ -72,13 +72,12 @@ export class PlatformStack extends Stack {
     if (app?.service) new CfnOutput(this, 'ServiceName', { value: app.service.serviceName });
   }
 
-  /** Staging gets its own pool; production references the existing one by id. */
+  /** Each stage owns its pool; production's is retained and deletion-protected (P12.1). */
   private cognito(stage: StageConfig, appOrigin: string): CognitoSettings {
-    if (stage.existingCognito) return stage.existingCognito;
-    return new StagingIdentity(this, 'Identity', {
+    return new PlatformIdentity(this, 'Identity', {
+      stage,
       appOrigin: stage.publicOrigins?.api ?? appOrigin,
       clientOrigin: stage.publicOrigins?.client ?? appOrigin,
-      stageName: stage.name,
     }).settings;
   }
 }

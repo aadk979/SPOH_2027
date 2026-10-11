@@ -167,7 +167,7 @@ describe('operational settings catalogue reader', () => {
       '/events/evt_test/admin/settings/catalogue?scope=event',
       { cache: 'no-store' },
     );
-    expect(screen.getAllByRole('button', { name: /^View history:/ })).toHaveLength(14);
+    expect(screen.getAllByRole('button', { name: /^View history:/ })).toHaveLength(15);
     for (const key of scopedOperationalKeys('event')) {
       const row = rowFor(GENERATED_SETTING_METADATA[key].label);
       expect(row.getByText(GENERATED_SETTING_METADATA[key].description)).toBeTruthy();

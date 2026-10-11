@@ -60,7 +60,7 @@ it('returns complete default event values, strict metadata and no side effects',
     target: { scope: 'event' },
     eventStatus: 'DRAFT',
   });
-  expect(parsed.data).toHaveLength(14);
+  expect(parsed.data).toHaveLength(15);
   expect(
     parsed.data.every(
       (entry) =>

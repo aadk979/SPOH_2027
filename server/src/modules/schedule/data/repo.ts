@@ -3,7 +3,7 @@ import type { Prisma } from '../../../generated/prisma/client.js';
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 
-const METADATA = {
+export const TIMELINE_METADATA = {
   id: true,
   eventId: true,
   type: true,
@@ -19,7 +19,7 @@ const METADATA = {
   completedAt: true,
   lastError: true,
 } satisfies Prisma.ScheduledActionSelect;
-export type TimelineRow = Prisma.ScheduledActionGetPayload<{ select: typeof METADATA }>;
+export type TimelineRow = Prisma.ScheduledActionGetPayload<{ select: typeof TIMELINE_METADATA }>;
 
 /** Never load action payloads, dedupe keys or lease tokens for the timeline. */
 export async function timelineRows(
@@ -41,7 +41,7 @@ export async function timelineRows(
           }
         : {}),
     },
-    select: METADATA,
+    select: TIMELINE_METADATA,
     orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     // Explicit immutable keyset bounds retain the next row when a cursor changes status.
     take: query.limit + 1,

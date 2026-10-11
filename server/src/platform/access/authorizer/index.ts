@@ -3,7 +3,6 @@ import type { CacheChannel } from '../../events/cacheBus.js';
 import { AvpAuthorizer, sdkAvpClient, type AvpClient } from './avpAuthorizer.js';
 import { LocalCedarAuthorizer } from './localCedarAuthorizer.js';
 import { ResilientAuthorizer } from './resilientAuthorizer.js';
-import { startAvpSummary } from './avpTally.js';
 import type { Authorizer } from './types.js';
 
 /**
@@ -61,6 +60,5 @@ export function createAuthorizer(setup: AuthorizerSetup): Authorizer {
   });
   const authorizer = new ResilientAuthorizer({ primary, local, log: setup.log });
   authorizer.cache.subscribe(setup.subscribe);
-  startAvpSummary((tally) => setup.log.info({ avp: tally }, 'avp summary'));
   return authorizer;
 }

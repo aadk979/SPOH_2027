@@ -1,10 +1,9 @@
 import { logger } from '../logger/index.js';
 
 /**
- * Legacy interval composition during P10.7's handler migration. Refresh-session
- * and replay pruning, plus per-event lost-person purging, use app/startScheduledJobs.ts.
- * Remaining business jobs move there one verified module at a time; only cache
- * maintenance remains a local tick when the migration is complete.
+ * Local ticks (ADR-004 §4): per-instance, in memory and not audited. Only cache
+ * maintenance and per-instance metric summaries run here (`app/jobs.ts`); every
+ * business job is a durable action in app/startScheduledJobs.ts.
  */
 
 /** A job a module registers: a name for the logs, how often, and what to run. */

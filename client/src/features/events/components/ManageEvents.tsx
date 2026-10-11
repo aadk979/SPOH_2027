@@ -16,10 +16,11 @@ export function ManageEvents() {
 }
 
 function ManagementContents({ data }: { data: Management }) {
-  const [organisationId, setOrganisationId] = useState(data.organisations[0]?.id ?? '');
+  const [initial] = useState(() => initialSelection(data));
+  const [organisationId, setOrganisationId] = useState(initial.organisationId);
   const [choice, setChoice] = useState<
     { kind: 'create' } | { kind: 'clone'; sourceId: string } | null
-  >(null);
+  >(initial.choice);
   const organisation = data.organisations.find((item) => item.id === organisationId);
   const events = data.events.filter((item) => item.organisationId === organisationId);
   return (
@@ -59,6 +60,17 @@ function ManagementContents({ data }: { data: Management }) {
 }
 
 type Choice = { kind: 'create' } | { kind: 'clone'; sourceId: string } | null;
+function initialSelection(data: Management): { organisationId: string; choice: Choice } {
+  const sourceId =
+    typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('clone');
+  const source = data.events.find((event) => event.id === sourceId);
+  const organisation = data.organisations.find(
+    (item) => item.id === source?.organisationId && item.canClone,
+  );
+  return organisation && source
+    ? { organisationId: organisation.id, choice: { kind: 'clone', sourceId: source.id } }
+    : { organisationId: data.organisations[0]?.id ?? '', choice: null };
+}
 function SelectedWizard({
   choice,
   organisation,

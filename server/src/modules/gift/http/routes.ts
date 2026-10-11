@@ -4,10 +4,11 @@ import {
   fromParam,
   stationFromBody,
   anyStation,
+  theEvent,
 } from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import { z } from 'zod';
-import { AdjustGiftStockRequest, GiftSummaryQuery, Id, RedeemGiftRequest } from '@spoh/shared';
+import { AdjustGiftStockRequest, AdjustGiftStockWithReceiptRequest, GiftSummaryQuery, Id, RedeemGiftRequest } from '@spoh/shared';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { idempotent } from '../../../platform/http/idempotency.js';
 import { captureRateLimit, defaultRateLimit } from '../../../platform/http/rateLimit.js';
@@ -17,6 +18,7 @@ import {
   listGiftsHandler,
   redeemGiftHandler,
   summariseGiftsHandler,
+  giftCatalogueHandler,
 } from './handlers.js';
 
 /** Gift redemption and inventory (BUILD_PLAN §7.2). */
@@ -25,6 +27,10 @@ export const giftRouter: Router = Router();
 const IdParams = z.object({ id: Id }).strict();
 
 giftRouter.use(requireAuth);
+giftRouter.get('/catalogue', defaultRateLimit, authorize('Settings.Read', theEvent), giftCatalogueHandler);
+giftRouter.post('/:id/stock', defaultRateLimit, authorize('Count.Adjust', fromParam('GiftType')),
+  validate({ params: IdParams, body: AdjustGiftStockWithReceiptRequest }),
+  idempotent('POST /gifts/:id/stock'), adjustStockHandler);
 
 /**
  * Stock levels. Readable by anyone who can redeem, because the redemption

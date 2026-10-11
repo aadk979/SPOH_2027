@@ -40,6 +40,22 @@ const OPERATIONS_TOOLS: Action[] = [
   'Report.Generate',
 ];
 
+/** Authored permission-to-destination contract, independent of the registry implementation. */
+const TOOL_DESTINATIONS: Array<[Action, string[]]> = [
+  ['Dashboard.ReadEvent', ['/chief']],
+  ['Dashboard.ReadStation', ['/ic', '/counts']],
+  ['People.Read', ['/admin/users']],
+  ['Settings.Read', ['/admin/permissions', '/admin/settings', '/admin/gifts', '/admin/close-out']],
+  ['Fallback.Declare', ['/chief/fallback']],
+  ['Fallback.Import', ['/chief/imports']],
+  ['Report.Generate', ['/reports']],
+  ['Incident.Read', ['/safety/incidents']],
+  ['Self.Read', ['/admin/cards']],
+  ['Roster.Edit', ['/admin/staffing']],
+  ['Count.Adjust', ['/admin/corrections']],
+  ['Audit.Read', ['/admin/audit']],
+];
+
 describe('navigation registry', () => {
   it('has exactly one entry per app route, and no entry without a route', () => {
     const paths = NAV_REGISTRY.map((entry) => entry.path);
@@ -59,6 +75,12 @@ describe('navigation registry', () => {
     ['/map', '/guide'],
     ['/safety/lost-found/new', '/safety'],
     ['/admin/settings', '/operations'],
+    ['/admin/audit', '/operations'],
+    ['/admin/corrections', '/operations'],
+    ['/admin/close-out', '/operations'],
+    ['/safety/incidents', '/safety'],
+    ['/swaps', '/shift'],
+    ['/briefings', '/shift'],
     ['/chief/imports', '/operations'],
     ['/tv', '/operations'],
     ['/inbox', '/inbox'],
@@ -82,16 +104,14 @@ describe('navigation registry', () => {
     const sections = (actions: Action[]) =>
       sectionEntries({ allows: allows(actions) }).map((entry) => entry.path);
     expect(sections([])).toEqual(['/home', '/shift', '/guide', '/safety']);
-    for (const tool of OPERATIONS_TOOLS) {
+    for (const [tool, destinations] of TOOL_DESTINATIONS) {
       expect(canOpenOperations({ allows: allows([tool]) })).toBe(true);
       expect(sections([tool])).toContain('/operations');
       expect(
-        operationGroups({ allows: allows([tool]) }).flatMap((group) => group.links),
-      ).toHaveLength(
-        NAV_REGISTRY.filter(
-          (entry) => entry.requires === tool && entry.surfaces?.includes('operations'),
-        ).length,
-      );
+        operationGroups({ allows: allows([tool]) }).flatMap((group) =>
+          group.links.map((link) => link.href),
+        ),
+      ).toEqual(destinations);
     }
   });
 
@@ -103,21 +123,25 @@ describe('navigation registry', () => {
     expect(groups.flatMap((group) => group.links.map((link) => link.href))).toEqual([
       '/chief',
       '/ic',
+      '/counts',
       '/admin/users',
       '/admin/permissions',
       '/admin/settings',
+      '/admin/gifts',
       '/chief/fallback',
       '/chief/imports',
       '/reports',
+      '/admin/close-out',
     ]);
   });
 
   it('lists hub screens under their hub, and names only hubs as parents', () => {
     expect(hubLinks('/guide').map((link) => link.href)).toEqual(['/map', '/journey', '/brief']);
-    expect(hubLinks('/safety').map((link) => link.emphasis ?? null)).toEqual([
-      null,
-      'primary',
-      null,
+    expect(hubLinks('/safety').map((link) => [link.href, link.emphasis ?? null])).toEqual([
+      ['/safety/incident/new', null],
+      ['/safety/lost-person/new', 'primary'],
+      ['/safety/lost-found', null],
+      ['/safety/incidents', null],
     ]);
     expect(hubLabel('/operations')).toBe('Operations');
     expect(hubLabel('/shift')).toBeNull();
@@ -126,6 +150,8 @@ describe('navigation registry', () => {
   it('keeps the inbox on the global bar with a short label for narrow phones', () => {
     expect(globalEntries().map((entry) => [entry.path, entry.label, entry.shortLabel])).toEqual([
       ['/devices', 'Your devices', 'Devices'],
+      ['/swaps', 'Shift swaps', undefined],
+      ['/briefings', 'Briefing slots', undefined],
       ['/inbox', 'Announcements', 'Inbox'],
     ]);
   });

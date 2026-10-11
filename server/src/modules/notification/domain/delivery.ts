@@ -13,6 +13,10 @@ export const TTL_SECONDS: Readonly<Record<NotificationKind, number>> = Object.fr
   'incident.critical': 900,
   'announcement.urgent': 1800,
   'gift.lowStock': 1800,
+  // Repeats while the window stays open, so a stale copy is replaced rather than awaited.
+  'fallback.reminder': 1800,
+  // Archiving waits on a person, not the clock: a day-old reminder is still true.
+  'event.archiveReminder': 86_400,
 });
 
 /**

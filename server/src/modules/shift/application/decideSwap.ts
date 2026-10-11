@@ -1,7 +1,6 @@
 import type { DecideSwapRequest, SwapRequestRecord } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
-import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { toSwapRecord } from '../data/mappers.js';
@@ -17,6 +16,8 @@ import { assertStillRequesters, assertSwapPending, assertTargetFree } from '../d
 import { ERROR_CODES } from '@spoh/shared';
 import { AppError } from '../../../platform/errors/index.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
+import { settleShiftReceipt } from './mutationReceipt.js';
+import { prepareShiftWrite } from './prepareShiftWrite.js';
 
 /**
  * Approving moves the assignment and clears the check-in state — the new
@@ -40,10 +41,16 @@ async function approve(tx: PrismaTransactionClient, scope: EventScope, swap: Swa
 export async function decideSwap(
   swapId: string,
   request: DecideSwapRequest,
-  { volunteerId: deciderId, scope, audit }: ActorContext,
+  actor: ActorContext,
 ): Promise<SwapRequestRecord> {
+  const { volunteerId: deciderId, scope, audit } = actor;
   await prisma.$transaction(async (tx) => {
-    await holdCaptureEvent(tx, scope);
+    await prepareShiftWrite(tx, {
+      actor,
+      action: 'Swap.Decide',
+      key: request.idempotencyKey,
+      resource: { type: 'SwapRequest', id: swapId },
+    });
     const swap = await findSwapForDecision(tx, scope, swapId);
     if (!swap) throw new NotFoundError('Swap request');
     assertSwapPending(swap);
@@ -65,6 +72,11 @@ export async function decideSwap(
       entityId: swapId,
       before: { status: swap.status },
       after: { status: request.decision, note: request.note ?? null },
+    });
+    await settleShiftReceipt(tx, scope, {
+      key: request.idempotencyKey,
+      id: swapId,
+      statusCode: 200,
     });
   });
 

@@ -12,13 +12,22 @@ import {
   hasAssignmentOnShift,
 } from '../data/repo.js';
 import { assertNotSelf, assertOwnShift, assertTargetFree } from '../domain/swapRules.js';
+import { settleShiftReceipt } from './mutationReceipt.js';
+import { prepareShiftWrite } from './prepareShiftWrite.js';
 
 /** Ask to give a shift to someone else; an IC decides. */
 export async function requestSwap(
   request: CreateSwapRequest,
-  { volunteerId: requesterId, scope, audit }: ActorContext,
+  actor: ActorContext,
 ): Promise<SwapRequestRecord> {
+  const { volunteerId: requesterId, scope, audit } = actor;
   const swap = await prisma.$transaction(async (tx) => {
+    await prepareShiftWrite(tx, {
+      actor,
+      action: 'Swap.Request',
+      key: request.idempotencyKey,
+      resource: { type: 'ShiftAssignment', id: request.assignmentId },
+    });
     const assignment = await findAssignmentForSwap(tx, scope, request.assignmentId);
     if (!assignment) throw new NotFoundError('Shift assignment');
     assertOwnShift(assignment, requesterId);
@@ -49,6 +58,11 @@ export async function requestSwap(
       entityType: 'ShiftSwapRequest',
       entityId: row.id,
       after: { status: 'REQUESTED', assignmentId: assignment.id, targetId: target.id },
+    });
+    await settleShiftReceipt(tx, scope, {
+      key: request.idempotencyKey,
+      id: row.id,
+      statusCode: 201,
     });
     return row;
   });

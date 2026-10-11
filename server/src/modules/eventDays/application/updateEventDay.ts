@@ -1,22 +1,25 @@
 import type { EventDayRecord, UpdateEventDayRequest } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
-import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
+import { requireStructureEdit } from '../../structure/index.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { toEventDayRecord } from '../data/mappers.js';
 import { findEventDayRow, updateEventDayRow } from '../data/repo.js';
+import { lockReserved, settleReserved } from '../../../platform/idempotency/index.js';
 
 export async function updateEventDay(
   id: string,
   patch: UpdateEventDayRequest,
-  { scope, audit }: ActorContext,
+  actor: ActorContext,
 ): Promise<EventDayRecord> {
-  const existing = await findEventDayRow(scope, id);
-  if (!existing) throw new NotFoundError('Event day');
+  const { scope, audit } = actor;
 
   const row = await prisma.$transaction(async (tx) => {
-    await holdCaptureEvent(tx, scope);
+    await requireStructureEdit(actor, tx);
+    const existing = await findEventDayRow(scope, id, tx);
+    if (!existing) throw new NotFoundError('Event day');
+    if (patch.idempotencyKey) await lockReserved(tx, scope, patch.idempotencyKey);
     const updated = await updateEventDayRow(tx, scope, {
       id,
       data: {
@@ -33,6 +36,12 @@ export async function updateEventDay(
       before: { label: existing.label },
       after: { ...patch },
     });
+    if (patch.idempotencyKey)
+      await settleReserved(tx, scope, {
+        key: patch.idempotencyKey,
+        statusCode: 200,
+        body: { eventDay: toEventDayRecord(updated) },
+      });
     return updated;
   });
 

@@ -1,6 +1,7 @@
 import type { ScheduleTimelineRecord } from '@spoh/shared';
 import { useEventTime } from '@/features/session';
 import { scheduleErrorLabels, scheduleKindLabels, scheduleStatusLabels } from '../model/copy';
+import { ScheduleCancelButton } from './ScheduleCancelButton';
 
 export function ScheduleTimelineRow({ row }: { row: ScheduleTimelineRecord }) {
   const format = useEventTime();
@@ -28,6 +29,7 @@ export function ScheduleTimelineRow({ row }: { row: ScheduleTimelineRecord }) {
         <p className="text-caption text-text-muted">Finished {format.dateTime(row.completedAt)}</p>
       ) : null}
       {row.lastError ? <p>{scheduleErrorLabels[row.lastError]}</p> : null}
+      <ScheduleCancelButton row={row} />
     </li>
   );
 }

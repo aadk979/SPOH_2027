@@ -8,7 +8,10 @@ import { rawDb } from './db.js';
 import { createVolunteer, testEvent } from './fixtures.js';
 import { FROZEN_NOW } from '../setup.js';
 
-export const lifecycleRegistry = new HandlerRegistry(eventScheduledHandlers);
+// Transitions only: a due archive reminder must not take the claim a transition test expects.
+export const lifecycleRegistry = new HandlerRegistry(
+  eventScheduledHandlers.filter((handler) => handler.type === 'event.transition'),
+);
 export const lifecycleNow = FROZEN_NOW;
 export const lifecycleAt = (offset: number) => new Date(lifecycleNow.getTime() + offset);
 

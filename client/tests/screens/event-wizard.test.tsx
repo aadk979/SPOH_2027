@@ -72,10 +72,26 @@ function fillBasics(): void {
   fireEvent.change(screen.getByLabelText('Last day'), { target: { value: '2027-02-02' } });
 }
 beforeEach(() => {
+  window.history.replaceState({}, '', '/events');
   mockedApi.mockReset();
   state.push.mockReset();
   state.actions = ['Settings.Read', 'People.Read', 'Schedule.Manage', 'Report.Generate'];
   state.path = '/overview';
+});
+
+it('opens the permitted clone wizard from the close-out link', async () => {
+  window.history.replaceState({}, '', '/events?clone=evt_source');
+  mockedApi.mockResolvedValue({ organisations: [organisation], events: [source] });
+  show(<ManageEvents />);
+  expect(await screen.findByRole('heading', { name: 'Clone Previous Event' })).toBeTruthy();
+  cleanup();
+  mockedApi.mockResolvedValue({
+    organisations: [{ ...organisation, canClone: false }],
+    events: [source],
+  });
+  show(<ManageEvents />);
+  await screen.findByRole('button', { name: 'Create new event' });
+  expect(screen.queryByRole('heading', { name: 'Clone Previous Event' })).toBeNull();
 });
 afterEach(() => {
   cleanup();

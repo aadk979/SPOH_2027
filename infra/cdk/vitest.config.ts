@@ -5,5 +5,6 @@ import { fileURLToPath } from 'node:url';
 // Pin selection here so root-directory callers cannot accidentally load database suites.
 export default defineConfig({
   root: fileURLToPath(new URL('.', import.meta.url)),
-  test: { include: ['test/**/*.test.ts'], testTimeout: 30_000 },
+  // Bound concurrent synths: each runs nag over the full resource catalogue.
+  test: { include: ['test/**/*.test.ts'], testTimeout: 30_000, maxWorkers: 2 },
 });

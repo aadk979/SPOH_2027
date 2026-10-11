@@ -76,7 +76,8 @@ jobs:
       - run: npx prisma generate
         working-directory: server
         env:
-          DATABASE_URL: postgresql://unused:unused@localhost:5432/unused
+          DATABASE_URL: postgresql://unused:unused@localhost:5432/unused_test
+          SPOH_SKIP_DOTENV: '1'
 
       - run: npm run lint
 
@@ -202,7 +203,8 @@ jobs:
       - run: npx prisma generate
         working-directory: server
         env:
-          DATABASE_URL: postgresql://unused:unused@localhost:5432/unused
+          DATABASE_URL: postgresql://unused:unused@localhost:5432/unused_test
+          SPOH_SKIP_DOTENV: '1'
 
       - name: Guard counts
         continue-on-error: true

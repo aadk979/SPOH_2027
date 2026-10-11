@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Id } from '../common/index.js';
+import { Id, IdempotencyKey } from '../common/index.js';
 
 /**
  * What a station is, as the event defines it (ADR-002): its capabilities are
@@ -64,6 +64,7 @@ export const CreateStationRequest = z
     tagCodes: z.array(z.string().trim().min(1).max(64)).max(20).default([]),
     floor: z.string().trim().max(40).nullish(),
     sortOrder: z.number().int().min(0).max(9999).default(0),
+    idempotencyKey: IdempotencyKey.optional(),
   })
   .strict();
 export type CreateStationRequest = z.infer<typeof CreateStationRequest>;
@@ -74,9 +75,13 @@ export type CreateStationRequest = z.infer<typeof CreateStationRequest>;
  */
 export const UpdateStationRequest = CreateStationRequest.omit({ code: true })
   .partial()
-  .extend({ active: z.boolean().optional() })
+  .extend({
+    active: z.boolean().optional(),
+    tagCodes: z.array(z.string().trim().min(1).max(64)).max(20).optional(),
+    sortOrder: z.number().int().min(0).max(9999).optional(),
+  })
   .strict()
-  .refine((patch) => Object.keys(patch).length > 0, {
+  .refine((patch) => Object.keys(patch).some((key) => key !== 'idempotencyKey'), {
     message: 'supply at least one field to change',
   });
 export type UpdateStationRequest = z.infer<typeof UpdateStationRequest>;

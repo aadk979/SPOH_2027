@@ -9,6 +9,10 @@ import {
   CancelCaptureScheduleRequest,
   type ScopedSettingsTarget,
   type ScopedOperationalSettingKey,
+  CancelScheduleRequest,
+  CreateLifecycleScheduleRequest,
+  CreateReportScheduleRequest,
+  ScheduleMutationResponse,
 } from '@spoh/shared';
 import { eventApi } from '@/shared/lib/eventApi';
 import { assertCaptureTarget } from './model/captureScheduleResponse';
@@ -120,5 +124,42 @@ export async function cancelCaptureSchedule(
       `/admin/settings/catalogue/schedules/${encodeURIComponent(input.id)}/cancel`,
       { method: 'POST', body, cache: 'no-store' },
     ),
+  );
+}
+
+function scheduleMutation(eventId: string, result: unknown) {
+  const response = ScheduleMutationResponse.parse(result);
+  if (response.schedule.eventId !== eventId) throw new Error('Schedule event mismatch');
+  return response;
+}
+export async function createLifecycleSchedule(
+  eventId: string,
+  input: CreateLifecycleScheduleRequest,
+) {
+  const body = CreateLifecycleScheduleRequest.parse(input);
+  return scheduleMutation(
+    eventId,
+    await eventApi(eventId, '/schedules/lifecycle', { method: 'POST', body, cache: 'no-store' }),
+  );
+}
+export async function createReportSchedule(eventId: string, input: CreateReportScheduleRequest) {
+  const body = CreateReportScheduleRequest.parse(input);
+  return scheduleMutation(
+    eventId,
+    await eventApi(eventId, '/schedules/reports', { method: 'POST', body, cache: 'no-store' }),
+  );
+}
+export async function cancelSchedule(
+  eventId: string,
+  input: { id: string; body: CancelScheduleRequest },
+) {
+  const body = CancelScheduleRequest.parse(input.body);
+  return scheduleMutation(
+    eventId,
+    await eventApi(eventId, `/schedules/${encodeURIComponent(input.id)}/cancel`, {
+      method: 'POST',
+      body,
+      cache: 'no-store',
+    }),
   );
 }

@@ -5,6 +5,15 @@ import { DeployAccessStack } from './deployAccessStack.js';
 import { PlatformStack } from './platformStack.js';
 import { StagingEdgeStack } from './stagingEdgeStack.js';
 
+/**
+ * `-c cognitoPlan=plus` moves production to Cognito Plus (threat protection) for the
+ * owner-approved event month (ADR-008 §6); staging always stays on Essentials.
+ */
+function withIdentityPlan(app: App, stage: StageConfig): StageConfig {
+  if (stage.name !== 'prod' || app.node.tryGetContext('cognitoPlan') !== 'plus') return stage;
+  return { ...stage, identity: { ...stage.identity, plan: 'plus' } };
+}
+
 function tag(stage: StageConfig, stack: Stack): void {
   for (const [key, value] of Object.entries(stage.tags)) Tags.of(stack).add(key, value);
 }
@@ -17,7 +26,8 @@ export function buildApp(app: App = new App()): App {
     description: 'GitHub OIDC and the CI deploy role (P08.2)',
   });
   Tags.of(access).add('app', 'spoh-platform');
-  for (const stage of Object.values(STAGES)) {
+  for (const configured of Object.values(STAGES)) {
+    const stage = withIdentityPlan(app, configured);
     const stack = new PlatformStack(app, `Spoh-${stage.name}-Platform`, {
       stage,
       env: { account: stage.account, region: stage.region },
