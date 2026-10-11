@@ -61,7 +61,7 @@
     "qrcode": "1.5.4",
     "regenerator-runtime": "0.14.1",
     "web-push": "^3.6.7",
-    "zod": "^4.5.4"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.10",
