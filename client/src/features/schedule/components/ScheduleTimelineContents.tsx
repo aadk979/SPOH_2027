@@ -1,4 +1,4 @@
-import { Button, Callout, LoadingRows } from '@/shared/ui';
+import { Button, LoadingRows, ErrorState } from '@/shared/ui';
 import { useEventTime } from '@/features/session';
 import type { ScheduledActionStatus, ScheduleTimelineResponse } from '@spoh/shared';
 import { useScheduleTimeline } from '../queries';
@@ -10,9 +10,7 @@ export function ScheduleTimelineContents({ status }: { status?: ScheduledActionS
     <div className="flex flex-col gap-md">
       {timeline.isPending ? <LoadingRows /> : null}
       {timeline.isError ? (
-        <Callout tone="alert" role="alert">
-          Scheduled work is unavailable. Reload to check your access.
-        </Callout>
+        <ErrorState error={timeline.error}>Scheduled work is unavailable. Reload to check your access.</ErrorState>
       ) : null}
       <Button
         variant="quiet"

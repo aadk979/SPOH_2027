@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { EventAdministrationResponse } from '@spoh/shared';
-import { Button, Callout, Field, LoadingRows, Select, Stack, StatusText } from '@/shared/ui';
+import { Button, Callout, Field, LoadingRows, Select, Stack, StatusText, ErrorState } from '@/shared/ui';
 import { useEventAdministration } from '../queries';
 import { CloneEventWizard } from './CloneEventWizard';
 import { CreateEventWizard } from './CreateEventWizard';
@@ -8,7 +8,7 @@ import { CreateEventWizard } from './CreateEventWizard';
 type Management = EventAdministrationResponse;
 export function ManageEvents() {
   const query = useEventAdministration();
-  if (query.isError) return <Callout tone="alert">Event management could not be loaded.</Callout>;
+  if (query.isError) return <ErrorState error={query.error}>Event management could not be loaded.</ErrorState>;
   if (!query.data) return <LoadingRows />;
   const allowed = query.data.organisations.filter((item) => item.canCreate || item.canClone);
   if (!allowed.length) return null;

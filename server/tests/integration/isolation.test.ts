@@ -74,6 +74,8 @@ interface EventB {
   found: string;
   card: { shortCode: string; qrPayload: string };
   giftType: string;
+  redemption: string;
+  importBatch: string;
   announcement: string;
   announcementDraft: string;
   announcementSchedule: string;
@@ -204,6 +206,9 @@ async function seedEventB(): Promise<EventB> {
   const giftType = await rawDb.giftType.create({
     data: { eventId, name: 'B tote', initialStock: 10 },
   });
+  const redemption = await rawDb.giftRedemption.create({ data: { ...common, giftTypeId: giftType.id, idempotencyKey: idempotencyKey() } });
+  const importBatch = await rawDb.importBatch.create({ data: { eventId, targetTable: 'Registration',
+    importedById: person, source: 'PAPER', rowCount: 0, provenanceVersion: 1 } });
   const announcement = await rawDb.announcement.create({
     data: { eventId, body: 'B notice', authorId: person, requiresAck: true },
   });
@@ -288,6 +293,8 @@ async function seedEventB(): Promise<EventB> {
     found: found.id,
     card: { shortCode: card.shortCode, qrPayload: card.qrPayload },
     giftType: giftType.id,
+    redemption: redemption.id,
+    importBatch: importBatch.id,
     announcement: announcement.id,
     announcementDraft: announcementDraft.id,
     announcementSchedule: announcementSchedule.id,
@@ -329,6 +336,18 @@ const LIST = noId('lists the path event only');
 const ACTOR = noId("acts on the caller's own records in the path event");
 
 const CASES: Record<string, Case> = {
+  'GET /workspace/entity': { query: (b) => ({ kind: 'station', id: b.station }) },
+  'GET /workspace/records': { query: (b) => ({ kind: 'footfall', cursor: b.tick }) },
+  'GET /workspace/search': noId('each source searches only the path event under current authority'),
+  'GET /branding': LIST,
+  'GET /branding/draft/assets/:variant': noId('variant is a fixed enum; asset registry resolves only the path event'),
+  'PUT /branding/draft': noId('receipt ownership and immutable asset namespace have dedicated branding isolation cases'),
+  'POST /branding/publish': noId('publishes only the path event draft under its expected version'),
+  'POST /branding/images/upload': noId('allocates a server-generated key under the path event namespace'),
+  'POST /gifts/redemptions/:id/void': { params: (b) => ({ id: b.redemption }), body: () => ({ ...capture(), reason: 'Reviewed correction' }) },
+  'POST /fallback/imports/:id/undo': { params: (b) => ({ id: b.importBatch }), body: () => ({ ...capture(), reason: 'Reviewed import correction' }) },
+  'POST /fallback/salvage/confirm': { query: () => ({}), body: (b) => ({ ...capture(), reason: 'Reviewed retained capture',
+    entries: [{ ...capture(), captureKind: 'registration', recordId: b.registration }] }) },
   'GET /admin/structure': LIST,
   'GET /gifts/catalogue': LIST,
   'POST /admin/structure/types': noId('creates a station type in the path event'),

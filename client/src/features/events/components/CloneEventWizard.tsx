@@ -4,7 +4,7 @@ import { CloneEventWizardRequest, type EventAdministrationResponse } from '@spoh
 import { useZodForm } from '@/shared/hooks/useZodForm';
 import { useRetryKey } from '@/shared/hooks/useRetryKey';
 import { eventHref } from '@/shared/lib/eventPath';
-import { Button, Callout, Stack } from '@/shared/ui';
+import { Button, Callout, Stack, ErrorState } from '@/shared/ui';
 import { useCloneEvent } from '../queries';
 import { CloneEventFields, COPY_PARTS } from './CloneEventFields';
 import { EventWizardReview } from './EventWizardReview';
@@ -99,9 +99,7 @@ export function CloneEventWizard({ source }: { source: Source }) {
         </form>
       )}
       {clone.isError ? (
-        <Callout tone="alert" role="alert">
-          {clone.error.message}
-        </Callout>
+        <ErrorState error={clone.error} />
       ) : null}
       {clone.isSuccess && !clone.data.joined ? (
         <Callout tone="ok" role="status">

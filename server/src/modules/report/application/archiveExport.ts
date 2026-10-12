@@ -20,6 +20,7 @@ import { activeFinalSnapshot } from '../data/snapshotRepo.js';
 import { archiveStorage } from './archiveStorage.js';
 import { toXlsx } from './export/toXlsx.js';
 import { finalReportReady } from './finalReportReady.js';
+import { readFrozenBrandingLogo } from '../../branding/index.js';
 
 async function prepareArchiveExport(
   tx: PrismaTransactionClient,
@@ -56,7 +57,9 @@ export function createArchiveExport(
       await lockReserved(tx, actor.scope, request.idempotencyKey);
       const id = randomUUID();
       const key = `archive/${actor.scope.eventId}/${id}.xlsx`;
-      await archiveStorage().write({ key, body: await toXlsx(FullReport.parse(snapshot.report)) });
+      const report = FullReport.parse(snapshot.report);
+      const assets = { logoPng: await readFrozenBrandingLogo(actor.scope, report.event.branding) };
+      await archiveStorage().write({ key, body: await toXlsx(report, undefined, assets) });
       const row = await saveArchiveExport(actor.scope, {
         tx,
         id,

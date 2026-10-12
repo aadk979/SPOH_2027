@@ -25,3 +25,4 @@ export {
   type Station,
 } from './data/repo.js';
 export { toStationSummary } from './data/mappers.js';
+export { stationWorkspaceSource } from './application/workspace.js';

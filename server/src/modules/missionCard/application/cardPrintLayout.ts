@@ -6,6 +6,8 @@ import { drawCardText, wrapCardText, type CardFonts } from './cardFonts.js';
 export const CARD_WIDTH = 253;
 export const PAGE_HEIGHT = 841.89;
 export const PAGE_MARGIN = 34;
+/** Branding uses the existing right footer reserve, below stamp boxes and away from QR quiet zones. */
+export const CARD_LOGO_AREA = { x: 165, y: 8, width: 76, height: 16 } as const;
 const CELL_WIDTH = 110.5;
 const STAMP_COLUMNS = 2;
 const CARD_TOP_INSET = 16;

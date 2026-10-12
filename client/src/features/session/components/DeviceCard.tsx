@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import type { SessionSummary } from '@spoh/shared';
-import { Button, Callout, Card } from '@/shared/ui';
+import { Button, Callout, Card, ErrorState } from '@/shared/ui';
 import { useEventTime } from '../useEventTime';
 import { useRevokeDevice } from '../queries';
 
@@ -44,9 +44,7 @@ export function DeviceCard({ device }: { device: SessionSummary }): ReactNode {
         </Button>
       )}
       {revoke.isError ? (
-        <Callout tone="alert" role="alert">
-          {revoke.error.message}
-        </Callout>
+        <ErrorState error={revoke.error} />
       ) : null}
     </Card>
   );

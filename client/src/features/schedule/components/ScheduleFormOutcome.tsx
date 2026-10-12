@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Callout } from '@/shared/ui';
+import { Callout, ErrorState } from '@/shared/ui';
 
 /** What happened to the last submit: an invalid time, the server's refusal, or the new schedule. */
 export function ScheduleFormOutcome({
@@ -11,11 +11,10 @@ export function ScheduleFormOutcome({
   error: Error | null;
   done: boolean;
 }): ReactNode {
-  if (invalid || error)
+  if (invalid) return <Callout tone="alert" role="alert">{invalid}</Callout>;
+  if (error)
     return (
-      <Callout tone="alert" role="alert">
-        {invalid ?? error?.message}
-      </Callout>
+      <ErrorState error={error} />
     );
   if (done)
     return (

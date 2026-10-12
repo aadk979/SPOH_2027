@@ -6,7 +6,7 @@ import { useStampCapture } from '../hooks/useStampCapture';
 import { AppShell } from '@/shared/shell/AppShell';
 import { CardCodeInput } from '@/features/capture';
 import { SyncIndicator } from '@/shared/shell/SyncIndicator';
-import { Callout, EmptyState } from '@/shared/ui';
+import { Callout, CountHelp, EmptyState } from '@/shared/ui';
 import { useWakeLock } from '@/shared/hooks/useWakeLock';
 import { useRequireSession } from '@/features/session';
 
@@ -62,6 +62,8 @@ export default function StampCaptureScreen(): ReactNode {
           pending={pending}
         />
 
+        {pending ? <Callout tone="info" role="status">Checking this card…</Callout> : null}
+
         {message ? (
           <Callout tone={message.tone} role="status">
             <span className="font-semibold">{message.text}</span>
@@ -69,6 +71,7 @@ export default function StampCaptureScreen(): ReactNode {
         ) : null}
 
         {card ? <CardSummary card={card} /> : null}
+        <CountHelp topic="cards" />
       </div>
     </AppShell>
   );

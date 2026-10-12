@@ -1,5 +1,5 @@
 import type { CaptureScheduleRecord, ScheduledActionStatus } from '@spoh/shared';
-import { Button, Callout, Field, Select, LoadingRows } from '@/shared/ui';
+import { Button, Field, Select, LoadingRows, ErrorState } from '@/shared/ui';
 import type { useCaptureSchedules } from '../queries';
 import type { CaptureScheduleAction } from '../model/captureScheduleReview';
 import { scheduleStatusLabels } from '../model/copy';
@@ -31,9 +31,7 @@ export function CaptureScheduleCollection(input: CollectionInput) {
       </p>
       <CaptureScheduleFilter status={input.status} onChange={input.setStatus} />
       {query.isError ? (
-        <Callout tone="alert" role="alert">
-          Capture schedules are unavailable. Reload before reviewing.
-        </Callout>
+        <ErrorState error={query.error}>Capture schedules are unavailable. Reload before reviewing.</ErrorState>
       ) : null}
       {query.isPending ? <LoadingRows label="Loading capture schedules" /> : null}
       <Button variant="quiet" disabled={query.isFetching} onClick={() => void query.refetch()}>

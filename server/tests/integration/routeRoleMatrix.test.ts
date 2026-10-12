@@ -85,8 +85,13 @@ describe('the route × role matrix', () => {
     // Composite questions: a setting by its class, an announcement by its target, a lifecycle
     // transition by its target.
     for (const line of unknown) {
-      expect(line).toMatch(/→ (Settings|Announcement\.Send|Event\.Transition)$/);
+      expect(line).toMatch(/→ (Settings|Announcement\.Send|Event\.Transition|Entity\.Read|Records\.Read|Workspace\.Search)$/);
     }
+    // Source composites are reviewed per route, rather than a grant or a new Cedar action.
+    const workspace = Object.entries(generated).filter(([, entry]) => ['Entity.Read', 'Records.Read', 'Workspace.Search'].includes(entry.asks));
+    expect(Object.fromEntries(workspace.map(([route, entry]) => [route, entry.asks]))).toEqual({
+      'GET /workspace/entity': 'Entity.Read', 'GET /workspace/records': 'Records.Read', 'GET /workspace/search': 'Workspace.Search',
+    });
   });
 });
 

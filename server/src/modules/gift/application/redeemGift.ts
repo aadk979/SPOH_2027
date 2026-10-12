@@ -17,7 +17,7 @@ import {
 } from '../data/repo.js';
 import { checkPresentedCard, stockFlag, type CardCheck } from '../domain/redemptionRules.js';
 import type { RedemptionFlag } from '@spoh/shared';
-import { notifyLowStock } from './notifyLowStock.js';
+import { queueLowStockNotice } from './notifyLowStock.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 
 const NO_CARD: CardCheck = {
@@ -150,6 +150,8 @@ async function recordRedemption(tx: PrismaTransactionClient, input: RecordInput)
   });
 
   const record = toGiftTypeRecord(giftType, await totalsForGiftType(tx, scope, giftType.id));
+  await queueLowStockNotice(tx, scope, { gift: record, beforeRemaining: remaining,
+    transitionId: redemption.id, transitionType: 'REDEMPTION', now: recordedAt });
   return { redemption, record, check };
 }
 
@@ -165,9 +167,5 @@ export async function redeemGift(
     recordRedemption(tx, { request, stationId: station.id, context, recordedAt }),
   );
 
-  // Low stock alerts are an IC duty in the deck; automating it beats relying on
-  // someone noticing (§5).
-  if (!result.record.rehearsal && result.record.lowStock)
-    notifyLowStock(context.scope, result.record);
   return toResponse(result);
 }

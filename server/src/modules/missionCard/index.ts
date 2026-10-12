@@ -8,3 +8,5 @@ export { getFunnel } from './application/getFunnel.js';
 export { findJourneyCardIds } from './data/repo.js';
 export { linkGroupToCard } from './application/linkGroupToCard.js';
 export { normaliseShortCode } from './domain/shortCode.js';
+export { cardWorkspaceSource } from './application/workspaceCards.js';
+export { stampWorkspaceSource } from './application/workspaceStamps.js';

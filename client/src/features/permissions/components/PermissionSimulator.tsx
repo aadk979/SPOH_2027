@@ -2,7 +2,7 @@
 import { useState, type ReactNode } from 'react';
 import type { Action, RolePermissionsResponse, SimulatePermissionResponse } from '@spoh/shared';
 import { useVolunteers } from '@/features/volunteers';
-import { Button, Callout, Field, Section, Select, Stack, StatusText } from '@/shared/ui';
+import { Button, Callout, Field, Section, Select, Stack, StatusText, ErrorState } from '@/shared/ui';
 import { useMemberPermissions, useSimulatePermission } from '../queries';
 import { asLine } from '../model/permissionTable';
 
@@ -95,9 +95,7 @@ function SimulationResult(input: {
 }): ReactNode {
   if (input.error) {
     return (
-      <Callout tone="alert" role="alert">
-        {input.error.message || 'Could not check.'}
-      </Callout>
+      <ErrorState error={input.error} />
     );
   }
   const { result } = input;

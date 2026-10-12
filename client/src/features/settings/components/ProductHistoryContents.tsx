@@ -6,7 +6,7 @@ import type {
 } from '@spoh/shared';
 import { useEventTime } from '@/features/session';
 import { useStations } from '@/features/stations';
-import { Button, Callout, LoadingRows } from '@/shared/ui';
+import { Button, LoadingRows, ErrorState } from '@/shared/ui';
 import { useProductHistory, useProductReviewCurrent } from '../queries';
 import { ProductHistoryRows } from './ProductHistoryRows';
 import { ProductRevertReview } from './ProductRevertReview';
@@ -34,9 +34,7 @@ export function ProductHistoryContents({ settingKey }: { settingKey: EventSettin
     return (
       <div className="flex flex-col gap-md">
         {reloadButton}
-        <Callout tone="alert" role="alert">
-          Setting history is unavailable. Reload before making a change.
-        </Callout>
+        <ErrorState error={history.error ?? current.error}>Setting history is unavailable. Reload before making a change.</ErrorState>
       </div>
     );
   if (!history.data || !current.data) return <LoadingRows />;

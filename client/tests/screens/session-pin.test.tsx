@@ -1,5 +1,6 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { SessionResponse } from '@spoh/shared';
 import SignInScreen from '@/features/session/screens/SignInScreen';
 
@@ -15,6 +16,7 @@ vi.mock('@/shared/lib/sessionHandoff', () => ({
 vi.mock('@/features/session', () => ({ getHostedSignInUrl: () => '#hosted-sign-in' }));
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ replace: vi.fn() }),
+  usePathname: () => '/sign-in',
   useSearchParams: () => new URLSearchParams(),
 }));
 
@@ -22,6 +24,7 @@ const PIN = '@spoh/client/expected-person';
 const SIGNED_OUT = '@spoh/client/signed-out';
 const fetchMock = vi.fn<typeof fetch>();
 let session: typeof import('@/shared/lib/session');
+const clients: QueryClient[] = [];
 function response(person: string, token: string): SessionResponse {
   return {
     accessToken: token, tokenType: 'Bearer', expiresIn: 900, refreshAvailable: true,
@@ -44,6 +47,7 @@ beforeEach(async () => {
 });
 afterEach(() => {
   cleanup();
+  clients.splice(0).forEach((client) => client.clear());
   session.clearSession();
   vi.clearAllTimers();
   vi.useRealTimers();
@@ -112,7 +116,9 @@ it('deliberate account change clears the pin and sign-out marker before hosted r
 
 it('wires the hosted Continue button to deliberate account change', async () => {
   (await import('@/shared/lib/sessionIntent')).rememberSignOut();
-  render(<SignInScreen />);
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  clients.push(client);
+  render(<QueryClientProvider client={client}><SignInScreen /></QueryClientProvider>);
   const link = screen.getByRole('link', { name: 'Continue to sign in' });
   link.addEventListener('click', (event) => event.preventDefault());
   fireEvent.click(link);

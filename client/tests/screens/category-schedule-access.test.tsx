@@ -100,7 +100,7 @@ async function uncertainReview() {
 }
 async function refreshMe(client: QueryClient) {
   await act(async () => {
-    await client.refetchQueries({ queryKey: sessionKeys.me(TEST_EVENT.id), exact: true });
+    await client.refetchQueries({ queryKey: sessionKeys.me(TEST_EVENT.id, 'manager'), exact: true });
   });
 }
 beforeEach(() => {
@@ -189,8 +189,8 @@ it('preserves the exact uncertain request through a real cached /me 503 and reco
   });
   await refreshMe(view.client);
   await screen.findByText(/Current event access and clock are unavailable/);
-  expect(view.client.getQueryState(sessionKeys.me(TEST_EVENT.id))?.status).toBe('error');
-  expect(view.client.getQueryData(sessionKeys.me(TEST_EVENT.id))).toEqual(me);
+  expect(view.client.getQueryState(sessionKeys.me(TEST_EVENT.id, 'manager'))?.status).toBe('error');
+  expect(view.client.getQueryData(sessionKeys.me(TEST_EVENT.id, 'manager'))).toEqual(me);
   expect(screen.getByRole('alert').textContent).toContain(
     'Current event access and clock are unavailable',
   );
@@ -230,7 +230,7 @@ it.each([401, 403])(
     });
     await refreshMe(view.client);
     await screen.findByText(/Current event access and clock are unavailable/);
-    expect(view.client.getQueryState(sessionKeys.me(TEST_EVENT.id))?.status).toBe('error');
+    expect(view.client.getQueryState(sessionKeys.me(TEST_EVENT.id, 'manager'))?.status).toBe('error');
     expect(screen.getByRole('alert')).toBeTruthy();
     await waitFor(() =>
       expect(screen.queryByText('Retry same category schedule request')).toBeNull(),

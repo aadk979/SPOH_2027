@@ -1,4 +1,4 @@
-import { Button, Callout } from '@/shared/ui';
+import { Button, ErrorState } from '@/shared/ui';
 import { useAllows, useCurrentSession } from '@/features/session';
 import { useEventId } from '@/shared/lib/eventContext';
 import { usePhotoRead } from '../queries';
@@ -21,7 +21,7 @@ function PhotoReader({ objectKey, label }: { objectKey: string; label: string })
       <Button variant="quiet" disabled={photo.isPending} onClick={() => photo.mutate()}>
         View photo of {label}
       </Button>
-      {photo.error ? <Callout role="alert">{photo.error.message}</Callout> : null}
+      {photo.error ? <ErrorState error={photo.error} /> : null}
       {photo.data && !photo.isError ? (
         <a href={photo.data.url} target="_blank" rel="noopener noreferrer">
           Open photo of {label}

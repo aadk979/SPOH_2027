@@ -33,6 +33,8 @@ import {
   auditShippingRecurringActions,
 } from '../platform/audit/shipping.js';
 import { identityRecurringActions, identityRetentionHandlers } from '../platform/identity/retention.js';
+import { deliverNoticeBatch } from '../modules/notification/index.js';
+import { noticeSourceReaders } from './noticeSources.js';
 
 /** Module catalogue and recurring declarations are composed once per API instance. */
 export async function startScheduledJobs(clock?: Clock) {
@@ -72,6 +74,9 @@ export async function startScheduledJobs(clock?: Clock) {
       recordCacheBusMetrics();
       await syncEvents();
     },
-    afterActions: () => deliverAnnouncementBatch({ workerId, clock }),
+    afterActions: async () => {
+      await deliverAnnouncementBatch({ workerId, clock });
+      await deliverNoticeBatch({ workerId, clock, sourceReaders: noticeSourceReaders });
+    },
   });
 }

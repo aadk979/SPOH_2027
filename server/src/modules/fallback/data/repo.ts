@@ -17,7 +17,7 @@ import { membershipIdOf } from '../../../platform/db/membershipMirror.js';
  */
 export async function rangeOverlapsFallbackWindow(
   scope: ReportingScope,
-  range: { from?: Date; to?: Date; stationId?: string },
+  range: { from?: Date; to?: Date; stationId?: string; rehearsal?: boolean; asOf?: Date },
 ): Promise<boolean> {
   const from = range.from ?? new Date(0);
   const to = range.to ?? new Date(8.64e15);
@@ -25,8 +25,8 @@ export async function rangeOverlapsFallbackWindow(
   const overlapping = await prisma.fallbackWindow.findFirst({
     where: {
       eventId: scope.eventId,
-      ...rehearsalFilter(scope),
-      startedAt: { lt: to },
+      ...(range.rehearsal === undefined ? rehearsalFilter(scope) : { rehearsal: range.rehearsal }),
+      startedAt: { lt: to, ...(range.asOf ? { lte: range.asOf } : {}) },
       AND: [
         // An open window (endedAt null) extends to now, so it overlaps anything
         // that starts before the present.
@@ -227,6 +227,8 @@ export async function createImportBatch(
     importedById: string;
     importedByMembershipId: string;
     notes: string | null;
+    provenanceVersion: number;
+    fallbackWindowId: string | null;
   },
 ): Promise<{ id: string }> {
   return tx.importBatch.create({

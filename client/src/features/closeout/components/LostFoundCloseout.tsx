@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useCloseOutLostFound } from '@/features/lostFound';
 import { useAllows } from '@/features/session';
-import { Button, Callout, Checkbox } from '@/shared/ui';
+import { Button, Checkbox, ErrorState } from '@/shared/ui';
 
 export function LostFoundCloseout() {
   const allows = useAllows();
@@ -27,9 +27,7 @@ export function LostFoundCloseout() {
         Settle lost and found
       </Button>
       {mutation.error ? (
-        <Callout tone="alert" role="alert">
-          {mutation.error.message}
-        </Callout>
+        <ErrorState error={mutation.error} />
       ) : null}
       {mutation.data ? (
         <p role="status">{mutation.data.markedUnclaimed} items marked unclaimed.</p>

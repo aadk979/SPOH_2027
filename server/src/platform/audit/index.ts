@@ -31,6 +31,7 @@ export type AuditAction =
   | 'card.reissue'
   | 'gift.redeem'
   | 'gift.adjust'
+  | 'gift.void'
   | 'incident.create'
   | 'incident.statusChange'
   | 'incident.followUp'
@@ -69,6 +70,8 @@ export type AuditAction =
   | 'fallback.declare'
   | 'fallback.close'
   | 'import.run'
+  | 'import.undo'
+  | 'outbox.salvage.confirm'
   | 'user.provision'
   | 'user.update'
   | 'user.deactivate'
@@ -109,6 +112,13 @@ export type AuditAction =
   | 'session.prune'
   | 'idempotency.prune'
   | 'notification.dispatch'
+  | 'notification.read'
+  | 'notification.preference'
+  | 'notification.purge'
+  | 'notification.materialise'
+  | 'branding.image.issue'
+  | 'branding.draft'
+  | 'branding.publish'
   | 'media.upload'
   | 'auth.stationScopeBypass'
   | 'authorization.denied'
@@ -140,6 +150,7 @@ export interface AuditContext {
 }
 
 export interface AuditEntry extends AuditContext {
+  id?: string;
   severity?: AuditSeverity;
   outcome?: AuditOutcome;
   action: AuditAction;
@@ -208,6 +219,7 @@ function transportOf({ method, path, statusCode }: AuditEntry) {
 export async function writeAudit(tx: PrismaTransactionClient, entry: AuditEntry): Promise<void> {
   await tx.auditLog.create({
     data: {
+      ...(entry.id ? { id: entry.id } : {}),
       actorId: entry.actorId,
       actorSub: entry.actorSub,
       eventId: entry.eventId,

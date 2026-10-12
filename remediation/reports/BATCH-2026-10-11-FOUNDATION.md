@@ -65,6 +65,10 @@ exception remains until 31 October; this is not a zero-advisory claim.
 
 An independent read-only review found no concrete defect in the grouped private
 reader, download ownership, print lock/history, physical bound or scanner repairs.
-This review supplements the gate. D-11 authorizes the application commit and one
-push to main; exact-head application GitHub CI is pending. Closure evidence will
-be carried into the next P14 batch, with staging/browser acceptance in P16.
+This review supplements the gate. D-11 application commit
+`c00da9faefda04ac2984dac177e5903a8e3b0260` included the entire preserved staged
+batch (383 files) and was pushed once to main. Exact-head push CI
+[38131824850](https://github.com/aadk979/SPOH_2027/actions/runs/38131824850)
+completed successfully at 10:42:41 UTC on 11 October with all five required jobs
+successful. Tracker closure and this final online evidence enter the P14 batch;
+AWS remains deleted and staging/browser acceptance remains in P16.

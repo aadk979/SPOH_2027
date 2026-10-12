@@ -313,6 +313,7 @@ async function gifts(route: Route, state: StockPrintState) {
   expect(body).toEqual({
     delta: 5,
     reason: 'Verified delivery of five badges',
+    expectedRehearsal: true,
     idempotencyKey: expect.any(String),
   });
   state.adjustments.push(body);

@@ -8,7 +8,7 @@ import {
   type ScopedSettingsHistoryRecord,
 } from '@spoh/shared';
 import { useEventTime } from '@/features/session';
-import { Button, Callout, Card, LoadingRows, Section } from '@/shared/ui';
+import { Button, Callout, Card, LoadingRows, Section, ErrorState } from '@/shared/ui';
 import { useScopedCatalogue } from '../hooks/useScopedCatalogue';
 import { catalogueGroups, catalogueValue } from '../model/operationalCatalogue';
 import { captureSource } from '../model/captureControl';
@@ -52,9 +52,7 @@ export function OperationalCatalogueContents(input: {
     return (
       <div className="flex flex-col gap-md">
         {reload}
-        <Callout tone="alert" role="alert">
-          Current catalogue values are unavailable.
-        </Callout>
+        <ErrorState error={current.error}>Current catalogue values are unavailable.</ErrorState>
       </div>
     );
   if (!current.data) return <LoadingRows />;

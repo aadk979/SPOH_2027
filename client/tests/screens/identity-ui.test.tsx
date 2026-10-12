@@ -2,8 +2,8 @@ import type { ReactNode } from 'react';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { VolunteerAdminRecord } from '@spoh/shared';
-import { api } from '@/shared/lib/api';
+import { PersonDataExportResponse, type VolunteerAdminRecord } from '@spoh/shared';
+import { api, ApiError } from '@/shared/lib/api';
 import { InvitePersonForm } from '@/features/provisioning/components/InvitePersonForm';
 import { RosterImportForm } from '@/features/provisioning/components/RosterImportForm';
 import { BulkPeoplePanel } from '@/features/volunteers/components/BulkPeoplePanel';
@@ -66,6 +66,8 @@ function show(children: ReactNode): QueryClient {
 }
 beforeEach(() => {
   mockedApi.mockReset();
+  vi.mocked(clearSession).mockClear();
+  vi.mocked(setSession).mockClear();
   access.replace.mockReset();
   access.actions = ['People.Invite', 'People.AssignRole', 'People.Deactivate'];
 });
@@ -95,9 +97,10 @@ describe('personal data requests', () => {
   });
   it('downloads the requested data without exposing a credential', async () => {
     access.actions = ['Platform.ManageAdmins'];
-    mockedApi.mockResolvedValue({ data: { person: { id: 'other', displayName: 'Sample Person', email: 'sample@example.test', phone: null,
+    mockedApi.mockResolvedValue(PersonDataExportResponse.parse({ data: { person: { id: 'other', displayName: 'Sample Person', email: 'sample@example.test', phone: null,
       createdAt: '2026-10-10T00:00:00.000Z', lastSeenAt: null, deactivatedAt: null, piiErasedAt: null,
-      eventMemberships: [], refreshSessions: [], pushSubscriptions: [] }, activity: [] }, retained: ['Counts retained.'] });
+      eventMemberships: [], refreshSessions: [], pushSubscriptions: [] }, activity: [],
+      notifications: { noticePreference: null, notices: [] } }, retained: ['Counts retained.'] }));
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:synthetic');
     vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
     const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
@@ -149,7 +152,8 @@ describe('People provisioning', () => {
     fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Sample' } });
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'a@example.test' } });
     fireEvent.click(screen.getByRole('button', { name: 'Invite person' }));
-    await screen.findByText('Network unavailable');
+    await screen.findByText('This action was not confirmed');
+    expect(screen.queryByText('Network unavailable')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Invite person' }));
     await waitFor(() => expect(mockedApi).toHaveBeenCalledTimes(2));
     expect(mockedApi.mock.calls[1]?.[1]).toEqual(mockedApi.mock.calls[0]?.[1]);
@@ -349,5 +353,21 @@ describe('membership and device actions', () => {
       method: 'POST',
       body: { code: '123456' },
     });
+  });
+  it('keeps a failed authenticator verification unconfirmed with its safe request ID and entered code', async () => {
+    mockedApi.mockResolvedValueOnce({ secretCode: 'SYNTHETIC-SETUP' })
+      .mockRejectedValueOnce(new ApiError(503, { code: 'UNAVAILABLE', message: 'private provider detail', requestId: 'synthetic-mfa-verification' }));
+    show(<MfaEnrollment />);
+    fireEvent.click(screen.getByRole('button', { name: 'Get setup key' }));
+    await screen.findByText('SYNTHETIC-SETUP');
+    fireEvent.change(screen.getByLabelText('Six-digit code'), { target: { value: '123456' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Verify authenticator' }));
+    await screen.findByText('synthetic-mfa-verification');
+    expect(screen.getByRole('alert').textContent).toContain('Configuring your authenticator was not confirmed');
+    expect(screen.queryByText('private provider detail')).toBeNull();
+    expect(screen.getByLabelText('Six-digit code')).toHaveProperty('value', '123456');
+    expect(mockedApi).toHaveBeenCalledWith('/auth/mfa/verify', { method: 'POST', body: { code: '123456' } });
+    expect(setSession).not.toHaveBeenCalled();
+    expect(access.replace).not.toHaveBeenCalled();
   });
 });

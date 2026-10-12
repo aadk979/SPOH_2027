@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import type { EventContent } from '@spoh/shared';
 import type { FormErrors } from '@/shared/hooks/useZodForm';
-import { Button, Callout, Field, Input, Stack } from '@/shared/ui';
+import { Button, Field, Input, Stack, ErrorState } from '@/shared/ui';
 import { ContentTextField } from './ContentTextField';
 import { useUploadContentImage } from '../queries';
 type Floor = EventContent['map']['levels'][number];
@@ -41,6 +41,7 @@ export function FloorPlanUpload({
         label={`${floor.label || `Level ${index + 1}`}: floor plan`}
         optional
         hint="Upload a PNG, JPEG or WebP image, up to 1 MB. It becomes available to volunteers when published."
+        error={failure}
       >
         {(props) => (
           <Input
@@ -73,10 +74,8 @@ export function FloorPlanUpload({
           </Button>
         </>
       ) : null}
-      {failure || upload.error ? (
-        <Callout tone="alert" role="alert">
-          {failure ?? upload.error?.message}
-        </Callout>
+      {upload.error ? (
+        <ErrorState error={upload.error} />
       ) : null}
       {upload.isPending ? <p role="status">Uploading floor plan…</p> : null}
     </Stack>

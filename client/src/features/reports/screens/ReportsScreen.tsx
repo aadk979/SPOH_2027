@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from 'react';
 
 import { AppShell } from '@/shared/shell/AppShell';
-import { Button, Callout, LoadingCards, Stack } from '@/shared/ui';
+import { Button, Callout, LoadingCards, Stack, ErrorState, ControlHelp } from '@/shared/ui';
 import { useRequireSession } from '@/features/session';
 import { useReport } from '@/features/reports';
 import { useReportExport } from '../hooks/useReportExport';
@@ -48,10 +48,11 @@ export default function ReportsScreen(): ReactNode {
   return (
     <AppShell width="wide" title="Post-event report" back={{ href: '/home', label: 'Home' }}>
       <RehearsalReportControl included={includeRehearsal} onChange={setIncludeRehearsal} />
+      <ControlHelp topic="three-counts">Registrations, room entries and card journeys count different things. Live view uses current records; a frozen snapshot records its observation time.</ControlHelp>
       <CurrentReportControl current={current} onChange={setCurrent} />
       <ArchiveExportPanel />
       <SnapshotHistory />
-      {report.isLoading ? (
+      {report.error ? <ErrorState error={report.error} operation="Generating the report" onRetry={() => void report.refetch()} /> : report.isLoading ? (
         <LoadingCards count={3} label="Generating the report" />
       ) : !data ? (
         <Callout tone="alert" title="The report could not be generated">

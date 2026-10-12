@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { CommitteeRole } from '../../invariants/enums.js';
 import { Id, IsoDateTime, PaginationQuery, ReasonText } from '../common/index.js';
 import { VolunteerPhone, VolunteerRecord } from '../roster/index.js';
+import { NoticeKind, NoticeSourceKind } from '../notification/sources.js';
 
 /**
  * Administering volunteers: the roster as an admin sees and changes it.
@@ -177,6 +178,10 @@ export const PersonDataExportResponse = z.object({
     }).strict(),
     activity: z.array(z.object({ id: Id, eventId: Id.nullable(), action: z.string(), entityType: z.string(),
       entityId: z.string().nullable(), createdAt: IsoDateTime }).strict()),
+    notifications: z.object({ noticePreference: z.object({ urgentPush: z.boolean(), operationalPush: z.boolean(),
+      updatedAt: IsoDateTime }).strict().nullable(), notices: z.array(z.object({ id: Id, eventId: Id, kind: NoticeKind,
+      priority: z.enum(['INFO', 'URGENT', 'OPERATIONAL']), sourceKind: NoticeSourceKind, sourceId: Id,
+      transitionKey: z.string(), createdAt: IsoDateTime, expiresAt: PersonalInstant, readAt: PersonalInstant }).strict()) }).strict(),
   }).strict(),
   retained: z.array(z.string()),
 }).strict();

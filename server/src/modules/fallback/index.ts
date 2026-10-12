@@ -5,3 +5,6 @@ export { rangeOverlapsFallbackWindow } from './data/repo.js';
 export { closeRehearsalWindows } from './application/closeRehearsalWindows.js';
 export { closeOpenWindows } from './application/closeOpenWindows.js';
 export { fallbackScheduledHandlers } from './jobs.js';
+export { readFallbackNoticeSource } from './application/readNoticeSource.js';
+export { fallbackWorkspaceSource } from './application/workspaceWindows.js';
+export { importWorkspaceSource } from './application/workspaceImports.js';

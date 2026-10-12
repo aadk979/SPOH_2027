@@ -209,6 +209,8 @@ model EventMembership {
   attendanceMembership                   Attendance[]               @relation("AttendanceMembership")
   attendanceVerifiedByMembership         Attendance[]               @relation("AttendanceVerifiedByMembership")
   shiftAssignmentMembership              ShiftAssignment[]          @relation("ShiftAssignmentMembership")
+  noticeRecipientMembership              Notice[]                   @relation("NoticeRecipientMembership")
+  noticeDeliveryMembership               NoticeDelivery[]           @relation("NoticeDeliveryMembership")
 
   @@unique([eventId, personId])
   @@unique([eventId, id])
@@ -337,6 +339,8 @@ model Event {
   contentVersions            ContentVersion[]
   contentUploads             ContentUploadReceipt[]
   scheduledActions           ScheduledAction[]
+  notices                    Notice[]
+  noticeDeliveries           NoticeDelivery[]
 
   @@unique([organisationId, slug])
   @@index([status])
@@ -609,10 +613,13 @@ model Person {
   refreshSessions            RefreshSession[]
   reportSnapshots            ReportSnapshot[]
   scheduledActions           ScheduledAction[]
-  contentDocumentsUpdated    ContentDocument[]      @relation("ContentDocumentUpdater")
-  contentDocumentsReviewed   ContentDocument[]      @relation("ContentDocumentReviewer")
-  contentVersionsPublished   ContentVersion[]       @relation("ContentVersionPublisher")
-  contentUploadReceipts       ContentUploadReceipt[] @relation("ContentUploadIssuer")
+  contentDocumentsUpdated    ContentDocument[]          @relation("ContentDocumentUpdater")
+  contentDocumentsReviewed   ContentDocument[]          @relation("ContentDocumentReviewer")
+  contentVersionsPublished   ContentVersion[]           @relation("ContentVersionPublisher")
+  contentUploadReceipts      ContentUploadReceipt[]     @relation("ContentUploadIssuer")
+  notices                    Notice[]
+  noticePreference           NoticePreference?
+  noticeDeliveries           NoticeDelivery[]
 
   eventMemberships        EventMembership[]
   organisationMemberships OrganisationMembership[]
@@ -859,6 +866,8 @@ model Registration {
   recordedByMembership EventMembership? @relation("RegistrationRecordedByMembership", fields: [eventId, recordedByMembershipId], references: [eventId, id], onDelete: Restrict)
 
   visitorRecord VisitorRecord?
+  importBatchId String?
+  importBatch   ImportBatch?   @relation(fields: [eventId, importBatchId], references: [eventId, id], onDelete: Restrict, onUpdate: NoAction)
 
   @@unique([eventId, id])
   @@unique([eventId, id, rehearsal])
@@ -866,6 +875,7 @@ model Registration {
   @@index([groupId])
   @@index([eventId, recordedAt])
   @@index([eventId, categoryId, recordedAt])
+  @@index([eventId, importBatchId, recordedAt])
   @@index([recordedByMembershipId])
   @@index([eventId, rehearsal])
 }
@@ -902,10 +912,13 @@ model FootfallTick {
 
   // Their memberships, inside the event (ADR-001 §2).
   recordedByMembership EventMembership? @relation("FootfallTickRecordedByMembership", fields: [eventId, recordedByMembershipId], references: [eventId, id], onDelete: Restrict)
+  importBatchId        String?
+  importBatch          ImportBatch?     @relation(fields: [eventId, importBatchId], references: [eventId, id], onDelete: Restrict, onUpdate: NoAction)
 
   @@index([stationId, recordedAt])
   @@index([recordedAt])
   @@index([eventId, recordedAt])
+  @@index([eventId, importBatchId, recordedAt])
   @@index([recordedByMembershipId])
   @@index([eventId, rehearsal])
 }
@@ -1029,6 +1042,9 @@ model GiftRedemption {
   voided                 Boolean         @default(false)
   /// Set when a queued redemption broke a rule on sync (ADR-007 §5, F03-034).
   flag                   RedemptionFlag?
+  voidedAt               DateTime?       @db.Timestamptz(3)
+  /// @class operational
+  voidedReason           String?
 
   giftType    GiftType     @relation(fields: [eventId, giftTypeId], references: [eventId, id], onDelete: Restrict)
   missionCard MissionCard? @relation(fields: [eventId, missionCardId], references: [eventId, id], onDelete: Restrict)
@@ -1432,6 +1448,7 @@ enum AnnouncementPushDeliveryStatus {
 
 enum AnnouncementPushDeliveryError {
   UNCONFIGURED
+  PUSH_DISABLED
   RECIPIENT_INACTIVE
   RECIPIENT_OUT_OF_SCOPE
   SUBSCRIPTION_GONE
@@ -1516,7 +1533,9 @@ model FallbackWindow {
 
   // Their memberships, inside the event (ADR-001 §2).
   declaredByMembership EventMembership? @relation("FallbackWindowDeclaredByMembership", fields: [eventId, declaredByMembershipId], references: [eventId, id], onDelete: Restrict)
+  importBatches        ImportBatch[]
 
+  @@unique([eventId, id])
   @@index([startedAt])
   // "Is a window open right now" is asked on every dashboard poll.
   @@index([endedAt])
@@ -1544,6 +1563,12 @@ model ImportBatch {
   importedAt             DateTime   @default(now()) @db.Timestamptz(3)
   /// @class operational
   notes                  String?
+  /// Exact provenance exists only for batches created by the new linked writer.
+  provenanceVersion      Int        @default(0)
+  undoneAt               DateTime?  @db.Timestamptz(3)
+  /// @class operational
+  undoReason             String?
+  fallbackWindowId       String?
 
   importedBy Person @relation(fields: [importedById], references: [id], onDelete: Restrict)
 
@@ -1551,7 +1576,11 @@ model ImportBatch {
 
   // Their memberships, inside the event (ADR-001 §2).
   importedByMembership EventMembership? @relation("ImportBatchImportedByMembership", fields: [eventId, importedByMembershipId], references: [eventId, id], onDelete: Restrict)
+  fallbackWindow       FallbackWindow?  @relation(fields: [eventId, fallbackWindowId], references: [eventId, id], onDelete: Restrict, onUpdate: NoAction)
+  registrations        Registration[]
+  footfallTicks        FootfallTick[]
 
+  @@unique([eventId, id])
   @@index([importedAt])
   @@index([eventId])
   @@index([importedByMembershipId])
@@ -1600,8 +1629,8 @@ model ReportSnapshot {
   createdAt         DateTime           @default(now()) @db.Timestamptz(3)
   supersededAt      DateTime?          @db.Timestamptz(3)
 
-  event     Event   @relation(fields: [eventId], references: [id], onDelete: Restrict)
-  createdBy Person? @relation(fields: [createdByPersonId], references: [id], onDelete: Restrict)
+  event          Event           @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  createdBy      Person?         @relation(fields: [createdByPersonId], references: [id], onDelete: Restrict)
   archiveExports ArchiveExport[]
 
   @@unique([eventId, id])
@@ -1612,15 +1641,16 @@ model ReportSnapshot {
 /// A completed final report workbook in private S3 exports; no visitor-value sheet.
 /// @eventOwned
 model ArchiveExport {
-  id String @id
-  eventId String
-  snapshotId String
+  id               String         @id
+  eventId          String
+  snapshotId       String
   lifecycleVersion Int
   /// @class operational
-  objectKey String @unique
-  createdAt DateTime @db.Timestamptz(3)
-  event Event @relation(fields: [eventId], references: [id], onDelete: Restrict)
-  snapshot ReportSnapshot @relation(fields: [eventId, snapshotId], references: [eventId, id], onDelete: Restrict)
+  objectKey        String         @unique
+  createdAt        DateTime       @db.Timestamptz(3)
+  event            Event          @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  snapshot         ReportSnapshot @relation(fields: [eventId, snapshotId], references: [eventId, id], onDelete: Restrict)
+
   @@unique([eventId, id])
   @@index([eventId, lifecycleVersion])
 }
@@ -1628,22 +1658,23 @@ model ArchiveExport {
 /// Immutable printable card objects, reachable only through this event's authenticated API.
 /// @eventOwned
 model CardPrintExport {
-  id String @id
-  eventId String
+  id           String   @id
+  eventId      String
   /// @class operational
-  objectKey String @unique
+  objectKey    String   @unique
   /// @class operational
-  format String
-  count Int
+  format       String
+  count        Int
   /// Immutable historical values from the selected event-owned cards, not live card references.
   /// @class operational
-  shortCodes String[] @default([])
+  shortCodes   String[] @default([])
   /// Frozen event, station and batch labels used to render this export.
   /// @class operational
-  printContext Json @default("{}")
-  rehearsal Boolean
-  createdAt DateTime @db.Timestamptz(3)
-  event Event @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  printContext Json     @default("{}")
+  rehearsal    Boolean
+  createdAt    DateTime @db.Timestamptz(3)
+  event        Event    @relation(fields: [eventId], references: [id], onDelete: Restrict)
+
   @@unique([eventId, id])
   @@index([eventId, createdAt, id])
 }
@@ -1963,6 +1994,7 @@ model PushSubscription {
   volunteer Person @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
 
   announcementDeliveries AnnouncementPushDelivery[]
+  noticeDeliveries       NoticeDelivery[]
 
   @@index([volunteerId])
 }
@@ -2013,12 +2045,12 @@ model RefreshSession {
 
 /// One-use, PKCE-bound access handoff for clients with third-party cookies blocked.
 model AuthHandoff {
-  id         String    @id
+  id         String         @id
   sessionId  String
   /// @class credential
   challenge  String
-  expiresAt  DateTime  @db.Timestamptz(3)
-  consumedAt DateTime? @db.Timestamptz(3)
+  expiresAt  DateTime       @db.Timestamptz(3)
+  consumedAt DateTime?      @db.Timestamptz(3)
   session    RefreshSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@index([expiresAt])
@@ -2028,20 +2060,20 @@ model AuthHandoff {
 /// The editable event guide; draft changes never replace a published document.
 /// @eventOwned
 model ContentDocument {
-  id                 String    @id @default(cuid())
-  eventId            String    @unique
+  id                 String          @id @default(cuid())
+  eventId            String          @unique
   /// @class operational
   body               Json
-  version            Int       @default(1)
+  version            Int             @default(1)
   reviewedVersion    Int?
-  reviewedAt         DateTime? @db.Timestamptz(3)
+  reviewedAt         DateTime?       @db.Timestamptz(3)
   reviewedByPersonId String?
   publishedVersionId String?
   updatedByPersonId  String
-  updatedAt          DateTime  @db.Timestamptz(3)
-  event              Event     @relation(fields: [eventId], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  updatedBy          Person    @relation("ContentDocumentUpdater", fields: [updatedByPersonId], references: [id], onDelete: Restrict)
-  reviewedBy         Person?   @relation("ContentDocumentReviewer", fields: [reviewedByPersonId], references: [id], onDelete: Restrict)
+  updatedAt          DateTime        @db.Timestamptz(3)
+  event              Event           @relation(fields: [eventId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  updatedBy          Person          @relation("ContentDocumentUpdater", fields: [updatedByPersonId], references: [id], onDelete: Restrict)
+  reviewedBy         Person?         @relation("ContentDocumentReviewer", fields: [reviewedByPersonId], references: [id], onDelete: Restrict)
   publishedVersion   ContentVersion? @relation("PublishedContentDocumentVersion", fields: [eventId, publishedVersionId], references: [eventId, id], onDelete: Restrict)
 
   @@unique([eventId, id])
@@ -2050,20 +2082,20 @@ model ContentDocument {
 /// Frozen publication plus its exact private S3 object; database guards refuse edits.
 /// @eventOwned
 model ContentVersion {
-  id                  String   @id
+  id                  String            @id
   eventId             String
   version             Int
   draftVersion        Int
   /// @class operational
   body                Json
   /// @class operational
-  objectKey           String   @unique
+  objectKey           String            @unique
   /// @class operational
   etag                String
   publishedByPersonId String
-  publishedAt         DateTime @db.Timestamptz(3)
-  event               Event    @relation(fields: [eventId], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  publishedBy         Person   @relation("ContentVersionPublisher", fields: [publishedByPersonId], references: [id], onDelete: Restrict)
+  publishedAt         DateTime          @db.Timestamptz(3)
+  event               Event             @relation(fields: [eventId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  publishedBy         Person            @relation("ContentVersionPublisher", fields: [publishedByPersonId], references: [id], onDelete: Restrict)
   publishedDocuments  ContentDocument[] @relation("PublishedContentDocumentVersion")
 
   @@unique([eventId, id])
@@ -2092,9 +2124,140 @@ model ContentUploadReceipt {
 
 /// Shared Cognito sender quota; no addresses or message content are stored.
 model IdentityDeliveryQuota {
-  id        String @id
-  used      Int @default(0)
+  id        String   @id
+  used      Int      @default(0)
   expiresAt DateTime @db.Timestamptz(3)
 
   @@index([expiresAt])
+}
+
+/// Personal notices retain only bounded operational source context, never copied safety PII.
+/// @eventOwned
+model Notice {
+  id                    String               @id @default(cuid())
+  eventId               String
+  recipientPersonId     String
+  recipientMembershipId String?
+  kind                  NoticeKind
+  priority              AnnouncementPriority
+  sourceKind            NoticeSourceKind
+  /// Polymorphic source identity: removal notices must survive source deletion.
+  /// @class operational
+  sourceId              String
+  /// @class operational
+  transitionKey         String
+  /// @class staff-personal
+  context               Json
+  createdAt             DateTime             @default(now()) @db.Timestamptz(3)
+  expiresAt             DateTime?            @db.Timestamptz(3)
+  /// @class staff-personal
+  readAt                DateTime?            @db.Timestamptz(3)
+
+  event      Event            @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  recipient  Person           @relation(fields: [recipientPersonId], references: [id], onDelete: Cascade)
+  membership EventMembership? @relation("NoticeRecipientMembership", fields: [eventId, recipientMembershipId], references: [eventId, id], onDelete: Restrict)
+  deliveries NoticeDelivery[]
+
+  @@unique([eventId, id])
+  @@unique([eventId, recipientPersonId, transitionKey])
+  @@index([eventId, recipientPersonId, createdAt, id])
+  @@index([recipientPersonId, readAt, createdAt, id])
+}
+
+model NoticePreference {
+  personId        String   @id
+  /// @class staff-personal
+  urgentPush      Boolean  @default(true)
+  /// @class staff-personal
+  operationalPush Boolean  @default(false)
+  updatedAt       DateTime @updatedAt @db.Timestamptz(3)
+  person          Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+}
+
+/// Technical delivery journal; source, standing and device ownership are rechecked by the worker.
+/// @eventOwned
+model NoticeDelivery {
+  id                String               @id @default(cuid())
+  eventId           String
+  noticeId          String
+  recipientPersonId String
+  membershipId      String?
+  subscriptionId    String?
+  /// Opaque identity survives subscription deletion for delivery deduplication.
+  /// @class operational
+  deviceKey         String
+  status            NoticeDeliveryStatus @default(PENDING)
+  attempts          Int                  @default(0)
+  maxAttempts       Int                  @default(5)
+  version           Int                  @default(0)
+  runAt             DateTime             @db.Timestamptz(3)
+  expiresAt         DateTime             @db.Timestamptz(3)
+  /// @class operational
+  lockedBy          String?
+  lockedUntil       DateTime?            @db.Timestamptz(3)
+  completedAt       DateTime?            @db.Timestamptz(3)
+  lastError         NoticeDeliveryError?
+  createdAt         DateTime             @default(now()) @db.Timestamptz(3)
+
+  event        Event             @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  notice       Notice            @relation(fields: [eventId, noticeId], references: [eventId, id], onDelete: Cascade)
+  recipient    Person            @relation(fields: [recipientPersonId], references: [id], onDelete: Cascade)
+  membership   EventMembership?  @relation("NoticeDeliveryMembership", fields: [eventId, membershipId], references: [eventId, id], onDelete: Restrict)
+  subscription PushSubscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@unique([eventId, id])
+  @@unique([noticeId, deviceKey])
+  @@index([status, runAt])
+  @@index([eventId, noticeId])
+  @@index([membershipId])
+  @@index([subscriptionId])
+}
+
+enum NoticeKind {
+  ANNOUNCEMENT_PUBLISHED
+  LOST_PERSON_RAISED
+  LOST_PERSON_RESOLVED
+  ASSIGNMENT_CHANGED
+  ASSIGNMENT_REMOVED
+  SWAP_APPROVED
+  SWAP_REJECTED
+  SWAP_CANCELLED
+  FALLBACK_REMINDER
+  ARCHIVE_REMINDER
+  INCIDENT_RAISED
+  GIFT_LOW_STOCK
+}
+
+enum NoticeSourceKind {
+  ANNOUNCEMENT
+  LOST_PERSON
+  ASSIGNMENT
+  SWAP
+  FALLBACK
+  EVENT
+  INCIDENT
+  GIFT
+}
+
+enum NoticeDeliveryStatus {
+  PENDING
+  RUNNING
+  SENT
+  SKIPPED
+  DEAD
+}
+
+enum NoticeDeliveryError {
+  UNCONFIGURED
+  PUSH_DISABLED
+  RECIPIENT_INACTIVE
+  RECIPIENT_OUT_OF_SCOPE
+  SUBSCRIPTION_GONE
+  SUBSCRIPTION_REASSIGNED
+  EXPIRED
+  ARCHIVED
+  SOURCE_UNAVAILABLE
+  SOURCE_CHANGED
+  PUSH_FAILED
+  RETRY_EXHAUSTED
 }

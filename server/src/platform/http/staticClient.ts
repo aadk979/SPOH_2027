@@ -1,9 +1,11 @@
 import { existsSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import { join, normalize, sep } from 'node:path';
 import express, { Router, type Request, type Response, type NextFunction } from 'express';
 import helmet from 'helmet';
 import { isClientConfigOrigin } from '@spoh/shared';
 import { mediaObjectOrigin, type MediaStorageLocation } from '../aws/mediaOrigin.js';
+import { brandedHtml, brandingSlugFromAddress, htmlEtag, type StaticBrandingReader } from './staticBranding.js';
 
 /**
  * The client as a static export, served beside the API (ADR-008 §2, P08.4).
@@ -21,14 +23,16 @@ import { mediaObjectOrigin, type MediaStorageLocation } from '../aws/mediaOrigin
 /** The client's own policy; the API keeps its stricter one. Hashes replace 'unsafe-inline' in P15.3. */
 function clientHeaders(apiOrigin: string, mediaOrigin: string | null) {
   const mediaSources = mediaOrigin ? [mediaOrigin] : [];
+  const publicApiSources = isClientConfigOrigin(apiOrigin) ? [apiOrigin] : [];
   return helmet({
     contentSecurityPolicy: {
       useDefaults: false,
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'", "'unsafe-inline'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", 'data:', 'blob:', ...mediaSources],
+        styleSrc: ["'self'", "'unsafe-inline'", ...publicApiSources],
+        imgSrc: ["'self'", 'data:', 'blob:', ...mediaSources, ...publicApiSources],
+        manifestSrc: ["'self'", ...publicApiSources],
         fontSrc: ["'self'", 'data:'],
         connectSrc: [
           "'self'",
@@ -76,8 +80,11 @@ function setCacheHeaders(res: Response, path: string): void {
   );
 }
 
-export function staticClient(root: string, apiOrigin = '', storage?: MediaStorageLocation): Router {
+export interface StaticClientOptions { storage?: MediaStorageLocation; publicBranding?: StaticBrandingReader }
+export function staticClient(root: string, apiOrigin = '', input?: MediaStorageLocation | StaticClientOptions): Router {
   const router = Router();
+  const options: StaticClientOptions = input && 'region' in input ? { storage: input } : input ?? {};
+  const { storage } = options;
   const inside = (relative: string): boolean => {
     const full = normalize(join(root, relative));
     return full.startsWith(normalize(root) + sep) && existsSync(full);
@@ -88,6 +95,18 @@ export function staticClient(root: string, apiOrigin = '', storage?: MediaStorag
     const query = req.url.slice(req.path.length);
     req.url = exportedPath(req.path, inside) + query;
     next();
+  });
+  if (options.publicBranding) router.use(async (req: Request, res: Response, next: NextFunction) => {
+    if (!['GET', 'HEAD'].includes(req.method) || !req.path.endsWith('.html') || !inside(req.path)) return next();
+    const slug = brandingSlugFromAddress(req.originalUrl);
+    if (!slug) return next();
+    const publication = await options.publicBranding!(slug);
+    if (!publication) return next();
+    const body = brandedHtml(await readFile(join(root, req.path), 'utf8'), publication.data, apiOrigin);
+    res.type('html').set({ ETag: htmlEtag(body), 'Cache-Control': 'no-cache', 'Content-Length': String(Buffer.byteLength(body)) });
+    if (req.fresh) { res.status(304).end(); return; }
+    if (req.method === 'HEAD') { res.end(); return; }
+    res.send(body);
   });
   router.use(
     express.static(root, {

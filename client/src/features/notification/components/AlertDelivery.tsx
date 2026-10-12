@@ -36,7 +36,7 @@ export function AlertDelivery(): ReactNode {
       {state === 'subscribed' ? (
         <>
           <p className="text-body">
-            On. A lost-person alert or a critical incident will reach you with the app closed.
+            Enabled on this device. Eligible notices may alert you with the app closed, according to your push preferences.
           </p>
           <div>
             <Button variant="quiet" size="sm" onClick={() => void disable()}>
@@ -77,7 +77,7 @@ export function AlertDelivery(): ReactNode {
       {state === 'unconfigured' ? (
         <p className="text-body">
           Background alerts are not switched on for this deployment. Alerts appear in the app while
-          it is open, which is how they are guaranteed to arrive in any case.
+          it is open. Your notification centre remains available.
         </p>
       ) : null}
     </Card>

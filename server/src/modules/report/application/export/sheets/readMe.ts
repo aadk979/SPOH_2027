@@ -11,6 +11,7 @@ export function writeReadMeSheet(workbook: ExcelJS.Workbook, report: FullReport)
   sheet.addRow([]);
   sheet.addRow([`Generated ${new Date(report.generatedAt).toISOString()}`]);
   sheet.addRow([reportReadLabel(report)]).font = { bold: true };
+  sheet.addRow([report.event.branding ? `Frozen branding: publication ${report.event.branding.publicationId ?? 'neutral'}, accent ${report.event.branding.accent}.` : 'Branding history is unknown for this legacy report.']);
   sheet.addRow([
     'Visitor details, if included, are a current permission-controlled read and are separate from the frozen report.',
   ]);

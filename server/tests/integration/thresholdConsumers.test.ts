@@ -11,6 +11,8 @@ import { getStationDashboard } from '../../src/modules/dashboard/application/get
 import { getLiveFootfall } from '../../src/modules/footfall/index.js';
 import { getLongShifts } from '../../src/modules/shift/index.js';
 import { prepareThresholds } from '../../src/platform/settings/thresholds.js';
+import { createReadContext } from '../../src/platform/access/currentRead.js';
+import { prisma } from '../../src/platform/db/client.js';
 import { rawDb, resetDatabase } from '../helpers/db.js';
 import {
   assignToStationAllBlocks,
@@ -33,6 +35,7 @@ let roomA: string;
 let roomB: string;
 let booth: string;
 let counter: TestVolunteer;
+let dashboardReader: TestVolunteer;
 let otherEventId: string;
 
 /** A stored override, written the way the migration or catalogue would, or raw when the scope is not allowed. */
@@ -74,8 +77,14 @@ beforeEach(async () => {
   roomA = (await createStation({ code: 'ROOM_A', name: 'Room A', countsEntry: true })).id;
   roomB = (await createStation({ code: 'ROOM_B', name: 'Room B', countsEntry: true })).id;
   counter = await createVolunteer({ email: 'counter@threshold.test', role: 'VOLUNTEER' });
+  dashboardReader = await createVolunteer({ email: 'reader@threshold.test', role: 'CHIEF_COORDINATOR' });
   await assignToStationAllBlocks({ volunteerId: counter.id, stationId: roomA, eventDayId });
 });
+
+async function currentDashboardReader() {
+  const membership = await rawDb.eventMembership.findFirstOrThrow({ where: { eventId, personId: dashboardReader.id } });
+  return createReadContext({ scope: { eventId }, personId: dashboardReader.id, membershipId: membership.id, now: FROZEN_NOW, db: prisma });
+}
 
 async function tick(stationId: string, minutes: number) {
   await rawDb.footfallTick.create({
@@ -159,7 +168,7 @@ describe('data health stale device', () => {
   });
   const stale = async () => [
     ...new Set(
-      (await getDataHealth({ eventId }, FROZEN_NOW)).staleDevices.map((row) => row.volunteerId),
+      (await getDataHealth({ eventId }, FROZEN_NOW, { reader: await currentDashboardReader() })).staleDevices.map((row) => row.volunteerId),
     ),
   ];
 
@@ -180,7 +189,7 @@ describe('data health stale device', () => {
   it('falls an invalid event value through to the default', async () => {
     await store('EVENT', 'staleDeviceMinutes', 'soon');
     expect(await stale()).toEqual([counter.id]);
-    expect(DataHealthResponse.safeParse(await getDataHealth({ eventId }, FROZEN_NOW)).success).toBe(
+    expect(DataHealthResponse.safeParse(await getDataHealth({ eventId }, FROZEN_NOW, { reader: await currentDashboardReader() })).success).toBe(
       true,
     );
   });
@@ -237,7 +246,7 @@ describe('station dashboard implausible taps', () => {
     }
   });
   const anomaly = async (stationId = booth) => {
-    const response = await getStationDashboard({ eventId }, stationId, FROZEN_NOW);
+    const response = await getStationDashboard({ eventId }, stationId, { now: FROZEN_NOW, reader: await currentDashboardReader() });
     expect(StationDashboardResponse.safeParse(response).success).toBe(true);
     return response.registrations.byDevice.map((device) => device.rateAnomaly);
   };
@@ -273,7 +282,7 @@ describe('live dashboard composition', () => {
     await tick(roomB, 20);
     await store('EVENT', 'silentStationMinutes', 30);
     await store('STATION', 'silentStationMinutes', 10, roomA);
-    const response = await getLiveDashboard({ eventId }, FROZEN_NOW);
+    const response = await getLiveDashboard({ eventId }, FROZEN_NOW, await currentDashboardReader());
     expect(LiveDashboardResponse.safeParse(response).success).toBe(true);
     const direct = response.footfall.stations.filter((s) => s.silent).map((s) => s.stationId);
     expect(direct).toEqual([roomA]);

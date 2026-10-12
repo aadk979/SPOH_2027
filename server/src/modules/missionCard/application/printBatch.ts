@@ -20,6 +20,7 @@ import {
 import type { CardPrintContext } from '../domain/printContext.js';
 import { cardPrintStorage } from './printStorage.js';
 import { renderCardPdf, renderCardZip } from './renderCards.js';
+import { freezeBranding, readFrozenBrandingLogo } from '../../branding/index.js';
 
 type PrintActor = ActorContext & { clock?: Clock };
 type Cards = Awaited<ReturnType<typeof printableCards>>;
@@ -66,6 +67,7 @@ async function frozenPrintContext(
   const stations = await listStampingStations(scope, tx);
   return {
     eventName: name,
+    branding: await freezeBranding(scope, tx),
     stampingStations: stations.map(({ id, name }) => ({ id, name })),
     batches: cards.map(({ shortCode, batchLabel }) => ({ shortCode, batchLabel })),
   };
@@ -75,9 +77,10 @@ async function storePrintExport(tx: PrismaTransactionClient, work: PrintWork) {
   const { request, actor, cards, context: printContext } = work;
   const id = randomUUID();
   const objectKey = `card-print/${actor.scope.eventId}/${id}.${request.format}`;
+  const assets = { logoPng: await readFrozenBrandingLogo(actor.scope, printContext.branding) };
   const body = await (request.format === 'pdf'
-    ? renderCardPdf(cards, printContext)
-    : renderCardZip(cards, printContext));
+    ? renderCardPdf(cards, printContext, assets)
+    : renderCardZip(cards, printContext, assets));
   // S3 cannot share the SQL commit. A later rollback leaves an inaccessible private object
   // until the existing 90-day exports lifecycle removes it; never overwrite it on retry.
   await cardPrintStorage().write({

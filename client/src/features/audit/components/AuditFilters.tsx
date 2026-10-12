@@ -1,4 +1,4 @@
-import { Button, Callout, Card, Field, Input, Stack } from '@/shared/ui';
+import { Button, Card, Field, Input, Stack, ErrorState } from '@/shared/ui';
 import type { useAuditFilters } from '../hooks/useAuditFilters';
 
 export function AuditFilters({ control }: { control: ReturnType<typeof useAuditFilters> }) {
@@ -46,9 +46,7 @@ export function AuditFilters({ control }: { control: ReturnType<typeof useAuditF
         </div>
         <Button onClick={control.apply}>Apply audit filters</Button>
         {control.error ? (
-          <Callout role="alert" tone="alert">
-            {control.error}
-          </Callout>
+          <ErrorState error={control.error}>{control.error}</ErrorState>
         ) : null}
       </Stack>
     </Card>

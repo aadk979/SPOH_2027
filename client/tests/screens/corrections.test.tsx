@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { api } from '@/shared/lib/api';
+import { api, ApiError } from '@/shared/lib/api';
 import { eventWallTimeInstant } from '@/shared/lib/eventWallTime';
 import { BulkFootfallForm } from '@/features/corrections/components/BulkFootfallForm';
 import { VoidRecordForm } from '@/features/corrections/components/VoidRecordForm';
@@ -87,12 +87,14 @@ describe('correction selection and voiding', () => {
     mockApi.mockImplementation(async (path) => {
       const value = stations(String(path));
       if (value) return value;
-      throw new Error(String(path).includes('/recent?') ? 'Recent records unavailable' : 'Record already changed');
+      if (String(path).includes('/recent?')) throw new ApiError(503, { code: 'UNAVAILABLE', message: 'Recent records unavailable', requestId: 'synthetic-correction-read' });
+      throw new ApiError(409, { code: 'CONFLICT', message: 'Record already changed', requestId: 'synthetic-correction-void' });
     });
     show(<VoidRecordForm />);
     await screen.findByRole('option', { name: 'Hall' });
     fireEvent.change(screen.getByLabelText('Find a recent record at'), { target: { value: 'hall' } });
-    await screen.findByText('Recent records unavailable');
+    await screen.findByText('synthetic-correction-read');
+    expect(screen.queryByText('Recent records unavailable')).toBeNull();
     fireEvent.change(screen.getByLabelText('Selected record ID'), { target: { value: 'older' } });
     fireEvent.change(screen.getByLabelText('Reason'), { target: { value: 'Duplicate in the older audit record' } });
     fireEvent.click(screen.getByLabelText(/I checked the record ID/));
@@ -121,7 +123,9 @@ describe('paper block corrections', () => {
     await screen.findByRole('option', { name: 'Hall' });
     enterBlock();
     fireEvent.click(screen.getByRole('button', { name: 'Record paper total' }));
-    await screen.findByText('Connection interrupted');
+    await screen.findByText('This action was not confirmed');
+    expect(screen.queryByText('Connection interrupted')).toBeNull();
+    expect(screen.getByLabelText('Reason')).toHaveProperty('value', 'Clicker sheet for the morning block');
     fireEvent.click(screen.getByRole('button', { name: 'Record paper total' }));
     await screen.findByText(/Correction saved/);
     const calls = mockApi.mock.calls.filter(([path]) => path === `${base}/footfall/bulk`);

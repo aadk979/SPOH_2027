@@ -1,13 +1,13 @@
 import type { ReactNode } from 'react';
 import { ROSTER_CSV_HEADER } from '@spoh/shared';
-import { Button, Callout, Field, Textarea, Stack } from '@/shared/ui';
+import { Button, Callout, Field, Textarea, Stack, ErrorState } from '@/shared/ui';
 import { useRosterImport } from '../hooks/useRosterImport';
 
 export function RosterImportForm(): ReactNode {
   const draft = useRosterImport();
   const result = draft.importPeople.data;
   return (
-    <Stack>
+    <div data-form><Stack>
       <p>
         Paste a CSV or tab-separated spreadsheet. Review it before applying. Cognito’s default
         sender allows about 50 invitations per day.
@@ -16,7 +16,7 @@ export function RosterImportForm(): ReactNode {
       <Field
         id="people-csv"
         label="Roster CSV"
-        error={draft.form.errors.csv}
+        error={draft.form.errors.csv ?? draft.error}
         hint="Use YYYY-MM-DD dates and your event’s exact station and shift codes."
       >
         {(props) => (
@@ -30,15 +30,8 @@ export function RosterImportForm(): ReactNode {
           />
         )}
       </Field>
-      {draft.error ? (
-        <Callout tone="alert" role="alert">
-          <p className="whitespace-pre-wrap">{draft.error}</p>
-        </Callout>
-      ) : null}
       {draft.importPeople.isError ? (
-        <Callout tone="alert" role="alert">
-          {draft.importPeople.error.message}
-        </Callout>
+        <ErrorState error={draft.importPeople.error} />
       ) : null}
       {result ? (
         <Callout tone={result.issues.length ? 'warn' : 'ok'} role="status">
@@ -68,6 +61,6 @@ export function RosterImportForm(): ReactNode {
           </Button>
         ) : null}
       </div>
-    </Stack>
+    </Stack></div>
   );
 }

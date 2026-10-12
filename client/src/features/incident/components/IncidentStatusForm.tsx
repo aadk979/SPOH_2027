@@ -1,6 +1,6 @@
 import { IncidentStatus, UpdateIncidentStatusRequest, type IncidentRecord } from '@spoh/shared';
 import { useZodForm } from '@/shared/hooks/useZodForm';
-import { Button, Callout, Field, Select, Textarea } from '@/shared/ui';
+import { Button, Field, Select, Textarea, ErrorState } from '@/shared/ui';
 import { useIncidentStatus } from '../queries';
 
 export function IncidentStatusForm({ incident }: { incident: IncidentRecord }) {
@@ -49,9 +49,7 @@ export function IncidentStatusForm({ incident }: { incident: IncidentRecord }) {
         Update incident status
       </Button>
       {mutation.error ? (
-        <Callout tone="alert" role="alert">
-          {mutation.error.message}
-        </Callout>
+        <ErrorState error={mutation.error} />
       ) : null}
       {mutation.isSuccess ? <p role="status">Incident status updated.</p> : null}
     </>

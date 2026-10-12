@@ -5,7 +5,12 @@ import { announcementRouter } from '../modules/announcement/index.js';
 import { adminRouter } from '../modules/admin/index.js';
 import { authRouter } from '../modules/auth/index.js';
 import { mediaRouter } from '../modules/media/index.js';
-import { notificationRouter } from '../modules/notification/index.js';
+import { notificationRouter, createPersonNotificationRouter } from '../modules/notification/index.js';
+import { brandingRouter, publicBrandingRouter } from '../modules/branding/index.js';
+import { noticeSourceReaders } from './noticeSources.js';
+import { noticeHistoryMaterialiser } from './noticeHistory.js';
+import { createWorkspaceRouter } from '../modules/workspace/index.js';
+import { workspaceSources } from './workspaceSources.js';
 import { auditRouter } from '../modules/audit/index.js';
 import { dashboardRouter } from '../modules/dashboard/index.js';
 import { fallbackRouter } from '../modules/fallback/index.js';
@@ -44,6 +49,9 @@ export interface ModuleRoutes {
  * its authentication requirements.
  */
 export const PLATFORM_ROUTES: readonly ModuleRoutes[] = [
+  { path: '/public/events/:slug/branding', router: publicBrandingRouter },
+  { path: '/notification-centre', router: createPersonNotificationRouter({ sourceReaders: noticeSourceReaders,
+    materialiseHistory: noticeHistoryMaterialiser }) },
   { path: '/client-config', router: clientConfigRouter },
   { path: '/auth', router: authRouter },
   { path: '/people', router: personRouter },
@@ -61,9 +69,12 @@ export const PLATFORM_ROUTES: readonly ModuleRoutes[] = [
  * Every router mounts `requireAuth` itself — default deny, with `/healthz` and
  * `/readyz` mounted outside this surface as the only unauthenticated routes in
  * the system — and authentication resolves the caller's membership of the
- * path's event.
+ * path's event. The platform public branding exception and authenticated
+ * person notification centre are listed separately above.
  */
 export const EVENT_ROUTES: readonly ModuleRoutes[] = [
+  { path: '/workspace', router: createWorkspaceRouter(workspaceSources) },
+  { path: '/branding', router: brandingRouter },
   { path: '/content', router: contentRouter },
   { path: '/lifecycle', router: eventLifecycleRouter },
   { path: '/schedules', router: scheduleRouter },

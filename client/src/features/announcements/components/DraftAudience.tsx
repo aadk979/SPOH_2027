@@ -1,5 +1,5 @@
 import type { MeResponse } from '@spoh/shared';
-import { Checkbox, Field, Select } from '@/shared/ui';
+import { Checkbox, Field, Select, ControlHelp } from '@/shared/ui';
 import type { useDraftEditor } from '../hooks/useDraftEditor';
 
 export function DraftAudience({
@@ -11,6 +11,7 @@ export function DraftAudience({
 }) {
   return (
     <>
+      <ControlHelp>Saving keeps this audience in your private draft. Publication uses that saved audience; whole event must be chosen explicitly.</ControlHelp>
       <Checkbox
         label="Ask for acknowledgement when published"
         checked={form.requiresAck}
@@ -24,7 +25,7 @@ export function DraftAudience({
         />
       ) : null}
       {!form.eventWide ? (
-        <Field id="draft-station" label="Draft audience" error={form.errors.stationId}>
+        <Field id="draft-station" label="Draft audience" hint="Choose a station, or use your current posting. No current posting means a station must be selected." error={form.errors.stationId}>
           {(props) => (
             <Select
               {...props}
@@ -45,6 +46,7 @@ export function DraftAudience({
           )}
         </Field>
       ) : null}
+      <p role="status" className="text-caption text-text-muted">Draft audience: {form.eventWide ? 'Whole event' : form.stationId ? form.stations.data?.find((station) => station.id === form.stationId)?.name ?? 'Selected station' : me.currentAssignment?.station.name ?? 'Choose a station before saving'}</p>
     </>
   );
 }

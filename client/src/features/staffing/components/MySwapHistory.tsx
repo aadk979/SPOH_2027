@@ -1,5 +1,5 @@
 import { useCurrentSession, useEventTime } from '@/features/session';
-import { Callout, Card } from '@/shared/ui';
+import { Card, ErrorState } from '@/shared/ui';
 import { listMySwaps } from '../api';
 import { useStaffingRead } from '../queries';
 import { WithdrawSwapButton } from './WithdrawSwapButton';
@@ -10,9 +10,7 @@ export function MySwapHistory() {
   const swaps = useStaffingRead('my-swaps', listMySwaps, true);
   if (swaps.isError)
     return (
-      <Callout tone="alert" role="alert">
-        {swaps.error.message}
-      </Callout>
+      <ErrorState error={swaps.error} />
     );
   if (!swaps.data) return <p>Loading your requests…</p>;
   if (!swaps.data.length) return <p>No swap requests yet.</p>;

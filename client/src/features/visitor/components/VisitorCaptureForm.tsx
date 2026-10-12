@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import type { CaptureCategoryRecord } from '@spoh/shared';
-import { Button, Callout, Card, Field, Input, Select } from '@/shared/ui';
+import { Button, Card, Field, Input, Select, ErrorState } from '@/shared/ui';
 import { useVisitorCapture } from '../hooks/useVisitorCapture';
 
 type Capture = ReturnType<typeof useVisitorCapture>;
@@ -87,9 +87,7 @@ export function VisitorCaptureForm({
       </p>
       <VisitorCaptureInputs capture={capture} categories={categories} />
       {capture.error ? (
-        <Callout tone="alert" role="alert">
-          {capture.error}
-        </Callout>
+        <ErrorState error={capture.error}>{capture.error}</ErrorState>
       ) : null}
       {capture.message ? <p role="status">{capture.message}</p> : null}
       <Button type="submit" disabled={capture.saving}>

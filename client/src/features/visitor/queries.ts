@@ -1,10 +1,11 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { CreateVisitorFieldRequest, UpdateVisitorFieldRequest } from '@spoh/shared';
 import { useEventId } from '@/shared/lib/eventContext';
 import { useCurrentSession } from '@/features/session';
+import { ApiError } from '@/shared/lib/apiErrors';
 import { createVisitorField, listVisitorFields, updateVisitorField } from './api';
 import { readVisitorRecords } from './api';
 export function useVisitorRecords(enabled: boolean) {
@@ -23,7 +24,7 @@ export function useVisitorRecords(enabled: boolean) {
   return useQuery({
     queryKey: [eventId, 'visitor-records', personId, role],
     queryFn: async ({ signal }) => {
-      const response = await readVisitorRecords(eventId);
+      const response = await readVisitorRecords(eventId, signal);
       signal.throwIfAborted();
       return response;
     },
@@ -40,12 +41,21 @@ export const visitorKeys = {
 
 export function useVisitorFields(enabled: boolean) {
   const eventId = useEventId();
-  return useQuery({
-    queryKey: visitorKeys.fields(eventId),
-    queryFn: () => listVisitorFields(eventId),
-    enabled,
-    staleTime: 60_000,
+  const personId = useCurrentSession()?.volunteerId;
+  const client = useQueryClient();
+  const queryKey = useMemo(() => [...visitorKeys.fields(eventId), personId], [eventId, personId]);
+  const query = useQuery({
+    queryKey,
+    queryFn: ({ signal }) => listVisitorFields(eventId, signal),
+    enabled: enabled && !!personId,
+    staleTime: 0, gcTime: 0, retry: false,
   });
+  useEffect(() => {
+    const purge = () => { void client.cancelQueries({ queryKey, exact: true }); client.removeQueries({ queryKey, exact: true }); };
+    if (!enabled || !personId || (query.error instanceof ApiError && [401, 403, 404].includes(query.error.status))) purge();
+    return purge;
+  }, [client, queryKey, enabled, personId, query.error]);
+  return { ...query, data: enabled && personId && !query.error ? query.data : undefined };
 }
 
 export function useCreateVisitorField() {

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import type { StationDashboardResponse } from '@spoh/shared';
-import { EmptyState, LoadingCards } from '@/shared/ui';
+import { EmptyState, LoadingCards, PermissionDenied } from '@/shared/ui';
+import { CaptureSources } from './CaptureSources';
 import { StationCategories } from './StationCategories';
 import { StationRoster } from './StationRoster';
 import { StationCounters } from './StationCounters';
@@ -30,13 +31,15 @@ export function StationBoard({
       <StationTotals board={board} />
 
       <FlaggedRedemptions flagged={board.flaggedRedemptions} />
+      <CaptureSources board={board} />
 
       <div className="grid gap-lg lg:grid-cols-2">
-        {board.registrations.byDevice.length > 0 ? <DeviceRegistrations board={board} /> : null}
+        {board.deviceAvailability === 'available' && board.registrations.byDevice.length > 0 ? <DeviceRegistrations board={board} /> : null}
 
-        {board.footfall.contributors.length > 0 ? <StationCounters board={board} /> : null}
+        {board.deviceAvailability === 'available' && board.footfall.contributors.length > 0 ? <StationCounters board={board} /> : null}
 
-        <StationRoster board={board} />
+        {board.rosterAvailability === 'available' ? <StationRoster board={board} /> : <PermissionDenied>Named station roster is unavailable under your current permission.</PermissionDenied>}
+        {board.deviceAvailability !== 'available' ? <PermissionDenied>Named phone contributions are unavailable under your current permission. Source totals remain visible.</PermissionDenied> : null}
 
         <StationCategories board={board} />
       </div>

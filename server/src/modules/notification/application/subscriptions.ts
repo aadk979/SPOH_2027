@@ -1,4 +1,5 @@
 import { systemClock, type Clock } from '../../../platform/time/index.js';
+import { UnauthenticatedError } from '../../../platform/errors/index.js';
 import { deleteOwnSubscription, pruneDevicesBeyond, upsertSubscription } from '../data/repo.js';
 import { MAX_DEVICES_PER_PERSON } from '../domain/delivery.js';
 
@@ -14,6 +15,7 @@ export async function subscribeDevice(
   clock: Clock = systemClock,
 ): Promise<{ id: string }> {
   const subscription = await upsertSubscription(input, clock.now());
+  if (!subscription) throw new UnauthenticatedError();
   // Capped per person: the newest devices stay, the least recently seen go (F04-025).
   await pruneDevicesBeyond(input.volunteerId, MAX_DEVICES_PER_PERSON);
   return subscription;

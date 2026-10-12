@@ -37,7 +37,12 @@ const PLATFORM_LEVEL = new Set([
 ]);
 
 /** `…Id` columns on event-owned rows that name nothing in the database. */
-const NOT_REFERENCES = new Set(['Registration.groupId']);
+const NOT_REFERENCES = new Set([
+  'Registration.groupId',
+  // A discriminated opaque source key across eight tables, never a generic FK
+  // or an authority grant. The selected facade proves event and visibility.
+  'Notice.sourceId',
+]);
 
 function relations(model: Model) {
   return [...model.body.matchAll(/^\s*(\w+)\s+(\w+)(\??)\s+@relation\(([^)]*)\)/gm)].map(

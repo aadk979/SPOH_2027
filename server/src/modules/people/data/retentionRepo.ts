@@ -1,5 +1,6 @@
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
+import { erasePersonalNotices } from './notificationPersonalRepo.js';
 
 export async function archiveRetentionEvent(tx: PrismaTransactionClient, scope: EventScope) {
   await tx.$queryRaw`SELECT id FROM "Event" WHERE id = ${scope.eventId} FOR SHARE`;
@@ -34,6 +35,7 @@ export async function anonymisePerson(tx: PrismaTransactionClient, input: { pers
       phone: null, lastSeenAt: null, deactivatedAt: input.now, piiErasedAt: input.now },
   });
   if (!changed.count) return 0;
+  await erasePersonalNotices(tx, input.personId);
   await tx.pushSubscription.deleteMany({ where: { volunteerId: input.personId } });
   await tx.refreshSession.updateMany({ where: { volunteerId: input.personId, revokedAt: null },
     data: { revokedAt: input.now, revokedReason: 'staff-retention', providerTokenEncrypted: null, providerTokenExpiresAt: null } });

@@ -2,7 +2,7 @@ import { DecideSwapRequest, type SwapRequestRecord } from '@spoh/shared';
 import { useZodForm } from '@/shared/hooks/useZodForm';
 import { useRetryKey } from '@/shared/hooks/useRetryKey';
 import { useEventTime } from '@/features/session';
-import { Button, Callout, Card, Field, Select, Stack, Textarea } from '@/shared/ui';
+import { Button, Card, Field, Select, Stack, Textarea, ErrorState } from '@/shared/ui';
 import { listStaffingPendingSwaps, reviewSwap } from '../api';
 import { useStaffingRead, useStaffingWrite } from '../queries';
 import { MutationFeedback } from './MutationFeedback';
@@ -11,9 +11,7 @@ export function SwapReviewQueue() {
   const queue = useStaffingRead('pending-swaps', listStaffingPendingSwaps, true);
   if (queue.isError)
     return (
-      <Callout tone="alert" role="alert">
-        {queue.error.message}
-      </Callout>
+      <ErrorState error={queue.error} />
     );
   if (queue.isPending) return <p>Loading requests…</p>;
   return (

@@ -18,6 +18,8 @@ import { AppError } from '../../../platform/errors/index.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { settleShiftReceipt } from './mutationReceipt.js';
 import { prepareShiftWrite } from './prepareShiftWrite.js';
+import { queueNotices } from '../../notification/index.js';
+import { systemClock, type Clock } from '../../../platform/time/index.js';
 
 /**
  * Approving moves the assignment and clears the check-in state — the new
@@ -41,7 +43,7 @@ async function approve(tx: PrismaTransactionClient, scope: EventScope, swap: Swa
 export async function decideSwap(
   swapId: string,
   request: DecideSwapRequest,
-  actor: ActorContext,
+  actor: ActorContext & { clock?: Clock },
 ): Promise<SwapRequestRecord> {
   const { volunteerId: deciderId, scope, audit } = actor;
   await prisma.$transaction(async (tx) => {
@@ -73,6 +75,10 @@ export async function decideSwap(
       before: { status: swap.status },
       after: { status: request.decision, note: request.note ?? null },
     });
+    await queueNotices(tx, scope, { kind: request.decision === 'APPROVED' ? 'SWAP_APPROVED' : 'SWAP_REJECTED',
+      priority: 'OPERATIONAL', source: { kind: 'SWAP', id: swapId },
+      transitionKey: `swap:${swapId}:${request.decision}`, context: { type: 'swap' },
+      recipientPersonIds: [swap.requesterId, swap.targetId], createdAt: (actor.clock ?? systemClock).now() });
     await settleShiftReceipt(tx, scope, {
       key: request.idempotencyKey,
       id: swapId,

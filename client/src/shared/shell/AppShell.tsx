@@ -9,6 +9,7 @@ import { SectionNav } from '@/shared/shell/SectionNav';
 import { LostPersonBanner } from '@/features/lostPerson/components/LostPersonBanner';
 import { RehearsalBanner, EventWorkspaceNav } from '@/features/events';
 import { SyncWarningBanner } from '@/shared/shell/SyncIndicator';
+import { ConnectionState } from '@/shared/shell/ConnectionState';
 import { cx } from '@/shared/ui/cx';
 
 /**
@@ -111,6 +112,7 @@ export function AppShell({
         <AppHeader container={container} parent={parent} title={title} actions={actions} />
 
         <SyncWarningBanner />
+        <ConnectionState />
       </div>
 
       <div className="workspace-body">

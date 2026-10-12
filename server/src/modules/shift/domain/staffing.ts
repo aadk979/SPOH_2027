@@ -9,6 +9,7 @@ import { minutesBetween } from '../../../platform/time/index.js';
 interface StaffingRow {
   stationId: string;
   shiftCode: string;
+  shiftId: string;
   assigned: number;
   checkedIn: number;
 }
@@ -41,7 +42,7 @@ export function staffingGaps(input: {
   return input.shifts.flatMap((shift) =>
     input.stations.flatMap((station) => {
       const row = input.staffing.find(
-        (s) => s.stationId === station.id && s.shiftCode === shift.code,
+        (s) => s.stationId === station.id && s.shiftId === shift.id,
       );
       const gap = gapAt(station, shift, row);
       return gap ? [gap] : [];
@@ -57,6 +58,10 @@ export function staffingGaps(input: {
 export function longShiftWarnings(
   rows: ReadonlyArray<{
     volunteerId: string;
+    id: string;
+    stationId: string;
+    shiftId: string;
+    eventDayId: string;
     checkedInAt: Date | null;
     volunteer: { displayName: string };
     station: { name: string };
@@ -70,11 +75,16 @@ export function longShiftWarnings(
       volunteerId: row.volunteerId,
       volunteerName: row.volunteer.displayName,
       stationName: row.station.name,
+      assignmentId: row.id,
+      stationId: row.stationId,
+      shiftId: row.shiftId,
+      eventDayId: row.eventDayId,
       checkedInAt: row.checkedInAt.toISOString(),
       minutesOnStation: minutesBetween(row.checkedInAt, now),
     };
     const existing = byVolunteer.get(row.volunteerId);
-    if (!existing || warning.minutesOnStation > existing.minutesOnStation) {
+    if (!existing || warning.minutesOnStation > existing.minutesOnStation ||
+      (warning.minutesOnStation === existing.minutesOnStation && warning.assignmentId! < existing.assignmentId!)) {
       byVolunteer.set(row.volunteerId, warning);
     }
   }

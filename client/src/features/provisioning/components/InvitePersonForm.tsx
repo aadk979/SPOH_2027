@@ -2,7 +2,7 @@ import type { FormEvent, ReactNode } from 'react';
 import { ProvisionVolunteerRequest, type CommitteeRole } from '@spoh/shared';
 import { ROLE_LABELS } from '@/features/volunteers';
 import { useZodForm } from '@/shared/hooks/useZodForm';
-import { Button, Callout, Field, Input, Select, Stack } from '@/shared/ui';
+import { Button, Callout, Field, Input, Select, Stack, ErrorState } from '@/shared/ui';
 import { useInvitePerson } from '../queries';
 
 export function InvitePersonForm(): ReactNode {
@@ -62,9 +62,7 @@ export function InvitePersonForm(): ReactNode {
           {invite.isPending ? 'Inviting…' : 'Invite person'}
         </Button>
         {invite.isError ? (
-          <Callout tone="alert" role="alert">
-            {invite.error.message}
-          </Callout>
+          <ErrorState error={invite.error} />
         ) : null}
         {invite.isSuccess ? (
           <Callout tone="ok" role="status">

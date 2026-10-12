@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import type { SwapRequestRecord } from '@spoh/shared';
-import { Button, Callout, Card, Section } from '@/shared/ui';
+import { Button, Card, Section, ErrorState } from '@/shared/ui';
 import { useDecideSwap } from '@/features/roster';
 /** Swap approvals. Two taps, per remediation/phases/P07-client-refactor.md. */
 export function SwapQueue({
@@ -32,9 +32,7 @@ export function SwapQueue({
   return (
     <Section title="Swap requests">
       {error ? (
-        <Callout tone="alert" role="alert" className="mb-sm">
-          {error}
-        </Callout>
+        <ErrorState error={error}>{error}</ErrorState>
       ) : null}
       <ul className="flex flex-col gap-sm">
         {swaps.map((swap) => (

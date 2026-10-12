@@ -1,5 +1,6 @@
 import type { PushSubscriptionRequest } from '@spoh/shared';
 import { registerPush } from './api';
+import { getSession, getSessionGeneration } from '@/shared/lib/session';
 
 /**
  * Keeping the server's copy of this phone's push subscription current (F03-035).
@@ -54,12 +55,15 @@ export function rememberRegistered(volunteerId: string | null, endpoint: string 
 }
 
 export async function syncPushSubscription(volunteerId: string): Promise<void> {
+  const generation = getSessionGeneration();
+  const current = () => generation === getSessionGeneration() && getSession()?.volunteerId === volunteerId;
   if (!pushSupported() || Notification.permission !== 'granted') return;
   const registration = await navigator.serviceWorker.ready;
   const subscription = await registration.pushManager.getSubscription();
-  if (!subscription || lastRegistered() === `${volunteerId} ${subscription.endpoint}`) return;
+  if (!subscription || !current() || lastRegistered() === `${volunteerId} ${subscription.endpoint}`) return;
   try {
     await registerPush(toPushRequest(subscription));
+    if (!current()) return;
     rememberRegistered(volunteerId, subscription.endpoint);
   } catch {
     // Best effort, like all push: the alert poll still delivers. Retried next sync.

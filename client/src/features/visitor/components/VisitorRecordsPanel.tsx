@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Button, Callout, LoadingRows } from '@/shared/ui';
+import { Button, EmptyState, LoadingRows, ErrorState } from '@/shared/ui';
 import { useAllows, useCurrentSession, useEventTime } from '@/features/session';
 import { useEventId } from '@/shared/lib/eventContext';
 import { ApiError } from '@/shared/lib/apiErrors';
@@ -30,7 +30,7 @@ function VisitorRecordsOwner() {
       <Button variant="secondary" onClick={toggle}>
         {opened ? 'Hide visitor values' : 'Read permitted visitor values'}
       </Button>
-      {denied ? <Callout role="alert">{denied.message}</Callout> : null}
+      {denied ? <ErrorState error={denied} operation="Reading visitor values" /> : null}
       {opened && !denied ? <VisitorValues onAccessLost={onAccessLost} /> : null}
     </section>
   );
@@ -42,11 +42,11 @@ function VisitorValues({ onAccessLost }: { onAccessLost: (error: Error) => void 
     if (records.error instanceof ApiError && [401, 403, 404].includes(records.error.status))
       onAccessLost(records.error);
   }, [records.error, onAccessLost]);
-  if (records.isError) return <Callout role="alert">{records.error.message}</Callout>;
+  if (records.isError) return <ErrorState error={records.error} operation="Reading visitor values" onRetry={() => void records.refetch()} />;
   return (
     <>
       {records.isPending ? <LoadingRows /> : null}
-      {records.data?.data.length === 0 ? <p>No retained visitor values in this event.</p> : null}
+      {records.data?.data.length === 0 ? <EmptyState title="No retained visitor values">This event has no retained values available under your current access.</EmptyState> : null}
       {records.data?.data.map((record) => (
         <dl key={record.registrationId}>
           <dt>Recorded</dt>

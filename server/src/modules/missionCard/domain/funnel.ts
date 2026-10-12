@@ -17,12 +17,12 @@ export function buildFunnelStages(counts: FunnelCounts): CardFunnelResponse['sta
   const { issued, completed, redeemed } = counts;
   const rate = (value: number): number => (issued === 0 ? 0 : value / issued);
   return [
-    { key: 'issued', label: 'Issued', value: issued, rateOfIssued: issued === 0 ? 0 : 1 },
+    { key: 'issued', metric: 'issued', label: 'Issued', value: issued, rateOfIssued: issued === 0 ? 0 : 1 },
     ...counts.stations.map((station) => {
       const value = counts.perStation.get(station.id) ?? 0;
-      return { key: station.code, label: station.name, value, rateOfIssued: rate(value) };
+      return { key: station.code, metric: 'station' as const, stationId: station.id, label: station.name, value, rateOfIssued: rate(value) };
     }),
-    { key: 'completed', label: 'Completed', value: completed, rateOfIssued: rate(completed) },
-    { key: 'redeemed', label: 'Gift redeemed', value: redeemed, rateOfIssued: rate(redeemed) },
+    { key: 'completed', metric: 'completed', label: 'Completed', value: completed, rateOfIssued: rate(completed) },
+    { key: 'redeemed', metric: 'redeemed', label: 'Gift redeemed', value: redeemed, rateOfIssued: rate(redeemed) },
   ];
 }

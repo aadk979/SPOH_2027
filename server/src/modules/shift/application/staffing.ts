@@ -36,7 +36,7 @@ export async function getStaffingGaps(
   }
 
   const [staffing, stations] = await Promise.all([
-    staffingByStation(scope, running),
+    staffingByStation(scope, running, now),
     listStaffedStations(scope),
   ]);
   return {
@@ -50,10 +50,11 @@ export async function getStaffingGaps(
 export async function getLongShifts(
   scope: EventScope,
   now = new Date(),
-  options: { thresholds?: ThresholdSnapshot } = {},
+  options: { thresholds?: ThresholdSnapshot; stationIds?: readonly string[] } = {},
 ): Promise<LongShiftWarning[]> {
   const thresholds = options.thresholds ?? (await prepareThresholds(scope));
   const cutoff = new Date(now.getTime() - thresholds.longShiftMinutes() * 60_000);
   const since = await eventTodayStart(scope, now);
-  return longShiftWarnings(await longRunningShifts(scope, { cutoff, since }), now);
+  return longShiftWarnings(await longRunningShifts(scope, { cutoff, since, now,
+    ...(options.stationIds ? { stationIds: options.stationIds } : {}) }), now);
 }

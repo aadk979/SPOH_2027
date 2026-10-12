@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import type { VolunteerAdminRecord } from '@spoh/shared';
 import { useAllows } from '@/features/session';
-import { Button, Callout } from '@/shared/ui';
+import { Button, Callout, ErrorState } from '@/shared/ui';
 import { useResendInvite, useSignOutPerson } from '../queries';
 
 function ResendPersonInvite({ volunteer }: { volunteer: VolunteerAdminRecord }): ReactNode {
@@ -23,9 +23,7 @@ function ResendPersonInvite({ volunteer }: { volunteer: VolunteerAdminRecord }):
         </Callout>
       ) : null}
       {resend.isError ? (
-        <Callout tone="alert" role="alert">
-          {resend.error.message}
-        </Callout>
+        <ErrorState error={resend.error} />
       ) : null}
     </>
   );
@@ -62,9 +60,7 @@ function RevokePersonSessions({ volunteer }: { volunteer: VolunteerAdminRecord }
         </Callout>
       ) : null}
       {signOut.isError ? (
-        <Callout tone="alert" role="alert">
-          {signOut.error.message}
-        </Callout>
+        <ErrorState error={signOut.error} />
       ) : null}
     </>
   );

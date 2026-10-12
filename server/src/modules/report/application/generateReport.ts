@@ -17,6 +17,7 @@ import { findReportEvent } from '../data/readScope.js';
 import { eventSetting } from '../../../platform/settings/eventSettings.js';
 import type { EventZone } from '../../../platform/time/index.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
+import { freezeBranding } from '../../branding/index.js';
 
 /** Absent bounds mean the whole event. */
 function resolveRange(query: ReportQuery, zone: EventZone): ReportSpan {
@@ -79,7 +80,7 @@ export async function generateReportInTransaction(
     generatedAt: now.toISOString(),
     range: { from: query.from ?? null, to: query.to ?? null },
     timezone: zone.timezone,
-    event: { name: summary.name, slug: summary.slug, status: summary.status },
+    event: { name: summary.name, slug: summary.slug, status: summary.status, branding: await freezeBranding(eventScope, tx) },
     countingNote: COUNTING_NOTE,
     headline,
     registrations,

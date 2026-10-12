@@ -2,7 +2,7 @@
 import { useState, type ReactNode } from 'react';
 import type { RolePermissionsResponse } from '@spoh/shared';
 import { roleLabel } from '@/features/volunteers';
-import { Callout, Checkbox, Field, Section, Select, Stack, StatusText } from '@/shared/ui';
+import { Checkbox, Field, Section, Select, Stack, StatusText, ErrorState } from '@/shared/ui';
 import { useChangeRolePermission } from '../queries';
 import { asLine, canToggle, cellState, groupedRows } from '../model/permissionTable';
 
@@ -48,9 +48,7 @@ export function RolePermissionsPanel({ table }: { table: Table }): ReactNode {
           )}
         </Field>
         {change.isError ? (
-          <Callout tone="alert" role="alert">
-            {change.error instanceof Error ? change.error.message : 'The change was not saved.'}
-          </Callout>
+          <ErrorState error={change.error} />
         ) : null}
         {groupedRows(table).map(({ group, rows }) => (
           <fieldset key={group} className="grid gap-xxs">

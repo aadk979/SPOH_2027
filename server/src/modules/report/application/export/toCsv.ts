@@ -1,8 +1,7 @@
 import type { FullReport, VisitorRecordsResponse } from '@spoh/shared';
 import { reportReadLabel } from '@spoh/shared';
 import { headlineLine, rows, eventTime } from './format.js';
-
-type Cell = string | number | null;
+import { escapeCsv, type CsvCell as Cell } from './csvCell.js';
 
 /** One `## Section` block: its title and its rows, the header first. */
 interface CsvSection {
@@ -19,14 +18,15 @@ interface CsvSection {
  */
 export function toCsv(report: FullReport, visitors: VisitorRecordsResponse | null = null): string {
   const lines = [
-    `# ${report.event.name} post-event report`,
+    escapeCsv(`# ${report.event.name} post-event report`),
     `# Generated,${report.generatedAt}`,
     `# ${reportReadLabel(report)}`,
-    `# ${report.countingNote.replace(/,/g, ';')}`,
+    escapeCsv(`# ${report.countingNote}`),
+    escapeCsv(report.event.branding ? `# Frozen branding: publication ${report.event.branding.publicationId ?? 'neutral'}, accent ${report.event.branding.accent}` : '# Frozen branding: unknown for this historical report.'),
     report.rehearsalIncluded
       ? '# Includes rehearsal data: totals combine live and practice captures. Gift stock pools stay separate.'
       : '# Rehearsal data is excluded.',
-    ...(report.headline ? [`# ${headlineLine(report.headline).replace(/,/g, ';')}`] : []),
+    ...(report.headline ? [escapeCsv(`# ${headlineLine(report.headline)}`)] : []),
   ];
   const all = [...sections(report), ...(visitors ? [visitorSection(visitors)] : [])];
   for (const section of all) {
@@ -41,9 +41,9 @@ function sections(report: FullReport): CsvSection[] {
     {
       title: 'Registrations (unit: registrations)',
       rows: [
-        ['Category', 'Registrations'],
+        ['Category code', 'Category', 'Registrations'],
         ...rows.categories(report),
-        ['TOTAL', report.registrations.total],
+        ['TOTAL', '', report.registrations.total],
       ],
     },
     {
@@ -115,13 +115,6 @@ function integrityRows(report: FullReport): Array<readonly Cell[]> {
     ['Records by source', '', '', '', ''],
     ...rows.recordsBySource(report),
   ];
-}
-
-/** RFC 4180 quoting. Incident descriptions contain commas and newlines. */
-function escapeCsv(value: Cell): string {
-  if (value === null || value === undefined) return '';
-  const text = String(value);
-  return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
 /** The values the caller's role reads, apart from the counts (ADR-002 §4). */

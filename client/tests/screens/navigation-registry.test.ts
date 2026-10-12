@@ -136,7 +136,7 @@ describe('navigation registry', () => {
   });
 
   it('lists hub screens under their hub, and names only hubs as parents', () => {
-    expect(hubLinks('/guide').map((link) => link.href)).toEqual(['/map', '/journey', '/brief']);
+    expect(hubLinks('/guide').map((link) => link.href)).toEqual(['/help', '/map', '/journey', '/brief']);
     expect(hubLinks('/safety').map((link) => [link.href, link.emphasis ?? null])).toEqual([
       ['/safety/incident/new', null],
       ['/safety/lost-person/new', 'primary'],
@@ -149,6 +149,7 @@ describe('navigation registry', () => {
 
   it('keeps the inbox on the global bar with a short label for narrow phones', () => {
     expect(globalEntries().map((entry) => [entry.path, entry.label, entry.shortLabel])).toEqual([
+      ['/notifications', 'Notifications', 'Alerts'],
       ['/devices', 'Your devices', 'Devices'],
       ['/swaps', 'Shift swaps', undefined],
       ['/briefings', 'Briefing slots', undefined],

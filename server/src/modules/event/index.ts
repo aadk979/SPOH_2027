@@ -9,3 +9,4 @@ export { planClone, type ClonePlan } from './application/planClone.js';
 export { applyClone } from './application/applyClone.js';
 export type { EventTaxonomy } from './data/repo.js';
 export { requireLifecycleScheduleEdge } from './application/lifecycleScheduleAuthority.js';
+export { readArchiveNoticeSource } from './application/readNoticeSource.js';

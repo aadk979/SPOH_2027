@@ -7,7 +7,7 @@ import {
 import { tagValues } from '../model/editorDefaults';
 import { useZodForm } from '@/shared/hooks/useZodForm';
 import { useRetryKey } from '@/shared/hooks/useRetryKey';
-import { Button, Checkbox, Stack } from '@/shared/ui';
+import { Button, Checkbox, ControlHelp, Stack } from '@/shared/ui';
 import { useStructureWrite } from '../queries';
 import { EditorField } from './EditorField';
 import { WriteFeedback } from './WriteFeedback';
@@ -57,6 +57,7 @@ export function StationTagEditor({
         />
         <EditorField
           label="Tag label"
+          hint="The readable name shown when grouping stations or selecting an audience."
           value={form.values.label}
           onChange={form.setter('label')}
           error={form.errors.label}
@@ -64,6 +65,7 @@ export function StationTagEditor({
         />
         <EditorField
           label="Tag description"
+          hint="Explain the shared purpose of stations carrying this tag."
           value={form.values.description}
           onChange={form.setter('description')}
           error={form.errors.description}
@@ -72,11 +74,13 @@ export function StationTagEditor({
         {record ? (
           <Checkbox
             label="Active tag"
+            aria-describedby={`tag-active-${record.id}`}
             checked={form.values.active}
             disabled={!editable}
             onChange={(event) => form.setField('active', event.target.checked)}
           />
         ) : null}
+        {record ? <ControlHelp id={`tag-active-${record.id}`}>Turning this off stops new stations choosing this tag. Existing tagged stations and history remain.</ControlHelp> : null}
         <Button type="submit" disabled={!editable || write.isPending}>
           {record ? 'Save tag' : 'Create tag'}
         </Button>

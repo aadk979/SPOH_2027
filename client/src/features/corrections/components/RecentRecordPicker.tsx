@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { RegistrationRecord, FootfallTickRecord } from '@spoh/shared';
 import { useStations } from '@/features/stations';
 import { useEventTime } from '@/features/session';
-import { Button, Callout, Field, Select } from '@/shared/ui';
+import { Button, Field, Select, ErrorState } from '@/shared/ui';
 import { useRecentCorrectionRecords } from '../queries';
 
 export function RecentRecordPicker({
@@ -44,9 +44,7 @@ export function RecentRecordPicker({
           </Button>
         ))}
       {records.error ? (
-        <Callout tone="alert" role="alert">
-          {records.error.message}
-        </Callout>
+        <ErrorState error={records.error} />
       ) : null}
       {records.hasNextPage ? (
         <Button

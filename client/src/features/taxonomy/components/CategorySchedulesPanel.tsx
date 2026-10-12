@@ -79,7 +79,7 @@ function useCategoryAccess(enabled: boolean) {
     me,
     personId,
     eventId,
-    loading: (!me.data && !me.isError) || (!permissions.data && !permissions.isError),
+    loading: Boolean(personId) && ((!me.data && !me.isError) || (!permissions.data && !permissions.isError)),
     authorised:
       enabled && categorySchedulingIdentity({ me: me.data, personId, eventId, mayManage }),
     refused: categoryAccessDenied(me.error) || categoryAccessDenied(permissions.error),

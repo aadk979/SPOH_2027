@@ -3,7 +3,7 @@ import { useActiveAlerts } from '@/features/lostPerson';
 import { useFallbackWindows } from '@/features/fallback';
 import { useLostFound } from '@/features/lostFound';
 import { useAllows } from '@/features/session';
-import { ButtonLink, Callout, Card, CardTitle, Stack } from '@/shared/ui';
+import { ButtonLink, Card, CardTitle, Stack, ErrorState } from '@/shared/ui';
 
 export function OpenCloseoutCases() {
   const allows = useAllows();
@@ -47,12 +47,14 @@ export function OpenCloseoutCases() {
         {items.data?.map((item) => (
           <p key={item.id}>{item.itemLabel}</p>
         ))}
-        {[incidentList, alerts, windows, items].some((query) => query.isError) ? (
-          <Callout tone="warn">
-            Some case lists could not load. Open the linked screens and reload before closing.
-          </Callout>
-        ) : null}
+        <CaseListErrors queries={[incidentList, alerts, windows, items]} />
       </Stack>
     </Card>
   );
+}
+
+function CaseListErrors({ queries }: { queries: { isError: boolean; error: unknown }[] }) {
+  if (!queries.some((query) => query.isError)) return null;
+  const error = queries.map((query) => query.error).find((candidate) => candidate != null);
+  return <ErrorState error={error}>Some case lists could not load. Open the linked screens and reload before closing.</ErrorState>;
 }

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { StationDashboardResponse } from '@spoh/shared';
 import { Section } from '@/shared/ui';
 import { BarList, BarRow } from '@/features/dashboard';
+import { registrationsLink } from '../model/drillLinks';
 export function DeviceRegistrations({ board }: { board: StationDashboardResponse }): ReactNode {
   return (
     <Section
@@ -14,7 +15,7 @@ export function DeviceRegistrations({ board }: { board: StationDashboardResponse
 
           return (
             <div key={device.volunteerId}>
-              <BarRow label={device.volunteerName} value={device.value} max={max} />
+              <BarRow label={device.volunteerName} value={device.value} max={max} href={registrationsLink(board.observation, { stationId: board.stationId, personId: device.volunteerId, source: 'APP' })} />
               {device.rateAnomaly ? (
                 /*
                               Sits directly under its own bar rather than at a

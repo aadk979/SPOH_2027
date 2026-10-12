@@ -1,6 +1,6 @@
 'use client';
 
-import type { FormEvent, ReactNode, RefObject } from 'react';
+import { useId, type FormEvent, type ReactNode, type RefObject } from 'react';
 import { useZodForm } from '@/shared/hooks/useZodForm';
 import { CardCodeEntry } from '../model/cardCodeEntry';
 import type { ScannerState } from '@/features/capture/useQrScanner';
@@ -29,6 +29,7 @@ export function CardCodeInput({
   const form = useZodForm(CardCodeEntry, { code: '' });
   const { code } = form.values;
   const error = form.errors.code;
+  const errorId = useId();
 
   /** The printed alphabet's reading rule, from the schema the server applies (F03-020). */
   function submit(event: FormEvent): void {
@@ -81,13 +82,14 @@ export function CardCodeInput({
             // told apart at arm's length.
             className="flex-1 font-display tracking-[0.25em] uppercase"
             aria-invalid={error ? true : undefined}
+            aria-describedby={error ? errorId : undefined}
           />
           <Button type="submit" size="lg" disabled={code.trim().length !== 6 || pending}>
             Go
           </Button>
         </div>
         {error ? (
-          <p role="alert" className="text-caption font-semibold text-alert">
+          <p id={errorId} role="alert" className="text-caption font-semibold text-alert">
             {error}
           </p>
         ) : null}

@@ -8,7 +8,9 @@ import { RehearsalDashboardControl } from '../components/RehearsalDashboardContr
 
 import { useState, type ReactNode } from 'react';
 import { useLiveDashboard } from '@/features/dashboard';
-import { useRequireSession, useEventTime } from '@/features/session';
+import { useAllows, useRequireSession, useEventTime } from '@/features/session';
+import { EventIdentity } from '@/features/branding';
+import { ErrorState, PermissionDenied } from '@/shared/ui';
 import { AppLink } from '@/shared/lib/AppLink';
 import { useEvent } from '@/shared/lib/eventContext';
 import { RehearsalBanner } from '@/features/events';
@@ -33,12 +35,16 @@ export default function TvScreen(): ReactNode {
   const format = useEventTime();
   const event = useEvent();
   const session = useRequireSession();
+  const allows = useAllows();
   const [includeRehearsal, setIncludeRehearsal] = useState(false);
-  const { data } = useLiveDashboard(includeRehearsal);
+  const query = useLiveDashboard(includeRehearsal);
+  const data = query.isError ? undefined : query.data;
 
   useTvWakeLock();
 
   if (!session) return null;
+  if (!allows('Dashboard.ReadEvent')) return <main data-theme="dark"><PermissionDenied /></main>;
+  if (query.isError) return <main data-theme="dark"><ErrorState error={query.error} onRetry={() => void query.refetch()} /></main>;
 
   if (!data) {
     return (
@@ -71,7 +77,7 @@ export default function TvScreen(): ReactNode {
       <header className="flex flex-wrap items-baseline justify-between gap-sm">
         <div className="flex items-baseline gap-sm">
           <h1 className="text-tv-row font-semibold">
-            {`${event.name} · ${data.eventDayLabel ?? 'Ops'}`}
+            <EventIdentity name={event.name} /> · {data.eventDayLabel ?? 'Ops'}
           </h1>
           <AppLink
             href="/chief"

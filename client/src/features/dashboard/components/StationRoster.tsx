@@ -3,6 +3,8 @@ import type { StationDashboardResponse } from '@spoh/shared';
 import { Card, Section, StatusText } from '@/shared/ui';
 import { useEvent } from '@/shared/lib/eventContext';
 import { shiftHours } from '@/shared/lib/format';
+import { entityPath } from '@/shared/lib/workspacePath';
+import { AppLink } from '@/shared/lib/AppLink';
 
 /** One row per assignment, so a person on two shifts is listed once for each, with its hours. */
 export function StationRoster({ board }: { board: StationDashboardResponse }): ReactNode {
@@ -19,7 +21,7 @@ export function StationRoster({ board }: { board: StationDashboardResponse }): R
               className="flex items-center justify-between gap-sm py-xs first:pt-0 last:pb-0"
             >
               <span className="min-w-0">
-                <span className="block">{person.volunteerName}</span>
+                <AppLink className="block text-primary underline" href={entityPath({ kind: 'assignment', id: person.assignmentId })}>{person.volunteerName}</AppLink>
                 <span className="block text-caption text-text-muted">
                   {person.roleLabel} · {shiftHours(person.shift, timezone)}
                 </span>

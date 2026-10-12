@@ -22,11 +22,11 @@ export async function getCountViews(eventId: string, signal?: AbortSignal) {
     gifts: GiftSummaryResponse.parse(gifts),
   };
 }
-export async function getDataHealth(eventId: string, signal?: AbortSignal) {
-  const options = { signal, cache: 'no-store' as const };
+export async function getDataHealth(eventId: string, options: { signal?: AbortSignal; staffing?: boolean } = {}) {
+  const request = { signal: options.signal, cache: 'no-store' as const };
   const [health, staffing] = await Promise.all([
-    eventApi(eventId, '/dashboard/data-health', options),
-    eventApi(eventId, '/roster/gaps', options),
+    eventApi(eventId, '/dashboard/data-health', request),
+    options.staffing ? eventApi(eventId, '/roster/gaps', request) : Promise.resolve(null),
   ]);
-  return { ...DataHealthResponse.parse(health), staffing: StaffingGapsResponse.parse(staffing) };
+  return { ...DataHealthResponse.parse(health), staffing: staffing === null ? null : StaffingGapsResponse.parse(staffing) };
 }

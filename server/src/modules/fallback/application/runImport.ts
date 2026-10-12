@@ -7,6 +7,7 @@ import type { ImportPlan } from '../domain/importPlan.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { assertImportProvenance, type ImportProvenance } from './importProvenance.js';
 import { assertCountCaptureOpen } from '../../../platform/db/countCaptureAdmission.js';
+import { requireCurrentPermission } from '../../../platform/access/currentPermission.js';
 
 interface ImportInput<T extends { stationId: string }> {
   source: 'FALLBACK_SHEET' | 'PAPER';
@@ -63,26 +64,26 @@ async function applyPlan<T extends { stationId: string }>(
   const { plan } = input;
   return prisma.$transaction(async (tx) => {
     await assertImportProvenance(tx, scope, input.provenance);
+    await requireCurrentPermission(tx, { scope, personId: volunteerId, membershipId, action: 'Fallback.Import' });
     for (const stationId of new Set(plan.creates.map(({ record }) => record.stationId))) {
       await assertCountCaptureOpen(tx, scope, stationId);
     }
-    const created = await input.insert(
-      tx,
-      scope,
-      plan.creates.map((keyed) => keyed.record),
-    );
-    const skipped = plan.skipped + (plan.creates.length - created);
-
     const batch = await createImportBatch(tx, scope, {
       source: input.source,
       targetTable: input.targetTable,
-      rowCount: created,
+      rowCount: 0,
+      provenanceVersion: 1,
+      fallbackWindowId: input.provenance.fallbackWindowId ?? null,
       fileName: input.fileName,
       importedById: volunteerId,
       importedByMembershipId: membershipId,
       notes: input.notes,
       rehearsal: input.provenance.rehearsal,
     });
+    const created = await input.insert(tx, scope,
+      plan.creates.map((keyed) => ({ ...keyed.record, importBatchId: batch.id })));
+    const skipped = plan.skipped + (plan.creates.length - created);
+    await tx.importBatch.update({ where: { eventId: scope.eventId, id: batch.id }, data: { rowCount: created } });
 
     await writeAudit(tx, {
       ...audit,

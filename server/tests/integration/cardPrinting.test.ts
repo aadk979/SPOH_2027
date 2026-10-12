@@ -215,6 +215,13 @@ describe('private card print exports', () => {
     expect(row.shortCodes).toEqual(['ABC123', 'ABC126']);
     expect(row.printContext).toEqual({
       eventName: event.name,
+      branding: {
+        schemaVersion: 1,
+        publicationId: null,
+        publicationVersion: null,
+        accent: '#0066cc',
+        logo: null,
+      },
       stampingStations: [{ id: station.id, name: '课程体验站 தமிழ் நிலையம்' }],
       batches: [
         { shortCode: 'ABC123', batchLabel: '印刷批次 தமிழ்' },

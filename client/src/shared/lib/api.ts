@@ -125,7 +125,7 @@ export async function api<T>(path: string, options: ApiRequest = {}): Promise<T>
 /** Authenticated images use the same renewal and error handling as JSON reads. */
 export async function apiBlob(
   path: string,
-  options: Pick<ApiRequest, 'offlineContent'> = {},
+  options: Pick<ApiRequest, 'offlineContent' | 'signal' | 'cache'> = {},
 ): Promise<Blob> {
   const invocation: ApiInvocation = {
     path,

@@ -4,9 +4,9 @@ import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import { prisma } from '../../../platform/db/client.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { minutesBetween, systemClock, type Clock } from '../../../platform/time/index.js';
-import { dispatch } from '../../notification/index.js';
+import { activeNoticeAudience, queueNotices } from '../../notification/index.js';
 import { findAlertForUpdate, resolveAlert } from '../data/repo.js';
-import { assertAlertActive, resolvedPush } from '../domain/alertRules.js';
+import { assertAlertActive } from '../domain/alertRules.js';
 import { getAlert } from './alertRecord.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
 
@@ -16,7 +16,7 @@ export async function resolve(
   request: ResolveLostPersonRequest,
   { scope, audit, clock = systemClock }: ActorContext & { clock?: Clock },
 ): Promise<LostPersonAlertRecord> {
-  const existing = await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx) => {
     await holdCaptureEvent(tx, scope);
     const alert = await findAlertForUpdate(tx, scope, alertId);
     if (!alert) throw new NotFoundError('Lost person alert');
@@ -35,10 +35,12 @@ export async function resolve(
         rehearsal: alert.rehearsal,
       },
     });
-    return alert;
+    await queueNotices(tx, scope, { kind: 'LOST_PERSON_RESOLVED', priority: 'URGENT',
+      source: { kind: 'LOST_PERSON', id: alert.id }, transitionKey: `lostPerson:${alert.id}:resolved`,
+      context: { type: 'lost-person' }, recipientPersonIds: await activeNoticeAudience(scope, { tx }),
+      createdAt: now });
   });
 
   const record = await getAlert(scope, alertId, audit.actorId ?? '');
-  void dispatch(scope, resolvedPush(existing));
   return record;
 }

@@ -10,6 +10,7 @@ import {
 } from '../data/deliveryExecutionRepo.js';
 import { deliveryDeadlineMs } from '../domain/deliveryDeadline.js';
 import { audienceOf } from '../domain/audience.js';
+import { urgentPushPreference } from '../data/noticePreferenceRepo.js';
 
 function sourceRefusal(locked: LockedDelivery): AnnouncementPushDeliveryError | null {
   const { row, event, now } = locked;
@@ -33,6 +34,7 @@ export async function deliveryReadiness(
 ): Promise<ReadyDevice> {
   const refusal = sourceRefusal(locked);
   if (refusal) return { refusal, device: null };
+  if (!await urgentPushPreference(tx, locked.row.recipientPersonId)) return { refusal: 'PUSH_DISABLED', device: null };
   const recipient = await currentDeliveryRecipient(tx, {
     locked,
     audience: audienceOf(locked.row.plan.announcement),

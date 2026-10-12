@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { VolunteerAdminRecord } from '@spoh/shared';
 import { useMe } from '@/features/session';
-import { Button, Callout, Checkbox, Stack } from '@/shared/ui';
+import { Button, Callout, Checkbox, Stack, ErrorState } from '@/shared/ui';
 import { useBulkPeopleDraft } from '../hooks/useBulkPeopleDraft';
 import { BulkPeopleFields } from './BulkPeopleFields';
 
@@ -53,9 +53,7 @@ export function BulkPeoplePanel({ rows }: { rows: VolunteerAdminRecord[] }): Rea
             </Button>
           )}
           {draft.apply.isError ? (
-            <Callout tone="alert" role="alert">
-              {draft.apply.error.message}
-            </Callout>
+            <ErrorState error={draft.apply.error} />
           ) : null}
           {draft.apply.data ? (
             <Callout tone="info" role="status">

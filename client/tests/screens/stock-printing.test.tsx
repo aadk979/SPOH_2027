@@ -12,7 +12,7 @@ const api = vi.hoisted(() => ({
   create: vi.fn(),
   adjust: vi.fn(),
 }));
-vi.mock('@/shared/lib/eventContext', () => ({ useEventId: () => 'event-a' }));
+vi.mock('@/shared/lib/eventContext', () => ({ useEventId: () => 'event-a', useEvent: () => ({ id: 'event-a', status: 'LIVE' }), useOptionalEvent: () => null }));
 vi.mock('@/features/session', () => ({
   useCurrentSession: () => ({ volunteerId: 'print-manager' }),
   useAllows: () => () => true,
@@ -102,7 +102,7 @@ it('records opening stock and refuses a zero stock correction', async () => {
   fireEvent.change(screen.getByLabelText('Reason for stock change'), {
     target: { value: 'Delivery' },
   });
-  fireEvent.click(screen.getByRole('button', { name: 'Record stock change' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Review stock change' }));
   expect(api.adjust).not.toHaveBeenCalled();
   expect(await screen.findByText('A zero adjustment records nothing')).toBeTruthy();
 });
@@ -113,10 +113,18 @@ it('keeps the same stock receipt after a transport failure and replaces it after
   fireEvent.change(screen.getByLabelText('Reason for stock change'), {
     target: { value: 'Delivery' },
   });
+  fireEvent.click(screen.getByRole('button', { name: 'Review stock change' }));
+  expect(api.adjust).not.toHaveBeenCalled();
+  const origin = screen.getByRole('button', { name: 'Review stock change' });
+  fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+  expect(api.adjust).not.toHaveBeenCalled();
+  origin.focus(); fireEvent.click(origin);
+  expect(screen.getByText('Pool: Live')).toBeTruthy();
   fireEvent.click(screen.getByRole('button', { name: 'Record stock change' }));
-  await screen.findByText(/Stock was not confirmed/);
+  await screen.findAllByText(/Changing gift stock was not confirmed/);
   const first = api.adjust.mock.calls[0]![1].body.idempotencyKey;
   fireEvent.click(screen.getByRole('button', { name: 'Record stock change' }));
-  await screen.findByText('Stock change recorded.');
+  await screen.findByText('Stock change recorded in the reviewed pool.');
   expect(api.adjust.mock.calls[1]![1].body.idempotencyKey).toBe(first);
+  expect(api.adjust.mock.calls[0]![1].body).toMatchObject({ delta: 5, reason: 'Delivery', expectedRehearsal: false });
 });

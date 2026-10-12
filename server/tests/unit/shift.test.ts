@@ -66,9 +66,9 @@ describe('staffingGaps', () => {
         { id: 'd', name: 'D' },
       ],
       staffing: [
-        { stationId: 'b', shiftCode: 'MORNING', assigned: 2, checkedIn: 0 },
-        { stationId: 'c', shiftCode: 'MORNING', assigned: 2, checkedIn: 1 },
-        { stationId: 'd', shiftCode: 'MORNING', assigned: 2, checkedIn: 2 },
+        { stationId: 'b', shiftId: 'shift-am', shiftCode: 'MORNING', assigned: 2, checkedIn: 0 },
+        { stationId: 'c', shiftId: 'shift-am', shiftCode: 'MORNING', assigned: 2, checkedIn: 1 },
+        { stationId: 'd', shiftId: 'shift-am', shiftCode: 'MORNING', assigned: 2, checkedIn: 2 },
       ],
     });
     expect(gaps.map((gap) => [gap.stationId, gap.severity, gap.missing])).toEqual([
@@ -87,6 +87,7 @@ describe('longShiftWarnings', () => {
     const at = (hoursAgo: number) => new Date(now.getTime() - hoursAgo * 3_600_000);
     const row = (volunteerId: string, hoursAgo: number) => ({
       volunteerId,
+      id: `${volunteerId}-${hoursAgo}`, stationId: 'station', shiftId: 'shift-am', eventDayId: 'day',
       checkedInAt: at(hoursAgo),
       volunteer: { displayName: volunteerId },
       station: { name: 'Room' },

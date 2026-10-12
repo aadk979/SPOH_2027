@@ -80,6 +80,7 @@ const responses = () => ({
   },
   '/dashboard/data-health': {
     asOf: AS_OF,
+    rosterAvailability: 'available',
     withinEventHours: true,
     fallbackWindowOpen: true,
     flaggedRedemptions: [],
@@ -138,7 +139,7 @@ function mount() {
   };
 }
 beforeEach(() => {
-  state.actions = ['Dashboard.ReadStation', 'Dashboard.ReadEvent'];
+  state.actions = ['Dashboard.ReadStation', 'Dashboard.ReadEvent', 'Roster.ReadStation'];
   state.personId = 'reader-a';
   state.eventId = 'event-a';
   state.signedIn = true;
@@ -204,13 +205,26 @@ describe('counts and data health', () => {
     ).toBe(false);
     expect(screen.queryByRole('heading', { name: 'Data health' })).toBeNull();
   });
-  it('reads health independently when the reader has only event-wide permission', async () => {
-    state.actions = ['Dashboard.ReadEvent'];
+  it('reads health and permitted staffing independently without the station counts grant', async () => {
+    state.actions = ['Dashboard.ReadEvent', 'Roster.ReadStation'];
     mount();
     await screen.findByText('Fallback is open; reconcile paper records.');
     expect(mockedApi.mock.calls).toHaveLength(2);
     expect(screen.queryByRole('heading', { name: 'Room entries' })).toBeNull();
     expect(screen.getByText('Your event permission does not allow these counts.')).toBeTruthy();
+  });
+  it('does not request staffing or display named recorder checks without roster permission', async () => {
+    state.actions = ['Dashboard.ReadEvent'];
+    const data = responses();
+    data['/dashboard/data-health'].rosterAvailability = 'denied';
+    data['/dashboard/data-health'].staleDevices = [];
+    mockedApi.mockImplementation(async (path) => data[path.replace(/^\/events\/[^/]+/, '') as keyof typeof data]);
+    mount();
+    await screen.findByText('Fallback is open; reconcile paper records.');
+    expect(mockedApi.mock.calls.map(([path]) => path)).toEqual(['/events/event-a/dashboard/data-health']);
+    expect(screen.getByText('Named recorder checks are unavailable under your current roster permission.')).toBeTruthy();
+    expect(screen.queryByText('Sam at Atrium: no recent capture.')).toBeNull();
+    expect(screen.queryByText(/checked in of .* assigned/)).toBeNull();
   });
   it('makes no protected request when no grant is present or the session has ended', async () => {
     state.actions = [];
@@ -227,7 +241,8 @@ describe('counts and data health', () => {
       throw new Error('Room totals could not be read');
     });
     mount();
-    await screen.findByText('Room totals could not be read');
+    await screen.findByText('This action was not confirmed');
+    expect(screen.queryByText('Room totals could not be read')).toBeNull();
     expect(await screen.findByText('Fallback is open; reconcile paper records.')).toBeTruthy();
     expect(screen.queryByText('12 room entries in the summary.')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Retry counts' }));
@@ -250,7 +265,8 @@ describe('counts and data health', () => {
       return usual(...args);
     });
     mount();
-    await screen.findByText('Staffing unavailable');
+    await screen.findByText('This action was not confirmed');
+    expect(screen.queryByText('Staffing unavailable')).toBeNull();
     expect(await screen.findByText('12 room entries in the summary.')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Retry data health' }));
     expect(await screen.findByText('Fallback is open; reconcile paper records.')).toBeTruthy();

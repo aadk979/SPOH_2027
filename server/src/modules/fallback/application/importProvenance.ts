@@ -37,7 +37,13 @@ export async function assertImportProvenance(
   provenance: ImportProvenance,
 ): Promise<void> {
   const current = await admitCapture(tx, scope);
-  if (provenance.fallbackWindowId) return;
+  if (provenance.fallbackWindowId) {
+    const window = await findWindow(tx, scope, provenance.fallbackWindowId);
+    if (!window || window.rehearsal !== provenance.rehearsal) {
+      throw new ConflictError(ERROR_CODES.CONFLICT, 'The proven fallback window changed. Preview the import again.');
+    }
+    return;
+  }
   if (current.rehearsal !== provenance.rehearsal) {
     throw new ConflictError(
       ERROR_CODES.CONFLICT,

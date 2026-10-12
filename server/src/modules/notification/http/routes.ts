@@ -14,6 +14,8 @@ import { pushConfigHandler, subscribeHandler, unsubscribeHandler } from './handl
  * Every signed-in volunteer may register their own device, and only their own —
  * the subscription is written against `req.auth.volunteerId`, never against an
  * id from the body.
+ * This event-member compatibility surface remains for existing devices; the
+ * current client uses the person-owned /notification-centre/device surface.
  */
 export const notificationRouter: Router = Router();
 

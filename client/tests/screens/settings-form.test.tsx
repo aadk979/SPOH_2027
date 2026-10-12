@@ -187,7 +187,8 @@ describe('event name', () => {
     await loaded();
     fireEvent.change(field(), { target: { value: 'SPOH 2027' } });
     fireEvent.click(renameButton()!);
-    await screen.findByText('Not saved');
+    await screen.findByText('This action was not confirmed');
+    expect(screen.queryByText('offline')).toBeNull();
     expect(field().value).toBe('SPOH 2027');
     fails = false;
     fireEvent.click(renameButton()!);

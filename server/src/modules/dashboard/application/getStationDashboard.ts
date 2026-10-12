@@ -1,123 +1,31 @@
-import { systemClock } from '../../../platform/time/index.js';
-import { toShiftRef } from '../../../platform/db/shiftRef.js';
 import type { StationDashboardResponse } from '@spoh/shared';
+import { systemClock } from '../../../platform/time/index.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
-import { prepareThresholds } from '../../../platform/settings/thresholds.js';
 import { eventToday, eventTodayStart } from '../../../platform/event/today.js';
-import { minutesBetween } from '../../../platform/time/index.js';
-import { findStationById } from '../../station/index.js';
-import {
-  footfallByDevice,
-  registrationsByDevice,
-  stampsAtStation,
-  stationRegistrationsByCategory,
-  stationRoster,
-  type Window,
-} from '../data/repo.js';
-import { deviceRate } from '../domain/signals.js';
-import { flaggedRedemptions } from '../data/flaggedRedemptions.js';
 import type { ReportingScope } from '../../../platform/db/rehearsalFilter.js';
+import type { ReadContext } from '../../../platform/access/currentRead.js';
+import { findStationById } from '../../station/index.js';
+import { dashboardObservation } from './observation.js';
+import { stationRosterAccess } from './rosterAccess.js';
+import { stationPanels } from './stationPanels.js';
 
-/**
- * The same picture scoped to one station, for an IC.
- *
- * The per-device breakdown is the point: two volunteers working the same queue
- * can see the discrepancy between their totals, which is how double-counting
- * becomes visible before it becomes a reconciliation problem (§2.4).
- */
-export async function getStationDashboard(
-  scope: ReportingScope,
-  stationId: string,
-  now = systemClock.now(),
-): Promise<StationDashboardResponse> {
+type StationOptions = Date | { now?: Date; reader?: ReadContext };
+function stationOptions(options: StationOptions) {
+  return options instanceof Date ? { now: options } : { now: options.now ?? systemClock.now(),
+    ...(options.reader ? { reader: options.reader } : {}) };
+}
+
+/** Count authority does not grant the private roster or device facets. */
+export async function getStationDashboard(scope: ReportingScope, stationId: string,
+  options: StationOptions = systemClock.now()): Promise<StationDashboardResponse> {
+  const input = stationOptions(options);
   const station = await findStationById(scope, stationId);
   if (!station) throw new NotFoundError('Station');
-
-  const since = await eventTodayStart(scope, now);
-  const today = await eventToday(scope, now);
-  const window = { since, until: now };
-  const [registrations, footfall, stamps, roster, flagged] = await Promise.all([
-    registrationsPanel(scope, stationId, window),
-    footfallPanel(scope, stationId, window),
-    stampsAtStation(scope, stationId, window),
-    rosterPanel(scope, stationId, today),
-    flaggedRedemptions(scope, { since, until: now, stationId }),
-  ]);
-
-  return {
-    rehearsalIncluded: scope.includeRehearsal ?? false,
-    asOf: now.toISOString(),
-    stationId: station.id,
-    stationName: station.name,
-    registrations,
-    footfall,
-    stamps,
-    flaggedRedemptions: flagged,
-    roster,
-  };
-}
-
-type Panels = StationDashboardResponse;
-
-async function registrationsPanel(
-  scope: ReportingScope,
-  stationId: string,
-  window: Window,
-): Promise<Panels['registrations']> {
-  const implausibleRate = (await prepareThresholds(scope)).implausibleTapsPerMinute(stationId);
-  const [devices, byCategory] = await Promise.all([
-    registrationsByDevice(scope, stationId, window),
-    stationRegistrationsByCategory(scope, stationId, window),
-  ]);
-  return {
-    unit: 'registrations',
-    todayTotal: devices.reduce((sum, device) => sum + device.value, 0),
-    byCategory,
-    byDevice: devices.map((device) => ({
-      volunteerId: device.volunteerId,
-      volunteerName: device.volunteerName,
-      value: device.value,
-      ...deviceRate(device.value, minutesBetween(device.firstAt, device.lastAt), implausibleRate),
-    })),
-  };
-}
-
-async function footfallPanel(
-  scope: ReportingScope,
-  stationId: string,
-  window: Window,
-): Promise<Panels['footfall']> {
-  const devices = await footfallByDevice(scope, stationId, window);
-  return {
-    unit: 'roomEntries',
-    todayTotal: devices.reduce((sum, device) => sum + device.value, 0),
-    lastActivityAt:
-      devices
-        .map((device) => device.lastAt)
-        .sort((a, b) => b.getTime() - a.getTime())[0]
-        ?.toISOString() ?? null,
-    contributors: devices.map((device) => ({
-      volunteerId: device.volunteerId,
-      volunteerName: device.volunteerName,
-      value: device.value,
-      lastActivityAt: device.lastAt.toISOString(),
-    })),
-  };
-}
-
-async function rosterPanel(
-  scope: ReportingScope,
-  stationId: string,
-  day: Date,
-): Promise<Panels['roster']> {
-  const roster = await stationRoster(scope, stationId, day);
-  return roster.map((assignment) => ({
-    assignmentId: assignment.id,
-    shift: toShiftRef(assignment.shift),
-    volunteerId: assignment.volunteerId,
-    volunteerName: assignment.volunteer.displayName,
-    roleLabel: assignment.roleLabel,
-    checkedInAt: assignment.checkedInAt?.toISOString() ?? null,
-    checkedOutAt: assignment.checkedOutAt?.toISOString() ?? null,
-  }));
+  const since = await eventTodayStart(scope, input.now);
+  const today = await eventToday(scope, input.now);
+  const privateRoster = await stationRosterAccess(scope, { stationId, ...input });
+  const panels = await stationPanels(scope, { stationId, window: { since, until: input.now }, today, privateRoster });
+  return { rehearsalIncluded: scope.includeRehearsal ?? false, asOf: input.now.toISOString(),
+    observation: dashboardObservation(scope, { today, since, now: input.now }), stationId: station.id, stationName: station.name,
+    rosterAvailability: privateRoster ? 'available' : 'denied', deviceAvailability: privateRoster ? 'available' : 'denied', ...panels };
 }

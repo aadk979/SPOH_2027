@@ -3,8 +3,9 @@
 import { type ReactNode } from 'react';
 
 import { AppShell } from '@/shared/shell/AppShell';
+import { SyncIndicator } from '@/shared/shell/SyncIndicator';
 import { CardCodeInput } from '@/features/capture';
-import { Button, Callout, EmptyState, Section } from '@/shared/ui';
+import { Button, Callout, CountHelp, EmptyState, Section } from '@/shared/ui';
 import { GiftPicker } from '../components/GiftPicker';
 import { useRedemption } from '../hooks/useRedemption';
 import { useRequireSession } from '@/features/session';
@@ -38,7 +39,7 @@ export default function RedeemScreen(): ReactNode {
   }
 
   return (
-    <AppShell width="capture" title="Redeem a gift" back={{ href: '/home', label: 'Home' }}>
+    <AppShell width="capture" title="Redeem a gift" back={{ href: '/home', label: 'Home' }} actions={<SyncIndicator />}>
       <div className="flex flex-col gap-lg">
         <p className="text-caption text-text-muted">
           Check the stamps on the physical card first. The scan is a cross-check, not a gate.
@@ -71,11 +72,13 @@ export default function RedeemScreen(): ReactNode {
           <p className="text-text-muted">Pick a gift to continue.</p>
         )}
 
+        {pending ? <Callout tone="info" role="status">Recording this gift handover…</Callout> : null}
         {message ? (
           <Callout tone={message.tone} role="status">
             <span className="font-semibold">{message.text}</span>
           </Callout>
         ) : null}
+        <CountHelp topic="redemptions" />
       </div>
     </AppShell>
   );

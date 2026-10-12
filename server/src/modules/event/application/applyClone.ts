@@ -28,6 +28,7 @@ import { movedDays, movedShifts } from '../domain/movedStructure.js';
 import type { ClonePlan } from './planClone.js';
 import { copyEventSettings } from '../data/cloneSettingsRepo.js';
 import { cloneContentInto } from '../../content/index.js';
+import { cloneBrandingInto } from '../../branding/index.js';
 
 /**
  * Create the planned clone in one transaction (ADR-001 §6): a DRAFT event
@@ -68,6 +69,8 @@ export async function applyCloneInTransaction(
     now: context.now,
   });
   if (plan.request.copy?.settings !== false) await copyEventSettings(tx, target, source.id);
+  await cloneBrandingInto(tx, { sourceScope: { eventId: source.id }, targetScope: { eventId: event.id },
+    copySettings: plan.request.copy?.settings !== false });
   if (plan.request.copy?.content !== false && context.audit.actorId)
     await cloneContentInto(tx, {
       sourceEventId: source.id,
@@ -100,7 +103,6 @@ function createClonedEvent(
     timezone: source.timezone,
     locale: source.locale,
     dayBoundaryMinutes: source.dayBoundaryMinutes,
-    ...(source.branding !== null ? { branding: source.branding } : {}),
     status: 'DRAFT',
     clonedFromEventId: source.id,
   });

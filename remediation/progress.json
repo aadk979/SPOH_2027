@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-10T17:04:42.236Z",
+  "updatedAt": "2026-10-11T11:06:37.775Z",
   "current": {
-    "phase": "P13",
-    "step": "P13.10"
+    "phase": "P14",
+    "step": "P14.10"
   },
   "gates": [
     {
@@ -1740,7 +1740,7 @@
           "title": "DNS, TLS and edge (needs D-08)",
           "status": "done",
           "startedAt": "2026-10-02T12:36:53.451Z",
-          "completedAt": "2026-10-10T14:03:54.569Z",
+          "completedAt": "2026-10-11T10:43:13.306Z",
           "commits": [
             "ff8fe1f7a78514d57c54abf4de5dbf59795d3f43",
             "89366e4e207cec0b678823ea76d38973b9101ec4",
@@ -1751,7 +1751,8 @@
             "18b6dbe0e85d6db86e73d6dfc818cdb7459fc522",
             "ce0a83a64b057295ea71c5d10e283d98855e97f8",
             "3f4f6a1c83cdfbfb2c40893d368dfd349a253b42",
-            "6755db38ce3f8891cc1ac26f309d9165c8f03705"
+            "6755db38ce3f8891cc1ac26f309d9165c8f03705",
+            "c00da9faefda04ac2984dac177e5903a8e3b0260"
           ],
           "notes": [
             {
@@ -1797,6 +1798,10 @@
             {
               "at": "2026-10-10T14:03:54.595Z",
               "text": "Code complete (edge, exact origins, explicit refresh flow); production identifiers wait for P12.8. CI 38056722817 green"
+            },
+            {
+              "at": "2026-10-11T10:43:13.347Z",
+              "text": "Code and authored tests verified: complete Node 24 local gate exit 0; exact-head application CI 38131824850 all five jobs success. AWS remains torn down; staging/browser/soak/owner acceptance deferred to P16 under ADR-011."
             }
           ]
         },
@@ -1805,11 +1810,12 @@
           "title": "Secrets and configuration",
           "status": "done",
           "startedAt": "2026-10-02T12:07:33.967Z",
-          "completedAt": "2026-10-10T14:03:54.960Z",
+          "completedAt": "2026-10-11T10:43:14.142Z",
           "commits": [
             "d362d1765ff9c8512750cdd34a518a2020a30102",
             "89366e4e207cec0b678823ea76d38973b9101ec4",
-            "6755db38ce3f8891cc1ac26f309d9165c8f03705"
+            "6755db38ce3f8891cc1ac26f309d9165c8f03705",
+            "c00da9faefda04ac2984dac177e5903a8e3b0260"
           ],
           "notes": [
             {
@@ -1827,6 +1833,10 @@
             {
               "at": "2026-10-10T14:03:54.997Z",
               "text": "SSM injection, scoped roles, attendance secret, VAPID secret + provisioning helper; operator rotation assumed (no NAT). Rotation proof in P16.8. CI 38056722817 green"
+            },
+            {
+              "at": "2026-10-11T10:43:14.179Z",
+              "text": "Code and authored tests verified: complete Node 24 local gate exit 0; exact-head application CI 38131824850 all five jobs success. AWS remains torn down; staging/browser/soak/owner acceptance deferred to P16 under ADR-011."
             }
           ]
         },
@@ -1835,7 +1845,7 @@
           "title": "Storage",
           "status": "done",
           "startedAt": "2026-10-04T12:10:08.912Z",
-          "completedAt": "2026-10-10T14:03:55.250Z",
+          "completedAt": "2026-10-11T10:43:14.611Z",
           "commits": [
             "0ec47031f1d2fcf6c64db27decc8d887d22a1211",
             "2cd80a382d7073b021b7a209803ff1818470a0a4",
@@ -1844,7 +1854,8 @@
             "ac6a186dad23c5b354e0aef2f6d43a79d5c82783",
             "e5a2a1cd0961df4d21721419ec9a2e8e5dd11fa3",
             "619094980810de06afa1a8e0bf147f124fb057d9",
-            "6755db38ce3f8891cc1ac26f309d9165c8f03705"
+            "6755db38ce3f8891cc1ac26f309d9165c8f03705",
+            "c00da9faefda04ac2984dac177e5903a8e3b0260"
           ],
           "notes": [
             {
@@ -1890,22 +1901,27 @@
             {
               "at": "2026-10-10T14:03:55.276Z",
               "text": "Private buckets, signed uploads, versioned content, frozen floor plans, private XLSX export packs, media retention. Staging privacy/upload checks in P16.8. CI 38056722817 green"
+            },
+            {
+              "at": "2026-10-11T10:43:14.651Z",
+              "text": "Code and authored tests verified: complete Node 24 local gate exit 0; exact-head application CI 38131824850 all five jobs success. AWS remains torn down; staging/browser/soak/owner acceptance deferred to P16 under ADR-011."
             }
           ]
         },
         {
           "id": "P08.8",
           "title": "Observability",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-02T15:20:43.846Z",
-          "completedAt": null,
+          "completedAt": "2026-10-11T10:43:15.063Z",
           "commits": [
             "a852c535d1181d6073ac591a41ca6a1df09d2ede",
             "1a87f4ff0a529d2fa36e33c5e9f3ced488d933fb",
             "210db7b675173634aa4aa5c26d1c7979c27eb607",
             "cd4c94083212889170ee741c4691c0256ff4ecea",
             "79c95b26ccf78ee0227671a0d64615da1588575a",
-            "6dd233b6f76e2c798c1f52e4364cf892ac0f498b"
+            "6dd233b6f76e2c798c1f52e4364cf892ac0f498b",
+            "c00da9faefda04ac2984dac177e5903a8e3b0260"
           ],
           "notes": [
             {
@@ -1939,19 +1955,24 @@
             {
               "at": "2026-10-07T03:18:45.857Z",
               "text": "API access logs are one JSON line per request with integration status/latency/error, response latency, path and gateway error type/message (ac84907; quoting fix 2bfae89 after staging showed the unquoted messageString wrote a bare -). Task 141 acceptance: 37/37 lines parse. 503 watch: 8 503s on task 136 between 11:24-13:13 UTC 6 Oct, none since task 137 (13:38 UTC) through 03:20 UTC 7 Oct. Notification, dashboard and budget criteria remain open (P08 dashboard awaits owner cost decision)."
+            },
+            {
+              "at": "2026-10-11T10:43:15.099Z",
+              "text": "Code and authored tests verified: complete Node 24 local gate exit 0; exact-head application CI 38131824850 all five jobs success. AWS remains torn down; staging/browser/soak/owner acceptance deferred to P16 under ADR-011."
             }
           ]
         },
         {
           "id": "P08.9",
           "title": "CI/CD",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-05T09:28:18.296Z",
-          "completedAt": null,
+          "completedAt": "2026-10-11T10:43:15.609Z",
           "commits": [
             "cb506cf8ace20c07c9c4e26e1b1de53eda9f3589",
             "73d1849a09afefb40f741528c46dd80f5bc3dfcd",
-            "ba183cca8352e529c64cfb3f062e24e6bee836a6"
+            "ba183cca8352e529c64cfb3f062e24e6bee836a6",
+            "c00da9faefda04ac2984dac177e5903a8e3b0260"
           ],
           "notes": [
             {
@@ -1969,6 +1990,10 @@
             {
               "at": "2026-10-07T03:18:45.468Z",
               "text": "Tracker flag parsing fixed (ff184d7): --force is a switch and no longer swallows the following --note, value flags refuse to consume another flag, unknown flags are errors; four parser tests run in the dependency-free CI safety step. Released with ec6fc8e after full CI."
+            },
+            {
+              "at": "2026-10-11T10:43:15.645Z",
+              "text": "Code and authored tests verified: complete Node 24 local gate exit 0; exact-head application CI 38131824850 all five jobs success. AWS remains torn down; staging/browser/soak/owner acceptance deferred to P16 under ADR-011."
             }
           ]
         },
@@ -1977,11 +2002,12 @@
           "title": "Staging live and smoke",
           "status": "done",
           "startedAt": "2026-09-29T08:43:49.981Z",
-          "completedAt": "2026-10-10T14:03:55.540Z",
+          "completedAt": "2026-10-11T10:43:16.044Z",
           "commits": [
             "d6fe080b11c4d9479357688a83c94aa9faf37bbd",
             "7ed246bd8c195b814333af36db74b16591f4b8ea",
-            "6755db38ce3f8891cc1ac26f309d9165c8f03705"
+            "6755db38ce3f8891cc1ac26f309d9165c8f03705",
+            "c00da9faefda04ac2984dac177e5903a8e3b0260"
           ],
           "notes": [
             {
@@ -2007,22 +2033,31 @@
             {
               "at": "2026-10-10T14:03:55.567Z",
               "text": "Smoke runner, fixture command, cost reconciliation scripts exist; staging smoke and 3-day cost in P16.8. CI 38056722817 green"
+            },
+            {
+              "at": "2026-10-11T10:43:16.080Z",
+              "text": "Code and authored tests verified: complete Node 24 local gate exit 0; exact-head application CI 38131824850 all five jobs success. AWS remains torn down; staging/browser/soak/owner acceptance deferred to P16 under ADR-011."
             }
           ]
         },
         {
           "id": "P08.11",
           "title": "Report",
-          "status": "not_started",
+          "status": "done",
           "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-10-11T10:43:16.607Z",
+          "commits": ["c00da9faefda04ac2984dac177e5903a8e3b0260"],
+          "notes": [
+            {
+              "at": "2026-10-11T10:43:16.644Z",
+              "text": "Code and authored tests verified: complete Node 24 local gate exit 0; exact-head application CI 38131824850 all five jobs success. AWS remains torn down; staging/browser/soak/owner acceptance deferred to P16 under ADR-011."
+            }
+          ]
         }
       ],
-      "status": "in_progress",
+      "status": "done",
       "startedAt": "2026-09-29T03:34:33.880Z",
-      "completedAt": null
+      "completedAt": "2026-10-11T10:43:17.280Z"
     },
     {
       "id": "P09",
@@ -2318,7 +2353,7 @@
           "title": "Event lifecycle",
           "status": "done",
           "startedAt": "2026-10-01T13:40:50.186Z",
-          "completedAt": "2026-10-10T14:03:55.850Z",
+          "completedAt": "2026-10-11T10:43:17.728Z",
           "commits": [
             "6ac79bf",
             "efff58c",
@@ -2334,7 +2369,8 @@
             "a79b131b0150c00f210be5e1a6d5a924de14d187",
             "05fc4c40a69612a61412093408d427c681234e4b",
             "e362c571db7303a1c7526f9a17444c6518dba5a8",
-            "6755db38ce3f8891cc1ac26f309d9165c8f03705"
+            "6755db38ce3f8891cc1ac26f309d9165c8f03705",
+            "c00da9faefda04ac2984dac177e5903a8e3b0260"
           ],
           "notes": [
             {
@@ -2396,6 +2432,10 @@
             {
               "at": "2026-10-10T14:03:55.883Z",
               "text": "Guarded audited lifecycle; close freezes, archive checks evidence, ends memberships, starts retention. Cloud observations in P16.8. CI 38056722817 green"
+            },
+            {
+              "at": "2026-10-11T10:43:17.768Z",
+              "text": "Code and authored tests verified: complete Node 24 local gate exit 0; exact-head application CI 38131824850 all five jobs success. AWS remains torn down; staging/browser/soak/owner acceptance deferred to P16 under ADR-011."
             }
           ]
         },
@@ -2447,9 +2487,9 @@
         {
           "id": "P10.7",
           "title": "Schedulable actions",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-02T14:26:45.064Z",
-          "completedAt": null,
+          "completedAt": "2026-10-11T10:43:18.289Z",
           "commits": [
             "c0b5105ae3b26f36887ef0c32136a36b5c0c2085",
             "df85f7b1e710dda56f51d11e4ce2598fcba31d95",
@@ -2470,7 +2510,8 @@
             "3b4e5cf10c2c9136a479c6bab22574ee6e1d867d",
             "bb00322e2604c6393fdd80142f8a11e0544f23c0",
             "5ea2d31358cd21659331a70d040698a20861ea27",
-            "7ed246bd8c195b814333af36db74b16591f4b8ea"
+            "7ed246bd8c195b814333af36db74b16591f4b8ea",
+            "c00da9faefda04ac2984dac177e5903a8e3b0260"
           ],
           "notes": [
             {
@@ -2560,15 +2601,19 @@
             {
               "at": "2026-10-06T14:03:02.934Z",
               "text": "Category scheduling milestone accepted on exact image 7ed246b (task 137): normal Cognito phone lost-receipt retry, edit v2, cancel v3, real worker inactive and laptop fresh restore with public options following, hard reload, completed replay, eight WCAG 2 A/AA states, zero backend failures, sign-out 204, all owned actions terminal and unrelated baselines unchanged. Two earlier ab9a67d attempts excluded and fully cleaned. Evidence: reports/P10/staging-category-schedule-ui-evidence-2026-10-06.json. Broader P10.7/P10.8 criteria remain open."
+            },
+            {
+              "at": "2026-10-11T10:43:18.325Z",
+              "text": "Code and authored tests verified: complete Node 24 local gate exit 0; exact-head application CI 38131824850 all five jobs success. AWS remains torn down; staging/browser/soak/owner acceptance deferred to P16 under ADR-011."
             }
           ]
         },
         {
           "id": "P10.8",
           "title": "Admin UI: settings, schedule and lifecycle",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-03T14:59:10.795Z",
-          "completedAt": null,
+          "completedAt": "2026-10-11T10:43:18.847Z",
           "commits": [
             "e9b1be7ccdc6ff48193efb01d008209fd5ef799c",
             "b71fe5003685854aeb7c27332cfedee149d7a29f",
@@ -2596,7 +2641,8 @@
             "5acc87829e063c77202c489852052aa7acecf098",
             "7ed246bd8c195b814333af36db74b16591f4b8ea",
             "86d2ec49a927438c54c6a0165a27ff3ba8ad115c",
-            "a81f36bd54b5e6e2f25119117213e83fdfadadb4"
+            "a81f36bd54b5e6e2f25119117213e83fdfadadb4",
+            "c00da9faefda04ac2984dac177e5903a8e3b0260"
           ],
           "notes": [
             {
@@ -2742,27 +2788,38 @@
             {
               "at": "2026-10-07T06:05:40.221Z",
               "text": "Organisation-wide settings moved per owner decision D-17 (platform admins only). Editor 3e946b5 (task 144): /admin/organisation-settings with current-organisation-role check, legacy PATCH refused; refusal-only staging acceptance passed. Copy/readers 8f1c9d6 (task 145): devices, refresh sessions (cookie 30.00 days = organisation value) and per-organisation replay prune read the platform scope; no staging legacy overrides to copy. Only eventName remains in AppSetting and nothing reads it."
+            },
+            {
+              "at": "2026-10-11T10:43:18.885Z",
+              "text": "Code and authored tests verified: complete Node 24 local gate exit 0; exact-head application CI 38131824850 all five jobs success. AWS remains torn down; staging/browser/soak/owner acceptance deferred to P16 under ADR-011."
             }
           ]
         },
         {
           "id": "P10.9",
           "title": "Verify and report",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-03T13:41:27.997Z",
-          "completedAt": null,
-          "commits": ["4b597947d4722334554322fc76a95fecacb73364"],
+          "completedAt": "2026-10-11T10:43:19.353Z",
+          "commits": [
+            "4b597947d4722334554322fc76a95fecacb73364",
+            "c00da9faefda04ac2984dac177e5903a8e3b0260"
+          ],
           "notes": [
             {
               "at": "2026-10-03T13:41:28.035Z",
               "text": "Actual staging-announcement subcriterion passed at 21:39 Singapore on exact 2ecabfd after green CI/deploy: normal Cognito/API owned-draft producer, real scheduled INFO publication, private current status/replay, one Chrome inbox message and hard reload, sign-out. Full P10.9 remains open for phase dependencies/remaining verification; no external device receipt claimed."
+            },
+            {
+              "at": "2026-10-11T10:43:19.390Z",
+              "text": "Code and authored tests verified: complete Node 24 local gate exit 0; exact-head application CI 38131824850 all five jobs success. AWS remains torn down; staging/browser/soak/owner acceptance deferred to P16 under ADR-011."
             }
           ]
         }
       ],
-      "status": "in_progress",
+      "status": "done",
       "startedAt": "2026-10-01T07:26:01.906Z",
-      "completedAt": null
+      "completedAt": "2026-10-11T10:43:19.831Z"
     },
     {
       "id": "P11",
@@ -2962,11 +3019,16 @@
         {
           "id": "P12.1",
           "title": "Pool configuration as code",
-          "status": "not_started",
+          "status": "done",
           "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-10-11T10:43:20.243Z",
+          "commits": ["c00da9faefda04ac2984dac177e5903a8e3b0260"],
+          "notes": [
+            {
+              "at": "2026-10-11T10:43:20.278Z",
+              "text": "Code and authored tests verified: complete Node 24 local gate exit 0; exact-head application CI 38131824850 all five jobs success. AWS remains torn down; staging/browser/soak/owner acceptance deferred to P16 under ADR-011."
+            }
+          ]
         },
         {
           "id": "P12.2",
@@ -3041,20 +3103,30 @@
         {
           "id": "P12.7",
           "title": "Verify and report",
-          "status": "not_started",
+          "status": "done",
           "startedAt": null,
-          "completedAt": null,
-          "commits": [],
-          "notes": []
+          "completedAt": "2026-10-11T10:43:20.734Z",
+          "commits": ["c00da9faefda04ac2984dac177e5903a8e3b0260"],
+          "notes": [
+            {
+              "at": "2026-10-11T10:43:20.769Z",
+              "text": "Code and authored tests verified: complete Node 24 local gate exit 0; exact-head application CI 38131824850 all five jobs success. AWS remains torn down; staging/browser/soak/owner acceptance deferred to P16 under ADR-011."
+            }
+          ]
         },
         {
           "id": "P12.8",
           "title": "Go/no-go (28 Oct) and production cutover",
-          "status": "not_started",
+          "status": "blocked",
           "startedAt": null,
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-11T11:06:35.393Z",
+              "text": "Owner hold: 28 October go/no-go and production/cutover approval retained under ADR-011; no production created."
+            }
+          ]
         }
       ],
       "status": "in_progress",
@@ -3074,14 +3146,18 @@
         {
           "id": "P13.1",
           "title": "Information architecture",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-10T17:04:40.297Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-11T10:43:21.221Z",
+          "commits": ["c00da9faefda04ac2984dac177e5903a8e3b0260"],
           "notes": [
             {
               "at": "2026-10-10T17:04:40.299Z",
               "text": "Owner ordered P13 build after identity contracts; dependency code is built in this batch. P12.8 production approval remains held. ADR-011 validation pending."
+            },
+            {
+              "at": "2026-10-11T10:43:21.257Z",
+              "text": "Code and authored tests verified: complete Node 24 local gate exit 0; exact-head application CI 38131824850 all five jobs success. AWS remains torn down; staging/browser/soak/owner acceptance deferred to P16 under ADR-011."
             }
           ]
         },
@@ -3090,26 +3166,37 @@
           "title": "Create and clone wizard",
           "status": "done",
           "startedAt": null,
-          "completedAt": "2026-10-10T14:03:57.611Z",
-          "commits": ["6755db38ce3f8891cc1ac26f309d9165c8f03705"],
+          "completedAt": "2026-10-11T10:43:21.962Z",
+          "commits": [
+            "6755db38ce3f8891cc1ac26f309d9165c8f03705",
+            "c00da9faefda04ac2984dac177e5903a8e3b0260"
+          ],
           "notes": [
             {
               "at": "2026-10-10T14:03:57.640Z",
               "text": "Create/clone wizard, transactional org-scoped creation; event-wizard spec written, run in P16. CI 38056722817 green"
+            },
+            {
+              "at": "2026-10-11T10:43:22.000Z",
+              "text": "Code and authored tests verified: complete Node 24 local gate exit 0; exact-head application CI 38131824850 all five jobs success. AWS remains torn down; staging/browser/soak/owner acceptance deferred to P16 under ADR-011."
             }
           ]
         },
         {
           "id": "P13.3",
           "title": "Setup sections",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-10T17:04:40.687Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-11T10:43:22.426Z",
+          "commits": ["c00da9faefda04ac2984dac177e5903a8e3b0260"],
           "notes": [
             {
               "at": "2026-10-10T17:04:40.688Z",
               "text": "Owner ordered P13 build after identity contracts; dependency code is built in this batch. P12.8 production approval remains held. ADR-011 validation pending."
+            },
+            {
+              "at": "2026-10-11T10:43:22.463Z",
+              "text": "Code and authored tests verified: complete Node 24 local gate exit 0; exact-head application CI 38131824850 all five jobs success. AWS remains torn down; staging/browser/soak/owner acceptance deferred to P16 under ADR-011."
             }
           ]
         },
@@ -3118,36 +3205,50 @@
           "title": "Offline content delivery",
           "status": "done",
           "startedAt": null,
-          "completedAt": "2026-10-10T14:03:57.882Z",
-          "commits": ["6755db38ce3f8891cc1ac26f309d9165c8f03705"],
+          "completedAt": "2026-10-11T10:43:22.855Z",
+          "commits": [
+            "6755db38ce3f8891cc1ac26f309d9165c8f03705",
+            "c00da9faefda04ac2984dac177e5903a8e3b0260"
+          ],
           "notes": [
             {
               "at": "2026-10-10T14:03:57.907Z",
               "text": "Versioned published content, ETag, SW precache, offline after token expiry; offline spec written, run in P16. CI 38056722817 green"
+            },
+            {
+              "at": "2026-10-11T10:43:22.891Z",
+              "text": "Code and authored tests verified: complete Node 24 local gate exit 0; exact-head application CI 38131824850 all five jobs success. AWS remains torn down; staging/browser/soak/owner acceptance deferred to P16 under ADR-011."
             }
           ]
         },
         {
           "id": "P13.5",
           "title": "People and assignments",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-10T17:04:41.022Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-11T10:43:23.313Z",
+          "commits": ["c00da9faefda04ac2984dac177e5903a8e3b0260"],
           "notes": [
             {
               "at": "2026-10-10T17:04:41.023Z",
               "text": "Owner ordered P13 build after identity contracts; dependency code is built in this batch. P12.8 production approval remains held. ADR-011 validation pending."
+            },
+            {
+              "at": "2026-10-11T10:43:23.349Z",
+              "text": "Code and authored tests verified: complete Node 24 local gate exit 0; exact-head application CI 38131824850 all five jobs success. AWS remains torn down; staging/browser/soak/owner acceptance deferred to P16 under ADR-011."
             }
           ]
         },
         {
           "id": "P13.6",
           "title": "Go-live readiness",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-06T01:15:06.381Z",
-          "completedAt": null,
-          "commits": ["7ed246bd8c195b814333af36db74b16591f4b8ea"],
+          "completedAt": "2026-10-11T10:43:24.063Z",
+          "commits": [
+            "7ed246bd8c195b814333af36db74b16591f4b8ea",
+            "c00da9faefda04ac2984dac177e5903a8e3b0260"
+          ],
           "notes": [
             {
               "at": "2026-10-06T13:22:47.560Z",
@@ -3156,69 +3257,89 @@
             {
               "at": "2026-10-06T14:03:03.352Z",
               "text": "7ed246b passed full CI 37470438573 and deployment 37471646765. Read-only normal Cognito readback on task 137: strict eleven-item checklist with no-store; categories, card batch and gift stock passed; shift coverage and attendance failed with named reasons; six external domains unavailable. No transition requested. Remaining evidence domains, P10 lifecycle, G3 and the 28 October decision stay open."
+            },
+            {
+              "at": "2026-10-11T10:43:24.098Z",
+              "text": "Code and authored tests verified: complete Node 24 local gate exit 0; exact-head application CI 38131824850 all five jobs success. AWS remains torn down; staging/browser/soak/owner acceptance deferred to P16 under ADR-011."
             }
           ]
         },
         {
           "id": "P13.7",
           "title": "Screens for every API-only feature",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-10T17:04:41.355Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-11T10:43:24.513Z",
+          "commits": ["c00da9faefda04ac2984dac177e5903a8e3b0260"],
           "notes": [
             {
               "at": "2026-10-10T17:04:41.356Z",
               "text": "Owner ordered P13 build after identity contracts; dependency code is built in this batch. P12.8 production approval remains held. ADR-011 validation pending."
+            },
+            {
+              "at": "2026-10-11T10:43:24.558Z",
+              "text": "Code and authored tests verified: complete Node 24 local gate exit 0; exact-head application CI 38131824850 all five jobs success. AWS remains torn down; staging/browser/soak/owner acceptance deferred to P16 under ADR-011."
             }
           ]
         },
         {
           "id": "P13.8",
           "title": "After the event",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-10T17:04:41.650Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-11T10:43:25.084Z",
+          "commits": ["c00da9faefda04ac2984dac177e5903a8e3b0260"],
           "notes": [
             {
               "at": "2026-10-10T17:04:41.651Z",
               "text": "Owner ordered P13 build after identity contracts; dependency code is built in this batch. P12.8 production approval remains held. ADR-011 validation pending."
+            },
+            {
+              "at": "2026-10-11T10:43:25.124Z",
+              "text": "Code and authored tests verified: complete Node 24 local gate exit 0; exact-head application CI 38131824850 all five jobs success. AWS remains torn down; staging/browser/soak/owner acceptance deferred to P16 under ADR-011."
             }
           ]
         },
         {
           "id": "P13.9",
           "title": "End-to-end journeys",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-10T17:04:41.938Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-11T10:43:25.621Z",
+          "commits": ["c00da9faefda04ac2984dac177e5903a8e3b0260"],
           "notes": [
             {
               "at": "2026-10-10T17:04:41.939Z",
               "text": "Owner ordered P13 build after identity contracts; dependency code is built in this batch. P12.8 production approval remains held. ADR-011 validation pending."
+            },
+            {
+              "at": "2026-10-11T10:43:25.658Z",
+              "text": "Code and authored tests verified: complete Node 24 local gate exit 0; exact-head application CI 38131824850 all five jobs success. AWS remains torn down; staging/browser/soak/owner acceptance deferred to P16 under ADR-011."
             }
           ]
         },
         {
           "id": "P13.10",
           "title": "Report",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-10T17:04:42.235Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-11T10:43:26.128Z",
+          "commits": ["c00da9faefda04ac2984dac177e5903a8e3b0260"],
           "notes": [
             {
               "at": "2026-10-10T17:04:42.236Z",
               "text": "Owner ordered P13 build after identity contracts; dependency code is built in this batch. P12.8 production approval remains held. ADR-011 validation pending."
+            },
+            {
+              "at": "2026-10-11T10:43:26.164Z",
+              "text": "Code and authored tests verified: complete Node 24 local gate exit 0; exact-head application CI 38131824850 all five jobs success. AWS remains torn down; staging/browser/soak/owner acceptance deferred to P16 under ADR-011."
             }
           ]
         }
       ],
-      "status": "in_progress",
+      "status": "done",
       "startedAt": "2026-10-06T01:15:06.382Z",
-      "completedAt": null
+      "completedAt": "2026-10-11T10:43:26.762Z"
     },
     {
       "id": "P14",
@@ -3233,96 +3354,146 @@
         {
           "id": "P14.1",
           "title": "Entity pages",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-11T11:06:35.644Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-11T11:06:35.645Z",
+              "text": "Whole P14 source batch in progress; only lint/typecheck while writing, then authored/affected suites and one complete gate."
+            }
+          ]
         },
         {
           "id": "P14.2",
           "title": "Dashboard drill-downs",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-11T11:06:35.863Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-11T11:06:35.863Z",
+              "text": "Whole P14 source batch in progress; only lint/typecheck while writing, then authored/affected suites and one complete gate."
+            }
+          ]
         },
         {
           "id": "P14.3",
           "title": "Search and quick actions",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-11T11:06:36.108Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-11T11:06:36.108Z",
+              "text": "Whole P14 source batch in progress; only lint/typecheck while writing, then authored/affected suites and one complete gate."
+            }
+          ]
         },
         {
           "id": "P14.4",
           "title": "Consistent states",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-11T11:06:36.376Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-11T11:06:36.376Z",
+              "text": "Whole P14 source batch in progress; only lint/typecheck while writing, then authored/affected suites and one complete gate."
+            }
+          ]
         },
         {
           "id": "P14.5",
           "title": "Notification centre",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-11T11:06:36.607Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-11T11:06:36.608Z",
+              "text": "Whole P14 source batch in progress; only lint/typecheck while writing, then authored/affected suites and one complete gate."
+            }
+          ]
         },
         {
           "id": "P14.6",
           "title": "Event branding",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-11T11:06:36.841Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-11T11:06:36.842Z",
+              "text": "Whole P14 source batch in progress; only lint/typecheck while writing, then authored/affected suites and one complete gate."
+            }
+          ]
         },
         {
           "id": "P14.7",
           "title": "Accessibility",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-11T11:06:37.072Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-11T11:06:37.073Z",
+              "text": "Whole P14 source batch in progress; only lint/typecheck while writing, then authored/affected suites and one complete gate."
+            }
+          ]
         },
         {
           "id": "P14.8",
           "title": "Copy and help",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-11T11:06:37.316Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-11T11:06:37.317Z",
+              "text": "Whole P14 source batch in progress; only lint/typecheck while writing, then authored/affected suites and one complete gate."
+            }
+          ]
         },
         {
           "id": "P14.9",
           "title": "Visual regression",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-11T11:06:37.543Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-11T11:06:37.544Z",
+              "text": "Whole P14 source batch in progress; only lint/typecheck while writing, then authored/affected suites and one complete gate."
+            }
+          ]
         },
         {
           "id": "P14.10",
           "title": "Report",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-11T11:06:37.774Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-11T11:06:37.775Z",
+              "text": "Whole P14 source batch in progress; only lint/typecheck while writing, then authored/affected suites and one complete gate."
+            }
+          ]
         }
       ],
-      "status": "not_started",
-      "startedAt": null,
+      "status": "in_progress",
+      "startedAt": "2026-10-11T10:43:26.999Z",
       "completedAt": null
     },
     {

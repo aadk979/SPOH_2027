@@ -44,12 +44,15 @@ describe('archive export', () => {
     call.mockImplementation(async (_path, input) => { if (input?.method === 'POST') throw new Error('Storage unavailable'); return { data: [] }; });
     show(); fireEvent.click(screen.getByRole('button', { name: 'Prepare archive export' }));
     fireEvent.click(screen.getByRole('button', { name: 'Save export pack' }));
-    await screen.findByText('Storage unavailable');
+    await screen.findByText('This action was not confirmed');
+    expect(screen.queryByText('Storage unavailable')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Save export pack' }));
     await waitFor(() => expect(call.mock.calls.filter(([, input]) => input?.method === 'POST')).toHaveLength(2));
     const writes = call.mock.calls.filter(([, input]) => input?.method === 'POST'); expect(writes[0]![1]?.body).toEqual(writes[1]![1]?.body);
     cleanup(); call.mockResolvedValue({ data: [{ ...pack, eventId: 'foreign_event' }] }); show();
-    await screen.findByText('The exports belong to another event'); expect(screen.queryByRole('button', { name: /Download pack/ })).toBeNull();
+    await screen.findByText('This action was not confirmed');
+    expect(screen.queryByText('The exports belong to another event')).toBeNull();
+    expect(screen.queryByRole('button', { name: /Download pack/ })).toBeNull();
   });
   it('offers creation only after close and respects permission', () => {
     call.mockResolvedValue({ data: [] }); access.status = 'LIVE'; show();

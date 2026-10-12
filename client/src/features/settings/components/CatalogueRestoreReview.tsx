@@ -4,7 +4,7 @@ import {
   type ScopedSettingsReadResponse,
   type ScopedSettingsHistoryRecord,
 } from '@spoh/shared';
-import { Button, Callout, Checkbox, Field, Textarea } from '@/shared/ui';
+import { Button, Callout, Checkbox, Field, Textarea, ErrorState } from '@/shared/ui';
 import { scopedSettingRow } from '@/shared/lib/scopedSettingReview';
 import { captureSource } from '../model/captureControl';
 import { catalogueValue } from '../model/operationalCatalogue';
@@ -76,9 +76,7 @@ function CatalogueRestoreFeedback({ review }: { review: ReturnType<typeof useCat
   return (
     <>
       {review.error ? (
-        <Callout tone="alert" role="alert">
-          {review.error}
-        </Callout>
+        <ErrorState error={review.error}>{review.error}</ErrorState>
       ) : null}
       {review.stale && !review.uncertain ? (
         <Callout tone="alert">Catalogue settings changed after your review.</Callout>

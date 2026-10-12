@@ -72,6 +72,20 @@ it('freezes new gift types and reactivation after go-live while keeping correcti
     409,
   );
 });
+it('refuses a reviewed stock change after its pool changes without stock, audit or a completed receipt', async () => {
+  const gift = await rawDb.giftType.create({ data: { eventId, name: 'Badge', initialStock: 20, rehearsalInitialStock: 50 } });
+  const change = { delta: 5, reason: 'Reviewed live delivery', expectedRehearsal: false, idempotencyKey: idempotencyKey() };
+  await rawDb.event.update({ where: { id: eventId }, data: { status: 'REHEARSAL' } });
+  expect((await send(`/gifts/${gift.id}/stock`, change)).status).toBe(409);
+  expect(await rawDb.giftStockAdjustment.count()).toBe(0);
+  expect(await rawDb.auditLog.count({ where: { action: 'gift.adjust' } })).toBe(0);
+  expect(await rawDb.idempotencyRecord.count({ where: { key: change.idempotencyKey, statusCode: 200 } })).toBe(0);
+  const practice = { ...change, expectedRehearsal: true, idempotencyKey: idempotencyKey() };
+  const adjusted = await send(`/gifts/${gift.id}/stock`, practice);
+  expect(adjusted.status).toBe(200);
+  expect(adjusted.body.giftType).toMatchObject({ rehearsal: true, remaining: 55 });
+  expect(await rawDb.giftStockAdjustment.findMany({ select: { rehearsal: true } })).toEqual([{ rehearsal: true }]);
+});
 it('rejects empty receipt-only edits, duplicates and foreign gift ids', async () => {
   const body = { name: 'Badge', initialStock: 20 };
   const created = await send('/admin/gift-types', body);

@@ -7,8 +7,8 @@ import { footfallEndpoint } from '@/features/footfall';
 import { type ReactNode } from 'react';
 import { AppShell } from '@/shared/shell/AppShell';
 import { SyncIndicator } from '@/shared/shell/SyncIndicator';
-import { Button, Callout, EmptyState } from '@/shared/ui';
-import { useCapture } from '@/features/capture';
+import { Button, Callout, CountHelp, EmptyState, ErrorState } from '@/shared/ui';
+import { CaptureFeedback, useCapture } from '@/features/capture';
 import { useWakeLock } from '@/shared/hooks/useWakeLock';
 import { useMe, useRequireSession } from '@/features/session';
 
@@ -30,7 +30,7 @@ import { useMe, useRequireSession } from '@/features/session';
 export default function FootfallCaptureScreen(): ReactNode {
   const session = useRequireSession();
   const { data: me } = useMe();
-  const { sessionCount, undoable, error, capture, undo } = useCapture();
+  const { sessionCount, undoable, error, feedback, capture, undo } = useCapture();
   const { idle, resetIdle } = useIdleNudge(sessionCount);
 
   useWakeLock(session !== null);
@@ -61,9 +61,7 @@ export default function FootfallCaptureScreen(): ReactNode {
     >
       <div className="flex flex-col gap-sm">
         {error ? (
-          <Callout tone="alert" role="alert">
-            {error}
-          </Callout>
+          <ErrorState error={error}>{error}</ErrorState>
         ) : null}
 
         {idle ? (
@@ -115,6 +113,8 @@ export default function FootfallCaptureScreen(): ReactNode {
             </span>
           )}
         </div>
+        <CaptureFeedback feedback={feedback} />
+        <CountHelp />
       </div>
     </AppShell>
   );

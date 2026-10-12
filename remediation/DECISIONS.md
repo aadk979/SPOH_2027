@@ -483,6 +483,20 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   metadata. Private upload objects whose database transaction rolls back remain
   inaccessible and expire under the exports bucket's existing ninety-day lifecycle.
 
+  **Assumed P14 implementation recommendations, 11 October 2026:** use the
+  reviewed existing Cedar action/resource map in `reports/P14/workspace-policy-review-2026-10-11.md`.
+  Private roster, actor and source facets get their own current checks before
+  querying their rows. Archive import/sender metadata uses `Audit.Read`; bodies
+  retain their recipient/author proof. Exact new import provenance supports
+  atomic retained undo; legacy and roster batches have no inferred undo set.
+  Event branding uses existing `Content.Edit` and `Content.Publish` authority,
+  bounded decoded PNG assets and immutable approved publication references.
+  The anonymous public surface contains only the event name and approved accent,
+  logo/icons, CSS and manifest; unpublished assets and operational data remain
+  private. Ambiguous slugs do not select an arbitrary event. A clone starts with
+  an unpublished branding draft; historical exports retain their frozen inputs.
+  Full browser/visual/axe execution and copy acceptance remain P16.1/P16.8.
+
 ### D-24 — Production identity after the teardown
 
 - **Owner:** you

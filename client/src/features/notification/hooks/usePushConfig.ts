@@ -8,6 +8,8 @@ export function usePushConfig() {
   const [state, setState] = useState<PushState>('loading');
   const [publicKey, setPublicKey] = useState<string | null>(null);
   useEffect(() => {
+    setState('loading');
+    setPublicKey(null);
     if (!session) return;
 
     if (!pushSupported()) {
@@ -37,7 +39,7 @@ export function usePushConfig() {
 
         const registration = await navigator.serviceWorker.ready;
         const existing = await registration.pushManager.getSubscription();
-
+        if (cancelled) return;
         setState(existing && Notification.permission === 'granted' ? 'subscribed' : 'prompt');
       } catch {
         if (!cancelled) setState('unsupported');

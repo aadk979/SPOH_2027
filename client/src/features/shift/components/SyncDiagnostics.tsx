@@ -2,9 +2,13 @@ import type { ReactNode } from 'react';
 import type { SyncDiagnosticsState } from '../hooks/useSyncDiagnostics';
 import { Button, Callout, Card, Section } from '@/shared/ui';
 import { flush } from '@/shared/lib/outbox';
-import { useEventTime } from '@/features/session';
+import { useCurrentSession, useEventTime } from '@/features/session';
+import { useEventId } from '@/shared/lib/eventContext';
+import { FailedSalvage } from './FailedSalvage';
 export function SyncDiagnostics({ state }: { state: SyncDiagnosticsState }): ReactNode {
   const format = useEventTime();
+  const ownerId = useCurrentSession()?.volunteerId;
+  const eventId = useEventId();
   const { entries, failed, pending, copied, copyError, copyFailed } = state;
   return (
     <Section title="Sync">
@@ -57,6 +61,7 @@ export function SyncDiagnostics({ state }: { state: SyncDiagnosticsState }): Rea
           ) : null}
         </Card>
       )}
+      {failed.length && ownerId ? <FailedSalvage key={`${eventId}:${ownerId}`} failed={failed} /> : null}
     </Section>
   );
 }

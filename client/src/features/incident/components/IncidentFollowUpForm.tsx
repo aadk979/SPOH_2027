@@ -1,6 +1,6 @@
 import { CreateIncidentFollowUpRequest } from '@spoh/shared';
 import { useZodForm } from '@/shared/hooks/useZodForm';
-import { Button, Callout, Field, Textarea } from '@/shared/ui';
+import { Button, Field, Textarea, ErrorState } from '@/shared/ui';
 import { useIncidentFollowUp } from '../queries';
 
 export function IncidentFollowUpForm({ id }: { id: string }) {
@@ -31,9 +31,7 @@ export function IncidentFollowUpForm({ id }: { id: string }) {
         Append follow-up
       </Button>
       {mutation.error ? (
-        <Callout tone="alert" role="alert">
-          {mutation.error.message}
-        </Callout>
+        <ErrorState error={mutation.error} />
       ) : null}
       {mutation.isSuccess ? <p role="status">Follow-up recorded.</p> : null}
     </>

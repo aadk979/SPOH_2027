@@ -60,6 +60,7 @@
     "prisma": "7.10.0",
     "qrcode": "1.5.4",
     "regenerator-runtime": "0.14.1",
+    "sharp": "0.35.5",
     "web-push": "^3.6.7",
     "zod": "^4.5.4"
   },

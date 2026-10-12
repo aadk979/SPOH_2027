@@ -13,8 +13,9 @@ import { apiBlob } from '@/shared/lib/api';
 import { NetworkError } from '@/shared/lib/apiErrors';
 import { contentPointer, rememberContentVersion } from './model/contentPointer';
 
-export async function getContentDraft(eventId: string) {
-  const response = await eventApi<{ data: unknown }>(eventId, '/content/draft');
+export async function getContentDraft(eventId: string, signal?: AbortSignal) {
+  const response = await eventApi<{ data: unknown }>(eventId, '/content/draft', { signal, cache: 'no-store' });
+  signal?.throwIfAborted();
   const draft = ContentDraftRecord.parse(response.data);
   if (draft.eventId !== eventId) throw new Error('The guide belongs to another event');
   return draft;
@@ -47,9 +48,12 @@ export async function scheduleContent(eventId: string, input: ScheduleContentReq
   });
   return ContentScheduleResponse.parse(response.data);
 }
-export async function listContentVersions(eventId: string) {
-  const response = await eventApi<{ data: unknown[] }>(eventId, '/content/versions');
-  return response.data.map((item) => PublishedContentRecord.parse(item));
+export async function listContentVersions(eventId: string, signal?: AbortSignal) {
+  const response = await eventApi<{ data: unknown[] }>(eventId, '/content/versions', { signal, cache: 'no-store' });
+  signal?.throwIfAborted();
+  const versions = response.data.map((item) => PublishedContentRecord.parse(item));
+  if (versions.some((version) => version.eventId !== eventId)) throw new Error('The guide history belongs to another event');
+  return versions;
 }
 async function versionedContent(eventId: string, version?: string) {
   const suffix = version ? `?v=${encodeURIComponent(version)}` : '';

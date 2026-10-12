@@ -3,7 +3,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { FoundItemCard } from '../components/FoundItemCard';
 import { AppShell } from '@/shared/shell/AppShell';
-import { ButtonLink, Callout, Checkbox, EmptyState, Field, Input, LoadingCards } from '@/shared/ui';
+import { ButtonLink, Checkbox, EmptyState, Field, Input, LoadingCards, ErrorState } from '@/shared/ui';
 import { useRequireSession } from '@/features/session';
 import { useLostFound, useClaimLostFound } from '@/features/lostFound';
 
@@ -79,9 +79,7 @@ export default function LostFoundScreen(): ReactNode {
       </div>
 
       {claim.isError ? (
-        <Callout tone="alert" role="alert" className="mt-md">
-          Could not mark item as claimed. Check your connection and try again.
-        </Callout>
+        <ErrorState error={claim.error}>Could not mark item as claimed. Check your connection and try again.</ErrorState>
       ) : null}
 
       <p className="mt-md mb-sm text-caption text-text-muted" aria-live="polite">

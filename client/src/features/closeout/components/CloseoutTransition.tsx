@@ -3,7 +3,7 @@ import { TransitionEventRequest, type LifecycleReadinessResponse } from '@spoh/s
 import { useTransitionLifecycle, lifecycleBlocker } from '@/features/events';
 import { useRetryKey } from '@/shared/hooks/useRetryKey';
 import { useZodForm } from '@/shared/hooks/useZodForm';
-import { Button, Callout, Checkbox, Stack } from '@/shared/ui';
+import { Button, Callout, Checkbox, Stack, ErrorState } from '@/shared/ui';
 
 export function CloseoutTransition({
   readiness,
@@ -69,9 +69,7 @@ function ConfirmedTransition({
         </Button>
       </>
       {mutation.error ? (
-        <Callout role="alert" tone="alert">
-          {mutation.error.message} Reload readiness before retrying a changed event.
-        </Callout>
+        <ErrorState error={mutation.error}>Reload readiness before retrying a changed event.</ErrorState>
       ) : null}
       {mutation.isSuccess ? <p role="status">Event moved to {to.toLowerCase()}.</p> : null}
     </Stack>

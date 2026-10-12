@@ -5,14 +5,14 @@ import { ShiftCard, RoleTiles } from '@/features/shift';
 import { SyncIndicator } from '@/shared/shell/SyncIndicator';
 import { WorkspaceIntro } from '@/shared/ui/WorkspaceIntro';
 import { NavTile } from '@/shared/ui/NavTile';
-import { Button, ButtonLink, Callout, Card, LoadingCards, Stack } from '@/shared/ui';
+import { ButtonLink, ErrorState, Card, LoadingCards, Stack } from '@/shared/ui';
 import { useAllows, useMe, useRequireSession } from '@/features/session';
 import { canOpenOperations } from '@/navigation';
 import { useEvent } from '@/shared/lib/eventContext';
 
 export default function HomeScreen() {
   const session = useRequireSession();
-  const { data: me, isPending, isError, refetch } = useMe();
+  const { data: me, isPending, error, refetch } = useMe();
   const allows = useAllows();
   const event = useEvent();
   if (!session) return null;
@@ -26,13 +26,10 @@ export default function HomeScreen() {
         >
           Your shift, your next action, and the information you need along the way.
         </WorkspaceIntro>
-        {isError ? (
-          <Callout tone="alert" title="We couldn’t load your shift">
+        {error ? (
+          <ErrorState error={error} operation="Loading your shift" onRetry={() => void refetch()}>
             Check your connection and try again. The guide and safety tools are still available.
-            <Button variant="secondary" className="mt-sm" onClick={() => void refetch()}>
-              Try again
-            </Button>
-          </Callout>
+          </ErrorState>
         ) : isPending || !me ? (
           <LoadingCards count={2} label="Loading your shift" />
         ) : (

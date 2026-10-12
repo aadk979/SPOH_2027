@@ -4,7 +4,7 @@ import { CreateEventRequest, type EventAdministrationResponse } from '@spoh/shar
 import { useZodForm } from '@/shared/hooks/useZodForm';
 import { useRetryKey } from '@/shared/hooks/useRetryKey';
 import { eventHref } from '@/shared/lib/eventPath';
-import { Button, Callout, Checkbox, Stack } from '@/shared/ui';
+import { Button, Callout, Checkbox, Stack, ErrorState } from '@/shared/ui';
 import { useCreateEvent } from '../queries';
 import { EventBasicsFields } from './EventBasicsFields';
 import { EventWizardReview } from './EventWizardReview';
@@ -70,9 +70,7 @@ export function CreateEventWizard({ organisation }: { organisation: Organisation
         </form>
       )}
       {create.isError ? (
-        <Callout tone="alert" role="alert">
-          {create.error.message}
-        </Callout>
+        <ErrorState error={create.error} />
       ) : null}
       {create.isSuccess && !create.data.joined ? (
         <Callout tone="ok" role="status">

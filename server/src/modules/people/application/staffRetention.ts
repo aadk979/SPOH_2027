@@ -4,6 +4,7 @@ import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { loadResolvedSetting } from '../../../platform/settings/scopedStore.js';
 import { archivedPeople, clearArchivedNotes, anonymisePerson, scheduleStaffRetention, archiveRetentionEvent, lockRetentionPerson } from '../data/retentionRepo.js';
+import { clearEventNotices } from '../data/notificationPersonalRepo.js';
 
 const deadline = (at: Date, days: number) => new Date(at.getTime() + days * 86400000);
 
@@ -37,13 +38,14 @@ export async function purgeStaffInTransaction(tx: PrismaTransactionClient, scope
   if (event.status !== 'ARCHIVED' || !event.archivedAt) return 0;
   if (await staffDeadline(tx, { ...scope, organisationId: event.organisationId, archivedAt: event.archivedAt }) > input.now) return 0;
   const notes = await clearArchivedNotes(tx, scope);
+  const notices = await clearEventNotices(tx, scope);
   let people = 0;
   for (const candidate of await archivedPeople(tx, scope)) {
     const person = await lockRetentionPerson(tx, scope, candidate.id);
     if (person && await canAnonymise(tx, person, input.now)) people += await anonymisePerson(tx, { personId: person.id, now: input.now });
   }
-  if (notes.count || people) await writeAudit(tx, { ...input.audit, eventId: scope.eventId,
+  if (notes.count || people || notices.count) await writeAudit(tx, { ...input.audit, eventId: scope.eventId,
     action: 'staff.purge', entityType: 'EventMembership', entityId: null,
-    after: { notes: notes.count, people, reason: 'retention' } });
-  return notes.count + people;
+    after: { notes: notes.count, people, notices: notices.count, reason: 'retention' } });
+  return notes.count + people + notices.count;
 }

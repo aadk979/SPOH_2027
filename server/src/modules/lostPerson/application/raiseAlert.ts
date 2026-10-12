@@ -3,10 +3,9 @@ import type { LostPersonAlertRecord, RaiseLostPersonRequest } from '@spoh/shared
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
-import { dispatch } from '../../notification/index.js';
+import { activeNoticeAudience, queueNotices } from '../../notification/index.js';
 import { requireEventStation } from '../../station/index.js';
 import { createAlert } from '../data/repo.js';
-import { raisedPush } from '../domain/alertRules.js';
 import { decorate } from './alertRecord.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
 
@@ -41,9 +40,12 @@ export async function raiseAlert(
       // would quietly defeat the whole transience guarantee.
       after: { lastSeenStationId: row.lastSeenStationId, rehearsal: row.rehearsal },
     });
+    await queueNotices(tx, scope, { kind: 'LOST_PERSON_RAISED', priority: 'URGENT',
+      source: { kind: 'LOST_PERSON', id: row.id }, transitionKey: `lostPerson:${row.id}:raised`,
+      context: { type: 'lost-person' }, recipientPersonIds: await activeNoticeAudience(scope, { tx }),
+      createdAt: row.raisedAt });
     return row;
   });
 
-  void dispatch(scope, raisedPush(alert));
   return decorate(scope, alert, volunteerId);
 }

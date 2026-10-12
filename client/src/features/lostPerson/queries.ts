@@ -1,15 +1,19 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import type { ActiveLostPersonResponse, RaiseLostPersonRequest } from '@spoh/shared';
 import { useEvent, useEventId } from '@/shared/lib/eventContext';
 import { getActiveAlerts, acknowledgeAlert, resolveAlert } from './api';
 
 export const lostPersonKeys = {
-  active: (eventId: string) => [eventId, 'lost-person', 'active'] as const,
+  active: (eventId: string, personId?: string) => personId
+    ? [eventId, 'lost-person', 'active', personId] as const
+    : [eventId, 'lost-person', 'active'] as const,
 };
 import { ms } from '@/shared/lib/runtimeSettings';
-import { useCurrentSession } from '@/features/session';
+import { useToast } from '@/shared/ui';
+import { useAllows, useCurrentSession } from '@/features/session';
 
 /**
  * Active lost-person alerts.
@@ -22,11 +26,20 @@ import { useCurrentSession } from '@/features/session';
 export function useActiveAlerts(): UseQueryResult<ActiveLostPersonResponse> {
   const session = useCurrentSession();
   const eventId = useEventId();
+  const client = useQueryClient();
+  const allowed = useAllows()('Self.Read');
+  const key = lostPersonKeys.active(eventId, session?.volunteerId ?? 'signed-out');
+  useEffect(() => {
+    if (allowed && session) return;
+    void client.cancelQueries({ queryKey: key });
+    client.removeQueries({ queryKey: key });
+  }, [client, allowed, eventId, session?.volunteerId]);
 
   return useQuery({
-    queryKey: lostPersonKeys.active(eventId),
-    queryFn: () => getActiveAlerts(eventId),
-    enabled: session !== null,
+    queryKey: key,
+    queryFn: ({ signal }) => getActiveAlerts(eventId, signal),
+    enabled: session !== null && allowed,
+    gcTime: 0,
     refetchInterval: ms.alertPoll(),
     // Keep polling when the tab is backgrounded: a phone in a pocket is still
     // a phone that should buzz when a child goes missing.
@@ -38,10 +51,12 @@ export function useActiveAlerts(): UseQueryResult<ActiveLostPersonResponse> {
 export function useAcknowledgeAlert(): ReturnType<typeof useMutation<unknown, Error, string>> {
   const queryClient = useQueryClient();
   const eventId = useEventId();
+  const announce = useToast();
 
   return useMutation({
     mutationFn: (alertId: string) => acknowledgeAlert(eventId, alertId),
     onSuccess: () => {
+      announce('Lost-person alert acknowledged.');
       void queryClient.invalidateQueries({ queryKey: lostPersonKeys.active(eventId) });
     },
   });
@@ -63,11 +78,13 @@ export function useResolveAlert(): ReturnType<
 > {
   const queryClient = useQueryClient();
   const eventId = useEventId();
+  const announce = useToast();
 
   return useMutation({
     mutationFn: (input: { alertId: string; outcome: 'RESOLVED_FOUND' | 'RESOLVED_OTHER' }) =>
       resolveAlert(eventId, input),
     onSuccess: () => {
+      announce('Lost-person alert cleared.');
       void queryClient.invalidateQueries({ queryKey: lostPersonKeys.active(eventId) });
     },
   });

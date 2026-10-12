@@ -1,7 +1,7 @@
 'use client';
 import { CardLookupParams } from '@spoh/shared';
 import { useZodForm } from '@/shared/hooks/useZodForm';
-import { Button, Field, Input, Callout } from '@/shared/ui';
+import { Button, Field, Input, ErrorState } from '@/shared/ui';
 import { useCardLookup } from '../queries';
 import { CardCorrections } from './CardCorrections';
 import { CardIssue } from './CardIssue';
@@ -32,7 +32,7 @@ export function CardLookup() {
         </Button>
       </form>
       {lookup.isError ? (
-        <Callout>Card not found or unavailable. Check the printed code and current event.</Callout>
+        <ErrorState error={lookup.error}>Card not found or unavailable. Check the printed code and current event.</ErrorState>
       ) : null}
       {lookup.data ? (
         <div>

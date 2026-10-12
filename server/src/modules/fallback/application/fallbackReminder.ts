@@ -1,8 +1,7 @@
-import { zonedWallTime } from '@spoh/shared';
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { loadResolvedSetting } from '../../../platform/settings/scopedStore.js';
-import { dispatch } from '../../notification/index.js';
+import { activeNoticeAudience, queueNotices } from '../../notification/index.js';
 import {
   enqueueFallbackReminder,
   findOpenReminderWindow,
@@ -42,24 +41,10 @@ export async function remindOpenFallback(
   const window = await findOpenReminderWindow(tx, scope, input.windowId);
   if (!window) return false;
   await scheduleFallbackReminder(tx, scope, { ...input, sequence: input.sequence + 1 });
-  const { timezone } = await findReminderEvent(tx, scope);
-  const since = zonedWallTime(window.startedAt, timezone).slice(11);
-  void dispatch(
-    scope,
-    {
-      kind: 'fallback.reminder',
-      priority: 'OPERATIONAL',
-      title: 'A fallback window is still open',
-      body: `Open since ${since}. Close it once the app is back, then import the paper records.`,
-      url: '/chief/fallback',
-      tag: `fallback-open:${window.id}`,
-      audience: {
-        everyone: false,
-        minimumRole: 'DEPUTY_COORDINATOR',
-        volunteerIds: [window.declaredById],
-      },
-    },
-    input.now,
-  );
+  const coordinators = await activeNoticeAudience(scope, { tx, minimumRole: 'DEPUTY_COORDINATOR' });
+  await queueNotices(tx, scope, { kind: 'FALLBACK_REMINDER', priority: 'OPERATIONAL',
+    source: { kind: 'FALLBACK', id: window.id }, transitionKey: `fallback:${window.id}:remind:${input.sequence}`,
+    context: { type: 'fallback', sequence: input.sequence }, createdAt: input.now,
+    recipientPersonIds: [...coordinators, window.declaredById] });
   return true;
 }

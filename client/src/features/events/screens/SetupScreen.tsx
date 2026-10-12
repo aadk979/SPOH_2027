@@ -4,6 +4,7 @@ import { AppShell } from '@/shared/shell/AppShell';
 import { Callout, Stack } from '@/shared/ui';
 import { SetupChecklist } from '../components/SetupChecklist';
 import { GoLiveReadinessPanel } from '../components/GoLiveReadinessPanel';
+import { BrandingPanel } from '@/features/branding';
 
 export default function SetupScreen() {
   const session = useRequireSession();
@@ -21,6 +22,7 @@ export default function SetupScreen() {
               Live.
             </p>
             <SetupChecklist />
+            <BrandingPanel />
             <GoLiveReadinessPanel />
           </>
         )}

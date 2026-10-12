@@ -1,5 +1,5 @@
 import { authorize, authorizeAll } from '../../../platform/http/authorize.js';
-import { theEvent, anyStation } from '../../../platform/http/authorizeResources.js';
+import { theEvent, anyStation, self } from '../../../platform/http/authorizeResources.js';
 import { Router } from 'express';
 import { z } from 'zod';
 import {
@@ -9,16 +9,21 @@ import {
   ImportFootfallRequest,
   ImportRegistrationsRequest,
   TimeRangeQuery,
+  UndoCaptureImportRequest,
+  ConfirmOutboxSalvageRequest,
 } from '@spoh/shared';
 import { requireAuth } from '../../../platform/http/requireAuth.js';
 import { defaultRateLimit, sensitiveRateLimit } from '../../../platform/http/rateLimit.js';
 import { validate } from '../../../platform/http/validate.js';
+import { idempotent } from '../../../platform/http/idempotency.js';
 import {
   closeWindowHandler,
   declareWindowHandler,
   importFootfallHandler,
   importRegistrationsHandler,
   listWindowsHandler,
+  undoImportHandler,
+  confirmSalvageHandler,
 } from './handlers.js';
 
 /** Fallback windows and reconciliation imports (BUILD_PLAN §7.2). */
@@ -27,6 +32,11 @@ export const fallbackRouter: Router = Router();
 const IdParams = z.object({ id: Id }).strict();
 
 fallbackRouter.use(requireAuth);
+fallbackRouter.post('/imports/:id/undo', sensitiveRateLimit, authorize('Fallback.Import', theEvent),
+  validate({ params: IdParams, body: UndoCaptureImportRequest }), idempotent('POST /fallback/imports/:id/undo'),
+  undoImportHandler);
+fallbackRouter.post('/salvage/confirm', sensitiveRateLimit, authorize('Self.Read', self),
+  validate({ body: ConfirmOutboxSalvageRequest }), idempotent('POST /fallback/salvage/confirm'), confirmSalvageHandler);
 
 /**
  * Declaring a tier is a command decision — DC and above only. Individual

@@ -9,6 +9,7 @@ import { writeRegistrationsSheet } from './sheets/registrations.js';
 import { writeSafetySheet } from './sheets/safety.js';
 import { writeVisitorsSheet } from './sheets/visitors.js';
 import { writeVolunteersSheet } from './sheets/volunteers.js';
+import { applyWorkbookBranding, type ExportBrandingAssets } from './branding.js';
 
 /**
  * Report export (PRODUCT_BRIEF §10).
@@ -24,6 +25,7 @@ import { writeVolunteersSheet } from './sheets/volunteers.js';
 export async function toXlsx(
   report: FullReport,
   visitors: VisitorRecordsResponse | null = null,
+  assets: ExportBrandingAssets = {},
 ): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
   workbook.creator = report.event.name;
@@ -38,6 +40,7 @@ export async function toXlsx(
   writeVolunteersSheet(workbook, report);
   writeIntegritySheet(workbook, report);
   if (visitors) writeVisitorsSheet(workbook, visitors);
+  applyWorkbookBranding(workbook, { report, assets });
 
   const buffer = await workbook.xlsx.writeBuffer();
   return Buffer.from(buffer);

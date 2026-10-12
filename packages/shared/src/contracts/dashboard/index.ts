@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Id, IsoDateTime } from '../common/index.js';
+import { DashboardWindow, Id, IsoDateTime } from '../common/index.js';
 import { Headline } from '../eventSettings/index.js';
 import { FootfallLiveStation } from '../footfall/index.js';
 import { FunnelStage } from '../missionCard/index.js';
@@ -80,8 +80,10 @@ export type SafetyLiveBreakdown = z.infer<typeof SafetyLiveBreakdown>;
  */
 export const DataHealthResponse = z
   .object({
+    observation: DashboardWindow.optional(),
     rehearsalIncluded: z.boolean().optional(),
     asOf: IsoDateTime,
+    rosterAvailability: z.enum(['available', 'partial', 'denied']).optional(),
     /** Counted rooms with no activity for 15+ minutes during event hours. */
     silentStations: z.array(
       z
@@ -101,6 +103,7 @@ export const DataHealthResponse = z
           volunteerName: z.string(),
           stationName: z.string(),
           lastCaptureAt: IsoDateTime.nullable(),
+          assignmentId: Id.optional(), stationId: Id.optional(), shiftId: Id.optional(), eventDayId: Id.optional(),
           minutesSinceLastCapture: z.number().int().nonnegative().nullable(),
         })
         .strict(),
@@ -117,6 +120,7 @@ export type DataHealthResponse = z.infer<typeof DataHealthResponse>;
 
 export const StaffingLiveBreakdown = z
   .object({
+    rosterAvailability: z.enum(['available', 'partial', 'denied']).optional(),
     onShift: z.number().int().nonnegative(),
     checkedIn: z.number().int().nonnegative(),
     gaps: z.array(StaffingGap),
@@ -127,6 +131,7 @@ export type StaffingLiveBreakdown = z.infer<typeof StaffingLiveBreakdown>;
 
 export const LiveDashboardResponse = z
   .object({
+    observation: DashboardWindow.optional(),
     rehearsalIncluded: z.boolean().optional(),
     asOf: IsoDateTime,
     eventDayLabel: z.string().nullable(),
@@ -147,15 +152,19 @@ export type LiveDashboardResponse = z.infer<typeof LiveDashboardResponse>;
 /** The same picture, scoped to one station, for an IC. */
 export const StationDashboardResponse = z
   .object({
+    observation: DashboardWindow.optional(),
     rehearsalIncluded: z.boolean().optional(),
     asOf: IsoDateTime,
     stationId: Id,
     stationName: z.string(),
+    rosterAvailability: z.enum(['available', 'denied']).optional(),
+    deviceAvailability: z.enum(['available', 'denied']).optional(),
     registrations: z
       .object({
         unit: z.literal('registrations'),
         todayTotal: z.number().int().nonnegative(),
         byCategory: z.array(CategoryCount),
+        sourceBreakdown: z.array(z.object({ source: z.enum(['APP', 'FALLBACK_SHEET', 'PAPER', 'MANUAL_ADJUSTMENT']), value: z.number().int().nonnegative() }).strict()).optional(),
         /** Per-device contribution, so two people on one queue see the drift. */
         byDevice: z.array(
           z
@@ -176,6 +185,7 @@ export const StationDashboardResponse = z
         unit: z.literal('roomEntries'),
         todayTotal: z.number().int().nonnegative(),
         lastActivityAt: IsoDateTime.nullable(),
+        sourceBreakdown: z.array(z.object({ source: z.enum(['APP', 'FALLBACK_SHEET', 'PAPER', 'MANUAL_ADJUSTMENT']), value: z.number().int().nonnegative() }).strict()).optional(),
         contributors: z.array(
           z
             .object({

@@ -1,7 +1,7 @@
 'use client';
 import { useAllows, useMe, useRequireSession } from '@/features/session';
 import { AppShell } from '@/shared/shell/AppShell';
-import { Callout, Section, Stack } from '@/shared/ui';
+import { Section, Stack, ErrorState } from '@/shared/ui';
 import { listSwapTargets } from '../api';
 import { useStaffingRead } from '../queries';
 import { SwapRequestForm } from '../components/SwapRequestForm';
@@ -25,9 +25,7 @@ export default function SwapsScreen() {
           <p>Swap creation is unavailable until your assignments and permissions load.</p>
         )}
         {targets.isError ? (
-          <Callout tone="alert" role="alert">
-            {targets.error.message}
-          </Callout>
+          <ErrorState error={targets.error} />
         ) : null}
         <Section title="My requests">
           <MySwapHistory />

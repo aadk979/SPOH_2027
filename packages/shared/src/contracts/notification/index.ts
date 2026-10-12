@@ -91,6 +91,9 @@ export const NotificationKind = z.enum([
   'gift.lowStock',
   'fallback.reminder',
   'event.archiveReminder',
+  'announcement.operational',
+  'assignment.changed',
+  'swap.decision',
 ]);
 export type NotificationKind = z.infer<typeof NotificationKind>;
 

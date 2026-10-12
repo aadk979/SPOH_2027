@@ -1,7 +1,7 @@
 'use client';
 import type { ReactNode } from 'react';
 import { AppShell } from '@/shared/shell/AppShell';
-import { Callout, EmptyState, LoadingRows, Stack } from '@/shared/ui';
+import { EmptyState, LoadingRows, Stack, ErrorState } from '@/shared/ui';
 import { useRequireSession } from '../useSession';
 import { useDevices } from '../queries';
 import { DeviceCard } from '../components/DeviceCard';
@@ -20,9 +20,7 @@ export default function DevicesScreen(): ReactNode {
         {devices.isPending ? (
           <LoadingRows label="Loading devices" />
         ) : devices.isError ? (
-          <Callout tone="alert" role="alert">
-            {devices.error.message}
-          </Callout>
+          <ErrorState error={devices.error} />
         ) : devices.data.length === 0 ? (
           <EmptyState title="No active devices" />
         ) : (

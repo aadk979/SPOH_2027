@@ -55,18 +55,18 @@ export async function findGiftType(
 
 /** Redemption and adjustment totals for every gift type, in two queries. */
 export async function giftTotals(
-  scope: EventScope & { rehearsal?: boolean },
+  scope: EventScope & { rehearsal?: boolean; asOf?: Date },
   tx: PrismaTransactionClient = prisma,
 ): Promise<Map<string, GiftTotals>> {
   const rehearsal = scope.rehearsal ?? (await captureProvenance(tx, scope)).rehearsal;
   const redemptions = await tx.giftRedemption.groupBy({
     by: ['giftTypeId'],
-    where: { eventId: scope.eventId, rehearsal, voided: false },
+    where: { eventId: scope.eventId, rehearsal, voided: false, ...(scope.asOf ? { recordedAt: { lte: scope.asOf } } : {}) },
     _count: { _all: true },
   });
   const adjustments = await tx.giftStockAdjustment.groupBy({
     by: ['giftTypeId'],
-    where: { eventId: scope.eventId, rehearsal },
+    where: { eventId: scope.eventId, rehearsal, ...(scope.asOf ? { createdAt: { lte: scope.asOf } } : {}) },
     _sum: { delta: true },
   });
 
@@ -115,9 +115,10 @@ export async function createAdjustment(
   tx: PrismaTransactionClient,
   scope: EventScope,
   data: Omit<Prisma.GiftStockAdjustmentUncheckedCreateInput, 'eventId'>,
-): Promise<void> {
-  await tx.giftStockAdjustment.create({
+): Promise<{ id: string }> {
+  return tx.giftStockAdjustment.create({
     data: { ...data, eventId: scope.eventId, ...(await captureProvenance(tx, scope)) },
+    select: { id: true },
   });
 }
 
@@ -134,6 +135,8 @@ export async function existingRedemptionForCards(
 }
 
 export interface GiftSummaryFilter {
+  rehearsal: boolean;
+  asOf?: Date;
   stationId?: string;
   from?: Date;
   to?: Date;
@@ -148,12 +151,14 @@ export async function summariseRedemptions(
     where: {
       eventId: scope.eventId,
       voided: false,
+      rehearsal: filter.rehearsal,
       ...(filter.stationId ? { stationId: filter.stationId } : {}),
-      ...(filter.from || filter.to
+      ...(filter.from || filter.to || filter.asOf
         ? {
             recordedAt: {
               ...(filter.from ? { gte: filter.from } : {}),
               ...(filter.to ? { lt: filter.to } : {}),
+              ...(filter.asOf ? { lte: filter.asOf } : {}),
             },
           }
         : {}),

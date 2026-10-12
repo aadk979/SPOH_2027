@@ -207,6 +207,7 @@ export async function countStampsForCard(
 export interface CardFunnelFilter {
   from?: Date;
   to?: Date;
+  asOf?: Date;
 }
 
 /**
@@ -222,11 +223,12 @@ function issuedWhere(
     eventId: scope.eventId,
     ...rehearsalFilter(scope),
     status: { notIn: ['UNISSUED', 'LOST'] },
-    ...(filter.from || filter.to
+    ...(filter.from || filter.to || filter.asOf
       ? {
           issuedAt: {
             ...(filter.from ? { gte: filter.from } : {}),
             ...(filter.to ? { lt: filter.to } : {}),
+            ...(filter.asOf ? { lte: filter.asOf } : {}),
           },
         }
       : { issuedAt: { not: null } }),
@@ -269,6 +271,7 @@ export async function countCardsPerStation(
 ): Promise<Map<string, number>> {
   const from = filter.from ?? new Date(0);
   const to = filter.to ?? new Date(8.64e15);
+  const asOf = filter.asOf ?? new Date(8.64e15);
 
   const rows = await prisma.$queryRaw<Array<{ stationId: string; cards: bigint }>>`
     SELECT s."stationId", COUNT(DISTINCT s."missionCardId")::bigint AS cards
@@ -278,6 +281,7 @@ export async function countCardsPerStation(
       AND c."eventId" = ${scope.eventId}
       AND (${scope.includeRehearsal ?? false} OR (s."rehearsal" = false AND c."rehearsal" = false))
       AND s."recordedAt" >= ${from} AND s."recordedAt" < ${to}
+      AND s."recordedAt" <= ${asOf}
       AND c."status" <> 'LOST'
     GROUP BY s."stationId"`;
 
@@ -290,6 +294,7 @@ export async function countRedeemedCards(
 ): Promise<number> {
   const from = filter.from ?? new Date(0);
   const to = filter.to ?? new Date(8.64e15);
+  const asOf = filter.asOf ?? new Date(8.64e15);
 
   const rows = await prisma.$queryRaw<Array<{ cards: bigint }>>`
     SELECT COUNT(DISTINCT "missionCardId")::bigint AS cards
@@ -298,7 +303,8 @@ export async function countRedeemedCards(
       AND (${scope.includeRehearsal ?? false} OR "rehearsal" = false)
       AND "voided" = false
       AND "missionCardId" IS NOT NULL
-      AND "recordedAt" >= ${from} AND "recordedAt" < ${to}`;
+      AND "recordedAt" >= ${from} AND "recordedAt" < ${to}
+      AND "recordedAt" <= ${asOf}`;
 
   return Number(rows[0]?.cards ?? 0);
 }

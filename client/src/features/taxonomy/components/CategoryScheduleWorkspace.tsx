@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { CategoryActivityRecord } from '@spoh/shared';
-import { Button, Callout, Field, LoadingRows, Select } from '@/shared/ui';
+import { Button, Field, LoadingRows, Select, ErrorState } from '@/shared/ui';
 import { useCategoryActivityList } from '../queries';
 import { CategoryScheduleContents } from './CategoryScheduleContents';
 import { categoryAccessDenied } from '../model/access';
@@ -32,9 +32,7 @@ export function CategoryScheduleWorkspace({
       <p>Review every category page, including inactive categories, before selecting a category.</p>
       {categories.isPending ? <LoadingRows label="Loading capture categories" /> : null}
       {categories.isError ? (
-        <Callout role="alert" tone="alert">
-          Capture categories are unavailable. Reload before reviewing.
-        </Callout>
+        <ErrorState error={categories.error}>Capture categories are unavailable. Reload before reviewing.</ErrorState>
       ) : null}
       <CategorySchedulePicker
         categoryId={categoryId}

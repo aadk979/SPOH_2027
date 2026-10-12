@@ -1,4 +1,4 @@
-import { Button, Callout, Card, CardTitle, Stack } from '@/shared/ui';
+import { Button, Card, CardTitle, Stack, ErrorState } from '@/shared/ui';
 import { useBulkFootfallForm } from '../hooks/useBulkFootfallForm';
 import { BulkFootfallFields } from './BulkFootfallFields';
 import { CorrectionReason } from './CorrectionReason';
@@ -25,9 +25,7 @@ export function BulkFootfallForm() {
           Record paper total
         </Button>
         {control.error ? (
-          <Callout tone="alert" role="alert">
-            {control.error}
-          </Callout>
+          <ErrorState error={control.error}>{control.error}</ErrorState>
         ) : null}
         <CorrectionOutcome error={control.mutation.error} saved={control.mutation.isSuccess} />
       </Stack>

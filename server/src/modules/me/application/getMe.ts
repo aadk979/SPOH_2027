@@ -11,6 +11,7 @@ import {
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { runningShifts } from '../../../platform/event/runningShifts.js';
 import { getEventSummary } from '../../event/index.js';
+import { eventToday } from '../../../platform/event/today.js';
 
 /**
  * `GET /me` is the client's boot call. It returns everything the role-scoped
@@ -55,5 +56,6 @@ export async function getMe(
       portfolio: person.portfolio,
     })),
     serverTime: now.toISOString(),
+    operationalDate: (await eventToday(scope, now)).toISOString().slice(0, 10),
   };
 }

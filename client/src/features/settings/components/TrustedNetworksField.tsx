@@ -1,7 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import type { AttendanceConfig } from '@spoh/shared';
-import { ApiError } from '@/shared/lib/apiErrors';
-import { Button, Callout, Field, Textarea } from '@/shared/ui';
+import { Button, Callout, Field, Textarea, ErrorState } from '@/shared/ui';
 import { useChangeAttendanceConfig, useTestAttendanceNetwork } from '../queries';
 import { SettingSaveError } from './SettingSaveError';
 
@@ -73,9 +72,7 @@ export function TrustedNetworksField({
         </Callout>
       ) : null}
       {test.isError ? (
-        <Callout tone="alert" role="alert" title="Could not test network">
-          {test.error instanceof ApiError ? test.error.message : 'Try again in a moment.'}
-        </Callout>
+        <ErrorState error={test.error} />
       ) : null}
       {save.isError ? <SettingSaveError error={save.error} /> : null}
     </div>

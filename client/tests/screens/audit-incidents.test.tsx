@@ -125,7 +125,8 @@ describe('audit explorer', () => {
   it('refuses an inverted event-clock range and reports failed reads', async () => {
     mockApi.mockRejectedValue(new Error('Audit service unavailable'));
     show(<AuditScreen />);
-    await screen.findByText('Audit service unavailable');
+    await screen.findByText('This action was not confirmed');
+    expect(screen.queryByText('Audit service unavailable')).toBeNull();
     fireEvent.change(screen.getByLabelText(/^From \(inclusive\)/), {
       target: { value: '2027-01-07T10:00' },
     });
@@ -237,7 +238,8 @@ describe('incident management', () => {
       target: { value: 'Another leader checked the floor' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Append follow-up' }));
-    await screen.findByText('Follow-up could not save');
+    await screen.findByText('This action was not confirmed');
+    expect(screen.queryByText('Follow-up could not save')).toBeNull();
   });
 
   it('pages the incident list and distinguishes empty, failure and forbidden states', async () => {
@@ -262,7 +264,8 @@ describe('incident management', () => {
     cleanup();
     mockApi.mockRejectedValue(new Error('Incident service unavailable'));
     show(<IncidentsScreen />);
-    await screen.findByText('Incident service unavailable');
+    await screen.findByText('This action was not confirmed');
+    expect(screen.queryByText('Incident service unavailable')).toBeNull();
     cleanup();
     access.allowed = false;
     mockApi.mockClear();

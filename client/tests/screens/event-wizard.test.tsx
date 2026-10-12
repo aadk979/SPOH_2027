@@ -131,7 +131,9 @@ it('allows creating without joining, and reuses one receipt after a failed reque
   fireEvent.click(screen.getByRole('button', { name: 'Review event' }));
   expect(screen.getByText(/without joining its roster/)).toBeTruthy();
   fireEvent.click(screen.getByRole('button', { name: 'Create event' }));
-  await screen.findByText('Connection interrupted');
+  await screen.findByText('This action was not confirmed');
+  expect(screen.queryByText('Connection interrupted')).toBeNull();
+  expect(screen.getByRole('button', { name: 'Create event' }).hasAttribute('disabled')).toBe(false);
   const first = mockedApi.mock.calls[0]?.[1]?.body;
   fireEvent.click(screen.getByRole('button', { name: 'Create event' }));
   await screen.findByText('Created New Event. You have not joined its roster.');

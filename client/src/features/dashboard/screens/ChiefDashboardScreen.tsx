@@ -12,9 +12,11 @@ import { RehearsalDashboardControl } from '../components/RehearsalDashboardContr
 import { useState, type ReactNode } from 'react';
 import type { LiveDashboardResponse } from '@spoh/shared';
 import { AppShell } from '@/shared/shell/AppShell';
-import { ButtonLink, Callout, LoadingCards, Section, Stack } from '@/shared/ui';
+import { ButtonLink, ErrorState, PermissionDenied, CountHelp, LoadingCards, Section, Stack, PrivateReadBoundary } from '@/shared/ui';
+import { usePrivateReadFailure } from '@/shared/hooks/usePrivateReadFailure';
+import { useEventId } from '@/shared/lib/eventContext';
 import { useLiveDashboard } from '@/features/dashboard';
-import { useRequireSession } from '@/features/session';
+import { useAllows, useRequireSession } from '@/features/session';
 
 /**
  * The live operations dashboard (remediation/phases/P07-client-refactor.md).
@@ -30,7 +32,8 @@ import { useRequireSession } from '@/features/session';
 export default function ChiefDashboardScreen(): ReactNode {
   const session = useRequireSession();
   const [includeRehearsal, setIncludeRehearsal] = useState(false);
-  const { data, isLoading, isError } = useLiveDashboard(includeRehearsal);
+  const allowed = useAllows()('Dashboard.ReadEvent');
+  const eventId = useEventId();
 
   if (!session) return null;
 
@@ -46,17 +49,23 @@ export default function ChiefDashboardScreen(): ReactNode {
       }
     >
       <RehearsalDashboardControl included={includeRehearsal} onChange={setIncludeRehearsal} />
-      {isError ? (
-        <Callout tone="alert" title="The dashboard could not be loaded">
+      <CountHelp />
+      {!allowed ? <PermissionDenied /> : <PrivateReadBoundary key={`${eventId}:${session.volunteerId}`}>{(onDenied) => <LiveReader includeRehearsal={includeRehearsal} onDenied={onDenied} />}</PrivateReadBoundary>}
+    </AppShell>
+  );
+}
+function LiveReader({ includeRehearsal, onDenied }: { includeRehearsal: boolean; onDenied(): void }): ReactNode {
+  const { data, isLoading, error, refetch } = useLiveDashboard(includeRehearsal);
+  usePrivateReadFailure(error, onDenied);
+  return error ? (
+        <ErrorState error={error} operation="Loading the dashboard" onRetry={() => void refetch()}>
           Capture is unaffected — volunteers keep working.
-        </Callout>
+        </ErrorState>
       ) : isLoading || !data ? (
         <LoadingCards count={3} label="Loading live operations" />
       ) : (
         <DashboardBody data={data} />
-      )}
-    </AppShell>
-  );
+      );
 }
 
 function DashboardBody({ data }: { data: LiveDashboardResponse }): ReactNode {

@@ -42,6 +42,11 @@ async function archive(at: Date) {
 
 describe('person data requests', () => {
   it('exports the requested profile without session secrets, push credentials or arbitrary audit payloads', async () => {
+    const scope = await testEvent();
+    const notice = await rawDb.notice.create({ data: { eventId: scope.eventId, recipientPersonId: person.id,
+      kind: 'SWAP_APPROVED', priority: 'OPERATIONAL', sourceKind: 'SWAP', sourceId: randomUUID(),
+      transitionKey: randomUUID(), context: { type: 'swap' }, createdAt: FROZEN_NOW, readAt: FROZEN_NOW } });
+    await rawDb.noticePreference.create({ data: { personId: person.id, urgentPush: false, operationalPush: true } });
     await request(app).post('/api/v1/auth/session').send({ email: person.email }).expect(201);
     const result = await request(app).get(endpoint('/data')).set('Authorization', bearer(admin)).expect(200);
     expect(PersonDataExportResponse.safeParse(result.body).success).toBe(true);
@@ -49,10 +54,20 @@ describe('person data requests', () => {
     expect(serialised).not.toMatch(/tokenHash|refreshToken|providerTokenEncrypted|p256dh/);
     expect(result.body.data.person).toMatchObject({ id: person.id, email: person.email, phone: '+6512345678' });
     expect(result.body.data.activity[0]).not.toHaveProperty('after');
+    expect(result.body.data.notifications.noticePreference).toMatchObject({ urgentPush: false, operationalPush: true });
+    expect(result.body.data.notifications.notices).toEqual([expect.objectContaining({ id: notice.id, sourceId: notice.sourceId,
+      readAt: FROZEN_NOW.toISOString() })]);
+    expect(result.body.data.notifications.notices[0]).not.toHaveProperty('context');
     expect(await rawDb.auditLog.count({ where: { action: 'person.export', entityId: person.id } })).toBe(1);
   });
   it('requires suspension, then anonymises once while preserving membership and audit references', async () => {
     const scope = await testEvent();
+    const notice = await rawDb.notice.create({ data: { eventId: scope.eventId, recipientPersonId: person.id,
+      kind: 'SWAP_APPROVED', priority: 'OPERATIONAL', sourceKind: 'SWAP', sourceId: randomUUID(),
+      transitionKey: randomUUID(), context: { type: 'swap' } } });
+    await rawDb.noticeDelivery.create({ data: { eventId: scope.eventId, noticeId: notice.id,
+      recipientPersonId: person.id, deviceKey: 'gone-device', runAt: FROZEN_NOW, expiresAt: FROZEN_NOW } });
+    await rawDb.noticePreference.create({ data: { personId: person.id, operationalPush: true } });
     const station = await createStation({ code: 'ERASURE-COUNT', countsEntry: true });
     const capture = await rawDb.footfallTick.create({ data: { eventId: scope.eventId, stationId: station.id,
       recordedById: person.id, quantity: 17, idempotencyKey: randomUUID() } });
@@ -64,6 +79,9 @@ describe('person data requests', () => {
     await request(app).post(endpoint('/erase')).set('Authorization', bearer(admin)).send(input).expect(200);
     expect(await rawDb.person.findUniqueOrThrow({ where: { id: person.id } })).toMatchObject({ phone: null, displayName: 'Archived staff member', piiErasedAt: expect.any(Date), cognitoSub: person.sub });
     expect(await rawDb.eventMembership.count({ where: { personId: person.id } })).toBe(1);
+    expect(await rawDb.notice.count({ where: { recipientPersonId: person.id } })).toBe(0);
+    expect(await rawDb.noticeDelivery.count({ where: { recipientPersonId: person.id } })).toBe(0);
+    expect(await rawDb.noticePreference.count({ where: { personId: person.id } })).toBe(0);
     expect(await rawDb.footfallTick.findUniqueOrThrow({ where: { id: capture.id } })).toMatchObject({ quantity: 17, recordedById: person.id });
     expect(await rawDb.auditLog.count({ where: { action: 'person.erase', entityId: person.id } })).toBe(1);
     const log = await rawDb.auditLog.findFirstOrThrow({ where: { action: 'person.erase' } });
@@ -100,8 +118,16 @@ describe('archive retention and access', () => {
     const source = await rawDb.event.findUniqueOrThrow({ where: { id: scope.eventId } });
     const event = await rawDb.event.create({ data: { organisationId: source.organisationId, slug: 'remaining-event', name: 'Remaining', timezone: source.timezone } });
     await rawDb.eventMembership.create({ data: { eventId: event.id, personId: person.id } });
+    const noticeInput = { recipientPersonId: person.id, kind: 'SWAP_APPROVED' as const,
+      priority: 'OPERATIONAL' as const, sourceKind: 'SWAP' as const, sourceId: randomUUID(),
+      transitionKey: randomUUID(), context: { type: 'swap' } };
+    await rawDb.notice.create({ data: { ...noticeInput, eventId: scope.eventId } });
+    const currentNotice = await rawDb.notice.create({ data: { ...noticeInput, eventId: event.id } });
+    await rawDb.noticePreference.create({ data: { personId: person.id, operationalPush: true } });
     await staffPurge(FROZEN_NOW);
     expect(await rawDb.person.findUniqueOrThrow({ where: { id: person.id } })).toMatchObject({ phone: '+6512345678', piiErasedAt: null });
+    expect(await rawDb.notice.findMany({ where: { recipientPersonId: person.id } })).toEqual([expect.objectContaining({ id: currentNotice.id })]);
+    expect(await rawDb.noticePreference.findUnique({ where: { personId: person.id } })).toMatchObject({ operationalPush: true });
     const args = { eventId: scope.eventId, archivedAt: FROZEN_NOW, audit: SYSTEM_AUDIT_CONTEXT };
     await prisma.$transaction((tx) => scheduleArchivedRetention(tx, args));
     await prisma.$transaction((tx) => scheduleArchivedRetention(tx, args));

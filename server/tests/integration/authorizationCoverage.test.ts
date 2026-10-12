@@ -11,6 +11,11 @@ import { routeInventory } from '../helpers/routeInventory.js';
  */
 
 const WITHOUT_MEMBERSHIP = new Set([
+  // ADR-001 approved publication exception; no unpublished or operational data.
+  'GET /public/events/:slug/branding',
+  'GET /public/events/:slug/branding/theme.css',
+  'GET /public/events/:slug/branding/manifest.webmanifest',
+  'GET /public/events/:slug/branding/assets/:publicationId/:variant',
   'POST /auth/session',
   'DELETE /auth/session',
   'POST /auth/refresh',
@@ -29,6 +34,14 @@ const WITHOUT_MEMBERSHIP = new Set([
 
 /** These cross-event platform use cases ask current Cedar authority in their transactions. */
 const PLATFORM_USE_CASE_AUTHORITY = new Map([
+  ['GET /notification-centre', 'requirePerson: own private centre; each source rechecks current event authority'],
+  ['GET /notification-centre/:id', 'requirePerson: exact notice recipient; current scoped source visibility before projection'],
+  ['PUT /notification-centre/:id/read', 'requirePerson: exact notice recipient and current source authority before read-state change'],
+  ['GET /notification-centre/preferences', 'requirePerson: reads only the authenticated person preference row'],
+  ['PUT /notification-centre/preferences', 'requirePerson: writes only the authenticated person preference row'],
+  ['GET /notification-centre/device/config', 'requirePerson: public push configuration behind the person session'],
+  ['POST /notification-centre/device/subscriptions', 'requirePerson: registers only the current authenticated person device'],
+  ['DELETE /notification-centre/device/subscriptions', 'requirePerson: removes only subscriptions owned by the authenticated person'],
   ['GET /people/:id', 'permittedPerson: Platform.ManageAdmins for every target organisation'],
   ['GET /people/:id/data', 'permittedPerson: Platform.ManageAdmins for every target organisation'],
   ['POST /people/:id/erase', 'permittedPerson: Platform.ManageAdmins under the person lock'],

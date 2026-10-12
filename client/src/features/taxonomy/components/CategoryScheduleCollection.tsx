@@ -3,7 +3,7 @@ import type {
   CategoryScheduleRecord,
   ScheduledActionStatus,
 } from '@spoh/shared';
-import { Button, Callout, Field, LoadingRows, Select } from '@/shared/ui';
+import { Button, Field, LoadingRows, Select, ErrorState } from '@/shared/ui';
 import type { useCategorySchedules } from '../queries';
 import type { CategoryScheduleAction } from '../model/categoryScheduleReview';
 import { scheduleStatusLabels } from '../model/copy';
@@ -45,9 +45,7 @@ export function CategoryScheduleCollection(input: CollectionInput) {
         onChange={input.setStatus}
       />
       {query.isError ? (
-        <Callout tone="alert" role="alert">
-          Category schedules are unavailable. Reload before reviewing.
-        </Callout>
+        <ErrorState error={query.error}>Category schedules are unavailable. Reload before reviewing.</ErrorState>
       ) : null}
       {query.isPending ? <LoadingRows label="Loading category schedules" /> : null}
       <Button

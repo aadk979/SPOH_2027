@@ -172,6 +172,7 @@ export type StaffingGapsResponse = z.infer<typeof StaffingGapsResponse>;
  */
 export const LongShiftWarning = z
   .object({
+    assignmentId: Id.optional(), stationId: Id.optional(), shiftId: Id.optional(), eventDayId: Id.optional(),
     volunteerId: Id,
     volunteerName: z.string(),
     stationName: z.string(),

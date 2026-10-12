@@ -21,3 +21,4 @@ export { volunteerMutationReplay } from './http/replay.js';
 export { getVolunteer } from './application/queries.js';
 export { scheduleArchivedRetention } from './application/staffRetention.js';
 export { peopleScheduledHandlers, peopleRecurringActions } from './jobs.js';
+export { peopleWorkspaceSource } from './application/workspace.js';

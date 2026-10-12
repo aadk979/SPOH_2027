@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import type { FoundItemFormState } from '../hooks/useFoundItemForm';
 import { Button, Field } from '@/shared/ui';
+import { PhotoUploadStatus } from './PhotoUploadStatus';
 export function FoundItemPhoto({ form }: { form: FoundItemFormState }): ReactNode {
   const { photo } = form;
   return (
@@ -30,9 +31,7 @@ export function FoundItemPhoto({ form }: { form: FoundItemFormState }): ReactNod
                 className="text-body file:mr-sm file:rounded-pill file:border-0 file:bg-surface-sunken file:px-md file:py-xs file:text-caption"
               />
 
-              {photo.state === 'uploading' ? (
-                <p className="text-caption text-text-muted">Uploading…</p>
-              ) : null}
+              <PhotoUploadStatus state={photo.state} />
 
               {photo.canRetry ? (
                 <Button variant="quiet" size="sm" type="button" onClick={() => void photo.retry()}>

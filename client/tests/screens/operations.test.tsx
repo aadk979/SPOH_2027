@@ -102,20 +102,29 @@ describe('operations screen safety net', () => {
   it('reports a failed report query without offering a misleading export', async () => {
     mockedApi.mockRejectedValue(new Error('offline'));
     show(<ReportsPage />);
-    await screen.findByText('The report could not be generated');
+    await screen.findByText('Generating the report was not confirmed');
+    expect(screen.queryByText('offline')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Retry generating the report' })).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Download XLSX' })).toBeNull();
   });
 
   it('shows dashboard failure rather than zero-valued operational totals', async () => {
+    state.actions = ['Dashboard.ReadEvent'];
     mockedApi.mockRejectedValue(new Error('offline'));
     show(<ChiefPage />);
-    await screen.findByText('The dashboard could not be loaded');
+    await screen.findByText('Loading the dashboard was not confirmed');
+    expect(screen.queryByText('offline')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Retry loading the dashboard' })).toBeTruthy();
+    expect(screen.queryByText('Registered')).toBeNull();
   });
 
   it('requests the IC dashboard for the assigned station', async () => {
+    state.actions = ['Dashboard.ReadStation'];
     show(<IcPage />);
     await waitFor(() =>
-      expect(mockedApi).toHaveBeenCalledWith(`${API}/dashboard/station/station-1`),
+      expect(mockedApi).toHaveBeenCalledWith(`${API}/dashboard/station/station-1`, {
+        signal: expect.any(AbortSignal), cache: 'no-store',
+      }),
     );
   });
 

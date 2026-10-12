@@ -3,7 +3,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../../src/app/createApp.js';
 import { eventScheduledHandlers } from '../../src/modules/event/index.js';
 import { fallbackScheduledHandlers } from '../../src/modules/fallback/index.js';
-import * as notification from '../../src/modules/notification/index.js';
 import { claimDueActions } from '../../src/platform/scheduler/claimDueActions.js';
 import { HandlerRegistry } from '../../src/platform/scheduler/registry.js';
 import { runClaimedAction } from '../../src/platform/scheduler/runClaimedAction.js';
@@ -71,20 +70,22 @@ describe('open fallback reminders', () => {
 
   it('notifies the declarer and coordinators, then queues the next one', async () => {
     const windowId = await declare();
-    const dispatch = vi.spyOn(notification, 'dispatch');
+    const deputy = await createVolunteer({ email: 'deputy@reminder.test', role: 'DEPUTY_COORDINATOR' });
+    const coordinator = await createVolunteer({ email: 'other-chief@reminder.test', role: 'CHIEF_COORDINATOR' });
+    await createVolunteer({ email: 'ordinary@reminder.test', role: 'VOLUNTEER' });
+    const inactive = await createVolunteer({ email: 'inactive-chief@reminder.test', role: 'CHIEF_COORDINATOR' });
+    const { eventId } = (await reminders())[0]!;
+    // The original declarer remains an explicit recipient after a role change.
+    await rawDb.eventMembership.updateMany({ where: { eventId: eventId!, personId: chief.id }, data: { role: 'IC' } });
+    await rawDb.eventMembership.updateMany({ where: { eventId: eventId!, personId: inactive.id }, data: { status: 'DEACTIVATED' } });
     expect(await runDue(registry, at(30))).toBe('SUCCEEDED');
-    expect(dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({ eventId: expect.any(String) }),
-      expect.objectContaining({
-        kind: 'fallback.reminder',
-        tag: `fallback-open:${windowId}`,
-        audience: expect.objectContaining({
-          minimumRole: 'DEPUTY_COORDINATOR',
-          volunteerIds: [chief.id],
-        }),
-      }),
-      at(30),
-    );
+    const notices = await rawDb.notice.findMany({ where: { eventId: eventId!, sourceId: windowId } });
+    expect(notices.map((row) => row.recipientPersonId).sort()).toEqual([chief.id, deputy.id, coordinator.id].sort());
+    for (const notice of notices) expect(notice).toMatchObject({ kind: 'FALLBACK_REMINDER', priority: 'OPERATIONAL',
+      sourceKind: 'FALLBACK', sourceId: windowId, transitionKey: `fallback:${windowId}:remind:1`,
+      context: { type: 'fallback', sequence: 1 }, createdAt: at(30), expiresAt: null });
+    // Default operational preferences retain centre history without creating device sends.
+    expect(await rawDb.noticeDelivery.count()).toBe(0);
     const queued = await reminders();
     expect(queued.map((row) => row.status)).toEqual(['SUCCEEDED', 'PENDING']);
     expect(queued[1]).toMatchObject({ payload: { windowId, sequence: 2 } });
@@ -94,9 +95,9 @@ describe('open fallback reminders', () => {
   it('stops once the window is closed', async () => {
     const windowId = await declare();
     await rawDb.fallbackWindow.update({ where: { id: windowId }, data: { endedAt: at(10) } });
-    const dispatch = vi.spyOn(notification, 'dispatch');
     expect(await runDue(registry, at(30))).toBe('SUCCEEDED');
-    expect(dispatch).not.toHaveBeenCalled();
+    expect(await rawDb.notice.count()).toBe(0);
+    expect(await rawDb.noticeDelivery.count()).toBe(0);
     expect((await reminders()).map((row) => row.status)).toEqual(['SUCCEEDED']);
   });
 
@@ -108,6 +109,8 @@ describe('open fallback reminders', () => {
     });
     expect(await runDue(registry, at(30))).not.toBe('SUCCEEDED');
     expect(await rawDb.fallbackWindow.findUnique({ where: { id: windowId } })).not.toBeNull();
+    expect(await rawDb.notice.count()).toBe(0);
+    expect(await rawDb.noticeDelivery.count()).toBe(0);
   });
 });
 
@@ -134,17 +137,25 @@ describe('the archive reminder', () => {
 
   it('tells the platform admins once the late-sync grace has passed', async () => {
     await platformAdmin();
+    const standalone = await createVolunteer({ email: 'standalone-admin@reminder.test', role: 'VOLUNTEER' });
+    const inactive = await createVolunteer({ email: 'inactive-platform@reminder.test', role: 'ADMIN' });
+    const foreign = await createVolunteer({ email: 'foreign-platform@reminder.test', role: 'ADMIN' });
+    await rawDb.organisationMembership.createMany({ data: [standalone, inactive].map((person) => ({
+      organisationId: f.organisationId, personId: person.id, role: 'PLATFORM_ADMIN' })) });
+    await rawDb.person.update({ where: { id: inactive.id }, data: { deactivatedAt: FROZEN_NOW } });
+    const organisation = await rawDb.organisation.create({ data: { slug: 'foreign-reminder', name: 'Foreign reminder', appName: 'Foreign ops', defaultTimezone: 'Asia/Singapore' } });
+    await rawDb.organisationMembership.create({ data: { organisationId: organisation.id, personId: foreign.id, role: 'PLATFORM_ADMIN' } });
     const reminder = await closeWithReminder();
-    const dispatch = vi.spyOn(notification, 'dispatch');
     expect(await runDue(registry, reminder.runAt)).toBe('SUCCEEDED');
-    expect(dispatch).toHaveBeenCalledWith(
-      { eventId: f.eventId },
-      expect.objectContaining({
-        kind: 'event.archiveReminder',
-        audience: { everyone: false, volunteerIds: [f.creator.id] },
-      }),
-      reminder.runAt,
-    );
+    const notices = await rawDb.notice.findMany({ where: { eventId: f.eventId } });
+    expect(notices.map((row) => row.recipientPersonId).sort()).toEqual([f.creator.id, standalone.id].sort());
+    const { lifecycleVersion } = await f.state();
+    for (const notice of notices) expect(notice).toMatchObject({ kind: 'ARCHIVE_REMINDER', priority: 'OPERATIONAL',
+      sourceKind: 'EVENT', sourceId: f.eventId, transitionKey: `event:${f.eventId}:archive:${lifecycleVersion}`,
+      context: { type: 'event', lifecycleVersion }, createdAt: reminder.runAt, expiresAt: null });
+    expect(notices.find((row) => row.recipientPersonId === standalone.id)?.recipientMembershipId).toBeNull();
+    expect(notices.find((row) => row.recipientPersonId === f.creator.id)?.recipientMembershipId).toBe(f.membershipId);
+    expect(await rawDb.noticeDelivery.count()).toBe(0);
   });
 
   it('stays silent when the event moved on from the close that queued it', async () => {
@@ -154,15 +165,15 @@ describe('the archive reminder', () => {
     for (const status of ['LIVE', 'CLOSED'] as const) {
       await rawDb.event.update({ where: { id: f.eventId }, data: { status } });
     }
-    const dispatch = vi.spyOn(notification, 'dispatch');
     expect(await runDue(registry, reminder.runAt)).toBe('SUCCEEDED');
-    expect(dispatch).not.toHaveBeenCalled();
+    expect(await rawDb.notice.count()).toBe(0);
+    expect(await rawDb.noticeDelivery.count()).toBe(0);
   });
 
   it('has nobody to tell without an active platform admin', async () => {
     const reminder = await closeWithReminder();
-    const dispatch = vi.spyOn(notification, 'dispatch');
     expect(await runDue(registry, reminder.runAt)).toBe('SUCCEEDED');
-    expect(dispatch).not.toHaveBeenCalled();
+    expect(await rawDb.notice.count()).toBe(0);
+    expect(await rawDb.noticeDelivery.count()).toBe(0);
   });
 });

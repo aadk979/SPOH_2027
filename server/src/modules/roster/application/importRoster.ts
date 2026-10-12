@@ -13,6 +13,7 @@ import { currentRoster } from './currentRoster.js';
 import { identitiesByEmail, reserveIdentityDeliveries } from '../../../platform/identity/deliveryQuota.js';
 import { systemClock } from '../../../platform/time/index.js';
 import { ForbiddenError } from '../../../platform/errors/index.js';
+import { recordRosterImport } from '../data/importMetadataRepo.js';
 
 /**
  * Roster CSV import. A preview unless `commit` is set: importing 200
@@ -53,7 +54,9 @@ export async function importRoster(
       if (step.created)
         await currentRoster(tx, actor, { action: 'People.Invite', role: step.row.role });
     }
-    await applyRosterImport(tx, plan, { identities, scope: actor.scope, audit: actor.audit });
+    await applyRosterImport(tx, plan, { identities, scope: actor.scope, audit: actor.audit, ...(actor.clock ? { clock: actor.clock } : {}) });
+    await recordRosterImport(tx, actor.scope, { rowCount: plan.people.length, importedById: actor.volunteerId,
+      now: (actor.clock ?? systemClock).now() });
     await writeAudit(tx, {
       ...actor.audit,
       action: 'roster.import',

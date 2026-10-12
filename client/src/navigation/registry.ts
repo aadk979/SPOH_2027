@@ -1,13 +1,7 @@
 import { ADMIN_ENTRIES } from './adminEntries';
+import { WORKSPACE_ENTRIES } from './workspaceEntries';
 import type { NavContext, NavEntry, OperationsGroup } from './types';
-export type {
-  NavContext,
-  NavEntry,
-  NavStation,
-  NavSurface,
-  OperationsGroup,
-  SectionPath,
-} from './types';
+export type { NavContext, NavEntry, NavStation, NavSurface, OperationsGroup, SectionPath } from './types';
 
 /**
  * The navigation registry (ADR-007 §1): the one source for every nav surface.
@@ -33,6 +27,7 @@ export const NAV_REGISTRY: readonly NavEntry[] = [
     requires: 'Platform.ManageAdmins',
   },
   { path: '/events', label: 'Your events', section: '/home' },
+  ...WORKSPACE_ENTRIES,
   {
     path: '/overview',
     label: 'Overview',

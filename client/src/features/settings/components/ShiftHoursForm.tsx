@@ -1,7 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import type { ShiftTemplateRecord } from '@spoh/shared';
-import { ApiError } from '@/shared/lib/apiErrors';
-import { Button, Callout, Card, LoadingRows, Section } from '@/shared/ui';
+import { Button, Card, LoadingRows, Section, ErrorState } from '@/shared/ui';
 import { shiftHoursError } from '../model/shiftHours';
 import { useSaveShiftTemplate, useShiftTemplates } from '../queries';
 import { ShiftRow } from './ShiftRow';
@@ -45,9 +44,7 @@ function TemplateHours({
         </div>
       ) : null}
       {save.isError ? (
-        <Callout tone="alert" role="alert" title="Not saved">
-          {save.error instanceof ApiError ? save.error.message : 'Try again in a moment.'}
-        </Callout>
+        <ErrorState error={save.error} />
       ) : null}
     </div>
   );

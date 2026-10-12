@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useAllows, useRequireSession } from '@/features/session';
 import { AppShell } from '@/shared/shell/AppShell';
-import { Callout, LoadingRows, Stack } from '@/shared/ui';
+import { Callout, LoadingRows, Stack, ErrorState } from '@/shared/ui';
 import { usePerson } from '../queries';
 import { PersonMemberships } from '../components/PersonMemberships';
 import { PersonLifecycle } from '../components/PersonLifecycle';
@@ -22,9 +22,7 @@ export default function PersonScreen(): ReactNode {
       ) : !id ? (
         <Callout tone="info">Choose a person from the roster.</Callout>
       ) : person.isError ? (
-        <Callout tone="alert" role="alert">
-          {person.error.message}
-        </Callout>
+        <ErrorState error={person.error} />
       ) : !person.data ? (
         <LoadingRows label="Loading person" />
       ) : (

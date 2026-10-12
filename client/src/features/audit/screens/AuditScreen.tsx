@@ -3,7 +3,7 @@ import { useAllows, useRequireSession } from '@/features/session';
 import { useCallback, useState } from 'react';
 import { useEventId } from '@/shared/lib/eventContext';
 import { AppShell } from '@/shared/shell/AppShell';
-import { Button, Callout, EmptyState, LoadingRows, Stack } from '@/shared/ui';
+import { Button, Callout, EmptyState, LoadingRows, Stack, ErrorState } from '@/shared/ui';
 import { useAuditAccessFailure, useAuditLog } from '../queries';
 import { useAuditFilters } from '../hooks/useAuditFilters';
 import { AuditFilters } from '../components/AuditFilters';
@@ -46,9 +46,7 @@ function AuditReader({ onAccessLost }: { onAccessLost: () => void }) {
     return (
       <>
         <AuditFilters control={control} />
-        <Callout tone="alert" role="alert">
-          {log.error.message}
-        </Callout>
+        <ErrorState error={log.error} />
       </>
     );
   return (

@@ -10,6 +10,7 @@ import { Id, IsoDate, IsoDateTime, TimeRangeQuery } from '../common/index.js';
 import { EventStatus } from '../event/index.js';
 import { FallbackWindowRecord } from '../fallback/index.js';
 import { ReportRange, ReportSnapshotMetadata } from './snapshots.js';
+import { FrozenBranding } from '../branding/frozen.js';
 
 export * from './snapshots.js';
 export * from './archive.js';
@@ -293,6 +294,8 @@ export const FullReport = z
         slug: z.string(),
         /** The lifecycle state at generation or freeze time. */
         status: EventStatus,
+        /** Missing/null in legacy snapshots means historical branding is unknown. */
+        branding: FrozenBranding.nullable().optional(),
       })
       .strict(),
     /**

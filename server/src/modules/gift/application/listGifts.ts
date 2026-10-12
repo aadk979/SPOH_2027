@@ -7,7 +7,7 @@ import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /** Every active gift type with its derived stock. */
 export async function listGifts(
-  scope: EventScope & { rehearsal?: boolean },
+  scope: EventScope & { rehearsal?: boolean; asOf?: Date },
   db: PrismaTransactionClient = prisma,
 ): Promise<GiftTypeRecord[]> {
   const rehearsal = scope.rehearsal ?? (await captureProvenance(db, scope)).rehearsal;

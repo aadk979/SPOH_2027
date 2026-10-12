@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useEventTime } from '@/features/session';
-import { Button, Callout } from '@/shared/ui';
+import { Button, Callout, ErrorState } from '@/shared/ui';
 import { useCategoryScheduleReview } from '../hooks/useCategoryScheduleReview';
 import type { CategoryScheduleReviewInput } from '../model/controls';
 import { scheduleStatusLabels } from '../model/copy';
@@ -83,9 +83,7 @@ function CategoryScheduleReviewFeedback({
   return (
     <>
       {review.error ? (
-        <Callout tone="alert" role="alert">
-          {review.error}
-        </Callout>
+        <ErrorState error={review.error}>{review.error}</ErrorState>
       ) : null}
       {review.stale && !review.uncertain ? (
         <Callout tone="alert">Category, schedule or event clock changed after your review.</Callout>

@@ -1,7 +1,7 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { EventContent, type ContentDraftRecord } from '@spoh/shared';
 import { useZodForm } from '@/shared/hooks/useZodForm';
-import { Button, Callout, Stack } from '@/shared/ui';
+import { Button, Callout, MutationFeedback, Stack } from '@/shared/ui';
 import { EMPTY_CONTENT } from '../model/contentEditor';
 import { useSaveContent } from '../queries';
 import { BriefEditor } from './BriefEditor';
@@ -54,11 +54,8 @@ export function ContentEditor({ draft }: { draft: ContentDraftRecord }): ReactNo
             Check the marked fields before saving.
           </Callout>
         ) : null}
-        {save.error ? (
-          <Callout tone="alert" role="alert">
-            {save.error.message} Reload the draft if another organiser changed it.
-          </Callout>
-        ) : null}
+        <MutationFeedback error={save.error} pending={save.isPending} saved={save.isSuccess}
+          operation="Saving the draft" success="Draft saved. Review this version before publishing." />
         {preview ? <ContentPreview body={form.values} /> : null}
       </Stack>
     </form>

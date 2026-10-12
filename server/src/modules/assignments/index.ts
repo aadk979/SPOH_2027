@@ -9,3 +9,6 @@ export {
 } from './http/handlers.js';
 export { toAssignmentRecord } from './data/mappers.js';
 export { assignmentLinks } from './data/repo.js';
+export { readAssignmentNoticeSource } from './application/readNoticeSource.js';
+export { queueAssignmentNotice } from './application/queueAssignmentNotice.js';
+export { assignmentWorkspaceSource } from './application/workspace.js';

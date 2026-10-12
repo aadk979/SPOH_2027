@@ -3,7 +3,7 @@ import { CreateEventDayRequest, UpdateEventDayRequest, type EventDayRecord } fro
 import { dayValues } from '../model/editorDefaults';
 import { useZodForm } from '@/shared/hooks/useZodForm';
 import { useRetryKey } from '@/shared/hooks/useRetryKey';
-import { Button, Checkbox, Stack } from '@/shared/ui';
+import { Button, Checkbox, ControlHelp, Stack } from '@/shared/ui';
 import { useDayWrite } from '../queries';
 import { EditorField } from './EditorField';
 import { WriteFeedback } from './WriteFeedback';
@@ -20,6 +20,7 @@ export function DayEditor({
   );
   const write = useDayWrite();
   const retry = useRetryKey();
+  const helpKey = record?.id ?? 'new';
   function submit(event: FormEvent) {
     event.preventDefault();
     const { date, ...fields } = form.values;
@@ -50,6 +51,7 @@ export function DayEditor({
         />
         <EditorField
           label="Day label"
+          hint="The readable date label shown in day choices and staffing."
           value={form.values.label}
           onChange={form.setter('label')}
           error={form.errors.label}
@@ -57,16 +59,20 @@ export function DayEditor({
         />
         <Checkbox
           label="Public day"
+          aria-describedby={`day-public-${helpKey}`}
           checked={form.values.isPublicDay}
           disabled={!editable}
           onChange={(event) => form.setField('isPublicDay', event.target.checked)}
         />
+        <ControlHelp id={`day-public-${helpKey}`}>Mark this as a public event day. Shift hours still follow templates and exceptions.</ControlHelp>
         <Checkbox
           label="Tour day"
+          aria-describedby={`day-tour-${helpKey}`}
           checked={form.values.isTourDay}
           disabled={!editable}
           onChange={(event) => form.setField('isTourDay', event.target.checked)}
         />
+        <ControlHelp id={`day-tour-${helpKey}`}>Allow this day to be selected for tour briefing waves.</ControlHelp>
         <Button type="submit" disabled={!editable || write.isPending}>
           {record ? 'Save day' : 'Create day'}
         </Button>

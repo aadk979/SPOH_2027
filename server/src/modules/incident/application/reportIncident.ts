@@ -3,7 +3,7 @@ import type { CreateIncidentRequest, IncidentRecord } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { prisma } from '../../../platform/db/client.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
-import { findStationById, requireEventStation } from '../../station/index.js';
+import { requireEventStation } from '../../station/index.js';
 import { createIncident, findIncidentById } from '../data/repo.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { toRecordWithAuthors } from './incidentRecord.js';
@@ -45,21 +45,9 @@ export async function reportIncident(
         ...(provenance.lateSync ? { lateSync: provenance.lateSync } : {}),
       },
     });
+    await notifySafetyChain(tx, scope, { incident: row, reporterId: volunteerId, now: row.reportedAt });
     return row;
   });
-
-  const station = incident.stationId ? await findStationById(scope, incident.stationId) : null;
-  notifySafetyChain(
-    scope,
-    {
-      id: incident.id,
-      severity: incident.severity,
-      type: incident.type,
-      stationName: station?.name ?? request.locationNote ?? null,
-      rehearsal: incident.rehearsal,
-    },
-    volunteerId,
-  );
 
   // Loaded after commit: its relations would overlap on the transaction's
   // connection (F03-019).

@@ -2,7 +2,7 @@
 import type { ReactNode } from 'react';
 import { useRequireSession } from '@/features/session';
 import { AppShell } from '@/shared/shell/AppShell';
-import { Callout, LoadingRows, Stack } from '@/shared/ui';
+import { LoadingRows, Stack, ErrorState } from '@/shared/ui';
 import { GuardrailsPanel, RolePermissionsPanel } from '../components/RolePermissionsPanel';
 import { PermissionSimulator } from '../components/PermissionSimulator';
 import { useRolePermissions } from '../queries';
@@ -16,11 +16,7 @@ export default function PermissionsScreen(): ReactNode {
   return (
     <AppShell title="Role permissions" back={{ href: '/chief', label: 'Ops' }} width="reading">
       {permissions.isError ? (
-        <Callout tone="alert" role="alert">
-          {permissions.error instanceof Error
-            ? permissions.error.message
-            : 'Role permissions could not be loaded.'}
-        </Callout>
+        <ErrorState error={permissions.error} />
       ) : !table ? (
         <LoadingRows label="Loading role permissions" />
       ) : (

@@ -103,6 +103,8 @@ export const AdjustGiftStockRequest = z
 export type AdjustGiftStockRequest = z.infer<typeof AdjustGiftStockRequest>;
 export const AdjustGiftStockWithReceiptRequest = AdjustGiftStockRequest.extend({
   idempotencyKey: IdempotencyKey,
+  /** Reviewed clients pin the displayed pool; older callers remain compatible. */
+  expectedRehearsal: z.boolean().optional(),
 }).strict();
 export type AdjustGiftStockWithReceiptRequest = z.infer<typeof AdjustGiftStockWithReceiptRequest>;
 
@@ -124,6 +126,8 @@ export type GiftSummaryRow = z.infer<typeof GiftSummaryRow>;
 
 export const GiftSummaryResponse = z
   .object({
+    rehearsal: z.boolean().optional(),
+    asOf: IsoDateTime.optional(),
     unit: z.literal('redemptions'),
     total: z.number().int().nonnegative(),
     byGiftType: z.array(GiftSummaryRow),
@@ -131,6 +135,11 @@ export const GiftSummaryResponse = z
   })
   .strict();
 export type GiftSummaryResponse = z.infer<typeof GiftSummaryResponse>;
+
+export const VoidGiftRedemptionRequest = z.object({ idempotencyKey: IdempotencyKey, reason: ReasonText }).strict();
+export type VoidGiftRedemptionRequest = z.infer<typeof VoidGiftRedemptionRequest>;
+export const VoidGiftRedemptionResponse = z.object({ id: Id, voided: z.literal(true), giftType: GiftTypeRecord }).strict();
+export type VoidGiftRedemptionResponse = z.infer<typeof VoidGiftRedemptionResponse>;
 
 // Administering gift types (`config.manage`).
 

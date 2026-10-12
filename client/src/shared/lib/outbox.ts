@@ -1,10 +1,11 @@
 'use client';
 
-import { openDB, type IDBPDatabase } from 'idb';
 import { ApiError, api, isRetryable } from '@/shared/lib/api';
 import { eventApiPath } from '@/shared/lib/eventApi';
 import { getClientSettings, ms } from '@/shared/lib/runtimeSettings';
-import { currentVolunteerId, getSession, subscribeToSession } from '@/shared/lib/session';
+import { currentVolunteerId, getSession, getSessionGeneration, subscribeToSession } from '@/shared/lib/session';
+import { belongsToOwner, cancelEntry, claimEntry, outboxDatabase as db, OUTBOX_STORE as STORE, settleClaim, storeNewEntry, type OutboxClaim, type OutboxEntry } from './outboxStore';
+export type { OutboxEntry, OutboxStatus } from './outboxStore';
 
 /**
  * The local write buffer (BUILD_PLAN §9.5).
@@ -19,39 +20,6 @@ import { currentVolunteerId, getSession, subscribeToSession } from '@/shared/lib
  * server collapses replays to one row, so a flaky connection can never inflate
  * a count. Without it this buffer would be a duplicate-count machine.
  */
-
-// hardcoding-allowed: the product's own identifier, not an event; renaming it would strand queued captures.
-const DB_NAME = 'spoh2027';
-const DB_VERSION = 1;
-const STORE = 'outbox';
-
-export type OutboxStatus = 'pending' | 'sending' | 'failed';
-
-export interface OutboxEntry {
-  /** Equals the idempotencyKey in the body. One key, one row, forever. */
-  id: string;
-  /** The full API path, event included: `/events/<id>/registrations` (ADR-001 §5). */
-  endpoint: string;
-  /**
-   * The event the capture belongs to. Absent on entries the pre-P09.8 build
-   * queued, whose endpoint is an old path (`/registrations`): those belong to
-   * Event #1 and are upgraded to its paths (`upgradeLegacyEntries`).
-   */
-  eventId?: string | null;
-  method: 'POST';
-  body: unknown;
-  clientRecordedAt: string;
-  attempts: number;
-  lastAttemptAt: string | null;
-  status: OutboxStatus;
-  /** Last error message, surfaced on the shift diagnostics panel. */
-  lastError: string | null;
-  /**
-   * The volunteer signed in when the tap was made. Absent on entries queued by
-   * a build that did not record it; those go under whoever is signed in.
-   */
-  ownerId?: string | null;
-}
 
 /** After this many attempts an entry is parked for an IC to salvage by hand. */
 export const MAX_ATTEMPTS = 10;
@@ -84,27 +52,6 @@ function sendGraceMs(): number {
 export const UNSYNCED_WARNING_COUNT = 20;
 export const UNSYNCED_WARNING_AGE_MS = 5 * 60 * 1000;
 
-let dbPromise: Promise<IDBPDatabase> | null = null;
-
-function db(): Promise<IDBPDatabase> {
-  if (!dbPromise) {
-    dbPromise = openDB(DB_NAME, DB_VERSION, {
-      upgrade(database) {
-        const store = database.createObjectStore(STORE, { keyPath: 'id' });
-        store.createIndex('status', 'status');
-      },
-      // A denied or unavailable database (Safari private browsing, storage
-      // full) must not wedge the outbox for the rest of the session: without
-      // clearing the cache, every future call reuses this same rejected
-      // promise and a tap can never be queued again until the page reloads.
-    }).catch((error: unknown) => {
-      dbPromise = null;
-      throw error;
-    });
-  }
-  return dbPromise;
-}
-
 type Listener = (entries: OutboxEntry[]) => void;
 const listeners = new Set<Listener>();
 
@@ -112,6 +59,7 @@ async function notify(): Promise<void> {
   const entries = await listEntries();
   for (const listener of listeners) listener(entries);
 }
+export const refreshOutbox = notify;
 
 export function subscribeToOutbox(listener: Listener): () => void {
   listeners.add(listener);
@@ -155,14 +103,13 @@ export async function enqueue(input: {
     ownerId: currentVolunteerId(),
   };
 
-  const database = await db();
-  await database.put(STORE, entry);
+  const stored = await storeNewEntry(entry);
   await notify();
 
   // Deliberately not an immediate flush — see SEND_GRACE_MS.
   scheduleFlush(sendGraceMs());
 
-  return entry;
+  return stored;
 }
 
 /**
@@ -175,17 +122,19 @@ export async function enqueue(input: {
  */
 export async function upgradeLegacyEntries(legacyEventId: string): Promise<number> {
   const database = await db();
-  const legacy = ((await database.getAll(STORE)) as OutboxEntry[]).filter(
+  const tx = database.transaction(STORE, 'readwrite');
+  const legacy = ((await tx.store.getAll()) as OutboxEntry[]).filter(
     (entry) =>
       !entry.eventId && !entry.endpoint.startsWith('/events/') && entry.status !== 'sending',
   );
   for (const entry of legacy) {
-    await database.put(STORE, {
+    await tx.store.put({
       ...entry,
       eventId: legacyEventId,
       endpoint: eventApiPath(legacyEventId, entry.endpoint),
     });
   }
+  await tx.done;
   if (legacy.length > 0) await notify();
   return legacy.length;
 }
@@ -199,14 +148,9 @@ export async function upgradeLegacyEntries(legacyEventId: string): Promise<numbe
  * never actually happened.
  */
 export async function cancel(id: string): Promise<boolean> {
-  const database = await db();
-  const entry = (await database.get(STORE, id)) as OutboxEntry | undefined;
-
-  if (!entry || entry.status === 'sending') return false;
-
-  await database.delete(STORE, id);
-  await notify();
-  return true;
+  const cancelled = await cancelEntry(id);
+  if (cancelled) await notify();
+  return cancelled;
 }
 
 let flushing = false;
@@ -267,7 +211,7 @@ export async function flush(options: FlushOptions = {}): Promise<void> {
  * signs in again.
  */
 function isSendableNow(entry: OutboxEntry): boolean {
-  return entry.ownerId == null || entry.ownerId === currentVolunteerId();
+  return belongsToOwner(entry);
 }
 
 /**
@@ -277,17 +221,17 @@ function isSendableNow(entry: OutboxEntry): boolean {
  * the real problem, so it is parked for the diagnostics panel. A 401 is the
  * exception: see `holdUntilSignIn`.
  */
-async function recordFailure(entry: OutboxEntry, error: unknown): Promise<'stop' | 'continue'> {
+async function recordFailure(claim: OutboxClaim, error: unknown): Promise<'stop' | 'continue'> {
+  const { entry } = claim;
   if (error instanceof ApiError && error.isUnauthenticated) {
-    await holdUntilSignIn(entry, error.message);
+    await holdUntilSignIn(claim, error.message);
     return 'stop';
   }
 
   const attempts = entry.attempts + 1;
   const givingUp = !isRetryable(error) || attempts >= MAX_ATTEMPTS;
 
-  const database = await db();
-  await database.put(STORE, {
+  await settleClaim(claim, {
     ...entry,
     attempts,
     lastAttemptAt: new Date().toISOString(),
@@ -306,10 +250,9 @@ async function recordFailure(entry: OutboxEntry, error: unknown): Promise<'stop'
  * and stop this flush, because every entry behind it would get the same answer.
  * The flush that follows the next sign-in sends it (F03-033).
  */
-async function holdUntilSignIn(entry: OutboxEntry, message: string): Promise<void> {
-  const database = await db();
-  await database.put(STORE, {
-    ...entry,
+async function holdUntilSignIn(claim: OutboxClaim, message: string): Promise<void> {
+  await settleClaim(claim, {
+    ...claim.entry,
     status: 'pending',
     lastError: message,
   } satisfies OutboxEntry);
@@ -414,14 +357,23 @@ export function toClipboardText(entries: OutboxEntry[]): string {
 }
 
 async function sendEntry(entry: OutboxEntry): Promise<'stop' | 'continue'> {
-  const database = await db();
-  await database.put(STORE, { ...entry, status: 'sending' } satisfies OutboxEntry);
+  const claim = await claimEntry(entry.id);
+  if (!claim) return 'continue';
+  if (!belongsToOwner(claim.entry) || claim.generation !== getSessionGeneration()) {
+    await settleClaim(claim, { ...claim.entry, status: 'pending' });
+    return 'stop';
+  }
+  await notify();
+  if (!belongsToOwner(claim.entry) || claim.generation !== getSessionGeneration()) {
+    await settleClaim(claim, { ...claim.entry, status: 'pending' });
+    return 'stop';
+  }
 
   try {
-    await api(entry.endpoint, { method: 'POST', body: entry.body });
-    await database.delete(STORE, entry.id);
+    await api(claim.entry.endpoint, { method: 'POST', body: claim.entry.body });
+    await settleClaim(claim, null);
   } catch (error) {
-    return recordFailure(entry, error);
+    return recordFailure(claim, error);
   }
 
   return 'continue';

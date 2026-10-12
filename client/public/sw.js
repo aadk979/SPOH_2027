@@ -33,7 +33,10 @@ const EVENT_SEGMENT = /^\/e\/[^/]+/;
 const PLACEHOLDER = '/e/_';
 
 function cacheKeyOf(url) {
-  return url.pathname.replace(EVENT_SEGMENT, PLACEHOLDER) + url.search;
+  // An event's HTML contains its approved public identity. Only shared RSC
+  // payloads may collapse to the export placeholder; HTML stays under its slug.
+  const sharedPayload = /(?:\.txt|\.rsc)$/.test(url.pathname);
+  return (sharedPayload ? url.pathname.replace(EVENT_SEGMENT, PLACEHOLDER) : url.pathname) + url.search;
 }
 
 const SHELL = [

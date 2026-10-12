@@ -6,13 +6,14 @@ import type {
   VisitorFieldRecord,
 } from '@spoh/shared';
 import { eventApi } from '@/shared/lib/eventApi';
-import { VisitorRecordsResponse } from '@spoh/shared';
-export async function readVisitorRecords(eventId: string) {
-  return VisitorRecordsResponse.parse(await eventApi(eventId, '/visitors', { cache: 'no-store' }));
+import { VisitorFieldRecord as VisitorFieldSchema, VisitorRecordsResponse } from '@spoh/shared';
+export async function readVisitorRecords(eventId: string, signal?: AbortSignal) {
+  return VisitorRecordsResponse.parse(await eventApi(eventId, '/visitors', { cache: 'no-store', signal }));
 }
 
-export async function listVisitorFields(eventId: string): Promise<VisitorFieldRecord[]> {
-  return (await eventApi<{ data: VisitorFieldRecord[] }>(eventId, '/admin/visitor-fields')).data;
+export async function listVisitorFields(eventId: string, signal?: AbortSignal): Promise<VisitorFieldRecord[]> {
+  const response = await eventApi<{ data: unknown }>(eventId, '/admin/visitor-fields', { cache: 'no-store', signal });
+  return VisitorFieldSchema.array().parse(response.data);
 }
 
 export async function createVisitorField(eventId: string, body: CreateVisitorFieldRequest) {

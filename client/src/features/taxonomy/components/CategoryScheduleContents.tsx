@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { ScheduledActionStatus } from '@spoh/shared';
 import { ApiError } from '@/shared/lib/apiErrors';
-import { Button, Callout, LoadingRows } from '@/shared/ui';
+import { Button, LoadingRows, ErrorState } from '@/shared/ui';
 import { useApplyCategoryCurrent, useCategoryActivity, useCategorySchedules } from '../queries';
 import type { CategoryScheduleAction } from '../model/categoryScheduleReview';
 import { CategoryScheduleCollection } from './CategoryScheduleCollection';
@@ -45,9 +45,7 @@ export function CategoryScheduleContents(input: {
   if (!current.data || (current.isError && !action))
     return (
       <>
-        <Callout role="alert" tone="alert">
-          Current category is unavailable. Reload before reviewing.
-        </Callout>
+        <ErrorState error={current.error}>Current category is unavailable. Reload before reviewing.</ErrorState>
         <Button
           variant="quiet"
           disabled={!input.accessAvailable || current.isFetching}

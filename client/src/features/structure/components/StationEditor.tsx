@@ -8,7 +8,7 @@ import {
 import { stationValues } from '../model/editorDefaults';
 import { useZodForm } from '@/shared/hooks/useZodForm';
 import { useRetryKey } from '@/shared/hooks/useRetryKey';
-import { Button, Checkbox, Stack } from '@/shared/ui';
+import { Button, Checkbox, ControlHelp, Stack } from '@/shared/ui';
 import { useStationWrite } from '../queries';
 import { EditorField } from './EditorField';
 import { StationStructureFields } from './StationStructureFields';
@@ -37,6 +37,7 @@ export function StationEditor({
         />
         <EditorField
           label="Station name"
+          hint="The name shown in station choices, assignments and the event map."
           value={form.values.name}
           onChange={form.setter('name')}
           error={form.errors.name}
@@ -61,6 +62,7 @@ export function StationEditor({
         />
         <EditorField
           label="Display order"
+          hint="Lower numbers appear first in station lists."
           type="number"
           value={form.values.sortOrder}
           onChange={(value) => form.setField('sortOrder', Number(value))}
@@ -70,11 +72,13 @@ export function StationEditor({
         {record ? (
           <Checkbox
             label="Active station"
+            aria-describedby={`station-active-${record.id}`}
             checked={form.values.active}
             disabled={!editable}
             onChange={(event) => form.setField('active', event.target.checked)}
           />
         ) : null}
+        {record ? <ControlHelp id={`station-active-${record.id}`}>Turning this off removes the station from new selections. Existing records and assignments remain in history.</ControlHelp> : null}
         <Button type="submit" disabled={!editable || write.isPending}>
           {record ? 'Save station' : 'Create station'}
         </Button>

@@ -1,6 +1,6 @@
 'use client';
 import type { CardPrintContextRecord } from '@spoh/shared';
-import { Button, Callout, Card, LoadingRows } from '@/shared/ui';
+import { Button, Card, LoadingRows, ErrorState } from '@/shared/ui';
 import { useCardPrintDetails, useCardPrintDownload } from '../queries';
 import { usePrintAccessFailure } from '../hooks/usePrintAccessFailure';
 
@@ -33,12 +33,10 @@ export function CardPrintDetails({ id, onAccessLost }: { id: string; onAccessLos
       <h3>Stored export details</h3>
       {detail.isPending ? <LoadingRows label="Loading print details" /> : null}
       {detail.error ? (
-        <Callout role="alert" tone="alert">
-          Export details are unavailable.
+        <ErrorState error={detail.error}>Export details are unavailable.
           <Button variant="quiet" onClick={() => void detail.refetch()}>
             Retry export details
-          </Button>
-        </Callout>
+          </Button></ErrorState>
       ) : null}
       {data && !detail.isError ? (
         <>
@@ -55,9 +53,7 @@ export function CardPrintDetails({ id, onAccessLost }: { id: string; onAccessLos
             Download stored {data.format.toUpperCase()}
           </Button>
           {download.error ? (
-            <Callout role="alert" tone="alert">
-              Could not download this stored print file. Try again.
-            </Callout>
+            <ErrorState error={download.error}>Could not download this stored print file. Try again.</ErrorState>
           ) : null}
         </>
       ) : null}

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useAllows, useRequireSession } from '@/features/session';
 import { AppShell } from '@/shared/shell/AppShell';
-import { Callout, Field, Section, Select, Stack } from '@/shared/ui';
+import { Field, Section, Select, Stack, ErrorState } from '@/shared/ui';
 import { listStaffingDays } from '../api';
 import { useStaffingRead } from '../queries';
 import { BriefingScheduler } from '../components/BriefingScheduler';
@@ -20,9 +20,7 @@ export default function BriefingsScreen() {
     <AppShell title="Briefing schedule" back={{ href: '/shift', label: 'My shift' }}>
       <Stack>
         {days.isError ? (
-          <Callout tone="alert" role="alert">
-            {days.error.message}
-          </Callout>
+          <ErrorState error={days.error} />
         ) : null}
         {day ? (
           <Field id="briefing-day" label="Briefing day">

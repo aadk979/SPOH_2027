@@ -3,7 +3,7 @@ import {
   GENERATED_SETTING_METADATA as metadata,
   type ScopedSettingsReadResponse,
 } from '@spoh/shared';
-import { Button, Callout, Checkbox, Field, Textarea } from '@/shared/ui';
+import { Button, Callout, Checkbox, Field, Textarea, ErrorState } from '@/shared/ui';
 import { scopedSettingRow } from '@/shared/lib/scopedSettingReview';
 import { captureSource } from '../model/captureControl';
 import { catalogueValue } from '../model/operationalCatalogue';
@@ -66,9 +66,7 @@ function CatalogueEditFeedback({ review }: { review: Review }) {
   return (
     <>
       {review.error ? (
-        <Callout tone="alert" role="alert">
-          {review.error}
-        </Callout>
+        <ErrorState error={review.error}>{review.error}</ErrorState>
       ) : null}
       {review.stale && !review.uncertain ? (
         <Callout tone="alert">Catalogue settings changed after your review.</Callout>

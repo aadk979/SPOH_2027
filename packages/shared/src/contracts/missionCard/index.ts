@@ -174,6 +174,8 @@ export type GenerateCardBatchResponse = z.infer<typeof GenerateCardBatchResponse
 export const FunnelStage = z
   .object({
     key: z.string(),
+    metric: z.enum(['issued', 'completed', 'redeemed', 'station']).optional(),
+    stationId: Id.optional(),
     label: z.string(),
     value: z.number().int().nonnegative(),
     /** Share of issued cards that reached this stage, 0–1. */
@@ -187,6 +189,8 @@ export type CardFunnelQuery = z.infer<typeof CardFunnelQuery>;
 
 export const CardFunnelResponse = z
   .object({
+    observation: z.object({ from: IsoDateTime.optional(), to: IsoDateTime.optional(), asOf: IsoDateTime,
+      includeRehearsal: z.boolean() }).strict().optional(),
     rehearsalIncluded: z.boolean().optional(),
     unit: z.literal('cards'),
     issued: z.number().int().nonnegative(),

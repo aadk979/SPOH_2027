@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { ScopedSettingsHistoryRecord, ScopedSettingsReadResponse } from '@spoh/shared';
 import { useEventTime } from '@/features/session';
-import { Button, Callout, Card, LoadingRows } from '@/shared/ui';
+import { Button, Card, LoadingRows, ErrorState } from '@/shared/ui';
 import { ApiError } from '@/shared/lib/apiErrors';
 import { useScopedCaptureHistory } from '../queries';
 import { captureRow, captureValue } from '../model/captureControl';
@@ -56,9 +56,7 @@ function CaptureHistoryContents(input: HistoryInput) {
     return (
       <div className="flex flex-col gap-md">
         {reload}
-        <Callout tone="alert" role="alert">
-          Capture history is unavailable. Reload before reviewing a restore.
-        </Callout>
+        <ErrorState error={history.error}>Capture history is unavailable. Reload before reviewing a restore.</ErrorState>
       </div>
     );
   if (!history.data) return <LoadingRows />;

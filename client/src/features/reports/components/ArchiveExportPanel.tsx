@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { useAllows, useEventTime } from '@/features/session';
 import { useEvent } from '@/shared/lib/eventContext';
-import { Button, Callout, Card, CardTitle, Stack } from '@/shared/ui';
+import { Button, Callout, Card, CardTitle, Stack, ErrorState } from '@/shared/ui';
 import { useArchivePacks, useCreateArchivePack } from '../queries';
 import { useArchivePackDownload } from '../hooks/useArchivePackDownload';
 export function ArchiveExportPanel(): ReactNode {
@@ -57,9 +57,7 @@ export function ArchiveExportPanel(): ReactNode {
           </Button>
         ))}
         {error ? (
-          <Callout tone="alert" role="alert">
-            {error.message}
-          </Callout>
+          <ErrorState error={error} />
         ) : null}
         {failure ? (
           <Callout tone="alert" role="alert">

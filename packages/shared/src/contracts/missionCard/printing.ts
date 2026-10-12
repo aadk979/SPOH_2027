@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { Id, IdempotencyKey, IsoDateTime, PaginationQuery, collection } from '../common/index.js';
 import { CardShortCode } from './index.js';
+import { FrozenBranding } from '../branding/frozen.js';
 
 export const PrintCardBatchRequest = z
   .object({
@@ -36,6 +37,7 @@ export type CardPrintExportListResponse = z.infer<typeof CardPrintExportListResp
 export const CardPrintContextRecord = z
   .object({
     eventName: z.string().min(1),
+    branding: FrozenBranding.nullable().optional(),
     stampingStations: z.array(z.object({ id: Id, name: z.string().min(1) }).strict()),
     batches: z.array(
       z.object({ shortCode: CardShortCode, batchLabel: z.string().nullable() }).strict(),

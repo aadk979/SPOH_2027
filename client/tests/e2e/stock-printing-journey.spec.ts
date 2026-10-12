@@ -172,17 +172,16 @@ for (const viewport of viewports) {
     await expect(edited.getByText('14 remaining · 8 redeemed · Inactive')).toBeVisible();
     await expect(edited.getByText('Low stock: arrange another delivery.')).toHaveCount(0);
     await edited.getByLabel('Stock change').fill('5');
-    await edited.getByRole('button', { name: 'Record stock change' }).click();
+    await edited.getByRole('button', { name: 'Review stock change' }).click();
     expect(state.adjustments).toEqual([]);
     await edited.getByLabel('Reason for stock change').fill('Verified delivery of five badges');
-    await edited.getByRole('button', { name: 'Record stock change' }).click();
-    await expect(
-      edited.getByText(
-        'Stock was not confirmed. Retry the same change to check its result safely.',
-      ),
-    ).toBeVisible();
-    await edited.getByRole('button', { name: 'Record stock change' }).click();
-    await expect(edited.getByText('Stock change recorded.')).toBeVisible();
+    await edited.getByRole('button', { name: 'Review stock change' }).click();
+    const review = page.getByRole('dialog', { name: 'Review gift stock change' });
+    await expect(review.getByText('Pool: Practice')).toBeVisible();
+    await review.getByRole('button', { name: 'Record stock change' }).click();
+    await expect(review.getByText('synthetic-print-request')).toBeVisible();
+    await review.getByRole('button', { name: 'Record stock change' }).click();
+    await expect(edited.getByText('Stock change recorded in the reviewed pool.')).toBeVisible();
     await expect(edited.getByText('19 remaining · 8 redeemed · Inactive')).toBeVisible();
     expect(state.adjustments).toHaveLength(2);
     expect(state.adjustments[0]!.idempotencyKey).toBe(state.adjustments[1]!.idempotencyKey);

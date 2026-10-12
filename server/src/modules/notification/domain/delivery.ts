@@ -17,6 +17,9 @@ export const TTL_SECONDS: Readonly<Record<NotificationKind, number>> = Object.fr
   'fallback.reminder': 1800,
   // Archiving waits on a person, not the clock: a day-old reminder is still true.
   'event.archiveReminder': 86_400,
+  'announcement.operational': 1800,
+  'assignment.changed': 1800,
+  'swap.decision': 1800,
 });
 
 /**

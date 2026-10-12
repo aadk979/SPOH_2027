@@ -5,8 +5,11 @@ import { AlertDelivery } from '@/features/notification';
 import { AppShell } from '@/shared/shell/AppShell';
 import { useSyncDiagnostics } from '../hooks/useSyncDiagnostics';
 import { SyncDiagnostics } from '../components/SyncDiagnostics';
-import { ButtonLink, Card, EmptyState, Section, Stack, StatusText } from '@/shared/ui';
-import { useMe, useRequireSession, useEventTime } from '@/features/session';
+import { AssignmentList } from '../components/AssignmentList';
+import { assignmentGroups } from '../model/assignmentGroups';
+import { zonedDate } from '@spoh/shared';
+import { ButtonLink, ErrorState, LoadingRows, Section, Stack } from '@/shared/ui';
+import { useMe, useRequireSession } from '@/features/session';
 
 /**
  * My shift, plus the sync diagnostics panel (remediation/phases/P07-client-refactor.md).
@@ -17,15 +20,16 @@ import { useMe, useRequireSession, useEventTime } from '@/features/session';
  * Copying them as tab-separated text pastes straight into a Google Sheet.
  */
 export default function ShiftScreen(): ReactNode {
-  const format = useEventTime();
   const session = useRequireSession();
-  const { data: me } = useMe();
+  const query = useMe();
+  const me = query.error ? undefined : query.data;
   const diagnostics = useSyncDiagnostics();
   if (!session) return null;
 
   return (
     <AppShell title="My shift" back={{ href: '/home', label: 'Home' }}>
       <Stack>
+        <SyncDiagnostics state={diagnostics} />
         <Section title="Shift planning">
           <ButtonLink href="/swaps">Request or review a shift swap</ButtonLink>
           <ButtonLink href="/briefings">Briefing schedule and completion</ButtonLink>
@@ -33,38 +37,25 @@ export default function ShiftScreen(): ReactNode {
         <Section title="Attendance" description="Verify your presence with your admin or exco.">
           <ButtonLink href="/attendance">Submit attendance / verify team</ButtonLink>
         </Section>
-        <Section title="Shifts">
-          {me && me.upcomingAssignments.length > 0 ? (
-            <ul className="flex flex-col gap-xs">
-              {me.upcomingAssignments.map((assignment) => (
-                <Card as="li" variant="flat" key={assignment.id}>
-                  <p className="font-semibold">{assignment.station.name}</p>
-                  <p className="text-caption text-text-muted">
-                    {assignment.dayLabel} · {format.shiftHours(assignment.shift)} ·{' '}
-                    {assignment.roleLabel}
-                  </p>
-                  {assignment.checkedInAt ? (
-                    <StatusText tone="ok" className="mt-xxs block">
-                      <span aria-hidden="true">✓ </span>
-                      Checked in {format.time(assignment.checkedInAt)}
-                    </StatusText>
-                  ) : null}
-                </Card>
-              ))}
-            </ul>
-          ) : (
-            <EmptyState title="No shifts assigned yet">
-              Your IC assigns shifts from the roster. Check with them if the event has started.
-            </EmptyState>
-          )}
-        </Section>
+        {query.error ? <ErrorState error={query.error} operation="Loading your shifts" onRetry={() => void query.refetch()} /> : null}
+        {query.isPending ? <LoadingRows label="Loading your shifts" /> : null}
+        {me ? <ShiftGroups me={me} /> : null}
 
         <Section title="Alerts" description="Whether this phone can reach you with the app closed.">
           <AlertDelivery />
         </Section>
 
-        <SyncDiagnostics state={diagnostics} />
       </Stack>
     </AppShell>
   );
+}
+
+function ShiftGroups({ me }: { me: NonNullable<ReturnType<typeof useMe>['data']> }) {
+  const today = me.operationalDate ?? me.currentAssignment?.date ?? zonedDate(new Date(me.serverTime), me.event.timezone);
+  const groups = assignmentGroups(me.upcomingAssignments, today);
+  return <>
+    <Section title="Today"><AssignmentList assignments={groups.today} empty="No shifts today" /></Section>
+    <details><summary className="min-h-control cursor-pointer font-semibold">Upcoming shifts ({groups.upcoming.length})</summary><AssignmentList assignments={groups.upcoming} empty="No upcoming shifts" /></details>
+    <details><summary className="min-h-control cursor-pointer font-semibold">Past shifts ({groups.past.length})</summary><AssignmentList assignments={groups.past} empty="No past shifts" /></details>
+  </>;
 }

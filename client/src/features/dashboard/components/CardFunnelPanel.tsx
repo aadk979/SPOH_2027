@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { LiveDashboardResponse } from '@spoh/shared';
 import { Section } from '@/shared/ui';
 import { BarList, BarRow } from '@/features/dashboard';
+import { cardStageLink } from '../model/drillLinks';
 export function CardFunnelPanel({ data }: { data: LiveDashboardResponse }): ReactNode {
   const maxStage = Math.max(1, ...data.cards.stages.map((row) => row.value));
   return (
@@ -10,6 +11,7 @@ export function CardFunnelPanel({ data }: { data: LiveDashboardResponse }): Reac
         {data.cards.stages.map((stage) => (
           <BarRow
             key={stage.key}
+            href={cardStageLink(stage, data.observation ? { from: data.observation.from, asOf: data.asOf, includeRehearsal: data.observation.includeRehearsal } : undefined)}
             label={stage.label}
             value={stage.value}
             max={maxStage}

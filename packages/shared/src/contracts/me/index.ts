@@ -58,6 +58,8 @@ export const MeResponse = z
     /** My IC, my Deputy Coordinator, the Chief — the escalation chain. */
     escalationChain: z.array(ContactCard),
     serverTime: IsoDateTime,
+    /** Calendar anchor after the event's configured operational day boundary. */
+    operationalDate: IsoDate.optional(),
   })
   .strict();
 export type MeResponse = z.infer<typeof MeResponse>;

@@ -14,8 +14,8 @@ import { clearSession } from '@/shared/lib/session';
 import { useEventId } from '@/shared/lib/eventContext';
 import { useCurrentSession } from './useSession';
 export const sessionKeys = {
-  me: (eventId: string) => [eventId, 'me'] as const,
-  permissions: (eventId: string) => [eventId, 'me', 'permissions'] as const,
+  me: (eventId: string, personId?: string) => personId ? [eventId, 'me', personId] as const : [eventId, 'me'] as const,
+  permissions: (eventId: string, personId?: string) => personId ? [eventId, 'me', 'permissions', personId] as const : [eventId, 'me', 'permissions'] as const,
 };
 /**
  * The boot call. One request returns identity, today's posting
@@ -26,8 +26,9 @@ export function useMe(): UseQueryResult<MeResponse> {
   const eventId = useEventId();
 
   return useQuery({
-    queryKey: sessionKeys.me(eventId),
-    queryFn: () => getMe(eventId),
+    queryKey: sessionKeys.me(eventId, session?.volunteerId ?? 'signed-out'),
+    queryFn: ({ signal }) => getMe(eventId, signal),
+    gcTime: 0,
     enabled: session !== null,
     staleTime: 30_000,
   });
@@ -42,8 +43,9 @@ export function useMyPermissions(enabled = true): UseQueryResult<MyPermissionsRe
   const eventId = useEventId();
 
   return useQuery({
-    queryKey: sessionKeys.permissions(eventId),
-    queryFn: () => getMyPermissions(eventId),
+    queryKey: sessionKeys.permissions(eventId, session?.volunteerId ?? 'signed-out'),
+    queryFn: ({ signal }) => getMyPermissions(eventId, signal),
+    gcTime: 0,
     enabled: enabled && session !== null,
     staleTime: 30_000,
   });
@@ -55,16 +57,17 @@ export function useMyPermissions(enabled = true): UseQueryResult<MyPermissionsRe
  * request from the same policies (ADR-005 §6). False until the answer arrives.
  */
 export function useAllows(enabled = true): (action: Action) => boolean {
-  const { data } = useMyPermissions(enabled);
-  return useCallback((action: Action) => data?.actions?.[action] === true, [data]);
+  const { data, isError } = useMyPermissions(enabled);
+  return useCallback((action: Action) => enabled && !isError && data?.actions?.[action] === true, [data, enabled, isError]);
 }
 
 export function useDevices() {
   const eventId = useEventId();
   const session = useCurrentSession();
   return useQuery({
-    queryKey: [eventId, 'session', 'devices'],
-    queryFn: listDevices,
+    queryKey: [eventId, 'session', 'devices', session?.volunteerId ?? 'signed-out'],
+    queryFn: ({ signal }) => listDevices(signal),
+    gcTime: 0,
     enabled: session !== null,
     staleTime: 0,
   });

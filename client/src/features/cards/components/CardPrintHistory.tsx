@@ -2,7 +2,7 @@
 import { useCallback, useState } from 'react';
 import { useAllows, useCurrentSession, useEventTime } from '@/features/session';
 import { useEventId } from '@/shared/lib/eventContext';
-import { Button, Callout, EmptyState, LoadingRows, Stack } from '@/shared/ui';
+import { Button, Callout, EmptyState, LoadingRows, Stack, ErrorState } from '@/shared/ui';
 import { useCardPrintHistory } from '../queries';
 import { usePrintAccessFailure } from '../hooks/usePrintAccessFailure';
 import { CardPrintDetails } from './CardPrintDetails';
@@ -17,12 +17,10 @@ function PrintHistoryStatus({
   if (query.isPending) return <LoadingRows label="Loading print exports" />;
   if (query.error)
     return (
-      <Callout role="alert" tone="alert">
-        Print history is unavailable.
+      <ErrorState error={query.error}>Print history is unavailable.
         <Button variant="quiet" onClick={() => void query.refetch()}>
           Retry print history
-        </Button>
-      </Callout>
+        </Button></ErrorState>
     );
   return empty ? (
     <EmptyState title="No print exports yet">

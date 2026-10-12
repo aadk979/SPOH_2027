@@ -141,7 +141,8 @@ describe('metadata forms', () => {
     fireEvent.click(screen.getByLabelText('Group'));
     fireEvent.click(screen.getByLabelText('Active station'));
     submit('Save station');
-    await screen.findByText('Network failed');
+    await screen.findByText('Saving event structure was not confirmed');
+    expect(screen.queryByText('Network failed')).toBeNull();
     submit('Save station');
     await screen.findByText('Saved.');
     const first = mockedApi.mock.calls[0]![1]!.body as { idempotencyKey: string };
@@ -374,7 +375,7 @@ describe('templates, exceptions and unused days', () => {
     ).toBeTruthy();
   });
   it('requires explicit selection before removing an unused day and surfaces refusal', async () => {
-    mockedApi.mockRejectedValueOnce(new Error('This day has assignments'));
+    mockedApi.mockRejectedValueOnce(new ApiError(409, { code: 'CONFLICT', message: 'This day has assignments', requestId: 'synthetic-day-conflict' }));
     mount(<RemoveDay day={STRUCTURE_DAY} />);
     expect(screen.getByRole('button', { name: 'Remove unused day' })).toBeDisabled();
     fireEvent.click(screen.getByLabelText('Remove Event day (2027-01-07) and its empty shifts'));
@@ -412,7 +413,8 @@ describe('structure screens and API contracts', () => {
   it('offers retry after a structure load fails and can show read-only empty collections', async () => {
     mockedApi.mockRejectedValueOnce(new Error('Load failed'));
     mount(<CategoriesScreen />);
-    await screen.findByText('Load failed');
+    await screen.findByText('This action was not confirmed');
+    expect(screen.queryByText('Load failed')).toBeNull();
     submit('Reload structure');
     await screen.findByText('Guests');
     cleanup();
@@ -456,13 +458,14 @@ describe('structure screens and API contracts', () => {
       expect.objectContaining({ method: 'PATCH' }),
     );
   });
-  it('renders field-level and write feedback accessibly', () => {
+  it('renders field-level and safe write failure accessibly without claiming success', () => {
     mount(<WriteFeedback error={new Error('Write refused')} saved formError="Choose a value" />);
     expect(screen.getAllByRole('alert').map((node) => node.textContent)).toEqual([
       expect.stringContaining('Choose a value'),
-      expect.stringContaining('Write refused'),
+      expect.stringContaining('Saving event structure was not confirmed'),
     ]);
-    expect(screen.getByRole('status').textContent).toContain('Saved.');
+    expect(screen.queryByText('Write refused')).toBeNull();
+    expect(screen.queryByRole('status')).toBeNull();
   });
 });
 const privateScreens = [

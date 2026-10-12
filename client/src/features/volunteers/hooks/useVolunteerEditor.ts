@@ -33,9 +33,8 @@ export function useVolunteerEditor(volunteer: VolunteerAdminRecord) {
     });
     if (patch) update.mutate({ id: volunteer.id, patch });
   }
-  function withdraw(): void {
-    const body = withdrawal.validate({ reason: reason.trim(), disableIdentity: false });
-    if (body) deactivate.mutate({ id: volunteer.id, body });
+  function reviewWithdrawal() {
+    return withdrawal.validate({ reason: reason.trim(), disableIdentity: false });
   }
 
   const pending = update.isPending || deactivate.isPending || reactivate.isPending;
@@ -43,7 +42,7 @@ export function useVolunteerEditor(volunteer: VolunteerAdminRecord) {
 
   return {
     save,
-    withdraw,
+    reviewWithdrawal,
     errors: { ...fields.errors, ...withdrawal.errors },
     update,
     deactivate,

@@ -46,6 +46,7 @@ export function useDraftEditor(input: {
   }
   return {
     ...form.values,
+    eventWide: form.values.audienceIntent === 'EVENT',
     errors: form.errors,
     error,
     save,
@@ -96,7 +97,7 @@ function draftSetters(
     setBody: setter('body'),
     setPriority: setter('priority'),
     setRequiresAck: setter('requiresAck'),
-    setEventWide: setter('eventWide'),
+    setEventWide: (wide: boolean) => setter('audienceIntent')(wide ? 'EVENT' : 'TARGETED'),
     setStationId: setter('stationId'),
     setExpiresWallTime: setter('expiresWallTime'),
   };

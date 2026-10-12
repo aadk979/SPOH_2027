@@ -222,6 +222,29 @@ describe('data health', () => {
 });
 
 describe('staffing', () => {
+  it('uses one inclusive observation for safety alerts and check-ins and excludes future entries', async () => {
+    const { eventId } = await testEvent();
+    const future = new Date(FROZEN_NOW.getTime() + 1);
+    for (const at of [FROZEN_NOW, future]) {
+      await rawDb.incident.create({ data: { eventId, type: 'OTHER', severity: 'CRITICAL', description: 'Test observation',
+        occurredAt: at, reportedAt: at, reportedById: chief.id, idempotencyKey: idempotencyKey() } });
+      await rawDb.lostPersonAlert.create({ data: { eventId, raisedById: chief.id, raisedAt: at } });
+    }
+    const counterAssignment = await rawDb.shiftAssignment.findFirstOrThrow({ where: { eventId, volunteerId: counter.id,
+      shift: { template: { code: 'MORNING' } } } });
+    const futureAssignment = await rawDb.shiftAssignment.findFirstOrThrow({ where: { eventId, volunteerId: booth.id,
+      shift: { template: { code: 'MORNING' } } } });
+    await rawDb.shiftAssignment.update({ where: { id: counterAssignment.id },
+      data: { checkedInAt: FROZEN_NOW, checkedOutAt: future } });
+    await rawDb.shiftAssignment.update({ where: { id: futureAssignment.id }, data: { checkedInAt: future } });
+    const response = await live();
+    expect(response.status).toBe(200);
+    expect(response.body.safety).toEqual({ openIncidents: 1, criticalIncidents: 1, activeLostPersonAlerts: 1 });
+    expect(response.body.staffing.checkedIn).toBe(1);
+    expect(response.body.dataHealth.staleDevices.map((row: { volunteerId: string }) => row.volunteerId)).not.toContain(booth.id);
+    expect(response.body.staffing.gaps.some((row: { stationId: string }) => row.stationId === roomAId)).toBe(false);
+  });
+
   it('reports stations with nobody rostered as unstaffed', async () => {
     const response = await live();
     const gaps = response.body.staffing.gaps as Array<{ stationName: string; severity: string }>;
@@ -303,5 +326,64 @@ describe('the station console', () => {
     const roster = response.body.roster as Array<{ checkedInAt: string | null }>;
     expect(roster.length).toBeGreaterThan(0);
     expect(roster.every((person) => person.checkedInAt === null)).toBe(true);
+  });
+
+  it('allows foreign-station IC counts without exposing names, device contributions, roster or redemption flags', async () => {
+    const { eventId } = await testEvent();
+    const member = await rawDb.eventMembership.findFirstOrThrow({ where: { eventId, personId: counter.id } });
+    const category = await rawDb.captureCategory.findFirstOrThrow({ where: { eventId } });
+    for (const source of ['APP', 'FALLBACK_SHEET', 'PAPER'] as const) {
+      await rawDb.registration.create({ data: { eventId, stationId: roomAId, recordedById: counter.id,
+        recordedByMembershipId: member.id, categoryId: category.id, source, recordedAt: FROZEN_NOW, idempotencyKey: idempotencyKey() } });
+      await rawDb.footfallTick.create({ data: { eventId, stationId: roomAId, recordedById: counter.id,
+        recordedByMembershipId: member.id, source, quantity: source === 'APP' ? 2 : source === 'PAPER' ? 3 : 5,
+        recordedAt: FROZEN_NOW, idempotencyKey: idempotencyKey() } });
+    }
+    const gift = await rawDb.giftType.create({ data: { eventId, name: 'Private flagged gift', initialStock: 1 } });
+    await rawDb.giftRedemption.create({ data: { eventId, giftTypeId: gift.id, stationId: roomAId, recordedById: counter.id,
+      recordedByMembershipId: member.id, flag: 'OVER_STOCK', recordedAt: FROZEN_NOW, idempotencyKey: idempotencyKey() } });
+    const response = await request(app).get(`/api/v1/dashboard/station/${roomAId}`).set('Authorization', bearer(ic));
+    expect(response.status).toBe(200);
+    expect(response.body.registrations.todayTotal).toBe(3);
+    expect(response.body.footfall.todayTotal).toBe(10);
+    expect(response.body.registrations.sourceBreakdown).toEqual(expect.arrayContaining([
+      { source: 'APP', value: 1 }, { source: 'FALLBACK_SHEET', value: 1 }, { source: 'PAPER', value: 1 },
+    ]));
+    expect(response.body.rosterAvailability).toBe('denied');
+    expect(response.body.deviceAvailability).toBe('denied');
+    expect(response.body.roster).toEqual([]);
+    expect(response.body.registrations.byDevice).toEqual([]);
+    expect(response.body.footfall.contributors).toEqual([]);
+    expect(response.body.flaggedRedemptions).toEqual([]);
+    expect(JSON.stringify(response.body)).not.toContain(counter.email);
+    expect(JSON.stringify(response.body)).not.toContain('Private flagged gift');
+    const authorized = await request(app).get(`/api/v1/dashboard/station/${roomAId}`).set('Authorization', bearer(chief));
+    expect(authorized.status).toBe(200);
+    expect(authorized.body.registrations.todayTotal).toBe(3);
+    expect(authorized.body.registrations.byDevice).toHaveLength(1);
+    expect(authorized.body.registrations.byDevice[0].value).toBe(1);
+    expect(authorized.body.footfall.contributors[0].value).toBe(2);
+    expect(authorized.body.flaggedRedemptions).toHaveLength(1);
+  });
+
+  it('keeps a device stale when its only recent captures are imports or voided APP rows', async () => {
+    const { eventId } = await testEvent();
+    const member = await rawDb.eventMembership.findFirstOrThrow({ where: { eventId, personId: counter.id } });
+    await rawDb.shiftAssignment.updateMany({ where: { eventId, volunteerId: counter.id },
+      data: { checkedInAt: new Date(FROZEN_NOW.getTime() - 60 * 60_000) } });
+    for (const capture of [{ source: 'APP' as const, at: new Date(FROZEN_NOW.getTime() - 20 * 60_000), voided: false },
+      { source: 'FALLBACK_SHEET' as const, at: FROZEN_NOW, voided: false },
+      { source: 'APP' as const, at: FROZEN_NOW, voided: true }]) {
+      await rawDb.footfallTick.create({ data: { eventId, stationId: roomAId, recordedById: counter.id,
+        recordedByMembershipId: member.id, recordedAt: capture.at, source: capture.source, voided: capture.voided,
+        quantity: 1, idempotencyKey: idempotencyKey() } });
+    }
+    const response = await live();
+    expect(response.status).toBe(200);
+    expect(response.body.dataHealth.staleDevices.map((row: { volunteerId: string }) => row.volunteerId)).toContain(counter.id);
+    const station = await request(app).get(`/api/v1/dashboard/station/${roomAId}`).set('Authorization', bearer(chief));
+    expect(station.body.footfall.todayTotal).toBe(2);
+    expect(station.body.footfall.contributors[0].value).toBe(1);
+    expect(station.body.footfall.lastActivityAt).toBe(FROZEN_NOW.toISOString());
   });
 });

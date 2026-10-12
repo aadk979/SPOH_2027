@@ -4,13 +4,13 @@ import { AppShell } from '@/shared/shell/AppShell';
 import { NavTile } from '@/shared/ui/NavTile';
 import { EscalationChain } from '@/features/shift';
 import { WorkspaceIntro } from '@/shared/ui/WorkspaceIntro';
-import { Button, ButtonLink, Callout, CardGrid, LoadingCards, Section, Stack } from '@/shared/ui';
+import { ButtonLink, Callout, CardGrid, LoadingCards, Section, Stack, ErrorState } from '@/shared/ui';
 import { useMe, useRequireSession } from '@/features/session';
 import { hubLinks } from '@/navigation';
 
 export default function SafetyScreen() {
   const session = useRequireSession();
-  const { data: me, isPending, isError, refetch } = useMe();
+  const { data: me, isPending, error, refetch } = useMe();
   if (!session) return null;
   return (
     <AppShell title="Safety & help" width="wide">
@@ -28,13 +28,8 @@ export default function SafetyScreen() {
             ))}
           </CardGrid>
         </Section>
-        {isError ? (
-          <Callout tone="warn" title="Team contacts could not be loaded">
-            <p>Could not retrieve your escalation contacts. Check your connection and retry.</p>
-            <Button variant="secondary" size="sm" className="mt-sm" onClick={() => void refetch()}>
-              Retry loading contacts
-            </Button>
-          </Callout>
+        {error ? (
+          <ErrorState error={error} operation="Loading team contacts" onRetry={() => void refetch()} />
         ) : isPending ? (
           <LoadingCards count={1} label="Loading team contacts" />
         ) : me && me.escalationChain.length > 0 ? (

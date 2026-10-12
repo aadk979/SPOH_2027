@@ -112,7 +112,8 @@ describe.each(cases)('$name private readers', ({ name, action, View, body }) => 
     await waitFor(() => expect(view.container.textContent).toContain('Private original'));
     mockApi.mockRejectedValue(new Error('Read unavailable'));
     await act(() => client.invalidateQueries({ queryKey: [state.eventId, name] }));
-    await screen.findByText('Read unavailable');
+    await screen.findByText('This action was not confirmed');
+    expect(screen.queryByText('Read unavailable')).toBeNull();
     expect(view.container.textContent).not.toContain('Private original');
   });
 

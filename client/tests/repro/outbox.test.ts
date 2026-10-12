@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '@/shared/lib/api';
-import { cancel, enqueue, flush, listEntries } from '@/shared/lib/outbox';
+import { enqueue, flush, listEntries } from '@/shared/lib/outbox';
 import { clearSession, setSession, type Session } from '@/shared/lib/session';
+import { OUTBOX_STORE, outboxDatabase } from '@/shared/lib/outboxStore';
 
 /**
  * P03 bug reproduction: the outbox gives up for good on answers that are not
@@ -18,7 +19,8 @@ const apiModule = await import('@/shared/lib/api');
 const mockedApi = vi.mocked(apiModule.api);
 
 beforeEach(async () => {
-  for (const entry of await listEntries()) await cancel(entry.id);
+  // Owner-scoped cancellation must refuse another person's taps, including in test cleanup.
+  await (await outboxDatabase()).clear(OUTBOX_STORE);
 });
 
 afterEach(() => {

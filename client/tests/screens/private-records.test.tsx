@@ -85,7 +85,7 @@ it('keeps visitor values out of the page and cache until explicitly opened, then
   fireEvent.click(screen.getByRole('button', { name: 'Read permitted visitor values' }));
   await screen.findByText('Sample school');
   expect(screen.queryByText('Private value')).toBeNull();
-  expect(transport.api).toHaveBeenCalledWith('event-a', '/visitors', { cache: 'no-store' });
+  expect(transport.api).toHaveBeenCalledWith('event-a', '/visitors', { cache: 'no-store', signal: expect.any(AbortSignal) });
   fireEvent.click(screen.getByRole('button', { name: 'Hide visitor values' }));
   expect(screen.queryByText('Sample school')).toBeNull();
   await waitFor(() =>
@@ -100,7 +100,7 @@ it('separates retained visitor reads by person and reports empty and refused rea
     .mockRejectedValueOnce(new Error('Your reader permission changed.'));
   const { view } = mount(<VisitorRecordsPanel />);
   fireEvent.click(screen.getByRole('button', { name: 'Read permitted visitor values' }));
-  await screen.findByText('No retained visitor values in this event.');
+  await screen.findByText('No retained visitor values');
   transport.person = 'reader-b';
   view.rerender(
     <QueryClientProvider
@@ -109,9 +109,10 @@ it('separates retained visitor reads by person and reports empty and refused rea
       <VisitorRecordsPanel />
     </QueryClientProvider>,
   );
-  expect(screen.queryByText('No retained visitor values in this event.')).toBeNull();
+  expect(screen.queryByText('No retained visitor values')).toBeNull();
   fireEvent.click(screen.getByRole('button', { name: 'Read permitted visitor values' }));
-  await screen.findByText('Your reader permission changed.');
+  await screen.findByText('Reading visitor values was not confirmed');
+  expect(screen.queryByText('Your reader permission changed.')).toBeNull();
 });
 
 const denied = () =>

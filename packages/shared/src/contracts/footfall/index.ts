@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { DataSource } from '../../invariants/enums.js';
 import {
   CaptureEnvelope,
+  DashboardWindow,
   Id,
   IsoDateTime,
   ReasonText,
@@ -124,6 +125,7 @@ export type FootfallLiveStation = z.infer<typeof FootfallLiveStation>;
 
 export const FootfallLiveResponse = z
   .object({
+    observation: DashboardWindow.optional(),
     rehearsalIncluded: z.boolean().optional(),
     unit: z.literal('roomEntries'),
     asOf: IsoDateTime,

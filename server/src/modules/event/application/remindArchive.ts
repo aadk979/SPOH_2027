@@ -1,6 +1,6 @@
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
-import { dispatch } from '../../notification/index.js';
+import { queueNotices } from '../../notification/index.js';
 import { findArchiveReminderTarget } from '../data/archiveReminderRepo.js';
 
 /**
@@ -16,18 +16,9 @@ export async function remindArchive(
   const { event, adminIds } = await findArchiveReminderTarget(tx, scope);
   if (event.status !== 'CLOSED' || event.lifecycleVersion !== input.lifecycleVersion) return false;
   if (adminIds.length === 0) return false;
-  void dispatch(
-    scope,
-    {
-      kind: 'event.archiveReminder',
-      priority: 'OPERATIONAL',
-      title: `${event.name} is ready to archive`,
-      body: 'Late captures can no longer arrive. Check the close-out list, export the final report, then archive the event.',
-      url: '/overview',
-      tag: `archive-reminder:${scope.eventId}`,
-      audience: { everyone: false, volunteerIds: adminIds },
-    },
-    input.now,
-  );
+  await queueNotices(tx, scope, { kind: 'ARCHIVE_REMINDER', priority: 'OPERATIONAL',
+    source: { kind: 'EVENT', id: scope.eventId }, transitionKey: `event:${scope.eventId}:archive:${input.lifecycleVersion}`,
+    context: { type: 'event', lifecycleVersion: input.lifecycleVersion }, createdAt: input.now,
+    recipientPersonIds: adminIds });
   return true;
 }

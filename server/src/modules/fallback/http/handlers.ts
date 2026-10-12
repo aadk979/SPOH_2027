@@ -5,6 +5,8 @@ import type {
   ImportFootfallRequest,
   ImportRegistrationsRequest,
   TimeRangeQuery,
+  UndoCaptureImportRequest,
+  ConfirmOutboxSalvageRequest,
 } from '@spoh/shared';
 import { actorContextFrom } from '../../../platform/http/auditContext.js';
 import { validatedBody, validatedParams, validatedQuery } from '../../../platform/http/validate.js';
@@ -14,6 +16,16 @@ import { importFootfall } from '../application/importFootfall.js';
 import { importRegistrations } from '../application/importRegistrations.js';
 import { listFallbackWindows } from '../application/listFallbackWindows.js';
 import { scopeOf } from '../../../platform/http/requireAuth.js';
+import { undoCaptureImport } from '../application/undoImport.js';
+import { confirmOutboxSalvage } from '../application/confirmSalvage.js';
+
+export async function undoImportHandler(req: Request, res: Response): Promise<void> {
+  res.json(await undoCaptureImport(validatedParams<{ id: string }>(req).id,
+    validatedBody<UndoCaptureImportRequest>(req), actorContextFrom(req)));
+}
+export async function confirmSalvageHandler(req: Request, res: Response): Promise<void> {
+  res.json(await confirmOutboxSalvage(validatedBody<ConfirmOutboxSalvageRequest>(req), actorContextFrom(req)));
+}
 
 export async function declareWindowHandler(req: Request, res: Response): Promise<void> {
   const body = validatedBody<DeclareFallbackRequest>(req);

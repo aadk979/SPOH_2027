@@ -11,7 +11,7 @@ import {
 import type {
   CreateGiftTypeRequest,
   UpdateGiftTypeRequest,
-  AdjustGiftStockRequest,
+  AdjustGiftStockWithReceiptRequest,
 } from '@spoh/shared';
 import { useRetryKey } from '@/shared/hooks/useRetryKey';
 export const giftKeys = { all: (eventId: string) => [eventId, 'gifts'] as const };
@@ -51,7 +51,7 @@ export function useGiftAdmin() {
     },
   });
   const adjust = useMutation({
-    mutationFn: (change: { id: string; body: AdjustGiftStockRequest }) =>
+    mutationFn: (change: { id: string; body: Omit<AdjustGiftStockWithReceiptRequest, 'idempotencyKey'> }) =>
       adjustGiftStock(eventId, {
         ...change,
         body: { ...change.body, idempotencyKey: receipt.forInput(change) },

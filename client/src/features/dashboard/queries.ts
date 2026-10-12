@@ -4,7 +4,7 @@ import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import type { LiveDashboardResponse, StationDashboardResponse } from '@spoh/shared';
 import { getLiveDashboard, getStationDashboard } from './api';
 import { DEFAULT_CLIENT_SETTINGS, ms } from '@/shared/lib/runtimeSettings';
-import { useCurrentSession } from '@/features/session';
+import { useAllows, useCurrentSession } from '@/features/session';
 import { useEventId } from '@/shared/lib/eventContext';
 
 /**
@@ -27,11 +27,13 @@ export const DASHBOARD_POLL_MS = DEFAULT_CLIENT_SETTINGS.dashboardPollSeconds * 
 export function useLiveDashboard(includeRehearsal = false): UseQueryResult<LiveDashboardResponse> {
   const session = useCurrentSession();
   const eventId = useEventId();
+  const allowed = useAllows()('Dashboard.ReadEvent');
 
   return useQuery({
-    queryKey: dashboardKeys.live(eventId, includeRehearsal),
-    queryFn: () => getLiveDashboard(eventId, includeRehearsal),
-    enabled: session !== null,
+    queryKey: [...dashboardKeys.live(eventId, includeRehearsal), session?.volunteerId ?? 'signed-out'],
+    queryFn: ({ signal }) => getLiveDashboard(eventId, includeRehearsal, signal),
+    enabled: session !== null && allowed,
+    gcTime: 0,
     refetchInterval: ms.dashboardPoll(),
     // The ops-room display is never focused. Without this it would silently
     // freeze the moment somebody clicked away from it.
@@ -46,11 +48,13 @@ export function useStationDashboard(
 ): UseQueryResult<StationDashboardResponse> {
   const session = useCurrentSession();
   const eventId = useEventId();
+  const allowed = useAllows()('Dashboard.ReadStation');
 
   return useQuery({
-    queryKey: dashboardKeys.station(eventId, stationId, includeRehearsal),
-    queryFn: () => getStationDashboard(eventId, stationId ?? '', includeRehearsal),
-    enabled: session !== null && Boolean(stationId),
+    queryKey: [...dashboardKeys.station(eventId, stationId, includeRehearsal), session?.volunteerId ?? 'signed-out'],
+    queryFn: ({ signal }) => getStationDashboard(eventId, stationId ?? '', { includeRehearsal, signal }),
+    enabled: session !== null && allowed && Boolean(stationId),
+    gcTime: 0,
     refetchInterval: ms.dashboardPoll(),
     staleTime: 0,
   });

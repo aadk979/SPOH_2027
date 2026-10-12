@@ -2,7 +2,7 @@ import type { FormEvent, ReactNode } from 'react';
 import { ScheduleContentRequest } from '@spoh/shared';
 import { useZodForm } from '@/shared/hooks/useZodForm';
 import { useEventTime } from '@/features/session';
-import { Button, Callout, Field, Input, Stack } from '@/shared/ui';
+import { Button, Field, Input, Stack, ErrorState } from '@/shared/ui';
 import { useScheduleContent } from '../queries';
 export function ContentScheduleForm({ version }: { version: number }): ReactNode {
   const form = useZodForm(ScheduleContentRequest, { runAt: '' });
@@ -38,9 +38,7 @@ export function ContentScheduleForm({ version }: { version: number }): ReactNode
           Schedule publication
         </Button>
         {schedule.error ? (
-          <Callout tone="alert" role="alert">
-            {schedule.error.message}
-          </Callout>
+          <ErrorState error={schedule.error} />
         ) : null}
         {schedule.data ? (
           <p role="status">

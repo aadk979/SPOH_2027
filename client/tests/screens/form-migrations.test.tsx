@@ -24,6 +24,7 @@ const API = `/events/${TEST_EVENT.id}`;
 const state = vi.hoisted(() => ({ replace: vi.fn() }));
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ replace: state.replace }),
+  usePathname: () => '/sign-in',
   useSearchParams: () => new URLSearchParams(),
 }));
 vi.mock('@/shared/shell/AppShell', () => ({

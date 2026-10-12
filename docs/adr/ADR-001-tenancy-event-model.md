@@ -192,6 +192,16 @@ Settings that point at a membership, such as the attendance root (F02-017), are 
 together with the memberships. Otherwise they are cleared, and the go-live checklist (P13.6)
 reports them as unset.
 
+### Approved public branding exception (P14, D-23 assumed recommendation)
+
+`/api/v1/public/events/:slug/branding/*` is a narrow anonymous read surface for
+the unique event's name and explicitly approved branding publication: accent,
+bounded PNG logo/icons, derived CSS and manifest. It exposes no membership,
+contact, count, draft, upload receipt or storage key. Assets resolve through the
+event/publication namespace and immutable digest. Unknown or ambiguous slugs
+return not found. Editing/publishing remains authenticated under existing
+`Content.Edit`/`Content.Publish`; anonymous requests never publish a draft.
+
 ## Options considered
 
 | Topic                      | Chosen                                                                               | Rejected, and why                                                                                                                                                                                                                                                                                                                              |

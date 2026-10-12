@@ -149,6 +149,7 @@ describe('countsMode: headline', () => {
   it('heads the exports with the headline, saying it is not a sum', async () => {
     await setCounts({ mode: 'headline', source: { count: 'registrations' } });
     const csv = await get('/reports/export?format=csv');
-    expect(csv.text).toContain('# Headline: 3; from registrations. It is one of the three');
+    expect(csv.status).toBe(200);
+    expect(csv.text.split('\n')).toContain('"# Headline: 3, from registrations. It is one of the three counts below, not their sum."');
   });
 });

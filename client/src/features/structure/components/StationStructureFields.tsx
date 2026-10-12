@@ -1,6 +1,6 @@
 import { useId } from 'react';
 import type { StructureResponse } from '@spoh/shared';
-import { Checkbox, Field, Select } from '@/shared/ui';
+import { Checkbox, ControlHelp, Field, Select } from '@/shared/ui';
 export function StationStructureFields(props: {
   structure: StructureResponse['data'];
   typeCode: string;
@@ -42,8 +42,9 @@ export function StationStructureFields(props: {
           </Select>
         )}
       </Field>
-      <fieldset disabled={props.disabled}>
+      <fieldset disabled={props.disabled} aria-describedby={`${id}-tags-help`}>
         <legend className="font-semibold">Station tags</legend>
+        <ControlHelp id={`${id}-tags-help`}>Tags group stations for filters and audience choices. They do not change the station type's capture tools.</ControlHelp>
         {tags.length === 0 ? (
           <p className="text-text-muted">Create a tag below to group stations.</p>
         ) : null}

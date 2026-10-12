@@ -2,7 +2,7 @@
 import { useLifecycleReadiness } from '@/features/events';
 import { useAllows, useRequireSession } from '@/features/session';
 import { AppShell } from '@/shared/shell/AppShell';
-import { Button, Callout, LoadingRows, Stack } from '@/shared/ui';
+import { Button, Callout, LoadingRows, Stack, ErrorState } from '@/shared/ui';
 import { CloseoutChecklist } from '../components/CloseoutChecklist';
 import { OpenCloseoutCases } from '../components/OpenCloseoutCases';
 
@@ -29,9 +29,7 @@ export default function CloseoutScreen() {
             </Button>
             {readiness.isPending ? <LoadingRows /> : null}
             {readiness.error ? (
-              <Callout role="alert" tone="alert">
-                {readiness.error.message}
-              </Callout>
+              <ErrorState error={readiness.error} />
             ) : null}
             {readiness.data && !readiness.isError ? (
               <CloseoutChecklist

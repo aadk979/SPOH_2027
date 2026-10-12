@@ -113,7 +113,7 @@ describe('serving', () => {
     expect(response.status).toBe(404);
   });
 
-  it('allows only the configured regional media origin for photo upload and images', async () => {
+  it('allows only the approved API and configured regional media origins for uploads and images', async () => {
     const stage = express().use(
       staticClient(root, 'https://api.example.test', {
         bucket: 'spoh-synthetic-media',
@@ -121,9 +121,10 @@ describe('serving', () => {
       }),
     );
     const csp = (await request(stage).get('/sign-in')).headers['content-security-policy'];
+    if (typeof csp !== 'string') throw new Error('Expected a Content-Security-Policy response header');
     const media = 'https://spoh-synthetic-media.s3.ap-southeast-1.amazonaws.com';
     expect(csp).toContain(`connect-src 'self' https://api.example.test ${media};`);
-    expect(csp).toContain(`img-src 'self' data: blob: ${media};`);
+    expect(csp.split(';').find((directive) => directive.trim().startsWith('img-src '))?.trim()).toBe(`img-src 'self' data: blob: ${media} https://api.example.test`);
     expect(csp).toContain("form-action 'self'");
     expect(csp).toContain("script-src 'self' 'unsafe-inline';");
     expect(csp).not.toContain('*.amazonaws.com');

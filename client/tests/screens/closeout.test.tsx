@@ -100,7 +100,8 @@ describe('guided close-out transitions', () => {
     show(<CloseoutTransition readiness={readiness('CLOSED')} to="ARCHIVED" />);
     fireEvent.click(screen.getByLabelText(/I saved the export pack/));
     fireEvent.click(screen.getByRole('button', { name: 'Archive event' }));
-    await screen.findByText(/Readiness changed/);
+    await screen.findByText('This action was not confirmed');
+    expect(screen.queryByText('Readiness changed')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Archive event' }));
     await waitFor(() => expect(mockApi).toHaveBeenCalledTimes(2));
     expect(mockApi.mock.calls[0]![1]?.body).toEqual(mockApi.mock.calls[1]![1]?.body);
@@ -164,7 +165,8 @@ describe('lost-and-found settlement', () => {
     const view = show(<LostFoundCloseout />);
     fireEvent.click(screen.getByLabelText('I reviewed held items and their custody'));
     fireEvent.click(screen.getByRole('button', { name: 'Settle lost and found' }));
-    await screen.findByText('Custody settlement unavailable');
+    await screen.findByText('This action was not confirmed');
+    expect(screen.queryByText('Custody settlement unavailable')).toBeNull();
     view.unmount();
     access.allowed = false;
     show(<LostFoundCloseout />);
@@ -201,7 +203,8 @@ describe('close-out workspace', () => {
       return emptyCases(String(path));
     });
     show(<CloseoutScreen />);
-    await screen.findByText('Readiness unavailable');
+    await screen.findByText('This action was not confirmed');
+    expect(screen.queryByText('Readiness unavailable')).toBeNull();
     expect(screen.queryByRole('button', { name: 'Close event' })).toBeNull();
     cleanup();
     access.allowed = false;

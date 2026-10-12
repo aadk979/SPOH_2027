@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import type { GroupRegistrationForm } from '../hooks/useGroupRegistration';
-import { Button, Callout, Card, Field, Input } from '@/shared/ui';
+import { Button, Card, Field, Input, ErrorState } from '@/shared/ui';
 import { shortCodeError } from '../model/groupRequest';
 export function GroupSubmitForm({ form }: { form: GroupRegistrationForm }): ReactNode {
   const { submit, shortCode, setShortCode, total, saving, errors } = form;
@@ -51,9 +51,7 @@ export function GroupSubmitForm({ form }: { form: GroupRegistrationForm }): Reac
       </Field>
 
       {error ? (
-        <Callout tone="alert" role="alert">
-          {error}
-        </Callout>
+        <ErrorState error={error}>{error}</ErrorState>
       ) : null}
 
       <Button

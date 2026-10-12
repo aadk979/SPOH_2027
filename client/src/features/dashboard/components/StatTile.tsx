@@ -3,6 +3,9 @@
 import type { ReactNode } from 'react';
 import { formatCount } from '@/shared/lib/format';
 import { Card, cx } from '@/shared/ui';
+import { AppLink } from '@/shared/lib/AppLink';
+
+const TONE_COLOUR = { neutral: 'text-text', ok: 'text-ok', warn: 'text-warn', alert: 'text-alert' };
 
 /**
  * A single figure, with its unit stated.
@@ -23,6 +26,8 @@ export function StatTile({
   note,
   tone = 'neutral',
   large = false,
+  href,
+  noteHref,
 }: {
   label: string;
   value: number | string;
@@ -31,18 +36,14 @@ export function StatTile({
   note?: string;
   tone?: 'neutral' | 'ok' | 'warn' | 'alert';
   large?: boolean;
+  href?: string;
+  noteHref?: string;
 }): ReactNode {
-  const toneColour =
-    tone === 'ok'
-      ? 'text-ok'
-      : tone === 'warn'
-        ? 'text-warn'
-        : tone === 'alert'
-          ? 'text-alert'
-          : 'text-text';
+  const toneColour = TONE_COLOUR[tone];
 
   return (
     <Card className="flex flex-col">
+      <FigureLink href={href} label={`View ${label.toLowerCase()}: ${value} ${unit ?? ''}`}>
       <p className="text-caption font-semibold tracking-[0.06em] text-text-muted uppercase">
         {label}
       </p>
@@ -60,9 +61,14 @@ export function StatTile({
       {/* The unit sits directly under the figure with no gap: it is part of
           the number, not a caption about it. */}
       {unit ? <p className="text-caption text-text-muted">{unit}</p> : null}
-      {note ? <p className="mt-xs text-caption text-text-muted">{note}</p> : null}
+      </FigureLink>
+      {note ? <FigureLink href={noteHref} label={`View ${note}`}><p className="mt-xs text-caption text-text-muted">{note}</p></FigureLink> : null}
     </Card>
   );
+}
+
+function FigureLink({ href, label, children }: { href?: string; label: string; children: ReactNode }): ReactNode {
+  return href ? <AppLink href={href} aria-label={label} className="block rounded-sm text-inherit hover:underline">{children}</AppLink> : <div>{children}</div>;
 }
 
 /**
@@ -82,16 +88,18 @@ export function BarRow({
   max,
   suffix,
   muted = false,
+  href,
 }: {
   label: string;
   value: number;
   max: number;
   suffix?: string;
   muted?: boolean;
+  href?: string;
 }): ReactNode {
   const width = max > 0 && value > 0 ? Math.max(1, Math.round((value / max) * 100)) : 0;
 
-  return (
+  const content = (
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-sm gap-y-xxs sm:grid-cols-[minmax(7rem,11rem)_minmax(0,1fr)_auto]">
       <span className="min-w-0 text-caption">{label}</span>
 
@@ -117,6 +125,7 @@ export function BarRow({
       </span>
     </div>
   );
+  return <FigureLink href={href} label={`View ${label}: ${value}${suffix ?? ''}`}>{content}</FigureLink>;
 }
 
 /** The container every bar list sits in, so the gaps agree across screens. */

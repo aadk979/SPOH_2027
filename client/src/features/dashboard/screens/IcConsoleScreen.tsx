@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { AppShell } from '@/shared/shell/AppShell';
-import { Field, Select, Stack } from '@/shared/ui';
+import { Field, Select, Stack, ErrorState, CountHelp } from '@/shared/ui';
 import { SwapQueue } from '../components/SwapQueue';
 import { StationBoard } from '../components/StationBoard';
 import { useIcConsole } from '../hooks/useIcConsole';
@@ -35,6 +35,7 @@ export default function IcConsoleScreen(): ReactNode {
     <AppShell width="wide" title="IC console" back={{ href: '/home', label: 'Home' }}>
       <Stack>
         <RehearsalDashboardControl included={includeRehearsal} onChange={setIncludeRehearsal} />
+        <CountHelp />
         {/*
           The picker is capped at a phone's width even on a console. A select
           stretched across 1600px puts its chevron a full head-turn away from
@@ -57,10 +58,11 @@ export default function IcConsoleScreen(): ReactNode {
           )}
         </Field>
 
-        <StationBoard board={dashboard.data} selected={selected} />
+        {stations.error ? <ErrorState error={stations.error} operation="Loading stations" onRetry={() => void stations.refetch()} /> : null}
+        {dashboard.error ? <ErrorState error={dashboard.error} operation="Loading this station" onRetry={() => void dashboard.refetch()} /> : <StationBoard board={dashboard.data} selected={selected} />}
 
         {canDecideSwaps ? (
-          <SwapQueue swaps={swaps.data ?? []} onDecided={() => void swaps.refetch()} />
+          swaps.error ? <ErrorState error={swaps.error} operation="Loading swaps" onRetry={() => void swaps.refetch()} /> : <SwapQueue swaps={swaps.data ?? []} onDecided={() => void swaps.refetch()} />
         ) : null}
       </Stack>
     </AppShell>

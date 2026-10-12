@@ -1,9 +1,10 @@
 'use client';
 import { useEffect, type ReactNode } from 'react';
 import { useCaptureCategories } from '@/features/registration';
-import { useRequireSession } from '@/features/session';
+import { useCurrentSession, useRequireSession } from '@/features/session';
 import { upgradeLegacyEntries } from '@/shared/lib/outbox';
-import { ButtonLink, Card, CardTitle, LoadingRows, Stack } from '@/shared/ui';
+import { ButtonLink, Card, CardTitle, LoadingRows, Stack, ToastProvider } from '@/shared/ui';
+import { useEvent } from '@/shared/lib/eventContext';
 import { EventProvider } from './EventProvider';
 import { useMyEvents } from './queries';
 
@@ -18,10 +19,18 @@ export function EventLayout({ children }: { children: ReactNode }): ReactNode {
   if (!session) return null;
   return (
     <EventProvider fallback={(state) => <EventUnavailable state={state} />}>
+      <EventOwnerToast>
       <OfflineWarmup />
       {children}
+      </EventOwnerToast>
     </EventProvider>
   );
+}
+
+function EventOwnerToast({ children }: { children: ReactNode }): ReactNode {
+  const event = useEvent();
+  const session = useCurrentSession();
+  return <ToastProvider ownerKey={`${event.id}:${session?.volunteerId ?? 'signed-out'}`}>{children}</ToastProvider>;
 }
 
 /**

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import type { ScopedSettingsReadResponse } from '@spoh/shared';
-import { Button, Callout, Checkbox, Field, Textarea } from '@/shared/ui';
+import { Button, Callout, Checkbox, Field, Textarea, ErrorState } from '@/shared/ui';
 import { useCaptureReview } from '../hooks/useCaptureReview';
 import {
   captureActionLabel,
@@ -76,9 +76,7 @@ function CaptureReviewFeedback({ review }: { review: ReturnType<typeof useCaptur
   return (
     <>
       {review.error ? (
-        <Callout tone="alert" role="alert">
-          {review.error}
-        </Callout>
+        <ErrorState error={review.error}>{review.error}</ErrorState>
       ) : null}
       {review.stale && !review.uncertain ? (
         <Callout tone="alert">Capture settings changed after your review.</Callout>

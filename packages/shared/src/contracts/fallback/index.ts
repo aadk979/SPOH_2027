@@ -1,4 +1,22 @@
 import { z } from 'zod';
+import { IdempotencyKey } from '../common/index.js';
+
+export const ConfirmOutboxSalvageRequest = z.object({ idempotencyKey: IdempotencyKey, reason: ReasonText,
+  entries: z.array(z.object({ idempotencyKey: IdempotencyKey,
+    captureKind: z.enum(['registration', 'footfall', 'stamp', 'redemption', 'incident']), recordId: Id }).strict()).min(1).max(100),
+}).strict().refine((request) => new Set(request.entries.map((entry) => entry.idempotencyKey)).size === request.entries.length,
+  'Select each original capture key once.');
+export type ConfirmOutboxSalvageRequest = z.infer<typeof ConfirmOutboxSalvageRequest>;
+export const ConfirmOutboxSalvageResponse = z.object({ eventId: Id, personId: Id, auditId: Id,
+  confirmedKeys: z.array(IdempotencyKey).min(1).max(100) }).strict();
+export type ConfirmOutboxSalvageResponse = z.infer<typeof ConfirmOutboxSalvageResponse>;
+
+export const UndoCaptureImportRequest = z.object({ idempotencyKey: IdempotencyKey, reason: ReasonText }).strict();
+export type UndoCaptureImportRequest = z.infer<typeof UndoCaptureImportRequest>;
+export const UndoCaptureImportResponse = z.object({ importBatchId: z.string().min(1).max(64),
+  voided: z.number().int().nonnegative(), alreadyVoided: z.number().int().nonnegative(),
+  retained: z.number().int().nonnegative() }).strict();
+export type UndoCaptureImportResponse = z.infer<typeof UndoCaptureImportResponse>;
 import { DataSource } from '../../invariants/enums.js';
 import { CategoryCode } from '../registration/index.js';
 import { Id, IsoDateTime, ReasonText } from '../common/index.js';

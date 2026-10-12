@@ -1,22 +1,30 @@
 import type { ReactNode } from 'react';
 import type { LiveDashboardResponse } from '@spoh/shared';
-import { Card, CardGrid, Section } from '@/shared/ui';
+import { Card, CardGrid, Section, PermissionDenied, ControlHelp } from '@/shared/ui';
 import { StatTile } from '@/features/dashboard';
 import { formatDuration } from '@/shared/lib/format';
+import { staffingLink } from '../model/drillLinks';
+import { entityPath } from '@/shared/lib/workspacePath';
+import { AppLink } from '@/shared/lib/AppLink';
 export function StaffingPanel({ data }: { data: LiveDashboardResponse }): ReactNode {
+  if (!['available', 'partial'].includes(data.staffing.rosterAvailability ?? 'denied')) return <PermissionDenied>Staffing details are unavailable under your current permission.</PermissionDenied>;
   return (
     <Section title="Staffing">
+      <ControlHelp topic="staffing">{data.staffing.rosterAvailability === 'partial' ? 'Only stations whose roster you may read are included. ' : ''}On shift and checked in describe different assignment sets.</ControlHelp>
       <CardGrid columns={2}>
         <StatTile
           label="On shift"
+          href={staffingLink(data.observation, 'running')}
+          noteHref={staffingLink(data.observation, 'checkedIn')}
           value={data.staffing.onShift}
           unit="assignments this block"
           note={`${data.staffing.checkedIn} checked in`}
         />
         <StatTile
-          label="Staffing gaps"
+          label="Station / shift gaps"
+          href={staffingLink(data.observation, 'gaps')}
           value={data.staffing.gaps.length}
-          unit="stations needing attention"
+          unit="station / shift cells needing attention"
           tone={data.staffing.gaps.length > 0 ? 'warn' : 'ok'}
         />
       </CardGrid>
@@ -27,8 +35,8 @@ export function StaffingPanel({ data }: { data: LiveDashboardResponse }): ReactN
         // screenful of scrolling to read what fits in a third of the height.
         <Card as="ul" className="mt-sm grid gap-x-lg gap-y-xxs sm:grid-cols-2 xl:grid-cols-3">
           {data.staffing.gaps.map((gap) => (
-            <li key={`${gap.stationId}:${gap.shift.code}`}>
-              <strong>{gap.stationName}</strong>{' '}
+            <li key={`${gap.stationId}:${gap.shift.id}`}>
+              <AppLink href={staffingLink(data.observation, 'gaps', { stationId: gap.stationId, shiftId: gap.shift.id }) ?? entityPath({ kind: 'station', id: gap.stationId })} className="text-primary underline"><strong>{gap.stationName} · {gap.shift.label}</strong></AppLink>{' '}
               <span className="text-text-muted">
                 {gap.severity === 'UNSTAFFED'
                   ? 'nobody rostered'
@@ -44,12 +52,12 @@ export function StaffingPanel({ data }: { data: LiveDashboardResponse }): ReactN
       {data.staffing.longShifts.length > 0 ? (
         <Card tone="warn" className="mt-sm">
           <h3 className="text-body font-semibold text-warn">
-            On station three hours or more, no break recorded
+            Long checked-in shifts, no break recorded
           </h3>
           <ul className="mt-xs flex flex-col gap-xxs text-text-muted">
             {data.staffing.longShifts.map((warning) => (
               <li key={warning.volunteerId}>
-                {warning.volunteerName} — {warning.stationName},{' '}
+                {warning.assignmentId ? <AppLink href={entityPath({ kind: 'assignment', id: warning.assignmentId })} className="text-primary underline">{warning.volunteerName} — {warning.stationName}</AppLink> : <>{warning.volunteerName} — {warning.stationName}</>},{' '}
                 {formatDuration(warning.minutesOnStation)}
               </li>
             ))}

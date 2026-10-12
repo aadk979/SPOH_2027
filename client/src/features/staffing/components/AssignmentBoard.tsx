@@ -1,26 +1,22 @@
 import { useState } from 'react';
 import { useEventTime } from '@/features/session';
-import { Button, Callout, Card, Field, Select, Stack } from '@/shared/ui';
-import { unassignVolunteer } from '../api';
-import { useAssignmentBoard, useStaffingWrite } from '../queries';
+import { Card, CountHelp, EmptyState, Field, LoadingRows, Select, Stack, ErrorState } from '@/shared/ui';
+import { useAssignmentBoard } from '../queries';
 import { assignmentCells } from '../model/board';
 import { AssignmentForm } from './AssignmentForm';
-import { MutationFeedback } from './MutationFeedback';
+import { UnassignAssignment } from './UnassignAssignment';
 
 export function AssignmentBoard({ enabled }: { enabled: boolean }) {
   const query = useAssignmentBoard(enabled);
   const format = useEventTime();
   const [dayId, setDayId] = useState('');
-  const remove = useStaffingWrite(unassignVolunteer);
   const day = query.data?.days.find((item) => item.id === dayId) ?? query.data?.days[0];
-  if (query.isPending) return <p>Loading assignment board…</p>;
+  if (query.isPending) return <LoadingRows label="Loading assignment board" />;
   if (query.isError)
     return (
-      <Callout tone="alert" role="alert">
-        {query.error.message}
-      </Callout>
+      <ErrorState error={query.error} operation="Loading assignment board" onRetry={() => void query.refetch()} />
     );
-  if (!query.data || !day) return <p>Create event days and shifts before assigning people.</p>;
+  if (!query.data || !day) return <EmptyState title="No assignment days">Create event days and shifts before assigning people.</EmptyState>;
   const cells = assignmentCells({
     day,
     stations: query.data.stations,
@@ -28,7 +24,7 @@ export function AssignmentBoard({ enabled }: { enabled: boolean }) {
   });
   return (
     <Stack>
-      <Field id="staffing-day" label="Day">
+      <Field id="staffing-day" label="Day" hint="Show station coverage for this event day. Changing this selection does not change assignments.">
         {(props) => (
           <Select {...props} value={day.id} onChange={(event) => setDayId(event.target.value)}>
             {query.data.days.map((item) => (
@@ -43,7 +39,7 @@ export function AssignmentBoard({ enabled }: { enabled: boolean }) {
         {cells.filter((cell) => !cell.assignments.length).length} unstaffed station shifts of{' '}
         {cells.length}.
       </p>
-      <MutationFeedback error={remove.error} saved={remove.isSuccess} />
+      <CountHelp topic="staffing" />
       {cells.map((cell) => (
         <Card
           key={`${cell.station.id}:${cell.shift.id}`}
@@ -59,14 +55,7 @@ export function AssignmentBoard({ enabled }: { enabled: boolean }) {
             {cell.assignments.map((assignment) => (
               <li key={assignment.id} className="flex flex-wrap items-center gap-sm">
                 {assignment.volunteerName} · {assignment.roleLabel}
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  disabled={remove.isPending}
-                  onClick={() => remove.mutate(assignment.id)}
-                >
-                  Unassign {assignment.volunteerName}
-                </Button>
+                <UnassignAssignment assignment={assignment} />
               </li>
             ))}
           </ul>

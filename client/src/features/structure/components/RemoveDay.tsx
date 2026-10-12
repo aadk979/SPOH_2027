@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { EventDayRecord } from '@spoh/shared';
 import { useRetryKey } from '@/shared/hooks/useRetryKey';
-import { Button, Callout, Checkbox, Stack } from '@/shared/ui';
+import { Button, Callout, Checkbox, Stack, ErrorState } from '@/shared/ui';
 import { useDayRemoval } from '../queries';
 export function RemoveDay({ day }: { day: EventDayRecord }) {
   const [confirmed, setConfirmed] = useState(false);
@@ -31,9 +31,7 @@ export function RemoveDay({ day }: { day: EventDayRecord }) {
         Remove unused day
       </Button>
       {remove.error ? (
-        <Callout tone="alert" role="alert">
-          {remove.error.message}
-        </Callout>
+        <ErrorState error={remove.error} />
       ) : null}
     </Stack>
   );

@@ -1,5 +1,5 @@
 import type { EventSettingHistoryRecord, EventSettingsResponse } from '@spoh/shared';
-import { Button, Callout, Checkbox, Field, Textarea } from '@/shared/ui';
+import { Button, Callout, Checkbox, Field, Textarea, ErrorState } from '@/shared/ui';
 import { useProductRevertReview } from '../hooks/useProductRevertReview';
 import {
   productRevertWarning,
@@ -55,9 +55,7 @@ function ProductRevertFeedback({ review }: { review: ReturnType<typeof useProduc
   return (
     <>
       {review.error ? (
-        <Callout tone="alert" role="alert">
-          {review.error}
-        </Callout>
+        <ErrorState error={review.error}>{review.error}</ErrorState>
       ) : null}
       {review.stale ? (
         <Callout tone="alert" role="alert">

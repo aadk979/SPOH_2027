@@ -1,7 +1,7 @@
 'use client';
 import { GenerateCardBatchRequest } from '@spoh/shared';
 import { useZodForm } from '@/shared/hooks/useZodForm';
-import { Button, Field, Input, Checkbox, Callout } from '@/shared/ui';
+import { Button, Field, Input, Checkbox, ErrorState } from '@/shared/ui';
 import { useCardPrinting } from '../queries';
 function PrintResults({ printing }: { printing: ReturnType<typeof useCardPrinting> }) {
   const { generate, print, download } = printing;
@@ -32,14 +32,14 @@ function PrintResults({ printing }: { printing: ReturnType<typeof useCardPrintin
         </Button>
       ))}
       {print.isError ? (
-        <Callout>Could not prepare the print file. Retry when export storage is available.</Callout>
+        <ErrorState error={print.error}>Could not prepare the print file. Retry when export storage is available.</ErrorState>
       ) : null}
       {print.data ? (
         <Button disabled={download.isPending} onClick={() => download.mutate(print.data!)}>
           Download {print.data.format.toUpperCase()}
         </Button>
       ) : null}
-      {download.isError ? <Callout>Could not download this print file. Try again.</Callout> : null}
+      {download.isError ? <ErrorState error={download.error}>Could not download this print file. Try again.</ErrorState> : null}
     </div>
   );
 }
@@ -100,7 +100,7 @@ export function CardBatchForm() {
           onChange={(e) => form.setField('rehearsal', e.target.checked)}
         />
         {printing.generate.isError ? (
-          <Callout>Generation was not confirmed. Retry the same batch to check its result.</Callout>
+          <ErrorState error={printing.generate.error}>Generation was not confirmed. Retry the same batch to check its result.</ErrorState>
         ) : null}
         <Button type="submit" disabled={printing.generate.isPending || printing.print.isPending}>
           Generate card batch

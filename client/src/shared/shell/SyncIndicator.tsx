@@ -3,6 +3,9 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { needsAttention, subscribeToOutbox, type OutboxEntry } from '@/shared/lib/outbox';
 import { cx } from '@/shared/ui/cx';
+import { useCurrentSession } from '@/features/session';
+import { useOptionalEvent } from '@/shared/lib/eventContext';
+import { belongsToOwner } from '@/shared/lib/outboxStore';
 
 /**
  * The unsynced count, visible at all times on every capture screen
@@ -15,8 +18,11 @@ import { cx } from '@/shared/ui/cx';
  */
 export function useOutboxEntries(): OutboxEntry[] {
   const [entries, setEntries] = useState<OutboxEntry[]>([]);
+  const session = useCurrentSession();
+  const event = useOptionalEvent();
   useEffect(() => subscribeToOutbox(setEntries), []);
-  return entries;
+  return session ? entries.filter((entry) => belongsToOwner(entry, session.volunteerId) &&
+    (!event || entry.eventId === event.id)) : [];
 }
 
 /**

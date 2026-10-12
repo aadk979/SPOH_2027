@@ -96,7 +96,8 @@ states are consistent, and the event's identity (name, branding) appears through
   4. Owner review of the copy.
 - **Done when:** the owner signs off the copy.
 - **ADR-011:** the staging, soak, load or sign-off part of _Done when_ runs in P16.8. The step
-  closes when its code and tests are green in CI and the pipeline has deployed it.
+  closes when its code and tests are green in exact-head CI. AWS stays torn down
+  until all feature batches are built and the ordered P16 staging campaign begins.
 
 ### P14.9 — Visual regression
 

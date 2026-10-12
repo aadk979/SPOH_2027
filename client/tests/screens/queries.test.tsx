@@ -15,7 +15,10 @@ import {
 } from '@/features/volunteers';
 
 vi.mock('@/shared/lib/api', () => ({ api: vi.fn() }));
-vi.mock('@/features/session', () => ({ useCurrentSession: () => ({ accessToken: 'test' }) }));
+vi.mock('@/features/session', () => ({
+  useCurrentSession: () => ({ accessToken: 'test', volunteerId: 'query-reader' }),
+  useAllows: () => (action: string) => action === 'Dashboard.ReadStation',
+}));
 const clients: QueryClient[] = [];
 function setup() {
   const client = new QueryClient({
@@ -46,7 +49,9 @@ it('does not query a station dashboard until a station is selected', async () =>
   expect(api).not.toHaveBeenCalled();
   rerender({ id: 'station-42' });
   await waitFor(() =>
-    expect(api).toHaveBeenCalledWith(`/events/${TEST_EVENT.id}/dashboard/station/station-42`),
+    expect(api).toHaveBeenCalledWith(`/events/${TEST_EVENT.id}/dashboard/station/station-42`, {
+      signal: expect.any(AbortSignal), cache: 'no-store',
+    }),
   );
 });
 

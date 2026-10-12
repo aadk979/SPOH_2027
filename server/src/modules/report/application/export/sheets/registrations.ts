@@ -11,7 +11,7 @@ export function writeRegistrationsSheet(workbook: ExcelJS.Workbook, report: Full
   sheet.addRow([`Voided and excluded: ${report.registrations.voided}`]);
   sheet.addRow([]);
 
-  header(sheet, ['Category', 'Registrations']);
+  header(sheet, ['Category code', 'Category', 'Registrations']);
   for (const row of rows.categories(report)) sheet.addRow([...row]);
 
   sheet.addRow([]);

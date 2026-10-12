@@ -1,4 +1,5 @@
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
+import { erasePersonalNotices, exportPersonalNotices } from './notificationPersonalRepo.js';
 
 /** Credentials, other people's contact data and arbitrary audit payloads never enter the export. */
 export async function exportPersonData(tx: PrismaTransactionClient, personId: string) {
@@ -13,10 +14,12 @@ export async function exportPersonData(tx: PrismaTransactionClient, personId: st
   const activity = await tx.auditLog.findMany({ where: { actorId: personId },
     select: { id: true, eventId: true, action: true, entityType: true, entityId: true, createdAt: true },
     orderBy: { createdAt: 'asc' } });
-  return { person, activity };
+  const notifications = await exportPersonalNotices(tx, personId);
+  return { person, activity, notifications };
 }
 
 export async function erasePersonNotes(tx: PrismaTransactionClient, personId: string) {
+  await erasePersonalNotices(tx, personId);
   const person = await tx.person.findUniqueOrThrow({ where: { id: personId },
     select: { eventMemberships: { select: { eventId: true, id: true } } } });
   const memberships = person.eventMemberships;

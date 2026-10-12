@@ -2,7 +2,7 @@ import type { FormEvent } from 'react';
 import { UpdateShiftExceptionRequest, type ShiftExceptionRecord } from '@spoh/shared';
 import { useZodForm } from '@/shared/hooks/useZodForm';
 import { useRetryKey } from '@/shared/hooks/useRetryKey';
-import { Button, Checkbox, Stack } from '@/shared/ui';
+import { Button, Checkbox, ControlHelp, Stack } from '@/shared/ui';
 import { useStructureWrite } from '../queries';
 import { EditorField } from './EditorField';
 import { WriteFeedback } from './WriteFeedback';
@@ -33,6 +33,7 @@ export function ExceptionEditor({
       <Stack>
         <EditorField
           label="Exception start time"
+          hint="Override the event-local start for this shift only. Other dates keep their template hours."
           type="time"
           value={form.values.startLocal}
           onChange={form.setter('startLocal')}
@@ -41,6 +42,7 @@ export function ExceptionEditor({
         />
         <EditorField
           label="Exception end time"
+          hint="Override the event-local end for this shift only."
           type="time"
           value={form.values.endLocal}
           onChange={form.setter('endLocal')}
@@ -49,10 +51,12 @@ export function ExceptionEditor({
         />
         <Checkbox
           label="Exception ends the next day"
+          aria-describedby={`exception-next-${shift.id}`}
           checked={form.values.endsNextDay}
           disabled={!editable}
           onChange={(event) => form.setField('endsNextDay', event.target.checked)}
         />
+        <ControlHelp id={`exception-next-${shift.id}`}>Treat the exception end as the following calendar day. Following the template again removes this shift's override.</ControlHelp>
         <Button type="submit" disabled={!editable || write.isPending}>
           Save exception
         </Button>

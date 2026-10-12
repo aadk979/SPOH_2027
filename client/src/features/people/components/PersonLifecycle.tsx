@@ -2,11 +2,13 @@ import { useState, type ReactNode } from 'react';
 import { DeactivatePersonRequest, type PersonDetailResponse } from '@spoh/shared';
 import { useMe } from '@/features/session';
 import { useZodForm } from '@/shared/hooks/useZodForm';
-import { Button, Callout, Field, Input, Stack } from '@/shared/ui';
+import { useReviewFocus } from '@/shared/hooks/useReviewFocus';
+import { Button, Callout, Field, Input, Stack, ErrorState } from '@/shared/ui';
 import { useDeactivatePerson, useReactivatePerson } from '../queries';
 
 function WithdrawPerson({ person }: { person: PersonDetailResponse['person'] }): ReactNode {
   const [review, setReview] = useState(false);
+  const origin = useReviewFocus(review);
   const form = useZodForm(DeactivatePersonRequest, { reason: '' });
   const deactivate = useDeactivatePerson();
   function withdraw(): void {
@@ -43,6 +45,7 @@ function WithdrawPerson({ person }: { person: PersonDetailResponse['person'] }):
         </Callout>
       ) : (
         <Button
+          ref={origin}
           variant="danger"
           disabled={deactivate.isPending}
           onClick={() => {
@@ -53,9 +56,7 @@ function WithdrawPerson({ person }: { person: PersonDetailResponse['person'] }):
         </Button>
       )}
       {deactivate.isError ? (
-        <Callout tone="alert" role="alert">
-          {deactivate.error.message}
-        </Callout>
+        <ErrorState error={deactivate.error} />
       ) : null}
       {deactivate.isSuccess ? (
         <Callout tone="ok" role="status">
@@ -77,9 +78,7 @@ function RestorePerson({ id }: { id: string }): ReactNode {
         Reactivate person
       </Button>
       {reactivate.isError ? (
-        <Callout tone="alert" role="alert">
-          {reactivate.error.message}
-        </Callout>
+        <ErrorState error={reactivate.error} />
       ) : null}
       {reactivate.isSuccess ? (
         <Callout tone="ok" role="status">

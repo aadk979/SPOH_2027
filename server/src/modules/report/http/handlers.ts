@@ -5,6 +5,7 @@ import { sendReportExport } from './exportResponse.js';
 import { readReport } from '../application/readReport.js';
 import { getAuth, scopeOf } from '../../../platform/http/requireAuth.js';
 import { visitorRecordsFor } from '../../visitor/index.js';
+import { readFrozenBrandingLogo } from '../../branding/index.js';
 
 export async function reportSummaryHandler(req: Request, res: Response): Promise<void> {
   res.setHeader('Cache-Control', 'no-store');
@@ -27,5 +28,6 @@ export async function exportReportHandler(req: Request, res: Response): Promise<
   const stamp = report.generatedAt.slice(0, 10);
   const fileName = `${report.event.slug}-report-${stamp}${report.snapshot ? '-frozen-final' : ''}${report.rehearsalIncluded ? '-with-rehearsal' : ''}`;
 
-  await sendReportExport(res, { report, visitors, fileName, format: query.format });
+  const assets = { logoPng: await readFrozenBrandingLogo(scopeOf(req), report.event.branding) };
+  await sendReportExport(res, { report, visitors, fileName, format: query.format, assets });
 }

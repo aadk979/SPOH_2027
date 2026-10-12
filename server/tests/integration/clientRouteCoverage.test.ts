@@ -6,6 +6,30 @@ import { routeInventory } from '../helpers/routeInventory.js';
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const exceptions = new Map([
   [
+    'GET /public/events/:slug/branding/theme.css',
+    'PublicBranding.themePath supplies the approved stylesheet URL. features/branding/model/head.ts creates its anonymous stylesheet link after publicBrandingUrl validates the exact slug and fixed theme.css resource; branding-api and branding screen tests assert those runtime links.',
+  ],
+  [
+    'GET /public/events/:slug/branding/manifest.webmanifest',
+    'PublicBranding.manifestPath supplies the approved manifest URL. features/branding/model/head.ts assigns the anonymous manifest link after publicBrandingUrl validates the exact slug and fixed manifest.webmanifest resource; branding-api and branding screen tests assert those runtime links.',
+  ],
+  [
+    'GET /public/events/:slug/branding/assets/:publicationId/:variant',
+    'PublicBranding.icons and logo supply approved publication-owned image URLs. features/branding/model/head.ts and EventIdentity.tsx consume them through publicBrandingUrl, whose anchored validation permits only the exact slug, publication and four raster variants; branding-api tests reject foreign and arbitrary assets.',
+  ],
+  [
+    'GET /notifications/config',
+    'Legacy event-member device projection remains compatible and is exercised in routeContracts. features/notification/api.ts now reads the same pushConfigResponse through GET /notification-centre/device/config, supporting the current person outside an event membership.',
+  ],
+  [
+    'POST /notifications/subscriptions',
+    'Legacy event-member device registration remains compatible and is exercised in routeContracts. features/notification/api.ts uses POST /notification-centre/device/subscriptions for the same current-person ownership use case outside an event membership.',
+  ],
+  [
+    'DELETE /notifications/subscriptions',
+    'Legacy event-member device removal remains compatible and is exercised in routeContracts. features/notification/api.ts uses DELETE /notification-centre/device/subscriptions for the same current-person ownership use case outside an event membership.',
+  ],
+  [
     'GET /content/assets/:versionId/:image',
     'PublishedContentRecord supplies the version-owned image URL. features/content/api.ts getContentImage validates its anchored asset route and calls apiBlob; it is a runtime caller whose URL comes from the server.',
   ],

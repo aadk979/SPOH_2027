@@ -9,9 +9,9 @@ export function toAlertRecord(
     id: alert.id,
     rehearsal: alert.rehearsal,
     status: alert.status,
-    approxAge: alert.approxAge,
-    descriptionText: alert.descriptionText,
-    clothingText: alert.clothingText,
+    approxAge: alert.status === 'ACTIVE' ? alert.approxAge : null,
+    descriptionText: alert.status === 'ACTIVE' ? alert.descriptionText : null,
+    clothingText: alert.status === 'ACTIVE' ? alert.clothingText : null,
     lastSeenStationId: alert.lastSeenStationId,
     lastSeenStationName: context.stationName,
     lastSeenAt: alert.lastSeenAt?.toISOString() ?? null,
@@ -20,7 +20,7 @@ export function toAlertRecord(
     // The reporter's number travels with the alert on purpose: the standing
     // instruction is that calling beats tapping, and a searcher who finds the
     // child needs to reach the person who raised it without leaving the screen.
-    raisedByPhone: alert.raisedBy.phone,
+    raisedByPhone: alert.status === 'ACTIVE' ? alert.raisedBy.phone : null,
     raisedAt: alert.raisedAt.toISOString(),
     resolvedAt: alert.resolvedAt?.toISOString() ?? null,
     ackCount: alert._count.acknowledgements,

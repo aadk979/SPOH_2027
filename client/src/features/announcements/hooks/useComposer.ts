@@ -32,12 +32,13 @@ export function useComposer(me: MeResponse | undefined) {
   }
   return {
     ...form.values,
+    eventWide: form.values.audienceIntent === 'EVENT',
     submit,
     errors: form.errors,
     setBody,
     setPriority: form.setter('priority'),
     setRequiresAck: form.setter('requiresAck'),
-    setEventWide: form.setter('eventWide'),
+    setEventWide: (wide: boolean) => form.setter('audienceIntent')(wide ? 'EVENT' : 'TARGETED'),
     setStationId: form.setter('stationId'),
     error,
     stations,

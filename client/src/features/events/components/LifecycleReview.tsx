@@ -1,5 +1,5 @@
 import type { LifecycleReadinessResponse } from '@spoh/shared';
-import { Button, Callout } from '@/shared/ui';
+import { Button, Callout, ErrorState } from '@/shared/ui';
 import { useLifecycleReview } from '../hooks/useLifecycleReview';
 import { LifecycleTransitionFields } from './LifecycleTransitionFields';
 import { LifecycleReadinessSummary } from './LifecycleReadinessSummary';
@@ -41,9 +41,7 @@ export function LifecycleReview({
         </>
       ) : null}
       {review.error ? (
-        <Callout tone="alert" role="alert">
-          {review.error}
-        </Callout>
+        <ErrorState error={review.error}>{review.error}</ErrorState>
       ) : null}
       <LifecycleTransitionFields review={review} />
     </div>

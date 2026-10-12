@@ -48,24 +48,33 @@ describe('dashboard attention priority', () => {
         minutesSinceLastCapture: null,
       },
     ];
+    const observation = { asOf: data.dataHealth.asOf, includeRehearsal: false };
     expect(attentionProblems(data)).toEqual([
-      { text: '1 active lost-person alert', tone: 'alert' },
-      { text: '2 critical incidents open', tone: 'alert' },
-      { text: 'A fallback window is open — data is degraded', tone: 'warn' },
-      { text: 'Room A has recorded nothing at all today', tone: 'warn' },
-      { text: 'Room B has recorded nothing for 20 minutes', tone: 'warn' },
-      { text: 'Alex (Room C) is checked in but has recorded nothing', tone: 'warn' },
-      { text: '3 incidents open', tone: 'warn' },
+      { kind: 'lost-person', text: '1 active lost-person alert', tone: 'alert', action: 'Self.Read',
+        target: { type: 'records', filter: { kind: 'lost-person', status: 'ACTIVE', ...observation } } },
+      { kind: 'critical-incident', text: '2 critical incidents open', tone: 'alert', action: 'Incident.Read',
+        target: { type: 'records', filter: { kind: 'incidents', open: true, severity: 'CRITICAL', ...observation } } },
+      { kind: 'fallback', text: 'A fallback window is open — data is degraded', tone: 'warn', action: 'Dashboard.ReadStation',
+        target: { type: 'records', filter: { kind: 'fallback', open: true, ...observation } } },
+      { kind: 'silent-station', text: 'Room A has recorded nothing at all today', tone: 'warn', action: 'Self.Read',
+        target: { type: 'entity', target: { kind: 'station', id: 'a' } } },
+      { kind: 'silent-station', text: 'Room B has recorded nothing for 20 minutes', tone: 'warn', action: 'Self.Read',
+        target: { type: 'entity', target: { kind: 'station', id: 'b' } } },
+      { kind: 'stale-recorder', text: 'Alex (Room C) is checked in but has recorded nothing', tone: 'warn', action: 'Roster.ReadStation', target: null },
+      { kind: 'incident', text: '3 incidents open', tone: 'warn', action: 'Incident.Read',
+        target: { type: 'records', filter: { kind: 'incidents', open: true, ...observation } } },
     ]);
   });
   it('pluralizes lost-person alerts without promoting ordinary incidents', () => {
     const data = fixture();
     data.safety.activeLostPersonAlerts = 2;
     expect(attentionProblems(data)).toEqual([
-      { text: '2 active lost-person alerts', tone: 'alert' },
+      { kind: 'lost-person', text: '2 active lost-person alerts', tone: 'alert', action: 'Self.Read',
+        target: { type: 'records', filter: { kind: 'lost-person', status: 'ACTIVE', asOf: data.dataHealth.asOf, includeRehearsal: false } } },
     ]);
     data.safety.activeLostPersonAlerts = 0;
     data.safety.openIncidents = 1;
-    expect(attentionProblems(data)).toEqual([{ text: '1 incidents open', tone: 'warn' }]);
+    expect(attentionProblems(data)).toEqual([{ kind: 'incident', text: '1 incidents open', tone: 'warn', action: 'Incident.Read',
+      target: { type: 'records', filter: { kind: 'incidents', open: true, asOf: data.dataHealth.asOf, includeRehearsal: false } } }]);
   });
 });

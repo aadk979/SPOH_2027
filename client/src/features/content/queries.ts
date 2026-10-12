@@ -21,10 +21,10 @@ import {
 } from './api';
 
 export const contentKeys = {
-  draft: (eventId: string) => [eventId, 'content', 'draft'] as const,
+  draft: (eventId: string, personId?: string) => [eventId, 'content', 'draft', personId] as const,
   published: (eventId: string, personId?: string) =>
     [eventId, 'content', 'published', personId] as const,
-  versions: (eventId: string) => [eventId, 'content', 'versions'] as const,
+  versions: (eventId: string, personId?: string) => [eventId, 'content', 'versions', personId] as const,
 };
 export function usePublishedContent() {
   const eventId = useEventId();
@@ -51,19 +51,26 @@ export function useContentImage(path?: string) {
 }
 export function useContentDraft(enabled: boolean) {
   const eventId = useEventId();
+  const personId = useCurrentSession()?.volunteerId;
   return useQuery({
-    queryKey: contentKeys.draft(eventId),
-    queryFn: () => getContentDraft(eventId),
-    enabled,
+    queryKey: contentKeys.draft(eventId, personId),
+    queryFn: ({ signal }) => getContentDraft(eventId, signal),
+    enabled: enabled && !!personId,
     gcTime: 0,
+    staleTime: 0,
+    retry: false,
   });
 }
 export function useContentVersions(enabled: boolean) {
   const eventId = useEventId();
+  const personId = useCurrentSession()?.volunteerId;
   return useQuery({
-    queryKey: contentKeys.versions(eventId),
-    queryFn: () => listContentVersions(eventId),
-    enabled,
+    queryKey: contentKeys.versions(eventId, personId),
+    queryFn: ({ signal }) => listContentVersions(eventId, signal),
+    enabled: enabled && !!personId,
+    gcTime: 0,
+    staleTime: 0,
+    retry: false,
   });
 }
 function useReceipt() {

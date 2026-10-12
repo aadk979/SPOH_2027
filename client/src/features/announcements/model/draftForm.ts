@@ -9,7 +9,7 @@ export function initialDraftValues(draft: AnnouncementDraftRecord | undefined, t
     body: draft.body,
     priority: draft.priority,
     requiresAck: draft.requiresAck,
-    eventWide: !draft.target.stationId,
+    audienceIntent: draft.target.stationId ? 'TARGETED' as const : 'EVENT' as const,
     stationId: draft.target.stationId ?? '',
     expiresWallTime: draft.expiresAt ? publicationWallTime(draft.expiresAt, timezone) : '',
   };

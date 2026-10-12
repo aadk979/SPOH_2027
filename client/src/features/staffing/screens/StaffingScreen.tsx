@@ -5,7 +5,7 @@ import { usePrivateReadFailure } from '@/shared/hooks/usePrivateReadFailure';
 import { RosterImportForm } from '@/features/provisioning';
 import { AppShell } from '@/shared/shell/AppShell';
 import { useEventId } from '@/shared/lib/eventContext';
-import { ButtonLink, Callout, Section, Stack } from '@/shared/ui';
+import { ButtonLink, Callout, Section, Stack, ErrorState } from '@/shared/ui';
 import { listStaffingPeople } from '../api';
 import { useStaffingRead } from '../queries';
 import { AssignmentBoard } from '../components/AssignmentBoard';
@@ -72,9 +72,7 @@ function StaffingWorkspace({ onAccessLost }: { onAccessLost: () => void }) {
           </Section>
         ) : null}
         {people.isError ? (
-          <Callout tone="alert" role="alert">
-            {people.error.message}
-          </Callout>
+          <ErrorState error={people.error} />
         ) : null}
       </Stack>
     </AppShell>

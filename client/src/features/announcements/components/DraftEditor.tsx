@@ -53,7 +53,7 @@ function DraftEditorFields({
   const saveLabel = draft ? 'Save changes' : 'Save private draft';
   return (
     <fieldset disabled={readonly || form.save.isPending} className="flex min-w-0 flex-col gap-md">
-      <Field id="draft-body" label="Draft message" error={form.errors.body}>
+      <Field id="draft-body" label="Draft message" hint="This text remains private until you publish the saved draft." error={form.errors.body}>
         {(props) => (
           <Textarea
             {...props}
@@ -82,6 +82,7 @@ function DraftEditorFields({
       <Field
         id="draft-expiry"
         label={`Expiry (${me.event.timezone})`}
+        hint="After this event-local time the announcement is no longer current. Leaving it empty keeps it current until withdrawn."
         optional
         error={form.errors.expiresWallTime}
       >

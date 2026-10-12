@@ -3,11 +3,14 @@ import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { setManager, upsertAssignment, upsertVolunteer } from '../data/repo.js';
 import type { RosterImportPlan } from '../domain/planRosterImport.js';
+import { queueAssignmentNotice } from '../../assignments/index.js';
+import { systemClock, type Clock } from '../../../platform/time/index.js';
 
 interface RosterImportContext {
   identities: ReadonlyMap<string, string>;
   scope: EventScope;
   audit: AuditContext;
+  clock?: Clock;
 }
 
 /** Create or update each person, and audit a role change per person. */
@@ -57,12 +60,15 @@ export async function applyRosterImport(
     });
   }
   for (const step of plan.assignments) {
-    await upsertAssignment(tx, context.scope, {
+    const target = {
       volunteerId: ids.get(step.email) as string,
       stationId: step.stationId,
       eventDayId: step.eventDayId,
       shiftId: step.shiftId,
       roleLabel: step.roleLabel,
-    });
+    };
+    const result = await upsertAssignment(tx, context.scope, target);
+    if (result.changed) await queueAssignmentNotice(tx, context.scope, { ...target, id: result.id,
+      operation: result.created ? 'ADDED' : 'MOVED', now: (context.clock ?? systemClock).now() });
   }
 }

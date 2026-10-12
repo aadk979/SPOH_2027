@@ -8,7 +8,7 @@ import { rehearsalFilter, type ReportingScope } from '../../../platform/db/rehea
  */
 export async function flaggedRedemptions(
   scope: ReportingScope,
-  input: { since: Date; until: Date; stationId?: string },
+  input: { since: Date; until: Date; stationId?: string; stationIds?: readonly string[] },
 ): Promise<FlaggedRedemption[]> {
   const rows = await prisma.giftRedemption.findMany({
     where: {
@@ -18,6 +18,7 @@ export async function flaggedRedemptions(
       voided: false,
       recordedAt: { gte: input.since, lte: input.until },
       ...(input.stationId ? { stationId: input.stationId } : {}),
+      ...(input.stationIds ? { stationId: { in: [...input.stationIds] } } : {}),
     },
     select: {
       id: true,

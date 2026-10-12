@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { UpdateVisitorFieldRequest, type VisitorFieldRecord } from '@spoh/shared';
 import { useZodForm } from '@/shared/hooks/useZodForm';
-import { Button, Checkbox, Field, Input } from '@/shared/ui';
+import { Button, Checkbox, ControlHelp, Field, Input, MutationFeedback } from '@/shared/ui';
 import { useUpdateVisitorField } from '../queries';
 import { ReaderRoles } from './ReaderRoles';
 
@@ -20,19 +20,19 @@ export function VisitorFieldRow({
   });
   const save = useUpdateVisitorField();
   const prefix = `visitor-${field.id}`;
+  function submit() {
+    const body = form.validate();
+    if (body && canEdit) save.mutate({ id: field.id, body });
+  }
   return (
     <form
       className="flex flex-col gap-sm border-t border-line pt-md"
-      onSubmit={(event) => {
-        event.preventDefault();
-        const body = form.validate();
-        if (body) save.mutate({ id: field.id, body });
-      }}
+      onSubmit={(event) => { event.preventDefault(); submit(); }}
     >
       <p className="font-semibold">
         {field.code} · {field.type} · {field.classification}
       </p>
-      <Field id={`${prefix}-label`} label="Label" error={form.errors.label}>
+      <Field id={`${prefix}-label`} label="Label" hint="The label people see when entering this value. The stable field code is retained." error={form.errors.label}>
         {(props) => (
           <Input
             {...props}
@@ -45,6 +45,7 @@ export function VisitorFieldRow({
       <Field
         id={`${prefix}-retention`}
         label="Keep for days after close"
+        hint="Values are removed after this retention period; the separate event counts remain."
         error={form.errors.retentionDays}
       >
         {(props) => (
@@ -67,12 +68,13 @@ export function VisitorFieldRow({
       {form.errors.readers ? <p role="alert">{form.errors.readers}</p> : null}
       <Checkbox
         label="Available for new captures"
+        aria-describedby={`${prefix}-active-help`}
         checked={form.values.active}
         disabled={!canEdit || save.isPending}
         onChange={(event) => form.setField('active', event.target.checked)}
       />
-      {save.isError ? <p role="alert">Could not save this field. Try again.</p> : null}
-      {save.isSuccess ? <p role="status">Field saved.</p> : null}
+      <ControlHelp id={`${prefix}-active-help`} topic="privacy">Turning this off stops collecting new values. Retained values still follow their reader and retention rules.</ControlHelp>
+      <MutationFeedback error={save.error} pending={save.isPending} saved={save.isSuccess} operation="Saving visitor field" success="Field saved." onRetry={submit} />
       {canEdit ? (
         <Button type="submit" variant="secondary" disabled={save.isPending}>
           Save field

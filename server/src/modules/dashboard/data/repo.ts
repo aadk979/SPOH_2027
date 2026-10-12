@@ -25,6 +25,17 @@ export interface Window {
 
 const within = (window: Window) => ({ gte: window.since, lte: window.until });
 
+interface DeviceCaptureRow {
+  volunteerId: string;
+  volunteerName: string;
+  stationName: string;
+  assignmentId: string;
+  stationId: string;
+  shiftId: string;
+  eventDayId: string;
+  lastCaptureAt: Date | null;
+}
+
 export async function registrationsSince(scope: ReportingScope, window: Window): Promise<number> {
   return prisma.registration.count({
     where: {
@@ -69,17 +80,19 @@ export async function registrationsByCategory(scope: ReportingScope, window: Win
 
 export async function openIncidentCounts(
   scope: ReportingScope,
+  asOf: Date,
 ): Promise<{ open: number; critical: number }> {
   const { eventId } = scope;
   const [open, critical] = await Promise.all([
     prisma.incident.count({
-      where: { eventId, ...rehearsalFilter(scope), status: { not: 'RESOLVED' } },
+      where: { eventId, ...rehearsalFilter(scope), status: { not: 'RESOLVED' }, reportedAt: { lte: asOf } },
     }),
     prisma.incident.count({
       where: {
         eventId,
         ...rehearsalFilter(scope),
         status: { not: 'RESOLVED' },
+        reportedAt: { lte: asOf },
         severity: 'CRITICAL',
       },
     }),
@@ -87,9 +100,9 @@ export async function openIncidentCounts(
   return { open, critical };
 }
 
-export async function activeLostPersonCount(scope: ReportingScope): Promise<number> {
+export async function activeLostPersonCount(scope: ReportingScope, asOf: Date): Promise<number> {
   return prisma.lostPersonAlert.count({
-    where: { eventId: scope.eventId, ...rehearsalFilter(scope), status: 'ACTIVE' },
+    where: { eventId: scope.eventId, ...rehearsalFilter(scope), status: 'ACTIVE', raisedAt: { lte: asOf } },
   });
 }
 
@@ -128,16 +141,10 @@ export async function anyShiftRunning(
  */
 export async function checkedInWithLastCapture(
   scope: ReportingScope,
-  input: Window & { eventDayId: string },
-): Promise<
-  Array<{
-    volunteerId: string;
-    volunteerName: string;
-    stationName: string;
-    lastCaptureAt: Date | null;
-  }>
-> {
+  input: Window & { eventDayId: string; stationIds: readonly string[] },
+): Promise<DeviceCaptureRow[]> {
   const { eventId } = scope;
+  if (input.stationIds.length === 0) return [];
   /**
    * Scalar subqueries rather than three LEFT JOINs.
    *
@@ -148,46 +155,45 @@ export async function checkedInWithLastCapture(
    * GREATEST ignores NULLs and returns NULL only when every argument is NULL,
    * which is exactly the "checked in but has recorded nothing at all" case.
    */
-  const rows = await prisma.$queryRaw<
-    Array<{
-      volunteerId: string;
-      volunteerName: string;
-      stationName: string;
-      lastCaptureAt: Date | null;
-    }>
-  >`
+  const rows = await prisma.$queryRaw<DeviceCaptureRow[]>`
     SELECT
       v."id"          AS "volunteerId",
       v."displayName" AS "volunteerName",
       s."name"        AS "stationName",
+      a."id" AS "assignmentId", a."stationId", a."shiftId", a."eventDayId",
       GREATEST(
         (SELECT MAX(r."recordedAt") FROM "Registration"   r
           WHERE r."eventId" = ${eventId} AND r."recordedById" = v."id"
+            AND r."source" = 'APP' AND r."voided" = false
             AND (${scope.includeRehearsal ?? false} OR r."rehearsal" = false)
             AND r."recordedAt" >= ${input.since} AND r."recordedAt" <= ${input.until}),
         (SELECT MAX(f."recordedAt") FROM "FootfallTick"   f
           WHERE f."eventId" = ${eventId} AND f."recordedById" = v."id"
+            AND f."source" = 'APP' AND f."voided" = false
             AND (${scope.includeRehearsal ?? false} OR f."rehearsal" = false)
             AND f."recordedAt" >= ${input.since} AND f."recordedAt" <= ${input.until}),
         (SELECT MAX(c."recordedAt") FROM "CardStampEvent" c
           WHERE c."eventId" = ${eventId} AND c."recordedById" = v."id"
+            AND c."source" = 'APP'
             AND (${scope.includeRehearsal ?? false} OR c."rehearsal" = false)
             AND c."recordedAt" >= ${input.since} AND c."recordedAt" <= ${input.until})
       ) AS "lastCaptureAt"
     FROM "ShiftAssignment" a
     JOIN "Person" v ON v."id" = a."volunteerId"
-    JOIN "Station"   s ON s."id" = a."stationId"
+    JOIN "Station"   s ON s."id" = a."stationId" AND s."eventId" = a."eventId"
     WHERE a."eventId" = ${eventId}
+      AND a."stationId" = ANY(${[...input.stationIds]}::text[])
       AND a."eventDayId" = ${input.eventDayId}
-      AND a."checkedInAt" IS NOT NULL
-      AND a."checkedOutAt" IS NULL`;
+      AND a."checkedInAt" <= ${input.until}
+      AND (a."checkedOutAt" IS NULL OR a."checkedOutAt" > ${input.until})`;
 
   return rows;
 }
 
-export async function checkedInCount(scope: ReportingScope, eventDayId: string): Promise<number> {
+export async function checkedInCount(scope: ReportingScope, eventDayId: string, asOf: Date): Promise<number> {
   return prisma.shiftAssignment.count({
-    where: { eventId: scope.eventId, eventDayId, checkedInAt: { not: null }, checkedOutAt: null },
+    where: { eventId: scope.eventId, eventDayId, checkedInAt: { lte: asOf },
+      OR: [{ checkedOutAt: null }, { checkedOutAt: { gt: asOf } }] },
   });
 }
 
@@ -227,6 +233,7 @@ export async function registrationsByDevice(
     WHERE r."eventId" = ${scope.eventId}
       AND (${scope.includeRehearsal ?? false} OR r."rehearsal" = false)
       AND r."voided" = false AND r."stationId" = ${stationId}
+      AND r."source" = 'APP'
       AND r."recordedAt" >= ${window.since} AND r."recordedAt" <= ${window.until}
     GROUP BY v."id", v."displayName"
     ORDER BY value DESC`;
@@ -252,6 +259,7 @@ export async function footfallByDevice(
     WHERE f."eventId" = ${scope.eventId}
       AND (${scope.includeRehearsal ?? false} OR f."rehearsal" = false)
       AND f."voided" = false AND f."stationId" = ${stationId}
+      AND f."source" = 'APP'
       AND f."recordedAt" >= ${window.since} AND f."recordedAt" <= ${window.until}
     GROUP BY v."id", v."displayName"
     ORDER BY value DESC`;

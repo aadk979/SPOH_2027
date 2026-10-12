@@ -89,6 +89,11 @@ export const TimeRangeQuery = z
   .strict();
 export type TimeRangeQuery = z.infer<typeof TimeRangeQuery>;
 
+/** Exact server observation for today links, including configured day boundaries and DST. */
+export const DashboardWindow = z.object({ date: IsoDate, from: IsoDateTime,
+  asOf: IsoDateTime, includeRehearsal: z.boolean() }).strict();
+export type DashboardWindow = z.infer<typeof DashboardWindow>;
+
 /** Explicit inclusion only: the string "false" must never coerce to true. */
 export const RehearsalInclusionQuery = z
   .object({

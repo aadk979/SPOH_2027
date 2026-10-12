@@ -3,12 +3,18 @@ import { rangeOverlapsFallbackWindow } from '../../fallback/index.js';
 import { summariseRedemptions } from '../data/repo.js';
 import { listGifts } from './listGifts.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
+import { captureProvenance } from '../../../platform/db/captureProvenance.js';
+import { prisma } from '../../../platform/db/client.js';
+import { systemClock } from '../../../platform/time/index.js';
 
 export async function summariseGifts(
   scope: EventScope,
   query: GiftSummaryQuery,
 ): Promise<GiftSummaryResponse> {
+  const asOf = systemClock.now();
   const filter = {
+    asOf,
+    rehearsal: (await captureProvenance(prisma, scope)).rehearsal,
     ...(query.stationId ? { stationId: query.stationId } : {}),
     ...(query.from ? { from: new Date(query.from) } : {}),
     ...(query.to ? { to: new Date(query.to) } : {}),
@@ -16,13 +22,15 @@ export async function summariseGifts(
 
   const [rows, gifts, containsFallbackData] = await Promise.all([
     summariseRedemptions(scope, filter),
-    listGifts(scope),
+    listGifts({ ...scope, rehearsal: filter.rehearsal, asOf }),
     rangeOverlapsFallbackWindow(scope, filter),
   ]);
   const counts = new Map(rows.map((row) => [row.giftTypeId, row.count]));
 
   return {
     unit: 'redemptions',
+    rehearsal: filter.rehearsal,
+    asOf: asOf.toISOString(),
     total: rows.reduce((sum, row) => sum + row.count, 0),
     byGiftType: gifts.map((gift) => ({
       giftTypeId: gift.id,

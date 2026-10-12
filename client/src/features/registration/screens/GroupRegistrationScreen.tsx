@@ -6,7 +6,7 @@ import { GroupSubmitForm } from '../components/GroupSubmitForm';
 
 import type { ReactNode } from 'react';
 import { AppShell } from '@/shared/shell/AppShell';
-import { EmptyState } from '@/shared/ui';
+import { CountHelp, EmptyState } from '@/shared/ui';
 import { useRequireSession } from '@/features/session';
 
 /**
@@ -53,6 +53,7 @@ export default function GroupRegistrationScreen(): ReactNode {
         <CategorySteppers form={form} />
 
         <GroupSubmitForm form={form} />
+        <CountHelp />
       </div>
     </AppShell>
   );

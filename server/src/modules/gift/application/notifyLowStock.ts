@@ -1,5 +1,6 @@
 import type { GiftTypeRecord } from '@spoh/shared';
-import { dispatch } from '../../notification/index.js';
+import { activeNoticeAudience, queueNotices } from '../../notification/index.js';
+import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /**
@@ -9,14 +10,16 @@ import type { EventScope } from '../../../platform/db/eventScope.js';
  * someone noticing is that the first anyone hears of it is a visitor being
  * turned away at the desk.
  */
-export function notifyLowStock(scope: EventScope, gift: GiftTypeRecord): void {
-  void dispatch(scope, {
-    kind: 'gift.lowStock',
-    priority: 'OPERATIONAL',
-    title: `${gift.name} is running low`,
-    body: `${gift.remaining} left. Restock, or brief the desk on an alternative.`,
-    url: '/chief',
-    tag: `gift-low:${gift.id}`,
-    audience: { everyone: false, minimumRole: 'DEPUTY_COORDINATOR', volunteerIds: [] },
-  });
+export async function queueLowStockNotice(tx: PrismaTransactionClient, scope: EventScope, input: {
+  gift: GiftTypeRecord; beforeRemaining: number; transitionId: string;
+  transitionType: 'REDEMPTION' | 'ADJUSTMENT'; now: Date;
+}): Promise<void> {
+  const { gift } = input;
+  if (gift.rehearsal || input.beforeRemaining <= gift.lowStockThreshold || !gift.lowStock) return;
+  await queueNotices(tx, scope, { kind: 'GIFT_LOW_STOCK', priority: 'OPERATIONAL',
+    source: { kind: 'GIFT', id: gift.id }, transitionKey: `gift:${gift.id}:low:${input.transitionId}`,
+    context: { type: 'gift', rehearsal: false, transitionId: input.transitionId,
+      transitionType: input.transitionType, threshold: gift.lowStockThreshold, remaining: gift.remaining },
+    recipientPersonIds: await activeNoticeAudience(scope, { tx, minimumRole: 'DEPUTY_COORDINATOR' }),
+    createdAt: input.now });
 }

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Button, Callout } from '@/shared/ui';
+import { Button, Callout, ErrorState } from '@/shared/ui';
 import { scopedSettingRow } from '@/shared/lib/scopedSettingReview';
 import { useCaptureScheduleReview } from '../hooks/useCaptureScheduleReview';
 import type { CaptureScheduleReviewInput } from '../model/captureScheduleControls';
@@ -93,9 +93,7 @@ function CaptureScheduleReviewFeedback({
   return (
     <>
       {review.error ? (
-        <Callout tone="alert" role="alert">
-          {review.error}
-        </Callout>
+        <ErrorState error={review.error}>{review.error}</ErrorState>
       ) : null}
       {review.stale && !review.uncertain ? (
         <Callout tone="alert">Schedule or capture settings changed after your review.</Callout>

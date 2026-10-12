@@ -2,7 +2,7 @@ import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { membershipIdOf } from '../../../platform/db/membershipMirror.js';
-import { SHIFT_REF_SELECT, toShiftRef, type ShiftRefRow } from '../../../platform/db/shiftRef.js';
+import { SHIFT_REF_SELECT, toShiftRef } from '../../../platform/db/shiftRef.js';
 
 /**
  * Data access for swaps, briefing waves and staffing (PRODUCT_BRIEF §6). Every
@@ -186,18 +186,23 @@ export async function completeSlot(
   });
 }
 
-/** The shifts running now, one per template, named and timed. */
+/** Every running materialized shift retains its own identity, including overlapping days. */
 export async function runningShiftRefs(scope: EventScope, running: Prisma.ShiftWhereInput) {
   const shifts = await prisma.shift.findMany({
     where: { eventId: scope.eventId, ...running },
     select: SHIFT_REF_SELECT,
     orderBy: { startsAt: 'asc' },
   });
-  const byCode = new Map<string, ShiftRefRow>();
-  for (const shift of shifts) {
-    if (!byCode.has(shift.template.code)) byCode.set(shift.template.code, shift);
-  }
-  return [...byCode.values()].map(toShiftRef);
+  return shifts.map(toShiftRef);
+}
+
+interface StaffingStationRow {
+  stationId: string;
+  stationName: string;
+  shiftCode: string;
+  shiftId: string;
+  assigned: number;
+  checkedIn: number;
 }
 
 /**
@@ -208,19 +213,13 @@ export async function runningShiftRefs(scope: EventScope, running: Prisma.ShiftW
 export async function staffingByStation(
   scope: EventScope,
   running: Prisma.ShiftWhereInput,
-): Promise<
-  Array<{
-    stationId: string;
-    stationName: string;
-    shiftCode: string;
-    assigned: number;
-    checkedIn: number;
-  }>
-> {
+  asOf: Date,
+): Promise<StaffingStationRow[]> {
   const assignments = await prisma.shiftAssignment.findMany({
     where: { eventId: scope.eventId, shift: running },
     select: {
       stationId: true,
+      shiftId: true,
       checkedInAt: true,
       checkedOutAt: true,
       station: { select: { name: true } },
@@ -228,31 +227,24 @@ export async function staffingByStation(
     },
   });
 
-  const byKey = new Map<
-    string,
-    {
-      stationId: string;
-      stationName: string;
-      shiftCode: string;
-      assigned: number;
-      checkedIn: number;
-    }
-  >();
+  const byKey = new Map<string, StaffingStationRow>();
 
   for (const assignment of assignments) {
     const shiftCode = assignment.shift.template.code;
-    const key = `${assignment.stationId}:${shiftCode}`;
+    const key = `${assignment.stationId}:${assignment.shiftId}`;
     const entry = byKey.get(key) ?? {
       stationId: assignment.stationId,
       stationName: assignment.station.name,
       shiftCode,
+      shiftId: assignment.shiftId,
       assigned: 0,
       checkedIn: 0,
     };
 
     entry.assigned += 1;
     // Checked out counts as not on station: they have gone.
-    if (assignment.checkedInAt && !assignment.checkedOutAt) entry.checkedIn += 1;
+    if (assignment.checkedInAt && assignment.checkedInAt <= asOf &&
+      (!assignment.checkedOutAt || assignment.checkedOutAt > asOf)) entry.checkedIn += 1;
 
     byKey.set(key, entry);
   }
@@ -269,19 +261,22 @@ export async function staffingByStation(
  * day that nobody checked out of is a record to tidy, not someone still
  * standing at a station (F03-023).
  */
-export async function longRunningShifts(scope: EventScope, window: { cutoff: Date; since: Date }) {
+export async function longRunningShifts(scope: EventScope, window: { cutoff: Date; since: Date; now: Date; stationIds?: readonly string[] }) {
   return prisma.shiftAssignment.findMany({
     where: {
       eventId: scope.eventId,
       checkedInAt: { lt: window.cutoff, gte: window.since },
-      checkedOutAt: null,
+      OR: [{ checkedOutAt: null }, { checkedOutAt: { gt: window.now } }],
+      ...(window.stationIds ? { stationId: { in: [...window.stationIds] } } : {}),
     },
     select: {
       volunteerId: true,
+      id: true, stationId: true, shiftId: true, eventDayId: true,
       checkedInAt: true,
       volunteer: { select: { displayName: true } },
       station: { select: { name: true } },
     },
+    orderBy: [{ checkedInAt: 'asc' }, { id: 'asc' }],
   });
 }
 

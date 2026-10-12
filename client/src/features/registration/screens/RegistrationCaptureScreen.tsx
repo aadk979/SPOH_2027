@@ -5,12 +5,13 @@ import { RegistrationButtons } from '../components/RegistrationButtons';
 import { VisitorCaptureAvailability } from '../components/VisitorCaptureAvailability';
 import { AppShell } from '@/shared/shell/AppShell';
 import { SyncIndicator } from '@/shared/shell/SyncIndicator';
-import { Button, ButtonLink, Callout, EmptyState } from '@/shared/ui';
-import { useCapture } from '@/features/capture';
+import { Button, ButtonLink, CountHelp, EmptyState, ErrorState } from '@/shared/ui';
+import { CaptureFeedback, useCapture } from '@/features/capture';
 import { useWakeLock } from '@/shared/hooks/useWakeLock';
 import { useAllows, useMe, useRequireSession } from '@/features/session';
 import { useRegistrationSummary } from '@/features/registration';
 import { formatCount } from '@/shared/lib/format';
+import { useClientSettings } from '@/shared/lib/runtimeSettings';
 
 /**
  * The sign-up booth (remediation/phases/P07-client-refactor.md).
@@ -25,7 +26,8 @@ export default function RegistrationCaptureScreen(): ReactNode {
   const session = useRequireSession();
   const { data: me } = useMe();
   const allows = useAllows();
-  const { sessionCount, undoable, error, capture, undo } = useCapture();
+  const { sessionCount, undoable, error, feedback, capture, undo } = useCapture();
+  const settings = useClientSettings();
 
   useWakeLock(session !== null);
 
@@ -60,9 +62,7 @@ export default function RegistrationCaptureScreen(): ReactNode {
     >
       <div className="flex flex-col gap-md">
         {error ? (
-          <Callout tone="alert" role="alert">
-            {error}
-          </Callout>
+          <ErrorState error={error}>{error}</ErrorState>
         ) : null}
 
         <div className="flex flex-wrap items-baseline justify-between gap-x-md gap-y-xxs">
@@ -73,7 +73,7 @@ export default function RegistrationCaptureScreen(): ReactNode {
             <span className="ml-xs text-caption text-text-muted">this device</span>
           </p>
 
-          {boothTotal.data ? (
+          {!boothTotal.error && boothTotal.data ? (
             <p className="text-caption text-text-muted">
               Booth today: <strong>{formatCount(boothTotal.data.total)}</strong> registrations
             </p>
@@ -99,10 +99,13 @@ export default function RegistrationCaptureScreen(): ReactNode {
             </>
           ) : (
             <span className="text-caption text-text-muted">
-              Tap a category for each visitor. Undo is available for ten seconds.
+              Tap a category for each visitor. Undo is available for {settings.captureUndoWindowSeconds} seconds while the record is waiting on this device.
             </span>
           )}
         </div>
+
+        <CaptureFeedback feedback={feedback} />
+        <CountHelp />
 
         {/* `self-start` so the pill sizes to its label: the parent is a flex
             column, which would otherwise stretch it across the whole booth. */}

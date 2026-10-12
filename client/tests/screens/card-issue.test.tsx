@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom/vitest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MissionCardRecord } from '@spoh/shared';
 import { api } from '@/shared/lib/api';
@@ -66,8 +67,10 @@ describe('physical card issue', () => {
     const invalidate = vi.spyOn(view.client, 'invalidateQueries');
     expect(screen.getByText(/only when you hand the physical card to a visitor/)).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Issue this card' }));
+    expect(mockedApi).not.toHaveBeenCalled();
+    expect(screen.getByRole('dialog', { name: 'Issue card ABC123' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm physical handover' }));
     await waitFor(() => expect(onIssued).toHaveBeenCalledExactlyOnceWith(issued));
-    expect(window.confirm).toHaveBeenCalledWith('Hand card ABC123 to the visitor?');
     expect(mockedApi).toHaveBeenCalledExactlyOnceWith('/events/event-a/cards/ABC123/issue', {
       method: 'POST',
       body: { idempotencyKey: expect.stringMatching(/^[0-9a-f-]{36}$/) },
@@ -77,10 +80,13 @@ describe('physical card issue', () => {
     expect(screen.queryByRole('button', { name: 'Issue this card' })).toBeNull();
   });
   it('does not create a receipt or send a request when handover is cancelled', () => {
-    vi.mocked(window.confirm).mockReturnValue(false);
     const onIssued = vi.fn();
     mount(<CardIssue card={card} onIssued={onIssued} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Issue this card' }));
+    const origin = screen.getByRole('button', { name: 'Issue this card' });
+    origin.focus(); fireEvent.click(origin);
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(document.activeElement).toBe(origin);
+    expect(screen.queryByRole('dialog')).toBeNull();
     expect(mockedApi).not.toHaveBeenCalled();
     expect(onIssued).not.toHaveBeenCalled();
   });
@@ -106,10 +112,13 @@ describe('physical card issue', () => {
     const onIssued = vi.fn();
     mount(<CardIssue card={card} onIssued={onIssued} />);
     fireEvent.click(screen.getByRole('button', { name: 'Issue this card' }));
-    expect((await screen.findByRole('alert')).textContent).toContain('Issue was not confirmed');
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm physical handover' }));
+    await screen.findAllByText('Issuing this card was not confirmed');
+    expect(screen.queryByText('Issue was not confirmed')).toBeNull();
+    expect(screen.getByRole('dialog')).toHaveTextContent('Issuing this card was not confirmed');
     expect(onIssued).not.toHaveBeenCalled();
     const firstBody = mockedApi.mock.calls[0]![1]!.body;
-    fireEvent.click(screen.getByRole('button', { name: 'Issue this card' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm physical handover' }));
     await waitFor(() => expect(onIssued).toHaveBeenCalledExactlyOnceWith(issued));
     expect(mockedApi.mock.calls[1]![1]!.body).toEqual(firstBody);
   });
@@ -125,10 +134,13 @@ describe('physical card issue', () => {
     mount(<CardIssue card={card} onIssued={onIssued} />);
     const button = screen.getByRole('button', { name: 'Issue this card' });
     fireEvent.click(button);
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm physical handover' }));
     await waitFor(() => expect(button.hasAttribute('disabled')).toBe(true));
     fireEvent.click(button);
     expect(mockedApi).toHaveBeenCalledTimes(1);
-    expect(window.confirm).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('button', { name: 'Confirming…' })).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Confirming…' }));
+    expect(mockedApi).toHaveBeenCalledTimes(1);
     expect(onIssued).not.toHaveBeenCalled();
     finish({ card: issued });
     await waitFor(() => expect(onIssued).toHaveBeenCalledExactlyOnceWith(issued));
@@ -138,12 +150,16 @@ describe('physical card issue', () => {
     const onIssued = vi.fn();
     const view = mount(<CardIssue card={card} onIssued={onIssued} />);
     fireEvent.click(screen.getByRole('button', { name: 'Issue this card' }));
-    await screen.findByRole('alert');
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm physical handover' }));
+    await screen.findAllByRole('alert');
     const firstBody = mockedApi.mock.calls[0]![1]!.body;
     view.rerender(
       view.wrap(<CardIssue card={{ ...card, shortCode: 'ABC 124' }} onIssued={onIssued} />),
     );
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm physical handover' }));
+    expect(mockedApi).toHaveBeenCalledTimes(1);
     fireEvent.click(screen.getByRole('button', { name: 'Issue this card' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm physical handover' }));
     await waitFor(() => expect(onIssued).toHaveBeenCalled());
     expect(mockedApi.mock.calls[1]![0]).toBe('/events/event-a/cards/ABC%20124/issue');
     expect(mockedApi.mock.calls[1]![1]!.body).not.toEqual(firstBody);

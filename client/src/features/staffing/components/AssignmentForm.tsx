@@ -21,16 +21,18 @@ export function AssignmentForm({
     if (body) mutation.mutate(body);
   }
   return (
-    <Stack>
+    <form onSubmit={(event) => { event.preventDefault(); submit(); }}><Stack>
       <Field
         id={`person-${stationId}-${shiftId}`}
         label="Assign person"
+        hint="Assign this person to the selected station and shift. An existing posting on this shift moves here."
         error={form.errors.volunteerId}
       >
         {(props) => (
           <Select
             {...props}
             value={form.values.volunteerId}
+            disabled={mutation.isPending}
             onChange={(event) => form.setField('volunteerId', event.target.value)}
           >
             <option value="">Choose a person</option>
@@ -45,12 +47,14 @@ export function AssignmentForm({
       <Field
         id={`role-${stationId}-${shiftId}`}
         label="Assignment role"
+        hint="A label for this posting; it does not change the person's account permissions."
         error={form.errors.roleLabel}
       >
         {(props) => (
           <Input
             {...props}
             value={form.values.roleLabel}
+            disabled={mutation.isPending}
             onChange={(event) => form.setField('roleLabel', event.target.value)}
           />
         )}
@@ -58,10 +62,10 @@ export function AssignmentForm({
       <p className="text-caption">
         Assigning someone already on this shift moves their posting here.
       </p>
-      <Button disabled={mutation.isPending} onClick={submit}>
+      <Button type="submit" disabled={mutation.isPending}>
         Assign
       </Button>
       <MutationFeedback error={mutation.error} saved={mutation.isSuccess} />
-    </Stack>
+    </Stack></form>
   );
 }

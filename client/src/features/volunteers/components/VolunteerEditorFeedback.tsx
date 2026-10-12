@@ -1,8 +1,7 @@
 import { type ReactNode } from 'react';
 import { type VolunteerAdminRecord } from '@spoh/shared';
 
-import { Callout } from '@/shared/ui';
-import { ApiError } from '@/shared/lib/apiErrors';
+import { Callout, ErrorState } from '@/shared/ui';
 
 import type { VolunteerEditorState } from '../hooks/useVolunteerEditor';
 export function VolunteerEditorFeedback({
@@ -16,9 +15,7 @@ export function VolunteerEditorFeedback({
   return (
     <>
       {error ? (
-        <Callout tone="alert" role="alert" title="That change did not go through">
-          {error instanceof ApiError ? error.message : 'Try again in a moment.'}
-        </Callout>
+        <ErrorState error={error} />
       ) : null}
 
       {update.isSuccess ? (

@@ -7,6 +7,7 @@ import { getHostedSignInUrl } from '@/features/session';
 import { useSignInForm } from '../hooks/useSignInForm';
 import { Button, ButtonLink, Card, Field, Input, Skeleton } from '@/shared/ui';
 import { beginAccountChange } from '@/shared/lib/sessionIntent';
+import { SignInIdentity } from '@/features/branding';
 
 /**
  * Sign-in.
@@ -84,7 +85,7 @@ export default function SignInScreen(): ReactNode {
      */
     <main className="mx-auto flex min-h-dvh max-w-form flex-col justify-center px-md py-xl">
       <h1 className="text-display">Sign in</h1>
-      <p className="mt-xxs mb-lg text-lead text-text-muted">Volunteer operations</p>
+      <p className="mt-xxs mb-lg text-lead text-text-muted"><SignInIdentity /></p>
 
       {/*
         `useSearchParams` suspends, so the fallback has to hold the form's

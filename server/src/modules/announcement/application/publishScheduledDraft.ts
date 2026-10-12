@@ -7,6 +7,7 @@ import { recordPublication } from '../data/publicationRepo.js';
 import { createAnnouncement } from '../data/repo.js';
 import { prepareScheduledPublication } from './prepareScheduledPublication.js';
 import { queueAnnouncementDeliveries } from './queueAnnouncementDeliveries.js';
+import { publicationAudience, queuePublicationNotices } from './queuePublicationNotices.js';
 
 /** The supplied scheduler transaction owns publication, delivery storage and completion. */
 export async function publishScheduledDraft(
@@ -35,6 +36,7 @@ export async function publishScheduledDraft(
     scheduledActionId: context.action.id,
     now,
   });
+  await queuePublicationNotices(tx, scope, { announcement: { ...publicationAudience(source), ...source }, now });
   const { plan } = await queueAnnouncementDeliveries(scope, {
     tx,
     announcementId: source.id,

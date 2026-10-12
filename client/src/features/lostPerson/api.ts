@@ -2,8 +2,8 @@ import type { RaiseLostPersonRequest } from '@spoh/shared';
 import type { ActiveLostPersonResponse } from '@spoh/shared';
 import { eventApi } from '@/shared/lib/eventApi';
 
-export function getActiveAlerts(eventId: string): Promise<ActiveLostPersonResponse> {
-  return eventApi<ActiveLostPersonResponse>(eventId, '/lost-person/active');
+export function getActiveAlerts(eventId: string, signal?: AbortSignal): Promise<ActiveLostPersonResponse> {
+  return eventApi<ActiveLostPersonResponse>(eventId, '/lost-person/active', { signal, cache: 'no-store' });
 }
 
 export function acknowledgeAlert(eventId: string, alertId: string): Promise<unknown> {

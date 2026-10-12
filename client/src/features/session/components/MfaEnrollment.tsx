@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import { VerifyMfaRequest } from '@spoh/shared';
 import { useZodForm } from '@/shared/hooks/useZodForm';
 import { sessionFromResponse, setSession } from '@/shared/lib/session';
-import { Button, Callout, Field, Input, Stack } from '@/shared/ui';
+import { Button, Field, Input, Stack, ErrorState } from '@/shared/ui';
 import { useStartMfa, useVerifyMfa } from '../queries';
 
 export function MfaEnrollment(): ReactNode {
@@ -55,9 +55,7 @@ export function MfaEnrollment(): ReactNode {
         </form>
       )}
       {setup.isError || verify.isError ? (
-        <Callout tone="alert" role="alert">
-          {setup.error?.message ?? verify.error?.message}
-        </Callout>
+        <ErrorState error={verify.error ?? setup.error} operation="Configuring your authenticator" />
       ) : null}
     </Stack>
   );

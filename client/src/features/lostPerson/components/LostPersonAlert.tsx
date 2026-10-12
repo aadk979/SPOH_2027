@@ -1,7 +1,7 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { LostPersonAlertRecord } from '@spoh/shared';
 import type { useAcknowledgeAlert, useResolveAlert } from '@/features/lostPerson';
-import { Button, ButtonLink } from '@/shared/ui';
+import { Button, ButtonLink, ConfirmationDialog } from '@/shared/ui';
 /**
  * Button colours for the one red surface in the app.
  *
@@ -14,6 +14,17 @@ const SOLID =
 const OUTLINE =
   'border-2 border-on-alert bg-transparent text-on-alert hover:bg-white/10 active:scale-[0.97] focus-visible:outline-white disabled:opacity-70';
 
+function SearchDescription({ alert }: { alert: LostPersonAlertRecord }): ReactNode {
+  return <>
+    <p className="text-lead font-semibold">{alert.descriptionText}</p>
+    <dl className="grid grid-cols-[auto_1fr] gap-x-sm gap-y-xxs text-caption text-white/90">
+      {alert.approxAge ? <><dt className="font-semibold">Approx. age</dt><dd>{alert.approxAge}</dd></> : null}
+      {alert.clothingText ? <><dt className="font-semibold">Wearing</dt><dd>{alert.clothingText}</dd></> : null}
+      {alert.lastSeenStationName ? <><dt className="font-semibold">Last seen</dt><dd>{alert.lastSeenStationName}</dd></> : null}
+    </dl>
+  </>;
+}
+
 export function LostPersonAlert({
   alert,
   acknowledge,
@@ -25,6 +36,11 @@ export function LostPersonAlert({
   resolve: ReturnType<typeof useResolveAlert>;
   canResolve: boolean;
 }): ReactNode {
+  const [review, setReview] = useState(false);
+  function clear(): void {
+    if (!canResolve) return;
+    resolve.mutate({ alertId: alert.id, outcome: 'RESOLVED_FOUND' }, { onSuccess: () => setReview(false) });
+  }
   return (
     <div className="border-b border-white/20 px-md py-md last:border-b-0">
       <div className="mx-auto flex max-w-reading flex-col gap-sm">
@@ -35,31 +51,10 @@ export function LostPersonAlert({
               ? 'REHEARSAL · Lost person practice alert'
               : 'Lost person — search now'}
           </p>
-          <p className="shrink-0 text-caption text-white/90">{alert.ackCount} acknowledged</p>
+          <p aria-live="polite" className="shrink-0 text-caption text-white/90">{alert.ackCount} acknowledged{alert.ackedByMe ? ' · You acknowledged this alert.' : ''}</p>
         </div>
 
-        <p className="text-lead font-semibold">{alert.descriptionText}</p>
-
-        <dl className="grid grid-cols-[auto_1fr] gap-x-sm gap-y-xxs text-caption text-white/90">
-          {alert.approxAge ? (
-            <>
-              <dt className="font-semibold">Approx. age</dt>
-              <dd>{alert.approxAge}</dd>
-            </>
-          ) : null}
-          {alert.clothingText ? (
-            <>
-              <dt className="font-semibold">Wearing</dt>
-              <dd>{alert.clothingText}</dd>
-            </>
-          ) : null}
-          {alert.lastSeenStationName ? (
-            <>
-              <dt className="font-semibold">Last seen</dt>
-              <dd>{alert.lastSeenStationName}</dd>
-            </>
-          ) : null}
-        </dl>
+        <SearchDescription alert={alert} />
 
         <div className="flex flex-wrap items-center gap-sm">
           {/*
@@ -89,7 +84,7 @@ export function LostPersonAlert({
           {canResolve ? (
             <Button
               variant="unstyled"
-              onClick={() => resolve.mutate({ alertId: alert.id, outcome: 'RESOLVED_FOUND' })}
+              onClick={() => setReview(true)}
               disabled={resolve.isPending}
               className={SOLID}
             >
@@ -97,6 +92,9 @@ export function LostPersonAlert({
             </Button>
           ) : null}
         </div>
+        <ConfirmationDialog open={review && canResolve} title="Clear this lost-person alert?" confirmLabel="Confirmed found — clear alert" pending={resolve.isPending} onConfirm={clear} onCancel={() => setReview(false)}>
+          Confirm the person has been found and the reporter has been informed. This clears this alert on every device; it does not clear other active alerts.
+        </ConfirmationDialog>
       </div>
     </div>
   );

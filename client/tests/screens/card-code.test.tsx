@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom/vitest';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CardShortCode } from '@spoh/shared';
 import { CardCodeInput } from '@/features/capture';
@@ -39,8 +40,11 @@ describe('card code entry (F03-020)', () => {
       CardShortCode.safeParse('ABCU12').error?.issues[0]?.message,
     );
     expect(input.getAttribute('aria-invalid')).toBe('true');
+    expect(input).toHaveAccessibleDescription(screen.getByRole('alert').textContent ?? '');
+    expect(document.getElementById(input.getAttribute('aria-describedby')!)).toBe(screen.getByRole('alert'));
     fireEvent.change(input, { target: { value: 'ABC' } });
     expect(screen.queryByRole('alert')).toBeNull();
+    expect(input).not.toHaveAttribute('aria-describedby');
   });
 
   it('clears the box after a valid code so the next card can be typed', () => {

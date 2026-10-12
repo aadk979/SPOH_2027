@@ -103,6 +103,10 @@ secret scans passed. The dependency result retains the documented CDK-only
 exception, rather than claiming no advisories. An independent read-only review
 found no concrete defect in the takeover repairs.
 
-D-11 authorizes this application commit and one main push. Exact-head application
-GitHub CI remains the closure gate; its evidence and tracker reconciliation enter
-the next P14 batch. AWS remains torn down, and browser/owner acceptance stays in P16.
+D-11 application commit `c00da9faefda04ac2984dac177e5903a8e3b0260` includes the
+entire staged batch and was pushed once to main. Exact-head push
+[CI 38131824850](https://github.com/aadk979/SPOH_2027/actions/runs/38131824850)
+completed successfully at 10:42:41 UTC on 11 October; all five required jobs ran
+and succeeded. P13.1–P13.10 are code-complete with authored tests and green CI.
+Tracker reconciliation and this final evidence enter the P14 batch. AWS remains
+torn down; browser, copy and owner acceptance remain in P16.8/P16.1.

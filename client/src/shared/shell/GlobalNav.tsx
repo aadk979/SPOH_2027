@@ -6,10 +6,12 @@ import type { ReactNode } from 'react';
 import { getClientEnv } from '@/shared/lib/env';
 import { useCurrentSession } from '@/features/session';
 import { EventSwitcher } from '@/features/events';
+import { EventIdentity } from '@/features/branding';
 import { useOptionalEvent } from '@/shared/lib/eventContext';
 import { cx } from '@/shared/ui/cx';
 import { globalEntries } from '@/navigation';
 import { SignOutButton } from './SignOutButton';
+import { QuickActions } from './QuickActions';
 
 /**
  * The persistent top bar (design.md `global-nav`).
@@ -44,7 +46,7 @@ export function GlobalNav(): ReactNode {
         href="/home"
         className="flex min-h-[44px] items-center whitespace-nowrap font-semibold tracking-[-0.01em] text-on-dark no-underline transition-colors hover:text-primary-on-dark focus-visible:outline-primary-on-dark"
       >
-        {event?.name ?? 'Home'}
+        <EventIdentity name={event?.name ?? 'Home'} compact />
       </Link>
 
       {/*
@@ -63,11 +65,12 @@ export function GlobalNav(): ReactNode {
 
       <span className="flex-1 min-w-0" />
 
-      {session ? <EventSwitcher /> : null}
+      {session ? <span className="hidden sm:inline"><EventSwitcher /></span> : null}
 
       {session ? (
         <>
-          {globalEntries().map((entry) => (
+          <QuickActions />
+          {globalEntries().filter((entry) => entry.path === '/notifications').map((entry) => (
             <Link
               key={entry.path}
               href={entry.path}

@@ -1,5 +1,5 @@
 import { useAllows } from '@/features/session';
-import { Callout, LoadingRows, Section } from '@/shared/ui';
+import { LoadingRows, Section, ErrorState } from '@/shared/ui';
 import { useLifecycleReadiness } from '../queries';
 import { GoLiveChecklist } from './GoLiveChecklist';
 
@@ -10,9 +10,7 @@ export function GoLiveReadinessPanel() {
   if (!enabled) return null;
   if (readiness.isError)
     return (
-      <Callout tone="alert">
-        Readiness could not be loaded. Reload before changing event state.
-      </Callout>
+      <ErrorState error={readiness.error}>Readiness could not be loaded. Reload before changing event state.</ErrorState>
     );
   if (!readiness.data)
     return (

@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useAllows, useCurrentSession, useEventTime } from '@/features/session';
 import { useEventId } from '@/shared/lib/eventContext';
-import { Button, Callout, LoadingRows, Section } from '@/shared/ui';
+import { Button, Callout, LoadingRows, Section, ErrorState } from '@/shared/ui';
 import { useReportSnapshots, useReportSnapshot, useSnapshotDownload } from '../queries';
 import { ReportTotals } from './ReportTotals';
 import { usePrivateReadFailure } from '@/shared/hooks/usePrivateReadFailure';
@@ -34,10 +34,7 @@ function SnapshotReader({ onDenied }: { onDenied(): void }) {
       </p>
       {list.isPending ? <LoadingRows /> : null}
       {list.error ? (
-        <Callout role="alert">
-          {list.error.message}
-          <Button onClick={() => void list.refetch()}>Retry history</Button>
-        </Callout>
+        <ErrorState error={list.error}><Button onClick={() => void list.refetch()}>Retry history</Button></ErrorState>
       ) : null}
       {!list.error ? <SnapshotList list={list} onSelect={select} /> : null}
       {id && !list.error ? <SelectedSnapshot key={id} id={id} onDenied={onDenied} /> : null}
@@ -82,7 +79,7 @@ function SelectedSnapshot({ id, onDenied }: { id: string; onDenied(): void }) {
   return (
     <>
       {report.isPending ? <LoadingRows /> : null}
-      {report.error ? <Callout role="alert">{report.error.message}</Callout> : null}
+      {report.error ? <ErrorState error={report.error} /> : null}
       {report.data && !report.error ? (
         <>
           <ReportTotals data={report.data} />
@@ -101,7 +98,7 @@ function SelectedSnapshot({ id, onDenied }: { id: string; onDenied(): void }) {
           ) : null}
         </>
       ) : null}
-      {download.error ? <Callout role="alert">{download.error.message}</Callout> : null}
+      {download.error ? <ErrorState error={download.error} /> : null}
     </>
   );
 }

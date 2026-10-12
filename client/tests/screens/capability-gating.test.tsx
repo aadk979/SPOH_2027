@@ -12,11 +12,13 @@ vi.mock('@/shared/shell/AppShell', () => ({
 }));
 vi.mock('@/shared/shell/SyncIndicator', () => ({ SyncIndicator: () => null }));
 vi.mock('@/shared/hooks/useWakeLock', () => ({ useWakeLock: vi.fn() }));
-vi.mock('@/features/capture', () => ({
+vi.mock('@/features/capture', async (original) => ({
+  ...(await original<typeof import('@/features/capture')>()),
   useCapture: () => ({
     sessionCount: 0,
     undoable: null,
     error: null,
+    feedback: null,
     capture: vi.fn(),
     undo: vi.fn(),
   }),

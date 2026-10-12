@@ -24,6 +24,9 @@ import {
 } from '../data/repo.js';
 import { getDataHealth } from './getDataHealth.js';
 import type { ReportingScope } from '../../../platform/db/rehearsalFilter.js';
+import type { ReadContext } from '../../../platform/access/currentRead.js';
+import { dashboardRosterAccess } from './rosterAccess.js';
+import { dashboardObservation } from './observation.js';
 
 /**
  * The live operations dashboard (PRODUCT_BRIEF §9).
@@ -39,6 +42,7 @@ import type { ReportingScope } from '../../../platform/db/rehearsalFilter.js';
 export async function getLiveDashboard(
   scope: ReportingScope,
   now = systemClock.now(),
+  reader?: ReadContext,
 ): Promise<LiveDashboardResponse> {
   const since = await eventTodayStart(scope, now);
   const today = await eventToday(scope, now);
@@ -51,14 +55,16 @@ export async function getLiveDashboard(
   // One observation of the thresholds serves the direct footfall panel, the
   // data-health panel and the welfare list, so they cannot disagree.
   const thresholds = await prepareThresholds(scope);
+  const roster = await dashboardRosterAccess(scope, reader);
   const [registrations, footfall, cards, gifts, safety, staffing, dataHealth] = await Promise.all([
     registrationsPanel(scope, { since, until: now }),
     footfallPanel(scope, now, thresholds),
     cardsPanel(scope, { since, now }),
-    giftsPanel(scope),
-    safetyPanel(scope),
-    staffingPanel(scope, { eventDayId: eventDay?.id ?? null, running, now, thresholds }),
-    getDataHealth(scope, now, { thresholds }),
+    giftsPanel(scope, now),
+    safetyPanel(scope, now),
+    staffingPanel(scope, { eventDayId: eventDay?.id ?? null, running, now, thresholds, rosterStationIds: roster.stationIds,
+      rosterAvailability: roster.availability }),
+    getDataHealth(scope, now, { thresholds, ...(reader ? { reader } : {}) }),
   ]);
 
   const headline = headlineOf(await eventSetting(scope, 'product.countsMode'), {
@@ -74,6 +80,7 @@ export async function getLiveDashboard(
   return {
     rehearsalIncluded: scope.includeRehearsal ?? false,
     asOf: now.toISOString(),
+    observation: dashboardObservation(scope, { today, since, now }),
     eventDayLabel: eventDay?.label ?? null,
     withinEventHours,
     headline,
@@ -89,10 +96,10 @@ export async function getLiveDashboard(
 
 type Panels = LiveDashboardResponse;
 
-async function giftsPanel(scope: ReportingScope): Promise<Panels['gifts']> {
+async function giftsPanel(scope: ReportingScope, now: Date): Promise<Panels['gifts']> {
   const pools = await Promise.all([
-    listGifts({ ...scope, rehearsal: false }),
-    scope.includeRehearsal ? listGifts({ ...scope, rehearsal: true }) : [],
+    listGifts({ ...scope, rehearsal: false, asOf: now }),
+    scope.includeRehearsal ? listGifts({ ...scope, rehearsal: true, asOf: now }) : [],
   ]);
   return pools.flat();
 }
@@ -127,7 +134,7 @@ async function cardsPanel(
   scope: ReportingScope,
   { since, now }: { since: Date; now: Date },
 ): Promise<Panels['cards']> {
-  const funnel = await getFunnel(scope, { from: since.toISOString(), to: now.toISOString() });
+  const funnel = await getFunnel(scope, { from: since.toISOString() }, now);
   return {
     unit: 'cards',
     issued: funnel.issued,
@@ -137,10 +144,10 @@ async function cardsPanel(
   };
 }
 
-async function safetyPanel(scope: ReportingScope): Promise<Panels['safety']> {
+async function safetyPanel(scope: ReportingScope, now: Date): Promise<Panels['safety']> {
   const [incidents, lostPersons] = await Promise.all([
-    openIncidentCounts(scope),
-    activeLostPersonCount(scope),
+    openIncidentCounts(scope, now),
+    activeLostPersonCount(scope, now),
   ]);
   return {
     openIncidents: incidents.open,
@@ -156,18 +163,22 @@ async function staffingPanel(
     running,
     now,
     thresholds,
+    rosterStationIds,
+    rosterAvailability,
   }: {
     eventDayId: string | null;
     running: ReturnType<typeof scheduledShifts>;
     now: Date;
     thresholds: ThresholdSnapshot;
+    rosterStationIds: readonly string[];
+    rosterAvailability: 'available' | 'partial' | 'denied';
   },
 ): Promise<Panels['staffing']> {
   const [onShift, checkedIn, gaps, longShifts] = await Promise.all([
     onShiftCount(scope, running),
-    eventDayId ? checkedInCount(scope, eventDayId) : 0,
+    eventDayId ? checkedInCount(scope, eventDayId, now) : 0,
     getStaffingGaps(scope, now),
-    getLongShifts(scope, now, { thresholds }),
+    rosterStationIds.length ? getLongShifts(scope, now, { thresholds, stationIds: rosterStationIds }) : [],
   ]);
-  return { onShift, checkedIn, gaps: gaps.gaps, longShifts };
+  return { onShift, checkedIn, gaps: gaps.gaps, longShifts, rosterAvailability };
 }

@@ -4,7 +4,10 @@ import { useAllows, useRequireSession } from '@/features/session';
 import { useEventId } from '@/shared/lib/eventContext';
 import { usePrivateReadFailure } from '@/shared/hooks/usePrivateReadFailure';
 import { AppShell } from '@/shared/shell/AppShell';
-import { Button, ButtonLink, Callout, LoadingRows, Section, Stack } from '@/shared/ui';
+import { Button, ButtonLink, Callout, LoadingRows, Section, Stack, ErrorState, ControlHelp, PermissionDenied } from '@/shared/ui';
+import { AppLink } from '@/shared/lib/AppLink';
+import { entityPath, recordsPath } from '@/shared/lib/workspacePath';
+import { footfallLink, cardStageLink, giftLedgerLink, giftRedemptionsLink, staffingLink } from '@/features/dashboard';
 import { useCountViews, useDataHealth } from '../queries';
 export default function CountsScreen() {
   const session = useRequireSession();
@@ -14,10 +17,10 @@ export default function CountsScreen() {
   return (
     <AppShell title="Counts and data health" back={{ href: '/operations', label: 'Operations' }}>
       <Stack>
-        <Callout>
+        <ControlHelp topic="three-counts">
           Registrations count people; room entries count visits; cards count journeys. Keep these
           units separate.
-        </Callout>
+        </ControlHelp>
         <ButtonLink href="/reports" variant="quiet">
           Registration totals and historical reports
         </ButtonLink>
@@ -53,10 +56,7 @@ function CountPanel({ onDenied }: { onDenied(): void }) {
     <>
       {counts.isPending ? <LoadingRows /> : null}
       {counts.error ? (
-        <Callout role="alert">
-          {counts.error.message}
-          <Button onClick={() => void counts.refetch()}>Retry counts</Button>
-        </Callout>
+        <ErrorState error={counts.error}><Button onClick={() => void counts.refetch()}>Retry counts</Button></ErrorState>
       ) : null}
       {counts.data && !counts.error ? <CountDetails data={counts.data} /> : null}
     </>
@@ -69,10 +69,7 @@ function HealthPanel({ onDenied }: { onDenied(): void }) {
     <>
       {health.isPending ? <LoadingRows /> : null}
       {health.error ? (
-        <Callout role="alert">
-          {health.error.message}
-          <Button onClick={() => void health.refetch()}>Retry data health</Button>
-        </Callout>
+        <ErrorState error={health.error}><Button onClick={() => void health.refetch()}>Retry data health</Button></ErrorState>
       ) : null}
       {health.data && !health.error ? <HealthDetails data={health.data} /> : null}
     </>
@@ -82,27 +79,25 @@ function CountDetails({ data }: { data: NonNullable<ReturnType<typeof useCountVi
   return (
     <>
       <Section title="Room entries">
-        <p>{data.footfall.total} room entries in the summary.</p>
+        <CountFigure href={recordsPath({ kind: 'footfall', includeRehearsal: data.footfall.rehearsalIncluded ?? false, voided: false })}>{data.footfall.total} room entries in the summary.</CountFigure>
         {data.live.stations.map((station) => (
-          <p key={station.stationId}>
+          <CountFigure key={station.stationId} href={footfallLink(data.live.observation, { stationId: station.stationId })}>
             {station.stationName}: {station.todayTotal} today · {station.activeCounterCount} active
             counters · {station.silent ? 'Check this station' : 'Recording'}
-          </p>
+          </CountFigure>
         ))}
       </Section>
       <Section title="Card journeys">
         {data.cards.stages.map((stage) => (
-          <p key={stage.key}>
+          <CountFigure key={stage.key} href={cardStageLink(stage, data.cards.observation)}>
             {stage.label}: {stage.value} journeys
-          </p>
+          </CountFigure>
         ))}
       </Section>
       <Section title="Gift redemptions">
-        <p>{data.gifts.total} gifts redeemed.</p>
+        <CountFigure href={data.gifts.asOf && data.gifts.rehearsal !== undefined ? recordsPath({ kind: 'redemptions', rehearsal: data.gifts.rehearsal, asOf: data.gifts.asOf, voided: false }) : undefined}>{data.gifts.total} gifts redeemed.</CountFigure>
         {data.gifts.byGiftType.map((gift) => (
-          <p key={gift.giftTypeId}>
-            {gift.giftTypeName}: {gift.redeemed} redeemed, {gift.remaining} remaining
-          </p>
+          <p key={gift.giftTypeId}><InlineFigure href={data.gifts.asOf ? giftRedemptionsLink(gift.giftTypeId, data.gifts.rehearsal, data.gifts.asOf) : undefined}>{gift.giftTypeName}: {gift.redeemed} redeemed</InlineFigure>, <InlineFigure href={data.gifts.asOf ? giftLedgerLink(gift.giftTypeId, data.gifts.rehearsal, data.gifts.asOf) : undefined}>{gift.remaining} remaining</InlineFigure></p>
         ))}
         <ButtonLink href="/admin/gifts">Review stock</ButtonLink>
       </Section>
@@ -117,26 +112,26 @@ function HealthDetails({ data }: { data: NonNullable<ReturnType<typeof useDataHe
           ? 'Event hours are running.'
           : 'Outside event hours; silence is expected.'}
       </p>
-      <p>
+      <CountFigure href={recordsPath({ kind: 'fallback', open: data.fallbackWindowOpen, asOf: data.asOf, includeRehearsal: data.rehearsalIncluded ?? false })}>
         {data.fallbackWindowOpen
           ? 'Fallback is open; reconcile paper records.'
           : 'No open fallback window.'}
-      </p>
+      </CountFigure>
       {data.silentStations.map((station) => (
-        <p key={station.stationId}>
+        <CountFigure key={station.stationId} href={entityPath({ kind: 'station', id: station.stationId })}>
           {station.stationName}: no recent count. Check the assigned counter.
-        </p>
+        </CountFigure>
       ))}
-      {data.staleDevices.map((device) => (
-        <p key={device.volunteerId}>
+      {['available', 'partial'].includes(data.rosterAvailability ?? 'denied') ? data.staleDevices.map((device) => (
+        <CountFigure key={device.volunteerId} href={device.assignmentId ? entityPath({ kind: 'assignment', id: device.assignmentId }) : undefined}>
           {device.volunteerName} at {device.stationName}: no recent capture.
-        </p>
-      ))}
-      {data.staffing.gaps.map((gap) => (
-        <p key={`${gap.stationId}-${gap.shift.id}`}>
+        </CountFigure>
+      )) : <PermissionDenied>Named recorder checks are unavailable under your current roster permission.</PermissionDenied>}
+      {data.staffing?.gaps.map((gap) => (
+        <CountFigure key={`${gap.stationId}-${gap.shift.id}`} href={staffingLink(data.observation, 'gaps', { stationId: gap.stationId, shiftId: gap.shift.id })}>
           {gap.stationName} · {gap.shift.label}: {gap.checkedIn} checked in of {gap.assigned}{' '}
           assigned · {gap.missing} missing.
-        </p>
+        </CountFigure>
       ))}
       <ButtonLink href="/admin/staffing">Check staffing</ButtonLink>
       <ButtonLink href="/admin/corrections" variant="quiet">
@@ -144,4 +139,10 @@ function HealthDetails({ data }: { data: NonNullable<ReturnType<typeof useDataHe
       </ButtonLink>
     </Section>
   );
+}
+function CountFigure({ href, children }: { href?: string; children: ReactNode }) {
+  return <p><InlineFigure href={href}>{children}</InlineFigure></p>;
+}
+function InlineFigure({ href, children }: { href?: string; children: ReactNode }) {
+  return href ? <AppLink href={href} className="text-primary underline">{children}</AppLink> : <>{children}</>;
 }

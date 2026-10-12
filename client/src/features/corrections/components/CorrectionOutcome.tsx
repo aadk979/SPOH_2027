@@ -1,12 +1,10 @@
-import { Callout } from '@/shared/ui';
+import { Callout, ErrorState } from '@/shared/ui';
 
 export function CorrectionOutcome({ error, saved }: { error: Error | null; saved: boolean }) {
   return (
     <>
       {error ? (
-        <Callout tone="alert" role="alert">
-          {error.message}
-        </Callout>
+        <ErrorState error={error} />
       ) : null}
       {saved ? (
         <Callout role="status">

@@ -1,4 +1,4 @@
-import { Button, Callout, LoadingRows } from '@/shared/ui';
+import { Button, LoadingRows, ErrorState } from '@/shared/ui';
 export function StructureFeedback({
   pending,
   error,
@@ -12,12 +12,9 @@ export function StructureFeedback({
     <>
       {pending ? <LoadingRows label="Loading event structure" /> : null}
       {error ? (
-        <Callout tone="alert" role="alert">
-          {error.message}
-          <Button variant="secondary" onClick={reload}>
+        <ErrorState error={error}><Button variant="secondary" onClick={reload}>
             Reload structure
-          </Button>
-        </Callout>
+          </Button></ErrorState>
       ) : null}
     </>
   );

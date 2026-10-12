@@ -1,7 +1,7 @@
 import type { IncidentSeverity } from '@spoh/shared';
-import { logger } from '../../../platform/logger/index.js';
-import { dispatch } from '../../notification/index.js';
-import { pushesToSafetyChain, safetyPushMessage } from '../domain/safetyPush.js';
+import type { PrismaTransactionClient } from '../../../platform/db/client.js';
+import { activeNoticeAudience, queueNotices } from '../../notification/index.js';
+import { pushesToSafetyChain } from '../domain/safetyPush.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 
 /**
@@ -9,34 +9,20 @@ import type { EventScope } from '../../../platform/db/eventScope.js';
  * Communications Chat remains the human channel; this feeds it rather than
  * replacing it (PRODUCT_BRIEF §7.4).
  */
-export function notifySafetyChain(
+export async function notifySafetyChain(
+  tx: PrismaTransactionClient,
   scope: EventScope,
-  incident: {
+  input: { incident: {
     id: string;
     severity: IncidentSeverity;
-    type: string;
-    stationName: string | null;
     rehearsal: boolean;
-  },
-  reporterId: string,
-): void {
-  if (!pushesToSafetyChain(incident.severity)) {
-    logger.info(
-      { incidentId: incident.id, severity: incident.severity },
-      'incident recorded; below the push threshold',
-    );
-    return;
-  }
-
-  void dispatch(scope, {
-    kind: 'incident.critical',
-    priority: 'URGENT',
-    ...safetyPushMessage(incident),
-    url: '/safety',
-    tag: `incident:${incident.id}`,
-    // IC and above: the people who can actually resolve one.
-    audience: { everyone: false, minimumRole: 'IC', volunteerIds: [] },
-    // The reporter is standing over it already.
-    excludeVolunteerId: reporterId,
-  });
+  }; reporterId: string; now: Date },
+): Promise<void> {
+  const { incident, reporterId, now } = input;
+  if (!pushesToSafetyChain(incident.severity)) return;
+  await queueNotices(tx, scope, { kind: 'INCIDENT_RAISED', priority: 'URGENT',
+    source: { kind: 'INCIDENT', id: incident.id }, transitionKey: `incident:${incident.id}:raised`,
+    context: { type: 'incident' }, createdAt: now,
+    recipientPersonIds: await activeNoticeAudience(scope, { tx,
+      minimumRole: 'IC', excludePersonId: reporterId }) });
 }

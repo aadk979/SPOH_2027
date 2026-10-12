@@ -12,6 +12,7 @@ const state = vi.hoisted(() => ({
   stop: vi.fn(),
 }));
 vi.mock('@/shared/lib/env', () => ({ loadClientConfiguration: state.load }));
+vi.mock('next/navigation', () => ({ usePathname: () => '/events', useSearchParams: () => new URLSearchParams() }));
 vi.mock('@/shared/lib/session', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/shared/lib/session')>()),
   bootstrapSession: state.bootstrap,

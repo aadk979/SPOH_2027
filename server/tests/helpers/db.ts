@@ -84,6 +84,9 @@ export async function resetDatabase(): Promise<void> {
   await wipe('AnnouncementDeliveryPlan');
   await wipe('AnnouncementDraft');
   await wipe('Announcement');
+  await wipe('NoticeDelivery');
+  await wipe('Notice');
+  await wipe('NoticePreference');
 
   await wipe('LostPersonAck');
   await wipe('LostPersonSummary');
@@ -110,8 +113,8 @@ export async function resetDatabase(): Promise<void> {
   await wipe('ShiftAssignment');
   await wipe('BriefingSlot');
 
-  await wipe('FallbackWindow');
   await wipe('ImportBatch');
+  await wipe('FallbackWindow');
 
   // Session and device state.
   await wipe('AuthHandoff');

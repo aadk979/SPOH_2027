@@ -1,6 +1,8 @@
+'use client';
 import type { MissionCardRecord } from '@spoh/shared';
+import { useState } from 'react';
 import { useAllows } from '@/features/session';
-import { Button, Callout } from '@/shared/ui';
+import { Button, ConfirmationDialog, MutationFeedback } from '@/shared/ui';
 import { useIssueCard } from '../queries';
 export function CardIssue({
   card,
@@ -11,6 +13,7 @@ export function CardIssue({
 }) {
   const allows = useAllows();
   const issue = useIssueCard(card.shortCode, onIssued);
+  const [reviewed, setReviewed] = useState<MissionCardRecord | null>(null);
   if (!allows('Registration.Create') || card.status !== 'UNISSUED') return null;
   return (
     <div>
@@ -20,13 +23,19 @@ export function CardIssue({
       </p>
       <Button
         disabled={issue.isPending}
-        onClick={() => {
-          if (window.confirm(`Hand card ${card.shortCode} to the visitor?`)) issue.mutate();
-        }}
+        onClick={() => setReviewed(card)}
       >
         Issue this card
       </Button>
-      {issue.error ? <Callout role="alert">{issue.error.message}</Callout> : null}
+      <ConfirmationDialog open={!!reviewed} title={`Issue card ${reviewed?.shortCode ?? ''}`} confirmLabel="Confirm physical handover" pending={issue.isPending}
+        onCancel={() => setReviewed(null)} onConfirm={() => {
+          if (reviewed?.shortCode !== card.shortCode || !allows('Registration.Create')) return setReviewed(null);
+          issue.mutate(undefined, { onSuccess: () => setReviewed(null) });
+        }}>
+        <p>Hand this exact physical card to the visitor. This starts one journey.</p>
+        <MutationFeedback error={issue.error} operation="Issuing this card" />
+      </ConfirmationDialog>
+      <MutationFeedback error={issue.error} pending={issue.isPending} saved={issue.isSuccess} operation="Issuing this card" success="Physical card handover confirmed." />
     </div>
   );
 }

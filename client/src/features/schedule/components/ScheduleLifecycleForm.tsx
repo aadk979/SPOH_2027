@@ -1,7 +1,7 @@
 'use client';
 import type { ReactNode } from 'react';
 import { EventStatus } from '@spoh/shared';
-import { Button, Field, LoadingRows, Select, Stack, Textarea } from '@/shared/ui';
+import { Button, ErrorState, Field, LoadingRows, Select, Stack, Textarea } from '@/shared/ui';
 import { useLifecycleScheduleForm } from '../hooks/useScheduleForms';
 import { eventStatusLabels } from '../model/producerForms';
 import { ScheduleFormOutcome } from './ScheduleFormOutcome';
@@ -13,6 +13,7 @@ import { ScheduleWallTimeField } from './ScheduleWallTimeField';
  */
 export function ScheduleLifecycleForm({ timezone }: { timezone: string }): ReactNode {
   const { readiness, form, produce, invalid, submit } = useLifecycleScheduleForm(timezone);
+  if (readiness.error) return <ErrorState error={readiness.error} operation="Loading lifecycle readiness" onRetry={() => void readiness.refetch()} />;
   if (readiness.isPending) return <LoadingRows />;
   const options = readiness.data?.transitions ?? [];
   if (!readiness.data || options.length === 0)

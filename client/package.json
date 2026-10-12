@@ -18,6 +18,7 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:visual": "playwright test --config playwright.visual.config.ts",
+    "test:campaign": "playwright test --config playwright.campaign.config.ts",
     "test:static-csp": "node --import tsx --test tests/static/csp-validation.test.mjs"
   },
   "dependencies": {

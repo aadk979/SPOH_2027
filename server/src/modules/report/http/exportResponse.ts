@@ -10,6 +10,7 @@ export async function sendReportExport(
     format: 'csv' | 'xlsx';
     fileName: string;
     visitors?: VisitorRecordsResponse | null;
+    assets?: { logoPng?: Uint8Array | null };
   },
 ): Promise<void> {
   res.setHeader('Content-Disposition', `attachment; filename="${input.fileName}.${input.format}"`);
@@ -18,7 +19,7 @@ export async function sendReportExport(
     res.status(200).send(toCsv(input.report, input.visitors));
     return;
   }
-  const workbook = await toXlsx(input.report, input.visitors);
+  const workbook = await toXlsx(input.report, input.visitors, input.assets);
   res.setHeader(
     'Content-Type',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

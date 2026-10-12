@@ -1,9 +1,10 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type Dispatch, type RefObject, type SetStateAction } from 'react';
 import { enqueue, cancel as cancelOutboxEntry } from '@/shared/lib/outbox';
 import { useEvent } from '@/shared/lib/eventContext';
 import { ms } from '@/shared/lib/runtimeSettings';
+import { useToast } from '@/shared/ui';
 
 /**
  * The shared mechanics behind both capture screens (BUILD_PLAN §9.4).
@@ -53,6 +54,7 @@ export interface UseCaptureResult {
    * outcome this whole screen exists to prevent.
    */
   error: string | null;
+  feedback: string | null;
   capture(input: { endpoint: string; body: object; label: string }): Promise<void>;
   undo(): Promise<void>;
 }
@@ -61,6 +63,8 @@ export function useCapture(): UseCaptureResult {
   const [sessionCount, setSessionCount] = useState(0);
   const [undoable, setUndoable] = useState<CaptureTap | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const announce = useToast();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { id: eventId, status } = useEvent();
   const rehearsal = status === 'REHEARSAL';
@@ -100,6 +104,8 @@ export function useCapture(): UseCaptureResult {
       }
 
       setError(null);
+      setFeedback('Saved on this phone. Waiting to sync.');
+      announce('Capture saved on this phone.');
       setSessionCount((count) => count + 1);
       setUndoable({ id: idempotencyKey, label: input.label, at: Date.now() });
 
@@ -108,22 +114,39 @@ export function useCapture(): UseCaptureResult {
       navigator.vibrate?.(15);
 
       if (timer.current) clearTimeout(timer.current);
-      timer.current = setTimeout(() => setUndoable(null), ms.undoWindow());
+      timer.current = setTimeout(() => {
+        setUndoable((current) => current?.id === idempotencyKey ? null : current);
+      }, ms.undoWindow());
     },
-    [eventId, rehearsal],
+    [eventId, rehearsal, announce],
   );
 
-  const undo = useCallback(async (): Promise<void> => {
+  const undo = useCaptureUndo({ undoable, timer, setUndoable, setSessionCount, setFeedback, setError, announce });
+  return { sessionCount, undoable, error, feedback, capture, undo };
+}
+
+function useCaptureUndo({ undoable, timer, setUndoable, setSessionCount, setFeedback, setError, announce }: {
+  undoable: CaptureTap | null; timer: RefObject<ReturnType<typeof setTimeout> | null>;
+  setUndoable: Dispatch<SetStateAction<CaptureTap | null>>; setSessionCount: Dispatch<SetStateAction<number>>;
+  setFeedback: Dispatch<SetStateAction<string | null>>; setError: Dispatch<SetStateAction<string | null>>; announce(text: string): void;
+}) {
+  return useCallback(async (): Promise<void> => {
     if (!undoable) return;
-
-    const removed = await cancelOutboxEntry(undoable.id);
-    if (removed) setSessionCount((count) => Math.max(0, count - 1));
-
-    // If it had already been sent, the correction is an IC-level void rather
-    // than something a volunteer does mid-queue — the undo simply expires.
-    setUndoable(null);
     if (timer.current) clearTimeout(timer.current);
-  }, [undoable]);
-
-  return { sessionCount, undoable, error, capture, undo };
+    if (Date.now() - undoable.at > ms.undoWindow()) {
+      setFeedback('The undo window ended. Ask your IC for a correction.');
+    } else {
+      try {
+        const removed = await cancelOutboxEntry(undoable.id);
+        if (removed) setSessionCount((count) => Math.max(0, count - 1));
+        const message = removed ? 'Capture removed from this phone.' : 'This capture is sending or already recorded. Ask your IC for a correction.';
+        setFeedback(message);
+        announce(message);
+      } catch {
+        setError('Cancellation was not confirmed. Keep this capture and ask your IC to check it.');
+      }
+    }
+    // A newer tap may finish queuing while this cancellation is awaiting IndexedDB.
+    setUndoable((current) => current?.id === undoable.id ? null : current);
+  }, [undoable, announce, timer, setUndoable, setSessionCount, setFeedback, setError]);
 }

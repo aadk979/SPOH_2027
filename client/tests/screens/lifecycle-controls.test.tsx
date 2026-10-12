@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom/vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
@@ -281,6 +282,20 @@ describe('reviewed lifecycle controls', () => {
     await screen.findByRole('alert');
     expect(screen.queryByText(/Reviewed state:/)).toBeNull();
     expect(screen.queryByLabelText('Next event state')).toBeNull();
+  });
+  it('shows unavailable initial readiness as failure with a safe request ID and explicit reload', async () => {
+    failure = new ApiError(503, { code: 'UNAVAILABLE', message: 'private database detail', requestId: 'synthetic-readiness' });
+    show(<LifecyclePanel enabled />);
+    fireEvent.click(screen.getByRole('button', { name: 'Lifecycle and readiness' }));
+    await screen.findByText('synthetic-readiness');
+    expect(screen.getByRole('alert')).toHaveTextContent('Lifecycle readiness is unavailable. Reload before making a change.');
+    expect(screen.queryByText('private database detail')).toBeNull();
+    expect(screen.queryByText(/Reviewed state:/)).toBeNull();
+    expect(screen.queryByLabelText('Next event state')).toBeNull();
+    failure = undefined;
+    fireEvent.click(screen.getByRole('button', { name: 'Reload readiness' }));
+    await screen.findByText(/Reviewed state: Ready/);
+    expect(writes()).toHaveLength(0);
   });
   it('removes the workspace immediately on permission loss and isolates accounts in its query key', async () => {
     const view = show(<LifecyclePanel enabled />);

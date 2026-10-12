@@ -100,6 +100,7 @@ describe('assignment board', () => {
     expect(mockedApi.mock.calls[1]?.[0]).toContain('cursor=next');
   });
   it('shows a gap, creates an assignment, refreshes to zero gaps, then unassigns', async () => {
+    state.actions = ['Roster.Edit'];
     let assigned = false;
     const fixture = mockedApi.getMockImplementation()!;
     mockedApi.mockImplementation(async (path, options) => {
@@ -128,7 +129,14 @@ describe('assignment board', () => {
         stationId: 'station',
       },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Unassign Sample Person' }));
+    const unassign = screen.getByRole('button', { name: 'Unassign Sample Person' });
+    unassign.focus(); fireEvent.click(unassign);
+    expect(screen.getByRole('dialog', { name: 'Review assignment removal' })).toBeTruthy();
+    expect(mockedApi.mock.calls.filter(([, options]) => options?.method === 'DELETE')).toEqual([]);
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(document.activeElement).toBe(unassign);
+    fireEvent.click(unassign);
+    fireEvent.click(screen.getByRole('button', { name: 'Unassign this person' }));
     await screen.findByText('1 unstaffed station shifts of 1.');
     expect(mockedApi).toHaveBeenCalledWith(`${API}/admin/assignments/assignment`, {
       method: 'DELETE',
@@ -144,12 +152,14 @@ describe('assignment board', () => {
     fireEvent.change(screen.getByLabelText('Assignment role'), { target: { value: 'Briefer' } });
     fireEvent.click(screen.getByRole('button', { name: 'Assign' }));
     await screen.findByRole('alert');
-    expect(screen.getByText('Assignment is locked')).toBeTruthy();
+    expect(screen.getByText('Saving the roster was not confirmed')).toBeTruthy();
+    expect(screen.queryByText('Assignment is locked')).toBeNull();
   });
   it('shows unavailable data and empty-day guidance', async () => {
     mockedApi.mockRejectedValueOnce(new Error('Read unavailable'));
     show(<AssignmentBoard enabled />);
-    await screen.findByText('Read unavailable');
+    await screen.findByText('Loading assignment board was not confirmed');
+    expect(screen.queryByText('Read unavailable')).toBeNull();
     cleanup();
     clients.splice(0).forEach((client) => client.clear());
     mockedApi.mockResolvedValue(envelope([]));
@@ -291,7 +301,8 @@ describe('swaps', () => {
   it('reports an unavailable review queue', async () => {
     mockedApi.mockRejectedValue(new Error('Queue unavailable'));
     show(<SwapReviewQueue />);
-    await screen.findByText('Queue unavailable');
+    await screen.findByText('This action was not confirmed');
+    expect(screen.queryByText('Queue unavailable')).toBeNull();
   });
 });
 
@@ -335,7 +346,8 @@ describe('briefing schedule and completion', () => {
       target: { value: '10:00' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Schedule briefing' }));
-    await screen.findByText('Network unavailable');
+    await screen.findByText('Saving the roster was not confirmed');
+    expect(screen.queryByText('Network unavailable')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Schedule briefing' }));
     await screen.findByRole('status');
     expect(mockedApi.mock.calls[0]?.[1]?.body).toEqual(mockedApi.mock.calls[1]?.[1]?.body);
@@ -385,7 +397,8 @@ describe('briefing schedule and completion', () => {
   it('shows day-read errors while keeping scheduling unavailable', async () => {
     mockedApi.mockRejectedValue(new Error('Days unavailable'));
     show(<BriefingsScreen />);
-    await screen.findByText('Days unavailable');
+    await screen.findByText('This action was not confirmed');
+    expect(screen.queryByText('Days unavailable')).toBeNull();
     expect(screen.queryByRole('button', { name: 'Schedule briefing' })).toBeNull();
   });
 });

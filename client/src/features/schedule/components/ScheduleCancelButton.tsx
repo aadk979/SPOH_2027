@@ -2,7 +2,7 @@
 import type { ReactNode } from 'react';
 import type { ScheduleTimelineRecord } from '@spoh/shared';
 import { useRetryKey } from '@/shared/hooks/useRetryKey';
-import { Button, Callout } from '@/shared/ui';
+import { Button, ErrorState } from '@/shared/ui';
 import { cancellableHere } from '../model/producerForms';
 import { useScheduleProducer } from '../queries';
 
@@ -29,9 +29,7 @@ export function ScheduleCancelButton({ row }: { row: ScheduleTimelineRecord }): 
         {produce.isPending ? 'Cancelling…' : 'Cancel this schedule'}
       </Button>
       {produce.isError ? (
-        <Callout tone="alert" role="alert">
-          {produce.error.message}
-        </Callout>
+        <ErrorState error={produce.error} />
       ) : null}
     </>
   );

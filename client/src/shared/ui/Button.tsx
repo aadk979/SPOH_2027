@@ -1,7 +1,7 @@
 'use client';
 
 import { AppLink as Link } from '@/shared/lib/AppLink';
-import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from 'react';
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode, Ref } from 'react';
 import { cx } from '@/shared/ui/cx';
 
 /**
@@ -111,7 +111,7 @@ export function Button({
   className,
   type = 'button',
   ...rest
-}: CommonProps & ButtonHTMLAttributes<HTMLButtonElement>): ReactNode {
+}: CommonProps & ButtonHTMLAttributes<HTMLButtonElement> & { ref?: Ref<HTMLButtonElement> }): ReactNode {
   return (
     <button
       // Explicit, because a bare `<button>` inside a form submits it, and the

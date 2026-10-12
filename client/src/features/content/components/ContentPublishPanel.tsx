@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import type { ContentDraftRecord } from '@spoh/shared';
 import { useAllows } from '@/features/session';
-import { Button, Callout, Card, CardTitle, Stack } from '@/shared/ui';
+import { Button, Card, CardTitle, ConfirmationDialog, MutationFeedback, Stack, useToast } from '@/shared/ui';
 import { usePublishContent, useReviewContent } from '../queries';
 import { ContentScheduleForm } from './ContentScheduleForm';
 import { ContentPreview } from './ContentPreview';
@@ -9,7 +9,8 @@ export function ContentPublishPanel({ draft }: { draft: ContentDraftRecord }): R
   const allows = useAllows();
   const review = useReviewContent();
   const publish = usePublishContent();
-  const [confirm, setConfirm] = useState(false);
+  const [confirmedVersion, setConfirmedVersion] = useState<number | null>(null);
+  const announce = useToast();
   const failure = review.error ?? publish.error;
   if (!draft.body || !allows('Content.Publish')) return null;
   const reviewed = draft.reviewedVersion === draft.version;
@@ -37,36 +38,20 @@ export function ContentPublishPanel({ draft }: { draft: ContentDraftRecord }): R
             Confirm reviewed draft {draft.version}
           </Button>
         ) : (
-          <Button onClick={() => setConfirm(true)} variant="secondary">
+          <Button onClick={() => setConfirmedVersion(draft.version)} variant="secondary">
             Publish reviewed draft
           </Button>
         )}
-        {confirm ? (
-          <Callout tone="warn">
-            <p>Publish draft {draft.version} now?</p>
-            <Button
-              onClick={() =>
-                publish.mutate(
-                  { expectedVersion: draft.version },
-                  { onSuccess: () => setConfirm(false) },
-                )
-              }
-              disabled={publish.isPending}
-            >
-              Publish now
-            </Button>
-            <Button variant="quiet" onClick={() => setConfirm(false)}>
-              Cancel
-            </Button>
-          </Callout>
-        ) : null}
+        <ConfirmationDialog open={confirmedVersion !== null} title="Publish reviewed guide" confirmLabel="Publish now" pending={publish.isPending}
+          onCancel={() => setConfirmedVersion(null)} onConfirm={() => {
+            if (confirmedVersion === null) return;
+            publish.mutate({ expectedVersion: confirmedVersion }, { onSuccess: () => { setConfirmedVersion(null); announce('Reviewed guide published.'); } });
+          }}>
+          <p>Publish saved draft {confirmedVersion} to every volunteer, including their offline copy?</p>
+          <MutationFeedback error={publish.error} operation="Publishing the guide" />
+        </ConfirmationDialog>
         {reviewed ? <ContentScheduleForm version={draft.version} /> : null}
-        {failure ? (
-          <Callout tone="alert" role="alert">
-            {failure.message}
-          </Callout>
-        ) : null}
-        {publish.isSuccess ? <p role="status">Guide published.</p> : null}
+        <MutationFeedback error={failure} pending={review.isPending || publish.isPending} saved={publish.isSuccess} operation="Publishing the guide" success="Guide published." />
       </Stack>
     </Card>
   );

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { ScopedSettingsReadResponse, ScopedSettingsTarget } from '@spoh/shared';
-import { Button, Callout, LoadingRows } from '@/shared/ui';
+import { Button, Callout, LoadingRows, ErrorState } from '@/shared/ui';
 import { ApiError } from '@/shared/lib/apiErrors';
 import { useScopedSettingsCurrent, useScopedSettingsCache } from '../queries';
 import { CaptureScheduleControls } from '@/features/schedule';
@@ -34,17 +34,14 @@ export function CaptureControlsContents({
     );
   if (current.isError && (!current.data || readDenied))
     return (
-      <Callout tone="alert" role="alert">
-        Capture settings are unavailable.{' '}
-        <Button
+      <ErrorState error={current.error}>Capture settings are unavailable.{' '}<Button
           variant="quiet"
           onClick={() => {
             void reload();
           }}
         >
           Reload capture settings
-        </Button>
-      </Callout>
+        </Button></ErrorState>
     );
   if (!current.data) return <LoadingRows />;
   return (

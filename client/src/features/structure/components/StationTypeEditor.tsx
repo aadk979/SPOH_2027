@@ -7,7 +7,7 @@ import {
 import { typeValues } from '../model/editorDefaults';
 import { useZodForm } from '@/shared/hooks/useZodForm';
 import { useRetryKey } from '@/shared/hooks/useRetryKey';
-import { Button, Checkbox, Stack } from '@/shared/ui';
+import { Button, Checkbox, ControlHelp, Stack } from '@/shared/ui';
 import { useStructureWrite } from '../queries';
 import { useAllows } from '@/features/session';
 import { EditorField } from './EditorField';
@@ -42,6 +42,7 @@ export function StationTypeEditor({
         />
         <EditorField
           label="Type label"
+          hint="The name shown when choosing a station type."
           value={form.values.label}
           onChange={form.setter('label')}
           error={form.errors.label}
@@ -56,8 +57,9 @@ export function StationTypeEditor({
           disabled={!editable}
           hint="Lower numbers appear first."
         />
-        <fieldset disabled={!editable || !canChange}>
+        <fieldset disabled={!editable || !canChange} aria-describedby={`${prefix}-capabilities`}>
           <legend className="font-semibold">What happens at this station type</legend>
+          <ControlHelp id={`${prefix}-capabilities`}>These capabilities control the capture tools at every station of this type. Change them only after reviewing affected stations.</ControlHelp>
           {CAPABILITIES.map(([key, label]) => (
             <Checkbox
               key={key}
@@ -71,11 +73,13 @@ export function StationTypeEditor({
         {record ? (
           <Checkbox
             label="Active type"
+            aria-describedby={`${prefix}-active`}
             checked={form.values.active}
             disabled={!editable || (!record.active && !canChange)}
             onChange={(event) => form.setField('active', event.target.checked)}
           />
         ) : null}
+        {record ? <ControlHelp id={`${prefix}-active`}>Turning this off prevents new stations choosing this type. Existing stations retain their type and records.</ControlHelp> : null}
         <Button type="submit" disabled={!editable || write.isPending}>
           {record ? 'Save type' : 'Create type'}
         </Button>

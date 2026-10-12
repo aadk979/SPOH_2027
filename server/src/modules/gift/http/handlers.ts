@@ -5,6 +5,7 @@ import type {
   GiftSummaryQuery,
   RedeemGiftRequest,
   UpdateGiftTypeRequest,
+  VoidGiftRedemptionRequest,
 } from '@spoh/shared';
 import { actorContextFrom } from '../../../platform/http/auditContext.js';
 import { captureContextFrom } from '../../../platform/http/captureActor.js';
@@ -16,6 +17,12 @@ import { updateGiftType } from '../application/updateGiftType.js';
 import { listGifts, listGiftCatalogue } from '../application/listGifts.js';
 import { redeemGift } from '../application/redeemGift.js';
 import { summariseGifts } from '../application/summariseGifts.js';
+import { voidGiftRedemption } from '../application/voidRedemption.js';
+
+export async function voidRedemptionHandler(req: Request, res: Response): Promise<void> {
+  const { id } = validatedParams<{ id: string }>(req);
+  res.json(await voidGiftRedemption(id, validatedBody<VoidGiftRedemptionRequest>(req), actorContextFrom(req)));
+}
 
 export async function listGiftsHandler(req: Request, res: Response): Promise<void> {
   const gifts = await listGifts(scopeOf(req));

@@ -4,7 +4,7 @@ import {
   prepareThresholds,
   type ThresholdSnapshot,
 } from '../../../platform/settings/thresholds.js';
-import { eventTodayStart } from '../../../platform/event/today.js';
+import { eventToday, eventTodayStart } from '../../../platform/event/today.js';
 import { listCountedStations } from '../../station/index.js';
 import { liveStationStats } from '../data/repo.js';
 import { liveStationRow } from '../domain/footfallRules.js';
@@ -42,6 +42,8 @@ export async function getLiveFootfall(
     rehearsalIncluded: scope.includeRehearsal ?? false,
     unit: 'roomEntries',
     asOf: now.toISOString(),
+    observation: { date: (await eventToday(scope, now)).toISOString().slice(0, 10), from: since.toISOString(),
+      asOf: now.toISOString(), includeRehearsal: scope.includeRehearsal ?? false },
     stations: stations.map((station) =>
       liveStationRow(station, statsByStation.get(station.id), {
         now,

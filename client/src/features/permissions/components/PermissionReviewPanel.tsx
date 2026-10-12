@@ -1,5 +1,5 @@
 import type { RolePermissionsResponse } from '@spoh/shared';
-import { Button, Callout, Checkbox, Field, Input, Section } from '@/shared/ui';
+import { Button, Checkbox, Field, Input, Section, ErrorState } from '@/shared/ui';
 import { usePermissionReview } from '../hooks/usePermissionReview';
 
 /** A review is explicit and invalidated as soon as the current grant version changes. */
@@ -48,10 +48,8 @@ export function PermissionReviewPanel({ table }: { table: RolePermissionsRespons
         </>
       ) : null}
       {mutation.isError ? (
-        <Callout tone="alert" role="alert">
-          Could not confirm the review. Retry the same request, or reload and review current
-          permissions.
-        </Callout>
+        <ErrorState error={mutation.error}>Could not confirm the review. Retry the same request, or reload and review current
+          permissions.</ErrorState>
       ) : null}
     </Section>
   );

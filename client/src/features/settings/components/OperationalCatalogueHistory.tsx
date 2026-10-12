@@ -7,7 +7,7 @@ import {
   type ScopedSettingsReadResponse,
 } from '@spoh/shared';
 import { useEventTime } from '@/features/session';
-import { Button, Callout, Card, LoadingRows } from '@/shared/ui';
+import { Button, Card, LoadingRows, ErrorState } from '@/shared/ui';
 import { ApiError } from '@/shared/lib/apiErrors';
 import { useScopedSettingHistory } from '../queries';
 import { catalogueValue } from '../model/operationalCatalogue';
@@ -42,9 +42,7 @@ export function OperationalCatalogueHistory(input: {
     return (
       <div className="flex flex-col gap-md">
         {reload}
-        <Callout tone="alert" role="alert">
-          Catalogue history is unavailable.
-        </Callout>
+        <ErrorState error={history.error}>Catalogue history is unavailable.</ErrorState>
       </div>
     );
   if (!history.data) return <LoadingRows />;

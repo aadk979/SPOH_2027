@@ -136,6 +136,7 @@ export type AnnouncementPushDeliveryStatus = z.infer<typeof AnnouncementPushDeli
 /** Persisted fixed codes keep device endpoints, credentials and raw errors out of outcomes. */
 export const AnnouncementPushDeliveryError = z.enum([
   'UNCONFIGURED',
+  'PUSH_DISABLED',
   'RECIPIENT_INACTIVE',
   'RECIPIENT_OUT_OF_SCOPE',
   'SUBSCRIPTION_GONE',

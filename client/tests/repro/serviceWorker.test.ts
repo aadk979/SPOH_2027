@@ -18,7 +18,7 @@ const PAGE =
   '<script src="/_next/static/chunks/app-1a2b.js"></script><link href="/_next/static/css/ui-9f.css">' +
   '<script>self.__next_f.push([1,"[\\"/_next/static/chunks/rsc-3c4d.js\\"]"])</script>';
 
-function loadWorker(search = '') {
+function loadWorker(search = '', retained = ['/e/_/home']) {
   const handlers = new Map<string, Handler>();
   const added: string[] = [];
   const opened: string[] = [];
@@ -58,7 +58,7 @@ function loadWorker(search = '') {
     caches: {
       open: (name: string) => (opened.push(name), Promise.resolve(cache)),
       keys: () => Promise.resolve([]),
-      match: (key: string) => (matched.push(key), Promise.resolve(new Response(`cached ${key}`))),
+      match: (key: string) => (matched.push(key), Promise.resolve(retained.includes(key) ? new Response(`cached ${key}`) : undefined)),
     },
     fetch: fetchMock,
     URL,
@@ -119,18 +119,25 @@ describe('service worker (P03 repros)', () => {
     expect(worker.opened.every((name) => name.endsWith('build-42'))).toBe(true);
   });
 
-  // P09.8: every event's pages are one exported placeholder (ADR-008 §2).
-  it("answers any event's screen offline from the placeholder's cached copy", async () => {
-    const worker = loadWorker('?v=build-42');
+  // HTML carries the event's approved identity; shared RSC exports retain the placeholder.
+  it.each([
+    { path: '/e/spoh-2028/capture/footfall', retained: ['/e/spoh-2028/capture/footfall'],
+      answer: '/e/spoh-2028/capture/footfall', matched: ['/e/spoh-2028/capture/footfall'] },
+    { path: '/e/spoh-2028/capture/footfall', retained: ['/e/spoh-2027/capture/footfall', '/e/_/home'],
+      answer: '/e/_/home', matched: ['/e/spoh-2028/capture/footfall', '/e/_/home'] },
+    { path: '/e/spoh-2028/capture/footfall.txt', retained: ['/e/_/capture/footfall.txt'],
+      answer: '/e/_/capture/footfall.txt', matched: ['/e/_/capture/footfall.txt'] },
+  ])('answers $path from its matching cache or the neutral fallback', async ({ path, retained, answer: expected, matched }) => {
+    const worker = loadWorker('?v=build-42', retained);
     worker.fetchMock.mockImplementation(() => Promise.reject(new TypeError('offline')));
     let answer: Promise<Response> | undefined;
 
     await worker.fire('fetch', {
-      request: { method: 'GET', url: 'https://ops.example/e/spoh-2028/capture/footfall' },
+      request: { method: 'GET', url: `https://ops.example${path}` },
       respondWith: (response: Promise<Response>) => (answer = response),
     });
 
-    expect(await (await answer!).text()).toBe('cached /e/_/capture/footfall');
-    expect(worker.matched).toEqual(['/e/_/capture/footfall']);
+    expect(await (await answer!).text()).toBe(`cached ${expected}`);
+    expect(worker.matched).toEqual(matched);
   });
 });

@@ -1,7 +1,12 @@
 import type { ReactNode } from 'react';
 import type { MeResponse } from '@spoh/shared';
 import type { useComposer } from '../hooks/useComposer';
-import { Checkbox, Field, Select } from '@/shared/ui';
+import { Checkbox, Field, Select, ControlHelp } from '@/shared/ui';
+function audienceLabel(form: ReturnType<typeof useComposer>, me: MeResponse | undefined): string {
+  if (form.eventWide) return 'Whole event';
+  if (form.stationId) return form.stations.data?.find((station) => station.id === form.stationId)?.name ?? 'Selected station';
+  return me?.currentAssignment?.station.name ?? 'Choose a station before sending';
+}
 export function ComposerAudience({
   form,
   me,
@@ -21,7 +26,7 @@ export function ComposerAudience({
   } = form;
   return (
     <>
-      {' '}
+      <ControlHelp>Choose the audience deliberately. A station selection sends only to that station; whole event sends to every eligible event member. Without a current station, choose one before sending.</ControlHelp>
       <div className="flex flex-col">
         <Checkbox
           label="Ask for acknowledgement"
@@ -38,7 +43,7 @@ export function ComposerAudience({
         ) : null}
       </div>
       {!eventWide ? (
-        <Field id="announcement-station" label="Send to" error={form.errors.stationId}>
+        <Field id="announcement-station" label="Send to" hint="An empty selection uses your current posted station only. It never means the whole event." error={form.errors.stationId}>
           {(props) => (
             <Select
               {...props}
@@ -59,6 +64,7 @@ export function ComposerAudience({
           )}
         </Field>
       ) : null}
+      <p role="status" className="text-caption text-text-muted">Audience: {audienceLabel(form, me)}</p>
     </>
   );
 }

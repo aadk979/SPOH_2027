@@ -60,8 +60,12 @@ export async function upsertSubscription(
     userAgent: string | null;
   },
   now: Date,
-): Promise<{ id: string }> {
-  return prisma.pushSubscription.upsert({
+): Promise<{ id: string } | null> {
+  return prisma.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT id FROM "Person" WHERE id = ${input.volunteerId} FOR UPDATE`;
+    if (!await tx.person.findFirst({ where: { id: input.volunteerId, deactivatedAt: null }, select: { id: true } }))
+      return null;
+    return tx.pushSubscription.upsert({
     where: { endpoint: input.endpoint },
     create: {
       volunteerId: input.volunteerId,
@@ -80,6 +84,7 @@ export async function upsertSubscription(
       failureCount: 0,
     },
     select: { id: true },
+    });
   });
 }
 
@@ -92,7 +97,8 @@ export async function pruneDevicesBeyond(volunteerId: string, keep: number): Pro
     select: { id: true },
   });
   if (stale.length === 0) return 0;
-  return deleteSubscriptions(stale.map((row) => row.id));
+  return (await prisma.pushSubscription.deleteMany({ where: { volunteerId,
+    id: { in: stale.map((row) => row.id) } } })).count;
 }
 
 /** Scoped to the owner: you may only unsubscribe yourself. */

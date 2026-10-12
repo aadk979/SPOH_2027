@@ -1,11 +1,18 @@
 {
   "DELETE /admin/assignments/:id": {
     "asks": "Roster.Edit",
-    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "DELETE /admin/structure/days/:id": {
     "asks": "Structure.Change",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "DELETE /notifications/subscriptions": {
     "asks": "Self.Read",
@@ -13,27 +20,48 @@
   },
   "GET /admin/attendance-settings": {
     "asks": "Settings.Read",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "GET /admin/capture-categories": {
     "asks": "Settings.Read",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "GET /admin/capture-categories/:categoryId": {
     "asks": "Settings.Read",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "GET /admin/capture-categories/:categoryId/schedules": {
     "asks": "Settings.Read",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "GET /admin/capture-categories/:categoryId/schedules/:id": {
     "asks": "Settings.Read",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "GET /admin/event-days": {
     "asks": "Structure.Read",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /admin/event-settings": {
     "asks": "Self.Read",
@@ -41,7 +69,10 @@
   },
   "GET /admin/event-settings/history": {
     "asks": "Settings.Read",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "GET /admin/organisation-settings": {
     "asks": "Self.Read",
@@ -49,19 +80,31 @@
   },
   "GET /admin/settings/catalogue": {
     "asks": "Settings.Read",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "GET /admin/settings/catalogue/history": {
     "asks": "Settings.Read",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "GET /admin/settings/catalogue/schedules": {
     "asks": "Settings.Read",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "GET /admin/settings/catalogue/schedules/:id": {
     "asks": "Settings.Read",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "GET /admin/settings/client": {
     "asks": "Self.Read",
@@ -69,15 +112,33 @@
   },
   "GET /admin/shift-templates": {
     "asks": "Structure.Read",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /admin/stations": {
     "asks": "Structure.Read",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /admin/structure": {
     "asks": "Structure.Read",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /admin/visitor-fields": {
     "asks": "Self.Read",
@@ -85,11 +146,21 @@
   },
   "GET /admin/volunteers": {
     "asks": "People.Read",
-    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /admin/volunteers/:id": {
     "asks": "People.Read",
-    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /announcements": {
     "asks": "Self.Read",
@@ -97,19 +168,39 @@
   },
   "GET /announcements/drafts": {
     "asks": "Announcement.SendStation",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "GET /announcements/drafts/:id": {
     "asks": "Announcement.SendStation",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "GET /announcements/drafts/:id/schedules": {
     "asks": "Announcement.SendStation",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "GET /announcements/drafts/:id/schedules/:scheduleId": {
     "asks": "Announcement.SendStation",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "GET /attendance": {
     "asks": "Self.Read",
@@ -117,7 +208,25 @@
   },
   "GET /audit": {
     "asks": "Audit.Read",
-    "who": ["CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
+  },
+  "GET /branding": {
+    "asks": "Settings.Read",
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
+  },
+  "GET /branding/draft/assets/:variant": {
+    "asks": "Settings.Read",
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "GET /cards/:shortCode": {
     "asks": "Self.Read",
@@ -125,19 +234,40 @@
   },
   "GET /cards/funnel": {
     "asks": "Dashboard.ReadStation",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /cards/print": {
     "asks": "Report.Export",
-    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
-  },
-  "GET /cards/print/:id/details": {
-    "asks": "Report.Export",
-    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /cards/print/:id": {
     "asks": "Report.Export",
-    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
+  },
+  "GET /cards/print/:id/details": {
+    "asks": "Report.Export",
+    "who": [
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /cards/qr/:payload": {
     "asks": "Self.Read",
@@ -153,39 +283,85 @@
   },
   "GET /content/draft": {
     "asks": "Settings.Read",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "GET /content/versions": {
     "asks": "Settings.Read",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "GET /dashboard/data-health": {
     "asks": "Dashboard.ReadEvent",
-    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /dashboard/live": {
     "asks": "Dashboard.ReadEvent",
-    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /dashboard/station/:id": {
     "asks": "Dashboard.ReadStation",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /fallback/windows": {
     "asks": "Dashboard.ReadStation",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /footfall/live": {
     "asks": "Dashboard.ReadStation",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /footfall/recent": {
     "asks": "Dashboard.ReadStation",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /footfall/summary": {
     "asks": "Dashboard.ReadStation",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /gifts": {
     "asks": "Self.Read",
@@ -193,23 +369,43 @@
   },
   "GET /gifts/catalogue": {
     "asks": "Settings.Read",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "GET /gifts/summary": {
     "asks": "Dashboard.ReadStation",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /incidents": {
     "asks": "Incident.Read",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "GET /lifecycle": {
     "asks": "Settings.Read",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "GET /lifecycle/readiness": {
     "asks": "Settings.Read",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "GET /lost-found": {
     "asks": "Self.Read",
@@ -241,11 +437,17 @@
   },
   "GET /permissions": {
     "asks": "Settings.Read",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "GET /permissions/people/:personId": {
     "asks": "Settings.Read",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "GET /registrations/categories": {
     "asks": "Self.Read",
@@ -253,39 +455,86 @@
   },
   "GET /registrations/recent": {
     "asks": "Dashboard.ReadStation",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /registrations/summary": {
     "asks": "Dashboard.ReadStation",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /reports/archive-export/:id": {
     "asks": "Report.Export",
-    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /reports/archive-exports": {
     "asks": "Report.Export",
-    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /reports/export": {
     "asks": "Report.Export",
-    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /reports/snapshots": {
     "asks": "Report.Generate",
-    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /reports/snapshots/:id": {
     "asks": "Report.Generate",
-    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /reports/snapshots/:id/export": {
     "asks": "Report.Export",
-    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /reports/summary": {
     "asks": "Report.Generate",
-    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /roster/briefing-slots": {
     "asks": "Self.Read",
@@ -293,7 +542,12 @@
   },
   "GET /roster/gaps": {
     "asks": "Dashboard.ReadEvent",
-    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /roster/me": {
     "asks": "Self.Read",
@@ -301,7 +555,13 @@
   },
   "GET /roster/station/:stationId": {
     "asks": "Roster.ReadStation",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "GET /roster/swap-targets": {
     "asks": "Self.Read",
@@ -313,11 +573,19 @@
   },
   "GET /roster/swaps/pending": {
     "asks": "Swap.Decide",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "GET /schedules": {
     "asks": "Settings.Read",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "GET /stations": {
     "asks": "Self.Read",
@@ -327,21 +595,42 @@
     "asks": "Self.Read",
     "who": "every member"
   },
+  "GET /workspace/entity": {
+    "asks": "Entity.Read",
+    "who": "decided per request"
+  },
+  "GET /workspace/records": {
+    "asks": "Records.Read",
+    "who": "decided per request"
+  },
+  "GET /workspace/search": {
+    "asks": "Workspace.Search",
+    "who": "decided per request"
+  },
   "PATCH /admin/attendance-settings": {
     "asks": "Settings",
     "who": "decided per request"
   },
   "PATCH /admin/capture-categories/:categoryId/schedules/:id": {
     "asks": "Schedule.Manage",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "PATCH /admin/event-days/:id": {
     "asks": "Structure.Edit",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "PATCH /admin/event-name": {
     "asks": "Structure.Edit",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "PATCH /admin/event-settings": {
     "asks": "Settings",
@@ -349,7 +638,10 @@
   },
   "PATCH /admin/gift-types/:id": {
     "asks": "Structure.Edit",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "PATCH /admin/organisation-settings": {
     "asks": "Platform.ManageOrganisation",
@@ -357,63 +649,109 @@
   },
   "PATCH /admin/settings/catalogue/schedules/:id": {
     "asks": "Schedule.Manage",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "PATCH /admin/shift-templates/:id": {
     "asks": "Structure.Edit",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "PATCH /admin/stations/:id": {
     "asks": "Structure.Edit",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "PATCH /admin/structure/categories/:id": {
     "asks": "Structure.Edit",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "PATCH /admin/structure/shifts/:id": {
     "asks": "Structure.Edit",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "PATCH /admin/structure/tags/:id": {
     "asks": "Structure.Edit",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "PATCH /admin/structure/templates/:id": {
     "asks": "Structure.Edit",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "PATCH /admin/structure/types/:id": {
     "asks": "Structure.Edit",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "PATCH /admin/visitor-fields/:id": {
     "asks": "Structure.Edit",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "PATCH /admin/volunteers/:id": {
     "asks": "People.Update",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /admin/assignments": {
     "asks": "Roster.Edit",
-    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /admin/attendance-settings/test-network": {
     "asks": "Structure.Edit",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /admin/capture-categories/:categoryId/schedules": {
     "asks": "Schedule.Manage",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /admin/capture-categories/:categoryId/schedules/:id/cancel": {
     "asks": "Schedule.Manage",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /admin/event-days": {
     "asks": "Structure.Change",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /admin/event-settings/revert": {
     "asks": "Settings",
@@ -421,67 +759,117 @@
   },
   "POST /admin/gift-types": {
     "asks": "Structure.Change",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /admin/settings/catalogue": {
     "asks": "Settings.ManageEvent",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /admin/settings/catalogue/revert": {
     "asks": "Settings.ManageEvent",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /admin/settings/catalogue/schedules": {
     "asks": "Schedule.Manage",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /admin/settings/catalogue/schedules/:id/cancel": {
     "asks": "Schedule.Manage",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /admin/stations": {
     "asks": "Structure.Change",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /admin/structure/categories": {
     "asks": "Structure.Change",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /admin/structure/tags": {
     "asks": "Structure.Change",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /admin/structure/templates": {
     "asks": "Structure.Change",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /admin/structure/types": {
     "asks": "Structure.Change",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /admin/visitor-fields": {
     "asks": "Structure.Change",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /admin/volunteers/:id/deactivate": {
     "asks": "People.Deactivate",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /admin/volunteers/:id/reactivate": {
     "asks": "People.Deactivate",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /admin/volunteers/:id/resend-invite": {
     "asks": "People.Update",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /admin/volunteers/:id/sign-out": {
     "asks": "People.Deactivate",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /admin/volunteers/bulk": {
     "asks": "People.Read",
-    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "POST /announcements": {
     "asks": "Announcement.Send",
@@ -493,15 +881,30 @@
   },
   "POST /announcements/drafts": {
     "asks": "Announcement.SendStation",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /announcements/drafts/:id/schedules": {
     "asks": "Announcement.SendStation",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /announcements/drafts/:id/schedules/:scheduleId/cancel": {
     "asks": "Announcement.SendStation",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /attendance/challenge": {
     "asks": "Attendance.IssueCode",
@@ -515,97 +918,234 @@
     "asks": "Attendance.Submit",
     "who": "every member"
   },
+  "POST /branding/images/upload": {
+    "asks": "Content.Edit",
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
+  },
+  "POST /branding/publish": {
+    "asks": "Content.Publish",
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
+  },
   "POST /cards/:shortCode/issue": {
     "asks": "Registration.Create",
-    "who": ["VOLUNTEER", "IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "VOLUNTEER",
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /cards/:shortCode/reissue": {
     "asks": "Card.Reissue",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /cards/:shortCode/stamps": {
     "asks": "Card.Stamp",
-    "who": ["VOLUNTEER", "IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "VOLUNTEER",
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /cards/:shortCode/void": {
     "asks": "Card.Void",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /cards/batch": {
     "asks": "Card.GenerateBatch",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /cards/print": {
     "asks": "Card.GenerateBatch",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /content/images/upload": {
     "asks": "Content.Edit",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /content/publish": {
     "asks": "Content.Publish",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /content/review": {
     "asks": "Content.Publish",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /content/schedules": {
     "asks": "Schedule.Manage",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
+  },
+  "POST /fallback/imports/:id/undo": {
+    "asks": "Fallback.Import",
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /fallback/imports/footfall": {
     "asks": "Fallback.Import",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /fallback/imports/registrations": {
     "asks": "Fallback.Import",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
+  },
+  "POST /fallback/salvage/confirm": {
+    "asks": "Self.Read",
+    "who": "every member"
   },
   "POST /fallback/windows": {
     "asks": "Fallback.Declare",
-    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /fallback/windows/:id/close": {
     "asks": "Fallback.Declare",
-    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /footfall/bulk": {
     "asks": "Count.Adjust",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /footfall/ticks": {
     "asks": "Footfall.Create",
-    "who": ["VOLUNTEER", "IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "VOLUNTEER",
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /footfall/ticks/:id/void": {
     "asks": "Record.Void",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /gifts/:id/adjust": {
     "asks": "Count.Adjust",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /gifts/:id/stock": {
     "asks": "Count.Adjust",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /gifts/redemptions": {
     "asks": "Gift.Redeem",
-    "who": ["VOLUNTEER", "IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "VOLUNTEER",
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
+  },
+  "POST /gifts/redemptions/:id/void": {
+    "asks": "Record.Void",
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /incidents": {
     "asks": "Incident.Report",
-    "who": ["VOLUNTEER", "IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "VOLUNTEER",
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "POST /incidents/:id/follow-ups": {
     "asks": "Incident.Update",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /incidents/:id/status": {
     "asks": "Incident.Update",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /lifecycle": {
     "asks": "Event.Transition",
@@ -613,19 +1153,42 @@
   },
   "POST /lost-found": {
     "asks": "LostFound.Log",
-    "who": ["VOLUNTEER", "IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "VOLUNTEER",
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /lost-found/:id/claim": {
     "asks": "LostFound.Claim",
-    "who": ["VOLUNTEER", "IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "VOLUNTEER",
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /lost-found/close-out": {
     "asks": "LostFound.CloseOut",
-    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /lost-person": {
     "asks": "LostPerson.Raise",
-    "who": ["VOLUNTEER", "IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "VOLUNTEER",
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "POST /lost-person/:id/ack": {
     "asks": "Alert.Ack",
@@ -633,7 +1196,12 @@
   },
   "POST /lost-person/:id/resolve": {
     "asks": "LostPerson.Resolve",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /me/check-in": {
     "asks": "Shift.CheckIn",
@@ -645,7 +1213,13 @@
   },
   "POST /media/uploads": {
     "asks": "LostFound.Log",
-    "who": ["VOLUNTEER", "IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "VOLUNTEER",
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /notifications/subscriptions": {
     "asks": "Self.Read",
@@ -657,27 +1231,56 @@
   },
   "POST /permissions/simulate": {
     "asks": "Settings.Read",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /registrations": {
     "asks": "Registration.Create",
-    "who": ["VOLUNTEER", "IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "VOLUNTEER",
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /registrations/:id/void": {
     "asks": "Record.Void",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /registrations/group": {
     "asks": "Registration.Create",
-    "who": ["VOLUNTEER", "IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "VOLUNTEER",
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /reports/archive-export": {
     "asks": "Report.Export",
-    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    "who": [
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "LEAD",
+      "ADMIN"
+    ]
   },
   "POST /roster/briefing-slots": {
     "asks": "Roster.Edit",
-    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /roster/briefing-slots/:id/complete": {
     "asks": "Briefing.Complete",
@@ -685,7 +1288,11 @@
   },
   "POST /roster/import": {
     "asks": "Roster.Edit",
-    "who": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /roster/swaps": {
     "asks": "Swap.Request",
@@ -693,7 +1300,12 @@
   },
   "POST /roster/swaps/:id/decide": {
     "asks": "Swap.Decide",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /roster/swaps/:id/withdraw": {
     "asks": "Self.Read",
@@ -701,31 +1313,63 @@
   },
   "POST /roster/volunteers": {
     "asks": "People.Invite",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /schedules/:id/cancel": {
     "asks": "Schedule.Manage",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /schedules/lifecycle": {
     "asks": "Schedule.Manage",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "POST /schedules/reports": {
     "asks": "Schedule.Manage",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "PUT /announcements/drafts/:id": {
     "asks": "Announcement.SendStation",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "PUT /announcements/drafts/:id/schedules/:scheduleId": {
     "asks": "Announcement.SendStation",
-    "who": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "IC",
+      "DEPUTY_COORDINATOR",
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
+  },
+  "PUT /branding/draft": {
+    "asks": "Content.Edit",
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "PUT /content/draft": {
     "asks": "Content.Edit",
-    "who": ["CHIEF_COORDINATOR", "ADMIN"]
+    "who": [
+      "CHIEF_COORDINATOR",
+      "ADMIN"
+    ]
   },
   "PUT /permissions": {
     "asks": "Permissions.Edit",

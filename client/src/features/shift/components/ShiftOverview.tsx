@@ -7,7 +7,7 @@ import { stationLinks } from '@/navigation';
 import { ShiftActions } from './ShiftActions';
 import { NavTile } from '@/shared/ui/NavTile';
 
-import { Callout, ButtonLink, Card, CardGrid, CardTitle, Section } from '@/shared/ui';
+import { ButtonLink, Card, CardGrid, CardTitle, Section, ErrorState } from '@/shared/ui';
 
 import { useAttendance } from '@/features/attendance';
 import { useAllows, useEventTime } from '@/features/session';
@@ -65,9 +65,7 @@ export function ShiftCard({ me }: { me: MeResponse }): ReactNode {
         setConfirmingCheckOut={setConfirmingCheckOut}
       />
       {checkIn.isError || checkOut.isError ? (
-        <Callout tone="alert" className="mt-sm">
-          Your shift could not be updated. Please try again.
-        </Callout>
+        <ErrorState error={checkIn.error ?? checkOut.error}>Your shift could not be updated. Please try again.</ErrorState>
       ) : null}
     </Card>
   );

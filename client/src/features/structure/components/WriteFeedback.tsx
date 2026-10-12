@@ -1,4 +1,4 @@
-import { Callout } from '@/shared/ui';
+import { Callout, MutationFeedback } from '@/shared/ui';
 export function WriteFeedback({
   error,
   saved,
@@ -15,16 +15,7 @@ export function WriteFeedback({
           {formError}
         </Callout>
       ) : null}
-      {error ? (
-        <Callout tone="alert" role="alert">
-          {error.message}
-        </Callout>
-      ) : null}
-      {saved ? (
-        <Callout tone="ok" role="status">
-          Saved.
-        </Callout>
-      ) : null}
+      <MutationFeedback error={error} saved={saved} operation="Saving event structure" />
     </>
   );
 }

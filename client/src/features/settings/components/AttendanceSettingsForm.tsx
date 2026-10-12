@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import { useMyPermissions } from '@/features/session';
-import { ApiError } from '@/shared/lib/apiErrors';
-import { Callout, Card, LoadingRows, Section } from '@/shared/ui';
+import { Card, LoadingRows, Section, ErrorState } from '@/shared/ui';
 import { useAttendanceConfig } from '../queries';
 import { AttendanceRootField } from './AttendanceRootField';
 import { TrustedNetworksField } from './TrustedNetworksField';
@@ -27,9 +26,7 @@ export function AttendanceSettingsForm({ enabled }: { enabled: boolean }): React
       <Card className="flex flex-col gap-lg">
         {config.isPending ? <LoadingRows /> : null}
         {config.isError ? (
-          <Callout tone="alert" role="alert" title="Attendance setup unavailable">
-            {config.error instanceof ApiError ? config.error.message : 'Try again in a moment.'}
-          </Callout>
+          <ErrorState error={config.error} />
         ) : null}
         {config.data ? (
           <>

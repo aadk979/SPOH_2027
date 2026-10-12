@@ -12,7 +12,8 @@ export async function sendAnnouncementHandler(req: Request, res: Response): Prom
   const body = validatedBody<CreateAnnouncementRequest>(req);
   const announcement = await sendAnnouncement(
     body,
-    { volunteerId: auth.volunteerId, role: auth.role, scope: { eventId: auth.eventId } },
+    { volunteerId: auth.volunteerId, membershipId: auth.membershipId,
+      role: auth.role, scope: { eventId: auth.eventId } },
     auditContextFrom(req),
   );
   res.status(201).json({ announcement });

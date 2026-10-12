@@ -2,8 +2,13 @@ import type { Express } from 'express';
 import request from 'supertest';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../../../src/app/createApp.js';
-import { logger } from '../../../src/platform/logger/index.js';
+import { StationDashboardResponse } from '@spoh/shared';
+import { claimDueDeliveries } from '../../../src/modules/announcement/application/claimDueDeliveries.js';
+import { executeClaimedDelivery } from '../../../src/modules/announcement/application/executeClaimedDelivery.js';
+import type { DevicePushInput, DevicePushResult } from '../../../src/modules/notification/index.js';
+import { fixedClock } from '../../../src/platform/time/index.js';
 import { resetDatabase, rawDb } from '../../helpers/db.js';
+import { FROZEN_NOW } from '../../setup.js';
 import {
   assignToStation,
   bearer,
@@ -156,6 +161,7 @@ describe('dashboard, report and import numbers (P03 repros)', () => {
   // F02-011
   it('lists a person rostered in both blocks so the two rows can be told apart', async () => {
     const ic = await createVolunteer({ email: 'ic@numbers.test', role: 'IC' });
+    await assignToStation({ volunteerId: ic.id, stationId, eventDayId: dayId });
     await assignToStation({ volunteerId: volunteer.id, stationId, eventDayId: dayId });
     await assignToStation({
       volunteerId: volunteer.id,
@@ -169,22 +175,31 @@ describe('dashboard, report and import numbers (P03 repros)', () => {
       .set('Authorization', bearer(ic));
     expect(response.status).toBe(200);
 
-    // The IC console keys "Who is here" by volunteerId: two identical rows are
-    // a duplicate React key and a person listed twice with nothing to say why.
-    const rows = (response.body.roster as unknown[]).map((row) => JSON.stringify(row));
+    const dashboard = StationDashboardResponse.parse(response.body);
+    expect(dashboard.rosterAvailability).toBe('available');
+    expect(dashboard.roster).toHaveLength(3);
+    const assignments = dashboard.roster.filter((row) => row.volunteerId === volunteer.id);
+    const rows = assignments.map((row) => JSON.stringify(row));
     expect(rows).toHaveLength(2);
     expect(new Set(rows).size).toBe(2);
+    expect(new Set(assignments.map((row) => row.assignmentId)).size).toBe(2);
+    expect(new Set(assignments.map((row) => row.shift.id)).size).toBe(2);
+    expect(assignments.map((row) => row.shift.code).sort()).toEqual(['AFTERNOON', 'MORNING']);
   });
 
   // F03-014
   it('pushes an urgent announcement to the same people it says it reaches', async () => {
     const booth = (await createStation({ code: 'BOOTH' })).id;
     const ic = await createVolunteer({ email: 'ic@numbers.test', role: 'IC' });
-    await createVolunteer({ email: 'deputy@numbers.test', role: 'DEPUTY_COORDINATOR' });
+    const deputy = await createVolunteer({ email: 'deputy@numbers.test', role: 'DEPUTY_COORDINATOR' });
     await assignToStation({ volunteerId: ic.id, stationId: booth, eventDayId: dayId });
     await assignToStation({ volunteerId: volunteer.id, stationId: booth, eventDayId: dayId });
 
-    const warn = vi.spyOn(logger, 'warn');
+    for (const person of [ic, volunteer, deputy, chief]) {
+      await rawDb.pushSubscription.create({ data: { volunteerId: person.id,
+        endpoint: `https://push.example.test/${person.id}`, p256dh: 'synthetic-key', auth: 'synthetic-auth',
+        lastSeenAt: FROZEN_NOW } });
+    }
 
     const response = await request(app)
       .post('/api/v1/announcements')
@@ -198,16 +213,25 @@ describe('dashboard, report and import numbers (P03 repros)', () => {
     const audience = response.body.announcement.audienceCount as number;
     expect(audience).toBe(1);
 
-    // Push is not configured in tests, so dispatch logs the recipient count.
-    await vi.waitFor(() => {
-      expect(warn).toHaveBeenCalledWith(
-        expect.objectContaining({ kind: 'announcement.urgent' }),
-        expect.any(String),
-      );
-    });
-    const call = warn.mock.calls.find(
-      ([fields]) => (fields as { kind?: string }).kind === 'announcement.urgent',
-    );
-    expect((call?.[0] as { recipients: number }).recipients).toBe(audience);
+    const announcementId = response.body.announcement.id as string;
+    const plan = await rawDb.announcementDeliveryPlan.findFirstOrThrow({ where: { announcementId } });
+    expect(plan).toMatchObject({ recipientCount: audience, deviceCount: 1 });
+    expect((await rawDb.notice.findMany({ where: { sourceId: announcementId } }))
+      .map((row) => row.recipientPersonId)).toEqual([ic.id]);
+    const deliveries = await rawDb.announcementPushDelivery.findMany({ where: { planId: plan.id } });
+    expect(deliveries.map((row) => row.recipientPersonId)).toEqual([ic.id]);
+    expect(deliveries[0]?.status).toBe('PENDING');
+    expect(await rawDb.noticeDelivery.count()).toBe(0);
+
+    const clock = fixedClock(FROZEN_NOW);
+    const claims = await claimDueDeliveries({ workerId: 'numbers-repro', clock });
+    expect(claims).toHaveLength(1);
+    const send = vi.fn<(input: DevicePushInput) => Promise<DevicePushResult>>().mockResolvedValue('ACCEPTED');
+    expect(await executeClaimedDelivery({ claim: claims[0]!, clock, send })).toBe('SENT');
+    expect(send).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
+      target: expect.objectContaining({ endpoint: `https://push.example.test/${ic.id}` }),
+      payload: expect.objectContaining({ kind: 'announcement.urgent', priority: 'URGENT' }),
+    }));
+    expect((await rawDb.announcementPushDelivery.findUniqueOrThrow({ where: { id: deliveries[0]!.id } })).status).toBe('SENT');
   });
 });

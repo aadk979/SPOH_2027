@@ -10,17 +10,20 @@ import {
 } from '../data/repo.js';
 import { buildFunnelStages } from '../domain/funnel.js';
 import type { ReportingScope } from '../../../platform/db/rehearsalFilter.js';
+import { systemClock } from '../../../platform/time/index.js';
 
 /** The card funnel for a time range. Every stage is a count of cards. */
 export async function getFunnel(
   eventScope: ReportingScope,
   range: CardFunnelQuery,
+  now = systemClock.now(),
 ): Promise<CardFunnelResponse> {
   const scope = {
     ...eventScope,
     includeRehearsal: range.includeRehearsal ?? eventScope.includeRehearsal ?? false,
   };
   const filter = {
+    asOf: now,
     ...(range.from ? { from: new Date(range.from) } : {}),
     ...(range.to ? { to: new Date(range.to) } : {}),
   };
@@ -37,6 +40,8 @@ export async function getFunnel(
     ]);
 
   return {
+    observation: { ...(range.from ? { from: range.from } : {}), ...(range.to ? { to: range.to } : {}),
+      asOf: filter.asOf.toISOString(), includeRehearsal: scope.includeRehearsal },
     rehearsalIncluded: scope.includeRehearsal,
     unit: 'cards',
     issued,

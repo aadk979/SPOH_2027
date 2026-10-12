@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { LiveDashboardResponse } from '@spoh/shared';
 import { CardGrid, Section } from '@/shared/ui';
 import { StatTile } from '@/features/dashboard';
+import { giftLedgerLink, giftRedemptionsLink } from '../model/drillLinks';
 export function GiftStockPanel({ data }: { data: LiveDashboardResponse }): ReactNode {
   return (
     <Section title="Gift stock">
@@ -9,6 +10,8 @@ export function GiftStockPanel({ data }: { data: LiveDashboardResponse }): React
         {data.gifts.map((gift) => (
           <StatTile
             key={`${gift.id}:${gift.rehearsal ?? false}`}
+            href={giftLedgerLink(gift.id, gift.rehearsal, data.asOf)}
+            noteHref={giftRedemptionsLink(gift.id, gift.rehearsal, data.asOf)}
             label={
               data.rehearsalIncluded
                 ? `${gift.name} · ${gift.rehearsal ? 'practice' : 'live'}`

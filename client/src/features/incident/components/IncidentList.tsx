@@ -1,13 +1,11 @@
-import { Button, Callout, EmptyState, LoadingRows } from '@/shared/ui';
+import { Button, EmptyState, LoadingRows, ErrorState } from '@/shared/ui';
 import type { useIncidents } from '../queries';
 import { IncidentRecordCard } from './IncidentRecordCard';
 
 export function IncidentList({ query }: { query: ReturnType<typeof useIncidents> }) {
   if (query.isError)
     return (
-      <Callout tone="alert" role="alert">
-        {query.error.message}
-      </Callout>
+      <ErrorState error={query.error} />
     );
   const pages = query.data?.pages;
   const records = pages?.flatMap((page) => page.data) ?? [];

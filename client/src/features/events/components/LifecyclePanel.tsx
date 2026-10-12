@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useCurrentSession } from '@/features/session';
-import { Button, Callout, Card, LoadingRows, Section } from '@/shared/ui';
+import { Button, Card, LoadingRows, Section, ErrorState } from '@/shared/ui';
 import { useLifecycleReadiness } from '../queries';
 import { LifecycleReview } from './LifecycleReview';
 
@@ -29,9 +29,7 @@ export function LifecyclePanel({ enabled }: { enabled: boolean }) {
           <div id="event-lifecycle-controls" className="flex flex-col gap-md">
             {readiness.isPending ? <LoadingRows /> : null}
             {readiness.isError ? (
-              <Callout tone="alert" role="alert">
-                Lifecycle readiness is unavailable. Reload before making a change.
-              </Callout>
+              <ErrorState error={readiness.error}>Lifecycle readiness is unavailable. Reload before making a change.</ErrorState>
             ) : null}
             <Button
               variant="quiet"

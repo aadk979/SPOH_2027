@@ -4,7 +4,7 @@ export type ComposerValues = {
   body: string;
   priority: Priority;
   requiresAck: boolean;
-  eventWide: boolean;
+  audienceIntent: 'EVENT' | 'TARGETED';
   stationId: string;
 };
 
@@ -12,7 +12,7 @@ export const EMPTY_COMPOSER: ComposerValues = {
   body: '',
   priority: 'OPERATIONAL',
   requiresAck: false,
-  eventWide: false,
+  audienceIntent: 'TARGETED',
   stationId: '',
 };
 
@@ -25,6 +25,6 @@ export function toAnnouncementRequest(values: ComposerValues, ownStationId: stri
     body: values.body.trim(),
     priority: values.priority,
     requiresAck: values.requiresAck,
-    target: values.eventWide ? {} : { stationId: values.stationId || ownStationId },
+    target: values.audienceIntent === 'EVENT' ? {} : { stationId: values.stationId || ownStationId || '' },
   };
 }

@@ -168,26 +168,30 @@ export async function upsertAssignment(
     shiftId: string;
     roleLabel: string;
   },
-): Promise<{ created: boolean }> {
+): Promise<{ id: string; created: boolean; changed: boolean }> {
+  await tx.$queryRaw`SELECT 1 FROM pg_advisory_xact_lock(hashtextextended(
+    ${`assignment:${scope.eventId}:${data.volunteerId}:${data.shiftId}`}, 0))`;
   const existing = await tx.shiftAssignment.findUnique({
     where: {
       volunteerId_shiftId: { volunteerId: data.volunteerId, shiftId: data.shiftId },
       eventId: scope.eventId,
     },
-    select: { id: true },
+    select: { id: true, stationId: true, eventDayId: true, roleLabel: true },
   });
   const links = await assignmentLinks(tx, scope, data.volunteerId);
 
   if (existing) {
+    if (existing.stationId === data.stationId && existing.eventDayId === data.eventDayId
+      && existing.roleLabel === data.roleLabel) return { id: existing.id, created: false, changed: false };
     await tx.shiftAssignment.update({
       where: { id: existing.id, eventId: scope.eventId },
-      data: { stationId: data.stationId, roleLabel: data.roleLabel, ...links },
+      data: { stationId: data.stationId, eventDayId: data.eventDayId, roleLabel: data.roleLabel, ...links },
     });
-    return { created: false };
+    return { id: existing.id, created: false, changed: true };
   }
 
-  await tx.shiftAssignment.create({ data: { ...data, ...links } });
-  return { created: true };
+  const row = await tx.shiftAssignment.create({ data: { ...data, ...links }, select: { id: true } });
+  return { id: row.id, created: true, changed: true };
 }
 
 /** The accounts with these emails, by email, as this event's roster sees them. */

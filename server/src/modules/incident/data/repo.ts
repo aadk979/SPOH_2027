@@ -39,6 +39,7 @@ export async function createIncident(
   severity: IncidentWithContext['severity'];
   stationId: string | null;
   rehearsal: boolean;
+  reportedAt: Date;
 }> {
   return tx.incident.create({
     data: {
@@ -47,7 +48,7 @@ export async function createIncident(
       eventId: scope.eventId,
       reportedByMembershipId: await membershipIdOf(tx, scope, data.reportedById),
     },
-    select: { id: true, type: true, severity: true, stationId: true, rehearsal: true },
+    select: { id: true, type: true, severity: true, stationId: true, rehearsal: true, reportedAt: true },
   });
 }
 

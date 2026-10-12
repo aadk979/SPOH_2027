@@ -10,6 +10,7 @@ import { requestId } from '../platform/http/requestId.js';
 import { staticClient } from '../platform/http/staticClient.js';
 import { healthRouter } from '../modules/health/index.js';
 import { createApiRouter } from './routes.js';
+import { publicBrandingForSlug } from '../modules/branding/index.js';
 
 /**
  * Express application factory.
@@ -33,8 +34,8 @@ export function createApp(): Express {
   if (env.CLIENT_DIR)
     app.use(
       staticClient(env.CLIENT_DIR, env.APP_BASE_URL?.replace(/\/$/, ''), {
-        bucket: env.S3_MEDIA_BUCKET,
-        region: env.AWS_REGION,
+        storage: { bucket: env.S3_MEDIA_BUCKET, region: env.AWS_REGION },
+        publicBranding: publicBrandingForSlug,
       }),
     );
 

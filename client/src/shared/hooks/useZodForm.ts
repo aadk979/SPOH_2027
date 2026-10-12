@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { z } from 'zod';
 
 export type FormErrors = Record<string, string | undefined>;
@@ -50,6 +50,12 @@ export function useZodForm<Schema extends z.ZodType, Values extends object>(
 ) {
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState<FormErrors>({});
+  const invalidScope = useRef<ParentNode | null>(null);
+  useEffect(() => {
+    if (Object.keys(errors).length === 0) return;
+    const invalid = invalidScope.current?.querySelector<HTMLElement>('[aria-invalid="true"]');
+    invalid?.focus();
+  }, [errors]);
 
   function setField<Key extends keyof Values>(key: Key, value: Values[Key]): void {
     setValues((current) => ({ ...current, [key]: value }));
@@ -70,6 +76,8 @@ export function useZodForm<Schema extends z.ZodType, Values extends object>(
   }
 
   function validate(input: unknown = values): z.output<Schema> | null {
+    const active = typeof document === 'undefined' ? null : document.activeElement;
+    invalidScope.current = active?.closest('form, [data-form]') ?? (typeof document === 'undefined' ? null : document);
     const result = schema.safeParse(input);
     setErrors(result.success ? {} : issueMessages(result.error.issues, errorFields));
     return result.success ? result.data : null;

@@ -3,7 +3,8 @@ import '@testing-library/jest-dom/vitest';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { api } from '@/shared/lib/api';
+import { api, ApiError } from '@/shared/lib/api';
+import ContentScreen from '@/features/content/screens/ContentScreen';
 import { ContentEditor } from '@/features/content/components/ContentEditor';
 import { ContentPublishPanel } from '@/features/content/components/ContentPublishPanel';
 import { FloorPlanUpload } from '@/features/content/components/FloorPlanUpload';
@@ -15,8 +16,10 @@ const session = vi.hoisted(() => ({ allows: true, person: 'person_a' }));
 vi.mock('@/features/session', () => ({
   useAllows: () => () => session.allows,
   useCurrentSession: () => ({ volunteerId: session.person, role: 'ADMIN' }),
+  useRequireSession: () => ({ volunteerId: session.person, role: 'ADMIN' }),
   useEventTime: () => ({ dateTime: (value: string) => value }),
 }));
+vi.mock('@/shared/shell/AppShell', () => ({ AppShell: ({ children }: { children: ReactNode }) => <main>{children}</main> }));
 vi.mock('@/features/stations', () => ({
   useStations: () => ({
     data: [{ id: 'station_a', name: 'Welcome desk', tags: [{ id: 'tag_a', label: 'Computing' }] }],
@@ -60,10 +63,12 @@ describe('guide editor', () => {
       target: { value: 'Call your IC.' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Save draft' }));
-    await screen.findByText(/Connection failed/);
+    await screen.findByText('Saving the draft was not confirmed');
+    expect(screen.queryByText('Connection failed')).toBeNull();
     const first = call.mock.calls[0]![1]?.body;
     fireEvent.click(screen.getByRole('button', { name: 'Save draft' }));
     await waitFor(() => expect(call).toHaveBeenCalledTimes(2));
+    await screen.findByText('Draft saved. Review this version before publishing.');
     expect(call.mock.calls[1]![1]?.body).toEqual(first);
     expect(first).toMatchObject({
       expectedVersion: 2,
@@ -129,6 +134,8 @@ describe('guide editor', () => {
       target: { files: [new File(['svg'], 'bad.svg', { type: 'image/svg+xml' })] },
     });
     expect(screen.getByRole('alert').textContent).toContain('Choose a PNG');
+    expect(screen.getByLabelText(/^Level one: floor plan/)).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByLabelText(/^Level one: floor plan/)).toHaveAccessibleDescription(/Choose a PNG/);
     expect(call).not.toHaveBeenCalled();
   });
   it('keeps every map control locked during an upload and preserves other section edits', async () => {
@@ -181,7 +188,8 @@ describe('guide editor', () => {
     const fields = screen.getByRole('group', { name: 'Floor map fields' }) as HTMLFieldSetElement;
     expect(fields.disabled).toBe(true);
     await act(async () => failUpload(new Error('Upload connection failed')));
-    await screen.findByText('Upload connection failed');
+    await screen.findByText('This action was not confirmed');
+    expect(screen.queryByText('Upload connection failed')).toBeNull();
     expect(fields.disabled).toBe(false);
     expect(screen.queryByText('Floor plan uploaded.')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Add level' }));
@@ -244,5 +252,31 @@ describe('publication review', () => {
     await screen.findByText(/published guide is unavailable/);
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
     await screen.findByText('Find the nearest exit.');
+  });
+});
+
+describe('saved guide ownership', () => {
+  it('unmounts the draft and drops retained queries when editing authority disappears', async () => {
+    call.mockImplementation(async (path) => ({ data: path.endsWith('/versions') ? [] : GUIDE_DRAFT }));
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    clients.push(client);
+    const view = render(<QueryClientProvider client={client}><ContentScreen /></QueryClientProvider>);
+    await screen.findByRole('button', { name: 'Save draft' });
+    session.allows = false;
+    view.rerender(<QueryClientProvider client={client}><ContentScreen /></QueryClientProvider>);
+    expect(screen.queryByRole('button', { name: 'Save draft' })).toBeNull();
+    await waitFor(() => expect(client.getQueriesData({ queryKey: [TEST_EVENT.id, 'content'] })).toEqual([]));
+  });
+  it('hides cached drafts after denied refresh, retains the request ID and unmounts all private readers', async () => {
+    call.mockImplementation(async (path) => ({ data: path.endsWith('/versions') ? [] : GUIDE_DRAFT }));
+    const client = show(<ContentScreen />);
+    await screen.findByRole('button', { name: 'Save draft' });
+    call.mockRejectedValue(new ApiError(403, { code: 'FORBIDDEN', message: 'Current guide authority was revoked.', requestId: 'synthetic-guide-denied' }));
+    await act(() => client.invalidateQueries({ queryKey: [TEST_EVENT.id, 'content'] }));
+    await screen.findByText('synthetic-guide-denied');
+    expect(screen.queryByRole('button', { name: 'Save draft' })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Reload draft|Retry/ })).toBeNull();
+    await waitFor(() => expect(client.getQueriesData({ queryKey: [TEST_EVENT.id, 'content'] })).toEqual([]));
+    expect(call.mock.calls[0]?.[1]).toMatchObject({ cache: 'no-store', signal: expect.any(AbortSignal) });
   });
 });
