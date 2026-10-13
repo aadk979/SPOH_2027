@@ -62,7 +62,7 @@ jobs:
         run: |
           npx tsx infra/cdk/bin/staging-permission-matrix.ts "$POLICY_STORE_ID" \
             .verification/permission-cases.jsonl .verification/permission-matrix.json "$EXPECTED_SHA" "$AWS_REGION"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: staging-permission-matrix-${{ github.sha }}
