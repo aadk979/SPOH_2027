@@ -4,11 +4,39 @@ import { describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
 import type { PlatformStack } from '../src/platformStack.js';
 
-const app = buildApp(new App({ context: { imageTag: 'release', serviceImageTag: 'release' } }));
+const app = buildApp(new App({ context: { imageTag: 'release', serviceImageTag: 'release',
+  '@aws-cdk/core:enablePartitionLiterals': true } }));
 const templateFor = (stage: string) =>
   Template.fromStack(app.node.findChild(`Spoh-${stage}-Platform`) as PlatformStack);
 
 describe('complete operational monitoring', () => {
+  // SNS resource policies accept this service-defined list, not the IAM sns:* wildcard.
+  // https://docs.aws.amazon.com/sns/latest/dg/sns-access-policy-language-api-permissions-reference.html
+  it.each(['staging', 'prod'])('rejects insecure %s topic access using valid SNS policy actions', (stage) => {
+    const template = templateFor(stage);
+    const policies = Object.values(template.findResources('AWS::SNS::TopicPolicy'));
+    expect(policies).toHaveLength(1);
+    const deny = policies[0]!.Properties.PolicyDocument.Statement.find((statement: { Effect: string }) => statement.Effect === 'Deny');
+    expect(deny).toMatchObject({ Principal: { AWS: '*' }, Condition: { Bool: { 'aws:SecureTransport': 'false' } } });
+    expect([...deny.Action].sort()).toEqual([
+      'sns:AddPermission', 'sns:DeleteTopic', 'sns:GetDataProtectionPolicy', 'sns:GetTopicAttributes',
+      'sns:ListSubscriptionsByTopic', 'sns:ListTagsForResource', 'sns:Publish', 'sns:PutDataProtectionPolicy',
+      'sns:RemovePermission', 'sns:SetTopicAttributes', 'sns:Subscribe',
+    ]);
+    const topic = Object.keys(template.findResources('AWS::SNS::Topic'))[0]!;
+    expect(deny.Resource).toEqual({ Ref: topic });
+  });
+  it.each(['staging', 'prod'])('allows only the actual %s alarm ARN namespace to publish', (stage) => {
+    const template = templateFor(stage);
+    const policy = Object.values(template.findResources('AWS::SNS::TopicPolicy'))[0]!;
+    const allows = policy.Properties.PolicyDocument.Statement.filter((statement: { Effect: string }) => statement.Effect === 'Allow');
+    expect(allows).toEqual([{
+      Sid: expect.any(String), Effect: 'Allow', Principal: { Service: 'cloudwatch.amazonaws.com' }, Action: 'sns:Publish',
+      Resource: { Ref: Object.keys(template.findResources('AWS::SNS::Topic'))[0]! },
+      Condition: { StringEquals: { 'aws:SourceAccount': '665146708212' },
+        ArnLike: { 'aws:SourceArn': `arn:aws:cloudwatch:ap-southeast-1:665146708212:alarm:spoh-${stage}-*` } },
+    }]);
+  });
   it('synthesises the real resource catalogue with nag validation', () =>
     expect(() => app.synth()).not.toThrow());
   it.each(['staging', 'prod'])(

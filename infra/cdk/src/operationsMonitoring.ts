@@ -1,4 +1,5 @@
 import {
+  ArnFormat,
   CfnCondition,
   CfnOutput,
   CfnParameter,
@@ -185,7 +186,10 @@ export class OperationsMonitoring extends Construct {
     });
     topic.addToResourcePolicy(
       new PolicyStatement({
-        actions: ['sns:*'],
+        // SNS topic policies reject IAM action wildcards. Deny every supported topic-policy action.
+        actions: ['sns:AddPermission', 'sns:DeleteTopic', 'sns:GetDataProtectionPolicy', 'sns:GetTopicAttributes',
+          'sns:ListSubscriptionsByTopic', 'sns:ListTagsForResource', 'sns:Publish', 'sns:PutDataProtectionPolicy',
+          'sns:RemovePermission', 'sns:SetTopicAttributes', 'sns:Subscribe'],
         resources: [topic.topicArn],
         effect: Effect.DENY,
         principals: [new AnyPrincipal()],
@@ -201,6 +205,7 @@ export class OperationsMonitoring extends Construct {
           StringEquals: { 'aws:SourceAccount': stack.account },
           ArnLike: {
             'aws:SourceArn': stack.formatArn({
+              arnFormat: ArnFormat.COLON_RESOURCE_NAME,
               service: 'cloudwatch',
               resource: 'alarm',
               resourceName: `spoh-${stage}-*`,
