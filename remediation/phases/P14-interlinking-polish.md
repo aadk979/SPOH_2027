@@ -119,4 +119,7 @@ states are consistent, and the event's identity (name, branding) appears through
 
 ## Phase report
 
-_Fill in on completion._
+[Interlinking and polish build report, 11–12 October 2026](../reports/P14/build-2026-10-11.md).
+Build accepted at `3bff8f868d1c8ac2510bff749d3f205e56ae36cd`, all five jobs
+green on CI38243217914. Browser/visual/keyboard/axe and owner copy acceptance
+remain P16.1/P16.8 under ADR-011; this is not their sign-off.

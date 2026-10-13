@@ -411,7 +411,8 @@ recorded in each ADR's _Migration_ section.
 
 ## P15 source and deferred acceptance ledger — 13 October 2026
 
-P15 complete local gate passed actual 0; exact-SHA CI is pending. The ranked tables above
+P15 complete local gate passed actual 0; all five exact-SHA CI38398631231 jobs
+passed at `14baa68c2e947c4cdfee376f1e33aca6c1030b5e`. The ranked tables above
 remain baseline history; operational High findings are not declared zero open
 risk. The [manual review](../reports/P15/security-review-2026-10-13.md),
 [253-control register](../reports/P15/asvs-review-2026-10-13.md),
@@ -419,17 +420,17 @@ risk. The [manual review](../reports/P15/security-review-2026-10-13.md),
 [operations runbook](../reports/P15/security-operations-runbook.md) record current
 source repairs and explicit residuals.
 
-| IDs | Implemented build work | Remaining acceptance / owner action |
-| --- | --- | --- |
-| PF-02, F03-042, F04-006 | Shared Postgres HTTP/denial counters, fixed settings/tiers, bounded cleanup/refunds and multi-instance tests. | Exact-SHA CI; P16 provider/campus/shared-instance load proof. |
-| F04-007 | Exact bootstrap/style hashes, fail-closed CSP manifests and Firebase/Express mappings, linked branding CSS and artifact tests. | P16 deployed HTML/error/redirect/browser headers; no current A-grade hosting claim. |
-| F04-015, F03-039, F03-040 | Effective SQL app audit restrictions, immutable owner-only 400-day cleanup, post-commit batches/cursor and append-only CloudWatch task rights. | P16 actual shipping, denied log administration, receipt and cost proof. |
-| F04-011 | Explicit key versions, preload/flip/retire protocol, independent attendance/VAPID, operator DB rollback and crypto/log inventories. | Actual rotation/recovery rehearsal and owner compromise choices. |
-| F04-014, F04-013 | Event deadlines, mutable staff text/lastSeen cleanup, curated export/erasure, terminal credentials/handoffs and media/identity maintenance. | DB frozen reports have no implemented purge deadline. Provider/backup/artifact policies and deployed synthetic expiry remain owner/P16 work. |
-| F04-002, F04-023 | Exact code-only provider settings, suppressed marked account creation, durable ambiguous invitation journals, pool-wide 50/day allowance and 30-day temporary passwords. | P16 real pool/MFA/replay/default sender receipt and assurance review; no SES/paid detector enabled. |
-| F04-010, F04-012, F04-019 | ECS task roles, lean CDK topology, verified-TLS updater and production/decommission procedures; prior host/pools are torn down. | Retained IAM users still exist. Owner-approved retirement, production/cutover and January fallback stay held. No account-wide key-removal claim. |
-| F04-017, F04-018 | CDK monitoring/backup/restore definitions and procedures. | Real human alarm receipt, failure drills and timed restore remain P16. |
-| F04-022, PF-11 | Update/audit delivery, dependency response, hashed component inventory and current security runbooks. | Dated CDK exception remains through 31 October; native npm SBOM refused overrides. Deployed provenance and full handover remain P16. |
+| IDs                       | Implemented build work                                                                                                                                                   | Remaining acceptance / owner action                                                                                                              |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| PF-02, F03-042, F04-006   | Shared Postgres HTTP/denial counters, fixed settings/tiers, bounded cleanup/refunds and multi-instance tests; exact-SHA CI passed.                                       | P16 provider/campus/shared-instance load proof.                                                                                                  |
+| F04-007                   | Exact bootstrap/style hashes, fail-closed CSP manifests and Firebase/Express mappings, linked branding CSS and artifact tests.                                           | P16 deployed HTML/error/redirect/browser headers; no current A-grade hosting claim.                                                              |
+| F04-015, F03-039, F03-040 | Effective SQL app audit restrictions, immutable owner-only 400-day cleanup, post-commit batches/cursor and append-only CloudWatch task rights.                           | P16 actual shipping, denied log administration, receipt and cost proof.                                                                          |
+| F04-011                   | Explicit key versions, preload/flip/retire protocol, independent attendance/VAPID, operator DB rollback and crypto/log inventories.                                      | Actual rotation/recovery rehearsal and owner compromise choices.                                                                                 |
+| F04-014, F04-013          | Event deadlines, mutable staff text/lastSeen cleanup, curated export/erasure, terminal credentials/handoffs and media/identity maintenance.                              | DB frozen reports have no implemented purge deadline. Provider/backup/artifact policies and deployed synthetic expiry remain owner/P16 work.     |
+| F04-002, F04-023          | Exact code-only provider settings, suppressed marked account creation, durable ambiguous invitation journals, pool-wide 50/day allowance and 30-day temporary passwords. | P16 real pool/MFA/replay/default sender receipt and assurance review; no SES/paid detector enabled.                                              |
+| F04-010, F04-012, F04-019 | ECS task roles, lean CDK topology, verified-TLS updater and production/decommission procedures; prior host/pools are torn down.                                          | Retained IAM users still exist. Owner-approved retirement, production/cutover and January fallback stay held. No account-wide key-removal claim. |
+| F04-017, F04-018          | CDK monitoring/backup/restore definitions and procedures.                                                                                                                | Real human alarm receipt, failure drills and timed restore remain P16.                                                                           |
+| F04-022, PF-11            | Update/audit delivery, dependency response, hashed component inventory and current security runbooks.                                                                    | Dated CDK exception remains through 31 October; native npm SBOM refused overrides. Deployed provenance and full handover remain P16.             |
 
 H1–H7 and additional diagnostic, credential, delivery, media, graph and bootstrap
 source findings have implementations and meaningful tests. ADR-011 closes build

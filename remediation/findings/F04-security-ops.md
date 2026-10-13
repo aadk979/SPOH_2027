@@ -6,10 +6,11 @@ Current P15 source reconciliation is recorded in
 [the data map](../reports/P15/data-map.md) and
 [the operations runbook](../reports/P15/security-operations-runbook.md).
 The original P04 findings below remain historical evidence. P15's complete
-local gate passed actual 0; exact-SHA CI acceptance is still pending. This makes no
+local gate passed actual 0; all five exact-SHA CI38398631231 jobs passed at
+`14baa68c2e947c4cdfee376f1e33aca6c1030b5e`. This makes no
 blanket L2, zero-High operational or production-readiness claim.
 
-## Final — P15 build review, acceptance pending
+## Final — P15 build accepted; operating assurance remains open
 
 The [individual ASVS register](../reports/P15/asvs-review-2026-10-13.md)
 contains all 253 pinned L1/L2 requirements, including explicit nonapplicability,
@@ -21,7 +22,8 @@ untracked-file inclusion, actual regression limits and the unavailable
 
 H1–H7 and the additional delivery, media, graph, bootstrap and logging source
 findings have implementations and meaningful tests. The complete current-source
-local gate passed all 27 steps; exact-SHA CI is still pending. Account/production/rotation,
+local gate passed all 27 steps and all five exact-SHA CI jobs passed.
+P15 build steps close under ADR-011 §5; account/production/rotation,
 human alarm receipt, restore and provider/browser acceptance stay open under
 P16 and existing owner gates. Native npm SBOM failed on reviewed dependency
 overrides; the operations runbook records the hashed component-inventory

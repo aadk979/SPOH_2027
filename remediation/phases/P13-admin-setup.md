@@ -148,4 +148,6 @@ a screen.
 ## Phase report
 
 [Admin build report, 11 October 2026](../reports/P13/admin-build-2026-10-11.md).
-Batch validation is pending; staging/browser journeys and the IA review are deferred to P16.8.
+Build accepted at `c00da9faefda04ac2984dac177e5903a8e3b0260`, all five jobs
+green on CI38131824850. Staging/browser journeys and the owner IA review remain
+deferred to P16.1/P16.8 under ADR-011; this is not their sign-off.

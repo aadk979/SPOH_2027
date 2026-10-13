@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-12T11:46:51.839Z",
+  "updatedAt": "2026-10-13T13:04:16.386Z",
   "current": {
-    "phase": "P15",
-    "step": "P15.10"
+    "phase": "P16",
+    "step": null
   },
   "gates": [
     {
@@ -52,9 +52,9 @@
       "id": "G4",
       "title": "Product complete and interlinked",
       "signoff": false,
-      "status": "pending",
-      "passedAt": null,
-      "note": null
+      "status": "passed",
+      "passedAt": "2026-10-13T13:04:16.156Z",
+      "note": "P13 and P14 source/tests are complete on their recorded accepted application SHAs and exact CI. ADR-011 build gate reconciled; browser/visual/IA/copy owner acceptance remains P16.1/P16.8. This is not a production go or UX owner sign-off."
     },
     {
       "id": "G5",
@@ -3549,147 +3549,187 @@
         {
           "id": "P15.1",
           "title": "Close High and Blocker findings",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-12T11:46:49.390Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-13T13:04:13.217Z",
+          "commits": ["14baa68c2e947c4cdfee376f1e33aca6c1030b5e"],
           "notes": [
             {
               "at": "2026-10-12T11:46:49.391Z",
               "text": "Whole P15 source batch under ADR-011; source and authored tests first. No DB suites/browser/AWS until readiness. Production/cutover/restored-person and paid-service owner gates retained."
+            },
+            {
+              "at": "2026-10-13T13:04:13.256Z",
+              "text": "ADR-011 build acceptance, CI38398631231 all five jobs success on 14baa68c2e947c4cdfee376f1e33aca6c1030b5e. Reviewed source High/Blocker repairs and regressions accepted; BACKLOG/F04 retain operational, assurance and owner residuals without claiming zero operating High risk."
             }
           ]
         },
         {
           "id": "P15.2",
           "title": "Shared rate limiting (fixes PF-02)",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-12T11:46:49.642Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-13T13:04:13.591Z",
+          "commits": ["14baa68c2e947c4cdfee376f1e33aca6c1030b5e"],
           "notes": [
             {
               "at": "2026-10-12T11:46:49.643Z",
               "text": "Whole P15 source batch under ADR-011; source and authored tests first. No DB suites/browser/AWS until readiness. Production/cutover/restored-person and paid-service owner gates retained."
+            },
+            {
+              "at": "2026-10-13T13:04:13.631Z",
+              "text": "ADR-011 build acceptance, CI38398631231 all five jobs success on 14baa68c2e947c4cdfee376f1e33aca6c1030b5e. Shared PostgreSQL quota/denial enforcement and multi-instance regressions accepted; deployed/load proof remains P16.8/P16.2. No current WAF enabled."
             }
           ]
         },
         {
           "id": "P15.3",
           "title": "Headers, CSP, CORS and cookies",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-12T11:46:49.896Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-13T13:04:13.873Z",
+          "commits": ["14baa68c2e947c4cdfee376f1e33aca6c1030b5e"],
           "notes": [
             {
               "at": "2026-10-12T11:46:49.896Z",
               "text": "Whole P15 source batch under ADR-011; source and authored tests first. No DB suites/browser/AWS until readiness. Production/cutover/restored-person and paid-service owner gates retained."
+            },
+            {
+              "at": "2026-10-13T13:04:13.913Z",
+              "text": "ADR-011 build acceptance, CI38398631231 all five jobs success on 14baa68c2e947c4cdfee376f1e33aca6c1030b5e. Real static export script hashes, fail-closed CSP/CORS/cookie source and artifact tests accepted; deployed header grade, S3 response limitations and browser proof remain P16."
             }
           ]
         },
         {
           "id": "P15.4",
           "title": "Isolation and IDOR suite",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-12T11:46:50.160Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-13T13:04:14.141Z",
+          "commits": ["14baa68c2e947c4cdfee376f1e33aca6c1030b5e"],
           "notes": [
             {
               "at": "2026-10-12T11:46:50.160Z",
               "text": "Whole P15 source batch under ADR-011; source and authored tests first. No DB suites/browser/AWS until readiness. Production/cutover/restored-person and paid-service owner gates retained."
+            },
+            {
+              "at": "2026-10-13T13:04:14.180Z",
+              "text": "ADR-011 build acceptance, CI38398631231 all five jobs success on 14baa68c2e947c4cdfee376f1e33aca6c1030b5e. Independent variation of all 160 declared ID inputs across six roles, global private routes and cross-organisation audit regressions accepted; actual staging matrix remains P16.10."
             }
           ]
         },
         {
           "id": "P15.5",
           "title": "Authorization regression and monitoring",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-12T11:46:50.431Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-13T13:04:14.389Z",
+          "commits": ["14baa68c2e947c4cdfee376f1e33aca6c1030b5e"],
           "notes": [
             {
               "at": "2026-10-12T11:46:50.432Z",
               "text": "Whole P15 source batch under ADR-011; source and authored tests first. No DB suites/browser/AWS until readiness. Production/cutover/restored-person and paid-service owner gates retained."
+            },
+            {
+              "at": "2026-10-13T13:04:14.427Z",
+              "text": "ADR-011 build acceptance, CI38398631231 all five jobs success on 14baa68c2e947c4cdfee376f1e33aca6c1030b5e. Dispatch-only deployed permission matrix and denial/policy alarms source/tests accepted; actual nightly enablement, deployed decisions and human receipt remain P16.8."
             }
           ]
         },
         {
           "id": "P15.6",
           "title": "Secrets and credentials",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-12T11:46:50.707Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-13T13:04:14.658Z",
+          "commits": ["14baa68c2e947c4cdfee376f1e33aca6c1030b5e"],
           "notes": [
             {
               "at": "2026-10-12T11:46:50.708Z",
               "text": "Whole P15 source batch under ADR-011; source and authored tests first. No DB suites/browser/AWS until readiness. Production/cutover/restored-person and paid-service owner gates retained."
+            },
+            {
+              "at": "2026-10-13T13:04:14.695Z",
+              "text": "ADR-011 build acceptance, CI38398631231 all five jobs success on 14baa68c2e947c4cdfee376f1e33aca6c1030b5e. Explicit signing-key versions/rotation protocol, operator DB rollback and crypto/log inventories accepted; real rotation, IAM-user retirement and paid detection retain owner/P16 gates."
             }
           ]
         },
         {
           "id": "P15.7",
           "title": "Data protection and retention",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-12T11:46:50.998Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-13T13:04:14.909Z",
+          "commits": ["14baa68c2e947c4cdfee376f1e33aca6c1030b5e"],
           "notes": [
             {
               "at": "2026-10-12T11:46:50.998Z",
               "text": "Whole P15 source batch under ADR-011; source and authored tests first. No DB suites/browser/AWS until readiness. Production/cutover/restored-person and paid-service owner gates retained."
+            },
+            {
+              "at": "2026-10-13T13:04:14.947Z",
+              "text": "ADR-011 build acceptance, CI38398631231 all five jobs success on 14baa68c2e947c4cdfee376f1e33aca6c1030b5e. Retention, curated export/erasure and immutable storage constraints/tests/data map accepted; immutable DB report purge deadline remains unimplemented/unapproved and provider/backup exceptions remain explicit."
             }
           ]
         },
         {
           "id": "P15.8",
           "title": "Production hardening and decommissioning",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-12T11:46:51.275Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-13T13:04:15.156Z",
+          "commits": ["14baa68c2e947c4cdfee376f1e33aca6c1030b5e"],
           "notes": [
             {
               "at": "2026-10-12T11:46:51.276Z",
               "text": "Whole P15 source batch under ADR-011; source and authored tests first. No DB suites/browser/AWS until readiness. Production/cutover/restored-person and paid-service owner gates retained."
+            },
+            {
+              "at": "2026-10-13T13:04:15.195Z",
+              "text": "ADR-011 build acceptance, CI38398631231 all five jobs success on 14baa68c2e947c4cdfee376f1e33aca6c1030b5e. Production/recovery/decommission runbooks and bounded resumable re-provisioning plus restored-operator trust-root source/tests accepted. No real identity change, production, cutover or retirement executed; owner holds remain."
             }
           ]
         },
         {
           "id": "P15.9",
           "title": "Security review",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-12T11:46:51.547Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-13T13:04:15.413Z",
+          "commits": ["14baa68c2e947c4cdfee376f1e33aca6c1030b5e"],
           "notes": [
             {
               "at": "2026-10-12T11:46:51.548Z",
               "text": "Whole P15 source batch under ADR-011; source and authored tests first. No DB suites/browser/AWS until readiness. Production/cutover/restored-person and paid-service owner gates retained."
+            },
+            {
+              "at": "2026-10-13T13:04:15.452Z",
+              "text": "ADR-011 build acceptance, CI38398631231 all five jobs success on 14baa68c2e947c4cdfee376f1e33aca6c1030b5e. Manual full-baseline review and all 253 ASVS L1/L2 evidence/residual entries recorded; unavailable security-review command and absence of a new independent audit are explicit. No blanket L2 claim."
             }
           ]
         },
         {
           "id": "P15.10",
           "title": "Report",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-12T11:46:51.838Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-13T13:04:15.674Z",
+          "commits": ["14baa68c2e947c4cdfee376f1e33aca6c1030b5e"],
           "notes": [
             {
               "at": "2026-10-12T11:46:51.839Z",
               "text": "Whole P15 source batch under ADR-011; source and authored tests first. No DB suites/browser/AWS until readiness. Production/cutover/restored-person and paid-service owner gates retained."
+            },
+            {
+              "at": "2026-10-13T13:04:15.714Z",
+              "text": "ADR-011 build acceptance, CI38398631231 all five jobs success on 14baa68c2e947c4cdfee376f1e33aca6c1030b5e. Whole preserved 373-file source delivery and bounded four-file CI correction accepted; fresh 27-step local gate actual0, 5649 passes plus two skips. Delivery report records cost/cutover limitations and P16 follow-through."
             }
           ]
         }
       ],
-      "status": "in_progress",
+      "status": "done",
       "startedAt": "2026-10-12T11:46:49.391Z",
-      "completedAt": null
+      "completedAt": "2026-10-13T13:04:15.939Z"
     },
     {
       "id": "P16",
@@ -4277,6 +4317,10 @@
     {
       "at": "2026-10-10T09:23:56.261Z",
       "text": "Handoff: reports/HANDOFF-2026-10-10-EVENING.md (P11 done, CI 38040576698 green on de59c82; AWS torn down; batch cycle). Next: sweep P08/P10/P13.6, then P12."
+    },
+    {
+      "at": "2026-10-13T13:04:16.385Z",
+      "text": "P15 source/test batch accepted on 14baa68c2e947c4cdfee376f1e33aca6c1030b5e, CI38398631231 all five jobs success; whole Node24/npm no-resume local gate actual0, 5649 passed plus two historical skips. P16 next in ADR-011 order; P12.8, G3/G5 and all production/cost/real-identity gates remain held."
     }
   ]
 }

@@ -121,4 +121,9 @@ stand up production from the same CDK code, and move off the Lightsail box witho
 
 ## Phase report
 
-_Fill in on completion._
+[Build delivery and operating boundaries, 13 October 2026](../reports/P15/delivery-2026-10-13.md).
+The complete no-resume local gate passed actual 0. All five jobs passed on
+CI38398631231 at `14baa68c2e947c4cdfee376f1e33aca6c1030b5e`.
+P15.1–P15.10 and the phase are build-complete under ADR-011 §5; deployed,
+provider/browser, assurance and operating acceptance remain P16 work.
+Production, real-person recovery/reinvite, cost and cutover owner gates remain.
