@@ -1,7 +1,7 @@
 import { beforeEach, expect, it } from 'vitest';
 import { createAssignment } from '../../src/modules/assignments/application/createAssignment.js';
 import { deleteAssignment } from '../../src/modules/assignments/application/deleteAssignment.js';
-import { applyRosterImport } from '../../src/modules/roster/application/applyRosterImport.js';
+import { importRoster } from '../../src/modules/roster/application/importRoster.js';
 import { recordRosterImport } from '../../src/modules/roster/data/importMetadataRepo.js';
 import { prisma } from '../../src/platform/db/client.js';
 import { SYSTEM_AUDIT_CONTEXT } from '../../src/platform/http/auditContext.js';
@@ -24,10 +24,9 @@ it('notifies actual add/move/remove changes only, including a removed row, and s
   const assignment = await createAssignment(input, actor);
   await createAssignment(input, actor);
   expect(await rawDb.notice.count()).toBe(1);
-  await prisma.$transaction((tx) => applyRosterImport(tx, { people: [{ row: { email: person.email, displayName: 'Recipient', role: 'VOLUNTEER' }, created: false, roleChangedFrom: null }],
-    links: [], assignments: [{ email: person.email, stationId: first.id, eventDayId: day.id, shiftId, roleLabel: 'Counter', created: false }], issues: [],
-    counters: { volunteersCreated: 0, volunteersUpdated: 1, assignmentsCreated: 0, assignmentsUpdated: 1 } },
-  { identities: new Map([[person.email, person.sub]]), scope, audit: actor.audit, clock: actor.clock }));
+  await importRoster({ rows: [{ email: person.email, displayName: 'Recipient', role: 'VOLUNTEER',
+    stationCode: first.code, eventDate: '2027-01-07', shift: 'MORNING', roleLabel: 'Counter' }], commit: true },
+  { ...actor, role: 'ADMIN', mayProvision: true });
   expect(await rawDb.notice.count()).toBe(1);
   await createAssignment({ ...input, stationId: next.id }, actor);
   await deleteAssignment(assignment.id, actor);

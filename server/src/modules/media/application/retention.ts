@@ -1,16 +1,15 @@
 import type { AuditContext } from '../../../platform/audit/index.js';
 import { writeAudit } from '../../../platform/audit/index.js';
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
-import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { loadResolvedSetting } from '../../../platform/settings/scopedStore.js';
-import { expiredMediaKeys, clearMediaReferences } from '../data/retentionRepo.js';
+import { expiredMediaKeys, clearMediaReferences, lockMediaRetentionEvent } from '../data/retentionRepo.js';
 import { deleteMediaObject } from './s3.js';
 
 /** Delete S3 before clearing references; a failed delete retries without claiming completion. */
 export async function purgeMediaInTransaction(tx: PrismaTransactionClient, scope: EventScope,
   input: { now: Date; audit: AuditContext }) {
-  const event = await holdCaptureEvent(tx, scope);
+  const event = await lockMediaRetentionEvent(tx, scope);
   if (!event.closedAt || !['CLOSED', 'ARCHIVED'].includes(event.status)) return 0;
   const days = Number((await loadResolvedSetting('privacy.mediaRetentionDays', {
     ...scope, organisationId: event.organisationId,

@@ -6,6 +6,7 @@ import { toContentDraft, toPublishedContent } from '../data/mappers.js';
 import { draftRow, publishedRow, versionRows } from '../data/repo.js';
 import { CONTENT_KEYS } from '../domain/contentRules.js';
 import { contentStorage } from './storage.js';
+import { imageManifest } from '../domain/imageManifest.js';
 
 export async function readContentDraft(scope: EventScope) {
   return { data: toContentDraft(scope.eventId, await draftRow(scope)) };
@@ -28,7 +29,8 @@ export async function readImmutableContent(
   const document = toPublishedContent(row);
   if (input.image && !document.body.map.levels.some((level) => level.image?.mediaKey === key))
     throw new NotFoundError('Published floor plan');
-  return { ...(await contentStorage().read(key)), etag: input.image ? undefined : row.etag };
+  const receipt = imageManifest.parse(row.imageManifest).find((image) => image.key === key);
+  return { ...(await contentStorage().read(key, receipt)), etag: input.image ? undefined : row.etag };
 }
 export async function contentReadiness(tx: PrismaTransactionClient, scope: EventScope) {
   const publication = await publishedRow(scope, {}, tx);

@@ -4,6 +4,10 @@ import { invalidateSessionCache } from '../../../platform/identity/index.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { revokeLiveSessions } from '../data/repo.js';
 import { inHomeEvent } from './sessionAudit.js';
+import { lockCredentialPerson } from '../data/securityRepo.js';
+import { lockRevocationSessions, currentRevocationSession } from '../data/revocationRepo.js';
+import { sessionEnded } from '../domain/sessionRules.js';
+import { credentialIsCurrent, providerAuthenticationIsFresh } from '../domain/credentialRules.js';
 
 /** Revoke every live session in a family. Returns how many were live. */
 export async function revokeFamily(
@@ -11,7 +15,7 @@ export async function revokeFamily(
   reason: string,
   clock: Clock = systemClock,
 ): Promise<{ count: number }> {
-  const count = await revokeLiveSessions({ familyId }, { at: clock.now(), reason });
+  const count = await prisma.$transaction((tx) => revokeLiveSessions({ familyId }, { at: clock.now(), reason }, tx));
   forgetRevoked();
   return { count };
 }
@@ -28,12 +32,15 @@ export async function revokeAllForVolunteer(
   reason: string,
   clock: Clock = systemClock,
 ): Promise<number> {
-  const count = await revokeLiveSessions({ volunteerId }, { at: clock.now(), reason });
+  const count = await prisma.$transaction(async (tx) => {
+    await lockCredentialPerson(tx, volunteerId);
+    return invalidatePersonCredentials(tx, { personId: volunteerId, at: clock.now(), reason });
+  });
   forgetRevoked();
   return count;
 }
 
-export async function revokeAllInTransaction(
+export async function invalidatePersonCredentials(
   tx: PrismaTransactionClient,
   input: { personId: string; reason: string; at: Date },
 ) {
@@ -43,6 +50,7 @@ export async function revokeAllInTransaction(
     tx,
   );
 }
+export const revokeAllInTransaction = invalidatePersonCredentials;
 
 /**
  * Requests check a session's liveness through a short cache, so a revoke must
@@ -64,13 +72,19 @@ function forgetRevoked(sessionId?: string): void {
 export async function revokeOwnSession(
   volunteerId: string,
   sessionId: string,
-  audit: AuditContext,
+  audit: AuditContext & { requesterSessionId?: string | null },
 ): Promise<boolean> {
   const recorded = await inHomeEvent(audit, volunteerId);
   const count = await prisma.$transaction(async (tx) => {
+    await lockCredentialPerson(tx, volunteerId);
+    await lockRevocationSessions(tx, [sessionId, ...(audit.requesterSessionId ? [audit.requesterSessionId] : [])]);
+    const now = systemClock.now();
+    if (audit.requesterSessionId !== sessionId) await requireFreshAuthentication(tx, {
+      personId: volunteerId, sessionId: audit.requesterSessionId, now,
+    });
     const changed = await revokeLiveSessions(
       { id: sessionId, volunteerId },
-      { at: systemClock.now(), reason: 'signed-out-remotely' },
+      { at: now, reason: 'signed-out-remotely' },
       tx,
     );
     if (!changed) return 0;
@@ -85,4 +99,12 @@ export async function revokeOwnSession(
   });
   if (count) forgetRevoked(sessionId);
   return count > 0;
+}
+
+async function requireFreshAuthentication(tx: PrismaTransactionClient,
+  input: { personId: string; sessionId?: string | null; now: Date }): Promise<void> {
+  if (!input.sessionId) throw sessionEnded();
+  const session = await currentRevocationSession(tx, { id: input.sessionId, personId: input.personId });
+  if (!session || session.volunteer.deactivatedAt || session.volunteer.piiErasedAt || session.mfaPending || !credentialIsCurrent(session, input.now) ||
+    !providerAuthenticationIsFresh(session.authenticatedAt, input.now)) throw sessionEnded();
 }

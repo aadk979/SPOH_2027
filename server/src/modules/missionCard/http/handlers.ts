@@ -57,8 +57,8 @@ export async function stampCardHandler(req: Request, res: Response): Promise<voi
 }
 
 export async function voidCardHandler(req: Request, res: Response): Promise<void> {
-  const { reason } = validatedBody<VoidCardRequest>(req);
-  res.status(200).json({ card: await voidCard(shortCodeOf(req), reason, actorContextFrom(req)) });
+  const body = validatedBody<VoidCardRequest>(req);
+  res.status(200).json({ card: await voidCard(shortCodeOf(req), body, actorContextFrom(req)) });
 }
 
 export async function reissueCardHandler(req: Request, res: Response): Promise<void> {

@@ -41,6 +41,8 @@ import { auditLogGroupName, grantAuditShipping } from './auditAccess.js';
 import { grantPhotoObjects } from './mediaAccess.js';
 import { grantContentObjects } from './contentAccess.js';
 import type { AuthorizationStore } from './authorizationStore.js';
+import { sessionSigningInjections } from './sessionSigningVersions.js';
+import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 
 const PORT = 4000;
 
@@ -177,7 +179,7 @@ export class AppService extends Construct {
       secrets: {
         ...this.configuration.appInjections,
         DB_APP_PASSWORD: EcsSecret.fromSecretsManager(secrets.appDbPassword),
-        SESSION_SIGNING_SECRET: EcsSecret.fromSecretsManager(secrets.sessionSigningSecret),
+        ...sessionSigningInjections(this, { stage: stage.name, secret: secrets.sessionSigningSecret }),
         ATTENDANCE_SIGNING_SECRET: EcsSecret.fromSecretsManager(secrets.attendanceSigningSecret),
         ...(secrets.vapid
           ? {
@@ -204,6 +206,11 @@ export class AppService extends Construct {
     if (props.contentBucket) grantContentObjects(task, props.contentBucket);
     if (props.exportsBucket) grantExportObjects(task, props.exportsBucket);
     props.authorization.grantIsAuthorized(task.taskRole);
+    task.taskRole.addToPrincipalPolicy(new PolicyStatement({
+      actions: ['cognito-idp:AdminCreateUser', 'cognito-idp:AdminGetUser',
+        'cognito-idp:AdminDisableUser', 'cognito-idp:AdminEnableUser'],
+      resources: [props.cognito.userPoolArn],
+    }));
     grantAuditShipping(task, stage.name);
     acknowledgeTask(task);
     Validations.of(task).acknowledge({

@@ -1,6 +1,6 @@
 import { captureProvenance } from '../../../platform/db/captureProvenance.js';
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
-import { findCardRow, updateCard } from '../data/repo.js';
+import { findCardRow, lockCard, updateCard } from '../data/repo.js';
 import { isOutOfUse } from '../domain/cardRules.js';
 import { normaliseShortCode } from '../domain/shortCode.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
@@ -21,7 +21,9 @@ export async function linkGroupToCard(
 ): Promise<{ cardId: string | null; linkError: string | null }> {
   if (!link.shortCode) return { cardId: null, linkError: null };
   const provenance = await captureProvenance(tx, scope);
-  const card = await findCardRow(tx, scope, normaliseShortCode(link.shortCode));
+  const shortCode = normaliseShortCode(link.shortCode);
+  await lockCard(tx, scope, shortCode);
+  const card = await findCardRow(tx, scope, shortCode);
 
   if (!card) {
     return { cardId: null, linkError: 'Card not found. The registrations were still recorded.' };

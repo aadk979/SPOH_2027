@@ -23,6 +23,7 @@ type Row = {
   eventId: string;
   endpoint: string;
   actorSub: string;
+  requestHash: string;
   statusCode: number;
   responseBody: object;
   createdAt: Date;
@@ -86,7 +87,8 @@ afterEach(() => {
 
 function run(handler: (res: Response) => Promise<void> | void, redacted?: RedactedReplay) {
   return new Promise<{ status: number; body: unknown }>((done) => {
-    const req = { body: { idempotencyKey: 'key' }, id: 'request' } as Request;
+    const req = { body: { idempotencyKey: 'key' }, id: 'request', method: 'POST',
+      originalUrl: '/api/v1/events/event/registrations', query: {} } as Request;
     const res = {
       statusCode: 200,
       writableEnded: false,
@@ -202,7 +204,7 @@ it('preserves the transaction’s mutation version when redacted.store rebuilds 
   expect(store).toHaveBeenCalledExactlyOnceWith({
     privateBody: 'fresh definition',
     currentVersion: 2,
-  });
+  }, expect.objectContaining({ method: 'POST', originalUrl: '/api/v1/events/event/registrations' }));
   expect(row?.responseBody).toEqual({ resourceId: 'owned', mutationVersion: 1 });
 });
 

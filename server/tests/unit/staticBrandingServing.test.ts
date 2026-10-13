@@ -6,18 +6,23 @@ import request from 'supertest';
 import { afterAll, beforeEach, expect, it, vi } from 'vitest';
 import type { PublicBranding } from '@spoh/shared';
 import { staticClient } from '../../src/platform/http/staticClient.js';
+import { describeStaticHtml } from '../../src/platform/http/staticClientManifest.js';
 
 const exportBase = fileURLToPath(new URL('../../coverage/', import.meta.url));
 mkdirSync(exportBase, { recursive: true });
 const root = mkdtempSync(join(exportBase, 'p14-brand-static-'));
-const html = '<html><head><title>Neutral</title><script>self.__next_f.push([1,"exact"])</script></head><body>Home</body></html>';
-for (const name of ['index.html', 'sign-in.html', 'e/_/home.html', '404.html']) {
+const html = '<!doctype html><html><head><title>Neutral</title><script>self.__next_f.push([1,"exact"])</script></head><body>Home</body></html>';
+const documents = ['index.html', 'sign-in.html', 'e/_/home.html', '404.html'].sort();
+for (const name of documents) {
   mkdirSync(dirname(join(root, name)), { recursive: true });
   writeFileSync(join(root, name), html);
 }
+writeFileSync(`${root}.csp.json`, JSON.stringify({ version: 1,
+  documents: documents.map((name) => describeStaticHtml(name, Buffer.from(html))) }));
 afterAll(() => {
   if (!resolve(root).startsWith(resolve(exportBase) + sep)) throw new Error('Unsafe temporary export path');
   rmSync(root, { recursive: true, force: true });
+  rmSync(`${root}.csp.json`);
 });
 
 const brand: PublicBranding = {

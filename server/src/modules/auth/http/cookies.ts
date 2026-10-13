@@ -10,7 +10,8 @@ import { env, isProduction } from '../../../config/env.js';
  * attached to a capture request; the refresh credential travels to exactly one
  * endpoint and nowhere else.
  */
-const REFRESH_COOKIE = 'spoh_refresh';
+const LEGACY_REFRESH_COOKIE = 'spoh_refresh';
+const REFRESH_COOKIE = isProduction ? '__Secure-spoh_refresh' : LEGACY_REFRESH_COOKIE;
 
 /**
  * The cookie is scoped to the auth path, not the whole API. It exists to renew
@@ -18,8 +19,8 @@ const REFRESH_COOKIE = 'spoh_refresh';
  */
 const COOKIE_PATH = '/api/v1/auth';
 
-export const OAUTH_STATE_COOKIE = 'spoh_oauth_state';
-export const OAUTH_VERIFIER_COOKIE = 'spoh_pkce_verifier';
+export const OAUTH_STATE_COOKIE = isProduction ? '__Secure-spoh_oauth_state' : 'spoh_oauth_state';
+export const OAUTH_VERIFIER_COOKIE = isProduction ? '__Secure-spoh_pkce_verifier' : 'spoh_pkce_verifier';
 
 function refreshCookieOptions(expiresAt: Date): CookieOptions {
   const crossSite = env.SESSION_COOKIE_CROSS_SITE;
@@ -32,7 +33,7 @@ function refreshCookieOptions(expiresAt: Date): CookieOptions {
     sameSite: crossSite ? 'none' : 'lax',
     path: COOKIE_PATH,
     expires: expiresAt,
-    ...(env.SESSION_COOKIE_DOMAIN ? { domain: env.SESSION_COOKIE_DOMAIN } : {}),
+    ...(!isProduction && env.SESSION_COOKIE_DOMAIN ? { domain: env.SESSION_COOKIE_DOMAIN } : {}),
   };
 }
 
@@ -41,10 +42,18 @@ export function setRefreshCookie(
   session: { refreshToken: string; expiresAt: Date },
 ): void {
   res.cookie(REFRESH_COOKIE, session.refreshToken, refreshCookieOptions(session.expiresAt));
+  clearLegacyRefreshCookie(res);
 }
 
 export function clearRefreshCookie(res: Response): void {
   res.clearCookie(REFRESH_COOKIE, { ...refreshCookieOptions(new Date(0)), expires: undefined });
+  clearLegacyRefreshCookie(res);
+}
+
+/** A production upgrade stops reading the old name and expires its prior auth-path cookie. */
+function clearLegacyRefreshCookie(res: Response): void {
+  if (!isProduction) return;
+  res.clearCookie(LEGACY_REFRESH_COOKIE, { ...refreshCookieOptions(new Date(0)), expires: undefined });
 }
 
 export function readRefreshCookie(req: Request): string | undefined {
@@ -71,6 +80,10 @@ export function setOAuthCookies(res: Response, login: { state: string; verifier:
 export function clearOAuthCookies(res: Response): void {
   res.clearCookie(OAUTH_STATE_COOKIE, { ...oauthCookieOptions(), maxAge: undefined });
   res.clearCookie(OAUTH_VERIFIER_COOKIE, { ...oauthCookieOptions(), maxAge: undefined });
+  if (isProduction) {
+    res.clearCookie('spoh_oauth_state', { ...oauthCookieOptions(), maxAge: undefined });
+    res.clearCookie('spoh_pkce_verifier', { ...oauthCookieOptions(), maxAge: undefined });
+  }
 }
 
 export function cookiesOf(req: Request): Record<string, unknown> {

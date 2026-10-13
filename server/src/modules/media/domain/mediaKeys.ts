@@ -39,3 +39,8 @@ export function isReadableKey(key: string): boolean {
   const known = Object.values(PREFIXES).some((prefix) => key.startsWith(`${prefix}/`));
   return known && !key.includes('..');
 }
+
+/** One derivative per issued key makes SQL-rollback objects discoverable by event retention. */
+export function validatedObjectKey(eventId: string, issuedKey: string): string {
+  return `lost-found/validated/${encodeURIComponent(eventId)}/${encodeURIComponent(issuedKey)}`;
+}

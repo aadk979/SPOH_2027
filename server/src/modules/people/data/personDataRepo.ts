@@ -1,5 +1,6 @@
 import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import { erasePersonalNotices, exportPersonalNotices } from './notificationPersonalRepo.js';
+import { exportPersonalOperations } from './personalOperationalRepo.js';
 
 /** Credentials, other people's contact data and arbitrary audit payloads never enter the export. */
 export async function exportPersonData(tx: PrismaTransactionClient, personId: string) {
@@ -15,7 +16,8 @@ export async function exportPersonData(tx: PrismaTransactionClient, personId: st
     select: { id: true, eventId: true, action: true, entityType: true, entityId: true, createdAt: true },
     orderBy: { createdAt: 'asc' } });
   const notifications = await exportPersonalNotices(tx, personId);
-  return { person, activity, notifications };
+  const operational = await exportPersonalOperations(tx, personId);
+  return { person, activity, notifications, operational };
 }
 
 export async function erasePersonNotes(tx: PrismaTransactionClient, personId: string) {

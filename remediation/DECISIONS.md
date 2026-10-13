@@ -514,3 +514,15 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
 - **Answer:** **A, assumed** (11 October 2026, ADR-011 §6). Built in P12.1
   (`infra/cdk/src/identity.ts`). Nothing is created until the owner's go (P12.8); the
   re-provisioning tool for a restored database is P15.8 build work.
+
+  **Assumed restored-operator recommendation, 13 October 2026 (ADR-011 §6):**
+  when every retained administrator still has a deleted-pool subject, use a
+  separate explicit offline bootstrap of one exact existing active platform
+  administrator. Require owner-reviewed Person/old-subject/profile/pool/provider
+  evidence, a distinct operation UUID and current held standing. Never add or
+  promote a Person, adopt by an email Map, send mail or infer authority over a
+  foreign organisation. Rebinding, complete credential invalidation and attributed
+  audit commit atomically; exact audited retries preserve fresh sessions. Real
+  execution remains owner-gated. Initial administrator creation retains its
+  original first-admin-only refusal rules. This is source workflow preparation,
+  not approval of a real identity change.

@@ -13,8 +13,8 @@ export interface AuditFilter {
 
 /**
  * A page of audit entries matching every given filter, newest first: the
- * event's own rows and those that belong to no event (organisation and system
- * actions), never another event's (ADR-001 §2).
+ * event's own rows. Global rows have no proven organisation ownership and must
+ * never be included in an event feed (ADR-001 §2).
  */
 export async function findAuditEntries(
   scope: EventScope,
@@ -23,7 +23,7 @@ export async function findAuditEntries(
 ) {
   return prisma.auditLog.findMany({
     where: {
-      OR: [{ eventId: scope.eventId }, { eventId: null }],
+      eventId: scope.eventId,
       ...(filter.action ? { action: filter.action } : {}),
       ...(filter.entityType ? { entityType: filter.entityType } : {}),
       ...(filter.entityId ? { entityId: filter.entityId } : {}),

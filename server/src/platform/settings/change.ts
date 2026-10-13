@@ -70,12 +70,12 @@ async function assertAttendanceRoot(
     where: {
       id: value,
       eventId: input.target.eventId,
-      status: 'ACTIVE',
-      role: 'ADMIN',
     },
-    select: { id: true },
+    select: { id: true, status: true, role: true, person: { select: { deactivatedAt: true, piiErasedAt: true } } },
   });
-  if (!member) throw new ValidationError('Choose an active admin from this event');
+  if (!member) throw new NotFoundError('Attendance root');
+  if (member.status !== 'ACTIVE' || member.role !== 'ADMIN' || member.person.deactivatedAt || member.person.piiErasedAt)
+    throw new ValidationError('Choose an active admin from this event');
 }
 
 async function nextVersion(

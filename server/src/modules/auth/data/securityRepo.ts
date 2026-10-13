@@ -1,8 +1,8 @@
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 
-export async function personNeedsMfa(personId: string): Promise<boolean> {
-  const person = await prisma.person.findUniqueOrThrow({
+export async function personNeedsMfa(personId: string, tx: PrismaTransactionClient = prisma): Promise<boolean> {
+  const person = await tx.person.findUniqueOrThrow({
     where: { id: personId },
     select: {
       organisationMemberships: { where: { role: 'PLATFORM_ADMIN' }, select: { id: true } },
@@ -31,16 +31,19 @@ export async function acceptMembership(
   return changed.count > 0;
 }
 
-export async function mfaSession(id: string) {
-  return prisma.refreshSession.findUnique({
+export async function mfaSession(id: string, tx: PrismaTransactionClient = prisma) {
+  return tx.refreshSession.findUnique({
     where: { id },
-    include: { volunteer: { select: { cognitoSub: true } } },
+    include: { volunteer: { select: { cognitoSub: true, deactivatedAt: true, piiErasedAt: true } } },
   });
 }
 
-export async function completeMfa(tx: PrismaTransactionClient, id: string) {
-  await tx.refreshSession.update({
-    where: { id },
-    data: { mfaPending: false, providerTokenEncrypted: null, providerTokenExpiresAt: null },
-  });
+/** Event archive also takes Event before Person; visit stamping requires UPDATE, never a later upgrade. */
+export async function lockCredentialPerson(tx: PrismaTransactionClient, personId: string): Promise<void> {
+  await tx.$queryRaw`SELECT e.id FROM "Event" e WHERE EXISTS (
+    SELECT 1 FROM "EventMembership" m WHERE m."eventId" = e.id AND m."personId" = ${personId}
+  ) ORDER BY e.id FOR SHARE OF e`;
+  await tx.$queryRaw`SELECT id FROM "Person" WHERE id = ${personId} FOR UPDATE`;
+  await tx.$queryRaw`SELECT id FROM "OrganisationMembership" WHERE "personId" = ${personId} ORDER BY id FOR SHARE`;
+  await tx.$queryRaw`SELECT id FROM "EventMembership" WHERE "personId" = ${personId} ORDER BY id FOR SHARE`;
 }

@@ -44,7 +44,7 @@ describe('pruneIdempotencyRecords', () => {
 });
 
 describe('pruneRefreshSessions', () => {
-  it('deletes expired sessions and ones revoked over a week ago', async () => {
+  it('keeps terminal session history for thirty days independently of validity', async () => {
     const volunteer = await createVolunteer({ email: 'prune@jobs.test', role: 'VOLUNTEER' });
     const session = (tokenHash: string, fields: { expiresAt: Date; revokedAt?: Date }) =>
       prisma.refreshSession.create({
@@ -52,10 +52,11 @@ describe('pruneRefreshSessions', () => {
       });
     const later = new Date(FROZEN_NOW.getTime() + DAY);
 
-    await session('expired', { expiresAt: new Date(FROZEN_NOW.getTime() - 1000) });
+    await session('expired', { expiresAt: new Date(FROZEN_NOW.getTime() - 31 * DAY) });
+    await session('expired-recently', { expiresAt: new Date(FROZEN_NOW.getTime() - 1000) });
     await session('revoked-long-ago', {
       expiresAt: later,
-      revokedAt: new Date(FROZEN_NOW.getTime() - 8 * DAY),
+      revokedAt: new Date(FROZEN_NOW.getTime() - 31 * DAY),
     });
     await session('revoked-recently', {
       expiresAt: later,
@@ -68,6 +69,6 @@ describe('pruneRefreshSessions', () => {
       select: { tokenHash: true },
       orderBy: { tokenHash: 'asc' },
     });
-    expect(left.map((row) => row.tokenHash)).toEqual(['live', 'revoked-recently']);
+    expect(left.map((row) => row.tokenHash)).toEqual(['expired-recently', 'live', 'revoked-recently']);
   });
 });

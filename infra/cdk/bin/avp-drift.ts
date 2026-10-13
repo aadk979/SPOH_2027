@@ -5,35 +5,10 @@
  *
  *   npx tsx bin/avp-drift.ts <policyStoreId> [region]
  */
-import {
-  GetPolicyCommand,
-  GetSchemaCommand,
-  ListPoliciesCommand,
-  VerifiedPermissionsClient,
-} from '@aws-sdk/client-verifiedpermissions';
+import { VerifiedPermissionsClient } from '@aws-sdk/client-verifiedpermissions';
 import { readPolicyStoreFile } from '../src/authorizationStore.js';
 import { compareStores, hasDrift, type StoreContents } from '../src/avpDrift.js';
-
-async function deployed(client: VerifiedPermissionsClient, policyStoreId: string) {
-  const policies: Record<string, string> = {};
-  let nextToken: string | undefined;
-  do {
-    const page = await client.send(new ListPoliciesCommand({ policyStoreId, nextToken }));
-    for (const item of page.policies ?? []) {
-      const policy = await client.send(
-        new GetPolicyCommand({ policyStoreId, policyId: item.policyId }),
-      );
-      const definition = policy.definition;
-      const statement = definition && 'static' in definition ? definition.static?.statement : '';
-      const name =
-        definition && 'static' in definition ? definition.static?.description : undefined;
-      policies[name ?? `avp:${item.policyId}`] = statement ?? '';
-    }
-    nextToken = page.nextToken;
-  } while (nextToken);
-  const schema = await client.send(new GetSchemaCommand({ policyStoreId }));
-  return { schema: JSON.parse(schema.schema ?? '{}') as unknown, policies } satisfies StoreContents;
-}
+import { readDeployedPolicyStore } from '../src/avpDeployed.js';
 
 async function main(): Promise<void> {
   const [policyStoreId, region = 'ap-southeast-1'] = process.argv.slice(2);
@@ -45,14 +20,14 @@ async function main(): Promise<void> {
   };
   const drift = compareStores(
     expected,
-    await deployed(new VerifiedPermissionsClient({ region }), policyStoreId),
+    (await readDeployedPolicyStore(new VerifiedPermissionsClient({ region, maxAttempts: 1 }), policyStoreId)).contents,
   );
   console.log(JSON.stringify(drift, null, 2));
   if (hasDrift(drift)) process.exit(1);
   console.log('no drift');
 }
 
-main().catch((error: unknown) => {
-  console.error(error);
+main().catch(() => {
+  console.error('AVP drift verification could not complete; no acceptance claimed.');
   process.exit(1);
 });

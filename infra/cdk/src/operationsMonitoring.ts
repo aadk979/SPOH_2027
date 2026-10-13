@@ -17,12 +17,13 @@ import {
   GraphWidget,
   Metric,
   TreatMissingData,
+  Unit,
 } from 'aws-cdk-lib/aws-cloudwatch';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { AnyPrincipal, Effect, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
-import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
+import { FilterPattern, LogGroup, MetricFilter, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import type { IDatabaseInstance } from 'aws-cdk-lib/aws-rds';
 import type { FargateService } from 'aws-cdk-lib/aws-ecs';
 import { CfnSubscription, Topic } from 'aws-cdk-lib/aws-sns';
@@ -39,14 +40,27 @@ export class OperationsMonitoring extends Construct {
     input: { stage: StageName; database: IDatabaseInstance; service?: FargateService },
   ) {
     super(scope, id);
-    new LogGroup(this, 'AuditLogs', {
+    const auditLogs = new LogGroup(this, 'AuditLogs', {
       logGroupName: auditLogGroupName(input.stage),
       retention: RetentionDays.THIRTEEN_MONTHS,
       removalPolicy: RemovalPolicy.RETAIN,
     });
+    this.policyChangeAlarm(input.stage, auditLogs);
     this.databaseAlarms(input);
     if (input.service) this.observations(input, input.service);
     this.delivery(input.stage);
+  }
+
+  private policyChangeAlarm(stage: StageName, auditLogs: LogGroup): void {
+    new MetricFilter(this, 'PolicyChangeFilter', { logGroup: auditLogs,
+      filterPattern: FilterPattern.stringValue('$.action', '=', 'permissions.change'),
+      metricNamespace: `SPOH/${stage}`, metricName: 'PermissionPolicyChanges', metricValue: '1', unit: Unit.COUNT });
+    new Alarm(this, 'PolicyChangeAlarm', { alarmName: `spoh-${stage}-permission-policy-change`,
+      alarmDescription: 'A committed permission policy change was shipped to the audit log; at-least-once activity signal.',
+      metric: new Metric({ namespace: `SPOH/${stage}`, metricName: 'PermissionPolicyChanges',
+        statistic: 'Sum', period: Duration.minutes(5), unit: Unit.COUNT }),
+      threshold: 0, evaluationPeriods: 1, comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
+      treatMissingData: TreatMissingData.NOT_BREACHING });
   }
 
   private databaseAlarms(input: { stage: StageName; database: IDatabaseInstance }): void {

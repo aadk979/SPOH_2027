@@ -70,6 +70,8 @@ jobs:
       - run: npm run actions:check
       - run: npm run check:pricing
       - run: npm run check:firebase
+      - name: Static CSP manifest contract tests
+        run: npm run test:static-manifest --workspace client
 
       # prisma.config.ts refuses to load without DATABASE_URL, even though
       # generate never connects. A placeholder satisfies it.

@@ -129,7 +129,7 @@ export async function revokeSessionHandler(req: Request, res: Response): Promise
 
   // Scoped to the caller's own sessions inside the query, so one volunteer
   // cannot sign another one out by guessing an id (IDOR).
-  const revoked = await revokeOwnSession(auth.personId, id, auditContextFrom(req));
+  const revoked = await revokeOwnSession(auth.personId, id, { ...auditContextFrom(req), requesterSessionId: auth.sessionId });
   if (!revoked) throw new NotFoundError('Session');
 
   if (id === auth.sessionId) clearRefreshCookie(res);

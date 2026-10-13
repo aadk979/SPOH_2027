@@ -59,6 +59,9 @@ export interface RosterImportPlan {
 const DEACTIVATED = 'deactivated' as const;
 /** A new person the importer may not create (F03-043). */
 const NOT_ADDED = 'not-added' as const;
+const profileKey = (row: RosterImportRow) => JSON.stringify([
+  row.displayName, row.phone ?? null, row.role, row.portfolio ?? null, row.reportsToEmail ?? null,
+]);
 
 /** What the second pass reads and writes as it walks the rows. */
 interface PlanState {
@@ -125,7 +128,14 @@ function planPeople(
   plan: RosterImportPlan,
 ) {
   const seen = new Map<string, string>();
+  const profiles = new Map<string, string>();
   for (const [index, row] of rows.entries()) {
+    const profile = profileKey(row);
+    if (profiles.has(row.email) && profiles.get(row.email) !== profile) {
+      plan.issues.push({ rowNumber: index + 1, field: 'email', message: 'Repeated rows for one email must use the same profile, role and manager.' });
+      continue;
+    }
+    profiles.set(row.email, profile);
     const existing = context.snapshot.existing.get(row.email);
     const first = !seen.has(row.email);
     if (existing && !existing.active) {

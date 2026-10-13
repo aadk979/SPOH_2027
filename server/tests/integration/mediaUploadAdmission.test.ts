@@ -15,7 +15,8 @@ import {
   lifecycleNow,
 } from '../helpers/scheduledLifecycle.js';
 
-vi.mock('../../src/modules/media/application/s3.js', () => ({
+vi.mock('../../src/modules/media/application/s3.js', async () => ({
+  validateUpload: (await import('../helpers/mediaValidation.js')).syntheticValidatedUpload,
   mediaEnabled: () => true,
   assertConfigured: () => undefined,
   presignUpload: vi.fn(() => Promise.resolve({ url: 'https://bucket.test/upload', fields: {} })),

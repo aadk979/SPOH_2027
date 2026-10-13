@@ -7,6 +7,7 @@ interface LockedReservation {
   eventId: string;
   endpoint: string;
   actorSub: string;
+  requestHash: string | null;
   statusCode: number;
   createdAt: Date;
 }
@@ -18,13 +19,14 @@ async function holdReservation(
 ): Promise<LockedReservation> {
   const attempt = reservationAttempt(key, scope);
   const [row] = await tx.$queryRaw<LockedReservation[]>`SELECT key, "eventId", endpoint,
-    "actorSub", "statusCode", "createdAt" FROM "IdempotencyRecord"
+    "actorSub", "requestHash", "statusCode", "createdAt" FROM "IdempotencyRecord"
     WHERE key = ${key} AND "eventId" = ${scope.eventId} FOR UPDATE`;
   if (!row || row.statusCode !== 0) throw reservationUnavailable();
   if (
     attempt &&
     (row.endpoint !== attempt.endpoint ||
       row.actorSub !== attempt.actorSub ||
+      (row.requestHash ?? null) !== (attempt.requestHash ?? null) ||
       row.createdAt.getTime() !== attempt.createdAt)
   )
     throw reservationUnavailable();
@@ -55,6 +57,7 @@ export async function settleReserved(
       createdAt: row.createdAt,
       endpoint: row.endpoint,
       actorSub: row.actorSub,
+      requestHash: row.requestHash ?? null,
     },
     data: { statusCode: result.statusCode, responseBody: result.body },
   });

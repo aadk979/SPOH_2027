@@ -5,7 +5,6 @@ import {
   type CloneEventWizardRequest,
   type EventCreatedResponse,
 } from '@spoh/shared';
-import type { AuditContext } from '../../../platform/audit/index.js';
 import { writeAudit } from '../../../platform/audit/index.js';
 import { defaultRoleGrantRows } from '../../../platform/access/authorizer/roleGrants.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
@@ -30,12 +29,10 @@ import {
 import { requireOrganisationAuthority } from './organisationAuthority.js';
 import { applyCloneInTransaction } from './applyClone.js';
 import { managedClonePlan } from './managedClonePlan.js';
+import { prepareManagedContentClone } from './managedContentClone.js';
+import type { PlatformEventActor } from './platformEventActor.js';
+export type { PlatformEventActor } from './platformEventActor.js';
 
-export interface PlatformEventActor {
-  personId: string;
-  sub: string;
-  audit: AuditContext;
-}
 type ManagedInput = CreateEventRequest | CloneEventWizardRequest;
 type StoredReceipt = { eventId?: string; joined?: boolean; fingerprint?: string };
 type Mutation = {
@@ -44,6 +41,7 @@ type Mutation = {
   mode: 'create' | 'clone';
   build: (tx: PrismaTransactionClient) => Promise<Event>;
 };
+type MutationReceipt = Mutation & { endpoint: string; fingerprint: string };
 
 function response(event: Event, joined: boolean): EventCreatedResponse {
   return {
@@ -69,44 +67,39 @@ async function managedMutation({
   const endpoint = `platform.event.${mode}`;
   const fingerprint = createHash('sha256').update(JSON.stringify(input)).digest('hex');
   const result = await prisma.$transaction(
-    async (tx) => {
-      const receipt = await lockManagedReceipt(tx, input.idempotencyKey);
-      await requireOrganisationAuthority(tx, {
-        personId: actor.personId,
-        organisationId: input.organisationId,
-        action: mode === 'create' ? 'Platform.CreateEvent' : 'Platform.CloneEvent',
-      });
-      if (receipt) {
-        const stored = receipt.responseBody as StoredReceipt;
-        if (
-          receipt.actorSub !== actor.sub ||
-          receipt.endpoint !== endpoint ||
-          receipt.eventId !== null ||
-          stored.fingerprint !== fingerprint
-        )
-          throw new IdempotencyKeyReuseError();
-        const event = stored.eventId
-          ? await findManagedEvent(tx, { id: stored.eventId, organisationId: input.organisationId })
-          : null;
-        if (!event) throw new NotFoundError('Event');
-        return response(event, stored.joined === true);
-      }
-      const event = await build(tx);
-      if (input.joinAsAdmin) await joinEvent(tx, event, actor);
-      await saveManagedReceipt(tx, {
-        key: input.idempotencyKey,
-        endpoint,
-        actorSub: actor.sub,
-        eventId: event.id,
-        joined: input.joinAsAdmin,
-        fingerprint,
-      });
-      return response(event, input.joinAsAdmin);
-    },
+    (tx) => executeManagedMutation(tx, { input, actor, mode, build, endpoint, fingerprint }),
     { timeout: 30_000 },
   );
   invalidateEventCache();
   return result;
+}
+
+async function executeManagedMutation(tx: PrismaTransactionClient, mutation: MutationReceipt) {
+  const { input, actor, mode, build, endpoint, fingerprint } = mutation;
+  if ('sourceEventId' in input) {
+    const source = await lockManagedSource(tx, { id: input.sourceEventId, organisationId: input.organisationId });
+    if (!source) throw new NotFoundError('Event');
+  }
+  await requireOrganisationAuthority(tx, { personId: actor.personId, subject: actor.sub,
+    organisationId: input.organisationId, action: mode === 'create' ? 'Platform.CreateEvent' : 'Platform.CloneEvent' });
+  const receipt = await lockManagedReceipt(tx, input.idempotencyKey);
+  if (receipt) return replayManagedMutation(tx, mutation, receipt);
+  const event = await build(tx);
+  if (input.joinAsAdmin) await joinEvent(tx, event, actor);
+  await saveManagedReceipt(tx, { key: input.idempotencyKey, endpoint, actorSub: actor.sub,
+    eventId: event.id, joined: input.joinAsAdmin, fingerprint });
+  return response(event, input.joinAsAdmin);
+}
+async function replayManagedMutation(tx: PrismaTransactionClient, mutation: MutationReceipt,
+  receipt: NonNullable<Awaited<ReturnType<typeof lockManagedReceipt>>>) {
+  const stored = receipt.responseBody as StoredReceipt;
+  if (receipt.actorSub !== mutation.actor.sub || receipt.endpoint !== mutation.endpoint ||
+    receipt.eventId !== null || stored.fingerprint !== mutation.fingerprint)
+    throw new IdempotencyKeyReuseError();
+  const event = stored.eventId ? await findManagedEvent(tx,
+    { id: stored.eventId, organisationId: mutation.input.organisationId }) : null;
+  if (!event) throw new NotFoundError('Event');
+  return response(event, stored.joined === true);
 }
 
 async function joinEvent(
@@ -182,10 +175,11 @@ export function createManagedEvent(
   });
 }
 
-export function cloneManagedEvent(
+export async function cloneManagedEvent(
   input: CloneEventWizardRequest,
   actor: PlatformEventActor,
 ): Promise<EventCreatedResponse> {
+  const prepared = await prepareManagedContentClone(input, actor);
   return managedMutation({
     input,
     actor,
@@ -201,7 +195,7 @@ export function cloneManagedEvent(
         slug: input.clone.slug,
       });
       const plan = await managedClonePlan(tx, { source, request: input.clone });
-      return applyCloneInTransaction(tx, plan, { audit: actor.audit, now: systemClock.now() });
+      return applyCloneInTransaction(tx, { ...plan, ...prepared }, { audit: actor.audit, now: systemClock.now() });
     },
   });
 }

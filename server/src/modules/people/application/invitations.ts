@@ -6,23 +6,21 @@ import type { ManagerContext } from './context.js';
 import { loadTarget } from './queries.js';
 import { revokeAllInTransaction } from '../../auth/index.js';
 import { systemClock } from '../../../platform/time/index.js';
-import { reserveIdentityDeliveries } from '../../../platform/identity/deliveryQuota.js';
+import { deliverIdentityInvitation } from '../../../platform/identity/invitationDelivery.js';
+import { ValidationError } from '../../../platform/errors/index.js';
 
-export async function resendInvite(id: string, actor: ManagerContext) {
-  const target = await loadTarget(id, actor, 'resend');
-  return prisma.$transaction(async (tx) => {
+export async function resendInvite(id: string, actor: ManagerContext, requestKey?: string) {
+  if (!requestKey || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestKey))
+    throw new ValidationError('An invitation request UUID is required. Keep it when retrying this invitation.');
+  await loadTarget(id, actor, 'resend');
+  const organisationId = await prisma.$transaction(async (tx) => {
     await currentManagement(tx, actor, { id, action: 'People.Update' });
-    await reserveIdentityDeliveries(tx, { scope: actor.scope, count: 1, now: systemClock.now() });
-    const sent = await identityProvider.resendInvite(target.email);
-    await writeAudit(tx, {
-      ...actor.audit,
-      action: 'user.resendInvite',
-      entityType: 'Person',
-      entityId: id,
-      after: { sent },
-    });
-    return { sent };
-  }, { timeout: 30_000 });
+    const event = await tx.event.findUniqueOrThrow({ where: { id: actor.scope.eventId }, select: { organisationId: true } });
+    return event.organisationId;
+  });
+  return deliverIdentityInvitation({ provider: identityProvider, targetPoolId: identityProvider.poolId ?? '',
+    organisationId, personId: id, actorPersonId: actor.volunteerId, requestKey, audit: actor.audit,
+    authorize: async (tx) => { await currentManagement(tx, actor, { id, action: 'People.Update' }); } });
 }
 
 export async function signOutPerson(id: string, actor: ManagerContext) {

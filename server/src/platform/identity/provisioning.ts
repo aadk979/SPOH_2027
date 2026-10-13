@@ -13,18 +13,20 @@ import type { CommitteeRole } from '@spoh/shared';
  */
 export interface IdentityProvider {
   readonly name: 'cognito' | 'local';
+  readonly poolId?: string;
 
   /**
-   * Create (or find) the identity for an email address and put it in the right
-   * group. Returns the provider subject to store as `Volunteer.cognitoSub`.
+   * Create a suppressed account belonging to a durable operation, or reconcile
+   * that exact operation's account. Unknown provider accounts are never adopted.
    */
-  ensureUser(input: { email: string; displayName: string; role: CommitteeRole }): Promise<{
+  ensureUser(input: { email: string; displayName: string; role: CommitteeRole; operationId?: string }): Promise<{
     sub: string;
     created: boolean;
+    username?: string;
   }>;
 
   /** Revoke access. Used when a volunteer leaves or loses a device. */
-  disableUser(email: string): Promise<void>;
+  disableUser(email: string, expectedSubject?: string): Promise<void>;
 
   /**
    * Restore access to a previously disabled account.
@@ -34,11 +36,11 @@ export interface IdentityProvider {
    * deleting and re-provisioning them, which would issue a new subject and
    * orphan every capture they had already recorded.
    */
-  enableUser(email: string): Promise<void>;
+  enableUser(email: string, expectedSubject?: string): Promise<void>;
 
   /** Cognito resends only an unaccepted temporary-password invite. */
-  resendInvite(email: string): Promise<boolean>;
-  hasMfa(email: string): Promise<boolean>;
+  resendInvite(email: string, expectedSubject?: string): Promise<boolean>;
+  hasMfa(email: string, expectedSubject?: string): Promise<boolean>;
   beginMfa(accessToken: string): Promise<string>;
   verifyMfa(input: { accessToken: string; code: string }): Promise<void>;
 }

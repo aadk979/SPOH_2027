@@ -100,7 +100,9 @@ describe('personal data requests', () => {
     mockedApi.mockResolvedValue(PersonDataExportResponse.parse({ data: { person: { id: 'other', displayName: 'Sample Person', email: 'sample@example.test', phone: null,
       createdAt: '2026-10-10T00:00:00.000Z', lastSeenAt: null, deactivatedAt: null, piiErasedAt: null,
       eventMemberships: [], refreshSessions: [], pushSubscriptions: [] }, activity: [],
-      notifications: { noticePreference: null, notices: [] } }, retained: ['Counts retained.'] }));
+      notifications: { noticePreference: null, notices: [] }, operational: { organisationMemberships: [],
+        attendance: [], shiftAssignments: [], swapsRequested: [], swapsTargeted: [], swapsDecided: [],
+        briefingSlots: [], identityAccounts: [], identityInvitations: [] } }, retained: ['Counts retained.'] }));
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:synthetic');
     vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
     const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});

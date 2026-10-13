@@ -13,6 +13,7 @@ import type { IdentityProvider } from './provisioning.js';
 export function createLocalIdentityProvider(): IdentityProvider {
   return {
     name: 'local',
+    poolId: 'local',
 
     ensureUser({ email }) {
       const sub = `local:${createHash('sha256').update(email).digest('hex').slice(0, 32)}`;

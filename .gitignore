@@ -7,6 +7,7 @@ dist/
 build/
 .next/
 out/
+out.csp.json
 *.tsbuildinfo
 
 # environment — NEVER commit real values (BUILD_PLAN §8.6)
@@ -24,6 +25,9 @@ blob-report/
 # logs
 *.log
 npm-debug.log*
+
+# Private operator plans, credentials, local backups and verification evidence.
+/.local/
 
 # editors / OS
 .DS_Store

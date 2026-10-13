@@ -12,6 +12,10 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./static-client": {
+      "types": "./dist/contracts/staticClient/index.d.ts",
+      "default": "./dist/contracts/staticClient/index.js"
+    },
     "./generated/actions": {
       "types": "./dist/generated/actions/index.d.ts",
       "default": "./dist/generated/actions/index.js"

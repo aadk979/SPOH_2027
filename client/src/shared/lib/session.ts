@@ -336,6 +336,7 @@ export async function signOut(): Promise<void> {
       credentials: 'include',
       headers: {
         Accept: 'application/json',
+        'Content-Type': 'application/json',
         ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       },
     });

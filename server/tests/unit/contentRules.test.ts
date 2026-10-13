@@ -90,6 +90,7 @@ describe('event content', () => {
       draftVersion: 2,
       body,
       objectKey: 'content/event/version.json',
+      imageManifest: [],
       etag: '"hash"',
       publishedAt: new Date('2026-10-10T00:00:00Z'),
       publishedByPersonId: 'person',

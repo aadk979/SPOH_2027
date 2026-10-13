@@ -106,7 +106,7 @@ export const StampCardResponse = z
   .strict();
 export type StampCardResponse = z.infer<typeof StampCardResponse>;
 
-export const VoidCardRequest = z.object({ reason: ReasonText }).strict();
+export const VoidCardRequest = z.object({ reason: ReasonText, idempotencyKey: IdempotencyKey }).strict();
 export type VoidCardRequest = z.infer<typeof VoidCardRequest>;
 
 /**
@@ -117,6 +117,7 @@ export type VoidCardRequest = z.infer<typeof VoidCardRequest>;
 export const ReissueCardRequest = z
   .object({
     reason: ReasonText,
+    idempotencyKey: IdempotencyKey,
     /** The replacement card's printed code, taken from a fresh card. */
     replacementShortCode: CardShortCode,
   })

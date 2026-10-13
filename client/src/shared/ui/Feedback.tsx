@@ -13,28 +13,17 @@ import { Card } from '@/shared/ui/Card';
  * Skeletons hold the space the content is about to take.
  */
 
-export function Skeleton({
-  /**
-   * Any CSS length. A prop rather than an `h-*` class, because a default height
-   * in the base classes and an override in `className` are two `h-*` utilities,
-   * and Tailwind picks between them by stylesheet order rather than by the
-   * order they were written.
-   */
-  height = '1.25em',
-  className,
-}: {
-  height?: string;
-  className?: string;
+const SKELETON_SIZE = {
+  // hardcoding-allowed: fixed shared CSS selectors, independent of event content.
+  text: 'spoh-skeleton-text', title: 'spoh-skeleton-title',
+  // hardcoding-allowed: fixed shared CSS selectors, independent of event content.
+  field: 'spoh-skeleton-field', button: 'spoh-skeleton-button',
+};
+export function Skeleton({ size = 'text', className }: {
+  size?: keyof typeof SKELETON_SIZE; className?: string;
 }): ReactNode {
-  return (
-    <span
-      aria-hidden="true"
-      style={{ height }}
-      className={cx('block animate-pulse rounded-md bg-line', className)}
-    />
-  );
+  return <span aria-hidden="true" className={cx('block animate-pulse rounded-md bg-line', SKELETON_SIZE[size], className)} />;
 }
-
 /**
  * A stand-in for a grid of cards.
  *
@@ -59,7 +48,7 @@ export function LoadingCards({
       {Array.from({ length: count }, (_, index) => (
         <Card key={index}>
           <Skeleton className="w-1/2" />
-          <Skeleton height="2em" className="mt-sm w-2/3" />
+          <Skeleton size="title" className="mt-sm w-2/3" />
           <Skeleton className="mt-xs w-1/3" />
         </Card>
       ))}

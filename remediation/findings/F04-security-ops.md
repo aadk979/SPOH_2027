@@ -1,5 +1,36 @@
 # F04 — Security and operational readiness (P04)
 
+Current P15 source reconciliation is recorded in
+[the 13 October review](../reports/P15/security-review-2026-10-13.md),
+[the 253-control ASVS register](../reports/P15/asvs-review-2026-10-13.md),
+[the data map](../reports/P15/data-map.md) and
+[the operations runbook](../reports/P15/security-operations-runbook.md).
+The original P04 findings below remain historical evidence. P15's complete
+local/exact-SHA delivery acceptance is still pending; this addition makes no
+blanket L2, zero-High operational or production-readiness claim.
+
+## Final — P15 build review, acceptance pending
+
+The [individual ASVS register](../reports/P15/asvs-review-2026-10-13.md)
+contains all 253 pinned L1/L2 requirements, including explicit nonapplicability,
+source repairs, provider/P16 proof and owner-reviewed assurance residuals. No
+row is labelled compliant. The [manual baseline review](../reports/P15/security-review-2026-10-13.md)
+records independent prereview scope, implementing-agent follow-through,
+untracked-file inclusion, actual regression limits and the unavailable
+`/security-review` command without claiming it ran.
+
+H1–H7 and the additional delivery, media, graph, bootstrap and logging source
+findings have implementations and meaningful tests. Complete current-source
+local gate and exact-SHA CI are still pending. Account/production/rotation,
+human alarm receipt, restore and provider/browser acceptance stay open under
+P16 and existing owner gates. Native npm SBOM failed on reviewed dependency
+overrides; the operations runbook records the hashed component-inventory
+fallback and preserves the dated CDK advisory exception. The data map states
+immutable report/provider/backup retention exceptions truthfully.
+
+The remainder of this file is the original P04 audit record; its historical
+baseline counts and deployment questions are not current acceptance evidence.
+
 Audit D: how secure and how operable the system is today, judged **from the repository only**.
 D-13 forbids using this environment's AWS credentials and any audit request to the live staging
 site, so nothing here comes from the AWS account or from `spoh2027.duckdns.org`. The code on

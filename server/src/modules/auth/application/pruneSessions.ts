@@ -9,8 +9,8 @@ import { deleteStaleSessions } from '../data/repo.js';
 import { REVOKED_RETENTION_MS } from '../domain/sessionRules.js';
 
 /**
- * Housekeeping. Expired and long-revoked rows carry no value and the table is
- * written to on every refresh, so it is the one that grows fastest.
+ * Housekeeping retains terminal history for ADR-003's 30 days after expiry or
+ * revocation. This retention is independent of the credential family lifetime.
  */
 export async function pruneSessionsInTransaction(
   tx: PrismaTransactionClient,

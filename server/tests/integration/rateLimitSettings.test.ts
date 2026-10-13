@@ -7,6 +7,7 @@ import type { SettingKey } from '../../src/platform/settings/registry.js';
 import { resetDatabase, rawDb } from '../helpers/db.js';
 import { bearer, createVolunteer, testEvent } from '../helpers/fixtures.js';
 import { FROZEN_NOW } from '../setup.js';
+import { settleQuotaRefunds } from '../../src/platform/http/quotaRequestCharge.js';
 
 const app = createApp();
 const audit = {
@@ -108,10 +109,12 @@ describe('live platform rate limits', () => {
     const signIn = (email: string) =>
       request(app)
         .post(`/api/v1/auth/session?organisationId=${other.organisationId}`)
+        .set('Origin', 'http://localhost:3000')
         .send({ email });
 
     for (let i = 0; i < 3; i += 1) {
       expect((await signIn(volunteer.email)).status).toBe(201);
+      await settleQuotaRefunds();
     }
     expect((await signIn('missing@second.example')).status).toBe(404);
     expect((await signIn('missing@second.example')).status).toBe(404);

@@ -6,6 +6,7 @@ import type { ActorContext } from '../../../platform/http/auditContext.js';
 import { assertConfigured, presignRead } from './s3.js';
 import { mediaLimits } from './limits.js';
 import { requireIssuedMediaKey } from './requireIssuedMediaKey.js';
+import { validateMedia } from './validateMedia.js';
 
 /** Mint a short-lived URL while current event membership and exact ownership are held. */
 export async function readUrl(key: string, actor: ActorContext): Promise<MediaUrlResponse> {
@@ -21,8 +22,9 @@ export async function readUrl(key: string, actor: ActorContext): Promise<MediaUr
         resource: { type: 'Membership', id: actor.membershipId },
       });
       await requireIssuedMediaKey(tx, actor.scope, key);
+      const verified = await validateMedia(tx, actor.scope, key);
       const { ttlSeconds } = await mediaLimits(tx, event.organisationId);
-      return { url: await presignRead(key, ttlSeconds), expiresIn: ttlSeconds };
+      return { url: await presignRead(verified.objectKey, ttlSeconds, verified.objectVersionId), expiresIn: ttlSeconds };
     },
     { isolationLevel: 'ReadCommitted', timeout: 30_000 },
   );

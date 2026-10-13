@@ -19,7 +19,8 @@ export async function graceSuccessor(
   const previous = await lockSession(tx, id);
   if (!withinGrace(previous, input)) return null;
   const next = await findReplacement(tx, previous.replacedById as string);
-  if (!next || next.revokedAt || next.expiresAt <= input.now) throw sessionEnded();
+  if (!next || next.revokedAt || next.mfaPending || next.expiresAt <= input.now ||
+      (next.absoluteExpiresAt && next.absoluteExpiresAt <= input.now)) throw sessionEnded();
   const refreshToken = matchingSuccessorRefreshToken(previous.id, next.tokenHash);
   if (!refreshToken) throw sessionEnded();
   return {

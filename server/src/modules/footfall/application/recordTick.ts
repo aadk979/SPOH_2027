@@ -24,7 +24,7 @@ export async function recordTick(
   const recordedAt = clock.now();
 
   const tick = await prisma.$transaction(async (tx) => {
-    const mode = await captureStation(tx, { scope, actor, clock }, request);
+    const mode = await captureStation(tx, { scope, actor, clock, action: 'Footfall.Create' }, request);
     const row = await createTick(tx, scope, {
       stationId: station.id,
       recordedById: actor.volunteerId,

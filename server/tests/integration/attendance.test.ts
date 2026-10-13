@@ -71,7 +71,7 @@ beforeEach(async () => {
       },
     ],
   });
-  for (const person of [root, exco, volunteer]) sensitiveRateLimit.resetKey(`sub:${person.sub}`);
+  for (const person of [root, exco, volunteer]) await sensitiveRateLimit.resetKey(`sub:${person.sub}`);
   dayId = (await createEventDayToday()).id;
   const station = await createStation({ code: 'ATTENDANCE' });
   assignmentId = (

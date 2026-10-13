@@ -1,7 +1,7 @@
 import type { Action, Role } from '@spoh/access-policies';
 import type { PrismaTransactionClient } from '../db/client.js';
 import type { EventScope } from '../db/eventScope.js';
-import { ForbiddenError } from '../errors/index.js';
+import { ForbiddenError, NotFoundError, ServiceUnavailableError } from '../errors/index.js';
 import { systemClock, type Clock } from '../time/index.js';
 import {
   databaseRoleGrants,
@@ -24,6 +24,23 @@ export interface CurrentPermission {
   readonly resource?: ResourceRef | readonly ResourceRef[];
   readonly clock?: Clock;
   readonly facts?: RequestFacts;
+  readonly shiftAt?: Date;
+}
+
+/** Caller holds Event first; all authority writers must retain this Person → member order. */
+export async function lockCurrentActor(tx: PrismaTransactionClient,
+  input: { scope: EventScope; membershipId: string; personId: string }): Promise<void> {
+  await tx.$queryRaw`SELECT id FROM "Person" WHERE id = ${input.personId} FOR SHARE`;
+  await tx.$queryRaw`SELECT id FROM "EventMembership" WHERE "eventId" = ${input.scope.eventId}
+    AND id = ${input.membershipId} AND "personId" = ${input.personId} FOR SHARE`;
+  const person = await tx.person.findUnique({ where: { id: input.personId },
+    select: { deactivatedAt: true, piiErasedAt: true } });
+  const member = await tx.eventMembership.findFirst({
+    where: { eventId: input.scope.eventId, id: input.membershipId, personId: input.personId },
+    select: { status: true },
+  });
+  if (!person || person.deactivatedAt !== null || person.piiErasedAt !== null || member?.status !== 'ACTIVE')
+    throw new ForbiddenError('Your event permission changed. Reload before trying again.');
 }
 
 /**
@@ -39,8 +56,7 @@ export async function requireCurrentPermission(
   input: CurrentPermission,
 ): Promise<void> {
   const { scope, membershipId, personId, action } = input;
-  await tx.$queryRaw`SELECT id FROM "EventMembership" WHERE "eventId" = ${scope.eventId}
-    AND id = ${membershipId} AND "personId" = ${personId} FOR SHARE`;
+  await lockCurrentActor(tx, { scope, membershipId, personId });
   const member = await tx.eventMembership.findFirst({
     where: { eventId: scope.eventId, id: membershipId, personId },
     select: { status: true, role: true },
@@ -55,6 +71,7 @@ export async function requireCurrentPermission(
   const builder = new EntityBuilder(tx, {
     eventId: scope.eventId,
     now: (input.clock ?? systemClock).now(),
+    ...(input.shiftAt ? { shiftAt: input.shiftAt } : {}),
   });
   for (const resource of resources) {
     if (
@@ -84,12 +101,18 @@ async function allows(
   membershipId: string,
   question: Question,
 ): Promise<boolean> {
-  const request = await builder.forMembership(membershipId, question);
-  const decision = await currentAuthorizer().isAuthorized(request);
-  if (decision.errors.length > 0) return false;
-  if (decision.allowed) return true;
-  const policies = decision.determiningPolicies;
-  return policies.length > 0 && policies.every((policy) => USE_CASE_PHASE_GUARDRAILS.has(policy));
+  try {
+    const request = await builder.forMembership(membershipId, question);
+    const decision = await currentAuthorizer().isAuthorized(request);
+    if (decision.errors.length > 0) throw new ServiceUnavailableError('Permissions could not be checked.');
+    if (decision.allowed) return true;
+    const policies = decision.determiningPolicies;
+    return policies.length > 0 && policies.every((policy) => USE_CASE_PHASE_GUARDRAILS.has(policy));
+  } catch (cause) {
+    if (cause instanceof NotFoundError) return false;
+    if (cause instanceof ServiceUnavailableError) throw cause;
+    throw new ServiceUnavailableError('Permissions could not be checked.', cause);
+  }
 }
 
 const changed = (action: Action) =>

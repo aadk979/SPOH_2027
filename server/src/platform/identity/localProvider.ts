@@ -64,7 +64,8 @@ export function createLocalAuthProvider(config: {
           throw new Error('token has no subject');
         }
 
-        return { sub: payload.sub, groups: extractGroups(payload.groups) };
+        return { sub: payload.sub, groups: extractGroups(payload.groups),
+          ...(typeof payload.auth_time === 'number' ? { authTime: payload.auth_time } : {}) };
       } catch (error) {
         logger.debug({ err: error }, 'local token verification failed');
         throw new UnauthenticatedError();
@@ -74,7 +75,7 @@ export function createLocalAuthProvider(config: {
     /** Mint a token. Used by the dev sign-in route and by integration tests. */
     async issue(claims: LocalTokenClaims): Promise<string> {
       const lifetime = claims.expiresInSeconds ?? 12 * 60 * 60;
-      return new SignJWT({ groups: claims.groups })
+      return new SignJWT({ groups: claims.groups, auth_time: Math.floor(Date.now() / 1000) })
         .setProtectedHeader({ alg: 'HS256' })
         .setSubject(claims.sub)
         .setIssuer(ISSUER)

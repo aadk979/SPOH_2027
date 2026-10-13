@@ -38,6 +38,7 @@ async function holdPrintAuthority(tx: PrismaTransactionClient, actor: PrintActor
     personId: actor.volunteerId,
     membershipId: actor.membershipId,
     action: 'Card.GenerateBatch',
+    clock: actor.clock,
   });
   if (event.status === 'ARCHIVED')
     throw new ConflictError(ERROR_CODES.CONFLICT, 'Archived events cannot create print exports.');

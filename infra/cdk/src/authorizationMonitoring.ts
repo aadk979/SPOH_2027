@@ -3,6 +3,7 @@ import {
   Alarm,
   ComparisonOperator,
   Metric,
+  MathExpression,
   TreatMissingData,
   Unit,
 } from 'aws-cdk-lib/aws-cloudwatch';
@@ -66,6 +67,25 @@ export class AuthorizationMonitoring extends Construct {
       value: this.failedAlarm.alarmName,
     });
     this.avpAlarms(input, namespace);
+    this.denialAlarms(input.stage, namespace);
+  }
+
+  private denialAlarms(stage: StageName, namespace: string): void {
+    const metric = (metricName: string) => new Metric({ namespace, metricName,
+      statistic: 'Sum', period: Duration.minutes(5), unit: Unit.COUNT });
+    const denied = metric('AuthorizationDenied');
+    new Alarm(this, 'DenialVolumeAlarm', { alarmName: `spoh-${stage}-authorization-denial-volume`,
+      alarmDescription: 'At least 100 authorization refusals in five minutes; investigate callers, grants and policies.',
+      metric: denied, threshold: 100, evaluationPeriods: 1,
+      comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+      treatMissingData: TreatMissingData.NOT_BREACHING });
+    new Alarm(this, 'DenialRatioAlarm', { alarmName: `spoh-${stage}-authorization-denial-ratio`,
+      alarmDescription: 'At least 20 percent refusals with 100 or more decisions in five minutes.',
+      metric: new MathExpression({ expression: 'IF((a+d)>=100,100*d/IF((a+d)>0,a+d,1),0)',
+        usingMetrics: { a: metric('AuthorizationAllowed'), d: denied }, period: Duration.minutes(5) }),
+      threshold: 20, evaluationPeriods: 1,
+      comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+      treatMissingData: TreatMissingData.NOT_BREACHING });
   }
 
   /**

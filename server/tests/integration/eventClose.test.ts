@@ -513,11 +513,11 @@ it('does not silently substitute current results for a missing or invalid frozen
 
 it('keeps active members able to sign in and refresh after close for reports and late sync', async () => {
   const browser = request.agent(app);
-  expect((await browser.post('/api/v1/auth/session').send({ email: admin.email })).status).toBe(
+  expect((await browser.post('/api/v1/auth/session').set('Origin', 'http://localhost:3000').send({ email: admin.email })).status).toBe(
     201,
   );
   expect((await post(closeBody())).status).toBe(200);
-  const refresh = await browser.post('/api/v1/auth/refresh').send({});
+  const refresh = await browser.post('/api/v1/auth/refresh').set('Origin', 'http://localhost:3000').send({});
   expect(refresh.status).toBe(200);
   const frozen = await request(app)
     .get(`/api/v1/events/${eventId}/reports/summary`)
@@ -525,6 +525,6 @@ it('keeps active members able to sign in and refresh after close for reports and
   expect(frozen.status).toBe(200);
   expect(frozen.body.snapshot.kind).toBe('FINAL');
   expect(
-    (await request(app).post('/api/v1/auth/session').send({ email: admin.email })).status,
+    (await request(app).post('/api/v1/auth/session').set('Origin', 'http://localhost:3000').send({ email: admin.email })).status,
   ).toBe(201);
 });

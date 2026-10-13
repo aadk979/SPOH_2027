@@ -1,71 +1,47 @@
 import type { Store, ClientRateLimitInfo } from 'express-rate-limit';
+import { prisma, type PrismaTransactionClient } from '../db/client.js';
+import { ServiceUnavailableError } from '../errors/index.js';
+import { systemClock, type Clock } from '../time/index.js';
+import { incrementCounter, readCounter, refundCounter, resetCounter,
+  resetCounterNamespace, resetCounterSubject, type CounterCharge, type QuotaNamespace } from './quotaCounterRepo.js';
+import { counterNumber, parseQuotaKey, quotaDigest } from './quotaKeys.js';
+import { captureQuotaCharge, refundCapturedQuota } from './quotaRequestCharge.js';
 
-interface Counter {
-  totalHits: number;
-  resetTime: Date;
-}
-
-/** In-process store for P10.4. P15.2 replaces this boundary with Postgres. */
+/** All app instances share SQL admission; storage failure never admits a request. */
 export class DynamicRateLimitStore implements Store {
-  readonly localKeys = true;
-  private readonly counters = new Map<string, Counter>();
-  private increments = 0;
-
-  private active(key: string): Counter | undefined {
-    const counter = this.counters.get(key);
-    if (counter && counter.resetTime.getTime() > Date.now()) return counter;
-    if (counter) this.counters.delete(key);
-    return undefined;
+  readonly localKeys = false;
+  private readonly db: PrismaTransactionClient;
+  private readonly clock: Clock;
+  constructor(readonly namespace: QuotaNamespace, input: { db?: PrismaTransactionClient; clock?: Clock } = {}) {
+    this.db = input.db ?? prisma;
+    this.clock = input.clock ?? systemClock;
   }
 
-  private prune(): void {
-    for (const key of this.counters.keys()) this.active(key);
+  async increment(key: string): Promise<ClientRateLimitInfo> {
+    try {
+      const increment = await incrementCounter(this.db, parseQuotaKey(key, this.namespace), this.clock.now());
+      captureQuotaCharge(key, increment.charge);
+      return { totalHits: counterNumber(increment.totalHits), resetTime: increment.charge.resetTime };
+    } catch (error) { throw new ServiceUnavailableError('Request quota temporarily unavailable', error); }
   }
 
-  increment(key: string): ClientRateLimitInfo {
-    if (++this.increments % 1_024 === 0) this.prune();
-    const existing = this.active(key);
-    if (existing) {
-      existing.totalHits += 1;
-      return { ...existing };
-    }
-    const separator = key.indexOf('|');
-    const windowSeconds = Number(key.slice(2, separator));
-    if (
-      separator < 0 ||
-      !Number.isInteger(windowSeconds) ||
-      windowSeconds < 10 ||
-      windowSeconds > 600
-    ) {
-      throw new Error('Invalid internal rate limit window');
-    }
-    const counter = { totalHits: 1, resetTime: new Date(Date.now() + windowSeconds * 1_000) };
-    this.counters.set(key, counter);
-    return { ...counter };
+  async refund(charge: CounterCharge): Promise<boolean> {
+    if (charge.namespace !== this.namespace) throw new Error('Quota refund namespace mismatch');
+    return refundCounter(this.db, charge, this.clock.now());
   }
-
-  decrement(key: string): void {
-    const counter = this.active(key);
-    if (counter) counter.totalHits = Math.max(0, counter.totalHits - 1);
+  async decrement(key: string): Promise<void> {
+    await refundCapturedQuota(key, (charge) => this.refund(charge));
   }
-
-  get(key: string): ClientRateLimitInfo | undefined {
-    const counter = this.active(key);
-    return counter ? { ...counter } : undefined;
+  async get(key: string): Promise<ClientRateLimitInfo | undefined> {
+    const counter = await readCounter(this.db, parseQuotaKey(key, this.namespace), this.clock.now());
+    return counter ? { totalHits: counterNumber(counter.totalHits), resetTime: counter.charge.resetTime } : undefined;
   }
-
-  resetKey(key: string): void {
-    this.counters.delete(key);
+  async resetKey(key: string): Promise<void> {
+    await resetCounter(this.db, parseQuotaKey(key, this.namespace));
   }
-
-  /** Compatibility for tests and callers that name a subject without a scope. */
-  resetSubject(subject: string): void {
-    for (const key of this.counters.keys()) {
-      if (key.endsWith(`|${subject}`)) this.counters.delete(key);
-    }
+  /** Compatibility for explicit test/operational subject resets across organisation windows. */
+  async resetSubject(subject: string): Promise<void> {
+    await resetCounterSubject(this.db, { namespace: this.namespace, subjectDigest: quotaDigest(subject) });
   }
-
-  resetAll(): void {
-    this.counters.clear();
-  }
+  async resetAll(): Promise<void> { await resetCounterNamespace(this.db, this.namespace); }
 }

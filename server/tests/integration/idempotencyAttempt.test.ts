@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import express, { type RequestHandler } from 'express';
+import express, { type RequestHandler, type Request, type Response } from 'express';
 import request from 'supertest';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { createApp } from '../../src/app/createApp.js';
@@ -152,7 +152,7 @@ function bookkeepingApp(handler: RequestHandler) {
     } as NonNullable<typeof req.auth>;
     next();
   });
-  testApp.post('/attempt', idempotent('test.attempt'), handler);
+  testApp.post(['/attempt', '/attempt/:target'], idempotent('test.attempt'), handler);
   testApp.use(errorHandler);
   return testApp;
 }
@@ -161,13 +161,15 @@ it.each([201, 500])(
   'retains the winner when delayed nontransactional response is %s',
   async (status) => {
     const key = randomUUID();
-    const testApp = bookkeepingApp((req, res) => {
-      res.status(req.body.original ? status : 201).json({ winner: !req.body.original });
+    let responses = 0;
+    const testApp = bookkeepingApp((_req, res) => {
+      const winner = responses++ === 0;
+      res.status(winner ? 201 : status).json({ winner });
     });
     const delayed = delayCommittedReservation();
     const original = request(testApp)
       .post('/attempt')
-      .send({ idempotencyKey: key, original: true })
+      .send({ idempotencyKey: key })
       .then((response) => response);
     await delayed.observed;
     vi.setSystemTime(FROZEN_NOW.getTime() + 61_001);
@@ -186,6 +188,42 @@ it.each([201, 500])(
     }
   },
 );
+
+it.each(['body', 'query', 'target'] as const)('refuses changed %s intent under the same receipt UUID', async (change) => {
+  const key = randomUUID();
+  let effects = 0;
+  const testApp = bookkeepingApp((_req, res) => { effects++; res.status(201).json({ saved: true }); });
+  const original = '/attempt/one?pool=live';
+  await request(testApp).post(original).send({ idempotencyKey: key, value: 1 }).expect(201);
+  const path = change === 'query' ? '/attempt/one?pool=practice' : change === 'target' ? '/attempt/two?pool=live' : original;
+  const result = await request(testApp).post(path).send({ idempotencyKey: key, value: change === 'body' ? 2 : 1 });
+  expect(result.status).toBe(409);
+  expect(result.body.error.code).toBe('IDEMPOTENCY_KEY_REUSE');
+  expect(effects).toBe(1);
+  expect((await record(key)).requestHash).toMatch(/^[a-f0-9]{64}$/);
+});
+
+it('does not take over a historical unfinished receipt without a request fingerprint', async () => {
+  const key = randomUUID();
+  await reserve(key, { endpoint: 'test.attempt', actorSub: admin.sub, eventId });
+  vi.setSystemTime(FROZEN_NOW.getTime() + 61_001);
+  const effect = vi.fn((_req: Request, res: Response) => res.status(201).json({ saved: true }));
+  const testApp = bookkeepingApp(effect);
+  await request(testApp).post('/attempt').send({ idempotencyKey: key }).expect(409);
+  expect(effect).not.toHaveBeenCalled();
+  expect((await record(key)).requestHash).toBeNull();
+});
+
+it('replays a historical completed receipt without executing a new unfingerprinted intent', async () => {
+  const key = randomUUID();
+  await reserve(key, { endpoint: 'test.attempt', actorSub: admin.sub, eventId });
+  await rawDb.idempotencyRecord.update({ where: { key }, data: { statusCode: 201, responseBody: { legacy: true } } });
+  const effect = vi.fn((_req: Request, res: Response) => res.status(201).json({ saved: true }));
+  const response = await request(bookkeepingApp(effect)).post('/attempt').send({ idempotencyKey: key });
+  expect(response.status).toBe(201);
+  expect(response.body).toEqual({ legacy: true });
+  expect(effect).not.toHaveBeenCalled();
+});
 
 it('releases its own failed unfinished reservation so a fresh retry succeeds', async () => {
   const key = randomUUID();

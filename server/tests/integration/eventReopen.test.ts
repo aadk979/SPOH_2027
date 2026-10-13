@@ -149,7 +149,7 @@ it.each([
   ['before the recorded close', -1, 409],
 ] as const)('checks the injected clock at %s', async (_name, elapsed, status) => {
   vi.setSystemTime(new Date(FROZEN_NOW.getTime() + elapsed));
-  const session = await request(app).post('/api/v1/auth/session').send({ email: admin.email });
+  const session = await request(app).post('/api/v1/auth/session').set('Origin', 'http://localhost:3000').send({ email: admin.email });
   expect(session.status).toBe(201);
   admin = { ...admin, token: session.body.accessToken };
   const result = await post(reopenBody());

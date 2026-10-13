@@ -190,6 +190,7 @@ describe('rehearsal capture provenance', () => {
     const reissued = await post('/cards/ABC234/reissue', {
       replacementShortCode: 'DEF234',
       reason: 'Practice lost card',
+      idempotencyKey: idempotencyKey(),
     });
     expect(reissued.status).toBe(201);
     expect(reissued.body.stampsCarriedOver).toBe(1);
@@ -324,6 +325,7 @@ describe('rehearsal capture provenance', () => {
         await post('/cards/ABC234/reissue', {
           replacementShortCode: 'DEF234',
           reason: 'Practice replacement',
+          idempotencyKey: idempotencyKey(),
         })
       ).status,
     ).toBe(409);

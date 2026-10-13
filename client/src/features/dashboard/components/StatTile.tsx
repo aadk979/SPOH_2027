@@ -97,7 +97,7 @@ export function BarRow({
   muted?: boolean;
   href?: string;
 }): ReactNode {
-  const width = max > 0 && value > 0 ? Math.max(1, Math.round((value / max) * 100)) : 0;
+  const width = Number.isFinite(max) && Number.isFinite(value) && max > 0 && value > 0 ? Math.min(100, Math.max(1, Math.round((value / max) * 100))) : 0;
 
   const content = (
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-sm gap-y-xxs sm:grid-cols-[minmax(7rem,11rem)_minmax(0,1fr)_auto]">
@@ -109,11 +109,8 @@ export function BarRow({
       */}
       <span className="order-last col-span-2 h-[10px] overflow-hidden rounded-pill bg-line-soft sm:order-none sm:col-span-1 sm:h-[20px] sm:rounded-sm">
         <span
-          // The one runtime-computed value in the app, and the only surviving
-          // inline style: a percentage cannot be a utility class.
-          style={{ width: `${width}%` }}
           className={cx(
-            'block h-full rounded-pill sm:rounded-sm',
+            'block h-full rounded-pill sm:rounded-sm', `bar-width-${width}`,
             muted ? 'bg-text-subtle' : 'bg-primary',
           )}
         />

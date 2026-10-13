@@ -168,8 +168,14 @@ the baseline, and it only ever receives P06.12 cherry-picks. What each fix chang
 
 **Since 10 October 2026 the programme builds every feature first and verifies after**
 ([ADR-011](../docs/adr/ADR-011-build-first-verify-after.md), D-23). Read
-[the latest handoff](reports/HANDOFF-2026-10-11-TAKEOVER.md), ADR-011 and
+[the latest handoff](reports/HANDOFF-2026-10-12-P15-SOURCE.md), ADR-011 and
 [ADR-010](../docs/adr/ADR-010-delivery-process.md) first. In short:
+
+**12 October checkpoint:** P14 is committed, pushed and accepted on exact-SHA CI;
+P15 is a preserved uncommitted source batch and P16 has not started. Follow the
+latest handoff's explicit `V1-main` checkout, preservation and Node24/test-database
+instructions before the generic orientation example below. Do not pull over the
+saved changes. [Ready-to-copy takeover prompt](reports/TAKEOVER-PROMPT-2026-10-12.md).
 
 - Build the remaining features of P08 and P10–P15 in batches, each with its tests, and push each
   batch to `main`. Full CI runs on every code push (run its steps locally first, under Node 24),

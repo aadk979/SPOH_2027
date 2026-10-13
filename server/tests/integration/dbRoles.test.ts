@@ -54,6 +54,20 @@ describe('database roles (F04-015)', () => {
     expect((await app.query('SELECT id FROM "AuditLog"')).rows).toEqual([{ id: 'audit-1' }]);
   });
 
+  it('checks effective audit privileges and grants the additive security tables through the real role', async () => {
+    const { rows } = await app.query(`SELECT
+      has_table_privilege(current_user, '"AuditLog"', 'SELECT') AS readable,
+      has_table_privilege(current_user, '"AuditLog"', 'INSERT') AS appendable,
+      has_table_privilege(current_user, '"AuditLog"', 'UPDATE') AS updatable,
+      has_table_privilege(current_user, '"AuditLog"', 'DELETE') AS deletable,
+      has_table_privilege(current_user, '"AuditLog"', 'TRUNCATE') AS truncatable`);
+    expect(rows).toEqual([{ readable: true, appendable: true, updatable: false, deletable: false, truncatable: false }]);
+    for (const table of ['RateLimitCounter', 'IdentityAccountOperation', 'IdentityInvitationAttempt', 'ValidatedMedia', 'ContentStorageIntent']) {
+      const result = await app.query('SELECT has_table_privilege(current_user, $1, $2) AS permitted', [`"${table}"`, 'SELECT, INSERT, UPDATE, DELETE']);
+      expect(result.rows, table).toEqual([{ permitted: true }]);
+    }
+  });
+
   it('cannot shorten recent audit retention by backdating mutable event metadata', async () => {
     await app.query(`INSERT INTO "Organisation" (id, slug, name, "appName", "defaultTimezone", "updatedAt")
       VALUES ('retention-org', 'retention-org', 'Retention test', 'Test', 'UTC', CURRENT_TIMESTAMP)`);

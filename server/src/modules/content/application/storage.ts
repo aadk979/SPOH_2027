@@ -1,8 +1,8 @@
 import { createHash } from 'node:crypto';
 import {
-  CopyObjectCommand,
   GetObjectCommand,
   HeadObjectCommand,
+  DeleteObjectCommand,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
@@ -15,6 +15,10 @@ import {
   frozenContent,
   publicationImageKey,
 } from '../domain/contentRules.js';
+import { decodeS3Image, storeImmutableImage, type ImageProof, type DecodedObject } from '../../../platform/uploads/s3Image.js';
+import { boundedBytes } from '../../../platform/uploads/boundedBytes.js';
+import { normalizeImage } from '../../../platform/uploads/validatedImage.js';
+import type { ImageManifestEntry } from '../domain/imageManifest.js';
 
 export interface ContentImageReceipt {
   key: string;
@@ -25,6 +29,7 @@ export interface FrozenPublication {
   body: EventContent;
   objectKey: string;
   etag: string;
+  imageManifest?: ImageManifestEntry[];
 }
 export interface ContentStorage {
   issueImage(input: {
@@ -38,8 +43,9 @@ export interface ContentStorage {
     body: EventContent;
     images: readonly ContentImageReceipt[];
   }): Promise<FrozenPublication>;
-  read(key: string): Promise<{ body: Uint8Array; contentType: string }>;
-  copyImage(input: { sourceKey: string; key: string }): Promise<ContentImageReceipt>;
+  read(key: string, receipt?: ImageProof): Promise<{ body: Uint8Array; contentType: string }>;
+  copyImage(input: { sourceKey: string; key: string; receipt?: ImageProof }): Promise<ContentImageReceipt>;
+  deleteObject?(key: string): Promise<void>;
 }
 const requireStorage = () => {
   if (!env.S3_CONTENT_BUCKET)
@@ -49,6 +55,16 @@ const requireStorage = () => {
     });
   return { client: new S3Client({ region: env.AWS_REGION }), bucket: env.S3_CONTENT_BUCKET };
 };
+async function servedBytes(body: Buffer, contentType: string | undefined,
+  input: { key: string; validated: boolean }) {
+  const imageType = UploadContentType.safeParse(contentType);
+  if (imageType.success && !input.validated) {
+    const normalized = await normalizeImage({ body, contentType: imageType.data, maxBytes: 1024 * 1024 });
+    return { body: normalized.body, contentType: normalized.contentType };
+  }
+  if (!input.key.endsWith('.json') && !imageType.success) throw new ValidationError('Published image type is invalid.');
+  return { body, contentType: contentType ?? 'application/json' };
+}
 async function freezeImages(input: {
   eventId: string;
   id: string;
@@ -56,63 +72,52 @@ async function freezeImages(input: {
 }) {
   const { client, bucket } = requireStorage();
   const paths = new Map<string, string>();
+  const decodedImages: Array<{ key: string; decoded: DecodedObject }> = [];
   let bytes = 0;
   for (const [index, image] of input.images.entries()) {
-    const object = await client.send(new HeadObjectCommand({ Bucket: bucket, Key: image.key }));
-    if (
-      object.ContentType !== image.contentType ||
-      object.ContentLength !== image.contentLength ||
-      !object.ETag
-    )
-      throw new ValidationError(
-        'An image upload is incomplete or changed. Upload it again before publishing.',
-      );
-    bytes += object.ContentLength;
+    const decoded = await decodeS3Image({ client, bucket }, { ...image, maxBytes: 1024 * 1024 });
+    bytes += decoded.image.contentLength;
     if (bytes > CONTENT_BUDGET_BYTES)
       throw new ValidationError('The published guide and floor plans must fit within 2 MB.');
     const key = publicationImageKey(input.eventId, input.id, index);
-    const source = `${bucket}/${image.key.split('/').map(encodeURIComponent).join('/')}`;
-    await client.send(
-      new CopyObjectCommand({
-        Bucket: bucket,
-        Key: key,
-        CopySource: object.VersionId
-          ? `${source}?versionId=${encodeURIComponent(object.VersionId)}`
-          : source,
-        CopySourceIfMatch: object.ETag,
-        ContentType: image.contentType,
-        CacheControl: 'public, max-age=31536000, immutable',
-        MetadataDirective: 'REPLACE',
-      }),
-    );
+    decodedImages.push({ key, decoded });
     paths.set(image.key, key);
   }
-  return { paths, bytes };
+  return { paths, bytes, decodedImages };
+}
+async function storePublicationImages(images: Array<{ key: string; decoded: DecodedObject }>) {
+  const storage = requireStorage();
+  const manifest: ImageManifestEntry[] = [];
+  for (const { key, decoded } of images) {
+    const objectVersionId = await storeImmutableImage(storage, key,
+      { image: decoded.image, cacheControl: 'public, max-age=31536000, immutable' });
+    manifest.push({ schemaVersion: 1, key, contentType: decoded.image.contentType,
+      contentLength: decoded.image.contentLength, sha256: decoded.image.sha256,
+      sourceEtag: decoded.sourceEtag, sourceVersionId: decoded.sourceVersionId, objectVersionId });
+  }
+  return manifest;
 }
 const s3Content: ContentStorage = {
+  async deleteObject(key) {
+    const { client, bucket } = requireStorage();
+    const abortSignal = AbortSignal.timeout(2000);
+    try {
+      const object = await client.send(new HeadObjectCommand({ Bucket: bucket, Key: key }), { abortSignal });
+      if (!object.VersionId)
+        throw new ValidationError('Content cleanup requires the configured versioned bucket.');
+      await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: key, VersionId: object.VersionId }), { abortSignal });
+    } catch (error) {
+      if (typeof error === 'object' && error !== null && 'name' in error &&
+        (error.name === 'NotFound' || error.name === 'NoSuchKey')) return;
+      throw error;
+    }
+  },
   async copyImage(input) {
     const { client, bucket } = requireStorage();
-    const object = await client.send(
-      new HeadObjectCommand({ Bucket: bucket, Key: input.sourceKey }),
-    );
-    const contentType = UploadContentType.parse(object.ContentType);
-    if (!object.ETag || !object.ContentLength || object.ContentLength > 1024 * 1024)
-      throw new ValidationError('A published floor plan is unavailable or too large to copy.');
-    const source = `${bucket}/${input.sourceKey.split('/').map(encodeURIComponent).join('/')}`;
-    await client.send(
-      new CopyObjectCommand({
-        Bucket: bucket,
-        Key: input.key,
-        CopySource: object.VersionId
-          ? `${source}?versionId=${encodeURIComponent(object.VersionId)}`
-          : source,
-        CopySourceIfMatch: object.ETag,
-        ContentType: contentType,
-        CacheControl: 'no-store',
-        MetadataDirective: 'REPLACE',
-      }),
-    );
-    return { key: input.key, contentType, contentLength: object.ContentLength };
+    const decoded = await decodeS3Image({ client, bucket },
+      { key: input.sourceKey, maxBytes: 1024 * 1024, ...(input.receipt ? { proof: input.receipt } : {}) });
+    await storeImmutableImage({ client, bucket }, input.key, { image: decoded.image, cacheControl: 'no-store' });
+    return { key: input.key, contentType: decoded.image.contentType, contentLength: decoded.image.contentLength };
   },
   async issueImage(input) {
     const { client, bucket } = requireStorage();
@@ -129,11 +134,12 @@ const s3Content: ContentStorage = {
   },
   async publish(input) {
     const { client, bucket } = requireStorage();
-    const { paths, bytes } = await freezeImages(input);
+    const { paths, bytes, decodedImages } = await freezeImages(input);
     const body = frozenContent(input.body, paths);
     const json = JSON.stringify(body);
     if (Buffer.byteLength(json) + bytes > CONTENT_BUDGET_BYTES)
       throw new ValidationError('The published guide and floor plans must fit within 2 MB.');
+    const manifest = await storePublicationImages(decodedImages);
     const objectKey = `content/${input.eventId}/${input.id}.json`;
     await client.send(
       new PutObjectCommand({
@@ -143,18 +149,22 @@ const s3Content: ContentStorage = {
         IfNoneMatch: '*',
         ContentType: 'application/json',
         CacheControl: 'public, max-age=31536000, immutable',
-      }),
+      }), { abortSignal: AbortSignal.timeout(10_000) },
     );
-    return { body, objectKey, etag: `"${createHash('sha256').update(json).digest('hex')}"` };
+    return { body, objectKey, etag: `"${createHash('sha256').update(json).digest('hex')}"`, imageManifest: manifest };
   },
-  async read(key) {
+  async read(key, receipt) {
     const { client, bucket } = requireStorage();
-    const object = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+    const abortSignal = AbortSignal.timeout(10_000);
+    const object = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key,
+      ...(receipt?.objectVersionId ? { VersionId: receipt.objectVersionId } : {}) }),
+      { abortSignal });
     if (!object.Body) throw new ValidationError('Published content is unavailable.');
-    return {
-      body: await object.Body.transformToByteArray(),
-      contentType: object.ContentType ?? 'application/octet-stream',
-    };
+    const body = await boundedBytes(object.Body, CONTENT_BUDGET_BYTES, abortSignal);
+    if (receipt && (body.length !== receipt.contentLength ||
+      createHash('sha256').update(body).digest('hex') !== receipt.sha256))
+      throw new ValidationError('The published image does not match its validated receipt.');
+    return servedBytes(body, receipt?.contentType ?? object.ContentType, { key, validated: receipt !== undefined });
   },
 };
 let activeStorage: ContentStorage = s3Content;

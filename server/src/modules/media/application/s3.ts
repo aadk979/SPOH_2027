@@ -5,6 +5,8 @@ import { ERROR_CODES } from '@spoh/shared';
 import { env } from '../../../config/env.js';
 import { AppError } from '../../../platform/errors/index.js';
 import { logger } from '../../../platform/logger/index.js';
+import { decodeS3Image, storeImmutableImage } from '../../../platform/uploads/s3Image.js';
+import { validatedObjectKey } from '../domain/mediaKeys.js';
 
 /**
  * Media storage.
@@ -79,16 +81,31 @@ export async function presignUpload(input: {
 }
 
 /** A short-lived read URL for one object. */
-export async function presignRead(key: string, ttlSeconds: number): Promise<string> {
+export async function presignRead(key: string, ttlSeconds: number, versionId?: string | null): Promise<string> {
   return getSignedUrl(
     requireClient(),
     new GetObjectCommand({
       Bucket: env.S3_MEDIA_BUCKET as string,
       Key: key,
+      ...(versionId ? { VersionId: versionId } : {}),
       ResponseCacheControl: 'no-store',
     }),
     { expiresIn: ttlSeconds },
   );
+}
+
+/** Validation never publishes the writable upload key; only fresh normalized bytes are read. */
+export async function validateUpload(input: {
+  key: string; eventId: string; contentType: string; contentLength?: number; maxBytes: number;
+}) {
+  const storage = { client: requireClient(), bucket: env.S3_MEDIA_BUCKET as string };
+  const decoded = await decodeS3Image(storage, input);
+  const objectKey = validatedObjectKey(input.eventId, input.key);
+  const objectVersionId = await storeImmutableImage(storage, objectKey,
+    { image: decoded.image, cacheControl: 'no-store' });
+  const { contentType, contentLength, sha256 } = decoded.image;
+  return { objectKey, objectVersionId, sourceEtag: decoded.sourceEtag,
+    sourceVersionId: decoded.sourceVersionId, contentType, contentLength, sha256 };
 }
 
 /** Keys come only from this event's immutable issuance receipts and item references. */

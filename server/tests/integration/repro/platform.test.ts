@@ -2,6 +2,7 @@ import type { Express } from 'express';
 import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../../src/app/createApp.js';
+import { requestIntentHash } from '../../../src/platform/http/requestIntent.js';
 import { resetDatabase, rawDb } from '../../helpers/db.js';
 import {
   assignToStation,
@@ -70,12 +71,16 @@ describe('cross-cutting rules (P03 repros)', () => {
     // A race: five abandoned keys, each retried three times at once.
     for (let round = 0; round < 5; round += 1) {
       const key = idempotencyKey();
+      const eventId = (await testEvent()).eventId;
+      const intent = { stationId, category: 'SEC_3', idempotencyKey: key };
       await rawDb.idempotencyRecord.create({
         data: {
           key,
-          eventId: (await testEvent()).eventId,
+          eventId,
           endpoint: 'POST /registrations',
           actorSub: volunteer.sub,
+          requestHash: requestIntentHash({ method: 'POST', originalUrl: `/api/v1/events/${eventId}/registrations`,
+            query: {}, body: intent }),
           statusCode: 0,
           responseBody: {},
           createdAt: new Date(Date.now() - 5 * 60_000),
@@ -86,7 +91,7 @@ describe('cross-cutting rules (P03 repros)', () => {
           request(app)
             .post('/api/v1/registrations')
             .set('Authorization', bearer(volunteer))
-            .send({ stationId, category: 'SEC_3', idempotencyKey: key }),
+            .send(intent),
         ),
       );
       statuses.push(...retries.map((response) => response.status));

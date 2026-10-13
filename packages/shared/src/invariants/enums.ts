@@ -172,3 +172,11 @@ export const SettingChangeSource = z.enum([
   'MIGRATION',
 ]);
 export type SettingChangeSource = z.infer<typeof SettingChangeSource>;
+
+/** Durable suppressed provider creation and atomic business binding. */
+export const IdentityAccountState = z.enum(['CREATE_STARTED', 'PROVIDER_READY', 'BOUND']);
+export type IdentityAccountState = z.infer<typeof IdentityAccountState>;
+
+/** Provider acceptance and ambiguous delivery remain distinct outcomes. */
+export const IdentityInvitationState = z.enum(['STARTED', 'ACCEPTED', 'DELIVERY_UNKNOWN', 'NOT_ELIGIBLE']);
+export type IdentityInvitationState = z.infer<typeof IdentityInvitationState>;

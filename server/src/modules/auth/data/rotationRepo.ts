@@ -28,7 +28,9 @@ export async function storeReplacement(
       ip: input.ip,
       expiresAt: input.expiresAt,
       lastUsedAt: input.now,
-      absoluteExpiresAt: input.previous.absoluteExpiresAt,
+      absoluteExpiresAt: input.previous.absoluteExpiresAt ?? input.expiresAt,
+      authenticatedAt: input.previous.authenticatedAt,
+      issuedAt: input.now,
     },
     select: { id: true },
   });

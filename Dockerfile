@@ -49,6 +49,7 @@ COPY --from=build --chown=node:node /app/server/assets/fonts server/assets/fonts
 COPY --from=build --chown=node:node /app/server/prisma server/prisma
 COPY --from=build --chown=node:node /app/server/scripts server/scripts
 COPY --from=build --chown=node:node /app/client/out client/out
+COPY --from=build --chown=node:node /app/client/out.csp.json client/out.csp.json
 COPY --chown=node:node infra/docker/entrypoint.sh /app/entrypoint.sh
 # The P09 totals check, for the entrypoint's one-off `totals` task.
 COPY --chown=node:node remediation/reports/P09/totals.mjs server/scripts/event-one-totals.mjs

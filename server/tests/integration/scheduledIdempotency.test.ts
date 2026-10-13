@@ -84,7 +84,9 @@ it('boots both daily handlers and prunes event and platform replays at the stric
     });
     expect(boot.map((row) => row.type)).toEqual([
       'audit.ship',
+      'content.storage.prune',
       'idempotency.prune',
+      'quota.prune',
       'retention.audit',
       'retention.identity',
       'session.prune',
@@ -95,7 +97,7 @@ it('boots both daily handlers and prunes event and platform replays at the stric
           row.eventId === null &&
           row.createdByPersonId === null &&
           row.recurrence ===
-            ({ 'retention.identity': 60, 'audit.ship': 300 }[row.type] ?? 86400),
+            ({ 'retention.identity': 60, 'audit.ship': 300, 'content.storage.prune': 3600, 'quota.prune': 600 }[row.type] ?? 86400),
       ),
     ).toBe(true);
     const action = boot.find((row) => row.type === 'idempotency.prune')!;

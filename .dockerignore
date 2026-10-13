@@ -2,6 +2,7 @@
 **/.next
 **/dist
 **/out
+**/out.csp.json
 **/coverage
 **/test-results
 **/playwright-report

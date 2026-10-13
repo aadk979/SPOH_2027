@@ -1,14 +1,13 @@
 import type { IdentityMutationResponse, PersonDetailResponse } from '@spoh/shared';
 import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
-import { currentAuthorizer } from '../../../platform/access/engine.js';
-import { EntityBuilder } from '../../../platform/access/authorizer/index.js';
+import { requireCurrentOrganisationPermission } from '../../../platform/access/currentOrganisation.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import { ForbiddenError, NotFoundError, ConflictError } from '../../../platform/errors/index.js';
 import { ERROR_CODES } from '@spoh/shared';
 import { identityProvider, invalidateVolunteerCache } from '../../../platform/identity/index.js';
 import { systemClock } from '../../../platform/time/index.js';
 import { revokeAllInTransaction } from '../../auth/index.js';
-import { personDetail, changePersonStanding } from '../data/personRepo.js';
+import { personDetail, changePersonStanding, holdManagedPerson } from '../data/personRepo.js';
 import { deletePushSubscriptions } from '../data/repo.js';
 import { personMutation } from './personMutation.js';
 
@@ -20,17 +19,21 @@ export interface PersonActor {
 }
 
 export async function permittedPerson(tx: PrismaTransactionClient, id: string, actor: PersonActor) {
+  await holdManagedPerson(tx, { targetId: id, actorId: actor.personId });
   const target = await personDetail(id, tx);
-  if (!target || !target.eventMemberships.length) throw new NotFoundError('Person');
-  for (const member of target.eventMemberships) {
-    const builder = new EntityBuilder(tx, { eventId: member.eventId, now: systemClock.now() });
-    const request = await builder.forPerson(actor.personId, {
-      action: 'Platform.ManageAdmins',
-      resource: { type: 'Organisation', id: member.event.organisationId },
-    });
-    const decision = await currentAuthorizer().isAuthorized(request);
-    if (!decision.allowed || decision.errors.length)
-      throw new ForbiddenError('Platform administrator access is required');
+  if (!target) throw new NotFoundError('Person');
+  const organisations = [...new Set([...target.organisationMemberships.map((member) => member.organisationId),
+    ...target.eventMemberships.map((member) => member.event.organisationId)])].sort();
+  if (!organisations.length) throw new NotFoundError('Person');
+  for (const organisationId of organisations) {
+    try {
+      await requireCurrentOrganisationPermission(tx, { organisationId, personId: actor.personId,
+        subject: actor.sub, action: 'Platform.ManageAdmins' });
+    } catch (error) {
+      // Target-specific authority must not disclose whether a foreign Person exists.
+      if (error instanceof ForbiddenError || error instanceof NotFoundError) throw new NotFoundError('Person');
+      throw error;
+    }
   }
   return target;
 }
@@ -67,9 +70,10 @@ export async function deactivatePerson(
   const now = systemClock.now();
   requireOtherAccount(id, input.actor);
   const result = await personMutation({ personId: id, actorSub: input.actor.sub,
-    operation: 'deactivate', idempotencyKey: input.actor.idempotencyKey, reason: input.reason }, async (tx) => {
+    operation: 'deactivate', idempotencyKey: input.actor.idempotencyKey, reason: input.reason,
+    authorizeReplay: (tx) => permittedPerson(tx, id, input.actor) }, async (tx) => {
     const target = await permittedPerson(tx, id, input.actor);
-    await identityProvider.disableUser(target.email);
+    await identityProvider.disableUser(target.email, target.cognitoSub);
     await changePersonStanding(tx, { id, at: now, reason: input.reason });
     await deletePushSubscriptions(tx, id);
     const sessionsRevoked = await revokeAllInTransaction(tx, {
@@ -95,10 +99,11 @@ export async function reactivatePerson(
 ): Promise<IdentityMutationResponse> {
   requireOtherAccount(id, actor);
   const result = await personMutation({ personId: id, actorSub: actor.sub,
-    operation: 'reactivate', idempotencyKey: actor.idempotencyKey }, async (tx) => {
+    operation: 'reactivate', idempotencyKey: actor.idempotencyKey,
+    authorizeReplay: (tx) => permittedPerson(tx, id, actor) }, async (tx) => {
     const target = await permittedPerson(tx, id, actor);
     if (target.piiErasedAt) throw new ConflictError(ERROR_CODES.CONFLICT, 'This archived profile was anonymised and cannot be reactivated.');
-    await identityProvider.enableUser(target.email);
+    await identityProvider.enableUser(target.email, target.cognitoSub);
     await changePersonStanding(tx, { id, at: null });
     await auditPerson(tx, { id, actor, action: 'user.reactivate', after: { global: true } });
     return { sessionsRevoked: 0, identityChanged: true };

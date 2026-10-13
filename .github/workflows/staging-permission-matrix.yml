@@ -1,0 +1,71 @@
+name: Staging permission matrix
+
+# ADR-011: manual until P16 recreates and accepts staging. No schedule or deployment.
+on:
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: Exact accepted main commit to attest (must equal this dispatch revision)
+        required: true
+      policy_store_id:
+        description: Synthetic staging PolicyStoreId from the owner-approved P16 stack
+        required: true
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: staging-permission-matrix
+  cancel-in-progress: false
+
+jobs:
+  matrix:
+    if: >-
+      github.ref == 'refs/heads/main' && github.repository_id == '1379786785' &&
+      github.workflow_ref == 'aadk979/SPOH_2027/.github/workflows/staging-permission-matrix.yml@refs/heads/main'
+    runs-on: ubuntu-latest
+    # No GitHub environment: IAM pins the immutable repository's exact main-ref OIDC sub.
+    env:
+      EXPECTED_SHA: ${{ inputs.expected_sha }}
+      POLICY_STORE_ID: ${{ inputs.policy_store_id }}
+      AWS_REGION: ap-southeast-1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Pin reviewed source before credentials
+        run: |
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [ "$(git rev-parse HEAD)" = "$EXPECTED_SHA" ]
+          [ "$GITHUB_SHA" = "$EXPECTED_SHA" ]
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run build:shared
+      - name: Record the complete passing synthetic role, changes and adversarial matrix
+        run: |
+          mkdir -p .verification
+          node --import tsx --test packages/access-policies/tests/matrix.test.mjs \
+            packages/access-policies/tests/changes.test.mjs packages/access-policies/tests/adversarial.test.mjs \
+            packages/access-policies/tests/deployed-matrix.test.mjs
+        env:
+          SPOH_POLICY_SUITE_RECORD: ${{ github.workspace }}/.verification/permission-cases.jsonl
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::665146708212:role/spoh-staging-permission-matrix
+          role-duration-seconds: 900
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Read and attest staging decisions against the exact local cases and policy set
+        run: |
+          npx tsx infra/cdk/bin/staging-permission-matrix.ts "$POLICY_STORE_ID" \
+            .verification/permission-cases.jsonl .verification/permission-matrix.json "$EXPECTED_SHA" "$AWS_REGION"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: staging-permission-matrix-${{ github.sha }}
+          path: .verification/permission-matrix.json
+          include-hidden-files: true
+          if-no-files-found: warn

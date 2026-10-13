@@ -30,6 +30,9 @@ const CONTROL =
   'placeholder:text-text-subtle transition-colors hover:border-text-subtle ' +
   'disabled:cursor-not-allowed disabled:bg-surface-alt disabled:text-text-subtle';
 
+// hardcoding-allowed: fixed shared CSS selector, independent of event content.
+const SELECT_CONTROL = 'spoh-select cursor-pointer appearance-none pr-xxl';
+
 /**
  * Size is a prop, never a `className`.
  *
@@ -138,38 +141,15 @@ export function Textarea({
   );
 }
 
-/**
- * The chevron, as a data URI.
- *
- * `appearance-none` alone leaves a control with no affordance at all on Windows
- * and Android, so the arrow is painted back as a background image — inline SVG,
- * because the CSP allows `img-src data:` but no CDN.
- *
- * Every space is percent-encoded and the whole thing is a constant rather than
- * a literal in the class list. A raw `bg-[url("…viewBox='0 0 12 8'…")]` looks
- * like one class and is not: the browser splits a `class` attribute on
- * whitespace, so it arrived as a dozen nonsense tokens and the arrow silently
- * never rendered.
- */
-const CHEVRON =
-  "url(\"data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2012%208'%3E%3Cpath%20d='M1%201.5%206%206.5l5-5'%20stroke='%237a7a7a'%20stroke-width='1.75'%20fill='none'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E\")";
-
 /** A select, with the native chevron replaced by a drawn one. */
 export function Select({
   className,
   children,
   ...rest
-}: SelectHTMLAttributes<HTMLSelectElement>): ReactNode {
+}: Omit<SelectHTMLAttributes<HTMLSelectElement>, 'style'>): ReactNode {
   return (
     <select
-      // The chevron is the one thing here that cannot be a utility: see CHEVRON.
-      style={{
-        backgroundImage: CHEVRON,
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'right 17px center',
-        backgroundSize: '14px',
-      }}
-      className={cx(CONTROL, CONTROL_SCALE.md, 'cursor-pointer appearance-none pr-xxl', className)}
+      className={cx(CONTROL, CONTROL_SCALE.md, SELECT_CONTROL, className)}
       {...rest}
     >
       {children}

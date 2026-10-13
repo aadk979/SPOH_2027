@@ -46,10 +46,11 @@ it('limits publication and clone access to generated drafts/content prefixes in 
   );
   expect(policies).toHaveLength(2);
   for (const row of policies)
-    expect(row.Action).toEqual(['s3:GetObject', 's3:GetObjectVersion', 's3:PutObject']);
+    expect(row.Action).toEqual(['s3:GetObject', 's3:GetObjectVersion', 's3:PutObject',
+      's3:DeleteObject', 's3:DeleteObjectVersion']);
   expect(policies.map((row) => JSON.stringify(row.Resource)).join(' ')).toContain('/drafts/*');
   expect(policies.map((row) => JSON.stringify(row.Resource)).join(' ')).toContain('/content/*');
-  expect(JSON.stringify(policies)).not.toMatch(/Delete|List|Acl/);
+  expect(JSON.stringify(policies)).not.toMatch(/List|Acl/);
 });
 it('limits final exports to private archive objects and keeps migration roles free of S3', () => {
   const id = Object.keys(template.findResources('AWS::S3::Bucket')).find((key) =>

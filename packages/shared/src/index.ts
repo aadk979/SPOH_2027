@@ -73,3 +73,4 @@ export * from './time/index.js';
 export * from './contracts/structure/index.js';
 export * from './contracts/audit/index.js';
 export * from './contracts/corrections/index.js';
+export * from './contracts/staticClient/index.js';

@@ -31,7 +31,7 @@ async function secondEvent() {
   return other;
 }
 async function session(email = member.email) {
-  return request(app).post('/api/v1/auth/session').send({ email }).expect(201);
+  return request(app).post('/api/v1/auth/session').set('Origin', 'http://localhost:3000').send({ email }).expect(201);
 }
 
 describe('membership identity lifecycle', () => {
@@ -82,14 +82,14 @@ describe('membership identity lifecycle', () => {
     expect(response.body.sessionsRevoked).toBe(1);
   });
   it('limits cross-event person details and global suspension to platform admins', async () => {
-    await request(app).get(`/api/v1/people/${member.id}`).set('Authorization', bearer(admin)).expect(403);
+    await request(app).get(`/api/v1/people/${member.id}`).set('Authorization', bearer(admin)).expect(404);
     const event = await rawDb.event.findUniqueOrThrow({ where: { id: (await testEvent()).eventId } });
     await rawDb.organisationMembership.create({ data: { organisationId: event.organisationId, personId: admin.id, role: 'PLATFORM_ADMIN' } });
     const detail = await request(app).get(`/api/v1/people/${member.id}`).set('Authorization', bearer(admin)).expect(200);
     expect(detail.body.memberships).toHaveLength(1);
     await session();
     await request(app).post(`/api/v1/people/${member.id}/deactivate`).set('Authorization', bearer(admin)).send({ reason: 'Lost account credential' }).expect(200);
-    await request(app).post('/api/v1/auth/session').send({ email: member.email }).expect(403);
+    await request(app).post('/api/v1/auth/session').set('Origin', 'http://localhost:3000').send({ email: member.email }).expect(403);
     await request(app).post(`/api/v1/people/${member.id}/reactivate`).set('Authorization', bearer(admin)).send({}).expect(200);
     await session();
   });
@@ -105,8 +105,8 @@ describe('first-party recovery and MFA', () => {
     const header = `Bearer ${own.body.accessToken as string}`;
     const devices = await request(app).get('/api/v1/auth/sessions').set('Authorization', header).expect(200);
     expect(devices.body.data).toEqual([expect.objectContaining({ current: true })]);
-    await request(app).delete(`/api/v1/auth/sessions/${decodeJwt(somebodyElse.body.accessToken as string).sid as string}`).set('Authorization', header).expect(404);
-    await request(app).delete(`/api/v1/auth/sessions/${decodeJwt(own.body.accessToken as string).sid as string}`).set('Authorization', header).expect(204);
+    await request(app).delete(`/api/v1/auth/sessions/${decodeJwt(somebodyElse.body.accessToken as string).sid as string}`).set('Origin', 'http://localhost:3000').set('Authorization', header).expect(404);
+    await request(app).delete(`/api/v1/auth/sessions/${decodeJwt(own.body.accessToken as string).sid as string}`).set('Origin', 'http://localhost:3000').set('Authorization', header).expect(204);
     await request(app).get('/api/v1/auth/sessions').set('Authorization', header).expect(401);
   });
   it('uses an expired signed proof only to revoke its own rotated family when cookies are blocked', async () => {
@@ -114,19 +114,19 @@ describe('first-party recovery and MFA', () => {
     const anotherDevice = await session();
     const sid = decodeJwt(opened.body.accessToken as string).sid as string;
     const expired = await issueAccessToken({ sub: member.sub, sid }, -1);
-    const renewed = await request(app).post('/api/v1/auth/refresh').set('Cookie', cookie(opened)).expect(200);
+    const renewed = await request(app).post('/api/v1/auth/refresh').set('Origin', 'http://localhost:3000').set('Cookie', cookie(opened)).expect(200);
     await request(app).get('/api/v1/auth/sessions').set('Authorization', `Bearer ${expired.token}`).expect(401);
-    await request(app).delete('/api/v1/auth/session').set('Authorization', `Bearer ${expired.token}`).expect(204);
-    await request(app).post('/api/v1/auth/refresh').set('Cookie', cookie(renewed)).expect(401);
+    await request(app).delete('/api/v1/auth/session').set('Origin', 'http://localhost:3000').set('Authorization', `Bearer ${expired.token}`).expect(204);
+    await request(app).post('/api/v1/auth/refresh').set('Origin', 'http://localhost:3000').set('Cookie', cookie(renewed)).expect(401);
     await request(app).get('/api/v1/me').set('Authorization', `Bearer ${anotherDevice.body.accessToken as string}`).expect(200);
   });
   it('refuses tampered logout proofs and binds a valid proof to the session owner', async () => {
     const opened = await session();
     const sid = decodeJwt(opened.body.accessToken as string).sid as string;
     const wrongOwner = await issueAccessToken({ sub: admin.sub, sid }, -1);
-    await request(app).delete('/api/v1/auth/session').set('Authorization', `Bearer ${wrongOwner.token}`).expect(204);
+    await request(app).delete('/api/v1/auth/session').set('Origin', 'http://localhost:3000').set('Authorization', `Bearer ${wrongOwner.token}`).expect(204);
     const token = opened.body.accessToken as string;
-    await request(app).delete('/api/v1/auth/session').set('Authorization', `Bearer ${token.slice(0, -5)}aaaaa`).expect(204);
+    await request(app).delete('/api/v1/auth/session').set('Origin', 'http://localhost:3000').set('Authorization', `Bearer ${token.slice(0, -5)}aaaaa`).expect(204);
     await request(app).get('/api/v1/me').set('Authorization', `Bearer ${token}`).expect(200);
   });
   it('redeems a PKCE handoff without cookies once, rejecting a wrong verifier', async () => {
@@ -138,12 +138,12 @@ describe('first-party recovery and MFA', () => {
     const target = new URL(recovery.headers.location as string);
     expect(target.searchParams.get('auth_state')).toBe(state);
     const code = target.searchParams.get('auth_code');
-    await request(app).post('/api/v1/auth/handoff').send({ code, verifier: randomBytes(32).toString('base64url') }).expect(401);
-    const redeemed = await request(app).post('/api/v1/auth/handoff').send({ code, verifier }).expect(200);
+    await request(app).post('/api/v1/auth/handoff').set('Origin', 'http://localhost:3000').send({ code, verifier: randomBytes(32).toString('base64url') }).expect(401);
+    const redeemed = await request(app).post('/api/v1/auth/handoff').set('Origin', 'http://localhost:3000').send({ code, verifier }).expect(200);
     expect(redeemed.headers['set-cookie']).toBeUndefined();
     expect(redeemed.body).not.toHaveProperty('refreshToken');
     await request(app).get('/api/v1/me').set('Authorization', `Bearer ${redeemed.body.accessToken as string}`).expect(200);
-    await request(app).post('/api/v1/auth/handoff').send({ code, verifier }).expect(401);
+    await request(app).post('/api/v1/auth/handoff').set('Origin', 'http://localhost:3000').send({ code, verifier }).expect(401);
   });
   it('returns signed-out for missing cookies and rejects unsafe return addresses', async () => {
     const query = { challenge: randomBytes(32).toString('base64url'), state: randomBytes(32).toString('base64url'), returnTo: 'http://localhost:3000/' };
@@ -154,25 +154,28 @@ describe('first-party recovery and MFA', () => {
   });
   it('signs out by thin bearer when the browser blocks third-party cookies', async () => {
     const opened = await session();
-    await request(app).delete('/api/v1/auth/session').set('Authorization', `Bearer ${opened.body.accessToken as string}`).expect(204);
+    await request(app).delete('/api/v1/auth/session').set('Origin', 'http://localhost:3000').set('Authorization', `Bearer ${opened.body.accessToken as string}`).expect(204);
     await request(app).get('/api/v1/me').set('Authorization', `Bearer ${opened.body.accessToken as string}`).expect(401);
   });
   it('restricts an admin without TOTP to enrolment, then clears the temporary provider credential', async () => {
-    vi.spyOn(identityProvider, 'hasMfa').mockResolvedValue(false);
+    vi.spyOn(identityProvider, 'hasMfa').mockResolvedValueOnce(false).mockResolvedValue(true);
     vi.spyOn(identityProvider, 'beginMfa').mockResolvedValue('TESTTOTPSECRET');
     vi.spyOn(identityProvider, 'verifyMfa').mockResolvedValue();
-    const opened = await request(app).post('/api/v1/auth/session').send({ providerAccessToken: admin.token }).expect(201);
+    const opened = await request(app).post('/api/v1/auth/session').set('Origin', 'http://localhost:3000').send({ providerAccessToken: admin.token }).expect(201);
     expect(opened.body.mfaRequired).toBe(true);
     const token = opened.body.accessToken as string;
     const id = decodeJwt(token).sid as string;
     expect((await rawDb.refreshSession.findUniqueOrThrow({ where: { id } })).providerTokenEncrypted).not.toContain(admin.token);
     await request(app).get('/api/v1/me').set('Authorization', `Bearer ${token}`).expect(401);
-    await request(app).post('/api/v1/auth/mfa/setup').set('Authorization', `Bearer ${token}`).send({}).expect(200);
-    const verified = await request(app).post('/api/v1/auth/mfa/verify').set('Authorization', `Bearer ${token}`).send({ code: '123456' }).expect(200);
+    await request(app).post('/api/v1/auth/mfa/setup').set('Origin', 'http://localhost:3000').set('Authorization', `Bearer ${token}`).send({}).expect(200);
+    const verified = await request(app).post('/api/v1/auth/mfa/verify').set('Origin', 'http://localhost:3000').set('Authorization', `Bearer ${token}`).send({ code: '123456' }).expect(200);
     expect(verified.body.mfaRequired).toBeUndefined();
     invalidateVolunteerCache();
     await request(app).get('/api/v1/me').set('Authorization', `Bearer ${verified.body.accessToken as string}`).expect(200);
-    expect(await rawDb.refreshSession.findUnique({ where: { id } })).toMatchObject({ mfaPending: false, providerTokenEncrypted: null });
+    expect(decodeJwt(verified.body.accessToken as string).sid).not.toBe(id);
+    expect(cookie(verified)).not.toBe(cookie(opened));
+    expect(await rawDb.refreshSession.findUnique({ where: { id } })).toMatchObject({
+      mfaPending: true, revokedReason: 'mfa-completed', providerTokenEncrypted: null });
   });
   it('expires admin sessions at configured idle and absolute limits', async () => {
     const opened = await session(admin.email);
@@ -181,6 +184,6 @@ describe('first-party recovery and MFA', () => {
     await request(app).get('/api/v1/me').set('Authorization', `Bearer ${opened.body.accessToken as string}`).expect(401);
     const again = await session(admin.email);
     await rawDb.refreshSession.update({ where: { id: decodeJwt(again.body.accessToken as string).sid as string }, data: { absoluteExpiresAt: new Date(Date.now() - 1000) } });
-    await request(app).post('/api/v1/auth/refresh').set('Cookie', cookie(again)).expect(401);
+    await request(app).post('/api/v1/auth/refresh').set('Origin', 'http://localhost:3000').set('Cookie', cookie(again)).expect(401);
   });
 });

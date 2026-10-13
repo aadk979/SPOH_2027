@@ -5,6 +5,7 @@ import { revokeLiveSessions } from '../data/repo.js';
 import { inHomeEvent } from './sessionAudit.js';
 import { invalidateSessionCache } from '../../../platform/identity/index.js';
 import { systemClock } from '../../../platform/time/index.js';
+import { lockCredentialPerson } from '../data/securityRepo.js';
 
 /** The bearer path is for third-party-cookie-blocked clients and is idempotent. */
 export async function signOutAccessSession(token: string | undefined, audit: AuditContext) {
@@ -15,6 +16,7 @@ export async function signOutAccessSession(token: string | undefined, audit: Aud
     const session = await tx.refreshSession.findFirst({ where: { id: claims.sid,
       volunteer: { cognitoSub: claims.sub } } });
     if (!session) return;
+    await lockCredentialPerson(tx, session.volunteerId);
     const recorded = await inHomeEvent(audit, session.volunteerId);
     const revoked = await revokeLiveSessions({ familyId: session.familyId },
       { at: systemClock.now(), reason: 'signed-out' }, tx);

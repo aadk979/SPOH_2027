@@ -14,7 +14,8 @@ import {
 } from '../helpers/scheduledLifecycle.js';
 
 // Policies and read URLs are fake; these cases never call AWS or upload objects.
-vi.mock('../../src/modules/media/application/s3.js', () => ({
+vi.mock('../../src/modules/media/application/s3.js', async () => ({
+  validateUpload: (await import('../helpers/mediaValidation.js')).syntheticValidatedUpload,
   mediaEnabled: () => true,
   assertConfigured: () => undefined,
   presignUpload: () => Promise.resolve({ url: 'https://bucket.test/upload', fields: {} }),
@@ -43,7 +44,7 @@ const receipt = (patch: Partial<Prisma.AuditLogUncheckedCreateInput> = {}) =>
       action: 'media.upload',
       entityType: 'MediaObject',
       entityId: key,
-      after: { purpose: 'lostFound', contentType: 'image/jpeg' },
+      after: { purpose: 'lostFound', contentType: 'image/jpeg', rehearsal: false },
       ...patch,
     },
   });
@@ -109,7 +110,7 @@ it('signs the event’s issued legacy-format key without exposing or changing it
   expect(response.status).toBe(200);
   expect(response.headers['cache-control']).toBe('no-store');
   expect(response.body).toEqual({ url: 'https://bucket.test/read', expiresIn: 300 });
-  expect(presignRead).toHaveBeenCalledExactlyOnceWith(key, 300);
+  expect(presignRead).toHaveBeenCalledExactlyOnceWith(`${key}.validated`, 300, null);
   expect(response.text).not.toContain(f.creator.id);
   expect(await rawDb.auditLog.findUnique({ where: { id: original.id } })).toEqual(original);
   expect(await rawDb.auditLog.count()).toBe(1);

@@ -15,6 +15,17 @@ on:
       sha:
         description: Commit whose image to deploy (defaults to the branch head)
         required: false
+      signing_rotation_phase:
+        description: Explicit session key phase; preload/flip/retire require the documented P16 operator evidence
+        type: choice
+        options: [stable, preload, flip, retire]
+        default: stable
+      session_current_version_id:
+        description: Optional explicit current VersionId override (first service requires one)
+        required: false
+      session_previous_version_id:
+        description: Optional explicit overlap VersionId override
+        required: false
 
 permissions:
   actions: read
@@ -155,6 +166,12 @@ jobs:
             --query "Stacks[0].Outputs[?OutputKey=='ServiceImageTag'].OutputValue" --output text)
           [ "$tag" = "None" ] && tag=""
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          current=$(aws cloudformation describe-stacks --stack-name "$STACK" \
+            --query "Stacks[0].Outputs[?OutputKey=='SessionSigningCurrentVersionIdOutput'].OutputValue" --output text)
+          previous=$(aws cloudformation describe-stacks --stack-name "$STACK" \
+            --query "Stacks[0].Outputs[?OutputKey=='SessionSigningPreviousVersionIdOutput'].OutputValue" --output text)
+          echo "session_current=$current" >> "$GITHUB_OUTPUT"
+          echo "session_previous=$previous" >> "$GITHUB_OUTPUT"
 
       - name: Recheck source and actual deployed image under the deployment lock
         id: guard
@@ -176,12 +193,28 @@ jobs:
       - run: npm ci
         if: steps.guard.outputs.eligible == 'true'
 
+      - name: Retain explicit signing versions and validate rotation phase
+        id: signing
+        if: steps.guard.outputs.eligible == 'true'
+        run: |
+          context=$(node infra/scripts/session-version-context.mjs)
+          echo "context=$context" >> "$GITHUB_OUTPUT"
+        env:
+          SESSION_SIGNING_CURRENT_VERSION_ID: ${{ inputs.session_current_version_id || vars.STAGING_SESSION_SIGNING_CURRENT_VERSION_ID }}
+          SESSION_SIGNING_PREVIOUS_VERSION_ID: ${{ inputs.session_previous_version_id || vars.STAGING_SESSION_SIGNING_PREVIOUS_VERSION_ID }}
+          DEPLOYED_SESSION_SIGNING_CURRENT_VERSION_ID: ${{ steps.current.outputs.session_current }}
+          DEPLOYED_SESSION_SIGNING_PREVIOUS_VERSION_ID: ${{ steps.current.outputs.session_previous }}
+          SESSION_SIGNING_ROTATION_PHASE: ${{ inputs.signing_rotation_phase || 'stable' }}
+
       - name: Define the migrate task for this release
         if: steps.guard.outputs.eligible == 'true'
         working-directory: infra/cdk
+        env:
+          SIGNING_CONTEXT: ${{ steps.signing.outputs.context }}
         run: |
           npx cdk deploy "$STACK" --require-approval never --outputs-file ../../outputs.json \
-            -c imageTag="$SHA" ${{ steps.current.outputs.tag && format('-c serviceImageTag={0}', steps.current.outputs.tag) || '' }}
+            -c imageTag="$SHA" -c "sessionSigningVersions=$SIGNING_CONTEXT" \
+            ${{ steps.current.outputs.tag && format('-c serviceImageTag={0}', steps.current.outputs.tag) || '' }}
 
       - name: Run migrations
         if: steps.guard.outputs.eligible == 'true'
@@ -190,9 +223,11 @@ jobs:
       - name: Move the service to this release
         if: steps.guard.outputs.eligible == 'true'
         working-directory: infra/cdk
+        env:
+          SIGNING_CONTEXT: ${{ steps.signing.outputs.context }}
         run: |
           npx cdk deploy "$STACK" --require-approval never --outputs-file ../../outputs.json \
-            -c imageTag="$SHA" -c serviceImageTag="$SHA"
+            -c imageTag="$SHA" -c serviceImageTag="$SHA" -c "sessionSigningVersions=$SIGNING_CONTEXT"
 
       - name: Smoke
         if: steps.guard.outputs.eligible == 'true'

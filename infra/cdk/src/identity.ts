@@ -1,12 +1,15 @@
 import { Duration, RemovalPolicy, Stack, Validations } from 'aws-cdk-lib';
 import {
   AccountRecovery,
+  type CfnUserPoolClient,
+  ClientAttributes,
   CfnManagedLoginBranding,
   FeaturePlan,
   ManagedLoginVersion,
   Mfa,
   OAuthScope,
   StandardThreatProtectionMode,
+  StringAttribute,
   UserPool,
   UserPoolClient,
   type IUserPool,
@@ -16,6 +19,7 @@ import type { StageConfig } from './config.js';
 
 export interface CognitoSettings {
   userPoolId: string;
+  userPoolArn: string;
   clientId: string;
   /** The managed login base URL. */
   domain: string;
@@ -64,6 +68,7 @@ export class PlatformIdentity extends Construct {
     this.pool = pool;
     this.settings = {
       userPoolId: pool.userPoolId,
+      userPoolArn: pool.userPoolArn,
       clientId: client.userPoolClientId,
       domain: domain.baseUrl(),
     };
@@ -77,6 +82,8 @@ export class PlatformIdentity extends Construct {
       selfSignUpEnabled: false,
       signInAliases: { email: true },
       autoVerify: { email: true },
+      // Persisted random operation UUID proves app-owned creation; immutable after create.
+      customAttributes: { spoh_operation: new StringAttribute({ mutable: false, minLen: 36, maxLen: 36 }) },
       accountRecovery: AccountRecovery.EMAIL_ONLY,
       passwordPolicy: {
         minLength: 12,
@@ -101,13 +108,16 @@ export class PlatformIdentity extends Construct {
   }
 
   private appClient(pool: UserPool, props: IdentityProps): UserPoolClient {
-    return new UserPoolClient(this, 'Client', {
+    const client = new UserPoolClient(this, 'Client', {
       userPool: pool,
       generateSecret: false,
       authFlows: {},
+      refreshTokenRotationGracePeriod: Duration.seconds(10),
+      readAttributes: new ClientAttributes().withStandardAttributes({ fullname: true, email: true, emailVerified: true }),
+      writeAttributes: new ClientAttributes().withStandardAttributes({ fullname: true, email: true }),
       oAuth: {
         flows: { authorizationCodeGrant: true },
-        scopes: [OAuthScope.OPENID, OAuthScope.EMAIL, OAuthScope.PROFILE, OAuthScope.COGNITO_ADMIN],
+        scopes: [OAuthScope.OPENID, OAuthScope.EMAIL, OAuthScope.COGNITO_ADMIN],
         callbackUrls: [`${props.appOrigin}/api/v1/auth/callback`],
         logoutUrls: [`${props.clientOrigin}/sign-in`],
       },
@@ -117,6 +127,9 @@ export class PlatformIdentity extends Construct {
       idTokenValidity: Duration.minutes(5),
       refreshTokenValidity: Duration.minutes(60),
     });
+    // CDK omits an empty authFlows map; omission enables Cognito API defaults.
+    (client.node.defaultChild as CfnUserPoolClient).explicitAuthFlows = [];
+    return client;
   }
 
   private acknowledge(pool: UserPool, { stage }: IdentityProps): void {

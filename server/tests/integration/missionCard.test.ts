@@ -205,7 +205,7 @@ describe('stamping', () => {
     await request(app)
       .post(`/api/v1/cards/${CARD_A}/void`)
       .set('Authorization', bearer(ic))
-      .send({ reason: 'Card was damaged beyond use' });
+      .send({ reason: 'Card was damaged beyond use', idempotencyKey: idempotencyKey() });
 
     const response = await stamp(facilitator, CARD_A, courseId);
     expect(response.status).toBe(409);
@@ -276,7 +276,7 @@ describe('reissue', () => {
     const response = await request(app)
       .post(`/api/v1/cards/${CARD_A}/reissue`)
       .set('Authorization', bearer(ic))
-      .send({ reason: 'Visitor lost the card at the lounge', replacementShortCode: CARD_B });
+      .send({ reason: 'Visitor lost the card at the lounge', replacementShortCode: CARD_B, idempotencyKey: idempotencyKey() });
 
     expect(response.status).toBe(201);
     expect(response.body.stampsCarriedOver).toBe(1);
@@ -305,7 +305,7 @@ describe('reissue', () => {
     const response = await request(app)
       .post(`/api/v1/cards/${CARD_A}/reissue`)
       .set('Authorization', bearer(ic))
-      .send({ reason: 'Lost card', replacementShortCode: CARD_B });
+      .send({ reason: 'Lost card', replacementShortCode: CARD_B, idempotencyKey: idempotencyKey() });
 
     expect(response.status).toBe(409);
     expect(response.body.error.code).toBe('CARD_ALREADY_ISSUED');
@@ -315,7 +315,7 @@ describe('reissue', () => {
     const response = await request(app)
       .post(`/api/v1/cards/${CARD_A}/reissue`)
       .set('Authorization', bearer(booth))
-      .send({ reason: 'Lost card', replacementShortCode: CARD_B });
+      .send({ reason: 'Lost card', replacementShortCode: CARD_B, idempotencyKey: idempotencyKey() });
 
     expect(response.status).toBe(403);
   });

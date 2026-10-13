@@ -6,6 +6,7 @@ import { ValidationError } from '../../../platform/errors/index.js';
 import { lockReserved, settleReserved } from '../../../platform/idempotency/index.js';
 import { insertContentSchedule } from '../data/repo.js';
 import { checkedContentDraft, prepareContentMutation, type ContentActor } from './prepare.js';
+import { planPublicationInTransaction } from './storagePlan.js';
 
 export function scheduleContentPublication(request: ScheduleContentRequest, actor: ContentActor) {
   return prisma.$transaction(async (tx) => {
@@ -27,8 +28,10 @@ export function scheduleContentPublication(request: ScheduleContentRequest, acto
       throw new ValidationError('Choose a future publication time.');
     if (draft.reviewedVersion !== draft.version)
       throw new ValidationError('Review this draft version before scheduling it.');
+    const plan = await planPublicationInTransaction(tx, { actor, expectedVersion: draft.version, runAt });
     const row = await insertContentSchedule(scope, {
       tx,
+      id: plan.id,
       version: draft.version,
       personId: actor.volunteerId,
       runAt,

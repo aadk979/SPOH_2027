@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
+import type {} from 'pino-http';
 
 /** Header a load balancer or the client may use to supply a correlation id. */
 const REQUEST_ID_HEADER = 'x-request-id';

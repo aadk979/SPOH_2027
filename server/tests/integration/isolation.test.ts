@@ -1,6 +1,7 @@
 import type { Express, Router } from 'express';
 import request from 'supertest';
-import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { ROLE_IDS, type Role } from '@spoh/access-policies';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../../src/app/createApp.js';
 import { EVENT_ROUTES } from '../../src/app/routes.js';
 import { createEvent } from '../../src/modules/event/index.js';
@@ -14,11 +15,21 @@ import {
   createStation,
   createVolunteer,
   idempotencyKey,
+  makePlatformAdmin,
   testEvent,
   type TestVolunteer,
 } from '../helpers/fixtures.js';
 import { FROZEN_NOW } from '../setup.js';
 import { guideContent, insertContentPublicationFixture } from '../helpers/content.js';
+import { presignRead } from '../../src/modules/media/application/s3.js';
+import { eventIdInputInventory } from '../helpers/idInputInventory.js';
+
+// Only external object transport/configuration is replaced; receipt and event authority stay real.
+vi.mock('../../src/modules/media/application/s3.js', async (importOriginal) => ({
+  ...await importOriginal<typeof import('../../src/modules/media/application/s3.js')>(),
+  assertConfigured: () => undefined,
+  presignRead: vi.fn(() => { throw new Error('Foreign media must never reach signing.'); }),
+}));
 
 /**
  * Cross-event isolation (P09.7, ADR-001 "How it is tested" 1).
@@ -67,12 +78,14 @@ interface EventB {
   template: string;
   assignment: string;
   registration: string;
+  group: string;
   category: string;
   tick: string;
   incident: string;
   alert: string;
   found: string;
   card: { shortCode: string; qrPayload: string };
+  replacementCard: string;
   giftType: string;
   redemption: string;
   importBatch: string;
@@ -85,10 +98,17 @@ interface EventB {
   visitorField: string;
   reportSnapshot: string;
   contentVersion: string;
+  contentImageKey: string;
   archiveExport: string;
   cardPrintExport: string;
   stationType: string;
   stationTag: string;
+  history: string;
+  mediaKey: string;
+  membership: string;
+  brandingReceipt: string;
+  cardId: string;
+  audit: string;
 }
 
 async function createEventB(): Promise<EventScope> {
@@ -121,21 +141,23 @@ async function personIn(scope: EventScope, email: string): Promise<string> {
   return person.id;
 }
 
-async function seedEventB(): Promise<EventB> {
-  const scope = await createEventB();
+async function seedEventB(input?: { scope: EventScope; tag: string }): Promise<EventB> {
+  const scope = input?.scope ?? await createEventB();
+  const tag = input?.tag ?? 'b';
   const { eventId } = scope;
-  const person = await personIn(scope, 'b-one@isolation.test');
-  const other = await personIn(scope, 'b-two@isolation.test');
-  const type = await rawDb.stationType.findFirstOrThrow({ where: { eventId } });
+  const person = await personIn(scope, `${tag}-one@isolation.test`);
+  const other = await personIn(scope, `${tag}-two@isolation.test`);
+  const type = await rawDb.stationType.create({ data: { eventId, code: `${tag.toUpperCase()}-BOUNDARY`,
+    label: 'Boundary desk', registersVisitors: true, redeemsGifts: true, countsEntry: true, issuesStamp: true } });
   const station = await rawDb.station.create({
-    data: { eventId, typeId: type.id, code: 'B-DESK', name: 'B desk' },
+    data: { eventId, typeId: type.id, code: tag === 'b' ? 'B-DESK' : 'A-BOUNDARY', name: `${tag} boundary desk` },
   });
   const stationTag = await rawDb.stationTag.create({
     data: { eventId, code: 'B-TAG', label: 'B tag' },
   });
   const cardPrintExport = await rawDb.cardPrintExport.create({
     data: {
-      id: 'b-card-print-export',
+      id: `${tag}-card-print-export`,
       eventId,
       objectKey: `card-print/${eventId}/foreign.pdf`,
       format: 'pdf',
@@ -178,7 +200,7 @@ async function seedEventB(): Promise<EventB> {
   const common = { eventId, stationId: station.id, recordedById: person };
   const category = await rawDb.captureCategory.findFirstOrThrow({ where: { eventId } });
   const registration = await rawDb.registration.create({
-    data: { ...common, categoryId: category.id, idempotencyKey: idempotencyKey() },
+    data: { ...common, categoryId: category.id, groupId: `${tag}-registration-group`, idempotencyKey: idempotencyKey() },
   });
   const tick = await rawDb.footfallTick.create({
     data: { ...common, idempotencyKey: idempotencyKey() },
@@ -201,8 +223,10 @@ async function seedEventB(): Promise<EventB> {
     data: { eventId, itemLabel: 'B umbrella', foundAt: FROZEN_NOW, loggedById: person },
   });
   const card = await rawDb.missionCard.create({
-    data: { eventId, shortCode: 'BBBB22', qrPayload: 'isolation-b-card', status: 'ISSUED' },
+    data: { eventId, shortCode: tag === 'b' ? 'BBBB22' : 'AAAA22', qrPayload: `isolation-${tag}-card`, status: 'ISSUED' },
   });
+  const replacement = await rawDb.missionCard.create({ data: { eventId,
+    shortCode: tag === 'b' ? 'CCCC33' : 'DDDD33', qrPayload: `isolation-${tag}-replacement` } });
   const giftType = await rawDb.giftType.create({
     data: { eventId, name: 'B tote', initialStock: 10 },
   });
@@ -267,9 +291,24 @@ async function seedEventB(): Promise<EventB> {
     personId: person,
     now: FROZEN_NOW,
   });
+  const history = await rawDb.settingChange.create({ data: {
+    scope: 'EVENT', scopeId: eventId, eventId, key: 'product.countsMode', version: 1,
+    before: { mode: 'separate' }, after: { mode: 'separate' }, source: 'USER', actorPersonId: person,
+  } });
+  const mediaAudit = await rawDb.auditLog.create({ data: { eventId, actorId: person, actorSub: `local:b-one@isolation.test`,
+    membershipId: membership.id, action: 'media.upload', entityType: 'MediaObject',
+    entityId: `lost-found/${eventId}/foreign.jpg`, after: { purpose: 'lostFound', contentType: 'image/jpeg', rehearsal: false } } });
+  const brandingReceipt = await rawDb.contentUploadReceipt.create({ data: {
+    id: idempotencyKey(), eventId, key: `drafts/${eventId}/branding/foreign-upload`,
+    contentType: 'image/png', contentLength: 1000, issuedByPersonId: person, createdAt: FROZEN_NOW,
+  } });
+  const contentImage = await rawDb.contentUploadReceipt.create({ data: {
+    id: idempotencyKey(), eventId, key: `drafts/${eventId}/${idempotencyKey()}`,
+    contentType: 'image/png', contentLength: 1000, issuedByPersonId: person, createdAt: FROZEN_NOW,
+  } });
   const archiveExport = await rawDb.archiveExport.create({
     data: {
-      id: 'other-archive-export',
+      id: `${tag}-archive-export`,
       eventId,
       snapshotId: reportSnapshot.id,
       lifecycleVersion: 0,
@@ -286,12 +325,14 @@ async function seedEventB(): Promise<EventB> {
     day: day.id,
     assignment: assignment.id,
     registration: registration.id,
+    group: registration.groupId!,
     category: category.id,
     tick: tick.id,
     incident: incident.id,
     alert: alert.id,
     found: found.id,
     card: { shortCode: card.shortCode, qrPayload: card.qrPayload },
+    replacementCard: replacement.shortCode,
     giftType: giftType.id,
     redemption: redemption.id,
     importBatch: importBatch.id,
@@ -304,10 +345,17 @@ async function seedEventB(): Promise<EventB> {
     visitorField: visitorField.id,
     reportSnapshot: reportSnapshot.id,
     contentVersion: contentVersion.id,
+    contentImageKey: contentImage.key,
     archiveExport: archiveExport.id,
     cardPrintExport: cardPrintExport.id,
     stationType: type.id,
     stationTag: stationTag.id,
+    history: history.id,
+    mediaKey: `lost-found/${eventId}/foreign.jpg`,
+    membership: membership.id,
+    brandingReceipt: brandingReceipt.id,
+    cardId: card.id,
+    audit: mediaAudit.id,
   };
 }
 
@@ -336,12 +384,13 @@ const LIST = noId('lists the path event only');
 const ACTOR = noId("acts on the caller's own records in the path event");
 
 const CASES: Record<string, Case> = {
-  'GET /workspace/entity': { query: (b) => ({ kind: 'station', id: b.station }) },
+  'GET /workspace/entity': { query: (b) => ({ kind: 'person', id: b.person, via: 'assignment', assignmentId: b.assignment }) },
   'GET /workspace/records': { query: (b) => ({ kind: 'footfall', cursor: b.tick }) },
   'GET /workspace/search': noId('each source searches only the path event under current authority'),
   'GET /branding': LIST,
   'GET /branding/draft/assets/:variant': noId('variant is a fixed enum; asset registry resolves only the path event'),
-  'PUT /branding/draft': noId('receipt ownership and immutable asset namespace have dedicated branding isolation cases'),
+  'PUT /branding/draft': { body: (b) => ({ ...capture(), expectedVersion: 0,
+    body: { accent: '#112233', logoAlt: 'Synthetic boundary logo', uploadReceiptId: b.brandingReceipt } }) },
   'POST /branding/publish': noId('publishes only the path event draft under its expected version'),
   'POST /branding/images/upload': noId('allocates a server-generated key under the path event namespace'),
   'POST /gifts/redemptions/:id/void': { params: (b) => ({ id: b.redemption }), body: () => ({ ...capture(), reason: 'Reviewed correction' }) },
@@ -411,7 +460,10 @@ const CASES: Record<string, Case> = {
       expectedVersion: 0,
       body: {
         ...guideContent(),
+        brief: { ...guideContent().brief, programmes: [{ stationTagId: b.stationTag, oneLiner: 'A programme', faqs: [] }] },
         journey: { steps: [{ title: 'Visit', detail: 'Visit the desk', stationIds: [b.station] }] },
+        map: { intro: 'Find the desk', levels: [{ label: 'Ground', image: { mediaKey: b.contentImageKey, alt: 'Floor plan' },
+          points: [{ label: 'Desk', kind: 'station', stationId: b.station }] }] },
       },
     }),
   },
@@ -424,7 +476,7 @@ const CASES: Record<string, Case> = {
   },
   'GET /lifecycle': LIST,
   'GET /lifecycle/readiness': LIST,
-  'GET /schedules': LIST,
+  'GET /schedules': { query: (b) => ({ cursor: b.announcementSchedule }) },
   'POST /schedules/lifecycle': noId(
     'schedules a transition of the path event only, reviewed against its own lifecycle version',
   ),
@@ -452,7 +504,7 @@ const CASES: Record<string, Case> = {
     "changes a role's grant in the path event; the body names a role and an action, not a row",
   ),
   'POST /permissions/simulate': {
-    body: (b) => ({ personId: b.person, action: 'Self.Read' }),
+    body: (b) => ({ personId: b.person, action: 'Self.Read', resource: { type: 'Station', id: b.station } }),
   },
   'GET /permissions/people/:personId': { params: (b) => ({ personId: b.person }) },
   'POST /me/check-in': { body: (b) => ({ assignmentId: b.assignment }) },
@@ -481,9 +533,9 @@ const CASES: Record<string, Case> = {
     params: (b) => ({ id: b.registration }),
     body: () => ({ reason: 'isolation check' }),
   },
-  'GET /registrations/summary': { query: (b) => ({ stationId: b.station }) },
+  'GET /registrations/summary': { query: (b) => ({ stationId: b.station, eventDayId: b.day }) },
   'GET /registrations/categories': LIST,
-  'GET /registrations/recent': { query: (b) => ({ stationId: b.station }) },
+  'GET /registrations/recent': { query: (b) => ({ stationId: b.station, cursor: b.registration }) },
 
   'POST /footfall/ticks': { body: (b) => ({ ...capture(), stationId: b.station }) },
   'POST /footfall/bulk': {
@@ -500,9 +552,9 @@ const CASES: Record<string, Case> = {
     params: (b) => ({ id: b.tick }),
     body: () => ({ reason: 'isolation check' }),
   },
-  'GET /footfall/summary': { query: (b) => ({ stationId: b.station }) },
+  'GET /footfall/summary': { query: (b) => ({ stationId: b.station, eventDayId: b.day }) },
   'GET /footfall/live': LIST,
-  'GET /footfall/recent': { query: (b) => ({ stationId: b.station }) },
+  'GET /footfall/recent': { query: (b) => ({ stationId: b.station, cursor: b.tick }) },
 
   'POST /incidents': {
     body: (b) => ({
@@ -514,7 +566,7 @@ const CASES: Record<string, Case> = {
       occurredAt: FROZEN_NOW.toISOString(),
     }),
   },
-  'GET /incidents': LIST,
+  'GET /incidents': { query: (b) => ({ stationId: b.station, cursor: b.incident }) },
   'POST /incidents/:id/follow-ups': {
     params: (b) => ({ id: b.incident }),
     body: () => ({ note: 'isolation check' }),
@@ -539,7 +591,7 @@ const CASES: Record<string, Case> = {
   },
 
   'GET /roster/me': ACTOR,
-  'GET /roster/station/:stationId': { params: (b) => ({ stationId: b.station }) },
+  'GET /roster/station/:stationId': { params: (b) => ({ stationId: b.station }), query: (b) => ({ eventDayId: b.day }) },
   'POST /roster/volunteers': noId('creates a person in the path event from names and emails'),
   'POST /roster/import': noId('rows name stations by code, resolved in the path event'),
   'POST /roster/swaps': {
@@ -565,7 +617,7 @@ const CASES: Record<string, Case> = {
   'GET /cards/:shortCode': { params: (b) => ({ shortCode: b.card.shortCode }) },
   'POST /cards/:shortCode/issue': {
     params: (b) => ({ shortCode: b.card.shortCode }),
-    body: () => capture(),
+    body: (b) => ({ ...capture(), groupId: b.group }),
   },
   'POST /cards/:shortCode/stamps': {
     params: (b) => ({ shortCode: b.card.shortCode }),
@@ -573,11 +625,11 @@ const CASES: Record<string, Case> = {
   },
   'POST /cards/:shortCode/void': {
     params: (b) => ({ shortCode: b.card.shortCode }),
-    body: () => ({ reason: 'isolation check' }),
+    body: () => ({ reason: 'isolation check', idempotencyKey: idempotencyKey() }),
   },
   'POST /cards/:shortCode/reissue': {
     params: (b) => ({ shortCode: b.card.shortCode }),
-    body: () => ({ reason: 'isolation check', replacementShortCode: 'CCCC33' }),
+    body: (b) => ({ reason: 'isolation check', replacementShortCode: b.replacementCard, idempotencyKey: idempotencyKey() }),
   },
 
   'GET /gifts': LIST,
@@ -588,21 +640,21 @@ const CASES: Record<string, Case> = {
     params: (b) => ({ id: b.giftType }),
     body: () => ({ delta: 1, reason: 'isolation check' }),
   },
-  'GET /gifts/summary': LIST,
+  'GET /gifts/summary': { query: (b) => ({ eventDayId: b.day, stationId: b.station }) },
 
   'POST /announcements': {
-    body: (b) => ({ body: 'isolation check', target: { stationId: b.station } }),
+    body: (b) => ({ body: 'isolation check', target: { stationId: b.station, eventDayId: b.day } }),
   },
-  'GET /announcements': LIST,
+  'GET /announcements': { query: (b) => ({ cursor: b.announcement }) },
   'POST /announcements/:id/ack': { params: (b) => ({ id: b.announcement }) },
   'POST /announcements/drafts': {
-    body: (b) => ({ ...capture(), body: 'isolation check', target: { stationId: b.station } }),
+    body: (b) => ({ ...capture(), body: 'isolation check', target: { stationId: b.station, eventDayId: b.day } }),
   },
   'GET /announcements/drafts': { query: (b) => ({ cursor: b.announcementDraft }) },
   'GET /announcements/drafts/:id': { params: (b) => ({ id: b.announcementDraft }) },
   'PUT /announcements/drafts/:id': {
     params: (b) => ({ id: b.announcementDraft }),
-    body: () => ({ body: 'isolation check', expectedVersion: 1 }),
+    body: (b) => ({ body: 'isolation check', expectedVersion: 1, target: { stationId: b.station, eventDayId: b.day } }),
   },
   'POST /announcements/drafts/:id/schedules': {
     params: (b) => ({ id: b.announcementDraft }),
@@ -617,6 +669,7 @@ const CASES: Record<string, Case> = {
   },
   'GET /announcements/drafts/:id/schedules': {
     params: (b) => ({ id: b.announcementDraft }),
+    query: (b) => ({ cursor: b.announcementSchedule }),
   },
   'PUT /announcements/drafts/:id/schedules/:scheduleId': {
     params: (b) => ({ id: b.announcementDraft, scheduleId: b.announcementSchedule }),
@@ -636,12 +689,12 @@ const CASES: Record<string, Case> = {
   'GET /dashboard/station/:id': { params: (b) => ({ id: b.station }) },
 
   'POST /lost-found': { body: (b) => ({ itemLabel: 'isolation', foundStationId: b.station }) },
-  'GET /lost-found': LIST,
+  'GET /lost-found': { query: (b) => ({ cursor: b.found }) },
   'POST /lost-found/:id/claim': { params: (b) => ({ id: b.found }), body: () => ({}) },
   'POST /lost-found/close-out': noId('closes out the path event'),
 
-  'GET /reports/summary': LIST,
-  'GET /reports/export': LIST,
+  'GET /reports/summary': { query: (b) => ({ eventDayId: b.day }) },
+  'GET /reports/export': { query: (b) => ({ eventDayId: b.day }) },
   'GET /reports/archive-exports': LIST,
   'POST /reports/archive-export': noId(
     'creates a private export from the path event current frozen final report',
@@ -651,13 +704,13 @@ const CASES: Record<string, Case> = {
   'GET /reports/snapshots/:id': { params: (b) => ({ id: b.reportSnapshot }) },
   'GET /reports/snapshots/:id/export': { params: (b) => ({ id: b.reportSnapshot }) },
   'GET /visitors': LIST,
-  'GET /audit': LIST,
+  'GET /audit': { query: (b) => ({ actorId: b.person, entityId: b.incident, cursor: b.audit }) },
 
-  'GET /admin/volunteers': LIST,
+  'GET /admin/volunteers': { query: (b) => ({ stationId: b.station, eventDayId: b.day, cursor: b.person }) },
   'GET /admin/volunteers/:id': { params: (b) => ({ id: b.person }) },
   'PATCH /admin/volunteers/:id': {
     params: (b) => ({ id: b.person }),
-    body: () => ({ displayName: 'Renamed' }),
+    body: (b) => ({ displayName: 'Renamed', reportsToId: b.person }),
   },
   'POST /admin/volunteers/:id/deactivate': {
     params: (b) => ({ id: b.person }),
@@ -706,12 +759,13 @@ const CASES: Record<string, Case> = {
   'GET /admin/settings/client': noId(
     "resolves the path event's device tuning; foreign event layers are covered by clientSettings tests",
   ),
-  'GET /admin/capture-categories': LIST,
+  'GET /admin/capture-categories': { query: (b) => ({ cursor: b.category }) },
   'GET /admin/capture-categories/:categoryId': {
     params: (b) => ({ categoryId: b.category }),
   },
   'GET /admin/capture-categories/:categoryId/schedules': {
     params: (b) => ({ categoryId: b.category }),
+    query: (b) => ({ cursor: b.announcementSchedule }),
   },
   'GET /admin/capture-categories/:categoryId/schedules/:id': {
     params: (b) => ({ categoryId: b.category, id: b.announcementSchedule }),
@@ -743,27 +797,23 @@ const CASES: Record<string, Case> = {
     params: (b) => ({ categoryId: b.category, id: b.announcementSchedule }),
     body: () => ({ ...capture(), expectedScheduleVersion: 1, reason: 'isolation check' }),
   },
-  'GET /admin/settings/catalogue': noId(
-    'reads the current manager’s scoped operational settings; foreign station, event and organisation layers are covered by scopedSettingsRead tests',
-  ),
-  'POST /admin/settings/catalogue': noId(
-    'changes only current-manager operational keys in the path event; foreign stations, history scope and replay identity are covered by scopedSettingsMutation tests',
-  ),
-  'GET /admin/settings/catalogue/history': noId(
-    'reads only the current manager’s exact path-event/scope/key history; foreign stations and event/key/scope cursors are covered by scopedSettingsHistory tests',
-  ),
-  'POST /admin/settings/catalogue/revert': noId(
-    'restores only the current manager’s owned path-event/scope/key history; foreign selections and reviewed versions/replay identity are covered by scopedSettingsRevert tests',
-  ),
-  'POST /admin/settings/catalogue/schedules': noId(
-    'creates only a reviewed capture schedule in the path event; foreign event/station/retry scope is covered by captureSchedule tests',
-  ),
+  'GET /admin/settings/catalogue': { query: (b) => ({ scope: 'station', stationId: b.station }) },
+  'POST /admin/settings/catalogue': { body: (b) => ({ ...capture(),
+    target: { scope: 'station', stationId: b.station }, key: 'capture.open',
+    operation: 'set', value: false, expectedVersion: 0, reason: 'Isolation boundary' }) },
+  'GET /admin/settings/catalogue/history': { query: (b) => ({ scope: 'station', stationId: b.station,
+    key: 'capture.open', cursor: b.history }) },
+  'POST /admin/settings/catalogue/revert': { body: (b) => ({ ...capture(),
+    target: { scope: 'station', stationId: b.station }, key: 'capture.open',
+    historyId: b.history, expectedVersion: 0, reason: 'Isolation boundary' }) },
+  'POST /admin/settings/catalogue/schedules': { body: (b) => ({ ...capture(),
+    target: { scope: 'station', stationId: b.station }, key: 'capture.open', value: false,
+    expectedVersion: 0, reason: 'Isolation boundary', runAt: '2027-01-07T05:00:00Z' }) },
   'GET /admin/settings/catalogue/schedules/:id': {
     params: (b) => ({ id: b.announcementSchedule }),
   },
-  'GET /admin/settings/catalogue/schedules': noId(
-    'lists only exact path-event capture targets; foreign target/cursors are covered by captureScheduleManagement tests',
-  ),
+  'GET /admin/settings/catalogue/schedules': { query: (b) => ({ scope: 'station', stationId: b.station,
+    cursor: b.announcementSchedule }) },
   'PATCH /admin/settings/catalogue/schedules/:id': {
     params: (b) => ({ id: b.announcementSchedule }),
     body: () => ({
@@ -784,17 +834,14 @@ const CASES: Record<string, Case> = {
     }),
   },
   'GET /admin/event-settings': noId("reads the path event's settings"),
-  'GET /admin/event-settings/history': noId(
-    'reads only the current manager’s path-event/key history; explicit foreign event/key/scope cursors are covered by eventSettingHistory tests',
-  ),
-  'PATCH /admin/event-settings': noId("changes the path event's settings"),
-  'POST /admin/event-settings/revert': noId(
-    'restores a guarded product setting in the path event; foreign history targets and replay identity are covered by eventSettingRevert tests',
-  ),
+  'GET /admin/event-settings/history': { query: (b) => ({ key: 'product.countsMode', cursor: b.history }) },
+  'PATCH /admin/event-settings': { body: (b) => ({ key: 'product.countsMode', expectedVersion: 0,
+    value: { mode: 'headline', source: { count: 'footfall', stationId: b.station } }, reason: 'Isolation check' }) },
+  'POST /admin/event-settings/revert': { body: (b) => ({ ...capture(), key: 'product.countsMode',
+    historyId: b.history, expectedVersion: 0, reason: 'Isolation boundary' }) },
   'GET /admin/attendance-settings': noId("reads the path event's attendance setup"),
-  'PATCH /admin/attendance-settings': noId(
-    'changes path event settings; root membership scope is checked by settingStore tests',
-  ),
+  'PATCH /admin/attendance-settings': { body: (b) => ({ key: 'attendance.rootMembershipId',
+    value: b.membership, expectedVersion: 0 }) },
   'POST /admin/attendance-settings/test-network': noId(
     'tests the request IP against supplied ranges without reading another event',
   ),
@@ -811,9 +858,7 @@ const CASES: Record<string, Case> = {
 
   'GET /media/config': noId('upload configuration is platform-wide'),
   'POST /media/uploads': noId('uses a validated client retry UUID, never a supplied object key'),
-  'GET /media/url': noId(
-    'signs only a key with a successful upload receipt in the path event; foreign keys are covered by mediaEventOwnership tests',
-  ),
+  'GET /media/url': { query: (b) => ({ key: b.mediaKey }) },
 
   'POST /fallback/windows': {
     body: (b) => ({ tier: 3, reason: 'isolation check', stationId: b.station }),
@@ -855,11 +900,17 @@ beforeAll(() => {
 });
 
 beforeEach(async () => {
+  vi.clearAllMocks();
   await resetDatabase();
   eventA = await testEvent();
+  const { organisationId } = await rawDb.event.findUniqueOrThrow({ where: { id: eventA.eventId } });
+  // This campaign exercises authority rather than filling an unrelated fixed-window quota.
+  await rawDb.setting.createMany({ data: ['rateLimit.max.admin', 'rateLimit.max.default'].map((key) => ({
+    scope: 'PLATFORM', scopeId: organisationId, key, value: 10000, version: 1 })) });
   const dayId = (await createEventDayToday()).id;
   const stationId = (await createStation({ code: 'A-DESK' })).id;
   admin = await createVolunteer({ email: 'admin@isolation.test', role: 'ADMIN' });
+  await makePlatformAdmin(admin.id);
   await assignToStationAllBlocks({ volunteerId: admin.id, stationId, eventDayId: dayId });
   b = await seedEventB();
 });
@@ -880,7 +931,14 @@ function ghostOf(real: EventB): EventB {
       : value && typeof value === 'object'
         ? Object.fromEntries(Object.entries(value).map(([key, inner]) => [key, replace(inner)]))
         : value;
-  return replace(real) as EventB;
+  const ghost = replace(real) as EventB;
+  // Keep the missing target schema-valid, so validation is never isolation proof.
+  ghost.card = { shortCode: 'ZZZZ22', qrPayload: 'isolation-missing-card' };
+  ghost.replacementCard = 'ZZZZ33';
+  ghost.brandingReceipt = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+  ghost.mediaKey = `lost-found/${real.scope.eventId}/missing.jpg`;
+  ghost.contentImageKey = `drafts/${real.scope.eventId}/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa`;
+  return ghost;
 }
 
 /** Bodies equal apart from computation time and per-request correlation ids. */
@@ -890,11 +948,60 @@ function sameBody(left: unknown, right: unknown): boolean {
   return strip(left) === strip(right);
 }
 
-function send(method: string, path: string, body?: object) {
+/** This queue confirmation deliberately refuses with CONFLICT, keeping unproved captures locally. */
+function targetStatuses(route: string, testCase: IdCase) {
+  return route === 'POST /fallback/salvage/confirm' ? [409]
+    : testCase.query ? [200, 403, 404] : [403, 404];
+}
+
+function send(method: string, path: string, body?: object, actor = admin) {
   const call =
     request(app)[method.toLowerCase() as 'get' | 'post' | 'put' | 'patch' | 'delete'](path);
-  const authed = call.set('Authorization', bearer(admin));
+  const authed = call.set('Authorization', bearer(actor));
   return body ? authed.send(body) : authed;
+}
+
+type InputLocation = 'params' | 'query' | 'body';
+interface IdInput { location: InputLocation; path: string[]; foreign: string; missing: string }
+function stringLeaves(value: unknown, path: string[] = []): Array<{ path: string[]; value: string }> {
+  if (typeof value === 'string') return [{ path, value }];
+  if (!value || typeof value !== 'object') return [];
+  return Object.entries(value).flatMap(([key, inner]) => stringLeaves(inner, [...path, key]));
+}
+function atPath(value: unknown, path: string[]): unknown {
+  return path.reduce<unknown>((current, key) => (current as Record<string, unknown>)[key], value);
+}
+/** Discover every fixture-backed path/body/query ID separately, including nested fields and arrays. */
+function idInputs(testCase: IdCase, foreign: EventB): IdInput[] {
+  const targets = new Set(stringLeaves(foreign).map((row) => row.value));
+  const missing = ghostOf(foreign);
+  return (['params', 'query', 'body'] as const).flatMap((location) => {
+    const actual = testCase[location]?.(foreign);
+    const absent = testCase[location]?.(missing);
+    return stringLeaves(actual).filter((leaf) => targets.has(leaf.value)).map((leaf) => ({
+      location, path: leaf.path, foreign: leaf.value, missing: atPath(absent, leaf.path) as string,
+    }));
+  });
+}
+function changeInput(value: unknown, path: string[], replacement: string): unknown {
+  if (!path.length) return replacement;
+  const [key, ...rest] = path;
+  const copy = structuredClone(value) as Record<string, unknown>;
+  copy[key!] = changeInput(copy[key!], rest, replacement);
+  return copy;
+}
+function singleTargetRequest(route: string, testCase: IdCase, own: EventB,
+  input: IdInput, target: string, actor: TestVolunteer) {
+  const parts: Record<InputLocation, unknown> = { params: testCase.params?.(own) ?? {},
+    query: testCase.query?.(own) ?? {}, body: testCase.body?.(own) };
+  parts[input.location] = changeInput(parts[input.location], input.path, target);
+  // The independently seeded own event has a real version-1 publication/draft.
+  if (route === 'PUT /content/draft') (parts.body as { expectedVersion: number }).expectedVersion = 1;
+  const [method = 'GET', template = ''] = route.split(' ');
+  const path = fill(template, parts.params as Record<string, string>);
+  const query = new URLSearchParams(parts.query as Record<string, string>).toString();
+  return send(method, `/api/v1/events/${eventA.eventId}${path}${query ? `?${query}` : ''}`,
+    parts.body as object | undefined, actor);
 }
 
 describe('cross-event isolation (P09.7)', () => {
@@ -904,11 +1011,23 @@ describe('cross-event isolation (P09.7)', () => {
     expect(Object.keys(CASES).filter((route) => !routes.includes(route))).toEqual([]);
   });
 
+  it('has an independently varied fixture for each ID input declared by the mounted schemas', () => {
+    const missing = eventIdInputInventory().filter(({ route, field }) => {
+      const testCase = CASES[route];
+      if (!testCase || 'noId' in testCase) return true;
+      const inputs = idInputs(testCase, b).map((input) => `${input.location}.${input.path.join('.')}`.replace(/\.\d+(?=\.|$)/g, '.*'));
+      return !inputs.includes(field);
+    });
+    expect(missing).toEqual([]);
+  });
+
   it("answers a foreign id as a missing one under the caller's own event: 404, or an empty filter", async () => {
     const ghost = ghostOf(b);
     const leaks: string[] = [];
     for (const [route, testCase] of Object.entries(CASES)) {
       if ('noId' in testCase) continue;
+      // Each route is a separate authority scenario; sensitive quota is proven by its own suites.
+      await rawDb.rateLimitCounter.deleteMany({ where: { namespace: 'http.sensitive' } });
       // Day removal is deliberately unavailable in LIVE; exercise its id lookup in preparation.
       if (route === 'DELETE /admin/structure/days/:id')
         await rawDb.event.update({ where: { id: eventA.eventId }, data: { status: 'DRAFT' } });
@@ -958,6 +1077,154 @@ describe('cross-event isolation (P09.7)', () => {
   });
 });
 
+describe('P15 every id-taking event route × all roles', () => {
+  const entityTargets = {
+    station: 'station', person: 'person', 'event-day': 'day', shift: 'shift', card: 'cardId',
+    incident: 'incident', 'lost-person': 'alert', 'lost-found': 'found', announcement: 'announcement',
+    fallback: 'window', import: 'importBatch', assignment: 'assignment', registration: 'registration',
+    footfall: 'tick', redemption: 'redemption', gift: 'giftType', audit: 'audit',
+  } as const satisfies Record<string, keyof EventB>;
+  const recordTargets = {
+    registrations: { stationId: 'station', personId: 'person', categoryId: 'category', importBatchId: 'importBatch', cardId: 'cardId' },
+    footfall: { stationId: 'station', personId: 'person', importBatchId: 'importBatch' },
+    cards: { stationId: 'station' }, stamps: { stationId: 'station', personId: 'person', cardId: 'cardId' },
+    redemptions: { stationId: 'station', personId: 'person', giftTypeId: 'giftType', cardId: 'cardId' },
+    incidents: { stationId: 'station', personId: 'person' }, 'lost-person': { stationId: 'station', personId: 'person' },
+    'lost-found': { stationId: 'station', personId: 'person' },
+    announcements: { stationId: 'station', personId: 'person', eventDayId: 'day' },
+    assignments: { stationId: 'station', personId: 'person', eventDayId: 'day', shiftId: 'shift' },
+    imports: { personId: 'person', fallbackWindowId: 'window' }, fallback: { stationId: 'station' },
+    'gift-ledger': { giftTypeId: 'giftType' }, audit: { personId: 'person' }, people: { personId: 'person' },
+    days: { eventDayId: 'day' },
+  } as const satisfies Record<string, Record<string, keyof EventB>>;
+
+  it.each(ROLE_IDS)('isolates each distinct path/body/query target independently for %s', async (role: Role) => {
+    const own = await seedEventB({ scope: eventA, tag: 'a' });
+    const actor = await createVolunteer({ email: `${role.toLowerCase()}@p15-one-target.test`, role });
+    const day = await createEventDayToday();
+    const station = await createStation({ code: 'A-DESK' });
+    await assignToStationAllBlocks({ volunteerId: actor.id, stationId: station.id, eventDayId: day.id });
+    const tested: string[] = [];
+    for (const [route, testCase] of Object.entries(CASES)) {
+      if ('noId' in testCase) continue;
+      await rawDb.rateLimitCounter.deleteMany({ where: { namespace: 'http.sensitive' } });
+      const fields = idInputs(testCase, b);
+      expect(fields.length, `No inventoried target for ${route}`).toBeGreaterThan(0);
+      if (route === 'DELETE /admin/structure/days/:id')
+        await rawDb.event.update({ where: { id: eventA.eventId }, data: { status: 'DRAFT' } });
+      for (const field of fields) {
+        const label = `${role} ${route} ${field.location}.${field.path.join('.')}`;
+        const foreign = await singleTargetRequest(route, testCase, own, field, field.foreign, actor);
+        const missing = await singleTargetRequest(route, testCase, own, field, field.missing, actor);
+        expect(targetStatuses(route, testCase), label).toContain(foreign.status);
+        if (route === 'POST /fallback/salvage/confirm') expect(foreign.body.error.code).toBe('CONFLICT');
+        expect(missing.status, label).toBe(foreign.status);
+        expect(sameBody(foreign.body, missing.body), label).toBe(true);
+        tested.push(`${route} ${field.location}.${field.path.join('.')}`);
+      }
+      if (route === 'DELETE /admin/structure/days/:id')
+        await rawDb.event.update({ where: { id: eventA.eventId }, data: { status: 'LIVE' } });
+    }
+    expect(tested.length).toBeGreaterThan(Object.values(CASES).filter((item) => !('noId' in item)).length);
+    expect(new Set(tested).size).toBe(tested.length);
+    expect(presignRead).not.toHaveBeenCalled();
+  }, 300_000);
+
+  it.each(ROLE_IDS)('isolates every workspace entity and each foreign record predicate for %s', async (role: Role) => {
+    const actor = await createVolunteer({ email: `${role.toLowerCase()}@p15-workspace-isolation.test`, role });
+    const missing = ghostOf(b);
+    for (const [kind, target] of Object.entries(entityTargets)) {
+      const call = (ids: EventB) => send('GET', `/api/v1/events/${eventA.eventId}/workspace/entity?${new URLSearchParams({
+        kind, id: ids[target] as string,
+      })}`, undefined, actor);
+      const foreign = await call(b);
+      const ghost = await call(missing);
+      expect([403, 404], `${role} entity ${kind}`).toContain(foreign.status);
+      expect(ghost.status, `${role} entity ${kind}`).toBe(foreign.status);
+      expect(sameBody(foreign.body, ghost.body), `${role} entity ${kind}`).toBe(true);
+    }
+    for (const [kind, fields] of Object.entries(recordTargets)) {
+      for (const [field, target] of Object.entries(fields)) {
+        const call = (ids: EventB) => send('GET', `/api/v1/events/${eventA.eventId}/workspace/records?${new URLSearchParams({
+          kind, [field]: ids[target] as string,
+          ...(kind === 'cards' ? { stage: 'station' } : {}),
+          ...(kind === 'gift-ledger' ? { rehearsal: 'false' } : {}),
+        })}`, undefined, actor);
+        const foreign = await call(b);
+        const ghost = await call(missing);
+        expect([200, 403, 404], `${role} ${kind}.${field}`).toContain(foreign.status);
+        expect(ghost.status, `${role} ${kind}.${field}`).toBe(foreign.status);
+        // The response echoes the supplied filter; verify it exactly before comparing all server output.
+        const body = (response: typeof foreign, supplied: string) => {
+          const copy = structuredClone(response.body);
+          if (response.status === 200) {
+            expect(copy.filter[field]).toBe(supplied);
+            copy.filter[field] = '[supplied-filter]';
+          }
+          return copy;
+        };
+        expect(sameBody(body(foreign, b[target] as string), body(ghost, missing[target] as string)), `${role} ${kind}.${field}`).toBe(true);
+        if (foreign.status === 200) expect(foreign.body.data, `${role} ${kind}.${field}`).toEqual([]);
+      }
+    }
+  }, 120_000);
+
+  it.each(ROLE_IDS)('keeps foreign targets and missing targets indistinguishable for %s', async (role: Role) => {
+    const actor = await createVolunteer({ email: `${role.toLowerCase()}@p15-isolation.test`, role });
+    const day = await createEventDayToday();
+    const station = await createStation({ code: 'A-DESK' });
+    await assignToStationAllBlocks({ volunteerId: actor.id, stationId: station.id, eventDayId: day.id });
+    const ghost = ghostOf(b);
+    const tried: string[] = [];
+    for (const [route, testCase] of Object.entries(CASES)) {
+      if ('noId' in testCase) continue;
+      await rawDb.rateLimitCounter.deleteMany({ where: { namespace: 'http.sensitive' } });
+      if (route === 'DELETE /admin/structure/days/:id')
+        await rawDb.event.update({ where: { id: eventA.eventId }, data: { status: 'DRAFT' } });
+      const call = (ids: EventB) => {
+        const [method = 'GET', template = ''] = route.split(' ');
+        const path = fill(template, testCase.params?.(ids) ?? {});
+        const query = new URLSearchParams(testCase.query?.(ids) ?? {}).toString();
+        return send(method, `/api/v1/events/${eventA.eventId}${path}${query ? `?${query}` : ''}`,
+          testCase.body?.(ids), actor);
+      };
+      const foreign = await call(b);
+      const missing = await call(ghost);
+      const label = `${role} ${route}`;
+      // A valid credential is essential: 401 or availability/validation failures prove nothing.
+      expect(foreign.status, label).not.toBe(401);
+      expect(missing.status, label).not.toBe(401);
+      expect(foreign.status, label).toBe(missing.status);
+      expect(sameBody(foreign.body, missing.body), label).toBe(true);
+      expect(targetStatuses(route, testCase), label).toContain(foreign.status);
+      if (route === 'POST /fallback/salvage/confirm') expect(foreign.body.error.code).toBe('CONFLICT');
+      if (foreign.status === 200) {
+        expect(JSON.stringify(foreign.body), label).not.toMatch(/B incident|B child|B umbrella|B private draft|B notice|b-one@isolation/);
+      }
+      if (route === 'DELETE /admin/structure/days/:id')
+        await rawDb.event.update({ where: { id: eventA.eventId }, data: { status: 'LIVE' } });
+      tried.push(route);
+    }
+    expect(tried.sort()).toEqual(Object.entries(CASES).filter(([, value]) => !('noId' in value)).map(([route]) => route).sort());
+    expect(presignRead).not.toHaveBeenCalled();
+    expect(await rawDb.person.findUniqueOrThrow({ where: { id: b.person } })).toMatchObject({ email: 'b-one@isolation.test' });
+    expect(await rawDb.missionCard.findFirstOrThrow({ where: { eventId: b.scope.eventId, shortCode: b.card.shortCode } }))
+      .toMatchObject({ status: 'ISSUED' });
+  }, 120_000);
+
+  it.each(ROLE_IDS)('refuses every route under a foreign event for %s', async (role: Role) => {
+    const actor = await createVolunteer({ email: `${role.toLowerCase()}@p15-foreign-event.test`, role });
+    for (const route of inventory()) {
+      const [method = 'GET', template = ''] = route.split(' ');
+      const testCase = CASES[route]!;
+      const path = template.replace(/:(\w+)/g, 'missing-row');
+      const response = await send(method, `/api/v1/events/${b.scope.eventId}${path}`,
+        'noId' in testCase ? {} : testCase.body?.(b), actor);
+      expect(response.status, `${role} ${route}`).toBe(404);
+    }
+  }, 120_000);
+});
+
 describe('the pre-P09.7 paths (ADR-009 §6)', () => {
   it("answer exactly as Event #1's paths do", async () => {
     for (const path of ['/stations', '/me', '/footfall/live', '/admin/event-days']) {
@@ -1004,7 +1271,7 @@ describe('two events, one person', () => {
 
   it('opens a session for someone whose only event is the second one, in that event', async () => {
     const opened = await request(app)
-      .post('/api/v1/auth/session')
+      .post('/api/v1/auth/session').set('Origin', 'http://localhost:3000')
       .send({ email: 'b-one@isolation.test' });
     expect(opened.status).toBe(201);
     expect(opened.body.volunteer.role).toBe('VOLUNTEER');
@@ -1038,7 +1305,7 @@ describe('two events, one person', () => {
     ]);
 
     const opened = await request(app)
-      .post('/api/v1/auth/session')
+      .post('/api/v1/auth/session').set('Origin', 'http://localhost:3000')
       .send({ email: 'b-one@isolation.test' });
     const onlyB = await request(app)
       .get('/api/v1/events')

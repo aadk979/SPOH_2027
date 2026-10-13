@@ -44,6 +44,7 @@ import {
   printHistoryHandler,
   printDetailHandler,
 } from './printHandlers.js';
+import { cardReplay } from './cardReplay.js';
 
 /** COUNT 3 — Mission Cards (BUILD_PLAN §7.2). */
 export const missionCardRouter: Router = Router();
@@ -127,7 +128,7 @@ missionCardRouter.post(
     any: true,
   }),
   validate({ params: CardLookupParams, body: IssueCardRequest }),
-  idempotent('POST /cards/:shortCode/issue'),
+  idempotent('POST /cards/:shortCode/issue', { redacted: cardReplay('ISSUE') }),
   issueCardHandler,
 );
 
@@ -136,7 +137,7 @@ missionCardRouter.post(
   captureRateLimit,
   authorize('Card.Stamp', stationFromBody),
   validate({ params: CardLookupParams, body: StampCardRequest }),
-  idempotent('POST /cards/:shortCode/stamps'),
+  idempotent('POST /cards/:shortCode/stamps', { redacted: cardReplay('STAMP') }),
   stampCardHandler,
 );
 
@@ -145,6 +146,7 @@ missionCardRouter.post(
   defaultRateLimit,
   authorize('Card.Void', cardFromShortCode),
   validate({ params: CardLookupParams, body: VoidCardRequest }),
+  idempotent('POST /cards/:shortCode/void', { redacted: cardReplay('VOID') }),
   voidCardHandler,
 );
 
@@ -153,5 +155,6 @@ missionCardRouter.post(
   defaultRateLimit,
   authorize('Card.Reissue', cardFromShortCode),
   validate({ params: CardLookupParams, body: ReissueCardRequest }),
+  idempotent('POST /cards/:shortCode/reissue', { redacted: cardReplay('REISSUE') }),
   reissueCardHandler,
 );

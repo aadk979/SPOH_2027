@@ -1,5 +1,6 @@
 import { ClientConfigurationSchema, type ClientConfiguration } from '@spoh/shared';
 import { env, type Env } from '../../../config/env.js';
+import { mediaObjectOrigin } from '../../../platform/aws/mediaOrigin.js';
 
 type PublicEnvironment = Pick<
   Env,
@@ -11,12 +12,15 @@ type PublicEnvironment = Pick<
   | 'COGNITO_USER_POOL_ID'
   | 'COGNITO_CLIENT_ID'
   | 'COGNITO_DOMAIN'
+  | 'S3_MEDIA_BUCKET'
+  | 'AWS_REGION'
 >;
 
 /** Build only the public allowlist; never spread the environment into a response. */
 export function readClientConfiguration(source: PublicEnvironment = env): ClientConfiguration {
   return ClientConfigurationSchema.parse({
-    version: 1,
+    version: 2,
+    mediaOrigin: mediaObjectOrigin({ bucket: source.S3_MEDIA_BUCKET, region: source.AWS_REGION }),
     apiBaseUrl: source.APP_BASE_URL?.replace(/\/$/, '') ?? '',
     envLabel: source.DEPLOYMENT_ENV ?? source.NODE_ENV,
     authProvider: source.AUTH_PROVIDER,

@@ -9,13 +9,19 @@ export function isClientConfigOrigin(value: string): boolean {
 }
 
 const common = {
-  version: z.literal(1),
+  version: z.literal(2),
   apiBaseUrl: z
     .string()
     .max(2048)
     .refine((value) => value === '' || isClientConfigOrigin(value)),
   envLabel: z.enum(['development', 'test', 'staging', 'production']),
+  mediaOrigin: z.string().max(2048).refine(isMediaObjectOrigin).nullable(),
 };
+
+/** A configured regional object-storage destination, never an arbitrary media host. */
+export function isMediaObjectOrigin(value: string): boolean {
+  return /^https:\/\/[a-z0-9][a-z0-9-]{1,61}[a-z0-9]\.s3\.(?!cn-)[a-z]{2}-(?:[a-z]+-)+[1-9]\d*\.amazonaws\.com$/.test(value);
+}
 const cognito = z.strictObject({
   region: z.string().min(1).max(64),
   userPoolId: z.string().min(1).max(128),
@@ -27,7 +33,13 @@ const cognito = z.strictObject({
 export const ClientConfigurationSchema = z.discriminatedUnion('authProvider', [
   z.strictObject({ ...common, authProvider: z.literal('local'), cognito: z.null() }),
   z.strictObject({ ...common, authProvider: z.literal('cognito'), cognito }),
-]);
+]).superRefine((value, ctx) => {
+  if (value.envLabel !== 'production' && value.envLabel !== 'staging') return;
+  if (value.authProvider !== 'cognito' || !value.apiBaseUrl.startsWith('https://') ||
+    (value.cognito !== null && !value.cognito.domain.startsWith('https://'))) {
+    ctx.addIssue({ code: 'custom', message: 'Cloud client configuration requires Cognito and HTTPS origins.' });
+  }
+});
 export type ClientConfiguration = z.infer<typeof ClientConfigurationSchema>;
 export interface ClientConfigurationResponse {
   data: ClientConfiguration;

@@ -15,7 +15,7 @@
 
 namespace SPOH {
   type RequestContext = {
-    // ADR-004 lifecycle: DRAFT | READY | REHEARSAL | LIVE | CLOSED | ARCHIVED
+    // ADR-004 lifecycle, or ORGANISATION for a real global question with no event.
     eventPhase: String,
     // true only for a queued capture recorded before the close, inside capture.lateSyncHours
     lateSyncAllowed: Bool,

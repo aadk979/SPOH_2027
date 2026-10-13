@@ -55,7 +55,7 @@ async function baseResponse(route: Route, url: URL): Promise<boolean> {
   }
   if (route.request().method() !== 'GET') return false;
   const base: Record<string, unknown> = {
-    '/api/v1/client-config': { data: { version: 1, apiBaseUrl: '', envLabel: 'development', authProvider: 'local', cognito: null } },
+    '/api/v1/client-config': { data: { version: 2, mediaOrigin: null, apiBaseUrl: '', envLabel: 'development', authProvider: 'local', cognito: null } },
     '/api/v1/events': { data: [WORKSPACE_EVENT] },
     [`/api/v1/events/${WORKSPACE_EVENT.id}/me`]: me,
     [`/api/v1/events/${WORKSPACE_EVENT.id}/me/permissions`]: permissions,

@@ -17,7 +17,7 @@ export interface StageConfig {
   /** The app's hostname under the D-08 domain. */
   domainName: string;
   /** Verified public edge origins; omitted until a stage's routing is ready. */
-  publicOrigins?: { api: string; client: string };
+  publicOrigins?: { api: string; client: string; crossSiteCookies: boolean };
   /** ADR-008 §3 sizing, off-season; event days scale by owner-approved schedule (P08.4). */
   app: { cpu: number; memoryMiB: number; desiredCount: number };
   database: { instanceClass: string; allocatedStorageGiB: number; maxStorageGiB: number };
@@ -71,6 +71,8 @@ export const STAGES: Record<StageName, StageConfig> = {
     publicOrigins: {
       api: `https://${STAGING_EDGE.apiHost}`,
       client: `https://${STAGING_EDGE.clientHost}`,
+      // These HTTPS DuckDNS hosts share one site; the approved Firebase topology sets true.
+      crossSiteCookies: false,
     },
     app: { cpu: 512, memoryMiB: 1024, desiredCount: 1 },
     database: { instanceClass: 't4g.micro', allocatedStorageGiB: 20, maxStorageGiB: 100 },

@@ -96,8 +96,8 @@ export default function SignInScreen(): ReactNode {
         fallback={
           <Card aria-busy="true" aria-label="Loading sign-in" className="flex flex-col gap-md">
             <Skeleton className="w-1/3" />
-            <Skeleton height="48px" />
-            <Skeleton height="56px" className="rounded-pill" />
+            <Skeleton size="field" />
+            <Skeleton size="button" className="rounded-pill" />
           </Card>
         }
       >

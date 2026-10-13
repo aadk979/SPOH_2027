@@ -16,6 +16,7 @@ import {
 import { logger } from '../logger/index.js';
 import { named } from './named.js';
 import { getAuth } from './requireAuth.js';
+import { requestIntentHash } from './requestIntent.js';
 
 /**
  * The idempotency middleware for every create endpoint (BUILD_PLAN §7.4): the
@@ -40,7 +41,7 @@ interface IdempotentBody {
  * the row as it is now, after any purge.
  */
 export interface RedactedReplay {
-  store(body: unknown): object;
+  store(body: unknown, req: Request): object;
   replay(req: Request, stored: unknown): Promise<unknown>;
 }
 
@@ -58,6 +59,7 @@ interface KeyContext {
   key: string;
   endpointName: string;
   options: IdempotentOptions;
+  requestHash: string;
   next: NextFunction;
 }
 
@@ -88,7 +90,7 @@ async function resolveExisting(
   if (
     existing.endpoint !== ctx.endpointName ||
     existing.actorSub !== actor.sub ||
-    existing.eventId !== actor.eventId
+    existing.eventId !== actor.eventId || !matchesIntent(ctx, existing)
   ) {
     return new IdempotencyKeyReuseError();
   }
@@ -103,6 +105,13 @@ async function resolveExisting(
   return inProgress();
 }
 
+function matchesIntent(ctx: KeyContext, existing: Reservation): boolean {
+  if (existing.requestHash) return existing.requestHash === ctx.requestHash;
+  // Historical completed receipts can only replay; an unknown unfinished intent
+  // must never be adopted and executed with a newly supplied request body.
+  return existing.statusCode !== IN_PROGRESS;
+}
+
 function runOwnedHandler(ctx: KeyContext): void {
   captureResponse(ctx.req, ctx.res, { key: ctx.key, redacted: ctx.options.redacted });
   ctx.next();
@@ -115,6 +124,7 @@ async function runAbandoned(ctx: KeyContext, existing: Reservation): Promise<voi
     endpoint: ctx.endpointName,
     actorSub: auth.sub,
     eventId: auth.eventId,
+    requestHash: ctx.requestHash,
   };
   await withReservationTakeoverAttempt(
     { owner, observedCreatedAt: existing.createdAt.getTime() },
@@ -136,10 +146,11 @@ function idempotencyMiddleware(endpointName: string, options: IdempotentOptions)
           return;
         }
 
-        const owner = { endpoint: endpointName, actorSub: auth.sub, eventId: auth.eventId };
+        const requestHash = requestIntentHash(req);
+        const owner = { endpoint: endpointName, actorSub: auth.sub, eventId: auth.eventId, requestHash };
         await withReservationAttempt({ key, ...owner }, async () => {
           const existing = await reserve(key, owner);
-          const ctx: KeyContext = { req, res, key, endpointName, options, next };
+          const ctx: KeyContext = { req, res, key, endpointName, options, next, requestHash };
           const outcome = existing ? await resolveExisting(ctx, existing, auth) : null;
           if (outcome === 'replayed') return;
           if (outcome === 'takeover' && existing) {
@@ -193,7 +204,7 @@ function captureResponse(
   const originalJson = res.json.bind(res);
   const complete = bindReservationAttempt((statusCode: number, body: unknown) =>
     statusCode >= 200 && statusCode < 300
-      ? settle(key, statusCode, redacted ? redacted.store(body) : (body as object))
+      ? settle(key, statusCode, redacted ? redacted.store(body, req) : (body as object))
       : release(key),
   );
 

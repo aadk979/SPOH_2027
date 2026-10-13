@@ -5,6 +5,7 @@ import { readDefaultGrants } from '@spoh/access-policies/default-grants';
 import { wallTimeToInstant, zonedDate } from '@spoh/shared';
 import { PrismaClient } from '../src/generated/prisma/client.js';
 import type { CommitteeRole } from '../src/generated/prisma/enums.js';
+import { bootstrapAdminConfiguration, bootstrapProductionAdmin } from './bootstrapAdmin.js';
 import {
   ASSIGNMENTS,
   CATEGORIES,
@@ -32,7 +33,7 @@ import {
  * on another day adds that day's rows and changes nothing else.
  */
 
-if (!process.env.DATABASE_URL) {
+if (!process.env.DATABASE_URL && process.env.SPOH_SKIP_DOTENV !== '1' && process.env.NODE_ENV !== 'production') {
   try {
     process.loadEnvFile(fileURLToPath(new URL('../.env', import.meta.url)));
   } catch {
@@ -508,8 +509,17 @@ async function seedFixture(): Promise<void> {
 }
 
 async function main(): Promise<void> {
+  if (process.argv[2] === 'restored-operator' && !isProduction)
+    throw new Error('Restored operator bootstrap cannot select development fixtures.');
   if (isProduction) {
-    await seedAdmin();
+    if (process.argv[2] === 'restored-operator') {
+      const { restoredOperatorConfiguration } = await import('./restoredOperatorInputs.js');
+      const { bootstrapRestoredOperator } = await import('./bootstrapRestoredOperator.js');
+      await bootstrapRestoredOperator(prisma, restoredOperatorConfiguration(process.env));
+      console.log('seed: restored operator rebound; fresh hosted sign-in and MFA are required');
+      return;
+    }
+    await bootstrapProductionAdmin(prisma, bootstrapAdminConfiguration(process.env));
     console.log('seed: production — the administrator only; events come from set-up (D-12)');
   } else {
     await seedFixture();
@@ -518,8 +528,8 @@ async function main(): Promise<void> {
 }
 
 main()
-  .catch((error: unknown) => {
-    console.error('seed failed', error);
+  .catch(() => {
+    console.error('seed failed; review the private bootstrap context');
     process.exitCode = 1;
   })
   .finally(() => {

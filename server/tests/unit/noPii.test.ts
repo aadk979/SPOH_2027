@@ -34,6 +34,8 @@ const COMMITTEE_MODELS = new Set([
   'ShiftSwapRequest',
   'BriefingSlot',
   'AuditLog',
+  // Durable provisioning journals describe staff identity, never visitors.
+  'IdentityAccountOperation',
 ]);
 
 /**
@@ -65,7 +67,11 @@ const TRANSIENT_EXCEPTIONS = new Set(['LostPersonAlert']);
  * photographs of identifiable visitors, and a picture of a lost jacket on a
  * desk is not one. Anything added here needs the same kind of justification.
  */
-const FIELD_ALLOWLIST = new Set(['LostFoundItem.photoKey']);
+const FIELD_ALLOWLIST = new Set([
+  'LostFoundItem.photoKey',
+  // A fixed counter tier, e.g. http.admin; contains no person's name.
+  'RateLimitCounter.namespace',
+]);
 
 interface ParsedModel {
   name: string;

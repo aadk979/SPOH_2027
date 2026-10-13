@@ -1,5 +1,6 @@
 import { pino, type Logger } from 'pino';
 import { env, isProduction, isTest } from '../../config/env.js';
+import { safeError } from './safeSerializers.js';
 
 /**
  * Structured logging (BUILD_PLAN §8.7).
@@ -27,10 +28,14 @@ const REDACTED_PATHS = [
   '*.idempotencyKey',
   'body.password',
   'body.idempotencyKey',
+  'key',
+  '*.key',
+  'prisma',
 ] as const;
 
 export const logger: Logger = pino({
   level: isTest ? 'silent' : env.LOG_LEVEL,
+  serializers: { err: safeError, cause: safeError },
   redact: {
     paths: [...REDACTED_PATHS],
     censor: '[redacted]',

@@ -23,14 +23,8 @@ const swVersion = process.env.SPOH_BUILD_ID ?? Date.now().toString(36);
 
 const contentSecurityPolicy = [
   "default-src 'self'",
-  // 'unsafe-inline' is required in both dev and prod: Next's App Router
-  // injects inline bootstrap/RSC-payload scripts that a nonce could replace,
-  // but only at the cost of forcing every page to dynamic rendering (see
-  // Next's CSP guide). 'unsafe-eval' is dev-only — React's dev-mode error
-  // reconstruction needs it; neither React nor Next use eval in production.
-  isDev ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'" : "script-src 'self' 'unsafe-inline'",
-  // Tailwind emits a style element at runtime, and inline `style` attributes
-  // carry the design tokens. Styles only — scripts are never inline in prod.
+  // Only the development server emits this policy; production uses each finished document's hashes.
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
@@ -47,6 +41,7 @@ const contentSecurityPolicy = [
  * the headers below are the API's job there (`platform/http/staticClient.ts`).
  */
 const staticExport = process.env.SPOH_STATIC_EXPORT === '1';
+if (!isDev && !staticExport) throw new Error('Production requires the static export/manifest build wrapper');
 
 const nextConfig: NextConfig = {
   ...(staticExport ? { output: 'export' as const } : {}),

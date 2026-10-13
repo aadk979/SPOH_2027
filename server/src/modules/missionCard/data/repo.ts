@@ -4,6 +4,7 @@ import type { Prisma } from '../../../generated/prisma/client.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { rehearsalFilter, type ReportingScope } from '../../../platform/db/rehearsalFilter.js';
+import { lockCards } from './cardLocks.js';
 
 /** Data access for COUNT 3 — Mission Cards. Every query names its event (ADR-001 §2). */
 
@@ -70,10 +71,7 @@ export async function lockCard(
   scope: EventScope,
   shortCode: string,
 ): Promise<void> {
-  await tx.$queryRaw`
-    SELECT "id" FROM "MissionCard"
-    WHERE "eventId" = ${scope.eventId} AND "shortCode" = ${shortCode}
-    FOR UPDATE`;
+  await lockCards(tx, scope, [shortCode]);
 }
 
 /** The card with the stations it has been stamped at, for a stamp. */
@@ -155,6 +153,14 @@ export async function attachGroupRegistrations(
     },
     data: { missionCardId: link.cardId },
   });
+}
+
+/** A group link holds the exact registrations before authority checks and attachment. */
+export async function lockGroupStations(tx: PrismaTransactionClient, scope: EventScope, groupId: string) {
+  await tx.$queryRaw`SELECT id FROM "Registration" WHERE "eventId" = ${scope.eventId}
+    AND "groupId" = ${groupId} ORDER BY id FOR UPDATE`;
+  return tx.registration.findMany({ where: { eventId: scope.eventId, groupId,
+    ...(await captureProvenance(tx, scope)) }, select: { stationId: true }, distinct: ['stationId'] });
 }
 
 /**

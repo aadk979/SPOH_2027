@@ -6,6 +6,7 @@ import { invalidateEventCache } from '../../src/platform/event/events.js';
 import { invalidateVolunteerCache } from '../../src/platform/identity/index.js';
 import { invalidateRateLimitPolicy } from '../../src/platform/http/rateLimitPolicy.js';
 import { settleDenials } from '../../src/platform/http/authorizationDenials.js';
+import { settleQuotaRefunds } from '../../src/platform/http/quotaRequestCharge.js';
 
 /**
  * Test database helpers.
@@ -65,6 +66,8 @@ export async function resetDatabase(): Promise<void> {
   assertTestDatabase();
   // A denial's audit row is written after its response; let it land before the wipe.
   await settleDenials();
+  await settleQuotaRefunds();
+  await wipe('RateLimitCounter');
 
   await wipe('AuditLog');
   await wipe('AuditShipment');
@@ -76,6 +79,8 @@ export async function resetDatabase(): Promise<void> {
   await wipe('ScheduledAction');
   await wipe('IdempotencyRecord');
   await wipe('ContentUploadReceipt');
+  await wipe('ContentStorageIntent');
+  await wipe('ValidatedMedia');
   await wipe('ContentDocument');
   await wipe('ContentVersion');
 
@@ -119,6 +124,8 @@ export async function resetDatabase(): Promise<void> {
   // Session and device state.
   await wipe('AuthHandoff');
   await wipe('IdentityDeliveryQuota');
+  await wipe('IdentityInvitationAttempt');
+  await wipe('IdentityAccountOperation');
   await wipe('RefreshSession');
   await wipe('PushSubscription');
 

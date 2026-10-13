@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-11T11:06:37.775Z",
+  "updatedAt": "2026-10-12T11:46:51.839Z",
   "current": {
-    "phase": "P14",
-    "step": "P14.10"
+    "phase": "P15",
+    "step": "P15.10"
   },
   "gates": [
     {
@@ -3354,147 +3354,187 @@
         {
           "id": "P14.1",
           "title": "Entity pages",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-11T11:06:35.644Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-12T11:46:08.732Z",
+          "commits": ["3bff8f868d1c8ac2510bff749d3f205e56ae36cd"],
           "notes": [
             {
               "at": "2026-10-11T11:06:35.645Z",
               "text": "Whole P14 source batch in progress; only lint/typecheck while writing, then authored/affected suites and one complete gate."
+            },
+            {
+              "at": "2026-10-12T11:46:08.772Z",
+              "text": "P14 whole batch 3bff8f8: complete Node24 no-resume gate actual0; exact-head CI38243217914 all five jobs success. Browser/visual/keyboard/axe and owner copy review deferred to P16.1/P16.8; AWS remains torn down."
             }
           ]
         },
         {
           "id": "P14.2",
           "title": "Dashboard drill-downs",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-11T11:06:35.863Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-12T11:46:09.094Z",
+          "commits": ["3bff8f868d1c8ac2510bff749d3f205e56ae36cd"],
           "notes": [
             {
               "at": "2026-10-11T11:06:35.863Z",
               "text": "Whole P14 source batch in progress; only lint/typecheck while writing, then authored/affected suites and one complete gate."
+            },
+            {
+              "at": "2026-10-12T11:46:09.133Z",
+              "text": "P14 whole batch 3bff8f8: complete Node24 no-resume gate actual0; exact-head CI38243217914 all five jobs success. Browser/visual/keyboard/axe and owner copy review deferred to P16.1/P16.8; AWS remains torn down."
             }
           ]
         },
         {
           "id": "P14.3",
           "title": "Search and quick actions",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-11T11:06:36.108Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-12T11:46:09.369Z",
+          "commits": ["3bff8f868d1c8ac2510bff749d3f205e56ae36cd"],
           "notes": [
             {
               "at": "2026-10-11T11:06:36.108Z",
               "text": "Whole P14 source batch in progress; only lint/typecheck while writing, then authored/affected suites and one complete gate."
+            },
+            {
+              "at": "2026-10-12T11:46:09.407Z",
+              "text": "P14 whole batch 3bff8f8: complete Node24 no-resume gate actual0; exact-head CI38243217914 all five jobs success. Browser/visual/keyboard/axe and owner copy review deferred to P16.1/P16.8; AWS remains torn down."
             }
           ]
         },
         {
           "id": "P14.4",
           "title": "Consistent states",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-11T11:06:36.376Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-12T11:46:09.640Z",
+          "commits": ["3bff8f868d1c8ac2510bff749d3f205e56ae36cd"],
           "notes": [
             {
               "at": "2026-10-11T11:06:36.376Z",
               "text": "Whole P14 source batch in progress; only lint/typecheck while writing, then authored/affected suites and one complete gate."
+            },
+            {
+              "at": "2026-10-12T11:46:09.679Z",
+              "text": "P14 whole batch 3bff8f8: complete Node24 no-resume gate actual0; exact-head CI38243217914 all five jobs success. Browser/visual/keyboard/axe and owner copy review deferred to P16.1/P16.8; AWS remains torn down."
             }
           ]
         },
         {
           "id": "P14.5",
           "title": "Notification centre",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-11T11:06:36.607Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-12T11:46:09.904Z",
+          "commits": ["3bff8f868d1c8ac2510bff749d3f205e56ae36cd"],
           "notes": [
             {
               "at": "2026-10-11T11:06:36.608Z",
               "text": "Whole P14 source batch in progress; only lint/typecheck while writing, then authored/affected suites and one complete gate."
+            },
+            {
+              "at": "2026-10-12T11:46:09.945Z",
+              "text": "P14 whole batch 3bff8f8: complete Node24 no-resume gate actual0; exact-head CI38243217914 all five jobs success. Browser/visual/keyboard/axe and owner copy review deferred to P16.1/P16.8; AWS remains torn down."
             }
           ]
         },
         {
           "id": "P14.6",
           "title": "Event branding",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-11T11:06:36.841Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-12T11:46:10.194Z",
+          "commits": ["3bff8f868d1c8ac2510bff749d3f205e56ae36cd"],
           "notes": [
             {
               "at": "2026-10-11T11:06:36.842Z",
               "text": "Whole P14 source batch in progress; only lint/typecheck while writing, then authored/affected suites and one complete gate."
+            },
+            {
+              "at": "2026-10-12T11:46:10.236Z",
+              "text": "P14 whole batch 3bff8f8: complete Node24 no-resume gate actual0; exact-head CI38243217914 all five jobs success. Browser/visual/keyboard/axe and owner copy review deferred to P16.1/P16.8; AWS remains torn down."
             }
           ]
         },
         {
           "id": "P14.7",
           "title": "Accessibility",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-11T11:06:37.072Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-12T11:46:10.492Z",
+          "commits": ["3bff8f868d1c8ac2510bff749d3f205e56ae36cd"],
           "notes": [
             {
               "at": "2026-10-11T11:06:37.073Z",
               "text": "Whole P14 source batch in progress; only lint/typecheck while writing, then authored/affected suites and one complete gate."
+            },
+            {
+              "at": "2026-10-12T11:46:10.531Z",
+              "text": "P14 whole batch 3bff8f8: complete Node24 no-resume gate actual0; exact-head CI38243217914 all five jobs success. Browser/visual/keyboard/axe and owner copy review deferred to P16.1/P16.8; AWS remains torn down."
             }
           ]
         },
         {
           "id": "P14.8",
           "title": "Copy and help",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-11T11:06:37.316Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-12T11:46:10.783Z",
+          "commits": ["3bff8f868d1c8ac2510bff749d3f205e56ae36cd"],
           "notes": [
             {
               "at": "2026-10-11T11:06:37.317Z",
               "text": "Whole P14 source batch in progress; only lint/typecheck while writing, then authored/affected suites and one complete gate."
+            },
+            {
+              "at": "2026-10-12T11:46:10.825Z",
+              "text": "P14 whole batch 3bff8f8: complete Node24 no-resume gate actual0; exact-head CI38243217914 all five jobs success. Browser/visual/keyboard/axe and owner copy review deferred to P16.1/P16.8; AWS remains torn down."
             }
           ]
         },
         {
           "id": "P14.9",
           "title": "Visual regression",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-11T11:06:37.543Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-12T11:46:11.070Z",
+          "commits": ["3bff8f868d1c8ac2510bff749d3f205e56ae36cd"],
           "notes": [
             {
               "at": "2026-10-11T11:06:37.544Z",
               "text": "Whole P14 source batch in progress; only lint/typecheck while writing, then authored/affected suites and one complete gate."
+            },
+            {
+              "at": "2026-10-12T11:46:11.108Z",
+              "text": "P14 whole batch 3bff8f8: complete Node24 no-resume gate actual0; exact-head CI38243217914 all five jobs success. Browser/visual/keyboard/axe and owner copy review deferred to P16.1/P16.8; AWS remains torn down."
             }
           ]
         },
         {
           "id": "P14.10",
           "title": "Report",
-          "status": "in_progress",
+          "status": "done",
           "startedAt": "2026-10-11T11:06:37.774Z",
-          "completedAt": null,
-          "commits": [],
+          "completedAt": "2026-10-12T11:46:11.358Z",
+          "commits": ["3bff8f868d1c8ac2510bff749d3f205e56ae36cd"],
           "notes": [
             {
               "at": "2026-10-11T11:06:37.775Z",
               "text": "Whole P14 source batch in progress; only lint/typecheck while writing, then authored/affected suites and one complete gate."
+            },
+            {
+              "at": "2026-10-12T11:46:11.408Z",
+              "text": "P14 whole batch 3bff8f8: complete Node24 no-resume gate actual0; exact-head CI38243217914 all five jobs success. Browser/visual/keyboard/axe and owner copy review deferred to P16.1/P16.8; AWS remains torn down."
             }
           ]
         }
       ],
-      "status": "in_progress",
+      "status": "done",
       "startedAt": "2026-10-11T10:43:26.999Z",
-      "completedAt": null
+      "completedAt": "2026-10-12T11:46:49.088Z"
     },
     {
       "id": "P15",
@@ -3509,96 +3549,146 @@
         {
           "id": "P15.1",
           "title": "Close High and Blocker findings",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-12T11:46:49.390Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-12T11:46:49.391Z",
+              "text": "Whole P15 source batch under ADR-011; source and authored tests first. No DB suites/browser/AWS until readiness. Production/cutover/restored-person and paid-service owner gates retained."
+            }
+          ]
         },
         {
           "id": "P15.2",
           "title": "Shared rate limiting (fixes PF-02)",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-12T11:46:49.642Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-12T11:46:49.643Z",
+              "text": "Whole P15 source batch under ADR-011; source and authored tests first. No DB suites/browser/AWS until readiness. Production/cutover/restored-person and paid-service owner gates retained."
+            }
+          ]
         },
         {
           "id": "P15.3",
           "title": "Headers, CSP, CORS and cookies",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-12T11:46:49.896Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-12T11:46:49.896Z",
+              "text": "Whole P15 source batch under ADR-011; source and authored tests first. No DB suites/browser/AWS until readiness. Production/cutover/restored-person and paid-service owner gates retained."
+            }
+          ]
         },
         {
           "id": "P15.4",
           "title": "Isolation and IDOR suite",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-12T11:46:50.160Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-12T11:46:50.160Z",
+              "text": "Whole P15 source batch under ADR-011; source and authored tests first. No DB suites/browser/AWS until readiness. Production/cutover/restored-person and paid-service owner gates retained."
+            }
+          ]
         },
         {
           "id": "P15.5",
           "title": "Authorization regression and monitoring",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-12T11:46:50.431Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-12T11:46:50.432Z",
+              "text": "Whole P15 source batch under ADR-011; source and authored tests first. No DB suites/browser/AWS until readiness. Production/cutover/restored-person and paid-service owner gates retained."
+            }
+          ]
         },
         {
           "id": "P15.6",
           "title": "Secrets and credentials",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-12T11:46:50.707Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-12T11:46:50.708Z",
+              "text": "Whole P15 source batch under ADR-011; source and authored tests first. No DB suites/browser/AWS until readiness. Production/cutover/restored-person and paid-service owner gates retained."
+            }
+          ]
         },
         {
           "id": "P15.7",
           "title": "Data protection and retention",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-12T11:46:50.998Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-12T11:46:50.998Z",
+              "text": "Whole P15 source batch under ADR-011; source and authored tests first. No DB suites/browser/AWS until readiness. Production/cutover/restored-person and paid-service owner gates retained."
+            }
+          ]
         },
         {
           "id": "P15.8",
           "title": "Production hardening and decommissioning",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-12T11:46:51.275Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-12T11:46:51.276Z",
+              "text": "Whole P15 source batch under ADR-011; source and authored tests first. No DB suites/browser/AWS until readiness. Production/cutover/restored-person and paid-service owner gates retained."
+            }
+          ]
         },
         {
           "id": "P15.9",
           "title": "Security review",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-12T11:46:51.547Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-12T11:46:51.548Z",
+              "text": "Whole P15 source batch under ADR-011; source and authored tests first. No DB suites/browser/AWS until readiness. Production/cutover/restored-person and paid-service owner gates retained."
+            }
+          ]
         },
         {
           "id": "P15.10",
           "title": "Report",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-12T11:46:51.838Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-12T11:46:51.839Z",
+              "text": "Whole P15 source batch under ADR-011; source and authored tests first. No DB suites/browser/AWS until readiness. Production/cutover/restored-person and paid-service owner gates retained."
+            }
+          ]
         }
       ],
-      "status": "not_started",
-      "startedAt": null,
+      "status": "in_progress",
+      "startedAt": "2026-10-12T11:46:49.391Z",
       "completedAt": null
     },
     {

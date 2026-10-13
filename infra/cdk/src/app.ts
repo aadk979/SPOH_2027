@@ -30,6 +30,7 @@ export function buildApp(app: App = new App()): App {
     const stage = withIdentityPlan(app, configured);
     const stack = new PlatformStack(app, `Spoh-${stage.name}-Platform`, {
       stage,
+      githubOidcProviderArn: access.oidcProviderArn,
       env: { account: stage.account, region: stage.region },
       terminationProtection: stage.name === 'prod',
       description: `SPOH platform, ${stage.name} (ADR-008)`,

@@ -23,7 +23,7 @@ afterEach(() => vi.restoreAllMocks());
 
 async function pendingSession() {
   vi.spyOn(identityProvider, 'hasMfa').mockResolvedValue(false);
-  const response = await request(app).post('/api/v1/auth/session')
+  const response = await request(app).post('/api/v1/auth/session').set('Origin', 'http://localhost:3000')
     .send({ providerAccessToken: person.token }).expect(201);
   expect(response.body.mfaRequired).toBe(true);
   const header: unknown = response.headers['set-cookie'];
@@ -57,7 +57,7 @@ it.each(['pruned', 'expired', 'revoked'] as const)(
         await rawDb.refreshSession.update({ where: { id: opened.id }, data: { revokedAt: FROZEN_NOW } });
       } else {
         await rawDb.refreshSession.update({ where: { id: opened.id }, data: { expiresAt: new Date(FROZEN_NOW.getTime() - 1) } });
-        if (change === 'pruned') await pruneRefreshSessions(FROZEN_NOW);
+        if (change === 'pruned') await pruneRefreshSessions(new Date(FROZEN_NOW.getTime() + 31 * 86400000));
       }
       return result;
     });
@@ -113,7 +113,7 @@ it('holds pruning behind handoff issuance until its foreign-key insert commits',
   let outcome: Awaited<typeof pruning>;
   vi.spyOn(handoffRepo, 'insertHandoff').mockImplementationOnce(async (...args) => {
     // Catch immediately: a worker failure must not become an unhandled pending rejection.
-    pruning = pruneRefreshSessions(new Date(FROZEN_NOW.getTime() + 1001))
+    pruning = pruneRefreshSessions(new Date(FROZEN_NOW.getTime() + 31 * 86400000))
       .then((removed) => ({ removed }), (error: unknown) => ({ error }));
     await waitForSessionLock();
     expect(await rawDb.refreshSession.findUnique({ where: { id: opened.id } })).not.toBeNull();

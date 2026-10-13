@@ -38,7 +38,7 @@ function cookieAttributes(response: request.Response, name: string): string {
 const COOKIE = 'spoh_refresh';
 
 async function openSession(email: string): Promise<request.Response> {
-  return request(app).post('/api/v1/auth/session').send({ email });
+  return request(app).post('/api/v1/auth/session').set('Origin', 'http://localhost:3000').send({ email });
 }
 
 describe('opening a session', () => {
@@ -88,7 +88,7 @@ describe('opening a session', () => {
       data: { value: 240, version: 2 },
     });
     const refreshed = await request(app)
-      .post('/api/v1/auth/refresh')
+      .post('/api/v1/auth/refresh').set('Origin', 'http://localhost:3000')
       .set('Cookie', `${COOKIE}=${cookieValue(first, COOKIE) as string}`);
     expect(refreshed.status).toBe(200);
     expect(refreshed.body.expiresIn).toBe(240);
@@ -97,7 +97,7 @@ describe('opening a session', () => {
     expect((firstClaims.exp ?? 0) - (firstClaims.iat ?? 0)).toBe(120);
   });
 
-  it("gives new and rotated sessions the organisation's session lifetime", async () => {
+  it("fixes the family lifetime at sign-in even when the organisation setting later increases", async () => {
     const DAY = 86_400_000;
     const { eventId } = await testEvent();
     const { organisationId } = await rawDb.event.findUniqueOrThrow({
@@ -123,12 +123,13 @@ describe('opening a session', () => {
       data: { value: 5, version: 2 },
     });
     const refreshed = await request(app)
-      .post('/api/v1/auth/refresh')
+      .post('/api/v1/auth/refresh').set('Origin', 'http://localhost:3000')
       .set('Cookie', `${COOKIE}=${cookieValue(first, COOKIE) as string}`);
     expect(refreshed.status).toBe(200);
     const rotated = await prisma.refreshSession.findFirstOrThrow({ where: { revokedAt: null } });
     expect(rotated.id).not.toBe(opened.id);
-    expect(rotated.expiresAt.getTime() - Date.now()).toBe(5 * DAY);
+    expect(rotated.expiresAt).toEqual(opened.expiresAt);
+    expect(rotated.absoluteExpiresAt).toEqual(opened.absoluteExpiresAt);
   });
 
   it('makes the refresh cookie unreadable by page script and scopes it to the auth path', async () => {
@@ -171,7 +172,7 @@ describe('opening a session', () => {
 
   it('rejects a request from an origin the API does not serve', async () => {
     const response = await request(app)
-      .post('/api/v1/auth/session')
+      .post('/api/v1/auth/session').set('Origin', 'http://localhost:3000')
       .set('Origin', 'https://not-us.example')
       .send({ email: 'ic@spoh.test' });
 
@@ -201,7 +202,7 @@ describe('using a session', () => {
     const token = session.body.accessToken as string;
 
     await request(app)
-      .delete('/api/v1/auth/session')
+      .delete('/api/v1/auth/session').set('Origin', 'http://localhost:3000')
       .set('Cookie', `${COOKIE}=${cookieValue(session, COOKIE) as string}`)
       .expect(204);
 
@@ -223,7 +224,7 @@ describe('rotation', () => {
     const first = cookieValue(session, COOKIE) as string;
 
     const refreshed = await request(app)
-      .post('/api/v1/auth/refresh')
+      .post('/api/v1/auth/refresh').set('Origin', 'http://localhost:3000')
       .set('Cookie', `${COOKIE}=${first}`);
 
     expect(refreshed.status).toBe(200);
@@ -237,11 +238,11 @@ describe('rotation', () => {
     const session = await openSession('ic@spoh.test');
     const first = cookieValue(session, COOKIE) as string;
 
-    await request(app).post('/api/v1/auth/refresh').set('Cookie', `${COOKIE}=${first}`).expect(200);
+    await request(app).post('/api/v1/auth/refresh').set('Origin', 'http://localhost:3000').set('Cookie', `${COOKIE}=${first}`).expect(200);
 
     await prisma.refreshSession.updateMany({ where: { revokedReason: 'rotated' }, data: { revokedAt: new Date(Date.now() - 11_000) } });
     const replay = await request(app)
-      .post('/api/v1/auth/refresh')
+      .post('/api/v1/auth/refresh').set('Origin', 'http://localhost:3000')
       .set('Cookie', `${COOKIE}=${first}`);
 
     expect(replay.status).toBe(401);
@@ -258,15 +259,15 @@ describe('rotation', () => {
     const first = cookieValue(session, COOKIE) as string;
 
     const refreshed = await request(app)
-      .post('/api/v1/auth/refresh')
+      .post('/api/v1/auth/refresh').set('Origin', 'http://localhost:3000')
       .set('Cookie', `${COOKIE}=${first}`);
     const second = cookieValue(refreshed, COOKIE) as string;
     await prisma.refreshSession.updateMany({ where: { revokedReason: 'rotated' }, data: { revokedAt: new Date(Date.now() - 11_000) } });
-    await request(app).post('/api/v1/auth/refresh').set('Cookie', `${COOKIE}=${first}`).expect(401);
+    await request(app).post('/api/v1/auth/refresh').set('Origin', 'http://localhost:3000').set('Cookie', `${COOKIE}=${first}`).expect(401);
 
     // The token the honest client is holding is now dead too.
     const afterBreach = await request(app)
-      .post('/api/v1/auth/refresh')
+      .post('/api/v1/auth/refresh').set('Origin', 'http://localhost:3000')
       .set('Cookie', `${COOKIE}=${second}`);
 
     expect(afterBreach.status).toBe(401);
@@ -277,7 +278,7 @@ describe('rotation', () => {
 
   it('clears the cookie when the session is gone, so the client stops retrying', async () => {
     const response = await request(app)
-      .post('/api/v1/auth/refresh')
+      .post('/api/v1/auth/refresh').set('Origin', 'http://localhost:3000')
       .set('Cookie', `${COOKIE}=not-a-real-token`);
 
     expect(response.status).toBe(401);
@@ -285,7 +286,7 @@ describe('rotation', () => {
   });
 
   it('refuses to refresh without a cookie at all', async () => {
-    const response = await request(app).post('/api/v1/auth/refresh');
+    const response = await request(app).post('/api/v1/auth/refresh').set('Origin', 'http://localhost:3000');
     expect(response.status).toBe(401);
     expect(response.body.error.code).toBe('SESSION_EXPIRED');
   });
@@ -321,7 +322,7 @@ describe('device list', () => {
     });
 
     const response = await request(app)
-      .delete(`/api/v1/auth/sessions/${theirSession?.id ?? 'missing'}`)
+      .delete(`/api/v1/auth/sessions/${theirSession?.id ?? 'missing'}`).set('Origin', 'http://localhost:3000')
       .set('Authorization', `Bearer ${mine.body.accessToken as string}`);
 
     expect(response.status).toBe(404);

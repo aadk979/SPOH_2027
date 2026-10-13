@@ -45,7 +45,7 @@ export function campaignCoreResponses(path: string): CampaignResponse[] {
     escalationChain: [{ id: 'campaign-lead', displayName: 'Synthetic Lead', role: 'CHIEF_COORDINATOR', phone: '+6500002222', portfolio: null }],
     serverTime: CAMPAIGN_NOW, operationalDate: '2027-01-08' });
   return [
-    { path: '/api/v1/client-config', body: { data: ClientConfigurationSchema.parse({ version: 1, apiBaseUrl: '', envLabel: 'development', authProvider: 'local', cognito: null }) } },
+    { path: '/api/v1/client-config', body: { data: ClientConfigurationSchema.parse({ version: 2, mediaOrigin: null, apiBaseUrl: '', envLabel: 'development', authProvider: 'local', cognito: null }) } },
     { path: '/api/v1/auth/refresh', method: 'POST', body: campaignSession(path === '/mfa') },
     { path: '/api/v1/auth/mfa/setup', method: 'POST', body: MfaSetupResponse.parse({ secretCode: 'SYNTHETICSETUPKEY' }) },
     { path: '/api/v1/events', body: { data: MyEvent.array().parse([event, { ...event, id: 'evt_other', slug: 'other-event', name: 'Synthetic Other Event' }]) } },

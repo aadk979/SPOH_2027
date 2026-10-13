@@ -6,6 +6,9 @@ import { StationScopeError } from '../errors/index.js';
 import { shiftFilter } from '../event/runningShifts.js';
 import { databaseRoleGrants } from './authorizer/index.js';
 import type { CaptureContext } from '../http/captureActor.js';
+import { lockCurrentActor, requireCurrentPermission } from './currentPermission.js';
+
+export type StationCaptureAction = 'Registration.Create' | 'Footfall.Create' | 'Card.Stamp' | 'Gift.Redeem';
 
 /**
  * Recheck station permission under the phase lock; middleware alone can race go-live. A role
@@ -14,7 +17,7 @@ import type { CaptureContext } from '../http/captureActor.js';
  */
 export async function captureStation(
   tx: PrismaTransactionClient,
-  context: Pick<CaptureContext, 'scope' | 'actor' | 'clock'>,
+  context: Pick<CaptureContext, 'scope' | 'actor' | 'clock'> & { action: StationCaptureAction },
   request: CaptureAdmissionRequest & { stationId: string },
 ) {
   const { scope, actor } = context;
@@ -23,6 +26,15 @@ export async function captureStation(
     stationId: request.stationId,
     clock: context.clock,
   });
+  await lockCurrentActor(tx, { scope, membershipId: actor.membershipId, personId: actor.volunteerId });
+  await tx.$queryRaw`SELECT id FROM "ShiftAssignment" WHERE "eventId" = ${scope.eventId}
+    AND "membershipId" = ${actor.membershipId} ORDER BY id FOR SHARE`;
+  await tx.$queryRaw`SELECT s.id FROM "Shift" s WHERE s."eventId" = ${scope.eventId}
+    AND EXISTS (SELECT 1 FROM "ShiftAssignment" a WHERE a."eventId" = s."eventId"
+      AND a."shiftId" = s.id AND a."membershipId" = ${actor.membershipId}) ORDER BY s.id FOR SHARE`;
+  await requireCurrentPermission(tx, { scope, membershipId: actor.membershipId,
+    personId: actor.volunteerId, action: context.action, resource: { type: 'Station', id: request.stationId },
+    clock: context.clock, shiftAt, facts: { lateSyncAllowed: provenance.lateSync !== undefined } });
   const membership = await tx.eventMembership.findFirst({
     where: { eventId: scope.eventId, id: actor.membershipId, personId: actor.volunteerId },
     select: { role: true, status: true },

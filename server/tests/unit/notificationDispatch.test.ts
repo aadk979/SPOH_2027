@@ -55,7 +55,9 @@ describe('legacy notification fan-out compatibility', () => {
     expect(await dispatch(scope, input, now)).toEqual({ kind: input.kind, priority: input.priority,
       recipients: 1, devices: 0, delivered: 0, failed: 0, pruned: 0, enabled: false });
     expect(ports.findSubscriptions).not.toHaveBeenCalled(); expect(ports.sendPush).not.toHaveBeenCalled();
-    expect(ports.warn).toHaveBeenCalledWith({ kind: input.kind, recipients: 1, tag: input.tag }, input.title);
+    expect(ports.warn).toHaveBeenCalledExactlyOnceWith(
+      { kind: input.kind, recipients: 1 }, 'notification dispatch attempted',
+    );
   });
 
   it('makes no device query after the only recipient was excluded', async () => {

@@ -5,6 +5,8 @@ import { createApp } from '../../src/app/createApp.js';
 import { logger } from '../../src/platform/logger/index.js';
 import { settleDenials } from '../../src/platform/http/authorizationDenials.js';
 import { useAuthorizer } from '../../src/platform/http/authorize.js';
+import * as auditModule from '../../src/platform/audit/index.js';
+import { FROZEN_NOW } from '../setup.js';
 import { rawDb, resetDatabase } from '../helpers/db.js';
 import {
   assignToStationAllBlocks,
@@ -71,6 +73,33 @@ describe('a refusal', () => {
 
   it('collapses a caller polling a refused route into one row a minute', async () => {
     for (let i = 0; i < 5; i++) expect((await auditAs(volunteer)).status).toBe(403);
+    expect(await denials()).toHaveLength(1);
+  });
+
+  it('coordinates simultaneous denials from independent app instances and retains suppression across settle calls', async () => {
+    const otherApp = createApp();
+    const responses = await Promise.all(Array.from({ length: 12 }, (_, index) =>
+      request(index % 2 ? app : otherApp).get('/api/v1/audit').set('Authorization', bearer(volunteer))));
+    expect(responses.every((response) => response.status === 403)).toBe(true);
+    expect(await denials()).toHaveLength(1);
+    expect((await auditAs(volunteer)).status).toBe(403);
+    expect(await denials()).toHaveLength(1);
+    vi.setSystemTime(new Date(FROZEN_NOW.getTime() + 61_000));
+    expect((await auditAs(volunteer)).status).toBe(403);
+    const rows = await denials();
+    expect(rows).toHaveLength(2);
+    expect(rows.some((row) => (row.after as { previousWindowSuppressed?: number }).previousWindowSuppressed === 12)).toBe(true);
+    vi.setSystemTime(FROZEN_NOW);
+  });
+
+  it('rolls back the first denial claim when its audit fails, so the next refusal can be recorded', async () => {
+    const failingAudit = vi.spyOn(auditModule, 'writeAudit').mockRejectedValueOnce(new Error('audit unavailable'));
+    expect((await auditAs(volunteer)).status).toBe(403);
+    expect(await denials()).toEqual([]);
+    const counters = await rawDb.$queryRaw<Array<{ count: bigint }>>`SELECT count FROM "RateLimitCounter" WHERE namespace = 'authorization.denial'`;
+    expect(counters).toEqual([]);
+    failingAudit.mockRestore();
+    expect((await auditAs(volunteer)).status).toBe(403);
     expect(await denials()).toHaveLength(1);
   });
 

@@ -18,10 +18,14 @@ export interface ValidationTargets {
   query?: z.ZodType;
   params?: z.ZodType;
 }
+const validationContracts = new WeakMap<RequestHandler, Readonly<ValidationTargets>>();
+
+/** Inventory consumes the same schemas the boundary enforces; schemas never come from requests. */
+export const validationSchemasOf = (handler: RequestHandler) => validationContracts.get(handler);
 
 export function validate(targets: ValidationTargets): RequestHandler {
   const name = `validate(${Object.keys(targets).join(',')})`;
-  return named(name, (req: Request, _res: Response, next: NextFunction): void => {
+  const handler = named(name, (req: Request, _res: Response, next: NextFunction): void => {
     try {
       if (targets.body) req.body = parseOrThrow(targets.body, req.body, 'body');
 
@@ -50,6 +54,8 @@ export function validate(targets: ValidationTargets): RequestHandler {
       next(error);
     }
   });
+  validationContracts.set(handler, Object.freeze({ ...targets }));
+  return handler;
 }
 
 function parseOrThrow(schema: z.ZodType, value: unknown, location: string): unknown {

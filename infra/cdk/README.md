@@ -73,12 +73,58 @@ connections continue until replaced; new app tasks read the new secret at startu
 and fresh task connections. A failure rolls back the secret version, reruns the credential task,
 and restores the previous image; never reset or recreate the database to rotate a password.
 
-Rotate session/attendance secrets in a controlled maintenance window and restart every app task
-together: active session tokens and attendance challenges issued with the old keys expire early.
-Revoke existing refresh sessions for a suspected session-key leak; a routine rotation still requires
-P16 proof that users can sign in again. Retain prior key versions only for bounded rollback.
-VAPID changes require renewed device subscriptions. Access Analyzer, real key rotations and
-notification delivery are P16.8 acceptance evidence, not synthesis evidence.
+Session signing uses explicit VersionIds of the same stage secret ARN. Bootstrap exposes
+`SessionSigningSecretArn`; before the first app task, obtain its non-secret VersionId and supply
+`sessionSigningVersions` context or the required `SessionSigningCurrentVersionId` parameter.
+There is no implicit AWSCURRENT selector. Only app execution roles fetch signing values;
+migration tasks receive neither current nor previous signing key.
+
+The dispatch-only staging release preserves the deployed current/previous outputs during a
+routine `stable` release. Rotation has three explicit phases:
+
+1. `preload`: retain the old current writer and deploy the new version as previous verifier to
+   every task. Wait for all tasks to use that pair and prove both signatures/envelopes verify.
+2. `flip`: exchange the deployed pair so every new writer uses the new key and can still verify
+   the old key. Verify the rollout and record when the last old writer stopped.
+3. `retire`: keep the new writer and explicitly remove the previous selector. First wait beyond
+   the maximum configured app access-token, pending MFA credential, handoff and encrypted
+   refresh-retry lifetimes, plus clock skew, measured from the last old writer. Clear any
+   repository previous-version variable too. Refresh-session row lifetime is not a signature
+   lifetime; inspect pending encrypted provider envelopes before retiring their decrypting key.
+
+The release validator refuses skipped phases, equal/invalid versions and a routine release that
+drops an overlap. Non-secret selector outputs persist across deploys and rollbacks. Keep secret
+values private; VersionId alone is neither a credential nor rotation acceptance. A suspected key
+leak requires credential revocation and an incident-specific accelerated retirement decision.
+Attendance signing remains a separate protocol: coordinate its maintenance restart and challenge
+expiry explicitly. VAPID changes require renewed device subscriptions. Access Analyzer, real key
+rotations and notification delivery remain P16.8 evidence, rather than synthesis evidence.
+
+Authorization monitoring alarms on 100 refusals in five minutes and a 20% refusal ratio only
+after 100 decisions, with a zero-safe denominator and quiet periods non-breaching. Committed
+`permissions.change` audit shipments trigger the policy-change alarm; at-least-once delivery
+means this counts activity, rather than exact distinct changes. All alarms use existing stage SNS
+delivery. CloudTrail, GuardDuty, Security Hub and optional WAF retain owner cost gates.
+
+`.github/workflows/staging-permission-matrix.yml` remains dispatch-only until P16 recreates and
+accepts staging. Its separate main-ref OIDC role can only list/get schema and policies and ask
+IsAuthorized of the exact staging store. The workflow first pins the reviewed commit and records
+all passing synthetic role, changes and adversarial cases, then attests actual deployed decisions,
+determining policies and errors. Its artifact records source/deployed schema and policy digests,
+case digest, exact commit and policy stability across the run. It deploys nothing and has no
+production access. A schedule and live matrix result require the documented P16 acceptance.
+
+The approved `publicOrigins` configuration explicitly declares `crossSiteCookies`: false for
+the current HTTPS DuckDNS parent/subdomain pair, true when the client moves to an approved
+Firebase site while the API stays on DuckDNS. This injects `SESSION_COOKIE_CROSS_SITE` only
+into app tasks; migration tasks do not receive it. Production cookies remain Secure, HttpOnly
+and host-only. P16 must verify actual browser cookie delivery and credentialed CORS after the
+concrete origin change; a template assertion cannot prove third-party browser cookie support.
+
+App content access permits DeleteObject/DeleteObjectVersion only beneath the owned content
+bucket's `drafts/*` and `content/*` prefixes. Durable storage intents supply exact orphan keys
+and versions for cleanup; this grants no ListBucket/ListBucketVersions or ACL access. Bound
+publications retain their existing immutable history. Migration tasks receive no S3 grants.
 
 Dependabot checks npm workspaces, GitHub Actions and the Dockerfile weekly. Keep Prisma client
 and CLI versions aligned, Node images on 24, CDK CLI/lib compatible, and Cedar WASM/schema

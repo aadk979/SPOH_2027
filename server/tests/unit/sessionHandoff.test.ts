@@ -5,6 +5,10 @@ const database = vi.hoisted(() => ({
   transaction: vi.fn(),
   lock: vi.fn(),
   insert: vi.fn(),
+  lookup: vi.fn(),
+  person: vi.fn(),
+  volunteer: vi.fn(),
+  limit: vi.fn(),
 }));
 vi.mock('../../src/platform/db/client.js', () => ({
   prisma: { $transaction: database.transaction },
@@ -12,7 +16,11 @@ vi.mock('../../src/platform/db/client.js', () => ({
 vi.mock('../../src/modules/auth/data/handoffRepo.js', () => ({
   lockHandoffSession: database.lock,
   insertHandoff: database.insert,
+  handoffSession: database.lookup,
 }));
+vi.mock('../../src/modules/auth/data/securityRepo.js', () => ({ lockCredentialPerson: database.person }));
+vi.mock('../../src/modules/auth/application/issueSession.js', () => ({ loadVolunteer: database.volunteer }));
+vi.mock('../../src/modules/auth/application/currentSession.js', () => ({ currentSessionLimit: database.limit }));
 const { createSessionHandoff } = await import('../../src/modules/auth/application/createSessionHandoff.js');
 const now = new Date('2027-01-07T03:30:00Z');
 const input = { sessionId: 'session', sub: 'owner', challenge: 'challenge' };
@@ -20,6 +28,10 @@ const currentSession = () => ({
   revokedAt: null,
   expiresAt: new Date(now.getTime() + 120_000),
   absoluteExpiresAt: null,
+  volunteerId: 'person',
+  mfaPending: false,
+  providerTokenEncrypted: null,
+  providerTokenExpiresAt: null,
   volunteer: { cognitoSub: 'owner' },
 });
 
@@ -27,6 +39,9 @@ beforeEach(() => {
   vi.resetAllMocks();
   database.transaction.mockImplementation(async (run: (tx: object) => Promise<string>) => run({}));
   database.lock.mockResolvedValue(currentSession());
+  database.lookup.mockResolvedValue(currentSession());
+  database.volunteer.mockResolvedValue({ id: 'person', scope: { eventId: 'event' } });
+  database.limit.mockResolvedValue(currentSession().expiresAt);
 });
 
 it.each([

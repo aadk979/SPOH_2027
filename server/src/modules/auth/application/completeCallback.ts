@@ -5,6 +5,7 @@ import { authProvider } from '../../../platform/identity/index.js';
 import { clientSignInOrigin, exchangeCode, hostedSignInConfig } from './hostedSignIn.js';
 import type { OpenedSession, SessionContext } from './issueSession.js';
 import { openSession } from './openSession.js';
+import { verifiedAuthenticationAt } from '../domain/credentialRules.js';
 
 export interface CallbackInput {
   code: unknown;
@@ -38,15 +39,16 @@ export async function completeCallback(
   const accessToken = await exchangeCode(config, grant);
   if (!accessToken) return failed('exchange');
 
-  let sub: string;
+  let verified: Awaited<ReturnType<typeof authProvider.verify>>;
   try {
-    sub = (await authProvider.verify(accessToken)).sub;
+    verified = await authProvider.verify(accessToken);
   } catch {
     return failed('verify');
   }
 
   try {
-    const session = await openSession(sub, { ...context, providerAccessToken: accessToken }, audit);
+    const session = await openSession(verified.sub, { ...context, providerAccessToken: accessToken,
+      authenticatedAt: verifiedAuthenticationAt(verified.authTime) }, audit);
     return { redirectTo: `${clientSignInOrigin()}/`, session };
   } catch (cause) {
     return failed(cause instanceof AppError ? cause.code : ERROR_CODES.INTERNAL_ERROR);

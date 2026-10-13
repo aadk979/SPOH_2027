@@ -7,8 +7,6 @@ import {
 } from '../../../platform/identity/index.js';
 import { systemClock } from '../../../platform/time/index.js';
 import { createRefreshSession, touchVolunteer } from '../data/repo.js';
-import { refreshExpiry } from '../domain/sessionRules.js';
-import { refreshSessionDays } from './sessionLifetime.js';
 import {
   issueSession,
   loadVolunteer,
@@ -17,7 +15,7 @@ import {
 } from './issueSession.js';
 import { inHomeEvent } from './sessionAudit.js';
 import { sessionSecurity } from './sessionSecurity.js';
-import { acceptMembership } from '../data/securityRepo.js';
+import { acceptMembership, lockCredentialPerson } from '../data/securityRepo.js';
 
 /**
  * Open a session for an already-authenticated subject.
@@ -31,16 +29,15 @@ export async function openSession(
   context: SessionContext,
   audit: AuditContext,
 ): Promise<OpenedSession> {
-  const volunteer = await loadVolunteer(sub);
-
+  const initial = await loadVolunteer(sub);
   const refreshToken = generateRefreshToken();
-  const now = systemClock.now();
-  const security = await sessionSecurity(volunteer, context);
-  const expiresAt =
-    security.absoluteExpiresAt ?? refreshExpiry(now, await refreshSessionDays(volunteer.scope));
-
-  const recorded = await inHomeEvent(audit, volunteer.id);
-  const session = await prisma.$transaction(async (tx) => {
+  const recorded = await inHomeEvent(audit, initial.id);
+  const opened = await prisma.$transaction(async (tx) => {
+    await lockCredentialPerson(tx, initial.id);
+    const volunteer = await loadVolunteer(sub, tx);
+    const now = systemClock.now();
+    const security = await sessionSecurity(tx, { person: volunteer, context, now });
+    const expiresAt = security.absoluteExpiresAt;
     const row = await createRefreshSession(tx, {
       volunteerId: volunteer.id,
       tokenHash: hashRefreshToken(refreshToken),
@@ -48,6 +45,8 @@ export async function openSession(
       userAgent: context.userAgent,
       ip: context.ip,
       expiresAt,
+      issuedAt: now,
+      authenticatedAt: context.authenticatedAt ?? null,
       ...security,
     });
 
@@ -64,15 +63,15 @@ export async function openSession(
       after: { userAgent: context.userAgent },
     });
 
-    return row;
-  });
+    return { volunteer, row, security, expiresAt };
+  }, { timeout: 30_000 });
 
-  return issueSession(volunteer, {
+  return issueSession(opened.volunteer, {
     sub,
-    sessionId: session.id,
+    sessionId: opened.row.id,
     refreshToken,
-    expiresAt,
-    mfaPending: security.mfaPending,
+    expiresAt: opened.expiresAt,
+    mfaPending: opened.security.mfaPending,
   });
 }
 
@@ -85,6 +84,7 @@ async function recordInvitationAcceptance(
     now: Date;
   },
 ) {
+  if (!('eventId' in input.volunteer.scope)) return;
   if (
     !(await acceptMembership(tx, input.volunteer.scope, {
       personId: input.volunteer.id,

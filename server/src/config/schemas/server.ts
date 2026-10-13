@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { CsvList, type EnvRule } from './common.js';
+import { isHttpOrigin } from './auth.js';
 
 /** The process, the HTTP edge and the development conveniences. */
 export const serverFields = {
@@ -30,4 +31,10 @@ export const corsWildcardRule: EnvRule<ServerEnv> = (env, ctx) => {
       message: 'wildcard origins are not permitted (BUILD_PLAN §8.2)',
     });
   }
+  if (env.CORS_ALLOWED_ORIGINS.some((origin) => !isHttpOrigin(origin) || origin.endsWith('/')))
+    ctx.addIssue({ code: 'custom', path: ['CORS_ALLOWED_ORIGINS'],
+      message: 'CORS requires exact canonical HTTP(S) origins without paths, credentials or trailing slashes' });
+  if (env.NODE_ENV === 'production' && env.CORS_ALLOWED_ORIGINS.some((origin) => !origin.startsWith('https://')))
+    ctx.addIssue({ code: 'custom', path: ['CORS_ALLOWED_ORIGINS'],
+      message: 'production CORS origins must use HTTPS' });
 };

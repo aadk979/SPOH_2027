@@ -17,6 +17,7 @@ export const EVENT_OWNED_MODELS = [
   'CardPrintExport',
   'CardStampEvent',
   'ContentDocument',
+  'ContentStorageIntent',
   'ContentUploadReceipt',
   'ContentVersion',
   'EventDay',
@@ -47,6 +48,7 @@ export const EVENT_OWNED_MODELS = [
   'StationTag',
   'StationTagging',
   'StationType',
+  'ValidatedMedia',
   'VisitorField',
   'VisitorRecord',
 ] as const;

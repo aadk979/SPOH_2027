@@ -14,7 +14,8 @@ describe('runtime configuration validation (F03-037: no Zod on every route)', ()
   it.each([
     {},
     null,
-    { ...LOCAL_CONFIGURATION, version: 2 },
+    { ...LOCAL_CONFIGURATION, version: 1 },
+    { ...LOCAL_CONFIGURATION, version: 3 },
     { ...LOCAL_CONFIGURATION, authProvider: undefined },
     { ...CLOUD_CONFIGURATION, cognito: null },
     { ...CLOUD_CONFIGURATION, envLabel: 'stagng' },

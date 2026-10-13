@@ -5,12 +5,14 @@ import { prisma } from '../../src/platform/db/client.js';
 import { rawDb, resetDatabase } from '../helpers/db.js';
 import { createVolunteer, testEvent } from '../helpers/fixtures.js';
 import { FROZEN_NOW } from '../setup.js';
+const originalPool = env.COGNITO_USER_POOL_ID;
 
 beforeEach(async () => {
   await resetDatabase();
   await createVolunteer({ email: 'quota@example.test', role: 'VOLUNTEER' });
+  env.COGNITO_USER_POOL_ID = 'ap-southeast-1_quota';
 });
-afterEach(() => { env.AUTH_PROVIDER = 'local'; });
+afterEach(() => { env.AUTH_PROVIDER = 'local'; env.COGNITO_USER_POOL_ID = originalPool; });
 
 describe('shared default Cognito sender quota', () => {
   it('allows exactly fifty simultaneous deliveries across instances and keeps no recipient data', async () => {

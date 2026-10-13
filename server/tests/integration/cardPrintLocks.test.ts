@@ -198,6 +198,7 @@ it('validates card status after the selected-card lock sees an issue committed w
 
 it('holds selected cards, member and event through upload and receipt commit while a real issue waits', async () => {
   await createStation({ code: 'BOOTH' });
+  const issuer = await createVolunteer({ email: 'separate-issuer@print.test', role: 'ADMIN' });
   const started = deferred();
   const release = deferred();
   restore?.();
@@ -220,12 +221,12 @@ it('holds selected cards, member and event through upload and receipt commit whi
   await started.promise;
   const issuing = request(app)
     .post(`/api/v1/events/${eventId}/cards/ABC123/issue`)
-    .set('Authorization', bearer(admin))
+    .set('Authorization', bearer(issuer))
     .send({ idempotencyKey: idempotencyKey() })
     .then((response) => response);
   // Start the issue first: a queued event rename must not overtake its event SHARE lock.
   try {
-    await waitForLock('%UPDATE%MissionCard%');
+    await waitForLock('%FROM "MissionCard"%FOR UPDATE%');
   } catch (error) {
     release.resolve();
     await printing;
@@ -261,6 +262,62 @@ it('holds selected cards, member and event through upload and receipt commit whi
     (await rawDb.missionCard.findFirstOrThrow({ where: { eventId, shortCode: 'ABC123' } })).status,
   ).toBe('ISSUED');
 });
+
+it.each(['void', 'reissue', 'group'] as const)(
+  'holds the selected card through real storage while a distinct actor %s waits on its card lock',
+  async (kind) => {
+    const writer = await createVolunteer({ email: `writer-${kind}@print.test`, role: 'ADMIN' });
+    const station = await createStation({ code: 'LINK', countsEntry: true, issuesStamp: true });
+    if (kind === 'reissue') {
+      const stamped = await request(app).post(`/api/v1/events/${eventId}/cards/ABC124/stamps`)
+        .set('Authorization', bearer(writer)).send({ stationId: station.id, idempotencyKey: idempotencyKey() });
+      expect(stamped.status).toBe(201);
+    }
+    const started = deferred();
+    const release = deferred();
+    restore?.();
+    restore = useCardPrintStorage({
+      async write({ key, body }) { started.resolve(); await release.promise; uploads.set(key, body); },
+      async read(key) { return uploads.get(key)!; },
+    });
+    const printBody = { idempotencyKey: idempotencyKey(), shortCodes: ['ABC123'], format: 'pdf' };
+    const printing = request(app).post(`/api/v1/events/${eventId}/cards/print`)
+      .set('Authorization', bearer(admin)).send(printBody).then((response) => response);
+    await started.promise;
+    const key = idempotencyKey();
+    const path = kind === 'group' ? '/registrations/group' : `/cards/${kind === 'reissue' ? 'ABC124' : 'ABC123'}/${kind}`;
+    const body = kind === 'group' ? { idempotencyKey: key, stationId: station.id,
+      members: [{ category: 'SEC_4', count: 2 }], missionCardShortCode: 'ABC123' }
+      : { idempotencyKey: key, reason: 'Reviewed physical card correction',
+        ...(kind === 'reissue' ? { replacementShortCode: 'ABC123' } : {}) };
+    const mutation = request(app).post(`/api/v1/events/${eventId}${path}`)
+      .set('Authorization', bearer(writer)).send(body).then((response) => response);
+    let responses: Awaited<typeof printing>[];
+    try {
+      await waitForLock('%FROM "MissionCard"%ORDER BY%FOR UPDATE%');
+      expect((await rawDb.missionCard.findFirstOrThrow({ where: { eventId, shortCode: 'ABC123' } })).status).toBe('UNISSUED');
+      expect(await rawDb.registration.count()).toBe(0);
+      expect(await rawDb.cardPrintExport.count()).toBe(0);
+      expect((await rawDb.idempotencyRecord.findUniqueOrThrow({ where: { key } })).statusCode).toBe(0);
+    } finally {
+      release.resolve();
+      responses = await Promise.all([printing, mutation]);
+    }
+    expect(responses[0]!.status).toBe(201);
+    expect(responses[1]!.status).toBe(kind === 'void' ? 200 : 201);
+    const printed = await rawDb.cardPrintExport.findFirstOrThrow({ where: { eventId } });
+    expect(printed.shortCodes).toEqual(['ABC123']);
+    expect(printed.printContext).toMatchObject({ eventName: 'Test Event' });
+    expect((await rawDb.idempotencyRecord.findUniqueOrThrow({ where: { key: printBody.idempotencyKey } })).statusCode).toBe(201);
+    const card = await rawDb.missionCard.findFirstOrThrow({ where: { eventId, shortCode: 'ABC123' } });
+    expect(card.status).toBe(kind === 'void' ? 'VOIDED' : kind === 'reissue' ? 'COMPLETED' : 'ISSUED');
+    if (kind === 'group') expect(await rawDb.registration.count({ where: { eventId, missionCardId: card.id } })).toBe(2);
+    if (kind === 'reissue') {
+      expect(await rawDb.cardStampEvent.count({ where: { eventId, missionCardId: card.id } })).toBe(1);
+      expect((await rawDb.missionCard.findFirstOrThrow({ where: { eventId, shortCode: 'ABC124' } })).status).toBe('LOST');
+    }
+  },
+);
 
 it('prints concurrent reversed selections in one deterministic card-lock order without a deadlock', async () => {
   const left = await print(['ABC124', 'ABC123']);

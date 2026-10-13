@@ -144,7 +144,7 @@ describe('rehearsal shift access (P10.5)', () => {
     try {
       const refused = await tap();
       expect(refused.status).toBe(403);
-      expect(refused.body.error.code).toBe('STATION_SCOPE_DENIED');
+      expect(refused.body.error.code).toBe('FORBIDDEN');
       expect(await rawDb.registration.count({ where: { eventId } })).toBe(0);
     } finally {
       useAuthorizer(null);

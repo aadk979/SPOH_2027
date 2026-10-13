@@ -26,7 +26,7 @@ export function registerPeopleLifecycleRoutes(router: Router) {
     '/volunteers/:id/resend-invite',
     adminRateLimit,
     authorize('People.Update', memberFromPersonParam()),
-    validate({ params }),
+    validate({ params, body: z.object({ idempotencyKey: z.uuid() }).strict() }),
     optionalIdempotent('people.resend'),
     resendInviteHandler,
   );

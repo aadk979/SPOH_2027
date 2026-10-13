@@ -7,6 +7,7 @@ import { NotFoundError } from '../../../platform/errors/index.js';
 import { mediaUploadReceipt } from '../data/ownershipRepo.js';
 import { isReadableKey } from '../domain/mediaKeys.js';
 import { issuedRehearsal } from '../domain/mediaCaptureMode.js';
+import { validateMedia } from './validateMedia.js';
 
 /** A new item cannot promote a practice photo or relabel a live photo as practice. */
 export async function requireAttachableMediaKey(
@@ -19,4 +20,5 @@ export async function requireAttachableMediaKey(
   const rehearsal = issuedRehearsal(receipt?.after);
   if (rehearsal === null) throw new NotFoundError('Media object');
   assertCaptureMode(scope.rehearsal, { rehearsal });
+  await validateMedia(tx, scope, key);
 }

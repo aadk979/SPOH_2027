@@ -1,4 +1,4 @@
-import { Validations } from 'aws-cdk-lib';
+import { CfnOutput, Stack, Validations } from 'aws-cdk-lib';
 import { Secret, type ISecret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 
@@ -37,6 +37,7 @@ export class AppSecrets extends Construct {
       'Signs the API access tokens (SESSION_SIGNING_SECRET)',
       64,
     );
+    new CfnOutput(Stack.of(this), 'SessionSigningSecretArn', { value: this.sessionSigningSecret.secretArn });
     this.attendanceSigningSecret = generated(
       'attendance-signing-secret',
       'Signs attendance tokens independently of API sessions',

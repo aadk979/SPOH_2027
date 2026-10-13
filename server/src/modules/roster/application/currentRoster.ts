@@ -17,6 +17,7 @@ export async function currentRoster(
     personId: actor.volunteerId,
     membershipId: actor.audit.membershipId ?? '',
     action: input.action,
+    resource: { type: 'Event', id: actor.scope.eventId },
     ...(input.role ? { facts: { grantedRank: ROLE_RANKS[input.role] } } : {}),
   });
   assertWritableEvent(event);

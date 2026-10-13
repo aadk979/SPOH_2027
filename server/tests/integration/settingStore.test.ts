@@ -202,7 +202,7 @@ describe('scoped setting store (P10.2)', () => {
         target: { scope: 'event', eventId: other.id },
         value: adminMember.id,
       }),
-    ).rejects.toMatchObject({ statusCode: 400 });
+    ).rejects.toMatchObject({ statusCode: 404 });
     expect(await changeSetting({ ...input, value: adminMember.id })).toBe(1);
     await rawDb.eventMembership.update({
       where: { id: adminMember.id },

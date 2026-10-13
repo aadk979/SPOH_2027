@@ -39,8 +39,10 @@ it('two real API worker boots create one event recurrence and remove the legacy 
     const actions = await rawDb.scheduledAction.findMany({ select: { eventId: true, type: true } });
     expect(actions.map((action) => action.type).sort()).toEqual([
       'audit.ship',
+      'content.storage.prune',
       'idempotency.prune',
       'lostPerson.purge',
+      'quota.prune',
       'retention.audit',
       'retention.identity',
       'retention.media',

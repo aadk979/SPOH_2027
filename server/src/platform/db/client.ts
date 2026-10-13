@@ -49,10 +49,9 @@ const base = new PrismaClient({
 });
 
 if (!isTest) {
-  base.$on('warn', (e) => logger.warn({ prisma: e }, 'prisma warning'));
-  // Prisma error events carry query text. They go to the server log only and
-  // are never surfaced to a client (BUILD_PLAN §7.1).
-  base.$on('error', (e) => logger.error({ prisma: e }, 'prisma error'));
+  // Prisma events can include query text and parameters. Emit only the category.
+  base.$on('warn', () => logger.warn({ category: 'database' }, 'prisma warning'));
+  base.$on('error', () => logger.error({ category: 'database' }, 'prisma error'));
 }
 
 /**

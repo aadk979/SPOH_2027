@@ -173,14 +173,12 @@ it('publishes through the real worker and rebuilds current completed status on a
   expect((await schedule(draft.id)).status).toBe(409);
 });
 
-it('reuses the original action for a changed request body and rejects a key moved to another draft or actor', async () => {
+  it('replays the same intent and rejects a changed body or a key moved to another draft or actor', async () => {
   const draft = await save();
   const key = idempotencyKey();
   const first = await schedule(draft.id, { idempotencyKey: key });
-  expect(
-    (await schedule(draft.id, { idempotencyKey: key, runAt: at(120_000).toISOString() })).body
-      .schedule,
-  ).toEqual(first.body.schedule);
+  expect((await schedule(draft.id, { idempotencyKey: key })).body.schedule).toEqual(first.body.schedule);
+  expect((await schedule(draft.id, { idempotencyKey: key, runAt: at(120_000).toISOString() })).status).toBe(409);
   const second = await save();
   expect((await schedule(second.id, { idempotencyKey: key })).status).toBe(409);
   const other = await createVolunteer({ email: 'schedule-key-other@test.example', role: 'ADMIN' });

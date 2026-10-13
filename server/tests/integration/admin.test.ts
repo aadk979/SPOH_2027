@@ -153,7 +153,7 @@ describe('privilege escalation is refused', () => {
 describe('editing a volunteer', () => {
   it('changes a role and revokes their signed-in devices', async () => {
     const session = await request(app)
-      .post('/api/v1/auth/session')
+      .post('/api/v1/auth/session').set('Origin', 'http://localhost:3000')
       .send({ email: 'vol@spoh.test' })
       .expect(201);
 
@@ -175,7 +175,7 @@ describe('editing a volunteer', () => {
   });
 
   it('does not revoke anything when nothing that matters changed', async () => {
-    await request(app).post('/api/v1/auth/session').send({ email: 'vol@spoh.test' }).expect(201);
+    await request(app).post('/api/v1/auth/session').set('Origin', 'http://localhost:3000').send({ email: 'vol@spoh.test' }).expect(201);
 
     const response = await request(app)
       .patch(`/api/v1/admin/volunteers/${volunteer.id}`)
@@ -221,7 +221,7 @@ describe('editing a volunteer', () => {
 describe('withdrawing access', () => {
   it('locks the account out immediately, not when the token expires', async () => {
     const session = await request(app)
-      .post('/api/v1/auth/session')
+      .post('/api/v1/auth/session').set('Origin', 'http://localhost:3000')
       .send({ email: 'vol@spoh.test' })
       .expect(201);
 
@@ -247,7 +247,7 @@ describe('withdrawing access', () => {
       .expect(200);
 
     const response = await request(app)
-      .post('/api/v1/auth/session')
+      .post('/api/v1/auth/session').set('Origin', 'http://localhost:3000')
       .send({ email: 'vol@spoh.test' });
 
     expect(response.status).toBe(403);
@@ -323,7 +323,7 @@ describe('withdrawing access', () => {
     expect(response.body.volunteer.active).toBe(true);
     expect(response.body.volunteer.deactivatedReason).toBeNull();
 
-    await request(app).post('/api/v1/auth/session').send({ email: 'vol@spoh.test' }).expect(201);
+    await request(app).post('/api/v1/auth/session').set('Origin', 'http://localhost:3000').send({ email: 'vol@spoh.test' }).expect(201);
   });
 });
 

@@ -7,6 +7,47 @@ import { buildApp } from '../src/app.js';
 import { vapidKeys } from '../../scripts/provision-vapid.mjs';
 
 describe('task signing secrets', () => {
+  it('pins current and previous versions of one ARN only in app tasks', () => {
+    const current = '11111111-1111-4111-8111-111111111111';
+    const previous = '22222222-2222-4222-8222-222222222222';
+    const app = buildApp(new App({ context: { imageTag: 'release', serviceImageTag: 'release',
+      sessionSigningVersions: { staging: { current, previous } } } }));
+    const template = Template.fromStack(app.node.findChild('Spoh-staging-Platform') as never);
+    for (const task of Object.values(template.findResources('AWS::ECS::TaskDefinition'))) {
+      const container = task.Properties.ContainerDefinitions[0];
+      const signing = container.Secrets.filter((secret: { Name: string }) => secret.Name.startsWith('SESSION_SIGNING_SECRET'));
+      if (container.Name !== 'app') { expect(signing).toEqual([]); continue; }
+      expect(signing).toHaveLength(2);
+      const writer = signing.find((secret: { Name: string }) => secret.Name === 'SESSION_SIGNING_SECRET');
+      const verifier = signing.find((secret: { Name: string }) => secret.Name === 'SESSION_SIGNING_SECRET_PREVIOUS');
+      expect(JSON.stringify(writer.ValueFrom)).toContain(`:::${current}`);
+      expect(JSON.stringify(verifier.ValueFrom)).toContain(`:::${previous}`);
+      expect(writer.ValueFrom['Fn::Join'][1][0]).toEqual(verifier.ValueFrom['Fn::Join'][1][0]);
+    }
+    expect(Object.values(template.findResources('AWS::SecretsManager::Secret')).filter(
+      (secret) => secret.Properties.Name?.includes('session-signing'))).toHaveLength(1);
+  });
+
+  it.each([
+    { previous: '22222222-2222-4222-8222-222222222222' },
+    { current: 'short' },
+    { current: '11111111-1111-4111-8111-111111111111', previous: '11111111-1111-4111-8111-111111111111' },
+    { current: '11111111-1111-4111-8111-111111111111', versionStage: 'AWSCURRENT' },
+  ])('refuses unsafe signing selectors %j', (selectors) => {
+    expect(() => buildApp(new App({ context: { imageTag: 'release', serviceImageTag: 'release',
+      sessionSigningVersions: { staging: selectors } } }))).toThrow();
+  });
+
+  it('requires an explicit initial current version parameter and does not inject an absent previous key', () => {
+    const app = buildApp(new App({ context: { imageTag: 'release', serviceImageTag: 'release' } }));
+    const template = Template.fromStack(app.node.findChild('Spoh-staging-Platform') as never);
+    expect(template.toJSON().Parameters.SessionSigningCurrentVersionId).toMatchObject({ Type: 'String' });
+    expect(template.toJSON().Parameters.SessionSigningCurrentVersionId.Default).toBeUndefined();
+    const task = Object.values(template.findResources('AWS::ECS::TaskDefinition')).find(
+      (resource) => resource.Properties.ContainerDefinitions[0].Name === 'app')!;
+    const names = task.Properties.ContainerDefinitions[0].Secrets.map((secret: { Name: string }) => secret.Name);
+    expect(names).not.toContain('SESSION_SIGNING_SECRET_PREVIOUS');
+  });
   it('injects attendance and valid imported VAPID fields only into the app execution role', () => {
     const app = buildApp(
       new App({

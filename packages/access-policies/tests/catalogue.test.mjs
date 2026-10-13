@@ -85,7 +85,7 @@ unless { action in SPOH::Action::"Write" };
 
 `;
 
-test('accepted P05/D-21 sources stay identical apart from the pinned archive-reader extension', () => {
+test('accepted P05/D-21 sources retain only the pinned archive-reader and organisation-resource extensions', () => {
   const policyFiles = readdirSync(join(ROOT, 'policies')).filter((file) => file.endsWith('.cedar'));
   for (const file of [
     'schema.cedarschema',
@@ -98,6 +98,17 @@ test('accepted P05/D-21 sources stay identical apart from the pinned archive-rea
     if (file === join('policies', 'platform-admin.cedar')) {
       assert.ok(current.includes(ARCHIVED_READER), 'The exact read-only extension is present');
       assert.equal(current.replace(ARCHIVED_READER, ''), baseline, file);
+    } else if (file === 'schema.cedarschema') {
+      const comment = '// ADR-004 lifecycle, or ORGANISATION for a real global question with no event.';
+      const originalComment = '// ADR-004 lifecycle: DRAFT | READY | REHEARSAL | LIVE | CLOSED | ARCHIVED';
+      const platform = 'action "Platform.CreateEvent", "Platform.CloneEvent", "Platform.ManageOrganisation", "Platform.ManageAdmins"';
+      const start = current.indexOf(platform);
+      assert.ok(start >= 0);
+      const prefix = current.slice(0, start).replace(comment, originalComment);
+      const suffix = current.slice(start);
+      const reviewed = 'appliesTo { principal: [Person], resource: [Organisation], context: RequestContext };';
+      assert.ok(suffix.includes(reviewed), 'Global actions use their real Organisation resource');
+      assert.equal(prefix + suffix, baseline, file);
     } else assert.equal(current, baseline, file);
   }
 });

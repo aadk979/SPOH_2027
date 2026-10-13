@@ -5,6 +5,7 @@ import { authProvider, localAuthIssuer } from '../../../platform/identity/index.
 import { findVolunteerByEmail } from '../data/repo.js';
 import type { OpenedSession, SessionContext } from './issueSession.js';
 import { openSession } from './openSession.js';
+import { verifiedAuthenticationAt } from '../domain/credentialRules.js';
 
 /** `POST /auth/session`: verify the credential, then open a session for its subject. */
 export async function signIn(
@@ -12,19 +13,21 @@ export async function signIn(
   context: SessionContext,
   audit: AuditContext,
 ): Promise<OpenedSession> {
+  const verified = await subjectOf(body);
   return openSession(
-    await subjectOf(body),
+    verified.sub,
     {
       ...context,
       ...(body.providerAccessToken ? { providerAccessToken: body.providerAccessToken } : {}),
+      authenticatedAt: verifiedAuthenticationAt(verified.authTime),
     },
     audit,
   );
 }
 
-async function subjectOf(body: CreateSessionRequest): Promise<string> {
+async function subjectOf(body: CreateSessionRequest) {
   if (body.providerAccessToken) {
-    return (await authProvider.verify(body.providerAccessToken)).sub;
+    return authProvider.verify(body.providerAccessToken);
   }
 
   // Development sign-in. `localAuthIssuer` is null under Cognito, which is
@@ -44,5 +47,5 @@ async function subjectOf(body: CreateSessionRequest): Promise<string> {
     sub: volunteer.cognitoSub,
     groups: [body.role ?? volunteer.role],
   });
-  return (await localAuthIssuer.verify(providerToken)).sub;
+  return localAuthIssuer.verify(providerToken);
 }

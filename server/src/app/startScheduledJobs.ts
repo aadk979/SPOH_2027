@@ -5,7 +5,7 @@ import {
   deliverAnnouncementBatch,
 } from '../modules/announcement/index.js';
 import { settingsScheduledHandlers } from '../modules/settings/index.js';
-import { contentScheduledHandlers } from '../modules/content/index.js';
+import { contentScheduledHandlers, contentRecurringActions } from '../modules/content/index.js';
 import { eventScheduledHandlers } from '../modules/event/index.js';
 import { fallbackScheduledHandlers } from '../modules/fallback/index.js';
 import { reportScheduledHandlers } from '../modules/report/index.js';
@@ -57,7 +57,8 @@ export async function startScheduledJobs(clock?: Clock) {
     ...auditShippingHandlers,
     ...identityRetentionHandlers,
   ]);
-  for (const action of [...authRecurringActions, ...idempotencyRecurringActions, ...auditRecurringActions, ...auditShippingRecurringActions, ...identityRecurringActions]) {
+  for (const action of [...authRecurringActions, ...idempotencyRecurringActions, ...contentRecurringActions,
+    ...auditRecurringActions, ...auditShippingRecurringActions, ...identityRecurringActions]) {
     await ensureRecurring({ ...action, registry, clock });
   }
   const syncEvents = createEventRecurringSync({

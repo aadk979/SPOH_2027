@@ -51,16 +51,34 @@ export function configurationChecks(pool, client) {
         client?.AllowedOAuthFlows?.join(',') === 'code',
     ],
     [
-      'no password auth grant',
-      !(client?.ExplicitAuthFlows ?? []).some((flow) => flow.includes('PASSWORD')),
+      'explicitly no API auth flows',
+      Array.isArray(client?.ExplicitAuthFlows) && client.ExplicitAuthFlows.length === 0,
+    ],
+    [
+      'refresh rotation with 10-second retry grace',
+      client?.RefreshTokenRotation?.Feature === 'ENABLED' &&
+        client.RefreshTokenRotation.RetryGracePeriodSeconds === 10,
+    ],
+    [
+      'immutable app creation marker',
+      (pool?.SchemaAttributes ?? []).some((attribute) =>
+        attribute.Name === 'custom:spoh_operation' && attribute.AttributeDataType === 'String' &&
+        attribute.Mutable === false && attribute.StringAttributeConstraints?.MinLength === '36' &&
+        attribute.StringAttributeConstraints?.MaxLength === '36'),
+    ],
+    [
+      'app client cannot read or write creation marker',
+      Array.isArray(client?.ReadAttributes) && Array.isArray(client?.WriteAttributes) &&
+        !client.ReadAttributes.includes('custom:spoh_operation') &&
+        !client.WriteAttributes.includes('custom:spoh_operation'),
     ],
     [
       'revocation and existence protection',
       client?.EnableTokenRevocation === true && client?.PreventUserExistenceErrors === 'ENABLED',
     ],
     [
-      'MFA enrollment scope',
-      (client?.AllowedOAuthScopes ?? []).includes('aws.cognito.signin.user.admin'),
+      'only required OAuth scopes',
+      [...(client?.AllowedOAuthScopes ?? [])].sort().join(',') === 'aws.cognito.signin.user.admin,email,openid',
     ],
   ];
 }
@@ -70,12 +88,28 @@ function arg(name) {
   return index === -1 ? undefined : process.argv[index + 1];
 }
 
-async function checkLiveAuth(api, token, check) {
-  const config = await fetch(`${api}/api/v1/client-config`);
+/** Synthetic live credentials may go only to explicitly selected canonical HTTPS origins. */
+export function liveProbeOrigins(api, origin) {
+  const canonical = (value) => {
+    if (typeof value !== 'string') throw new Error('Explicit HTTPS API and client origins are required');
+    const normalized = value.replace(/\/$/, '');
+    const parsed = new URL(normalized);
+    if (parsed.protocol !== 'https:' || parsed.origin !== normalized)
+      throw new Error('Explicit HTTPS API and client origins are required');
+    return normalized;
+  };
+  return { api: canonical(api), origin: canonical(origin) };
+}
+
+async function checkLiveAuth(target, token, check) {
+  const probe = (path, options = {}) => fetch(`${target.api}${path}`, {
+    ...options, redirect: 'error', signal: AbortSignal.timeout(10_000),
+  });
+  const config = await probe('/api/v1/client-config');
   const data = await config.json().catch(() => null);
   check('API uses Cognito', config.ok && data?.data?.authProvider === 'cognito');
   for (const bearer of [undefined, 'synthetic-invalid-proof', token]) {
-    const response = await fetch(`${api}/api/v1/events`, {
+    const response = await probe('/api/v1/events', {
       headers: bearer ? { Authorization: `Bearer ${bearer}` } : {},
     });
     check(
@@ -85,9 +119,9 @@ async function checkLiveAuth(api, token, check) {
       response.status === 401,
     );
   }
-  const response = await fetch(`${api}/api/v1/auth/session`, {
+  const response = await probe('/api/v1/auth/session', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', Origin: target.origin },
     body: JSON.stringify({ providerAccessToken: token }),
   });
   const parsed = SessionResponse.safeParse(await response.json().catch(() => null));
@@ -102,11 +136,12 @@ async function checkLiveAuth(api, token, check) {
     'refresh cookie is secure, httpOnly and auth-scoped',
     /HttpOnly/i.test(cookie) &&
       /Secure/i.test(cookie) &&
-      /Path=\/api\/v1\/auth(?:;|$)/i.test(cookie),
+      /(?:^|,\s*)__Secure-spoh_refresh=/i.test(cookie) &&
+      /Path=\/api\/v1\/auth(?:;|$)/i.test(cookie) && !/(?:^|;)\s*Domain=/i.test(cookie),
   );
-  const headers = { Authorization: `Bearer ${session.accessToken}` };
+  const headers = { Authorization: `Bearer ${session.accessToken}`, Origin: target.origin };
   try {
-    const devices = await fetch(`${api}/api/v1/auth/sessions`, { headers });
+    const devices = await probe('/api/v1/auth/sessions', { headers });
     check(
       session.mfaRequired
         ? 'MFA-restricted session cannot read devices'
@@ -116,7 +151,7 @@ async function checkLiveAuth(api, token, check) {
     if (session.mfaRequired)
       console.log('  DEFERRED full TOTP and browser handoff exercise: P16.8');
   } finally {
-    const logout = await fetch(`${api}/api/v1/auth/session`, { method: 'DELETE', headers });
+    const logout = await probe('/api/v1/auth/session', { method: 'DELETE', headers });
     check('synthetic session revoked after probe', logout.ok);
   }
 }
@@ -135,10 +170,11 @@ export async function main() {
     throw new Error('Pass --pool and --client or their COGNITO environment values.');
   const cognito = new CognitoIdentityProviderClient({
     region: arg('region') ?? process.env.COGNITO_REGION ?? 'ap-southeast-1',
+    maxAttempts: 1,
   });
   const [pool, client] = await Promise.all([
-    cognito.send(new DescribeUserPoolCommand({ UserPoolId: poolId })),
-    cognito.send(new DescribeUserPoolClientCommand({ UserPoolId: poolId, ClientId: clientId })),
+    cognito.send(new DescribeUserPoolCommand({ UserPoolId: poolId }), { abortSignal: AbortSignal.timeout(10_000) }),
+    cognito.send(new DescribeUserPoolClientCommand({ UserPoolId: poolId, ClientId: clientId }), { abortSignal: AbortSignal.timeout(10_000) }),
   ]);
   const results = [];
   const check = (name, passed) => {
@@ -151,7 +187,7 @@ export async function main() {
   const token = process.env.VERIFY_PROVIDER_ACCESS_TOKEN;
   if (token)
     await checkLiveAuth(
-      (arg('api') ?? process.env.VERIFY_API ?? 'http://localhost:4010').replace(/\/$/, ''),
+      liveProbeOrigins(arg('api') ?? process.env.VERIFY_API, arg('client-origin') ?? process.env.VERIFY_CLIENT_ORIGIN),
       token,
       check,
     );

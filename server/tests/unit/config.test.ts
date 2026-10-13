@@ -106,6 +106,35 @@ describe('configuration', () => {
   });
 });
 
+describe('production identity origins and signing overlap', () => {
+  const PROD = { DATABASE_URL: 'postgresql://fixture:fixture@localhost:5435/spoh2027_test?sslmode=require',
+    NODE_ENV: 'production', AUTH_PROVIDER: 'cognito', COGNITO_USER_POOL_ID: 'ap-southeast-1_fixture',
+    COGNITO_CLIENT_ID: 'client', COGNITO_DOMAIN: 'https://fixture.auth.ap-southeast-1.amazoncognito.com',
+    APP_BASE_URL: 'https://api.example', CLIENT_BASE_URL: 'https://client.example',
+    CORS_ALLOWED_ORIGINS: 'https://client.example', SESSION_SIGNING_SECRET: 'current-fixture-key-with-at-least-thirty-two-chars' };
+  it('accepts exact HTTPS origins and a distinct explicit signing overlap key', () => {
+    expect(parseEnv({ ...PROD, SESSION_SIGNING_SECRET_PREVIOUS: 'previous-fixture-key-with-at-least-thirty-two-chars' }))
+      .toMatchObject({ APP_BASE_URL: PROD.APP_BASE_URL, CLIENT_BASE_URL: PROD.CLIENT_BASE_URL });
+  });
+  it.each(['APP_BASE_URL', 'CLIENT_BASE_URL', 'CORS_ALLOWED_ORIGINS'])(
+    'refuses HTTP %s in production even without cross-site cookies', (key) => {
+      expect(messageOf(() => parseEnv({ ...PROD, [key]: 'http://plain.example' }))).toContain(key);
+    });
+  it.each(['https://user:pass@client.example', 'https://client.example/path', 'https://client.example/', 'null'])(
+    'refuses noncanonical CORS origin %s', (origin) => {
+      expect(messageOf(() => parseEnv({ ...PROD, CORS_ALLOWED_ORIGINS: origin }))).toContain('CORS_ALLOWED_ORIGINS');
+    });
+  it('refuses domain-scoped production cookies and identical signing overlap keys', () => {
+    expect(messageOf(() => parseEnv({ ...PROD, SESSION_COOKIE_DOMAIN: '.example' }))).toContain('SESSION_COOKIE_DOMAIN');
+    expect(messageOf(() => parseEnv({ ...PROD, SESSION_SIGNING_SECRET_PREVIOUS: PROD.SESSION_SIGNING_SECRET })))
+      .toContain('SESSION_SIGNING_SECRET_PREVIOUS');
+  });
+  it.each(['http://provider.example', 'https://provider.example/token', 'https://provider.example?redirect=evil'])(
+    'refuses non-origin or plaintext provider destination %s', (value) => {
+      expect(messageOf(() => parseEnv({ ...PROD, COGNITO_DOMAIN: value }))).toContain('COGNITO_DOMAIN');
+    });
+});
+
 describe('server/.env.example (F01-051)', () => {
   // A key is documented when it appears as `KEY=` or as a commented `# KEY=`.
   const documented = new Set(

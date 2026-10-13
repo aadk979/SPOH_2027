@@ -9,6 +9,7 @@ url() { # user password
 }
 
 cd /app/server
+export SPOH_SKIP_DOTENV=1
 case "${1:-serve}" in
   serve)
     DATABASE_URL="$(url spoh_app "$DB_APP_PASSWORD")"
@@ -26,8 +27,8 @@ case "${1:-serve}" in
     node scripts/db-roles.mjs grants
     ;;
   seed)
-    # One-off (P08.10): the idempotent seed, as the app. NODE_ENV=production
-    # keeps it to event days, stations, gift types and the admin.
+    # Production requires explicit owner-reviewed initial-admin/provider inputs.
+    # Run with the app task's own-pool GetUser permission; migration tasks do not have it.
     DATABASE_URL="$(url spoh_app "$DB_APP_PASSWORD")"
     export DATABASE_URL
     exec node dist/seed/prisma/seed.js
@@ -37,6 +38,12 @@ case "${1:-serve}" in
     DATABASE_URL="$(url spoh_app "$DB_APP_PASSWORD")"
     export DATABASE_URL
     exec node scripts/event-one-totals.mjs
+    ;;
+  seed-restored-operator)
+    # Separate owner-approved offline restore operation; never chosen by ordinary seed.
+    DATABASE_URL="$(url spoh_app "$DB_APP_PASSWORD")"
+    export DATABASE_URL
+    exec node dist/seed/prisma/seed.js restored-operator
     ;;
   *)
     exec "$@"

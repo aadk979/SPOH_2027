@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { CommitteeRole } from '../../invariants/enums.js';
+import { AttendanceMethod, CommitteeRole, SwapStatus, IdentityAccountState, IdentityInvitationState } from '../../invariants/enums.js';
 import { Id, IsoDateTime, PaginationQuery, ReasonText } from '../common/index.js';
 import { VolunteerPhone, VolunteerRecord } from '../roster/index.js';
 import { NoticeKind, NoticeSourceKind } from '../notification/sources.js';
@@ -164,6 +164,26 @@ export const SignOutPersonResponse = z
 export type SignOutPersonResponse = z.infer<typeof SignOutPersonResponse>;
 
 const PersonalInstant = IsoDateTime.nullable();
+const PersonalSwap = z.object({ id: Id, eventId: Id, assignmentId: Id, status: SwapStatus,
+  createdAt: IsoDateTime, decidedAt: PersonalInstant }).strict();
+const PersonalOperations = z.object({
+  organisationMemberships: z.array(z.object({ id: Id, organisationId: Id,
+    role: z.enum(['MEMBER', 'PLATFORM_ADMIN']), createdAt: IsoDateTime, updatedAt: IsoDateTime }).strict()),
+  attendance: z.array(z.object({ id: Id, eventId: Id, eventDayId: Id,
+    rehearsal: z.boolean(), method: AttendanceMethod, presentAt: IsoDateTime }).strict()),
+  shiftAssignments: z.array(z.object({ id: Id, eventId: Id, shiftId: Id, stationId: Id, eventDayId: Id,
+    roleLabel: z.string(), checkedInAt: PersonalInstant, checkedOutAt: PersonalInstant,
+    createdAt: IsoDateTime }).strict()),
+  swapsRequested: z.array(PersonalSwap), swapsTargeted: z.array(PersonalSwap), swapsDecided: z.array(PersonalSwap),
+  briefingSlots: z.array(z.object({ id: Id, eventId: Id, eventDayId: Id, startsAt: IsoDateTime,
+    waveSize: z.number().int().positive(), completedAt: PersonalInstant }).strict()),
+  identityAccounts: z.array(z.object({ id: Id, organisationId: Id,
+    state: IdentityAccountState, createdAt: IsoDateTime,
+    updatedAt: IsoDateTime, boundAt: PersonalInstant }).strict()),
+  identityInvitations: z.array(z.object({ id: Id, organisationId: Id,
+    state: IdentityInvitationState,
+    startedAt: IsoDateTime, finishedAt: PersonalInstant }).strict()),
+}).strict();
 export const PersonDataExportResponse = z.object({
   data: z.object({
     person: z.object({ id: Id, displayName: z.string(), email: z.string(), phone: z.string().nullable(),
@@ -178,6 +198,7 @@ export const PersonDataExportResponse = z.object({
     }).strict(),
     activity: z.array(z.object({ id: Id, eventId: Id.nullable(), action: z.string(), entityType: z.string(),
       entityId: z.string().nullable(), createdAt: IsoDateTime }).strict()),
+    operational: PersonalOperations,
     notifications: z.object({ noticePreference: z.object({ urgentPush: z.boolean(), operationalPush: z.boolean(),
       updatedAt: IsoDateTime }).strict().nullable(), notices: z.array(z.object({ id: Id, eventId: Id, kind: NoticeKind,
       priority: z.enum(['INFO', 'URGENT', 'OPERATIONAL']), sourceKind: NoticeSourceKind, sourceId: Id,

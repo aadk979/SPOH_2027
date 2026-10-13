@@ -21,7 +21,7 @@ export interface Drift {
 const normalise = (statement: string) => statement.replace(/\s+/g, ' ').trim();
 
 /** Key order in a JSON schema is not drift either. */
-function canonical(value: unknown): string {
+export function canonical(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`;
   if (value && typeof value === 'object') {
     const entries = Object.entries(value as Record<string, unknown>).sort(([a], [b]) =>

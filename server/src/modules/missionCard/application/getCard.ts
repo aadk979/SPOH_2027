@@ -1,6 +1,6 @@
 import type { MissionCardRecord } from '@spoh/shared';
 import { toMissionCardRecord } from '../data/mappers.js';
-import { findCardByQrPayload, findCardByShortCode } from '../data/repo.js';
+import { findCardById, findCardByQrPayload, findCardByShortCode } from '../data/repo.js';
 import { requireCard } from '../domain/cardRules.js';
 import { normaliseShortCode } from '../domain/shortCode.js';
 import { stampingStationIds } from './stampingStations.js';
@@ -18,5 +18,11 @@ export async function getCard(
 /** The card a printed QR was generated for (F03-045). */
 export async function getCardByQr(scope: EventScope, payload: string): Promise<MissionCardRecord> {
   const card = requireCard(await findCardByQrPayload(scope, payload));
+  return toMissionCardRecord(card, await stampingStationIds(scope));
+}
+
+/** Replay resolves the retained row, including current recorder redaction and station names. */
+export async function getCardById(scope: EventScope, id: string): Promise<MissionCardRecord> {
+  const card = requireCard(await findCardById(scope, id));
   return toMissionCardRecord(card, await stampingStationIds(scope));
 }

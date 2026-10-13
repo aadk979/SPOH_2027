@@ -94,7 +94,7 @@ export async function dispatch(
     // The log line is not a fallback for the unconfigured case alone — it is the
     // operational record that the system tried to reach somebody, and it stays
     // useful when push is working.
-    logger.warn({ kind: input.kind, recipients: recipients.length, tag: input.tag }, input.title);
+    logger.warn({ kind: input.kind, recipients: recipients.length }, 'notification dispatch attempted');
 
     if (!pushEnabled() || recipients.length === 0) return base;
 

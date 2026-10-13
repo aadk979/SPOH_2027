@@ -19,10 +19,10 @@ import { AppError } from '../../../platform/errors/index.js';
 const DAY_MS = 86_400_000;
 
 /**
- * Revoked rows are kept for a week: reuse detection needs to still recognise
+ * Terminal rows are kept for thirty days (ADR-003): reuse detection must recognise
  * a rotated token, and a same-day forensic question is worth answering.
  */
-export const REVOKED_RETENTION_MS = 7 * DAY_MS;
+export const REVOKED_RETENTION_MS = 30 * DAY_MS;
 
 export function refreshExpiry(now: Date, sessionDays: number): Date {
   return new Date(now.getTime() + sessionDays * DAY_MS);

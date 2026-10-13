@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import { pinoHttp } from 'pino-http';
 import { env, isProduction } from '../config/env.js';
 import { logger } from '../platform/logger/index.js';
+import { safeHttpSerializers } from '../platform/logger/safeSerializers.js';
 import { errorHandler, notFoundHandler } from '../platform/http/errorHandler.js';
 import { requestId } from '../platform/http/requestId.js';
 import { staticClient } from '../platform/http/staticClient.js';
@@ -95,6 +96,14 @@ function logRequests(app: Express): void {
   app.use(
     pinoHttp({
       logger,
+      wrapSerializers: false,
+      serializers: safeHttpSerializers,
+      quietReqLogger: true,
+      quietResLogger: true,
+      // Serialize after routing, with no raw request binding created before a route is selected.
+      customSuccessObject: (req, _res, value) => ({ ...value, req }),
+      // eslint-disable-next-line max-params -- Pino's error hook supplies four positional SDK arguments.
+      customErrorObject: (req, _res, _error, value) => ({ ...value, req }),
       genReqId: (req) => (req as { id?: string }).id ?? 'unknown',
       // Health checks fire every few seconds and would otherwise dominate the log.
       autoLogging: { ignore: (req) => req.url === '/healthz' || req.url === '/readyz' },

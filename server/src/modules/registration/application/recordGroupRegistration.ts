@@ -30,7 +30,7 @@ export async function recordGroupRegistration(
   const groupId = randomUUID();
 
   const { registrations, cardId, linkError, rehearsal } = await prisma.$transaction(async (tx) => {
-    const mode = await captureStation(tx, { scope, actor, clock }, request);
+    const mode = await captureStation(tx, { scope, actor, clock, action: 'Registration.Create' }, request);
     const link = await linkGroupToCard(tx, scope, {
       shortCode: request.missionCardShortCode,
       issuedAt: recordedAt,

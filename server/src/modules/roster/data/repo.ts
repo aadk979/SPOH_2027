@@ -123,6 +123,7 @@ export async function upsertVolunteer(
   tx: PrismaTransactionClient,
   scope: EventScope,
   data: {
+    id?: string;
     cognitoSub: string;
     displayName: string;
     email: string;
@@ -138,10 +139,11 @@ export async function upsertVolunteer(
   const person = existing
     ? await tx.person.update({
         where: { id: existing.id },
-        data: { displayName: data.displayName, phone: data.phone ?? existing.phone },
+        data: { displayName: data.displayName, ...(data.phone !== undefined ? { phone: data.phone } : {}) },
       })
     : await tx.person.create({
         data: {
+          ...(data.id ? { id: data.id } : {}),
           cognitoSub: data.cognitoSub,
           displayName: data.displayName,
           email: data.email,

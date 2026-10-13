@@ -2,6 +2,7 @@ import type { EventContent } from '@spoh/shared';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import type { Prisma } from '../../../generated/prisma/client.js';
+import type { ImageManifestEntry } from '../domain/imageManifest.js';
 
 export async function lockContentEvent(scope: EventScope, tx: PrismaTransactionClient) {
   await tx.$queryRaw`SELECT id FROM "Event" WHERE id = ${scope.eventId} FOR UPDATE`;
@@ -120,6 +121,7 @@ export async function insertContentVersion(
     body: EventContent;
     objectKey: string;
     etag: string;
+    imageManifest?: ImageManifestEntry[];
     personId: string;
     now: Date;
   },
@@ -138,6 +140,7 @@ export async function insertContentVersion(
       body: input.body as Prisma.InputJsonValue,
       objectKey: input.objectKey,
       etag: input.etag,
+      imageManifest: input.imageManifest ?? [],
       publishedByPersonId: input.personId,
       publishedAt: input.now,
     },
@@ -150,10 +153,11 @@ export async function insertContentVersion(
 }
 export const insertContentSchedule = (
   scope: EventScope,
-  input: { tx: PrismaTransactionClient; version: number; personId: string; runAt: Date; now: Date },
+  input: { tx: PrismaTransactionClient; id: string; version: number; personId: string; runAt: Date; now: Date },
 ) =>
   input.tx.scheduledAction.create({
     data: {
+      id: input.id,
       eventId: scope.eventId,
       type: 'content.publish',
       payload: { expectedVersion: input.version },

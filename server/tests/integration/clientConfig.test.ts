@@ -10,7 +10,9 @@ const app = createApp();
 beforeEach(async () => {
   await resetDatabase();
 });
-afterEach(() => Object.assign(env, original));
+afterEach(() => Object.assign(env, original, { DEPLOYMENT_ENV: original.DEPLOYMENT_ENV,
+  APP_BASE_URL: original.APP_BASE_URL, COGNITO_CLIENT_ID: original.COGNITO_CLIENT_ID,
+  COGNITO_DOMAIN: original.COGNITO_DOMAIN, COGNITO_USER_POOL_ID: original.COGNITO_USER_POOL_ID }));
 
 describe('public runtime client configuration', () => {
   it('works without a session/event and returns only the explicit local metadata allowlist', async () => {
@@ -22,7 +24,8 @@ describe('public runtime client configuration', () => {
     expect(response.headers['set-cookie']).toBeUndefined();
     expect(response.body).toEqual({
       data: {
-        version: 1,
+        version: 2,
+        mediaOrigin: null,
         apiBaseUrl: '',
         envLabel: 'development',
         authProvider: 'local',
@@ -47,7 +50,8 @@ describe('public runtime client configuration', () => {
       .set('Host', 'evil.example');
     expect(response.status).toBe(200);
     expect(response.body.data).toEqual({
-      version: 1,
+      version: 2,
+      mediaOrigin: null,
       apiBaseUrl: 'https://api.example.test',
       envLabel: 'staging',
       authProvider: 'cognito',

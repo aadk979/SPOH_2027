@@ -70,6 +70,7 @@ export interface Reservation {
   eventId: string | null;
   endpoint: string;
   actorSub: string;
+  requestHash?: string | null;
   statusCode: number;
   responseBody: unknown;
   createdAt: Date;
@@ -81,10 +82,11 @@ export interface Reservation {
  */
 export async function reserve(
   key: string,
-  owner: { endpoint: string; actorSub: string; eventId: string },
+  owner: { endpoint: string; actorSub: string; eventId: string; requestHash?: string },
 ): Promise<Reservation | null> {
   const attempt = reservationAttempt(key, { eventId: owner.eventId });
-  if (attempt && (attempt.endpoint !== owner.endpoint || attempt.actorSub !== owner.actorSub))
+  if (attempt && (attempt.endpoint !== owner.endpoint || attempt.actorSub !== owner.actorSub ||
+    attempt.requestHash !== owner.requestHash))
     throw reservationUnavailable();
   try {
     await prisma.idempotencyRecord.create({
@@ -134,13 +136,7 @@ export function isAbandoned(reservation: Reservation, now: number = Date.now()):
  */
 export async function takeOver(key: string, reservation: Reservation): Promise<boolean> {
   const attempt = reservationAttempt(key);
-  if (
-    attempt &&
-    (attempt.eventId !== reservation.eventId ||
-      attempt.endpoint !== reservation.endpoint ||
-      attempt.actorSub !== reservation.actorSub)
-  )
-    throw reservationUnavailable();
+  if (attempt) assertTakeoverOwner(attempt, reservation);
   const createdAt =
     attempt?.createdAt ??
     Math.max(systemClock.now().getTime(), reservation.createdAt.getTime() + 1);
@@ -153,10 +149,17 @@ export async function takeOver(key: string, reservation: Reservation): Promise<b
       eventId: reservation.eventId,
       endpoint: reservation.endpoint,
       actorSub: reservation.actorSub,
+      requestHash: reservation.requestHash ?? null,
     },
     data: { createdAt: new Date(createdAt) },
   });
   return count === 1;
+}
+
+function assertTakeoverOwner(attempt: NonNullable<ReturnType<typeof reservationAttempt>>, reservation: Reservation) {
+  if (attempt.eventId !== reservation.eventId || attempt.endpoint !== reservation.endpoint ||
+    attempt.actorSub !== reservation.actorSub || (attempt.requestHash ?? null) !== (reservation.requestHash ?? null))
+    throw reservationUnavailable();
 }
 
 /** Store a successful response for replay. */

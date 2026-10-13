@@ -42,6 +42,12 @@ const NOT_REFERENCES = new Set([
   // A discriminated opaque source key across eight tables, never a generic FK
   // or an authority grant. The selected facade proves event and visibility.
   'Notice.sourceId',
+  // External S3 versions, not database identifiers; immutable byte proofs bind them.
+  'ValidatedMedia.sourceVersionId',
+  'ValidatedMedia.objectVersionId',
+  // Prewrite intent precedes the clone Event/publication rows; owning eventId still has its FK.
+  'ContentStorageIntent.contentVersionId',
+  'ContentStorageIntent.targetEventId',
 ]);
 
 function relations(model: Model) {

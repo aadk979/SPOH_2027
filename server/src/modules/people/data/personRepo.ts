@@ -7,8 +7,10 @@ export async function personDetail(id: string, tx: PrismaTransactionClient = pri
       id: true,
       displayName: true,
       email: true,
+      cognitoSub: true,
       deactivatedAt: true,
       piiErasedAt: true,
+      organisationMemberships: { select: { organisationId: true } },
       eventMemberships: {
         select: {
           id: true,
@@ -23,6 +25,16 @@ export async function personDetail(id: string, tx: PrismaTransactionClient = pri
       },
     },
   });
+}
+
+export async function holdManagedPerson(tx: PrismaTransactionClient, input: { targetId: string; actorId: string }) {
+  await tx.$queryRaw`SELECT e.id FROM "Event" e WHERE EXISTS (
+    SELECT 1 FROM "EventMembership" m WHERE m."eventId" = e.id AND m."personId" = ${input.targetId}
+  ) ORDER BY e.id FOR SHARE OF e`;
+  const ids = [...new Set([input.targetId, input.actorId])].sort();
+  await tx.$queryRaw`SELECT id FROM "Person" WHERE id = ANY(${ids}::text[]) ORDER BY id FOR UPDATE`;
+  await tx.$queryRaw`SELECT id FROM "OrganisationMembership" WHERE "personId" = ANY(${ids}::text[]) ORDER BY id FOR SHARE`;
+  await tx.$queryRaw`SELECT id FROM "EventMembership" WHERE "personId" = ${input.targetId} ORDER BY id FOR UPDATE`;
 }
 
 export async function changePersonStanding(

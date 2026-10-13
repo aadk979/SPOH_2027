@@ -7,6 +7,7 @@ import { assertWritableEvent } from '../../../platform/db/writableEvent.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { assertMayActOn, assertMayGrant } from '../domain/escalation.js';
 import type { ManagerContext } from './context.js';
+import { holdIdentityPeople } from '../../../platform/db/identityAccountRepo.js';
 
 export async function currentManagement(
   tx: PrismaTransactionClient,
@@ -18,6 +19,7 @@ export async function currentManagement(
   },
 ) {
   const event = await holdCaptureEvent(tx, actor.scope);
+  await holdIdentityPeople(tx, [actor.volunteerId, input.id]);
   await tx.$queryRaw`SELECT id FROM "EventMembership" WHERE "eventId" = ${actor.scope.eventId} AND "personId" = ${input.id} FOR UPDATE`;
   const target = await tx.eventMembership.findUnique({
     where: {
@@ -26,11 +28,14 @@ export async function currentManagement(
         personId: input.id,
       },
     },
-    select: { id: true, personId: true, role: true },
+    select: { id: true, personId: true, role: true, portfolio: true, reportsToId: true },
   });
   if (!target) throw new NotFoundError('Membership');
-  assertMayActOn(actor, { id: target.personId, role: target.role }, 'manage');
-  assertMayGrant(actor.role, input.role);
+  const currentActor = await tx.eventMembership.findUniqueOrThrow({ where: {
+    eventId_personId: { eventId: actor.scope.eventId, personId: actor.volunteerId },
+  }, select: { role: true } });
+  assertMayActOn({ ...actor, role: currentActor.role }, { id: target.personId, role: target.role }, 'manage');
+  assertMayGrant(currentActor.role, input.role);
   await requireCurrentPermission(tx, {
     scope: actor.scope,
     membershipId: actor.audit.membershipId ?? '',
@@ -40,4 +45,5 @@ export async function currentManagement(
     ...(input.role ? { facts: { grantedRank: ROLE_RANKS[input.role] } } : {}),
   });
   assertWritableEvent(event);
+  return target;
 }

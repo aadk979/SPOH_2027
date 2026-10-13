@@ -1,13 +1,22 @@
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
+import type { SessionScope } from '../domain/sessionScope.js';
 
 /** Data access for refresh sessions and the volunteer rows they belong to. */
 
-export async function findVolunteerBySub(sub: string) {
-  return prisma.person.findUnique({
+export async function findVolunteerBySub(sub: string, tx: PrismaTransactionClient = prisma) {
+  return tx.person.findUnique({
     where: { cognitoSub: sub },
-    select: { id: true, displayName: true, email: true, deactivatedAt: true },
+    select: { id: true, cognitoSub: true, displayName: true, email: true, deactivatedAt: true, piiErasedAt: true },
   });
+}
+
+export async function platformSessionOrganisation(personId: string, tx: PrismaTransactionClient = prisma) {
+  const person = await tx.person.findUnique({ where: { id: personId }, select: {
+    organisationMemberships: { where: { role: 'PLATFORM_ADMIN' },
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }], select: { organisationId: true }, take: 1 },
+  } });
+  return person?.organisationMemberships[0]?.organisationId;
 }
 
 /** A person's membership of the event: where role and standing live (ADR-001 §1). */
@@ -23,8 +32,8 @@ export async function findMembership(scope: EventScope, personId: string) {
  * and late sync, oldest event first. A platform read about the person, so it goes
  * through the person rather than naming one event (ADR-001 §4).
  */
-export async function findLiveMemberships(personId: string) {
-  const person = await prisma.person.findUnique({
+export async function findLiveMemberships(personId: string, tx: PrismaTransactionClient = prisma) {
+  const person = await tx.person.findUnique({
     where: { id: personId },
     select: {
       eventMemberships: {
@@ -37,11 +46,11 @@ export async function findLiveMemberships(personId: string) {
   return person?.eventMemberships ?? [];
 }
 
-export async function findArchivedAdminMembership(personId: string) {
-  const person = await prisma.person.findUnique({ where: { id: personId },
+export async function findArchivedAdminMembership(personId: string, tx: PrismaTransactionClient = prisma) {
+  const person = await tx.person.findUnique({ where: { id: personId },
     select: { organisationMemberships: { where: { role: 'PLATFORM_ADMIN' }, select: { organisationId: true } } } });
   if (!person?.organisationMemberships.length) return null;
-  const row = await prisma.person.findUnique({ where: { id: personId },
+  const row = await tx.person.findUnique({ where: { id: personId },
     select: { eventMemberships: { where: { status: 'ENDED', event: { status: 'ARCHIVED',
       organisationId: { in: person.organisationMemberships.map((member) => member.organisationId) } } },
       select: { id: true, eventId: true, role: true, status: true },
@@ -84,6 +93,8 @@ export async function createRefreshSession(
     mfaPending?: boolean;
     providerTokenEncrypted?: string | null;
     providerTokenExpiresAt?: Date | null;
+    authenticatedAt?: Date | null;
+    issuedAt?: Date;
   },
 ): Promise<{ id: string }> {
   return tx.refreshSession.create({ data, select: { id: true } });
@@ -91,19 +102,20 @@ export async function createRefreshSession(
 
 export async function touchVolunteer(
   tx: PrismaTransactionClient,
-  scope: EventScope,
+  scope: SessionScope,
   visit: { id: string; at: Date },
 ): Promise<void> {
   const { id, at } = visit;
   await tx.person.update({ where: { id }, data: { lastSeenAt: at } });
+  if (!('eventId' in scope)) return;
   await tx.eventMembership.updateMany({
     where: { eventId: scope.eventId, personId: id },
     data: { lastSeenAt: at },
   });
 }
 
-export async function findSessionByTokenHash(tokenHash: string) {
-  return prisma.refreshSession.findUnique({
+export async function findSessionByTokenHash(tokenHash: string, tx: PrismaTransactionClient = prisma) {
+  return tx.refreshSession.findUnique({
     where: { tokenHash },
     select: {
       id: true,
@@ -116,6 +128,7 @@ export async function findSessionByTokenHash(tokenHash: string) {
       absoluteExpiresAt: true,
       issuedAt: true,
       lastUsedAt: true,
+      authenticatedAt: true,
       mfaPending: true,
       volunteer: { select: { cognitoSub: true } },
     },
@@ -129,14 +142,16 @@ export async function revokeSession(
   id: string,
   revocation: { at: Date; reason: string; lastUsedAt?: Date },
 ): Promise<void> {
-  await tx.refreshSession.update({
-    where: { id },
+  await tx.refreshSession.updateMany({
+    where: { id, revokedAt: null },
     data: {
       revokedAt: revocation.at,
       revokedReason: revocation.reason,
       ...(revocation.lastUsedAt ? { lastUsedAt: revocation.lastUsedAt } : {}),
     },
   });
+  await tx.refreshSession.updateMany({ where: { id }, data: { providerTokenEncrypted: null, providerTokenExpiresAt: null } });
+  await tx.authHandoff.deleteMany({ where: { sessionId: id } });
 }
 
 /** Revokes every live session matching `where`; returns how many were live. */
@@ -145,10 +160,17 @@ export async function revokeLiveSessions(
   revocation: { at: Date; reason: string },
   tx: PrismaTransactionClient = prisma,
 ): Promise<number> {
-  const { count } = await tx.refreshSession.updateMany({
+  const count = await tx.refreshSession.count({ where: { ...where, revokedAt: null,
+    expiresAt: { gt: revocation.at }, OR: [{ absoluteExpiresAt: null }, { absoluteExpiresAt: { gt: revocation.at } }],
+  } });
+  await tx.refreshSession.updateMany({
     where: { ...where, revokedAt: null },
     data: { revokedAt: revocation.at, revokedReason: revocation.reason },
   });
+  await tx.refreshSession.updateMany({ where, data: {
+    providerTokenEncrypted: null, providerTokenExpiresAt: null,
+  } });
+  await tx.authHandoff.deleteMany({ where: { session: where } });
   await tx.$executeRaw`SELECT pg_notify('session', ${JSON.stringify({ reason: revocation.reason })})`;
   return count;
 }
@@ -167,7 +189,7 @@ export async function listLiveSessions(volunteerId: string, now: Date) {
   });
 }
 
-/** Expired rows, and rows revoked before the cutoff. Returns how many went. */
+/** Keep terminal history for the cutoff period independently of credential validity. */
 export async function deleteStaleSessions(
   tx: PrismaTransactionClient,
   cutoff: { now: Date; revokedBefore: Date },
@@ -183,7 +205,7 @@ export async function deleteStaleSessions(
   });
   const { count } = await tx.refreshSession.deleteMany({
     where: {
-      OR: [{ expiresAt: { lt: now } }, { revokedAt: { lt: revokedBefore } }],
+      OR: [{ expiresAt: { lt: revokedBefore } }, { revokedAt: { lt: revokedBefore } }],
     },
   });
   return count;

@@ -1,7 +1,7 @@
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import type { CardPrintContext } from '../domain/printContext.js';
-import { Prisma } from '../../../generated/prisma/client.js';
+import { lockCards } from './cardLocks.js';
 
 /** Lock in code order before reading status; every card writer can share this order. */
 export async function lockPrintableCards(
@@ -9,10 +9,7 @@ export async function lockPrintableCards(
   codes: string[],
   tx: PrismaTransactionClient,
 ) {
-  const ordered = [...new Set(codes)].sort();
-  if (ordered.length === 0) return;
-  await tx.$queryRaw`SELECT id FROM "MissionCard" WHERE "eventId" = ${scope.eventId}
-    AND "shortCode" IN (${Prisma.join(ordered)}) ORDER BY "shortCode" FOR UPDATE`;
+  await lockCards(tx, scope, codes);
 }
 
 export function printEventName(scope: EventScope, tx: PrismaTransactionClient) {

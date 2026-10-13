@@ -7,7 +7,7 @@ import {
   useContentStorage,
   type ContentStorage,
 } from '../../src/modules/content/application/storage.js';
-import { cloneContentInto } from '../../src/modules/content/index.js';
+import { cloneContentInto, planCloneContent } from '../../src/modules/content/index.js';
 import { contentReferences, frozenContent } from '../../src/modules/content/domain/contentRules.js';
 import { rawDb, resetDatabase } from '../helpers/db.js';
 import { guideContent } from '../helpers/content.js';
@@ -15,6 +15,7 @@ import {
   bearer,
   createVolunteer,
   idempotencyKey,
+  makePlatformAdmin,
   testEvent,
   type TestVolunteer,
 } from '../helpers/fixtures.js';
@@ -234,6 +235,9 @@ it('copies only the source publication into an unreviewed target-owned draft', a
       timezone: event.timezone,
     },
   });
+  await makePlatformAdmin(admin.id);
+  const storagePlan = await planCloneContent({ sourceEventId: eventId, eventId: target.id,
+    personId: admin.id, sub: admin.sub, now: FROZEN_NOW });
   await transactionDb.$transaction((tx) =>
     cloneContentInto(tx, {
       sourceEventId: eventId,
@@ -241,6 +245,7 @@ it('copies only the source publication into an unreviewed target-owned draft', a
       personId: admin.id,
       now: FROZEN_NOW,
       stationIds: new Map(),
+      storagePlan,
     }),
   );
   const cloned = await rawDb.contentDocument.findUniqueOrThrow({ where: { eventId: target.id } });

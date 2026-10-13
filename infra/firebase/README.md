@@ -17,7 +17,7 @@ and existing outputs. It never deletes an output or modifies the input export.
 Supply the API's public `{ "data": ... }` response, never an environment dump,
 SSM export or credentials. Metadata is not cached by the service worker; hosting
 uses `no-store` for it and the worker, `no-cache` for documents, and immutable
-caching for hashed assets. CSP permits only self and the selected API for connections.
+caching for hashed assets. Each document receives only its verified executable script hashes. CSP blocks inline styles and event handlers; linked theme CSS and manifests use the exact API origin, and image/upload access uses the required nullable mediaOrigin from public metadata. Policies have an 8 KiB bound and custom response headers have a 9 KiB bound.
 
 From `C:\Users\aadk9\OneDrive\Desktop\SPOH_2027\V1-main`, with Node 24:
 
@@ -30,9 +30,11 @@ node infra/firebase/prepareRelease.mjs --export client/out --runtime <public-jso
 npm run check:firebase
 ```
 
+The build wrapper creates `client/out` and its adjacent version 1 `client/out.csp.json` as a pair. Preparation recomputes every HTML byte digest and executable script hash, including 404 and Next navigation documents, before creating outputs. The copied pair is verified again; private `public.csp.json` stays beside `public`, outside the published directory. Keep both artifacts together for rollback.
+
 The generated `firebase.json` uses the `client` deployment target and contains
 explicit routing for every exported document and Next navigation payload.
-Event URLs map to the existing `/e/_/` placeholder without making unknown routes
+Header rules cover actual requested clean and physical addresses before rewrites. The custom 404 receives its own hashes. Event URLs map to the existing `/e/_/` placeholder without making unknown routes
 successful. There is no catch-all API proxy or SPA rewrite.
 
 At the approved production release, CI must prepare the exact export for that

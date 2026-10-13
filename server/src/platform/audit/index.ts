@@ -73,6 +73,7 @@ export type AuditAction =
   | 'import.undo'
   | 'outbox.salvage.confirm'
   | 'user.provision'
+  | 'user.reprovision'
   | 'user.update'
   | 'user.deactivate'
   | 'user.reactivate'
@@ -94,6 +95,7 @@ export type AuditAction =
   | 'content.publish'
   | 'content.schedule'
   | 'content.image.issue'
+  | 'content.storage.prune'
   | 'visitorField.create'
   | 'visitorField.update'
   | 'visitor.purge'
@@ -106,6 +108,11 @@ export type AuditAction =
   | 'session.create'
   | 'session.mfaEnrolled'
   | 'user.resendInvite'
+  | 'identity.account.start'
+  | 'identity.account.ready'
+  | 'identity.account.bind'
+  | 'identity.invitation.start'
+  | 'identity.invitation.finish'
   | 'user.acceptInvite'
   | 'session.revoke'
   | 'session.reuseDetected'
@@ -178,6 +185,7 @@ const MEMBERSHIP_CHANGES = new Set<AuditAction>([
   'roster.edit',
   'roster.import',
   'user.provision',
+  'user.reprovision',
   'user.update',
   'user.deactivate',
   'user.reactivate',

@@ -10,7 +10,8 @@ import { bearer, createVolunteer, testEvent } from '../helpers/fixtures.js';
  * Upload auditing (F03-018). S3 is not configured in tests, so the adapter is
  * replaced with one that signs nothing: what is under test is the use case.
  */
-vi.mock('../../src/modules/media/application/s3.js', () => ({
+vi.mock('../../src/modules/media/application/s3.js', async () => ({
+  validateUpload: (await import('../helpers/mediaValidation.js')).syntheticValidatedUpload,
   mediaEnabled: () => true,
   assertConfigured: () => undefined,
   presignUpload: () => Promise.resolve({ url: 'https://bucket.test/upload', fields: {} }),

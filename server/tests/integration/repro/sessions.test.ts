@@ -22,11 +22,11 @@ function cookieValue(response: request.Response): string {
 }
 
 function refresh(cookie: string): request.Test {
-  return request(app).post('/api/v1/auth/refresh').set('Cookie', `${COOKIE}=${cookie}`);
+  return request(app).post('/api/v1/auth/refresh').set('Origin', 'http://localhost:3000').set('Cookie', `${COOKIE}=${cookie}`);
 }
 
 async function signIn(): Promise<{ cookie: string; accessToken: string }> {
-  const response = await request(app).post('/api/v1/auth/session').send({ email: 'ic@repro.test' });
+  const response = await request(app).post('/api/v1/auth/session').set('Origin', 'http://localhost:3000').send({ email: 'ic@repro.test' });
   expect(response.status).toBe(201);
   return { cookie: cookieValue(response), accessToken: response.body.accessToken as string };
 }
@@ -94,7 +94,7 @@ describe('refresh sessions (P03 repros)', () => {
     expect(phoneSession).toBeDefined();
 
     const revoke = await request(app)
-      .delete(`/api/v1/auth/sessions/${phoneSession?.id ?? ''}`)
+      .delete(`/api/v1/auth/sessions/${phoneSession?.id ?? ''}`).set('Origin', 'http://localhost:3000')
       .set('Authorization', `Bearer ${laptop.accessToken}`);
     expect(revoke.status).toBe(204);
 

@@ -1,15 +1,20 @@
 // Import the real startup module without marking application source as a setup file:
 // Vitest automatically excludes setup files from measured coverage.
 import '../src/instrumentation-client';
+import '@testing-library/jest-dom/vitest';
+import * as domMatchers from '@testing-library/jest-dom/matchers';
 import 'fake-indexeddb/auto';
-import { afterEach, vi } from 'vitest';
+import { afterEach, expect, vi } from 'vitest';
 import { TEST_EVENT } from './helpers/event';
+// Extend this worker's expect explicitly, including when dependency modules are externalized.
+expect.extend(domMatchers);
 
 /** Screen/API units have an explicit local fixture; startup contract tests unmock this. */
 vi.mock('@/shared/lib/env', async (original) => {
   const actual = await original<typeof import('@/shared/lib/env')>();
   const fixture = {
-    version: 1 as const,
+    version: 2 as const,
+    mediaOrigin: null,
     apiBaseUrl: 'http://localhost:4010',
     envLabel: 'development' as const,
     authProvider: 'local' as const,

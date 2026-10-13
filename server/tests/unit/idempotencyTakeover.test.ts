@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import { describe, expect, it, vi } from 'vitest';
+import { requestIntentHash } from '../../src/platform/http/requestIntent.js';
 
 /**
  * F03-011: of two retries that both find the same abandoned reservation, only
@@ -8,11 +9,14 @@ import { describe, expect, it, vi } from 'vitest';
  * try the takeover.
  */
 
+const requestShape = { body: { idempotencyKey: 'k1' }, id: 'r', method: 'POST',
+  originalUrl: '/api/v1/events/event-1/registrations', query: {} };
 const stale = {
   key: 'k1',
   eventId: 'event-1',
   endpoint: 'POST /registrations',
   actorSub: 'sub-1',
+  requestHash: requestIntentHash(requestShape),
   statusCode: 0,
   responseBody: {},
   createdAt: new Date(Date.now() - 5 * 60_000),
@@ -35,7 +39,7 @@ const { idempotent } = await import('../../src/platform/http/idempotency.js');
 
 function run(middleware: ReturnType<typeof idempotent>): Promise<unknown[]> {
   return new Promise((resolve) => {
-    const req = { body: { idempotencyKey: 'k1' }, id: 'r' } as unknown as Request;
+    const req = { ...requestShape } as unknown as Request;
     const res = { json: vi.fn(), status: vi.fn() } as unknown as Response;
     const next: NextFunction = (...args: unknown[]) => resolve(args);
     middleware(req, res, next);

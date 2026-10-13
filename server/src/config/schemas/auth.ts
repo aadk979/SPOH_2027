@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import type { EnvRule, NodeEnv } from './common.js';
 
-function isHttpOrigin(value: string): boolean {
+export function isHttpOrigin(value: string): boolean {
   try {
     const url = new URL(value);
     return (
@@ -21,9 +21,10 @@ export const authFields = {
   COGNITO_USER_POOL_ID: z.string().optional(),
   COGNITO_CLIENT_ID: z.string().optional(),
   /** Hosted UI base, e.g. https://<domain>.auth.<region>.amazoncognito.com */
-  COGNITO_DOMAIN: z.string().optional(),
+  COGNITO_DOMAIN: z.string().refine((value) => isHttpOrigin(value) && value.startsWith('https://'),
+    'must be an HTTPS origin without credentials, path, query or fragment').optional(),
   /** This deployment's own public origin, used to build the OAuth redirect_uri. */
-  APP_BASE_URL: z.string().optional(),
+  APP_BASE_URL: z.string().refine(isHttpOrigin, 'must be an http(s) origin without credentials, query or fragment').optional(),
   /** Browser landing origin after sign-in; defaults to APP_BASE_URL for a shared origin. */
   CLIENT_BASE_URL: z
     .string()
@@ -132,6 +133,12 @@ export const sessionRule: EnvRule<AuthEnv> = (env, ctx) => {
     });
   }
 
+  if (env.SESSION_SIGNING_SECRET_PREVIOUS && env.SESSION_SIGNING_SECRET_PREVIOUS === env.SESSION_SIGNING_SECRET)
+    ctx.addIssue({ code: 'custom', path: ['SESSION_SIGNING_SECRET_PREVIOUS'],
+      message: 'the explicit previous signing key must differ from the current key' });
+
+  if (env.NODE_ENV === 'production') enforceProductionOrigins(env, ctx);
+
   if (
     env.NODE_ENV === 'production' &&
     env.SESSION_COOKIE_CROSS_SITE &&
@@ -144,4 +151,13 @@ export const sessionRule: EnvRule<AuthEnv> = (env, ctx) => {
         'a cross-site refresh cookie requires SameSite=None, which browsers only accept with Secure — every allowed origin must be https',
     });
   }
+};
+
+const enforceProductionOrigins: EnvRule<AuthEnv> = (env, ctx) => {
+  for (const key of ['APP_BASE_URL', 'CLIENT_BASE_URL'] as const) {
+    if (env[key] && !env[key].startsWith('https://')) ctx.addIssue({ code: 'custom', path: [key],
+      message: 'production identity and client origins must use HTTPS' });
+  }
+  if (env.SESSION_COOKIE_DOMAIN !== undefined) ctx.addIssue({ code: 'custom', path: ['SESSION_COOKIE_DOMAIN'],
+    message: 'production authentication cookies must be host-only; leave the cookie domain unset' });
 };

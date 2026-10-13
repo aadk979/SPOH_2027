@@ -9,6 +9,15 @@ const app = buildApp(
 );
 
 describe('authorization evaluation monitoring (P11.5, D-22)', () => {
+  it('alarms on denial volume and a ratio with an explicit activity minimum and zero-safe denominator', () => {
+    const template = Template.fromStack(app.node.findChild('Spoh-staging-Platform') as never);
+    template.hasResourceProperties('AWS::CloudWatch::Alarm', { AlarmName: 'spoh-staging-authorization-denial-volume',
+      Threshold: 100, Period: 300, TreatMissingData: 'notBreaching' });
+    const ratio = Object.values(template.findResources('AWS::CloudWatch::Alarm')).find(
+      (alarm) => alarm.Properties.AlarmName === 'spoh-staging-authorization-denial-ratio')!;
+    expect(ratio.Properties).toMatchObject({ Threshold: 20, TreatMissingData: 'notBreaching' });
+    expect(JSON.stringify(ratio.Properties.Metrics)).toContain('IF((a+d)>=100,100*d/IF((a+d)>0,a+d,1),0)');
+  });
   it.each(['staging', 'prod'] as const)(
     'counts %s failed, allowed and denied evaluations from the summary, and alarms on any failure',
     (stage) => {

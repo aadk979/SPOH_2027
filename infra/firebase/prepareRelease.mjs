@@ -4,7 +4,6 @@ import {
   lstatSync,
   mkdirSync,
   readFileSync,
-  readdirSync,
   realpathSync,
   writeFileSync,
 } from 'node:fs';
@@ -14,6 +13,7 @@ import { parseArgs } from 'node:util';
 import { z } from 'zod';
 import { ClientConfigurationSchema } from '@spoh/shared';
 import { hostingConfig } from './hostingConfig.mjs';
+import { loadStaticExport } from './staticExportManifest.mjs';
 
 const envelope = z.strictObject({ data: ClientConfigurationSchema });
 
@@ -23,7 +23,7 @@ export function productionRuntime(input) {
   if (data.envLabel !== 'production' || data.authProvider !== 'cognito') {
     throw new Error('Firebase release requires explicit production Cognito metadata');
   }
-  for (const origin of [data.apiBaseUrl, data.cognito.domain]) {
+  for (const origin of [data.apiBaseUrl, data.cognito.domain, ...(data.mediaOrigin ? [data.mediaOrigin] : [])]) {
     const url = new URL(origin);
     if (
       url.protocol !== 'https:' ||
@@ -34,18 +34,6 @@ export function productionRuntime(input) {
     }
   }
   return data;
-}
-
-function exportFiles(root, prefix = '') {
-  return readdirSync(join(root, prefix), { withFileTypes: true }).flatMap((entry) => {
-    const path = prefix ? `${prefix}/${entry.name}` : entry.name;
-    if (entry.name.startsWith('.') || entry.isSymbolicLink()) {
-      throw new Error(`Hidden files and symlinks are not static export inputs: ${path}`);
-    }
-    if (entry.isDirectory()) return exportFiles(root, path);
-    if (!entry.isFile()) throw new Error(`Not a regular static export file: ${path}`);
-    return [path];
-  });
 }
 
 function assertSeparatePaths(exportRoot, outputRoot) {
@@ -87,7 +75,7 @@ export function prepareRelease({ exportDirectory, outputDirectory, configuration
   const exportRoot = realpathSync(exportInput);
   const outputRoot = resolvedOutput(resolve(outputDirectory));
   assertSeparatePaths(exportRoot, outputRoot);
-  const files = exportFiles(exportRoot);
+  const { files, manifest } = loadStaticExport(exportRoot);
   if (!['index.html', '404.html', 'sign-in.html', 'sw.js'].every((file) => files.includes(file))) {
     throw new Error(
       'Incomplete static export: index, 404, sign-in and service worker are required',
@@ -96,9 +84,12 @@ export function prepareRelease({ exportDirectory, outputDirectory, configuration
   if (files.some((file) => file.startsWith('api/') || file === 'client-config.json')) {
     throw new Error('Static export must not supply runtime metadata or an API path');
   }
-  const config = hostingConfig(files, runtime);
+  const config = hostingConfig(files, runtime, manifest);
   mkdirSync(outputRoot, { recursive: true });
   cpSync(exportRoot, join(outputRoot, 'public'), { recursive: true });
+  writeFileSync(join(outputRoot, 'public.csp.json'), json(manifest));
+  const copied = loadStaticExport(join(outputRoot, 'public'));
+  if (JSON.stringify(copied.files) !== JSON.stringify(files)) throw new Error('Copied static export inventory changed');
   writeFileSync(join(outputRoot, 'public', 'client-config.json'), json({ data: runtime }));
   writeFileSync(join(outputRoot, 'firebase.json'), json(config));
   return { outputRoot, exportedFiles: files.length, rewrites: config.hosting.rewrites.length };

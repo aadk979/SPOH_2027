@@ -24,9 +24,11 @@ import {
   requireCard,
 } from '../domain/cardRules.js';
 import { normaliseShortCode } from '../domain/shortCode.js';
-import { getCard } from './getCard.js';
+import { getCardById } from './getCard.js';
 import { stampingStationIds } from './stampingStations.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
+import { lockReserved, settleReserved } from '../../../platform/idempotency/index.js';
+import { stampReceipt } from './cardReceipt.js';
 
 interface StampInput {
   shortCode: string;
@@ -38,6 +40,7 @@ interface StampInput {
 }
 
 interface StampOutcome {
+  cardId: string;
   stampAdded: boolean;
   justCompleted: boolean;
   warning: string | null;
@@ -64,9 +67,11 @@ async function completeStampedJourney(
  * its last station.
  */
 async function applyStamp(tx: PrismaTransactionClient, input: StampInput): Promise<StampOutcome> {
-  const { station, recordedAt, context } = input;
+  const { station, context } = input;
   const { scope } = context;
-  const { stationScopeBypass, ...provenance } = await captureStation(tx, context, input.request);
+  const { stationScopeBypass, ...provenance } = await captureStation(
+    tx, { ...context, action: 'Card.Stamp' }, input.request);
+  await lockReserved(tx, scope, input.request.idempotencyKey);
   await lockCard(tx, scope, input.shortCode);
   const existing = requireCard(await findCardWithStampStations(tx, scope, input.shortCode));
   assertCardProvenance(existing, provenance);
@@ -74,8 +79,27 @@ async function applyStamp(tx: PrismaTransactionClient, input: StampInput): Promi
 
   if (existing.stampEvents.some((stamp) => stamp.stationId === station.id)) {
     const warning = `This card was already stamped at ${station.name}.`;
-    return { stampAdded: false, justCompleted: false, warning };
+    return finishStamp(tx, input, { cardId: existing.id, stampAdded: false, justCompleted: false, warning });
   }
+  return writeStamp(tx, input, { existing, stationScopeBypass, provenance });
+}
+
+async function finishStamp(tx: PrismaTransactionClient, input: StampInput,
+  outcome: StampOutcome): Promise<StampOutcome> {
+  await settleReserved(tx, input.context.scope, { key: input.request.idempotencyKey,
+    statusCode: outcome.stampAdded ? 201 : 200,
+    body: stampReceipt({ cardId: outcome.cardId, shortCode: input.shortCode,
+      stationId: input.station.id, stampAdded: outcome.stampAdded, justCompleted: outcome.justCompleted }) });
+  return outcome;
+}
+
+async function writeStamp(tx: PrismaTransactionClient, input: StampInput,
+  admitted: { existing: NonNullable<Awaited<ReturnType<typeof findCardWithStampStations>>>;
+    stationScopeBypass: { stationId: string } | undefined;
+    provenance: Omit<Awaited<ReturnType<typeof captureStation>>, 'stationScopeBypass'> }): Promise<StampOutcome> {
+  const { station, recordedAt, context } = input;
+  const { scope } = context;
+  const { existing, stationScopeBypass, provenance } = admitted;
 
   // A card scanned at a station before the booth issued it was handed out
   // without being linked. Record the stamp anyway and mark it issued: losing
@@ -120,7 +144,7 @@ async function applyStamp(tx: PrismaTransactionClient, input: StampInput): Promi
     },
   });
 
-  return { stampAdded: true, justCompleted, warning: null };
+  return finishStamp(tx, input, { cardId: existing.id, stampAdded: true, justCompleted, warning: null });
 }
 
 /**
@@ -147,5 +171,6 @@ export async function stampCard(
     applyStamp(tx, { shortCode, station, stationCount, request, context, recordedAt }),
   );
 
-  return { card: await getCard(context.scope, shortCode), ...outcome };
+  const { cardId, ...facts } = outcome;
+  return { card: await getCardById(context.scope, cardId), ...facts };
 }

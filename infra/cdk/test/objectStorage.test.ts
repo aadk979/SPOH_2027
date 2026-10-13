@@ -161,7 +161,7 @@ describe('private object storage foundation (P08.7)', () => {
       () =>
         new ObjectStorage(stack, 'Storage', {
           ...STAGES.staging,
-          publicOrigins: { api: STAGES.staging.publicOrigins!.api, client },
+          publicOrigins: { api: STAGES.staging.publicOrigins!.api, client, crossSiteCookies: true },
         }),
     ).toThrow();
   });

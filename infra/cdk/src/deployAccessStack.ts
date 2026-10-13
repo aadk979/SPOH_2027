@@ -37,6 +37,7 @@ export const IMAGE_REPOSITORY = 'spoh-app';
 export class DeployAccessStack extends Stack {
   readonly role: Role;
   readonly repository: Repository;
+  readonly oidcProviderArn: string;
 
   constructor(scope: Construct, id: string, props: DeployAccessStackProps) {
     super(scope, id, props);
@@ -46,6 +47,7 @@ export class DeployAccessStack extends Stack {
       url: `https://${GITHUB_OIDC}`,
       clientIds: ['sts.amazonaws.com'],
     });
+    this.oidcProviderArn = provider.openIdConnectProviderArn;
 
     this.role = new Role(this, 'GitHubDeployRole', {
       roleName: 'spoh-github-deploy',

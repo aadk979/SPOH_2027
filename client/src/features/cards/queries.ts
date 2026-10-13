@@ -132,13 +132,19 @@ export function useCardCorrections(
   onChange: (card: MissionCardRecord) => void,
 ) {
   const eventId = useEventId();
+  const voidKey = useRetryKey();
+  const reissueKey = useRetryKey();
   const voidMutation = useMutation({
-    mutationFn: (body: VoidCardRequest) => voidCard(eventId, { code: card.shortCode, body }),
-    onSuccess: onChange,
+    mutationFn: (body: Omit<VoidCardRequest, 'idempotencyKey'>) => voidCard(eventId, {
+      code: card.shortCode, body: { ...body, idempotencyKey: voidKey.forInput({ code: card.shortCode, body }) },
+    }),
+    onSuccess: (updated) => { voidKey.clear(); onChange(updated); },
   });
   const reissue = useMutation({
-    mutationFn: (body: ReissueCardRequest) => reissueCard(eventId, { code: card.shortCode, body }),
-    onSuccess: (result) => onChange(result.card),
+    mutationFn: (body: Omit<ReissueCardRequest, 'idempotencyKey'>) => reissueCard(eventId, {
+      code: card.shortCode, body: { ...body, idempotencyKey: reissueKey.forInput({ code: card.shortCode, body }) },
+    }),
+    onSuccess: (result) => { reissueKey.clear(); onChange(result.card); },
   });
   return { voidMutation, reissue };
 }

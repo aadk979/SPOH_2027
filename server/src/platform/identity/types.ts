@@ -14,6 +14,8 @@ export interface VerifiedToken {
   sub: string;
   /** Group memberships, already filtered to known committee roles. */
   groups: CommitteeRole[];
+  /** Original verified provider authentication time, in Unix seconds; never token issue time. */
+  authTime?: number;
 }
 
 export interface AuthProvider {

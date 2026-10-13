@@ -9,6 +9,7 @@ export interface ReservationOwner {
   readonly eventId: string;
   readonly endpoint: string;
   readonly actorSub: string;
+  readonly requestHash?: string;
 }
 
 interface ReservationAttempt extends ReservationOwner {
@@ -48,7 +49,8 @@ export function reservationAttempt(key: string, scope?: EventScope) {
 export function ownedReservationWhere(key: string) {
   const attempt = reservationAttempt(key);
   if (!attempt) throw reservationUnavailable();
-  return { ...attempt, createdAt: new Date(attempt.createdAt), statusCode: 0 };
+  return { ...attempt, requestHash: attempt.requestHash ?? null,
+    createdAt: new Date(attempt.createdAt), statusCode: 0 };
 }
 
 export function reservationUnavailable(): AppError {

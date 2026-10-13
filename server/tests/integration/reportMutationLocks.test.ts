@@ -42,6 +42,7 @@ let itemId: string;
 let windowId: string;
 let giftId: string;
 let batchKey: string;
+let cardKey: string;
 
 beforeEach(async () => {
   await resetDatabase();
@@ -145,6 +146,9 @@ beforeEach(async () => {
       responseBody: {},
     },
   });
+  cardKey = idempotencyKey();
+  await rawDb.idempotencyRecord.create({ data: { key: cardKey, eventId, actorSub: admin.sub,
+    endpoint: 'POST /cards/:shortCode/void', statusCode: 0, responseBody: {} } });
 });
 
 const corrections = [
@@ -154,7 +158,7 @@ const corrections = [
     'registration.void',
   ],
   ['footfall void', () => voidTickById(tickId, 'Correction', actor), 'footfall.void'],
-  ['card void', () => voidCard('A2B3C4', 'Correction', actor), 'card.void'],
+  ['card void', () => voidCard('A2B3C4', { reason: 'Correction', idempotencyKey: cardKey }, actor), 'card.void'],
   [
     'card batch',
     () =>
@@ -309,7 +313,7 @@ it('a close waiting for a correction includes its committed result in every repo
 it('card void and found-item claim use their injected receipt clock', async () => {
   const now = new Date(FROZEN_NOW.getTime() + 123_000);
   const timedActor = { ...actor, clock: fixedClock(now) };
-  await voidCard('A2B3C4', 'Timed correction', timedActor);
+  await voidCard('A2B3C4', { reason: 'Timed correction', idempotencyKey: cardKey }, timedActor);
   await claimItem(itemId, {}, timedActor);
   expect(
     (await rawDb.missionCard.findFirstOrThrow({ where: { eventId, shortCode: 'A2B3C4' } }))

@@ -58,5 +58,7 @@ export async function mfaSetupHandler(req: Request, res: Response): Promise<void
 export async function mfaVerifyHandler(req: Request, res: Response): Promise<void> {
   assertTrustedOrigin(req);
   const { code } = validatedBody<VerifyMfaRequest>(req);
-  res.json(await verifyMfa(await restrictedClaims(req), { code, audit: auditContextFrom(req) }));
+  const opened = await verifyMfa(await restrictedClaims(req), { code, audit: auditContextFrom(req) });
+  setRefreshCookie(res, opened);
+  res.json(opened.response);
 }

@@ -16,7 +16,7 @@ import { defineConfig } from 'prisma/config';
 // Prisma 7 no longer loads `.env` implicitly, and this file is self-contained
 // on purpose — importing the server's env module would drag Cognito and CORS
 // validation into a CLI that only needs a connection string.
-if (!process.env.DATABASE_URL) {
+if (!process.env.DATABASE_URL && process.env.SPOH_SKIP_DOTENV !== '1') {
   try {
     // fileURLToPath, not URL.pathname — on Windows the latter yields "/C:/..."
     process.loadEnvFile(fileURLToPath(new URL('./.env', import.meta.url)));

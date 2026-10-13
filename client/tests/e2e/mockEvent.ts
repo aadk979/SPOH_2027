@@ -2,7 +2,8 @@ import type { ClientConfiguration, MyEvent } from '@spoh/shared';
 import type { Route } from '@playwright/test';
 
 const configuration: ClientConfiguration = {
-  version: 1,
+  version: 2,
+  mediaOrigin: null,
   apiBaseUrl: '',
   envLabel: 'development',
   authProvider: 'local',

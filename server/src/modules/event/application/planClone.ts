@@ -5,6 +5,7 @@ import { NotFoundError } from '../../../platform/errors/index.js';
 import { findEvent } from '../data/repo.js';
 import { readMemberships, readStructure, slugTaken } from '../data/cloneRepo.js';
 import { shiftDate } from '../domain/cloneShift.js';
+import type { CloneContentStoragePlan } from '../../content/index.js';
 
 type Counted =
   | 'categories'
@@ -28,6 +29,8 @@ export interface ClonePlan {
   counts: Record<Counted, number>;
   days: Array<{ from: string; to: string; label: string }>;
   conflicts: string[];
+  targetEventId?: string;
+  contentStoragePlan?: CloneContentStoragePlan;
 }
 
 /** Reads only: nothing is created until the plan is applied. */

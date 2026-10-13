@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { ClientConfigurationSchema } from './index.js';
 
 const LOCAL = {
-  version: 1,
+  version: 2,
+  mediaOrigin: null,
   apiBaseUrl: '',
   envLabel: 'development',
   authProvider: 'local',
@@ -29,7 +30,7 @@ describe('public client configuration contract', () => {
       false,
     );
     expect(ClientConfigurationSchema.safeParse({ ...CLOUD, cognito: null }).success).toBe(false);
-    expect(ClientConfigurationSchema.safeParse({ ...LOCAL, version: 2 }).success).toBe(false);
+    expect(ClientConfigurationSchema.safeParse({ ...LOCAL, version: 1 }).success).toBe(false);
   });
 
   it('refuses additional fields including secret metadata at both levels', () => {

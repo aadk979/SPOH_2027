@@ -160,7 +160,7 @@ export class EntityBuilder {
     if (this.has(entity)) return entity;
     const person = await this.tx.person.findUnique({
       where: { id: personId },
-      select: { id: true, deactivatedAt: true },
+      select: { id: true, deactivatedAt: true, piiErasedAt: true },
     });
     if (!person) throw new NotFoundError('Person');
     const { organisationId } = await this.event();
@@ -170,7 +170,8 @@ export class EntityBuilder {
     });
     this.put({
       uid: entity,
-      attrs: { active: person.deactivatedAt === null, platformAdmin: member?.role === 'PLATFORM_ADMIN' },
+      attrs: { active: person.deactivatedAt === null && person.piiErasedAt === null,
+        platformAdmin: member?.role === 'PLATFORM_ADMIN' },
       parents: [],
     });
     return entity;

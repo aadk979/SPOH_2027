@@ -156,7 +156,7 @@ describe('rate limits (P04.4)', () => {
     for (let i = 0; i < 30; i += 1) {
       const person = await createVolunteer({ email: `rush${i}@p04.test`, role: 'VOLUNTEER' });
       const response = await request(app)
-        .post('/api/v1/auth/session')
+        .post('/api/v1/auth/session').set('Origin', 'http://localhost:3000')
         .send({ email: person.email });
       statuses.push(response.status);
     }
@@ -245,16 +245,19 @@ describe('access by id across stations (P04.3)', () => {
     // Opens a session through the sign-in route, so it shares the per-IP
     // sensitive limit with any other sign-in in this file.
     const opened = await request(app)
-      .post('/api/v1/auth/session')
+      .post('/api/v1/auth/session').set('Origin', 'http://localhost:3000')
       .send({ email: volunteerB.email });
     expect(opened.status).toBe(201);
     const session = await prisma.refreshSession.findFirstOrThrow({
       where: { volunteerId: volunteerB.id },
     });
+    const caller = await request(app).post('/api/v1/auth/session').set('Origin', 'http://localhost:3000')
+      .send({ email: volunteerA.email }).expect(201);
 
     const response = await request(app)
       .delete(`/api/v1/auth/sessions/${session.id}`)
-      .set('Authorization', bearer(volunteerA));
+      .set('Origin', 'http://localhost:3000')
+      .set('Authorization', `Bearer ${caller.body.accessToken as string}`);
 
     expect(response.status).toBe(404);
     const after = await prisma.refreshSession.findUniqueOrThrow({ where: { id: session.id } });
@@ -278,7 +281,7 @@ describe('sign-in limit (P04.4)', () => {
     const statuses: number[] = [];
     for (let i = 0; i < 21; i += 1) {
       const response = await request(app)
-        .post('/api/v1/auth/session')
+        .post('/api/v1/auth/session').set('Origin', 'http://localhost:3000')
         .send({ email: `nobody${i}@p04.test` });
       statuses.push(response.status);
     }

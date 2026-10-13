@@ -32,6 +32,7 @@ function infrastructureValues(props: InfrastructureProps) {
     COGNITO_DOMAIN: cognito.domain,
     APP_BASE_URL: stage.publicOrigins?.api ?? appOrigin,
     CORS_ALLOWED_ORIGINS: stage.publicOrigins?.client ?? appOrigin,
+    SESSION_COOKIE_CROSS_SITE: String(stage.publicOrigins?.crossSiteCookies ?? false),
     ...(stage.publicOrigins
       ? {
           CLIENT_BASE_URL: stage.publicOrigins.client,

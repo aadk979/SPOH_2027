@@ -6,6 +6,7 @@ import { presignUpload } from '../../src/modules/media/application/s3.js';
 import { replayUpload } from '../../src/modules/media/application/replayUpload.js';
 import { SYSTEM_AUDIT_CONTEXT } from '../../src/platform/http/auditContext.js';
 import { sensitiveRateLimit } from '../../src/platform/http/rateLimit.js';
+import { requestIntentHash } from '../../src/platform/http/requestIntent.js';
 import { reserve, settle } from '../../src/platform/idempotency/index.js';
 import { fixedClock } from '../../src/platform/time/index.js';
 import { rawDb, resetDatabase } from '../helpers/db.js';
@@ -21,7 +22,8 @@ vi.mock('../../src/platform/idempotency/index.js', async (original) => {
   return { ...actual, settle: vi.fn(actual.settle) };
 });
 
-vi.mock('../../src/modules/media/application/s3.js', () => ({
+vi.mock('../../src/modules/media/application/s3.js', async () => ({
+  validateUpload: (await import('../helpers/mediaValidation.js')).syntheticValidatedUpload,
   mediaEnabled: () => true,
   assertConfigured: () => undefined,
   presignUpload: vi.fn(() =>
@@ -51,7 +53,7 @@ beforeEach(async () => {
   await resetDatabase();
   f = await scheduledLifecycleFixture();
   await rawDb.event.update({ where: { id: f.eventId }, data: { status: 'REHEARSAL' } });
-  sensitiveRateLimit.resetKey(`sub:${f.creator.sub}`);
+  await sensitiveRateLimit.resetKey(`sub:${f.creator.sub}`);
   vi.mocked(presignUpload)
     .mockReset()
     .mockResolvedValue({
@@ -275,6 +277,8 @@ it('prevents concurrent duplicate issuance and recovers an abandoned reservation
     endpoint: 'media.upload',
     eventId: f.eventId,
     actorSub: f.creator.sub,
+    requestHash: requestIntentHash({ method: 'POST', originalUrl: `/api/v1/events/${f.eventId}/media/uploads`,
+      query: {}, body: abandoned }),
   });
   await rawDb.idempotencyRecord.update({
     where: { key: abandoned.idempotencyKey },

@@ -37,6 +37,7 @@ export function createCognitoAuthProvider(config: {
         return {
           sub: payload.sub,
           groups: [],
+          ...(typeof payload.auth_time === 'number' ? { authTime: payload.auth_time } : {}),
         };
       } catch (error) {
         // The detail is genuinely useful for debugging a misconfigured pool,

@@ -23,6 +23,7 @@ personRouter.get('/:id', validate({ params }), async (req: Request, res: Respons
   res.json(await getPersonDetail(id(req), actor(req)));
 });
 personRouter.get('/:id/data', validate({ params }), async (req: Request, res: Response) => {
+  res.set('Cache-Control', 'private, no-store');
   res.json(await readPersonData(id(req), actor(req)));
 });
 personRouter.post('/:id/erase', validate({ params, body: DeactivatePersonRequest }),

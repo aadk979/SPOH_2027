@@ -56,10 +56,10 @@ beforeEach(async () => {
 });
 
 it('boots one daily recurring handler, runs it through the real worker and removes its legacy interval', async () => {
-  await session('expired', { expiresAt: at(-1) });
-  await session('expiry-equality', { expiresAt: due });
-  await session('revoked-old', { revokedAt: at(-7 * DAY - 1) });
-  await session('revoked-equality', { revokedAt: at(-7 * DAY) });
+  await session('expired', { expiresAt: at(-30 * DAY - 1) });
+  await session('expiry-equality', { expiresAt: at(-30 * DAY) });
+  await session('revoked-old', { revokedAt: at(-30 * DAY - 1) });
+  await session('revoked-equality', { revokedAt: at(-30 * DAY) });
   await session('revoked-recent', { revokedAt: at(-DAY) });
   await session('live');
   let instant = FROZEN_NOW;
@@ -76,7 +76,8 @@ it('boots one daily recurring handler, runs it through the real worker and remov
       runAt: due,
     });
     instant = due;
-    await worker.tick();
+    // Seven global and event recurrences share a five-action claim batch.
+    for (let tick = 0; tick < 3; tick += 1) await worker.tick();
     expect(await hashes()).toEqual([
       'expiry-equality',
       'live',
@@ -107,7 +108,7 @@ it('boots one daily recurring handler, runs it through the real worker and remov
 it.each(['prune audit', 'cache publication', 'completion'])(
   'rolls back deletion and module audit when %s fails, then retries once cleanly',
   async (stage) => {
-    await session('expired', { expiresAt: at(-1) });
+    await session('expired', { expiresAt: at(-30 * DAY - 1) });
     await session('live');
     const action = await create();
     const spy =

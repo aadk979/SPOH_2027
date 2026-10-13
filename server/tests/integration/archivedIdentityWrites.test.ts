@@ -46,7 +46,7 @@ it('refuses new identity provisioning and committed import before quota or provi
 });
 
 it('refuses profile, role, event-standing, invitation and session changes while keeping archive reads', async () => {
-  const opened = await request(app).post('/api/v1/auth/session').send({ email: member.email }).expect(201);
+  const opened = await request(app).post('/api/v1/auth/session').set('Origin', 'http://localhost:3000').send({ email: member.email }).expect(201);
   const resend = vi.spyOn(identityProvider, 'resendInvite');
   await archive();
   const prefix = `/admin/volunteers/${member.id}`;
@@ -55,7 +55,7 @@ it('refuses profile, role, event-standing, invitation and session changes while 
   expect(updated.status).toBe(409);
   for (const [suffix, body] of [
     ['/deactivate', { reason: 'Archived suspension attempt' }], ['/reactivate', {}],
-    ['/resend-invite', {}], ['/sign-out', {}],
+    ['/resend-invite', { idempotencyKey: crypto.randomUUID() }], ['/sign-out', {}],
   ] as const) expect((await post(`${prefix}${suffix}`, body)).status).toBe(409);
   expect((await request(app).get(path(prefix)).set('Authorization', bearer(admin))).status).toBe(200);
   expect(await rawDb.eventMembership.findUnique({ where: { eventId_personId: { eventId, personId: member.id } } }))
@@ -69,7 +69,7 @@ it('refuses profile, role, event-standing, invitation and session changes while 
 it.each(['role', 'resend', 'deactivate'] as const)('reports archived bulk %s rows as refused without effects', async (action) => {
   await archive();
   const response = await post('/admin/volunteers/bulk', { ids: [member.id], action,
-    ...(action === 'role' ? { role: 'IC' } : {}),
+    ...(action === 'role' ? { role: 'IC' } : {}), idempotencyKey: crypto.randomUUID(),
     ...(action === 'deactivate' ? { reason: 'Archived bulk attempt' } : {}) });
   expect(response.status).toBe(200);
   expect(response.body.data).toEqual([expect.objectContaining({ id: member.id, ok: false })]);
@@ -101,8 +101,8 @@ it.each(['invite', 'import', 'resend'] as const)('rechecks archive after the rea
     await tx.$queryRaw`SELECT id FROM "Event" WHERE id = ${eventId} FOR UPDATE`;
     pending = Promise.resolve(operation === 'invite' ? post('/roster/volunteers', invite())
       : operation === 'import' ? post('/roster/import', importInput())
-      : post(`/admin/volunteers/${member.id}/resend-invite`));
-    await waitForEventLock('%FROM "Event"%FOR SHARE%');
+      : post(`/admin/volunteers/${member.id}/resend-invite`, { idempotencyKey: crypto.randomUUID() }));
+    await waitForEventLock(operation === 'resend' ? '%IdempotencyRecord%' : '%FROM "Event"%FOR SHARE%');
     await tx.event.update({ where: { id: eventId }, data: { status: 'ARCHIVED' } });
   });
   const response = await pending!;
@@ -112,7 +112,7 @@ it.each(['invite', 'import', 'resend'] as const)('rechecks archive after the rea
   expect(await rawDb.identityDeliveryQuota.count()).toBe(0);
 });
 
-it('holds archive behind the identity delivery and attributed membership transaction', async () => {
+it('retains the suppressed creation journal but refuses binding when archive commits during provider IO', async () => {
   let entered!: () => void;
   let release!: () => void;
   const started = new Promise<void>((resolve) => { entered = resolve; });
@@ -127,12 +127,14 @@ it('holds archive behind the identity delivery and attributed membership transac
   let archived = false;
   const transition = archive().then(() => { archived = true; });
   try {
-    await waitForEventLock('%UPDATE%Event%');
-    expect(archived).toBe(false);
+    await transition;
+    expect(archived).toBe(true);
   } finally { release(); }
-  expect((await response).status).toBe(201);
+  expect((await response).status).toBe(409);
   await transition;
-  expect(await rawDb.auditLog.count({ where: { action: 'user.provision' } })).toBe(1);
+  expect(await rawDb.auditLog.count({ where: { action: 'user.provision' } })).toBe(0);
+  expect(await rawDb.identityAccountOperation.findFirst()).toMatchObject({ state: 'PROVIDER_READY' });
+  expect(await rawDb.person.count({ where: { email: invite().email } })).toBe(0);
 });
 
 it('retains historical platform reads for ended memberships while refusing their mutations', async () => {

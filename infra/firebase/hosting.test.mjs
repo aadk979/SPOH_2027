@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import {
   mkdtempSync,
   mkdirSync,
@@ -17,7 +18,8 @@ import { exportRewrites, hostingConfig } from './hostingConfig.mjs';
 import { prepareRelease, productionRuntime } from './prepareRelease.mjs';
 
 const runtime = {
-  version: 1,
+  version: 2,
+  mediaOrigin: 'https://spoh-fixture-media.s3.ap-southeast-1.amazonaws.com',
   apiBaseUrl: 'https://api.fixture.example',
   envLabel: 'production',
   authProvider: 'cognito',
@@ -41,6 +43,19 @@ const files = [
   'sign-in/__next.sign-in/__PAGE__.txt',
 ];
 
+const html = (file) => `<!doctype html><html><head></head><body><script>window.file=${JSON.stringify(file)}</script></body></html>`;
+const scriptHash = (file) => `'sha256-${createHash('sha256').update(`window.file=${JSON.stringify(file)}`).digest('base64')}'`;
+function manifest() {
+  return { version: 1, documents: files.filter((file) => file.endsWith('.html')).sort().map((path) => ({
+    path, sha256: createHash('sha256').update(html(path)).digest('hex'), scriptHashes: [scriptHash(path)],
+  })) };
+}
+function policyFor(hosting, path) {
+  const headers = hosting.headers.filter((rule) => rule.regex && new RegExp(rule.regex).test(path))
+    .flatMap((rule) => rule.headers).filter((header) => header.key === 'Content-Security-Policy');
+  assert.equal(headers.length, 1, `one requested-path policy for ${path}`);
+  return headers[0].value;
+}
 function fixture(t) {
   const root = mkdtempSync(join(tmpdir(), 'spoh-firebase-test-'));
   // This fixture alone owns the resolved temporary directory; no workspace cleanup is used.
@@ -51,8 +66,9 @@ function fixture(t) {
   for (const file of files) {
     const destination = join(exportDirectory, file);
     mkdirSync(join(destination, '..'), { recursive: true });
-    writeFileSync(destination, file);
+    writeFileSync(destination, file.endsWith('.html') ? html(file) : file);
   }
+  writeFileSync(`${exportDirectory}.csp.json`, JSON.stringify(manifest()));
   return {
     root,
     exportDirectory,
@@ -93,7 +109,7 @@ test('dot-joined Next payloads resolve without a full-page fallback', () => {
 });
 
 test('bootstrap is a local JSON rewrite, with exact-origin CSP and deliberate cache rules', () => {
-  const { hosting } = hostingConfig(files, runtime);
+  const { hosting } = hostingConfig(files, runtime, manifest());
   assert.deepEqual(hosting.rewrites[0], {
     source: '/api/v1/client-config',
     destination: '/client-config.json',
@@ -102,10 +118,10 @@ test('bootstrap is a local JSON rewrite, with exact-origin CSP and deliberate ca
     hosting.rewrites.some((rule) => rule.function || rule.run),
     false,
   );
-  const policy = hosting.headers[0].headers.find(
-    (header) => header.key === 'Content-Security-Policy',
-  ).value;
-  assert.match(policy, /connect-src 'self' https:\/\/api\.fixture\.example;/);
+  const policy = policyFor(hosting, '/sign-in');
+  assert.ok(policy.includes("connect-src 'self' https://api.fixture.example https://spoh-fixture-media.s3.ap-southeast-1.amazonaws.com;"));
+  assert.ok(policy.includes(scriptHash('sign-in.html')));
+  assert.equal(hosting.headers[0].headers.some((header) => header.key === 'Content-Security-Policy'), false);
   assert.equal(policy.includes('unsafe-eval'), false);
   assert.equal(hosting.headers[1].headers[0].value, 'public, max-age=31536000, immutable');
   assert.equal(hosting.headers[2].headers[0].value, 'no-store');
@@ -121,7 +137,7 @@ test('preparation preserves original export bytes and publishes only the strict 
   const options = fixture(t);
   const result = prepareRelease(options);
   assert.equal(result.exportedFiles, files.length);
-  assert.equal(readFileSync(join(options.exportDirectory, 'index.html'), 'utf8'), 'index.html');
+  assert.equal(readFileSync(join(options.exportDirectory, 'index.html'), 'utf8'), html('index.html'));
   assert.equal(existsSync(join(options.exportDirectory, 'client-config.json')), false);
   assert.deepEqual(
     JSON.parse(readFileSync(join(options.outputDirectory, 'public/client-config.json'), 'utf8')),
@@ -233,4 +249,41 @@ test('directory aliases cannot bypass overlap checks or source-root validation',
     /contain each other/,
   );
   assert.equal(existsSync(join(options.exportDirectory, 'nested')), false);
+});
+
+
+test('requested clean, physical and event aliases select distinct document policies before rewrites', () => {
+  const { hosting } = hostingConfig(files, runtime, manifest());
+  for (const path of ['/', '/index', '/index.html']) assert.ok(policyFor(hosting, path).includes(scriptHash('index.html')));
+  for (const path of ['/sign-in', '/sign-in.html']) {
+    const policy = policyFor(hosting, path);
+    assert.ok(policy.includes(scriptHash('sign-in.html'))); assert.equal(policy.includes(scriptHash('index.html')), false);
+    assert.equal(/unsafe-|nonce-/.test(policy), false); assert.ok(policy.includes("style-src-attr 'none'"));
+  }
+  for (const path of ['/404', '/404.html']) assert.ok(policyFor(hosting, path).includes(scriptHash('404.html')));
+  for (const path of ['/e/first/home', '/e/second/home', '/e/_/home.html'])
+    assert.ok(policyFor(hosting, path).includes(scriptHash('e/_/home.html')));
+  for (const path of ['/e/sample/home.txt', '/e/sample/home/__next.e.sample.home.__PAGE__.txt', '/sign-in/__next.sign-in.__PAGE__.txt', '/sw.js'])
+    assert.equal(policyFor(hosting, path).includes('sha256-'), false);
+  const fallback = hosting.headers.find((rule) => rule.source === '404.html');
+  assert.ok(fallback.headers.find((header) => header.key === 'Content-Security-Policy').value.includes(scriptHash('404.html')));
+  assert.equal(hosting.headers.filter((rule) => rule.regex && new RegExp(rule.regex).test('/unknown')).length, 0);
+});
+test('stale, incomplete and forged sidecars fail before output creation', (t) => {
+  const options = fixture(t); const sidecar = `${options.exportDirectory}.csp.json`;
+  const original = readFileSync(sidecar);
+  for (const mutate of [
+    () => rmSync(sidecar),
+    () => writeFileSync(sidecar, JSON.stringify({ ...manifest(), documents: manifest().documents.slice(1) })),
+    () => writeFileSync(sidecar, JSON.stringify({ ...manifest(), documents: manifest().documents.map((entry) => ({ ...entry, scriptHashes: [] })) })),
+    () => writeFileSync(join(options.exportDirectory, 'index.html'), html('changed')),
+  ]) {
+    mutate(); assert.throws(() => prepareRelease(options)); assert.equal(existsSync(options.outputDirectory), false);
+    writeFileSync(sidecar, original); writeFileSync(join(options.exportDirectory, 'index.html'), html('index.html'));
+  }
+});
+test('release retains its private manifest pair and never publishes the sidecar', (t) => {
+  const options = fixture(t); prepareRelease(options);
+  assert.equal(existsSync(join(options.outputDirectory, 'public.csp.json')), true);
+  assert.equal(existsSync(join(options.outputDirectory, 'public/out.csp.json')), false);
 });

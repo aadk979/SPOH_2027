@@ -5,15 +5,15 @@
   "packages": {
     "server": {
       "lines": 96.67,
-      "branches": 87.11
+      "branches": 88.09
     },
     "client": {
-      "lines": 79.77,
-      "branches": 71.39
+      "lines": 79.85,
+      "branches": 71.56
     },
     "shared": {
-      "lines": 93.96,
-      "branches": 84.41
+      "lines": 94.38,
+      "branches": 87.4
     }
   }
 }

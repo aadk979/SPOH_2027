@@ -30,6 +30,8 @@ export async function exchangeCode(
   grant: { code: string; verifier: string },
 ): Promise<string | null> {
   const tokenResponse = await fetch(new URL('/oauth2/token', config.domain), {
+    redirect: 'error',
+    signal: AbortSignal.timeout(10_000),
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
@@ -43,7 +45,7 @@ export async function exchangeCode(
 
   if (!tokenResponse.ok) {
     logger.warn(
-      { status: tokenResponse.status, body: await tokenResponse.text().catch(() => '') },
+      { status: tokenResponse.status, category: 'identity-provider' },
       'Cognito token exchange failed',
     );
     return null;

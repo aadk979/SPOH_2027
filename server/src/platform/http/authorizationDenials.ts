@@ -1,8 +1,12 @@
 import type { Request } from 'express';
+import { ipKeyGenerator } from 'express-rate-limit';
 import { writeAudit } from '../audit/index.js';
 import { prisma } from '../db/client.js';
 import { logger } from '../logger/index.js';
 import { auditContextFrom } from './auditContext.js';
+import { incrementCounter, type CounterSpec } from './quotaCounterRepo.js';
+import { counterNumber, quotaDigest } from './quotaKeys.js';
+import { systemClock } from '../time/index.js';
 
 /**
  * Denials in the security audit (P11.5): who was refused what, and which policies decided it.
@@ -10,23 +14,12 @@ import { auditContextFrom } from './auditContext.js';
  * A screen that polls a route its reader may not use is refused every few seconds, and a
  * row each time would make the audit table the incident. Identical denials (one caller,
  * one route) within a minute collapse into one row; the next window's row says how many it
- * stood for. The window is per process, as the rate limits are, until P15.2 moves both to
- * Postgres (F03-042).
+ * stood for. PostgreSQL coordinates every app instance and keeps events separate.
  *
  * Fire-and-forget: nothing changed, so there is no transaction to join, and a failing
  * database must not turn a 403 into a 500. Every denial is also logged.
  */
 
-const WINDOW_MS = 60_000;
-/** Distinct callers and routes tracked at once, so a flood cannot grow the map unbounded. */
-const MAX_KEYS = 5_000;
-
-interface Window {
-  readonly openedAt: number;
-  count: number;
-}
-
-const windows = new Map<string, Window>();
 /**
  * Audit writes not yet settled, so a test can wait for them before it resets the database.
  * One set per process, even when a test loads the app twice (`vi.resetModules`).
@@ -50,23 +43,22 @@ export function recordDenial(req: Request, denial: Denial): void {
     { authorization: { ...denial, role: req.auth?.role, membershipId: req.auth?.membershipId } },
     'authorization denied',
   );
-  const suppressed = openWindow(`${req.auth?.sub ?? `ip:${req.ip ?? 'unknown'}`}|${denial.route}`);
-  if (suppressed === null) return;
-  const write = writeAudit(prisma, {
-    ...auditContextFrom(req),
-    action: 'authorization.denied',
-    severity: 'WARNING',
-    outcome: 'DENIED',
-    entityType: 'Route',
-    entityId: denial.route,
-    after: {
-      actions: [...denial.actions],
-      policies: [...denial.policies],
-      ...(suppressed > 0 ? { previousWindowSuppressed: suppressed } : {}),
-    },
-    method: req.method,
-    path: denial.path,
-    statusCode: 403,
+  const audit = auditContextFrom(req);
+  const spec: CounterSpec = { namespace: 'authorization.denial',
+    scopeDigest: quotaDigest([audit.eventId ?? 'platform', denial.route]),
+    subjectDigest: quotaDigest(audit.actorSub ? `sub:${audit.actorSub}` : `ip:${ipKeyGenerator(req.ip ?? 'unknown')}`),
+    windowSeconds: 60 };
+  const now = systemClock.now();
+  const method = req.method;
+  const write = prisma.$transaction(async (tx) => {
+    const claim = await incrementCounter(tx, spec, now);
+    if (!claim.opened) return;
+    const suppressed = counterNumber(claim.previousWindowHits > 0n ? claim.previousWindowHits - 1n : 0n);
+    await writeAudit(tx, { ...audit, action: 'authorization.denied', severity: 'WARNING',
+      outcome: 'DENIED', entityType: 'Route', entityId: denial.route,
+      after: { actions: [...denial.actions], policies: [...denial.policies],
+        ...(suppressed > 0 ? { previousWindowSuppressed: suppressed } : {}) },
+      method, path: denial.path, statusCode: 403 });
   })
     .catch((error: unknown) => {
       logger.error({ err: error, route: denial.route }, 'failed to record an authorization denial');
@@ -75,35 +67,7 @@ export function recordDenial(req: Request, denial: Denial): void {
   pending.add(write);
 }
 
-/**
- * Counts a denial into its window. Null while the window is open; when it opens a new one,
- * how many denials the window before stood for beyond its own row.
- */
-function openWindow(key: string): number | null {
-  const now = Date.now();
-  const open = windows.get(key);
-  if (open && now - open.openedAt < WINDOW_MS) {
-    open.count += 1;
-    return null;
-  }
-  if (windows.size >= MAX_KEYS) evict(now);
-  windows.set(key, { openedAt: now, count: 1 });
-  return open ? open.count - 1 : 0;
-}
-
-/** Closed windows first; if every window is live, the oldest, so dedupe never switches off. */
-function evict(now: number): void {
-  for (const [key, window] of windows) {
-    if (now - window.openedAt >= WINDOW_MS) windows.delete(key);
-  }
-  if (windows.size >= MAX_KEYS) {
-    const oldest = windows.keys().next();
-    if (!oldest.done) windows.delete(oldest.value);
-  }
-}
-
-/** For tests: wait for every denial's audit row, then forget every window. */
+/** Drain pending writes; callers reset the shared counter table explicitly. */
 export async function settleDenials(): Promise<void> {
-  await Promise.all(pending);
-  windows.clear();
+  while (pending.size > 0) await Promise.all([...pending]);
 }

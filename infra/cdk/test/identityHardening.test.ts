@@ -18,8 +18,16 @@ describe('P12 identity hardening', () => {
       AccessTokenValidity: 5, IdTokenValidity: 5, RefreshTokenValidity: 60,
       TokenValidityUnits: { AccessToken: 'minutes', IdToken: 'minutes', RefreshToken: 'minutes' },
       EnableTokenRevocation: true, PreventUserExistenceErrors: 'ENABLED',
-      AllowedOAuthFlows: ['code'], AllowedOAuthScopes: ['openid', 'email', 'profile', 'aws.cognito.signin.user.admin'],
+      AllowedOAuthFlows: ['code'], AllowedOAuthScopes: ['openid', 'email', 'aws.cognito.signin.user.admin'],
+      ExplicitAuthFlows: [], RefreshTokenRotation: { Feature: 'ENABLED', RetryGracePeriodSeconds: 10 },
+      ReadAttributes: ['email', 'email_verified', 'name'], WriteAttributes: ['email', 'name'],
     });
+  });
+
+  it('defines immutable app operation ownership without exposing it to the public client', () => {
+    const template = Template.fromStack(app.node.findChild('Spoh-staging-Platform') as never);
+    template.hasResourceProperties('AWS::Cognito::UserPool', { Schema: [{ Name: 'spoh_operation',
+      AttributeDataType: 'String', Mutable: false, StringAttributeConstraints: { MinLength: '36', MaxLength: '36' } }] });
   });
 
   it('retains and deletion-protects the production pool, and lets staging go with its stack', () => {

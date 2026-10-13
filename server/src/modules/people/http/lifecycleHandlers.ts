@@ -19,7 +19,8 @@ export async function bulkPeopleHandler(req: Request, res: Response) {
   res.json(await bulkPeople(validatedBody<BulkPeopleRequest>(req), manager(req)));
 }
 export async function resendInviteHandler(req: Request, res: Response) {
-  res.json(await resendInvite(validatedParams<{ id: string }>(req).id, manager(req)));
+  res.json(await resendInvite(validatedParams<{ id: string }>(req).id, manager(req),
+    validatedBody<{ idempotencyKey: string }>(req).idempotencyKey));
 }
 export async function signOutPersonHandler(req: Request, res: Response) {
   res.json(await signOutPerson(validatedParams<{ id: string }>(req).id, manager(req)));

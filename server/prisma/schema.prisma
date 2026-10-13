@@ -238,6 +238,8 @@ model Organisation {
 
   events      Event[]
   memberships OrganisationMembership[]
+  identityAccounts IdentityAccountOperation[]
+  identityInvitations IdentityInvitationAttempt[]
 }
 
 /// The event lifecycle (ADR-004 §1).
@@ -337,10 +339,12 @@ model Event {
   cardPrintExports           CardPrintExport[]
   contentDocument            ContentDocument?
   contentVersions            ContentVersion[]
+  contentStorageIntents      ContentStorageIntent[]
   contentUploads             ContentUploadReceipt[]
   scheduledActions           ScheduledAction[]
   notices                    Notice[]
   noticeDeliveries           NoticeDelivery[]
+  validatedMedia             ValidatedMedia[]
 
   @@unique([organisationId, slug])
   @@index([status])
@@ -623,6 +627,11 @@ model Person {
 
   eventMemberships        EventMembership[]
   organisationMemberships OrganisationMembership[]
+  identityAccounts          IdentityAccountOperation[] @relation("IdentityAccountPerson")
+  identityAccountOperations IdentityAccountOperation[] @relation("IdentityAccountActor")
+  identityInvitations       IdentityInvitationAttempt[] @relation("IdentityInvitationPerson")
+  identityInvitationActions IdentityInvitationAttempt[] @relation("IdentityInvitationActor")
+  validatedMedia            ValidatedMedia[] @relation("ValidatedMediaIssuer")
 
   // The roster screen lists by name.
   @@index([displayName])
@@ -1811,6 +1820,10 @@ model IdempotencyRecord {
   endpoint     String
   /// @class staff-personal
   actorSub     String
+  /// SHA-256 of the exact HTTP request intent; no request body is retained.
+  /// Null is retained only for historical receipts and trusted internal callers.
+  /// @class operational
+  requestHash  String?  @db.Char(64)
   /// @class staff-personal
   responseBody Json
   statusCode   Int
@@ -2029,6 +2042,8 @@ model RefreshSession {
   revokedReason          String?
   replacedById           String?
   absoluteExpiresAt      DateTime? @db.Timestamptz(3)
+  /// Verified provider authentication time; refresh never makes authentication newer.
+  authenticatedAt        DateTime? @db.Timestamptz(3)
   mfaPending             Boolean   @default(false)
   /// Encrypted Cognito access token, retained only during five-minute enrolment.
   /// @class credential
@@ -2079,6 +2094,27 @@ model ContentDocument {
   @@unique([eventId, id])
 }
 
+/// Durable exact-key cleanup plan, committed before any external publication object write.
+/// @eventOwned
+model ContentStorageIntent {
+  id               String   @id @db.Uuid
+  eventId          String
+  /// Planned immutable publication identity; not a foreign key before publication commits.
+  /// @class operational
+  contentVersionId String
+  /// Planned clone owner; intentionally lacks a FK until the target Event commits.
+  /// @class operational
+  targetEventId    String
+  /// @class operational
+  objectKeys       String[]
+  createdAt        DateTime @db.Timestamptz(3)
+  cleanupAfter     DateTime @db.Timestamptz(3)
+  event            Event @relation(fields: [eventId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+
+  @@unique([eventId, id])
+  @@index([cleanupAfter, eventId])
+}
+
 /// Frozen publication plus its exact private S3 object; database guards refuse edits.
 /// @eventOwned
 model ContentVersion {
@@ -2088,6 +2124,9 @@ model ContentVersion {
   draftVersion        Int
   /// @class operational
   body                Json
+  /// Curated immutable image identity and decoding proof; never credentials or image bytes.
+  /// @class operational
+  imageManifest       Json              @default("[]")
   /// @class operational
   objectKey           String            @unique
   /// @class operational
@@ -2129,6 +2168,136 @@ model IdentityDeliveryQuota {
   expiresAt DateTime @db.Timestamptz(3)
 
   @@index([expiresAt])
+}
+
+/// Ephemeral shared admission counters; the migration creates this table UNLOGGED.
+/// Digests are domain-separated hashes and never retain addresses or person identifiers.
+model RateLimitCounter {
+  /// Fixed quota tier; not a person's name.
+  /// @class operational
+  namespace           String
+  /// @class staff-personal
+  scopeDigest         String   @db.Char(64)
+  /// @class staff-personal
+  subjectDigest       String   @db.Char(64)
+  /// @class operational
+  generation          String   @db.Uuid
+  windowStart         DateTime @db.Timestamptz(3)
+  expiresAt           DateTime @db.Timestamptz(3)
+  count               BigInt   @default(0)
+  previousWindowCount BigInt   @default(0)
+
+  @@id([namespace, scopeDigest, subjectDigest])
+  @@index([expiresAt])
+  @@index([namespace, subjectDigest])
+}
+
+enum IdentityAccountState {
+  CREATE_STARTED
+  PROVIDER_READY
+  BOUND
+}
+
+enum IdentityInvitationState {
+  STARTED
+  ACCEPTED
+  DELIVERY_UNKNOWN
+  NOT_ELIGIBLE
+}
+
+/// Durable ownership and recovery progress survive generic retry-receipt expiry.
+model IdentityAccountOperation {
+  id                    String               @id @db.Uuid
+  /// @class operational
+  targetPoolId          String
+  /// @class operational
+  organisationId        String
+  personId              String?
+  plannedPersonId       String
+  actorPersonId         String
+  /// @class staff-personal
+  emailDigest           String               @db.Char(64)
+  /// @class staff-personal
+  profileDigest         String               @db.Char(64)
+  /// @class staff-personal
+  expectedSubjectDigest String?              @db.Char(64)
+  /// @class staff-personal
+  providerSubject       String?
+  /// @class staff-personal
+  providerUsername      String?
+  state                 IdentityAccountState @default(CREATE_STARTED)
+  /// @class operational
+  generation            String               @db.Uuid
+  leaseExpiresAt        DateTime             @db.Timestamptz(3)
+  createdAt             DateTime             @db.Timestamptz(3)
+  updatedAt             DateTime             @db.Timestamptz(3)
+  boundAt               DateTime?            @db.Timestamptz(3)
+  person                Person?              @relation("IdentityAccountPerson", fields: [personId], references: [id], onDelete: Restrict)
+  actor                 Person               @relation("IdentityAccountActor", fields: [actorPersonId], references: [id], onDelete: Restrict)
+  invitations           IdentityInvitationAttempt[]
+  organisation          Organisation @relation(fields: [organisationId], references: [id], onDelete: Restrict)
+
+  @@unique([targetPoolId, emailDigest])
+  @@unique([targetPoolId, personId])
+  @@index([state, leaseExpiresAt])
+  @@index([organisationId, createdAt])
+}
+
+/// A committed send intent consumes its allowance even if delivery becomes ambiguous.
+model IdentityInvitationAttempt {
+  id             String                  @id @db.Uuid
+  /// @class operational
+  targetPoolId   String
+  /// @class operational
+  organisationId String
+  personId       String
+  actorPersonId  String
+  accountId      String?                 @db.Uuid
+  /// @class operational
+  requestDigest  String                  @unique @db.Char(64)
+  state          IdentityInvitationState @default(STARTED)
+  startedAt      DateTime                @db.Timestamptz(3)
+  finishedAt     DateTime?               @db.Timestamptz(3)
+  person         Person                  @relation("IdentityInvitationPerson", fields: [personId], references: [id], onDelete: Restrict)
+  actor          Person                  @relation("IdentityInvitationActor", fields: [actorPersonId], references: [id], onDelete: Restrict)
+  account        IdentityAccountOperation? @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  organisation   Organisation @relation(fields: [organisationId], references: [id], onDelete: Restrict)
+
+  @@index([personId, startedAt])
+  @@index([organisationId, startedAt])
+}
+
+/// Only completely decoded, normalized immutable images may be attached or read.
+/// @eventOwned
+model ValidatedMedia {
+  id                 String   @id @default(uuid()) @db.Uuid
+  eventId            String
+  /// Externally issued upload identity; never the read destination.
+  /// @class operational
+  key                String   @unique
+  issuedByPersonId   String
+  /// @class operational
+  purpose            String
+  rehearsal          Boolean
+  /// @class operational
+  sourceEtag         String
+  /// @class operational
+  sourceVersionId    String?
+  /// @class operational
+  objectKey          String   @unique
+  /// @class operational
+  objectVersionId    String?
+  /// @class operational
+  contentType        String
+  contentLength      Int
+  /// @class operational
+  sha256             String   @db.Char(64)
+  createdAt          DateTime @db.Timestamptz(3)
+  event              Event    @relation(fields: [eventId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  issuedBy           Person   @relation("ValidatedMediaIssuer", fields: [issuedByPersonId], references: [id], onDelete: Restrict)
+
+  @@unique([eventId, id])
+  @@index([eventId, key])
 }
 
 /// Personal notices retain only bounded operational source context, never copied safety PII.

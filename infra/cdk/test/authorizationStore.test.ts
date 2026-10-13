@@ -40,7 +40,11 @@ describe('the AVP policy store (P11.6)', () => {
 
   it('lets the app ask the store and nothing else', () => {
     const template = templateOf('staging');
-    const statements = Object.values(template.findResources('AWS::IAM::Policy')).flatMap(
+    const appTask = Object.values(template.findResources('AWS::ECS::TaskDefinition')).find(
+      (task) => task.Properties.ContainerDefinitions[0].Name === 'app')!;
+    const policies = Object.values(template.findResources('AWS::IAM::Policy')).filter((policy) =>
+      policy.Properties.Roles.some((ref: { Ref: string }) => JSON.stringify(appTask.Properties.TaskRoleArn).includes(ref.Ref)));
+    const statements = policies.flatMap(
       (policy) => policy.Properties.PolicyDocument.Statement as { Action: string | string[] }[],
     );
     const avp = statements.flatMap((statement) =>

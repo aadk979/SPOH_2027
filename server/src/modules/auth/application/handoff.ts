@@ -11,6 +11,11 @@ import { findSessionByTokenHash } from '../data/repo.js';
 import { hashRefreshToken } from '../../../platform/identity/sessionTokens.js';
 import { clientSignInOrigin } from './hostedSignIn.js';
 import { createSessionHandoff } from './createSessionHandoff.js';
+import { handoffById, handoffSession, lockHandoff, consumeHandoff } from '../data/handoffRepo.js';
+import { lockCredentialPerson } from '../data/securityRepo.js';
+import { lockSession } from '../data/rotationRepo.js';
+import { currentSessionLimit } from './currentSession.js';
+import { credentialIsCurrent, restrictedProviderIsCurrent } from '../domain/credentialRules.js';
 
 export function recoveryTarget(input: { returnTo: unknown; challenge: unknown; state: unknown }) {
   if (
@@ -67,7 +72,7 @@ export async function recoverSession(
 }
 
 export async function redeemHandoff(input: { code: string; verifier: string }) {
-  const handoff = await prisma.authHandoff.findUnique({ where: { id: input.code } });
+  const handoff = await handoffById(input.code);
   const now = systemClock.now();
   if (!handoff || handoff.consumedAt || handoff.expiresAt <= now) throw sessionEnded();
   const challenge = createHash('sha256').update(input.verifier).digest('base64url');
@@ -76,24 +81,28 @@ export async function redeemHandoff(input: { code: string; verifier: string }) {
     !timingSafeEqual(Buffer.from(challenge), Buffer.from(handoff.challenge))
   )
     throw sessionEnded();
-  const session = await prisma.refreshSession.findUnique({
-    where: { id: handoff.sessionId },
-    include: { volunteer: true },
-  });
+  const session = await handoffSession(handoff.sessionId);
   if (!session || session.revokedAt || session.expiresAt <= now) throw sessionEnded();
-  const consumed = await prisma.authHandoff.updateMany({
-    where: { id: handoff.id, consumedAt: null, expiresAt: { gt: now } },
-    data: { consumedAt: now },
+  const result = await prisma.$transaction(async (tx) => {
+    await lockCredentialPerson(tx, session.volunteerId);
+    await lockSession(tx, session.id);
+    const current = await handoffSession(session.id, tx);
+    const latest = await lockHandoff(tx, handoff.id);
+    if (!current || !latest || latest.consumedAt || latest.expiresAt <= now) throw sessionEnded();
+    if (!credentialIsCurrent(current, now)) throw sessionEnded();
+    const volunteer = await loadVolunteer(current.volunteer.cognitoSub, tx);
+    if (current.mfaPending && !restrictedProviderIsCurrent(current, now)) throw sessionEnded();
+    if (!current.mfaPending) await currentSessionLimit(tx, { session: current, volunteer, now });
+    if (!(await consumeHandoff(tx, { id: latest.id, now }))) throw sessionEnded();
+    return { volunteer, current };
   });
-  if (!consumed.count) throw sessionEnded();
-  const volunteer = await loadVolunteer(session.volunteer.cognitoSub);
   return (
-    await issueSession(volunteer, {
-      sub: session.volunteer.cognitoSub,
-      sessionId: session.id,
+    await issueSession(result.volunteer, {
+      sub: result.current.volunteer.cognitoSub,
+      sessionId: result.current.id,
       refreshToken: '',
-      expiresAt: session.expiresAt,
-      mfaPending: session.mfaPending,
+      expiresAt: result.current.expiresAt,
+      mfaPending: result.current.mfaPending,
     })
   ).response;
 }

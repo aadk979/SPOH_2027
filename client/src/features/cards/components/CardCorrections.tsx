@@ -6,16 +6,16 @@ import { useZodForm } from '@/shared/hooks/useZodForm';
 import { Button, Field, Input, ConfirmationDialog, MutationFeedback } from '@/shared/ui';
 import { useCardCorrections } from '../queries';
 
-type Review = { kind: 'void'; code: string; body: VoidCardRequest }
-  | { kind: 'reissue'; code: string; body: ReissueCardRequest };
+type Review = { kind: 'void'; code: string; body: Omit<VoidCardRequest, 'idempotencyKey'> }
+  | { kind: 'reissue'; code: string; body: Omit<ReissueCardRequest, 'idempotencyKey'> };
 
 export function CardCorrections({ card, onChange }: {
   card: MissionCardRecord;
   onChange(card: MissionCardRecord): void;
 }) {
   const allows = useAllows();
-  const form = useZodForm(ReissueCardRequest, { reason: '', replacementShortCode: '' });
-  const voidForm = useZodForm(VoidCardRequest, { reason: '' });
+  const form = useZodForm(ReissueCardRequest.omit({ idempotencyKey: true }), { reason: '', replacementShortCode: '' });
+  const voidForm = useZodForm(VoidCardRequest.omit({ idempotencyKey: true }), { reason: '' });
   const { voidMutation, reissue } = useCardCorrections(card, onChange);
   const [review, setReview] = useState<Review | null>(null);
   const pending = voidMutation.isPending || reissue.isPending;

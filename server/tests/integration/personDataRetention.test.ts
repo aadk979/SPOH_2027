@@ -47,7 +47,7 @@ describe('person data requests', () => {
       kind: 'SWAP_APPROVED', priority: 'OPERATIONAL', sourceKind: 'SWAP', sourceId: randomUUID(),
       transitionKey: randomUUID(), context: { type: 'swap' }, createdAt: FROZEN_NOW, readAt: FROZEN_NOW } });
     await rawDb.noticePreference.create({ data: { personId: person.id, urgentPush: false, operationalPush: true } });
-    await request(app).post('/api/v1/auth/session').send({ email: person.email }).expect(201);
+    await request(app).post('/api/v1/auth/session').set('Origin', 'http://localhost:3000').send({ email: person.email }).expect(201);
     const result = await request(app).get(endpoint('/data')).set('Authorization', bearer(admin)).expect(200);
     expect(PersonDataExportResponse.safeParse(result.body).success).toBe(true);
     const serialised = JSON.stringify(result.body);
@@ -93,8 +93,8 @@ describe('person data requests', () => {
     const org = await rawDb.organisation.create({ data: { slug: 'foreign-privacy', name: 'Foreign', appName: 'Foreign', defaultTimezone: 'Asia/Singapore' } });
     const event = await rawDb.event.create({ data: { organisationId: org.id, slug: 'foreign', name: 'Foreign', timezone: 'Asia/Singapore' } });
     await rawDb.eventMembership.create({ data: { eventId: event.id, personId: person.id } });
-    await request(app).get(endpoint('/data')).set('Authorization', bearer(admin)).expect(403);
-    await request(app).post(endpoint('/erase')).set('Authorization', bearer(admin)).send({ reason: 'Cross scope' }).expect(403);
+    await request(app).get(endpoint('/data')).set('Authorization', bearer(admin)).expect(404);
+    await request(app).post(endpoint('/erase')).set('Authorization', bearer(admin)).send({ reason: 'Cross scope' }).expect(404);
   });
 });
 
@@ -111,7 +111,7 @@ describe('archive retention and access', () => {
     await request(app).get(`/api/v1/events/${scope.eventId}/admin/volunteers`).set('Authorization', bearer(admin)).expect(200);
     await request(app).post(`/api/v1/events/${scope.eventId}/admin/volunteers/${person.id}/reactivate`).set('Authorization', bearer(admin)).send({}).expect(403);
     await request(app).get(`/api/v1/events/${scope.eventId}/me`).set('Authorization', bearer(person)).expect(403);
-    await request(app).post('/api/v1/auth/session').send({ email: admin.email }).expect(201);
+    await request(app).post('/api/v1/auth/session').set('Origin', 'http://localhost:3000').send({ email: admin.email }).expect(201);
   });
   it('preserves a person still working in another event and schedules a deduplicated system deadline', async () => {
     const scope = await archive(new Date(FROZEN_NOW.getTime() - 366 * 86400000));

@@ -14,7 +14,8 @@ import {
   lifecycleNow,
 } from '../helpers/scheduledLifecycle.js';
 
-vi.mock('../../src/modules/media/application/s3.js', () => ({
+vi.mock('../../src/modules/media/application/s3.js', async () => ({
+  validateUpload: (await import('../helpers/mediaValidation.js')).syntheticValidatedUpload,
   mediaEnabled: () => true,
   assertConfigured: () => undefined,
   presignUpload: () => Promise.resolve({ url: 'https://bucket.test/upload', fields: {} }),
@@ -26,7 +27,7 @@ beforeEach(async () => {
   await resetDatabase();
   f = await scheduledLifecycleFixture();
   await rawDb.event.update({ where: { id: f.eventId }, data: { status: 'REHEARSAL' } });
-  sensitiveRateLimit.resetKey(`sub:${f.creator.sub}`);
+  await sensitiveRateLimit.resetKey(`sub:${f.creator.sub}`);
 });
 const actor = () => ({
   scope: { eventId: f.eventId },
@@ -120,7 +121,7 @@ it.each([
   { rehearsal: 0 },
   { rehearsal: { value: true } },
 ])(
-  'rejects missing or nonboolean provenance %j without breaking historical reads',
+  'rejects missing or nonboolean provenance %j before attachment or signing',
   async (metadata) => {
     const key = await upload();
     await rawDb.auditLog.updateMany({
@@ -131,7 +132,7 @@ it.each([
     expect(await rawDb.lostFoundItem.count()).toBe(0);
     expect(await rawDb.auditLog.count({ where: { action: 'lostFound.create' } })).toBe(0);
     const historical = await read(key);
-    expect(historical.status).toBe(200);
+    expect(historical.status).toBe(404);
     expect(historical.headers['cache-control']).toBe('no-store');
   },
 );

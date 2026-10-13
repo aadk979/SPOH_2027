@@ -93,7 +93,7 @@ function reissue(original: string, replacement: string): request.Test {
   return request(app)
     .post(`/api/v1/cards/${original}/reissue`)
     .set('Authorization', bearer(ic))
-    .send({ reason: 'Visitor lost the card', replacementShortCode: replacement });
+    .send({ reason: 'Visitor lost the card', replacementShortCode: replacement, idempotencyKey: idempotencyKey() });
 }
 
 function redeem(body: Record<string, unknown>): request.Test {

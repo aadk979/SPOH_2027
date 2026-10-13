@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import type { IdentityMutationResponse } from '@spoh/shared';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
-import { IdempotencyKeyReuseError } from '../../../platform/errors/index.js';
+import { IdempotencyKeyReuseError, ForbiddenError } from '../../../platform/errors/index.js';
 
 export interface PersonMutation {
   personId: string;
@@ -9,6 +9,7 @@ export interface PersonMutation {
   operation: string;
   idempotencyKey?: string;
   reason?: string;
+  authorizeReplay?: (tx: PrismaTransactionClient) => Promise<unknown>;
 }
 
 /** Platform retry receipts carry counts and a request digest, never profile data. */
@@ -24,6 +25,8 @@ export async function personMutation(input: PersonMutation,
     if (receipt) {
       const stored = receipt.responseBody as IdentityMutationResponse & { digest?: string };
       if (receipt.eventId !== null || receipt.actorSub !== input.actorSub || receipt.endpoint !== endpoint || stored.digest !== digest) throw new IdempotencyKeyReuseError();
+      if (!input.authorizeReplay) throw new ForbiddenError('Current account authority is required to replay this operation.');
+      await input.authorizeReplay(tx);
       return { identityChanged: stored.identityChanged, sessionsRevoked: stored.sessionsRevoked };
     }
     const result = await execute(tx);

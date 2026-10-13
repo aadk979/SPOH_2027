@@ -126,7 +126,7 @@ describe('two instances, one database (P03.5 repros)', () => {
   it('revokes an access token already cached on the other instance', async () => {
     const signIn = async (): Promise<string> => {
       const response = await request(a.app)
-        .post('/api/v1/auth/session')
+        .post('/api/v1/auth/session').set('Origin', 'http://localhost:3000')
         .send({ email: volunteer.email });
       expect(response.status).toBe(201);
       return response.body.accessToken as string;
@@ -144,6 +144,7 @@ describe('two instances, one database (P03.5 repros)', () => {
     expect(phoneSession).toBeDefined();
     await request(a.app)
       .delete(`/api/v1/auth/sessions/${phoneSession?.id ?? ''}`)
+      .set('Origin', 'http://localhost:3000')
       .set('Authorization', `Bearer ${laptop}`)
       .expect(204);
     await expect.poll(async () => (await me()).status, { timeout: 2_000, interval: 50 }).toBe(401);
@@ -152,7 +153,7 @@ describe('two instances, one database (P03.5 repros)', () => {
   // PF-02
   it.skip('applies the sign-in limit across instances, not per instance', async () => {
     const attempt = (instance: Instance) =>
-      request(instance.app).post('/api/v1/auth/session').send({ email: 'nobody@multi.test' });
+      request(instance.app).post('/api/v1/auth/session').set('Origin', 'http://localhost:3000').send({ email: 'nobody@multi.test' });
 
     // RATE_LIMIT_MAX_SENSITIVE is 20 per window from one address.
     for (let i = 0; i < 20; i += 1) expect((await attempt(a)).status).toBe(404);

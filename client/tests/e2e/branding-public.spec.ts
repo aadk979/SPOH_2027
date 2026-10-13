@@ -34,7 +34,7 @@ async function anonymousFixture(page: Page) {
   await page.route('**/api/v1/**', async (route) => {
     const request = route.request(); const url = new URL(request.url());
     if (request.method() === 'GET' && url.pathname === '/api/v1/client-config' && url.search === '') {
-      await route.fulfill({ json: { data: { version: 1, apiBaseUrl: '', envLabel: 'development', authProvider: 'local', cognito: null } } }); return;
+      await route.fulfill({ json: { data: { version: 2, mediaOrigin: null, apiBaseUrl: '', envLabel: 'development', authProvider: 'local', cognito: null } } }); return;
     }
     if (request.method() === 'POST' && url.pathname === '/api/v1/auth/refresh' && url.search === '') {
       await route.fulfill({ status: 401, json: { error: { code: 'UNAUTHORIZED', message: 'Sign in required', requestId: 'anonymous' } } }); return;

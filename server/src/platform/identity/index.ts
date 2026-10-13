@@ -162,7 +162,7 @@ async function resolveVolunteer(sub: string, event: RequestedEvent): Promise<Cac
 
   const volunteer = await prisma.person.findUnique({
     where: { cognitoSub: sub },
-    select: { id: true, displayName: true, deactivatedAt: true },
+    select: { id: true, displayName: true, deactivatedAt: true, piiErasedAt: true },
   });
   if (!volunteer) throw new NotProvisionedError();
 
@@ -189,9 +189,9 @@ async function resolveVolunteer(sub: string, event: RequestedEvent): Promise<Cac
   return entry;
 }
 
-async function standingInEvent(person: { id: string; deactivatedAt: Date | null },
+async function standingInEvent(person: { id: string; deactivatedAt: Date | null; piiErasedAt: Date | null },
   member: { status: string; accepted: boolean; eventId: string }) {
-  if (person.deactivatedAt) return false;
+  if (person.deactivatedAt || person.piiErasedAt) return false;
   if (member.status === 'ACTIVE' || member.accepted) return true;
   return archiveReader(prisma, { personId: person.id, status: member.status, eventId: member.eventId });
 }
@@ -263,10 +263,10 @@ export async function authenticatePerson(
   const { sub, sessionId } = await subjectOf(token);
   const person = await prisma.person.findUnique({
     where: { cognitoSub: sub },
-    select: { id: true, deactivatedAt: true },
+    select: { id: true, deactivatedAt: true, piiErasedAt: true },
   });
   if (!person) throw new NotProvisionedError();
-  if (person.deactivatedAt) throw new AccountInactiveError();
+  if (person.deactivatedAt || person.piiErasedAt) throw new AccountInactiveError();
   return { sub, personId: person.id, ...(sessionId ? { sessionId } : {}) };
 }
 

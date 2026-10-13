@@ -13,14 +13,14 @@ import { ForbiddenError } from '../../../platform/errors/index.js';
  *
  * Two things prevent it: the JSON content type (a form POST cannot send one
  * without triggering a preflight the allowlist rejects), and this check on
- * every state-changing route. A same-origin or non-browser caller sends no
- * Origin header at all, which is allowed — but a browser that does send one
- * must be on the allowlist.
+ * every state-changing route. An absent Origin needs same-origin Fetch Metadata
+ * and a non-safelisted JSON content type, rather than granting an unknown caller.
  */
 export function assertTrustedOrigin(req: Request): void {
   const origin = req.get('origin');
-  if (!origin) return;
-  if (env.CORS_ALLOWED_ORIGINS.includes(origin)) return;
+  if (origin && env.CORS_ALLOWED_ORIGINS.includes(origin)) return;
+  if (!origin && req.get('sec-fetch-site') === 'same-origin' &&
+    req.is('application/json')) return;
 
   throw new ForbiddenError('This request did not come from a known origin');
 }

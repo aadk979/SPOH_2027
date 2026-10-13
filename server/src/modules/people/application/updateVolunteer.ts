@@ -1,6 +1,5 @@
 import type {
   UpdateVolunteerRequest,
-  VolunteerAdminRecord,
   VolunteerMutationResponse,
 } from '@spoh/shared';
 import { writeAudit } from '../../../platform/audit/index.js';
@@ -9,13 +8,15 @@ import { holdCaptureEvent } from '../../../platform/db/captureProvenance.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { NotFoundError } from '../../../platform/errors/index.js';
 import { invalidateVolunteerCache } from '../../../platform/identity/index.js';
-import { revokeAllForVolunteer } from '../../auth/index.js';
+import { invalidatePersonCredentials } from '../../auth/index.js';
+import { systemClock } from '../../../platform/time/index.js';
 import { toAdminRecord } from '../data/mappers.js';
 import { findManager, findManagerOf, updateVolunteerRow } from '../data/repo.js';
 import { assertMayGrant, assertNoReportingCycle } from '../domain/escalation.js';
 import type { ManagerContext } from './context.js';
 import { loadTarget } from './queries.js';
 import { currentManagement } from './currentManagement.js';
+import { holdReportingEvent, requireReportingLine } from '../../../platform/db/reportingLine.js';
 
 async function assertValidManager(
   scope: EventScope,
@@ -49,26 +50,25 @@ function toChange(id: string, patch: UpdateVolunteerRequest) {
  * sessions must not outlive it. Permissions remain database-derived; a new
  * sign-in also makes the person review the changed event access.
  */
-async function afterRoleChange(updated: VolunteerAdminRecord): Promise<number> {
-  return revokeAllForVolunteer(updated.id, 'role-changed');
-}
-
 export async function updateVolunteer(
   id: string,
   patch: UpdateVolunteerRequest,
   actor: ManagerContext,
 ): Promise<VolunteerMutationResponse> {
-  const target = await loadTarget(id, actor, 'edit');
+  await loadTarget(id, actor, 'edit');
   assertMayGrant(actor.role, patch.role);
   await assertValidManager(actor.scope, { volunteerId: id, managerId: patch.reportsToId });
-  const roleChanged = patch.role !== undefined && patch.role !== target.role;
 
   const updated = await prisma.$transaction(async (tx) => {
+    if (patch.reportsToId !== undefined) await holdReportingEvent(tx, actor.scope);
     await holdCaptureEvent(tx, actor.scope);
-    await currentManagement(tx, actor, { id, action: 'People.Update' });
+    const target = await currentManagement(tx, actor, { id, action: 'People.Update' });
     if (patch.role)
       await currentManagement(tx, actor, { id, action: 'People.AssignRole', role: patch.role });
+    if (patch.reportsToId) await requireReportingLine(tx, actor.scope, { personId: id, managerId: patch.reportsToId });
     const row = await updateVolunteerRow(tx, actor.scope, toChange(id, patch));
+    const sessionsRevoked = patch.role !== undefined && patch.role !== target.role
+      ? await invalidatePersonCredentials(tx, { personId: id, reason: 'role-changed', at: systemClock.now() }) : 0;
     await writeAudit(tx, {
       ...actor.audit,
       action: 'user.update',
@@ -83,11 +83,10 @@ export async function updateVolunteer(
         ...(patch.role ? { role: patch.role } : {}),
         ...(patch.reportsToId !== undefined ? { reportsToId: patch.reportsToId } : {}) },
     });
-    return row;
+    return { row, sessionsRevoked };
   });
 
-  const volunteer = toAdminRecord(updated);
-  const sessionsRevoked = roleChanged ? await afterRoleChange(volunteer) : 0;
+  const volunteer = toAdminRecord(updated.row);
   invalidateVolunteerCache();
-  return { volunteer, sessionsRevoked, identityChanged: false };
+  return { volunteer, sessionsRevoked: updated.sessionsRevoked, identityChanged: false };
 }

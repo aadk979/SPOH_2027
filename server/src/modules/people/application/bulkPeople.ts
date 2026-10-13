@@ -14,7 +14,7 @@ export async function bulkPeople(
   for (const id of [...new Set(input.ids)]) await getVolunteer(actor.scope, id);
   for (const id of [...new Set(input.ids)]) {
     try {
-      if (input.action === 'resend') await resendInvite(id, actor);
+      if (input.action === 'resend') await resendInvite(id, actor, input.idempotencyKey);
       else if (input.action === 'deactivate')
         await deactivateVolunteer(
           id,

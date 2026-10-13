@@ -3,7 +3,7 @@ import { Template } from 'aws-cdk-lib/assertions';
 import { describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { PlatformStack } from '../src/platformStack.js';
-import type { StageName } from '../src/config.js';
+import { ACCOUNT_ENV, STAGES, type StageName } from '../src/config.js';
 
 const app = buildApp(
   new App({ context: { imageTag: 'verified-release', serviceImageTag: 'verified-release' } }),
@@ -23,6 +23,7 @@ const INFRA_NAMES = [
   'NODE_ENV',
   'PORT',
   'S3_EXPORTS_BUCKET',
+  'SESSION_COOKIE_CROSS_SITE',
   'TRUST_PROXY_HOPS',
 ];
 const STAGING_INFRA_NAMES = [
@@ -123,10 +124,24 @@ describe('infrastructure injection (P08.6)', () => {
       CLIENT_BASE_URL: 'https://secure-channel.duckdns.org',
       CORS_ALLOWED_ORIGINS: 'https://secure-channel.duckdns.org',
       DEPLOYMENT_ENV: 'staging',
+      SESSION_COOKIE_CROSS_SITE: 'false',
     });
     const poolId = Object.keys(staging.findResources('AWS::Cognito::UserPool'))[0];
     expect(values.COGNITO_USER_POOL_ID).toEqual({ Ref: poolId });
     prod.resourceCountIs('AWS::Cognito::UserPool', 1);
+  });
+
+  it('requires an explicit cross-site cookie choice when approved Firebase client and API origins are configured', () => {
+    const configured = new App({ context: { imageTag: 'release', serviceImageTag: 'release' } });
+    const actual = new PlatformStack(configured, 'FirebaseTasks', { env: ACCOUNT_ENV,
+      githubOidcProviderArn: 'arn:aws:iam::665146708212:oidc-provider/token.actions.githubusercontent.com',
+      stage: { ...STAGES.staging, publicOrigins: {
+        api: 'https://api.secure-channel.duckdns.org', client: 'https://synthetic-spoh.web.app', crossSiteCookies: true,
+      } } });
+    const template = Template.fromStack(actual);
+    template.hasResourceProperties('AWS::SSM::Parameter', {
+      Name: '/spoh/staging/infra/SESSION_COOKIE_CROSS_SITE', Value: 'true',
+    });
   });
 
   it('sets each stage its own callback and logout URLs, one pool and one client each', () => {

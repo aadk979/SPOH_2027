@@ -7,6 +7,9 @@ import { createCardBatch } from '../data/repo.js';
 import { generateBatchRows, toBatchCsv, type BatchRow } from '../domain/cardBatch.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import type { ActorContext } from '../../../platform/http/auditContext.js';
+import { requireCurrentPermission } from '../../../platform/access/currentPermission.js';
+import type { Clock } from '../../../platform/time/index.js';
+import { assertCardWritePhase } from '../domain/cardPhase.js';
 
 /** Collisions with existing codes are rare (32^6 codes); a few rounds always suffice. */
 const MAX_ROUNDS = 5;
@@ -43,12 +46,14 @@ const BATCH_TRANSACTION = { timeout: 60_000 };
  */
 export async function generateBatch(
   request: GenerateCardBatchRequest,
-  { scope, audit }: ActorContext,
+  { scope, audit, membershipId, volunteerId, clock }: ActorContext & { clock?: Clock },
 ): Promise<GenerateCardBatchResponse> {
   // The cards and their audit row commit together, and the batch is its own
   // action: it was audited as card.issue, after the insert (F03-018).
   return prisma.$transaction(async (tx) => {
-    await holdCaptureEvent(tx, scope);
+    assertCardWritePhase((await holdCaptureEvent(tx, scope)).status);
+    await requireCurrentPermission(tx, { scope, membershipId, personId: volunteerId,
+      action: 'Card.GenerateBatch', clock });
     await lockReserved(tx, scope, request.idempotencyKey);
     const inserted = await insertFreshCards(tx, scope, request);
     await writeAudit(tx, {

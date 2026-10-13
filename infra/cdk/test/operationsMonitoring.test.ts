@@ -30,6 +30,7 @@ describe('complete operational monitoring', () => {
         'scheduler-dead',
         'authorization-degraded',
         'cache-bus-degraded',
+        'authorization-denial-volume', 'authorization-denial-ratio', 'permission-policy-change',
       ])
         expect(names).toContain(`spoh-${stage}-${suffix}`);
       const topicId = Object.keys(template.findResources('AWS::SNS::Topic'))[0]!;
@@ -48,6 +49,12 @@ describe('complete operational monitoring', () => {
         ComparisonOperator: 'LessThanThreshold',
       });
       template.resourceCountIs('AWS::CloudWatch::Dashboard', 1);
+      const policyFilter = Object.values(template.findResources('AWS::Logs::MetricFilter')).find(
+        (filter) => filter.Properties.MetricTransformations[0].MetricName === 'PermissionPolicyChanges')!;
+      expect(policyFilter.Properties.FilterPattern).toBe('{ $.action = "permissions.change" }');
+      const auditGroup = template.toJSON().Resources[policyFilter.Properties.LogGroupName.Ref];
+      expect(auditGroup.Properties.LogGroupName).toBe(`/spoh/${stage}/audit`);
+      expect(auditGroup.Properties.RetentionInDays).toBe(400);
       const templateJson = template.toJSON();
       expect(templateJson.Parameters.AlarmEmail.NoEcho).toBe(true);
       expect(templateJson.Parameters.EventWeekPhone.Default).toBe('');

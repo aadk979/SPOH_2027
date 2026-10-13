@@ -14,3 +14,10 @@ export const MediaUploadAuditIntent = z
     rehearsal: z.boolean(),
   })
   .strict();
+
+/** Historical size may be absent; validation still requires proven event/pool issuance. */
+export const MediaValidationIntent = z.object({
+  purpose: CreateUploadRequest.shape.purpose,
+  contentType: CreateUploadRequest.shape.contentType,
+  contentLength: CreateUploadRequest.shape.contentLength.optional(),
+});

@@ -26,17 +26,19 @@ function origin(value: unknown, allowEmpty = false): string {
 
 /** Explicit provider, exact public fields, complete cloud metadata, no auth defaults. */
 export function readClientEnv(raw: unknown): ClientConfiguration {
-  const value = record(raw, ['version', 'apiBaseUrl', 'envLabel', 'authProvider', 'cognito']);
-  if (value.version !== 1) throw new Error('Invalid configuration');
+  const value = record(raw, ['version', 'apiBaseUrl', 'envLabel', 'authProvider', 'cognito', 'mediaOrigin']);
+  if (value.version !== 2) throw new Error('Invalid configuration');
   const label = text(value.envLabel, 32);
   if (!['development', 'test', 'staging', 'production'].includes(label))
     throw new Error('Invalid configuration');
   const common = {
-    version: 1 as const,
+    version: 2 as const,
     apiBaseUrl: origin(value.apiBaseUrl, true),
     envLabel: label as ClientConfiguration['envLabel'],
+    mediaOrigin: mediaOrigin(value.mediaOrigin),
   };
-  if (value.authProvider === 'local' && value.cognito === null)
+  const cloudEnvironment = label === 'production' || label === 'staging';
+  if (value.authProvider === 'local' && value.cognito === null && !cloudEnvironment)
     return Object.freeze({ ...common, authProvider: 'local', cognito: null });
   if (value.authProvider !== 'cognito') throw new Error('Invalid configuration');
   const cloud = record(value.cognito, ['region', 'userPoolId', 'clientId', 'domain']);
@@ -46,5 +48,19 @@ export function readClientEnv(raw: unknown): ClientConfiguration {
     clientId: text(cloud.clientId, 128),
     domain: origin(cloud.domain),
   });
+  if (cloudEnvironment) requireCloudOrigins(common.apiBaseUrl, cognito.domain);
   return Object.freeze({ ...common, authProvider: 'cognito', cognito });
+}
+
+function requireCloudOrigins(apiBaseUrl: string, domain: string): void {
+  if (!apiBaseUrl.startsWith('https://') || !domain.startsWith('https://'))
+    throw new Error('Invalid configuration');
+}
+
+function mediaOrigin(value: unknown): string | null {
+  if (value === null) return null;
+  const address = text(value, 2048);
+  if (!/^https:\/\/[a-z0-9][a-z0-9-]{1,61}[a-z0-9]\.s3\.(?!cn-)[a-z]{2}-(?:[a-z]+-)+[1-9]\d*\.amazonaws\.com$/.test(address))
+    throw new Error('Invalid configuration');
+  return address;
 }

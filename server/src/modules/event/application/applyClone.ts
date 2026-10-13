@@ -1,4 +1,5 @@
 import { ERROR_CODES, type CloneEventParts } from '@spoh/shared';
+import { randomUUID } from 'node:crypto';
 import { defaultRoleGrantRows } from '../../../platform/access/authorizer/roleGrants.js';
 import { writeAudit, type AuditContext } from '../../../platform/audit/index.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
@@ -27,8 +28,9 @@ import {
 import { movedDays, movedShifts } from '../domain/movedStructure.js';
 import type { ClonePlan } from './planClone.js';
 import { copyEventSettings } from '../data/cloneSettingsRepo.js';
-import { cloneContentInto } from '../../content/index.js';
+import { cloneContentInto, planCloneContent } from '../../content/index.js';
 import { cloneBrandingInto } from '../../branding/index.js';
+import { requireOrganisationAuthority } from './organisationAuthority.js';
 
 /**
  * Create the planned clone in one transaction (ADR-001 §6): a DRAFT event
@@ -45,8 +47,13 @@ export async function applyClone(
     throw new ConflictError(ERROR_CODES.CONFLICT, plan.conflicts.join(' '));
   }
   const now = (context.clock ?? systemClock).now();
+  const targetEventId = plan.targetEventId ?? randomUUID();
+  const contentStoragePlan = plan.request.copy?.content !== false && context.audit.actorId
+    ? await planCloneContent({ sourceEventId: plan.source.eventId, eventId: targetEventId,
+      personId: context.audit.actorId, sub: context.audit.actorSub ?? undefined, now }) : undefined;
+  const prepared = { ...plan, targetEventId, contentStoragePlan };
   const created = await prisma.$transaction(
-    (tx) => applyCloneInTransaction(tx, plan, { audit: context.audit, now }),
+    (tx) => applyCloneInTransaction(tx, prepared, { audit: context.audit, now }),
     { timeout: 30_000 },
   );
   invalidateEventCache();
@@ -59,8 +66,13 @@ export async function applyCloneInTransaction(
   plan: ClonePlan,
   context: { audit: AuditContext; now: Date },
 ): Promise<Event> {
+  await tx.$queryRaw`SELECT id FROM "Event" WHERE id = ${plan.source.eventId} FOR SHARE`;
   const source = await findEvent(plan.source.eventId, tx);
   if (!source) throw new NotFoundError('Event');
+  if (context.audit.actorId) await requireOrganisationAuthority(tx, {
+    personId: context.audit.actorId, subject: context.audit.actorSub ?? undefined,
+    organisationId: source.organisationId, action: 'Platform.CloneEvent',
+  });
   const event = await createClonedEvent(tx, { plan, source });
   const target = await copyStructure(tx, {
     source: { eventId: source.id },
@@ -78,6 +90,7 @@ export async function applyCloneInTransaction(
       personId: context.audit.actorId,
       now: context.now,
       stationIds: target.ids,
+      storagePlan: plan.contentStoragePlan,
     });
   await writeAudit(tx, {
     ...context.audit,
@@ -96,6 +109,7 @@ function createClonedEvent(
   { plan, source }: { plan: ClonePlan; source: Event },
 ): Promise<Event> {
   return insertEvent(tx, {
+    ...(plan.targetEventId ? { id: plan.targetEventId } : {}),
     organisationId: source.organisationId,
     slug: plan.request.slug,
     name: plan.request.name,

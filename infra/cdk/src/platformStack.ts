@@ -11,9 +11,11 @@ import { DatabaseCpuMonitoring } from './databaseCpuMonitoring.js';
 import { ObjectStorage } from './objectStorage.js';
 import { AuthorizationStore } from './authorizationStore.js';
 import { OperationsMonitoring } from './operationsMonitoring.js';
+import { StagingPermissionMatrixAccess } from './stagingPermissionMatrixAccess.js';
 
 export interface PlatformStackProps extends StackProps {
   stage: StageConfig;
+  githubOidcProviderArn: string;
 }
 
 /**
@@ -38,6 +40,9 @@ export class PlatformStack extends Stack {
     const secrets = new AppSecrets(this, 'Secrets', `spoh/${props.stage.name}`);
     const authorization = new AuthorizationStore(this, 'Authorization', {
       stage: props.stage.name,
+    });
+    if (props.stage.name === 'staging') new StagingPermissionMatrixAccess(this, 'PermissionMatrixAccess', {
+      providerArn: props.githubOidcProviderArn, authorization,
     });
     const api = createHttpApi(this, props.stage);
     const cognito = this.cognito(props.stage, api.apiEndpoint);

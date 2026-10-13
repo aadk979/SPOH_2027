@@ -3,14 +3,16 @@ import type { PrismaTransactionClient } from '../../../platform/db/client.js';
 import { erasePersonalNotices } from './notificationPersonalRepo.js';
 
 export async function archiveRetentionEvent(tx: PrismaTransactionClient, scope: EventScope) {
-  await tx.$queryRaw`SELECT id FROM "Event" WHERE id = ${scope.eventId} FOR SHARE`;
+  // Expiry updates membership/source rows before global profiles; exclude current event readers first.
+  await tx.$queryRaw`SELECT id FROM "Event" WHERE id = ${scope.eventId} FOR UPDATE`;
   return tx.event.findUniqueOrThrow({ where: { id: scope.eventId },
     select: { status: true, archivedAt: true, organisationId: true } });
 }
 
 export function archivedPeople(tx: PrismaTransactionClient, scope: EventScope) {
   return tx.person.findMany({
-    where: { piiErasedAt: null, eventMemberships: { some: { eventId: scope.eventId } } },
+    where: { eventMemberships: { some: { eventId: scope.eventId } } },
+    orderBy: { id: 'asc' },
     select: { id: true, organisationMemberships: { where: { role: 'PLATFORM_ADMIN' }, select: { id: true } },
       eventMemberships: { select: { eventId: true, status: true,
         event: { select: { status: true, archivedAt: true, organisationId: true } } } } },
@@ -24,7 +26,8 @@ export async function lockRetentionPerson(tx: PrismaTransactionClient, scope: Ev
 }
 
 export async function clearArchivedNotes(tx: PrismaTransactionClient, scope: EventScope) {
-  return tx.eventMembership.updateMany({ where: { eventId: scope.eventId, deactivatedReason: { not: null } },
+  return tx.eventMembership.updateMany({ where: { eventId: scope.eventId,
+    OR: [{ deactivatedReason: { not: null } }, { lastSeenAt: { not: null } }] },
     data: { deactivatedReason: null, lastSeenAt: null } });
 }
 
@@ -34,11 +37,8 @@ export async function anonymisePerson(tx: PrismaTransactionClient, input: { pers
     data: { displayName: 'Archived staff member', email: `archived-${input.personId}@invalid.example`,
       phone: null, lastSeenAt: null, deactivatedAt: input.now, piiErasedAt: input.now },
   });
-  if (!changed.count) return 0;
   await erasePersonalNotices(tx, input.personId);
   await tx.pushSubscription.deleteMany({ where: { volunteerId: input.personId } });
-  await tx.refreshSession.updateMany({ where: { volunteerId: input.personId, revokedAt: null },
-    data: { revokedAt: input.now, revokedReason: 'staff-retention', providerTokenEncrypted: null, providerTokenExpiresAt: null } });
   return changed.count;
 }
 
