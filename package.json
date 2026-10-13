@@ -58,7 +58,7 @@
     "globals": "^17.11.0",
     "npm-run-all2": "^9.0.3",
     "parse5": "8.0.1",
-    "prettier": "^3.9.6",
+    "prettier": "^3.9.10",
     "typescript": "6.0.3",
     "typescript-eslint": "^8.69.0"
   },
