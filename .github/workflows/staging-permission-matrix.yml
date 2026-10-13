@@ -53,7 +53,7 @@ jobs:
             packages/access-policies/tests/deployed-matrix.test.mjs
         env:
           SPOH_POLICY_SUITE_RECORD: ${{ github.workspace }}/.verification/permission-cases.jsonl
-      - uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::665146708212:role/spoh-staging-permission-matrix
           role-duration-seconds: 900
