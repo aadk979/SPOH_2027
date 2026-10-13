@@ -1,3 +1,4 @@
+import { checkedBrowserDatabase } from '../browser/testDatabase';
 import { expect, test, type Page } from '@playwright/test';
 import pg from 'pg';
 import { promoteToPlatformAdmin } from './platformAdmin';
@@ -21,10 +22,10 @@ const CHIEF = 'chief@spoh2027.test';
 const BOOTH = 'booth@spoh2027.test';
 
 function checkedDatabase(): string {
-  const database = new URL(process.env.E2E_DATABASE_URL ?? 'about:blank');
+  const database = new URL(checkedBrowserDatabase());
   if (
     database.hostname !== 'localhost' ||
-    database.pathname !== '/spoh2027_rehearsal_shift_e2e_test'
+    database.pathname !== '/spoh2027_test'
   )
     throw new Error('Dedicated local browser database required');
   return database.toString();

@@ -1,10 +1,11 @@
+import { checkedBrowserDatabase } from '../browser/testDatabase';
 import pg from 'pg';
 import { expect, test, type Page } from '@playwright/test';
 import { promoteToPlatformAdmin } from './platformAdmin';
 
 const EVENT_ID = 'evt_spoh2027'; // The disposable development fixture only.
 const DB_URL =
-  process.env.E2E_DATABASE_URL ?? 'postgresql://spoh:spoh@localhost:5435/spoh2027_p06_e2e_test';
+  checkedBrowserDatabase();
 
 function checkedTestDatabase(): string {
   const url = new URL(DB_URL);

@@ -1,3 +1,4 @@
+import { checkedBrowserDatabase } from '../browser/testDatabase';
 import { randomUUID } from 'node:crypto';
 import { expect, test, type Page } from '@playwright/test';
 import {
@@ -45,10 +46,10 @@ for (const [device, width, height] of [
         page,
       }) => {
         test.setTimeout(90_000);
-        const database = new URL(process.env.E2E_DATABASE_URL ?? 'about:blank');
+        const database = new URL(checkedBrowserDatabase());
         if (
           database.hostname !== 'localhost' ||
-          database.pathname !== '/spoh2027_rehearsal_shift_e2e_test'
+          database.pathname !== '/spoh2027_test'
         )
           throw new Error('Dedicated local catalogue editor database required');
         const errors: string[] = [],

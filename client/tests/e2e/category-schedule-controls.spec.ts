@@ -1,3 +1,4 @@
+import { checkedBrowserDatabase } from '../browser/testDatabase';
 import { randomUUID } from 'node:crypto';
 import pg from 'pg';
 import { expect, test, type Page, type BrowserContext } from '@playwright/test';
@@ -16,13 +17,13 @@ type Attempt = { body: CreateCategoryScheduleRequest; id?: string };
 type OwnedRegistration = { key: string; personId: string; stationId: string; id?: string };
 
 function databaseUrl() {
-  const value = process.env.E2E_DATABASE_URL;
+  const value = checkedBrowserDatabase();
   const url = new URL(value ?? 'about:blank');
   if (
     url.protocol !== 'postgresql:' ||
     url.hostname !== 'localhost' ||
-    url.port !== '5435' ||
-    url.pathname !== '/spoh2027_rehearsal_shift_e2e_test'
+    url.port !== (['true', '1'].includes(process.env.CI ?? '') ? '5432' : '5435') ||
+    url.pathname !== '/spoh2027_test'
   )
     throw new Error('Dedicated rehearsal category browser database required');
   return value!;

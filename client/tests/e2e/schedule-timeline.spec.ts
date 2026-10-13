@@ -1,3 +1,4 @@
+import { checkedBrowserDatabase } from '../browser/testDatabase';
 import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { ScheduleTimelineResponse } from '@spoh/shared';
@@ -15,10 +16,10 @@ for (const [name, width, height] of [
       viewport: { width, height },
     });
     test('current event schedule metadata survives cancellation and reload', async ({ page }) => {
-      const database = new URL(process.env.E2E_DATABASE_URL ?? 'about:blank');
+      const database = new URL(checkedBrowserDatabase());
       if (
         database.hostname !== 'localhost' ||
-        database.pathname !== '/spoh2027_rehearsal_shift_e2e_test'
+        database.pathname !== '/spoh2027_test'
       )
         throw new Error('Dedicated local schedule browser database required');
       const meRequest = page.waitForRequest(

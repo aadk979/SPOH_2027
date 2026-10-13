@@ -1,23 +1,11 @@
 import { expect, request, type APIRequestContext } from '@playwright/test';
 import { SessionResponse } from '@spoh/shared';
+import { localBrowserFixtureEnvironment } from '../../../scripts/browser-test-environment.mjs';
 
 export function categoryScheduleOrigins(clientOrigin: string) {
-  const configured = process.env.E2E_API_ORIGIN;
-  if (!configured) throw new Error('Explicit E2E_API_ORIGIN is required');
-  const api = new URL(configured);
-  const client = new URL(clientOrigin);
-  if (
-    api.protocol !== 'http:' ||
-    api.hostname !== 'localhost' ||
-    !['4012', '4014'].includes(api.port) ||
-    api.origin !== configured ||
-    client.protocol !== 'http:' ||
-    client.hostname !== 'localhost' ||
-    (!['3001', '3002'].includes(client.port) && client.origin !== api.origin) ||
-    client.origin !== clientOrigin
-  )
-    throw new Error('Dedicated local category scheduling origins required');
-  return { apiOrigin: api.origin, clientOrigin: client.origin };
+  const fixture = localBrowserFixtureEnvironment(process.env);
+  if (clientOrigin !== fixture.baseURL) throw new Error('Category scheduling must use the same checked local browser origin.');
+  return { apiOrigin: fixture.apiOrigin, clientOrigin: fixture.baseURL };
 }
 
 /** An independent cookie family prevents API polling from racing the UI refresh. */

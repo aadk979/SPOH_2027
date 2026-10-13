@@ -1,3 +1,4 @@
+import { checkedBrowserDatabase } from '../browser/testDatabase';
 import pg from 'pg';
 import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
@@ -6,10 +7,10 @@ import { expect, test } from '@playwright/test';
 const EVENT_ID = 'evt_spoh2027';
 const axe = readFileSync('../node_modules/axe-core/axe.min.js', 'utf8');
 function databaseUrl(): string {
-  const value = process.env.E2E_DATABASE_URL;
+  const value = checkedBrowserDatabase();
   if (!value) throw new Error('E2E_DATABASE_URL is required');
   const url = new URL(value);
-  if (url.hostname !== 'localhost' || url.pathname !== '/spoh2027_rehearsal_shift_e2e_test')
+  if (url.hostname !== 'localhost' || url.pathname !== '/spoh2027_test')
     throw new Error('Dedicated local lifecycle browser database required');
   return value;
 }

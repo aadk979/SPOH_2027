@@ -1,13 +1,14 @@
+import { checkedBrowserDatabase } from '../browser/testDatabase';
 import { EventSettingHistoryResponse, EventSettingsResponse } from '@spoh/shared';
 import { expect, test, type Page } from '@playwright/test';
 import pg from 'pg';
 import { promoteToPlatformAdmin } from './platformAdmin';
 
 function checkedDatabase(): string {
-  const database = new URL(process.env.E2E_DATABASE_URL ?? 'about:blank');
+  const database = new URL(checkedBrowserDatabase());
   if (
     database.hostname !== 'localhost' ||
-    database.pathname !== '/spoh2027_rehearsal_shift_e2e_test'
+    database.pathname !== '/spoh2027_test'
   )
     throw new Error('Dedicated local browser database required');
   return database.toString();

@@ -37,7 +37,7 @@ for (const [name, width, height] of [
         });
         await route.fulfill({
           status: objectUploads.length === 1 ? 503 : 204,
-          headers: { 'Access-Control-Allow-Origin': 'http://localhost:3001' },
+          headers: { 'Access-Control-Allow-Origin': 'http://localhost:4012' },
         });
       });
       await page.route('**/api/v1/**', async (route) => {

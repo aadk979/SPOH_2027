@@ -1,22 +1,18 @@
 import { defineConfig, devices } from '@playwright/test';
+import { localBrowserFixtureEnvironment } from '../scripts/browser-test-environment.mjs';
+
+const fixture = localBrowserFixtureEnvironment(process.env);
 
 /**
  * End-to-end tests (BUILD_PLAN §10).
  *
- * Three flows only, and they are the three that decide whether the event has
- * usable data: a booth volunteer tapping through registrations, a counter
- * counting entries, and a lost-person alert reaching a second device.
+ * Local fixture role/feature regressions against the real same-origin static
+ * build. They use SQL setup and local sign-in; they are not real Cognito or
+ * staging journeys. The P16 provider campaign has separate fixtures and evidence.
  *
- * Everything else is covered far more cheaply by the integration suite. An
- * exhaustive e2e suite would be slow, flaky, and would still not tell us
- * anything the 224 integration tests do not.
- *
- * Requires a running server and a seeded database:
- *
- *   npm run db:up
- *   npm run db:seed --workspace server
- *   npm run dev
- *   npm run test:e2e --workspace client
+ * Requires the existing spoh2027_test database with three matching explicit
+ * URLs, SPOH_SKIP_DOTENV=1, development/local auth and both client/API origins
+ * explicitly http://localhost:4012. No default DB, seed or dev server is started.
  */
 export default defineConfig({
   testDir: './tests/e2e',
@@ -27,7 +23,7 @@ export default defineConfig({
   reporter: process.env.CI ? 'list' : 'html',
 
   use: {
-    baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:3000',
+    baseURL: fixture.baseURL,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     // Containers that ship a browser build other than the one this Playwright

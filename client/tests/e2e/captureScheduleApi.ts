@@ -1,14 +1,15 @@
 import { expect, request, type APIRequestContext, type APIResponse } from '@playwright/test';
 import { SessionResponse } from '@spoh/shared';
+import { localBrowserFixtureEnvironment } from '../../../scripts/browser-test-environment.mjs';
 
 /** A separate cookie family avoids racing the UI's short-lived fixture session. */
 export async function localCaptureScheduleApi(origin: string) {
-  const url = new URL(origin);
-  if (url.hostname !== 'localhost' || url.port !== '4012')
+  const fixture = localBrowserFixtureEnvironment(process.env);
+  if (origin !== fixture.apiOrigin)
     throw new Error('Dedicated local fixture API required');
   const context = await request.newContext({
     baseURL: origin,
-    extraHTTPHeaders: { Origin: 'http://localhost:3001' },
+    extraHTTPHeaders: { Origin: fixture.baseURL },
   });
   const opened = await context.post('/api/v1/auth/session', {
     data: { email: 'admin@spoh2027.test' },

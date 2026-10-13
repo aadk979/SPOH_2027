@@ -1,5 +1,42 @@
 # P07 visual safety net
 
+## Current P16 boundary — 13 October 2026
+
+The earlier fixture record below is history. Its other database names and ports
+are obsolete and must not be used. Local regressions now use **only the existing
+spoh2027_test database**, local5435/CI5432, and the real static client/API together
+at **http://localhost:4012**. The guards require identical DATABASE_URL,
+TEST_DATABASE_URL and E2E_DATABASE_URL, SPOH_SKIP_DOTENV=1, NODE_ENV=development,
+DEPLOYMENT_ENV=development and AUTH_PROVIDER=local. E2E_BASE_URL/E2E_API_ORIGIN
+and VISUAL_BASE_URL/VISUAL_API_URL must be explicitly set to that same origin.
+No default database or dev server is silently selected. Do not reuse an unknown
+listener on4012 or stop another checkout's process.
+
+Work only from V1-main with Node24/npm and TEMP/TMP in V1-main/.local/tmp.
+The current [dispatch-only local browser workflow](../../../.github/workflows/browser.yml)
+is the reproducible setup: build shared packages, migrate the sole pre-existing
+test DB with the guarded setup CLI, seed only that local fixture, build the server
+and actual static export/manifest, then start an owned API with CLIENT_DIR set to
+that export. Database suites and fixture servers run serially.
+
+The frozen clock also checks the exact database and explicit local/development
+mode. Higher visual fixture quotas require SPOH_ALLOW_LOCAL_VISUAL_LIMITS=1;
+conversion of an unused rehearsal fixture separately requires
+SPOH_ALLOW_LOCAL_VISUAL_REHEARSAL=1 and retains its existing refusal/cleanup
+checks. Those local quotas and dates do not prove normal rate limits, real
+provider authentication, staging or load behavior.
+
+The journey/visual configurations contain SQL and local sign-in fixtures; the
+campaign configuration contains network-mocked UI composition. Their guards
+refuse staging and production. Real HTTPS/Cognito acceptance has separate
+fixtures and evidence in P16.10/P16.1. A generated manifest or local screenshot
+is not an executed provider journey. Keep existing baselines; establish new
+ones only after populated states, functional, keyboard and axe checks pass and
+the resulting image changes are reviewed. No browser run or baseline refresh
+was performed by the guard repair.
+
+## Historical P07–P10 fixture record (read-only)
+
 `npm run test:visual --workspace client` compares all 29 current app routes at 390×844 and 1440×900, plus capture, category scheduling and operational catalogue panel states at both widths (100 checks). Panel snapshots retain the viewport width and extend the height when needed to include every control; CSS property assignments hide surrounding sticky navigation for that crop, with zero CSP violations asserted. Functional phone/laptop journeys retain the original viewport heights. Baselines use the installed Playwright Chromium on Windows. Use the same browser/platform to avoid font-rendering differences. Screenshots are assertions, not automatically updated during refactors.
 
 The 6 October continuation preserves the existing frozen database, its nine

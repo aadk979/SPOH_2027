@@ -1,0 +1,236 @@
+{
+  "schemaVersion": 1,
+  "evidence": "bounded estimate, not measured staging cost or spending authorisation beyond D-10",
+  "generatedUtc": "2026-10-13T14:38:27.434Z",
+  "priceFetchedUtc": "2026-10-13T13:59:14.559Z",
+  "priceSha256": "a4b471e8c1e01bf2c97ad2c145159539e7897cba9c8c95310bfe5da9721395c7",
+  "templateSha256": "169c4b87c1c6f65e26b2aab5069cac7a0a8088d88f7b07f36746d39c302b5a8d",
+  "approvedCeilingUsd": 100,
+  "retainedAlertBudgetUsd": 50,
+  "grossChargesThroughEndExclusive20261013Usd": 14.7036442777,
+  "usage": {
+    "activeDays": 7,
+    "baseTaskHours": 168,
+    "extraTaskHours": 48,
+    "rdsHoursIncludingPossibleRestart": 288,
+    "requests": 2000000,
+    "uncachedAvpCalls": 2000000,
+    "logsGb": 20,
+    "backupGb": 40,
+    "storageGb": 20,
+    "ecrGb": 10,
+    "s3Gb": 20
+  },
+  "inventory": {
+    "alarms": 20,
+    "alarmInputs": 22,
+    "customMetrics": 14,
+    "dashboards": 1,
+    "secrets": 6,
+    "s3GatewayEndpoint": true,
+    "paidInterfaceEndpoints": 0,
+    "productionDeployed": false
+  },
+  "lines": {
+    "Fargate ARM 0.5vCPU/1GiB and public IPv4": 6.40332,
+    "RDS micro including automatic restart allowance": 7.2,
+    "Provisioned RDS storage, full month": 2.7600000000000002,
+    "Snapshot/backup storage, full month conservative": 3.8,
+    "Approved IPv4 Lightsail edge, full month": 7,
+    "Secrets including separately provisioned VAPID, full month": 2.4000000000000004,
+    "Standard alarm inputs, full month": 2.2,
+    "Custom metrics, full month": 4.2,
+    "Dashboards, no free-tier assumption": 3,
+    "All application/audit/flow/observer log ingestion and storage allowance": 14.6,
+    "HTTP API requests": 2.5,
+    "Cloud Map directory calls": 2,
+    "AVP calls, no cache savings assumed": 10,
+    "Private Cloud Map DNS namespace": 0.5,
+    "Cloud Map resource allowance": 0.2,
+    "ECR storage allowance": 1,
+    "Private S3 storage allowance": 0.5,
+    "Observer/Lambda/metrics APIs/SNS/RDS CPU credit/migration/restore contingency": 5
+  },
+  "estimatedAdditionalUsd": 75.26332000000001,
+  "estimatedOctoberGrossUsd": 89.96696427770001,
+  "estimatedHeadroomUsd": 10.0330357223,
+  "controls": [
+    "Initial active campaign bounded to seven days; review actual cost before extension.",
+    "Park after campaign/while waiting; do not park during the actual 24-hour soak.",
+    "Account for RDS automatic restart after seven stopped days; keep existing stronger $50 alert unchanged.",
+    "No production, SES, WAF, paid detectors, NAT or interface endpoints; no real snapshot restoration.",
+    "Request/log/storage/CPU allowances are limits of this estimate, not a measured guarantee."
+  ],
+  "rates": {
+    "fargate.arm.vcpuHour": {
+      "usd": 0.04045,
+      "unit": "hours",
+      "description": "AWS Fargate - ARM - vCPU - Asia Pacific (Singapore)",
+      "usagetype": "APS1-Fargate-ARM-vCPU-Hours:perCPU",
+      "offer": "AmazonECS",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonECS/20260911124425/ap-southeast-1/index.json",
+      "version": "20260911124425",
+      "publicationDate": "2026-09-11T12:44:25Z"
+    },
+    "fargate.arm.gbHour": {
+      "usd": 0.00442,
+      "unit": "hours",
+      "description": "AWS Fargate - ARM - Memory - Asia Pacific (Singapore)",
+      "usagetype": "APS1-Fargate-ARM-GB-Hours",
+      "offer": "AmazonECS",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonECS/20260911124425/ap-southeast-1/index.json",
+      "version": "20260911124425",
+      "publicationDate": "2026-09-11T12:44:25Z"
+    },
+    "vpc.publicIpv4Hour": {
+      "usd": 0.005,
+      "unit": "Hrs",
+      "description": "$0.005 per In-use public IPv4 address per hour",
+      "usagetype": "APS1-PublicIPv4:InUseAddress",
+      "offer": "AmazonVPC",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonVPC/20260917190528/ap-southeast-1/index.json",
+      "version": "20260917190528",
+      "publicationDate": "2026-09-17T19:05:28Z"
+    },
+    "apigw.httpRequest": {
+      "usd": 0.00000125,
+      "unit": "Requests",
+      "description": "$1.25/million requests - API Gateway HTTP API (first 300 million)",
+      "usagetype": "APS1-ApiGatewayHttpRequest",
+      "offer": "AmazonApiGateway",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonApiGateway/20261013003044/ap-southeast-1/index.json",
+      "version": "20261013003044",
+      "publicationDate": "2026-10-13T00:30:44Z"
+    },
+    "cloudmap.resourceMonth": {
+      "usd": 0.1,
+      "unit": "CloudMapResource",
+      "description": "$0.10 per resource-month",
+      "usagetype": "APS1-Cloud-Map-Resources",
+      "offer": "AWSCloudMap",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSCloudMap/20260911124531/ap-southeast-1/index.json",
+      "version": "20260911124531",
+      "publicationDate": "2026-09-11T12:45:31Z"
+    },
+    "cloudmap.apiCall": {
+      "usd": 0.000001,
+      "unit": "CloudMapAPICall",
+      "description": "$1.00 per million API calls",
+      "usagetype": "APS1-Cloud-Map-DIR-API-Calls",
+      "offer": "AWSCloudMap",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSCloudMap/20260911124531/ap-southeast-1/index.json",
+      "version": "20260911124531",
+      "publicationDate": "2026-09-11T12:45:31Z"
+    },
+    "rds.pg.t4gMicro.singleAzHour": {
+      "usd": 0.025,
+      "unit": "Hrs",
+      "description": "$ 0.025 per RDS db.t4g.micro Single-AZ instance hour (or partial hour) running PostgreSQL",
+      "usagetype": "APS1-InstanceUsage:db.t4g.micro",
+      "offer": "AmazonRDS",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonRDS/20261006224050/ap-southeast-1/index.json",
+      "version": "20261006224050",
+      "publicationDate": "2026-10-06T22:40:50Z"
+    },
+    "rds.gp3.singleAzGbMonth": {
+      "usd": 0.138,
+      "unit": "GB-Mo",
+      "description": "$0.138 per GB-month of provisioned GP3 storage running PostgreSQL",
+      "usagetype": "APS1-RDS:GP3-Storage",
+      "offer": "AmazonRDS",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonRDS/20261006224050/ap-southeast-1/index.json",
+      "version": "20261006224050",
+      "publicationDate": "2026-10-06T22:40:50Z"
+    },
+    "rds.backupGbMonth": {
+      "usd": 0.095,
+      "unit": "GB-Mo",
+      "description": "$0.095 per additional GB-month of backup storage exceeding free allocation running PostgreSQL",
+      "usagetype": "APS1-RDS:ChargedBackupUsage",
+      "offer": "AmazonRDS",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonRDS/20261006224050/ap-southeast-1/index.json",
+      "version": "20261006224050",
+      "publicationDate": "2026-10-06T22:40:50Z"
+    },
+    "avp.singleRequest": {
+      "usd": 0.000005,
+      "unit": "API Requests",
+      "description": "5 USD per million Single Authorization Requests",
+      "usagetype": "APS1-SingleAuthorizationRequest-API-Requests",
+      "offer": "AmazonVerifiedPermissions",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonVerifiedPermissions/20260911124513/ap-southeast-1/index.json",
+      "version": "20260911124513",
+      "publicationDate": "2026-09-11T12:45:13Z"
+    },
+    "secrets.secretMonth": {
+      "usd": 0.4,
+      "unit": "Secrets",
+      "description": "$0.40 per Secret",
+      "usagetype": "APS1-AWSSecretsManager-Secret",
+      "offer": "AWSSecretsManager",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSSecretsManager/20260911124610/ap-southeast-1/index.json",
+      "version": "20260911124610",
+      "publicationDate": "2026-09-11T12:46:10Z"
+    },
+    "cloudwatch.logIngestGb": {
+      "usd": 0.7,
+      "unit": "GB",
+      "description": "$0.70 per GB custom log data ingested in Standard log class - Asia Pacific (Singapore)",
+      "usagetype": "APS1-DataProcessing-Bytes",
+      "offer": "AmazonCloudWatch",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonCloudWatch/20261007115540/ap-southeast-1/index.json",
+      "version": "20261007115540",
+      "publicationDate": "2026-10-07T11:55:40Z"
+    },
+    "cloudwatch.logStorageGbMonth": {
+      "usd": 0.03,
+      "unit": "GB-Mo",
+      "description": "$0.03 per GB-mo of log storage - Asia Pacific (Singapore)",
+      "usagetype": "APS1-TimedStorage-ByteHrs",
+      "offer": "AmazonCloudWatch",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonCloudWatch/20261007115540/ap-southeast-1/index.json",
+      "version": "20261007115540",
+      "publicationDate": "2026-10-07T11:55:40Z"
+    },
+    "cloudwatch.alarmMonth": {
+      "usd": 0.1,
+      "unit": "Alarms",
+      "description": "$0.10 per alarm metric month (standard resolution) - Asia Pacific (Singapore)",
+      "usagetype": "APS1-CW:AlarmMonitorUsage",
+      "offer": "AmazonCloudWatch",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonCloudWatch/20261007115540/ap-southeast-1/index.json",
+      "version": "20261007115540",
+      "publicationDate": "2026-10-07T11:55:40Z"
+    },
+    "cloudwatch.metricMonth": {
+      "usd": 0.3,
+      "unit": "Metrics",
+      "description": "$0.30 per metric-month for the first 10,000 metrics - Asia Pacific (Singapore)",
+      "usagetype": "APS1-CW:MetricMonitorUsage",
+      "offer": "AmazonCloudWatch",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonCloudWatch/20261007115540/ap-southeast-1/index.json",
+      "version": "20261007115540",
+      "publicationDate": "2026-10-07T11:55:40Z"
+    },
+    "s3.standardGbMonth": {
+      "usd": 0.025,
+      "unit": "GB-Mo",
+      "description": "$0.025 per GB - first 50 TB / month of storage used",
+      "usagetype": "APS1-TimedStorage-ByteHrs",
+      "offer": "AmazonS3",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/20261012231102/ap-southeast-1/index.json",
+      "version": "20261012231102",
+      "publicationDate": "2026-10-12T23:11:02Z"
+    },
+    "ecr.storageGbMonth": {
+      "usd": 0.1,
+      "unit": "GB-Mo",
+      "description": "$0.10 per GB-month of data storage",
+      "usagetype": "APS1-TimedStorage-ByteHrs",
+      "offer": "AmazonECR",
+      "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonECR/20260911124425/ap-southeast-1/index.json",
+      "version": "20260911124425",
+      "publicationDate": "2026-09-11T12:44:25Z"
+    }
+  }
+}

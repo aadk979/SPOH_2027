@@ -1,3 +1,4 @@
+import { checkedBrowserDatabase } from '../browser/testDatabase';
 import { OrganisationSettingsResponse } from '@spoh/shared';
 import { expect, test } from '@playwright/test';
 
@@ -7,10 +8,10 @@ import { expect, test } from '@playwright/test';
  */
 test('a platform admin changes alert refresh for the organisation', async ({ page }) => {
   test.setTimeout(90_000);
-  const database = new URL(process.env.E2E_DATABASE_URL ?? 'about:blank');
+  const database = new URL(checkedBrowserDatabase());
   if (
     database.hostname !== 'localhost' ||
-    database.pathname !== '/spoh2027_rehearsal_shift_e2e_test'
+    database.pathname !== '/spoh2027_test'
   )
     throw new Error('Dedicated local browser database required');
   const errors: string[] = [];

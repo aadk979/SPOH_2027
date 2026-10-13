@@ -1,11 +1,12 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma/client.js';
+import { testDatabaseEnvironment } from '../../scripts/test-database-environment.mjs';
 
-/** The visual clock never advances, so its in-process rate buckets never expire. */
-const databaseUrl = process.env.DATABASE_URL;
-if (!databaseUrl || new URL(databaseUrl).pathname !== '/spoh2027_visual_test') {
-  throw new Error('This fixture script runs only against spoh2027_visual_test');
-}
+/** Local frozen UI composition only; actual rate-limit acceptance keeps normal settings. */
+const { DATABASE_URL: databaseUrl } = testDatabaseEnvironment(process.env);
+if (process.env.AUTH_PROVIDER !== 'local' || process.env.DEPLOYMENT_ENV !== 'development' ||
+  process.env.SPOH_ALLOW_LOCAL_VISUAL_LIMITS !== '1')
+  throw new Error('Visual limits require explicit local development and SPOH_ALLOW_LOCAL_VISUAL_LIMITS=1.');
 
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: databaseUrl }) });
 try {

@@ -49,3 +49,12 @@ it('lets the app append to that group only, never read, delete or change it', ()
   expect(JSON.stringify(statements[0])).toContain('log-group:/spoh/staging/audit:log-stream:*');
   expect(logStatements('migrate')).toEqual([]);
 });
+
+it('passes full deployment nag when the CLI resolves AWS partition literals', () => {
+  const deployment = buildApp(new App({ context: {
+    imageTag: 'verified-release', serviceImageTag: 'verified-release',
+    '@aws-cdk/core:enablePartitionLiterals': true,
+  } }));
+  // Plain App tests leave partition tokens unresolved; the deployment CLI does not.
+  expect(() => deployment.synth()).not.toThrow();
+});

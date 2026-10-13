@@ -1,8 +1,9 @@
-/** Date-only clock for the visual fixture API and seed. Timers still run normally. */
-const database = new URL(process.env.DATABASE_URL ?? 'postgresql://invalid/invalid').pathname;
-if (!database.endsWith('_test') || process.env.NODE_ENV === 'production') {
-  throw new Error('Visual fixture clock requires a disposable *_test database outside production');
-}
+import { testDatabaseEnvironment } from '../../../scripts/test-database-environment.mjs';
+
+/** Date-only clock for the sole local fixture API/seed, never for real acceptance. */
+testDatabaseEnvironment(process.env);
+if (process.env.AUTH_PROVIDER !== 'local' || process.env.DEPLOYMENT_ENV !== 'development')
+  throw new Error('Visual fixture clock requires explicit local auth/development.');
 const RealDate = Date;
 const instant = RealDate.parse('2026-09-28T02:00:00.000Z');
 globalThis.Date = class extends RealDate {

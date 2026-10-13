@@ -1,3 +1,4 @@
+import { checkedBrowserDatabase } from '../browser/testDatabase';
 import { expect, test, type Page } from '@playwright/test';
 import { ScopedSettingsReadResponse, ScopedSettingsHistoryResponse } from '@spoh/shared';
 import { source as axe } from 'axe-core';
@@ -32,10 +33,10 @@ for (const [name, width, height] of [
       test(`reads registered values and owned history at ${scope} scope without setting writes`, async ({
         page,
       }) => {
-        const database = new URL(process.env.E2E_DATABASE_URL ?? 'about:blank');
+        const database = new URL(checkedBrowserDatabase());
         if (
           database.hostname !== 'localhost' ||
-          database.pathname !== '/spoh2027_rehearsal_shift_e2e_test'
+          database.pathname !== '/spoh2027_test'
         )
           throw new Error('Dedicated local catalogue browser database required');
         const errors: string[] = [],

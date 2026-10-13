@@ -30,8 +30,9 @@ export function grantAuditShipping(task: FargateTaskDefinition, stage: StageName
   // cdk-nag names the finding by the rendered ARN: concrete for an environment-bound stack.
   const region = Token.isUnresolved(stack.region) ? '<AWS::Region>' : stack.region;
   const account = Token.isUnresolved(stack.account) ? '<AWS::AccountId>' : stack.account;
+  const partition = Token.isUnresolved(stack.partition) ? '<AWS::Partition>' : stack.partition;
   Validations.of(task.taskRole).acknowledge({
-    id: `AwsSolutions-IAM5[Resource::arn:<AWS::Partition>:logs:${region}:${account}:log-group:${auditLogGroupName(stage)}:log-stream:*]`,
+    id: `AwsSolutions-IAM5[Resource::arn:${partition}:logs:${region}:${account}:log-group:${auditLogGroupName(stage)}:log-stream:*]`,
     reason:
       'Streams of the one retained audit log group; the server creates a single fixed stream and can only append to it.',
   });

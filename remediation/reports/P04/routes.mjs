@@ -13,7 +13,15 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { CAPABILITY_MATRIX } from '../../../packages/shared/dist/capabilities.js';
+
+/** Preserve this historical parser and its snapshots; the current tool reads the live stack. */
+function refuseHistoricalRegeneration() {
+  throw new Error('P04 route regeneration is retired; use remediation/tools/route-inventory.mjs with an explicit new P16 --out. Historical snapshots are read-only.');
+}
+refuseHistoricalRegeneration();
+
+// Retained historical dependency, never loaded by the retired entry point.
+const { CAPABILITY_MATRIX } = await import('../../../packages/shared/dist/capabilities.js');
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const SRC = path.join(ROOT, 'server/src');

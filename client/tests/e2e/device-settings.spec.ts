@@ -1,3 +1,4 @@
+import { checkedBrowserDatabase } from '../browser/testDatabase';
 import { ClientSettingsResponse } from '@spoh/shared';
 import { expect, test } from '@playwright/test';
 
@@ -6,10 +7,10 @@ import { expect, test } from '@playwright/test';
  * capture and outbox values are that event's, not the legacy global copy.
  */
 test('a signed-in device loads its settings for the open event, privately', async ({ page }) => {
-  const database = new URL(process.env.E2E_DATABASE_URL ?? 'about:blank');
+  const database = new URL(checkedBrowserDatabase());
   if (
     database.hostname !== 'localhost' ||
-    database.pathname !== '/spoh2027_rehearsal_shift_e2e_test'
+    database.pathname !== '/spoh2027_test'
   )
     throw new Error('Dedicated local browser database required');
   const errors: string[] = [];

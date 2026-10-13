@@ -1,3 +1,4 @@
+import { checkedBrowserDatabase } from '../browser/testDatabase';
 import { readFileSync } from 'node:fs';
 import {
   EventSettingHistoryResponse,
@@ -21,10 +22,10 @@ for (const [name, width, height] of [
       page,
     }) => {
       test.setTimeout(90_000);
-      const database = new URL(process.env.E2E_DATABASE_URL ?? 'about:blank');
+      const database = new URL(checkedBrowserDatabase());
       if (
         database.hostname !== 'localhost' ||
-        database.pathname !== '/spoh2027_rehearsal_shift_e2e_test'
+        database.pathname !== '/spoh2027_test'
       )
         throw new Error('Dedicated local product history browser database required');
       const meRequest = page.waitForRequest(

@@ -1,3 +1,4 @@
+import { checkedBrowserDatabase } from '../browser/testDatabase';
 import { randomUUID } from 'node:crypto';
 import { expect, test } from '@playwright/test';
 import pg from 'pg';
@@ -7,10 +8,10 @@ import { promoteToPlatformAdmin } from './platformAdmin';
 test('an organiser creates and clones an event through the reviewed wizard into Setup', async ({
   page,
 }) => {
-  const database = new URL(process.env.E2E_DATABASE_URL ?? 'about:blank');
+  const database = new URL(checkedBrowserDatabase());
   if (
     database.hostname !== 'localhost' ||
-    database.port !== '5435' ||
+    database.port !== (['true', '1'].includes(process.env.CI ?? '') ? '5432' : '5435') ||
     database.pathname !== '/spoh2027_test'
   )
     throw new Error('The authorised local test database is required');

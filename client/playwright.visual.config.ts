@@ -1,4 +1,7 @@
 import { defineConfig } from '@playwright/test';
+import { localBrowserFixtureEnvironment } from '../scripts/browser-test-environment.mjs';
+
+const fixture = localBrowserFixtureEnvironment(process.env, 'visual');
 
 export default defineConfig({
   testDir: './tests/visual',
@@ -9,7 +12,7 @@ export default defineConfig({
   reporter: 'list',
   snapshotPathTemplate: '{testDir}/snapshots/{projectName}/{arg}{ext}',
   use: {
-    baseURL: process.env.VISUAL_BASE_URL ?? 'http://localhost:3001',
+    baseURL: fixture.baseURL,
     locale: 'en-SG',
     timezoneId: 'Asia/Singapore',
     colorScheme: 'light',

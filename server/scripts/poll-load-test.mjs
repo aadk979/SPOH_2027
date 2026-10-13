@@ -1,9 +1,13 @@
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { SignJWT } from 'jose';
+import { legacyLocalLoadEnvironment } from '../../scripts/browser-test-environment.mjs';
 
 /**
  * Polled-screen load test (P11.5 release 2b, D-22).
+ * P16 preparation: this historical local JWT harness refuses staging/production,
+ * other databases, implicit dotenv and other origins. It is not P16 evidence;
+ * real provider/event-scoped load follows only after the actual 24-hour soak.
  *
  * Coordinators and volunteers open their first screen at the same moment, after
  * the server has been idle long enough for its pool to close spare connections,
@@ -33,17 +37,12 @@ const POLL_SECONDS = arg('poll', 60);
 /** Longer than the pool's 30 s idle timeout, so spare connections close first. */
 const IDLE_SECONDS = arg('idle', 45);
 
-const BASE = process.env.LOAD_TEST_API ?? 'http://localhost:4010';
+const BASE = legacyLocalLoadEnvironment(process.env).apiOrigin;
 const CHIEF_EMAIL = process.env.LOAD_TEST_CHIEF ?? 'chief@spoh2027.test';
 const STATION_CODE = process.env.LOAD_TEST_STATION ?? 'SIGNUP_BOOTH';
 const LOAD_EMAIL_DOMAIN = 'pollload.spoh2027.test';
 
 function loadLocalSecret() {
-  try {
-    process.loadEnvFile(fileURLToPath(new URL('../.env', import.meta.url)));
-  } catch {
-    // Falling back to the ambient environment.
-  }
   const secret = process.env.LOCAL_AUTH_SECRET;
   if (!secret)
     throw new Error('LOCAL_AUTH_SECRET is not set. This script needs AUTH_PROVIDER=local.');

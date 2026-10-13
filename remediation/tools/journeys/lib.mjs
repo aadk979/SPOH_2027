@@ -12,6 +12,12 @@ import { fileURLToPath } from 'node:url';
 import { chromium, devices } from 'playwright';
 import sharp from 'sharp';
 
+/** The P02 audit outputs are historical; current regressions use the guarded Playwright configs. */
+function refuseHistoricalJourneyRun() {
+  throw new Error('P02 journey regeneration is retired. Preserve its audit/screenshots; use the current guarded browser configurations and separate P16 staging campaign.');
+}
+refuseHistoricalJourneyRun();
+
 const here = path.dirname(fileURLToPath(import.meta.url));
 export const ROOT = path.resolve(here, '../../..');
 export const STATE_DIR = path.join(here, '.state');

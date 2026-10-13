@@ -10,10 +10,10 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-13T13:04:16.386Z",
+  "updatedAt": "2026-10-13T15:23:50.903Z",
   "current": {
     "phase": "P16",
-    "step": null
+    "step": "P16.10"
   },
   "gates": [
     {
@@ -3753,11 +3753,16 @@
         {
           "id": "P16.10",
           "title": "Granular API suite (run first)",
-          "status": "not_started",
-          "startedAt": null,
+          "status": "in_progress",
+          "startedAt": "2026-10-13T13:07:17.596Z",
           "completedAt": null,
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-13T13:07:17.597Z",
+              "text": "ADR-011 campaign entry: repair route inventory/history and all legacy browser DB/port/setup guards before execution; staging recreation/API/browser acceptance not yet run."
+            }
+          ]
         },
         {
           "id": "P16.8",
@@ -3832,8 +3837,8 @@
           "notes": []
         }
       ],
-      "status": "not_started",
-      "startedAt": null,
+      "status": "in_progress",
+      "startedAt": "2026-10-13T13:07:17.597Z",
       "completedAt": null
     }
   ],
@@ -4321,6 +4326,18 @@
     {
       "at": "2026-10-13T13:04:16.385Z",
       "text": "P15 source/test batch accepted on 14baa68c2e947c4cdfee376f1e33aca6c1030b5e, CI38398631231 all five jobs success; whole Node24/npm no-resume local gate actual0, 5649 passed plus two historical skips. P16 next in ADR-011 order; P12.8, G3/G5 and all production/cost/real-identity gates remain held."
+    },
+    {
+      "at": "2026-10-13T14:42:51.194Z",
+      "text": "P16.10 preparation: exact sole-DB/localhost4012 guards authored; 33 safety tests actual0; 423 source routes/343 schema routes/470 locations inventoried, no HTTP proof. Full CDK deployment nag found partition-ack defect; failing regression reproduced, narrow source fix/3 tests/full CLI synth actual0. Account/cost read-only preflight, seven-day bounded estimate89.97 gross under D-10; no deployment/mailbox/provider/browser yet. Whole batch acceptance remains pending."
+    },
+    {
+      "at": "2026-10-13T15:23:07.128Z",
+      "text": "P16 preparation/fix complete local27-step Node24/npm no-resume gate actual0 at2026-10-13T15:21:49.4945681Z:5650 passes plus2 retained skips; separate59 tracker/delivery/safety checks. Controlled private synthetic mailbox authenticated, no invitation/provider identity. OIDC immutable prefix matches exact trust; retained snapshot untouched. D-11 staging/exact-SHA CI next; no P16 step accepted."
+    },
+    {
+      "at": "2026-10-13T15:23:50.902Z",
+      "text": "Correction to preceding P16 prep log: always-run tracker/delivery/safety group is61 tests (28 existing plus33 new), not59. Controlled mailbox was created/verified during the gate before its final exit; not afterward."
     }
   ]
 }

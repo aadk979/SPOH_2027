@@ -1,10 +1,11 @@
+import { checkedBrowserDatabase } from '../browser/testDatabase';
 import pg from 'pg';
 import { randomUUID } from 'node:crypto';
 import { expect, test } from '@playwright/test';
 
 const EVENT_ID = 'evt_spoh2027';
 function databaseUrl(): string {
-  const value = process.env.E2E_DATABASE_URL;
+  const value = checkedBrowserDatabase();
   if (!value) throw new Error('E2E_DATABASE_URL is required');
   const url = new URL(value);
   if (url.hostname !== 'localhost' || !url.pathname.endsWith('_test'))

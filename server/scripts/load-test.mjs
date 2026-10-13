@@ -1,9 +1,14 @@
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { SignJWT } from 'jose';
+import { legacyLocalLoadEnvironment } from '../../scripts/browser-test-environment.mjs';
 
 /**
  * Capture load test (BUILD_PLAN §12, Phase 4 acceptance).
+ * P16 preparation: retained local synthetic harness only. It requires explicit
+ * development/local auth, sole spoh2027_test URLs, skip-dotenv and localhost4012.
+ * It cannot run against staging. P16.2 must replace its synthetic JWT path with
+ * real authenticated provider sessions and event-scoped mixed workload.
  *
  * 100 concurrent capture clients at 20 taps per minute each, p95 under 300ms.
  *
@@ -35,7 +40,7 @@ const P95_BUDGET_MS = arg('budget', 300);
 /** Seconds of ramp-up excluded from the steady-state figures. */
 const RAMP_SECONDS = arg('ramp', 5);
 
-const BASE = process.env.LOAD_TEST_API ?? 'http://localhost:4010';
+const BASE = legacyLocalLoadEnvironment(process.env).apiOrigin;
 const CHIEF_EMAIL = process.env.LOAD_TEST_CHIEF ?? 'chief@spoh2027.test';
 const STATION_CODE = process.env.LOAD_TEST_STATION ?? 'SIGNUP_BOOTH';
 
@@ -52,12 +57,6 @@ const LOAD_EMAIL_DOMAIN = 'loadtest.spoh2027.test';
  * exactly as tests/helpers/fixtures.ts does.
  */
 function loadLocalSecret() {
-  try {
-    process.loadEnvFile(fileURLToPath(new URL('../.env', import.meta.url)));
-  } catch {
-    // Falling back to the ambient environment.
-  }
-
   const secret = process.env.LOCAL_AUTH_SECRET;
   if (!secret) {
     throw new Error('LOCAL_AUTH_SECRET is not set. This script needs AUTH_PROVIDER=local.');

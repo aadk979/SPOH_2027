@@ -1,5 +1,8 @@
 import { defineConfig } from '@playwright/test';
 import { BROWSER_PROJECTS } from './tests/browser/routeManifest';
+import { localBrowserMockEnvironment } from '../scripts/browser-test-environment.mjs';
+
+const fixture = localBrowserMockEnvironment(process.env);
 
 /** Populated deterministic UI acceptance. Real API/policy acceptance is P16.10. */
 export default defineConfig({
@@ -12,7 +15,7 @@ export default defineConfig({
   reporter: [['list'], ['junit', { outputFile: 'test-results/campaign-junit.xml' }]],
   snapshotPathTemplate: '{testDir}/snapshots/{projectName}/{arg}{ext}',
   use: {
-    baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:3000',
+    baseURL: fixture.baseURL,
     locale: 'en-SG',
     timezoneId: 'Asia/Singapore',
     deviceScaleFactor: 1,

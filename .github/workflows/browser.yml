@@ -85,6 +85,9 @@ jobs:
       - run: npm run build:shared
 
       - name: Migrate and seed the browser database
+        env:
+          # Frozen local UI fixtures only; never staging rate-limit acceptance.
+          SPOH_ALLOW_LOCAL_VISUAL_LIMITS: '1'
         run: |
           (cd server && npx prisma generate)
           node server/scripts/setup-test-db.mjs

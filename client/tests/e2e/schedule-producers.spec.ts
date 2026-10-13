@@ -1,3 +1,4 @@
+import { checkedBrowserDatabase } from '../browser/testDatabase';
 import { ScheduleMutationResponse, zonedWallTime } from '@spoh/shared';
 import { expect, test, type Page } from '@playwright/test';
 
@@ -6,10 +7,10 @@ import { expect, test, type Page } from '@playwright/test';
  * then cancelled there. The fixture is the rehearsal browser database (client/tests/visual).
  */
 async function signIn(page: Page) {
-  const database = new URL(process.env.E2E_DATABASE_URL ?? 'about:blank');
+  const database = new URL(checkedBrowserDatabase());
   if (
     database.hostname !== 'localhost' ||
-    database.pathname !== '/spoh2027_rehearsal_shift_e2e_test'
+    database.pathname !== '/spoh2027_test'
   )
     throw new Error('Dedicated local schedule browser database required');
   const meRequest = page.waitForRequest(

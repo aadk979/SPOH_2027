@@ -1,3 +1,4 @@
+import { checkedBrowserDatabase } from '../browser/testDatabase';
 import { randomUUID } from 'node:crypto';
 import pg from 'pg';
 import { expect, test, type Page } from '@playwright/test';
@@ -49,11 +50,11 @@ for (const [name, width, height] of [
         page,
       }) => {
         test.setTimeout(120_000);
-        const value = process.env.E2E_DATABASE_URL;
+        const value = checkedBrowserDatabase();
         const database = new URL(value ?? 'about:blank');
         if (
           database.hostname !== 'localhost' ||
-          database.pathname !== '/spoh2027_rehearsal_shift_e2e_test'
+          database.pathname !== '/spoh2027_test'
         )
           throw new Error('Dedicated local scoped capture browser database required');
         const db = new pg.Client({ connectionString: value });

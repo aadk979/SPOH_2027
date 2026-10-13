@@ -1,18 +1,13 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma/client.js';
 import { FIXTURE_EVENT, SECOND_EVENT } from '../prisma/fixtures/devEvent.js';
+import { testDatabaseEnvironment } from '../../scripts/test-database-environment.mjs';
 
 /** Convert only an unused legacy visual fixture; retain its historical dates. */
-const databaseUrl = process.env.DATABASE_URL;
-const url = databaseUrl ? new URL(databaseUrl) : null;
-if (
-  process.env.NODE_ENV === 'production' ||
-  url?.hostname !== 'localhost' ||
-  url.port !== '5435' ||
-  url.pathname !== '/spoh2027_visual_test'
-) {
-  throw new Error('Only localhost:5435/spoh2027_visual_test may be prepared');
-}
+const { DATABASE_URL: databaseUrl } = testDatabaseEnvironment(process.env);
+if (process.env.AUTH_PROVIDER !== 'local' || process.env.DEPLOYMENT_ENV !== 'development' ||
+  process.env.SPOH_ALLOW_LOCAL_VISUAL_REHEARSAL !== '1')
+  throw new Error('Rehearsal conversion requires explicit local development and SPOH_ALLOW_LOCAL_VISUAL_REHEARSAL=1.');
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: databaseUrl }) });
 const captures = [
   'registration',
