@@ -411,7 +411,7 @@ recorded in each ADR's _Migration_ section.
 
 ## P15 source and deferred acceptance ledger — 13 October 2026
 
-P15 complete local gate and exact-SHA CI are pending. The ranked tables above
+P15 complete local gate passed actual 0; exact-SHA CI is pending. The ranked tables above
 remain baseline history; operational High findings are not declared zero open
 risk. The [manual review](../reports/P15/security-review-2026-10-13.md),
 [253-control register](../reports/P15/asvs-review-2026-10-13.md),
@@ -421,7 +421,7 @@ source repairs and explicit residuals.
 
 | IDs | Implemented build work | Remaining acceptance / owner action |
 | --- | --- | --- |
-| PF-02, F03-042, F04-006 | Shared Postgres HTTP/denial counters, fixed settings/tiers, bounded cleanup/refunds and multi-instance tests. | Complete gate/CI; P16 provider/campus/shared-instance load proof. |
+| PF-02, F03-042, F04-006 | Shared Postgres HTTP/denial counters, fixed settings/tiers, bounded cleanup/refunds and multi-instance tests. | Exact-SHA CI; P16 provider/campus/shared-instance load proof. |
 | F04-007 | Exact bootstrap/style hashes, fail-closed CSP manifests and Firebase/Express mappings, linked branding CSS and artifact tests. | P16 deployed HTML/error/redirect/browser headers; no current A-grade hosting claim. |
 | F04-015, F03-039, F03-040 | Effective SQL app audit restrictions, immutable owner-only 400-day cleanup, post-commit batches/cursor and append-only CloudWatch task rights. | P16 actual shipping, denied log administration, receipt and cost proof. |
 | F04-011 | Explicit key versions, preload/flip/retire protocol, independent attendance/VAPID, operator DB rollback and crypto/log inventories. | Actual rotation/recovery rehearsal and owner compromise choices. |

@@ -118,7 +118,7 @@ describe('printable mission cards', () => {
     for (const station of multilingual.stampingStations)
       expect(text.replace(/\s/gu, '')).toContain(station.name.replace(/\s/gu, ''));
     expect(body.length).toBeLessThan(1_000_000);
-  });
+  }, 15_000); // Real Unicode subsetting and font inspection run under shared CI CPU load.
   it('wraps long Unicode names, grows cards instead of clipping labels, and retains an unlabelled batch', async () => {
     const fonts = await embedCardFonts(await PDFDocument.create());
     const longContext = {
@@ -142,7 +142,7 @@ describe('printable mission cards', () => {
       wrapCardText('  long words   and \n lines ', fonts, { size: 9, width: 35 }).join(' '),
     ).toBe('long words and lines');
     expect(wrapCardText('  ', fonts, { size: 9, width: 35 })).toEqual([]);
-  });
+  }, 15_000); // CJK shaping exceeded four seconds in the same instrumented CI run.
   it('refuses unsupported graphemes and a station grid larger than a physical A4 card', async () => {
     const fonts = await embedCardFonts(await PDFDocument.create());
     expect(() => cardTextRuns('Mission 🦄', fonts)).toThrow('unsupported');
