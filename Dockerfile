@@ -21,8 +21,9 @@ COPY packages/shared packages/shared
 COPY packages/access-policies packages/access-policies
 COPY server server
 COPY client client
+COPY scripts/test-database-environment.mjs scripts/browser-test-environment.mjs scripts/
 RUN npm run build:shared \
- && DATABASE_URL=postgresql://build:build@localhost:5432/build_test SPOH_SKIP_DOTENV=1 npm run build --workspace server  && npm run build:seed --workspace server \
+ && DATABASE_URL=postgresql://spoh:spoh@localhost:5435/spoh2027_test TEST_DATABASE_URL=postgresql://spoh:spoh@localhost:5435/spoh2027_test SPOH_SKIP_DOTENV=1 npm run build --workspace server  && npm run build:seed --workspace server \
  && SPOH_STATIC_EXPORT=1 npm run build --workspace client
 
 # Runtime dependencies of the server and the shared packages, the Prisma CLI
@@ -48,6 +49,7 @@ COPY --from=build --chown=node:node /app/server/dist server/dist
 COPY --from=build --chown=node:node /app/server/assets/fonts server/assets/fonts
 COPY --from=build --chown=node:node /app/server/prisma server/prisma
 COPY --from=build --chown=node:node /app/server/scripts server/scripts
+COPY --from=build --chown=node:node /app/scripts/test-database-environment.mjs /app/scripts/browser-test-environment.mjs scripts/
 COPY --from=build --chown=node:node /app/client/out client/out
 COPY --from=build --chown=node:node /app/client/out.csp.json client/out.csp.json
 COPY --chown=node:node infra/docker/entrypoint.sh /app/entrypoint.sh

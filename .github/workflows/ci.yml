@@ -77,11 +77,12 @@ jobs:
         run: npm run test:static-manifest --workspace client
 
       # prisma.config.ts refuses to load without DATABASE_URL, even though
-      # generate never connects. A placeholder satisfies it.
+      # generate never connects. Use the sole permitted test DB configuration.
       - run: npx prisma generate
         working-directory: server
         env:
-          DATABASE_URL: postgresql://unused:unused@localhost:5432/unused_test
+          DATABASE_URL: postgresql://spoh:spoh@localhost:5432/spoh2027_test
+          TEST_DATABASE_URL: postgresql://spoh:spoh@localhost:5432/spoh2027_test
           SPOH_SKIP_DOTENV: '1'
 
       - run: npm run lint
@@ -91,6 +92,12 @@ jobs:
       - run: npm run build --workspace client
         env:
           NEXT_PUBLIC_API_BASE_URL: https://api.example.invalid
+
+      # Check the actual deployment package; host builds cannot detect missing COPY inputs.
+      - name: Build and verify the deployment image
+        run: |
+          docker build --platform linux/amd64 -t spoh-ci-image .
+          node scripts/check-image-verification.mjs spoh-ci-image
 
   test:
     needs: changes
@@ -204,11 +211,12 @@ jobs:
       - run: npm run build:shared
 
       # The boundary rules resolve imports of the generated Prisma client.
-      # As in the quality job, generate needs only a placeholder DATABASE_URL.
+      # As in the quality job, generation uses only the permitted test DB URL.
       - run: npx prisma generate
         working-directory: server
         env:
-          DATABASE_URL: postgresql://unused:unused@localhost:5432/unused_test
+          DATABASE_URL: postgresql://spoh:spoh@localhost:5432/spoh2027_test
+          TEST_DATABASE_URL: postgresql://spoh:spoh@localhost:5432/spoh2027_test
           SPOH_SKIP_DOTENV: '1'
 
       - name: Guard counts

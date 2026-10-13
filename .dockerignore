@@ -16,6 +16,9 @@ infra/cdk/cdk.out
 remediation
 !remediation/reports/P09/totals.mjs
 docs
-client/tests
+client/tests/*
+!client/tests/browser
+client/tests/browser/*
+!client/tests/browser/routeManifest.ts
 server/tests
 **/*.tsbuildinfo

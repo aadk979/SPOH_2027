@@ -154,3 +154,66 @@ matrix. It records **zero executed cases** and requires concrete fixtures and
 expected outcomes, including custom semantic checks. It is not the passing
 granular suite required by P16.10. Exact-SHA CI for this coherent preparation
 batch is the remaining delivery prerequisite; P16.10 stays in progress.
+
+## Preparation delivery and image packaging correction
+
+The whole63-file preparation batch was delivered directly to main as
+`2be731d2c799f905a90a80149cc04006048bdb84`. Its exact-SHA
+[CI38421756985](https://github.com/aadk979/SPOH_2027/actions/runs/38421756985)
+completed with allfive jobs green at `2026-10-13T15:41:48Z`.
+
+A subsequent actual container build exposed missing inputs that the host build
+could not detect: the client campaign config imports its independently authored
+route manifest, excluded by `.dockerignore`, and all browser configs import root
+verification guards absent from the build image. Runtime server verification
+scripts also require those root guards. The pre-fix build failed TypeScript at
+`2026-10-13T15:43:58.6907150Z`; no database connection was attempted.
+The correction includes only the manifest from client tests and the two guards
+in build/runtime stages. Generator-only Docker/CI configuration uses the sole
+permitted `spoh2027_test` name; no other database is created or accessed.
+
+The blocking quality job now builds the complete image and executes a runtime
+check with networking disabled, no mounts and no credentials. It imports the
+packaged verification scripts, checks non-root Node24 and compiled entrypoints,
+exercises local/production refusal guards, and compares the complete actual HTML
+bytes and parsed executable-script hashes with the packaged CSP manifest.
+This is package verification, not provider, deployed ARM64 or staging API proof.
+The corrected source still requires its whole local gate and exact-SHA delivery.
+
+The corrected complete linux/amd64 image build and network-disabled runtime
+check both finished **actual0** at `2026-10-13T15:54:14.1488957Z`.
+All59 packaged HTML documents matched their CSP bytes/script hashes, packaged
+imports and refusal guards passed, and no database connection was attempted.
+The earlier failing build and corrected logs/exit records remain private.
+
+The owner will update DuckDNS after receiving the recreated staging edge's public
+IP (reconfirmed13October; consistent with D-08's2October DNS operation). Agent
+DuckDNS login/token access is unnecessary. No domain was changed. The temporary
+login panel was closed, and no production/live-site change is authorised.
+
+The whole corrected Node24/npm **29-step** local gate ran from the beginning
+without resume and finished **actual0** at `2026-10-13T16:32:53.8054192Z`
+(`ci-local-20261013T1555Z`). The five suites again passed5650 tests with the
+two existing server skips retained; the separate tracker/delivery/safety group
+passed61. Coverage floors and assertions are unchanged. The additional image
+build and network-disabled runtime check passed with59 verified documents;
+complete coverage/LCOV, logs and actual exit are retained privately.
+
+Read-only baseline synthesis/review also passed: seven deploy-access resources,
+147 fresh staging-platform resources and three staging-edge resources, with no
+app image/service requested yet. No paid interface endpoint/NAT, duplicate
+budget, production stack or snapshot restore is included. AWS confirms the
+configured PostgreSQL17.9/t4g.micro/gp3 and Ubuntu24.04 blueprint are available.
+The sole retained budget email recipient was recovered privately for the
+already-approved owner alarm destination; neither budget nor subscription was
+changed. Actual creation still waits for corrected exact-SHA CI.
+
+The operator and six role inboxes now have authenticated control proof. One
+[Mail.tm rate refusal](https://docs.mail.tm/getting-started/error-handling)
+was reconciled after waiting, using the exact same address/credentials.
+A further foreign-event inbox intent was rate-refused and remains journalled;
+no alternate identity/IP or duplicate account was used. All credentials remain
+private. No Cognito account/invitation or real-person message was created.
+Private planning now contains5246 concrete schema mutation intents and31
+partial platform fixture/expectation bindings, with514 authored semantic
+residuals and **zero executed cases**. These are not a passing granular suite.
