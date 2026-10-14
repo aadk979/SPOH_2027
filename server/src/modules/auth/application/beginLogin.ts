@@ -20,7 +20,7 @@ export function beginLogin(): { state: string; verifier: string; authorizeUrl: s
   const authorizeUrl = new URL('/oauth2/authorize', config.domain);
   authorizeUrl.searchParams.set('client_id', config.clientId);
   authorizeUrl.searchParams.set('response_type', 'code');
-  authorizeUrl.searchParams.set('scope', 'openid email');
+  authorizeUrl.searchParams.set('scope', 'openid email aws.cognito.signin.user.admin');
   authorizeUrl.searchParams.set('redirect_uri', callbackUrl(config.appBaseUrl));
   authorizeUrl.searchParams.set('state', state);
   authorizeUrl.searchParams.set('code_challenge', challenge);

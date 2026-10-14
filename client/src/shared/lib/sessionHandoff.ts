@@ -21,11 +21,8 @@ function base64url(bytes: Uint8Array): string {
 
 export async function needsSessionHandoff(): Promise<boolean> {
   const config = await loadClientConfiguration();
-  return (
-    typeof window !== 'undefined' &&
-    config.envLabel === 'production' &&
-    new URL(config.apiBaseUrl).origin !== window.location.origin
-  );
+  // Provider callbacks may open restricted MFA sessions, which ordinary refresh refuses.
+  return typeof window !== 'undefined' && config.authProvider === 'cognito';
 }
 
 function readPending(): Pending | null {

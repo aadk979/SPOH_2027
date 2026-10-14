@@ -5,6 +5,7 @@ import { needsSessionHandoff, recoverThroughHandoff } from '@/shared/lib/session
 const config = vi.hoisted(() => ({
   apiBaseUrl: 'https://api.example.test',
   envLabel: 'production',
+  authProvider: 'cognito',
 }));
 vi.mock('@/shared/lib/env', () => ({ loadClientConfiguration: async () => config }));
 const PENDING = '@spoh/client/session-handoff';
@@ -21,6 +22,7 @@ beforeEach(() => {
   replaceState.mockReset();
   fetchMock.mockReset();
   config.envLabel = 'production';
+  config.authProvider = 'cognito';
   config.apiBaseUrl = 'https://api.example.test';
   vi.stubGlobal('crypto', webcrypto);
   vi.stubGlobal('fetch', fetchMock);
@@ -48,13 +50,22 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 describe('first-party recovery for a cross-site client', () => {
-  it('uses a handoff only for production cross-origin hosting', async () => {
+  it('uses a provider handoff and keeps local fixture recovery on its cookie path', async () => {
     expect(await needsSessionHandoff()).toBe(true);
     config.envLabel = 'development';
+    config.authProvider = 'local';
     expect(await needsSessionHandoff()).toBe(false);
     config.envLabel = 'production';
     config.apiBaseUrl = 'https://client.example.test';
     expect(await needsSessionHandoff()).toBe(false);
+  });
+  it('bootstraps a staging provider session through first-party recovery before MFA', async () => {
+    config.envLabel = 'staging';
+    expect(await needsSessionHandoff()).toBe(true);
+  });
+  it('bootstraps a same-origin provider session without attempting restricted refresh', async () => {
+    config.apiBaseUrl = 'https://client.example.test';
+    expect(await needsSessionHandoff()).toBe(true);
   });
   it('redirects without exposing the refresh credential and binds the code to a tab verifier', async () => {
     expect(await recoverThroughHandoff()).toBe('redirecting');

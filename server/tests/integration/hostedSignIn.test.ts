@@ -147,6 +147,15 @@ function tokenResponse(status: number, body: unknown): Response {
 }
 
 describe('GET /auth/login', () => {
+  it('requests exactly the provider scopes needed for sign-in and user-managed MFA', async () => {
+    const response = await request(app).get('/api/v1/auth/login');
+    const location = new URL(response.headers.location as string);
+    expect(location.searchParams.get('scope')?.split(' ').sort()).toEqual([
+      'aws.cognito.signin.user.admin',
+      'email',
+      'openid',
+    ]);
+  });
   it('redirects to the Hosted UI with state and a PKCE challenge', async () => {
     const response = await request(app).get('/api/v1/auth/login');
 

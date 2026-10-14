@@ -22,7 +22,8 @@ const checks = [
     '/map',
     async (r) => r.status === 404 && (await r.text()).includes('<html'),
   ],
-  ['the API refuses the signed out', '/api/v1/me', (r) => r.status === 401],
+  // This person-level route exists before the first event; legacy /me needs Event #1.
+  ['the platform API refuses the signed out', '/api/v1/events', (r) => r.status === 401],
   ['readiness is private', '/readyz', (r) => r.status === 404],
 ];
 
@@ -30,7 +31,8 @@ let failed = 0;
 for (const [name, path, ok] of checks) {
   const response = await fetch(`${base}${path}`, { redirect: 'manual' });
   const passed = await ok(response);
+  if (!response.bodyUsed) await response.body?.cancel();
   failed += passed ? 0 : 1;
   console.log(`${passed ? 'ok  ' : 'FAIL'} ${name} (${path} → ${response.status})`);
 }
-process.exit(failed ? 1 : 0);
+process.exitCode = failed ? 1 : 0;
