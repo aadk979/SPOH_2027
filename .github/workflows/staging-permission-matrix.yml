@@ -39,7 +39,7 @@ jobs:
           [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
           [ "$(git rev-parse HEAD)" = "$EXPECTED_SHA" ]
           [ "$GITHUB_SHA" = "$EXPECTED_SHA" ]
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '24'
           cache: npm
