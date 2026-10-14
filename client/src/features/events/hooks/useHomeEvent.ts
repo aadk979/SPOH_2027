@@ -6,6 +6,7 @@ import { useMyEvents } from '../queries';
 export type HomeEvent =
   | { state: 'loading' }
   | { state: 'signed-out' }
+  | { state: 'mfa' }
   | { state: 'event'; slug: string }
   | { state: 'choose' }
   | { state: 'none' };
@@ -16,6 +17,7 @@ export function useHomeEvent(): HomeEvent {
   const { data: events, isError } = useMyEvents();
   if (status === 'unknown') return { state: 'loading' };
   if (!session) return { state: 'signed-out' };
+  if (session.mfaRequired) return { state: 'mfa' };
   if (isError) return { state: 'choose' };
   if (!events) return { state: 'loading' };
   if (!events.some((event) => event.membershipStatus === 'ACTIVE')) return { state: 'none' };

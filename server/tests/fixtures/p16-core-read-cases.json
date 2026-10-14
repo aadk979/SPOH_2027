@@ -1,0 +1,323 @@
+{
+  "formatVersion": 1,
+  "phase": "DRAFT",
+  "evidence": "Partial reviewed case bindings; remaining routes and lifecycles are required",
+  "cases": [
+    {
+      "path": "/me",
+      "action": "Self.Read",
+      "response": "MeResponse",
+      "allowedRoles": [
+        "VOLUNTEER",
+        "IC",
+        "DEPUTY_COORDINATOR",
+        "CHIEF_COORDINATOR",
+        "LEAD",
+        "ADMIN"
+      ]
+    },
+    {
+      "path": "/me/permissions",
+      "action": "Self.Read",
+      "response": "MyPermissionsResponse",
+      "allowedRoles": [
+        "VOLUNTEER",
+        "IC",
+        "DEPUTY_COORDINATOR",
+        "CHIEF_COORDINATOR",
+        "LEAD",
+        "ADMIN"
+      ]
+    },
+    {
+      "path": "/stations",
+      "action": "Self.Read",
+      "response": "StationList",
+      "allowedRoles": [
+        "VOLUNTEER",
+        "IC",
+        "DEPUTY_COORDINATOR",
+        "CHIEF_COORDINATOR",
+        "LEAD",
+        "ADMIN"
+      ]
+    },
+    {
+      "path": "/admin/event-days",
+      "action": "Structure.Read",
+      "response": "EventDayList",
+      "allowedRoles": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    },
+    {
+      "path": "/admin/volunteers",
+      "action": "People.Read",
+      "response": "VolunteerList",
+      "allowedRoles": ["DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    }
+  ],
+  "queryCases": [
+    {
+      "id": "roster-query-0",
+      "entries": [["limit", "0"]],
+      "contractIssues": [
+        {
+          "path": "limit",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "id": "roster-query-1",
+      "entries": [["limit", "201"]],
+      "contractIssues": [
+        {
+          "path": "limit",
+          "code": "too_big"
+        }
+      ]
+    },
+    {
+      "id": "roster-query-2",
+      "entries": [["limit", "1.5"]],
+      "contractIssues": [
+        {
+          "path": "limit",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "roster-query-3",
+      "entries": [["limit", "NaN"]],
+      "contractIssues": [
+        {
+          "path": "limit",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "roster-query-4",
+      "entries": [
+        ["limit", "1"],
+        ["limit", "2"]
+      ],
+      "contractIssues": [
+        {
+          "path": "limit",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "roster-query-5",
+      "entries": [["cursor", ""]],
+      "contractIssues": [
+        {
+          "path": "cursor",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "id": "roster-query-6",
+      "entries": [["cursor", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"]],
+      "contractIssues": [
+        {
+          "path": "cursor",
+          "code": "too_big"
+        }
+      ]
+    },
+    {
+      "id": "roster-query-7",
+      "entries": [
+        ["cursor", "one"],
+        ["cursor", "two"]
+      ],
+      "contractIssues": [
+        {
+          "path": "cursor",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "roster-query-8",
+      "entries": [
+        [
+          "q",
+          "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        ]
+      ],
+      "contractIssues": [
+        {
+          "path": "q",
+          "code": "too_big"
+        }
+      ]
+    },
+    {
+      "id": "roster-query-9",
+      "entries": [
+        ["q", "one"],
+        ["q", "two"]
+      ],
+      "contractIssues": [
+        {
+          "path": "q",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "roster-query-10",
+      "entries": [["role", "UNREVIEWED_ROLE"]],
+      "contractIssues": [
+        {
+          "path": "role",
+          "code": "invalid_value"
+        }
+      ]
+    },
+    {
+      "id": "roster-query-11",
+      "entries": [
+        ["role", "VOLUNTEER"],
+        ["role", "IC"]
+      ],
+      "contractIssues": [
+        {
+          "path": "role",
+          "code": "invalid_value"
+        }
+      ]
+    },
+    {
+      "id": "roster-query-12",
+      "entries": [["active", "maybe"]],
+      "contractIssues": [
+        {
+          "path": "active",
+          "code": "invalid_value"
+        }
+      ]
+    },
+    {
+      "id": "roster-query-13",
+      "entries": [
+        ["active", "true"],
+        ["active", "false"]
+      ],
+      "contractIssues": [
+        {
+          "path": "active",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "roster-query-14",
+      "entries": [["stationId", ""]],
+      "contractIssues": [
+        {
+          "path": "stationId",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "id": "roster-query-15",
+      "entries": [
+        ["stationId", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"]
+      ],
+      "contractIssues": [
+        {
+          "path": "stationId",
+          "code": "too_big"
+        }
+      ]
+    },
+    {
+      "id": "roster-query-16",
+      "entries": [
+        ["stationId", "one"],
+        ["stationId", "two"]
+      ],
+      "contractIssues": [
+        {
+          "path": "stationId",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "roster-query-17",
+      "entries": [["eventDayId", ""]],
+      "contractIssues": [
+        {
+          "path": "eventDayId",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "id": "roster-query-18",
+      "entries": [
+        ["eventDayId", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"]
+      ],
+      "contractIssues": [
+        {
+          "path": "eventDayId",
+          "code": "too_big"
+        }
+      ]
+    },
+    {
+      "id": "roster-query-19",
+      "entries": [
+        ["eventDayId", "one"],
+        ["eventDayId", "two"]
+      ],
+      "contractIssues": [
+        {
+          "path": "eventDayId",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "roster-query-20",
+      "entries": [["sort", "unsupported"]],
+      "contractIssues": [
+        {
+          "path": "sort",
+          "code": "invalid_value"
+        }
+      ]
+    },
+    {
+      "id": "roster-query-21",
+      "entries": [
+        ["sort", "name"],
+        ["sort", "role"]
+      ],
+      "contractIssues": [
+        {
+          "path": "sort",
+          "code": "invalid_value"
+        }
+      ]
+    },
+    {
+      "id": "roster-query-22",
+      "entries": [["__p16Unknown", "true"]],
+      "contractIssues": [
+        {
+          "path": "",
+          "code": "unrecognized_keys"
+        }
+      ]
+    }
+  ]
+}

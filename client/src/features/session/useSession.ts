@@ -21,8 +21,10 @@ export function useSessionState(): { status: SessionStatus; session: Session | n
   );
 }
 
+/** Business hooks wait for MFA; its screen reads the restricted proof through useSessionState. */
 export function useCurrentSession(): Session | null {
-  return useSessionState().session;
+  const current = useSessionState().session;
+  return current?.mfaRequired ? null : current;
 }
 
 /**

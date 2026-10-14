@@ -1,0 +1,591 @@
+{
+  "formatVersion": 1,
+  "route": "POST /api/v1/events",
+  "fixtureStartDate": "2026-10-14",
+  "evidence": "Reviewed case bindings; execution evidence is recorded separately",
+  "cases": [
+    {
+      "id": "missing-required:organisationId",
+      "mutation": {
+        "remove": "organisationId"
+      },
+      "contractIssues": [
+        {
+          "path": ["organisationId"],
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "missing-required:name",
+      "mutation": {
+        "remove": "name"
+      },
+      "contractIssues": [
+        {
+          "path": ["name"],
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "missing-required:slug",
+      "mutation": {
+        "remove": "slug"
+      },
+      "contractIssues": [
+        {
+          "path": ["slug"],
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "missing-required:venue",
+      "mutation": {
+        "remove": "venue"
+      },
+      "contractIssues": [
+        {
+          "path": ["venue"],
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "missing-required:timezone",
+      "mutation": {
+        "remove": "timezone"
+      },
+      "contractIssues": [
+        {
+          "path": ["timezone"],
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "missing-required:startDate",
+      "mutation": {
+        "remove": "startDate"
+      },
+      "contractIssues": [
+        {
+          "path": ["startDate"],
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "missing-required:endDate",
+      "mutation": {
+        "remove": "endDate"
+      },
+      "contractIssues": [
+        {
+          "path": ["endDate"],
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "missing-required:joinAsAdmin",
+      "mutation": {
+        "remove": "joinAsAdmin"
+      },
+      "contractIssues": [
+        {
+          "path": ["joinAsAdmin"],
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "missing-required:idempotencyKey",
+      "mutation": {
+        "remove": "idempotencyKey"
+      },
+      "contractIssues": [
+        {
+          "path": ["idempotencyKey"],
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "wrong-type:organisationId",
+      "mutation": {
+        "replace": "organisationId",
+        "value": []
+      },
+      "contractIssues": [
+        {
+          "path": ["organisationId"],
+          "code": "invalid_type"
+        },
+        {
+          "path": ["organisationId"],
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "id": "wrong-type:name",
+      "mutation": {
+        "replace": "name",
+        "value": []
+      },
+      "contractIssues": [
+        {
+          "path": ["name"],
+          "code": "invalid_type"
+        },
+        {
+          "path": ["name"],
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "id": "wrong-type:slug",
+      "mutation": {
+        "replace": "slug",
+        "value": []
+      },
+      "contractIssues": [
+        {
+          "path": ["slug"],
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "wrong-type:venue",
+      "mutation": {
+        "replace": "venue",
+        "value": []
+      },
+      "contractIssues": [
+        {
+          "path": ["venue"],
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "wrong-type:timezone",
+      "mutation": {
+        "replace": "timezone",
+        "value": []
+      },
+      "contractIssues": [
+        {
+          "path": ["timezone"],
+          "code": "invalid_type"
+        },
+        {
+          "path": ["timezone"],
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "id": "wrong-type:startDate",
+      "mutation": {
+        "replace": "startDate",
+        "value": []
+      },
+      "contractIssues": [
+        {
+          "path": ["startDate"],
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "wrong-type:endDate",
+      "mutation": {
+        "replace": "endDate",
+        "value": []
+      },
+      "contractIssues": [
+        {
+          "path": ["endDate"],
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "wrong-type:joinAsAdmin",
+      "mutation": {
+        "replace": "joinAsAdmin",
+        "value": []
+      },
+      "contractIssues": [
+        {
+          "path": ["joinAsAdmin"],
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "wrong-type:idempotencyKey",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": []
+      },
+      "contractIssues": [
+        {
+          "path": ["idempotencyKey"],
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "too-short:name",
+      "mutation": {
+        "replace": "name",
+        "value": "x"
+      },
+      "contractIssues": [
+        {
+          "path": ["name"],
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "id": "too-long:name",
+      "mutation": {
+        "replace": "name",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "contractIssues": [
+        {
+          "path": ["name"],
+          "code": "too_big"
+        }
+      ]
+    },
+    {
+      "id": "bad-slug:slug",
+      "mutation": {
+        "replace": "slug",
+        "value": "Invalid Slug"
+      },
+      "contractIssues": [
+        {
+          "path": ["slug"],
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "id": "unknown-zone:timezone",
+      "mutation": {
+        "replace": "timezone",
+        "value": "Not/AnIanaZone"
+      },
+      "contractIssues": [
+        {
+          "path": ["timezone"],
+          "code": "custom"
+        }
+      ]
+    },
+    {
+      "id": "invalid-calendar-date:startDate",
+      "mutation": {
+        "replace": "startDate",
+        "value": "2026-02-30"
+      },
+      "contractIssues": [
+        {
+          "path": ["startDate"],
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "id": "end-before-start:endDate",
+      "mutation": {
+        "replace": "endDate",
+        "value": "1900-01-01"
+      },
+      "contractIssues": [
+        {
+          "path": ["endDate"],
+          "code": "custom"
+        }
+      ]
+    },
+    {
+      "id": "bad-receipt:idempotencyKey",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": "not-a-uuid"
+      },
+      "contractIssues": [
+        {
+          "path": ["idempotencyKey"],
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "id": "unknown-key:__p16Unknown",
+      "mutation": {
+        "add": "__p16Unknown",
+        "value": true
+      },
+      "contractIssues": [
+        {
+          "path": [],
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "id": "null:organisationId",
+      "mutation": {
+        "replace": "organisationId",
+        "value": null
+      },
+      "contractIssues": [
+        {
+          "path": ["organisationId"],
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "null:name",
+      "mutation": {
+        "replace": "name",
+        "value": null
+      },
+      "contractIssues": [
+        {
+          "path": ["name"],
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "null:slug",
+      "mutation": {
+        "replace": "slug",
+        "value": null
+      },
+      "contractIssues": [
+        {
+          "path": ["slug"],
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "null:venue",
+      "mutation": {
+        "replace": "venue",
+        "value": null
+      },
+      "contractIssues": [
+        {
+          "path": ["venue"],
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "null:timezone",
+      "mutation": {
+        "replace": "timezone",
+        "value": null
+      },
+      "contractIssues": [
+        {
+          "path": ["timezone"],
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "null:startDate",
+      "mutation": {
+        "replace": "startDate",
+        "value": null
+      },
+      "contractIssues": [
+        {
+          "path": ["startDate"],
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "null:endDate",
+      "mutation": {
+        "replace": "endDate",
+        "value": null
+      },
+      "contractIssues": [
+        {
+          "path": ["endDate"],
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "null:joinAsAdmin",
+      "mutation": {
+        "replace": "joinAsAdmin",
+        "value": null
+      },
+      "contractIssues": [
+        {
+          "path": ["joinAsAdmin"],
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "null:idempotencyKey",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": null
+      },
+      "contractIssues": [
+        {
+          "path": ["idempotencyKey"],
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "empty:organisationId",
+      "mutation": {
+        "replace": "organisationId",
+        "value": ""
+      },
+      "contractIssues": [
+        {
+          "path": ["organisationId"],
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "id": "too-long:organisationId",
+      "mutation": {
+        "replace": "organisationId",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "contractIssues": [
+        {
+          "path": ["organisationId"],
+          "code": "too_big"
+        }
+      ]
+    },
+    {
+      "id": "trimmed-empty:name",
+      "mutation": {
+        "replace": "name",
+        "value": "   "
+      },
+      "contractIssues": [
+        {
+          "path": ["name"],
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "id": "too-short:slug",
+      "mutation": {
+        "replace": "slug",
+        "value": "x"
+      },
+      "contractIssues": [
+        {
+          "path": ["slug"],
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "id": "too-long:slug",
+      "mutation": {
+        "replace": "slug",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "contractIssues": [
+        {
+          "path": ["slug"],
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "id": "too-long:venue",
+      "mutation": {
+        "replace": "venue",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "contractIssues": [
+        {
+          "path": ["venue"],
+          "code": "too_big"
+        }
+      ]
+    },
+    {
+      "id": "empty:timezone",
+      "mutation": {
+        "replace": "timezone",
+        "value": ""
+      },
+      "contractIssues": [
+        {
+          "path": ["timezone"],
+          "code": "too_small"
+        },
+        {
+          "path": ["timezone"],
+          "code": "custom"
+        }
+      ]
+    },
+    {
+      "id": "too-long:timezone",
+      "mutation": {
+        "replace": "timezone",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "contractIssues": [
+        {
+          "path": ["timezone"],
+          "code": "too_big"
+        },
+        {
+          "path": ["timezone"],
+          "code": "custom"
+        }
+      ]
+    },
+    {
+      "id": "date-span-too-long:endDate",
+      "mutation": {
+        "replace": "endDate",
+        "value": "2028-10-14"
+      },
+      "contractIssues": [
+        {
+          "path": ["endDate"],
+          "code": "custom"
+        }
+      ]
+    }
+  ]
+}

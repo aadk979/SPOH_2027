@@ -1,14 +1,27 @@
 import { GetPolicyCommand, GetSchemaCommand, ListPoliciesCommand, type VerifiedPermissionsClient } from '@aws-sdk/client-verifiedpermissions';
 import type { StoreContents } from './avpDrift.js';
 
+/** Get/List management APIs default to ten requests/second per store. Keep headroom for operators. */
+function paceStoreReads(): () => Promise<void> {
+  let previousStartedAt = -Infinity;
+  return async () => {
+    const delay = Math.max(0, previousStartedAt + 250 - performance.now());
+    if (delay) await new Promise<void>((resolve) => setTimeout(resolve, delay));
+    previousStartedAt = performance.now();
+  };
+}
+
 /** Read-only snapshot reused by drift verification and synthetic matrix attestation. */
 export async function readDeployedPolicyStore(client: VerifiedPermissionsClient, policyStoreId: string) {
   const policies: Record<string, string> = {};
   const names: Record<string, string> = {};
   let nextToken: string | undefined;
+  const pace = paceStoreReads();
   do {
+    await pace();
     const page = await client.send(new ListPoliciesCommand({ policyStoreId, nextToken }), { abortSignal: AbortSignal.timeout(5_000) });
     for (const item of page.policies ?? []) {
+      await pace();
       const policy = await client.send(new GetPolicyCommand({ policyStoreId, policyId: item.policyId }), { abortSignal: AbortSignal.timeout(5_000) });
       const definition = policy.definition && 'static' in policy.definition ? policy.definition.static : undefined;
       const name = definition?.description ?? `avp:${item.policyId}`;
@@ -18,6 +31,7 @@ export async function readDeployedPolicyStore(client: VerifiedPermissionsClient,
     }
     nextToken = page.nextToken;
   } while (nextToken);
+  await pace();
   const schema = await client.send(new GetSchemaCommand({ policyStoreId }), { abortSignal: AbortSignal.timeout(5_000) });
   return { contents: { schema: JSON.parse(schema.schema ?? '{}') as unknown, policies } satisfies StoreContents, names };
 }

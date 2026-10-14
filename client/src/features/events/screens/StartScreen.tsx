@@ -14,6 +14,7 @@ export default function StartScreen(): ReactNode {
   const router = useRouter();
 
   useEffect(() => {
+    if (home.state === 'mfa') router.replace('/mfa');
     if (home.state === 'signed-out') router.replace('/sign-in');
     if (home.state === 'choose') router.replace('/events');
     if (home.state === 'event') router.replace(eventHref(home.slug, '/home'));
