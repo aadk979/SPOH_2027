@@ -18,11 +18,19 @@ const stack = (resources: Record<string, string>) => ({
   ],
 });
 const stopped = { desiredCount: 0, runningCount: 0, pendingCount: 0 };
-const stub = (statuses: string[], services = [stopped], resources = outputs) => {
+const restored = {
+  desiredCount: 1,
+  runningCount: 1,
+  pendingCount: 0,
+  deployments: [{ rolloutState: 'COMPLETED' }],
+};
+type Service = typeof stopped & { deployments?: Array<{ rolloutState: string }> };
+const stub = (statuses: string[], services?: Service[], resources = outputs) => {
   const calls: string[][] = [];
   let elapsed = 0;
   let dbIndex = 0;
   let serviceIndex = 0;
+  let desiredCount = 0;
   return {
     calls,
     now: () => elapsed,
@@ -32,6 +40,10 @@ const stub = (statuses: string[], services = [stopped], resources = outputs) => 
     aws: async (args: string[]) => {
       calls.push(args);
       if (args[1] === 'describe-stacks') return stack(resources);
+      if (args[1] === 'update-service') {
+        desiredCount = Number(args.at(-1));
+        return {};
+      }
       if (args[1] === 'describe-db-instances')
         return {
           DBInstances: [
@@ -47,7 +59,11 @@ const stub = (statuses: string[], services = [stopped], resources = outputs) => 
           services: [
             {
               serviceName: resources.ServiceName,
-              ...services[Math.min(serviceIndex++, services.length - 1)],
+              ...(services
+                ? services[Math.min(serviceIndex++, services.length - 1)]
+                : desiredCount === 1
+                  ? restored
+                  : stopped),
             },
           ],
         };
@@ -98,9 +114,10 @@ describe('staging park and unpark', () => {
       'describe-db-instances',
       'describe-db-instances',
       'update-service',
+      'describe-services',
     ]);
     expect(api.now()).toBe(60_000);
-    expect(api.calls.at(-1)).toContain('1');
+    expect(api.calls.find((call) => call[1] === 'update-service')).toContain('1');
   });
   it.each(['ClusterName', 'ServiceName', 'DatabaseIdentifier'])(
     'refuses non-staging %s before mutation',

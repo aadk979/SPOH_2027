@@ -111,10 +111,49 @@ export async function powerStaging({
   const status = await database();
   if (status === 'stopped')
     await aws(['rds', 'start-db-instance', '--db-instance-identifier', DatabaseIdentifier]);
-  else if (!['available', 'starting', 'rebooting'].includes(status))
+  else if (
+    !['available', 'starting', 'rebooting', 'configuring-enhanced-monitoring'].includes(status)
+  )
     throw new Error(`Cannot unpark database in ${status}`);
-  await waitForDatabase('available', ['stopped', 'starting', 'rebooting']);
+  await waitForDatabase('available', [
+    'stopped',
+    'starting',
+    'rebooting',
+    'configuring-enhanced-monitoring',
+  ]);
   await service(1);
+  await poll('staging compute to restore', async () => {
+    const result = await aws([
+      'ecs',
+      'describe-services',
+      '--cluster',
+      ClusterName,
+      '--services',
+      ServiceName,
+    ]);
+    const current = result.services?.[0];
+    if (
+      result.failures?.length ||
+      result.services?.length !== 1 ||
+      current.serviceName !== ServiceName ||
+      current.desiredCount !== 1 ||
+      ![current.runningCount, current.pendingCount].every(
+        (count) => Number.isInteger(count) && count >= 0,
+      ) ||
+      !Array.isArray(current.deployments) ||
+      current.deployments.length === 0 ||
+      current.deployments.some(
+        (deployment) => !['IN_PROGRESS', 'COMPLETED'].includes(deployment.rolloutState),
+      )
+    )
+      throw new Error('Cannot restore the exact staging service');
+    return (
+      current.runningCount === 1 &&
+      current.pendingCount === 0 &&
+      current.deployments.length === 1 &&
+      current.deployments[0].rolloutState === 'COMPLETED'
+    );
+  });
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
