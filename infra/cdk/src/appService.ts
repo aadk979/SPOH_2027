@@ -43,6 +43,7 @@ import { grantContentObjects } from './contentAccess.js';
 import type { AuthorizationStore } from './authorizationStore.js';
 import { sessionSigningInjections } from './sessionSigningVersions.js';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { configureCloudReadiness } from './readinessAccess.js';
 
 const PORT = 4000;
 
@@ -203,6 +204,8 @@ export class AppService extends Construct {
       },
     });
     if (props.mediaBucket) grantPhotoObjects(task, props.mediaBucket);
+    configureCloudReadiness(task, { stage, database: props.data.database,
+      nativeOrigin: props.api.apiEndpoint, deploymentId: props.serviceImageTag! });
     if (props.contentBucket) grantContentObjects(task, props.contentBucket);
     if (props.exportsBucket) grantExportObjects(task, props.exportsBucket);
     props.authorization.grantIsAuthorized(task.taskRole);
@@ -216,7 +219,7 @@ export class AppService extends Construct {
     Validations.of(task).acknowledge({
       id: 'AwsSolutions-ECS2',
       reason:
-        'AVP_POLICY_STORE_ID and AVP_POLICY_NAMES are non-secret ids CloudFormation generates in this stack; they change only with a deployment of the store itself, and the name map exceeds a standard SSM parameter.',
+        'AVP ids/name mapping, audit destination and selected cloud readiness metadata are non-secret infrastructure identities. Readiness binds the immutable task image and every required named alarm without a resource dependency cycle.',
     });
     return task;
   }

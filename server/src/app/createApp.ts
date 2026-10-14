@@ -8,6 +8,7 @@ import { logger } from '../platform/logger/index.js';
 import { safeHttpSerializers } from '../platform/logger/safeSerializers.js';
 import { errorHandler, notFoundHandler } from '../platform/http/errorHandler.js';
 import { requestId } from '../platform/http/requestId.js';
+import { deploymentIdentity } from '../platform/http/deploymentIdentity.js';
 import { staticClient } from '../platform/http/staticClient.js';
 import { healthRouter } from '../modules/health/index.js';
 import { createApiRouter } from './routes.js';
@@ -25,6 +26,7 @@ export function createApp(): Express {
 
   trustTheEdge(app);
   app.use(requestId);
+  app.use(deploymentIdentity);
   secureHeaders(app);
   allowOrigins(app);
   logRequests(app);

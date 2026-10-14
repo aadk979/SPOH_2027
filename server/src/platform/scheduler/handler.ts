@@ -9,10 +9,13 @@ export interface ScheduleContext {
   readonly action: ClaimedAction;
   readonly now: Date;
   readonly audit: Readonly<AuditContext>;
+  readonly prepared?: unknown;
 }
 
 export interface ScheduledHandler {
   readonly type: string;
+  /** Read-only provider observations, obtained before business locks; never authorization or effects. */
+  prepare?(): Promise<unknown>;
   validatePayload(payload: unknown): void;
   execute(context: ScheduleContext): Promise<void>;
 }
@@ -21,6 +24,7 @@ export interface ScheduledHandler {
 export function defineScheduledHandler<T>(definition: {
   type: string;
   schema: z.ZodType<T>;
+  prepare?(): Promise<unknown>;
   authorize(context: ScheduleContext, payload: T): Promise<void>;
   run(context: ScheduleContext, payload: T): Promise<void>;
 }): ScheduledHandler {
@@ -34,6 +38,7 @@ export function defineScheduledHandler<T>(definition: {
   };
   return Object.freeze({
     type: definition.type,
+    ...(definition.prepare ? { prepare: definition.prepare } : {}),
     validatePayload(input: unknown) {
       parsePayload(input);
     },

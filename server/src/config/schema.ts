@@ -6,6 +6,7 @@ import { databaseFields, databasePoolRule, databaseSslRule } from './schemas/dat
 import { pushFields, vapidRule } from './schemas/push.js';
 import { corsWildcardRule, serverFields } from './schemas/server.js';
 import { storageFields } from './schemas/storage.js';
+import { readinessFields } from './schemas/readiness.js';
 
 /**
  * The configuration schema, composed from one schema per concern (server,
@@ -23,6 +24,7 @@ const EnvSchema = z
     ...attendanceFields,
     ...storageFields,
     ...pushFields,
+    ...readinessFields,
   })
   .superRefine((env, ctx) => {
     for (const rule of [

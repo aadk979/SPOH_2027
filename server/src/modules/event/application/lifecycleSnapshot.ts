@@ -18,10 +18,11 @@ function timezoneValid(timeZone: string): boolean {
 export async function lifecycleSnapshot(
   tx: PrismaTransactionClient,
   scope: EventScope,
-  input: { event: LifecycleEvent; now: Date },
+  input: { event: LifecycleEvent; now: Date; cloud?: unknown },
 ): Promise<ObservedLifecycleSnapshot> {
   const { event } = input;
-  const readiness = await readGoLiveReadiness(tx, { scope, now: input.now });
+  const readiness = await readGoLiveReadiness(tx, { scope, now: input.now,
+    ...(input.cloud === undefined ? {} : { cloud: input.cloud }) });
   return {
     from: event.status,
     hasBeenLive: event.hasBeenLive,

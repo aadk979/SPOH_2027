@@ -8,12 +8,14 @@ import {
   type ReadinessContext,
 } from '../domain/readiness/index.js';
 import { localReadinessEvidence } from './localReadinessEvidence.js';
+import { cloudReadinessEvidence } from './cloudReadinessEvidence.js';
 
 /** The caller owns Event/current-member locks and samples its injected clock after waits. */
 export async function readGoLiveReadiness(
   tx: PrismaTransactionClient,
-  input: { scope: EventScope; now: Date },
+  input: { scope: EventScope; now: Date; cloud?: unknown },
 ) {
+  const cloud = cloudReadinessEvidence(input.cloud, input.scope.eventId);
   const context: ReadinessContext = {
     eventId: input.scope.eventId,
     evaluatedAtMs: input.now.getTime(),
@@ -21,9 +23,10 @@ export async function readGoLiveReadiness(
     databaseId: null,
     requiredAlarmIds: [],
     freshness: null,
+    ...cloud.selection,
   };
   const raw = await readinessSnapshot(tx, input.scope);
-  const evidence = localReadinessEvidence(raw, input.scope.eventId);
+  const evidence = { ...localReadinessEvidence(raw, input.scope.eventId), ...cloud.evidence };
   evidence.content = {
     eventId: input.scope.eventId,
     facts: await contentReadiness(tx, input.scope),

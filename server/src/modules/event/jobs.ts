@@ -7,6 +7,7 @@ import { fixedClock } from '../../platform/time/index.js';
 import { transitionEventInTransaction } from './application/transitionEvent.js';
 import { remindArchive } from './application/remindArchive.js';
 import { systemEventScope } from '../../platform/scheduler/systemAuthority.js';
+import { readCloudReadiness } from '../../platform/aws/readiness/index.js';
 
 function transitionActor(context: ScheduleContext): ActorContext {
   const { eventId, createdByPersonId } = context.action;
@@ -27,6 +28,7 @@ export const eventScheduledHandlers = [
   defineScheduledHandler({
     type: 'event.transition',
     schema: LifecycleTransitionInput,
+    prepare: readCloudReadiness,
     authorize: async (context) => {
       transitionActor(context);
       // The shared core rechecks current capability under its membership lock before any effect.
@@ -35,6 +37,7 @@ export const eventScheduledHandlers = [
       await transitionEventInTransaction(context.tx, payload, {
         ...transitionActor(context),
         clock: fixedClock(context.now),
+        cloudReadiness: context.prepared,
       });
     },
   }),

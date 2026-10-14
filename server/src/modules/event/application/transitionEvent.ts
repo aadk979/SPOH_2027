@@ -11,12 +11,13 @@ import { toLifecycleResponse } from '../data/lifecycleMapper.js';
 import { recordLifecycleTransition } from './recordLifecycleTransition.js';
 import { applyLifecycleEffects } from './applyLifecycleEffects.js';
 import { prepareLifecycleTransition } from './prepareLifecycleTransition.js';
+import { readCloudReadiness } from '../../../platform/aws/readiness/index.js';
 
 /** All guarded effects and receipts use the caller's transaction, including worker completion. */
 export async function transitionEventInTransaction(
   tx: PrismaTransactionClient,
   request: LifecycleTransitionInput,
-  actor: ActorContext & { clock?: Clock },
+  actor: ActorContext & { clock?: Clock; cloudReadiness?: unknown },
 ): Promise<EventLifecycleResponse> {
   const { scope, audit } = actor;
   const { event, snapshot, decision, now } = await prepareLifecycleTransition(tx, {
@@ -51,11 +52,12 @@ export async function transitionEvent(
   request: TransitionEventRequest,
   actor: ActorContext & { clock?: Clock },
 ): Promise<EventLifecycleResponse> {
+  const cloudReadiness = await readCloudReadiness();
   return prisma.$transaction(
     async (tx) => {
       const { scope } = actor;
       await lockReserved(tx, scope, request.idempotencyKey);
-      const response = await transitionEventInTransaction(tx, request, actor);
+      const response = await transitionEventInTransaction(tx, request, { ...actor, cloudReadiness });
       await settleReserved(tx, scope, {
         key: request.idempotencyKey,
         statusCode: 200,

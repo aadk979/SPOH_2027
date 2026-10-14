@@ -30,7 +30,8 @@ function requireTransitionPermission(
 /** Every guard is evaluated under the event lock and current membership authority. */
 export async function prepareLifecycleTransition(
   tx: PrismaTransactionClient,
-  input: { request: LifecycleTransitionInput; actor: ActorContext & { clock?: Clock } },
+  input: { request: LifecycleTransitionInput;
+    actor: ActorContext & { clock?: Clock; cloudReadiness?: unknown } },
 ) {
   const { request, actor } = input;
   const { scope } = actor;
@@ -43,7 +44,7 @@ export async function prepareLifecycleTransition(
     );
   }
   const now = (actor.clock ?? systemClock).now();
-  const snapshot = await lifecycleSnapshot(tx, scope, { event, now });
+  const snapshot = await lifecycleSnapshot(tx, scope, { event, now, cloud: actor.cloudReadiness });
   const organisationMember =
     request.to === 'ARCHIVED' ||
     (request.to === 'LIVE' && (event.status === 'CLOSED' || !!request.goLiveOverrides?.length))

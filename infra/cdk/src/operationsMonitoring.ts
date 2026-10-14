@@ -3,10 +3,12 @@ import {
   CfnCondition,
   CfnOutput,
   CfnParameter,
+  type CfnResource,
   Duration,
   Fn,
   RemovalPolicy,
   Stack,
+  Token,
   Validations,
 } from 'aws-cdk-lib';
 import { CfnBudget } from 'aws-cdk-lib/aws-budgets';
@@ -117,7 +119,9 @@ export class OperationsMonitoring extends Construct {
       environment: {
         CLUSTER: service.cluster.clusterArn,
         SERVICE: service.serviceName,
+        SERVICE_ARN: service.serviceArn,
         DATABASE_ARN: input.database.instanceArn,
+        DATABASE_IDENTIFIER: input.database.instanceIdentifier,
         METRIC_NAMESPACE: `SPOH/${input.stage}`,
       },
     });
@@ -125,7 +129,11 @@ export class OperationsMonitoring extends Construct {
       new PolicyStatement({ actions: ['ecs:DescribeServices'], resources: [service.serviceArn] }),
     );
     observer.addToRolePolicy(
-      new PolicyStatement({ actions: ['backup:ListRecoveryPointsByResource'], resources: ['*'] }),
+      new PolicyStatement({ actions: ['rds:DescribeDBSnapshots'], resources: [
+        input.database.instanceArn,
+        Stack.of(this).formatArn({ arnFormat: ArnFormat.COLON_RESOURCE_NAME, service: 'rds',
+          resource: 'snapshot', resourceName: `rds:${input.database.instanceIdentifier}-*` }),
+      ] }),
     );
     observer.addToRolePolicy(
       new PolicyStatement({
@@ -137,7 +145,14 @@ export class OperationsMonitoring extends Construct {
     Validations.of(role).acknowledge({
       id: 'AwsSolutions-IAM5[Resource::*]',
       reason:
-        'Backup ListRecoveryPointsByResource does not support resource-level IAM; its request uses only this database ARN. PutMetricData requires * and is constrained to this stage namespace. The observer cannot mutate resources.',
+        'Native automated snapshot reads are limited to the selected database and its rds:<identifier>-* snapshot namespace; the request filters that exact identifier/type. PutMetricData requires * and is constrained to this stage namespace. The observer cannot mutate resources.',
+    });
+    const databaseId = Stack.of(input.database).getLogicalId(input.database.node.defaultChild as CfnResource);
+    const partition = Token.isUnresolved(Stack.of(this).partition) ? '<AWS::Partition>' : Stack.of(this).partition;
+    Validations.of(role).acknowledge({
+      id: `AwsSolutions-IAM5[Resource::arn:${partition}:rds:${Stack.of(this).region}:${Stack.of(this).account}:snapshot:rds:<${databaseId}>-*]`,
+      reason:
+        'Only this owned database automated snapshot namespace is readable. Native snapshots have timestamped identifiers, so the exact database prefix is necessary; DescribeDBSnapshots also filters its identifier and automated type. No account-wide snapshot or backup access is granted.',
     });
     new Rule(this, 'Observe', {
       schedule: Schedule.rate(Duration.minutes(1)),

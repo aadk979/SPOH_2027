@@ -10,11 +10,13 @@ import { readinessTransitions } from '../domain/readinessTransitions.js';
 import { REOPEN_HOURS } from '../domain/lifecycle.js';
 import { lifecycleSnapshot } from './lifecycleSnapshot.js';
 import { publicGoLiveReadiness } from './publicGoLiveReadiness.js';
+import { readCloudReadiness } from '../../../platform/aws/readiness/index.js';
 
 /** Current authority and guard evidence share Event-first locks; this read has no effects. */
 export async function readLifecycleReadiness(
   actor: ActorContext & { clock?: Clock },
 ): Promise<LifecycleReadinessResponse> {
+  const cloud = await readCloudReadiness();
   return prisma.$transaction(
     async (tx) => {
       const { scope } = actor;
@@ -26,7 +28,7 @@ export async function readLifecycleReadiness(
         action: 'Settings.Read',
       });
       const now = (actor.clock ?? systemClock).now();
-      const snapshot = await lifecycleSnapshot(tx, scope, { event, now });
+      const snapshot = await lifecycleSnapshot(tx, scope, { event, now, cloud });
       const member =
         event.status === 'CLOSED'
           ? await currentOrganisationRole(tx, {

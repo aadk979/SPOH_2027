@@ -12,7 +12,7 @@ export interface ExecutionInput {
   clock?: Clock;
 }
 
-async function execute(input: ExecutionInput & { clock: Clock }) {
+async function execute(input: ExecutionInput & { clock: Clock; prepared?: unknown }) {
   return prisma.$transaction(
     async (tx) => {
       const locked = await lockClaimedAction(tx, input);
@@ -28,7 +28,7 @@ async function execute(input: ExecutionInput & { clock: Clock }) {
       const handler = input.registry.get(action.type);
       if (!handler) throw new ScheduleRefusal('HANDLER_UNAVAILABLE');
       const audit = await scheduleAuditContext(tx, action);
-      await handler.execute({ tx, action, now, audit });
+      await handler.execute({ tx, action, now, audit, prepared: input.prepared });
       const result = { status: 'SUCCEEDED' as const, lastError: null, runAt: action.runAt };
       await finishAction(tx, { action, now, result });
       await auditScheduleOutcome(tx, { action, audit, result });
@@ -59,7 +59,10 @@ async function recordFailure(error: unknown, input: ExecutionInput & { clock: Cl
 export async function runClaimedAction(input: ExecutionInput) {
   const execution = { ...input, clock: input.clock ?? systemClock };
   try {
-    return await execute(execution);
+    const prepared = input.claim.exhausted
+      ? undefined
+      : await input.registry.get(input.claim.type)?.prepare?.();
+    return await execute({ ...execution, prepared });
   } catch (error) {
     return recordFailure(error, execution);
   }
