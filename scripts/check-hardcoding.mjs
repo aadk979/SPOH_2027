@@ -46,8 +46,9 @@ const ALLOW = /hardcoding-allowed:\s*\S/;
 /** A whole file of event content awaiting its move to data, with the reason. */
 const ALLOW_FILE = /hardcoding-allowed-file:\s*\S/;
 
-function trackedFiles() {
-  const listed = execFileSync('git', ['ls-files', '-z', '--', ...SCOPE], { encoding: 'utf8' });
+function productSourceFiles() {
+  // A pre-commit gate must inspect newly authored files before they enter the index.
+  const listed = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '-z', '--', ...SCOPE], { encoding: 'utf8' });
   return (
     listed
       .split('\0')
@@ -71,7 +72,7 @@ export function findingsIn(file, text) {
 
 const isMain = process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/'));
 if (isMain) {
-  const findings = trackedFiles().flatMap((file) => findingsIn(file, readFileSync(file, 'utf8')));
+  const findings = productSourceFiles().flatMap((file) => findingsIn(file, readFileSync(file, 'utf8')));
   if (findings.length > 0) {
     console.error(`Event-specific literals in source (${findings.length}):`);
     for (const finding of findings) console.error(`  ${finding}`);

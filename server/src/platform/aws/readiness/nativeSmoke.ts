@@ -36,6 +36,7 @@ export async function nativeSmoke(config: CloudReadinessConfig,
       redirect: 'manual', signal: input.signal, headers: { 'Cache-Control': 'no-cache' },
     });
     try {
+      // hardcoding-allowed: fixed deployment response header, unrelated to event data.
       if (response.headers.get('X-SPOH-Deployment') !== config.deploymentId) {
         throw new Error('Smoke response does not match the selected deployment');
       }

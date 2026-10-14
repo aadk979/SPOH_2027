@@ -68,7 +68,7 @@ and [CloudWatch authorization reference](https://docs.aws.amazon.com/service-aut
 
 ## Verification and remaining programme work
 
-The complete 29-step Node 24/npm local gate exited zero at 16:49:50 UTC on 14 October
+The initial repair's complete 29-step Node 24/npm local gate exited zero at 16:49:50 UTC on 14 October
 (15 October in Singapore), without resumed or inherited steps. The frozen 42-file batch
 matched its source hashes. Application, policy and infrastructure suites passed 6,607 tests:
 server 4,702, client 1,220, shared 348, policies 158 and infrastructure 179. The two historical
@@ -83,10 +83,33 @@ collection, independent copies, cache expiry after provider refusal and clock ro
 No floor or assertion was lowered. A later interrupted attempt had no terminal result and
 was excluded from acceptance. Both attempts and the final coverage archive remain private.
 
-Final staged secret/whitespace review, D-11 delivery, exact-SHA CI, staging deployment,
+Final staged secret and whitespace checks passed, followed by the entire 42-file D-11 direct-main
+commit and one successful push of `f857146722dd8997e30b7ee722b6036fd135ea20`.
+Its [exact CI run](https://github.com/aadk979/SPOH_2027/actions/runs/38601868008) refused three
+fixed platform identifiers in the hardcoding guard: the alarm resource namespace and the two
+deployment-header references. Dependency boundaries passed. No staging release was dispatched.
+The run completed with four successful jobs, including the Tests job and its coverage ratchet;
+the Architecture refusal alone prevented acceptance.
+
+The local guard had inspected only tracked source, missing those newly authored files before
+delivery. Two additional fail-first CLI regressions reproduced that gap against real isolated
+Git fixtures. The follow-up scans untracked product source as well as tracked source, keeps
+generated/test/ignored exclusions, and proves that a narrowly explained protocol constant
+cannot hide adjacent event content. Its five guard tests and focused lint passed. The existing
+event-literal patterns stay unchanged; only the three fixed platform references gain explicit
+line-specific reasons. Runtime behaviour and protocol names are unchanged.
+
+The frozen six-file follow-up's complete 29-step Node 24/npm local gate exited zero at
+17:49:20 UTC on 14 October (15 October in Singapore), without resumed or inherited steps.
+All five hardcoding regressions passed, including the real untracked-file checks. The 6,607
+application/policy/infrastructure tests passed again, with the two retained skips and the same
+coverage measurements and floors. Lint, types, image verification, dependency boundaries,
+hardcoding, audit and history scans passed. Final coverage evidence was archived separately.
+
+Final staged checks, the follow-up's D-11 delivery and exact-SHA CI, staging deployment,
 actual smoke/policy checks and repaired live readiness/observer observations remain required
-at this report's source-verification checkpoint. The earlier deployment and its partial API
-campaigns remain the latest accepted runtime evidence; the local gate does not accept a release.
+at this checkpoint. The earlier deployment and its partial API campaigns remain the latest
+accepted runtime evidence; neither a local pass nor a partially successful CI run accepts a release.
 
 P16.10 continues before browser/full regression, deferred acceptance, the real 24-hour soak,
 load testing, resilience drills and restore rehearsal. Owner reviews, actual alarm receipt,

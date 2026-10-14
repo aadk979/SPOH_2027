@@ -13,6 +13,7 @@ export const CloudReadinessConfig = z.object({
     alarmsMaxAgeMs: freshness }).strict(),
 }).strict().superRefine((config, context) => {
   const database = `arn:aws:rds:${config.region}:${config.account}:db:${config.databaseIdentifier}`;
+  // hardcoding-allowed: fixed platform alarm namespace, never event or venue content.
   const alarm = `arn:aws:cloudwatch:${config.region}:${config.account}:alarm:spoh-`;
   if (config.databaseId !== database) context.addIssue({ code: 'custom', path: ['databaseId'],
     message: 'readiness database must match the selected account, region and identifier' });
