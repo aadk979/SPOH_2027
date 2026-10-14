@@ -74,7 +74,9 @@ async function resendInvite(pool: Pool, email: string, expectedSubject?: string)
   await pool.client.send(
     new AdminCreateUserCommand({
       UserPoolId: pool.userPoolId,
-      Username: user.Username,
+      // AdminCreateUser requires the email sign-in attribute in our email-only pool.
+      // Its generated internal username remains correct for disable/enable operations.
+      Username: email,
       MessageAction: 'RESEND',
       DesiredDeliveryMediums: ['EMAIL'],
     }),

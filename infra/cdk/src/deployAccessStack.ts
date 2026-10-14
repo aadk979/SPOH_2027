@@ -121,7 +121,7 @@ export class DeployAccessStack extends Stack {
     );
     this.role.addToPolicy(
       new PolicyStatement({
-        actions: ['ecs:UpdateService'],
+        actions: ['ecs:UpdateService', 'ecs:DescribeServices'],
         resources: [
           `arn:aws:ecs:${this.region}:${this.account}:service/Spoh-staging-Platform-AppCluster*/Spoh-staging-Platform-AppService*`,
         ],
@@ -165,7 +165,7 @@ export class DeployAccessStack extends Stack {
       ],
       [
         `AwsSolutions-IAM5[Resource::arn:aws:ecs:${this.region}:${this.account}:service/Spoh-staging-Platform-AppCluster*/Spoh-staging-Platform-AppService*]`,
-        'Manual park/unpark can change desired count of the staging service only; production and one-off tasks are excluded.',
+        'Manual park/unpark can change desired count and observe drain counts of the staging service only; production and one-off tasks are excluded.',
       ],
       [
         `AwsSolutions-IAM5[Resource::arn:aws:rds:${this.region}:${this.account}:db:spoh-staging-platform-datapostgres*]`,

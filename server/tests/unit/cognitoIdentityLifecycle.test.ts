@@ -136,8 +136,26 @@ describe('subject-proven invitations and MFA', () => {
     expect(send.mock.calls.map(([command]) => command.constructor.name))
       .toEqual(['AdminGetUserCommand', 'AdminGetUserCommand', 'AdminCreateUserCommand']);
     expect((send.mock.calls[2]![0] as AdminCreateUserCommand).input).toEqual({ UserPoolId: poolId,
-      Username: 'synthetic-provider-username', MessageAction: 'RESEND', DesiredDeliveryMediums: ['EMAIL'] });
+      Username: input.email, MessageAction: 'RESEND', DesiredDeliveryMediums: ['EMAIL'] });
     for (const call of send.mock.calls) expect(call[1]).toMatchObject({ abortSignal: expect.any(AbortSignal) });
+  });
+
+  it('uses the proven email sign-in attribute when Cognito generates an internal UUID username', async () => {
+    const internalUsername = '22222222-2222-4222-8222-222222222222';
+    const send = vi.spyOn(CognitoIdentityProviderClient.prototype, 'send').mockImplementation(async (command) => {
+      if (command instanceof AdminGetUserCommand) return account({ Username: internalUsername }) as never;
+      if (command instanceof AdminCreateUserCommand && command.input.Username === input.email)
+        return {} as never;
+      throw new Error('Username should be an email.');
+    });
+    await expect(createCognitoIdentityProvider(poolId).resendInvite(input.email, subject)).resolves.toBe(true);
+    expect(send.mock.calls.map(([command]) => command.constructor.name))
+      .toEqual(['AdminGetUserCommand', 'AdminCreateUserCommand']);
+    const resend = send.mock.calls[1]![0] as AdminCreateUserCommand;
+    expect(resend.input).toEqual({ UserPoolId: poolId, Username: input.email,
+      MessageAction: 'RESEND', DesiredDeliveryMediums: ['EMAIL'] });
+    expect(resend.input.ForceAliasCreation).toBeUndefined();
+    expect(resend.input.UserAttributes).toBeUndefined();
   });
 
   it.each([
