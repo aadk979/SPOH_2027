@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-15T09:30:23.099Z",
+  "updatedAt": "2026-10-15T14:29:57.684Z",
   "current": {
     "phase": "P16",
     "step": "P16.10"
@@ -4347,6 +4347,10 @@
     {
       "at": "2026-10-15T09:30:23.098Z",
       "text": "P16.10: Delivered 3d996c6 with complete29 Node24 gate (8547 passes) and all5 exact-SHA CI jobs38707672935 including image verification. Next 77-case campaign found permission-review replay no-store, platform-appointment principal/rank, and warm revoked-session cache defects; candidate source repairs pass matched local77 cases. New full gate, exact CI, repaired staging image and real-provider acceptance pending; P16 remains in progress and only P16.9 soak is waived."
+    },
+    {
+      "at": "2026-10-15T14:29:57.683Z",
+      "text": "P16.10: 628fba94 accepted by all5 exact CI38727031044 and staging38731108427 all3+Smoke; original152 repaired API cases accepted. Separate synthetic capture fixture passed366 additional primary cases including185 malformed requests, rehearsal/live retry and stock isolation, actual pre-close queues, archive refusal and platform reopen. False authorization-failure metrics and authenticated existing-person membership invitation replay reproduced; source fixes plus19 CI tests/corpus prepared. Fresh complete gate, exact CI, new image and provider rechecks remain pending. Only P16.9 is waived; all owner/production/cost gates retained."
     }
   ]
 }

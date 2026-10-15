@@ -138,7 +138,11 @@ async function enforce(req: Request, res: Response, point: EnforcementPoint): Pr
   );
   res.locals.authorization = outcome;
   if (outcome.kind === 'failed') {
-    countOutcome('failed');
+    // A malformed or missing resource can stop preparation before a policy is
+    // asked. Preserve its client refusal without reporting an engine outage.
+    countOutcome(
+      outcome.cause instanceof AppError && outcome.cause.statusCode < 500 ? 'unaskable' : 'failed',
+    );
     throw failure(req, outcome.cause);
   }
   if (outcome.kind === 'unaskable') {
