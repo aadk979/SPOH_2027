@@ -106,15 +106,42 @@ application/policy/infrastructure tests passed again, with the two retained skip
 coverage measurements and floors. Lint, types, image verification, dependency boundaries,
 hardcoding, audit and history scans passed. Final coverage evidence was archived separately.
 
-Final staged checks, the follow-up's D-11 delivery and exact-SHA CI, staging deployment,
-actual smoke/policy checks and repaired live readiness/observer observations remain required
-at this checkpoint. The earlier deployment and its partial API campaigns remain the latest
-accepted runtime evidence; neither a local pass nor a partially successful CI run accepts a release.
+The six-file follow-up passed its final staged checks and was delivered directly to main as
+`00a114d40c7dc426845f964bdef5b5148de0379e`, with one push. Its
+[exact CI run](https://github.com/aadk979/SPOH_2027/actions/runs/38610494257) completed with all
+five jobs successful. The single
+[staging release](https://github.com/aadk979/SPOH_2027/actions/runs/38616256967) completed all
+three jobs, including actual migrations, service move and Smoke. The signing version remained
+stable, and the healthy ARM64 task and immutable image digest were verified.
 
-P16.10 continues before browser/full regression, deferred acceptance, the real 24-hour soak,
+On 15 October, all 73 deployed policies, schema, statements and task name mappings matched
+the current source. Runtime metadata verified the strict immutable readiness selection,
+all 20 alarm identities, exact selected app/observer permissions and the deployed bytes of
+all four observer files. Six native HTTP checks carried the current image identity; all 20
+alarms were OK and the observed PITR horizon met the five-minute bound.
+
+The scheduled observer's complete post-code-update window recorded 436 invocations without
+an error. Two fresh task observations reported zero deficit; two fresh backup ages matched
+an available encrypted native automated snapshot. The running-task, backup-age and observer
+failure alarms recovered through actual observations. No synthetic metrics, alarm-state
+changes or manual invocation supplied this evidence.
+
+The authenticated readiness API then evaluated smoke, backup and alarm evidence as passed,
+with `no-store` and unchanged DRAFT lifecycle and standing. Card batch, gift stock, published
+content, attendance and permission review still blocked LIVE. These point-in-time results
+accept the repair; they do not establish complete go-live readiness, actual human alarm
+receipt, restore rehearsal or the later 24-hour soak. The subsequent partial event-day API
+campaign is recorded in [its report](event-day-api-cases-2026-10-15.md).
+
+P16.10 continues before browser/full regression, deferred acceptance,
 load testing, resilience drills and restore rehearsal. Owner reviews, actual alarm receipt,
 independent assurance, production/go approval and programme closure remain pending. No production
 deployment, real-person recovery, alarm delivery acceptance or ASVS Level 2 claim is made.
 
 Raw provider/mail identities, credentials, sessions, private API journals and failure proofs remain
 in ignored local evidence. They are excluded from public source and delivery artifacts.
+
+**Owner amendment, 15 October 2026:** P16.9’s continuous 24-hour soak is waived and
+recorded as skipped. Historical observations above remain point-in-time evidence; no
+successful soak is claimed. API/browser verification, deferred acceptance, load, drills,
+restore and other owner/production approvals remain required.

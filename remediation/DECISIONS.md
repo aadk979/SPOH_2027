@@ -468,6 +468,14 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   product rules; otherwise the recommendation is taken and marked **assumed**. The 28 October
   go/no-go (D-01) stands; ADR-011 § Consequences explains why a go is now less likely.
 
+  **Owner amendment, 15 October 2026:** the owner stated “the 24h soak isnt needed”.
+  P16.9’s continuous 24-hour soak is waived and recorded as **skipped**, with no
+  execution or successful soak claimed. The campaign proceeds from P16.8 deferred
+  acceptance to P16.2 load, P16.3 drills and P16.4 restore. Granular API and browser
+  verification, CI/coverage/security checks, actual alarm receipt, independent assurance,
+  owner reviews and production/go approval remain required. This grants no campaign
+  extension, paid service or production deployment.
+
   **Assumed operational recommendation, 10 October 2026:** retain ADR-008's no-NAT/no-interface-
   endpoint topology and use the documented one-off ECS credential task for operator DB rotation
   (`infra/cdk/README.md`, "Rotation under the lean network topology"). Automatic Secrets Manager

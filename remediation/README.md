@@ -186,8 +186,10 @@ saved changes. [Ready-to-copy takeover prompt](reports/TAKEOVER-PROMPT-2026-10-1
 - Ask the owner only about cost, production, unrecoverable data and product rules the ADRs leave
   open. Otherwise take the recommendation and record it as **assumed**.
 - When every feature step is closed, P16 is the verification campaign: staging sized like
-  production, the granular API suite (P16.10), full regression, deferred acceptance, a 24-hour
-  soak, load, drills and restore.
+  production, the granular API suite (P16.10), full regression, deferred acceptance, load,
+  drills and restore. The owner waived the continuous 24-hour soak on 15 October 2026
+  (D-23 amendment); P16.9 is skipped, with no passed soak claimed. All other acceptance
+  requirements and owner/production approvals remain.
 
 ADR-010 superseded historical whole-phase start ordering, no-subagent instructions and
 documentation deployment cycles. Read older handoffs only for the relevant feature's detailed constraints;

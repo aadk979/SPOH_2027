@@ -1,0 +1,2191 @@
+{
+  "formatVersion": 1,
+  "domain": "attendance-settings",
+  "lifecycle": "DRAFT",
+  "variants": [
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "base": {
+        "key": "attendance.rootMembershipId",
+        "value": "OWN_ACTIVE_ADMIN_MEMBERSHIP",
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "base": {
+        "key": "attendance.campusCidrs",
+        "value": [
+          "192.0.2.0/24"
+        ],
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "base": {
+        "cidrs": [
+          "192.0.2.0/24"
+        ]
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "key:missing",
+      "category": "schema-invalid",
+      "mutation": {
+        "remove": "key"
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:missing",
+      "category": "schema-invalid",
+      "mutation": {
+        "remove": "value"
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "expectedVersion:missing",
+      "category": "schema-invalid",
+      "mutation": {
+        "remove": "expectedVersion"
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "unknown-key",
+      "category": "schema-invalid",
+      "mutation": {
+        "add": "unexpected",
+        "value": true
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "key:invalid:0",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "key",
+        "value": null
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "key:invalid:1",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "key",
+        "value": 1
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "key:invalid:2",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "key",
+        "value": true
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "key:invalid:3",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "key",
+        "value": []
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "key:invalid:4",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "key",
+        "value": {}
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "key:invalid:5",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "key",
+        "value": ""
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "key:invalid:6",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "key",
+        "value": "unknown.key"
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "expectedVersion:invalid:0",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "expectedVersion",
+        "value": null
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "expectedVersion:invalid:1",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "expectedVersion",
+        "value": true
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "expectedVersion:invalid:2",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "expectedVersion",
+        "value": "0"
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "expectedVersion:invalid:3",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "expectedVersion",
+        "value": []
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "expectedVersion:invalid:4",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "expectedVersion",
+        "value": {}
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "expectedVersion:invalid:5",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "expectedVersion",
+        "value": -1
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "expectedVersion",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "expectedVersion:invalid:6",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "expectedVersion",
+        "value": 0.5
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:invalid:0",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "value",
+        "value": 1
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:invalid:1",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "value",
+        "value": true
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:invalid:2",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "value",
+        "value": []
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        },
+        {
+          "path": "value",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:invalid:3",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "value",
+        "value": {}
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:invalid:4",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "value",
+        "value": ""
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "value",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:invalid:5",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "value",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "value",
+          "code": "too_big"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "key:missing",
+      "category": "schema-invalid",
+      "mutation": {
+        "remove": "key"
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:missing",
+      "category": "schema-invalid",
+      "mutation": {
+        "remove": "value"
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "expectedVersion:missing",
+      "category": "schema-invalid",
+      "mutation": {
+        "remove": "expectedVersion"
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "unknown-key",
+      "category": "schema-invalid",
+      "mutation": {
+        "add": "unexpected",
+        "value": true
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "key:invalid:0",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "key",
+        "value": null
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "key:invalid:1",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "key",
+        "value": 1
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "key:invalid:2",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "key",
+        "value": true
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "key:invalid:3",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "key",
+        "value": []
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "key:invalid:4",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "key",
+        "value": {}
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "key:invalid:5",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "key",
+        "value": ""
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "key:invalid:6",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "key",
+        "value": "unknown.key"
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "expectedVersion:invalid:0",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "expectedVersion",
+        "value": null
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "expectedVersion:invalid:1",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "expectedVersion",
+        "value": true
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "expectedVersion:invalid:2",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "expectedVersion",
+        "value": "0"
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "expectedVersion:invalid:3",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "expectedVersion",
+        "value": []
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "expectedVersion:invalid:4",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "expectedVersion",
+        "value": {}
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "expectedVersion:invalid:5",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "expectedVersion",
+        "value": -1
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "expectedVersion",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "expectedVersion:invalid:6",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "expectedVersion",
+        "value": 0.5
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:invalid:0",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "value",
+        "value": null
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:invalid:1",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "value",
+        "value": 1
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:invalid:2",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "value",
+        "value": true
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:invalid:3",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "value",
+        "value": {}
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:invalid:4",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "value",
+        "value": ""
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:invalid:5",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "value",
+        "value": [
+          null
+        ]
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "value.0",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:invalid:6",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "value",
+        "value": [
+          1
+        ]
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "value.0",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:invalid:7",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "value",
+        "value": [
+          true
+        ]
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "value.0",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:invalid:8",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "value",
+        "value": [
+          []
+        ]
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "value.0",
+          "code": "invalid_type"
+        },
+        {
+          "path": "value.0",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:invalid:9",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "value",
+        "value": [
+          {}
+        ]
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "value.0",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:invalid:10",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "value",
+        "value": [
+          ""
+        ]
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "value.0",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:invalid:11",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "value",
+        "value": [
+          " "
+        ]
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "value.0",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:invalid:12",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "value",
+        "value": [
+          "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        ]
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "value.0",
+          "code": "too_big"
+        }
+      ]
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:invalid:13",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "value",
+        "value": [
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24"
+        ]
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "value",
+          "code": "too_big"
+        }
+      ]
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:missing",
+      "category": "schema-invalid",
+      "mutation": {
+        "remove": "cidrs"
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "cidrs",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "unknown-key",
+      "category": "schema-invalid",
+      "mutation": {
+        "add": "unexpected",
+        "value": true
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:invalid:0",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "cidrs",
+        "value": null
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "cidrs",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:invalid:1",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "cidrs",
+        "value": 1
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "cidrs",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:invalid:2",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "cidrs",
+        "value": true
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "cidrs",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:invalid:3",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "cidrs",
+        "value": {}
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "cidrs",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:invalid:4",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "cidrs",
+        "value": ""
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "cidrs",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:invalid:5",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "cidrs",
+        "value": [
+          null
+        ]
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "cidrs.0",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:invalid:6",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "cidrs",
+        "value": [
+          1
+        ]
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "cidrs.0",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:invalid:7",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "cidrs",
+        "value": [
+          true
+        ]
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "cidrs.0",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:invalid:8",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "cidrs",
+        "value": [
+          []
+        ]
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "cidrs.0",
+          "code": "invalid_type"
+        },
+        {
+          "path": "cidrs.0",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:invalid:9",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "cidrs",
+        "value": [
+          {}
+        ]
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "cidrs.0",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:invalid:10",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "cidrs",
+        "value": [
+          ""
+        ]
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "cidrs.0",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:invalid:11",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "cidrs",
+        "value": [
+          " "
+        ]
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "cidrs.0",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:invalid:12",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "cidrs",
+        "value": [
+          "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        ]
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "cidrs.0",
+          "code": "too_big"
+        }
+      ]
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:invalid:13",
+      "category": "schema-invalid",
+      "mutation": {
+        "replace": "cidrs",
+        "value": [
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24"
+        ]
+      },
+      "expectedStatus": 400,
+      "issues": [
+        {
+          "path": "cidrs",
+          "code": "too_big"
+        }
+      ]
+    }
+  ],
+  "semantic": [
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "expectedVersion:positive-integer",
+      "category": "actual-current-and-stale-version-bindings-required",
+      "mutation": {
+        "replace": "expectedVersion",
+        "value": 1
+      },
+      "normalized": {
+        "key": "attendance.rootMembershipId",
+        "value": "OWN_ACTIVE_ADMIN_MEMBERSHIP",
+        "expectedVersion": 1
+      }
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:nullable-root",
+      "category": "semantic-pending",
+      "mutation": {
+        "replace": "value",
+        "value": null
+      },
+      "normalized": {
+        "key": "attendance.rootMembershipId",
+        "value": null,
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:minimum-length",
+      "category": "absent-membership-resource-refusal",
+      "mutation": {
+        "replace": "value",
+        "value": "x"
+      },
+      "normalized": {
+        "key": "attendance.rootMembershipId",
+        "value": "x",
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:maximum-length",
+      "category": "absent-membership-resource-refusal",
+      "mutation": {
+        "replace": "value",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "normalized": {
+        "key": "attendance.rootMembershipId",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "root",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:whitespace-is-not-normalized",
+      "category": "absent-membership-resource-refusal",
+      "mutation": {
+        "replace": "value",
+        "value": " "
+      },
+      "normalized": {
+        "key": "attendance.rootMembershipId",
+        "value": " ",
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "expectedVersion:positive-integer",
+      "category": "actual-current-and-stale-version-bindings-required",
+      "mutation": {
+        "replace": "expectedVersion",
+        "value": 1
+      },
+      "normalized": {
+        "key": "attendance.campusCidrs",
+        "value": [
+          "192.0.2.0/24"
+        ],
+        "expectedVersion": 1
+      }
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:empty-array",
+      "category": "semantic-pending",
+      "mutation": {
+        "replace": "value",
+        "value": []
+      },
+      "normalized": {
+        "key": "attendance.campusCidrs",
+        "value": [],
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:ipv4-host",
+      "category": "semantic-pending",
+      "mutation": {
+        "replace": "value",
+        "value": [
+          "192.0.2.1/32"
+        ]
+      },
+      "normalized": {
+        "key": "attendance.campusCidrs",
+        "value": [
+          "192.0.2.1/32"
+        ],
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:ipv6",
+      "category": "semantic-pending",
+      "mutation": {
+        "replace": "value",
+        "value": [
+          "2001:db8::/32"
+        ]
+      },
+      "normalized": {
+        "key": "attendance.campusCidrs",
+        "value": [
+          "2001:db8::/32"
+        ],
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:ipv6-host",
+      "category": "semantic-pending",
+      "mutation": {
+        "replace": "value",
+        "value": [
+          "2001:db8::1/128"
+        ]
+      },
+      "normalized": {
+        "key": "attendance.campusCidrs",
+        "value": [
+          "2001:db8::1/128"
+        ],
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:mixed-families",
+      "category": "semantic-pending",
+      "mutation": {
+        "replace": "value",
+        "value": [
+          "192.0.2.0/24",
+          "2001:db8::/32"
+        ]
+      },
+      "normalized": {
+        "key": "attendance.campusCidrs",
+        "value": [
+          "192.0.2.0/24",
+          "2001:db8::/32"
+        ],
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:maximum-array",
+      "category": "semantic-pending",
+      "mutation": {
+        "replace": "value",
+        "value": [
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24"
+        ]
+      },
+      "normalized": {
+        "key": "attendance.campusCidrs",
+        "value": [
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24"
+        ],
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:trimmed",
+      "category": "semantic-pending",
+      "mutation": {
+        "replace": "value",
+        "value": [
+          " 192.0.2.0/24 "
+        ]
+      },
+      "normalized": {
+        "key": "attendance.campusCidrs",
+        "value": [
+          "192.0.2.0/24"
+        ],
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:schema-accepted:not-a-cidr",
+      "category": "business-cidr-refinement-refusal",
+      "mutation": {
+        "replace": "value",
+        "value": [
+          "not-a-network"
+        ]
+      },
+      "normalized": {
+        "key": "attendance.campusCidrs",
+        "value": [
+          "not-a-network"
+        ],
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:schema-accepted:ipv4-octet",
+      "category": "business-cidr-refinement-refusal",
+      "mutation": {
+        "replace": "value",
+        "value": [
+          "999.0.0.1/24"
+        ]
+      },
+      "normalized": {
+        "key": "attendance.campusCidrs",
+        "value": [
+          "999.0.0.1/24"
+        ],
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:schema-accepted:ipv4-prefix",
+      "category": "business-cidr-refinement-refusal",
+      "mutation": {
+        "replace": "value",
+        "value": [
+          "192.0.2.1/33"
+        ]
+      },
+      "normalized": {
+        "key": "attendance.campusCidrs",
+        "value": [
+          "192.0.2.1/33"
+        ],
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:schema-accepted:ipv6-prefix",
+      "category": "business-cidr-refinement-refusal",
+      "mutation": {
+        "replace": "value",
+        "value": [
+          "2001:db8::/129"
+        ]
+      },
+      "normalized": {
+        "key": "attendance.campusCidrs",
+        "value": [
+          "2001:db8::/129"
+        ],
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:schema-accepted:negative-prefix",
+      "category": "business-cidr-refinement-refusal",
+      "mutation": {
+        "replace": "value",
+        "value": [
+          "192.0.2.0/-1"
+        ]
+      },
+      "normalized": {
+        "key": "attendance.campusCidrs",
+        "value": [
+          "192.0.2.0/-1"
+        ],
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "cidrs",
+      "method": "PATCH",
+      "path": "/admin/attendance-settings",
+      "schemaName": "ChangeAttendanceConfigRequest",
+      "id": "value:schema-accepted:missing-prefix",
+      "category": "business-cidr-refinement-refusal",
+      "mutation": {
+        "replace": "value",
+        "value": [
+          "192.0.2.1"
+        ]
+      },
+      "normalized": {
+        "key": "attendance.campusCidrs",
+        "value": [
+          "192.0.2.1"
+        ],
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:empty-array",
+      "category": "semantic-pending",
+      "mutation": {
+        "replace": "cidrs",
+        "value": []
+      },
+      "normalized": {
+        "cidrs": []
+      }
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:ipv4-host",
+      "category": "semantic-pending",
+      "mutation": {
+        "replace": "cidrs",
+        "value": [
+          "192.0.2.1/32"
+        ]
+      },
+      "normalized": {
+        "cidrs": [
+          "192.0.2.1/32"
+        ]
+      }
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:ipv6",
+      "category": "semantic-pending",
+      "mutation": {
+        "replace": "cidrs",
+        "value": [
+          "2001:db8::/32"
+        ]
+      },
+      "normalized": {
+        "cidrs": [
+          "2001:db8::/32"
+        ]
+      }
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:ipv6-host",
+      "category": "semantic-pending",
+      "mutation": {
+        "replace": "cidrs",
+        "value": [
+          "2001:db8::1/128"
+        ]
+      },
+      "normalized": {
+        "cidrs": [
+          "2001:db8::1/128"
+        ]
+      }
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:mixed-families",
+      "category": "semantic-pending",
+      "mutation": {
+        "replace": "cidrs",
+        "value": [
+          "192.0.2.0/24",
+          "2001:db8::/32"
+        ]
+      },
+      "normalized": {
+        "cidrs": [
+          "192.0.2.0/24",
+          "2001:db8::/32"
+        ]
+      }
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:maximum-array",
+      "category": "semantic-pending",
+      "mutation": {
+        "replace": "cidrs",
+        "value": [
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24"
+        ]
+      },
+      "normalized": {
+        "cidrs": [
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24",
+          "192.0.2.0/24"
+        ]
+      }
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:trimmed",
+      "category": "semantic-pending",
+      "mutation": {
+        "replace": "cidrs",
+        "value": [
+          " 192.0.2.0/24 "
+        ]
+      },
+      "normalized": {
+        "cidrs": [
+          "192.0.2.0/24"
+        ]
+      }
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:schema-accepted:not-a-cidr",
+      "category": "business-cidr-refinement-refusal",
+      "mutation": {
+        "replace": "cidrs",
+        "value": [
+          "not-a-network"
+        ]
+      },
+      "normalized": {
+        "cidrs": [
+          "not-a-network"
+        ]
+      }
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:schema-accepted:ipv4-octet",
+      "category": "business-cidr-refinement-refusal",
+      "mutation": {
+        "replace": "cidrs",
+        "value": [
+          "999.0.0.1/24"
+        ]
+      },
+      "normalized": {
+        "cidrs": [
+          "999.0.0.1/24"
+        ]
+      }
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:schema-accepted:ipv4-prefix",
+      "category": "business-cidr-refinement-refusal",
+      "mutation": {
+        "replace": "cidrs",
+        "value": [
+          "192.0.2.1/33"
+        ]
+      },
+      "normalized": {
+        "cidrs": [
+          "192.0.2.1/33"
+        ]
+      }
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:schema-accepted:ipv6-prefix",
+      "category": "business-cidr-refinement-refusal",
+      "mutation": {
+        "replace": "cidrs",
+        "value": [
+          "2001:db8::/129"
+        ]
+      },
+      "normalized": {
+        "cidrs": [
+          "2001:db8::/129"
+        ]
+      }
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:schema-accepted:negative-prefix",
+      "category": "business-cidr-refinement-refusal",
+      "mutation": {
+        "replace": "cidrs",
+        "value": [
+          "192.0.2.0/-1"
+        ]
+      },
+      "normalized": {
+        "cidrs": [
+          "192.0.2.0/-1"
+        ]
+      }
+    },
+    {
+      "variant": "network-test",
+      "method": "POST",
+      "path": "/admin/attendance-settings/test-network",
+      "schemaName": "TestAttendanceNetworkRequest",
+      "id": "cidrs:schema-accepted:missing-prefix",
+      "category": "business-cidr-refinement-refusal",
+      "mutation": {
+        "replace": "cidrs",
+        "value": [
+          "192.0.2.1"
+        ]
+      },
+      "normalized": {
+        "cidrs": [
+          "192.0.2.1"
+        ]
+      }
+    }
+  ]
+}

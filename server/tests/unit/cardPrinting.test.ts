@@ -47,7 +47,7 @@ describe('printable mission cards', () => {
     expect(pdf.getPageCount()).toBe(2);
     expect(pdf.getPages()[0]!.getWidth()).toBeCloseTo(595.28);
     expect(pdf.getPages()[0]!.getHeight()).toBeCloseTo(841.89);
-  });
+  }, 15_000); // Nine real cards include cold font subsetting under whole-suite coverage.
   it('exports the printable PDF with the exact codes and opaque payloads in the CSV', async () => {
     const zip = await JSZip.loadAsync(
       await renderCardZip([card, { ...card, shortCode: 'ABC124', rehearsal: true }], context),

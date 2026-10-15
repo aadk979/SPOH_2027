@@ -23,7 +23,8 @@ documentation that lets someone else run it next year. Close the programme.
   (P16.8 lists them). First recreate AWS, torn down on 10 October 2026
   ([record](../reports/P08/aws-teardown-2026-10-10.md)), and deploy staging sized like production (ADR-008), then run, in this
   order: **P16.10** granular API suite → **P16.1** full regression → **P16.8** deferred
-  acceptance → **P16.9** soak → **P16.2** load → **P16.3** drills → **P16.4** restore. Fix what
+  acceptance → **P16.2** load → **P16.3** drills → **P16.4** restore. P16.9 is waived by the
+  owner’s 15 October 2026 amendment to D-23; it is skipped, not an accepted soak. Fix what
   each finds (a failing test first), and re-run what the fix touched.
 
 ## Steps
@@ -155,12 +156,11 @@ documentation that lets someone else run it next year. Close the programme.
 
 ### P16.9 — Soak
 
-- **Do:** With the whole build on staging sized like production, run a 24-hour soak: the
-  cold-start probe (sign in, first screens) every 30 minutes, steady polling at the configured
-  intervals, and scheduled actions firing. Watch `AuthorizationFailed`, 5xx, p95, task restarts,
-  database connections and the scheduler's lag and dead actions.
-- **Done when:** 24 hours with no evaluation failure, no 5xx and no restarts, or each one found
-  has a fix and the soak is repeated.
+- **Owner decision, 15 October 2026 (D-23 amendment):** the continuous 24-hour soak is
+  waived. Record this step as **skipped**; no execution or successful soak is claimed.
+- **Remaining order:** after P16.8, continue to P16.2 load, P16.3 drills and P16.4 restore.
+  Their measurements, monitoring and failure checks remain required, as do all other
+  owner and production/go approvals.
 
 ### P16.2 — Load test
 

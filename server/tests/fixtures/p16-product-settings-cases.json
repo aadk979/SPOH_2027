@@ -1,0 +1,5866 @@
+{
+  "formatVersion": 1,
+  "domain": "product-settings",
+  "lifecycle": "DRAFT",
+  "variants": [
+    {
+      "variant": "counts-separate",
+      "method": "PATCH",
+      "path": "/admin/event-settings",
+      "schemaName": "ChangeEventSettingRequest",
+      "base": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "separate"
+        },
+        "expectedVersion": 0,
+        "reason": "Synthetic verification"
+      }
+    },
+    {
+      "variant": "counts-registrations",
+      "method": "PATCH",
+      "path": "/admin/event-settings",
+      "schemaName": "ChangeEventSettingRequest",
+      "base": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "registrations"
+          }
+        },
+        "expectedVersion": 0,
+        "reason": "Synthetic verification"
+      }
+    },
+    {
+      "variant": "counts-journeys",
+      "method": "PATCH",
+      "path": "/admin/event-settings",
+      "schemaName": "ChangeEventSettingRequest",
+      "base": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "journeys"
+          }
+        },
+        "expectedVersion": 0,
+        "reason": "Synthetic verification"
+      }
+    },
+    {
+      "variant": "counts-footfall",
+      "method": "PATCH",
+      "path": "/admin/event-settings",
+      "schemaName": "ChangeEventSettingRequest",
+      "base": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "footfall",
+            "stationId": "OWN_COUNTING_STATION"
+          }
+        },
+        "expectedVersion": 0,
+        "reason": "Synthetic verification"
+      }
+    },
+    {
+      "variant": "privacy-none",
+      "method": "PATCH",
+      "path": "/admin/event-settings",
+      "schemaName": "ChangeEventSettingRequest",
+      "base": {
+        "key": "product.visitorDataMode",
+        "value": "none",
+        "expectedVersion": 0,
+        "reason": "Synthetic verification"
+      }
+    },
+    {
+      "variant": "privacy-allowlist",
+      "method": "PATCH",
+      "path": "/admin/event-settings",
+      "schemaName": "ChangeEventSettingRequest",
+      "base": {
+        "key": "product.visitorDataMode",
+        "value": "allowlist",
+        "expectedVersion": 0,
+        "reason": "Synthetic verification"
+      }
+    },
+    {
+      "variant": "lost-person-retention",
+      "method": "PATCH",
+      "path": "/admin/event-settings",
+      "schemaName": "ChangeEventSettingRequest",
+      "base": {
+        "key": "lostPersonPurgeHours",
+        "value": 24,
+        "expectedVersion": 0,
+        "reason": "Synthetic verification"
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "variant": "counts-separate",
+      "id": "key:missing",
+      "mutation": {
+        "path": "key",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "value:missing",
+      "mutation": {
+        "path": "value",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "expectedVersion:missing",
+      "mutation": {
+        "path": "expectedVersion",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "key:invalid:0",
+      "mutation": {
+        "path": "key",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "key:invalid:1",
+      "mutation": {
+        "path": "key",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "key:invalid:2",
+      "mutation": {
+        "path": "key",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "key:invalid:3",
+      "mutation": {
+        "path": "key",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "key:invalid:4",
+      "mutation": {
+        "path": "key",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "key:invalid:5",
+      "mutation": {
+        "path": "key",
+        "value": ""
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "key:invalid:6",
+      "mutation": {
+        "path": "key",
+        "value": "product.unknown"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "expectedVersion:invalid:0",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "expectedVersion:invalid:1",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "expectedVersion:invalid:2",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": "0"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "expectedVersion:invalid:3",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "expectedVersion:invalid:4",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "expectedVersion:invalid:5",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": -1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "expectedVersion:invalid:6",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": 0.5
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "reason:invalid:0",
+      "mutation": {
+        "path": "reason",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "reason:invalid:1",
+      "mutation": {
+        "path": "reason",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "reason:invalid:2",
+      "mutation": {
+        "path": "reason",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "reason:invalid:3",
+      "mutation": {
+        "path": "reason",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "reason:invalid:4",
+      "mutation": {
+        "path": "reason",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "reason:invalid:5",
+      "mutation": {
+        "path": "reason",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "too_big"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "unknown-key",
+      "mutation": {
+        "path": "unexpected",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "idempotency-key-is-not-supported",
+      "mutation": {
+        "path": "idempotencyKey",
+        "value": "bf186237-8dd9-40cb-8881-912e69216263"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "value:invalid:0",
+      "mutation": {
+        "path": "value",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "value:invalid:1",
+      "mutation": {
+        "path": "value",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "value:invalid:2",
+      "mutation": {
+        "path": "value",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "value:invalid:3",
+      "mutation": {
+        "path": "value",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "value:invalid:4",
+      "mutation": {
+        "path": "value",
+        "value": ""
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "value:invalid:5",
+      "mutation": {
+        "path": "value",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "mode:missing",
+      "mutation": {
+        "path": "value.mode",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "mode:invalid:0",
+      "mutation": {
+        "path": "value.mode",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "mode:invalid:1",
+      "mutation": {
+        "path": "value.mode",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "mode:invalid:2",
+      "mutation": {
+        "path": "value.mode",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "mode:invalid:3",
+      "mutation": {
+        "path": "value.mode",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "mode:invalid:4",
+      "mutation": {
+        "path": "value.mode",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "mode:invalid:5",
+      "mutation": {
+        "path": "value.mode",
+        "value": ""
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "mode:invalid:6",
+      "mutation": {
+        "path": "value.mode",
+        "value": "summed"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "value:unknown-key",
+      "mutation": {
+        "path": "value.unexpected",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "counts-separate",
+      "id": "separate:source-is-forbidden",
+      "mutation": {
+        "path": "value.source",
+        "value": {
+          "count": "registrations"
+        }
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "key:missing",
+      "mutation": {
+        "path": "key",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "value:missing",
+      "mutation": {
+        "path": "value",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "expectedVersion:missing",
+      "mutation": {
+        "path": "expectedVersion",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "key:invalid:0",
+      "mutation": {
+        "path": "key",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "key:invalid:1",
+      "mutation": {
+        "path": "key",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "key:invalid:2",
+      "mutation": {
+        "path": "key",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "key:invalid:3",
+      "mutation": {
+        "path": "key",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "key:invalid:4",
+      "mutation": {
+        "path": "key",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "key:invalid:5",
+      "mutation": {
+        "path": "key",
+        "value": ""
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "key:invalid:6",
+      "mutation": {
+        "path": "key",
+        "value": "product.unknown"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "expectedVersion:invalid:0",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "expectedVersion:invalid:1",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "expectedVersion:invalid:2",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": "0"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "expectedVersion:invalid:3",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "expectedVersion:invalid:4",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "expectedVersion:invalid:5",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": -1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "expectedVersion:invalid:6",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": 0.5
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "reason:invalid:0",
+      "mutation": {
+        "path": "reason",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "reason:invalid:1",
+      "mutation": {
+        "path": "reason",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "reason:invalid:2",
+      "mutation": {
+        "path": "reason",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "reason:invalid:3",
+      "mutation": {
+        "path": "reason",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "reason:invalid:4",
+      "mutation": {
+        "path": "reason",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "reason:invalid:5",
+      "mutation": {
+        "path": "reason",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "too_big"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "unknown-key",
+      "mutation": {
+        "path": "unexpected",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "idempotency-key-is-not-supported",
+      "mutation": {
+        "path": "idempotencyKey",
+        "value": "bf186237-8dd9-40cb-8881-912e69216263"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "value:invalid:0",
+      "mutation": {
+        "path": "value",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "value:invalid:1",
+      "mutation": {
+        "path": "value",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "value:invalid:2",
+      "mutation": {
+        "path": "value",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "value:invalid:3",
+      "mutation": {
+        "path": "value",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "value:invalid:4",
+      "mutation": {
+        "path": "value",
+        "value": ""
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "value:invalid:5",
+      "mutation": {
+        "path": "value",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "mode:missing",
+      "mutation": {
+        "path": "value.mode",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "mode:invalid:0",
+      "mutation": {
+        "path": "value.mode",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "mode:invalid:1",
+      "mutation": {
+        "path": "value.mode",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "mode:invalid:2",
+      "mutation": {
+        "path": "value.mode",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "mode:invalid:3",
+      "mutation": {
+        "path": "value.mode",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "mode:invalid:4",
+      "mutation": {
+        "path": "value.mode",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "mode:invalid:5",
+      "mutation": {
+        "path": "value.mode",
+        "value": ""
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "mode:invalid:6",
+      "mutation": {
+        "path": "value.mode",
+        "value": "summed"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "value:unknown-key",
+      "mutation": {
+        "path": "value.unexpected",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "source:missing",
+      "mutation": {
+        "path": "value.source",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "source:invalid:0",
+      "mutation": {
+        "path": "value.source",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "source:invalid:1",
+      "mutation": {
+        "path": "value.source",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "source:invalid:2",
+      "mutation": {
+        "path": "value.source",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "source:invalid:3",
+      "mutation": {
+        "path": "value.source",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "source:invalid:4",
+      "mutation": {
+        "path": "value.source",
+        "value": ""
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "source:invalid:5",
+      "mutation": {
+        "path": "value.source",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "count:missing",
+      "mutation": {
+        "path": "value.source.count",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "count:invalid:0",
+      "mutation": {
+        "path": "value.source.count",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "count:invalid:1",
+      "mutation": {
+        "path": "value.source.count",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "count:invalid:2",
+      "mutation": {
+        "path": "value.source.count",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "count:invalid:3",
+      "mutation": {
+        "path": "value.source.count",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "count:invalid:4",
+      "mutation": {
+        "path": "value.source.count",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "count:invalid:5",
+      "mutation": {
+        "path": "value.source.count",
+        "value": ""
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "count:invalid:6",
+      "mutation": {
+        "path": "value.source.count",
+        "value": "all"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "source:unknown-key",
+      "mutation": {
+        "path": "value.source.unexpected",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "non-footfall:station-is-forbidden",
+      "mutation": {
+        "path": "value.source.stationId",
+        "value": "OWN_COUNTING_STATION"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "key:missing",
+      "mutation": {
+        "path": "key",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "value:missing",
+      "mutation": {
+        "path": "value",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "expectedVersion:missing",
+      "mutation": {
+        "path": "expectedVersion",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "key:invalid:0",
+      "mutation": {
+        "path": "key",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "key:invalid:1",
+      "mutation": {
+        "path": "key",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "key:invalid:2",
+      "mutation": {
+        "path": "key",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "key:invalid:3",
+      "mutation": {
+        "path": "key",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "key:invalid:4",
+      "mutation": {
+        "path": "key",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "key:invalid:5",
+      "mutation": {
+        "path": "key",
+        "value": ""
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "key:invalid:6",
+      "mutation": {
+        "path": "key",
+        "value": "product.unknown"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "expectedVersion:invalid:0",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "expectedVersion:invalid:1",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "expectedVersion:invalid:2",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": "0"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "expectedVersion:invalid:3",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "expectedVersion:invalid:4",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "expectedVersion:invalid:5",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": -1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "expectedVersion:invalid:6",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": 0.5
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "reason:invalid:0",
+      "mutation": {
+        "path": "reason",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "reason:invalid:1",
+      "mutation": {
+        "path": "reason",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "reason:invalid:2",
+      "mutation": {
+        "path": "reason",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "reason:invalid:3",
+      "mutation": {
+        "path": "reason",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "reason:invalid:4",
+      "mutation": {
+        "path": "reason",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "reason:invalid:5",
+      "mutation": {
+        "path": "reason",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "too_big"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "unknown-key",
+      "mutation": {
+        "path": "unexpected",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "idempotency-key-is-not-supported",
+      "mutation": {
+        "path": "idempotencyKey",
+        "value": "bf186237-8dd9-40cb-8881-912e69216263"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "value:invalid:0",
+      "mutation": {
+        "path": "value",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "value:invalid:1",
+      "mutation": {
+        "path": "value",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "value:invalid:2",
+      "mutation": {
+        "path": "value",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "value:invalid:3",
+      "mutation": {
+        "path": "value",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "value:invalid:4",
+      "mutation": {
+        "path": "value",
+        "value": ""
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "value:invalid:5",
+      "mutation": {
+        "path": "value",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "mode:missing",
+      "mutation": {
+        "path": "value.mode",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "mode:invalid:0",
+      "mutation": {
+        "path": "value.mode",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "mode:invalid:1",
+      "mutation": {
+        "path": "value.mode",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "mode:invalid:2",
+      "mutation": {
+        "path": "value.mode",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "mode:invalid:3",
+      "mutation": {
+        "path": "value.mode",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "mode:invalid:4",
+      "mutation": {
+        "path": "value.mode",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "mode:invalid:5",
+      "mutation": {
+        "path": "value.mode",
+        "value": ""
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "mode:invalid:6",
+      "mutation": {
+        "path": "value.mode",
+        "value": "summed"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "value:unknown-key",
+      "mutation": {
+        "path": "value.unexpected",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "source:missing",
+      "mutation": {
+        "path": "value.source",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "source:invalid:0",
+      "mutation": {
+        "path": "value.source",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "source:invalid:1",
+      "mutation": {
+        "path": "value.source",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "source:invalid:2",
+      "mutation": {
+        "path": "value.source",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "source:invalid:3",
+      "mutation": {
+        "path": "value.source",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "source:invalid:4",
+      "mutation": {
+        "path": "value.source",
+        "value": ""
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "source:invalid:5",
+      "mutation": {
+        "path": "value.source",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "count:missing",
+      "mutation": {
+        "path": "value.source.count",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "count:invalid:0",
+      "mutation": {
+        "path": "value.source.count",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "count:invalid:1",
+      "mutation": {
+        "path": "value.source.count",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "count:invalid:2",
+      "mutation": {
+        "path": "value.source.count",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "count:invalid:3",
+      "mutation": {
+        "path": "value.source.count",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "count:invalid:4",
+      "mutation": {
+        "path": "value.source.count",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "count:invalid:5",
+      "mutation": {
+        "path": "value.source.count",
+        "value": ""
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "count:invalid:6",
+      "mutation": {
+        "path": "value.source.count",
+        "value": "all"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "source:unknown-key",
+      "mutation": {
+        "path": "value.source.unexpected",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "non-footfall:station-is-forbidden",
+      "mutation": {
+        "path": "value.source.stationId",
+        "value": "OWN_COUNTING_STATION"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "key:missing",
+      "mutation": {
+        "path": "key",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "value:missing",
+      "mutation": {
+        "path": "value",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "expectedVersion:missing",
+      "mutation": {
+        "path": "expectedVersion",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "key:invalid:0",
+      "mutation": {
+        "path": "key",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "key:invalid:1",
+      "mutation": {
+        "path": "key",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "key:invalid:2",
+      "mutation": {
+        "path": "key",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "key:invalid:3",
+      "mutation": {
+        "path": "key",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "key:invalid:4",
+      "mutation": {
+        "path": "key",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "key:invalid:5",
+      "mutation": {
+        "path": "key",
+        "value": ""
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "key:invalid:6",
+      "mutation": {
+        "path": "key",
+        "value": "product.unknown"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "expectedVersion:invalid:0",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "expectedVersion:invalid:1",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "expectedVersion:invalid:2",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": "0"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "expectedVersion:invalid:3",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "expectedVersion:invalid:4",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "expectedVersion:invalid:5",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": -1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "expectedVersion:invalid:6",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": 0.5
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "reason:invalid:0",
+      "mutation": {
+        "path": "reason",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "reason:invalid:1",
+      "mutation": {
+        "path": "reason",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "reason:invalid:2",
+      "mutation": {
+        "path": "reason",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "reason:invalid:3",
+      "mutation": {
+        "path": "reason",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "reason:invalid:4",
+      "mutation": {
+        "path": "reason",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "reason:invalid:5",
+      "mutation": {
+        "path": "reason",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "too_big"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "unknown-key",
+      "mutation": {
+        "path": "unexpected",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "idempotency-key-is-not-supported",
+      "mutation": {
+        "path": "idempotencyKey",
+        "value": "bf186237-8dd9-40cb-8881-912e69216263"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "value:invalid:0",
+      "mutation": {
+        "path": "value",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "value:invalid:1",
+      "mutation": {
+        "path": "value",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "value:invalid:2",
+      "mutation": {
+        "path": "value",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "value:invalid:3",
+      "mutation": {
+        "path": "value",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "value:invalid:4",
+      "mutation": {
+        "path": "value",
+        "value": ""
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "value:invalid:5",
+      "mutation": {
+        "path": "value",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "mode:missing",
+      "mutation": {
+        "path": "value.mode",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "mode:invalid:0",
+      "mutation": {
+        "path": "value.mode",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "mode:invalid:1",
+      "mutation": {
+        "path": "value.mode",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "mode:invalid:2",
+      "mutation": {
+        "path": "value.mode",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "mode:invalid:3",
+      "mutation": {
+        "path": "value.mode",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "mode:invalid:4",
+      "mutation": {
+        "path": "value.mode",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "mode:invalid:5",
+      "mutation": {
+        "path": "value.mode",
+        "value": ""
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "mode:invalid:6",
+      "mutation": {
+        "path": "value.mode",
+        "value": "summed"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.mode",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "value:unknown-key",
+      "mutation": {
+        "path": "value.unexpected",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "source:missing",
+      "mutation": {
+        "path": "value.source",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "source:invalid:0",
+      "mutation": {
+        "path": "value.source",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "source:invalid:1",
+      "mutation": {
+        "path": "value.source",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "source:invalid:2",
+      "mutation": {
+        "path": "value.source",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "source:invalid:3",
+      "mutation": {
+        "path": "value.source",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "source:invalid:4",
+      "mutation": {
+        "path": "value.source",
+        "value": ""
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "source:invalid:5",
+      "mutation": {
+        "path": "value.source",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "count:missing",
+      "mutation": {
+        "path": "value.source.count",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "count:invalid:0",
+      "mutation": {
+        "path": "value.source.count",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "count:invalid:1",
+      "mutation": {
+        "path": "value.source.count",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "count:invalid:2",
+      "mutation": {
+        "path": "value.source.count",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "count:invalid:3",
+      "mutation": {
+        "path": "value.source.count",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "count:invalid:4",
+      "mutation": {
+        "path": "value.source.count",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "count:invalid:5",
+      "mutation": {
+        "path": "value.source.count",
+        "value": ""
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "count:invalid:6",
+      "mutation": {
+        "path": "value.source.count",
+        "value": "all"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.count",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "source:unknown-key",
+      "mutation": {
+        "path": "value.source.unexpected",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "stationId:missing",
+      "mutation": {
+        "path": "value.source.stationId",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.stationId",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "stationId:invalid:0",
+      "mutation": {
+        "path": "value.source.stationId",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.stationId",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "stationId:invalid:1",
+      "mutation": {
+        "path": "value.source.stationId",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.stationId",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "stationId:invalid:2",
+      "mutation": {
+        "path": "value.source.stationId",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.stationId",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "stationId:invalid:3",
+      "mutation": {
+        "path": "value.source.stationId",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.stationId",
+          "code": "invalid_type"
+        },
+        {
+          "path": "value.source.stationId",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "stationId:invalid:4",
+      "mutation": {
+        "path": "value.source.stationId",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.stationId",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "stationId:invalid:5",
+      "mutation": {
+        "path": "value.source.stationId",
+        "value": ""
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.stationId",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "stationId:invalid:6",
+      "mutation": {
+        "path": "value.source.stationId",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value.source.stationId",
+          "code": "too_big"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "key:missing",
+      "mutation": {
+        "path": "key",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "value:missing",
+      "mutation": {
+        "path": "value",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_value"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "expectedVersion:missing",
+      "mutation": {
+        "path": "expectedVersion",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "key:invalid:0",
+      "mutation": {
+        "path": "key",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "key:invalid:1",
+      "mutation": {
+        "path": "key",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "key:invalid:2",
+      "mutation": {
+        "path": "key",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "key:invalid:3",
+      "mutation": {
+        "path": "key",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "key:invalid:4",
+      "mutation": {
+        "path": "key",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "key:invalid:5",
+      "mutation": {
+        "path": "key",
+        "value": ""
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "key:invalid:6",
+      "mutation": {
+        "path": "key",
+        "value": "product.unknown"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "expectedVersion:invalid:0",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "expectedVersion:invalid:1",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "expectedVersion:invalid:2",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": "0"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "expectedVersion:invalid:3",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "expectedVersion:invalid:4",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "expectedVersion:invalid:5",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": -1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "expectedVersion:invalid:6",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": 0.5
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "reason:invalid:0",
+      "mutation": {
+        "path": "reason",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "reason:invalid:1",
+      "mutation": {
+        "path": "reason",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "reason:invalid:2",
+      "mutation": {
+        "path": "reason",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "reason:invalid:3",
+      "mutation": {
+        "path": "reason",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "reason:invalid:4",
+      "mutation": {
+        "path": "reason",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "reason:invalid:5",
+      "mutation": {
+        "path": "reason",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "too_big"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "unknown-key",
+      "mutation": {
+        "path": "unexpected",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "idempotency-key-is-not-supported",
+      "mutation": {
+        "path": "idempotencyKey",
+        "value": "bf186237-8dd9-40cb-8881-912e69216263"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "value:invalid:0",
+      "mutation": {
+        "path": "value",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_value"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "value:invalid:1",
+      "mutation": {
+        "path": "value",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_value"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "value:invalid:2",
+      "mutation": {
+        "path": "value",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_value"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "value:invalid:3",
+      "mutation": {
+        "path": "value",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_value"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "value:invalid:4",
+      "mutation": {
+        "path": "value",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_value"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "value:invalid:5",
+      "mutation": {
+        "path": "value",
+        "value": ""
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_value"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "value:invalid:6",
+      "mutation": {
+        "path": "value",
+        "value": "all"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_value"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-none",
+      "id": "value:invalid:7",
+      "mutation": {
+        "path": "value",
+        "value": " allowlist "
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_value"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "key:missing",
+      "mutation": {
+        "path": "key",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "value:missing",
+      "mutation": {
+        "path": "value",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_value"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "expectedVersion:missing",
+      "mutation": {
+        "path": "expectedVersion",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "key:invalid:0",
+      "mutation": {
+        "path": "key",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "key:invalid:1",
+      "mutation": {
+        "path": "key",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "key:invalid:2",
+      "mutation": {
+        "path": "key",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "key:invalid:3",
+      "mutation": {
+        "path": "key",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "key:invalid:4",
+      "mutation": {
+        "path": "key",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "key:invalid:5",
+      "mutation": {
+        "path": "key",
+        "value": ""
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "key:invalid:6",
+      "mutation": {
+        "path": "key",
+        "value": "product.unknown"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "expectedVersion:invalid:0",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "expectedVersion:invalid:1",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "expectedVersion:invalid:2",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": "0"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "expectedVersion:invalid:3",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "expectedVersion:invalid:4",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "expectedVersion:invalid:5",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": -1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "expectedVersion:invalid:6",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": 0.5
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "reason:invalid:0",
+      "mutation": {
+        "path": "reason",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "reason:invalid:1",
+      "mutation": {
+        "path": "reason",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "reason:invalid:2",
+      "mutation": {
+        "path": "reason",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "reason:invalid:3",
+      "mutation": {
+        "path": "reason",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "reason:invalid:4",
+      "mutation": {
+        "path": "reason",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "reason:invalid:5",
+      "mutation": {
+        "path": "reason",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "too_big"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "unknown-key",
+      "mutation": {
+        "path": "unexpected",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "idempotency-key-is-not-supported",
+      "mutation": {
+        "path": "idempotencyKey",
+        "value": "bf186237-8dd9-40cb-8881-912e69216263"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "value:invalid:0",
+      "mutation": {
+        "path": "value",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_value"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "value:invalid:1",
+      "mutation": {
+        "path": "value",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_value"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "value:invalid:2",
+      "mutation": {
+        "path": "value",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_value"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "value:invalid:3",
+      "mutation": {
+        "path": "value",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_value"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "value:invalid:4",
+      "mutation": {
+        "path": "value",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_value"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "value:invalid:5",
+      "mutation": {
+        "path": "value",
+        "value": ""
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_value"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "value:invalid:6",
+      "mutation": {
+        "path": "value",
+        "value": "all"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_value"
+        }
+      ]
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "value:invalid:7",
+      "mutation": {
+        "path": "value",
+        "value": " allowlist "
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_value"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "key:missing",
+      "mutation": {
+        "path": "key",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "value:missing",
+      "mutation": {
+        "path": "value",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "expectedVersion:missing",
+      "mutation": {
+        "path": "expectedVersion",
+        "remove": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "key:invalid:0",
+      "mutation": {
+        "path": "key",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "key:invalid:1",
+      "mutation": {
+        "path": "key",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "key:invalid:2",
+      "mutation": {
+        "path": "key",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "key:invalid:3",
+      "mutation": {
+        "path": "key",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "key:invalid:4",
+      "mutation": {
+        "path": "key",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "key:invalid:5",
+      "mutation": {
+        "path": "key",
+        "value": ""
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "key:invalid:6",
+      "mutation": {
+        "path": "key",
+        "value": "product.unknown"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "key",
+          "code": "invalid_union"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "expectedVersion:invalid:0",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "expectedVersion:invalid:1",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "expectedVersion:invalid:2",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": "0"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "expectedVersion:invalid:3",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "expectedVersion:invalid:4",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "expectedVersion:invalid:5",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": -1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "expectedVersion:invalid:6",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": 0.5
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "expectedVersion",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "reason:invalid:0",
+      "mutation": {
+        "path": "reason",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "reason:invalid:1",
+      "mutation": {
+        "path": "reason",
+        "value": 1
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "reason:invalid:2",
+      "mutation": {
+        "path": "reason",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "reason:invalid:3",
+      "mutation": {
+        "path": "reason",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "reason:invalid:4",
+      "mutation": {
+        "path": "reason",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "reason:invalid:5",
+      "mutation": {
+        "path": "reason",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "reason",
+          "code": "too_big"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "unknown-key",
+      "mutation": {
+        "path": "unexpected",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "idempotency-key-is-not-supported",
+      "mutation": {
+        "path": "idempotencyKey",
+        "value": "bf186237-8dd9-40cb-8881-912e69216263"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "value:invalid:0",
+      "mutation": {
+        "path": "value",
+        "value": null
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "value:invalid:1",
+      "mutation": {
+        "path": "value",
+        "value": true
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "value:invalid:2",
+      "mutation": {
+        "path": "value",
+        "value": "24"
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "value:invalid:3",
+      "mutation": {
+        "path": "value",
+        "value": []
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "value:invalid:4",
+      "mutation": {
+        "path": "value",
+        "value": {}
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "value:invalid:5",
+      "mutation": {
+        "path": "value",
+        "value": 0
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "value:invalid:6",
+      "mutation": {
+        "path": "value",
+        "value": 25
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "too_big"
+        }
+      ]
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "value:invalid:7",
+      "mutation": {
+        "path": "value",
+        "value": 1.5
+      },
+      "expectedEffect": "no-business-effect",
+      "schemaIssues": [
+        {
+          "path": "value",
+          "code": "invalid_type"
+        }
+      ]
+    }
+  ],
+  "semantic": [
+    {
+      "variant": "counts-separate",
+      "id": "reason:missing",
+      "mutation": {
+        "path": "reason",
+        "remove": true
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "separate"
+        },
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "counts-separate",
+      "id": "reason:empty",
+      "mutation": {
+        "path": "reason",
+        "value": ""
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "separate"
+        },
+        "expectedVersion": 0,
+        "reason": ""
+      }
+    },
+    {
+      "variant": "counts-separate",
+      "id": "reason:whitespace",
+      "mutation": {
+        "path": "reason",
+        "value": "   "
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "separate"
+        },
+        "expectedVersion": 0,
+        "reason": ""
+      }
+    },
+    {
+      "variant": "counts-separate",
+      "id": "reason:trim",
+      "mutation": {
+        "path": "reason",
+        "value": "  Synthetic reason  "
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "separate"
+        },
+        "expectedVersion": 0,
+        "reason": "Synthetic reason"
+      }
+    },
+    {
+      "variant": "counts-separate",
+      "id": "reason:maximum",
+      "mutation": {
+        "path": "reason",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "separate"
+        },
+        "expectedVersion": 0,
+        "reason": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "variant": "counts-separate",
+      "id": "reason:unicode",
+      "mutation": {
+        "path": "reason",
+        "value": "合成测试 — தமிழ் — اختبار"
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "separate"
+        },
+        "expectedVersion": 0,
+        "reason": "合成测试 — தமிழ் — اختبار"
+      }
+    },
+    {
+      "variant": "counts-separate",
+      "id": "expectedVersion:positive-integer",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": 1
+      },
+      "expectedEffect": "actual-current-or-stale-cas-binding-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "separate"
+        },
+        "expectedVersion": 1,
+        "reason": "Synthetic verification"
+      }
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "reason:missing",
+      "mutation": {
+        "path": "reason",
+        "remove": true
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "registrations"
+          }
+        },
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "reason:empty",
+      "mutation": {
+        "path": "reason",
+        "value": ""
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "registrations"
+          }
+        },
+        "expectedVersion": 0,
+        "reason": ""
+      }
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "reason:whitespace",
+      "mutation": {
+        "path": "reason",
+        "value": "   "
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "registrations"
+          }
+        },
+        "expectedVersion": 0,
+        "reason": ""
+      }
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "reason:trim",
+      "mutation": {
+        "path": "reason",
+        "value": "  Synthetic reason  "
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "registrations"
+          }
+        },
+        "expectedVersion": 0,
+        "reason": "Synthetic reason"
+      }
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "reason:maximum",
+      "mutation": {
+        "path": "reason",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "registrations"
+          }
+        },
+        "expectedVersion": 0,
+        "reason": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "reason:unicode",
+      "mutation": {
+        "path": "reason",
+        "value": "合成测试 — தமிழ் — اختبار"
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "registrations"
+          }
+        },
+        "expectedVersion": 0,
+        "reason": "合成测试 — தமிழ் — اختبار"
+      }
+    },
+    {
+      "variant": "counts-registrations",
+      "id": "expectedVersion:positive-integer",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": 1
+      },
+      "expectedEffect": "actual-current-or-stale-cas-binding-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "registrations"
+          }
+        },
+        "expectedVersion": 1,
+        "reason": "Synthetic verification"
+      }
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "reason:missing",
+      "mutation": {
+        "path": "reason",
+        "remove": true
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "journeys"
+          }
+        },
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "reason:empty",
+      "mutation": {
+        "path": "reason",
+        "value": ""
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "journeys"
+          }
+        },
+        "expectedVersion": 0,
+        "reason": ""
+      }
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "reason:whitespace",
+      "mutation": {
+        "path": "reason",
+        "value": "   "
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "journeys"
+          }
+        },
+        "expectedVersion": 0,
+        "reason": ""
+      }
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "reason:trim",
+      "mutation": {
+        "path": "reason",
+        "value": "  Synthetic reason  "
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "journeys"
+          }
+        },
+        "expectedVersion": 0,
+        "reason": "Synthetic reason"
+      }
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "reason:maximum",
+      "mutation": {
+        "path": "reason",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "journeys"
+          }
+        },
+        "expectedVersion": 0,
+        "reason": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "reason:unicode",
+      "mutation": {
+        "path": "reason",
+        "value": "合成测试 — தமிழ் — اختبار"
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "journeys"
+          }
+        },
+        "expectedVersion": 0,
+        "reason": "合成测试 — தமிழ் — اختبار"
+      }
+    },
+    {
+      "variant": "counts-journeys",
+      "id": "expectedVersion:positive-integer",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": 1
+      },
+      "expectedEffect": "actual-current-or-stale-cas-binding-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "journeys"
+          }
+        },
+        "expectedVersion": 1,
+        "reason": "Synthetic verification"
+      }
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "reason:missing",
+      "mutation": {
+        "path": "reason",
+        "remove": true
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "footfall",
+            "stationId": "OWN_COUNTING_STATION"
+          }
+        },
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "reason:empty",
+      "mutation": {
+        "path": "reason",
+        "value": ""
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "footfall",
+            "stationId": "OWN_COUNTING_STATION"
+          }
+        },
+        "expectedVersion": 0,
+        "reason": ""
+      }
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "reason:whitespace",
+      "mutation": {
+        "path": "reason",
+        "value": "   "
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "footfall",
+            "stationId": "OWN_COUNTING_STATION"
+          }
+        },
+        "expectedVersion": 0,
+        "reason": ""
+      }
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "reason:trim",
+      "mutation": {
+        "path": "reason",
+        "value": "  Synthetic reason  "
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "footfall",
+            "stationId": "OWN_COUNTING_STATION"
+          }
+        },
+        "expectedVersion": 0,
+        "reason": "Synthetic reason"
+      }
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "reason:maximum",
+      "mutation": {
+        "path": "reason",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "footfall",
+            "stationId": "OWN_COUNTING_STATION"
+          }
+        },
+        "expectedVersion": 0,
+        "reason": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "reason:unicode",
+      "mutation": {
+        "path": "reason",
+        "value": "合成测试 — தமிழ் — اختبار"
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "footfall",
+            "stationId": "OWN_COUNTING_STATION"
+          }
+        },
+        "expectedVersion": 0,
+        "reason": "合成测试 — தமிழ் — اختبار"
+      }
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "expectedVersion:positive-integer",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": 1
+      },
+      "expectedEffect": "actual-current-or-stale-cas-binding-required",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "footfall",
+            "stationId": "OWN_COUNTING_STATION"
+          }
+        },
+        "expectedVersion": 1,
+        "reason": "Synthetic verification"
+      }
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "stationId:minimum",
+      "mutation": {
+        "path": "value.source.stationId",
+        "value": "x"
+      },
+      "expectedEffect": "actual-absent-station-refusal-only",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "footfall",
+            "stationId": "x"
+          }
+        },
+        "expectedVersion": 0,
+        "reason": "Synthetic verification"
+      }
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "stationId:maximum",
+      "mutation": {
+        "path": "value.source.stationId",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expectedEffect": "actual-absent-station-refusal-only",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "footfall",
+            "stationId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        "expectedVersion": 0,
+        "reason": "Synthetic verification"
+      }
+    },
+    {
+      "variant": "counts-footfall",
+      "id": "stationId:whitespace",
+      "mutation": {
+        "path": "value.source.stationId",
+        "value": " "
+      },
+      "expectedEffect": "actual-absent-station-refusal-only",
+      "normalized": {
+        "key": "product.countsMode",
+        "value": {
+          "mode": "headline",
+          "source": {
+            "count": "footfall",
+            "stationId": " "
+          }
+        },
+        "expectedVersion": 0,
+        "reason": "Synthetic verification"
+      }
+    },
+    {
+      "variant": "privacy-none",
+      "id": "reason:missing",
+      "mutation": {
+        "path": "reason",
+        "remove": true
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.visitorDataMode",
+        "value": "none",
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "privacy-none",
+      "id": "reason:empty",
+      "mutation": {
+        "path": "reason",
+        "value": ""
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.visitorDataMode",
+        "value": "none",
+        "expectedVersion": 0,
+        "reason": ""
+      }
+    },
+    {
+      "variant": "privacy-none",
+      "id": "reason:whitespace",
+      "mutation": {
+        "path": "reason",
+        "value": "   "
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.visitorDataMode",
+        "value": "none",
+        "expectedVersion": 0,
+        "reason": ""
+      }
+    },
+    {
+      "variant": "privacy-none",
+      "id": "reason:trim",
+      "mutation": {
+        "path": "reason",
+        "value": "  Synthetic reason  "
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.visitorDataMode",
+        "value": "none",
+        "expectedVersion": 0,
+        "reason": "Synthetic reason"
+      }
+    },
+    {
+      "variant": "privacy-none",
+      "id": "reason:maximum",
+      "mutation": {
+        "path": "reason",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.visitorDataMode",
+        "value": "none",
+        "expectedVersion": 0,
+        "reason": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "variant": "privacy-none",
+      "id": "reason:unicode",
+      "mutation": {
+        "path": "reason",
+        "value": "合成测试 — தமிழ் — اختبار"
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.visitorDataMode",
+        "value": "none",
+        "expectedVersion": 0,
+        "reason": "合成测试 — தமிழ் — اختبار"
+      }
+    },
+    {
+      "variant": "privacy-none",
+      "id": "expectedVersion:positive-integer",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": 1
+      },
+      "expectedEffect": "actual-current-or-stale-cas-binding-required",
+      "normalized": {
+        "key": "product.visitorDataMode",
+        "value": "none",
+        "expectedVersion": 1,
+        "reason": "Synthetic verification"
+      }
+    },
+    {
+      "variant": "privacy-none",
+      "id": "value:other-mode",
+      "mutation": {
+        "path": "value",
+        "value": "allowlist"
+      },
+      "expectedEffect": "isolated-owned-synthetic-fixture-required-before-any-purge",
+      "normalized": {
+        "key": "product.visitorDataMode",
+        "value": "allowlist",
+        "expectedVersion": 0,
+        "reason": "Synthetic verification"
+      }
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "reason:missing",
+      "mutation": {
+        "path": "reason",
+        "remove": true
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.visitorDataMode",
+        "value": "allowlist",
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "reason:empty",
+      "mutation": {
+        "path": "reason",
+        "value": ""
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.visitorDataMode",
+        "value": "allowlist",
+        "expectedVersion": 0,
+        "reason": ""
+      }
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "reason:whitespace",
+      "mutation": {
+        "path": "reason",
+        "value": "   "
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.visitorDataMode",
+        "value": "allowlist",
+        "expectedVersion": 0,
+        "reason": ""
+      }
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "reason:trim",
+      "mutation": {
+        "path": "reason",
+        "value": "  Synthetic reason  "
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.visitorDataMode",
+        "value": "allowlist",
+        "expectedVersion": 0,
+        "reason": "Synthetic reason"
+      }
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "reason:maximum",
+      "mutation": {
+        "path": "reason",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.visitorDataMode",
+        "value": "allowlist",
+        "expectedVersion": 0,
+        "reason": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "reason:unicode",
+      "mutation": {
+        "path": "reason",
+        "value": "合成测试 — தமிழ் — اختبار"
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "product.visitorDataMode",
+        "value": "allowlist",
+        "expectedVersion": 0,
+        "reason": "合成测试 — தமிழ் — اختبار"
+      }
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "expectedVersion:positive-integer",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": 1
+      },
+      "expectedEffect": "actual-current-or-stale-cas-binding-required",
+      "normalized": {
+        "key": "product.visitorDataMode",
+        "value": "allowlist",
+        "expectedVersion": 1,
+        "reason": "Synthetic verification"
+      }
+    },
+    {
+      "variant": "privacy-allowlist",
+      "id": "value:other-mode",
+      "mutation": {
+        "path": "value",
+        "value": "none"
+      },
+      "expectedEffect": "isolated-owned-synthetic-fixture-required-before-any-purge",
+      "normalized": {
+        "key": "product.visitorDataMode",
+        "value": "none",
+        "expectedVersion": 0,
+        "reason": "Synthetic verification"
+      }
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "reason:missing",
+      "mutation": {
+        "path": "reason",
+        "remove": true
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "lostPersonPurgeHours",
+        "value": 24,
+        "expectedVersion": 0
+      }
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "reason:empty",
+      "mutation": {
+        "path": "reason",
+        "value": ""
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "lostPersonPurgeHours",
+        "value": 24,
+        "expectedVersion": 0,
+        "reason": ""
+      }
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "reason:whitespace",
+      "mutation": {
+        "path": "reason",
+        "value": "   "
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "lostPersonPurgeHours",
+        "value": 24,
+        "expectedVersion": 0,
+        "reason": ""
+      }
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "reason:trim",
+      "mutation": {
+        "path": "reason",
+        "value": "  Synthetic reason  "
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "lostPersonPurgeHours",
+        "value": 24,
+        "expectedVersion": 0,
+        "reason": "Synthetic reason"
+      }
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "reason:maximum",
+      "mutation": {
+        "path": "reason",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "lostPersonPurgeHours",
+        "value": 24,
+        "expectedVersion": 0,
+        "reason": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "reason:unicode",
+      "mutation": {
+        "path": "reason",
+        "value": "合成测试 — தமிழ் — اختبار"
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "lostPersonPurgeHours",
+        "value": 24,
+        "expectedVersion": 0,
+        "reason": "合成测试 — தமிழ் — اختبار"
+      }
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "expectedVersion:positive-integer",
+      "mutation": {
+        "path": "expectedVersion",
+        "value": 1
+      },
+      "expectedEffect": "actual-current-or-stale-cas-binding-required",
+      "normalized": {
+        "key": "lostPersonPurgeHours",
+        "value": 24,
+        "expectedVersion": 1,
+        "reason": "Synthetic verification"
+      }
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "value:minimum",
+      "mutation": {
+        "path": "value",
+        "value": 1
+      },
+      "expectedEffect": "isolated-owned-synthetic-fixture-required-before-retention-change",
+      "normalized": {
+        "key": "lostPersonPurgeHours",
+        "value": 1,
+        "expectedVersion": 0,
+        "reason": "Synthetic verification"
+      }
+    },
+    {
+      "variant": "lost-person-retention",
+      "id": "value:maximum",
+      "mutation": {
+        "path": "value",
+        "value": 24
+      },
+      "expectedEffect": "stored-readback-cas-history-and-restore-required",
+      "normalized": {
+        "key": "lostPersonPurgeHours",
+        "value": 24,
+        "expectedVersion": 0,
+        "reason": "Synthetic verification"
+      }
+    }
+  ]
+}

@@ -20,6 +20,12 @@ forward, not a refused volunteer.
 
 ## Decision
 
+**Owner amendment, 15 October 2026 (D-23):** P16.9’s continuous 24-hour soak is
+waived. The tracker records it as skipped; no successful soak is claimed. API/browser
+verification, deferred acceptance, load, drills, restore and remaining owner/production
+approvals remain required. The original 10 October decision is retained below with the
+current campaign order amended.
+
 ### 1. Build first
 
 Implement every remaining feature (P08, P10–P15 code and infrastructure) before the staging
@@ -56,15 +62,15 @@ tests, so a green docs run says nothing about code pushed before it.
 
 ### 4. What moves to the verification campaign (P16)
 
-| Deferred                                                          | Was                                         | Now                           |
-| ----------------------------------------------------------------- | ------------------------------------------- | ----------------------------- |
-| Soaks and shadow releases                                         | D-22 (24 h), D-20 (shadow, enforce, delete) | P16.9                         |
-| Per-feature staging acceptance (walks, baselines, probe compares) | each step's "Done when"                     | P16.8                         |
-| Full browser (Playwright) and visual suites                       | ADR-010 "before release"                    | P16.1                         |
-| Load, p95 and failure behaviour                                   | P11.9, P16.2                                | P16.2                         |
-| Resilience drills, restore rehearsal                              | P16.3, P16.4                                | unchanged                     |
-| Granular API tests: every route, every role, every edge case      | new                                         | P16.10                        |
-| Owner sign-offs of UX (IA walkthrough P13.1, copy P14.8)          | blocking                                    | reviewed in P16, non-blocking |
+| Deferred                                                          | Was                                         | Now                                    |
+| ----------------------------------------------------------------- | ------------------------------------------- | -------------------------------------- |
+| Soaks and shadow releases                                         | D-22 (24 h), D-20 (shadow, enforce, delete) | Waived by owner, 15 Oct; P16.9 skipped |
+| Per-feature staging acceptance (walks, baselines, probe compares) | each step's "Done when"                     | P16.8                                  |
+| Full browser (Playwright) and visual suites                       | ADR-010 "before release"                    | P16.1                                  |
+| Load, p95 and failure behaviour                                   | P11.9, P16.2                                | P16.2                                  |
+| Resilience drills, restore rehearsal                              | P16.3, P16.4                                | unchanged                              |
+| Granular API tests: every route, every role, every edge case      | new                                         | P16.10                                 |
+| Owner sign-offs of UX (IA walkthrough P13.1, copy P14.8)          | blocking                                    | reviewed in P16, non-blocking          |
 
 Write browser specs alongside the features they cover; running the full suite is P16's job. Run a
 single affected spec only when it is cheap and the change is risky.
@@ -86,7 +92,7 @@ going. Release plans for the remaining P11 work (release 3 and later) do not nee
 
 When every feature step is closed: recreate AWS (bootstrap, the GitHub deploy role, then the stacks) and deploy staging sized like production (the real
 infrastructure, ADR-008), then run P16 in this order: P16.10 granular API suite, P16.1 full
-regression including browser and visual suites, P16.8 deferred acceptance, P16.9 soak, P16.2 load,
+regression including browser and visual suites, P16.8 deferred acceptance, P16.2 load,
 P16.3 drills, P16.4 restore. Fix what they find, with a test per fix, and re-run what the fix
 touched. Production creation and cutover follow (P12.8), with the owner's approval as before.
 
@@ -107,7 +113,8 @@ touched. Production creation and cutover follow (P12.8), with the owner's approv
   matrix on staging). Under this order they are not measured by 28 October unless the features are
   done well before it. The owner still makes the call on 28 October (D-01); if it is a no-go,
   training and January run on `release/january` as ADR-009 §3 already prepares.
-- P16 grows: the deferred acceptance list (P16.8), the soak (P16.9) and the API suite (P16.10).
+- P16 retains deferred acceptance (P16.8) and the API suite (P16.10). The owner waived
+  the continuous soak (P16.9) on 15 October; a skipped step is not evidence of a passed soak.
 
 ## How it is tested
 

@@ -1,0 +1,2044 @@
+{
+  "formatVersion": 1,
+  "domain": "event-days-and-legacy-template-hours",
+  "lifecycle": "DRAFT",
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "base": {
+        "date": "2026-10-15",
+        "label": "Synthetic current day",
+        "isPublicDay": true,
+        "isTourDay": false,
+        "idempotencyKey": "11111111-1111-4111-8111-111111111111"
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "base": {
+        "label": "Synthetic current day",
+        "isPublicDay": true,
+        "isTourDay": false,
+        "idempotencyKey": "11111111-1111-4111-8111-111111111111"
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "base": {
+        "label": "Synthetic morning shift",
+        "startLocal": "00:00",
+        "endLocal": "12:00",
+        "idempotencyKey": "11111111-1111-4111-8111-111111111111"
+      }
+    }
+  ],
+  "cases": [
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "date:omitted",
+      "mutation": {
+        "remove": "date"
+      },
+      "issues": [
+        {
+          "path": "date",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "date:invalid:0",
+      "mutation": {
+        "replace": "date",
+        "value": null
+      },
+      "issues": [
+        {
+          "path": "date",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "date:invalid:1",
+      "mutation": {
+        "replace": "date",
+        "value": 3
+      },
+      "issues": [
+        {
+          "path": "date",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "date:invalid:2",
+      "mutation": {
+        "replace": "date",
+        "value": true
+      },
+      "issues": [
+        {
+          "path": "date",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "date:invalid:3",
+      "mutation": {
+        "replace": "date",
+        "value": []
+      },
+      "issues": [
+        {
+          "path": "date",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "date:invalid:4",
+      "mutation": {
+        "replace": "date",
+        "value": {}
+      },
+      "issues": [
+        {
+          "path": "date",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "date:invalid:5",
+      "mutation": {
+        "replace": "date",
+        "value": ""
+      },
+      "issues": [
+        {
+          "path": "date",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "date:invalid:6",
+      "mutation": {
+        "replace": "date",
+        "value": "15-10-2026"
+      },
+      "issues": [
+        {
+          "path": "date",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "date:invalid:7",
+      "mutation": {
+        "replace": "date",
+        "value": "2026-02-30"
+      },
+      "issues": [
+        {
+          "path": "date",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "date:invalid:8",
+      "mutation": {
+        "replace": "date",
+        "value": "2026-13-01"
+      },
+      "issues": [
+        {
+          "path": "date",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "date:invalid:9",
+      "mutation": {
+        "replace": "date",
+        "value": "2026-10-15T00:00:00Z"
+      },
+      "issues": [
+        {
+          "path": "date",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "label:omitted",
+      "mutation": {
+        "remove": "label"
+      },
+      "issues": [
+        {
+          "path": "label",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "label:invalid:0",
+      "mutation": {
+        "replace": "label",
+        "value": null
+      },
+      "issues": [
+        {
+          "path": "label",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "label:invalid:1",
+      "mutation": {
+        "replace": "label",
+        "value": 3
+      },
+      "issues": [
+        {
+          "path": "label",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "label:invalid:2",
+      "mutation": {
+        "replace": "label",
+        "value": true
+      },
+      "issues": [
+        {
+          "path": "label",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "label:invalid:3",
+      "mutation": {
+        "replace": "label",
+        "value": []
+      },
+      "issues": [
+        {
+          "path": "label",
+          "code": "invalid_type"
+        },
+        {
+          "path": "label",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "label:invalid:4",
+      "mutation": {
+        "replace": "label",
+        "value": {}
+      },
+      "issues": [
+        {
+          "path": "label",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "label:invalid:5",
+      "mutation": {
+        "replace": "label",
+        "value": ""
+      },
+      "issues": [
+        {
+          "path": "label",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "label:invalid:6",
+      "mutation": {
+        "replace": "label",
+        "value": "   "
+      },
+      "issues": [
+        {
+          "path": "label",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "label:invalid:7",
+      "mutation": {
+        "replace": "label",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "issues": [
+        {
+          "path": "label",
+          "code": "too_big"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "isPublicDay:invalid:0",
+      "mutation": {
+        "replace": "isPublicDay",
+        "value": null
+      },
+      "issues": [
+        {
+          "path": "isPublicDay",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "isPublicDay:invalid:1",
+      "mutation": {
+        "replace": "isPublicDay",
+        "value": 3
+      },
+      "issues": [
+        {
+          "path": "isPublicDay",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "isPublicDay:invalid:2",
+      "mutation": {
+        "replace": "isPublicDay",
+        "value": "true"
+      },
+      "issues": [
+        {
+          "path": "isPublicDay",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "isPublicDay:invalid:3",
+      "mutation": {
+        "replace": "isPublicDay",
+        "value": []
+      },
+      "issues": [
+        {
+          "path": "isPublicDay",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "isPublicDay:invalid:4",
+      "mutation": {
+        "replace": "isPublicDay",
+        "value": {}
+      },
+      "issues": [
+        {
+          "path": "isPublicDay",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "isTourDay:invalid:0",
+      "mutation": {
+        "replace": "isTourDay",
+        "value": null
+      },
+      "issues": [
+        {
+          "path": "isTourDay",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "isTourDay:invalid:1",
+      "mutation": {
+        "replace": "isTourDay",
+        "value": 3
+      },
+      "issues": [
+        {
+          "path": "isTourDay",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "isTourDay:invalid:2",
+      "mutation": {
+        "replace": "isTourDay",
+        "value": "true"
+      },
+      "issues": [
+        {
+          "path": "isTourDay",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "isTourDay:invalid:3",
+      "mutation": {
+        "replace": "isTourDay",
+        "value": []
+      },
+      "issues": [
+        {
+          "path": "isTourDay",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "isTourDay:invalid:4",
+      "mutation": {
+        "replace": "isTourDay",
+        "value": {}
+      },
+      "issues": [
+        {
+          "path": "isTourDay",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "idempotencyKey:invalid:0",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": null
+      },
+      "issues": [
+        {
+          "path": "idempotencyKey",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "idempotencyKey:invalid:1",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": 3
+      },
+      "issues": [
+        {
+          "path": "idempotencyKey",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "idempotencyKey:invalid:2",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": true
+      },
+      "issues": [
+        {
+          "path": "idempotencyKey",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "idempotencyKey:invalid:3",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": []
+      },
+      "issues": [
+        {
+          "path": "idempotencyKey",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "idempotencyKey:invalid:4",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": {}
+      },
+      "issues": [
+        {
+          "path": "idempotencyKey",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "idempotencyKey:invalid:5",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": ""
+      },
+      "issues": [
+        {
+          "path": "idempotencyKey",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "idempotencyKey:invalid:6",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": "not-a-uuid"
+      },
+      "issues": [
+        {
+          "path": "idempotencyKey",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "idempotencyKey:invalid:7",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": "bf186237-8dd9-40cb-8881-912e6921626Z"
+      },
+      "issues": [
+        {
+          "path": "idempotencyKey",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "unknown-key",
+      "mutation": {
+        "add": "unexpected",
+        "value": true
+      },
+      "issues": [
+        {
+          "path": "",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "label:invalid:0",
+      "mutation": {
+        "replace": "label",
+        "value": null
+      },
+      "issues": [
+        {
+          "path": "label",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "label:invalid:1",
+      "mutation": {
+        "replace": "label",
+        "value": 3
+      },
+      "issues": [
+        {
+          "path": "label",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "label:invalid:2",
+      "mutation": {
+        "replace": "label",
+        "value": true
+      },
+      "issues": [
+        {
+          "path": "label",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "label:invalid:3",
+      "mutation": {
+        "replace": "label",
+        "value": []
+      },
+      "issues": [
+        {
+          "path": "label",
+          "code": "invalid_type"
+        },
+        {
+          "path": "label",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "label:invalid:4",
+      "mutation": {
+        "replace": "label",
+        "value": {}
+      },
+      "issues": [
+        {
+          "path": "label",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "label:invalid:5",
+      "mutation": {
+        "replace": "label",
+        "value": ""
+      },
+      "issues": [
+        {
+          "path": "label",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "label:invalid:6",
+      "mutation": {
+        "replace": "label",
+        "value": "   "
+      },
+      "issues": [
+        {
+          "path": "label",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "label:invalid:7",
+      "mutation": {
+        "replace": "label",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "issues": [
+        {
+          "path": "label",
+          "code": "too_big"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "isPublicDay:invalid:0",
+      "mutation": {
+        "replace": "isPublicDay",
+        "value": null
+      },
+      "issues": [
+        {
+          "path": "isPublicDay",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "isPublicDay:invalid:1",
+      "mutation": {
+        "replace": "isPublicDay",
+        "value": 3
+      },
+      "issues": [
+        {
+          "path": "isPublicDay",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "isPublicDay:invalid:2",
+      "mutation": {
+        "replace": "isPublicDay",
+        "value": "true"
+      },
+      "issues": [
+        {
+          "path": "isPublicDay",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "isPublicDay:invalid:3",
+      "mutation": {
+        "replace": "isPublicDay",
+        "value": []
+      },
+      "issues": [
+        {
+          "path": "isPublicDay",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "isPublicDay:invalid:4",
+      "mutation": {
+        "replace": "isPublicDay",
+        "value": {}
+      },
+      "issues": [
+        {
+          "path": "isPublicDay",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "isTourDay:invalid:0",
+      "mutation": {
+        "replace": "isTourDay",
+        "value": null
+      },
+      "issues": [
+        {
+          "path": "isTourDay",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "isTourDay:invalid:1",
+      "mutation": {
+        "replace": "isTourDay",
+        "value": 3
+      },
+      "issues": [
+        {
+          "path": "isTourDay",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "isTourDay:invalid:2",
+      "mutation": {
+        "replace": "isTourDay",
+        "value": "true"
+      },
+      "issues": [
+        {
+          "path": "isTourDay",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "isTourDay:invalid:3",
+      "mutation": {
+        "replace": "isTourDay",
+        "value": []
+      },
+      "issues": [
+        {
+          "path": "isTourDay",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "isTourDay:invalid:4",
+      "mutation": {
+        "replace": "isTourDay",
+        "value": {}
+      },
+      "issues": [
+        {
+          "path": "isTourDay",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "idempotencyKey:invalid:0",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": null
+      },
+      "issues": [
+        {
+          "path": "idempotencyKey",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "idempotencyKey:invalid:1",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": 3
+      },
+      "issues": [
+        {
+          "path": "idempotencyKey",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "idempotencyKey:invalid:2",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": true
+      },
+      "issues": [
+        {
+          "path": "idempotencyKey",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "idempotencyKey:invalid:3",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": []
+      },
+      "issues": [
+        {
+          "path": "idempotencyKey",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "idempotencyKey:invalid:4",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": {}
+      },
+      "issues": [
+        {
+          "path": "idempotencyKey",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "idempotencyKey:invalid:5",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": ""
+      },
+      "issues": [
+        {
+          "path": "idempotencyKey",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "idempotencyKey:invalid:6",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": "not-a-uuid"
+      },
+      "issues": [
+        {
+          "path": "idempotencyKey",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "idempotencyKey:invalid:7",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": "bf186237-8dd9-40cb-8881-912e6921626Z"
+      },
+      "issues": [
+        {
+          "path": "idempotencyKey",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "unknown-key",
+      "mutation": {
+        "add": "unexpected",
+        "value": true
+      },
+      "issues": [
+        {
+          "path": "",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "empty-patch",
+      "body": {},
+      "issues": [
+        {
+          "path": "",
+          "code": "custom"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "receipt-only-patch",
+      "body": {
+        "idempotencyKey": "11111111-1111-4111-8111-111111111111"
+      },
+      "issues": [
+        {
+          "path": "",
+          "code": "custom"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "label:invalid:0",
+      "mutation": {
+        "replace": "label",
+        "value": null
+      },
+      "issues": [
+        {
+          "path": "label",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "label:invalid:1",
+      "mutation": {
+        "replace": "label",
+        "value": 3
+      },
+      "issues": [
+        {
+          "path": "label",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "label:invalid:2",
+      "mutation": {
+        "replace": "label",
+        "value": true
+      },
+      "issues": [
+        {
+          "path": "label",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "label:invalid:3",
+      "mutation": {
+        "replace": "label",
+        "value": []
+      },
+      "issues": [
+        {
+          "path": "label",
+          "code": "invalid_type"
+        },
+        {
+          "path": "label",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "label:invalid:4",
+      "mutation": {
+        "replace": "label",
+        "value": {}
+      },
+      "issues": [
+        {
+          "path": "label",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "label:invalid:5",
+      "mutation": {
+        "replace": "label",
+        "value": ""
+      },
+      "issues": [
+        {
+          "path": "label",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "label:invalid:6",
+      "mutation": {
+        "replace": "label",
+        "value": "   "
+      },
+      "issues": [
+        {
+          "path": "label",
+          "code": "too_small"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "label:invalid:7",
+      "mutation": {
+        "replace": "label",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "issues": [
+        {
+          "path": "label",
+          "code": "too_big"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "startLocal:invalid:0",
+      "mutation": {
+        "replace": "startLocal",
+        "value": null
+      },
+      "issues": [
+        {
+          "path": "startLocal",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "startLocal:invalid:1",
+      "mutation": {
+        "replace": "startLocal",
+        "value": 3
+      },
+      "issues": [
+        {
+          "path": "startLocal",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "startLocal:invalid:2",
+      "mutation": {
+        "replace": "startLocal",
+        "value": true
+      },
+      "issues": [
+        {
+          "path": "startLocal",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "startLocal:invalid:3",
+      "mutation": {
+        "replace": "startLocal",
+        "value": []
+      },
+      "issues": [
+        {
+          "path": "startLocal",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "startLocal:invalid:4",
+      "mutation": {
+        "replace": "startLocal",
+        "value": {}
+      },
+      "issues": [
+        {
+          "path": "startLocal",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "startLocal:invalid:5",
+      "mutation": {
+        "replace": "startLocal",
+        "value": ""
+      },
+      "issues": [
+        {
+          "path": "startLocal",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "startLocal:invalid:6",
+      "mutation": {
+        "replace": "startLocal",
+        "value": "0:00"
+      },
+      "issues": [
+        {
+          "path": "startLocal",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "startLocal:invalid:7",
+      "mutation": {
+        "replace": "startLocal",
+        "value": "24:00"
+      },
+      "issues": [
+        {
+          "path": "startLocal",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "startLocal:invalid:8",
+      "mutation": {
+        "replace": "startLocal",
+        "value": "12:60"
+      },
+      "issues": [
+        {
+          "path": "startLocal",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "startLocal:invalid:9",
+      "mutation": {
+        "replace": "startLocal",
+        "value": "12:00:00"
+      },
+      "issues": [
+        {
+          "path": "startLocal",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "startLocal:invalid:10",
+      "mutation": {
+        "replace": "startLocal",
+        "value": " 12:00 "
+      },
+      "issues": [
+        {
+          "path": "startLocal",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "endLocal:invalid:0",
+      "mutation": {
+        "replace": "endLocal",
+        "value": null
+      },
+      "issues": [
+        {
+          "path": "endLocal",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "endLocal:invalid:1",
+      "mutation": {
+        "replace": "endLocal",
+        "value": 3
+      },
+      "issues": [
+        {
+          "path": "endLocal",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "endLocal:invalid:2",
+      "mutation": {
+        "replace": "endLocal",
+        "value": true
+      },
+      "issues": [
+        {
+          "path": "endLocal",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "endLocal:invalid:3",
+      "mutation": {
+        "replace": "endLocal",
+        "value": []
+      },
+      "issues": [
+        {
+          "path": "endLocal",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "endLocal:invalid:4",
+      "mutation": {
+        "replace": "endLocal",
+        "value": {}
+      },
+      "issues": [
+        {
+          "path": "endLocal",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "endLocal:invalid:5",
+      "mutation": {
+        "replace": "endLocal",
+        "value": ""
+      },
+      "issues": [
+        {
+          "path": "endLocal",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "endLocal:invalid:6",
+      "mutation": {
+        "replace": "endLocal",
+        "value": "0:00"
+      },
+      "issues": [
+        {
+          "path": "endLocal",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "endLocal:invalid:7",
+      "mutation": {
+        "replace": "endLocal",
+        "value": "24:00"
+      },
+      "issues": [
+        {
+          "path": "endLocal",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "endLocal:invalid:8",
+      "mutation": {
+        "replace": "endLocal",
+        "value": "12:60"
+      },
+      "issues": [
+        {
+          "path": "endLocal",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "endLocal:invalid:9",
+      "mutation": {
+        "replace": "endLocal",
+        "value": "12:00:00"
+      },
+      "issues": [
+        {
+          "path": "endLocal",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "endLocal:invalid:10",
+      "mutation": {
+        "replace": "endLocal",
+        "value": " 12:00 "
+      },
+      "issues": [
+        {
+          "path": "endLocal",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "idempotencyKey:invalid:0",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": null
+      },
+      "issues": [
+        {
+          "path": "idempotencyKey",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "idempotencyKey:invalid:1",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": 3
+      },
+      "issues": [
+        {
+          "path": "idempotencyKey",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "idempotencyKey:invalid:2",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": true
+      },
+      "issues": [
+        {
+          "path": "idempotencyKey",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "idempotencyKey:invalid:3",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": []
+      },
+      "issues": [
+        {
+          "path": "idempotencyKey",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "idempotencyKey:invalid:4",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": {}
+      },
+      "issues": [
+        {
+          "path": "idempotencyKey",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "idempotencyKey:invalid:5",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": ""
+      },
+      "issues": [
+        {
+          "path": "idempotencyKey",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "idempotencyKey:invalid:6",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": "not-a-uuid"
+      },
+      "issues": [
+        {
+          "path": "idempotencyKey",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "idempotencyKey:invalid:7",
+      "mutation": {
+        "replace": "idempotencyKey",
+        "value": "bf186237-8dd9-40cb-8881-912e6921626Z"
+      },
+      "issues": [
+        {
+          "path": "idempotencyKey",
+          "code": "invalid_format"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "unknown-key",
+      "mutation": {
+        "add": "unexpected",
+        "value": true
+      },
+      "issues": [
+        {
+          "path": "",
+          "code": "unrecognized_keys"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "empty-patch",
+      "body": {},
+      "issues": [
+        {
+          "path": "",
+          "code": "custom"
+        }
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "receipt-only-patch",
+      "body": {
+        "idempotencyKey": "11111111-1111-4111-8111-111111111111"
+      },
+      "issues": [
+        {
+          "path": "",
+          "code": "custom"
+        }
+      ]
+    }
+  ],
+  "semanticCases": [
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "label:trimmed",
+      "mutation": {
+        "replace": "label",
+        "value": "  Synthetic trimmed label  "
+      },
+      "expectedStatus": 201
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "label:maximum",
+      "mutation": {
+        "replace": "label",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expectedStatus": 201
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "label:unicode",
+      "mutation": {
+        "replace": "label",
+        "value": "合成测试 — தமிழ் — اختبار"
+      },
+      "expectedStatus": 201
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "isPublicDay:omitted",
+      "mutation": {
+        "remove": "isPublicDay"
+      },
+      "expectedStatus": 201
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "isPublicDay:opposite",
+      "mutation": {
+        "replace": "isPublicDay",
+        "value": false
+      },
+      "expectedStatus": 201
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "isTourDay:omitted",
+      "mutation": {
+        "remove": "isTourDay"
+      },
+      "expectedStatus": 201
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "isTourDay:opposite",
+      "mutation": {
+        "replace": "isTourDay",
+        "value": true
+      },
+      "expectedStatus": 201
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "id": "idempotencyKey:omitted",
+      "mutation": {
+        "remove": "idempotencyKey"
+      },
+      "expectedStatus": 201
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "label:omitted",
+      "mutation": {
+        "remove": "label"
+      },
+      "expectedStatus": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "label:trimmed",
+      "mutation": {
+        "replace": "label",
+        "value": "  Synthetic trimmed label  "
+      },
+      "expectedStatus": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "label:maximum",
+      "mutation": {
+        "replace": "label",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expectedStatus": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "label:unicode",
+      "mutation": {
+        "replace": "label",
+        "value": "合成测试 — தமிழ் — اختبار"
+      },
+      "expectedStatus": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "isPublicDay:omitted",
+      "mutation": {
+        "remove": "isPublicDay"
+      },
+      "expectedStatus": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "isPublicDay:opposite",
+      "mutation": {
+        "replace": "isPublicDay",
+        "value": false
+      },
+      "expectedStatus": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "isTourDay:omitted",
+      "mutation": {
+        "remove": "isTourDay"
+      },
+      "expectedStatus": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "isTourDay:opposite",
+      "mutation": {
+        "replace": "isTourDay",
+        "value": true
+      },
+      "expectedStatus": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "id": "idempotencyKey:omitted",
+      "mutation": {
+        "remove": "idempotencyKey"
+      },
+      "expectedStatus": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "label:omitted",
+      "mutation": {
+        "remove": "label"
+      },
+      "expectedStatus": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "label:trimmed",
+      "mutation": {
+        "replace": "label",
+        "value": "  Synthetic trimmed label  "
+      },
+      "expectedStatus": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "label:maximum",
+      "mutation": {
+        "replace": "label",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expectedStatus": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "label:unicode",
+      "mutation": {
+        "replace": "label",
+        "value": "合成测试 — தமிழ் — اختبار"
+      },
+      "expectedStatus": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "startLocal:omitted",
+      "mutation": {
+        "remove": "startLocal"
+      },
+      "expectedStatus": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "endLocal:omitted",
+      "mutation": {
+        "remove": "endLocal"
+      },
+      "expectedStatus": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "id": "idempotencyKey:omitted",
+      "mutation": {
+        "remove": "idempotencyKey"
+      },
+      "expectedStatus": 200
+    }
+  ]
+}

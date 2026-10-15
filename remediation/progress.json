@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-13T15:23:50.903Z",
+  "updatedAt": "2026-10-15T04:18:17.629Z",
   "current": {
     "phase": "P16",
     "step": "P16.10"
@@ -270,8 +270,8 @@
       "owner": "you",
       "blocks": [],
       "status": "answered",
-      "answer": "B: build every feature first, full CI and automatic staging deploy on every push; verification campaign in P16 (ADR-011)",
-      "answeredAt": "2026-10-10T07:04:49.386Z"
+      "answer": "B: build every feature first, full CI and automatic staging deploy on every push; verification campaign in P16 (ADR-011) Owner amendment, 15 October 2026: waive only P16.9 continuous 24-hour soak; record skipped, no successful soak claimed. API/browser, deferred acceptance, load, drills, restore and all other owner/production gates remain required.",
+      "answeredAt": "2026-10-15T04:18:17.070Z"
     },
     {
       "id": "D-24",
@@ -3776,11 +3776,16 @@
         {
           "id": "P16.9",
           "title": "Soak",
-          "status": "not_started",
+          "status": "skipped",
           "startedAt": null,
-          "completedAt": null,
+          "completedAt": "2026-10-15T04:18:17.629Z",
           "commits": [],
-          "notes": []
+          "notes": [
+            {
+              "at": "2026-10-15T04:18:17.629Z",
+              "text": "Owner, 15 October 2026: \"the 24h soak isnt needed\". Continuous 24-hour soak waived; skipped without execution or a successful-soak claim. All other acceptance and owner/production gates remain."
+            }
+          ]
         },
         {
           "id": "P16.2",

@@ -1,0 +1,56 @@
+{
+  "formatVersion": 1,
+  "lifecycle": "DRAFT",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/admin/event-days",
+      "responseName": "EventDayList",
+      "action": "Structure.Read",
+      "allowedRoles": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    },
+    {
+      "method": "GET",
+      "path": "/admin/shift-templates",
+      "responseName": "TemplateList",
+      "action": "Structure.Read",
+      "allowedRoles": ["IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/event-days",
+      "schemaName": "CreateEventDayRequest",
+      "action": "Structure.Change",
+      "allowedRoles": ["CHIEF_COORDINATOR", "ADMIN"]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "schemaName": "UpdateEventDayRequest",
+      "action": "Structure.Edit",
+      "allowedRoles": ["CHIEF_COORDINATOR", "ADMIN"]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "schemaName": "UpdateShiftTemplateRequest",
+      "action": "Structure.Edit",
+      "allowedRoles": ["CHIEF_COORDINATOR", "ADMIN"]
+    }
+  ],
+  "forms": ["scoped", "alias"],
+  "roles": ["VOLUNTEER", "IC", "DEPUTY_COORDINATOR", "CHIEF_COORDINATOR", "LEAD", "ADMIN"],
+  "authKinds": ["missing", "actual-expired", "forged-signature"],
+  "objectKinds": ["actual-foreign", "absent", "overlong-id"],
+  "expectedCases": 142,
+  "nonmemberOutcomes": {
+    "scoped": {
+      "status": 404,
+      "errorCode": "NOT_FOUND"
+    },
+    "alias": {
+      "status": 403,
+      "errorCode": "NOT_PROVISIONED"
+    }
+  }
+}

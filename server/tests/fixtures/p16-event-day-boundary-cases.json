@@ -1,0 +1,252 @@
+{
+  "formatVersion": 1,
+  "lifecycle": "DRAFT",
+  "cases": [
+    {
+      "id": "scoped:POST:/admin/event-days:other-route-form-replay",
+      "form": "scoped",
+      "method": "POST",
+      "path": "/admin/event-days",
+      "kind": "other-route-form-replay",
+      "expectedStatus": 201
+    },
+    {
+      "id": "scoped:POST:/admin/event-days:other-actor-reuse",
+      "form": "scoped",
+      "method": "POST",
+      "path": "/admin/event-days",
+      "kind": "other-actor-reuse",
+      "expectedStatus": 409,
+      "errorCode": "IDEMPOTENCY_KEY_REUSE"
+    },
+    {
+      "id": "scoped:POST:/admin/event-days:other-event-reuse",
+      "form": "scoped",
+      "method": "POST",
+      "path": "/admin/event-days",
+      "kind": "other-event-reuse",
+      "expectedStatus": 409,
+      "errorCode": "IDEMPOTENCY_KEY_REUSE"
+    },
+    {
+      "id": "scoped:PATCH:/admin/event-days/:id:other-route-form-replay",
+      "form": "scoped",
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "kind": "other-route-form-replay",
+      "expectedStatus": 200
+    },
+    {
+      "id": "scoped:PATCH:/admin/event-days/:id:other-actor-reuse",
+      "form": "scoped",
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "kind": "other-actor-reuse",
+      "expectedStatus": 409,
+      "errorCode": "IDEMPOTENCY_KEY_REUSE"
+    },
+    {
+      "id": "scoped:PATCH:/admin/event-days/:id:other-event-reuse",
+      "form": "scoped",
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "kind": "other-event-reuse",
+      "expectedStatus": 409,
+      "errorCode": "IDEMPOTENCY_KEY_REUSE"
+    },
+    {
+      "id": "scoped:PATCH:/admin/event-days/:id:other-target-reuse",
+      "form": "scoped",
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "kind": "other-target-reuse",
+      "expectedStatus": 409,
+      "errorCode": "IDEMPOTENCY_KEY_REUSE"
+    },
+    {
+      "id": "scoped:PATCH:/admin/shift-templates/:id:other-route-form-replay",
+      "form": "scoped",
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "kind": "other-route-form-replay",
+      "expectedStatus": 200
+    },
+    {
+      "id": "scoped:PATCH:/admin/shift-templates/:id:other-actor-reuse",
+      "form": "scoped",
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "kind": "other-actor-reuse",
+      "expectedStatus": 409,
+      "errorCode": "IDEMPOTENCY_KEY_REUSE"
+    },
+    {
+      "id": "scoped:PATCH:/admin/shift-templates/:id:other-event-reuse",
+      "form": "scoped",
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "kind": "other-event-reuse",
+      "expectedStatus": 409,
+      "errorCode": "IDEMPOTENCY_KEY_REUSE"
+    },
+    {
+      "id": "scoped:PATCH:/admin/shift-templates/:id:other-target-reuse",
+      "form": "scoped",
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "kind": "other-target-reuse",
+      "expectedStatus": 409,
+      "errorCode": "IDEMPOTENCY_KEY_REUSE"
+    },
+    {
+      "id": "alias:POST:/admin/event-days:other-route-form-replay",
+      "form": "alias",
+      "method": "POST",
+      "path": "/admin/event-days",
+      "kind": "other-route-form-replay",
+      "expectedStatus": 201
+    },
+    {
+      "id": "alias:POST:/admin/event-days:other-actor-reuse",
+      "form": "alias",
+      "method": "POST",
+      "path": "/admin/event-days",
+      "kind": "other-actor-reuse",
+      "expectedStatus": 409,
+      "errorCode": "IDEMPOTENCY_KEY_REUSE"
+    },
+    {
+      "id": "alias:POST:/admin/event-days:other-event-reuse",
+      "form": "alias",
+      "method": "POST",
+      "path": "/admin/event-days",
+      "kind": "other-event-reuse",
+      "expectedStatus": 409,
+      "errorCode": "IDEMPOTENCY_KEY_REUSE"
+    },
+    {
+      "id": "alias:PATCH:/admin/event-days/:id:other-route-form-replay",
+      "form": "alias",
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "kind": "other-route-form-replay",
+      "expectedStatus": 200
+    },
+    {
+      "id": "alias:PATCH:/admin/event-days/:id:other-actor-reuse",
+      "form": "alias",
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "kind": "other-actor-reuse",
+      "expectedStatus": 409,
+      "errorCode": "IDEMPOTENCY_KEY_REUSE"
+    },
+    {
+      "id": "alias:PATCH:/admin/event-days/:id:other-event-reuse",
+      "form": "alias",
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "kind": "other-event-reuse",
+      "expectedStatus": 409,
+      "errorCode": "IDEMPOTENCY_KEY_REUSE"
+    },
+    {
+      "id": "alias:PATCH:/admin/event-days/:id:other-target-reuse",
+      "form": "alias",
+      "method": "PATCH",
+      "path": "/admin/event-days/:id",
+      "kind": "other-target-reuse",
+      "expectedStatus": 409,
+      "errorCode": "IDEMPOTENCY_KEY_REUSE"
+    },
+    {
+      "id": "alias:PATCH:/admin/shift-templates/:id:other-route-form-replay",
+      "form": "alias",
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "kind": "other-route-form-replay",
+      "expectedStatus": 200
+    },
+    {
+      "id": "alias:PATCH:/admin/shift-templates/:id:other-actor-reuse",
+      "form": "alias",
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "kind": "other-actor-reuse",
+      "expectedStatus": 409,
+      "errorCode": "IDEMPOTENCY_KEY_REUSE"
+    },
+    {
+      "id": "alias:PATCH:/admin/shift-templates/:id:other-event-reuse",
+      "form": "alias",
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "kind": "other-event-reuse",
+      "expectedStatus": 409,
+      "errorCode": "IDEMPOTENCY_KEY_REUSE"
+    },
+    {
+      "id": "alias:PATCH:/admin/shift-templates/:id:other-target-reuse",
+      "form": "alias",
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "kind": "other-target-reuse",
+      "expectedStatus": 409,
+      "errorCode": "IDEMPOTENCY_KEY_REUSE"
+    },
+    {
+      "id": "scoped:PATCH:/admin/shift-templates/:id:equal-hours",
+      "form": "scoped",
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "kind": "equal-hours",
+      "body": {
+        "startLocal": "12:00",
+        "endLocal": "12:00"
+      },
+      "expectedStatus": 400,
+      "errorCode": "VALIDATION_FAILED"
+    },
+    {
+      "id": "scoped:PATCH:/admin/shift-templates/:id:reversed-hours",
+      "form": "scoped",
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "kind": "reversed-hours",
+      "body": {
+        "startLocal": "12:00",
+        "endLocal": "11:00"
+      },
+      "expectedStatus": 400,
+      "errorCode": "VALIDATION_FAILED"
+    },
+    {
+      "id": "alias:PATCH:/admin/shift-templates/:id:equal-hours",
+      "form": "alias",
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "kind": "equal-hours",
+      "body": {
+        "startLocal": "12:00",
+        "endLocal": "12:00"
+      },
+      "expectedStatus": 400,
+      "errorCode": "VALIDATION_FAILED"
+    },
+    {
+      "id": "alias:PATCH:/admin/shift-templates/:id:reversed-hours",
+      "form": "alias",
+      "method": "PATCH",
+      "path": "/admin/shift-templates/:id",
+      "kind": "reversed-hours",
+      "body": {
+        "startLocal": "12:00",
+        "endLocal": "11:00"
+      },
+      "expectedStatus": 400,
+      "errorCode": "VALIDATION_FAILED"
+    }
+  ],
+  "receiptCases": 22,
+  "domainHourCases": 4
+}
