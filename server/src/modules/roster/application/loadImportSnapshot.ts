@@ -11,6 +11,8 @@ import {
 import type { ImportSnapshot } from '../domain/planRosterImport.js';
 import { assertMayManage } from '../domain/escalation.js';
 import type { RosterActor } from './context.js';
+import { prisma } from '../../../platform/db/client.js';
+import { isPlatformAdministrator } from '../../../platform/access/platformAdministrator.js';
 
 /**
  * Load every existing account the file names, refusing the whole import if any
@@ -19,13 +21,17 @@ import type { RosterActor } from './context.js';
  */
 async function loadExisting(request: RosterImportRequest, actor: RosterActor) {
   const existing = new Map<string, Volunteer>();
+  const platformAdmin = await isPlatformAdministrator(prisma, {
+    scope: actor.scope,
+    personId: actor.volunteerId,
+  });
   for (const [index, row] of request.rows.entries()) {
     if (!existing.has(row.email)) {
       const found = await findVolunteerByEmail(actor.scope, row.email);
       if (found) existing.set(row.email, found);
     }
     assertMayManage(
-      actor,
+      { ...actor, platformAdmin },
       { role: row.role, existing: existing.get(row.email) ?? null },
       `Row ${index + 1}: `,
     );

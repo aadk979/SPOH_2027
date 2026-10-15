@@ -2,6 +2,7 @@ import { ROLE_IDS, ROLE_RANKS, type Action, type Role } from '@spoh/access-polic
 import type { Request } from 'express';
 import type { ResourceRef, ResourceType } from '../access/authorizer/index.js';
 import { settingQuestion } from '../access/settingQuestion.js';
+import { isPlatformAdministrator } from '../access/platformAdministrator.js';
 import { stationCandidates } from '../access/stationCandidates.js';
 import { prisma } from '../db/client.js';
 import { NotFoundError, ValidationError } from '../errors/index.js';
@@ -208,10 +209,16 @@ export const organisationAdmin: ChecksOf = async (req) => [
 /** Inviting someone grants the role the body names, Volunteer by default (C5). */
 export const invite: ChecksOf = async (req) => {
   const rank = grantedRank(req, 'VOLUNTEER');
+  const auth = getAuth(req);
+  const asPerson = await isPlatformAdministrator(prisma, {
+    scope: { eventId: auth.eventId },
+    personId: auth.volunteerId,
+  });
   return [
     {
       action: 'People.Invite',
       resource: await theEvent(req),
+      asPerson,
       ...(rank === undefined ? {} : { facts: { grantedRank: rank } }),
     },
   ];

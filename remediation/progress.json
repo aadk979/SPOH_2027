@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-15T04:18:17.629Z",
+  "updatedAt": "2026-10-15T09:30:23.099Z",
   "current": {
     "phase": "P16",
     "step": "P16.10"
@@ -4343,6 +4343,10 @@
     {
       "at": "2026-10-13T15:23:50.902Z",
       "text": "Correction to preceding P16 prep log: always-run tracker/delivery/safety group is61 tests (28 existing plus33 new), not59. Controlled mailbox was created/verified during the gate before its final exit; not afterward."
+    },
+    {
+      "at": "2026-10-15T09:30:23.098Z",
+      "text": "P16.10: Delivered 3d996c6 with complete29 Node24 gate (8547 passes) and all5 exact-SHA CI jobs38707672935 including image verification. Next 77-case campaign found permission-review replay no-store, platform-appointment principal/rank, and warm revoked-session cache defects; candidate source repairs pass matched local77 cases. New full gate, exact CI, repaired staging image and real-provider acceptance pending; P16 remains in progress and only P16.9 soak is waived."
     }
   ]
 }

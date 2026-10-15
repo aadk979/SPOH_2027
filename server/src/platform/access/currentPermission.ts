@@ -17,6 +17,8 @@ export interface CurrentPermission {
   readonly membershipId: string;
   readonly personId: string;
   readonly action: Action;
+  /** Explicit person policy, still requiring an active event membership and current organisation standing. */
+  readonly asPerson?: boolean;
   /**
    * What the action is taken on; the event when absent. A list is asked as "any of them"
    * (see `stationCandidates`), and an empty list answers with the role's grant in the event.
@@ -28,18 +30,27 @@ export interface CurrentPermission {
 }
 
 /** Caller holds Event first; all authority writers must retain this Person → member order. */
-export async function lockCurrentActor(tx: PrismaTransactionClient,
-  input: { scope: EventScope; membershipId: string; personId: string }): Promise<void> {
+export async function lockCurrentActor(
+  tx: PrismaTransactionClient,
+  input: { scope: EventScope; membershipId: string; personId: string },
+): Promise<void> {
   await tx.$queryRaw`SELECT id FROM "Person" WHERE id = ${input.personId} FOR SHARE`;
   await tx.$queryRaw`SELECT id FROM "EventMembership" WHERE "eventId" = ${input.scope.eventId}
     AND id = ${input.membershipId} AND "personId" = ${input.personId} FOR SHARE`;
-  const person = await tx.person.findUnique({ where: { id: input.personId },
-    select: { deactivatedAt: true, piiErasedAt: true } });
+  const person = await tx.person.findUnique({
+    where: { id: input.personId },
+    select: { deactivatedAt: true, piiErasedAt: true },
+  });
   const member = await tx.eventMembership.findFirst({
     where: { eventId: input.scope.eventId, id: input.membershipId, personId: input.personId },
     select: { status: true },
   });
-  if (!person || person.deactivatedAt !== null || person.piiErasedAt !== null || member?.status !== 'ACTIVE')
+  if (
+    !person ||
+    person.deactivatedAt !== null ||
+    person.piiErasedAt !== null ||
+    member?.status !== 'ACTIVE'
+  )
     throw new ForbiddenError('Your event permission changed. Reload before trying again.');
 }
 
@@ -64,26 +75,56 @@ export async function requireCurrentPermission(
   if (!member || member.status !== 'ACTIVE') throw changed(action);
   const resources = resourcesOf(input);
   if (resources.length === 0) {
-    const grants = await databaseRoleGrants.grantsFor(tx, scope.eventId);
-    if (grants[member.role as Role].grants.includes(action)) return;
-    throw changed(action);
+    await requireStandingGrant(tx, input, member.role as Role);
+    return;
   }
   const builder = new EntityBuilder(tx, {
     eventId: scope.eventId,
     now: (input.clock ?? systemClock).now(),
     ...(input.shiftAt ? { shiftAt: input.shiftAt } : {}),
   });
+  if (input.asPerson) {
+    await lockOrganisationStanding(tx, scope, personId);
+  }
   for (const resource of resources) {
     if (
-      await allows(builder, membershipId, {
-        action,
-        resource,
-        ...(input.facts ? { facts: input.facts } : {}),
-      })
+      await allows(
+        builder,
+        { membershipId, personId, asPerson: input.asPerson === true },
+        {
+          action,
+          resource,
+          ...(input.facts ? { facts: input.facts } : {}),
+        },
+      )
     )
       return;
   }
   throw changed(action);
+}
+
+async function requireStandingGrant(
+  tx: PrismaTransactionClient,
+  input: CurrentPermission,
+  role: Role,
+): Promise<void> {
+  if (input.asPerson) throw changed(input.action);
+  const grants = await databaseRoleGrants.grantsFor(tx, input.scope.eventId);
+  if (!grants[role].grants.includes(input.action)) throw changed(input.action);
+}
+
+async function lockOrganisationStanding(
+  tx: PrismaTransactionClient,
+  scope: EventScope,
+  personId: string,
+): Promise<void> {
+  const event = await tx.event.findUnique({
+    where: { id: scope.eventId },
+    select: { organisationId: true },
+  });
+  if (!event) throw new NotFoundError('Event');
+  await tx.$queryRaw`SELECT id FROM "OrganisationMembership" WHERE "organisationId" = ${event.organisationId}
+    AND "personId" = ${personId} FOR SHARE`;
 }
 
 function resourcesOf(input: CurrentPermission): readonly ResourceRef[] {
@@ -98,13 +139,16 @@ function isList(value: ResourceRef | readonly ResourceRef[]): value is readonly 
 
 async function allows(
   builder: EntityBuilder,
-  membershipId: string,
+  actor: { membershipId: string; personId: string; asPerson: boolean },
   question: Question,
 ): Promise<boolean> {
   try {
-    const request = await builder.forMembership(membershipId, question);
+    const request = actor.asPerson
+      ? await builder.forPerson(actor.personId, question)
+      : await builder.forMembership(actor.membershipId, question);
     const decision = await currentAuthorizer().isAuthorized(request);
-    if (decision.errors.length > 0) throw new ServiceUnavailableError('Permissions could not be checked.');
+    if (decision.errors.length > 0)
+      throw new ServiceUnavailableError('Permissions could not be checked.');
     if (decision.allowed) return true;
     const policies = decision.determiningPolicies;
     return policies.length > 0 && policies.every((policy) => USE_CASE_PHASE_GUARDRAILS.has(policy));

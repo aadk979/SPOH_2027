@@ -26,6 +26,11 @@ import {
  * event's configuration; changing a grant is `Permissions.Edit`, which only platform admins hold.
  */
 export const permissionsRouter: Router = Router();
+// Receipts can answer before a handler, including redacted review replays.
+permissionsRouter.use(function permissionDataNoStore(_req, res, next) {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+});
 permissionsRouter.use(requireAuth);
 
 permissionsRouter.get(
