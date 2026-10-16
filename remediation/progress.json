@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-16T06:37:17.338Z",
+  "updatedAt": "2026-10-16T11:59:47.465Z",
   "current": {
     "phase": "P16",
     "step": "P16.10"
@@ -4355,6 +4355,14 @@
     {
       "at": "2026-10-16T06:37:17.337Z",
       "text": "P16.10: abfdd7ab accepted by all5 exact CI38782258226 and staging38787089743 all3+Smoke. Five existing memberships/assignments and80 visitor-permission cases/24denial audits accepted without replay or invites. E setup8localfacts accepted; bounded first-live refused scheduler-dead alarm. Global content.storage.prune exhausted5attempts; session rotation warm-cache and missing-object cleanup/IAM regressions reproduced. Coherent role/safety160 plus session/storage/operator-retry batch authored; new whole gate, exact CI, repaired image/infra and natural worker/alarm recovery pending. Only24hsoak waived; all owner gates retained."
+    },
+    {
+      "at": "2026-10-16T11:44:41.216Z",
+      "text": "P16.10: e1dae8d6 exact CI38868830891 and staging38876134722 plus Smoke, 73 policies and original Root accepted. One reviewed cleanup retry exhausted five worker attempts; native RDS logs identify a global-to-event scheduled audit scope violation. Two real scheduler regressions failed before the fix while the SQL refusal control passed. Audit-scope repair and maintained workspace-query promotion authored; fresh affected/full-source/exact-CI and new-image recovery pending. API campaign remains in progress; no first-live or all-route acceptance."
+    },
+    {
+      "at": "2026-10-16T11:59:47.464Z",
+      "text": "P16.10 preflight additionally found four legacy migration suites creating other databases. Their original SQL assertions are retained in owned schemas of sole spoh2027_test, using the central URL guard before client construction and public-schema definition checks. Ten namespace safety tests authored. Earlier eight-file freeze and staged scan are preserved; expanded coherent batch requires fresh source binding, affected verification, staged review and whole gate before delivery."
     }
   ]
 }

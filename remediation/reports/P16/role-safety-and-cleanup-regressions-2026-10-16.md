@@ -108,3 +108,14 @@ recorded as skipped. The existing CDK advisory exception expires on 31 October.
 References: [AWS HEAD semantics](https://docs.aws.amazon.com/AmazonS3/latest/API/API_HeadObject.html),
 [operations procedure](../P15/security-operations-runbook.md#staging-content-cleanup-retry),
 [P16 remaining acceptance](../../phases/P16-verification.md).
+
+## Later native outcome on 16 October
+
+Exact CI 38868830891 and staging deployment 38876134722 subsequently passed on
+`e1dae8d6`, including Smoke, exact deployed policy bytes and original Root sign-in.
+The one reviewed cleanup retry then exhausted five worker attempts. RDS native
+logs identified a scheduled-audit scope mismatch, including at the original
+15 October terminal failure. The S3 cause above was an inference; the database
+refusal now establishes that terminal failure's cause. Cleanup recovery and
+first-live remain unaccepted. See the [audit-scope repair and regression report](content-cleanup-audit-scope-2026-10-16.md)
+for the next coherent batch and retained failure evidence.

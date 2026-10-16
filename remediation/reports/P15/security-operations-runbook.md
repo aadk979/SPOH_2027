@@ -151,6 +151,12 @@ recurrence and original schedule; the transactional retry audit retains the old
 status, attempts, error and completion time before a new attempt is queued. A
 duplicate/stale apply refuses. Audit failure rolls back the queued retry.
 
+The global cleanup action's audits must retain the global scheduled-action scope.
+The storage intent's owning and target event IDs are provenance, not replacements
+for that scope. The database rejects a scheduled record naming another scope;
+keep that constraint intact. The 16 October native failure and regression repair
+are recorded in [the audit-scope report](../P16/content-cleanup-audit-scope-2026-10-16.md).
+
 Retain each task's actual exit and private plan. Observe the normal worker's new
 `schedule.execute` result and successor, unchanged historical failure audits,
 actual zero dead-action gauge and natural alarm recovery. A successful command

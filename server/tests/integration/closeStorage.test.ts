@@ -1,37 +1,21 @@
 import { readFileSync, readdirSync } from 'node:fs';
-import pg from 'pg';
+import type pg from 'pg';
 import { afterAll, beforeAll, expect, it } from 'vitest';
+import { openMigrationSchema, type MigrationSchema } from '../helpers/migrationSchema.js';
 
 const target = '20261002030000_lifecycle_close_storage';
 const migrations = new URL('../../prisma/migrations/', import.meta.url);
-const databaseName = 'spoh2027_close_storage_migration_test';
-const url = new URL(process.env.DATABASE_URL!);
-url.pathname = `/${databaseName}`;
-const adminUrl = new URL(url);
-adminUrl.pathname = '/postgres';
 let db: pg.Client;
+let sandbox: MigrationSchema | undefined;
 let sequence = 0;
 
-async function manageDatabase(sql: string) {
-  if (!databaseName.endsWith('_test')) throw new Error('Dedicated _test database required');
-  const admin = new pg.Client({ connectionString: adminUrl.toString() });
-  await admin.connect();
-  try {
-    await admin.query(sql);
-  } finally {
-    await admin.end();
-  }
-}
-
 beforeAll(async () => {
-  await manageDatabase(`DROP DATABASE IF EXISTS "${databaseName}" WITH (FORCE)`);
-  await manageDatabase(`CREATE DATABASE "${databaseName}"`);
-  db = new pg.Client({ connectionString: url.toString() });
-  await db.connect();
+  sandbox = await openMigrationSchema();
+  db = sandbox.db;
   for (const name of readdirSync(migrations)
     .filter((name) => name < target)
     .sort()) {
-    await db.query(readFileSync(new URL(`${name}/migration.sql`, migrations), 'utf8'));
+    await sandbox.apply(readFileSync(new URL(`${name}/migration.sql`, migrations), 'utf8'));
   }
   await db.query(
     'INSERT INTO "Organisation" (id,slug,name,"appName","defaultTimezone","updatedAt") VALUES ($1,$1,$1,$1,$2,now())',
@@ -60,12 +44,11 @@ beforeAll(async () => {
     'INSERT INTO "SettingChange" (id,scope,"scopeId","eventId",key,version,source,after) VALUES ($1,$2,$3,$3,$4,1,$5,$6)',
     ['legacy-setting', 'EVENT', 'close-a', 'capture.lateSyncHours', 'USER', 24],
   );
-  await db.query(readFileSync(new URL(`${target}/migration.sql`, migrations), 'utf8'));
+  await sandbox.apply(readFileSync(new URL(`${target}/migration.sql`, migrations), 'utf8'));
 });
 
 afterAll(async () => {
-  await db?.end();
-  await manageDatabase(`DROP DATABASE IF EXISTS "${databaseName}" WITH (FORCE)`);
+  await sandbox?.close();
 });
 
 async function action(eventId: string | null = 'close-a') {

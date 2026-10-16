@@ -1,25 +1,13 @@
 import { readFileSync, readdirSync } from 'node:fs';
-import pg from 'pg';
+import type pg from 'pg';
 import { afterAll, beforeAll, expect, it } from 'vitest';
+import { openMigrationSchema, type MigrationSchema } from '../helpers/migrationSchema.js';
 
 const migration = '20261002010000_derived_rehearsal_provenance';
 const migrations = new URL('../../prisma/migrations/', import.meta.url);
-const databaseName = 'spoh2027_derived_rehearsal_migration_test';
-const url = new URL(process.env.DATABASE_URL!);
-url.pathname = `/${databaseName}`;
-const adminUrl = new URL(url);
-adminUrl.pathname = '/postgres';
 let db: pg.Client;
-async function manageDatabase(sql: string) {
-  if (!databaseName.endsWith('_test')) throw new Error('Dedicated _test database required');
-  const admin = new pg.Client({ connectionString: adminUrl.toString() });
-  await admin.connect();
-  try {
-    await admin.query(sql);
-  } finally {
-    await admin.end();
-  }
-}
+let sandbox: MigrationSchema | undefined;
+let schema: string;
 const children = [
   ['IncidentFollowUp', 'Incident', 'incidentId'],
   ['LostPersonAck', 'LostPersonAlert', 'alertId'],
@@ -27,14 +15,13 @@ const children = [
 ] as const;
 
 beforeAll(async () => {
-  await manageDatabase(`DROP DATABASE IF EXISTS ${databaseName} WITH (FORCE)`);
-  await manageDatabase(`CREATE DATABASE ${databaseName}`);
-  db = new pg.Client({ connectionString: url.toString() });
-  await db.connect();
+  sandbox = await openMigrationSchema();
+  db = sandbox.db;
+  schema = sandbox.schema;
   for (const name of readdirSync(migrations)
     .filter((name) => name < migration)
     .sort())
-    await db.query(readFileSync(new URL(`${name}/migration.sql`, migrations), 'utf8'));
+    await sandbox.apply(readFileSync(new URL(`${name}/migration.sql`, migrations), 'utf8'));
   await db.query(`
     INSERT INTO "Event" (id, "organisationId", slug, name, timezone, "updatedAt")
       VALUES ('event', 'org_sp_school_of_computing', 'derived-migration', 'Migration', 'UTC', now()),
@@ -76,13 +63,12 @@ beforeAll(async () => {
       [mode],
     );
   }
-  await db.query(readFileSync(new URL(`${migration}/migration.sql`, migrations), 'utf8'));
+  await sandbox.apply(readFileSync(new URL(`${migration}/migration.sql`, migrations), 'utf8'));
   await db.query(`INSERT INTO "Registration" (id, "eventId", rehearsal, "categoryId", "stationId", "recordedById", "idempotencyKey")
     VALUES ('explicit-practice', 'event', true, 'category', 'station', 'person', 'explicit-practice')`);
 }, 60_000);
 afterAll(async () => {
-  await db?.end();
-  await manageDatabase(`DROP DATABASE IF EXISTS ${databaseName} WITH (FORCE)`);
+  await sandbox?.close();
 });
 
 it.each(children)(
@@ -96,8 +82,8 @@ it.each(children)(
       { id: 'practice', rehearsal: true },
     ]);
     const column = await db.query(
-      `SELECT is_nullable, column_default FROM information_schema.columns WHERE table_name = $1 AND column_name = 'rehearsal'`,
-      [table],
+      `SELECT is_nullable, column_default FROM information_schema.columns WHERE table_name = $1 AND table_schema = $2 AND column_name = 'rehearsal'`,
+      [table, schema],
     );
     expect(column.rows).toEqual([{ is_nullable: 'NO', column_default: null }]);
   },

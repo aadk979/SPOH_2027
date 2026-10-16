@@ -1,15 +1,13 @@
 import { readFileSync, readdirSync } from 'node:fs';
-import pg from 'pg';
+import type pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { openMigrationSchema, type MigrationSchema } from '../helpers/migrationSchema.js';
 
 const migration = '20261001150000_rehearsal_provenance';
 const migrations = new URL('../../prisma/migrations/', import.meta.url);
-const databaseName = 'spoh2027_rehearsal_migration_test';
-const url = new URL(process.env.DATABASE_URL!);
-url.pathname = `/${databaseName}`;
-const adminUrl = new URL(url);
-adminUrl.pathname = '/postgres';
 let db: pg.Client;
+let sandbox: MigrationSchema | undefined;
+let schema: string;
 
 const tables = [
   'Registration',
@@ -28,26 +26,14 @@ const tables = [
   'ImportBatch',
 ];
 
-async function manageDatabase(sql: string) {
-  if (!databaseName.endsWith('_test')) throw new Error('scratch database must end in _test');
-  const admin = new pg.Client({ connectionString: adminUrl.toString() });
-  await admin.connect();
-  try {
-    await admin.query(sql);
-  } finally {
-    await admin.end();
-  }
-}
-
 beforeAll(async () => {
-  await manageDatabase(`DROP DATABASE IF EXISTS ${databaseName} WITH (FORCE)`);
-  await manageDatabase(`CREATE DATABASE ${databaseName}`);
-  db = new pg.Client({ connectionString: url.toString() });
-  await db.connect();
+  sandbox = await openMigrationSchema();
+  db = sandbox.db;
+  schema = sandbox.schema;
   for (const name of readdirSync(migrations)
     .filter((name) => name < migration)
     .sort()) {
-    await db.query(readFileSync(new URL(`${name}/migration.sql`, migrations), 'utf8'));
+    await sandbox.apply(readFileSync(new URL(`${name}/migration.sql`, migrations), 'utf8'));
   }
   await db.query(`
     INSERT INTO "Event" (id, "organisationId", slug, name, timezone, "updatedAt")
@@ -81,12 +67,11 @@ beforeAll(async () => {
     INSERT INTO "AttendanceChallenge" (id, "eventId", "issuerId", "eventDayId", "pinHash", "campusNetwork", "expiresAt")
       VALUES ('challenge', 'event', 'person', 'day', 'live-pin', true, now());
   `);
-  await db.query(readFileSync(new URL(`${migration}/migration.sql`, migrations), 'utf8'));
+  await sandbox.apply(readFileSync(new URL(`${migration}/migration.sql`, migrations), 'utf8'));
 }, 60_000);
 
 afterAll(async () => {
-  await db?.end();
-  await manageDatabase(`DROP DATABASE IF EXISTS ${databaseName} WITH (FORCE)`);
+  await sandbox?.close();
 });
 
 describe('rehearsal provenance migration', () => {
@@ -95,9 +80,12 @@ describe('rehearsal provenance migration', () => {
       table_name: string;
       is_nullable: string;
       column_default: string;
-    }>(`
+    }>(
+      `
       SELECT table_name, is_nullable, column_default FROM information_schema.columns
-      WHERE table_schema = 'public' AND column_name = 'rehearsal' ORDER BY table_name`);
+      WHERE table_schema = $1 AND column_name = 'rehearsal' ORDER BY table_name`,
+      [schema],
+    );
     expect(result.rows.map((row) => row.table_name)).toEqual([...tables].sort());
     expect(
       result.rows.every((row) => row.is_nullable === 'NO' && row.column_default === 'false'),
