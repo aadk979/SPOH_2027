@@ -30,6 +30,7 @@ function objectStatements(name: string) {
         row.Properties.PolicyDocument.Statement as Array<{
           Action: string | string[];
           Resource: unknown;
+          Condition?: unknown;
         }>,
     )
     .filter((row) => JSON.stringify(row.Action).includes('s3:'));
@@ -44,13 +45,30 @@ it('limits publication and clone access to generated drafts/content prefixes in 
   const policies = objectStatements('app').filter((row) =>
     JSON.stringify(row.Resource).includes(id),
   );
-  expect(policies).toHaveLength(2);
-  for (const row of policies)
-    expect(row.Action).toEqual(['s3:GetObject', 's3:GetObjectVersion', 's3:PutObject',
-      's3:DeleteObject', 's3:DeleteObjectVersion']);
+  const existence = policies.filter(
+    (row) =>
+      row.Action === 's3:ListBucket' ||
+      (Array.isArray(row.Action) && row.Action.includes('s3:ListBucket')),
+  );
+  expect(existence).toHaveLength(1);
+  expect(existence[0]!.Resource).toEqual({ 'Fn::GetAtt': [id, 'Arn'] });
+  expect(existence[0]!.Condition).toEqual({
+    StringLike: { 's3:prefix': ['drafts/*', 'content/*'] },
+  });
+  const objects = policies.filter((row) => !existence.includes(row));
+  expect(objects).toHaveLength(2);
+  for (const row of objects)
+    expect(row.Action).toEqual([
+      's3:GetObject',
+      's3:GetObjectVersion',
+      's3:PutObject',
+      's3:DeleteObject',
+      's3:DeleteObjectVersion',
+    ]);
   expect(policies.map((row) => JSON.stringify(row.Resource)).join(' ')).toContain('/drafts/*');
   expect(policies.map((row) => JSON.stringify(row.Resource)).join(' ')).toContain('/content/*');
-  expect(JSON.stringify(policies)).not.toMatch(/List|Acl/);
+  expect(JSON.stringify(objects)).not.toMatch(/List|Acl/);
+  expect(JSON.stringify(policies)).not.toMatch(/ListBucketVersions|s3:ListAllMyBuckets|Acl/);
 });
 it('limits final exports to private archive objects and keeps migration roles free of S3', () => {
   const id = Object.keys(template.findResources('AWS::S3::Bucket')).find((key) =>

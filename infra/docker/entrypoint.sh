@@ -33,6 +33,13 @@ case "${1:-serve}" in
     export DATABASE_URL
     exec node dist/seed/prisma/seed.js
     ;;
+  retry-content-cleanup)
+    # Operator-only, staging-only and default dry run. The command preserves failure audits.
+    shift
+    DATABASE_URL="$(url spoh_app "$DB_APP_PASSWORD")"
+    export DATABASE_URL
+    exec node scripts/retry-content-cleanup.mjs "$@"
+    ;;
   totals)
     # One-off, read-only (P09.4, P09.10): old and new columns agree.
     DATABASE_URL="$(url spoh_app "$DB_APP_PASSWORD")"

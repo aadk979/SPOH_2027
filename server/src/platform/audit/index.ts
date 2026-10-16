@@ -138,7 +138,8 @@ export type AuditAction =
   | 'schedule.execute'
   | 'schedule.create'
   | 'schedule.update'
-  | 'schedule.cancel';
+  | 'schedule.cancel'
+  | 'schedule.retry';
 
 export interface AuditContext {
   /** `Volunteer.id`. Null only for system-initiated actions such as the purge job. */

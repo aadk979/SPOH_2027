@@ -68,7 +68,12 @@ it('pins the uploaded version and checksum, fully decodes bytes and stores a nor
   const body = await png();
   f.body.map.levels[0]!.image = { mediaKey: 'drafts/event/image', alt: 'Floor plan' };
   f.images = [{ key: 'drafts/event/image', contentType: 'image/png', contentLength: body.length }];
-  const metadata = { ContentType: 'image/png', ContentLength: body.length, ETag: '"source"', VersionId: 'source/version' };
+  const metadata = {
+    ContentType: 'image/png',
+    ContentLength: body.length,
+    ETag: '"source"',
+    VersionId: 'source/version',
+  };
   mocks.send
     .mockResolvedValueOnce(metadata)
     .mockResolvedValueOnce({ ...metadata, Body: Readable.from([body]) })
@@ -77,10 +82,14 @@ it('pins the uploaded version and checksum, fully decodes bytes and stores a nor
   const published = await contentStorage().publish(f);
   const commands = mocks.send.mock.calls.map(([command]) => command.input);
   expect(commands[1]).toMatchObject({
-    Key: 'drafts/event/image', IfMatch: '"source"', VersionId: 'source/version',
+    Key: 'drafts/event/image',
+    IfMatch: '"source"',
+    VersionId: 'source/version',
   });
   expect(commands[2]).toMatchObject({
-    Key: 'content/event/version/map-0', IfNoneMatch: '*', ContentType: 'image/png',
+    Key: 'content/event/version/map-0',
+    IfNoneMatch: '*',
+    ContentType: 'image/png',
   });
   expect(commands[3]).toMatchObject({
     Key: 'content/event/version.json',
@@ -89,10 +98,20 @@ it('pins the uploaded version and checksum, fully decodes bytes and stores a nor
   });
   expect(published.body.map.levels[0]!.image!.mediaKey).toBe('content/event/version/map-0');
   expect(published.etag).toMatch(/^"[a-f0-9]{64}"$/);
-  expect(published.imageManifest).toEqual([expect.objectContaining({ key: 'content/event/version/map-0',
-    sourceEtag: '"source"', sourceVersionId: 'source/version', objectVersionId: 'frozen/version',
-    sha256: createHash('sha256').update(commands[2]!.Body).digest('hex') })]);
-  expect(await sharp(commands[2]!.Body).metadata()).toMatchObject({ format: 'png', width: 3, height: 2 });
+  expect(published.imageManifest).toEqual([
+    expect.objectContaining({
+      key: 'content/event/version/map-0',
+      sourceEtag: '"source"',
+      sourceVersionId: 'source/version',
+      objectVersionId: 'frozen/version',
+      sha256: createHash('sha256').update(commands[2]!.Body).digest('hex'),
+    }),
+  ]);
+  expect(await sharp(commands[2]!.Body).metadata()).toMatchObject({
+    format: 'png',
+    width: 3,
+    height: 2,
+  });
 });
 it.each(['content-type', 'size', 'checksum'])(
   'refuses a changed or incomplete %s upload',
@@ -110,7 +129,11 @@ it.each(['content-type', 'size', 'checksum'])(
 );
 it('enforces the complete offline payload budget including JSON, not only individual images', async () => {
   const f = input();
-  const body = await sharp(randomBytes(400 * 600 * 3), { raw: { width: 400, height: 600, channels: 3 } }).png().toBuffer();
+  const body = await sharp(randomBytes(400 * 600 * 3), {
+    raw: { width: 400, height: 600, channels: 3 },
+  })
+    .png()
+    .toBuffer();
   f.images = [0, 1, 2].map((id) => ({
     key: `drafts/event/${id}`,
     contentType: 'image/png',
@@ -119,7 +142,12 @@ it('enforces the complete offline payload budget including JSON, not only indivi
   mocks.send.mockImplementation(async (command) =>
     command.constructor.name === 'HeadObjectCommand'
       ? { ContentType: 'image/png', ContentLength: body.length, ETag: '"source"' }
-      : { ContentType: 'image/png', ContentLength: body.length, ETag: '"source"', Body: Readable.from([body]) },
+      : {
+          ContentType: 'image/png',
+          ContentLength: body.length,
+          ETag: '"source"',
+          Body: Readable.from([body]),
+        },
   );
   await expect(contentStorage().publish(f)).rejects.toMatchObject({ statusCode: 400 });
   expect(
@@ -128,24 +156,39 @@ it('enforces the complete offline payload budget including JSON, not only indivi
 });
 it('clones only the committed image version and digest into a new independently validated draft key', async () => {
   const body = await png();
-  const metadata = { ContentType: 'image/png', ContentLength: body.length, ETag: '"source"', VersionId: 'immutable/version' };
+  const metadata = {
+    ContentType: 'image/png',
+    ContentLength: body.length,
+    ETag: '"source"',
+    VersionId: 'immutable/version',
+  };
   mocks.send
     .mockResolvedValueOnce(metadata)
     .mockResolvedValueOnce({ ...metadata, Body: Readable.from([body]) })
     .mockResolvedValue({});
   const copied = await contentStorage().copyImage({
-      sourceKey: 'content/source/version/map-0',
-      key: 'drafts/target/image',
-      receipt: { sha256: createHash('sha256').update(body).digest('hex'), objectVersionId: 'immutable/version',
-        contentType: 'image/png', contentLength: body.length },
-    });
-  expect(copied).toMatchObject({ key: 'drafts/target/image', contentType: 'image/png', contentLength: expect.any(Number) });
+    sourceKey: 'content/source/version/map-0',
+    key: 'drafts/target/image',
+    receipt: {
+      sha256: createHash('sha256').update(body).digest('hex'),
+      objectVersionId: 'immutable/version',
+      contentType: 'image/png',
+      contentLength: body.length,
+    },
+  });
+  expect(copied).toMatchObject({
+    key: 'drafts/target/image',
+    contentType: 'image/png',
+    contentLength: expect.any(Number),
+  });
   expect(mocks.send.mock.calls[0]![0].input.VersionId).toBe('immutable/version');
   expect(mocks.send.mock.calls[1]![0].input).toMatchObject({
-    IfMatch: '"source"', VersionId: 'immutable/version',
+    IfMatch: '"source"',
+    VersionId: 'immutable/version',
   });
   expect(mocks.send.mock.calls[2]![0].input).toMatchObject({
-    CacheControl: 'no-store', IfNoneMatch: '*',
+    CacheControl: 'no-store',
+    IfNoneMatch: '*',
     Key: 'drafts/target/image',
   });
   mocks.send.mockResolvedValueOnce({
@@ -171,41 +214,70 @@ it('reads authenticated bytes and handles absent content bodies', async () => {
 });
 it('reads a committed receipt with its trusted type and version and refuses byte replacement', async () => {
   const body = await png();
-  const receipt = { contentType: 'image/png', contentLength: body.length,
-    objectVersionId: 'frozen/version', sha256: createHash('sha256').update(body).digest('hex') };
+  const receipt = {
+    contentType: 'image/png',
+    contentLength: body.length,
+    objectVersionId: 'frozen/version',
+    sha256: createHash('sha256').update(body).digest('hex'),
+  };
   mocks.send.mockResolvedValueOnce({ Body: Readable.from([body]), ContentType: 'text/html' });
-  expect(await contentStorage().read('content/event/version/map-0', receipt)).toEqual({ body, contentType: 'image/png' });
+  expect(await contentStorage().read('content/event/version/map-0', receipt)).toEqual({
+    body,
+    contentType: 'image/png',
+  });
   expect(mocks.send.mock.calls[0]![0].input.VersionId).toBe('frozen/version');
-  mocks.send.mockResolvedValueOnce({ Body: Readable.from([Buffer.from('replacement')]), ContentType: 'image/png' });
-  await expect(contentStorage().read('content/event/version/map-0', receipt)).rejects.toMatchObject({ statusCode: 400 });
+  mocks.send.mockResolvedValueOnce({
+    Body: Readable.from([Buffer.from('replacement')]),
+    ContentType: 'image/png',
+  });
+  await expect(contentStorage().read('content/event/version/map-0', receipt)).rejects.toMatchObject(
+    { statusCode: 400 },
+  );
 });
 it('rejects MIME-correct active or truncated uploads before any immutable object is written', async () => {
   for (const body of [Buffer.from('<script>active</script>'), (await png()).subarray(0, 40)]) {
-    const f = input(); f.images = [{ key: 'drafts/event/image', contentType: 'image/png', contentLength: body.length }];
+    const f = input();
+    f.images = [
+      { key: 'drafts/event/image', contentType: 'image/png', contentLength: body.length },
+    ];
     const metadata = { ContentType: 'image/png', ContentLength: body.length, ETag: '"source"' };
-    mocks.send.mockReset().mockResolvedValueOnce(metadata)
+    mocks.send
+      .mockReset()
+      .mockResolvedValueOnce(metadata)
       .mockResolvedValueOnce({ ...metadata, Body: Readable.from([body]) });
     await expect(contentStorage().publish(f)).rejects.toMatchObject({ statusCode: 400 });
-    expect(mocks.send.mock.calls.some(([command]) => command.constructor.name === 'PutObjectCommand')).toBe(false);
+    expect(
+      mocks.send.mock.calls.some(([command]) => command.constructor.name === 'PutObjectCommand'),
+    ).toBe(false);
   }
 });
-const png = () => sharp({ create: { width: 3, height: 2, channels: 3, background: '#1267ab' } }).png().toBuffer();
+const png = () =>
+  sharp({ create: { width: 3, height: 2, channels: 3, background: '#1267ab' } })
+    .png()
+    .toBuffer();
 it('retires the exact immutable S3 version instead of creating a delete marker', async () => {
   mocks.send.mockResolvedValueOnce({ VersionId: 'orphan/version' }).mockResolvedValueOnce({});
   await contentStorage().deleteObject!('content/event/orphan.json');
-  expect(mocks.send.mock.calls[1]![0].input).toEqual({ Bucket: 'content-test',
-    Key: 'content/event/orphan.json', VersionId: 'orphan/version' });
+  expect(mocks.send.mock.calls[1]![0].input).toEqual({
+    Bucket: 'content-test',
+    Key: 'content/event/orphan.json',
+    VersionId: 'orphan/version',
+  });
   expect(mocks.send.mock.calls[1]![1].abortSignal).toBeInstanceOf(AbortSignal);
 });
 it('retries storage outages and refuses an unversioned cleanup target', async () => {
   mocks.send.mockResolvedValueOnce({});
-  await expect(contentStorage().deleteObject!('content/event/orphan.json')).rejects.toMatchObject({ statusCode: 400 });
+  await expect(contentStorage().deleteObject!('content/event/orphan.json')).rejects.toMatchObject({
+    statusCode: 400,
+  });
   expect(mocks.send).toHaveBeenCalledTimes(1);
   const outage = new Error('Storage unavailable');
   mocks.send.mockRejectedValueOnce(outage);
   await expect(contentStorage().deleteObject!('content/event/orphan.json')).rejects.toBe(outage);
   mocks.send.mockRejectedValueOnce(Object.assign(new Error('Absent object'), { name: 'NotFound' }));
-  await expect(contentStorage().deleteObject!('content/event/orphan.json')).resolves.toBeUndefined();
+  await expect(
+    contentStorage().deleteObject!('content/event/orphan.json'),
+  ).resolves.toBeUndefined();
 });
 it('stores private immutable export workbooks and reads them without signed credential persistence', async () => {
   mocks.send
@@ -221,4 +293,52 @@ it('stores private immutable export workbooks and reads them without signed cred
   expect(await archiveStorage().read('archive/event/id.xlsx')).toEqual(Buffer.from('xlsx'));
   mocks.send.mockResolvedValueOnce({});
   await expect(archiveStorage().read('missing')).rejects.toMatchObject({ statusCode: 404 });
+});
+
+it.each(['drafts/event/missing', 'content/event/missing.json'])(
+  'reconciles an absent exact key after S3 hides absence behind 403: %s',
+  async (key) => {
+    const denied = Object.assign(new Error('Head forbidden'), {
+      name: 'Forbidden',
+      $metadata: { httpStatusCode: 403 },
+    });
+    mocks.send.mockRejectedValueOnce(denied).mockResolvedValueOnce({ Contents: [] });
+    await expect(contentStorage().deleteObject!(key)).resolves.toBeUndefined();
+    expect(mocks.send).toHaveBeenCalledTimes(2);
+    expect(mocks.send.mock.calls[1]![0].constructor.name).toBe('ListObjectsV2Command');
+    expect(mocks.send.mock.calls[1]![0].input).toEqual({
+      Bucket: 'content-test',
+      Prefix: key,
+      MaxKeys: 1,
+    });
+    expect(
+      mocks.send.mock.calls.some(([command]) => command.constructor.name === 'DeleteObjectCommand'),
+    ).toBe(false);
+  },
+);
+it('does not mistake a longer prefix match for the missing exact object', async () => {
+  const key = 'content/event/missing.json';
+  mocks.send
+    .mockRejectedValueOnce(
+      Object.assign(new Error('Head forbidden'), { $metadata: { httpStatusCode: 403 } }),
+    )
+    .mockResolvedValueOnce({ Contents: [{ Key: key + '.other' }] });
+  await expect(contentStorage().deleteObject!(key)).resolves.toBeUndefined();
+  expect(mocks.send).toHaveBeenCalledTimes(2);
+});
+it('preserves a genuine denied object and refuses deletion when the exact key exists', async () => {
+  const key = 'content/event/denied.json',
+    denied = Object.assign(new Error('Real access denial'), { $metadata: { httpStatusCode: 403 } });
+  mocks.send.mockRejectedValueOnce(denied).mockResolvedValueOnce({ Contents: [{ Key: key }] });
+  await expect(contentStorage().deleteObject!(key)).rejects.toBe(denied);
+  expect(mocks.send).toHaveBeenCalledTimes(2);
+});
+it('propagates a denied existence check rather than treating it as successful cleanup', async () => {
+  const denied = Object.assign(new Error('Head forbidden'), { $metadata: { httpStatusCode: 403 } });
+  const listDenied = new Error('Existence check denied');
+  mocks.send.mockRejectedValueOnce(denied).mockRejectedValueOnce(listDenied);
+  await expect(contentStorage().deleteObject!('content/event/denied.json')).rejects.toBe(
+    listDenied,
+  );
+  expect(mocks.send).toHaveBeenCalledTimes(2);
 });

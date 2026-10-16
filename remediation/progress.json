@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-15T14:29:57.684Z",
+  "updatedAt": "2026-10-16T06:37:17.338Z",
   "current": {
     "phase": "P16",
     "step": "P16.10"
@@ -4351,6 +4351,10 @@
     {
       "at": "2026-10-15T14:29:57.683Z",
       "text": "P16.10: 628fba94 accepted by all5 exact CI38727031044 and staging38731108427 all3+Smoke; original152 repaired API cases accepted. Separate synthetic capture fixture passed366 additional primary cases including185 malformed requests, rehearsal/live retry and stock isolation, actual pre-close queues, archive refusal and platform reopen. False authorization-failure metrics and authenticated existing-person membership invitation replay reproduced; source fixes plus19 CI tests/corpus prepared. Fresh complete gate, exact CI, new image and provider rechecks remain pending. Only P16.9 is waived; all owner/production/cost gates retained."
+    },
+    {
+      "at": "2026-10-16T06:37:17.337Z",
+      "text": "P16.10: abfdd7ab accepted by all5 exact CI38782258226 and staging38787089743 all3+Smoke. Five existing memberships/assignments and80 visitor-permission cases/24denial audits accepted without replay or invites. E setup8localfacts accepted; bounded first-live refused scheduler-dead alarm. Global content.storage.prune exhausted5attempts; session rotation warm-cache and missing-object cleanup/IAM regressions reproduced. Coherent role/safety160 plus session/storage/operator-retry batch authored; new whole gate, exact CI, repaired image/infra and natural worker/alarm recovery pending. Only24hsoak waived; all owner gates retained."
     }
   ]
 }

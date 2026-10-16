@@ -7,16 +7,16 @@ paid detection services and irreversible real-data actions retain owner approval
 
 ## Secrets and cryptography inventory
 
-| Material | Purpose, location and lifecycle |
-| --- | --- |
-| Session signing secret | Secrets Manager, explicit VersionId in app tasks only. HS256 API JWTs pin issuer/audience/algorithm and carry subject/SID; the backend resolves current authority. SHA256-derived key ID selects at most current and previous. |
-| Temporary provider envelopes | AES-256-GCM, fresh 96-bit nonce and authentication tag. A SHA256-derived session key encrypts only short-lived backend MFA credentials; key ID permits bounded overlap. Never export or log envelopes. Expiry/invalidation clears them; inspect surviving envelopes before key retirement. |
-| Refresh credentials | Initial 32-byte random secret, SHA256 digest in PostgreSQL. Successors use HMAC-SHA256 with the distinct `refresh-successor:` purpose string and session ID. Overlap can reproduce a committed retry under either explicit key; stored digest must match. |
-| OAuth/PKCE and handoff | Cryptographic random state/verifier and one-use handoff; short expiry, fixed origin/return-path rules and no-store/no-referrer responses. Protocol query credentials must never enter logs or public evidence. |
-| Attendance signing | Independent Secrets Manager secret, app task only. Coordinate challenge expiry and a maintenance restart separately from API session rotation. |
-| Push/VAPID | Private key injected only into app tasks; public key reaches subscription clients. Replacement requires renewed subscriptions, confirmed synthetic receipt and operator coordination. |
-| DB app/migrator/admin passwords | Separate Secrets Manager credentials and SQL roles. App cannot migrate or directly mutate audit history. Operator rotation uses the one-off migration task under the existing lean network topology. |
-| TLS/service credentials | Managed certificates at the public edge; ECS task-role temporary AWS credentials. Internal Cloud Map HTTP is the recorded ADR-008 architecture exception, requiring P16 network-boundary proof. No application IAM user keys are injected. |
+| Material                        | Purpose, location and lifecycle                                                                                                                                                                                                                                                            |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Session signing secret          | Secrets Manager, explicit VersionId in app tasks only. HS256 API JWTs pin issuer/audience/algorithm and carry subject/SID; the backend resolves current authority. SHA256-derived key ID selects at most current and previous.                                                             |
+| Temporary provider envelopes    | AES-256-GCM, fresh 96-bit nonce and authentication tag. A SHA256-derived session key encrypts only short-lived backend MFA credentials; key ID permits bounded overlap. Never export or log envelopes. Expiry/invalidation clears them; inspect surviving envelopes before key retirement. |
+| Refresh credentials             | Initial 32-byte random secret, SHA256 digest in PostgreSQL. Successors use HMAC-SHA256 with the distinct `refresh-successor:` purpose string and session ID. Overlap can reproduce a committed retry under either explicit key; stored digest must match.                                  |
+| OAuth/PKCE and handoff          | Cryptographic random state/verifier and one-use handoff; short expiry, fixed origin/return-path rules and no-store/no-referrer responses. Protocol query credentials must never enter logs or public evidence.                                                                             |
+| Attendance signing              | Independent Secrets Manager secret, app task only. Coordinate challenge expiry and a maintenance restart separately from API session rotation.                                                                                                                                             |
+| Push/VAPID                      | Private key injected only into app tasks; public key reaches subscription clients. Replacement requires renewed subscriptions, confirmed synthetic receipt and operator coordination.                                                                                                      |
+| DB app/migrator/admin passwords | Separate Secrets Manager credentials and SQL roles. App cannot migrate or directly mutate audit history. Operator rotation uses the one-off migration task under the existing lean network topology.                                                                                       |
+| TLS/service credentials         | Managed certificates at the public edge; ECS task-role temporary AWS credentials. Internal Cloud Map HTTP is the recorded ADR-008 architecture exception, requiring P16 network-boundary proof. No application IAM user keys are injected.                                                 |
 
 The deployment operator owns secret generation, selectors, access and retirement;
 the programme owner approves production and compromise decisions. Use generated
@@ -79,15 +79,15 @@ and cannot substitute for identity proofing.
 
 ## Log and event inventory
 
-| Layer | Format, purpose, retention and access |
-| --- | --- |
-| Application HTTP/auth/authorization | Pino JSON stdout to `/spoh/<stage>/app`, one month. Known route template, method, request ID, status and bounded categories; no raw URL/query/private path IDs, headers, bodies, Location, provider errors, SQL or credentials. |
-| PostgreSQL warnings/errors | Fixed category/message through the same app stream; raw Prisma events/query text are omitted. Database operational logs are a separate AWS operator boundary. |
-| Business/security audit | PostgreSQL attributed append-only rows, transactionally paired with effects. Owner-only cleanup requires at least 400-day row age and, for event rows, 400-day archive age. Post-commit batches/cursor append to `/spoh/<stage>/audit`, thirteen-month CloudWatch retention. |
-| API edge access | Fixed structured API Gateway fields to its CDK log group, one month. Request/status/integration correlation; no credential-bearing request URL logging. |
-| Rejected VPC flows | Managed flow records, one month. Network refusal investigation; operator IAM controls read/delete. |
-| Observer/task failure | CDK-managed observer and `/spoh/<stage>/task-failures` logs, one month. Desired/running tasks, backups, health and bounded failure observations. |
-| Provider/CloudTrail/detection | Provider/account boundaries; complete deployed inventory, access, export and receipt proof is P16. Paid CloudTrail/GuardDuty/Security Hub choices remain owner-held. No enabled service or comprehensive authentication-factor event coverage is claimed. |
+| Layer                               | Format, purpose, retention and access                                                                                                                                                                                                                                        |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Application HTTP/auth/authorization | Pino JSON stdout to `/spoh/<stage>/app`, one month. Known route template, method, request ID, status and bounded categories; no raw URL/query/private path IDs, headers, bodies, Location, provider errors, SQL or credentials.                                              |
+| PostgreSQL warnings/errors          | Fixed category/message through the same app stream; raw Prisma events/query text are omitted. Database operational logs are a separate AWS operator boundary.                                                                                                                |
+| Business/security audit             | PostgreSQL attributed append-only rows, transactionally paired with effects. Owner-only cleanup requires at least 400-day row age and, for event rows, 400-day archive age. Post-commit batches/cursor append to `/spoh/<stage>/audit`, thirteen-month CloudWatch retention. |
+| API edge access                     | Fixed structured API Gateway fields to its CDK log group, one month. Request/status/integration correlation; no credential-bearing request URL logging.                                                                                                                      |
+| Rejected VPC flows                  | Managed flow records, one month. Network refusal investigation; operator IAM controls read/delete.                                                                                                                                                                           |
+| Observer/task failure               | CDK-managed observer and `/spoh/<stage>/task-failures` logs, one month. Desired/running tasks, backups, health and bounded failure observations.                                                                                                                             |
+| Provider/CloudTrail/detection       | Provider/account boundaries; complete deployed inventory, access, export and receipt proof is P16. Paid CloudTrail/GuardDuty/Security Hub choices remain owner-held. No enabled service or comprehensive authentication-factor event coverage is claimed.                    |
 
 Audit covers successful session creation, logout/reuse, MFA replacement,
 provision/recovery/invitation, role/grant changes, privacy and retention effects.
@@ -119,6 +119,45 @@ remaining resources, privately verify final recoverable backups and obtain the
 owner's approval. Do not delete the retained snapshot or private backups merely
 because source/runbooks are ready. The 28 October go/no-go and real January
 fallback choice remain held; neither source CI nor staging grants production go.
+
+## Staging content cleanup retry
+
+The 16 October P16 repair adds an operator application command for one exhausted
+global `content.storage.prune` occurrence. This is a staging recovery procedure;
+the command refuses production. It grants no production approval and does not
+reset dead work on startup.
+
+First identify the exact action from its shipped `schedule.execute` failure audit,
+review the underlying storage/permission repair, the complete local gate, exact
+CI/image and CDK diff, and verify the existing campaign budget. Deploy that accepted
+image and its prefix-constrained content-bucket policy before retrying. Use the
+existing app task definition, task role, private networking and protected secret
+injection; keep operator IAM authorization and the resulting task ARN in private
+evidence. Do not pass database credentials or tokens in command arguments, use a
+migration/admin database role, issue ad hoc SQL, or create a new paid service.
+
+Run one bounded task with command `retry-content-cleanup --id ACTION_ID`. Its
+default read-only output contains only the matched action's type, terminal status,
+version, attempts and dates. Review that concrete plan, then run:
+
+```text
+retry-content-cleanup --id ACTION_ID --apply --expected-version VERSION --reason "Verified repair and retained failure evidence" --operator-reference "Incident or campaign evidence reference"
+```
+
+An operator reference is attribution, not proof of owner approval. The command
+rechecks the exact global recurring kind, dedupe key, exhausted budget, terminal
+error, cleared lease and version under a lock. It preserves payload, creator,
+recurrence and original schedule; the transactional retry audit retains the old
+status, attempts, error and completion time before a new attempt is queued. A
+duplicate/stale apply refuses. Audit failure rolls back the queued retry.
+
+Retain each task's actual exit and private plan. Observe the normal worker's new
+`schedule.execute` result and successor, unchanged historical failure audits,
+actual zero dead-action gauge and natural alarm recovery. A successful command
+exit means queued, not completed. If execution fails again, preserve it and fix
+the cause before another reviewed retry. Never force a healthy alarm or bypass
+go-live readiness. The missing-object check may list only the exact generated
+content/draft prefix with one result; actual permission errors remain failures.
 
 ## Dependency response
 
