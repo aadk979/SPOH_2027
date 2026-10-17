@@ -4367,6 +4367,10 @@
     {
       "at": "2026-10-16T15:34:37.048Z",
       "text": "P16.10: c1f7fa0d exact CI38904399858 and staging38907521645 accepted; one reviewed cleanup retry and natural successor succeeded. Existing E reached LIVE, 245 capture requests and six strict warmed-session proofs reconciled; 438 selected import/safety/lost-found cases accepted. Workspace reads then failed on missing no-store at a cross-event404. Four new HTTP regressions failed before the shared error-header repair and passed after it; fresh whole gate, exact CI and new-image workspace acceptance remain pending. Historical native failures preserved; P16.10 remains in progress, P16.9 only skipped, original cost/production/owner gates unchanged."
+    },
+    {
+      "at": "2026-10-17T07:07:32.343Z",
+      "text": "P16.10: a940cb7e exact CI38987001422 and staging38989724604 plus Smoke accepted. Selected195workspace/57entity reads passed with unchanged existing event records; lifecycle positive-cache observation remains unaccepted. Local Docker stale IPC recovered with preservation. Frozen756record-field malformed descriptors/16valid controls passed32private HTTP tests after retaining the original quota-exhaustion failure. Maintained test-only promotion prepared; fresh whole gate/exact CI and expanded staging remain pending. P16.10 stays in progress; only P16.9 skipped; owner, production and original cost gates unchanged."
     }
   ]
 }

@@ -1,0 +1,6993 @@
+{
+  "invalid": [
+    {
+      "id": "records-field:registrations:kind:repeated",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": ["registrations", "registrations"]
+      }
+    },
+    {
+      "id": "records-field:registrations:kind:missing",
+      "route": "records",
+      "kind": "registrations",
+      "query": {}
+    },
+    {
+      "id": "records-field:registrations:kind:unknown-enum",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "P16_UNSUPPORTED_VALUE"
+      }
+    },
+    {
+      "id": "records-field:registrations:kind:empty",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": ""
+      }
+    },
+    {
+      "id": "records-field:registrations:from:repeated",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "from": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:registrations:from:empty",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "from": ""
+      }
+    },
+    {
+      "id": "records-field:registrations:from:malformed-format",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "from": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:registrations:to:repeated",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "to": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:registrations:to:empty",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "to": ""
+      }
+    },
+    {
+      "id": "records-field:registrations:to:malformed-format",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "to": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:registrations:asOf:repeated",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "asOf": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:registrations:asOf:empty",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "asOf": ""
+      }
+    },
+    {
+      "id": "records-field:registrations:asOf:malformed-format",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "asOf": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:registrations:date:repeated",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "date": ["2026-10-17", "2026-10-17"]
+      }
+    },
+    {
+      "id": "records-field:registrations:date:empty",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "date": ""
+      }
+    },
+    {
+      "id": "records-field:registrations:date:malformed-format",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "date": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:registrations:stationId:repeated",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "stationId": ["$STATION", "$STATION"]
+      }
+    },
+    {
+      "id": "records-field:registrations:stationId:empty",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "stationId": ""
+      }
+    },
+    {
+      "id": "records-field:registrations:stationId:too-long",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "stationId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:registrations:personId:repeated",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "personId": ["$PERSON", "$PERSON"]
+      }
+    },
+    {
+      "id": "records-field:registrations:personId:empty",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "personId": ""
+      }
+    },
+    {
+      "id": "records-field:registrations:personId:too-long",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "personId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:registrations:source:repeated",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "source": ["APP", "APP"]
+      }
+    },
+    {
+      "id": "records-field:registrations:source:unknown-enum",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "source": "P16_UNSUPPORTED_VALUE"
+      }
+    },
+    {
+      "id": "records-field:registrations:source:empty",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "source": ""
+      }
+    },
+    {
+      "id": "records-field:registrations:rehearsal:repeated",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "rehearsal": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:registrations:rehearsal:boolean:\"\"",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "rehearsal": ""
+      }
+    },
+    {
+      "id": "records-field:registrations:rehearsal:boolean:\"yes\"",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "rehearsal": "yes"
+      }
+    },
+    {
+      "id": "records-field:registrations:rehearsal:boolean:\"1\"",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "rehearsal": "1"
+      }
+    },
+    {
+      "id": "records-field:registrations:rehearsal:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "rehearsal": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:registrations:rehearsal:boolean:\"null\"",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "rehearsal": "null"
+      }
+    },
+    {
+      "id": "records-field:registrations:includeRehearsal:repeated",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "includeRehearsal": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:registrations:includeRehearsal:boolean:\"\"",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "includeRehearsal": ""
+      }
+    },
+    {
+      "id": "records-field:registrations:includeRehearsal:boolean:\"yes\"",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "includeRehearsal": "yes"
+      }
+    },
+    {
+      "id": "records-field:registrations:includeRehearsal:boolean:\"1\"",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "includeRehearsal": "1"
+      }
+    },
+    {
+      "id": "records-field:registrations:includeRehearsal:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "includeRehearsal": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:registrations:includeRehearsal:boolean:\"null\"",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "includeRehearsal": "null"
+      }
+    },
+    {
+      "id": "records-field:registrations:voided:repeated",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "voided": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:registrations:voided:boolean:\"\"",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "voided": ""
+      }
+    },
+    {
+      "id": "records-field:registrations:voided:boolean:\"yes\"",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "voided": "yes"
+      }
+    },
+    {
+      "id": "records-field:registrations:voided:boolean:\"1\"",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "voided": "1"
+      }
+    },
+    {
+      "id": "records-field:registrations:voided:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "voided": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:registrations:voided:boolean:\"null\"",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "voided": "null"
+      }
+    },
+    {
+      "id": "records-field:registrations:categoryId:repeated",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "categoryId": ["synthetic-reference", "synthetic-reference"]
+      }
+    },
+    {
+      "id": "records-field:registrations:categoryId:empty",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "categoryId": ""
+      }
+    },
+    {
+      "id": "records-field:registrations:categoryId:too-long",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "categoryId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:registrations:categoryCode:repeated",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "categoryCode": ["synthetic-reference", "synthetic-reference"]
+      }
+    },
+    {
+      "id": "records-field:registrations:categoryCode:empty",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "categoryCode": ""
+      }
+    },
+    {
+      "id": "records-field:registrations:categoryCode:too-long",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "categoryCode": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:registrations:importBatchId:repeated",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "importBatchId": ["synthetic-reference", "synthetic-reference"]
+      }
+    },
+    {
+      "id": "records-field:registrations:importBatchId:empty",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "importBatchId": ""
+      }
+    },
+    {
+      "id": "records-field:registrations:importBatchId:too-long",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "importBatchId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:registrations:groupId:repeated",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "groupId": ["synthetic-reference", "synthetic-reference"]
+      }
+    },
+    {
+      "id": "records-field:registrations:groupId:empty",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "groupId": ""
+      }
+    },
+    {
+      "id": "records-field:registrations:groupId:too-long",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "groupId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:registrations:cardId:repeated",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "cardId": ["synthetic-reference", "synthetic-reference"]
+      }
+    },
+    {
+      "id": "records-field:registrations:cardId:empty",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "cardId": ""
+      }
+    },
+    {
+      "id": "records-field:registrations:cardId:too-long",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "cardId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:registrations:unknown-key",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "p16Unexpected": "1"
+      }
+    },
+    {
+      "id": "records-field:registrations:limit:\"\"",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "limit": ""
+      }
+    },
+    {
+      "id": "records-field:registrations:limit:\"0\"",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "limit": "0"
+      }
+    },
+    {
+      "id": "records-field:registrations:limit:\"-1\"",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "limit": "-1"
+      }
+    },
+    {
+      "id": "records-field:registrations:limit:\"201\"",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "limit": "201"
+      }
+    },
+    {
+      "id": "records-field:registrations:limit:\"1.5\"",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "limit": "1.5"
+      }
+    },
+    {
+      "id": "records-field:registrations:limit:\"NaN\"",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "limit": "NaN"
+      }
+    },
+    {
+      "id": "records-field:registrations:limit:\"Infinity\"",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "limit": "Infinity"
+      }
+    },
+    {
+      "id": "records-field:registrations:limit:\"abc\"",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "limit": "abc"
+      }
+    },
+    {
+      "id": "records-field:registrations:limit:repeated",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "limit": ["1", "2"]
+      }
+    },
+    {
+      "id": "records-field:registrations:cursor:empty",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "cursor": ""
+      }
+    },
+    {
+      "id": "records-field:registrations:cursor:too-long",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "cursor": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:registrations:cursor:repeated",
+      "route": "records",
+      "kind": "registrations",
+      "query": {
+        "kind": "registrations",
+        "cursor": ["synthetic-cursor", "synthetic-cursor"]
+      }
+    },
+    {
+      "id": "records-field:footfall:kind:repeated",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": ["footfall", "footfall"]
+      }
+    },
+    {
+      "id": "records-field:footfall:from:repeated",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "from": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:footfall:from:empty",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "from": ""
+      }
+    },
+    {
+      "id": "records-field:footfall:from:malformed-format",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "from": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:footfall:to:repeated",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "to": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:footfall:to:empty",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "to": ""
+      }
+    },
+    {
+      "id": "records-field:footfall:to:malformed-format",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "to": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:footfall:asOf:repeated",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "asOf": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:footfall:asOf:empty",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "asOf": ""
+      }
+    },
+    {
+      "id": "records-field:footfall:asOf:malformed-format",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "asOf": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:footfall:date:repeated",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "date": ["2026-10-17", "2026-10-17"]
+      }
+    },
+    {
+      "id": "records-field:footfall:date:empty",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "date": ""
+      }
+    },
+    {
+      "id": "records-field:footfall:date:malformed-format",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "date": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:footfall:stationId:repeated",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "stationId": ["$STATION", "$STATION"]
+      }
+    },
+    {
+      "id": "records-field:footfall:stationId:empty",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "stationId": ""
+      }
+    },
+    {
+      "id": "records-field:footfall:stationId:too-long",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "stationId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:footfall:personId:repeated",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "personId": ["$PERSON", "$PERSON"]
+      }
+    },
+    {
+      "id": "records-field:footfall:personId:empty",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "personId": ""
+      }
+    },
+    {
+      "id": "records-field:footfall:personId:too-long",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "personId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:footfall:source:repeated",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "source": ["APP", "APP"]
+      }
+    },
+    {
+      "id": "records-field:footfall:source:unknown-enum",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "source": "P16_UNSUPPORTED_VALUE"
+      }
+    },
+    {
+      "id": "records-field:footfall:source:empty",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "source": ""
+      }
+    },
+    {
+      "id": "records-field:footfall:rehearsal:repeated",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "rehearsal": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:footfall:rehearsal:boolean:\"\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "rehearsal": ""
+      }
+    },
+    {
+      "id": "records-field:footfall:rehearsal:boolean:\"yes\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "rehearsal": "yes"
+      }
+    },
+    {
+      "id": "records-field:footfall:rehearsal:boolean:\"1\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "rehearsal": "1"
+      }
+    },
+    {
+      "id": "records-field:footfall:rehearsal:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "rehearsal": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:footfall:rehearsal:boolean:\"null\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "rehearsal": "null"
+      }
+    },
+    {
+      "id": "records-field:footfall:includeRehearsal:repeated",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "includeRehearsal": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:footfall:includeRehearsal:boolean:\"\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "includeRehearsal": ""
+      }
+    },
+    {
+      "id": "records-field:footfall:includeRehearsal:boolean:\"yes\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "includeRehearsal": "yes"
+      }
+    },
+    {
+      "id": "records-field:footfall:includeRehearsal:boolean:\"1\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "includeRehearsal": "1"
+      }
+    },
+    {
+      "id": "records-field:footfall:includeRehearsal:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "includeRehearsal": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:footfall:includeRehearsal:boolean:\"null\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "includeRehearsal": "null"
+      }
+    },
+    {
+      "id": "records-field:footfall:voided:repeated",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "voided": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:footfall:voided:boolean:\"\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "voided": ""
+      }
+    },
+    {
+      "id": "records-field:footfall:voided:boolean:\"yes\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "voided": "yes"
+      }
+    },
+    {
+      "id": "records-field:footfall:voided:boolean:\"1\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "voided": "1"
+      }
+    },
+    {
+      "id": "records-field:footfall:voided:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "voided": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:footfall:voided:boolean:\"null\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "voided": "null"
+      }
+    },
+    {
+      "id": "records-field:footfall:importBatchId:repeated",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "importBatchId": ["synthetic-reference", "synthetic-reference"]
+      }
+    },
+    {
+      "id": "records-field:footfall:importBatchId:empty",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "importBatchId": ""
+      }
+    },
+    {
+      "id": "records-field:footfall:importBatchId:too-long",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "importBatchId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:footfall:countedStationsOnly:repeated",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "countedStationsOnly": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:footfall:countedStationsOnly:boolean:\"\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "countedStationsOnly": ""
+      }
+    },
+    {
+      "id": "records-field:footfall:countedStationsOnly:boolean:\"yes\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "countedStationsOnly": "yes"
+      }
+    },
+    {
+      "id": "records-field:footfall:countedStationsOnly:boolean:\"1\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "countedStationsOnly": "1"
+      }
+    },
+    {
+      "id": "records-field:footfall:countedStationsOnly:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "countedStationsOnly": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:footfall:countedStationsOnly:boolean:\"null\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "countedStationsOnly": "null"
+      }
+    },
+    {
+      "id": "records-field:footfall:unknown-key",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "p16Unexpected": "1"
+      }
+    },
+    {
+      "id": "records-field:footfall:limit:\"\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "limit": ""
+      }
+    },
+    {
+      "id": "records-field:footfall:limit:\"0\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "limit": "0"
+      }
+    },
+    {
+      "id": "records-field:footfall:limit:\"-1\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "limit": "-1"
+      }
+    },
+    {
+      "id": "records-field:footfall:limit:\"201\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "limit": "201"
+      }
+    },
+    {
+      "id": "records-field:footfall:limit:\"1.5\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "limit": "1.5"
+      }
+    },
+    {
+      "id": "records-field:footfall:limit:\"NaN\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "limit": "NaN"
+      }
+    },
+    {
+      "id": "records-field:footfall:limit:\"Infinity\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "limit": "Infinity"
+      }
+    },
+    {
+      "id": "records-field:footfall:limit:\"abc\"",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "limit": "abc"
+      }
+    },
+    {
+      "id": "records-field:footfall:limit:repeated",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "limit": ["1", "2"]
+      }
+    },
+    {
+      "id": "records-field:footfall:cursor:empty",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "cursor": ""
+      }
+    },
+    {
+      "id": "records-field:footfall:cursor:too-long",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "cursor": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:footfall:cursor:repeated",
+      "route": "records",
+      "kind": "footfall",
+      "query": {
+        "kind": "footfall",
+        "cursor": ["synthetic-cursor", "synthetic-cursor"]
+      }
+    },
+    {
+      "id": "records-field:cards:kind:repeated",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": ["cards", "cards"]
+      }
+    },
+    {
+      "id": "records-field:cards:from:repeated",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "from": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:cards:from:empty",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "from": ""
+      }
+    },
+    {
+      "id": "records-field:cards:from:malformed-format",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "from": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:cards:to:repeated",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "to": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:cards:to:empty",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "to": ""
+      }
+    },
+    {
+      "id": "records-field:cards:to:malformed-format",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "to": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:cards:asOf:repeated",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "asOf": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:cards:asOf:empty",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "asOf": ""
+      }
+    },
+    {
+      "id": "records-field:cards:asOf:malformed-format",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "asOf": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:cards:date:repeated",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "date": ["2026-10-17", "2026-10-17"]
+      }
+    },
+    {
+      "id": "records-field:cards:date:empty",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "date": ""
+      }
+    },
+    {
+      "id": "records-field:cards:date:malformed-format",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "date": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:cards:rehearsal:repeated",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "rehearsal": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:cards:rehearsal:boolean:\"\"",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "rehearsal": ""
+      }
+    },
+    {
+      "id": "records-field:cards:rehearsal:boolean:\"yes\"",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "rehearsal": "yes"
+      }
+    },
+    {
+      "id": "records-field:cards:rehearsal:boolean:\"1\"",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "rehearsal": "1"
+      }
+    },
+    {
+      "id": "records-field:cards:rehearsal:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "rehearsal": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:cards:rehearsal:boolean:\"null\"",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "rehearsal": "null"
+      }
+    },
+    {
+      "id": "records-field:cards:includeRehearsal:repeated",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "includeRehearsal": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:cards:includeRehearsal:boolean:\"\"",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "includeRehearsal": ""
+      }
+    },
+    {
+      "id": "records-field:cards:includeRehearsal:boolean:\"yes\"",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "includeRehearsal": "yes"
+      }
+    },
+    {
+      "id": "records-field:cards:includeRehearsal:boolean:\"1\"",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "includeRehearsal": "1"
+      }
+    },
+    {
+      "id": "records-field:cards:includeRehearsal:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "includeRehearsal": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:cards:includeRehearsal:boolean:\"null\"",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "includeRehearsal": "null"
+      }
+    },
+    {
+      "id": "records-field:cards:status:repeated",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "status": ["UNISSUED", "UNISSUED"]
+      }
+    },
+    {
+      "id": "records-field:cards:status:unknown-enum",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "status": "P16_UNSUPPORTED_VALUE"
+      }
+    },
+    {
+      "id": "records-field:cards:status:empty",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "status": ""
+      }
+    },
+    {
+      "id": "records-field:cards:stage:repeated",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "stage": ["issued", "issued"]
+      }
+    },
+    {
+      "id": "records-field:cards:stage:unknown-enum",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "stage": "P16_UNSUPPORTED_VALUE"
+      }
+    },
+    {
+      "id": "records-field:cards:stage:empty",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "stage": ""
+      }
+    },
+    {
+      "id": "records-field:cards:stationId:repeated",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "stage": "station",
+        "stationId": ["$STATION", "$STATION"]
+      }
+    },
+    {
+      "id": "records-field:cards:stationId:empty",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "stage": "station",
+        "stationId": ""
+      }
+    },
+    {
+      "id": "records-field:cards:stationId:too-long",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "stage": "station",
+        "stationId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:cards:stationCode:repeated",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "stage": "station",
+        "stationId": "$STATION",
+        "stationCode": ["synthetic-reference", "synthetic-reference"]
+      }
+    },
+    {
+      "id": "records-field:cards:stationCode:empty",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "stage": "station",
+        "stationId": "$STATION",
+        "stationCode": ""
+      }
+    },
+    {
+      "id": "records-field:cards:stationCode:too-long",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "stage": "station",
+        "stationId": "$STATION",
+        "stationCode": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:cards:groupId:repeated",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "groupId": ["synthetic-reference", "synthetic-reference"]
+      }
+    },
+    {
+      "id": "records-field:cards:groupId:empty",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "groupId": ""
+      }
+    },
+    {
+      "id": "records-field:cards:groupId:too-long",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "groupId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:cards:unknown-key",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "p16Unexpected": "1"
+      }
+    },
+    {
+      "id": "records-field:cards:limit:\"\"",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "limit": ""
+      }
+    },
+    {
+      "id": "records-field:cards:limit:\"0\"",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "limit": "0"
+      }
+    },
+    {
+      "id": "records-field:cards:limit:\"-1\"",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "limit": "-1"
+      }
+    },
+    {
+      "id": "records-field:cards:limit:\"201\"",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "limit": "201"
+      }
+    },
+    {
+      "id": "records-field:cards:limit:\"1.5\"",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "limit": "1.5"
+      }
+    },
+    {
+      "id": "records-field:cards:limit:\"NaN\"",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "limit": "NaN"
+      }
+    },
+    {
+      "id": "records-field:cards:limit:\"Infinity\"",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "limit": "Infinity"
+      }
+    },
+    {
+      "id": "records-field:cards:limit:\"abc\"",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "limit": "abc"
+      }
+    },
+    {
+      "id": "records-field:cards:limit:repeated",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "limit": ["1", "2"]
+      }
+    },
+    {
+      "id": "records-field:cards:cursor:empty",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "cursor": ""
+      }
+    },
+    {
+      "id": "records-field:cards:cursor:too-long",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "cursor": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:cards:cursor:repeated",
+      "route": "records",
+      "kind": "cards",
+      "query": {
+        "kind": "cards",
+        "cursor": ["synthetic-cursor", "synthetic-cursor"]
+      }
+    },
+    {
+      "id": "records-field:stamps:kind:repeated",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": ["stamps", "stamps"]
+      }
+    },
+    {
+      "id": "records-field:stamps:from:repeated",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "from": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:stamps:from:empty",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "from": ""
+      }
+    },
+    {
+      "id": "records-field:stamps:from:malformed-format",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "from": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:stamps:to:repeated",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "to": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:stamps:to:empty",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "to": ""
+      }
+    },
+    {
+      "id": "records-field:stamps:to:malformed-format",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "to": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:stamps:asOf:repeated",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "asOf": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:stamps:asOf:empty",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "asOf": ""
+      }
+    },
+    {
+      "id": "records-field:stamps:asOf:malformed-format",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "asOf": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:stamps:date:repeated",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "date": ["2026-10-17", "2026-10-17"]
+      }
+    },
+    {
+      "id": "records-field:stamps:date:empty",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "date": ""
+      }
+    },
+    {
+      "id": "records-field:stamps:date:malformed-format",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "date": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:stamps:stationId:repeated",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "stationId": ["$STATION", "$STATION"]
+      }
+    },
+    {
+      "id": "records-field:stamps:stationId:empty",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "stationId": ""
+      }
+    },
+    {
+      "id": "records-field:stamps:stationId:too-long",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "stationId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:stamps:personId:repeated",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "personId": ["$PERSON", "$PERSON"]
+      }
+    },
+    {
+      "id": "records-field:stamps:personId:empty",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "personId": ""
+      }
+    },
+    {
+      "id": "records-field:stamps:personId:too-long",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "personId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:stamps:source:repeated",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "source": ["APP", "APP"]
+      }
+    },
+    {
+      "id": "records-field:stamps:source:unknown-enum",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "source": "P16_UNSUPPORTED_VALUE"
+      }
+    },
+    {
+      "id": "records-field:stamps:source:empty",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "source": ""
+      }
+    },
+    {
+      "id": "records-field:stamps:rehearsal:repeated",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "rehearsal": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:stamps:rehearsal:boolean:\"\"",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "rehearsal": ""
+      }
+    },
+    {
+      "id": "records-field:stamps:rehearsal:boolean:\"yes\"",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "rehearsal": "yes"
+      }
+    },
+    {
+      "id": "records-field:stamps:rehearsal:boolean:\"1\"",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "rehearsal": "1"
+      }
+    },
+    {
+      "id": "records-field:stamps:rehearsal:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "rehearsal": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:stamps:rehearsal:boolean:\"null\"",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "rehearsal": "null"
+      }
+    },
+    {
+      "id": "records-field:stamps:includeRehearsal:repeated",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "includeRehearsal": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:stamps:includeRehearsal:boolean:\"\"",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "includeRehearsal": ""
+      }
+    },
+    {
+      "id": "records-field:stamps:includeRehearsal:boolean:\"yes\"",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "includeRehearsal": "yes"
+      }
+    },
+    {
+      "id": "records-field:stamps:includeRehearsal:boolean:\"1\"",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "includeRehearsal": "1"
+      }
+    },
+    {
+      "id": "records-field:stamps:includeRehearsal:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "includeRehearsal": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:stamps:includeRehearsal:boolean:\"null\"",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "includeRehearsal": "null"
+      }
+    },
+    {
+      "id": "records-field:stamps:cardId:repeated",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "cardId": ["synthetic-reference", "synthetic-reference"]
+      }
+    },
+    {
+      "id": "records-field:stamps:cardId:empty",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "cardId": ""
+      }
+    },
+    {
+      "id": "records-field:stamps:cardId:too-long",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "cardId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:stamps:excludeLost:repeated",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "excludeLost": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:stamps:excludeLost:boolean:\"\"",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "excludeLost": ""
+      }
+    },
+    {
+      "id": "records-field:stamps:excludeLost:boolean:\"yes\"",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "excludeLost": "yes"
+      }
+    },
+    {
+      "id": "records-field:stamps:excludeLost:boolean:\"1\"",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "excludeLost": "1"
+      }
+    },
+    {
+      "id": "records-field:stamps:excludeLost:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "excludeLost": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:stamps:excludeLost:boolean:\"null\"",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "excludeLost": "null"
+      }
+    },
+    {
+      "id": "records-field:stamps:unknown-key",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "p16Unexpected": "1"
+      }
+    },
+    {
+      "id": "records-field:stamps:limit:\"\"",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "limit": ""
+      }
+    },
+    {
+      "id": "records-field:stamps:limit:\"0\"",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "limit": "0"
+      }
+    },
+    {
+      "id": "records-field:stamps:limit:\"-1\"",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "limit": "-1"
+      }
+    },
+    {
+      "id": "records-field:stamps:limit:\"201\"",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "limit": "201"
+      }
+    },
+    {
+      "id": "records-field:stamps:limit:\"1.5\"",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "limit": "1.5"
+      }
+    },
+    {
+      "id": "records-field:stamps:limit:\"NaN\"",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "limit": "NaN"
+      }
+    },
+    {
+      "id": "records-field:stamps:limit:\"Infinity\"",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "limit": "Infinity"
+      }
+    },
+    {
+      "id": "records-field:stamps:limit:\"abc\"",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "limit": "abc"
+      }
+    },
+    {
+      "id": "records-field:stamps:limit:repeated",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "limit": ["1", "2"]
+      }
+    },
+    {
+      "id": "records-field:stamps:cursor:empty",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "cursor": ""
+      }
+    },
+    {
+      "id": "records-field:stamps:cursor:too-long",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "cursor": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:stamps:cursor:repeated",
+      "route": "records",
+      "kind": "stamps",
+      "query": {
+        "kind": "stamps",
+        "cursor": ["synthetic-cursor", "synthetic-cursor"]
+      }
+    },
+    {
+      "id": "records-field:redemptions:kind:repeated",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": ["redemptions", "redemptions"]
+      }
+    },
+    {
+      "id": "records-field:redemptions:from:repeated",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "from": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:redemptions:from:empty",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "from": ""
+      }
+    },
+    {
+      "id": "records-field:redemptions:from:malformed-format",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "from": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:redemptions:to:repeated",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "to": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:redemptions:to:empty",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "to": ""
+      }
+    },
+    {
+      "id": "records-field:redemptions:to:malformed-format",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "to": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:redemptions:asOf:repeated",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "asOf": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:redemptions:asOf:empty",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "asOf": ""
+      }
+    },
+    {
+      "id": "records-field:redemptions:asOf:malformed-format",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "asOf": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:redemptions:date:repeated",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "date": ["2026-10-17", "2026-10-17"]
+      }
+    },
+    {
+      "id": "records-field:redemptions:date:empty",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "date": ""
+      }
+    },
+    {
+      "id": "records-field:redemptions:date:malformed-format",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "date": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:redemptions:stationId:repeated",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "stationId": ["$STATION", "$STATION"]
+      }
+    },
+    {
+      "id": "records-field:redemptions:stationId:empty",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "stationId": ""
+      }
+    },
+    {
+      "id": "records-field:redemptions:stationId:too-long",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "stationId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:redemptions:personId:repeated",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "personId": ["$PERSON", "$PERSON"]
+      }
+    },
+    {
+      "id": "records-field:redemptions:personId:empty",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "personId": ""
+      }
+    },
+    {
+      "id": "records-field:redemptions:personId:too-long",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "personId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:redemptions:source:repeated",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "source": ["APP", "APP"]
+      }
+    },
+    {
+      "id": "records-field:redemptions:source:unknown-enum",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "source": "P16_UNSUPPORTED_VALUE"
+      }
+    },
+    {
+      "id": "records-field:redemptions:source:empty",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "source": ""
+      }
+    },
+    {
+      "id": "records-field:redemptions:rehearsal:repeated",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "rehearsal": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:redemptions:rehearsal:boolean:\"\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "rehearsal": ""
+      }
+    },
+    {
+      "id": "records-field:redemptions:rehearsal:boolean:\"yes\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "rehearsal": "yes"
+      }
+    },
+    {
+      "id": "records-field:redemptions:rehearsal:boolean:\"1\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "rehearsal": "1"
+      }
+    },
+    {
+      "id": "records-field:redemptions:rehearsal:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "rehearsal": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:redemptions:rehearsal:boolean:\"null\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "rehearsal": "null"
+      }
+    },
+    {
+      "id": "records-field:redemptions:includeRehearsal:repeated",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "includeRehearsal": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:redemptions:includeRehearsal:boolean:\"\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "includeRehearsal": ""
+      }
+    },
+    {
+      "id": "records-field:redemptions:includeRehearsal:boolean:\"yes\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "includeRehearsal": "yes"
+      }
+    },
+    {
+      "id": "records-field:redemptions:includeRehearsal:boolean:\"1\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "includeRehearsal": "1"
+      }
+    },
+    {
+      "id": "records-field:redemptions:includeRehearsal:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "includeRehearsal": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:redemptions:includeRehearsal:boolean:\"null\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "includeRehearsal": "null"
+      }
+    },
+    {
+      "id": "records-field:redemptions:voided:repeated",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "voided": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:redemptions:voided:boolean:\"\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "voided": ""
+      }
+    },
+    {
+      "id": "records-field:redemptions:voided:boolean:\"yes\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "voided": "yes"
+      }
+    },
+    {
+      "id": "records-field:redemptions:voided:boolean:\"1\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "voided": "1"
+      }
+    },
+    {
+      "id": "records-field:redemptions:voided:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "voided": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:redemptions:voided:boolean:\"null\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "voided": "null"
+      }
+    },
+    {
+      "id": "records-field:redemptions:giftTypeId:repeated",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "giftTypeId": ["$GIFT", "$GIFT"]
+      }
+    },
+    {
+      "id": "records-field:redemptions:giftTypeId:empty",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "giftTypeId": ""
+      }
+    },
+    {
+      "id": "records-field:redemptions:giftTypeId:too-long",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "giftTypeId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:redemptions:cardId:repeated",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "cardId": ["synthetic-reference", "synthetic-reference"]
+      }
+    },
+    {
+      "id": "records-field:redemptions:cardId:empty",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "cardId": ""
+      }
+    },
+    {
+      "id": "records-field:redemptions:cardId:too-long",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "cardId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:redemptions:flagged:repeated",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "flagged": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:redemptions:flagged:boolean:\"\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "flagged": ""
+      }
+    },
+    {
+      "id": "records-field:redemptions:flagged:boolean:\"yes\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "flagged": "yes"
+      }
+    },
+    {
+      "id": "records-field:redemptions:flagged:boolean:\"1\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "flagged": "1"
+      }
+    },
+    {
+      "id": "records-field:redemptions:flagged:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "flagged": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:redemptions:flagged:boolean:\"null\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "flagged": "null"
+      }
+    },
+    {
+      "id": "records-field:redemptions:unknown-key",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "p16Unexpected": "1"
+      }
+    },
+    {
+      "id": "records-field:redemptions:limit:\"\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "limit": ""
+      }
+    },
+    {
+      "id": "records-field:redemptions:limit:\"0\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "limit": "0"
+      }
+    },
+    {
+      "id": "records-field:redemptions:limit:\"-1\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "limit": "-1"
+      }
+    },
+    {
+      "id": "records-field:redemptions:limit:\"201\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "limit": "201"
+      }
+    },
+    {
+      "id": "records-field:redemptions:limit:\"1.5\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "limit": "1.5"
+      }
+    },
+    {
+      "id": "records-field:redemptions:limit:\"NaN\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "limit": "NaN"
+      }
+    },
+    {
+      "id": "records-field:redemptions:limit:\"Infinity\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "limit": "Infinity"
+      }
+    },
+    {
+      "id": "records-field:redemptions:limit:\"abc\"",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "limit": "abc"
+      }
+    },
+    {
+      "id": "records-field:redemptions:limit:repeated",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "limit": ["1", "2"]
+      }
+    },
+    {
+      "id": "records-field:redemptions:cursor:empty",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "cursor": ""
+      }
+    },
+    {
+      "id": "records-field:redemptions:cursor:too-long",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "cursor": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:redemptions:cursor:repeated",
+      "route": "records",
+      "kind": "redemptions",
+      "query": {
+        "kind": "redemptions",
+        "cursor": ["synthetic-cursor", "synthetic-cursor"]
+      }
+    },
+    {
+      "id": "records-field:incidents:kind:repeated",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": ["incidents", "incidents"]
+      }
+    },
+    {
+      "id": "records-field:incidents:from:repeated",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "from": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:incidents:from:empty",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "from": ""
+      }
+    },
+    {
+      "id": "records-field:incidents:from:malformed-format",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "from": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:incidents:to:repeated",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "to": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:incidents:to:empty",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "to": ""
+      }
+    },
+    {
+      "id": "records-field:incidents:to:malformed-format",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "to": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:incidents:asOf:repeated",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "asOf": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:incidents:asOf:empty",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "asOf": ""
+      }
+    },
+    {
+      "id": "records-field:incidents:asOf:malformed-format",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "asOf": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:incidents:date:repeated",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "date": ["2026-10-17", "2026-10-17"]
+      }
+    },
+    {
+      "id": "records-field:incidents:date:empty",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "date": ""
+      }
+    },
+    {
+      "id": "records-field:incidents:date:malformed-format",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "date": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:incidents:rehearsal:repeated",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "rehearsal": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:incidents:rehearsal:boolean:\"\"",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "rehearsal": ""
+      }
+    },
+    {
+      "id": "records-field:incidents:rehearsal:boolean:\"yes\"",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "rehearsal": "yes"
+      }
+    },
+    {
+      "id": "records-field:incidents:rehearsal:boolean:\"1\"",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "rehearsal": "1"
+      }
+    },
+    {
+      "id": "records-field:incidents:rehearsal:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "rehearsal": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:incidents:rehearsal:boolean:\"null\"",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "rehearsal": "null"
+      }
+    },
+    {
+      "id": "records-field:incidents:includeRehearsal:repeated",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "includeRehearsal": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:incidents:includeRehearsal:boolean:\"\"",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "includeRehearsal": ""
+      }
+    },
+    {
+      "id": "records-field:incidents:includeRehearsal:boolean:\"yes\"",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "includeRehearsal": "yes"
+      }
+    },
+    {
+      "id": "records-field:incidents:includeRehearsal:boolean:\"1\"",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "includeRehearsal": "1"
+      }
+    },
+    {
+      "id": "records-field:incidents:includeRehearsal:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "includeRehearsal": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:incidents:includeRehearsal:boolean:\"null\"",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "includeRehearsal": "null"
+      }
+    },
+    {
+      "id": "records-field:incidents:stationId:repeated",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "stationId": ["$STATION", "$STATION"]
+      }
+    },
+    {
+      "id": "records-field:incidents:stationId:empty",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "stationId": ""
+      }
+    },
+    {
+      "id": "records-field:incidents:stationId:too-long",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "stationId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:incidents:personId:repeated",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "personId": ["$PERSON", "$PERSON"]
+      }
+    },
+    {
+      "id": "records-field:incidents:personId:empty",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "personId": ""
+      }
+    },
+    {
+      "id": "records-field:incidents:personId:too-long",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "personId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:incidents:status:repeated",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "status": ["OPEN", "OPEN"]
+      }
+    },
+    {
+      "id": "records-field:incidents:status:unknown-enum",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "status": "P16_UNSUPPORTED_VALUE"
+      }
+    },
+    {
+      "id": "records-field:incidents:status:empty",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "status": ""
+      }
+    },
+    {
+      "id": "records-field:incidents:open:repeated",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "open": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:incidents:open:boolean:\"\"",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "open": ""
+      }
+    },
+    {
+      "id": "records-field:incidents:open:boolean:\"yes\"",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "open": "yes"
+      }
+    },
+    {
+      "id": "records-field:incidents:open:boolean:\"1\"",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "open": "1"
+      }
+    },
+    {
+      "id": "records-field:incidents:open:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "open": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:incidents:open:boolean:\"null\"",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "open": "null"
+      }
+    },
+    {
+      "id": "records-field:incidents:severity:repeated",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "severity": ["LOW", "LOW"]
+      }
+    },
+    {
+      "id": "records-field:incidents:severity:unknown-enum",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "severity": "P16_UNSUPPORTED_VALUE"
+      }
+    },
+    {
+      "id": "records-field:incidents:severity:empty",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "severity": ""
+      }
+    },
+    {
+      "id": "records-field:incidents:incidentType:repeated",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "incidentType": ["INJURY", "INJURY"]
+      }
+    },
+    {
+      "id": "records-field:incidents:incidentType:unknown-enum",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "incidentType": "P16_UNSUPPORTED_VALUE"
+      }
+    },
+    {
+      "id": "records-field:incidents:incidentType:empty",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "incidentType": ""
+      }
+    },
+    {
+      "id": "records-field:incidents:unknown-key",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "p16Unexpected": "1"
+      }
+    },
+    {
+      "id": "records-field:incidents:limit:\"\"",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "limit": ""
+      }
+    },
+    {
+      "id": "records-field:incidents:limit:\"0\"",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "limit": "0"
+      }
+    },
+    {
+      "id": "records-field:incidents:limit:\"-1\"",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "limit": "-1"
+      }
+    },
+    {
+      "id": "records-field:incidents:limit:\"201\"",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "limit": "201"
+      }
+    },
+    {
+      "id": "records-field:incidents:limit:\"1.5\"",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "limit": "1.5"
+      }
+    },
+    {
+      "id": "records-field:incidents:limit:\"NaN\"",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "limit": "NaN"
+      }
+    },
+    {
+      "id": "records-field:incidents:limit:\"Infinity\"",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "limit": "Infinity"
+      }
+    },
+    {
+      "id": "records-field:incidents:limit:\"abc\"",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "limit": "abc"
+      }
+    },
+    {
+      "id": "records-field:incidents:limit:repeated",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "limit": ["1", "2"]
+      }
+    },
+    {
+      "id": "records-field:incidents:cursor:empty",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "cursor": ""
+      }
+    },
+    {
+      "id": "records-field:incidents:cursor:too-long",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "cursor": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:incidents:cursor:repeated",
+      "route": "records",
+      "kind": "incidents",
+      "query": {
+        "kind": "incidents",
+        "cursor": ["synthetic-cursor", "synthetic-cursor"]
+      }
+    },
+    {
+      "id": "records-field:lost-person:kind:repeated",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": ["lost-person", "lost-person"]
+      }
+    },
+    {
+      "id": "records-field:lost-person:from:repeated",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "from": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:lost-person:from:empty",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "from": ""
+      }
+    },
+    {
+      "id": "records-field:lost-person:from:malformed-format",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "from": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:lost-person:to:repeated",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "to": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:lost-person:to:empty",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "to": ""
+      }
+    },
+    {
+      "id": "records-field:lost-person:to:malformed-format",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "to": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:lost-person:asOf:repeated",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "asOf": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:lost-person:asOf:empty",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "asOf": ""
+      }
+    },
+    {
+      "id": "records-field:lost-person:asOf:malformed-format",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "asOf": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:lost-person:date:repeated",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "date": ["2026-10-17", "2026-10-17"]
+      }
+    },
+    {
+      "id": "records-field:lost-person:date:empty",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "date": ""
+      }
+    },
+    {
+      "id": "records-field:lost-person:date:malformed-format",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "date": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:lost-person:rehearsal:repeated",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "rehearsal": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:lost-person:rehearsal:boolean:\"\"",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "rehearsal": ""
+      }
+    },
+    {
+      "id": "records-field:lost-person:rehearsal:boolean:\"yes\"",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "rehearsal": "yes"
+      }
+    },
+    {
+      "id": "records-field:lost-person:rehearsal:boolean:\"1\"",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "rehearsal": "1"
+      }
+    },
+    {
+      "id": "records-field:lost-person:rehearsal:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "rehearsal": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:lost-person:rehearsal:boolean:\"null\"",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "rehearsal": "null"
+      }
+    },
+    {
+      "id": "records-field:lost-person:includeRehearsal:repeated",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "includeRehearsal": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:lost-person:includeRehearsal:boolean:\"\"",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "includeRehearsal": ""
+      }
+    },
+    {
+      "id": "records-field:lost-person:includeRehearsal:boolean:\"yes\"",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "includeRehearsal": "yes"
+      }
+    },
+    {
+      "id": "records-field:lost-person:includeRehearsal:boolean:\"1\"",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "includeRehearsal": "1"
+      }
+    },
+    {
+      "id": "records-field:lost-person:includeRehearsal:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "includeRehearsal": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:lost-person:includeRehearsal:boolean:\"null\"",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "includeRehearsal": "null"
+      }
+    },
+    {
+      "id": "records-field:lost-person:stationId:repeated",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "stationId": ["$STATION", "$STATION"]
+      }
+    },
+    {
+      "id": "records-field:lost-person:stationId:empty",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "stationId": ""
+      }
+    },
+    {
+      "id": "records-field:lost-person:stationId:too-long",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "stationId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:lost-person:personId:repeated",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "personId": ["$PERSON", "$PERSON"]
+      }
+    },
+    {
+      "id": "records-field:lost-person:personId:empty",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "personId": ""
+      }
+    },
+    {
+      "id": "records-field:lost-person:personId:too-long",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "personId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:lost-person:status:repeated",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "status": ["ACTIVE", "ACTIVE"]
+      }
+    },
+    {
+      "id": "records-field:lost-person:status:unknown-enum",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "status": "P16_UNSUPPORTED_VALUE"
+      }
+    },
+    {
+      "id": "records-field:lost-person:status:empty",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "status": ""
+      }
+    },
+    {
+      "id": "records-field:lost-person:unknown-key",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "p16Unexpected": "1"
+      }
+    },
+    {
+      "id": "records-field:lost-person:limit:\"\"",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "limit": ""
+      }
+    },
+    {
+      "id": "records-field:lost-person:limit:\"0\"",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "limit": "0"
+      }
+    },
+    {
+      "id": "records-field:lost-person:limit:\"-1\"",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "limit": "-1"
+      }
+    },
+    {
+      "id": "records-field:lost-person:limit:\"201\"",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "limit": "201"
+      }
+    },
+    {
+      "id": "records-field:lost-person:limit:\"1.5\"",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "limit": "1.5"
+      }
+    },
+    {
+      "id": "records-field:lost-person:limit:\"NaN\"",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "limit": "NaN"
+      }
+    },
+    {
+      "id": "records-field:lost-person:limit:\"Infinity\"",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "limit": "Infinity"
+      }
+    },
+    {
+      "id": "records-field:lost-person:limit:\"abc\"",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "limit": "abc"
+      }
+    },
+    {
+      "id": "records-field:lost-person:limit:repeated",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "limit": ["1", "2"]
+      }
+    },
+    {
+      "id": "records-field:lost-person:cursor:empty",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "cursor": ""
+      }
+    },
+    {
+      "id": "records-field:lost-person:cursor:too-long",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "cursor": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:lost-person:cursor:repeated",
+      "route": "records",
+      "kind": "lost-person",
+      "query": {
+        "kind": "lost-person",
+        "cursor": ["synthetic-cursor", "synthetic-cursor"]
+      }
+    },
+    {
+      "id": "records-field:lost-found:kind:repeated",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": ["lost-found", "lost-found"]
+      }
+    },
+    {
+      "id": "records-field:lost-found:from:repeated",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "from": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:lost-found:from:empty",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "from": ""
+      }
+    },
+    {
+      "id": "records-field:lost-found:from:malformed-format",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "from": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:lost-found:to:repeated",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "to": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:lost-found:to:empty",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "to": ""
+      }
+    },
+    {
+      "id": "records-field:lost-found:to:malformed-format",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "to": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:lost-found:asOf:repeated",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "asOf": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:lost-found:asOf:empty",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "asOf": ""
+      }
+    },
+    {
+      "id": "records-field:lost-found:asOf:malformed-format",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "asOf": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:lost-found:date:repeated",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "date": ["2026-10-17", "2026-10-17"]
+      }
+    },
+    {
+      "id": "records-field:lost-found:date:empty",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "date": ""
+      }
+    },
+    {
+      "id": "records-field:lost-found:date:malformed-format",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "date": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:lost-found:rehearsal:repeated",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "rehearsal": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:lost-found:rehearsal:boolean:\"\"",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "rehearsal": ""
+      }
+    },
+    {
+      "id": "records-field:lost-found:rehearsal:boolean:\"yes\"",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "rehearsal": "yes"
+      }
+    },
+    {
+      "id": "records-field:lost-found:rehearsal:boolean:\"1\"",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "rehearsal": "1"
+      }
+    },
+    {
+      "id": "records-field:lost-found:rehearsal:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "rehearsal": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:lost-found:rehearsal:boolean:\"null\"",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "rehearsal": "null"
+      }
+    },
+    {
+      "id": "records-field:lost-found:includeRehearsal:repeated",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "includeRehearsal": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:lost-found:includeRehearsal:boolean:\"\"",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "includeRehearsal": ""
+      }
+    },
+    {
+      "id": "records-field:lost-found:includeRehearsal:boolean:\"yes\"",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "includeRehearsal": "yes"
+      }
+    },
+    {
+      "id": "records-field:lost-found:includeRehearsal:boolean:\"1\"",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "includeRehearsal": "1"
+      }
+    },
+    {
+      "id": "records-field:lost-found:includeRehearsal:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "includeRehearsal": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:lost-found:includeRehearsal:boolean:\"null\"",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "includeRehearsal": "null"
+      }
+    },
+    {
+      "id": "records-field:lost-found:stationId:repeated",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "stationId": ["$STATION", "$STATION"]
+      }
+    },
+    {
+      "id": "records-field:lost-found:stationId:empty",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "stationId": ""
+      }
+    },
+    {
+      "id": "records-field:lost-found:stationId:too-long",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "stationId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:lost-found:personId:repeated",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "personId": ["$PERSON", "$PERSON"]
+      }
+    },
+    {
+      "id": "records-field:lost-found:personId:empty",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "personId": ""
+      }
+    },
+    {
+      "id": "records-field:lost-found:personId:too-long",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "personId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:lost-found:status:repeated",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "status": ["HELD", "HELD"]
+      }
+    },
+    {
+      "id": "records-field:lost-found:status:unknown-enum",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "status": "P16_UNSUPPORTED_VALUE"
+      }
+    },
+    {
+      "id": "records-field:lost-found:status:empty",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "status": ""
+      }
+    },
+    {
+      "id": "records-field:lost-found:unknown-key",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "p16Unexpected": "1"
+      }
+    },
+    {
+      "id": "records-field:lost-found:limit:\"\"",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "limit": ""
+      }
+    },
+    {
+      "id": "records-field:lost-found:limit:\"0\"",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "limit": "0"
+      }
+    },
+    {
+      "id": "records-field:lost-found:limit:\"-1\"",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "limit": "-1"
+      }
+    },
+    {
+      "id": "records-field:lost-found:limit:\"201\"",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "limit": "201"
+      }
+    },
+    {
+      "id": "records-field:lost-found:limit:\"1.5\"",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "limit": "1.5"
+      }
+    },
+    {
+      "id": "records-field:lost-found:limit:\"NaN\"",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "limit": "NaN"
+      }
+    },
+    {
+      "id": "records-field:lost-found:limit:\"Infinity\"",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "limit": "Infinity"
+      }
+    },
+    {
+      "id": "records-field:lost-found:limit:\"abc\"",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "limit": "abc"
+      }
+    },
+    {
+      "id": "records-field:lost-found:limit:repeated",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "limit": ["1", "2"]
+      }
+    },
+    {
+      "id": "records-field:lost-found:cursor:empty",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "cursor": ""
+      }
+    },
+    {
+      "id": "records-field:lost-found:cursor:too-long",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "cursor": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:lost-found:cursor:repeated",
+      "route": "records",
+      "kind": "lost-found",
+      "query": {
+        "kind": "lost-found",
+        "cursor": ["synthetic-cursor", "synthetic-cursor"]
+      }
+    },
+    {
+      "id": "records-field:announcements:kind:repeated",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": ["announcements", "announcements"]
+      }
+    },
+    {
+      "id": "records-field:announcements:from:repeated",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "from": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:announcements:from:empty",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "from": ""
+      }
+    },
+    {
+      "id": "records-field:announcements:from:malformed-format",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "from": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:announcements:to:repeated",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "to": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:announcements:to:empty",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "to": ""
+      }
+    },
+    {
+      "id": "records-field:announcements:to:malformed-format",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "to": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:announcements:asOf:repeated",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "asOf": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:announcements:asOf:empty",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "asOf": ""
+      }
+    },
+    {
+      "id": "records-field:announcements:asOf:malformed-format",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "asOf": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:announcements:date:repeated",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "date": ["2026-10-17", "2026-10-17"]
+      }
+    },
+    {
+      "id": "records-field:announcements:date:empty",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "date": ""
+      }
+    },
+    {
+      "id": "records-field:announcements:date:malformed-format",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "date": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:announcements:stationId:repeated",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "stationId": ["$STATION", "$STATION"]
+      }
+    },
+    {
+      "id": "records-field:announcements:stationId:empty",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "stationId": ""
+      }
+    },
+    {
+      "id": "records-field:announcements:stationId:too-long",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "stationId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:announcements:eventDayId:repeated",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "eventDayId": ["synthetic-reference", "synthetic-reference"]
+      }
+    },
+    {
+      "id": "records-field:announcements:eventDayId:empty",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "eventDayId": ""
+      }
+    },
+    {
+      "id": "records-field:announcements:eventDayId:too-long",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "eventDayId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:announcements:personId:repeated",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "personId": ["$PERSON", "$PERSON"]
+      }
+    },
+    {
+      "id": "records-field:announcements:personId:empty",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "personId": ""
+      }
+    },
+    {
+      "id": "records-field:announcements:personId:too-long",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "personId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:announcements:priority:repeated",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "priority": ["INFO", "INFO"]
+      }
+    },
+    {
+      "id": "records-field:announcements:priority:unknown-enum",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "priority": "P16_UNSUPPORTED_VALUE"
+      }
+    },
+    {
+      "id": "records-field:announcements:priority:empty",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "priority": ""
+      }
+    },
+    {
+      "id": "records-field:announcements:unknown-key",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "p16Unexpected": "1"
+      }
+    },
+    {
+      "id": "records-field:announcements:limit:\"\"",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "limit": ""
+      }
+    },
+    {
+      "id": "records-field:announcements:limit:\"0\"",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "limit": "0"
+      }
+    },
+    {
+      "id": "records-field:announcements:limit:\"-1\"",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "limit": "-1"
+      }
+    },
+    {
+      "id": "records-field:announcements:limit:\"201\"",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "limit": "201"
+      }
+    },
+    {
+      "id": "records-field:announcements:limit:\"1.5\"",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "limit": "1.5"
+      }
+    },
+    {
+      "id": "records-field:announcements:limit:\"NaN\"",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "limit": "NaN"
+      }
+    },
+    {
+      "id": "records-field:announcements:limit:\"Infinity\"",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "limit": "Infinity"
+      }
+    },
+    {
+      "id": "records-field:announcements:limit:\"abc\"",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "limit": "abc"
+      }
+    },
+    {
+      "id": "records-field:announcements:limit:repeated",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "limit": ["1", "2"]
+      }
+    },
+    {
+      "id": "records-field:announcements:cursor:empty",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "cursor": ""
+      }
+    },
+    {
+      "id": "records-field:announcements:cursor:too-long",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "cursor": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:announcements:cursor:repeated",
+      "route": "records",
+      "kind": "announcements",
+      "query": {
+        "kind": "announcements",
+        "cursor": ["synthetic-cursor", "synthetic-cursor"]
+      }
+    },
+    {
+      "id": "records-field:assignments:kind:repeated",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": ["assignments", "assignments"]
+      }
+    },
+    {
+      "id": "records-field:assignments:stationId:repeated",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "stationId": ["$STATION", "$STATION"]
+      }
+    },
+    {
+      "id": "records-field:assignments:stationId:empty",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "stationId": ""
+      }
+    },
+    {
+      "id": "records-field:assignments:stationId:too-long",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "stationId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:assignments:personId:repeated",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "personId": ["$PERSON", "$PERSON"]
+      }
+    },
+    {
+      "id": "records-field:assignments:personId:empty",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "personId": ""
+      }
+    },
+    {
+      "id": "records-field:assignments:personId:too-long",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "personId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:assignments:eventDayId:repeated",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "eventDayId": ["synthetic-reference", "synthetic-reference"]
+      }
+    },
+    {
+      "id": "records-field:assignments:eventDayId:empty",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "eventDayId": ""
+      }
+    },
+    {
+      "id": "records-field:assignments:eventDayId:too-long",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "eventDayId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:assignments:shiftId:repeated",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "shiftId": ["synthetic-reference", "synthetic-reference"]
+      }
+    },
+    {
+      "id": "records-field:assignments:shiftId:empty",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "shiftId": ""
+      }
+    },
+    {
+      "id": "records-field:assignments:shiftId:too-long",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "shiftId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:assignments:date:repeated",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "date": ["2026-10-17", "2026-10-17"]
+      }
+    },
+    {
+      "id": "records-field:assignments:date:empty",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "date": ""
+      }
+    },
+    {
+      "id": "records-field:assignments:date:malformed-format",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "date": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:assignments:asOf:repeated",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "asOf": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:assignments:asOf:empty",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "asOf": ""
+      }
+    },
+    {
+      "id": "records-field:assignments:asOf:malformed-format",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "asOf": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:assignments:running:repeated",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "running": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:assignments:running:boolean:\"\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "running": ""
+      }
+    },
+    {
+      "id": "records-field:assignments:running:boolean:\"yes\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "running": "yes"
+      }
+    },
+    {
+      "id": "records-field:assignments:running:boolean:\"1\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "running": "1"
+      }
+    },
+    {
+      "id": "records-field:assignments:running:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "running": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:assignments:running:boolean:\"null\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "running": "null"
+      }
+    },
+    {
+      "id": "records-field:assignments:checkedIn:repeated",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "checkedIn": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:assignments:checkedIn:boolean:\"\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "checkedIn": ""
+      }
+    },
+    {
+      "id": "records-field:assignments:checkedIn:boolean:\"yes\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "checkedIn": "yes"
+      }
+    },
+    {
+      "id": "records-field:assignments:checkedIn:boolean:\"1\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "checkedIn": "1"
+      }
+    },
+    {
+      "id": "records-field:assignments:checkedIn:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "checkedIn": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:assignments:checkedIn:boolean:\"null\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "checkedIn": "null"
+      }
+    },
+    {
+      "id": "records-field:assignments:checkedOut:repeated",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "checkedOut": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:assignments:checkedOut:boolean:\"\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "checkedOut": ""
+      }
+    },
+    {
+      "id": "records-field:assignments:checkedOut:boolean:\"yes\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "checkedOut": "yes"
+      }
+    },
+    {
+      "id": "records-field:assignments:checkedOut:boolean:\"1\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "checkedOut": "1"
+      }
+    },
+    {
+      "id": "records-field:assignments:checkedOut:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "checkedOut": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:assignments:checkedOut:boolean:\"null\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "checkedOut": "null"
+      }
+    },
+    {
+      "id": "records-field:assignments:coverageGap:repeated",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "coverageGap": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:assignments:coverageGap:boolean:\"\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "coverageGap": ""
+      }
+    },
+    {
+      "id": "records-field:assignments:coverageGap:boolean:\"yes\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "coverageGap": "yes"
+      }
+    },
+    {
+      "id": "records-field:assignments:coverageGap:boolean:\"1\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "coverageGap": "1"
+      }
+    },
+    {
+      "id": "records-field:assignments:coverageGap:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "coverageGap": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:assignments:coverageGap:boolean:\"null\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "coverageGap": "null"
+      }
+    },
+    {
+      "id": "records-field:assignments:unknown-key",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "p16Unexpected": "1"
+      }
+    },
+    {
+      "id": "records-field:assignments:limit:\"\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "limit": ""
+      }
+    },
+    {
+      "id": "records-field:assignments:limit:\"0\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "limit": "0"
+      }
+    },
+    {
+      "id": "records-field:assignments:limit:\"-1\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "limit": "-1"
+      }
+    },
+    {
+      "id": "records-field:assignments:limit:\"201\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "limit": "201"
+      }
+    },
+    {
+      "id": "records-field:assignments:limit:\"1.5\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "limit": "1.5"
+      }
+    },
+    {
+      "id": "records-field:assignments:limit:\"NaN\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "limit": "NaN"
+      }
+    },
+    {
+      "id": "records-field:assignments:limit:\"Infinity\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "limit": "Infinity"
+      }
+    },
+    {
+      "id": "records-field:assignments:limit:\"abc\"",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "limit": "abc"
+      }
+    },
+    {
+      "id": "records-field:assignments:limit:repeated",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "limit": ["1", "2"]
+      }
+    },
+    {
+      "id": "records-field:assignments:cursor:empty",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "cursor": ""
+      }
+    },
+    {
+      "id": "records-field:assignments:cursor:too-long",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "cursor": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:assignments:cursor:repeated",
+      "route": "records",
+      "kind": "assignments",
+      "query": {
+        "kind": "assignments",
+        "cursor": ["synthetic-cursor", "synthetic-cursor"]
+      }
+    },
+    {
+      "id": "records-field:imports:kind:repeated",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": ["imports", "imports"]
+      }
+    },
+    {
+      "id": "records-field:imports:from:repeated",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "from": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:imports:from:empty",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "from": ""
+      }
+    },
+    {
+      "id": "records-field:imports:from:malformed-format",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "from": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:imports:to:repeated",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "to": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:imports:to:empty",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "to": ""
+      }
+    },
+    {
+      "id": "records-field:imports:to:malformed-format",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "to": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:imports:asOf:repeated",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "asOf": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:imports:asOf:empty",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "asOf": ""
+      }
+    },
+    {
+      "id": "records-field:imports:asOf:malformed-format",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "asOf": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:imports:date:repeated",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "date": ["2026-10-17", "2026-10-17"]
+      }
+    },
+    {
+      "id": "records-field:imports:date:empty",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "date": ""
+      }
+    },
+    {
+      "id": "records-field:imports:date:malformed-format",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "date": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:imports:personId:repeated",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "personId": ["$PERSON", "$PERSON"]
+      }
+    },
+    {
+      "id": "records-field:imports:personId:empty",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "personId": ""
+      }
+    },
+    {
+      "id": "records-field:imports:personId:too-long",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "personId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:imports:fallbackWindowId:repeated",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "fallbackWindowId": ["synthetic-reference", "synthetic-reference"]
+      }
+    },
+    {
+      "id": "records-field:imports:fallbackWindowId:empty",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "fallbackWindowId": ""
+      }
+    },
+    {
+      "id": "records-field:imports:fallbackWindowId:too-long",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "fallbackWindowId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:imports:importType:repeated",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "importType": ["REGISTRATION", "REGISTRATION"]
+      }
+    },
+    {
+      "id": "records-field:imports:importType:unknown-enum",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "importType": "P16_UNSUPPORTED_VALUE"
+      }
+    },
+    {
+      "id": "records-field:imports:importType:empty",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "importType": ""
+      }
+    },
+    {
+      "id": "records-field:imports:unknown-key",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "p16Unexpected": "1"
+      }
+    },
+    {
+      "id": "records-field:imports:limit:\"\"",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "limit": ""
+      }
+    },
+    {
+      "id": "records-field:imports:limit:\"0\"",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "limit": "0"
+      }
+    },
+    {
+      "id": "records-field:imports:limit:\"-1\"",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "limit": "-1"
+      }
+    },
+    {
+      "id": "records-field:imports:limit:\"201\"",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "limit": "201"
+      }
+    },
+    {
+      "id": "records-field:imports:limit:\"1.5\"",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "limit": "1.5"
+      }
+    },
+    {
+      "id": "records-field:imports:limit:\"NaN\"",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "limit": "NaN"
+      }
+    },
+    {
+      "id": "records-field:imports:limit:\"Infinity\"",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "limit": "Infinity"
+      }
+    },
+    {
+      "id": "records-field:imports:limit:\"abc\"",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "limit": "abc"
+      }
+    },
+    {
+      "id": "records-field:imports:limit:repeated",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "limit": ["1", "2"]
+      }
+    },
+    {
+      "id": "records-field:imports:cursor:empty",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "cursor": ""
+      }
+    },
+    {
+      "id": "records-field:imports:cursor:too-long",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "cursor": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:imports:cursor:repeated",
+      "route": "records",
+      "kind": "imports",
+      "query": {
+        "kind": "imports",
+        "cursor": ["synthetic-cursor", "synthetic-cursor"]
+      }
+    },
+    {
+      "id": "records-field:fallback:kind:repeated",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": ["fallback", "fallback"]
+      }
+    },
+    {
+      "id": "records-field:fallback:from:repeated",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "from": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:fallback:from:empty",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "from": ""
+      }
+    },
+    {
+      "id": "records-field:fallback:from:malformed-format",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "from": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:fallback:to:repeated",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "to": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:fallback:to:empty",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "to": ""
+      }
+    },
+    {
+      "id": "records-field:fallback:to:malformed-format",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "to": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:fallback:asOf:repeated",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "asOf": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:fallback:asOf:empty",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "asOf": ""
+      }
+    },
+    {
+      "id": "records-field:fallback:asOf:malformed-format",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "asOf": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:fallback:date:repeated",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "date": ["2026-10-17", "2026-10-17"]
+      }
+    },
+    {
+      "id": "records-field:fallback:date:empty",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "date": ""
+      }
+    },
+    {
+      "id": "records-field:fallback:date:malformed-format",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "date": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:fallback:rehearsal:repeated",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "rehearsal": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:fallback:rehearsal:boolean:\"\"",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "rehearsal": ""
+      }
+    },
+    {
+      "id": "records-field:fallback:rehearsal:boolean:\"yes\"",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "rehearsal": "yes"
+      }
+    },
+    {
+      "id": "records-field:fallback:rehearsal:boolean:\"1\"",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "rehearsal": "1"
+      }
+    },
+    {
+      "id": "records-field:fallback:rehearsal:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "rehearsal": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:fallback:rehearsal:boolean:\"null\"",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "rehearsal": "null"
+      }
+    },
+    {
+      "id": "records-field:fallback:includeRehearsal:repeated",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "includeRehearsal": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:fallback:includeRehearsal:boolean:\"\"",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "includeRehearsal": ""
+      }
+    },
+    {
+      "id": "records-field:fallback:includeRehearsal:boolean:\"yes\"",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "includeRehearsal": "yes"
+      }
+    },
+    {
+      "id": "records-field:fallback:includeRehearsal:boolean:\"1\"",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "includeRehearsal": "1"
+      }
+    },
+    {
+      "id": "records-field:fallback:includeRehearsal:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "includeRehearsal": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:fallback:includeRehearsal:boolean:\"null\"",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "includeRehearsal": "null"
+      }
+    },
+    {
+      "id": "records-field:fallback:stationId:repeated",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "stationId": ["$STATION", "$STATION"]
+      }
+    },
+    {
+      "id": "records-field:fallback:stationId:empty",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "stationId": ""
+      }
+    },
+    {
+      "id": "records-field:fallback:stationId:too-long",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "stationId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:fallback:open:repeated",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "open": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:fallback:open:boolean:\"\"",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "open": ""
+      }
+    },
+    {
+      "id": "records-field:fallback:open:boolean:\"yes\"",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "open": "yes"
+      }
+    },
+    {
+      "id": "records-field:fallback:open:boolean:\"1\"",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "open": "1"
+      }
+    },
+    {
+      "id": "records-field:fallback:open:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "open": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:fallback:open:boolean:\"null\"",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "open": "null"
+      }
+    },
+    {
+      "id": "records-field:fallback:unknown-key",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "p16Unexpected": "1"
+      }
+    },
+    {
+      "id": "records-field:fallback:limit:\"\"",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "limit": ""
+      }
+    },
+    {
+      "id": "records-field:fallback:limit:\"0\"",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "limit": "0"
+      }
+    },
+    {
+      "id": "records-field:fallback:limit:\"-1\"",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "limit": "-1"
+      }
+    },
+    {
+      "id": "records-field:fallback:limit:\"201\"",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "limit": "201"
+      }
+    },
+    {
+      "id": "records-field:fallback:limit:\"1.5\"",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "limit": "1.5"
+      }
+    },
+    {
+      "id": "records-field:fallback:limit:\"NaN\"",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "limit": "NaN"
+      }
+    },
+    {
+      "id": "records-field:fallback:limit:\"Infinity\"",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "limit": "Infinity"
+      }
+    },
+    {
+      "id": "records-field:fallback:limit:\"abc\"",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "limit": "abc"
+      }
+    },
+    {
+      "id": "records-field:fallback:limit:repeated",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "limit": ["1", "2"]
+      }
+    },
+    {
+      "id": "records-field:fallback:cursor:empty",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "cursor": ""
+      }
+    },
+    {
+      "id": "records-field:fallback:cursor:too-long",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "cursor": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:fallback:cursor:repeated",
+      "route": "records",
+      "kind": "fallback",
+      "query": {
+        "kind": "fallback",
+        "cursor": ["synthetic-cursor", "synthetic-cursor"]
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:kind:repeated",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": ["gift-ledger", "gift-ledger"],
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:kind:missing",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:kind:unknown-enum",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "P16_UNSUPPORTED_VALUE",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:kind:empty",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:giftTypeId:repeated",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": ["$GIFT", "$GIFT"],
+        "rehearsal": "false"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:giftTypeId:missing",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "rehearsal": "false"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:giftTypeId:empty",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "",
+        "rehearsal": "false"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:giftTypeId:too-long",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "rehearsal": "false"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:rehearsal:repeated",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": ["false", "false"]
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:rehearsal:missing",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:rehearsal:boolean:\"\"",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": ""
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:rehearsal:boolean:\"yes\"",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "yes"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:rehearsal:boolean:\"1\"",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "1"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:rehearsal:boolean:\"TRUE\"",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "TRUE"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:rehearsal:boolean:\"null\"",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "null"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:from:repeated",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false",
+        "from": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:from:empty",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false",
+        "from": ""
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:from:malformed-format",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false",
+        "from": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:to:repeated",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false",
+        "to": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:to:empty",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false",
+        "to": ""
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:to:malformed-format",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false",
+        "to": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:asOf:repeated",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false",
+        "asOf": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:asOf:empty",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false",
+        "asOf": ""
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:asOf:malformed-format",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false",
+        "asOf": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:date:repeated",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false",
+        "date": ["2026-10-17", "2026-10-17"]
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:date:empty",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false",
+        "date": ""
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:date:malformed-format",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false",
+        "date": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:unknown-key",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false",
+        "p16Unexpected": "1"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:limit:\"\"",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false",
+        "limit": ""
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:limit:\"0\"",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false",
+        "limit": "0"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:limit:\"-1\"",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false",
+        "limit": "-1"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:limit:\"201\"",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false",
+        "limit": "201"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:limit:\"1.5\"",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false",
+        "limit": "1.5"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:limit:\"NaN\"",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false",
+        "limit": "NaN"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:limit:\"Infinity\"",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false",
+        "limit": "Infinity"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:limit:\"abc\"",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false",
+        "limit": "abc"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:limit:repeated",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false",
+        "limit": ["1", "2"]
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:cursor:empty",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false",
+        "cursor": ""
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:cursor:too-long",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false",
+        "cursor": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:gift-ledger:cursor:repeated",
+      "route": "records",
+      "kind": "gift-ledger",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false",
+        "cursor": ["synthetic-cursor", "synthetic-cursor"]
+      }
+    },
+    {
+      "id": "records-field:audit:kind:repeated",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": ["audit", "audit"]
+      }
+    },
+    {
+      "id": "records-field:audit:from:repeated",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "from": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:audit:from:empty",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "from": ""
+      }
+    },
+    {
+      "id": "records-field:audit:from:malformed-format",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "from": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:audit:to:repeated",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "to": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:audit:to:empty",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "to": ""
+      }
+    },
+    {
+      "id": "records-field:audit:to:malformed-format",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "to": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:audit:asOf:repeated",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "asOf": ["$NOW", "$NOW"]
+      }
+    },
+    {
+      "id": "records-field:audit:asOf:empty",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "asOf": ""
+      }
+    },
+    {
+      "id": "records-field:audit:asOf:malformed-format",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "asOf": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:audit:date:repeated",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "date": ["2026-10-17", "2026-10-17"]
+      }
+    },
+    {
+      "id": "records-field:audit:date:empty",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "date": ""
+      }
+    },
+    {
+      "id": "records-field:audit:date:malformed-format",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "date": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:audit:personId:repeated",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "personId": ["$PERSON", "$PERSON"]
+      }
+    },
+    {
+      "id": "records-field:audit:personId:empty",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "personId": ""
+      }
+    },
+    {
+      "id": "records-field:audit:personId:too-long",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "personId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:audit:action:repeated",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "action": ["synthetic-reference", "synthetic-reference"]
+      }
+    },
+    {
+      "id": "records-field:audit:action:empty",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "action": ""
+      }
+    },
+    {
+      "id": "records-field:audit:action:too-long",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "action": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:audit:entityType:repeated",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "entityType": ["synthetic-reference", "synthetic-reference"]
+      }
+    },
+    {
+      "id": "records-field:audit:entityType:empty",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "entityType": ""
+      }
+    },
+    {
+      "id": "records-field:audit:entityType:too-long",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "entityType": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:audit:entityId:repeated",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "entityId": ["synthetic-reference", "synthetic-reference"]
+      }
+    },
+    {
+      "id": "records-field:audit:entityId:empty",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "entityId": ""
+      }
+    },
+    {
+      "id": "records-field:audit:entityId:too-long",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "entityId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:audit:unknown-key",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "p16Unexpected": "1"
+      }
+    },
+    {
+      "id": "records-field:audit:limit:\"\"",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "limit": ""
+      }
+    },
+    {
+      "id": "records-field:audit:limit:\"0\"",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "limit": "0"
+      }
+    },
+    {
+      "id": "records-field:audit:limit:\"-1\"",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "limit": "-1"
+      }
+    },
+    {
+      "id": "records-field:audit:limit:\"201\"",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "limit": "201"
+      }
+    },
+    {
+      "id": "records-field:audit:limit:\"1.5\"",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "limit": "1.5"
+      }
+    },
+    {
+      "id": "records-field:audit:limit:\"NaN\"",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "limit": "NaN"
+      }
+    },
+    {
+      "id": "records-field:audit:limit:\"Infinity\"",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "limit": "Infinity"
+      }
+    },
+    {
+      "id": "records-field:audit:limit:\"abc\"",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "limit": "abc"
+      }
+    },
+    {
+      "id": "records-field:audit:limit:repeated",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "limit": ["1", "2"]
+      }
+    },
+    {
+      "id": "records-field:audit:cursor:empty",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "cursor": ""
+      }
+    },
+    {
+      "id": "records-field:audit:cursor:too-long",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "cursor": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:audit:cursor:repeated",
+      "route": "records",
+      "kind": "audit",
+      "query": {
+        "kind": "audit",
+        "cursor": ["synthetic-cursor", "synthetic-cursor"]
+      }
+    },
+    {
+      "id": "records-field:people:kind:repeated",
+      "route": "records",
+      "kind": "people",
+      "query": {
+        "kind": ["people", "people"]
+      }
+    },
+    {
+      "id": "records-field:people:status:repeated",
+      "route": "records",
+      "kind": "people",
+      "query": {
+        "kind": "people",
+        "status": ["INVITED", "INVITED"]
+      }
+    },
+    {
+      "id": "records-field:people:status:unknown-enum",
+      "route": "records",
+      "kind": "people",
+      "query": {
+        "kind": "people",
+        "status": "P16_UNSUPPORTED_VALUE"
+      }
+    },
+    {
+      "id": "records-field:people:status:empty",
+      "route": "records",
+      "kind": "people",
+      "query": {
+        "kind": "people",
+        "status": ""
+      }
+    },
+    {
+      "id": "records-field:people:personId:repeated",
+      "route": "records",
+      "kind": "people",
+      "query": {
+        "kind": "people",
+        "personId": ["$PERSON", "$PERSON"]
+      }
+    },
+    {
+      "id": "records-field:people:personId:empty",
+      "route": "records",
+      "kind": "people",
+      "query": {
+        "kind": "people",
+        "personId": ""
+      }
+    },
+    {
+      "id": "records-field:people:personId:too-long",
+      "route": "records",
+      "kind": "people",
+      "query": {
+        "kind": "people",
+        "personId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:people:query:repeated",
+      "route": "records",
+      "kind": "people",
+      "query": {
+        "kind": "people",
+        "query": ["synthetic-reference", "synthetic-reference"]
+      }
+    },
+    {
+      "id": "records-field:people:query:too-long",
+      "route": "records",
+      "kind": "people",
+      "query": {
+        "kind": "people",
+        "query": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:people:unknown-key",
+      "route": "records",
+      "kind": "people",
+      "query": {
+        "kind": "people",
+        "p16Unexpected": "1"
+      }
+    },
+    {
+      "id": "records-field:people:limit:\"\"",
+      "route": "records",
+      "kind": "people",
+      "query": {
+        "kind": "people",
+        "limit": ""
+      }
+    },
+    {
+      "id": "records-field:people:limit:\"0\"",
+      "route": "records",
+      "kind": "people",
+      "query": {
+        "kind": "people",
+        "limit": "0"
+      }
+    },
+    {
+      "id": "records-field:people:limit:\"-1\"",
+      "route": "records",
+      "kind": "people",
+      "query": {
+        "kind": "people",
+        "limit": "-1"
+      }
+    },
+    {
+      "id": "records-field:people:limit:\"201\"",
+      "route": "records",
+      "kind": "people",
+      "query": {
+        "kind": "people",
+        "limit": "201"
+      }
+    },
+    {
+      "id": "records-field:people:limit:\"1.5\"",
+      "route": "records",
+      "kind": "people",
+      "query": {
+        "kind": "people",
+        "limit": "1.5"
+      }
+    },
+    {
+      "id": "records-field:people:limit:\"NaN\"",
+      "route": "records",
+      "kind": "people",
+      "query": {
+        "kind": "people",
+        "limit": "NaN"
+      }
+    },
+    {
+      "id": "records-field:people:limit:\"Infinity\"",
+      "route": "records",
+      "kind": "people",
+      "query": {
+        "kind": "people",
+        "limit": "Infinity"
+      }
+    },
+    {
+      "id": "records-field:people:limit:\"abc\"",
+      "route": "records",
+      "kind": "people",
+      "query": {
+        "kind": "people",
+        "limit": "abc"
+      }
+    },
+    {
+      "id": "records-field:people:limit:repeated",
+      "route": "records",
+      "kind": "people",
+      "query": {
+        "kind": "people",
+        "limit": ["1", "2"]
+      }
+    },
+    {
+      "id": "records-field:people:cursor:empty",
+      "route": "records",
+      "kind": "people",
+      "query": {
+        "kind": "people",
+        "cursor": ""
+      }
+    },
+    {
+      "id": "records-field:people:cursor:too-long",
+      "route": "records",
+      "kind": "people",
+      "query": {
+        "kind": "people",
+        "cursor": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:people:cursor:repeated",
+      "route": "records",
+      "kind": "people",
+      "query": {
+        "kind": "people",
+        "cursor": ["synthetic-cursor", "synthetic-cursor"]
+      }
+    },
+    {
+      "id": "records-field:days:kind:repeated",
+      "route": "records",
+      "kind": "days",
+      "query": {
+        "kind": ["days", "days"]
+      }
+    },
+    {
+      "id": "records-field:days:date:repeated",
+      "route": "records",
+      "kind": "days",
+      "query": {
+        "kind": "days",
+        "date": ["2026-10-17", "2026-10-17"]
+      }
+    },
+    {
+      "id": "records-field:days:date:empty",
+      "route": "records",
+      "kind": "days",
+      "query": {
+        "kind": "days",
+        "date": ""
+      }
+    },
+    {
+      "id": "records-field:days:date:malformed-format",
+      "route": "records",
+      "kind": "days",
+      "query": {
+        "kind": "days",
+        "date": "not-a-date"
+      }
+    },
+    {
+      "id": "records-field:days:eventDayId:repeated",
+      "route": "records",
+      "kind": "days",
+      "query": {
+        "kind": "days",
+        "eventDayId": ["synthetic-reference", "synthetic-reference"]
+      }
+    },
+    {
+      "id": "records-field:days:eventDayId:empty",
+      "route": "records",
+      "kind": "days",
+      "query": {
+        "kind": "days",
+        "eventDayId": ""
+      }
+    },
+    {
+      "id": "records-field:days:eventDayId:too-long",
+      "route": "records",
+      "kind": "days",
+      "query": {
+        "kind": "days",
+        "eventDayId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:days:unknown-key",
+      "route": "records",
+      "kind": "days",
+      "query": {
+        "kind": "days",
+        "p16Unexpected": "1"
+      }
+    },
+    {
+      "id": "records-field:days:limit:\"\"",
+      "route": "records",
+      "kind": "days",
+      "query": {
+        "kind": "days",
+        "limit": ""
+      }
+    },
+    {
+      "id": "records-field:days:limit:\"0\"",
+      "route": "records",
+      "kind": "days",
+      "query": {
+        "kind": "days",
+        "limit": "0"
+      }
+    },
+    {
+      "id": "records-field:days:limit:\"-1\"",
+      "route": "records",
+      "kind": "days",
+      "query": {
+        "kind": "days",
+        "limit": "-1"
+      }
+    },
+    {
+      "id": "records-field:days:limit:\"201\"",
+      "route": "records",
+      "kind": "days",
+      "query": {
+        "kind": "days",
+        "limit": "201"
+      }
+    },
+    {
+      "id": "records-field:days:limit:\"1.5\"",
+      "route": "records",
+      "kind": "days",
+      "query": {
+        "kind": "days",
+        "limit": "1.5"
+      }
+    },
+    {
+      "id": "records-field:days:limit:\"NaN\"",
+      "route": "records",
+      "kind": "days",
+      "query": {
+        "kind": "days",
+        "limit": "NaN"
+      }
+    },
+    {
+      "id": "records-field:days:limit:\"Infinity\"",
+      "route": "records",
+      "kind": "days",
+      "query": {
+        "kind": "days",
+        "limit": "Infinity"
+      }
+    },
+    {
+      "id": "records-field:days:limit:\"abc\"",
+      "route": "records",
+      "kind": "days",
+      "query": {
+        "kind": "days",
+        "limit": "abc"
+      }
+    },
+    {
+      "id": "records-field:days:limit:repeated",
+      "route": "records",
+      "kind": "days",
+      "query": {
+        "kind": "days",
+        "limit": ["1", "2"]
+      }
+    },
+    {
+      "id": "records-field:days:cursor:empty",
+      "route": "records",
+      "kind": "days",
+      "query": {
+        "kind": "days",
+        "cursor": ""
+      }
+    },
+    {
+      "id": "records-field:days:cursor:too-long",
+      "route": "records",
+      "kind": "days",
+      "query": {
+        "kind": "days",
+        "cursor": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "records-field:days:cursor:repeated",
+      "route": "records",
+      "kind": "days",
+      "query": {
+        "kind": "days",
+        "cursor": ["synthetic-cursor", "synthetic-cursor"]
+      }
+    }
+  ],
+  "valid": [
+    {
+      "id": "records-field-control:registrations",
+      "route": "records",
+      "query": {
+        "kind": "registrations"
+      }
+    },
+    {
+      "id": "records-field-control:footfall",
+      "route": "records",
+      "query": {
+        "kind": "footfall"
+      }
+    },
+    {
+      "id": "records-field-control:cards",
+      "route": "records",
+      "query": {
+        "kind": "cards"
+      }
+    },
+    {
+      "id": "records-field-control:stamps",
+      "route": "records",
+      "query": {
+        "kind": "stamps"
+      }
+    },
+    {
+      "id": "records-field-control:redemptions",
+      "route": "records",
+      "query": {
+        "kind": "redemptions"
+      }
+    },
+    {
+      "id": "records-field-control:incidents",
+      "route": "records",
+      "query": {
+        "kind": "incidents"
+      }
+    },
+    {
+      "id": "records-field-control:lost-person",
+      "route": "records",
+      "query": {
+        "kind": "lost-person"
+      }
+    },
+    {
+      "id": "records-field-control:lost-found",
+      "route": "records",
+      "query": {
+        "kind": "lost-found"
+      }
+    },
+    {
+      "id": "records-field-control:announcements",
+      "route": "records",
+      "query": {
+        "kind": "announcements"
+      }
+    },
+    {
+      "id": "records-field-control:assignments",
+      "route": "records",
+      "query": {
+        "kind": "assignments"
+      }
+    },
+    {
+      "id": "records-field-control:imports",
+      "route": "records",
+      "query": {
+        "kind": "imports"
+      }
+    },
+    {
+      "id": "records-field-control:fallback",
+      "route": "records",
+      "query": {
+        "kind": "fallback"
+      }
+    },
+    {
+      "id": "records-field-control:gift-ledger",
+      "route": "records",
+      "query": {
+        "kind": "gift-ledger",
+        "giftTypeId": "$GIFT",
+        "rehearsal": "false"
+      }
+    },
+    {
+      "id": "records-field-control:audit",
+      "route": "records",
+      "query": {
+        "kind": "audit"
+      }
+    },
+    {
+      "id": "records-field-control:people",
+      "route": "records",
+      "query": {
+        "kind": "people"
+      }
+    },
+    {
+      "id": "records-field-control:days",
+      "route": "records",
+      "query": {
+        "kind": "days"
+      }
+    }
+  ],
+  "recordKinds": [
+    "registrations",
+    "footfall",
+    "cards",
+    "stamps",
+    "redemptions",
+    "incidents",
+    "lost-person",
+    "lost-found",
+    "announcements",
+    "assignments",
+    "imports",
+    "fallback",
+    "gift-ledger",
+    "audit",
+    "people",
+    "days"
+  ]
+}
