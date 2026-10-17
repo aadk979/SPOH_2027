@@ -52,10 +52,24 @@ including server 96.67% lines, passed. Image/build/CSP, architecture, hardcoding
 dependency and secret checks passed. Exact-SHA test CI and selected operating proof against the unchanged
 accepted 62513e56 image were pending at commit preparation.
 
-A fresh whole gate and all five exact-SHA CI jobs are required for this test
-source. Selected operating cases must then be bound to the unchanged accepted
-62513e56 application image and original controlled fixtures and sessions.
-A documentation/test commit does not require another application deployment.
+The whole six-file test-only batch was delivered once as c8eda5ab. All five
+exact CI jobs (39045745325) passed. Independent selected operating proof
+accepted 320 GET requests against the unchanged 62513e56 image: 214 malformed
+query refusals, 76 valid corpus controls, 16 selected before/after snapshots,
+three discovery/lifecycle controls and 11 existing-incident time/page controls.
+The original controlled Root made the new query reads; prior seven-actor
+acceptance is retained separately. All 73 deployed policy statements/schema
+and the original image digest/task were checked afresh. Selected people,
+incidents, rosters and owned announcement audit rows remained unchanged.
+
+The scoped E and compatibility D forms use their own station/day hydration.
+D's E-owned audit entity is explicitly an empty cross-event control. Existing
+eight-incident reported-time filters and finite one-row keyset pages were
+verified without creating incidents. The synthetic tied timestamps and
+one-millisecond fixture remain local/CI evidence. No business writes, successful
+fixture replays, new identities, invitations or application deployment occurred.
+A subsequent test-only batch adds role/person/station read-authority coverage.
+
 No whole-route, production or independent ASVS acceptance is claimed. Other
 role, lifecycle, conflict and rate-limit axes remain in the granular inventory.
 Only P16.9 continuous soak is owner-skipped. Browser, deferred acceptance,
