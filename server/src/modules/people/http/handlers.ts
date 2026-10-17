@@ -30,11 +30,14 @@ export async function listVolunteersHandler(req: Request, res: Response): Promis
     scopeOf(req),
     validatedQuery<ListVolunteersQuery>(req),
   );
+  res.setHeader('Cache-Control', 'private, no-store');
   res.status(200).json({ data, meta: { count: data.length, nextCursor } });
 }
 
 export async function getVolunteerHandler(req: Request, res: Response): Promise<void> {
-  res.status(200).json({ volunteer: await getVolunteer(scopeOf(req), idOf(req)) });
+  const volunteer = await getVolunteer(scopeOf(req), idOf(req));
+  res.setHeader('Cache-Control', 'private, no-store');
+  res.status(200).json({ volunteer });
 }
 
 export async function updateVolunteerHandler(req: Request, res: Response): Promise<void> {

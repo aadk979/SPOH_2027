@@ -8,7 +8,9 @@ import { checkOut } from '../application/checkOut.js';
 import { getMe } from '../application/getMe.js';
 
 export async function getMeHandler(req: Request, res: Response): Promise<void> {
-  res.status(200).json(await getMe(scopeOf(req), getAuth(req).volunteerId));
+  const body = await getMe(scopeOf(req), getAuth(req).volunteerId);
+  res.setHeader('Cache-Control', 'private, no-store');
+  res.status(200).json(body);
 }
 
 export async function checkInHandler(req: Request, res: Response): Promise<void> {

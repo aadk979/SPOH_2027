@@ -22,6 +22,7 @@ export async function reportIncidentHandler(req: Request, res: Response): Promis
 
 export async function listIncidentsHandler(req: Request, res: Response): Promise<void> {
   const page = await listIncidentRecords(scopeOf(req), validatedQuery<ListIncidentsQuery>(req));
+  res.setHeader('Cache-Control', 'private, no-store');
   res.status(200).json({
     data: page.data,
     meta: { count: page.data.length, nextCursor: page.nextCursor },

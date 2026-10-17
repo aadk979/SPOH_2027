@@ -40,7 +40,9 @@ export async function cloneEventHandler(req: Request, res: Response): Promise<vo
 }
 
 export async function listMyEventsHandler(req: Request, res: Response): Promise<void> {
-  res.status(200).json({ data: await listMyEvents(getPerson(req).personId) });
+  const data = await listMyEvents(getPerson(req).personId);
+  res.setHeader('Cache-Control', 'private, no-store');
+  res.status(200).json({ data });
 }
 
 export async function renameEventHandler(req: Request, res: Response): Promise<void> {

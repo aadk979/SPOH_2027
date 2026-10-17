@@ -32,6 +32,7 @@ async function actorFrom(req: Request): Promise<RosterActor> {
 /** My own shifts. Same payload as `/me`, reachable from the shift screen. */
 export async function myShiftsHandler(req: Request, res: Response): Promise<void> {
   const me = await getMe(scopeOf(req), getAuth(req).volunteerId);
+  res.setHeader('Cache-Control', 'private, no-store');
   res.status(200).json({
     data: me.upcomingAssignments,
     meta: { count: me.upcomingAssignments.length, nextCursor: null },

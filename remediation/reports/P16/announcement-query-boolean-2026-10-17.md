@@ -42,11 +42,20 @@ lines, passed. Image/build/CSP, architecture, hardcoding, dependency and secret
 checks passed. Exact-SHA CI and actual new-image staging acceptance remain
 separate and were pending at commit preparation.
 
-This batch changes application source. Exact-SHA CI, one genuine new-image
-staging release, current deployed-policy proof and actual controlled-actor API
-verification remain required. Quiet owned fixtures use only the existing event
-and seven original synthetic identities. Existing successful writes are preserved
-and reused across the release. No production or full-route acceptance is claimed.
+The whole eight-file batch was delivered once as a01a7381. All five exact-SHA
+CI jobs (39025421740) and staging release 39027399506 passed, including
+Smoke. Current immutable image, ARM64 task, 73 deployed policy bytes/schema
+and the seven original real-provider identities were verified.
+
+Selected operating proof accepted 45 GET requests: 24 malformed-query errors,
+13 successful personalised inbox reads, one foreign refusal, two genuine access
+refusals and five lifecycle/audit controls. Nonempty owned rows verify literal
+false, omission and per-person acknowledgement filtering. Both route forms have
+selected flag/cache proof. Owned message and acknowledgement audits were
+unchanged, and the two existing INFO messages and Root ACK were not replayed.
+These counts do not close the remaining granular route axes. A separate
+operational-read cache-policy repair follows the independently reproduced
+profile, roster, people, audit, incident and transient-description omissions.
 
 Only P16.9's continuous soak is owner-skipped. Browser/full acceptance, deferred
 acceptance, load, drills, restore, independent assurance, actual alarm-email

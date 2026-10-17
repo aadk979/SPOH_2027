@@ -31,7 +31,9 @@ export async function raiseAlertHandler(req: Request, res: Response): Promise<vo
 }
 
 export async function activeAlertsHandler(req: Request, res: Response): Promise<void> {
-  res.status(200).json(await getActiveAlerts(scopeOf(req), getAuth(req).volunteerId));
+  const body = await getActiveAlerts(scopeOf(req), getAuth(req).volunteerId);
+  res.setHeader('Cache-Control', 'private, no-store');
+  res.status(200).json(body);
 }
 
 export async function acknowledgeHandler(req: Request, res: Response): Promise<void> {

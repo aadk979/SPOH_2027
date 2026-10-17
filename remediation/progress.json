@@ -4375,6 +4375,10 @@
     {
       "at": "2026-10-17T09:34:21.128Z",
       "text": "P16.10: cd829ff9 exact CI39015969932 all5 accepted; tests-only runtime binding to a940cb7e retained without redeployment. Expanded756malformed scoped record queries/16valid controls independently reconciled across four chunks, original failure/interruption/timing witnesses retained and no case replay. Announcement literal-false coercion and missing personalised-inbox cache policy reproduced locally and on the old image using two quiet owned INFO messages and one Root ACK. Narrow parser/header repair plus31 maintained tests authored; affected/full gate, exact CI and one genuine new-image staging verification remain pending. P16.10 remains in progress; only P16.9 skipped, original cost/production/owner gates unchanged."
+    },
+    {
+      "at": "2026-10-17T11:43:16.714Z",
+      "text": "P16.10: a01a7381 exact CI39025421740 and staging39027399506 all3+Smoke accepted; current image/73policies/original7actors and45selected announcement GETs reconciled, no successful fixture replay. Next18local read-privacy regressions exposed missing no-store on caller/membership, staff contact/audit and transient-description responses. Targeted nine-getter/eight-module repair and maintained18tests authored; new affected/full29/exactCI/new-image verification remain pending. P16.10 stays in progress; onlyP16.9 skipped; original cost, production and owner gates unchanged."
     }
   ]
 }

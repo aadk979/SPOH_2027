@@ -26,5 +26,6 @@ export async function stationRosterHandler(req: Request, res: Response): Promise
     { stationId, eventDayId },
     { scope: { eventId: auth.eventId }, membershipId: auth.membershipId, role: auth.role },
   );
+  res.setHeader('Cache-Control', 'private, no-store');
   res.status(200).json({ data: roster, meta: { count: roster.length, nextCursor: null } });
 }
