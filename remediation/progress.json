@@ -4371,6 +4371,10 @@
     {
       "at": "2026-10-17T07:07:32.343Z",
       "text": "P16.10: a940cb7e exact CI38987001422 and staging38989724604 plus Smoke accepted. Selected195workspace/57entity reads passed with unchanged existing event records; lifecycle positive-cache observation remains unaccepted. Local Docker stale IPC recovered with preservation. Frozen756record-field malformed descriptors/16valid controls passed32private HTTP tests after retaining the original quota-exhaustion failure. Maintained test-only promotion prepared; fresh whole gate/exact CI and expanded staging remain pending. P16.10 stays in progress; only P16.9 skipped; owner, production and original cost gates unchanged."
+    },
+    {
+      "at": "2026-10-17T09:34:21.128Z",
+      "text": "P16.10: cd829ff9 exact CI39015969932 all5 accepted; tests-only runtime binding to a940cb7e retained without redeployment. Expanded756malformed scoped record queries/16valid controls independently reconciled across four chunks, original failure/interruption/timing witnesses retained and no case replay. Announcement literal-false coercion and missing personalised-inbox cache policy reproduced locally and on the old image using two quiet owned INFO messages and one Root ACK. Narrow parser/header repair plus31 maintained tests authored; affected/full gate, exact CI and one genuine new-image staging verification remain pending. P16.10 remains in progress; only P16.9 skipped, original cost/production/owner gates unchanged."
     }
   ]
 }

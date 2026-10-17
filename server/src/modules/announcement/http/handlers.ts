@@ -12,8 +12,12 @@ export async function sendAnnouncementHandler(req: Request, res: Response): Prom
   const body = validatedBody<CreateAnnouncementRequest>(req);
   const announcement = await sendAnnouncement(
     body,
-    { volunteerId: auth.volunteerId, membershipId: auth.membershipId,
-      role: auth.role, scope: { eventId: auth.eventId } },
+    {
+      volunteerId: auth.volunteerId,
+      membershipId: auth.membershipId,
+      role: auth.role,
+      scope: { eventId: auth.eventId },
+    },
     auditContextFrom(req),
   );
   res.status(201).json({ announcement });
@@ -27,6 +31,7 @@ export async function listInboxHandler(req: Request, res: Response): Promise<voi
     role: auth.role,
     scope: { eventId: auth.eventId },
   });
+  res.setHeader('Cache-Control', 'private, no-store');
   res.status(200).json({
     data: page.data,
     meta: { count: page.data.length, nextCursor: page.nextCursor },

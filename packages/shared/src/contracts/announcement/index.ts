@@ -148,6 +148,9 @@ export type AnnouncementRecord = z.infer<typeof AnnouncementRecord>;
 
 export const ListAnnouncementsQuery = PaginationQuery.extend({
   /** Only messages still awaiting my acknowledgement. */
-  unackedOnly: z.coerce.boolean().default(false),
+  unackedOnly: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((value) => value === 'true'),
 }).strict();
 export type ListAnnouncementsQuery = z.infer<typeof ListAnnouncementsQuery>;

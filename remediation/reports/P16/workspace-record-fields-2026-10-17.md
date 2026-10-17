@@ -43,10 +43,26 @@ All unchanged floors, including server 96.67% lines, passed. Image/build/CSP,
 architecture, hardcoding, dependency and secret checks passed. Exact-SHA CI
 acceptance remains separate and was pending at commit preparation.
 
-This batch changes only tests, frozen test data and reporting. Staging still runs
-the accepted `a940cb7e` image. The expanded corpus has not yet passed staging;
-its future execution needs bounded chunks, normal original-actor authentication
-and current release/policy proof. No production or all-route acceptance is claimed.
+This tests-only batch was committed as cd829ff9 and passed all five exact-SHA
+CI jobs (39015969932). Runtime build inputs were unchanged, so the staging proof
+reused the accepted a940cb7e image with explicit test/application provenance.
+No additional deployment was made for the tests-only change.
+
+The expanded scoped corpus passed all 756 malformed queries and 16 valid
+controls in four bounded chunks. There were 904 selected GET requests,
+13 additional audit diagnostics and two session reconciliation GETs.
+The exact recurring maintenance audit deltas were fully paginated and reconciled;
+all historical audit rows were identical and no actual alert or visitor purge audit occurred.
+Other record-kind summaries, operating counters and first-page IDs were unchanged;
+complete paginated business-row equality is not claimed.
+
+The original final-comparison failure, a controller interruption with unknown
+native exit, and a later strict recovery timing failure remain preserved.
+Saved successful requests were verified and continued without case replay.
+The already issued session was admitted by read-only proof; the failed 938 ms
+timing witness did not satisfy the unchanged 750 ms bound. Compatibility-route
+staging, lifecycle positive caching, production and all-route acceptance remain
+separate.
 
 Docker's recurring stale-socket startup failure was recovered locally by preserving
 the exact four runtime endpoints after the crashed processes exited. The existing
