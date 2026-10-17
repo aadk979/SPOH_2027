@@ -44,9 +44,28 @@ including server 96.67% lines, passed. Image/build/CSP, architecture, hardcoding
 dependency and secret checks passed. Exact-SHA CI and genuine new-image
 staging proof were pending at commit preparation.
 
-Application source changes require exact-SHA CI, one genuine new-image
-staging release, current deployed policies and actual controlled-actor GET
-proof. Existing fixtures and the original seven identities are retained.
+The whole twelve-file repair was delivered once as 62513e56. All five exact
+CI jobs (39033550622) and staging 39035771632 passed, including Smoke.
+The current immutable ARM64 image, deployed 73 policy bytes/schema and original
+seven identities were verified. Independent selected operating proof accepted
+69 GET requests: 44 successful private responses, eight foreign-event refusals,
+16 missing/genuinely expired access refusals and one unrelated station-discovery
+control. Both served forms preserve selected response rows and owned audits.
+No business writes or successful fixture replays were requested.
+
+The original comparison failure is preserved: four response clock fields
+(serverTime and asOf across the two served forms) advanced. Independent offline
+validation accepted the saved 69 responses without replay, checking their raw
+hashes, contracts, access timing and unchanged data and audits. The clock checks
+allow five seconds of server/client skew; the observed maximum over the local
+response observation was 33 milliseconds. No other response leaves differed.
+
+Nonempty active-alert and zero-membership-picker staging proof is not claimed;
+the maintained local tests cover those fixtures. Lifecycle cache classification
+and the remaining route axes remain separate. A subsequent test-only batch
+adds granular URL-field and nonempty incident-filter/keyset coverage without
+changing the accepted application image.
+
 No production, whole-route or independent ASVS acceptance is claimed. Only
 P16.9 continuous soak is owner-skipped. Browser/full, deferred, load, drills,
 restore, real-person recovery, alarm receipt and owner go decisions remain.

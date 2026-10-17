@@ -1,0 +1,1127 @@
+{
+  "invalid": [
+    {
+      "id": "people:unexpectedOption:unknown-key",
+      "family": "people",
+      "field": "unexpectedOption",
+      "query": {
+        "unexpectedOption": "x"
+      }
+    },
+    {
+      "id": "audit:unexpectedOption:unknown-key",
+      "family": "audit",
+      "field": "unexpectedOption",
+      "query": {
+        "unexpectedOption": "x"
+      }
+    },
+    {
+      "id": "incidents:unexpectedOption:unknown-key",
+      "family": "incidents",
+      "field": "unexpectedOption",
+      "query": {
+        "unexpectedOption": "x"
+      }
+    },
+    {
+      "id": "station-roster:unexpectedOption:unknown-key",
+      "family": "station-roster",
+      "field": "unexpectedOption",
+      "query": {
+        "unexpectedOption": "x"
+      }
+    },
+    {
+      "id": "people:limit:zero",
+      "family": "people",
+      "field": "limit",
+      "query": {
+        "limit": "0"
+      }
+    },
+    {
+      "id": "people:limit:negative",
+      "family": "people",
+      "field": "limit",
+      "query": {
+        "limit": "-1"
+      }
+    },
+    {
+      "id": "people:limit:over-max",
+      "family": "people",
+      "field": "limit",
+      "query": {
+        "limit": "201"
+      }
+    },
+    {
+      "id": "people:limit:fraction",
+      "family": "people",
+      "field": "limit",
+      "query": {
+        "limit": "1.5"
+      }
+    },
+    {
+      "id": "people:limit:text",
+      "family": "people",
+      "field": "limit",
+      "query": {
+        "limit": "abc"
+      }
+    },
+    {
+      "id": "people:limit:nan",
+      "family": "people",
+      "field": "limit",
+      "query": {
+        "limit": "NaN"
+      }
+    },
+    {
+      "id": "people:limit:infinity",
+      "family": "people",
+      "field": "limit",
+      "query": {
+        "limit": "Infinity"
+      }
+    },
+    {
+      "id": "people:limit:empty",
+      "family": "people",
+      "field": "limit",
+      "query": {
+        "limit": ""
+      }
+    },
+    {
+      "id": "people:limit:null-literal",
+      "family": "people",
+      "field": "limit",
+      "query": {
+        "limit": "null"
+      }
+    },
+    {
+      "id": "people:limit:repeated",
+      "family": "people",
+      "field": "limit",
+      "query": {
+        "limit": ["1", "2"]
+      }
+    },
+    {
+      "id": "people:cursor:empty",
+      "family": "people",
+      "field": "cursor",
+      "query": {
+        "cursor": ""
+      }
+    },
+    {
+      "id": "people:cursor:too-long",
+      "family": "people",
+      "field": "cursor",
+      "query": {
+        "cursor": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "people:cursor:repeated",
+      "family": "people",
+      "field": "cursor",
+      "query": {
+        "cursor": ["first", "second"]
+      }
+    },
+    {
+      "id": "audit:limit:zero",
+      "family": "audit",
+      "field": "limit",
+      "query": {
+        "limit": "0"
+      }
+    },
+    {
+      "id": "audit:limit:negative",
+      "family": "audit",
+      "field": "limit",
+      "query": {
+        "limit": "-1"
+      }
+    },
+    {
+      "id": "audit:limit:over-max",
+      "family": "audit",
+      "field": "limit",
+      "query": {
+        "limit": "201"
+      }
+    },
+    {
+      "id": "audit:limit:fraction",
+      "family": "audit",
+      "field": "limit",
+      "query": {
+        "limit": "1.5"
+      }
+    },
+    {
+      "id": "audit:limit:text",
+      "family": "audit",
+      "field": "limit",
+      "query": {
+        "limit": "abc"
+      }
+    },
+    {
+      "id": "audit:limit:nan",
+      "family": "audit",
+      "field": "limit",
+      "query": {
+        "limit": "NaN"
+      }
+    },
+    {
+      "id": "audit:limit:infinity",
+      "family": "audit",
+      "field": "limit",
+      "query": {
+        "limit": "Infinity"
+      }
+    },
+    {
+      "id": "audit:limit:empty",
+      "family": "audit",
+      "field": "limit",
+      "query": {
+        "limit": ""
+      }
+    },
+    {
+      "id": "audit:limit:null-literal",
+      "family": "audit",
+      "field": "limit",
+      "query": {
+        "limit": "null"
+      }
+    },
+    {
+      "id": "audit:limit:repeated",
+      "family": "audit",
+      "field": "limit",
+      "query": {
+        "limit": ["1", "2"]
+      }
+    },
+    {
+      "id": "audit:cursor:empty",
+      "family": "audit",
+      "field": "cursor",
+      "query": {
+        "cursor": ""
+      }
+    },
+    {
+      "id": "audit:cursor:too-long",
+      "family": "audit",
+      "field": "cursor",
+      "query": {
+        "cursor": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "audit:cursor:repeated",
+      "family": "audit",
+      "field": "cursor",
+      "query": {
+        "cursor": ["first", "second"]
+      }
+    },
+    {
+      "id": "incidents:limit:zero",
+      "family": "incidents",
+      "field": "limit",
+      "query": {
+        "limit": "0"
+      }
+    },
+    {
+      "id": "incidents:limit:negative",
+      "family": "incidents",
+      "field": "limit",
+      "query": {
+        "limit": "-1"
+      }
+    },
+    {
+      "id": "incidents:limit:over-max",
+      "family": "incidents",
+      "field": "limit",
+      "query": {
+        "limit": "201"
+      }
+    },
+    {
+      "id": "incidents:limit:fraction",
+      "family": "incidents",
+      "field": "limit",
+      "query": {
+        "limit": "1.5"
+      }
+    },
+    {
+      "id": "incidents:limit:text",
+      "family": "incidents",
+      "field": "limit",
+      "query": {
+        "limit": "abc"
+      }
+    },
+    {
+      "id": "incidents:limit:nan",
+      "family": "incidents",
+      "field": "limit",
+      "query": {
+        "limit": "NaN"
+      }
+    },
+    {
+      "id": "incidents:limit:infinity",
+      "family": "incidents",
+      "field": "limit",
+      "query": {
+        "limit": "Infinity"
+      }
+    },
+    {
+      "id": "incidents:limit:empty",
+      "family": "incidents",
+      "field": "limit",
+      "query": {
+        "limit": ""
+      }
+    },
+    {
+      "id": "incidents:limit:null-literal",
+      "family": "incidents",
+      "field": "limit",
+      "query": {
+        "limit": "null"
+      }
+    },
+    {
+      "id": "incidents:limit:repeated",
+      "family": "incidents",
+      "field": "limit",
+      "query": {
+        "limit": ["1", "2"]
+      }
+    },
+    {
+      "id": "incidents:cursor:empty",
+      "family": "incidents",
+      "field": "cursor",
+      "query": {
+        "cursor": ""
+      }
+    },
+    {
+      "id": "incidents:cursor:too-long",
+      "family": "incidents",
+      "field": "cursor",
+      "query": {
+        "cursor": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "incidents:cursor:repeated",
+      "family": "incidents",
+      "field": "cursor",
+      "query": {
+        "cursor": ["first", "second"]
+      }
+    },
+    {
+      "id": "people:q:too-long",
+      "family": "people",
+      "field": "q",
+      "query": {
+        "q": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "people:q:repeated",
+      "family": "people",
+      "field": "q",
+      "query": {
+        "q": ["first", "second"]
+      }
+    },
+    {
+      "id": "people:role:empty",
+      "family": "people",
+      "field": "role",
+      "query": {
+        "role": ""
+      }
+    },
+    {
+      "id": "people:role:unknown",
+      "family": "people",
+      "field": "role",
+      "query": {
+        "role": "NOT_A_DECLARED_VALUE"
+      }
+    },
+    {
+      "id": "people:role:wrong-case",
+      "family": "people",
+      "field": "role",
+      "query": {
+        "role": "admin"
+      }
+    },
+    {
+      "id": "people:role:repeated",
+      "family": "people",
+      "field": "role",
+      "query": {
+        "role": ["ADMIN", "ADMIN"]
+      }
+    },
+    {
+      "id": "people:stationId:empty",
+      "family": "people",
+      "field": "stationId",
+      "query": {
+        "stationId": ""
+      }
+    },
+    {
+      "id": "people:stationId:too-long",
+      "family": "people",
+      "field": "stationId",
+      "query": {
+        "stationId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "people:stationId:repeated",
+      "family": "people",
+      "field": "stationId",
+      "query": {
+        "stationId": ["first", "second"]
+      }
+    },
+    {
+      "id": "people:eventDayId:empty",
+      "family": "people",
+      "field": "eventDayId",
+      "query": {
+        "eventDayId": ""
+      }
+    },
+    {
+      "id": "people:eventDayId:too-long",
+      "family": "people",
+      "field": "eventDayId",
+      "query": {
+        "eventDayId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "people:eventDayId:repeated",
+      "family": "people",
+      "field": "eventDayId",
+      "query": {
+        "eventDayId": ["first", "second"]
+      }
+    },
+    {
+      "id": "people:active:empty",
+      "family": "people",
+      "field": "active",
+      "query": {
+        "active": ""
+      }
+    },
+    {
+      "id": "people:active:null-literal",
+      "family": "people",
+      "field": "active",
+      "query": {
+        "active": "null"
+      }
+    },
+    {
+      "id": "people:active:unknown",
+      "family": "people",
+      "field": "active",
+      "query": {
+        "active": "maybe"
+      }
+    },
+    {
+      "id": "people:active:repeated",
+      "family": "people",
+      "field": "active",
+      "query": {
+        "active": ["true", "false"]
+      }
+    },
+    {
+      "id": "people:sort:empty",
+      "family": "people",
+      "field": "sort",
+      "query": {
+        "sort": ""
+      }
+    },
+    {
+      "id": "people:sort:unknown",
+      "family": "people",
+      "field": "sort",
+      "query": {
+        "sort": "NOT_A_SORT"
+      }
+    },
+    {
+      "id": "people:sort:wrong-case",
+      "family": "people",
+      "field": "sort",
+      "query": {
+        "sort": "NAME"
+      }
+    },
+    {
+      "id": "people:sort:repeated",
+      "family": "people",
+      "field": "sort",
+      "query": {
+        "sort": ["name", "role"]
+      }
+    },
+    {
+      "id": "audit:action:too-long",
+      "family": "audit",
+      "field": "action",
+      "query": {
+        "action": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "audit:action:repeated",
+      "family": "audit",
+      "field": "action",
+      "query": {
+        "action": ["first", "second"]
+      }
+    },
+    {
+      "id": "audit:entityType:too-long",
+      "family": "audit",
+      "field": "entityType",
+      "query": {
+        "entityType": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "audit:entityType:repeated",
+      "family": "audit",
+      "field": "entityType",
+      "query": {
+        "entityType": ["first", "second"]
+      }
+    },
+    {
+      "id": "audit:entityId:empty",
+      "family": "audit",
+      "field": "entityId",
+      "query": {
+        "entityId": ""
+      }
+    },
+    {
+      "id": "audit:entityId:too-long",
+      "family": "audit",
+      "field": "entityId",
+      "query": {
+        "entityId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "audit:entityId:repeated",
+      "family": "audit",
+      "field": "entityId",
+      "query": {
+        "entityId": ["first", "second"]
+      }
+    },
+    {
+      "id": "audit:actorId:empty",
+      "family": "audit",
+      "field": "actorId",
+      "query": {
+        "actorId": ""
+      }
+    },
+    {
+      "id": "audit:actorId:too-long",
+      "family": "audit",
+      "field": "actorId",
+      "query": {
+        "actorId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "audit:actorId:repeated",
+      "family": "audit",
+      "field": "actorId",
+      "query": {
+        "actorId": ["first", "second"]
+      }
+    },
+    {
+      "id": "audit:from:empty",
+      "family": "audit",
+      "field": "from",
+      "query": {
+        "from": ""
+      }
+    },
+    {
+      "id": "audit:from:not-a-date",
+      "family": "audit",
+      "field": "from",
+      "query": {
+        "from": "not-a-date"
+      }
+    },
+    {
+      "id": "audit:from:no-offset",
+      "family": "audit",
+      "field": "from",
+      "query": {
+        "from": "2026-10-17T00:00:00"
+      }
+    },
+    {
+      "id": "audit:from:impossible-date",
+      "family": "audit",
+      "field": "from",
+      "query": {
+        "from": "2026-99-99T00:00:00Z"
+      }
+    },
+    {
+      "id": "audit:from:repeated",
+      "family": "audit",
+      "field": "from",
+      "query": {
+        "from": ["__P16_NOW__", "__P16_NOW__"]
+      }
+    },
+    {
+      "id": "audit:to:empty",
+      "family": "audit",
+      "field": "to",
+      "query": {
+        "to": ""
+      }
+    },
+    {
+      "id": "audit:to:not-a-date",
+      "family": "audit",
+      "field": "to",
+      "query": {
+        "to": "not-a-date"
+      }
+    },
+    {
+      "id": "audit:to:no-offset",
+      "family": "audit",
+      "field": "to",
+      "query": {
+        "to": "2026-10-17T00:00:00"
+      }
+    },
+    {
+      "id": "audit:to:impossible-date",
+      "family": "audit",
+      "field": "to",
+      "query": {
+        "to": "2026-99-99T00:00:00Z"
+      }
+    },
+    {
+      "id": "audit:to:repeated",
+      "family": "audit",
+      "field": "to",
+      "query": {
+        "to": ["__P16_NOW__", "__P16_NOW__"]
+      }
+    },
+    {
+      "id": "incidents:status:empty",
+      "family": "incidents",
+      "field": "status",
+      "query": {
+        "status": ""
+      }
+    },
+    {
+      "id": "incidents:status:unknown",
+      "family": "incidents",
+      "field": "status",
+      "query": {
+        "status": "NOT_A_DECLARED_VALUE"
+      }
+    },
+    {
+      "id": "incidents:status:wrong-case",
+      "family": "incidents",
+      "field": "status",
+      "query": {
+        "status": "open"
+      }
+    },
+    {
+      "id": "incidents:status:repeated",
+      "family": "incidents",
+      "field": "status",
+      "query": {
+        "status": ["OPEN", "OPEN"]
+      }
+    },
+    {
+      "id": "incidents:severity:empty",
+      "family": "incidents",
+      "field": "severity",
+      "query": {
+        "severity": ""
+      }
+    },
+    {
+      "id": "incidents:severity:unknown",
+      "family": "incidents",
+      "field": "severity",
+      "query": {
+        "severity": "NOT_A_DECLARED_VALUE"
+      }
+    },
+    {
+      "id": "incidents:severity:wrong-case",
+      "family": "incidents",
+      "field": "severity",
+      "query": {
+        "severity": "low"
+      }
+    },
+    {
+      "id": "incidents:severity:repeated",
+      "family": "incidents",
+      "field": "severity",
+      "query": {
+        "severity": ["LOW", "LOW"]
+      }
+    },
+    {
+      "id": "incidents:stationId:empty",
+      "family": "incidents",
+      "field": "stationId",
+      "query": {
+        "stationId": ""
+      }
+    },
+    {
+      "id": "incidents:stationId:too-long",
+      "family": "incidents",
+      "field": "stationId",
+      "query": {
+        "stationId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "incidents:stationId:repeated",
+      "family": "incidents",
+      "field": "stationId",
+      "query": {
+        "stationId": ["first", "second"]
+      }
+    },
+    {
+      "id": "incidents:from:empty",
+      "family": "incidents",
+      "field": "from",
+      "query": {
+        "from": ""
+      }
+    },
+    {
+      "id": "incidents:from:not-a-date",
+      "family": "incidents",
+      "field": "from",
+      "query": {
+        "from": "not-a-date"
+      }
+    },
+    {
+      "id": "incidents:from:no-offset",
+      "family": "incidents",
+      "field": "from",
+      "query": {
+        "from": "2026-10-17T00:00:00"
+      }
+    },
+    {
+      "id": "incidents:from:impossible-date",
+      "family": "incidents",
+      "field": "from",
+      "query": {
+        "from": "2026-99-99T00:00:00Z"
+      }
+    },
+    {
+      "id": "incidents:from:repeated",
+      "family": "incidents",
+      "field": "from",
+      "query": {
+        "from": ["__P16_NOW__", "__P16_NOW__"]
+      }
+    },
+    {
+      "id": "incidents:to:empty",
+      "family": "incidents",
+      "field": "to",
+      "query": {
+        "to": ""
+      }
+    },
+    {
+      "id": "incidents:to:not-a-date",
+      "family": "incidents",
+      "field": "to",
+      "query": {
+        "to": "not-a-date"
+      }
+    },
+    {
+      "id": "incidents:to:no-offset",
+      "family": "incidents",
+      "field": "to",
+      "query": {
+        "to": "2026-10-17T00:00:00"
+      }
+    },
+    {
+      "id": "incidents:to:impossible-date",
+      "family": "incidents",
+      "field": "to",
+      "query": {
+        "to": "2026-99-99T00:00:00Z"
+      }
+    },
+    {
+      "id": "incidents:to:repeated",
+      "family": "incidents",
+      "field": "to",
+      "query": {
+        "to": ["__P16_NOW__", "__P16_NOW__"]
+      }
+    },
+    {
+      "id": "station-roster:eventDayId:empty",
+      "family": "station-roster",
+      "field": "eventDayId",
+      "query": {
+        "eventDayId": ""
+      }
+    },
+    {
+      "id": "station-roster:eventDayId:too-long",
+      "family": "station-roster",
+      "field": "eventDayId",
+      "query": {
+        "eventDayId": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "station-roster:eventDayId:repeated",
+      "family": "station-roster",
+      "field": "eventDayId",
+      "query": {
+        "eventDayId": ["first", "second"]
+      }
+    }
+  ],
+  "valid": [
+    {
+      "id": "people:omitted-options",
+      "family": "people",
+      "query": {}
+    },
+    {
+      "id": "audit:omitted-options",
+      "family": "audit",
+      "query": {}
+    },
+    {
+      "id": "incidents:omitted-options",
+      "family": "incidents",
+      "query": {}
+    },
+    {
+      "id": "station-roster:omitted-options",
+      "family": "station-roster",
+      "query": {}
+    },
+    {
+      "id": "people:minimum-page",
+      "family": "people",
+      "query": {
+        "limit": "1"
+      }
+    },
+    {
+      "id": "people:maximum-page",
+      "family": "people",
+      "query": {
+        "limit": "200"
+      }
+    },
+    {
+      "id": "audit:minimum-page",
+      "family": "audit",
+      "query": {
+        "limit": "1"
+      }
+    },
+    {
+      "id": "audit:maximum-page",
+      "family": "audit",
+      "query": {
+        "limit": "200"
+      }
+    },
+    {
+      "id": "incidents:minimum-page",
+      "family": "incidents",
+      "query": {
+        "limit": "1"
+      }
+    },
+    {
+      "id": "incidents:maximum-page",
+      "family": "incidents",
+      "query": {
+        "limit": "200"
+      }
+    },
+    {
+      "id": "people:sort-name",
+      "family": "people",
+      "query": {
+        "sort": "name"
+      }
+    },
+    {
+      "id": "people:sort-role",
+      "family": "people",
+      "query": {
+        "sort": "role"
+      }
+    },
+    {
+      "id": "people:sort-lastSeen",
+      "family": "people",
+      "query": {
+        "sort": "lastSeen"
+      }
+    },
+    {
+      "id": "people:sort-created",
+      "family": "people",
+      "query": {
+        "sort": "created"
+      }
+    },
+    {
+      "id": "people:role-VOLUNTEER",
+      "family": "people",
+      "query": {
+        "role": "VOLUNTEER"
+      }
+    },
+    {
+      "id": "people:role-IC",
+      "family": "people",
+      "query": {
+        "role": "IC"
+      }
+    },
+    {
+      "id": "people:role-DEPUTY_COORDINATOR",
+      "family": "people",
+      "query": {
+        "role": "DEPUTY_COORDINATOR"
+      }
+    },
+    {
+      "id": "people:role-CHIEF_COORDINATOR",
+      "family": "people",
+      "query": {
+        "role": "CHIEF_COORDINATOR"
+      }
+    },
+    {
+      "id": "people:role-LEAD",
+      "family": "people",
+      "query": {
+        "role": "LEAD"
+      }
+    },
+    {
+      "id": "people:role-ADMIN",
+      "family": "people",
+      "query": {
+        "role": "ADMIN"
+      }
+    },
+    {
+      "id": "people:literal-false",
+      "family": "people",
+      "query": {
+        "active": "false"
+      }
+    },
+    {
+      "id": "people:literal-true",
+      "family": "people",
+      "query": {
+        "active": "true"
+      }
+    },
+    {
+      "id": "people:empty-search",
+      "family": "people",
+      "query": {
+        "q": ""
+      }
+    },
+    {
+      "id": "people:station-owned-day",
+      "family": "people",
+      "query": {
+        "stationId": "__P16_STATION_ID__",
+        "eventDayId": "__P16_EVENT_DAY_ID__"
+      }
+    },
+    {
+      "id": "audit:known-message-audit",
+      "family": "audit",
+      "query": {
+        "entityId": "__P16_ANNOUNCEMENT_ID__",
+        "action": "announcement.send",
+        "actorId": "__P16_PERSON_ID__",
+        "limit": "200"
+      }
+    },
+    {
+      "id": "audit:from-current",
+      "family": "audit",
+      "query": {
+        "from": "__P16_NOW__"
+      }
+    },
+    {
+      "id": "audit:to-current",
+      "family": "audit",
+      "query": {
+        "to": "__P16_NOW__"
+      }
+    },
+    {
+      "id": "incidents:status-OPEN",
+      "family": "incidents",
+      "query": {
+        "status": "OPEN"
+      }
+    },
+    {
+      "id": "incidents:status-ACKNOWLEDGED",
+      "family": "incidents",
+      "query": {
+        "status": "ACKNOWLEDGED"
+      }
+    },
+    {
+      "id": "incidents:status-RESOLVED",
+      "family": "incidents",
+      "query": {
+        "status": "RESOLVED"
+      }
+    },
+    {
+      "id": "incidents:severity-LOW",
+      "family": "incidents",
+      "query": {
+        "severity": "LOW"
+      }
+    },
+    {
+      "id": "incidents:severity-MEDIUM",
+      "family": "incidents",
+      "query": {
+        "severity": "MEDIUM"
+      }
+    },
+    {
+      "id": "incidents:severity-HIGH",
+      "family": "incidents",
+      "query": {
+        "severity": "HIGH"
+      }
+    },
+    {
+      "id": "incidents:severity-CRITICAL",
+      "family": "incidents",
+      "query": {
+        "severity": "CRITICAL"
+      }
+    },
+    {
+      "id": "incidents:owned-station",
+      "family": "incidents",
+      "query": {
+        "stationId": "__P16_STATION_ID__"
+      }
+    },
+    {
+      "id": "incidents:from-current",
+      "family": "incidents",
+      "query": {
+        "from": "__P16_NOW__"
+      }
+    },
+    {
+      "id": "incidents:to-current",
+      "family": "incidents",
+      "query": {
+        "to": "__P16_NOW__"
+      }
+    },
+    {
+      "id": "station-roster:owned-day",
+      "family": "station-roster",
+      "query": {
+        "eventDayId": "__P16_EVENT_DAY_ID__"
+      }
+    }
+  ],
+  "routeFamilies": ["people", "audit", "incidents", "station-roster"],
+  "transportValues": "strings or repeated URL keys only",
+  "noBusinessMutationRequests": true
+}

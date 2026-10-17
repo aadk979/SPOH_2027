@@ -4379,6 +4379,10 @@
     {
       "at": "2026-10-17T11:43:16.714Z",
       "text": "P16.10: a01a7381 exact CI39025421740 and staging39027399506 all3+Smoke accepted; current image/73policies/original7actors and45selected announcement GETs reconciled, no successful fixture replay. Next18local read-privacy regressions exposed missing no-store on caller/membership, staff contact/audit and transient-description responses. Targeted nine-getter/eight-module repair and maintained18tests authored; new affected/full29/exactCI/new-image verification remain pending. P16.10 stays in progress; onlyP16.9 skipped; original cost, production and owner gates unchanged."
+    },
+    {
+      "at": "2026-10-17T13:47:24.299Z",
+      "text": "P16.10: 62513e56 exactCI39033550622 and staging39035771632 all3+Smoke/currentimmutableARM64/73policies/original7actors/independent69GET selected read privacy proof accepted. Next coherent6file TESTS+DOCS-only batch authored:10maintained HTTP tests,214malformed+76valid URL GETs and34nonempty incident boundary/filter/tied-keyset controls. Typedpublic145descriptor corpus matches3private hydrations. Fresh29/exacttestSHA CI and selected unchanged625application operating proof remain required; no repeated application deployment planned. P16.10 active, onlyP16.9 skipped; production/cost/owner gates unchanged."
     }
   ]
 }
