@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-16T11:59:47.465Z",
+  "updatedAt": "2026-10-16T15:34:37.049Z",
   "current": {
     "phase": "P16",
     "step": "P16.10"
@@ -4363,6 +4363,10 @@
     {
       "at": "2026-10-16T11:59:47.464Z",
       "text": "P16.10 preflight additionally found four legacy migration suites creating other databases. Their original SQL assertions are retained in owned schemas of sole spoh2027_test, using the central URL guard before client construction and public-schema definition checks. Ten namespace safety tests authored. Earlier eight-file freeze and staged scan are preserved; expanded coherent batch requires fresh source binding, affected verification, staged review and whole gate before delivery."
+    },
+    {
+      "at": "2026-10-16T15:34:37.048Z",
+      "text": "P16.10: c1f7fa0d exact CI38904399858 and staging38907521645 accepted; one reviewed cleanup retry and natural successor succeeded. Existing E reached LIVE, 245 capture requests and six strict warmed-session proofs reconciled; 438 selected import/safety/lost-found cases accepted. Workspace reads then failed on missing no-store at a cross-event404. Four new HTTP regressions failed before the shared error-header repair and passed after it; fresh whole gate, exact CI and new-image workspace acceptance remain pending. Historical native failures preserved; P16.10 remains in progress, P16.9 only skipped, original cost/production/owner gates unchanged."
     }
   ]
 }

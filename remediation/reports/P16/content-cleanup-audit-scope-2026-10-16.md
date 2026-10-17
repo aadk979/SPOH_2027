@@ -87,11 +87,34 @@ hardcoding, dependency audit and both secret scans passed. Complete coverage was
 archived privately. This establishes local acceptance; exact CI and repaired-image
 operating evidence are separate.
 
-A repaired release still needs exact-SHA CI, one guarded staging deployment,
-current image/policy/provider proof, a newly reviewed concrete cleanup plan and
-normal worker/audit/alarm recovery before first-live verification. Natural hourly
-successor execution and the prepared API families remain operating acceptance.
-No readiness, alarm, clock or authentication override is permitted.
+Application `c1f7fa0d` subsequently passed all five exact CI jobs in run
+38904399858 and all three staging jobs plus Smoke in run 38907521645. Its ARM64
+task image and all 73 deployed policies matched source. The original controlled
+Root authenticated normally. Five actual task-role prefix simulations passed.
+
+One newly reviewed plan matched the original DEAD global job at version 22.
+One apply queued version 23; the normal worker succeeded on its first attempt.
+Read-only verification retained the original DEAD and failed-retry audits,
+confirmed the global scheduled scope and owner/target provenance, and observed
+the dead gauge return to zero and the alarm naturally return to OK. The storage
+intent completed with zero keys acknowledged; no physical deletion count is
+claimed. The normal hourly successor later succeeded on its first attempt.
+
+The existing multiday event passed all 11 fresh readiness checks, moved from
+DRAFT through READY to LIVE, and retained its original people and assignments.
+All 245 capture requests passed. The writer's final audit oracle failed because
+it excluded the Root's actual off-station captures; a separate read-only
+reconciliation verified the complete raw request and exact audit sets, without
+repeating business writes. Six warmed-session proofs passed with genuine 302
+recovery responses and old-session 401s within the unchanged 750 ms bound.
+Earlier inconclusive timing observations and native failures are retained.
+
+The following 438 selected import, scoped safety, role/query/pagination and
+lost-and-found cases passed with their expected audits. The subsequent workspace
+read batch stopped at a cross-event 404 missing `no-store`; its failure and the
+[new privacy regression](workspace-privacy-error-headers-2026-10-16.md) are
+tracked separately. These results do not close P16.10 or establish all-route
+acceptance. No readiness, alarm, clock or authentication override was used.
 
 The refreshed conservative cost estimate remains USD 93.44, including the entire
 original seven-day allocation. The USD 100 ceiling and USD 50 alert remain.

@@ -26,6 +26,7 @@ export const errorHandler: ErrorRequestHandler = (
     return;
   }
 
+  preventErrorCaching(res);
   const normalised = normalise(error);
   const requestId = requestIdOf(req);
   const log = logger.child({ requestId, actorSub: req.auth?.sub });
@@ -52,6 +53,18 @@ export const errorHandler: ErrorRequestHandler = (
   res.status(normalised.statusCode).json(body);
 };
 /* eslint-enable max-params */
+
+/** Scope and authentication errors can occur before a router sets its privacy headers. */
+function preventErrorCaching(res: Response): void {
+  const current = res.getHeader('Cache-Control');
+  if (
+    typeof current === 'string' &&
+    current.split(',').some((value) => value.trim().toLowerCase() === 'no-store')
+  ) {
+    return;
+  }
+  res.setHeader('Cache-Control', 'no-store');
+}
 
 /** Map anything thrown into the AppError shape. */
 function normalise(error: unknown): AppError {
@@ -83,6 +96,7 @@ function normalise(error: unknown): AppError {
 
 /** Terminal 404 handler, mounted after every router. */
 export function notFoundHandler(req: Request, res: Response): void {
+  preventErrorCaching(res);
   const body: ErrorBody = {
     error: {
       code: ERROR_CODES.NOT_FOUND,
