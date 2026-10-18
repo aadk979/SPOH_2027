@@ -21,6 +21,7 @@ export async function findAuditEntries(
   filter: AuditFilter,
   page: { limit: number; cursor?: string },
 ) {
+  if (!(await canPageFrom(scope, page.cursor))) return [];
   return prisma.auditLog.findMany({
     where: {
       eventId: scope.eventId,
@@ -41,6 +42,16 @@ export async function findAuditEntries(
     orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     ...pageArgs(page),
   });
+}
+
+/** Missing and out-of-event anchors have the same empty-page answer. */
+async function canPageFrom(scope: EventScope, cursor: string | undefined): Promise<boolean> {
+  if (!cursor) return true;
+  const owned = await prisma.auditLog.findFirst({
+    where: { id: cursor, eventId: scope.eventId },
+    select: { id: true },
+  });
+  return owned !== null;
 }
 
 export type AuditEntryRow = Awaited<ReturnType<typeof findAuditEntries>>[number];

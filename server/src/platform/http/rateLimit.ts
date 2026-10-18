@@ -1,3 +1,4 @@
+import { preventErrorCaching } from './errorHandler.js';
 import { ipKeyGenerator, rateLimit } from 'express-rate-limit';
 import type { Request, RequestHandler } from 'express';
 import { ERROR_CODES } from '@spoh/shared';
@@ -20,12 +21,18 @@ function subjectKey(req: Request): string {
 type ScopedLimiter = RequestHandler & { resetKey: (subject: string) => Promise<void> };
 
 function keyFor(req: Request, namespace: QuotaNamespace, policy: RateLimitPolicy) {
-  return quotaKey({ namespace, scope: [policy.organisationId ?? 'unconfigured', policy.windowSeconds],
-    subject: subjectKey(req), windowSeconds: policy.windowSeconds });
+  return quotaKey({
+    namespace,
+    scope: [policy.organisationId ?? 'unconfigured', policy.windowSeconds],
+    subject: subjectKey(req),
+    windowSeconds: policy.windowSeconds,
+  });
 }
 
 function configuredLimiter(input: {
-  tier: RateLimitTier; namespace: QuotaNamespace; store: DynamicRateLimitStore;
+  tier: RateLimitTier;
+  namespace: QuotaNamespace;
+  store: DynamicRateLimitStore;
   policyOf: (req: Request) => RateLimitPolicy;
 }) {
   return rateLimit({
@@ -38,6 +45,7 @@ function configuredLimiter(input: {
     standardHeaders: 'draft-8',
     legacyHeaders: false,
     handler: (req, res) => {
+      preventErrorCaching(res);
       res.status(429).json({
         error: {
           code: ERROR_CODES.RATE_LIMITED,
@@ -64,11 +72,20 @@ function build(tier: RateLimitTier, failedOnly = false): ScopedLimiter {
   const handler: RequestHandler = async (req, res, next) => {
     try {
       policies.set(req, await rateLimitPolicy(req, tier));
-      const run = () => limiter(req, res, (error) => next(error
-        ? new ServiceUnavailableError('Request quota temporarily unavailable', error) : undefined));
+      const run = () =>
+        limiter(req, res, (error) =>
+          next(
+            error
+              ? new ServiceUnavailableError('Request quota temporarily unavailable', error)
+              : undefined,
+          ),
+        );
       if (failedOnly) {
         const key = keyFor(req, namespace, policyOf(req));
-        await withSuccessfulQuotaRefund({ key, res, refund: (charge) => store.refund(charge) }, run);
+        await withSuccessfulQuotaRefund(
+          { key, res, refund: (charge) => store.refund(charge) },
+          run,
+        );
       } else await run();
     } catch (error) {
       next(new ServiceUnavailableError('Request quota temporarily unavailable', error));
@@ -87,10 +104,7 @@ export const captureRateLimit = named('captureRateLimit', build('capture'));
 export const sensitiveRateLimit = named('sensitiveRateLimit', build('sensitive'));
 
 /** A shared IP is charged only for failed sign-ins (F04-006). */
-export const signInRateLimit = named(
-  'signInRateLimit',
-  build('sensitive', true),
-);
+export const signInRateLimit = named('signInRateLimit', build('sensitive', true));
 
 /** Privileged writes, below the ordinary ceiling. */
 export const adminRateLimit = named('adminRateLimit', build('admin'));

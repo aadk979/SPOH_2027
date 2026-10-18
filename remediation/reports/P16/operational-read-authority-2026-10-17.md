@@ -46,7 +46,7 @@ including server 96.67% lines, passed. Image/build/CSP, architecture, hardcoding
 dependency and secret checks passed. Exact-SHA test CI and selected operating proof against the unchanged
 accepted 62513e56 image were pending at commit preparation.
 
-Selected staging role and station cases remain conditional on genuine fresh
+At preparation, selected staging role and station cases were conditional on genuine fresh
 D/E membership, grant and assignment readbacks using the original seven
 identities. D and E are distinct events. A positive D audit control needs an
 actual existing D-owned entity. Naturally separated denial-audit windows are
@@ -61,3 +61,5 @@ continuous soak is owner-skipped; remaining API, browser/full, deferred, load,
 drill, restore, alarm receipt, real-person recovery and owner gates remain.
 The original seven-day allocation, USD 100 ceiling, USD 50 alert and
 31 October CDK exception are unchanged.
+
+Selected operating authority proof subsequently passed independently against the unchanged 62513e56 image. All five exact test-commit CI jobs (39054831750) passed for 6d4c63cb. The original seven identities were used; 87 selected cases and 20 precisely attributed transport-visible policy-denial audits were verified, with 0 plan cases held for unavailable fixtures or grants. Selected business rows and owned audits remained unchanged. Unexposed persisted fields remain local/CI evidence. No fixture write, new identity or deployment was needed.

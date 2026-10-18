@@ -55,7 +55,7 @@ export const errorHandler: ErrorRequestHandler = (
 /* eslint-enable max-params */
 
 /** Scope and authentication errors can occur before a router sets its privacy headers. */
-function preventErrorCaching(res: Response): void {
+export function preventErrorCaching(res: Response): void {
   const current = res.getHeader('Cache-Control');
   if (
     typeof current === 'string' &&
