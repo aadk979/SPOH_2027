@@ -93,6 +93,19 @@ describe('membership identity lifecycle', () => {
     await request(app).post(`/api/v1/people/${member.id}/reactivate`).set('Authorization', bearer(admin)).send({}).expect(200);
     await session();
   });
+  it('keeps staff contact and cross-event membership details private and non-cacheable', async () => {
+    const event = await rawDb.event.findUniqueOrThrow({ where: { id: (await testEvent()).eventId } });
+    const other = await secondEvent();
+    await rawDb.organisationMembership.create({ data: { organisationId: event.organisationId, personId: admin.id, role: 'PLATFORM_ADMIN' } });
+    await rawDb.eventMembership.create({ data: { eventId: other.id, personId: member.id } });
+
+    const detail = await request(app).get(`/api/v1/people/${member.id}`)
+      .set('Authorization', bearer(admin)).expect(200);
+    expect(detail.body.person).toMatchObject({ id: member.id, email: member.email });
+    expect(detail.body.memberships.map((membership: { eventId: string }) => membership.eventId).sort())
+      .toEqual([event.id, other.id].sort());
+    expect(detail.headers['cache-control']).toBe('private, no-store');
+  });
 });
 
 describe('first-party recovery and MFA', () => {

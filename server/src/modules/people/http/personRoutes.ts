@@ -20,6 +20,7 @@ const actor = (req: Request) => ({ ...getPerson(req), audit: auditContextFrom(re
   idempotencyKey: (req.body as { idempotencyKey?: string } | undefined)?.idempotencyKey });
 const id = (req: Request) => validatedParams<{ id: string }>(req).id;
 personRouter.get('/:id', validate({ params }), async (req: Request, res: Response) => {
+  res.set('Cache-Control', 'private, no-store');
   res.json(await getPersonDetail(id(req), actor(req)));
 });
 personRouter.get('/:id/data', validate({ params }), async (req: Request, res: Response) => {
