@@ -86,6 +86,26 @@ describe('rehearsal shift access (P10.5)', () => {
     await rawDb.event.update({ where: { id: eventId }, data: { status: 'REHEARSAL' } });
   });
 
+  it('boots into the current station instead of an older rehearsal assignment', async () => {
+    const oldDay = await createEventDayOn('2027-01-06');
+    const oldStation = await createStation({ code: 'OLD_BOOTH' });
+    await assignToStation({
+      volunteerId: booth.id,
+      stationId: oldStation.id,
+      eventDayId: oldDay.id,
+      shift: 'MORNING',
+    });
+    await moveMorningShift({
+      startsAt: new Date(FROZEN_NOW.getTime() - 60_000),
+      endsAt: new Date(FROZEN_NOW.getTime() + 60_000),
+    });
+    const me = await request(app).get('/api/v1/me').set('Authorization', bearer(booth));
+    expect(me.status).toBe(200);
+    expect(me.body.currentAssignment?.station.id).toBe(stationId);
+    expect(me.body.currentAssignment?.eventDayId).toBe(eventDayId);
+    expect(me.body.upcomingAssignments).toHaveLength(2);
+  });
+
   it('allows assigned practice outside hours, then refuses the same volunteer in LIVE', async () => {
     const { eventId } = await testEvent();
     expect((await tap()).status).toBe(201);

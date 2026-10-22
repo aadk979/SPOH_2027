@@ -12,6 +12,7 @@ import type { EventScope } from '../../../platform/db/eventScope.js';
 import { runningShifts } from '../../../platform/event/runningShifts.js';
 import { getEventSummary } from '../../event/index.js';
 import { eventToday } from '../../../platform/event/today.js';
+import { currentAssignment as selectCurrentAssignment } from '../domain/currentAssignment.js';
 
 /**
  * `GET /me` is the client's boot call. It returns everything the role-scoped
@@ -35,7 +36,7 @@ export async function getMe(
     buildEscalationChain(scope, volunteer.reportsToMembershipId),
     findRunningAssignmentIds(scope, { volunteerId, running: await runningShifts(scope, now) }),
   ]);
-  const currentAssignment = assignments.find((a) => running.has(a.id)) ?? null;
+  const currentAssignment = selectCurrentAssignment(assignments, running, now);
 
   return {
     volunteer: {
