@@ -1,5 +1,8 @@
 # SPOH remediation status — 3 October 2026
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../../docs/EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 The verified tracker has **105 of 171 steps closed (61.4%)** and **9 of 17 phases
 closed (52.9%)**. Steps and phases differ in effort, so these are counts rather
 than a reliable estimate of remaining development time. The production readiness

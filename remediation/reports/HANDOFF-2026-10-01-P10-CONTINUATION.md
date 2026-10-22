@@ -1,5 +1,8 @@
 # SPOH 2027 handoff — 1 October 2026, P10 continuation
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../../docs/EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 Read `HANDOFF-2026-09-29.md` first, including “Owner answers of 2026-09-30”, then the README resume protocol and the later 1 October handoffs. Those handoffs are historical. Verify Git and `progress.json` before editing. This document records the work after `HANDOFF-2026-10-01-P10.md`.
 
 ## Verified repository state

@@ -1,5 +1,8 @@
 # P16 visitor fields and permissions API cases — 15 October 2026
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../../../docs/EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](../HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 This is partial P16.10 evidence. The campaign uses the seven existing synthetic staging
 actors, normal provider authentication and real HTTP against application SHA
 `00a114d40c7dc426845f964bdef5b5148de0379e`. Its previously accepted

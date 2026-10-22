@@ -1,5 +1,8 @@
 # P16 role, safety, session renewal and cleanup verification
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../../../docs/EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](../HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 P16.10 remains in progress. Application `abfdd7ab` passed the complete 29-step
 local gate, all five exact CI jobs in run 38782258226 and all three staging jobs
 plus Smoke in run 38787089743. The deployed image and 73 policies were verified.

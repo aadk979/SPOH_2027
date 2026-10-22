@@ -1,5 +1,8 @@
 # ADR-011 — Build every feature first, verify on staging after
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](../../remediation/reports/HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 | Field      | Value                                                                                                                                           |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | Status     | Accepted by the owner's instruction of 10 October 2026 (D-23)                                                                                   |
@@ -17,6 +20,10 @@ pace the programme would finish around the event itself.
 
 Staging has almost no traffic, and production does not exist yet. A defect on staging costs a fix
 forward, not a refused volunteer.
+
+## Current amendment — 22 October 2026
+
+[ADR-012](ADR-012-event-focused-release.md) and [the event plan](../EVENT_RELEASE_PLAN.md) replace the exhaustive campaign as the launch gate. Full exact-SHA CI remains; §2 local-full-run-before-push is superseded when CI supplies the isolated DB. Below preserves the 10/15 October programme decision, not additional launch prerequisites.
 
 ## Decision
 

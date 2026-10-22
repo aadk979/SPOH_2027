@@ -1,5 +1,8 @@
 # P16 preparation — 13 October 2026
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../../../docs/EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](../HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 P15 build acceptance is recorded at `14baa68c2e947c4cdfee376f1e33aca6c1030b5e`,
 all five CI38398631231 jobs green. Closure records were pushed as
 `07ccad403c846f171d5b820a4c58a3f6b8c1398d`; CI38402415957 passed its two

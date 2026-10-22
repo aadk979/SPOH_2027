@@ -1,5 +1,8 @@
 # P15 ASVS 5.0.0 L1/L2 review register
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../../../docs/EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](../HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 13 October 2026. All 253 individual L1/L2 controls (70 L1, 183 L2) from the pinned official input, SHA256 `33ea20d6fe9ca46b4a6336954f480a1d3ffa57af0fc25ab569e4f5788193bb99`. L3-only controls are excluded. This is an evidence/residual register, **not an ASVS L2 conformance certificate**.
 
 Review used the full baseline ref `d2497b6332bd32758f24fd832a01a4d14524c4f0`, preserved independent authority and privacy/logging/upload review notes, current source inspection and local regression results. `/security-review` is unavailable and was not run. The independent notes predate these repairs; current reconciliation is by the implementing agent and is not a new independent audit. The baseline includes historical findings as well as new remediation. Untracked P15 source is included in the final source inventory.

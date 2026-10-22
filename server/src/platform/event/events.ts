@@ -1,6 +1,7 @@
 import { prisma } from '../db/client.js';
 import type { EventScope } from '../db/eventScope.js';
-import { ServiceUnavailableError } from '../errors/index.js';
+import { NotFoundError, ServiceUnavailableError } from '../errors/index.js';
+import { zonedDayWindow } from '@spoh/shared';
 import type { EventZone } from '../time/index.js';
 import { onCacheBusRecovered, subscribeCacheEvent } from '../events/cacheBus.js';
 
@@ -69,6 +70,21 @@ async function eventRow(scope: EventScope): Promise<EventZone & { slug: string }
 /** An event's IANA timezone. */
 export async function eventTimezone(scope: EventScope): Promise<string> {
   return (await eventZone(scope)).timezone;
+}
+
+/** A selected day belongs to this event and uses its operational wall-clock boundaries. */
+export async function eventDayWindow(scope: EventScope, eventDayId: string) {
+  const day = await prisma.eventDay.findFirst({
+    where: { eventId: scope.eventId, id: eventDayId },
+    select: { date: true },
+  });
+  if (!day) throw new NotFoundError('Event day');
+  const zone = await eventZone(scope);
+  return zonedDayWindow(
+    day.date.toISOString().slice(0, 10),
+    zone.timezone,
+    zone.dayBoundaryMinutes,
+  );
 }
 
 /**

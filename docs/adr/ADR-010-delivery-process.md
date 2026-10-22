@@ -1,5 +1,8 @@
 # ADR-010 — Delivery cadence and prerequisite sequencing
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](../../remediation/reports/HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 | Field      | Value                                                                                                                                                       |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Status     | Accepted 6 October 2026; implementation cadence and per-milestone acceptance amended by [ADR-011](ADR-011-build-first-verify-after.md) (10 October 2026)    |
@@ -18,6 +21,10 @@ Whole-phase ordering also has a dependency knot: P11 depends on P10, while P10's
 LIVE/archive acceptance needs later policy and P13.6 readiness work; P13 itself
 depends on P10, P11 and P12. These are dependencies between concrete capabilities,
 not a reason to hold all policy/checklist implementation until P10 closes.
+
+## Current amendment — 22 October 2026
+
+[ADR-012](ADR-012-event-focused-release.md) permits CI-first acceptance: focused local checks, coherent main push, full exact-SHA online CI, then staging. Full local CI before every push no longer blocks this event. Docs do not redeploy. Current workspace-specific no-delegation/Git instructions in AGENTS.md override historical general delegation rules.
 
 ## Decision
 

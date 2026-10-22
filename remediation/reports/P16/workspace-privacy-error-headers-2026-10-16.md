@@ -1,5 +1,8 @@
 # P16 workspace error response privacy
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../../../docs/EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](../HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 P16.10 remains in progress. The workspace staging batch on application `c1f7fa0d`
 stopped at a real cross-event 404 response that lacked `Cache-Control: no-store`.
 The status and sanitized error code were correct. The batch is failed and its

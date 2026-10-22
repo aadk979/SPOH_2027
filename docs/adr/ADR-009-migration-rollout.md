@@ -1,5 +1,8 @@
 # ADR-009 — Migration, rollout and the 28 October go/no-go
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](../../remediation/reports/HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 | Field     | Value                                                                                                                                                                                                                                                             |
 | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Status    | Accepted (G1, 2026-09-26; written in P05.10)                                                                                                                                                                                                                      |
@@ -44,6 +47,8 @@ path as a real plan, not a footnote. Its first piece, P06.12, runs first in P06 
 decision goes.
 
 ### 2. Go/no-go criteria for 28 October
+
+**Amended 22 October 2026:** [the five event gates](../EVENT_RELEASE_PLAN.md) replace the following twelve-item launch list. Owner/date, migration data integrity and production/cutover permissions remain. The original list below is historical, not an additional all-items-must-pass gate.
 
 **Go** only if **every** item holds on staging, deployed from `main` by the pipeline:
 

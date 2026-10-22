@@ -1,5 +1,8 @@
 # P16 announcement query flags and inbox privacy
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../../../docs/EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](../HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 P16.10 remains in progress. The previous record-field test batch cd829ff9
 passed all five exact-SHA CI jobs (39015969932), after a fresh 29-step local
 gate with 8,900 passes and two historical skips. Its 756 malformed scoped

@@ -1,5 +1,8 @@
 # Copyable prompt for the next agent
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../../docs/EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 Continue the SPOH 2027 upgrade using the faster process approved on 6 October.
 Work ONLY in `C:\Users\aadk9\OneDrive\Desktop\SPOH_2027\V1-main`. Set command
 workdirs explicitly; leave sibling V1 unchanged.

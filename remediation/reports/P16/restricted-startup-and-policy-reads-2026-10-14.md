@@ -1,5 +1,8 @@
 # P16-008–009 — Restricted startup and policy snapshot pacing
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../../../docs/EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](../HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 The preceding corrective batch was delivered directly to main as
 `8b730c3af28a8cefd0f3ce97e2652b4c440b0419`.
 [Exact-SHA CI38512594365](https://github.com/aadk979/SPOH_2027/actions/runs/38512594365)

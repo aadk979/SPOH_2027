@@ -1,5 +1,8 @@
 # P16 permission replays and platform appointments — 15 October 2026
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../../../docs/EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](../HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 P16.10 remains in progress. The preceding 24-file event-day, settings and visitor-field
 batch was delivered as `3d996c6eb9ffb15d719f35e7b813ce71b474f11c` after a fresh complete
 29-step Node 24/npm gate: 8,547 passing tests and the same two historical server skips.

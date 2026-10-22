@@ -1,5 +1,8 @@
 # P16 operational read URL fields and incident selection
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../../../docs/EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](../HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 P16.10 remains in progress. The preceding personal read privacy repair
 62513e56 passed exact CI 39033550622 and staging 39035771632, all
 three release jobs and Smoke. Its immutable image, ARM64 task, 73 deployed

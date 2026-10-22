@@ -1,5 +1,8 @@
 # P16 attendance and product settings API cases — 15 October 2026
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../../../docs/EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](../HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 P16.10 remains in progress. This report records the current attendance and product settings
 batch, alongside the preserved [event-day cases](event-day-api-cases-2026-10-15.md).
 It does not accept all routes, lifecycle states, station scopes, quotas, browser journeys

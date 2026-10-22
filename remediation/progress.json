@@ -10,7 +10,7 @@
     "file": "baseline.md"
   },
   "createdAt": "2026-09-25T11:48:49.640Z",
-  "updatedAt": "2026-10-18T10:25:05.280Z",
+  "updatedAt": "2026-10-22T05:25:28.630Z",
   "current": {
     "phase": "P16",
     "step": "P16.10"
@@ -281,6 +281,15 @@
       "status": "answered",
       "answer": "A, assumed (11 October 2026, ADR-011 §6): production's CDK stack owns a retained, deletion-protected pool; re-provisioning at cutover (P15.8); creation waits for P12.8",
       "answeredAt": "2026-10-10T14:41:24.836Z"
+    },
+    {
+      "id": "D-25",
+      "title": "Event-focused readiness and CI-first testing",
+      "owner": "you",
+      "blocks": [],
+      "status": "answered",
+      "answer": "Owner-approved 22 October 2026: E1-E5 event-focused launch gate and CI-first testing; exhaustive assurance is nonblocking. See docs/EVENT_RELEASE_PLAN.md and ADR-012. Existing action/budget/data/production permissions remain.",
+      "answeredAt": "2026-10-22T05:25:27.963Z"
     }
   ],
   "phases": [
@@ -4395,6 +4404,10 @@
     {
       "at": "2026-10-18T10:25:05.278Z",
       "text": "P16.10 same-day sprint: accepted unchanged63 runtime/cost and historical scoped nonmembership origins reconciled; owner-approved one zero-stock D gift and42 held alias descriptors independently accepted without replaying730. Current-image person-detail GET then reproduced missing private/no-store on staff email/memberships. Maintained two-event HTTP regression failed before a one-line header repair. Fresh affected/whole29/coverage/exact-CI/new-image acceptance pending. P16.10 stays active; onlyP16.9 skipped; original cost/identity/production and human assurance gates remain."
+    },
+    {
+      "at": "2026-10-22T05:25:28.629Z",
+      "text": "D-25 / ADR-012, owner 22 October 2026: event-focused E1-E5 release replaces exhaustive API/compliance/SLA/durability campaign and local Docker/Whole29-before-push. Full exact-SHA CI with isolated PostgreSQL remains mandatory before staging. New AGENTS, plan, handoff and takeover prompt supersede old launch lists; eleven staged source/test/report blobs preserved. No application tests, cloud calls, commits, pushes or deployments in this documentation task; no historical step or gate marked passed."
     }
   ]
 }

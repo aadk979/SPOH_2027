@@ -1,5 +1,8 @@
 # P16 personal and operational read privacy
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../../../docs/EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](../HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 P16.10 remains in progress. The preceding announcement repair a01a7381
 passed all five exact-SHA CI jobs (39025421740) and staging release
 39027399506, including Smoke. Its selected 45 GET requests verified

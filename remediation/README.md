@@ -1,5 +1,8 @@
 # Remediation programme
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../docs/EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](reports/HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 This directory is the plan, the tracker and the memory for turning the SPOH 2027 codebase into a
 reusable, event-agnostic, production-grade event operations platform on AWS.
 
@@ -166,73 +169,17 @@ the baseline, and it only ever receives P06.12 cherry-picks. What each fix chang
 
 ## Resuming (read this first in a fresh session)
 
-**Since 10 October 2026 the programme builds every feature first and verifies after**
-([ADR-011](../docs/adr/ADR-011-build-first-verify-after.md), D-23). Read
-[the latest handoff](reports/HANDOFF-2026-10-13-P15-ACCEPTED.md), ADR-011 and
-[ADR-010](../docs/adr/ADR-010-delivery-process.md) first. In short:
+Read [AGENTS.md](../AGENTS.md), [the event release plan](../docs/EVENT_RELEASE_PLAN.md),
+[the 22 October handoff](reports/HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) and
+[the continuation prompt](reports/TAKEOVER-PROMPT-2026-10-22.md). These supersede older launch instructions.
 
-**13 October checkpoint:** P14 and P15 build work is committed, pushed and
-accepted on exact-SHA CI; P16 is next with all operating/owner gates retained. Follow the
-latest handoff's explicit `V1-main` checkout, preservation and Node24/test-database
-instructions before the generic orientation example below. Do not pull over the
-saved changes. [Ready-to-copy takeover prompt](reports/TAKEOVER-PROMPT-2026-10-13.md).
-
-- Build the remaining features of P08 and P10–P15 in batches, each with its tests, and push each
-  batch to `main`. Full CI runs on every code push (run its steps locally first, under Node 24),
-  and nothing deploys: AWS is torn down until P16 ([teardown record](reports/P08/aws-teardown-2026-10-10.md)).
-- No shadow releases, soaks, per-feature staging acceptance, full browser or visual runs, or
-  release-plan approvals between features. A step closes when its code and tests are green in CI;
-  any staging, soak, load or sign-off part of its _Done when_ goes to **P16.8**.
-- Ask the owner only about cost, production, unrecoverable data and product rules the ADRs leave
-  open. Otherwise take the recommendation and record it as **assumed**.
-- When every feature step is closed, P16 is the verification campaign: staging sized like
-  production, the granular API suite (P16.10), full regression, deferred acceptance, load,
-  drills and restore. The owner waived the continuous 24-hour soak on 15 October 2026
-  (D-23 amendment); P16.9 is skipped, with no passed soak claimed. All other acceptance
-  requirements and owner/production approvals remain.
-
-ADR-010 superseded historical whole-phase start ordering, no-subagent instructions and
-documentation deployment cycles. Read older handoffs only for the relevant feature's detailed constraints;
-do not restart completed work or reread every historical handoff on each takeover.
-
-1. **Get oriented**
-   ```bash
-   cd /home/user/SPOH_2027
-   git fetch origin && git checkout main && git pull origin main   # all work happens on main (D-11)
-   node remediation/tools/progress.mjs status
-   ```
-2. **Read, in order:** this file → `DECISIONS.md` (check nothing you need is still open) →
-   `standards/engineering-standards.md` → the current phase file (its **Context for a fresh
-   session** section first, then the current step).
-3. **Bootstrap the environment** if `node_modules` is missing. See [Environment bootstrap](#environment-bootstrap).
-4. **Work a batch of features (ADR-011):** use focused checks during iteration,
-   retain logical green commits and prepare source/tracker notes before one push.
-   Full application CI still gates every code push; reuse unchanged evidence and do not
-   redeploy documentation to make its SHA match the image. For example:
-   ```bash
-   node remediation/tools/progress.mjs start P06.3
-   # … do the step, run the phase's verification commands …
-   git commit -m "refactor(station): …" -m "Remediation-Step: P06.3"
-   node remediation/tools/progress.mjs done P06.3 --commit $(git rev-parse --short HEAD) --note "what changed"
-   git add remediation/progress.json && git commit -m "chore(remediation): P06.3 done"
-   git push origin main
-   ```
-5. **At the end of a phase:** fill in the phase file's **Phase report** section, snapshot metrics to
-   `reports/metrics/<phase>.json`, run `progress.mjs done P06`, commit, push, then tell the owner
-   the phase is done and that this is a good moment to clear context.
-6. Start work when its concrete prerequisites are ready. ADR-010 explicitly allows
-   bounded P11.1–P11.3 and P13.6 prerequisite work before whole-phase dependencies
-   close, using a recorded tracker override. All other dependency rules and owner
-   gates remain. Never force completion, pass G1 without recorded sign-off, or
-   change behaviour in P06/P07.
-
-**Git workflow (D-11): `main` only.** Commit each step to `main` and push to `main`. Do not create
-branches, pull requests or tags. If the environment assigns a session branch, still commit to `main`
-and run `git push origin main`. If that push is refused, stop and tell the owner rather than working
-around it.
-
-If `progress.json` and the git history disagree, trust git: inspect the commits carrying the
-`Remediation-Step:` trailer (`git log --grep "Remediation-Step"`), then correct the JSON.
+- Work ONLY in C:\Users\aadk9\OneDrive\Desktop\SPOH_2027\V1-main; every shell explicitly sets that workdir. Never inspect sibling V1 or pull/reset over the frozen candidate.
+- Current task: the five-gate event release, not completing every historical phase/checklist. Actual results stay factual; nothing unrun is passed.
+- CI-first delivery is permitted: coherent candidate/focused local checks, one main push, full exact-SHA CI with isolated PostgreSQL 17, then eligible staging. Local Docker and a duplicate Whole29-before-commit are not prerequisites. Full CI/coverage floors remain.
+- Preserve eleven staged summary-day files plus authorized docs; use the amended guard in the handoff. No partial commit, branch/worktree/PR, reset/clean/amend or delegation.
+- Keep financial, data, identity/session, resource and production permissions. Stale observations do not authorize a cloud window. No messages to others.
+- Reuse unchanged evidence; report E1–E5 and real bugs/journeys. Do not close thousands of API obligations before core browser testing.
+- The full tracker is historical programme status, not the event launch denominator. Record actual decisions/results; do not force old steps done. The bootstrap section below is historical; current Windows/Node/test-DB settings are in the handoff.
 
 ---
 

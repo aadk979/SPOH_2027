@@ -1,5 +1,8 @@
 # P16 event-day API verification — 15 October 2026
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../../../docs/EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](../HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 P16.10 remains in progress. This batch adds shared CI bindings for event-day creation,
 event-day edits and the legacy template-hour endpoint, plus their read routes. It does not
 close a P16 step or establish all-route, all-state, station, quota, browser or go-live acceptance.

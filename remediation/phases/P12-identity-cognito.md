@@ -1,5 +1,8 @@
 # P12 — Identity: Cognito hardening and membership lifecycle
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../../docs/EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](../reports/HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 | Field             | Value         |
 | ----------------- | ------------- |
 | Gate              | G3            |
@@ -108,7 +111,7 @@ immediate effect everywhere.
 ### P12.8 — Go/no-go (28 Oct) and production cutover
 
 - **Do:**
-  1. Check the twelve criteria in ADR-009 §2 on staging, with evidence per item, and walk the owner
+  1. Check E1–E5 in [the event release plan](../../docs/EVENT_RELEASE_PLAN.md) on staging, with actual evidence, and walk the owner
      through them. The owner decides. Record it: `progress.mjs log` plus a note on this step.
   2. **On go:** create production from the same CDK (ADR-008 §3). Rehearse the cutover once on
      staging, then run it (ADR-009 §5): announce, drain, freeze (nginx), final dump, restore,

@@ -1,5 +1,8 @@
 # Decisions
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../docs/EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](reports/HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 Questions whose answers change the plan. Each has options, a recommendation and the phases it
 blocks. Answers are recorded in `progress.json` with
 `node remediation/tools/progress.mjs decide D-01 --answer "…"`, and summarised here under **Answer**.
@@ -534,3 +537,15 @@ Audits (P00–P04) can run with every decision open, except where a step says ot
   execution remains owner-gated. Initial administrator creation retains its
   original first-admin-only refusal rules. This is source workflow preparation,
   not approval of a real identity change.
+
+
+### D-25 — Event-focused readiness and CI-first testing
+
+- **Owner:** you
+- **Blocks:** —
+- **Question:** Keep the exhaustive assurance launch gate, or test the short open-house app against practical event needs?
+- **Answer:** **Event-focused gate, accepted 22 October 2026.** The owner clarified that this few-day app does not need industry compliance, an SLA or durability certification, then requested documentation of the proposed five-gate plan and a new-agent prompt. See [ADR-012](../docs/adr/ADR-012-event-focused-release.md) and [the current plan](../docs/EVENT_RELEASE_PLAN.md).
+- **Required:** E1 correct candidate/full exact-SHA CI; E2 actual core browser journeys; E3 essential access/privacy/count/retry correctness; E4 short realistic traffic; E5 one staging deployment/rollback rehearsal plus basic backup/export/manual-fallback readiness.
+- **Nonblocking for this event:** exhaustive API/deferred combinations, formal ASVS/independent certification,660real load identities/invites, fixed100RPS/mandatory sizing, six failure drills, timed PITR/logical restores/RPO/RTO and already-waived24hsoak. Never mark unrun work passed or automatically close programme phases.
+- **Delivery amendment:** a complete reviewed candidate may be pushed coherently to main after applicable focused local checks; CI's PostgreSQL17 supplies integration/coverage acceptance. Local Docker/Whole29-before-commit is no longer required. Full green exact-SHA CI gates staging; coverage/auth/data guards stay. Old local guards/order are superseded, not historical evidence.
+- **Retained:** 28 October owner decision; production/cutover, real-data/identity authority; money limits/full reserve; workspace/Git/fixture constraints. No new cloud window/resources/identities/messages/SQL/production authority is implied. Legacy D-23/P16 lists remain programme history, not current launch prerequisites.

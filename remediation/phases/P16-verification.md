@@ -1,5 +1,8 @@
 # P16 — Verification, load, dry-run readiness and handover
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../../docs/EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](../reports/HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 | Field             | Value |
 | ----------------- | ----- |
 | Gate              | G5    |
@@ -15,17 +18,14 @@ documentation that lets someone else run it next year. Close the programme.
 
 ## Context for a fresh session
 
-- Hard dates: training 4 Nov 2026, Dry Run #1 18 Nov 2026, Dry Run #2 4 Jan 2027, event 6–9 Jan 2027.
-- Go/no-go criteria are in ADR-009 (from D-01).
-- **ADR-011 (D-23, 10 October 2026): this phase is the verification campaign for the whole build.**
-  It starts when every feature step in P08 and P10–P15 is closed. Earlier phases deferred their
-  staging acceptance, soaks, load numbers, browser and visual runs and UX sign-offs to here
-  (P16.8 lists them). First recreate AWS, torn down on 10 October 2026
-  ([record](../reports/P08/aws-teardown-2026-10-10.md)), and deploy staging sized like production (ADR-008), then run, in this
-  order: **P16.10** granular API suite → **P16.1** full regression → **P16.8** deferred
-  acceptance → **P16.2** load → **P16.3** drills → **P16.4** restore. P16.9 is waived by the
-  owner’s 15 October 2026 amendment to D-23; it is skipped, not an accepted soak. Fix what
-  each finds (a failing test first), and re-run what the fix touched.
+Owner amendment 22 October 2026 (D-25/ADR-012): use [the event release plan](../../docs/EVENT_RELEASE_PLAN.md).
+Launch uses E1 correct candidate/green CI → core E2/E3 browser/access/data checks → E4 brief realistic traffic. Prepare E5 deployment/rollback/fallback in parallel; execute under existing authority. Core browser work does not wait for every API field/route combination.
+
+CI-first replaces local Docker/Whole29-before-commit. Full exact-SHA CI/coverage, core correctness/privacy and action permissions remain. Formal assurance, exhaustive API/deferred lists, fixed660-real-account/100RPS/sizing, six drills and timed dual restores are nonblocking for this event. Unrun tests remain unpassed.
+
+Dates remain owner go/no-go28October2026, training4November, DryRun#1 18November, DryRun#2 4January2027, event6–9January2027. Read [the current handoff](../reports/HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md).
+
+The steps below preserve the original programme structure. Old “Done when” clauses are not extra launch requirements. P16.10 remains the historical API record; release status uses E1–E5.
 
 ## Steps
 

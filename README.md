@@ -1,5 +1,8 @@
 # SPOH 2027 — Event Operations System
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](docs/EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](remediation/reports/HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 Volunteer operations for the Singapore Polytechnic School of Computing Open House,
 **6–9 January 2027**.
 
@@ -11,6 +14,10 @@ Volunteer operations for the Singapore Polytechnic School of Computing Open Hous
 - **Backups:** [`ops/backup/README.md`](ops/backup/README.md) — the 15-minute dump daemon
 
 **The deadline that matters is Dry Run #1 on 18 November 2026**, not the event.
+
+**Current production-readiness scope:** [the five event-focused gates](docs/EVENT_RELEASE_PLAN.md).
+Use [the 22 October continuation prompt](remediation/reports/TAKEOVER-PROMPT-2026-10-22.md).
+Older onboarding statements about absent AWS/pools are historical; verify actual state from the current handoff.
 
 ---
 

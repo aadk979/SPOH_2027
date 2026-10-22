@@ -1,5 +1,8 @@
 # Takeover checkpoint — P14 source, 11 October 2026
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../../docs/EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 Owner requested documentation and a next-agent prompt at about **20:51 Singapore /
 12:51 UTC**. Feature authoring stops here. This is the latest continuation record;
 `HANDOFF-2026-10-11-TAKEOVER.md` is historical foundation/P13 context. Its repairs

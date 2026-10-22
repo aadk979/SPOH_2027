@@ -1,5 +1,8 @@
 # P16.10 — Capture, lifecycle and invitation regressions
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../../../docs/EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](../HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 The accepted application `628fba94fae82103223092747df758b6bacb65bc` passed all five
 jobs in exact-SHA CI 38727031044, including the actual image check. Staging release
 38731108427 passed all three jobs and Smoke. Its ARM64 image and 73 deployed policies

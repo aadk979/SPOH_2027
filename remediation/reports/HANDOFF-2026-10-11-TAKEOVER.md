@@ -1,5 +1,8 @@
 # Takeover checkpoint — 11 October 2026
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../../docs/EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 Owner requested a written handoff and another agent's prompt at about 13:10
 Singapore / 05:10 UTC. Feature work stops at this checkpoint. The already-running
 full local CI process is left running. This is the authoritative continuation

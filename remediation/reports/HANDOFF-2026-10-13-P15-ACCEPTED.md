@@ -1,5 +1,8 @@
 # P15 accepted; P16 next — 13 October 2026
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../../docs/EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 Work only in `C:\Users\aadk9\OneDrive\Desktop\SPOH_2027\V1-main`.
 Inherited cwd may be forbidden sibling V1: supply V1-main explicitly to every
 command and use absolute edit paths. Preserve all tracked/untracked/staged

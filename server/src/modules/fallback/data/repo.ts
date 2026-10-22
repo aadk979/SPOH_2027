@@ -21,6 +21,7 @@ export async function rangeOverlapsFallbackWindow(
 ): Promise<boolean> {
   const from = range.from ?? new Date(0);
   const to = range.to ?? new Date(8.64e15);
+  if (from >= to) return false;
 
   const overlapping = await prisma.fallbackWindow.findFirst({
     where: {

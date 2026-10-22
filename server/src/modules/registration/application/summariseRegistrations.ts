@@ -10,6 +10,7 @@ import type { EventScope } from '../../../platform/db/eventScope.js';
 import type { ReportingScope } from '../../../platform/db/rehearsalFilter.js';
 import { eventZone } from '../../../platform/event/events.js';
 import { zonedDayWindow } from '@spoh/shared';
+import { reportingRange } from '../../../platform/event/reportingRange.js';
 
 async function bucketsFor(
   scope: ReportingScope,
@@ -42,8 +43,7 @@ export async function summariseRegistrations(
   const scope = { ...eventScope, includeRehearsal: query.includeRehearsal ?? false };
   const filter = {
     ...(query.stationId ? { stationId: query.stationId } : {}),
-    ...(query.from ? { from: new Date(query.from) } : {}),
-    ...(query.to ? { to: new Date(query.to) } : {}),
+    ...(await reportingRange(eventScope, query)),
   };
 
   const [total, containsFallbackData] = await Promise.all([

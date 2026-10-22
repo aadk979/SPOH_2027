@@ -6,6 +6,7 @@ import { sumByBucket, sumMatching, type FootfallFilter } from '../data/repo.js';
 import { bucketsByStation } from '../domain/footfallRules.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { eventTimezone } from '../../../platform/event/events.js';
+import { reportingRange } from '../../../platform/event/reportingRange.js';
 
 export async function summariseFootfall(
   eventScope: EventScope,
@@ -14,8 +15,7 @@ export async function summariseFootfall(
   const scope = { ...eventScope, includeRehearsal: query.includeRehearsal ?? false };
   const filter: FootfallFilter = {
     ...(query.stationId ? { stationId: query.stationId } : {}),
-    ...(query.from ? { from: new Date(query.from) } : {}),
-    ...(query.to ? { to: new Date(query.to) } : {}),
+    ...(await reportingRange(eventScope, query)),
   };
 
   const bucket = { minutes: BUCKET_MINUTES[query.bucket], timezone: await eventTimezone(scope) };

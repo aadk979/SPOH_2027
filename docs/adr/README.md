@@ -1,21 +1,24 @@
 # Architecture Decision Records
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](../../remediation/reports/HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
 Decisions that shape the platform, written in P05 of the remediation programme. They outlive
 the programme, which is why they are here and not under `remediation/`.
 
-| ADR                                            | Decision                                           | Owner decisions  | Status                       |
-| ---------------------------------------------- | -------------------------------------------------- | ---------------- | ---------------------------- |
-| [ADR-001](ADR-001-tenancy-event-model.md)      | Tenancy, event model and API scoping               | D-02, D-12       | Accepted                     |
-| [ADR-002](ADR-002-configurable-taxonomy.md)    | Configurable taxonomy and per-event rules          | D-04             | Accepted                     |
-| [ADR-003](ADR-003-configuration-model.md)      | Configuration model, cache bus, retention          | D-14             | Accepted                     |
-| [ADR-004](ADR-004-lifecycle-scheduling.md)     | Event lifecycle and scheduling                     | D-09             | Accepted                     |
-| [ADR-005](ADR-005-authorization-avp.md)        | Authorization on Amazon Verified Permissions       | D-03, D-06       | Accepted                     |
-| [ADR-006](ADR-006-identity-cognito.md)         | Identity on Cognito                                | D-08             | Accepted                     |
-| [ADR-007](ADR-007-code-architecture.md)        | Code architecture, libraries, offline capture      | —                | Accepted                     |
-| [ADR-008](ADR-008-aws-topology-cost.md)        | AWS topology, environments and cost                | D-07, D-08, D-10 | Accepted                     |
-| [ADR-009](ADR-009-migration-rollout.md)        | Migration, rollout and the 28 Oct go/no-go         | D-01, D-12       | Accepted                     |
-| [ADR-010](ADR-010-delivery-process.md)         | Delivery cadence and prerequisite sequencing       | D-19             | Accepted, amended by ADR-011 |
-| [ADR-011](ADR-011-build-first-verify-after.md) | Build every feature first, verify on staging after | D-23             | Accepted                     |
+| ADR                                            | Decision                                           | Owner decisions  | Status                                        |
+| ---------------------------------------------- | -------------------------------------------------- | ---------------- | --------------------------------------------- |
+| [ADR-001](ADR-001-tenancy-event-model.md)      | Tenancy, event model and API scoping               | D-02, D-12       | Accepted                                      |
+| [ADR-002](ADR-002-configurable-taxonomy.md)    | Configurable taxonomy and per-event rules          | D-04             | Accepted                                      |
+| [ADR-003](ADR-003-configuration-model.md)      | Configuration model, cache bus, retention          | D-14             | Accepted                                      |
+| [ADR-004](ADR-004-lifecycle-scheduling.md)     | Event lifecycle and scheduling                     | D-09             | Accepted                                      |
+| [ADR-005](ADR-005-authorization-avp.md)        | Authorization on Amazon Verified Permissions       | D-03, D-06       | Accepted                                      |
+| [ADR-006](ADR-006-identity-cognito.md)         | Identity on Cognito                                | D-08             | Accepted                                      |
+| [ADR-007](ADR-007-code-architecture.md)        | Code architecture, libraries, offline capture      | —                | Accepted                                      |
+| [ADR-008](ADR-008-aws-topology-cost.md)        | AWS topology, environments and cost                | D-07, D-08, D-10 | Accepted                                      |
+| [ADR-009](ADR-009-migration-rollout.md)        | Migration, rollout and the 28 Oct go/no-go         | D-01, D-12       | Accepted                                      |
+| [ADR-010](ADR-010-delivery-process.md)         | Delivery cadence and prerequisite sequencing       | D-19             | Accepted, amended by ADR-011                  |
+| [ADR-011](ADR-011-build-first-verify-after.md) | Build every feature first, verify on staging after | D-23             | Accepted                                      |
+| [ADR-012](ADR-012-event-focused-release.md)    | Event-focused readiness and CI-first testing       | D-25             | Accepted 22 October 2026; current launch gate |
 
 ## Format
 

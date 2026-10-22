@@ -1,5 +1,8 @@
 # Runtime and staging continuation — 3 October 2026
 
+> **Current launch policy — 22 October 2026 (D-25/ADR-012):** [Event-focused release plan](../../docs/EVENT_RELEASE_PLAN.md) supersedes conflicting exhaustive API, compliance/SLA/durability, load-cohort, drill/restore and local-before-CI prerequisites below. [Current handoff](HANDOFF-2026-10-22-EVENT-FOCUSED-RELEASE.md) defines the next work. Preserve historical results; deferred/unrun work is not passed.
+
+
 Read `HANDOFF-2026-09-29.md` first, including the owner answers, then the takeover
 and authoritative `HANDOFF-2026-10-03.md`. This continuation updates the runtime,
 Docker, pricing, cloud verification and private announcement draft checkpoints. Their scope, production

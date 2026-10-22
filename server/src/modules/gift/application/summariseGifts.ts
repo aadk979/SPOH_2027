@@ -6,6 +6,7 @@ import type { EventScope } from '../../../platform/db/eventScope.js';
 import { captureProvenance } from '../../../platform/db/captureProvenance.js';
 import { prisma } from '../../../platform/db/client.js';
 import { systemClock } from '../../../platform/time/index.js';
+import { reportingRange } from '../../../platform/event/reportingRange.js';
 
 export async function summariseGifts(
   scope: EventScope,
@@ -16,8 +17,7 @@ export async function summariseGifts(
     asOf,
     rehearsal: (await captureProvenance(prisma, scope)).rehearsal,
     ...(query.stationId ? { stationId: query.stationId } : {}),
-    ...(query.from ? { from: new Date(query.from) } : {}),
-    ...(query.to ? { to: new Date(query.to) } : {}),
+    ...(await reportingRange(scope, query)),
   };
 
   const [rows, gifts, containsFallbackData] = await Promise.all([
