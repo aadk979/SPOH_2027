@@ -9,24 +9,14 @@ import {
   registrationsReport,
   safetyReport,
   volunteersReport,
-  type ReportSpan,
 } from './sections.js';
 import type { EventScope } from '../../../platform/db/eventScope.js';
 import { prisma, type PrismaTransactionClient } from '../../../platform/db/client.js';
 import { findReportEvent } from '../data/readScope.js';
 import { eventSetting } from '../../../platform/settings/eventSettings.js';
-import type { EventZone } from '../../../platform/time/index.js';
 import { systemClock, type Clock } from '../../../platform/time/index.js';
 import { freezeBranding } from '../../branding/index.js';
-
-/** Absent bounds mean the whole event. */
-function resolveRange(query: ReportQuery, zone: EventZone): ReportSpan {
-  return {
-    from: query.from ? new Date(query.from) : new Date(0),
-    to: query.to ? new Date(query.to) : new Date(8.64e15),
-    zone,
-  };
-}
+import { reportRange } from './reportRange.js';
 
 /**
  * The post-event report: each section built by its own loader from its own
@@ -52,7 +42,7 @@ export async function generateReportInTransaction(
   const scope = { ...eventScope, includeRehearsal: query.includeRehearsal ?? false, db: tx };
   const summary = await findReportEvent(scope);
   const zone = { timezone: summary.timezone, dayBoundaryMinutes: summary.dayBoundaryMinutes };
-  const range = resolveRange(query, zone);
+  const { span: range, range: resolvedRange } = await reportRange(scope, query, zone);
   const stations = await listStations(scope, { includeInactive: true }, tx);
   const names = new Map(stations.map((station) => [station.id, station.name]));
   const now = clock.now();
@@ -78,9 +68,14 @@ export async function generateReportInTransaction(
   return {
     rehearsalIncluded: scope.includeRehearsal,
     generatedAt: now.toISOString(),
-    range: { from: query.from ?? null, to: query.to ?? null },
+    range: resolvedRange,
     timezone: zone.timezone,
-    event: { name: summary.name, slug: summary.slug, status: summary.status, branding: await freezeBranding(eventScope, tx) },
+    event: {
+      name: summary.name,
+      slug: summary.slug,
+      status: summary.status,
+      branding: await freezeBranding(eventScope, tx),
+    },
     countingNote: COUNTING_NOTE,
     headline,
     registrations,

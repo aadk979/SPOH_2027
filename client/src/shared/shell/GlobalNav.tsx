@@ -44,7 +44,7 @@ export function GlobalNav(): ReactNode {
     >
       <Link
         href="/home"
-        className="flex min-h-[44px] items-center whitespace-nowrap font-semibold tracking-[-0.01em] text-on-dark no-underline transition-colors hover:text-primary-on-dark focus-visible:outline-primary-on-dark"
+        className="flex min-h-[44px] min-w-0 overflow-hidden items-center whitespace-nowrap font-semibold tracking-[-0.01em] text-on-dark no-underline transition-colors hover:text-primary-on-dark focus-visible:outline-primary-on-dark"
       >
         <EventIdentity name={event?.name ?? 'Home'} compact />
       </Link>

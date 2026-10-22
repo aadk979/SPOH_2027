@@ -361,20 +361,6 @@ export async function lostFoundCounts(scope: ReportReadScope, range: Range) {
   };
 }
 
-export async function volunteerAttendance(scope: ReportReadScope, range: Range) {
-  return scope.db.shiftAssignment.findMany({
-    where: { eventId: scope.eventId, eventDay: { date: { gte: range.from, lt: range.to } } },
-    select: {
-      volunteerId: true,
-      stationId: true,
-      checkedInAt: true,
-      checkedOutAt: true,
-      station: { select: { name: true } },
-      shift: { select: { endsAt: true } },
-    },
-  });
-}
-
 /** The event's active members. */
 export async function countActiveVolunteers(scope: ReportReadScope): Promise<number> {
   return scope.db.eventMembership.count({ where: { eventId: scope.eventId, status: 'ACTIVE' } });

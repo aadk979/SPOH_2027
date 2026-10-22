@@ -21,8 +21,8 @@ export async function exportReportHandler(req: Request, res: Response): Promise<
     { ...scopeOf(req), includeRehearsal: query.includeRehearsal },
     {
       role: getAuth(req).role,
-      from: query.from ? new Date(query.from) : new Date(0),
-      to: query.to ? new Date(query.to) : new Date(8.64e15),
+      from: report.range.from ? new Date(report.range.from) : new Date(0),
+      to: report.range.to ? new Date(report.range.to) : new Date(8.64e15),
     },
   );
   const stamp = report.generatedAt.slice(0, 10);

@@ -17,9 +17,9 @@ function IdentityImage({ src, alt, compact }: { src: string; alt: string; compac
 function SelectedIdentity({ brand, name, compact }: { brand: PublicBranding | null; name: string; compact: boolean }) {
   const logo = brand?.logo;
   const src = logo ? publicBrandingUrl(logo.path, { slug: brand!.slug, apiBaseUrl: getClientEnv().apiBaseUrl }) : null;
-  return <span className="inline-flex items-center gap-sm">
+  return <span className={compact ? 'inline-flex min-w-0 items-center gap-sm' : 'inline-flex items-center gap-sm'}>
     {src && logo ? <IdentityImage key={src} src={src} alt={logo.alt} compact={compact} /> : null}
-    <span>{name}</span>
+    <span className={compact ? 'truncate' : undefined}>{name}</span>
   </span>;
 }
 function selectedSlug(input: { slug?: string; eventSlug?: string; path: string }) { return input.slug ?? input.eventSlug ?? brandingSlug(input.path); }

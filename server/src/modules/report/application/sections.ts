@@ -20,7 +20,6 @@ import {
   registrationsByDay,
   registrationsByHour,
   unpurgedLostPersonCount,
-  volunteerAttendance,
   type Range,
 } from '../data/repo.js';
 import { importBatches, recordsBySource, voidedCounts } from '../data/integrity.js';
@@ -28,6 +27,7 @@ import { hourlyRows } from '../domain/hours.js';
 import { footfallSection, safetySection, volunteersSection } from '../domain/sections.js';
 import type { EventZone } from '../../../platform/time/index.js';
 import { rehearsalFilter } from '../../../platform/db/rehearsalFilter.js';
+import { volunteerAttendance } from '../data/attendance.js';
 
 /** One loader per report section: its own queries, then its builder. */
 
@@ -37,6 +37,7 @@ type Report = FullReport;
 /** The report's time range, read on the event's wall clock. */
 export interface ReportSpan extends Range {
   zone: EventZone;
+  eventDayId?: string;
 }
 
 export async function registrationsReport(
@@ -148,7 +149,7 @@ export async function safetyReport(
 
 export async function volunteersReport(
   scope: ReportReadScope,
-  range: Range,
+  range: ReportSpan,
   { names, now }: { names: Names; now: Date },
 ): Promise<Report['volunteers']> {
   const [attendance, volunteersActive] = [
@@ -163,11 +164,13 @@ export async function integrityReport(
   range: Range,
 ): Promise<Report['dataIntegrity']> {
   const [windows, imports, sources, voided] = [
-    await listFallbackWindows(
-      scope,
-      { from: range.from, to: range.to, ...rehearsalFilter(scope) },
-      scope.db,
-    ),
+    range.from < range.to
+      ? await listFallbackWindows(
+          scope,
+          { from: range.from, to: range.to, ...rehearsalFilter(scope) },
+          scope.db,
+        )
+      : [],
     await importBatches(scope, range),
     await recordsBySource(scope, range),
     await voidedCounts(scope, range),
