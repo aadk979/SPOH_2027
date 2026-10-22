@@ -10,6 +10,7 @@ import { rawDb, resetDatabase } from '../helpers/db.js';
 import {
   assignToStationAllBlocks,
   bearer,
+  createEventDayOn,
   createStation,
   createVolunteer,
   idempotencyKey,
@@ -38,9 +39,7 @@ async function arrange(timezone = 'Asia/Singapore', boundary = 360, date = '2026
     data: { timezone, dayBoundaryMinutes: boundary },
   });
   invalidateEventCache();
-  const day = await rawDb.eventDay.create({
-    data: { ...scope, date: new Date(`${date}T00:00:00Z`), label: 'Selected' },
-  });
+  const day = await createEventDayOn(date, 'Selected');
   const window = zonedDayWindow(date, timezone, boundary);
   const middle = new Date((window.start.getTime() + window.end.getTime()) / 2);
   const category = await rawDb.captureCategory.findFirstOrThrow({ where: scope });
