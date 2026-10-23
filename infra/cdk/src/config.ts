@@ -85,7 +85,13 @@ export const STAGES: Record<StageName, StageConfig> = {
     account: ACCOUNT,
     region: REGION,
     tags: tags('prod'),
-    domainName: DOMAIN,
+    domainName: STAGING_EDGE.clientHost,
+    // Owner-approved 23 October cutover reuses the existing same-site HTTPS edge.
+    publicOrigins: {
+      api: `https://${STAGING_EDGE.apiHost}`,
+      client: `https://${STAGING_EDGE.clientHost}`,
+      crossSiteCookies: false,
+    },
     app: { cpu: 256, memoryMiB: 512, desiredCount: 1 },
     database: { instanceClass: 't4g.micro', allocatedStorageGiB: 20, maxStorageGiB: 100 },
     existingBackupsBucket: EXISTING_BACKUPS_BUCKET,

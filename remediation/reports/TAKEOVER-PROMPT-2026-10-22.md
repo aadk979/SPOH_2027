@@ -1,5 +1,7 @@
 # Continue SPOH2027 — current agent prompt,22October2026
 
+Before continuing, read [the 23 October execution handoff](HANDOFF-2026-10-23-EVENT-READINESS.md). The repair and subsequent fixes are already committed, CI-accepted and staged. Do not repeat the original candidate delivery steps below. Keep the same D-25/action boundaries; the original baseline is retained for provenance.
+
 Continue production readiness for the short6–9January2027 open house. The owner approved an event-focused release plan instead of industry-compliance/SLA/durability assurance. Do practical tests and fix real event defects. Do not resume the exhaustive API ledger campaign.
 
 Work ONLY in `C:\Users\aadk9\OneDrive\Desktop\SPOH_2027\V1-main`. EVERY shell explicitly uses that workdir. NEVER inspect/touch siblingV1, even if inherited cwd points there. No delegation, new branch/worktree/PR, reset, clean, amend or partial commit.

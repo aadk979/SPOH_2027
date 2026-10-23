@@ -1,5 +1,9 @@
 # SPOH 2027 agent entry point
 
+## Owner production authorization — 23 October 2026
+
+The owner explicitly approved production creation and cutover now, reusing the current secure-channel HTTPS origins, USD125 **per month**, repurposing the previously protected USD75.26332 reserve for production, and parking staging only after successful cutover. The owner requested aadk979@gmail.com as the initial Root (PLATFORM_ADMIN), one default Cognito invitation email, and three DRAFT events: SPOH 2027 DRY RUN 1 (18 November 2026), SPOH 2027 DRY RUN 2 (18 December 2026), SPOH 2027 D DAY 1-7 (1–7 January 2027), Asia/Singapore. This supersedes the older 28 October wait/full-reserve restriction for this approved operation. Do not request this approval again. Preserve existing source/evidence and independent CI/auth/MFA/data safeguards; no automatic fixture migration or bulk crew invitations. The owner sets their own permanent password and authenticator through normal sign-in. See [production activation](docs/PRODUCTION_ACTIVATION.md).
+
 Read these first:
 
 1. [Current event release plan](docs/EVENT_RELEASE_PLAN.md) — owner-approved launch scope, 22 October 2026 (D-25 / ADR-012).

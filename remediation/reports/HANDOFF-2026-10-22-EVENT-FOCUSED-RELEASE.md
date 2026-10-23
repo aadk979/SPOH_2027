@@ -1,5 +1,7 @@
 # Current handoff — event-focused release,22October2026
 
+Latest checkpoint: [23 October readiness handoff](HANDOFF-2026-10-23-EVENT-READINESS.md). The baseline below is preserved history; its uncommitted-candidate and stale-session statements are superseded by that execution checkpoint.
+
 Read [agent instructions](../../AGENTS.md), [the current release plan](../../docs/EVENT_RELEASE_PLAN.md), [ADR-012](../../docs/adr/ADR-012-event-focused-release.md) and [the continuation prompt](TAKEOVER-PROMPT-2026-10-22.md) before older evidence.
 
 ## Current authority

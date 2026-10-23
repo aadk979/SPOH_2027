@@ -145,7 +145,10 @@ describe('private object storage foundation (P08.7)', () => {
     );
     for (const name of ['Exports', 'AccessLogs'])
       expect(bucketFor(template, name).Properties.CorsConfiguration).toBeUndefined();
-    expect(bucketFor(templateFor('prod'), 'Media').Properties.CorsConfiguration).toBeUndefined();
+    for (const name of ['Media', 'Content'])
+      expect(bucketFor(templateFor('prod'), name).Properties.CorsConfiguration).toEqual(
+        bucketFor(template, name).Properties.CorsConfiguration,
+      );
   });
 
   it.each([

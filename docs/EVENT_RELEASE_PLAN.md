@@ -1,5 +1,9 @@
 # Event-focused production readiness — current owner-approved plan
 
+**23 October owner amendment:** production creation/cutover is now explicitly authorized, with USD125/month and the old USD75.26332 reserve available for production. Reuse the current secure-channel origins and park staging after successful cutover. Root and three dated DRAFT events are authorized. See [production activation](PRODUCTION_ACTIVATION.md). This changes production timing/spending authority; E1–E5 and authentication/data safeguards remain.
+
+Latest execution checkpoint: [23 October readiness handoff](../remediation/reports/HANDOFF-2026-10-23-EVENT-READINESS.md). The table below preserves the original 22 October planning state; the new handoff records current candidate/tests and residuals. E1–E5 requirements below are unchanged.
+
 Effective 22 October 2026. Decision D-25; [ADR-012](adr/ADR-012-event-focused-release.md).
 
 The owner clarified that this app supports a short open house, 6–9 January 2027, and does not need an industry-compliance, SLA or disaster-durability certification campaign. The owner accepted the practical release plan and requested updated local documents and a continuation prompt. This replaces the exhaustive launch campaign; it does not claim missing tests passed.

@@ -93,9 +93,7 @@ describe('infrastructure injection (P08.6)', () => {
       const template = templateFor(stage);
       const parameters = Object.values(template.findResources('AWS::SSM::Parameter'));
       expect(parameters.map((row) => row.Properties.Name).sort()).toEqual(
-        (stage === 'staging' ? STAGING_INFRA_NAMES : INFRA_NAMES).map(
-          (name) => `/spoh/${stage}/infra/${name}`,
-        ),
+        STAGING_INFRA_NAMES.map((name) => `/spoh/${stage}/infra/${name}`),
       );
       for (const row of parameters) {
         expect(row.Properties).toMatchObject({ Type: 'String', Tier: 'Standard' });
@@ -133,14 +131,23 @@ describe('infrastructure injection (P08.6)', () => {
 
   it('requires an explicit cross-site cookie choice when approved Firebase client and API origins are configured', () => {
     const configured = new App({ context: { imageTag: 'release', serviceImageTag: 'release' } });
-    const actual = new PlatformStack(configured, 'FirebaseTasks', { env: ACCOUNT_ENV,
-      githubOidcProviderArn: 'arn:aws:iam::665146708212:oidc-provider/token.actions.githubusercontent.com',
-      stage: { ...STAGES.staging, publicOrigins: {
-        api: 'https://api.secure-channel.duckdns.org', client: 'https://synthetic-spoh.web.app', crossSiteCookies: true,
-      } } });
+    const actual = new PlatformStack(configured, 'FirebaseTasks', {
+      env: ACCOUNT_ENV,
+      githubOidcProviderArn:
+        'arn:aws:iam::665146708212:oidc-provider/token.actions.githubusercontent.com',
+      stage: {
+        ...STAGES.staging,
+        publicOrigins: {
+          api: 'https://api.secure-channel.duckdns.org',
+          client: 'https://synthetic-spoh.web.app',
+          crossSiteCookies: true,
+        },
+      },
+    });
     const template = Template.fromStack(actual);
     template.hasResourceProperties('AWS::SSM::Parameter', {
-      Name: '/spoh/staging/infra/SESSION_COOKIE_CROSS_SITE', Value: 'true',
+      Name: '/spoh/staging/infra/SESSION_COOKIE_CROSS_SITE',
+      Value: 'true',
     });
   });
 
@@ -161,11 +168,19 @@ describe('infrastructure injection (P08.6)', () => {
         row.Properties.Value,
       ]),
     );
-    const apiId = Object.keys(prod.findResources('AWS::ApiGatewayV2::Api'))[0];
-    expect(values.APP_BASE_URL).toEqual({ 'Fn::GetAtt': [apiId, 'ApiEndpoint'] });
-    expect(values.CORS_ALLOWED_ORIGINS).toEqual(values.APP_BASE_URL);
-    expect(values.CLIENT_BASE_URL).toBeUndefined();
-    expect(values.DEPLOYMENT_ENV).toBeUndefined();
+    expect(values.APP_BASE_URL).toBe('https://api.secure-channel.duckdns.org');
+    expect(values.CORS_ALLOWED_ORIGINS).toBe('https://secure-channel.duckdns.org');
+    expect(values.CLIENT_BASE_URL).toBe('https://secure-channel.duckdns.org');
+    expect(values.DEPLOYMENT_ENV).toBe('production');
+    expect(values.SESSION_COOKIE_CROSS_SITE).toBe('false');
+    prod.hasResourceProperties('AWS::Cognito::UserPoolClient', {
+      CallbackURLs: ['https://api.secure-channel.duckdns.org/api/v1/auth/callback'],
+      LogoutURLs: ['https://secure-channel.duckdns.org/sign-in'],
+      GenerateSecret: false,
+      AllowedOAuthFlows: ['code'],
+    });
+    expect(values.S3_MEDIA_BUCKET).toBeDefined();
+    expect(values.S3_CONTENT_BUCKET).toBeDefined();
     const prodPool = Object.keys(prod.findResources('AWS::Cognito::UserPool'))[0];
     expect(values.COGNITO_USER_POOL_ID).toEqual({ Ref: prodPool });
   });
@@ -176,7 +191,9 @@ describe('infrastructure injection (P08.6)', () => {
       const container = taskFor(staging, name).ContainerDefinitions[0]!;
       // Release-selected readiness metadata is immutable in the task, alongside generated AVP ids.
       expect((container.Environment ?? []).map((entry) => entry.Name)).toEqual(
-        name === 'app' ? ['AVP_POLICY_STORE_ID', 'AVP_POLICY_NAMES', 'AUDIT_LOG_GROUP', 'READINESS_CLOUD_CONFIG'] : [],
+        name === 'app'
+          ? ['AVP_POLICY_STORE_ID', 'AVP_POLICY_NAMES', 'AUDIT_LOG_GROUP', 'READINESS_CLOUD_CONFIG']
+          : [],
       );
       const infra = name === 'app' ? STAGING_INFRA_NAMES : ['DB_HOST', 'DB_NAME'];
       const credentials =
